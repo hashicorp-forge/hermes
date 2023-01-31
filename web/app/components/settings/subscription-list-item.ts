@@ -48,11 +48,11 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
         this.args.productArea
       );
     }
-    this.showPopover.perform();
+    void this.showPopover.perform();
   }
 
   showPopover = restartableTask(async () => {
-    // this.popoverIsShown = false;
+
     this.popoverIsClosing = false;
     this.popoverIsShown = true;
     await timeout(POPOVER_SHOW_DURATION * .75);
