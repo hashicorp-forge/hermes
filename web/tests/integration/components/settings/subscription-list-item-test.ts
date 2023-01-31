@@ -17,7 +17,7 @@ module(
         />
       `);
 
-      assert.dom("[data-test-subscription-list-item]").exists();
+      assert.dom(".subscription-list-item").exists();
       assert
         .dom(".flight-icon-waypoint-color")
         .exists("it shows the product logo if there is one");

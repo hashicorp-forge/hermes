@@ -1,4 +1,4 @@
-<li class="group" data-test-subscription-list-item>
+<li class="subscription-list-item">
   <button
     class="text-body-300 text-color-foreground-primary flex items-center space-x-6 hover:cursor-pointer bg-transparent hover:bg-color-surface-action border-0 w-full h-full justify-between py-3 px-3.5 transition-colors"
     type="button"
@@ -20,10 +20,17 @@
       <Hds::Form::Toggle::Base
         tabindex="-1"
         name="toggle-subscription"
-        aria-label={{if this.isChecked "Unsubscribe" "Subscribe"}}
+        aria-label={{if this.isChecked "Remove" "Subscribe"}}
         @value="enable"
         checked={{this.isChecked}}
       />
+      {{#if this.popoverIsShown}}
+        <div
+          class="subscription-list-popover {{if this.popoverIsClosing "out"}} {{if this.isChecked "subscribed" "removed"}}"
+        >
+          {{if this.isChecked "Subscribed" "Removed"}}
+        </div>
+      {{/if}}
     </div>
   </button>
 </li>
