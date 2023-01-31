@@ -120,7 +120,7 @@ make docker/postgres/start
 ./hermes server -config=config.hcl
 ```
 
-NOTE: when not usin a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send email, etc.
+NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send email, etc.
 
 ## Running Hermes in Production
 
