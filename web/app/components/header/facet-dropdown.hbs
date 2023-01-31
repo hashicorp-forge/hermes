@@ -1,0 +1,24 @@
+<Hds::Dropdown
+  class="facets-dropdown"
+  @listPosition="left"
+  ...attributes
+  as |dd|
+>
+  <dd.ToggleButton
+    data-test-facets-dropdown-toggle-button
+    @text={{@label}}
+    @color="secondary"
+    disabled={{@disabled}}
+  />
+  {{#if @facets}}
+    {{#each-in this.firstTenFacets as |value attrs|}}
+      <dd.Interactive
+        class="facet-interactive-item"
+        {{on "click" (fn this.onClick value dd.close)}}
+        @text="{{value}} ({{attrs.count}})"
+        @icon={{if attrs.selected "check-square-fill" "square"}}
+        class={{if attrs.selected "checked"}}
+      />
+    {{/each-in}}
+  {{/if}}
+</Hds::Dropdown>

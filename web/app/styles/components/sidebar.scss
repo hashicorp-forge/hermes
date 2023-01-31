@@ -1,0 +1,22 @@
+.sidebar {
+  @apply flex flex-col max-h-full relative z-10;
+
+  header, nav {
+    @apply sticky top-0 mb-4;
+  }
+
+  .body {
+    @apply space-y-8 pb-6;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .person-list {
+    @apply w-full list-none space-y-2;
+  }
+
+  .sidebar-footer {
+    @apply w-full shrink-0 pt-8 pb-6;
+    background-color: var(--token-color-page-faint);
+  }
+}

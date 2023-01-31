@@ -1,0 +1,20 @@
+// Design System Overrides (this should be limited to workarounds)
+.hds-typography-body-200.hds-form-select {
+  padding: var(--token-form-control-padding);
+  padding-right: calc(
+    var(--token-form-control-padding) + 24px
+  ); // extra space for the icon
+}
+
+.hds-dropdown-toggle-button .hds-button__icon,
+.hds-dropdown-toggle-icon__chevron {
+  transition: none;
+}
+
+.hds-link-standalone.small-external-link {
+  @apply font-regular;
+
+  .hds-link-standalone__text {
+    @apply text-body-100;
+  }
+}

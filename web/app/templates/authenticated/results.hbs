@@ -1,0 +1,5 @@
+{{page-title "Search Results"}}
+
+<Header @facets={{@model.facets}} @sortControlIsHidden={{true}} />
+
+<Results @results={{@model.results}} @query={{this.q}} />

@@ -1,0 +1,7 @@
+.footer {
+  @apply text-center mt-12 mb-16;
+
+  a {
+    @apply text-inherit no-underline border-b border-b-color-border-primary hover:border-b-color-foreground-action hover:text-color-foreground-action;
+  }
+}

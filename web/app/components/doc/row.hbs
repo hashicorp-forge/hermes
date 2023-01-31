@@ -1,0 +1,87 @@
+{{!
+  Used to render a document in a table row format
+
+  <Doc::Row /> properties:
+  @avatar (string): link to avatar image
+  @createdDate (string): created date
+  @docNumber (string): document number
+  @docID (string): document ID
+  @docType (string): document type
+  @isDraft (bool): document is a draft
+  @productArea eg. 'Waypoint' or 'Design Systems' etc
+  @status eg. 'approved', 'review', 'obsolete'
+  @isResult eg. 'true' (false by default) - optional
+  @isOwner eg. 'true' (false by default) - optional
+}}
+
+<Hds::Table::Tr class="row-results__table__row">
+  <Hds::Table::Td class="name">
+    <LinkTo
+      @route="authenticated.document"
+      @model="{{@docID}}"
+      @query={{hash draft=@isDraft}}
+      class="flex  space-x-4 no-underline"
+    >
+      <div
+        class="relative flex flex-shrink-0 items-center w-[40px] h-[56px] hds-surface-mid
+          {{if
+            (eq @status 'obsolete')
+            'hds-surface-faint opacity-75'
+            'hds-surface-primary'
+          }}
+          rounded overflow-hidden"
+      >
+        <img src="/images/document.png" class="w-full mix-blend-multiply" />
+        {{#if (eq @status "approved")}}
+          <FlightIcon
+            @name="check-circle"
+            @size="24"
+            class="absolute -right-2 top-1 fill-[var(--token-color-palette-green-200)] w-8 h-8 -rotate-12 mix-blend-multiply opacity-75"
+          />
+        {{/if}}
+        {{#if (eq @status "obsolete")}}
+          <div
+            class="absolute top-0 left-0 right-1 bottom-0 flex items-center hds-surface-strong hds-surface-mid rounded overflow-hidden"
+          >
+            <FlightIcon
+              @name="archive"
+              @size="24"
+              class="absolute -left-2 top-1 fill-[var(--token-color-palette-neutral-200)] w-8 h-8 -rotate-12 mix-blend-multiply opacity-75"
+            />
+          </div>
+        {{/if}}
+        <div class="{{if (eq @status 'obsolete') 'opacity-50'}}">
+          <Doc::Tag @name={{@productArea}} @isSmall="{true}" />
+        </div>
+      </div>
+      <div>
+        <h4
+          class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
+        >{{@title}}</h4>
+        {{#if (not (is-empty @docNumber))}}
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >{{@docNumber}}</small>
+        {{/if}}
+      </div>
+    </LinkTo>
+  </Hds::Table::Td>
+  <Hds::Table::Td class="type">
+    {{@docType}}
+  </Hds::Table::Td>
+  <Hds::Table::Td class="status">
+    <Doc::State
+      @state={{@status}}
+      @hideProgress={{true}}
+      class="whitespace-nowrap"
+    /></Hds::Table::Td>
+  <Hds::Table::Td class="product"><Hds::Badge
+      @text={{this.productAreaName}}
+      @icon={{this.productAreaIcon}}
+      title={{this.productAreaName}}
+    /></Hds::Table::Td>
+  <Hds::Table::Td class="owner">
+    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
+  </Hds::Table::Td>
+  <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
+</Hds::Table::Tr>

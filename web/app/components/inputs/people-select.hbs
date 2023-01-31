@@ -1,0 +1,18 @@
+<PowerSelectMultiple
+  class="hds-form-field__control multiselect w-full"
+  @searchEnabled={{true}}
+  @search={{perform this.searchDirectory}}
+  @searchField="email"
+  @options={{this.people}}
+  @selected={{@selected}}
+  @renderInPlace={{@renderInPlace}}
+  @placeholder="Search for your peers..."
+  @onChange={{@onChange}}
+  @onInput={{this.onInput}}
+  @onClose={{this.onClose}}
+  @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
+  ...attributes
+  as |value|
+>
+  {{value.email}}
+</PowerSelectMultiple>

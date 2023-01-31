@@ -1,0 +1,15 @@
+<div class="notifications-container">
+  {{#each this.flashMessages.queue as |flash|}}
+    <FlashMessage @flash={{flash}} class="notification" as |component flash|>
+      <Hds::Toast
+        @color={{flash.type}}
+        @icon={{flash.icon}}
+        @onDismiss={{this.dismiss}}
+        as |T|
+      >
+        <T.Title>{{flash.title}}</T.Title>
+        <T.Description>{{flash.message}}</T.Description>
+      </Hds::Toast>
+    </FlashMessage>
+  {{/each}}
+</div>

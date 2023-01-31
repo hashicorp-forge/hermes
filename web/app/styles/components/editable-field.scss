@@ -1,0 +1,61 @@
+.editable-field {
+  @apply w-full relative;
+
+  & > .field-toggle {
+    all: unset;
+    width: 100%;
+    cursor: pointer;
+    position: relative;
+
+    &[disabled] {
+      cursor: default;
+    }
+
+    &.loading {
+      opacity: 0.5;
+    }
+
+    &::before {
+      pointer-events: none;
+      content: "";
+      padding: 3px 5px;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      bottom: -5px;
+      left: -5px;
+    }
+
+    &::after {
+      pointer-events: none;
+      content: "edit";
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      padding: 3px 5px;
+      background: var(--token-form-control-base-border-color-default);
+      border-top-right-radius: var(--token-form-control-border-radius);
+      border-bottom-left-radius: var(--token-form-control-border-radius);
+      color: var(--token-color-foreground-high-contrast);
+      visibility: hidden;
+    }
+
+    &:not([disabled]):hover,
+    &:not([disabled]):focus {
+      &::before {
+        border: 1px solid var(--token-form-control-base-border-color-default);
+        border-radius: var(--token-form-control-border-radius);
+      }
+
+      &::after {
+        visibility: visible;
+      }
+    }
+  }
+
+  .loading-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

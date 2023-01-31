@@ -1,0 +1,11 @@
+.hermes-logo {
+  @apply shrink-0 flex items-center space-x-2.5 text-color-foreground-primary;
+}
+
+.hermes-logo-text {
+  @apply text-display-300 font-semibold;
+}
+
+.hermes-logo-divider {
+  @apply h-6 relative w-px bg-color-border-strong content-none;
+}

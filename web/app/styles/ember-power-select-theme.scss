@@ -1,0 +1,44 @@
+@import "ember-basic-dropdown";
+
+// ember-power-select
+$ember-power-select-background-color: var(
+  --token-form-control-base-surface-color-default
+);
+$ember-power-select-disabled-background-color: var(
+  --token-form-control-disabled-surface-color
+);
+$ember-power-select-multiple-selection-background-color: var(
+  --token-color-palette-neutral-100
+);
+$ember-power-select-highlighted-background: var(
+  --token-color-foreground-action
+);
+$ember-power-select-border-color: var(
+  --token-form-control-base-border-color-default
+);
+$ember-power-select-default-border: var(--token-form-control-border-width) solid
+  $ember-power-select-border-color;
+$ember-power-select-default-border-radius: var(
+  --token-form-control-border-radius
+);
+$ember-power-select-focus-box-shadow: var(--token-elevation-low-box-shadow);
+$ember-power-select-dropdown-box-shadow: var(--token-elevation-low-box-shadow);
+$ember-power-select-option-padding: 7px; // Can't use --token-form-control-padding here.
+$ember-power-select-focus-outline: 3px solid
+  var(--token-color-focus-action-external);
+$ember-power-select-trigger-ltr-padding: var(--token-form-control-padding);
+$ember-power-select-trigger-rtl-padding: var(--token-form-control-padding);
+$ember-power-select-multiple-option-padding: 0 7px;
+$ember-power-select-multiple-option-line-height: 1.3;
+
+.ember-basic-dropdown-content {
+  .hds-dropdown-list-item--interactive {
+    @apply no-underline text-color-foreground-primary flex items-center px-3;
+
+    &:hover {
+      @apply bg-color-surface-interactive-hover;
+    }
+  }
+}
+
+@import "ember-power-select";

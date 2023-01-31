@@ -1,0 +1,86 @@
+// This is built on ember-power-select
+.multiselect {
+  min-width: 300px;
+  background-image: var(--token-form-select-background-image-data-url);
+  background-position: right
+    var(--token-form-select-background-image-position-right-x) top
+    var(--token-form-select-background-image-position-top-y);
+  background-size: var(--token-form-select-background-image-size);
+  background-repeat: no-repeat;
+  box-shadow: var(--token-elevation-low-box-shadow);
+
+  &--narrow {
+    min-width: 0;
+  }
+
+  &.ember-power-select-trigger {
+    line-height: 1;
+  }
+
+  &:hover,
+  &.mock-hover {
+    border-color: var(--token-form-control-base-border-color-hover);
+  }
+
+  &:focus,
+  &.mock-focus {
+    border-color: var(--token-color-focus-action-internal);
+    outline: 3px solid var(--token-color-focus-action-external);
+    outline-offset: 0px;
+  }
+
+  .ember-power-select-status-icon {
+    display: none;
+  }
+
+  .ember-power-select-multiple-options {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .ember-power-select-trigger-multiple-input {
+    min-width: 80px;
+
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
+  }
+
+  .ember-power-select-multiple-option {
+    position: relative;
+    border: none;
+    padding: 3px 7px;
+    cursor: pointer;
+    flex-basis: 0;
+    white-space: nowrap;
+
+    // avoid overlapping the dropdown affordance
+    width: calc(100% - 28px);
+
+    &:hover {
+      background: var(--token-color-palette-neutral-200);
+    }
+
+    .flight-icon {
+      vertical-align: middle;
+    }
+
+    // This is an unremovable element used to remove selected options.
+    // We don't want the little x at all, but we need to continue to use this
+    // button, so we're hacking it a bit.
+    .ember-power-select-multiple-remove-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      color: transparent;
+      border-radius: var(--token-form-control-border-radius);
+
+      &:focus,
+      &:active {
+        outline: 2px solid var(--token-color-focus-action-internal);
+      }
+    }
+  }
+}
