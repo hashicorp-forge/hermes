@@ -1,0 +1,60 @@
+{{#if @facets}}
+  <div class="toolbar mb-7">
+    <div class="x-container">
+      <div class="flex justify-between w-full">
+        <div class="flex items-center">
+          <div
+            class="mr-4 tracking-wide font-medium text-body-100 text-color-foreground-faint uppercase"
+          >
+            Filter by:
+          </div>
+          <div class="facets flex items-center space-x-1.5">
+            <Header::FacetDropdown
+              @label="Type"
+              @facets={{@facets.docType}}
+              @onClick={{this.handleClick}}
+              @disabled={{not @facets.docType}}
+            />
+            <Header::FacetDropdown
+              @label="Status"
+              @facets={{this.statuses}}
+              @onClick={{this.handleClick}}
+              @disabled={{not this.statuses}}
+            />
+            <Header::FacetDropdown
+              @label="Product/Area"
+              @facets={{@facets.product}}
+              @onClick={{this.handleClick}}
+              @disabled={{not @facets.product}}
+            />
+            <Header::FacetDropdown
+              @label="Owner"
+              @facets={{@facets.owners}}
+              @onClick={{this.handleClick}}
+              @disabled={{this.ownerFacetIsDisabled}}
+            />
+          </div>
+        </div>
+
+        {{#if (and @facets (not @sortControlIsHidden))}}
+          <Hds::Dropdown class="sort-by-dropdown" as |dd|>
+            <dd.ToggleButton
+              @text="Sort: {{this.getSortByLabel}}"
+              @color="secondary"
+            />
+            <dd.Interactive
+              {{on "click" (fn this.updateSortBy "dateDesc" dd.close)}}
+              @text="Newest"
+              @icon="sort-desc"
+            />
+            <dd.Interactive
+              {{on "click" (fn this.updateSortBy "dateAsc" dd.close)}}
+              @text="Oldest"
+              @icon="sort-asc"
+            />
+          </Hds::Dropdown>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+{{/if}}

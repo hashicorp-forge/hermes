@@ -1,0 +1,9 @@
+{{page-title "My Docs"}}
+
+<Header @facets={{@model.facets}} />
+
+<RowResults
+  @docs={{@model.results.hits}}
+  @nbPages={{@model.results.nbPages}}
+  @currentPage={{(add @model.results.page 1)}}
+/>

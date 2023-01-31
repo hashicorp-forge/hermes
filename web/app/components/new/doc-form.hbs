@@ -1,0 +1,193 @@
+{{#if this.docIsBeingCreated}}
+  <div class="text-center hds-typography-display-400 mt-3">
+    <FlightIcon @name="loading" @size="24" />
+    <div class="mt-8 text-display-200 font-semibold">
+      Creating
+      {{@docType}}
+      draft...
+    </div>
+    <div class="text-body-200 text-color-foreground-faint">This usually takes 10-20 seconds.</div>
+  </div>
+{{else}}
+  <form
+    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    {{on "submit" this.submit}}
+  >
+    <div>
+      <div class="space-y-4">
+        <h1
+          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
+        >Create your {{@docType}}</h1>
+        <p>Complete the following metadata to create your
+          {{@docType}}
+          and begin editing your draft.</p>
+      </div>
+      <div class="pt-10 space-y-6">
+        <Hds::Form::TextInput::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.title}}
+          name="title"
+          placeholder="Enter a document title"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Title</F.Label>
+          <F.HelperText>Your title should succinctly outline the idea you're
+            proposing.</F.HelperText>
+        </Hds::Form::TextInput::Field>
+
+        <Hds::Form::Textarea::Field
+          @value={{this.summary}}
+          rows="3"
+          name="summary"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Summary</F.Label>
+          <F.HelperText>One or two sentences outlining your doc.</F.HelperText>
+        </Hds::Form::Textarea::Field>
+
+        <Hds::Form::Select::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.productArea}}
+          name="productArea"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Product/Area</F.Label>
+          <F.HelperText>Specify the full name of the product or area this
+            {{@docType}}
+            belongs to.</F.HelperText>
+          {{#if @productAbbrevMappings}}
+            <F.Options>
+              <option value=""></option>
+              {{#each-in @productAbbrevMappings as |name|}}
+                <option value="{{name}}">{{name}}</option>
+              {{/each-in}}
+            </F.Options>
+          {{/if}}
+        </Hds::Form::Select::Field>
+
+        <Hds::Form::TextInput::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.productAbbreviation}}
+          placeholder="Select product/area to populate abbreviation"
+          @isInvalid={{this.formErrors.productAbbreviation}}
+          name="productAbbreviation"
+          {{on "input" this.updateForm}}
+          disabled
+          as |F|
+        >
+          <F.Label>Product/Area abbreviation</F.Label>
+          {{#if this.formErrors.productAbbreviation}}
+            <F.Error as |E|>
+              <E.Message>{{this.formErrors.productAbbreviation}}</E.Message>
+            </F.Error>
+          {{/if}}
+          <F.HelperText>Product/Area abbreviation is automatically populated on
+            selecting the "Product/Area" option.
+          </F.HelperText>
+        </Hds::Form::TextInput::Field>
+
+        {{! Note: We are still refining the subscribe/follow feature set.
+                As part of that effort we will be looking into how the concept
+                of "tags" would be useful. For now, we are choosing to
+                comment out defining tags as part of the document draft
+                creation workflow.
+          }}
+        {{!-- <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
+          {{yield
+            (hash
+              Error=F.Error
+              HelperText=F.HelperText
+              Label=F.Label
+              isRequired=F.isRequired
+              isOptional=F.isOptional
+            )
+          }}
+          <F.Control>
+            <Inputs::TagSelect
+              @selected={{this.tags}}
+              @onChange={{this.updateTags}}
+            />
+          </F.Control>
+          <F.Label><FlightIcon @name="tag" />
+            Add tags
+          </F.Label>
+          {{#if this.formErrors.tags}}
+            <F.Error as |E|>
+              <E.Message>{{this.formErrors.tags}}</E.Message>
+            </F.Error>
+          {{/if}}
+          <F.HelperText>
+            Use tags to help people discover this document based on their
+            cross-functional interests. For instance, "raft", "design" or
+            "a11y". There is a maximum of 5 tags.
+          </F.HelperText>
+        </Hds::Form::Field> --}}
+
+        <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
+          {{yield
+            (hash
+              Error=F.Error
+              HelperText=F.HelperText
+              Label=F.Label
+              isRequired=F.isRequired
+              isOptional=F.isOptional
+            )
+          }}
+          <F.Control>
+            <PowerSelectMultiple
+              class="hds-form-field__control multiselect"
+              @searchEnabled={{true}}
+              @search={{perform this.searchDirectory}}
+              @searchField="email"
+              @options={{this.people}}
+              @selected={{this.contributors}}
+              @placeholder="Search for your peers..."
+              @onChange={{this.updateContributors}}
+              @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
+              as |value|
+            >
+              {{value.email}}
+            </PowerSelectMultiple>
+          </F.Control>
+          <F.Label><FlightIcon @name="users" />
+            Add contributors
+          </F.Label>
+          {{#if this.formErrors.contributors}}
+            <F.Error as |E|>
+              <E.Message>{{this.formErrors.contributors}}</E.Message>
+            </F.Error>
+          {{/if}}
+          <F.HelperText>
+            If you're collaborating with others on this
+            {{@docType}}, add them here. The document will automatically be
+            shared with the collaborators specified here. You can also add
+            contributors later.
+          </F.HelperText>
+        </Hds::Form::Field>
+      </div>
+    </div>
+    <div>
+      <div class="preview-card">
+        <h3><FlightIcon @name="eye" /> Preview</h3>
+        <Doc::Tile
+          @productArea={{this.productArea}}
+          @status="draft"
+          @title={{this.title}}
+          @owner={{this.authenticatedUser.info.email}}
+        />
+        <Hds::Button
+          @text="Create {{@docType}} in Google Drive"
+          type="submit"
+          disabled={{not this.isValid}}
+          class="w-full"
+        />
+      </div>
+    </div>
+  </form>
+{{/if}}

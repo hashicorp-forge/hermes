@@ -1,0 +1,27 @@
+{{#if @disabled}}
+  <span
+    class="w-9 h-12 grid place-items-center no-underline text-color-foreground-primary relative
+      {{if @icon 'opacity-50' 'text-color-foreground-action'}}"
+  >
+    {{#if @icon}}
+      <FlightIcon @name={{@icon}} />
+    {{else}}
+      {{@page}}
+      <div
+        class="absolute h-0.5 w-6 bg-color-palette-blue-200 bottom-0 left-1/2 -translate-x-1/2"
+      ></div>
+    {{/if}}
+  </span>
+{{else}}
+  <LinkTo
+    @route={{this.currentRouteName}}
+    @query={{hash page=@page}}
+    class="w-9 h-12 hover:text-color-foreground-strong grid place-items-center no-underline text-color-foreground-primary"
+  >
+    {{#if @icon}}
+      <FlightIcon @name={{@icon}} />
+    {{else}}
+      {{@page}}
+    {{/if}}
+  </LinkTo>
+{{/if}}

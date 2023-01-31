@@ -1,0 +1,22 @@
+{{#unless (eq this.currentRouteName "authenticated.document")}}
+  <div class="footer">
+    <div class="x-container">
+      <div
+        class="text-body-200 text-color-foreground-faint flex items-center justify-center"
+      >
+        ©
+        {{this.currentYear}}
+        HashiCorp
+        <div class="mx-2">•</div>
+        <a
+          href="https://github.com/hashicorp-forge/hermes"
+          target="_blank"
+          rel="noopener nofollow"
+          class="flex"
+        >
+          View Hermes on GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+{{/unless}}

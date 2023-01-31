@@ -1,0 +1,57 @@
+.header-nav {
+  @apply flex flex-wrap justify-between md:flex-nowrap items-center w-full relative;
+
+  .header-nav-logo {
+    @apply mr-6 mt-3.5 md:mt-0 shrink-0 flex items-center md:mr-0 order-1 md:h-16 hover:text-color-foreground-strong;
+  }
+
+  .primary-links {
+    @apply -ml-2.5 h-16 flex shrink-0 md:mx-6 order-3 md:order-2;
+
+    a {
+      @apply px-2.5 md:px-3.5 h-full flex items-center text-color-foreground-faint;
+
+      &:hover {
+        @apply text-color-foreground-strong;
+      }
+
+      &.active {
+        @apply text-color-palette-blue-200 relative;
+
+        /* Active indicator */
+        &::before {
+          content: "";
+          @apply absolute w-full h-1 left-0 -bottom-px bg-color-palette-blue-200;
+        }
+      }
+    }
+  }
+
+  .search-bar {
+    @apply order-2 md:order-3 pt-3.5 md:py-0 w-[calc(100%-9rem)] md:w-full flex;
+  }
+
+  .user-buttons {
+    @apply flex items-center justify-end space-x-1.5 sm:ml-6 md:ml-8 order-4;
+  }
+
+  .user-avatar {
+    @apply w-[30px] h-[30px] rounded-[3px] absolute z-10 top-1/2 -translate-y-1/2 left-[3px] pointer-events-none;
+  }
+
+  .search-dropdown {
+    @apply w-full max-w-none min-w-[320px];
+  }
+
+  a {
+    @apply no-underline;
+
+    &.hds-button:hover {
+      @apply no-underline;
+    }
+  }
+
+  .create-draft-button {
+    @apply rounded-full w-9 p-0;
+  }
+}

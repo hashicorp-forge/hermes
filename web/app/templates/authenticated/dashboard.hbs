@@ -1,0 +1,81 @@
+{{page-title "Dashboard"}}
+
+<Header />
+
+<section class="x-container">
+
+  <div class="hds-border-primary border-0 border-b pb-9">
+    <h1>Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
+    <p>Here’s all the latest updates across the organization.</p>
+
+  </div>
+
+  {{#if this.docsWaitingForReview}}
+    <div
+      class="flex flex-col w-full py-10 border-0 border-b hds-border-primary"
+    >
+      <div class="flex items-center space-x-2 mb-8">
+        <FlightIcon @name="user-check" @size="24" />
+        <h2
+          class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+        >Documents waiting for your review</h2>
+      </div>
+
+      <div class="tile-list">
+        {{#each this.docsWaitingForReview as |doc index|}}
+          {{#if (lt index 4)}}
+            <Doc::Tile
+              @avatar="{{get doc.ownerPhotos 0}}"
+              @docID="{{doc.objectID}}"
+              @docNumber="{{doc.docNumber}}"
+              @modifiedAgo="{{doc.modifiedAgo}}"
+              @owner="{{get doc.owners 0}}"
+              @productArea="{{doc.product}}"
+              @status="{{lowercase doc.status}}"
+              @title="{{doc.title}}"
+            />
+          {{/if}}
+        {{/each}}
+
+      </div>
+    </div>
+  {{/if}}
+
+  <div class="flex flex-col w-full py-10 border-0 border-b hds-border-primary">
+    <div class="flex items-center space-x-2 mb-8">
+      <FlightIcon @name="eye" @size="24" />
+      <h2
+        class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+      >Recently viewed</h2>
+    </div>
+
+    {{#if this.recentlyViewedDocs}}
+      <div class="tile-list">
+        {{#each this.recentlyViewedDocs as |doc index|}}
+          {{#if (lt index 4)}}
+            <Doc::Tile
+              @avatar="{{get doc.ownerPhotos 0}}"
+              @docID="{{doc.objectID}}"
+              @docNumber="{{doc.docNumber}}"
+              @modifiedAgo="{{doc.modifiedAgo}}"
+              @owner="{{get doc.owners 0}}"
+              @productArea="{{doc.product}}"
+              @status="{{lowercase doc.status}}"
+              @title="{{doc.title}}"
+            />
+          {{/if}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="text-display-200">
+        You havenʼt viewed any documents yet.
+      </div>
+    {{/if}}
+
+  </div>
+
+  <div class="flex flex-col w-full py-10">
+    <Dashboard::LatestUpdates />
+  </div>
+
+</section>

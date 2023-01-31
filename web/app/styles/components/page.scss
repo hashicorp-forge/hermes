@@ -1,0 +1,7 @@
+.page {
+  @apply flex flex-col items-center flex-1 min-h-full px-8 py-10;
+}
+
+.page--fixed-width {
+  @apply flex flex-col space-y-4 w-full max-w-screen-lg pb-12 container;
+}

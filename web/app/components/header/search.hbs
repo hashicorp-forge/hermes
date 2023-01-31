@@ -1,0 +1,90 @@
+{{on-document "keydown" this.onKeydown}}
+<div ...attributes>
+  <form class="w-full" {{on "submit" this.goToResults}}>
+    <BasicDropdown @renderInPlace={{true}} @horizontalPosition="right" as |dd|>
+      <Hds::Form::TextInput::Base
+        @type="search"
+        @value={{this.query}}
+        name="query"
+        size="25"
+        placeholder="Find a document..."
+        aria-label="Find a document..."
+        data-ebd-id="{{dd.uniqueId}}-trigger"
+        {{on "focusin" dd.actions.open}}
+        {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
+        {{on "input" (perform this.search dd)}}
+        {{did-insert this.registerInput}}
+      />
+      {{#unless this.query}}
+        <span
+          class="absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint"
+        >
+          ⌘K
+        </span>
+      {{/unless}}
+      {{#if this.query}}
+        <dd.Content class="hds-dropdown-list search-dropdown">
+          {{#if this.bestMatches}}
+            <div
+              class="flex flex-col border-0 border-b hds-border-primary pb-1"
+            >
+              <LinkTo
+                @route="authenticated.results"
+                @query={{hash q=this.query}}
+                class="hds-dropdown-list-item--interactive"
+              >
+                <FlightIcon @name="search" class="mr-1.5" />
+                <span>View all results for "{{this.query}}"</span>
+              </LinkTo>
+            </div>
+            <div
+              class="flex flex-col border-0 border-b hds-border-primary py-1"
+            >
+              {{#let (get (get this.bestMatches 0) "product") as |product|}}
+                <LinkTo
+                  @route="authenticated.all"
+                  @query={{hash product=(array product)}}
+                  class="hds-dropdown-list-item--interactive"
+                >
+                  <FlightIcon @name="folder" class="mr-1.5" />
+                  <span class="flex items-center">View all
+                    <Hds::Badge
+                      @text={{product}}
+                      @icon={{get-product-id product}}
+                      class="mx-2"
+                    />
+                    documents
+                  </span>
+                </LinkTo>
+              {{/let}}
+            </div>
+            <div id="bestMatches" class="flex flex-col pt-1">
+              <span
+                class="hds-typography-body-100 hds-font-weight-medium hds-foreground-faint px-3 py-1"
+              >Best matches</span>
+              {{#each this.bestMatches as |match|}}
+                <Doc::Inline
+                  @avatar="{{get match.ownerPhotos 0}}"
+                  @docID="{{match.objectID}}"
+                  @docNumber="{{match.docNumber}}"
+                  @isResult="{true}"
+                  @owner="{{get match.owners 0}}"
+                  @productArea="{{match.product}}"
+                  @snippet="{{match._snippetResult.content.value}}"
+                  @status="{{match.status}}"
+                  @title="{{match.title}}"
+                />
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="flex flex-col border-0 hds-border-primary pb-1">
+              <div class="py-1 px-3">
+                <span class="flex items-center">No results found for "{{this.query}}"</span>
+              </div>
+            </div>
+          {{/if}}
+        </dd.Content>
+      {{/if}}
+    </BasicDropdown>
+  </form>
+</div>

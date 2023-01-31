@@ -1,0 +1,37 @@
+.product-badge {
+  // `.hcp` uses the default styles
+
+  @apply absolute bottom-0.5 -left-4 grid rounded-r place-items-center bg-gradient-to-br w-9 h-7 from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+
+  &.nomad {
+    @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;
+  }
+
+  &.packer {
+    @apply from-color-packer-gradient-primary-start to-color-packer-gradient-primary-stop text-color-packer-foreground;
+  }
+
+  &.vault {
+    @apply from-color-vault-gradient-primary-start to-color-vault-gradient-primary-stop text-color-vault-foreground;
+  }
+
+  &.vagrant {
+    @apply from-color-vagrant-gradient-primary-start to-color-vagrant-gradient-primary-stop text-color-vagrant-foreground;
+  }
+
+  &.consul {
+    @apply from-color-consul-gradient-primary-start to-color-consul-gradient-primary-stop text-color-foreground-high-contrast;
+  }
+
+  &.terraform {
+    @apply from-color-terraform-gradient-primary-start to-color-terraform-gradient-primary-stop text-color-foreground-high-contrast;
+  }
+
+  &.boundary {
+    @apply from-color-boundary-gradient-primary-start to-color-boundary-gradient-primary-stop text-color-foreground-high-contrast;
+  }
+
+  &.waypoint {
+    @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
+  }
+}

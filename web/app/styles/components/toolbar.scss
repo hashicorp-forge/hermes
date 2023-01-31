@@ -1,0 +1,13 @@
+.toolbar {
+  .hds-dropdown-list-item {
+    &__interactive-text {
+      font-weight: normal;
+    }
+
+    .checked {
+      svg {
+        fill: var(--token-color-foreground-action);
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.ember-application {
+  .hds-modal {
+    @apply overflow-visible;
+
+    .ember-basic-dropdown {
+      @apply w-full mb-2 mt-1;
+    }
+
+    &__body {
+      // Allows PeopleSelect dropdown to be completely visible
+      @apply overflow-y-visible;
+    }
+
+    .hds-form-field--layout-vertical .hds-form-field__control:not(:last-child) {
+      // Positions dropdown correctly
+      @apply mb-0;
+    }
+  }
+}

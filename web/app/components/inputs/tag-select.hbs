@@ -1,0 +1,15 @@
+<PowerSelectMultipleWithCreate
+  class="hds-form-field__control multiselect"
+  @searchEnabled={{true}}
+  @search={{perform this.searchTags}}
+  @selected={{@selected}}
+  @placeholder="Select some tags..."
+  @onChange={{optional @onChange}}
+  @onCreate={{this.createTag}}
+  @buildSuggestion={{this.createTagSuggestion}}
+  @selectedItemComponent={{component "multiselect/tag-chip"}}
+  ...attributes
+  as |value|
+>
+  {{value}}
+</PowerSelectMultipleWithCreate>

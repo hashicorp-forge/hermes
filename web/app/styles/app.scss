@@ -1,0 +1,113 @@
+@use "components/action";
+@use "components/toolbar";
+@use "components/footer";
+@use "components/nav";
+@use "components/x-hds-tab";
+@use "components/editable-field";
+@use "components/modal-dialog";
+@use "components/multiselect";
+@use "components/page";
+@use "components/row-results";
+@use "components/template-card";
+@use "components/tile-list";
+@use "components/preview-card";
+@use "components/notification";
+@use "components/sidebar";
+@use "components/hds-badge";
+@use "hashicorp/product-badge";
+@use "hashicorp/hermes-logo";
+
+@use "./ember-power-select-theme";
+
+@use "@hashicorp/design-system-components";
+@use "./hds-overrides";
+
+@use "tailwindcss/base";
+@use "tailwindcss/components";
+@use "tailwindcss/utilities";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  border-style: solid;
+  border-color: transparent;
+}
+
+dialog {
+  margin: auto; // centers the dialog
+}
+
+body,
+button {
+  font-family: var(--token-typography-font-stack-display);
+  font-size: var(--token-typography-body-200-font-size);
+}
+
+body {
+  line-height: var(--token-typography-body-200-line-height);
+  color: var(--token-color-foreground-primary);
+}
+
+.x-container {
+  @apply w-full max-w-screen-lg mx-auto px-8;
+}
+
+h1 {
+  @apply text-display-500 font-bold text-color-foreground-strong mb-1.5;
+
+  + p {
+    @apply text-body-300;
+  }
+}
+
+// Prevent the Flight Icons shim from taking up space
+.flight-sprite-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+// HACK! This should be imported dynamically from @hashicorp/ember-flight-icons
+// but it's not and this is the fastest way to ship milestone 2 on time.
+.flight-icon {
+  display: block;
+}
+
+.flight-icon-display-inline {
+  display: inline-block;
+}
+
+@keyframes hds-flight-icon-animation-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.flight-icon--animation-loading {
+  animation: hds-flight-icon-animation-rotation 9s linear infinite;
+}
+
+.flight-icon--animation-running {
+  animation: hds-flight-icon-animation-rotation 9s linear infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .flight-icon--animation-loading {
+    animation-duration: 0.7s;
+  }
+
+  .flight-icon--animation-running {
+    animation-duration: 1s;
+  }
+}
+
+.flight-sprite-container {
+  position: absolute;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
