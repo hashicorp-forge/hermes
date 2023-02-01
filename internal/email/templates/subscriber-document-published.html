@@ -1,14 +1,14 @@
 <html>
   <body>
-    <p>Hi!</p>
-    <p>
-      A new document has been published for <b>{{.Product}}</b>,
-      <a href="{{.DocumentURL}}">[{{.DocumentShortName}}] {{.DocumentTitle}}</a
-      >, by {{.DocumentOwner}}.
-    </p>
-    <p>
-      Cheers,<br />
-      Hermes
-    </p>
+    <p>New document published.</p>
+    <h2>
+      <a href="{{.DocumentURL}}">
+        [{{.DocumentShortName}}] {{.DocumentTitle}}
+      </a>
+    </h2>
+    <p>by {{.DocumentOwner}}</p>
+    <br>
+    <hr />
+    <small>Sent by Hermes · You're subscribed to updates about <b>{{.Product}}</b></small>
   </body>
 </html>

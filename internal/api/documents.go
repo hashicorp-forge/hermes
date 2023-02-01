@@ -318,18 +318,19 @@ func DocumentHandler(
 				if len(approversToEmail) > 0 {
 					// TODO: use a template for email content.
 					rawBody := `
-<html>
-<body>
-<p>Hi!</p>
-<p>
-Your review has been requested for a new document, <a href="%s">[%s] %s</a>.
-</p>
-<p>
-Cheers,<br>
-Hermes
-</p>
-</body>
-</html>`
+						<html>
+							<body>
+								<p>Your review is requested.</p>
+								<h2>
+									<a href="%s">
+										[%s] %s
+									</a>
+								</h2>
+								<hr />
+								<small>Sent by Hermes</small>
+							</body>
+						</html>
+					`
 
 					docURL, err := getDocumentURL(cfg.BaseURL, docID)
 					if err != nil {

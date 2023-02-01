@@ -1,14 +1,14 @@
 <html>
   <body>
-    <p>Hi!</p>
-    <p>
-      Your review has been requested for a new document,
-      <a href="{{.DocumentURL}}">[{{.DocumentShortName}}] {{.DocumentTitle}}</a
-      >, by {{.DocumentOwner}}.
-    </p>
-    <p>
-      Cheers,<br />
-      Hermes
-    </p>
+    <p>Your review is requested.</p>
+    <h2>
+      <a href="{{.DocumentURL}}">
+        [{{.DocumentShortName}}] {{.DocumentTitle}}
+      </a>
+    </h2>
+    <p>by {{.DocumentOwner}}</p>
+    <hr />
+    <small>Sent by Hermes</small>
   </body>
 </html>
+<a href="%s">[%s] %s</a>
