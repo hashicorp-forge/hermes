@@ -24,9 +24,10 @@
         @value="enable"
         checked={{this.isChecked}}
       />
-      {{#if this.popoverIsShown}}
+      {{#if this.confirmationIsShown}}
         <div
-          class="subscription-list-popover {{if this.popoverIsClosing "out"}} {{if this.isChecked "subscribed" "removed"}}"
+          class="subscription-list-popover
+            {{if this.confirmationIsClosing 'out'}}"
         >
           {{if this.isChecked "Subscribed" "Removed"}}
         </div>

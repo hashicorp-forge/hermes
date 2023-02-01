@@ -18,8 +18,8 @@ const POPOVER_SHOW_DURATION = Ember.testing ? 0 : 1500;
 export default class SettingsSubscriptionListItemComponent extends Component<SettingsSubscriptionListItemComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  @tracked popoverIsShown = false;
-  @tracked popoverIsClosing = false;
+  @tracked protected confirmationIsShown = false;
+  @tracked protected confirmationIsClosing = false;
 
   /**
    * Determines whether the user is subscribed to the product area.
@@ -48,17 +48,22 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
         this.args.productArea
       );
     }
-    void this.showPopover.perform();
+    void this.temporarilyShowConfirmation.perform();
   }
 
-  showPopover = restartableTask(async () => {
+  /**
+   * Shows the confirmation message for a time, then hides it.
+   */
+  protected temporarilyShowConfirmation = restartableTask(async () => {
+    this.confirmationIsClosing = false;
+    this.confirmationIsShown = true;
+    await timeout(POPOVER_SHOW_DURATION * 0.75);
 
-    this.popoverIsClosing = false;
-    this.popoverIsShown = true;
-    await timeout(POPOVER_SHOW_DURATION * .75);
-    this.popoverIsClosing = true;
-    await timeout(POPOVER_SHOW_DURATION * .25);
-    this.popoverIsShown = false;
-    this.popoverIsClosing = false;
+    // Used to add an `.out` class to our message, animating it out.
+    this.confirmationIsClosing = true;
+
+    await timeout(POPOVER_SHOW_DURATION * 0.25);
+    this.confirmationIsShown = false;
+    this.confirmationIsClosing = false;
   });
 }

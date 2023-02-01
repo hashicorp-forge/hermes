@@ -40,7 +40,6 @@ module(
       assert.dom(".hds-form-toggle").exists();
       assert.dom('.hds-form-toggle input[type="checkbox"]').isNotChecked();
 
-      // something is broken here
       await click('.hds-form-toggle input[type="checkbox"]');
       assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
 
