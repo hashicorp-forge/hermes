@@ -6,13 +6,13 @@ import { action } from "@ember/object";
 
 interface PeopleSelectComponentSignature {
   Args: {
-    selected: GooglePerson[];
+    selected: GoogleUser[];
     onBlur?: () => void;
-    onChange: (people: GooglePerson[]) => void;
+    onChange: (people: GoogleUser[]) => void;
   };
 }
 
-export interface GooglePerson {
+export interface GoogleUser {
   emailAddresses: { value: string }[];
   photos: { url: string }[];
 }
@@ -69,7 +69,7 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
       const peopleJson = await res.json();
 
       if (peopleJson) {
-        this.people = peopleJson.map((p: GooglePerson) => {
+        this.people = peopleJson.map((p: GoogleUser) => {
           return {
             email: p.emailAddresses[0]?.value,
             imgURL: p.photos?.[0]?.url,

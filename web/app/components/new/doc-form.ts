@@ -8,9 +8,8 @@ import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
-import { DocumentPerson } from "hermes/types/document";
+import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
-import { GooglePerson } from "../inputs/people-select";
 
 interface DocFormErrors {
   title: string | null;
@@ -48,18 +47,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
   @tracked protected productArea: string = "";
-  @tracked protected contributors: DocumentPerson[] = [];
-
-  /**
-   * An array of potential contributors based on the contributors input.
-   */
-  @tracked private contributorQueryIndex: DocumentPerson[] = [];
+  @tracked protected contributors: HermesUser[] = [];
 
   /**
    * Whether the form has all required fields filled out.
    * True if the title and product area are filled out.
    */
-  @tracked formRequirementsMet = false;
+  @tracked protected formRequirementsMet = false;
 
   /**
    * Whether the document is being created.
@@ -83,12 +77,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Whether to validate eagerly, that is, after every change to the form.
    * Set true after an invalid submission attempt.
    */
-  @tracked validateEagerly = false;
+  @tracked private validateEagerly = false;
 
   /**
    * Whether the form has errors.
    */
-  get hasErrors(): boolean {
+  private get hasErrors(): boolean {
     const defined = (a: unknown) => a != null;
     return Object.values(this.formErrors).filter(defined).length > 0;
   }
@@ -130,7 +124,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Returns contributor emails as an array of strings.
    */
-  private getEmails(values: DocumentPerson[]) {
+  private getEmails(values: HermesUser[]) {
     return values.map((person) => person.email);
   }
 
@@ -167,7 +161,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Updates the contributors property and conditionally validates the form.
    */
-  @action protected updateContributors(contributors: DocumentPerson[]) {
+  @action protected updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
 
@@ -175,7 +169,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
    */
-  @action submit(event: SubmitEvent) {
+  @action protected submit(event: SubmitEvent) {
     event.preventDefault();
     this.validateEagerly = true;
     this.validate();

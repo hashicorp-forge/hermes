@@ -19,7 +19,7 @@ export interface HermesDocument {
   readonly objectID: string;
 }
 
-export interface DocumentPerson {
+export interface HermesUser {
   email: string;
   imgURL?: string | null;
 }
