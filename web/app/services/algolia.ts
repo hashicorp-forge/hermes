@@ -15,6 +15,7 @@ import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import { FacetOption, FacetRecord, FacetRecords } from "hermes/types/facets";
 import FetchService from "./fetch";
+import SessionService from "ember-simple-auth/session";
 
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
@@ -27,8 +28,7 @@ export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  // TODO: use actual type.
-  @service session: any;
+  @service declare session: SessionService;
 
   /**
    * A shorthand getter for the authenticatedUser's email.
@@ -62,6 +62,7 @@ export default class AlgoliaService extends Service {
       console.log(
         "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API."
       );
+
       return algoliaSearch("", "", {
         headers: {
           "Hermes-Google-Access-Token":

@@ -3,10 +3,11 @@ import { inject as service } from "@ember/service";
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import Transition from "@ember/routing/transition";
+import SessionService from "ember-simple-auth/session";
 
 export default class AuthenticateController extends Controller {
   @service declare router: RouterService;
-  @service declare session: any;
+  @service declare session: SessionService;
 
   previousTransition: Transition | null = null;
 

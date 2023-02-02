@@ -4,9 +4,10 @@ import ConfigService from "hermes/services/config";
 import AuthenticateController from "hermes/controllers/authenticate";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import Transition from "@ember/routing/transition";
+import SessionService from "ember-simple-auth/session";
 
 export default class AuthenticatedRoute extends Route {
-  @service declare session: any;
+  @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service("config") declare configSvc: ConfigService;
 
