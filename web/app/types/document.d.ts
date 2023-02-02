@@ -18,3 +18,8 @@ export interface HermesDocument {
   };
   readonly objectID: string;
 }
+
+export interface DocumentPerson {
+  email: string;
+  imgURL?: string | null;
+}

@@ -4,7 +4,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, pauseTest, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { DocumentPerson } from "document";
+import { DocumentPerson } from "hermes/types/document";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: DocumentPerson[];
