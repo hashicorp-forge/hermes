@@ -30,7 +30,7 @@ jobs:
           go-version: "^1.18"
 
       - name: Build UI
-        run: cd web && yarn install
+        run: make build-ui
 
       - name: Build
         run: make bin/linux
