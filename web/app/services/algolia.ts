@@ -289,9 +289,10 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
       userIsOwner = false
     ): Promise<FacetRecords | undefined> => {
+      let query = params["q"] || "";
       try {
         let facetFilters = userIsOwner ? [`owners:${this.userEmail}`] : [];
-        let algoliaFacets = await this.searchIndex.perform(searchIndex, "", {
+        let algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
           facetFilters: facetFilters,
           facets: FACET_NAMES,
           hitsPerPage: HITS_PER_PAGE,
@@ -335,8 +336,10 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
       userIsOwner = false
     ): Promise<SearchResponse | unknown> => {
+      let query = params["q"] || "";
+
       try {
-        return await this.searchIndex.perform(searchIndex, "", {
+        return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
           facets: FACET_NAMES,
           hitsPerPage: HITS_PER_PAGE,
