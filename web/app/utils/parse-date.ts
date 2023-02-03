@@ -1,25 +1,28 @@
 /**
- * Converts a valid Date/timestamp into a "MM/DD/YYYY"-formatted string.
+ * Converts a valid Date/timestamp into a string formatted
+ * as "DD MMM. YYYY" or "DD MMMM YYYY" (if monthFormat is "long").
  * Returns null if the time parameter is invalid.
  */
-
 export default function parseDate(
-  time?: string | number | Date
+  time?: string | number | Date,
+  monthFormat: "short" | "long" = "short"
 ): string | null {
   if (!time) {
     return null;
   }
   const date = new Date(time);
 
-  // `getMonth()` returns a zero-indexed month so we add 1
-  let month = date.getMonth() + 1;
-  let day = date.getDate();
-  let year = date.getFullYear();
-
-  // Nullify invalid timestamps
-  if (isNaN(month) || isNaN(day) || isNaN(year)) {
+  if (isNaN(date.getTime())) {
     return null;
   }
 
-  return `${month}/${day}/${year}`;
+  let day = date.getDate();
+  let year = date.getFullYear();
+  let month = date.toLocaleString("default", { month: monthFormat });
+
+  if (monthFormat === "short") {
+    month += ".";
+  }
+
+  return `${day} ${month} ${year}`;
 }
