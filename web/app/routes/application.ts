@@ -3,15 +3,16 @@ import { UnauthorizedError } from "@ember-data/adapter/error";
 import { action } from "@ember/object";
 import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
+import ConfigService from "hermes/services/config";
+import FetchService from "hermes/services/fetch";
 
 export default class ApplicationRoute extends Route {
-  @service config;
-  @service("fetch") fetchSvc;
-  @service flags;
-  @service session;
+  @service declare config: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
+  @service declare flags: any;
+  @service declare session: any;
 
-  @action
-  error(error) {
+  @action error(error: unknown) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
       return;

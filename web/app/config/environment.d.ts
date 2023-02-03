@@ -16,11 +16,15 @@ declare const config: {
     draftsIndexName: string;
     internalIndexName: string;
   };
-  featureFlags: Record<string, boolean>;
+  featureFlags: FeatureFlagObjects;
   google: {
     docFolders: string;
   };
   shortLinkBaseURL: string;
 };
+
+interface FeatureFlagObjects {
+  [key: string]: { enabled: boolean };
+}
 
 export default config;
