@@ -27,10 +27,13 @@ jobs:
           go-version: "^1.18"
 
       - name: Build UI
-        run: make build-ui
+        run: make ui/build
+
+      - name: Run UI test
+        run: make ui/test
 
       - name: Build
         run: make bin/linux
 
-      - name: Test
+      - name: Run Go test
         run: make go/test
