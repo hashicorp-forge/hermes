@@ -25,6 +25,9 @@ export default class ResultsRoute extends Route {
     status: {
       refreshModel: true,
     },
+    q: {
+      refreshModel: true,
+    }
   };
 
   async model(params: ResultsRouteParams) {
