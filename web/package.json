@@ -109,7 +109,7 @@
     "typescript": "latest"
   },
   "engines": {
-    "node": "12.* || 14.* || >= 16",
+    "node": ">=16",
     "yarn": "~3.3.0"
   },
   "ember": {
