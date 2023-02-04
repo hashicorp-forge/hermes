@@ -3,6 +3,11 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 
+// enum SortByValues {
+//   DateDesc = "dateDesc",
+//   DateAsc = "dateAsc",
+// }
+
 export default class Toolbar extends Component {
   @service router;
   @service toolbar;
