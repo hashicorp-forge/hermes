@@ -1,19 +1,27 @@
-export enum SortByValues {
+export const enum SortByValues {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
 
-export enum FacetNames {
+export const enum FacetNames {
   DocType = "docType",
   Owners = "owners",
   Product = "product",
   Status = "status",
 }
 
-export interface FacetDropdownObjectDetails {
+export type FacetDropdownObjectDetails = {
   count: number;
   selected: boolean;
-}
+};
+
+export type FacetDropdownObjects = {
+  [key: string]: FacetDropdownObjectDetails;
+};
+
+export type FacetDropdownGroups = {
+  [name in FacetNames]: FacetDropdownObjects;
+};
 
 export interface FacetDropdownObjects {
   [key: string]: FacetDropdownObjectDetails;
