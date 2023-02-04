@@ -13,7 +13,7 @@ import {
 } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
-import { FacetOption, FacetRecord, FacetRecords } from "hermes/types/facets";
+import { FacetDropdownObjectDetails, FacetRecord, FacetRecords } from "hermes/types/facets";
 import FetchService from "./fetch";
 import SessionService from "./session";
 
@@ -109,7 +109,7 @@ export default class AlgoliaService extends Service {
 
   /**
    * Iterates over the keys of a facet object and transforms the `count` value
-   * into a `FacetOption` object with `count` and `selected` properties.
+   * into a `FacetDropdownObjectDetails` object with `count` and `selected` properties.
    */
   mapStatefulFacetKeys = (facetObject: AlgoliaFacetsObject): FacetRecords => {
     /**
@@ -142,7 +142,7 @@ export default class AlgoliaService extends Service {
           let valProp = val[prop];
           if (valProp) {
             /**
-             * Use the mapper to transform the count into a `FacetOption` object:
+             * Use the mapper to transform the count into a `FacetDropdownObjectDetails` object:
              * { "meg@hashicorp.com": { count: 10, selected: false }}
              */
             newVal[prop] = mapper(valProp);
@@ -182,7 +182,7 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetOption).selected = true;
+        (facet[param] as FacetDropdownObjectDetails).selected = true;
       }
       /**
        * e.g., facet["Approved"] === { count: 6, selected: true }

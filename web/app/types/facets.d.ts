@@ -1,22 +1,26 @@
-export type FacetOption = {
-  count: number;
-  selected: boolean;
-};
-
-enum SortByValues {
+export const enum SortByValues {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
 
-export enum FacetNames {
+export const enum FacetNames {
   DocType = "docType",
   Owners = "owners",
   Product = "product",
   Status = "status",
 }
 
-export type Facets = {
-  [name in FacetNames]: { [key: string]: FacetOption };
+export type FacetDropdownObjectDetails = {
+  count: number;
+  selected: boolean;
+};
+
+export type FacetDropdownObjects = {
+  [key: string]: FacetDropdownObjectDetails;
+};
+
+export type FacetDropdownGroups = {
+  [name in FacetNames]: FacetDropdownObjects;
 };
 
 export type FacetRecord = Record<string, FacetOption>;

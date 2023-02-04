@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { FacetDropdownObjects } from "facets";
+import { FacetDropdownObjects } from "hermes/types/facets";
 
 interface FacetDropdownComponentSignature {
   Args: {
