@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { FacetDropdownObjects, FacetNames } from "hermes/types/facets";
+import { FacetDropdownObjects } from "hermes/types/facets";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -9,6 +9,13 @@ interface FacetDropdownComponentSignature {
     facets: FacetDropdownObjects;
     disabled: boolean;
   };
+}
+
+export enum FacetNames {
+  DocType = "docType",
+  Owners = "owners",
+  Status = "status",
+  Product = "product",
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {

@@ -1,41 +1,32 @@
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
-import {
-  FacetDropdownGroups,
-  FacetDropdownObjectDetails,
-  FacetDropdownObjects,
-  SortByValues,
-} from "hermes/types/facets";
 
-interface ToolbarComponentSignature {
-  Args: {
-    facets: any;
-  };
-}
+// enum SortByValues {
+//   DateDesc = "dateDesc",
+//   DateAsc = "dateAsc",
+// }
 
-export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
-  @service declare router: RouterService;
+export default class Toolbar extends Component {
+  @service router;
+  @service toolbar;
 
-  @tracked sortBy: any = 'dateDesc';
-
-  get currentRouteName(): string {
+  get currentRouteName() {
     return this.router.currentRouteName;
   }
 
-  protected get getSortByLabel(): string {
-    if (this.sortBy === "dateDesc") {
+  get getSortByLabel() {
+    switch (this.toolbar.sortBy) {
+      case "dateDesc":
         return "Newest";
-      }else {
+      case "dateAsc":
         return "Oldest";
-      }
-
+    }
   }
 
   // Disable `owner` dropdown on My and Draft screens
-  protected get ownerFacetIsDisabled(): boolean {
+  get ownerFacetIsDisabled() {
     switch (this.currentRouteName) {
       case "authenticated.my":
       case "authenticated.drafts":
@@ -46,15 +37,14 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   // True in the case of no drafts or docs
-  get sortControlIsDisabled(): boolean {
+  get sortControlIsDisabled() {
     return Object.keys(this.args.facets).length === 0;
   }
 
-  protected get statuses(): FacetDropdownObjects | null {
-    let statuses: FacetDropdownObjects = {};
-    // @ts-ignore
-    for (let status in this.args.facets["status"]) {
-      // Filter out statuses we don't want in the dropdown
+  // TODO: Remove when status facet values are cleaned up
+  get statuses() {
+    let statuses = {};
+    for (let status in this.args.facets.status) {
       if (
         status === "Approved" ||
         status === "In-Review" ||
@@ -62,10 +52,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        // @ts-ignore
-        statuses[status] = this.args.facets["status"][
-          status
-        ] as FacetDropdownObjectDetails;
+        statuses[status] = this.args.facets.status[status];
       }
     }
 
@@ -77,7 +64,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  @action protected handleClick(name: any, value: any) {
+  @action
+  handleClick(name, value) {
     // Build filters (selected facet values).
     let filters = {
       docType: [],
@@ -85,36 +73,26 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       status: [],
       product: [],
     };
-
-    debugger;
-
     for (const facet in this.args.facets) {
       let selectedFacetVals = [];
-      // @ts-ignore
       for (const facetVal in this.args.facets[facet]) {
-        // @ts-ignore
         if (this.args.facets[facet][facetVal]["selected"]) {
           selectedFacetVals.push(facetVal);
         }
       }
-      // @ts-ignore
       filters[facet] = selectedFacetVals;
     }
 
     // Update filters based on what facet value was clicked and if it was
     // previously selected or not.
-    // @ts-ignore
     if (this.args.facets[name][value]["selected"]) {
       // Facet value was already selected so we need to remove it.
-      // @ts-ignore
       const index = filters[name].indexOf(value);
       if (index > -1) {
-        // @ts-ignore
         filters[name].splice(index, 1);
       }
     } else {
       // Facet value wasn't selected before so now we need to add it.
-      // @ts-ignore
       filters[name].push(value);
     }
 
@@ -129,11 +107,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     });
   }
 
-  @action protected updateSortBy(
-    value: SortByValues,
-    closeDropdown: () => void
-  ) {
-    this.sortBy = value;
+  @action
+  updateSortBy(value, closeDropdown) {
+    this.toolbar.sortBy = value;
 
     this.router.transitionTo({
       queryParams: {
