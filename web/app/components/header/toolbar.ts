@@ -1,32 +1,45 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
+import RouterService from "@ember/routing/router-service";
+import { tracked } from "@glimmer/tracking";
+import {
+  FacetDropdownGroups,
+  FacetDropdownObjectDetails,
+  FacetDropdownObjects,
+} from "hermes/types/facets";
+import { FacetNames } from "./facet-dropdown";
 
-// enum SortByValues {
-//   DateDesc = "dateDesc",
-//   DateAsc = "dateAsc",
-// }
+enum SortByValues {
+  DateDesc = "dateDesc",
+  DateAsc = "dateAsc",
+}
+interface ToolbarComponentSignature {
+  Args: {
+    facets: FacetDropdownGroups;
+    sortControlIsHidden?: boolean;
+  };
+}
 
-export default class Toolbar extends Component {
-  @service router;
-  @service toolbar;
+export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
+  @service declare router: RouterService;
 
-  get currentRouteName() {
+  @tracked sortBy: SortByValues = SortByValues.DateDesc;
+
+  protected get currentRouteName() {
     return this.router.currentRouteName;
   }
 
-  get getSortByLabel() {
-    switch (this.toolbar.sortBy) {
-      case "dateDesc":
-        return "Newest";
-      case "dateAsc":
-        return "Oldest";
+  protected get getSortByLabel() {
+    if (this.sortBy === SortByValues.DateDesc) {
+      return "Newest";
+    } else {
+      return "Oldest";
     }
   }
 
   // Disable `owner` dropdown on My and Draft screens
-  get ownerFacetIsDisabled() {
+  protected get ownerFacetIsDisabled() {
     switch (this.currentRouteName) {
       case "authenticated.my":
       case "authenticated.drafts":
@@ -37,13 +50,12 @@ export default class Toolbar extends Component {
   }
 
   // True in the case of no drafts or docs
-  get sortControlIsDisabled() {
+  protected get sortControlIsDisabled() {
     return Object.keys(this.args.facets).length === 0;
   }
 
-  // TODO: Remove when status facet values are cleaned up
-  get statuses() {
-    let statuses = {};
+  protected get statuses() {
+    let statuses: FacetDropdownObjects = {};
     for (let status in this.args.facets.status) {
       if (
         status === "Approved" ||
@@ -52,7 +64,9 @@ export default class Toolbar extends Component {
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        statuses[status] = this.args.facets.status[status];
+        statuses[status] = this.args.facets.status[
+          status
+        ] as FacetDropdownObjectDetails;
       }
     }
 
@@ -64,28 +78,37 @@ export default class Toolbar extends Component {
     }
   }
 
-  @action
-  handleClick(name, value) {
-    // Build filters (selected facet values).
-    let filters = {
+  @action protected handleClick(name: FacetNames, value: string) {
+    let filters: {
+      docType: string[];
+      owners: string[];
+      status: string[];
+      product: string[];
+    } = {
       docType: [],
       owners: [],
       status: [],
       product: [],
     };
-    for (const facet in this.args.facets) {
+
+    for (const key in this.args.facets) {
       let selectedFacetVals = [];
-      for (const facetVal in this.args.facets[facet]) {
-        if (this.args.facets[facet][facetVal]["selected"]) {
-          selectedFacetVals.push(facetVal);
+
+      let facetObject = this.args.facets[key as FacetNames];
+
+      for (const details in facetObject) {
+        if (facetObject?.["selected"]) {
+          selectedFacetVals.push(details);
         }
       }
-      filters[facet] = selectedFacetVals;
+      filters[key as FacetNames] = selectedFacetVals;
     }
 
     // Update filters based on what facet value was clicked and if it was
     // previously selected or not.
-    if (this.args.facets[name][value]["selected"]) {
+    if (
+      (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
+    ) {
       // Facet value was already selected so we need to remove it.
       const index = filters[name].indexOf(value);
       if (index > -1) {
@@ -107,9 +130,11 @@ export default class Toolbar extends Component {
     });
   }
 
-  @action
-  updateSortBy(value, closeDropdown) {
-    this.toolbar.sortBy = value;
+  @action protected updateSortBy(
+    value: SortByValues,
+    closeDropdown: () => void
+  ) {
+    this.sortBy = value;
 
     this.router.transitionTo({
       queryParams: {

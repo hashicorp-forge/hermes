@@ -13,14 +13,6 @@ export type FacetDropdownGroups = {
   [name in FacetNames]: FacetDropdownObjects;
 };
 
-export type FacetDropdownObjects = {
-  [key: string]: FacetDropdownObjectDetails;
-};
-
-export type FacetDropdownGroups = {
-  [name in FacetNames]: FacetDropdownObjects;
-};
-
 export interface FacetDropdownObjects {
   [key: string]: FacetDropdownObjectDetails;
 }
