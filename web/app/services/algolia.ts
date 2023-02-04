@@ -13,7 +13,7 @@ import {
 } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
-import { FacetOption, FacetRecord, FacetRecords } from "hermes/types/facets";
+import { FacetDropdownObjectDetails, FacetRecord, FacetRecords } from "hermes/types/facets";
 import FetchService from "./fetch";
 import SessionService from "./session";
 
@@ -182,7 +182,7 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetOption).selected = true;
+        (facet[param] as FacetDropdownObjectDetails).selected = true;
       }
       /**
        * e.g., facet["Approved"] === { count: 6, selected: true }
