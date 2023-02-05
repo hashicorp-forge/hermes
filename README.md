@@ -51,6 +51,7 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 1. [Create OAuth client ID credentials](https://developers.google.com/workspace/guides/create-credentials) for a “desktop application” for Hermes backend.
 
    - Download the OAuth credentials JSON file and save it to the root of this project repository.
+   - Rename to `credentials.json`
 
 ### Google Drive
 
