@@ -1,7 +1,8 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { render } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import RouterService from "@ember/routing/router-service";
 
 const FACETS = {
   docType: {
@@ -30,7 +31,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .doesNotExist("Sort-by dropdown is hidden unless facets are provided");
   });
 
-  test("it renders ", async function (assert) {
+  test("it renders facets when provided", async function (assert) {
     this.set("facets", FACETS);
     this.set("sortControlIsHidden", false);
 
@@ -41,7 +42,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       />
     `);
 
-    assert.dom(".facets").exists("Facets are shown when provided");
+    assert.dom(".facets").exists();
     assert
       .dom(".sort-by-dropdown")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
@@ -51,9 +52,38 @@ module("Integration | Component | header/toolbar", function (hooks) {
     assert.dom(".sort-by-dropdown").exists({ count: 1 });
     assert.dom(".sort-by-dropdown").hasText("Sort: Newest");
 
+    await click("[data-test-sort-by-button]");
+    assert.dom(".hds-dropdown-list-item:nth-child(2)").hasText("Oldest");
+
     this.set("sortControlIsHidden", true);
     assert
       .dom(".sort-by-dropdown")
       .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
+  });
+
+  test("the sortBy can be changed", async function (assert) {
+    this.set("facets", FACETS);
+    this.set("sortControlIsHidden", false);
+
+    await render(hbs`
+      <Header::Toolbar
+        @facets={{this.facets}}
+        @sortControlIsHidden={{this.sortControlIsHidden}}
+      />
+    `);
+
+    assert.dom("[data-test-sort-by-button]").hasText("Sort: Newest");
+
+    await click("[data-test-sort-by-button]");
+
+    await click(".hds-dropdown-list-item:nth-child(2) button");
+    // Need to mock the routerService here
+    await this.pauseTest();
+
+    assert.dom(".sort-by-dropdown").hasText("Sort: Oldest");
+
+    const queryParams = (this.owner.lookup("service:router") as RouterService)
+      .currentRoute.queryParams;
+    assert.equal(queryParams["sortBy"], "dateAsc");
   });
 });

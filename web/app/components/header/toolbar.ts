@@ -14,6 +14,14 @@ enum SortByValues {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
+
+interface ToolbarFilters {
+  docType: string[];
+  owners: string[];
+  status: string[];
+  product: string[];
+}
+
 interface ToolbarComponentSignature {
   Args: {
     facets: FacetDropdownGroups;
@@ -38,7 +46,10 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  // Disable `owner` dropdown on My and Draft screens
+  /**
+   * Whether the owner facet is disabled.
+   * True on the My Docs and My Drafts screens.
+   */
   protected get ownerFacetIsDisabled() {
     switch (this.currentRouteName) {
       case "authenticated.my":
@@ -49,12 +60,18 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  // True in the case of no drafts or docs
+  /**
+   * Whether the sort control is disabled.
+   * True when there are no drafts or docs.
+   */
   protected get sortControlIsDisabled() {
     return Object.keys(this.args.facets).length === 0;
   }
 
-  protected get statuses() {
+  /**
+   * The statuses available as filters.
+   */
+  protected get statuses(): FacetDropdownObjects | null {
     let statuses: FacetDropdownObjects = {};
     for (let status in this.args.facets.status) {
       if (
@@ -78,13 +95,12 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  @action protected handleClick(name: FacetNames, value: string) {
-    let filters: {
-      docType: string[];
-      owners: string[];
-      status: string[];
-      product: string[];
-    } = {
+  /**
+   * Click handler for the facet dropdowns.
+   * Updates the query params based on the facet value that was clicked.
+   */
+  @action protected handleClick(name: FacetNames, value: string): void {
+    let filters: ToolbarFilters = {
       docType: [],
       owners: [],
       status: [],
@@ -92,20 +108,18 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     };
 
     for (const key in this.args.facets) {
-      let selectedFacetVals = [];
-
+      let selectedFacetValues = [];
       let facetObject = this.args.facets[key as FacetNames];
 
       for (const details in facetObject) {
         if (facetObject?.["selected"]) {
-          selectedFacetVals.push(details);
+          selectedFacetValues.push(details);
         }
       }
-      filters[key as FacetNames] = selectedFacetVals;
+      filters[key as FacetNames] = selectedFacetValues;
     }
 
-    // Update filters based on what facet value was clicked and if it was
-    // previously selected or not.
+    // Update filters based on whether the clicked facet value was previously selected.
     if (
       (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
     ) {
@@ -130,17 +144,21 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     });
   }
 
+  /**
+   * Updates the sortBy value and queryParams.
+   */
   @action protected updateSortBy(
     value: SortByValues,
     closeDropdown: () => void
   ) {
     this.sortBy = value;
-
+    debugger;
     this.router.transitionTo({
       queryParams: {
         sortBy: value,
       },
     });
+    debugger;
     closeDropdown();
   }
 }

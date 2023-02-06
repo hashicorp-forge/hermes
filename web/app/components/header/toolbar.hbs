@@ -39,6 +39,7 @@
         {{#if (and @facets (not @sortControlIsHidden))}}
           <Hds::Dropdown class="sort-by-dropdown" as |dd|>
             <dd.ToggleButton
+              data-test-sort-by-button
               @text="Sort: {{this.getSortByLabel}}"
               @color="secondary"
             />
