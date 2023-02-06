@@ -83,7 +83,7 @@ Example shared drive organization
 ### Requirements
 
 - Go 1.18
-- Node.js 14
+- Node.js 16
 
 ### Configuration File
 
