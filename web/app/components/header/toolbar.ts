@@ -10,7 +10,7 @@ import {
 } from "hermes/types/facets";
 import { FacetNames } from "./facet-dropdown";
 
-enum SortByValues {
+export enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
@@ -32,14 +32,14 @@ interface ToolbarComponentSignature {
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service declare router: RouterService;
 
-  @tracked sortBy: SortByValues = SortByValues.DateDesc;
+  @tracked sortBy: SortByValue = SortByValue.DateDesc;
 
   protected get currentRouteName() {
     return this.router.currentRouteName;
   }
 
   protected get getSortByLabel() {
-    if (this.sortBy === SortByValues.DateDesc) {
+    if (this.sortBy === SortByValue.DateDesc) {
       return "Newest";
     } else {
       return "Oldest";
@@ -148,17 +148,17 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * Updates the sortBy value and queryParams.
    */
   @action protected updateSortBy(
-    value: SortByValues,
+    value: SortByValue,
     closeDropdown: () => void
   ) {
     this.sortBy = value;
-    debugger;
+
+    debugger
     this.router.transitionTo({
       queryParams: {
         sortBy: value,
       },
     });
-    debugger;
     closeDropdown();
   }
 }

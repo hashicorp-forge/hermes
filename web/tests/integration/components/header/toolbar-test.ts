@@ -1,8 +1,11 @@
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render } from "@ember/test-helpers";
+import { click, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import RouterService from "@ember/routing/router-service";
+import Service from "@ember/service";
+import { SortByValue } from "hermes/components/header/toolbar";
+import { tracked } from "@glimmer/tracking";
+import { FacetDropdownObjects } from "hermes/types/facets";
 
 const FACETS = {
   docType: {
@@ -61,29 +64,74 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
   });
 
-  test("the sortBy can be changed", async function (assert) {
-    this.set("facets", FACETS);
-    this.set("sortControlIsHidden", false);
+  test("it handles status values correctly", async function (assert) {
+    const STATUS_NAMES = [
+      "Approved",
+      "In-Review",
+      "In Review",
+      "Obsolete",
+      "WIP",
+      "Archived",
+      "Draft",
+      "Rejected",
+      "Submitted",
+    ];
+
+    const STATUS_FACETS: FacetDropdownObjects = {};
+
+    STATUS_NAMES.forEach((status) => {
+      STATUS_FACETS[status] = { count: 1, selected: false };
+    });
+
+    this.set("facets", { status: STATUS_FACETS });
 
     await render(hbs`
-      <Header::Toolbar
-        @facets={{this.facets}}
-        @sortControlIsHidden={{this.sortControlIsHidden}}
-      />
+      <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert.dom("[data-test-sort-by-button]").hasText("Sort: Newest");
+    await click("[data-test-facet-dropdown='status'] button");
 
-    await click("[data-test-sort-by-button]");
+    assert.deepEqual(
+      findAll(".hds-dropdown-list-item")?.map((el) => el.textContent?.trim()),
+      [
+        "Approved (1)",
+        "In-Review (1)",
+        "In Review (1)",
+        "Obsolete (1)",
+        "WIP (1)",
+      ]
+    );
 
-    await click(".hds-dropdown-list-item:nth-child(2) button");
-    // Need to mock the routerService here
-    await this.pauseTest();
+    this.set("facets", { status: {} });
 
-    assert.dom(".sort-by-dropdown").hasText("Sort: Oldest");
+    assert
+      .dom("[data-test-facet-dropdown='status'] button")
+      .hasAttribute("disabled");
+  });
 
-    const queryParams = (this.owner.lookup("service:router") as RouterService)
-      .currentRoute.queryParams;
-    assert.equal(queryParams["sortBy"], "dateAsc");
+  test("it conditionally disables the sort control", async function (assert) {
+    this.set("facets", FACETS);
+    await render(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    assert.dom("[data-test-sort-by-button]").doesNotHaveAttribute("disabled");
+    this.set("facets", {});
+
+    assert.dom("[data-test-sort-by-button]").hasAttribute("disabled");
+  });
+
+  /**
+   * Waiting for acceptance tests to be implemented
+   */
+  todo(
+    "the owner facet is disabled on the 'my' and 'drafts' routes",
+    async function (assert) {
+      throw new Error("Will be implemented in an acceptance test");
+    }
+  );
+
+  todo("the sort can be changed", async function (assert) {
+    throw new Error("Will be implemented in an acceptance test");
   });
 });
