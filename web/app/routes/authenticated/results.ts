@@ -4,10 +4,12 @@ import { inject as service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";
+import ToolbarService from "hermes/services/toolbar";
 
 export default class ResultsRoute extends Route {
-  @service declare algolia: AlgoliaService;
   @service("config") declare configSvc: ConfigService;
+  @service declare algolia: AlgoliaService;
+  @service declare toolbar: ToolbarService;
 
   queryParams = {
     docType: {
@@ -31,6 +33,8 @@ export default class ResultsRoute extends Route {
   };
 
   async model(params: ResultsRouteParams) {
+    this.toolbar.updateFilters(params);
+
     const searchIndex =
       params.sortBy === "dateAsc"
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"

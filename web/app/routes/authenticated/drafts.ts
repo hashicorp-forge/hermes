@@ -14,6 +14,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
+import ToolbarService from "hermes/services/toolbar";
 
 interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -23,9 +24,10 @@ interface DraftResponseJSON {
 }
 
 export default class DraftsRoute extends Route {
-  @service declare algolia: AlgoliaService;
-  @service declare authenticatedUser: AuthenticatedUserService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare algolia: AlgoliaService;
+  @service declare toolbar: ToolbarService;
+  @service declare authenticatedUser: AuthenticatedUserService;
 
   queryParams = {
     docType: {
@@ -132,6 +134,8 @@ export default class DraftsRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams) {
+    this.toolbar.updateFilters(params);
+
     return RSVP.hash({
       facets: this.getDraftFacets.perform(params),
       results: this.getDraftResults.perform(params),

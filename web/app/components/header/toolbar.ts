@@ -10,6 +10,7 @@ import {
 } from "hermes/types/facets";
 import { FacetName } from "./facet-dropdown";
 import { assert } from "@ember/debug";
+import ToolbarService from "hermes/services/toolbar";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -29,6 +30,7 @@ interface ToolbarComponentSignature {
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service declare router: RouterService;
+  @service declare toolbar: ToolbarService;
 
   @tracked sortBy: SortByValue = SortByValue.DateDesc;
 
@@ -89,57 +91,73 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  @tracked activeFilters: ActiveToolbarFilters = {
-    docType: [],
-    owners: [],
-    status: [],
-    product: [],
-  };
-
-  @action protected didInsert() {
-    for (const key in this.args.facets) {
-      let selectedFacetValues = [];
-      let facetObjects = this.args.facets[key as FacetName];
-
-      for (const objectKey in facetObjects) {
-        if (
-          (facetObjects[objectKey] as FacetDropdownObjectDetails)["selected"]
-        ) {
-          selectedFacetValues.push(objectKey);
-        }
-      }
-      this.activeFilters[key as FacetName] = selectedFacetValues;
-    }
-  }
-
   /**
    * Click handler for the facet dropdowns.
    * Updates the query params based on the facet value that was clicked.
    */
   @action protected handleClick(name: FacetName, value: string): void {
-
     // Update filters based on whether the clicked facet value was previously selected.
     if (
       (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
     ) {
-      const index = this.activeFilters[name].indexOf(value);
+      let index: number | undefined = undefined;
+
+      switch (name) {
+        case FacetName.DocType:
+          index = this.toolbar.docTypeFilters.indexOf(value);
+          break;
+        case FacetName.Owners:
+          index = this.toolbar.ownerFilters.indexOf(value);
+          break;
+        case FacetName.Product:
+          index = this.toolbar.productFilters.indexOf(value);
+          break;
+        case FacetName.Status:
+          index = this.toolbar.statusFilters.indexOf(value);
+          break;
+      }
 
       if (index > -1) {
-        // Facet value was already selected so we need to remove it.
-        this.activeFilters[name].splice(index, 1);
+        switch (name) {
+          case FacetName.DocType:
+            this.toolbar.docTypeFilters.splice(index, 1);
+            break;
+          case FacetName.Owners:
+            this.toolbar.ownerFilters.splice(index, 1);
+            break;
+          case FacetName.Product:
+            this.toolbar.productFilters.splice(index, 1);
+            break;
+          case FacetName.Status:
+            this.toolbar.statusFilters.splice(index, 1);
+            break;
+        }
       }
     } else {
+      switch (name) {
+        case FacetName.DocType:
+          this.toolbar.docTypeFilters.push(value);
+          break;
+        case FacetName.Owners:
+          this.toolbar.ownerFilters.push(value);
+          break;
+        case FacetName.Product:
+          this.toolbar.productFilters.push(value);
+          break;
+        case FacetName.Status:
+          this.toolbar.statusFilters.push(value);
+          break;
+      }
       // Facet value wasn't selected before so now we need to add it.
-      this.activeFilters[name].push(value);
     }
 
     this.router.transitionTo({
       queryParams: {
-        docType: this.activeFilters["docType"],
-        owners: this.activeFilters["owners"],
+        docType: this.toolbar.docTypeFilters,
+        owners: this.toolbar.ownerFilters,
         page: 1,
-        product: this.activeFilters["product"],
-        status: this.activeFilters["status"],
+        product: this.toolbar.productFilters,
+        status: this.toolbar.statusFilters,
       },
     });
   }

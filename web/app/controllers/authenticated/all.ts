@@ -1,11 +1,14 @@
 import Controller from "@ember/controller";
+import { tracked } from "@glimmer/tracking";
 
 export default class AuthenticatedAllController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
-  docType = [];
-  owners = [];
+
+  @tracked docType = [];
+  @tracked owners = [];
+  @tracked product = [];
+  @tracked status = [];
+
   page = 1;
-  product = [];
   sortBy = "dateDesc";
-  status = [];
 }
