@@ -4,14 +4,14 @@ import { FacetDropdownObjects } from "hermes/types/facets";
 
 interface FacetDropdownComponentSignature {
   Args: {
-    onClick: (facetName: FacetNames, value: string) => void;
+    onClick: (facetName: FacetName, value: string) => void;
     label: string;
     facets: FacetDropdownObjects;
     disabled: boolean;
   };
 }
 
-export enum FacetNames {
+export enum FacetName {
   DocType = "docType",
   Owners = "owners",
   Status = "status",
@@ -19,16 +19,16 @@ export enum FacetNames {
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
-  get facetName(): FacetNames | undefined {
+  get facetName(): FacetName | undefined {
     switch (this.args.label) {
       case "Type":
-        return FacetNames.DocType;
+        return FacetName.DocType;
       case "Status":
-        return FacetNames.Status;
+        return FacetName.Status;
       case "Product/Area":
-        return FacetNames.Product;
+        return FacetName.Product;
       case "Owner":
-        return FacetNames.Owners;
+        return FacetName.Owners;
     }
   }
 

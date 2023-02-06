@@ -1,25 +1,26 @@
-import { FacetNames } from "hermes/components/header/facet-dropdown";
+import { FacetName } from "hermes/components/header/facet-dropdown";
 
-export type FacetDropdownObjectDetails = {
-  count: number;
-  selected: boolean;
-};
-
-export type FacetDropdownObjects = {
-  [key: string]: FacetDropdownObjectDetails;
-};
-
+/**
+ * E.g., { docType: { "API": { count: 1, selected: false }}}
+ */
 export type FacetDropdownGroups = {
-  [name in FacetNames]: FacetDropdownObjects;
+  [name in FacetName]: FacetDropdownObjects;
 };
 
+/**
+ * E.g., { "API": { count: 1, selected: false }}
+ */
 export interface FacetDropdownObjects {
   [key: string]: FacetDropdownObjectDetails;
 }
 
-export interface FacetDropdownGroups {
-  [name in FacetNames]: FacetDropdownObjects;
-}
+/**
+ * E.g., {count: 1, selected: false}
+ */
+export type FacetDropdownObjectDetails = {
+  count: number;
+  selected: boolean;
+};
 
 export type FacetRecord = Record<string, FacetDropdownObjectDetails>;
 export type FacetRecords = Record<string, FacetRecord>;

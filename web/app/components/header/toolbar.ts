@@ -8,19 +8,16 @@ import {
   FacetDropdownObjectDetails,
   FacetDropdownObjects,
 } from "hermes/types/facets";
-import { FacetNames } from "./facet-dropdown";
+import { FacetName } from "./facet-dropdown";
 
-enum SortByValue {
+export enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
 
-interface ToolbarFilters {
-  docType: string[];
-  owners: string[];
-  status: string[];
-  product: string[];
-}
+export type ActiveToolbarFilters = {
+  [name in FacetName]: string[];
+};
 
 interface ToolbarComponentSignature {
   Args: {
@@ -95,8 +92,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * Click handler for the facet dropdowns.
    * Updates the query params based on the facet value that was clicked.
    */
-  @action protected handleClick(name: FacetNames, value: string): void {
-    let filters: ToolbarFilters = {
+  @action protected handleClick(name: FacetName, value: string): void {
+    let filters: ActiveToolbarFilters = {
       docType: [],
       owners: [],
       status: [],
@@ -105,29 +102,33 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
     for (const key in this.args.facets) {
       let selectedFacetValues = [];
-      let facetObject = this.args.facets[key as FacetNames];
+      let facetObject = this.args.facets[key as FacetName];
 
       for (const details in facetObject) {
         if (facetObject?.["selected"]) {
           selectedFacetValues.push(details);
         }
       }
-      filters[key as FacetNames] = selectedFacetValues;
+      filters[key as FacetName] = selectedFacetValues;
     }
 
     // Update filters based on whether the clicked facet value was previously selected.
     if (
       (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
     ) {
-      // Facet value was already selected so we need to remove it.
       const index = filters[name].indexOf(value);
+
+
       if (index > -1) {
+        // Facet value was already selected so we need to remove it.
         filters[name].splice(index, 1);
       }
     } else {
+      debugger
       // Facet value wasn't selected before so now we need to add it.
       filters[name].push(value);
     }
+
 
     this.router.transitionTo({
       queryParams: {
