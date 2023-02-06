@@ -10,7 +10,7 @@ import {
 } from "hermes/types/facets";
 import { FacetNames } from "./facet-dropdown";
 
-export enum SortByValue {
+enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
@@ -34,10 +34,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
   @tracked sortBy: SortByValue = SortByValue.DateDesc;
 
-  protected get currentRouteName() {
-    return this.router.currentRouteName;
-  }
-
   protected get getSortByLabel() {
     if (this.sortBy === SortByValue.DateDesc) {
       return "Newest";
@@ -51,7 +47,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * True on the My Docs and My Drafts screens.
    */
   protected get ownerFacetIsDisabled() {
-    switch (this.currentRouteName) {
+    switch (this.router.currentRouteName) {
       case "authenticated.my":
       case "authenticated.drafts":
         return true;
@@ -152,8 +148,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     closeDropdown: () => void
   ) {
     this.sortBy = value;
-
-    debugger
     this.router.transitionTo({
       queryParams: {
         sortBy: value,

@@ -2,9 +2,6 @@ import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { click, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import Service from "@ember/service";
-import { SortByValue } from "hermes/components/header/toolbar";
-import { tracked } from "@glimmer/tracking";
 import { FacetDropdownObjects } from "hermes/types/facets";
 
 const FACETS = {
