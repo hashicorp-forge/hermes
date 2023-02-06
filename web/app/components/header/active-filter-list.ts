@@ -17,14 +17,10 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
     return Object.values(this.activeFilters.index).flat();
   }
 
-  @action clearFilters() {
-    this.router.transitionTo({
-      queryParams: {
-        docType: [],
-        owners: [],
-        product: [],
-        status: [],
-      },
-    });
-  }
+  defaultQuery = {
+    docType: [],
+    owners: [],
+    product: [],
+    status: [],
+  };
 }

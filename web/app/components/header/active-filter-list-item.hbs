@@ -1,3 +1,7 @@
-<LinkTo @query={{this.query}}>
+<LinkTo
+  @query={{this.query}}
+  class="flex items-center border-color-border-strong rounded-full border py-0.5 pl-2 pr-3.5 no-underline text-color-foreground-primary bg-color-surface-interactive hover:bg-color-surface-interactive-hover"
+>
+  <FlightIcon @name="x" class="mr-1 scale-75" />
   {{@filter}}
 </LinkTo>
