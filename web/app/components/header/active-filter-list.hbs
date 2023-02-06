@@ -1,0 +1,8 @@
+{{#if this.shownFilters.length}}
+  Active filters:
+  {{#each this.shownFilters as |filter|}}
+    <Header::ActiveFilterListItem @filter={{filter}} />
+  {{/each}}
+
+  <Action {{on "click" this.clearFilters}}>Clear all</Action>
+{{/if}}

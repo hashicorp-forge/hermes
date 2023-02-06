@@ -4,12 +4,12 @@ import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import AlgoliaService from "hermes/services/algolia";
-import ToolbarService from "hermes/services/toolbar";
+import ActiveFiltersService from "hermes/services/active-filters";
 
 export default class AuthenticatedMyRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
-  @service declare toolbar: ToolbarService;
+  @service declare activeFilters: ActiveFiltersService;
 
   queryParams = {
     docType: {
@@ -33,7 +33,7 @@ export default class AuthenticatedMyRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
-    this.toolbar.updateFilters(params);
+    this.activeFilters.update(params);
 
     const searchIndex =
       params.sortBy === "dateAsc"

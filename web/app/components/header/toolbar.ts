@@ -9,15 +9,14 @@ import {
   FacetDropdownObjects,
 } from "hermes/types/facets";
 import { FacetName } from "./facet-dropdown";
-import { assert } from "@ember/debug";
-import ToolbarService from "hermes/services/toolbar";
+import ActiveFiltersService from "hermes/services/active-filters";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
 }
 
-export type ActiveToolbarFilters = {
+export type ActiveFilters = {
   [name in FacetName]: string[];
 };
 
@@ -30,7 +29,7 @@ interface ToolbarComponentSignature {
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service declare router: RouterService;
-  @service declare toolbar: ToolbarService;
+  @service declare activeFilters: ActiveFiltersService;
 
   @tracked sortBy: SortByValue = SortByValue.DateDesc;
 
@@ -104,48 +103,48 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
       switch (name) {
         case FacetName.DocType:
-          index = this.toolbar.docTypeFilters.indexOf(value);
+          index = this.activeFilters.index["docType"].indexOf(value);
           break;
         case FacetName.Owners:
-          index = this.toolbar.ownerFilters.indexOf(value);
+          index = this.activeFilters.index["owners"].indexOf(value);
           break;
         case FacetName.Product:
-          index = this.toolbar.productFilters.indexOf(value);
+          index = this.activeFilters.index["product"].indexOf(value);
           break;
         case FacetName.Status:
-          index = this.toolbar.statusFilters.indexOf(value);
+          index = this.activeFilters.index["status"].indexOf(value);
           break;
       }
 
       if (index > -1) {
         switch (name) {
           case FacetName.DocType:
-            this.toolbar.docTypeFilters.splice(index, 1);
+            this.activeFilters.index["docType"].splice(index, 1);
             break;
           case FacetName.Owners:
-            this.toolbar.ownerFilters.splice(index, 1);
+            this.activeFilters.index["owners"].splice(index, 1);
             break;
           case FacetName.Product:
-            this.toolbar.productFilters.splice(index, 1);
+            this.activeFilters.index["product"].splice(index, 1);
             break;
           case FacetName.Status:
-            this.toolbar.statusFilters.splice(index, 1);
+            this.activeFilters.index["status"].splice(index, 1);
             break;
         }
       }
     } else {
       switch (name) {
         case FacetName.DocType:
-          this.toolbar.docTypeFilters.push(value);
+          this.activeFilters.index["docType"].push(value);
           break;
         case FacetName.Owners:
-          this.toolbar.ownerFilters.push(value);
+          this.activeFilters.index["owners"].push(value);
           break;
         case FacetName.Product:
-          this.toolbar.productFilters.push(value);
+          this.activeFilters.index["product"].push(value);
           break;
         case FacetName.Status:
-          this.toolbar.statusFilters.push(value);
+          this.activeFilters.index["status"].push(value);
           break;
       }
       // Facet value wasn't selected before so now we need to add it.
@@ -153,11 +152,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
     this.router.transitionTo({
       queryParams: {
-        docType: this.toolbar.docTypeFilters,
-        owners: this.toolbar.ownerFilters,
+        docType: this.activeFilters.index["docType"],
+        owners: this.activeFilters.index["owners"],
         page: 1,
-        product: this.toolbar.productFilters,
-        status: this.toolbar.statusFilters,
+        product: this.activeFilters.index["product"],
+        status: this.activeFilters.index["status"],
       },
     });
   }
