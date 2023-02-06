@@ -21,6 +21,9 @@ jobs:
           node-version: "16"
           cache-dependency-path: "web/yarn.lock"
 
+      - name: yarn set version 3.3.0
+        run: yarn set version 3.3.0
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
