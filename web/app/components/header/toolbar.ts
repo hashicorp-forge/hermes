@@ -9,6 +9,7 @@ import {
   FacetDropdownObjects,
 } from "hermes/types/facets";
 import { FacetName } from "./facet-dropdown";
+import { assert } from "@ember/debug";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -88,55 +89,57 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
+  @tracked activeFilters: ActiveToolbarFilters = {
+    docType: [],
+    owners: [],
+    status: [],
+    product: [],
+  };
+
+  @action protected didInsert() {
+    for (const key in this.args.facets) {
+      let selectedFacetValues = [];
+      let facetObjects = this.args.facets[key as FacetName];
+
+      for (const objectKey in facetObjects) {
+        if (
+          (facetObjects[objectKey] as FacetDropdownObjectDetails)["selected"]
+        ) {
+          selectedFacetValues.push(objectKey);
+        }
+      }
+      this.activeFilters[key as FacetName] = selectedFacetValues;
+    }
+  }
+
   /**
    * Click handler for the facet dropdowns.
    * Updates the query params based on the facet value that was clicked.
    */
   @action protected handleClick(name: FacetName, value: string): void {
-    let filters: ActiveToolbarFilters = {
-      docType: [],
-      owners: [],
-      status: [],
-      product: [],
-    };
-
-    for (const key in this.args.facets) {
-      let selectedFacetValues = [];
-      let facetObject = this.args.facets[key as FacetName];
-
-      for (const details in facetObject) {
-        if (facetObject?.["selected"]) {
-          selectedFacetValues.push(details);
-        }
-      }
-      filters[key as FacetName] = selectedFacetValues;
-    }
 
     // Update filters based on whether the clicked facet value was previously selected.
     if (
       (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
     ) {
-      const index = filters[name].indexOf(value);
-
+      const index = this.activeFilters[name].indexOf(value);
 
       if (index > -1) {
         // Facet value was already selected so we need to remove it.
-        filters[name].splice(index, 1);
+        this.activeFilters[name].splice(index, 1);
       }
     } else {
-      debugger
       // Facet value wasn't selected before so now we need to add it.
-      filters[name].push(value);
+      this.activeFilters[name].push(value);
     }
-
 
     this.router.transitionTo({
       queryParams: {
-        docType: filters["docType"],
-        owners: filters["owners"],
+        docType: this.activeFilters["docType"],
+        owners: this.activeFilters["owners"],
         page: 1,
-        product: filters["product"],
-        status: filters["status"],
+        product: this.activeFilters["product"],
+        status: this.activeFilters["status"],
       },
     });
   }
