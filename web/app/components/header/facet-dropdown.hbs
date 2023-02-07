@@ -13,11 +13,11 @@
   {{#if @facets}}
     {{#each-in this.firstTenFacets as |value attrs|}}
       <dd.Interactive
-        class="facet-interactive-item"
-        {{on "click" (fn this.onClick value dd.close)}}
+        class="facet-interactive-item {{if attrs.selected 'checked'}}"
+        @route={{this.currentRouteName}}
+        @query={{get-query-hash @label value attrs.selected}}
         @text="{{value}} ({{attrs.count}})"
         @icon={{if attrs.selected "check-square-fill" "square"}}
-        class={{if attrs.selected "checked"}}
       />
     {{/each-in}}
   {{/if}}
