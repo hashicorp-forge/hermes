@@ -1,5 +1,4 @@
 import Route from "@ember/routing/route";
-import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
 import AlgoliaService, {
   AlgoliaFacetsObject,
@@ -134,11 +133,11 @@ export default class DraftsRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams) {
+    let facets = await this.getDraftFacets.perform(params);
+    let results = await this.getDraftResults.perform(params);
+
     this.activeFilters.update(params);
 
-    return RSVP.hash({
-      facets: this.getDraftFacets.perform(params),
-      results: this.getDraftResults.perform(params),
-    });
+    return { facets, results };
   }
 }

@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { FacetDropdownObjects } from "hermes/types/facets";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
+import { next } from "@ember/runloop";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -37,8 +38,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   get currentRouteName(): string {
-    console.log(this.router.currentRouteName);
-
     return this.router.currentRouteName;
   }
 
@@ -47,11 +46,13 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     let firstTenFacetsObjects = Object.fromEntries(firstTenEntries);
     return firstTenFacetsObjects;
   }
-
-  @action onClick(value: string, close: () => void) {
-    if (this.facetName) {
-      this.args.onClick(this.facetName, value);
-    }
-    close();
+  /**
+   * Closes the dropdown on the next run loop.
+   * Done so we don't interfere with Ember's <LinkTo> handling.
+   */
+  @action delayedCloseDropdown(closeDropdown: () => void) {
+    next(() => {
+      closeDropdown();
+    });
   }
 }

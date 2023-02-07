@@ -9,16 +9,16 @@ export default class ActiveFiltersService extends Service {
 
   @tracked index: ActiveFilters = {
     docType: [],
-    product: [],
     status: [],
+    product: [],
     owners: [],
   };
 
   update(params: DocumentsRouteParams) {
     this.index = {
       docType: params.docType || [],
-      product: params.product || [],
       status: params.status || [],
+      product: params.product || [],
       owners: params.owners || [],
     };
   }

@@ -10,6 +10,7 @@ import {
 } from "hermes/types/facets";
 import { FacetName } from "./facet-dropdown";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { next } from "@ember/runloop";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -41,12 +42,16 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
+  get currentRouteName(): string {
+    return this.router.currentRouteName;
+  }
+
   /**
    * Whether the owner facet is disabled.
    * True on the My Docs and My Drafts screens.
    */
   protected get ownerFacetIsDisabled() {
-    switch (this.router.currentRouteName) {
+    switch (this.currentRouteName) {
       case "authenticated.my":
       case "authenticated.drafts":
         return true;
@@ -91,89 +96,12 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
-   * Click handler for the facet dropdowns.
-   * Updates the query params based on the facet value that was clicked.
+   * Closes the dropdown on the next run loop.
+   * Done so we don't interfere with Ember's <LinkTo> handling.
    */
-  @action protected handleClick(name: FacetName, value: string): void {
-    // Update filters based on whether the clicked facet value was previously selected.
-    if (
-      (this.args.facets[name][value] as FacetDropdownObjectDetails)["selected"]
-    ) {
-      let index: number | undefined = undefined;
-
-      switch (name) {
-        case FacetName.DocType:
-          index = this.activeFilters.index["docType"].indexOf(value);
-          break;
-        case FacetName.Owners:
-          index = this.activeFilters.index["owners"].indexOf(value);
-          break;
-        case FacetName.Product:
-          index = this.activeFilters.index["product"].indexOf(value);
-          break;
-        case FacetName.Status:
-          index = this.activeFilters.index["status"].indexOf(value);
-          break;
-      }
-
-      if (index > -1) {
-        switch (name) {
-          case FacetName.DocType:
-            this.activeFilters.index["docType"].splice(index, 1);
-            break;
-          case FacetName.Owners:
-            this.activeFilters.index["owners"].splice(index, 1);
-            break;
-          case FacetName.Product:
-            this.activeFilters.index["product"].splice(index, 1);
-            break;
-          case FacetName.Status:
-            this.activeFilters.index["status"].splice(index, 1);
-            break;
-        }
-      }
-    } else {
-      switch (name) {
-        case FacetName.DocType:
-          this.activeFilters.index["docType"].push(value);
-          break;
-        case FacetName.Owners:
-          this.activeFilters.index["owners"].push(value);
-          break;
-        case FacetName.Product:
-          this.activeFilters.index["product"].push(value);
-          break;
-        case FacetName.Status:
-          this.activeFilters.index["status"].push(value);
-          break;
-      }
-      // Facet value wasn't selected before so now we need to add it.
-    }
-
-    this.router.transitionTo({
-      queryParams: {
-        docType: this.activeFilters.index["docType"],
-        owners: this.activeFilters.index["owners"],
-        page: 1,
-        product: this.activeFilters.index["product"],
-        status: this.activeFilters.index["status"],
-      },
+  @action protected delayedCloseDropdown(closeDropdown: () => void) {
+    next(() => {
+      closeDropdown();
     });
-  }
-
-  /**
-   * Updates the sortBy value and queryParams.
-   */
-  @action protected updateSortBy(
-    value: SortByValue,
-    closeDropdown: () => void
-  ) {
-    this.sortBy = value;
-    this.router.transitionTo({
-      queryParams: {
-        sortBy: value,
-      },
-    });
-    closeDropdown();
   }
 }

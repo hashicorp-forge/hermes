@@ -1,5 +1,4 @@
 import Route from "@ember/routing/route";
-import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
@@ -33,16 +32,16 @@ export default class AuthenticatedMyRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
-    this.activeFilters.update(params);
-
     const searchIndex =
       params.sortBy === "dateAsc"
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    return RSVP.hash({
-      facets: this.algolia.getFacets.perform(searchIndex, params, true),
-      results: this.algolia.getDocResults.perform(searchIndex, params, true),
-    });
+    let facets = await this.algolia.getFacets.perform(searchIndex, params);
+    let results = await this.algolia.getDocResults.perform(searchIndex, params);
+
+    this.activeFilters.update(params);
+
+    return { facets, results };
   }
 }

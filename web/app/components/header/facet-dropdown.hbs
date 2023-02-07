@@ -18,6 +18,7 @@
         @query={{get-query-hash @label value attrs.selected}}
         @text="{{value}} ({{attrs.count}})"
         @icon={{if attrs.selected "check-square-fill" "square"}}
+        {{on "click" (fn this.delayedCloseDropdown dd.close)}}
       />
     {{/each-in}}
   {{/if}}
