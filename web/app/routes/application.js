@@ -9,6 +9,7 @@ export default class ApplicationRoute extends Route {
   @service("fetch") fetchSvc;
   @service flags;
   @service session;
+  @service dayjs;
 
   @action
   error(error) {
@@ -20,6 +21,26 @@ export default class ApplicationRoute extends Route {
 
   async beforeModel() {
     this.session.setup();
+
+    this.dayjs.extend("relativeTime");
+    this.dayjs.extend("updateLocale");
+    this.dayjs.self.updateLocale("en", {
+      relativeTime: {
+        future: "in %s",
+        past: "%s ago",
+        s: "A few seconds",
+        m: "1 minute",
+        mm: "%d minutes",
+        h: "1 hour",
+        hh: "%d hours",
+        d: "1 day",
+        dd: "%d days",
+        M: "1 month",
+        MM: "%d months",
+        y: "1 year",
+        yy: "%d years",
+      },
+    });
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days

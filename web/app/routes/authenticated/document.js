@@ -1,8 +1,6 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import timeAgo from "hermes/utils/time-ago";
 import RSVP from "rsvp";
-import parseDate from "hermes/utils/parse-date";
 
 const serializePeople = (people) =>
   people.map((p) => ({
@@ -82,12 +80,6 @@ export default class DocumentRoute extends Route {
         throw new Error(errorMessage);
       }
     }
-    if (!!doc.createdTime) {
-      doc.createdDate = parseDate(doc.createdTime * 1000, "long");
-    }
-
-    // Build strings for created and last-modified.
-    doc.lastModified = `${timeAgo(new Date(doc.modifiedTime * 1000))}`;
 
     // Record analytics.
     try {

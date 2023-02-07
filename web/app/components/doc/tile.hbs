@@ -7,7 +7,7 @@
   @docNumber (string): document number
   @isOwner eg. 'true' (false by default) - optional
   @isResult eg. 'true' (false by default) - optional
-  @modifiedAgo (string): e.g. 'Modified 3 days ago'
+  @modifiedAgo (number): e.g. 1516586508
   @owner (string): owner of document
   @productArea eg. 'Waypoint' or 'Design Systems' etc
   @snippet: HTML string - optional
@@ -76,11 +76,10 @@
 
   <div class="flex flex-col items-start space-y-1 pb-1 max-w-full">
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
-    {{#if (not (is-empty @modifiedAgo))}}
-      <p
-        class="hds-typography-body-100 hds-foreground-faint"
-      >{{@modifiedAgo}}</p>
-    {{/if}}
+    {{#let (multiply @modifiedTime 1000) as |unixTime|}}
+      <p class="text-color-foreground-faint">Modified
+        {{dayjs-from unixTime}}</p>
+    {{/let}}
   </div>
 
   <Hds::Badge @text={{this.productAreaName}} @icon={{this.productAreaIcon}} />

@@ -1,7 +1,6 @@
 import Route from "@ember/routing/route";
 import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
-import timeAgo from "hermes/utils/time-ago";
 
 export default class DashboardRoute extends Route {
   @service algolia;
@@ -45,27 +44,7 @@ export default class DashboardRoute extends Route {
           " AND status:In-Review",
         hitsPerPage: 4,
       })
-      .then((result) => {
-        // Add modifiedAgo for each doc.
-        for (const hit of result.hits) {
-          this.fetchSvc
-            .fetch("/api/v1/documents/" + hit.objectID)
-            .then((resp) => resp.json())
-            .then((doc) => {
-              if (doc.modifiedTime) {
-                const modifiedDate = new Date(doc.modifiedTime * 1000);
-                hit.modifiedAgo = `Modified ${timeAgo(modifiedDate)}`;
-              }
-            })
-            .catch((err) => {
-              console.log(
-                `Error getting document waiting for review (${hit.objectID}):`,
-                err
-              );
-            });
-        }
-        return result.hits;
-      });
+      .then((result) => result.hits);
 
     // Get recently viewed docs from app data.
     const recentlyViewedDocIDs = await this.recentDocs.get.perform();
@@ -96,13 +75,8 @@ export default class DashboardRoute extends Route {
     const recentlyViewedDocs = recentlyViewedDocsPromise.then((promises) => {
       let recentlyViewedDocs = [];
 
-      promises.forEach((promise, index) => {
+      promises.forEach((promise) => {
         if (promise.status == "fulfilled") {
-          let doc = promise.value;
-          doc.modifiedAgo = `Modified ${timeAgo(
-            new Date(doc.modifiedTime * 1000)
-          )}`;
-
           recentlyViewedDocs.push(promise.value);
         }
       });

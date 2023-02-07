@@ -25,14 +25,14 @@
         {{#each this.docsWaitingForReview as |doc index|}}
           {{#if (lt index 4)}}
             <Doc::Tile
-              @avatar="{{get doc.ownerPhotos 0}}"
-              @docID="{{doc.objectID}}"
-              @docNumber="{{doc.docNumber}}"
-              @modifiedAgo="{{doc.modifiedAgo}}"
-              @owner="{{get doc.owners 0}}"
-              @productArea="{{doc.product}}"
-              @status="{{lowercase doc.status}}"
-              @title="{{doc.title}}"
+              @avatar={{get doc.ownerPhotos 0}}
+              @docID={{doc.objectID}}
+              @docNumber={{doc.docNumber}}
+              @modifiedTime={{doc.modifiedTime}}
+              @owner={{get doc.owners 0}}
+              @productArea={{doc.product}}
+              @status={{lowercase doc.status}}
+              @title={{doc.title}}
             />
           {{/if}}
         {{/each}}
@@ -54,14 +54,14 @@
         {{#each this.recentlyViewedDocs as |doc index|}}
           {{#if (lt index 4)}}
             <Doc::Tile
-              @avatar="{{get doc.ownerPhotos 0}}"
-              @docID="{{doc.objectID}}"
-              @docNumber="{{doc.docNumber}}"
-              @modifiedAgo="{{doc.modifiedAgo}}"
-              @owner="{{get doc.owners 0}}"
-              @productArea="{{doc.product}}"
-              @status="{{lowercase doc.status}}"
-              @title="{{doc.title}}"
+              @avatar={{get doc.ownerPhotos 0}}
+              @docID={{doc.objectID}}
+              @docNumber={{doc.docNumber}}
+              @modifiedTime={{doc.modifiedTime}}
+              @owner={{get doc.owners 0}}
+              @productArea={{doc.product}}
+              @status={{lowercase doc.status}}
+              @title={{doc.title}}
             />
           {{/if}}
         {{/each}}
