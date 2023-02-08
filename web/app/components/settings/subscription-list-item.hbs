@@ -20,7 +20,7 @@
       <Hds::Form::Toggle::Base
         tabindex="-1"
         name="toggle-subscription"
-        aria-label={{if this.isChecked "Remove" "Subscribe"}}
+        aria-label={{if this.isChecked "Unsubscribe" "Subscribe"}}
         @value="enable"
         checked={{this.isChecked}}
       />
@@ -29,7 +29,7 @@
           class="subscription-list-popover
             {{if this.confirmationIsClosing 'out'}}"
         >
-          {{if this.isChecked "Subscribed" "Removed"}}
+          {{if this.isChecked "Subscribed" "Unsubscribed"}}
         </div>
       {{/if}}
     </div>
