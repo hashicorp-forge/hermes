@@ -26,13 +26,42 @@ export default function (config) {
         return new Response(200, {}, matches.models);
       });
 
-      this.get("/people", (schema) => {
+      this.get("/people", (schema, _request) => {
         return schema.people.all();
       });
 
-      this.post("/me/subscriptions", (schema, request) => {
+      this.post("/me/subscriptions", (_schema, _request) => {
         return new Response(200, {});
       });
+
+      // RecentlyViewedDocsService / fetchIndexID
+      this.get("https://www.googleapis.com/drive/v3/files", (schema) => {
+        console.log(schema);
+        return new Response(
+          200,
+          {},
+          { files: schema.recentlyViewedDocsDatabases.first().attrs }
+        );
+      });
+
+      // RecentlyViewedDocsService / fetchAll
+      this.get(
+        "https://www.googleapis.com/drive/v3/files/:id",
+        (schema, _request) => {
+          return new Response(200, {}, schema.recentlyViewedDocs.all().models);
+        }
+      );
+
+      // RecentlyViewedDocsService / markViewed
+      this.patch(
+        "https://www.googleapis.com/upload/drive/v3/files/:id",
+        (schema, request) => {
+          // meed this to update the recentlyViewedDocs index
+          return schema.recentlyViewedDocs
+            .find(request.params.id)
+            .update(request.requestBody);
+        }
+      );
     },
   };
   return createServer(finalConfig);

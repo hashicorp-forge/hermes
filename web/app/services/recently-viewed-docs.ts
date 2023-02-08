@@ -7,7 +7,7 @@ import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
 // @ts-ignore - not yet typed
-import timeAgo from "hashidocs/utils/time-ago";
+import timeAgo from "hermes/utils/time-ago";
 
 const RECENTLY_VIEWED_DOCS_FILENAME = "recently_viewed_docs.json";
 
@@ -69,6 +69,7 @@ export default class RecentlyViewedDocsService extends Service {
       }
 
       assert("_get expects a indexID", this.indexID);
+
       /**
        * Fetch the file IDs from the Google Index file.
        */
@@ -283,7 +284,7 @@ export default class RecentlyViewedDocsService extends Service {
         /**
          * Patch the file on Google Drive with the new index.
          */
-
+        console.log("one");
         await this.fetchSvc.fetch(
           `https://www.googleapis.com/upload/drive/v3/files/${this.indexID}`,
           {
@@ -296,7 +297,7 @@ export default class RecentlyViewedDocsService extends Service {
             body: JSON.stringify(this.index),
           }
         );
-
+        console.log("two");
         /**
          * Fetch the docs to update the tracked `all` property.
          * Done so the list of recently viewed docs is updated
