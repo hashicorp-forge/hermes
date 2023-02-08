@@ -67,17 +67,17 @@ web/build:
 	yarn build;
 
 .PHONY: web/test
-web/test: ## Run UI test
+web/test: ## Run web test
 	cd web; \
 	yarn test:ember;
 
 .PHONY: web/install-deps
-web/install-deps: ## Install UI application dependencies
+web/install-deps: ## Install web application dependencies
 	cd web \
 		&& yarn install
 
 .PHONY: web/run
-web/run: ## Run UI application while proxying backend requests
+web/run: ## Run web application while proxying backend requests
 web/run: web/install-deps
 	cd web \
 		&& yarn start:with-proxy
