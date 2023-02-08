@@ -1,17 +1,17 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { FacetDropdownObjects } from "facets";
+import { FacetDropdownObjects } from "hermes/types/facets";
 
 interface FacetDropdownComponentSignature {
   Args: {
-    onClick: (facetName: FacetName, value: string) => void;
+    onClick: (facetName: FacetNames, value: string) => void;
     label: string;
     facets: FacetDropdownObjects;
     disabled: boolean;
   };
 }
 
-export enum FacetName {
+export enum FacetNames {
   DocType = "docType",
   Owners = "owners",
   Status = "status",
@@ -19,16 +19,16 @@ export enum FacetName {
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
-  get facetName(): FacetName | undefined {
+  get facetName(): FacetNames | undefined {
     switch (this.args.label) {
       case "Type":
-        return FacetName.DocType;
+        return FacetNames.DocType;
       case "Status":
-        return FacetName.Status;
+        return FacetNames.Status;
       case "Product/Area":
-        return FacetName.Product;
+        return FacetNames.Product;
       case "Owner":
-        return FacetName.Owners;
+        return FacetNames.Owners;
     }
   }
 
