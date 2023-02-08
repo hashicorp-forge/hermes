@@ -1,22 +1,16 @@
-export type FacetOption = {
+import { FacetNames } from "hermes/components/header/facet-dropdown";
+
+export type FacetDropdownObjectDetails = {
   count: number;
   selected: boolean;
 };
 
-enum SortByValues {
-  DateDesc = "dateDesc",
-  DateAsc = "dateAsc",
-}
+export type FacetDropdownObjects = {
+  [key: string]: FacetDropdownObjectDetails;
+};
 
-export enum FacetNames {
-  DocType = "docType",
-  Owners = "owners",
-  Product = "product",
-  Status = "status",
-}
-
-export type Facets = {
-  [name in FacetNames]: { [key: string]: FacetOption };
+export type FacetDropdownGroups = {
+  [name in FacetNames]: FacetDropdownObjects;
 };
 
 export type FacetRecord = Record<string, FacetOption>;
