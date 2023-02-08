@@ -1,8 +1,7 @@
 import Helper, { helper } from "@ember/component/helper";
 import { assert } from "@ember/debug";
-import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import { FacetName } from "hermes/components/header/facet-dropdown";
+import { FacetName } from "hermes/components/header/toolbar";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 export default class GetQueryHashHelper extends Helper {

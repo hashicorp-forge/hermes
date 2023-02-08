@@ -8,13 +8,19 @@ import {
   FacetDropdownObjectDetails,
   FacetDropdownObjects,
 } from "hermes/types/facets";
-import { FacetName } from "./facet-dropdown";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
+}
+
+export enum FacetName {
+  DocType = "docType",
+  Owners = "owners",
+  Status = "status",
+  Product = "product",
 }
 
 export type ActiveFilters = {
