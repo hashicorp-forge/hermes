@@ -133,8 +133,10 @@ export default class DraftsRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams) {
-    let facets = await this.getDraftFacets.perform(params);
-    let results = await this.getDraftResults.perform(params);
+    let [facets, results] = await Promise.all([
+      this.getDraftFacets.perform(params),
+      this.getDraftResults.perform(params),
+    ]);
 
     this.activeFilters.update(params);
 

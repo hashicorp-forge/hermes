@@ -37,8 +37,10 @@ export default class ResultsRoute extends Route {
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    let facets = await this.algolia.getFacets.perform(searchIndex, params);
-    let results = await this.algolia.getDocResults.perform(searchIndex, params);
+    let [facets, results] = await Promise.all([
+      this.algolia.getFacets.perform(searchIndex, params),
+      this.algolia.getDocResults.perform(searchIndex, params),
+    ]);
 
     this.activeFilters.update(params);
 
