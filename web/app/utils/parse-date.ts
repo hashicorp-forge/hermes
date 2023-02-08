@@ -1,6 +1,6 @@
 /**
- * Converts a valid Date/timestamp into a string formatted
- * as "DD MMM. YYYY" or "DD MMMM YYYY" (if monthFormat is "long").
+ * Converts a valid Date/timestamp into a string formatted like
+ * "21 Dec. 2023" or "21 December 2023" (if monthFormat is "long").
  * Returns null if the time parameter is invalid.
  */
 export default function parseDate(
