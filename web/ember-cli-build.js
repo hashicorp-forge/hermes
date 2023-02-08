@@ -31,9 +31,6 @@ module.exports = function (defaults) {
     "ember-simple-auth": {
       useSessionSetupMethod: true,
     },
-    "ember-dayjs": {
-      plugins: ["relativeTime", "updateLocale"],
-    },
   });
 
   // Use `app.import` to add additional libraries to the generated

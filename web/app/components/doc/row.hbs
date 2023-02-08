@@ -20,7 +20,7 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex space-x-4 no-underline"
+      class="flex  space-x-4 no-underline"
     >
       <div
         class="relative flex flex-shrink-0 items-center w-[40px] h-[56px] hds-surface-mid
@@ -83,7 +83,5 @@
   <Hds::Table::Td class="owner">
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
   </Hds::Table::Td>
-  <Hds::Table::Td class="created">
-    {{dayjs-format @createdDate "D MMM YYYY"}}
-  </Hds::Table::Td>
+  <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
 </Hds::Table::Tr>

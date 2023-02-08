@@ -302,22 +302,14 @@
         <small class="hds-typography-body-100 hds-foreground-faint">
           Created
         </small>
-        <p>
-          {{#if @document.created}}
-            {{dayjs-format @document.created "D MMMM YYYY"}}
-          {{else}}
-            Unknown
-          {{/if}}
-        </p>
+        <p>{{or @document.createdDate "Unknown"}}</p>
       </div>
 
       <div class="flex flex-col items-start space-y-2 px-3">
         <small class="hds-typography-body-100 hds-foreground-faint">
           Last modified
         </small>
-        {{#let (multiply @document.modifiedTime 1000) as |unixTime|}}
-          <p>{{dayjs-from unixTime}}</p>
-        {{/let}}
+        <p>{{@document.lastModified}}</p>
       </div>
 
       {{#each-in this.customEditableFields as |field attributes|}}
