@@ -4273,7 +4273,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-import-util@npm:^1.1.0, babel-import-util@npm:^1.2.0, babel-import-util@npm:^1.3.0":
+"babel-import-util@npm:^1.1.0, babel-import-util@npm:^1.2.0":
   version: 1.3.0
   resolution: "babel-import-util@npm:1.3.0"
   checksum: 41c6b4276ceefd2263f59be97a99bf8d948899c76587b273d115e91fa9067b0d9cc80ba727a795732052e078c30a3665649c725aed966826bf7c0a258a5fcf03
@@ -4371,15 +4371,6 @@ __metadata:
     magic-string: ^0.26.0
     string.prototype.matchall: ^4.0.5
   checksum: aa67214290e498c86a775737529ea353d88988875fc95781cc6eec509064c4430f9433891d9c43ec30f14490c3413277043eed167a0d9d1be442a951e2adffc4
-  languageName: node
-  linkType: hard
-
-"babel-plugin-ember-template-compilation@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "babel-plugin-ember-template-compilation@npm:2.0.0"
-  dependencies:
-    babel-import-util: ^1.3.0
-  checksum: 8abe8d6b3f20574ef824a1b6d04694892dae85055ff7aa370a183b383c9322ace64c1bbc4b9ccd54d8b8507e3bd673df10e9f1331ed2d7f23d8f719943f23660
   languageName: node
   linkType: hard
 
@@ -7013,13 +7004,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.7":
-  version: 1.11.7
-  resolution: "dayjs@npm:1.11.7"
-  checksum: 5003a7c1dd9ed51385beb658231c3548700b82d3548c0cfbe549d85f2d08e90e972510282b7506941452c58d32136d6362f009c77ca55381a09c704e9f177ebb
-  languageName: node
-  linkType: hard
-
 "debug@npm:2.6.9, debug@npm:^2.1.0, debug@npm:^2.1.1, debug@npm:^2.1.3, debug@npm:^2.2.0, debug@npm:^2.3.3, debug@npm:^2.6.8, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
@@ -7699,28 +7683,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-cli-htmlbars@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "ember-cli-htmlbars@npm:6.2.0"
-  dependencies:
-    "@ember/edition-utils": ^1.2.0
-    babel-plugin-ember-template-compilation: ^2.0.0
-    babel-plugin-htmlbars-inline-precompile: ^5.3.0
-    broccoli-debug: ^0.6.5
-    broccoli-persistent-filter: ^3.1.2
-    broccoli-plugin: ^4.0.3
-    ember-cli-version-checker: ^5.1.2
-    fs-tree-diff: ^2.0.1
-    hash-for-dep: ^1.5.1
-    heimdalljs-logger: ^0.1.10
-    js-string-escape: ^1.0.1
-    semver: ^7.3.4
-    silent-error: ^1.1.1
-    walk-sync: ^2.2.0
-  checksum: 1a0f94152ae381aed4c0300f4d8e756d60bfc4dfd1357fd49a0d36d420d65d6dc3f5761e604976f63edd11bc264959dddbd1b4c8401e9922711eafc748f4df92
-  languageName: node
-  linkType: hard
-
 "ember-cli-inject-live-reload@npm:^2.1.0":
   version: 2.1.0
   resolution: "ember-cli-inject-live-reload@npm:2.1.0"
@@ -8227,19 +8189,6 @@ __metadata:
     ember-cli-typescript: ^4.1.0
     ember-inflector: ^4.0.1
   checksum: eb89f42e0ae56ef192dc427dfdc16ba4bcf5bfdf31158c495f490746a2e07231932775c2083b2de5b7a3b80b4bc66da30fc7eb326fb7433c8e3d6fcd07a9e866
-  languageName: node
-  linkType: hard
-
-"ember-dayjs@npm:^0.10.4":
-  version: 0.10.4
-  resolution: "ember-dayjs@npm:0.10.4"
-  dependencies:
-    dayjs: ^1.11.7
-    ember-cli-babel: ^7.26.11
-    ember-cli-htmlbars: ^6.2.0
-  peerDependencies:
-    ember-source: ^3.28.0 || ^4.0.0
-  checksum: 083dea95a8843585ac4f74f1958796024c4b688e80e89849609c8234aa77e770244d5d78b027bbdfe446cf3a20f6523563af4f25f8de0d789721d8f63dac07b9
   languageName: node
   linkType: hard
 
@@ -10752,45 +10701,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heimdalljs-fs-monitor@npm:^1.1.0":
-  version: 1.1.1
-  resolution: "heimdalljs-fs-monitor@npm:1.1.1"
-  dependencies:
-    callsites: ^3.1.0
-    clean-stack: ^2.2.0
-    extract-stack: ^2.0.0
-    heimdalljs: ^0.2.3
-    heimdalljs-logger: ^0.1.7
-  checksum: 0932adf032888bcc22c9ff8b5d832c708f1303b04e5a8c34b88dac09948bf6a45e4ea7d34bfdf30a3aaa41eabb0311d0e00e0fad1da862e16cc0950db50101cd
-  languageName: node
-  linkType: hard
-
-"heimdalljs-graph@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "heimdalljs-graph@npm:1.0.0"
-  checksum: eef4a3de227fa4b3e6b20f634b7c1bbb3c7ae9a83639444ce7f5f8ffbc979e205021538452ecd92804d49013245ed9a989075c8c9147cca8666f4d7a1983da93
-  languageName: node
-  linkType: hard
-
-"heimdalljs-logger@npm:^0.1.10, heimdalljs-logger@npm:^0.1.7, heimdalljs-logger@npm:^0.1.9":
-  version: 0.1.10
-  resolution: "heimdalljs-logger@npm:0.1.10"
-  dependencies:
-    debug: ^2.2.0
-    heimdalljs: ^0.2.6
-  checksum: 40a698843aa4773e3376f4e000c87599460971f4411b402985526a8f82563f5486fc85bfde90ce3e63d25381cf417289e870242321ce92ade32ea3b91585cfad
-  languageName: node
-  linkType: hard
-
-"heimdalljs@npm:^0.2.0, heimdalljs@npm:^0.2.1, heimdalljs@npm:^0.2.3, heimdalljs@npm:^0.2.5, heimdalljs@npm:^0.2.6":
-  version: 0.2.6
-  resolution: "heimdalljs@npm:0.2.6"
-  dependencies:
-    rsvp: ~3.2.1
-  checksum: 5b28d3df4e77ea94293b43c29f0a358381aa811079817f780a1dafc9d244c891a0a713691a3c53d0d2dc31a76484fb36d998e7ae5040ef4b52e8c4a00d2173ae
-  languageName: node
-  linkType: hard
-
 "hermes@workspace:.":
   version: 0.0.0-use.local
   resolution: "hermes@workspace:."
@@ -10855,7 +10765,6 @@ __metadata:
     ember-composable-helpers: ^5.0.0
     ember-concurrency: ^2.2.1
     ember-data: ~3.28.6
-    ember-dayjs: ^0.10.4
     ember-export-application-global: ^2.0.1
     ember-fetch: ^8.1.1
     ember-focus-trap: ^1.0.1
@@ -10896,6 +10805,45 @@ __metadata:
     webpack: ^5.70.0
   languageName: unknown
   linkType: soft
+
+"heimdalljs-fs-monitor@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "heimdalljs-fs-monitor@npm:1.1.1"
+  dependencies:
+    callsites: ^3.1.0
+    clean-stack: ^2.2.0
+    extract-stack: ^2.0.0
+    heimdalljs: ^0.2.3
+    heimdalljs-logger: ^0.1.7
+  checksum: 0932adf032888bcc22c9ff8b5d832c708f1303b04e5a8c34b88dac09948bf6a45e4ea7d34bfdf30a3aaa41eabb0311d0e00e0fad1da862e16cc0950db50101cd
+  languageName: node
+  linkType: hard
+
+"heimdalljs-graph@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "heimdalljs-graph@npm:1.0.0"
+  checksum: eef4a3de227fa4b3e6b20f634b7c1bbb3c7ae9a83639444ce7f5f8ffbc979e205021538452ecd92804d49013245ed9a989075c8c9147cca8666f4d7a1983da93
+  languageName: node
+  linkType: hard
+
+"heimdalljs-logger@npm:^0.1.10, heimdalljs-logger@npm:^0.1.7, heimdalljs-logger@npm:^0.1.9":
+  version: 0.1.10
+  resolution: "heimdalljs-logger@npm:0.1.10"
+  dependencies:
+    debug: ^2.2.0
+    heimdalljs: ^0.2.6
+  checksum: 40a698843aa4773e3376f4e000c87599460971f4411b402985526a8f82563f5486fc85bfde90ce3e63d25381cf417289e870242321ce92ade32ea3b91585cfad
+  languageName: node
+  linkType: hard
+
+"heimdalljs@npm:^0.2.0, heimdalljs@npm:^0.2.1, heimdalljs@npm:^0.2.3, heimdalljs@npm:^0.2.5, heimdalljs@npm:^0.2.6":
+  version: 0.2.6
+  resolution: "heimdalljs@npm:0.2.6"
+  dependencies:
+    rsvp: ~3.2.1
+  checksum: 5b28d3df4e77ea94293b43c29f0a358381aa811079817f780a1dafc9d244c891a0a713691a3c53d0d2dc31a76484fb36d998e7ae5040ef4b52e8c4a00d2173ae
+  languageName: node
+  linkType: hard
 
 "hmac-drbg@npm:^1.0.1":
   version: 1.0.1
