@@ -2,7 +2,7 @@
 default: help
 
 .PHONY: build
-build: ui/build
+build: web/build
 	rm -f ./hermes
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
@@ -17,7 +17,7 @@ bin/linux: # bin creates hermes binary for linux
 .PHONY: dev
 dev: ## One command to start a dev environment
 dev: docker/postgres/start
-	$(MAKE) bin && ($(MAKE) run &) && $(MAKE) ui/run && fg
+	$(MAKE) bin && ($(MAKE) run &) && $(MAKE) web/run && fg
 
 .PHONY: docker/postgres/clear
 docker/postgres/clear: ## Stop and clear data for PostgreSQL in Docker
@@ -59,25 +59,29 @@ run:
 test:
 	go test ./...
 
-.PHONY: ui/build
-ui/build:
+.PHONY: web/build
+web/build:
 	cd web; \
 	yarn install; \
 	rm -rf dist/; \
 	yarn build;
 
-.PHONY: ui/test
-ui/test: ## Run UI test
+.PHONY: web/test
+web/test: ## Run UI test
 	cd web; \
 	yarn test:ember;
 
-.PHONY: ui/install-deps
-ui/install-deps: ## Install UI application dependencies
+.PHONY: web/install-deps
+web/install-deps: ## Install UI application dependencies
 	cd web \
 		&& yarn install
 
-.PHONY: ui/run
-ui/run: ## Run UI application while proxying backend requests
-ui/run: ui/install-deps
+.PHONY: web/run
+web/run: ## Run UI application while proxying backend requests
+web/run: web/install-deps
 	cd web \
 		&& yarn start:with-proxy
+
+web/set-yarn-version: ## Set yarn version
+	cd web \
+		&& yarn set version 3.3.0
