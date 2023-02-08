@@ -1,4 +1,3 @@
-import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
@@ -12,11 +11,16 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
   @service declare activeFilters: ActiveFiltersService;
   @service declare router: RouterService;
 
+  /**
+   * A flat array of all the active filters.
+   */
   get shownFilters() {
-    // return a flat array of activeFilters; don't worry about the keys
     return Object.values(this.activeFilters.index).flat();
   }
 
+  /**
+   * The route's default query parameters. Used to reset the filters.
+   */
   defaultQuery = {
     docType: [],
     owners: [],

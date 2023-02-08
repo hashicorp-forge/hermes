@@ -1,21 +1,14 @@
 {{#if this.shownFilters.length}}
-  <div class="pt-6 flex items-start">
-    <h3 class="flex items-center h-[36px] mr-4 font-semibold">
-      Showing
-    </h3>
-    <div class="flex items-center min-h-[36px] space-x-1 mr-1">
+  <div class="active-filter-list">
+    <h3>Showing</h3>
+    <div class="active-filter-list-container">
       {{#each this.shownFilters as |filter|}}
         <Header::ActiveFilterListItem @filter={{filter}} />
       {{/each}}
     </div>
-    <div class="h-[36px] flex items-center">
-      <LinkTo
-        @query={{this.defaultQuery}}
-        class="no-underline text-color-foreground-faint hover:text-color-foreground-strong flex items-center py-0.5 pl-2 pr-3.5"
-      >
-        <FlightIcon @name="x-circle" class="mr-1" />
-        Clear all
-      </LinkTo>
-    </div>
+    <LinkTo @query={{this.defaultQuery}} class="clear-all-link">
+      <FlightIcon @name="x-circle" class="mr-1" />
+      Clear all
+    </LinkTo>
   </div>
 {{/if}}

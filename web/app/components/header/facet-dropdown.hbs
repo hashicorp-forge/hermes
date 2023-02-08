@@ -15,7 +15,7 @@
       <dd.Interactive
         class="facet-interactive-item {{if attrs.selected 'checked'}}"
         @route={{this.currentRouteName}}
-        @query={{get-query-hash @label value attrs.selected}}
+        @query={{get-facet-query-hash @label value attrs.selected}}
         @text="{{value}} ({{attrs.count}})"
         @icon={{if attrs.selected "check-square-fill" "square"}}
         {{on "click" (fn this.delayedCloseDropdown dd.close)}}
