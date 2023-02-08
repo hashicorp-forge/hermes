@@ -202,7 +202,7 @@ export default class Sidebar extends Component {
     }
   }
 
-  get shortLinkBaseURL() {    
+  get shortLinkBaseURL() {
     return this.configSvc.config.short_link_base_url;
   }
 
