@@ -53,6 +53,7 @@
       <div class="tile-list">
         {{#each this.recentDocs.all as |r|}}
           <Doc::Tile
+            @isDraft={{r.isDraft}}
             @avatar={{get r.doc.ownerPhotos 0}}
             @docID={{r.doc.objectID}}
             @docNumber={{r.doc.docNumber}}
