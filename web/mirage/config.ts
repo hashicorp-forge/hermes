@@ -26,16 +26,20 @@ export default function (config) {
         return new Response(200, {}, matches.models);
       });
 
-      this.get("/people", (schema, _request) => {
+      this.get("/people", (schema) => {
         return schema.people.all();
       });
 
-      this.post("/me/subscriptions", (_schema, _request) => {
+      this.post("/me/subscriptions", () => {
         return new Response(200, {});
       });
 
       this.get("documents/:id", (schema, request) => {
-        return new Response(200, {}, schema.db.recentlyViewedDocs.find(request.params.id));
+        return new Response(
+          200,
+          {},
+          schema.db.document.find(request.params.id)
+        );
       });
 
       // RecentlyViewedDocsService / fetchIndexID
@@ -50,7 +54,7 @@ export default function (config) {
       // RecentlyViewedDocsService / fetchAll
       this.get(
         "https://www.googleapis.com/drive/v3/files/:id",
-        (schema, _request) => {
+        (schema) => {
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
         }
       );

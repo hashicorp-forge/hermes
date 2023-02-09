@@ -67,6 +67,10 @@ export default class DashboardRoute extends Route {
         return result.hits;
       });
 
+    if (this.recentDocs.all === null) {
+      await this.recentDocs.fetchAll.perform();
+    }
+
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,
     });

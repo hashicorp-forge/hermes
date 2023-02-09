@@ -16,7 +16,7 @@ type IndexedDoc = {
   isDraft: boolean;
 };
 
-type RecentlyViewedDoc = {
+export type RecentlyViewedDoc = {
   doc: HermesDocument;
   isDraft: boolean;
 };
@@ -122,7 +122,6 @@ export default class RecentlyViewedDocsService extends Service {
       let docResponses = await Promise.allSettled(
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
-
           let fetchResponse: Response = await this.fetchSvc.fetch(
             `/api/v1/${endpoint}/${id}`
           );
@@ -280,7 +279,6 @@ export default class RecentlyViewedDocsService extends Service {
          * Update the tracked property.
          */
         this.index = newIndex.slice(0, 4);
-
         /**
          * Patch the file on Google Drive with the new index.
          */
