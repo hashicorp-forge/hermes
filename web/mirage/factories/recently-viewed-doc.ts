@@ -1,6 +1,7 @@
 import { Factory } from "miragejs";
 
 export default Factory.extend({
-  id: "123",
-  name: "a recently viewed doc",
+  id: (i: number) => `doc-${i}`,
+  name: (i: number) => `Document ${i}`,
+  isDraft: false,
 });

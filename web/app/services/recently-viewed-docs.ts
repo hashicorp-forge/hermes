@@ -122,6 +122,7 @@ export default class RecentlyViewedDocsService extends Service {
       let docResponses = await Promise.allSettled(
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
+
           let fetchResponse: Response = await this.fetchSvc.fetch(
             `/api/v1/${endpoint}/${id}`
           );
@@ -131,7 +132,6 @@ export default class RecentlyViewedDocsService extends Service {
           };
         })
       );
-
       /**
        * Set up an empty array to hold the documents.
        */
@@ -284,7 +284,6 @@ export default class RecentlyViewedDocsService extends Service {
         /**
          * Patch the file on Google Drive with the new index.
          */
-        console.log("one");
         await this.fetchSvc.fetch(
           `https://www.googleapis.com/upload/drive/v3/files/${this.indexID}`,
           {
@@ -297,7 +296,7 @@ export default class RecentlyViewedDocsService extends Service {
             body: JSON.stringify(this.index),
           }
         );
-        console.log("two");
+
         /**
          * Fetch the docs to update the tracked `all` property.
          * Done so the list of recently viewed docs is updated

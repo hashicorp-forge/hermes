@@ -18,10 +18,13 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
 
   test("it adds documents to an index", async function (this: RecentlyViewedDocsContext, assert) {
     this.server.create("recently-viewed-docs-database");
-    this.server.create("recently-viewed-doc", { id: "doc1" });
-    assert.equal(this.recentDocs.all, null);
-    await this.recentDocs.markViewed.perform("doc2");
-    await waitUntil(() => this.recentDocs.all, { timeout: 1000 });
-    assert.equal(this.recentDocs.all?.length, 1);
+    assert.equal(this.recentDocs.all, null, "the index is empty");
+    await this.recentDocs.markViewed.perform("doc-1");
+    await waitUntil(() => this.recentDocs.all?.length === 1);
+    assert.equal(
+      this.recentDocs.all?.length,
+      1,
+      "The document was added to the index"
+    );
   });
 });

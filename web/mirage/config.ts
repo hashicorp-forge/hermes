@@ -34,13 +34,16 @@ export default function (config) {
         return new Response(200, {});
       });
 
+      this.get("documents/:id", (schema, request) => {
+        return new Response(200, {}, schema.db.recentlyViewedDocs.find(request.params.id));
+      });
+
       // RecentlyViewedDocsService / fetchIndexID
       this.get("https://www.googleapis.com/drive/v3/files", (schema) => {
-        console.log(schema);
         return new Response(
           200,
           {},
-          { files: schema.recentlyViewedDocsDatabases.first().attrs }
+          { files: [schema.recentlyViewedDocsDatabases.first().attrs] }
         );
       });
 
@@ -56,10 +59,10 @@ export default function (config) {
       this.patch(
         "https://www.googleapis.com/upload/drive/v3/files/:id",
         (schema, request) => {
-          // meed this to update the recentlyViewedDocs index
-          return schema.recentlyViewedDocs
-            .find(request.params.id)
-            .update(request.requestBody);
+          let index = JSON.parse(request.requestBody);
+          schema.db.recentlyViewedDocs.remove();
+          schema.db.recentlyViewedDocs.insert(index);
+          return new Response(200, {}, schema.recentlyViewedDocs.all().models);
         }
       );
     },
