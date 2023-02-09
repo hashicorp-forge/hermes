@@ -10701,6 +10701,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"heimdalljs-fs-monitor@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "heimdalljs-fs-monitor@npm:1.1.1"
+  dependencies:
+    callsites: ^3.1.0
+    clean-stack: ^2.2.0
+    extract-stack: ^2.0.0
+    heimdalljs: ^0.2.3
+    heimdalljs-logger: ^0.1.7
+  checksum: 0932adf032888bcc22c9ff8b5d832c708f1303b04e5a8c34b88dac09948bf6a45e4ea7d34bfdf30a3aaa41eabb0311d0e00e0fad1da862e16cc0950db50101cd
+  languageName: node
+  linkType: hard
+
+"heimdalljs-graph@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "heimdalljs-graph@npm:1.0.0"
+  checksum: eef4a3de227fa4b3e6b20f634b7c1bbb3c7ae9a83639444ce7f5f8ffbc979e205021538452ecd92804d49013245ed9a989075c8c9147cca8666f4d7a1983da93
+  languageName: node
+  linkType: hard
+
+"heimdalljs-logger@npm:^0.1.10, heimdalljs-logger@npm:^0.1.7, heimdalljs-logger@npm:^0.1.9":
+  version: 0.1.10
+  resolution: "heimdalljs-logger@npm:0.1.10"
+  dependencies:
+    debug: ^2.2.0
+    heimdalljs: ^0.2.6
+  checksum: 40a698843aa4773e3376f4e000c87599460971f4411b402985526a8f82563f5486fc85bfde90ce3e63d25381cf417289e870242321ce92ade32ea3b91585cfad
+  languageName: node
+  linkType: hard
+
+"heimdalljs@npm:^0.2.0, heimdalljs@npm:^0.2.1, heimdalljs@npm:^0.2.3, heimdalljs@npm:^0.2.5, heimdalljs@npm:^0.2.6":
+  version: 0.2.6
+  resolution: "heimdalljs@npm:0.2.6"
+  dependencies:
+    rsvp: ~3.2.1
+  checksum: 5b28d3df4e77ea94293b43c29f0a358381aa811079817f780a1dafc9d244c891a0a713691a3c53d0d2dc31a76484fb36d998e7ae5040ef4b52e8c4a00d2173ae
+  languageName: node
+  linkType: hard
+
 "hermes@workspace:.":
   version: 0.0.0-use.local
   resolution: "hermes@workspace:."
@@ -10805,45 +10844,6 @@ __metadata:
     webpack: ^5.70.0
   languageName: unknown
   linkType: soft
-
-"heimdalljs-fs-monitor@npm:^1.1.0":
-  version: 1.1.1
-  resolution: "heimdalljs-fs-monitor@npm:1.1.1"
-  dependencies:
-    callsites: ^3.1.0
-    clean-stack: ^2.2.0
-    extract-stack: ^2.0.0
-    heimdalljs: ^0.2.3
-    heimdalljs-logger: ^0.1.7
-  checksum: 0932adf032888bcc22c9ff8b5d832c708f1303b04e5a8c34b88dac09948bf6a45e4ea7d34bfdf30a3aaa41eabb0311d0e00e0fad1da862e16cc0950db50101cd
-  languageName: node
-  linkType: hard
-
-"heimdalljs-graph@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "heimdalljs-graph@npm:1.0.0"
-  checksum: eef4a3de227fa4b3e6b20f634b7c1bbb3c7ae9a83639444ce7f5f8ffbc979e205021538452ecd92804d49013245ed9a989075c8c9147cca8666f4d7a1983da93
-  languageName: node
-  linkType: hard
-
-"heimdalljs-logger@npm:^0.1.10, heimdalljs-logger@npm:^0.1.7, heimdalljs-logger@npm:^0.1.9":
-  version: 0.1.10
-  resolution: "heimdalljs-logger@npm:0.1.10"
-  dependencies:
-    debug: ^2.2.0
-    heimdalljs: ^0.2.6
-  checksum: 40a698843aa4773e3376f4e000c87599460971f4411b402985526a8f82563f5486fc85bfde90ce3e63d25381cf417289e870242321ce92ade32ea3b91585cfad
-  languageName: node
-  linkType: hard
-
-"heimdalljs@npm:^0.2.0, heimdalljs@npm:^0.2.1, heimdalljs@npm:^0.2.3, heimdalljs@npm:^0.2.5, heimdalljs@npm:^0.2.6":
-  version: 0.2.6
-  resolution: "heimdalljs@npm:0.2.6"
-  dependencies:
-    rsvp: ~3.2.1
-  checksum: 5b28d3df4e77ea94293b43c29f0a358381aa811079817f780a1dafc9d244c891a0a713691a3c53d0d2dc31a76484fb36d998e7ae5040ef4b52e8c4a00d2173ae
-  languageName: node
-  linkType: hard
 
 "hmac-drbg@npm:^1.0.1":
   version: 1.0.1
