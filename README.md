@@ -84,6 +84,7 @@ Example shared drive organization
 
 - Go 1.18
 - Node.js 16
+- Yarn ~3.3.0 ([install with corepack](https://yarnpkg.com/getting-started/install))
 
 ### Configuration File
 
