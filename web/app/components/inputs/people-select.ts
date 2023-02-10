@@ -3,6 +3,8 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
+import FetchService from "hermes/services/fetch";
+import { assert } from "@ember/debug";
 
 export interface Person {
   emailAddresses: { value: string }[];
@@ -18,9 +20,7 @@ interface PeopleSelectComponentSignature {
 }
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
-  // @ts-ignore
-  // FetchService not yet in the registry
-  @service("fetch") declare fetchSvc: any;
+  @service("fetch") declare fetchSvc: FetchService;
 
   /**
    * The list of people to display in the dropdown.
@@ -66,6 +66,7 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         }),
       });
 
+      assert('response must be defined', res)
       const peopleJson = await res.json();
 
       if (peopleJson) {
