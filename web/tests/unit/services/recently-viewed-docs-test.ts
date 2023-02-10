@@ -69,4 +69,18 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
       "the index has a maximum of 4 items"
     );
   });
+
+  test("it handles legacy users", async function (this: RecentlyViewedDocsContext, assert) {
+    this.server.create("recently-viewed-docs-database");
+    this.server.createList("document", 4);
+    this.server.createList("recently-viewed-doc", 4, { isLegacy: true });
+    await this.recentDocs.fetchAll.perform();
+
+    assert.equal(this.recentDocs.all?.length, 4);
+    assert.equal(
+      this.recentDocs.all?.every((recentDoc) => recentDoc.doc),
+      true,
+      'the index was transformed from a list of strings to a list of objects with "doc" properties'
+    );
+  });
 });

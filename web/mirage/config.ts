@@ -52,12 +52,16 @@ export default function (config) {
       });
 
       // RecentlyViewedDocsService / fetchAll
-      this.get(
-        "https://www.googleapis.com/drive/v3/files/:id",
-        (schema) => {
-          return new Response(200, {}, schema.recentlyViewedDocs.all().models);
-        }
-      );
+      this.get("https://www.googleapis.com/drive/v3/files/:id", (schema) => {
+        let index = schema.recentlyViewedDocs.all().models.map((doc) => {
+          if (doc.attrs.isLegacy) {
+            return doc.attrs.id;
+          } else {
+            return doc.attrs;
+          }
+        });
+        return new Response(200, {}, index);
+      });
 
       // RecentlyViewedDocsService / markViewed
       this.patch(
