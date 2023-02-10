@@ -270,7 +270,7 @@ export default class DocumentSidebar extends Component {
         extendedTimeout: 1000,
       });
 
-      this.router.transitionTo("authenticated.document", this.docID, {
+      this.router.transitionTo({
         queryParams: { draft: false },
       });
 
@@ -278,7 +278,6 @@ export default class DocumentSidebar extends Component {
     } catch (err) {
       this.showModalError("Error creating review", err);
     }
-
     this.refreshRoute();
   }
 
