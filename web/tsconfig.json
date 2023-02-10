@@ -12,7 +12,8 @@
       "hermes/tests/*": ["tests/*"],
       "hermes/*": ["app/*"],
       "hermes/mirage/*": ["mirage/*"],
-      "*": ["types/*"]
+      "*": ["types/*"],
+      "fetch": ["node_modules/ember-fetch"]
     }
   },
   "include": ["app/**/*", "tests/**/*", "types/**/*"]
