@@ -17,6 +17,9 @@
             <FlightIcon @name="external-link" />
           </a>
         </div>
+        {{#if this.shareButtonIsShown}}
+          <Document::ShareButton @document={{@document}} class="scale-[80%]" />
+        {{/if}}
       </ul>
     </nav>
   {{else}}
@@ -38,15 +41,7 @@
       <ul class="flex w-full items-center justify-end space-x-1 pr-1 list-none">
 
         {{#if this.shareButtonIsShown}}
-          <Hds::Dropdown @listPosition="left" as |dd|>
-            <dd.ToggleIcon @icon="share" @text="share" @hasChevron={{false}} />
-            <dd.CopyItem
-              @text="{{this.shortLinkBaseURL}}/{{lowercase
-                @document.docType
-              }}/{{lowercase @document.docNumber}}"
-              @copyItemTitle="Copy URL"
-            />
-          </Hds::Dropdown>
+          <Document::ShareButton @document={{@document}} />
         {{/if}}
 
         <a
