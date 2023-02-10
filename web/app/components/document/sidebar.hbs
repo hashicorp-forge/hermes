@@ -18,7 +18,10 @@
           </a>
         </div>
         {{#if this.shareButtonIsShown}}
-          <Document::ShareButton @document={{@document}} class="scale-[80%]" />
+          <Document::ShareButton
+            @document={{@document}}
+            @isDownscaled={{true}}
+          />
         {{/if}}
       </div>
     </nav>

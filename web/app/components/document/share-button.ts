@@ -6,6 +6,7 @@ import { HermesDocument } from "hermes/types/document";
 interface DocumentShareButtonComponentSignature {
   Args: {
     document: HermesDocument;
+    isDownscaled?: boolean;
   };
 }
 
