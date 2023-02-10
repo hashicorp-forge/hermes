@@ -2,9 +2,6 @@
 FROM node:18-alpine as frontend-builder
 WORKDIR /app
 
-# Copy all file
-COPY . .
-
 # Install Make
 RUN apk add --no-cache make
 
@@ -12,6 +9,14 @@ RUN apk add --no-cache make
 RUN corepack enable
 RUN corepack prepare yarn@stable --activate
 RUN yarn set version stable
+
+# Copy and install deps
+COPY --link Makefile .
+COPY --link web web
+RUN make web/install-deps
+
+# Copy all file
+COPY --link . .
 
 # Build frontend
 RUN make web/build
