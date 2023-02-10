@@ -5,17 +5,18 @@ import { task } from "ember-concurrency";
 import { action } from "@ember/object";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
+import { HermesUser } from "hermes/types/document";
 
-export interface Person {
+export interface GoogleUser {
   emailAddresses: { value: string }[];
   photos: { url: string }[];
 }
 
 interface PeopleSelectComponentSignature {
   Args: {
-    selected: Person[];
+    selected: HermesUser[];
     onBlur?: () => void;
-    onChange: (people: Person[]) => void;
+    onChange: (people: GoogleUser[]) => void;
   };
 }
 
@@ -66,16 +67,23 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         }),
       });
 
-      assert('response must be defined', res)
+      assert("response must be defined", res);
       const peopleJson = await res.json();
 
       if (peopleJson) {
-        this.people = peopleJson.map((p: Person) => {
-          return {
-            email: p.emailAddresses[0]?.value,
-            imgURL: p.photos?.[0]?.url,
-          };
-        });
+        this.people = peopleJson
+          .map((person: GoogleUser) => {
+            return {
+              email: person.emailAddresses[0]?.value,
+              imgURL: person.photos?.[0]?.url,
+            };
+          })
+          .filter((person: HermesUser) => {
+            // filter out any people already selected
+            return !this.args.selected.find(
+              (selectedPerson) => selectedPerson.email === person.email
+            );
+          });
       } else {
         this.people = [];
       }
