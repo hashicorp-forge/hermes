@@ -8,9 +8,6 @@ there aren’t any conflicts with the upcoming plans for the project. As the
 project becomes more stable over the next several releases, we think it
 will become much easier to contribute.
 
-- Describe the change
-- Include tests
-
 If your PR resolves any open issue(s), please indicate them like this so they will be closed when your PR is merged:
 
 Closes #xxx
