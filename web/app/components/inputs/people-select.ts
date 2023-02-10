@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
+import { assert } from "@ember/debug";
 
 export interface Person {
   emailAddresses: { value: string }[];
@@ -56,9 +57,9 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
    */
-  protected searchDirectory = task(async (query) => {
+  protected searchDirectory = task(async (query: string) => {
     try {
-      const res = await this.fetchSvc.fetch("/api/v1/people", {
+      let fetchCall = this.fetchSvc.fetch("/api/v1/people", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,6 +67,14 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         }),
       });
 
+      let res = await fetchCall;
+
+      if (!res) {
+        // If Google doesn't respond quickly, try one more time.
+        res = await fetchCall;
+      }
+
+      assert("response must be defined", res);
       const peopleJson = await res.json();
 
       if (peopleJson) {
