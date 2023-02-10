@@ -60,7 +60,6 @@
           </Hds::Form::Textarea::Field>
         </div>
 
-          {{log this.productArea}}
         <Hds::Form::Select::Field
           @type="text"
           @isRequired={{true}}
@@ -75,7 +74,7 @@
             belongs to.</F.HelperText>
           {{#if @productAbbrevMappings}}
             <F.Options>
-              <option value="" disabled selected={{not this.productArea}}></option>
+              <option value=""></option>
               {{#each-in @productAbbrevMappings as |name|}}
                 <option value="{{name}}">{{name}}</option>
               {{/each-in}}
