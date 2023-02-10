@@ -83,6 +83,8 @@ export default class AuthenticatedUserService extends Service {
             this.session.data.authenticated.access_token,
         },
       });
+
+      assert('response must be defined', response)
       let subscriptions: string[] = await response.json();
 
       let newSubscriptions: Subscription[] = [];

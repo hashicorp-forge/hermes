@@ -92,7 +92,10 @@ export default class DraftsRoute extends Route {
             "/api/v1/drafts?" +
               this.createDraftURLSearchParams(params, ownerFacetOnly)
           )
-          .then((response) => response.json());
+          .then((response) => {
+            assert("response must be defined", response);
+            return response.json();
+          });
         return response;
       } catch (e: unknown) {
         console.error(e);

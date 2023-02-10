@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
 import FetchService from "hermes/services/fetch";
+import { assert } from "@ember/debug";
 
 export interface Person {
   emailAddresses: { value: string }[];
@@ -65,6 +66,7 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         }),
       });
 
+      assert('response must be defined', res)
       const peopleJson = await res.json();
 
       if (peopleJson) {

@@ -4,9 +4,11 @@ import { inject as service } from "@ember/service";
 import SessionService from "./session";
 
 interface FetchOptions {
+  method?: string;
   headers?: {
     [key: string]: string;
   };
+  body?: string;
 }
 
 export default class FetchService extends Service {
