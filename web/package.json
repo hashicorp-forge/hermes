@@ -131,5 +131,6 @@
     "tailwindcss": "^3.0.23",
     "torii": "^0.10.1",
     "webpack": "^5.70.0"
-  }
+  },
+  "packageManager": "yarn@3.3.0"
 }
