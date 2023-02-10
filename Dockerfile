@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.4
+
 # BUILD FRONTEND STAGE
 FROM node:18-alpine as frontend-builder
 WORKDIR /app
