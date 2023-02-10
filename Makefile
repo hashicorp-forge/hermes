@@ -62,9 +62,9 @@ test:
 .PHONY: web/build
 web/build:
 	cd web; \
-	yarn install; \
+	corepack yarn install; \
 	rm -rf dist/; \
-	yarn build;
+	corepack yarn build;
 
 .PHONY: web/test
 web/test: ## Run web test
