@@ -26,8 +26,10 @@ RUN make web/build
 # BUILD BACKEND STAGE
 FROM golang:1.18 as backend-builder
 WORKDIR /app
-COPY --from=frontend-builder /app/web/dist /app/web/dist
-COPY . .
+COPY --link go.mod go.sum ./
+RUN go mod download
+COPY --link . .
+COPY --link --from=frontend-builder /app/web/dist /app/web/dist
 RUN make bin
 
 # RUN STAGE
