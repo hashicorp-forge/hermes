@@ -4,17 +4,17 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
 
+export interface GoogleUser {
+  emailAddresses: { value: string }[];
+  photos: { url: string }[];
+}
+
 interface PeopleSelectComponentSignature {
   Args: {
     selected: GoogleUser[];
     onBlur?: () => void;
     onChange: (people: GoogleUser[]) => void;
   };
-}
-
-export interface GoogleUser {
-  emailAddresses: { value: string }[];
-  photos: { url: string }[];
 }
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
