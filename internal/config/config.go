@@ -167,6 +167,9 @@ type GoogleWorkspace struct {
 	// Auth contains the authentication configuration for Google Workspace.
 	Auth *gw.Config `hcl:"auth,block"`
 
+	// ADC enables using Application Default Credentials instead of service account or user authorization.
+	ADC bool `hcl:"adc"`
+
 	// CreateDocShortcuts enables creating a shortcut in the appropriate (per doc
 	// type and product) Shared Drive folder when a document is published.
 	CreateDocShortcuts bool `hcl:"create_doc_shortcuts,optional"`

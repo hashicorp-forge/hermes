@@ -232,3 +232,43 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	err = json.NewDecoder(f).Decode(tok)
 	return tok, err
 }
+
+// NewADC uses Application Default Credentials and returns a service with the required
+// access for Hermes.
+// https://cloud.google.com/docs/authentication/application-default-credentials
+func NewADC() *Service {
+	// adminSrv, err := admin.NewService(context.TODO())
+	// if err != nil {
+	// 	log.Fatalf("Unable to retrieve Admin client: %v", err)
+	// }
+	docSrv, err := docs.NewService(context.TODO())
+	if err != nil {
+		log.Fatalf("Unable to retrieve Google Docs client: %v", err)
+	}
+	driveSrv, err := drive.NewService(context.TODO())
+	if err != nil {
+		log.Fatalf("Unable to retrieve Google Drive client: %v", err)
+	}
+	gmailSrv, err := gmail.NewService(context.TODO())
+	if err != nil {
+		log.Fatalf("Unable to retrieve Drive client: %v", err)
+	}
+	oAuth2Srv, err := oauth2api.NewService(context.TODO())
+	if err != nil {
+		log.Fatalf("Unable to retrieve OAuth2 client: %v", err)
+	}
+	peopleSrv, err := people.NewService(context.TODO())
+	if err != nil {
+		log.Fatalf("Unable to retrieve Google People client: %v", err)
+	}
+	peoplePeopleSrv := people.NewPeopleService(peopleSrv)
+
+	return &Service{
+		// Admin:  adminSrv,
+		Docs:   docSrv,
+		Drive:  driveSrv,
+		Gmail:  gmailSrv,
+		OAuth2: oAuth2Srv,
+		People: peoplePeopleSrv,
+	}
+}

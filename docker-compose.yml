@@ -13,5 +13,15 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  hermes:
+    image: hermes-001
+    command: ["server", "-config=/etc/hermes-config/hermes-config.hcl"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.hcl:/etc/hermes-config/hermes-config.hcl
+    depends_on:
+      - postgres
+
 volumes:
   postgres:

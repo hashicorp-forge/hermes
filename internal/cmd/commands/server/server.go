@@ -103,6 +103,17 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
+	// TODO: fetch secret information from ENV or Google Secret Manager
+	if val, ok := os.LookupEnv("ALGOLIA_APP_ID"); ok {
+		cfg.Algolia.ApplicationID = val
+	}
+	if val, ok := os.LookupEnv("ALGOLIA_SEARCH_KEY"); ok {
+		cfg.Algolia.SearchAPIKey = val
+	}
+	if val, ok := os.LookupEnv("ALGOLIA_WRITE_KEY"); ok {
+		cfg.Algolia.WriteAPIKey = val
+	}
+
 	// Get configuration from environment variables if not set on the command
 	// line.
 	// TODO: make this section more DRY and add tests.
@@ -173,7 +184,9 @@ func (c *Command) Run(args []string) int {
 
 	// Initialize Google Workspace service.
 	var goog *gw.Service
-	if cfg.GoogleWorkspace.Auth != nil {
+	if cfg.GoogleWorkspace.ADC {
+		goog = gw.NewADC()
+	} else if cfg.GoogleWorkspace.Auth != nil {
 		// Use Google Workspace auth if it is defined in the config.
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
 	} else {
