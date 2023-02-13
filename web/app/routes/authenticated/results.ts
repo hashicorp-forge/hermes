@@ -27,14 +27,11 @@ export default class ResultsRoute extends Route {
     },
     q: {
       refreshModel: true,
-    }
+    },
   };
 
   async model(params: ResultsRouteParams) {
-    const searchIndex =
-      params.sortBy === "dateAsc"
-        ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
-        : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+    const searchIndex = this.configSvc.config.algolia_docs_index_name;
 
     return RSVP.hash({
       facets: this.algolia.getFacets.perform(searchIndex, params),
