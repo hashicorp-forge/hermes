@@ -79,6 +79,7 @@
               {{#each-in @productAbbrevMappings as |name|}}
                 <option
                   value="{{name}}"
+                  {{! This allows us to recover from errors: }}
                   selected={{eq name this.productArea}}
                 >{{name}}</option>
               {{/each-in}}
