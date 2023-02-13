@@ -240,61 +240,59 @@
         {{/if}}
       </div>
 
-      {{#unless this.isDraft}}
-        <div class="flex flex-col items-start space-y-2 px-3">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Approvers</small>
-          {{#if this.isOwner}}
-            <EditableField
-              @value={{this.approvers}}
-              @onChange={{perform this.save "approvers"}}
-              @loading={{this.save.isRunning}}
-              @disabled={{this.editingIsDisabled}}
-            >
-              <:default>
-                {{#if this.approvers.length}}
-                  <ol class="person-list">
-                    {{#each this.approvers as |approver|}}
-                      <li>
-                        <Person
-                          @imgURL={{approver.imgURL}}
-                          @email={{approver.email}}
-                        />
-                      </li>
-                    {{/each}}
-                  </ol>
-                {{else}}
-                  <em>No approvers</em>
-                {{/if}}
-              </:default>
-              <:editing as |F|>
-                <Inputs::PeopleSelect
-                  class="multiselect--narrow"
-                  @selected={{this.approvers}}
-                  @onChange={{this.updateApprovers}}
-                  {{click-outside (fn F.update this.approvers)}}
-                />
-              </:editing>
-            </EditableField>
+      <div class="flex flex-col items-start space-y-2 px-3">
+        <small
+          class="hds-typography-body-100 hds-foreground-faint"
+        >Approvers</small>
+        {{#if this.isOwner}}
+          <EditableField
+            @value={{this.approvers}}
+            @onChange={{perform this.save "approvers"}}
+            @loading={{this.save.isRunning}}
+            @disabled={{this.editingIsDisabled}}
+          >
+            <:default>
+              {{#if this.approvers.length}}
+                <ol class="person-list">
+                  {{#each this.approvers as |approver|}}
+                    <li>
+                      <Person
+                        @imgURL={{approver.imgURL}}
+                        @email={{approver.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No approvers</em>
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                class="multiselect--narrow"
+                @selected={{this.approvers}}
+                @onChange={{this.updateApprovers}}
+                {{click-outside (fn F.update this.approvers)}}
+              />
+            </:editing>
+          </EditableField>
+        {{else}}
+          {{#if this.approvers.length}}
+            <ol class="person-list">
+              {{#each this.approvers as |approver|}}
+                <li>
+                  <Person
+                    @imgURL={{approver.imgURL}}
+                    @email={{approver.email}}
+                  />
+                </li>
+              {{/each}}
+            </ol>
           {{else}}
-            {{#if this.approvers.length}}
-              <ol class="person-list">
-                {{#each this.approvers as |approver|}}
-                  <li>
-                    <Person
-                      @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No approvers</em>
-            {{/if}}
+            <em>No approvers</em>
           {{/if}}
-        </div>
-      {{/unless}}
+        {{/if}}
+      </div>
 
       <div class="flex flex-col items-start space-y-2 px-3">
         <small class="hds-typography-body-100 hds-foreground-faint">
