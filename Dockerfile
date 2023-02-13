@@ -33,7 +33,7 @@ COPY --link --from=frontend-builder /app/web/dist /app/web/dist
 RUN make bin
 
 # RUN STAGE
-FROM alpine:latest
+FROM alpine:3.17
 
 # Copy execute file
 WORKDIR /app
