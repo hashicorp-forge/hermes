@@ -1,5 +1,7 @@
 # Hermes
 
+![](https://github.com/hashicorp-forge/hermes/workflows/ci/badge.svg)
+
 > Hermes is not an official HashiCorp project.
 > The repository contains software which is under active development and is in the alpha stage. Please read the “[Project Status](#project-status)” section for more information.
 
@@ -51,6 +53,7 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 1. [Create OAuth client ID credentials](https://developers.google.com/workspace/guides/create-credentials) for a “desktop application” for Hermes backend.
 
    - Download the OAuth credentials JSON file and save it to the root of this project repository.
+   - Rename to `credentials.json`
 
 ### Google Drive
 
@@ -84,6 +87,7 @@ Example shared drive organization
 
 - Go 1.18
 - Node.js 16
+- Yarn ~3.3.0 ([install with corepack](https://yarnpkg.com/getting-started/install))
 
 ### Configuration File
 
