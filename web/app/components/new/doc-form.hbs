@@ -13,6 +13,7 @@
   <form
     class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
     {{on "submit" this.submit}}
+    {{did-insert this.registerForm}}
   >
     <div>
       <div class="space-y-4">
@@ -30,7 +31,7 @@
           @value={{this.title}}
           name="title"
           placeholder="Enter a document title"
-          {{on "input" this.updateTitle}}
+          {{on "input" this.updateForm}}
           as |F|
         >
           <F.Label>Title</F.Label>
@@ -43,7 +44,7 @@
             @value={{this.summary}}
             rows="3"
             name="summary"
-            {{on "input" this.updateSummary}}
+            {{on "input" this.updateForm}}
             as |F|
           >
             <F.Label>Summary</F.Label>
@@ -65,7 +66,7 @@
           @isRequired={{true}}
           @value={{this.productArea}}
           name="productArea"
-          {{on "input" this.updateProductArea}}
+          {{on "input" this.updateForm}}
           as |F|
         >
           <F.Label>Product/Area</F.Label>
@@ -76,7 +77,10 @@
             <F.Options>
               <option value=""></option>
               {{#each-in @productAbbrevMappings as |name|}}
-                <option value="{{name}}">{{name}}</option>
+                <option
+                  value="{{name}}"
+                  selected={{eq name this.productArea}}
+                >{{name}}</option>
               {{/each-in}}
             </F.Options>
           {{/if}}

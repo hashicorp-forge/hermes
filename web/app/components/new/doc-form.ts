@@ -10,6 +10,7 @@ import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
 import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
+import { assert } from "@ember/debug";
 
 interface DocFormErrors {
   title: string | null;
@@ -49,6 +50,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected productArea: string = "";
   @tracked protected contributors: HermesUser[] = [];
 
+  @tracked protected _form: HTMLFormElement | null = null;
+
   /**
    * Whether the form has all required fields filled out.
    * True if the title and product area are filled out.
@@ -80,6 +83,14 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked private validateEagerly = false;
 
   /**
+   * The form element. Used to bind FormData to our tracked elements.
+   */
+  get form(): HTMLFormElement {
+    assert("_form must exist", this._form);
+    return this._form;
+  }
+
+  /**
    * Whether the form has errors.
    */
   private get hasErrors(): boolean {
@@ -91,6 +102,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * The product abbreviation for the selected product area.
    */
   protected get productAbbreviation() {
+    console.log(this.productArea);
     return this.args.productAbbrevMappings.get(this.productArea);
   }
   /**
@@ -128,33 +140,34 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     return values.map((person) => person.email);
   }
 
+  @action protected registerForm(form: HTMLFormElement) {
+    this._form = form;
+  }
+
   /**
-   * Updates the summary property, checks if the `summaryIsLong`, then
-   * conditionally validates the form.
+   * Binds the FormData to our locally tracked properties.
+   * If the summary is long, shows a gentle warning.
+   * Conditionally validates.
    */
-  @action protected updateSummary(event: InputEvent) {
-    this.summary = (event.target as HTMLTextAreaElement).value;
+  @action protected updateForm() {
+    const formObject = Object.fromEntries(new FormData(this.form).entries());
+
+    assert("title is missing from formObject", "title" in formObject);
+    assert("summary is missing from formObject", "summary" in formObject);
+
+    this.title = formObject["title"] as string;
+    this.summary = formObject["summary"] as string;
+
+    if ("productArea" in formObject) {
+      this.productArea = formObject["productArea"] as string;
+    }
+
     if (this.summary.length > 200) {
       this.summaryIsLong = true;
     } else {
       this.summaryIsLong = false;
     }
-    this.maybeValidate();
-  }
 
-  /**
-   * Updates the title property and conditionally validates the form.
-   */
-  @action protected updateTitle(event: InputEvent) {
-    this.title = (event.target as HTMLInputElement).value;
-    this.maybeValidate();
-  }
-
-  /**
-   * Updates the productArea property and conditionally validates the form.
-   */
-  @action protected updateProductArea(event: Event) {
-    this.productArea = (event.target as HTMLSelectElement).value;
     this.maybeValidate();
   }
 
@@ -199,6 +212,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           title: this.title,
         }),
       });
+
+      throw new Error();
 
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
