@@ -1,4 +1,9 @@
-<div class="relative" ...attributes>
+<div
+  class="relative"
+  {{on "focusout" this.maybeHideDropdown}}
+  {{on "keydown" this.onKeydown}}
+  ...attributes
+>
 
   <Hds::Button
     @text={{@label}}
@@ -11,33 +16,33 @@
   />
   {{#if this.dropdownIsShown}}
     <div
-      class="facet-dropdown
-        {{if this.inputIsShown 'w-[290px]'}}
-        {{if (eq this.facetName 'status') 'w-[230px]'}}
-        absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] max-w-[290px] hds-dropdown-list pt-0 z-10
-        {{unless this.inputIsShown 'py-2.5'}}"
+      class="facet-dropdown absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] hds-dropdown-list pt-0 z-10
+        {{if this.inputIsShown 'w-[320px]'}}
+        {{if (eq this.facetName 'status') 'w-[240px]'}}"
     >
       {{#if this.inputIsShown}}
-        <div
-          class="px-2 py-2.5 border-b border-b-color-border-faint"
-        >
+        <div class="border-b border-b-color-border-primary">
           <Hds::Form::TextInput::Base
             {{autofocus}}
-            @value={{this.inputValue}}
+            @value={{this.query}}
+            @type="search"
             class="leading-none"
             placeholder="Filter..."
             {{did-insert this.registerInput}}
             {{on "input" (perform this.onInput)}}
-            {{on "keydown" this.onKeydown}}
+            {{on "focusin" this.resetMenuItemIndex}}
+            class="w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent"
           />
         </div>
       {{/if}}
-      <div class="overflow-auto h-full max-h-[400px]">
+      <div
+        style={{if this.inputerIsShown "scrollbar-gutter: stable;"}}
+        class="overflow-auto h-full max-h-[400px]"
+      >
 
         {{! https://www.w3.org/WAI/ARIA/apg/patterns/menubar/examples/menubar-editor/ }}
         <ol
-          class="facet-dropdown-menu pt-2.5 pb-1"
-          {{on "keydown" this.onKeydown}}
+          class="facet-dropdown-menu py-3 list-none"
           role="menu"
           aria-label={{this.facetName}}
         >
@@ -49,14 +54,14 @@
                 @route={{this.currentRouteName}}
                 data-test-facet-dropdown-list-item
                 {{! todo: queryparam }}
-                class="no-underline flex items-center py-1.5 pl-2.5 pr-5 w-full group hover:bg-color-surface-action focus:bg-color-surface-action"
+                class="no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full group hover:bg-color-surface-action focus:bg-color-surface-action"
               >
                 <FlightIcon
                   @name="check"
                   class="mr-2.5 text-color-foreground-action
                     {{if attrs.selected 'visible' 'invisible'}}"
                 />
-                <div class="flex justify-between w-full overflow-hidden pr-2.5">
+                <div class="flex justify-between w-full overflow-hidden">
                   <span
                     class="text-color-foreground-strong whitespace-nowrap truncate"
                   >{{value}}</span>

@@ -82,6 +82,13 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   @action protected onKeydown(event: KeyboardEvent) {
     if (event.key === "Escape") {
+      if (document.activeElement === this.inputElement) {
+        if (this.query.length) {
+          this.query = "";
+          this.shownFacets = this.args.facets;
+          return;
+        }
+      }
       this.hideDropdown();
       this.triggerElement.focus();
     }
@@ -95,11 +102,16 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
   }
 
+  @action protected resetMenuItemIndex() {
+    this.menuItemFocusIndex = -1;
+  }
+
   private setFocusTo(focusDirection: FocusDirection) {
     let menuItems = document.querySelectorAll(".facet-dropdown-menu li a");
     if (menuItems.length === 0) {
       return;
     }
+
     if (focusDirection === FocusDirection.Next) {
       if (this.menuItemFocusIndex === menuItems.length - 1) {
         this.menuItemFocusIndex = 0;
@@ -107,12 +119,13 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
         this.menuItemFocusIndex++;
       }
     }
+
     if (focusDirection === FocusDirection.Previous) {
       if (this.menuItemFocusIndex === -1) {
         this.menuItemFocusIndex = menuItems.length - 1;
       } else if (this.menuItemFocusIndex === 0 && this.inputIsShown) {
         this.inputElement.focus();
-        this.menuItemFocusIndex = -1;
+        this.resetMenuItemIndex();
         return;
       } else {
         this.menuItemFocusIndex--;
@@ -142,10 +155,31 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
   }
 
-  @action private hideDropdown(): void {
+  @action protected maybeHideDropdown(event: FocusEvent) {
+    let relatedTarget = event.relatedTarget;
+
+    console.log(event);
+
+    if (relatedTarget === null) {
+      this.hideDropdown();
+    }
+
+    if (relatedTarget === this.triggerElement) {
+      return;
+    }
+
+    if (
+      relatedTarget instanceof HTMLElement &&
+      !relatedTarget.closest(".facet-dropdown")
+    ) {
+      this.hideDropdown();
+    }
+  }
+
+  @action protected hideDropdown(): void {
     this.dropdownIsShown = false;
     this.query = "";
-    this.menuItemFocusIndex = -1;
+    this.resetMenuItemIndex();
     this.shownFacets = this.args.facets;
   }
 

@@ -18,3 +18,15 @@
     @apply text-body-100;
   }
 }
+/* Maintain contrast across hover and focus states */
+.hds-badge-count--color-neutral.hds-badge-count--type-filled {
+  @apply mix-blend-multiply;
+}
+
+.hds-form-text-input[type="search"] {
+  /* Line input text up with dropdown text */
+  @apply pl-[35px];
+
+  /* Compensate for the extra padding */
+  background-position: 10px center;
+}
