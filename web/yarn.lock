@@ -1820,7 +1820,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@embroider/addon-shim@npm:^1.0.0, @embroider/addon-shim@npm:^1.5.0":
+"@embroider/addon-shim@npm:^1.0.0, @embroider/addon-shim@npm:^1.5.0, @embroider/addon-shim@npm:^1.8.4":
   version: 1.8.4
   resolution: "@embroider/addon-shim@npm:1.8.4"
   dependencies:
@@ -7424,6 +7424,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ember-auto-import@npm:^2.5.0":
+  version: 2.6.0
+  resolution: "ember-auto-import@npm:2.6.0"
+  dependencies:
+    "@babel/core": ^7.16.7
+    "@babel/plugin-proposal-class-properties": ^7.16.7
+    "@babel/plugin-proposal-decorators": ^7.16.7
+    "@babel/preset-env": ^7.16.7
+    "@embroider/macros": ^1.0.0
+    "@embroider/shared-internals": ^2.0.0
+    babel-loader: ^8.0.6
+    babel-plugin-ember-modules-api-polyfill: ^3.5.0
+    babel-plugin-htmlbars-inline-precompile: ^5.2.1
+    babel-plugin-syntax-dynamic-import: ^6.18.0
+    broccoli-debug: ^0.6.4
+    broccoli-funnel: ^3.0.8
+    broccoli-merge-trees: ^4.2.0
+    broccoli-plugin: ^4.0.0
+    broccoli-source: ^3.0.0
+    css-loader: ^5.2.0
+    debug: ^4.3.1
+    fs-extra: ^10.0.0
+    fs-tree-diff: ^2.0.0
+    handlebars: ^4.3.1
+    js-string-escape: ^1.0.1
+    lodash: ^4.17.19
+    mini-css-extract-plugin: ^2.5.2
+    parse5: ^6.0.1
+    resolve: ^1.20.0
+    resolve-package-path: ^4.0.3
+    semver: ^7.3.4
+    style-loader: ^2.0.0
+    typescript-memoize: ^1.0.0-alpha.3
+    walk-sync: ^3.0.0
+  checksum: 9f0b2a381121ffc769868231f2e4bc9380ab96010dfbea60037d2c540e5d43e5c27a9931972ce9ddd53afbe3bfa77099dc521fb09b2269545910e783654b52c0
+  languageName: node
+  linkType: hard
+
+"ember-autofocus-modifier@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "ember-autofocus-modifier@npm:5.0.0"
+  dependencies:
+    ember-auto-import: ^2.5.0
+    ember-cli-babel: ^7.26.6
+    ember-modifier: ^3.2.7 || ^4.0.0
+  checksum: c3a51cf90c275499e831a5ea38a716b3d4155965c954f68de4f79d411f9799407112031f8fb4eb3eec30bc8eb0e8affb823ae73d29f9b6dbfa0eb8715a7d9d6a
+  languageName: node
+  linkType: hard
+
 "ember-basic-dropdown@npm:^4.0.5":
   version: 4.0.5
   resolution: "ember-basic-dropdown@npm:4.0.5"
@@ -8398,6 +8447,22 @@ __metadata:
     ember-cli-typescript: ^5.0.0
     ember-compatibility-helpers: ^1.2.5
   checksum: 2e96d9ec3939de178a9ce704d5a9360fd73f0276ffa4a9cce9f100a4087fdc8fae4a8b28bf1be22b05a4d1c61e1bb1ab93ca60576810c6556bc4d9323864c66a
+  languageName: node
+  linkType: hard
+
+"ember-modifier@npm:^3.2.7 || ^4.0.0":
+  version: 4.0.0
+  resolution: "ember-modifier@npm:4.0.0"
+  dependencies:
+    "@embroider/addon-shim": ^1.8.4
+    ember-cli-normalize-entity-name: ^1.0.0
+    ember-cli-string-utils: ^1.1.0
+  peerDependencies:
+    ember-source: "*"
+  peerDependenciesMeta:
+    ember-source:
+      optional: true
+  checksum: 8970eee22666426abed22414fc12f1547b4c02618297648ace0c22ec3db5299afe522ac2130148e6daeded0c70ad7005418c21888b8e4198e0c6b04c5f751312
   languageName: node
   linkType: hard
 
@@ -10785,6 +10850,7 @@ __metadata:
     babel-eslint: ^10.1.0
     broccoli-asset-rev: ^3.0.0
     ember-auto-import: ^2.4.0
+    ember-autofocus-modifier: ^5.0.0
     ember-basic-dropdown: ^4.0.5
     ember-cli: ~3.28.6
     ember-cli-app-version: ^5.0.0

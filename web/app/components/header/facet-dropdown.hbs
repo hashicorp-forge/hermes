@@ -1,24 +1,69 @@
-<Hds::Dropdown
-  class="facets-dropdown"
-  @listPosition="left"
-  ...attributes
-  as |dd|
->
-  <dd.ToggleButton
-    data-test-facets-dropdown-toggle-button
+<div class="relative" ...attributes>
+
+  <Hds::Button
     @text={{@label}}
+    @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
+    @iconPosition="trailing"
     @color="secondary"
-    disabled={{@disabled}}
+    {{!-- class={{if (and this.dropdownIsShown this.inputIsShown) "mock-focus"}} --}}
+    {{on "click" this.toggleDropdown}}
   />
-  {{#if @facets}}
-    {{#each-in this.firstTenFacets as |value attrs|}}
-      <dd.Interactive
-        class="facet-interactive-item"
-        {{on "click" (fn this.onClick value dd.close)}}
-        @text="{{value}} ({{attrs.count}})"
-        @icon={{if attrs.selected "check-square-fill" "square"}}
-        class={{if attrs.selected "checked"}}
-      />
-    {{/each-in}}
+  {{#if this.dropdownIsShown}}
+    <div
+      class="facet-dropdown
+        {{if this.inputIsShown 'w-[250px]'}}
+        absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[150px] max-w-[250px] max-h-[400px] overflow-auto hds-dropdown-list pt-0 z-10
+        {{unless this.inputIsShown 'py-2.5'}}
+        pb-3"
+    >
+      {{#if this.inputIsShown}}
+        <div
+          class="px-2.5 py-2.5 sticky top-0 bg-color-page-primary z-10 border-b border-b-color-border-faint"
+        >
+          <Hds::Form::TextInput::Base
+            {{autofocus}}
+            @value={{this.inputValue}}
+            class="leading-none"
+            placeholder="Filter..."
+            {{on "input" (perform this.onInput)}}
+          />
+        </div>
+      {{/if}}
+
+      <ol class="pt-2">
+        {{#each-in this.shownFacets as |value attrs|}}
+          <li class="w-full">
+            <LinkTo
+              @route={{this.currentRouteName}}
+              data-test-facet-dropdown-list-item
+              {{!-- todo: queryparam --}}
+              class="no-underline flex items-center py-1.5 px-4 w-full group"
+            >
+              <FlightIcon
+                @name={{if attrs.selected "check-square-fill" "square"}}
+                class="mr-2
+                  {{if
+                    attrs.selected
+                    'text-color-foreground-action'
+                    'text-color-foreground-primary'
+                  }}"
+              />
+              <div class="flex justify-between w-full overflow-hidden">
+
+                <span
+                  class="text-color-foreground-strong whitespace-nowrap truncate"
+                >{{value}}</span>
+                <Hds::BadgeCount
+                  @text={{attrs.count}}
+                  class="opacity-75 ml-3 shrink-0"
+                  @size="small"
+                />
+              </div>
+            </LinkTo>
+          </li>
+
+        {{/each-in}}
+      </ol>
+    </div>
   {{/if}}
-</Hds::Dropdown>
+</div>
