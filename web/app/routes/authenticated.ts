@@ -22,10 +22,11 @@ export default class AuthenticatedRoute extends Route {
     let target = window.sessionStorage.getItem(
       this.session.SESSION_STORAGE_KEY
     );
+
     if (
       !target &&
       !requireAuthentication &&
-      transition.to.name != "authenticated"
+      transition.to.name != "authenticated.index"
     ) {
       // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
 
