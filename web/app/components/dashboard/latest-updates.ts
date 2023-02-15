@@ -86,8 +86,10 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
       .then((result: SearchResponse<unknown>) => {
         // Add modifiedAgo for each doc.
         for (const hit of result.hits as HermesDocument[]) {
-          const modifiedAgo = new Date(hit.modifiedTime * 1000);
-          hit.modifiedAgo = `Modified ${timeAgo(modifiedAgo)}`;
+          if (hit.modifiedTime) {
+            const modifiedAgo = new Date(hit.modifiedTime * 1000);
+            hit.modifiedAgo = `Modified ${timeAgo(modifiedAgo)}`;
+          }
         }
         return result.hits;
       });
