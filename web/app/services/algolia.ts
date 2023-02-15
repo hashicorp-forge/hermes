@@ -13,7 +13,11 @@ import {
 } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
-import { FacetDropdownObjectDetails, FacetRecord, FacetRecords } from "hermes/types/facets";
+import {
+  FacetDropdownObjectDetails,
+  FacetRecord,
+  FacetRecords,
+} from "hermes/types/facets";
 import FetchService from "./fetch";
 import SessionService from "./session";
 
@@ -29,7 +33,6 @@ export default class AlgoliaService extends Service {
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
-
 
   /**
    * A shorthand getter for the authenticatedUser's email.
@@ -204,6 +207,14 @@ export default class AlgoliaService extends Service {
       return await index.search(query, params);
     }
   );
+
+  /**
+   * Clears Algolia's cache.
+   * Called by the dashboard to ensure an up-to-date index.
+   */
+  clearCache = task(async () => {
+    await this.client.clearCache();
+  });
 
   /**
    * Returns an array of facet filters based on the current parameters,
