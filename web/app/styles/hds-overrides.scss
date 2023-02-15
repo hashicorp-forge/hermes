@@ -27,6 +27,9 @@
   /* Line input text up with dropdown text */
   @apply pl-[35px];
 
-  /* Compensate for the extra padding */
+  /* Search icon: compensate for the extra padding */
   background-position: 10px center;
+
+  /* X icon: compensate for the extra padding */
+   @apply pr-[10px];
 }

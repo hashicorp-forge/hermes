@@ -40,7 +40,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   @tracked protected dropdownIsShown = false;
   @tracked protected shownFacets = this.args.facets;
 
-  private get triggerElement(): HTMLButtonElement {
+  protected get triggerElement(): HTMLButtonElement {
     assert("_triggerElement must exist", this._triggerElement);
     return this._triggerElement;
   }
@@ -81,17 +81,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   @action protected onKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-      if (document.activeElement === this.inputElement) {
-        if (this.query.length) {
-          this.query = "";
-          this.shownFacets = this.args.facets;
-          return;
-        }
-      }
-      this.hideDropdown();
-      this.triggerElement.focus();
-    }
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.setFocusTo(FocusDirection.Next);
@@ -152,27 +141,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
       this.hideDropdown();
     } else {
       this.dropdownIsShown = true;
-    }
-  }
-
-  @action protected maybeHideDropdown(event: FocusEvent) {
-    let relatedTarget = event.relatedTarget;
-
-    console.log(event);
-
-    if (relatedTarget === null) {
-      this.hideDropdown();
-    }
-
-    if (relatedTarget === this.triggerElement) {
-      return;
-    }
-
-    if (
-      relatedTarget instanceof HTMLElement &&
-      !relatedTarget.closest(".facet-dropdown")
-    ) {
-      this.hideDropdown();
     }
   }
 

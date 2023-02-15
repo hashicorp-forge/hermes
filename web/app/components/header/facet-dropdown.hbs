@@ -1,21 +1,16 @@
-<div
-  class="relative"
-  {{on "focusout" this.maybeHideDropdown}}
-  {{on "keydown" this.onKeydown}}
-  ...attributes
->
+<div class="relative" {{on "keydown" this.onKeydown}} ...attributes>
 
   <Hds::Button
     @text={{@label}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"
-    {{!-- class={{if (and this.dropdownIsShown this.inputIsShown) "mock-focus"}} --}}
     {{on "click" this.toggleDropdown}}
     {{did-insert this.registerTrigger}}
   />
   {{#if this.dropdownIsShown}}
     <div
+      {{dismissible action=this.hideDropdown related=this.triggerElement}}
       class="facet-dropdown absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] hds-dropdown-list pt-0 z-10
         {{if this.inputIsShown 'w-[320px]'}}
         {{if (eq this.facetName 'status') 'w-[240px]'}}"
@@ -31,7 +26,7 @@
             {{did-insert this.registerInput}}
             {{on "input" (perform this.onInput)}}
             {{on "focusin" this.resetMenuItemIndex}}
-            class="w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent"
+            class="w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none"
           />
         </div>
       {{/if}}
@@ -50,6 +45,7 @@
             <li class="w-full" role="none">
               <LinkTo
                 role="menuitemradio"
+                tabindex="-1"
                 aria-checked={{attrs.selected}}
                 @route={{this.currentRouteName}}
                 data-test-facet-dropdown-list-item
