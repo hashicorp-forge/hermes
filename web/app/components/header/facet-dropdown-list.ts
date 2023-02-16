@@ -12,6 +12,7 @@ interface HeaderFacetDropdownListComponentSignature {
   Args: {
     label: string;
     facets: FacetDropdownObjects;
+    menuItemFocusIndex: number;
   };
 }
 
@@ -37,7 +38,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
   @tracked protected menuItemFocusIndex = -1;
   @tracked protected shownFacets = this.args.facets;
-  @tracked protected activeDescendantId = "";
 
   /**
    * The name of the current route.
@@ -97,6 +97,16 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
         return FacetNames.Owners;
     }
   }
+  @tracked protected menuItems: NodeListOf<Element> | null = null;
+
+  @action registerMenuItems(items: NodeListOf<Element>): void {
+    this.menuItems = items;
+    for (let i = 0; i < items.length; i++) {
+      let item = items[i];
+      assert("item must exist", item instanceof HTMLElement);
+      item.id = `facet-dropdown-menu-item-${i}`;
+    }
+  }
 
   /**
    * Registers the popover element.
@@ -104,6 +114,9 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    */
   @action protected registerPopover(element: HTMLDivElement) {
     this._popoverElement = element;
+    this.registerMenuItems(
+      this.popoverElement.querySelectorAll("[role=option]")
+    );
   }
 
   /**
@@ -123,14 +136,16 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Used by the onKeydown action to navigate the dropdown.
    */
   @action protected setFocusTo(focusDirection: FocusDirection | number) {
-    let menuItems = this.popoverElement.querySelectorAll("[role=option]");
+    if (!this.menuItems) {
+      return;
+    }
 
-    if (menuItems.length === 0) {
+    if (this.menuItems.length === 0) {
       return;
     }
 
     if (focusDirection === FocusDirection.Next) {
-      if (this.menuItemFocusIndex === menuItems.length - 1) {
+      if (this.menuItemFocusIndex === this.menuItems.length - 1) {
         // When the last item is focused, "next" focuses the first item.
         this.menuItemFocusIndex = 0;
       } else {
@@ -142,7 +157,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     if (focusDirection === FocusDirection.Previous) {
       if (this.menuItemFocusIndex === 0) {
         // When the first item is focused, "previous" focuses the last item.
-        this.menuItemFocusIndex = menuItems.length - 1;
+        this.menuItemFocusIndex = this.menuItems.length - 1;
       } else {
         // In all other cases, it focuses the previous item.
         this.menuItemFocusIndex--;
@@ -150,8 +165,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     }
 
     if (typeof focusDirection === "number") {
-      // handle the number cases
-      // TODO: aria-
       this.menuItemFocusIndex = focusDirection;
     }
 
@@ -163,6 +176,11 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Handles the arrow keys to navigate the dropdown.
    */
   @action protected onKeydown(event: KeyboardEvent) {
+    console.log(this.menuItemFocusIndex);
+    this.registerMenuItems(
+      this.popoverElement.querySelectorAll("[role=option]")
+    );
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.setFocusTo(FocusDirection.Next);
@@ -195,5 +213,11 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
       }
     }
     this.shownFacets = shownFacets;
+    this.menuItemFocusIndex = -1;
+    // schedule("afterRender", () => {
+    //   this.registerMenuItems(
+    //     this.popoverElement.querySelectorAll("[role=option]")
+    //   );
+    // });
   });
 }

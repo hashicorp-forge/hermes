@@ -40,7 +40,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
    */
   @action protected toggleDropdown(): void {
     if (this.dropdownIsShown) {
-      // Hide the dropdown and reset the component parameters.
       this.hideDropdown();
     } else {
       this.dropdownIsShown = true;
@@ -49,7 +48,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   /**
    * The action run when the user clicks outside the dropdown.
-   * Closes the dropdown and resets the component parameters.
+   * Hides the dropdown.
    */
   @action protected hideDropdown(): void {
     this.dropdownIsShown = false;

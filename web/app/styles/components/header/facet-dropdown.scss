@@ -10,14 +10,10 @@
   }
 }
 
-.facet-dropdown-input {
-}
-
 .facet-dropdown-menu-item-link {
   @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
 
-  &:focus,
-  .is-selected {
+  &.is-focused {
     @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;
 
     .flight-icon {

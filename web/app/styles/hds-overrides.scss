@@ -24,8 +24,7 @@
 }
 
 .facet-dropdown-menu-item-link {
-  &:hover,
-  &:focus {
+  &.is-focused {
     .hds-badge-count--color-neutral.hds-badge-count--type-filled {
       @apply bg-white bg-opacity-10 text-color-foreground-high-contrast mix-blend-screen;
     }

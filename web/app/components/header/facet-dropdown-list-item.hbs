@@ -1,6 +1,6 @@
 <li
+  {{did-insert this.registerElement}}
   role="option"
-  id="facet-dropdown-menu-item-{{this.id}}"
   aria-selected={{this.isFocused}}
   data-test-facet-dropdown-menu-item
 >
@@ -10,12 +10,9 @@
     @route={{this.currentRouteName}}
     {{on "mouseover" this.onMouseover}}
     {{! TODO: queryParam - pending a separate PR merge }}
-    class="facet-dropdown-menu-item-link {{if this.isFocused 'bg-red-500'}}"
+    class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
   >
-    <FlightIcon
-      @name="check"
-      class={{if @selected "visible" "invisible"}}
-    />
+    <FlightIcon @name="check" class={{if @selected "visible" "invisible"}} />
     <div class="w-full flex justify-between overflow-hidden">
       <span class="facet-dropdown-list-item-value">
         {{@value}}
