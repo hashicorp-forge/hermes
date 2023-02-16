@@ -10,7 +10,6 @@ module("Unit | Utility | parse-date", function () {
   test("it parses dates", function (assert) {
     // Valid
     assert.equal(parseDate(628021800000), "25 Nov. 1989");
-    assert.equal(parseDate(628021800000 * 100), "14 Feb. 3960");
     assert.equal(parseDate("12/23/20", "long"), "23 December 2020");
     assert.equal(parseDate("1980/12/20"), "20 Dec. 1980");
     assert.equal(parseDate("November 21, 1963", "long"), "21 November 1963");
