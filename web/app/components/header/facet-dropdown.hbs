@@ -3,6 +3,7 @@
     data-test-facet-dropdown-trigger
     {{did-insert this.registerTrigger}}
     {{on "click" this.toggleDropdown}}
+    @disabled={{@disabled}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"
@@ -14,14 +15,14 @@
         dismissAction=this.hideDropdown
         related=this.triggerElement
       }}
-      class="facet-dropdown
-        {{if this.inputIsShown 'w-[320px]'}}
-        {{if (eq this.facetName 'status') 'w-[240px]'}}"
+      {{did-insert this.registerPopover}}
+      class="facet-dropdown-popover
+        {{if this.inputIsShown 'large'}}
+        {{if (eq this.facetName 'status') 'medium'}}"
     >
       {{#if this.inputIsShown}}
         <div class="border-b border-b-color-border-primary">
           <Hds::Form::TextInput::Base
-            {{autofocus}}
             {{did-insert this.registerInput}}
             {{on "input" (perform this.onInput)}}
             {{on "focusin" this.resetMenuItemIndex}}
@@ -35,18 +36,18 @@
       {{/if}}
       <div class="overflow-auto h-full">
         <ol
+          data-test-facet-dropdown-menu
           role="menu"
-          aria-label={{this.facetName}}
-          class="facet-dropdown-menu"
+          aria-label={{@label}}
+          class="py-3 list-none"
         >
           {{#each-in this.shownFacets as |value attrs|}}
-            <li role="none">
+            <li role="none" data-test-facet-dropdown-menu-item>
               <LinkTo
                 role="menuitemradio"
                 tabindex="-1"
                 aria-checked={{attrs.selected}}
                 @route={{this.currentRouteName}}
-                data-test-facet-dropdown-list-item
                 {{! TODO: queryParam - pending a separate PR merge }}
                 class="facet-dropdown-menu-item-link"
               >

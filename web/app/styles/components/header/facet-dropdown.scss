@@ -1,13 +1,17 @@
-.facet-dropdown {
-  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] max-h-[400px] hds-dropdown-list pt-0 z-10;
-}
+.facet-dropdown-popover {
+  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full flex flex-col rounded-md list-none min-w-[200px] max-h-[400px] hds-dropdown-list pt-0 z-10;
 
-.facet-dropdown-menu {
-  @apply py-3 list-none;
+  &.medium:not(.large) {
+    @apply w-[240px];
+  }
+
+  &.large {
+    @apply w-[320px];
+  }
 }
 
 .facet-dropdown-input {
-  @apply w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none;
+  @apply w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none shrink-0;
 }
 
 .facet-dropdown-menu-item-link {

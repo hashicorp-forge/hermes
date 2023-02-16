@@ -6,13 +6,17 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { restartableTask } from "ember-concurrency";
 import { assert } from "@ember/debug";
+import { next, schedule } from "@ember/runloop";
+
+const FOCUSABLE =
+  'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 interface FacetDropdownComponentSignature {
   Args: {
     onClick: (facetName: FacetNames, value: string) => void;
     label: string;
     facets: FacetDropdownObjects;
-    disabled: boolean;
+    disabled?: boolean;
   };
 }
 
@@ -33,6 +37,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   @tracked private _triggerElement: HTMLButtonElement | null = null;
   @tracked private _inputElement: HTMLInputElement | null = null;
+  @tracked private _popoverElement: HTMLDivElement | null = null;
 
   @tracked private query: string = "";
   @tracked private menuItemFocusIndex = -1;
@@ -48,6 +53,17 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     assert("_triggerElement must exist", this._triggerElement);
     return this._triggerElement;
   }
+
+  /**
+   * The input element.
+   * Receives focus when the user presses the up arrow key
+   * while the first menu item is focused.
+   */
+  private get popoverElement(): HTMLDivElement {
+    assert("_popoverElement must exist", this._popoverElement);
+    return this._popoverElement;
+  }
+
   /**
    * The input element.
    * Receives focus when the user presses the up arrow key
@@ -68,7 +84,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   /**
    * The code-friendly name of the facet.
-   * Used to apply styles and aria-labels.
+   * Used to apply width styles to the dropdown.
    */
   protected get facetName(): FacetNames | undefined {
     switch (this.args.label) {
@@ -92,12 +108,20 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     return Object.entries(this.args.facets).length > 12;
   }
 
-/**
- * Registers the trigger element.
- * Used to pass the trigger to the dismissible modifier as a relative.
- */
+  /**
+   * Registers the trigger element.
+   * Used to pass the trigger to the dismissible modifier as a relative.
+   */
   @action protected registerTrigger(element: HTMLButtonElement) {
     this._triggerElement = element;
+  }
+
+  /**
+   * Registers the popover element.
+   * Used to determine the focusable elements in the dropdown.
+   */
+  @action protected registerPopover(element: HTMLDivElement) {
+    this._popoverElement = element;
   }
 
   /**
@@ -118,6 +142,9 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
       this.hideDropdown();
     } else {
       this.dropdownIsShown = true;
+      schedule("afterRender", () => {
+        this.setFocusTo(FocusDirection.Next);
+      });
     }
   }
 
@@ -153,6 +180,11 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     this.shownFacets = this.args.facets;
     this.query = "";
     this.resetMenuItemIndex();
+
+    if (this.popoverElement.contains(document.activeElement)) {
+      // This will true when the user presses the escape key.
+      this.triggerElement.focus();
+    }
   }
 
   /**
@@ -160,13 +192,14 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
    * Used by the onKeydown action to navigate the dropdown.
    */
   private setFocusTo(focusDirection: FocusDirection) {
-    let menuItems = document.querySelectorAll(".facet-dropdown-menu li a");
+    let menuItems = this.popoverElement.querySelectorAll(FOCUSABLE);
 
     if (menuItems.length === 0) {
       return;
     }
 
     if (focusDirection === FocusDirection.Next) {
+      console.log("seeking next...");
       if (this.menuItemFocusIndex === menuItems.length - 1) {
         // When the last item is focused, "next" focuses the first item.
         this.menuItemFocusIndex = 0;
@@ -177,14 +210,11 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
 
     if (focusDirection === FocusDirection.Previous) {
-      if (this.menuItemFocusIndex === -1) {
-        // When no menuitem is focused, "previous" focuses the last item.
+      console.log("seeking prev...");
+
+      if (this.menuItemFocusIndex === 0) {
+        // When the first item is focused, "previous" focuses the last item.
         this.menuItemFocusIndex = menuItems.length - 1;
-      } else if (this.menuItemFocusIndex === 0 && this.inputIsShown) {
-        // When the first item is focused, "previous" focuses the input.
-        this.inputElement.focus();
-        this.resetMenuItemIndex();
-        return;
       } else {
         // In all other cases, it focuses the previous item.
         this.menuItemFocusIndex--;

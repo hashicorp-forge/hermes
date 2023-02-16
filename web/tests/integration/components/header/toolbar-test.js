@@ -46,7 +46,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .dom(".sort-by-dropdown")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
-    assert.dom(".facets .hds-dropdown").exists({ count: 4 });
+    assert.dom(".facets [data-test-facet-dropdown-trigger]").exists({ count: 4 });
 
     assert.dom(".sort-by-dropdown").exists({ count: 1 });
     assert.dom(".sort-by-dropdown").hasText("Sort: Newest");
