@@ -23,13 +23,11 @@
   @apply mix-blend-multiply;
 }
 
-.hds-form-text-input[type="search"] {
-  /* Line input text up with dropdown text */
-  @apply pl-[35px];
-
-  /* Search icon: compensate for the extra padding */
-  background-position: 10px center;
-
-  /* X icon: compensate for the extra padding */
-   @apply pr-[10px];
+.facet-dropdown-menu-item-link {
+  &:hover,
+  &:focus {
+    .hds-badge-count--color-neutral.hds-badge-count--type-filled {
+      @apply bg-white bg-opacity-10 text-color-foreground-high-contrast mix-blend-screen;
+    }
+  }
 }

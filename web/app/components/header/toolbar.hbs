@@ -37,6 +37,7 @@
         </div>
 
         {{#if (and @facets (not @sortControlIsHidden))}}
+          {{!-- TODO: Use the custom component for the sort dropdown --}}
           <Hds::Dropdown class="sort-by-dropdown" as |dd|>
             <dd.ToggleButton
               @text="Sort: {{this.getSortByLabel}}"

@@ -73,6 +73,14 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   @action maybeDismiss(event: FocusEvent | PointerEvent | KeyboardEvent) {
     if (event instanceof KeyboardEvent) {
       if (event.key === "Escape") {
+        let activeElement = document.activeElement;
+        if (
+          activeElement?.attributes.getNamedItem("type")?.value === "search"
+        ) {
+          if ((activeElement as HTMLInputElement).value !== "") {
+            return;
+          }
+        }
         this.dismissAction();
       }
       return;

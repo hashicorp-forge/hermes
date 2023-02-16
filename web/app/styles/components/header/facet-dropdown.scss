@@ -11,18 +11,18 @@
 }
 
 .facet-dropdown-input {
-  @apply w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none shrink-0;
 }
 
 .facet-dropdown-menu-item-link {
-  @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full;
+  @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
 
-  &:hover {
-    @apply bg-color-surface-action;
-  }
+  &:focus,
+  .is-selected {
+    @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;
 
-  &:focus {
-    @apply bg-color-surface-action;
+    .flight-icon {
+      @apply text-inherit;
+    }
   }
 
   .flight-icon {

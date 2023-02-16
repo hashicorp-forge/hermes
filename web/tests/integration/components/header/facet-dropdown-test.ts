@@ -115,6 +115,11 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
     assert
       .dom("[data-test-facet-dropdown-menu-item]")
       .exists({ count: 2 }, "The facets are filtered");
+
+    await fillIn(".facet-dropdown-input", "foobar");
+
+    assert.dom("[data-test-facet-dropdown-menu]").doesNotExist()
+    assert.dom('[data-test-facet-dropdown-menu-empty-state]').exists();
   });
 
   test("keyboard navigation works as expected", async function (this: MirageTestContext, assert) {
@@ -163,14 +168,6 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
 
     assert.equal(
       document.activeElement,
-      find(".facet-dropdown-input"),
-      "Keying up moves from the first filter to the input"
-    );
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowUp");
-
-    assert.equal(
-      document.activeElement,
       find("[data-test-facet-dropdown-menu-item]:nth-child(13) a"),
       "Keying up from the input moves to the last filter"
     );
@@ -179,8 +176,8 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
 
     assert.equal(
       document.activeElement,
-      find(".facet-dropdown-input"),
-      "Keying down from the last filter moves to first focusable element"
+      find("[data-test-facet-dropdown-menu-item]:nth-child(1) a"),
+      "Keying down moves from the input to the first filter"
     );
   });
 });

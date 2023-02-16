@@ -1,0 +1,55 @@
+{{on-document "keydown" this.onKeydown}}
+
+<div
+  {{did-insert this.registerPopover}}
+  id="facet-dropdown-popover"
+  class="facet-dropdown-popover
+    {{if this.inputIsShown 'large'}}
+    {{if (eq this.facetName 'status') 'medium'}}"
+  role={{if this.inputIsShown "combobox"}}
+  ...attributes
+>
+  {{#if this.inputIsShown}}
+    <div class="relative px-1 pb-1 border-b border-b-color-border-faint">
+      <Hds::Form::TextInput::Base
+        {{did-insert this.registerInput}}
+        {{on "input" (perform this.onInput)}}
+        {{on "focusin" this.resetMenuItemIndex}}
+        @value={{this.query}}
+        @type="search"
+        aria-controls="facet-dropdown-menu"
+        class="leading-none"
+        placeholder="Filter..."
+        class="facet-dropdown-input"
+        aria-activedescendant="facet-dropdown-menu-item-{{this.menuItemFocusIndex}}"
+      />
+    </div>
+  {{/if}}
+  <div class="overflow-auto h-full">
+    {{#if this.noMatchesFound}}
+      <div
+        data-test-facet-dropdown-menu-empty-state
+        class="p-12 text-center text-color-foreground-faint"
+      >
+        No matches
+      </div>
+    {{else}}
+      <ol
+        data-test-facet-dropdown-menu
+        id="facet-dropdown-menu"
+        role="listbox"
+        class="py-3 list-none"
+      >
+        {{#each-in this.shownFacets as |value attrs|}}
+          <Header::FacetDropdownListItem
+            @value={{value}}
+            @selected={{attrs.selected}}
+            @count={{attrs.count}}
+            @setFocusTo={{this.setFocusTo}}
+            @currentIndex={{this.menuItemFocusIndex}}
+          />
+        {{/each-in}}
+      </ol>
+    {{/if}}
+  </div>
+</div>
