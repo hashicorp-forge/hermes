@@ -79,7 +79,7 @@ module(
       promise = click('.hds-form-toggle input[type="checkbox"]');
 
       await waitFor(".subscription-list-popover");
-      assert.dom(".subscription-list-popover").hasText("Removed");
+      assert.dom(".subscription-list-popover").hasText("Unsubscribed");
 
       await promise;
     });

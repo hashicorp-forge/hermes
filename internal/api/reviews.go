@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
@@ -159,6 +160,35 @@ func ReviewHandler(
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
+
+			// Get file from Google Drive so we can get the latest modified time.
+			file, err := s.GetFile(docID)
+			if err != nil {
+				l.Error("error getting document file from Google",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, `{"error": "Error creating review"}`,
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Parse and set modified time.
+			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
+			if err != nil {
+				l.Error("error parsing modified time",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, `{"error": "Error creating review"}`,
+					http.StatusInternalServerError)
+				return
+			}
+			docObj.SetModifiedTime(modifiedTime.Unix())
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
