@@ -155,8 +155,8 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     }
 
     if (focusDirection === FocusDirection.Previous) {
-      if (this.menuItemFocusIndex === 0) {
-        // When the first item is focused, "previous" focuses the last item.
+      if (this.menuItemFocusIndex === -1 || this.menuItemFocusIndex === 0) {
+        // When the first or no item is focused, "previous" focuses the last item.
         this.menuItemFocusIndex = this.menuItems.length - 1;
       } else {
         // In all other cases, it focuses the previous item.
@@ -168,6 +168,8 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
       this.menuItemFocusIndex = focusDirection;
     }
 
+    console.log(this.menuItemFocusIndex);
+
     // (menuItems[this.menuItemFocusIndex] as HTMLElement).focus();
   }
 
@@ -176,7 +178,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Handles the arrow keys to navigate the dropdown.
    */
   @action protected onKeydown(event: KeyboardEvent) {
-    console.log(this.menuItemFocusIndex);
     this.registerMenuItems(
       this.popoverElement.querySelectorAll("[role=option]")
     );
@@ -204,6 +205,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Filters the facets shown in the dropdown.
    */
   protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+    this.menuItemFocusIndex = -1;
     let shownFacets: FacetDropdownObjects = {};
     let facets = this.args.facets;
     this.query = (inputEvent.target as HTMLInputElement).value;
@@ -213,11 +215,11 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
       }
     }
     this.shownFacets = shownFacets;
-    this.menuItemFocusIndex = -1;
-    // schedule("afterRender", () => {
-    //   this.registerMenuItems(
-    //     this.popoverElement.querySelectorAll("[role=option]")
-    //   );
-    // });
+
+    schedule("afterRender", () => {
+      this.registerMenuItems(
+        this.popoverElement.querySelectorAll("[role=option]")
+      );
+    });
   });
 }

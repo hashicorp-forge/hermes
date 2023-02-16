@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { FocusDirection } from "./facet-dropdown-list";
 import { tracked } from "@glimmer/tracking";
+import { assert } from "@ember/debug";
 
 interface HeaderFacetDropdownListItemComponentSignature {
   Element: HTMLLIElement;
@@ -20,8 +21,14 @@ interface HeaderFacetDropdownListItemComponentSignature {
 export default class HeaderFacetDropdownListItemComponent extends Component<HeaderFacetDropdownListItemComponentSignature> {
   @service declare router: RouterService;
 
+  @tracked _element: HTMLElement | null = null;
+  get element() {
+    assert("element must exist", this._element);
+    return this._element;
+  }
+
   get elementID() {
-    return this.element?.id || "";
+    return this.element.id;
   }
 
   protected get id(): number {
@@ -29,10 +36,9 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
     return parseInt(this.elementID.match(/\d+$/)?.[0] || "0", 10);
   }
 
-  @tracked element: HTMLLIElement | null = null;
-
-  @action registerElement(element: HTMLLIElement) {
-    this.element = element;
+  @action registerElement(element: HTMLElement) {
+    this._element = element;
+    // need an id-change listener to update the id
   }
 
   protected get currentRouteName(): string {
@@ -40,10 +46,17 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
   }
 
   get isFocused(): boolean {
-    return this.args.menuItemFocusIndex === this.id;
+    if (this.args.menuItemFocusIndex === -1) {
+      return false;
+    } else {
+      return this.args.menuItemFocusIndex === this.id;
+    }
   }
 
-  @action protected onMouseover(e: MouseEvent) {
+  @action protected onMouseenter(e: MouseEvent) {
+    let target = e.target;
+    assert("target must be an element", target instanceof HTMLElement);
+    this._element = target;
     this.args.setFocusTo(this.id);
   }
 }

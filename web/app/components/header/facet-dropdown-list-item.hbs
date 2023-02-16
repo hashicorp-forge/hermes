@@ -1,14 +1,12 @@
-<li
-  {{did-insert this.registerElement}}
-  role="option"
-  aria-selected={{this.isFocused}}
-  data-test-facet-dropdown-menu-item
->
+<li role="none" data-test-facet-dropdown-menu-item>
   <LinkTo
+    {{did-insert this.registerElement}}
+    role="option"
+    aria-selected={{this.isFocused}}
     tabindex="-1"
     aria-checked={{@selected}}
     @route={{this.currentRouteName}}
-    {{on "mouseover" this.onMouseover}}
+    {{on "mouseenter" this.onMouseenter}}
     {{! TODO: queryParam - pending a separate PR merge }}
     class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
   >
