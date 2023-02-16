@@ -5,12 +5,13 @@ import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
+import SessionService from "hermes/services/session";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flags: any;
-  @service declare session: any;
+  @service declare session: SessionService;
 
   @action error(error: unknown) {
     if (error instanceof UnauthorizedError) {
