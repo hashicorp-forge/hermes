@@ -9,7 +9,7 @@ interface DismissibleModifierSignature {
     Element: HTMLElement;
     Positional: [];
     Named: {
-      action: () => void;
+      dismissAction: () => void;
       related?: HTMLElement | HTMLElement[];
     };
   };
@@ -22,9 +22,16 @@ function cleanup(instance: DismissibleModifier) {
 }
 
 export default class DismissibleModifier extends Modifier<DismissibleModifierSignature> {
-  @tracked private _element: HTMLElement | null = null;
+  /**
+   * Register the cleanup function for when the modifier is destroyed.
+   */
+  constructor(owner: any, args: ArgsFor<DismissibleModifierSignature>) {
+    super(owner, args);
+    registerDestructor(this, cleanup);
+  }
 
-  @tracked private _action?: () => void;
+  @tracked private _element: HTMLElement | null = null;
+  @tracked private _dismissAction?: () => void;
   @tracked private related?: HTMLElement | HTMLElement[];
 
   get element(): HTMLElement {
@@ -32,23 +39,22 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
     return this._element;
   }
 
-  get action(): () => void {
-    assert("_action must exist", this._action);
-    return this._action;
+  get dismissAction(): () => void {
+    assert("_action must exist", this._dismissAction);
+    return this._dismissAction;
   }
 
-  constructor(owner: any, args: ArgsFor<DismissibleModifierSignature>) {
-    super(owner, args);
-    registerDestructor(this, cleanup);
-  }
-
+  /**
+   * Whether the target is related to the dismissible element.
+   * Used to prevent dismissing when targeting on a related element
+   * that isn't a child of the dismissible element.
+   */
   targetIsRelated(target: HTMLElement, related?: HTMLElement | HTMLElement[]) {
     if (related instanceof HTMLElement) {
       if (related.contains(target)) {
         return true;
       }
     }
-
     if (related instanceof Array) {
       for (let element of related) {
         if (element.contains(target)) {
@@ -56,39 +62,45 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
         }
       }
     }
-
     return false;
   }
 
+  /**
+   * The function to call when the user clicks/focuses/keys on the document.
+   * Will dismiss the element if the user clicks/focuses/keys outside
+   * of the element or its relatives.
+   */
   @action maybeDismiss(event: FocusEvent | PointerEvent | KeyboardEvent) {
-    console.log("event", event);
     if (event instanceof KeyboardEvent) {
       if (event.key === "Escape") {
-        this.action();
+        this.dismissAction();
       }
       return;
     } else {
       let target = event.target as HTMLElement;
       if (!this.element.contains(target)) {
         if (!this.targetIsRelated(target, this.related)) {
-          this.action();
+          this.dismissAction();
         }
       }
     }
   }
 
+  /**
+   * The function that runs when the modified element is shown.
+   * Sets up the event listeners and stores the properties locally.
+   */
   modify(
     element: HTMLElement,
     _positional: [],
     named: {
-      action: () => void;
+      dismissAction: () => void;
       related?: HTMLElement | HTMLElement[];
     }
   ) {
     this._element = element;
-    this._action = named.action;
+    this._dismissAction = named.dismissAction;
     this.related = named.related;
-
     document.addEventListener("focusin", this.maybeDismiss);
     document.addEventListener("click", this.maybeDismiss);
     document.addEventListener("keydown", this.maybeDismiss);

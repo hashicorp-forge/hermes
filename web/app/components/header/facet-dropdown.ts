@@ -31,98 +31,45 @@ enum FocusDirection {
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
   @service declare router: RouterService;
 
-  @tracked private query: string = "";
-  @tracked private menuItemFocusIndex = -1;
-
   @tracked private _triggerElement: HTMLButtonElement | null = null;
   @tracked private _inputElement: HTMLInputElement | null = null;
+
+  @tracked private query: string = "";
+  @tracked private menuItemFocusIndex = -1;
 
   @tracked protected dropdownIsShown = false;
   @tracked protected shownFacets = this.args.facets;
 
+  /**
+   * The dropdown trigger.
+   * Passed to the dismissible modifier as a dropdown relative.
+   */
   protected get triggerElement(): HTMLButtonElement {
     assert("_triggerElement must exist", this._triggerElement);
     return this._triggerElement;
   }
-
+  /**
+   * The input element.
+   * Receives focus when the user presses the up arrow key
+   * while the first menu item is focused.
+   */
   private get inputElement(): HTMLInputElement {
     assert("_inputElement must exist", this._inputElement);
     return this._inputElement;
   }
 
-  protected get inputIsShown() {
-    return Object.entries(this.args.facets).length > 12;
-  }
-
+  /**
+   * The name of the current route.
+   * Used to determine the component's LinkTo route.
+   */
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
   }
 
-  onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.query = (inputEvent.target as HTMLInputElement).value;
-
-    let facets = this.args.facets;
-    let shownFacets: FacetDropdownObjects = {};
-
-    for (const [key, value] of Object.entries(facets)) {
-      if (key.toLowerCase().includes(this.query.toLowerCase())) {
-        shownFacets[key] = value;
-      }
-    }
-    this.shownFacets = shownFacets;
-  });
-
-  @action protected registerTrigger(element: HTMLButtonElement) {
-    this._triggerElement = element;
-  }
-
-  @action protected registerInput(element: HTMLInputElement) {
-    this._inputElement = element;
-  }
-
-  @action protected onKeydown(event: KeyboardEvent) {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      this.setFocusTo(FocusDirection.Next);
-    }
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      this.setFocusTo(FocusDirection.Previous);
-    }
-  }
-
-  @action protected resetMenuItemIndex() {
-    this.menuItemFocusIndex = -1;
-  }
-
-  private setFocusTo(focusDirection: FocusDirection) {
-    let menuItems = document.querySelectorAll(".facet-dropdown-menu li a");
-    if (menuItems.length === 0) {
-      return;
-    }
-
-    if (focusDirection === FocusDirection.Next) {
-      if (this.menuItemFocusIndex === menuItems.length - 1) {
-        this.menuItemFocusIndex = 0;
-      } else {
-        this.menuItemFocusIndex++;
-      }
-    }
-
-    if (focusDirection === FocusDirection.Previous) {
-      if (this.menuItemFocusIndex === -1) {
-        this.menuItemFocusIndex = menuItems.length - 1;
-      } else if (this.menuItemFocusIndex === 0 && this.inputIsShown) {
-        this.inputElement.focus();
-        this.resetMenuItemIndex();
-        return;
-      } else {
-        this.menuItemFocusIndex--;
-      }
-    }
-    (menuItems[this.menuItemFocusIndex] as HTMLElement).focus();
-  }
-
+  /**
+   * The code-friendly name of the facet.
+   * Used to apply styles and aria-labels.
+   */
   protected get facetName(): FacetNames | undefined {
     switch (this.args.label) {
       case "Type":
@@ -136,25 +83,129 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
   }
 
+  /**
+   * Whether the filter input should be shown.
+   * True when the input has more facets than
+   * can be shown in the dropdown (12).
+   */
+  protected get inputIsShown() {
+    return Object.entries(this.args.facets).length > 12;
+  }
+
+/**
+ * Registers the trigger element.
+ * Used to pass the trigger to the dismissible modifier as a relative.
+ */
+  @action protected registerTrigger(element: HTMLButtonElement) {
+    this._triggerElement = element;
+  }
+
+  /**
+   * Registers the input element.
+   * Used to assert that the element exists and can be focused.
+   */
+  @action protected registerInput(element: HTMLInputElement) {
+    this._inputElement = element;
+  }
+
+  /**
+   * Toggles the dropdown visibility.
+   * Called when the user clicks on the dropdown trigger.
+   */
   @action protected toggleDropdown(): void {
     if (this.dropdownIsShown) {
+      // Hide the dropdown and reset the component parameters.
       this.hideDropdown();
     } else {
       this.dropdownIsShown = true;
     }
   }
 
-  @action protected hideDropdown(): void {
-    this.dropdownIsShown = false;
-    this.query = "";
-    this.resetMenuItemIndex();
-    this.shownFacets = this.args.facets;
+  /**
+   * The action run when the user presses a key.
+   * Handles the arrow keys to navigate the dropdown.
+   */
+  @action protected onKeydown(event: KeyboardEvent) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      this.setFocusTo(FocusDirection.Next);
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      this.setFocusTo(FocusDirection.Previous);
+    }
   }
 
-  @action onClick(value: string, close: () => void) {
-    if (this.facetName) {
-      this.args.onClick(this.facetName, value);
-    }
-    close();
+  /**
+   * Resets the focus index to its initial value.
+   * Called when the dropdown is closed, and when the input is focused.
+   */
+  @action protected resetMenuItemIndex() {
+    this.menuItemFocusIndex = -1;
   }
+
+  /**
+   * The action run when the user clicks outside the dropdown.
+   * Closes the dropdown and resets the component parameters.
+   */
+  @action protected hideDropdown(): void {
+    this.dropdownIsShown = false;
+    this.shownFacets = this.args.facets;
+    this.query = "";
+    this.resetMenuItemIndex();
+  }
+
+  /**
+   * Sets the focus to the next or previous menu item.
+   * Used by the onKeydown action to navigate the dropdown.
+   */
+  private setFocusTo(focusDirection: FocusDirection) {
+    let menuItems = document.querySelectorAll(".facet-dropdown-menu li a");
+
+    if (menuItems.length === 0) {
+      return;
+    }
+
+    if (focusDirection === FocusDirection.Next) {
+      if (this.menuItemFocusIndex === menuItems.length - 1) {
+        // When the last item is focused, "next" focuses the first item.
+        this.menuItemFocusIndex = 0;
+      } else {
+        // Otherwise it focuses the next item.
+        this.menuItemFocusIndex++;
+      }
+    }
+
+    if (focusDirection === FocusDirection.Previous) {
+      if (this.menuItemFocusIndex === -1) {
+        // When no menuitem is focused, "previous" focuses the last item.
+        this.menuItemFocusIndex = menuItems.length - 1;
+      } else if (this.menuItemFocusIndex === 0 && this.inputIsShown) {
+        // When the first item is focused, "previous" focuses the input.
+        this.inputElement.focus();
+        this.resetMenuItemIndex();
+        return;
+      } else {
+        // In all other cases, it focuses the previous item.
+        this.menuItemFocusIndex--;
+      }
+    }
+    (menuItems[this.menuItemFocusIndex] as HTMLElement).focus();
+  }
+
+  /**
+   * The action run when the user types in the input.
+   * Filters the facets shown in the dropdown.
+   */
+  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+    let shownFacets: FacetDropdownObjects = {};
+    let facets = this.args.facets;
+    this.query = (inputEvent.target as HTMLInputElement).value;
+    for (const [key, value] of Object.entries(facets)) {
+      if (key.toLowerCase().includes(this.query.toLowerCase())) {
+        shownFacets[key] = value;
+      }
+    }
+    this.shownFacets = shownFacets;
+  });
 }

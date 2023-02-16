@@ -1,0 +1,31 @@
+.facet-dropdown {
+  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] max-h-[400px] hds-dropdown-list pt-0 z-10;
+}
+
+.facet-dropdown-menu {
+  @apply py-3 list-none;
+}
+
+.facet-dropdown-input {
+  @apply w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none;
+}
+
+.facet-dropdown-menu-item-link {
+  @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full;
+
+  &:hover {
+    @apply bg-color-surface-action;
+  }
+
+  &:focus {
+    @apply bg-color-surface-action;
+  }
+
+  .flight-icon {
+    @apply mr-2.5 text-color-foreground-action;
+  }
+}
+
+.facet-dropdown-menu-item-value {
+  @apply text-color-foreground-strong whitespace-nowrap truncate;
+}

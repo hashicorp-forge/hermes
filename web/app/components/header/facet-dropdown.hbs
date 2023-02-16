@@ -1,17 +1,20 @@
 <div class="relative" {{on "keydown" this.onKeydown}} ...attributes>
-
   <Hds::Button
-    @text={{@label}}
+    data-test-facet-dropdown-trigger
+    {{did-insert this.registerTrigger}}
+    {{on "click" this.toggleDropdown}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"
-    {{on "click" this.toggleDropdown}}
-    {{did-insert this.registerTrigger}}
+    @text={{@label}}
   />
   {{#if this.dropdownIsShown}}
     <div
-      {{dismissible action=this.hideDropdown related=this.triggerElement}}
-      class="facet-dropdown absolute -bottom-1 left-0 bg-color-page-primary translate-y-full rounded-md list-none min-w-[200px] hds-dropdown-list pt-0 z-10
+      {{dismissible
+        dismissAction=this.hideDropdown
+        related=this.triggerElement
+      }}
+      class="facet-dropdown
         {{if this.inputIsShown 'w-[320px]'}}
         {{if (eq this.facetName 'status') 'w-[240px]'}}"
     >
@@ -19,48 +22,42 @@
         <div class="border-b border-b-color-border-primary">
           <Hds::Form::TextInput::Base
             {{autofocus}}
+            {{did-insert this.registerInput}}
+            {{on "input" (perform this.onInput)}}
+            {{on "focusin" this.resetMenuItemIndex}}
             @value={{this.query}}
             @type="search"
             class="leading-none"
             placeholder="Filter..."
-            {{did-insert this.registerInput}}
-            {{on "input" (perform this.onInput)}}
-            {{on "focusin" this.resetMenuItemIndex}}
-            class="w-full h-full py-3 border-0 text-body-200 hds-form-text-input bg-transparent focus:outline-none"
+            class="facet-dropdown-input"
           />
         </div>
       {{/if}}
-      <div
-        style={{if this.inputerIsShown "scrollbar-gutter: stable;"}}
-        class="overflow-auto h-full max-h-[400px]"
-      >
-
-        {{! https://www.w3.org/WAI/ARIA/apg/patterns/menubar/examples/menubar-editor/ }}
+      <div class="overflow-auto h-full">
         <ol
-          class="facet-dropdown-menu py-3 list-none"
           role="menu"
           aria-label={{this.facetName}}
+          class="facet-dropdown-menu"
         >
           {{#each-in this.shownFacets as |value attrs|}}
-            <li class="w-full" role="none">
+            <li role="none">
               <LinkTo
                 role="menuitemradio"
                 tabindex="-1"
                 aria-checked={{attrs.selected}}
                 @route={{this.currentRouteName}}
                 data-test-facet-dropdown-list-item
-                {{! todo: queryparam }}
-                class="no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full group hover:bg-color-surface-action focus:bg-color-surface-action"
+                {{! TODO: queryParam - pending a separate PR merge }}
+                class="facet-dropdown-menu-item-link"
               >
                 <FlightIcon
                   @name="check"
-                  class="mr-2.5 text-color-foreground-action
-                    {{if attrs.selected 'visible' 'invisible'}}"
+                  class={{if attrs.selected "visible" "invisible"}}
                 />
-                <div class="flex justify-between w-full overflow-hidden">
-                  <span
-                    class="text-color-foreground-strong whitespace-nowrap truncate"
-                  >{{value}}</span>
+                <div class="w-full flex justify-between overflow-hidden">
+                  <span class="facet-dropdown-list-item-value">
+                    {{value}}
+                  </span>
                   <Hds::BadgeCount
                     @text={{attrs.count}}
                     class="opacity-75 ml-8 shrink-0"
@@ -69,11 +66,9 @@
                 </div>
               </LinkTo>
             </li>
-
           {{/each-in}}
         </ol>
       </div>
-
     </div>
   {{/if}}
 </div>
