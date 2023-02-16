@@ -1,34 +1,39 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import AuthenticateController from "hermes/controllers/authenticate";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import Transition from "@ember/routing/transition";
+import window from "ember-window-mock";
+import SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
-  @service declare session: any;
+  @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  @service("config") declare configSvc: ConfigService;
 
   async afterModel(): Promise<void> {
-    // Load user info
     await this.authenticatedUser.loadInfo.perform();
   }
 
-  async beforeModel(transition: Transition): Promise<void> {
-    // Check if the request requires authentication and if so, preserve the URL
+  async beforeModel(transition: any): Promise<void> {
+    // If the user isn't authenticated, transition to the auth screen
     let requireAuthentication = this.session.requireAuthentication(
       transition,
       "authenticate"
     );
 
-    if (!requireAuthentication && transition.to.name != "authenticated.index") {
-      let authenticateController = this.controllerFor(
-        "authenticate"
-      ) as AuthenticateController;
+    let target = window.sessionStorage.getItem(
+      this.session.SESSION_STORAGE_KEY
+    );
 
-      // Set previous transition to preserve URL
-      authenticateController.previousTransition = transition;
+    if (
+      !target &&
+      !requireAuthentication &&
+      transition.to.name != "authenticated.index"
+    ) {
+      // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
+
+      window.sessionStorage.setItem(
+        this.session.SESSION_STORAGE_KEY,
+        transition.intent.url
+      );
     }
   }
 }

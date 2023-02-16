@@ -13,8 +13,9 @@ import {
 } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
-import { FacetOption, FacetRecord, FacetRecords } from "hermes/types/facets";
+import { FacetDropdownObjectDetails, FacetRecord, FacetRecords } from "hermes/types/facets";
 import FetchService from "./fetch";
+import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
@@ -26,9 +27,9 @@ export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  // TODO: use actual type.
-  @service session: any;
+
 
   /**
    * A shorthand getter for the authenticatedUser's email.
@@ -108,7 +109,7 @@ export default class AlgoliaService extends Service {
 
   /**
    * Iterates over the keys of a facet object and transforms the `count` value
-   * into a `FacetOption` object with `count` and `selected` properties.
+   * into a `FacetDropdownObjectDetails` object with `count` and `selected` properties.
    */
   mapStatefulFacetKeys = (facetObject: AlgoliaFacetsObject): FacetRecords => {
     /**
@@ -141,7 +142,7 @@ export default class AlgoliaService extends Service {
           let valProp = val[prop];
           if (valProp) {
             /**
-             * Use the mapper to transform the count into a `FacetOption` object:
+             * Use the mapper to transform the count into a `FacetDropdownObjectDetails` object:
              * { "meg@hashicorp.com": { count: 10, selected: false }}
              */
             newVal[prop] = mapper(valProp);
@@ -181,7 +182,7 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetOption).selected = true;
+        (facet[param] as FacetDropdownObjectDetails).selected = true;
       }
       /**
        * e.g., facet["Approved"] === { count: 6, selected: true }
@@ -289,9 +290,10 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
       userIsOwner = false
     ): Promise<FacetRecords | undefined> => {
+      let query = params["q"] || "";
       try {
         let facetFilters = userIsOwner ? [`owners:${this.userEmail}`] : [];
-        let algoliaFacets = await this.searchIndex.perform(searchIndex, "", {
+        let algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
           facetFilters: facetFilters,
           facets: FACET_NAMES,
           hitsPerPage: HITS_PER_PAGE,
@@ -335,8 +337,10 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
       userIsOwner = false
     ): Promise<SearchResponse | unknown> => {
+      let query = params["q"] || "";
+
       try {
-        return await this.searchIndex.perform(searchIndex, "", {
+        return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
           facets: FACET_NAMES,
           hitsPerPage: HITS_PER_PAGE,

@@ -5,6 +5,7 @@ import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import SessionService from "./session";
 
 export interface AuthenticatedUser {
   email: string;
@@ -25,8 +26,8 @@ enum SubscriptionType {
 
 export default class AuthenticatedUserService extends Service {
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare session: SessionService;
   @service declare store: Store;
-  @service declare session: any;
 
   @tracked subscriptions: Subscription[] | null = null;
   @tracked private _info: AuthenticatedUser | null = null;

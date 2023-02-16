@@ -29,6 +29,10 @@ export default function (config) {
       this.get("/people", (schema) => {
         return schema.people.all();
       });
+
+      this.post("/me/subscriptions", (schema, request) => {
+        return new Response(200, {});
+      });
     },
   };
   return createServer(finalConfig);
