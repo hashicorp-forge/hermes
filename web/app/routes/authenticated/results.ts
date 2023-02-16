@@ -32,10 +32,7 @@ export default class ResultsRoute extends Route {
   };
 
   async model(params: ResultsRouteParams) {
-    const searchIndex =
-      params.sortBy === "dateAsc"
-        ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
-        : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+    const searchIndex = this.configSvc.config.algolia_docs_index_name;
 
     let [facets, results] = await Promise.all([
       this.algolia.getFacets.perform(searchIndex, params),
