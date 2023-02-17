@@ -7,7 +7,6 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 
 interface HeaderFacetDropdownListItemComponentSignature {
-  Element: HTMLLIElement;
   Args: {
     focusedItemIndex: number;
     value: string;
