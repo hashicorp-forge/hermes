@@ -2,14 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import {
-  click,
-  fillIn,
-  find,
-  render,
-  triggerKeyEvent,
-  waitFor,
-} from "@ember/test-helpers";
+import { fillIn, find, render, triggerKeyEvent } from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
 
