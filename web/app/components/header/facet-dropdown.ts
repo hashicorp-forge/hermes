@@ -27,6 +27,15 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   /**
+   * Whether the filter input should be shown.
+   * True when the input has more facets than
+   * can be shown in the dropdown (12).
+   */
+  protected get inputIsShown() {
+    return Object.entries(this.args.facets).length > 12;
+  }
+
+  /**
    * Registers the trigger element.
    * Used to pass the trigger to the dismissible modifier as a relative.
    */

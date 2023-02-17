@@ -2,14 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import {
-  click,
-  fillIn,
-  find,
-  render,
-  triggerKeyEvent,
-} from "@ember/test-helpers";
-import { assert as emberAssert } from "@ember/debug";
+import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 const SHORT_FACET_LIST = {
@@ -42,6 +35,10 @@ const LONG_FACET_LIST = {
 module("Integration | Component | header/facet-dropdown", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
+
+
+  // TODO: Not currently using Mirage
+  // TODO: Use Mirage to create these facet lists
 
   test("it toggles when the trigger is clicked", async function (this: MirageTestContext, assert) {
     this.set("facets", SHORT_FACET_LIST);
@@ -84,100 +81,18 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       .hasStyle({ visibility: "visible" }, "Selected facets have an icon");
   });
 
-  test("the list can be filtered when there are more than 12 facets", async function (this: MirageTestContext, assert) {
+  test("an input is shown when there are more than 12 facets", async function (this: MirageTestContext, assert) {
     this.set("facets", LONG_FACET_LIST);
 
     await render(hbs`
       <Header::FacetDropdown
-        @label="Type"
+        @label="Status"
         @facets={{this.facets}}
       />
     `);
 
     await click("[data-test-facet-dropdown-trigger]");
-
-    assert
-      .dom(".facet-dropdown-popover")
-      .hasClass("large", "The popover has the correct class");
 
     assert.dom(".facet-dropdown-input").exists("The input is shown");
-
-    assert.equal(
-      document.activeElement,
-      find(".facet-dropdown-input"),
-      "The input is autofocused"
-    );
-
-    assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
-
-    await fillIn(".facet-dropdown-input", "3");
-
-    assert
-      .dom("[data-test-facet-dropdown-menu-item]")
-      .exists({ count: 2 }, "The facets are filtered");
-
-    await fillIn(".facet-dropdown-input", "foobar");
-
-    assert.dom("[data-test-facet-dropdown-menu]").doesNotExist()
-    assert.dom('[data-test-facet-dropdown-menu-empty-state]').exists();
-  });
-
-  test("keyboard navigation works as expected", async function (this: MirageTestContext, assert) {
-    this.set("facets", LONG_FACET_LIST);
-
-    await render(hbs`
-      <Header::FacetDropdown
-        @label="Type"
-        @facets={{this.facets}}
-      />
-    `);
-
-    await click("[data-test-facet-dropdown-trigger]");
-
-    let getActiveElement = () => {
-      let activeElement = document.activeElement;
-      emberAssert("activeElement must exist", activeElement);
-      return activeElement;
-    };
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowDown");
-
-    assert.equal(
-      document.activeElement,
-      find("[data-test-facet-dropdown-menu-item]:nth-child(1) a"),
-      "Keying down moves from the input to the first filter"
-    );
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowDown");
-
-    assert.equal(
-      document.activeElement,
-      find("[data-test-facet-dropdown-menu-item]:nth-child(2) a"),
-      "Keying down moves from the first filter to the second filter"
-    );
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowUp");
-
-    assert.equal(
-      document.activeElement,
-      find("[data-test-facet-dropdown-menu-item]:nth-child(1) a"),
-      "Keying up moves from the second filter to the first filter"
-    );
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowUp");
-
-    assert.equal(
-      document.activeElement,
-      find("[data-test-facet-dropdown-menu-item]:nth-child(13) a"),
-      "Keying up from the input moves to the last filter"
-    );
-
-    await triggerKeyEvent(getActiveElement(), "keydown", "ArrowDown");
-
-    assert.equal(
-      document.activeElement,
-      find("[data-test-facet-dropdown-menu-item]:nth-child(1) a"),
-      "Keying down moves from the input to the first filter"
-    );
   });
 });

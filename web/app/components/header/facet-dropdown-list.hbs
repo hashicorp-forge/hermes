@@ -1,15 +1,14 @@
 {{on-document "keydown" this.onKeydown}}
-
 <div
   {{did-insert this.registerPopover}}
+  role={{if @inputIsShown "combobox"}}
   id="facet-dropdown-popover"
   class="facet-dropdown-popover
-    {{if this.inputIsShown 'large'}}
-    {{if (eq this.facetName 'status') 'medium'}}"
-  role={{if this.inputIsShown "combobox"}}
+    {{if @inputIsShown 'large'}}
+    {{if (and (not @inputIsShown) (eq this.facetName 'status')) 'medium'}}"
   ...attributes
 >
-  {{#if this.inputIsShown}}
+  {{#if @inputIsShown}}
     <div class="relative px-1 pb-1 border-b border-b-color-border-faint">
       <Hds::Form::TextInput::Base
         {{did-insert this.registerInput}}
@@ -21,7 +20,10 @@
         class="leading-none"
         placeholder="Filter..."
         class="facet-dropdown-input"
-        aria-activedescendant="facet-dropdown-menu-item-{{this.menuItemFocusIndex}}"
+        aria-activedescendant={{unless
+          (eq this.menuItemFocusIndex -1)
+          (concat "facet-dropdown-menu-item-" this.menuItemFocusIndex)
+        }}
       />
     </div>
   {{/if}}
@@ -37,11 +39,16 @@
       <ol
         data-test-facet-dropdown-menu
         id="facet-dropdown-menu"
-        role="listbox"
+        role={{if @inputIsShown "listbox" "menu"}}
         class="py-3 list-none"
+        aria-activedescendant={{unless
+          (or @inputIsShown (eq this.menuItemFocusIndex -1))
+          (concat "facet-dropdown-menu-item-" this.menuItemFocusIndex)
+        }}
       >
         {{#each-in this.shownFacets as |value attrs|}}
           <Header::FacetDropdownListItem
+            @role={{if @inputIsShown "option" "menuitem"}}
             @value={{value}}
             @selected={{attrs.selected}}
             @count={{attrs.count}}

@@ -11,6 +11,7 @@ interface HeaderFacetDropdownListItemComponentSignature {
   Args: {
     menuItemFocusIndex: number;
     value: string;
+    role: string;
     count: number;
     selected: boolean;
     setFocusTo: (focusDirection: FocusDirection | number) => void;

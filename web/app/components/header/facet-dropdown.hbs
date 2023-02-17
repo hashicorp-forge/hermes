@@ -1,7 +1,6 @@
 <div
   class="relative"
   aria-owns="facet-dropdown-menu"
-  aria-haspopup="listbox"
   aria-expanded={{this.dropdownIsShown}}
   ...attributes
 >
@@ -14,6 +13,12 @@
     @iconPosition="trailing"
     @color="secondary"
     @text={{@label}}
+    aria-haspopup="listbox"
+    aria-controls={{if
+      this.inputIsShown
+      "facet-dropdown-popover"
+      "facet-dropdown-menu"
+    }}
   />
   {{#if this.dropdownIsShown}}
     <Header::FacetDropdownList
@@ -23,6 +28,7 @@
       }}
       @label={{@label}}
       @facets={{@facets}}
+      @inputIsShown={{this.inputIsShown}}
     />
   {{/if}}
 </div>

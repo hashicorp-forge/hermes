@@ -67,8 +67,9 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
 
   /**
    * The function to call when the user clicks/focuses/keys on the document.
-   * Will dismiss the element if the user clicks/focuses/keys outside
-   * of the element or its relatives.
+   * Will dismiss the element if it or its relatives don't contain the target.
+   * Will dismiss on Escape unless the target is a search input with a value,
+   * in which case we preserve the search's "clear" function.
    */
   @action maybeDismiss(event: FocusEvent | PointerEvent | KeyboardEvent) {
     if (event instanceof KeyboardEvent) {

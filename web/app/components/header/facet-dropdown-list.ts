@@ -10,9 +10,9 @@ import { schedule } from "@ember/runloop";
 
 interface HeaderFacetDropdownListComponentSignature {
   Args: {
+    inputIsShown: boolean;
     label: string;
     facets: FacetDropdownObjects;
-    menuItemFocusIndex: number;
   };
 }
 
@@ -38,6 +38,8 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
   @tracked protected menuItemFocusIndex = -1;
   @tracked protected shownFacets = this.args.facets;
+
+  private listItemRole = this.args.inputIsShown ? "option" : "menuitem";
 
   /**
    * The name of the current route.
@@ -66,15 +68,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
   }
 
   /**
-   * Whether the filter input should be shown.
-   * True when the input has more facets than
-   * can be shown in the dropdown (12).
-   */
-  protected get inputIsShown() {
-    return Object.entries(this.args.facets).length > 12;
-  }
-
-  /**
    * TODO
    */
   protected get noMatchesFound(): boolean {
@@ -97,6 +90,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
         return FacetNames.Owners;
     }
   }
+
   @tracked protected menuItems: NodeListOf<Element> | null = null;
 
   @action registerMenuItems(items: NodeListOf<Element>): void {
@@ -115,7 +109,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
   @action protected registerPopover(element: HTMLDivElement) {
     this._popoverElement = element;
     this.registerMenuItems(
-      this.popoverElement.querySelectorAll("[role=option]")
+      this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
     );
   }
 
@@ -136,41 +130,41 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Used by the onKeydown action to navigate the dropdown.
    */
   @action protected setFocusTo(focusDirection: FocusDirection | number) {
-    if (!this.menuItems) {
+    let { menuItems, menuItemFocusIndex } = this;
+
+    if (!menuItems) {
       return;
     }
 
-    if (this.menuItems.length === 0) {
+    if (menuItems.length === 0) {
       return;
     }
 
     if (focusDirection === FocusDirection.Next) {
-      if (this.menuItemFocusIndex === this.menuItems.length - 1) {
+      if (menuItemFocusIndex === menuItems.length - 1) {
         // When the last item is focused, "next" focuses the first item.
-        this.menuItemFocusIndex = 0;
+        menuItemFocusIndex = 0;
       } else {
         // Otherwise it focuses the next item.
-        this.menuItemFocusIndex++;
+        menuItemFocusIndex++;
       }
     }
 
     if (focusDirection === FocusDirection.Previous) {
-      if (this.menuItemFocusIndex === -1 || this.menuItemFocusIndex === 0) {
+      if (menuItemFocusIndex === -1 || menuItemFocusIndex === 0) {
         // When the first or no item is focused, "previous" focuses the last item.
-        this.menuItemFocusIndex = this.menuItems.length - 1;
+        menuItemFocusIndex = menuItems.length - 1;
       } else {
         // In all other cases, it focuses the previous item.
-        this.menuItemFocusIndex--;
+        menuItemFocusIndex--;
       }
     }
 
     if (typeof focusDirection === "number") {
-      this.menuItemFocusIndex = focusDirection;
+      menuItemFocusIndex = focusDirection;
     }
 
-    console.log(this.menuItemFocusIndex);
-
-    // (menuItems[this.menuItemFocusIndex] as HTMLElement).focus();
+    this.menuItemFocusIndex = menuItemFocusIndex;
   }
 
   /**
@@ -179,7 +173,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    */
   @action protected onKeydown(event: KeyboardEvent) {
     this.registerMenuItems(
-      this.popoverElement.querySelectorAll("[role=option]")
+      this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
     );
 
     if (event.key === "ArrowDown") {
@@ -218,7 +212,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
     schedule("afterRender", () => {
       this.registerMenuItems(
-        this.popoverElement.querySelectorAll("[role=option]")
+        this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
       );
     });
   });
