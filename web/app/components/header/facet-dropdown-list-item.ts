@@ -15,49 +15,92 @@ interface HeaderFacetDropdownListItemComponentSignature {
     count: number;
     selected: boolean;
     setFocusTo: (focusDirection: FocusDirection | number) => void;
-    setActiveDescendant(id: string): void;
   };
 }
 
 export default class HeaderFacetDropdownListItemComponent extends Component<HeaderFacetDropdownListItemComponentSignature> {
   @service declare router: RouterService;
 
-  @tracked _element: HTMLElement | null = null;
-  get element() {
+  /**
+   * The element reference, set on insertion and updated on mouseenter.
+   * Used to compute the element's ID, which may change when the list is filtered.
+   */
+  @tracked private _element: HTMLElement | null = null;
+
+  /**
+   * An asserted-true reference to the element.
+   */
+  protected get element() {
     assert("element must exist", this._element);
     return this._element;
   }
 
-  get elementID() {
+  /**
+   * The element's domID, e.g., "facet-dropdown-list-item-0"
+   * Which is computed by the parent component on render and when
+   * the FacetList is filtered. Parsed by `this.id` to get the
+   * numeric identifier for the element.
+   */
+  private get elementID() {
     return this.element.id;
   }
 
-  protected get id(): number {
-    // get the integer at the end of the id
-    return parseInt(this.elementID.match(/\d+$/)?.[0] || "0", 10);
-  }
-
-  @action registerElement(element: HTMLElement) {
-    this._element = element;
-    // need an id-change listener to update the id
-  }
-
+  /**
+   * The current route name, used to set the LinkTo's @route
+   */
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
   }
 
-  get isFocused(): boolean {
-    if (this.args.menuItemFocusIndex === -1) {
-      return false;
-    } else {
-      return this.args.menuItemFocusIndex === this.id;
-    }
+  /**
+   * A numeric identifier for the element based on its id,
+   * as computed by the parent component on render and when
+   * the FacetList is filtered. Strips everything but the trailing number.
+   * Used to apply classes and aria-selected, and to direct the parent component's
+   * focus action toward the correct element.
+   */
+  protected get id(): number {
+    return parseInt(this.elementID.match(/\d+$/)?.[0] || "0", 10);
+    // TODO: can this be more human readable?
   }
 
+  /**
+   * Whether the element is aria-focused.
+   * Used to determine whether to apply the "focused" class
+   * and to set the `aria-selected` attribute.
+   */
+  protected get isFocused(): boolean {
+    if (!this._element) {
+      // True when first computed, which happens
+      // before the element is inserted and registered.
+      return false;
+    }
+
+    if (this.args.menuItemFocusIndex === -1) {
+      return false;
+    }
+
+    return this.args.menuItemFocusIndex === this.id;
+  }
+
+  /**
+   * Sets our local `element` reference to mouse target,
+   * to capture its ID, which may change when the list is filtered.
+   * Then, calls the parent component's `setFocusTo` action,
+   * directing focus to the current element.
+   */
   @action protected onMouseenter(e: MouseEvent) {
     let target = e.target;
     assert("target must be an element", target instanceof HTMLElement);
     this._element = target;
     this.args.setFocusTo(this.id);
+  }
+
+  /**
+   * The action called on element insertion. Sets the local `element`
+   * reference to the domElement we know to be our target.
+   */
+  @action registerElement(element: HTMLElement) {
+    this._element = element;
   }
 }
