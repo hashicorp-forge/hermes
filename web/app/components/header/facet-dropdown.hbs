@@ -23,7 +23,7 @@
   {{#if this.dropdownIsShown}}
     <Header::FacetDropdownList
       {{dismissible
-        dismissAction=this.hideDropdown
+        dismiss=this.hideDropdown
         related=this.triggerElement
       }}
       @label={{@label}}

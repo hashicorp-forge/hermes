@@ -9,7 +9,7 @@ interface DismissibleModifierSignature {
     Element: HTMLElement;
     Positional: [];
     Named: {
-      dismissAction: () => void;
+      dismiss: () => void;
       related?: HTMLElement | HTMLElement[];
     };
   };
@@ -31,7 +31,7 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   }
 
   @tracked private _element: HTMLElement | null = null;
-  @tracked private _dismissAction?: () => void;
+  @tracked private _dismiss?: () => void;
   @tracked private related?: HTMLElement | HTMLElement[];
 
   get element(): HTMLElement {
@@ -39,9 +39,9 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
     return this._element;
   }
 
-  get dismissAction(): () => void {
-    assert("_action must exist", this._dismissAction);
-    return this._dismissAction;
+  get dismiss(): () => void {
+    assert("_action must exist", this._dismiss);
+    return this._dismiss;
   }
 
   /**
@@ -82,14 +82,14 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
             return;
           }
         }
-        this.dismissAction();
+        this.dismiss();
       }
       return;
     } else {
       let target = event.target as HTMLElement;
       if (!this.element.contains(target)) {
         if (!this.targetIsRelated(target, this.related)) {
-          this.dismissAction();
+          this.dismiss();
         }
       }
     }
@@ -103,12 +103,12 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
     element: HTMLElement,
     _positional: [],
     named: {
-      dismissAction: () => void;
+      dismiss: () => void;
       related?: HTMLElement | HTMLElement[];
     }
   ) {
     this._element = element;
-    this._dismissAction = named.dismissAction;
+    this._dismiss = named.dismiss;
     this.related = named.related;
     document.addEventListener("focusin", this.maybeDismiss);
     document.addEventListener("click", this.maybeDismiss);

@@ -9,12 +9,12 @@ import { assert } from "@ember/debug";
 interface HeaderFacetDropdownListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
-    menuItemFocusIndex: number;
+    focusedItemIndex: number;
     value: string;
     role: string;
     count: number;
     selected: boolean;
-    setFocusTo: (focusDirection: FocusDirection | number) => void;
+    setFocusedItemIndex: (focusDirection: FocusDirection | number) => void;
   };
 }
 
@@ -76,24 +76,24 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
       return false;
     }
 
-    if (this.args.menuItemFocusIndex === -1) {
+    if (this.args.focusedItemIndex === -1) {
       return false;
     }
 
-    return this.args.menuItemFocusIndex === this.id;
+    return this.args.focusedItemIndex === this.id;
   }
 
   /**
    * Sets our local `element` reference to mouse target,
    * to capture its ID, which may change when the list is filtered.
-   * Then, calls the parent component's `setFocusTo` action,
+   * Then, calls the parent component's `setFocusedItemIndex` action,
    * directing focus to the current element.
    */
   @action protected onMouseenter(e: MouseEvent) {
     let target = e.target;
     assert("target must be an element", target instanceof HTMLElement);
     this._element = target;
-    this.args.setFocusTo(this.id);
+    this.args.setFocusedItemIndex(this.id);
   }
 
   /**

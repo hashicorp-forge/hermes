@@ -1,7 +1,5 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { setupMirage } from "ember-cli-mirage/test-support";
-import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { render, triggerEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
@@ -9,10 +7,9 @@ module(
   "Integration | Component | header/facet-dropdown-list-item",
   function (hooks) {
     setupRenderingTest(hooks);
-    setupMirage(hooks);
 
-    test("the check mark is visible if the filter is selected", async function (this: MirageTestContext, assert) {
-      this.set("setFocusTo", () => {});
+    test("the check mark is visible if the filter is selected", async function (assert) {
+      this.set("setFocusedItemIndex", () => {});
       this.set("isSelected", false);
 
       await render(hbs`
@@ -21,8 +18,8 @@ module(
           @value="Filter01"
           @selected={{this.isSelected}}
           @count={{1}}
-          @setFocusTo={{this.setFocusTo}}
-          @menuItemFocusIndex={{0}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
+          @focusedItemIndex={{0}}
         />
       `);
 
@@ -33,20 +30,20 @@ module(
       assert.dom(".flight-icon").hasStyle({ visibility: "visible" });
     });
 
-    test("it gets aria-focused on mouseenter", async function (this: MirageTestContext, assert) {
+    test("it gets aria-focused on mouseenter", async function (assert) {
       this.set("isSelected", false);
-      this.set("menuItemFocusIndex", -1);
-      this.set("setFocusTo", (focusDirection: number) => {
-        this.set("menuItemFocusIndex", focusDirection);
+      this.set("focusedItemIndex", -1);
+      this.set("setFocusedItemIndex", (focusDirection: number) => {
+        this.set("focusedItemIndex", focusDirection);
       });
 
       await render(hbs`
         <Header::FacetDropdownListItem
           @value="Filter01"
           @count={{1}}
-          @menuItemFocusIndex={{this.menuItemFocusIndex}}
+          @focusedItemIndex={{this.focusedItemIndex}}
           @selected={{this.isSelected}}
-          @setFocusTo={{this.setFocusTo}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
         />
       `);
 
@@ -56,7 +53,6 @@ module(
       assert.dom(listItemSelector).doesNotHaveAttribute("aria-selected");
 
       await triggerEvent(listItemSelector, "mouseenter");
-
       assert.dom(listItemSelector).hasClass("is-focused");
       assert.dom(listItemSelector).hasAttribute("aria-selected");
     });

@@ -1,47 +1,17 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { setupMirage } from "ember-cli-mirage/test-support";
-import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { fillIn, find, render, triggerKeyEvent } from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
-
-const SHORT_FACET_LIST = {
-  RFC: {
-    count: 10,
-    selected: false,
-  },
-  PRD: {
-    count: 5,
-    selected: true,
-  },
-};
-
-const LONG_FACET_LIST = {
-  Filter01: { count: 1, selected: false },
-  Filter02: { count: 1, selected: false },
-  Filter03: { count: 1, selected: false },
-  Filter04: { count: 1, selected: false },
-  Filter05: { count: 1, selected: false },
-  Filter06: { count: 1, selected: false },
-  Filter07: { count: 1, selected: false },
-  Filter08: { count: 1, selected: false },
-  Filter09: { count: 1, selected: false },
-  Filter10: { count: 1, selected: false },
-  Filter11: { count: 1, selected: false },
-  Filter12: { count: 1, selected: false },
-  Filter13: { count: 1, selected: false },
-};
+import { LONG_FACET_LIST, SHORT_FACET_LIST } from "./facet-dropdown-test";
 
 module(
   "Integration | Component | header/facet-dropdown-list",
   function (hooks) {
     setupRenderingTest(hooks);
-    setupMirage(hooks);
 
-    test("filtering works as expected", async function (this: MirageTestContext, assert) {
+    test("filtering works as expected", async function (assert) {
       this.set("facets", LONG_FACET_LIST);
-
       await render(hbs`
       <Header::FacetDropdownList
         @label="Status"
@@ -50,18 +20,16 @@ module(
       />
     `);
 
-      assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
-
       let firstItemSelector = "#facet-dropdown-menu-item-0";
 
       assert.dom(firstItemSelector).hasText("Filter01 1");
+      assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
 
       await fillIn(".facet-dropdown-input", "3");
 
       assert
         .dom("[data-test-facet-dropdown-menu-item]")
         .exists({ count: 2 }, "The facets are filtered");
-
       assert
         .dom(firstItemSelector)
         .hasText(
@@ -73,13 +41,10 @@ module(
 
       assert.dom("[data-test-facet-dropdown-menu]").doesNotExist();
       assert.dom("[data-test-facet-dropdown-menu-empty-state]").exists();
-
-      // TODO: test that the ids change with every update
     });
 
-    test("keyboard navigation works as expected (long list)", async function (this: MirageTestContext, assert) {
+    test("keyboard navigation works as expected (long list)", async function (assert) {
       this.set("facets", LONG_FACET_LIST);
-
       await render(hbs`
       <Header::FacetDropdownList
         @label="Status"
@@ -178,7 +143,7 @@ module(
         );
     });
 
-    test("keyboard navigation works as expected (short list)", async function (this: MirageTestContext, assert) {
+    test("keyboard navigation works as expected (short list)", async function (assert) {
       this.set("facets", SHORT_FACET_LIST);
 
       await render(hbs`
@@ -238,7 +203,7 @@ module(
         );
     });
 
-    test("keyboard navigation works as expected (short list, ArrowUp)", async function (this: MirageTestContext, assert) {
+    test("keyboard navigation works as expected (short list, ArrowUp)", async function (assert) {
       this.set("facets", SHORT_FACET_LIST);
 
       await render(hbs`
@@ -262,9 +227,8 @@ module(
         );
 
       /**
-       * We tested the ArrowDown behavior in the previous test,
-       * Now let's test the ArrowUp behavior:
-       */
+       * We tested ArrowDown in the previous scenario. Let's try ArrowUp:
+       **/
       await triggerKeyEvent(menu, "keydown", "ArrowUp");
       assert
         .dom(menuSelector)
@@ -275,7 +239,7 @@ module(
         );
     });
 
-    test("it applies the correct classNames to the popover", async function (this: MirageTestContext, assert) {
+    test("it applies the correct classNames to the popover", async function (assert) {
       this.set("facets", SHORT_FACET_LIST);
       this.set("label", "Status");
       this.set("inputIsShown", false);
@@ -293,22 +257,20 @@ module(
 
       emberAssert("popover must exist", popover);
 
+      assert.dom(popoverSelector).doesNotHaveClass("large");
       assert
         .dom(popoverSelector)
         .hasClass("medium", 'the status facet has a "medium" class');
 
-      assert.dom(popoverSelector).doesNotHaveClass("large");
-
       this.set("label", "Type");
 
+      assert.dom(popoverSelector).doesNotHaveClass("large");
       assert
         .dom(popoverSelector)
         .doesNotHaveClass(
           "medium",
           'only the status facet has a "medium" class'
         );
-
-      assert.dom(popoverSelector).doesNotHaveClass("large");
 
       this.set("inputIsShown", true);
 
@@ -319,7 +281,6 @@ module(
       this.set("label", "Status");
 
       assert.dom(popoverSelector).hasClass("large");
-
       assert
         .dom(popoverSelector)
         .doesNotHaveClass(

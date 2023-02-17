@@ -26,6 +26,8 @@ export enum FacetNames {
 export enum FocusDirection {
   Previous = "previous",
   Next = "next",
+  First = "first",
+  Last = "last",
 }
 
 export default class HeaderFacetDropdownListComponent extends Component<HeaderFacetDropdownListComponentSignature> {
@@ -36,7 +38,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
   @tracked private query: string = "";
 
-  @tracked protected menuItemFocusIndex = -1;
+  @tracked protected focusedItemIndex = -1;
   @tracked protected shownFacets = this.args.facets;
 
   private listItemRole = this.args.inputIsShown ? "option" : "menuitem";
@@ -129,8 +131,18 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Sets the focus to the next or previous menu item.
    * Used by the onKeydown action to navigate the dropdown.
    */
-  @action protected setFocusTo(focusDirection: FocusDirection | number) {
-    let { menuItems, menuItemFocusIndex } = this;
+  @action protected setFocusedItemIndex(
+    focusDirectionOrNumber: FocusDirection | number
+  ) {
+    let { menuItems, focusedItemIndex } = this;
+
+    let setFirst = () => {
+      focusedItemIndex = 0;
+    };
+    let setLast = () => {
+      assert("menuItems must exist", menuItems);
+      focusedItemIndex = menuItems.length - 1;
+    };
 
     if (!menuItems) {
       return;
@@ -140,31 +152,35 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
       return;
     }
 
-    if (focusDirection === FocusDirection.Next) {
-      if (menuItemFocusIndex === menuItems.length - 1) {
-        // When the last item is focused, "next" focuses the first item.
-        menuItemFocusIndex = 0;
-      } else {
-        // Otherwise it focuses the next item.
-        menuItemFocusIndex++;
-      }
+    switch (focusDirectionOrNumber) {
+      case FocusDirection.Previous:
+        if (focusedItemIndex === -1 || focusedItemIndex === 0) {
+          // When the first or no item is focused, "previous" focuses the last item.
+          setLast();
+        } else {
+          focusedItemIndex--;
+        }
+        break;
+      case FocusDirection.Next:
+        if (focusedItemIndex === menuItems.length - 1) {
+          // When the last item is focused, "next" focuses the first item.
+          setFirst();
+        } else {
+          focusedItemIndex++;
+        }
+        break;
+      case FocusDirection.First:
+        setFirst();
+        break;
+      case FocusDirection.Last:
+        setLast();
+        break;
+      default:
+        focusedItemIndex = focusDirectionOrNumber;
+        break;
     }
 
-    if (focusDirection === FocusDirection.Previous) {
-      if (menuItemFocusIndex === -1 || menuItemFocusIndex === 0) {
-        // When the first or no item is focused, "previous" focuses the last item.
-        menuItemFocusIndex = menuItems.length - 1;
-      } else {
-        // In all other cases, it focuses the previous item.
-        menuItemFocusIndex--;
-      }
-    }
-
-    if (typeof focusDirection === "number") {
-      menuItemFocusIndex = focusDirection;
-    }
-
-    this.menuItemFocusIndex = menuItemFocusIndex;
+    this.focusedItemIndex = focusedItemIndex;
   }
 
   /**
@@ -178,11 +194,11 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      this.setFocusTo(FocusDirection.Next);
+      this.setFocusedItemIndex(FocusDirection.Next);
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      this.setFocusTo(FocusDirection.Previous);
+      this.setFocusedItemIndex(FocusDirection.Previous);
     }
   }
 
@@ -191,7 +207,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Called when the dropdown is closed, and when the input is focused.
    */
   @action protected resetMenuItemIndex() {
-    this.menuItemFocusIndex = -1;
+    this.focusedItemIndex = -1;
   }
 
   /**
@@ -199,7 +215,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Filters the facets shown in the dropdown.
    */
   protected onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.menuItemFocusIndex = -1;
+    this.focusedItemIndex = -1;
     let shownFacets: FacetDropdownObjects = {};
     let facets = this.args.facets;
     this.query = (inputEvent.target as HTMLInputElement).value;

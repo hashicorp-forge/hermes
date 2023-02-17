@@ -18,12 +18,12 @@ module("Integration | Modifier | it dismisses as expected", function (hooks) {
   test("it renders", async function (assert) {
     let count = 0;
 
-    this.set("dismissAction", () => {
+    this.set("dismiss", () => {
       count++;
     });
 
     await render(hbs`
-      <div {{dismissible dismissAction=this.dismissAction related=this.related}}>
+      <div {{dismissible dismiss=this.dismiss related=this.related}}>
         Dismiss me
       </div>
 
@@ -69,7 +69,7 @@ module("Integration | Modifier | it dismisses as expected", function (hooks) {
       <input
         type="search"
         value={{this.inputValue}}
-        {{dismissible dismissAction=this.dismiss}}
+        {{dismissible dismiss=this.dismiss}}
       />
     `);
     let input = find("input");

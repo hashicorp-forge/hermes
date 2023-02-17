@@ -21,8 +21,8 @@
         placeholder="Filter..."
         class="facet-dropdown-input"
         aria-activedescendant={{unless
-          (eq this.menuItemFocusIndex -1)
-          (concat "facet-dropdown-menu-item-" this.menuItemFocusIndex)
+          (eq this.focusedItemIndex -1)
+          (concat "facet-dropdown-menu-item-" this.focusedItemIndex)
         }}
       />
     </div>
@@ -42,8 +42,8 @@
         role={{if @inputIsShown "listbox" "menu"}}
         class="py-3 list-none"
         aria-activedescendant={{unless
-          (or @inputIsShown (eq this.menuItemFocusIndex -1))
-          (concat "facet-dropdown-menu-item-" this.menuItemFocusIndex)
+          (or @inputIsShown (eq this.focusedItemIndex -1))
+          (concat "facet-dropdown-menu-item-" this.focusedItemIndex)
         }}
       >
         {{#each-in this.shownFacets as |value attrs|}}
@@ -52,8 +52,8 @@
             @value={{value}}
             @selected={{attrs.selected}}
             @count={{attrs.count}}
-            @setFocusTo={{this.setFocusTo}}
-            @menuItemFocusIndex={{this.menuItemFocusIndex}}
+            @setFocusedItemIndex={{this.setFocusedItemIndex}}
+            @focusedItemIndex={{this.focusedItemIndex}}
           />
         {{/each-in}}
       </ol>
