@@ -1,7 +1,8 @@
 // https://www.ember-cli-mirage.com/docs/advanced/server-configuration
 
 import { Collection, Response, createServer } from "miragejs";
-import config from "../app/config/environment";
+// @ts-ignore
+import config from "hermes/config/environment";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -85,7 +86,7 @@ export default function (mirageConfig) {
               "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
             moreInfoLink: {
               text: "More-info link",
-              url: "",
+              url: "example.com",
             },
             checks: [
               {
@@ -95,7 +96,7 @@ export default function (mirageConfig) {
                 links: [
                   {
                     text: "Terms and Conditions",
-                    url: "",
+                    url: "example.com",
                   },
                 ],
               },
