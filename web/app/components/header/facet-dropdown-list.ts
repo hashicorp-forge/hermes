@@ -35,6 +35,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
   @tracked private _popoverElement: HTMLDivElement | null = null;
   @tracked private _inputElement: HTMLInputElement | null = null;
+  @tracked private _scrollContainer: HTMLElement | null = null;
 
   @tracked private query: string = "";
 
@@ -57,6 +58,14 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
   private get popoverElement(): HTMLDivElement {
     assert("_popoverElement must exist", this._popoverElement);
     return this._popoverElement;
+  }
+
+  /**
+   * TODO
+   */
+  private get scrollContainer(): HTMLElement {
+    assert("_scrollContainer must exist", this._scrollContainer);
+    return this._scrollContainer;
   }
 
   /**
@@ -104,6 +113,10 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     }
   }
 
+  @action registerScrollContainer(element: HTMLDivElement) {
+    this._scrollContainer = element;
+  }
+
   /**
    * Registers the popover element.
    * Used to determine the focusable elements in the dropdown.
@@ -132,7 +145,8 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Used by the onKeydown action to navigate the dropdown.
    */
   @action protected setFocusedItemIndex(
-    focusDirectionOrNumber: FocusDirection | number
+    focusDirectionOrNumber: FocusDirection | number,
+    maybeScrollIntoView = true
   ) {
     let { menuItems, focusedItemIndex } = this;
 
@@ -181,6 +195,28 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     }
 
     this.focusedItemIndex = focusedItemIndex;
+    if (maybeScrollIntoView) {
+      this.maybeScrollIntoView();
+    }
+  }
+
+  maybeScrollIntoView() {
+    const focusedItem = this.menuItems?.item(this.focusedItemIndex);
+    assert("focusedItem must exist", focusedItem instanceof HTMLElement);
+
+    const containerTopPadding = 12;
+    const containerHeight = this.scrollContainer.offsetHeight;
+    const itemHeight = focusedItem.offsetHeight;
+    const itemTop = focusedItem.offsetTop;
+    const itemBottom = focusedItem.offsetTop + itemHeight;
+    const scrollviewTop = this.scrollContainer.scrollTop - containerTopPadding;
+    const scrollviewBottom = scrollviewTop + containerHeight;
+
+    if (itemBottom > scrollviewBottom) {
+      this.scrollContainer.scrollTop = itemTop + itemHeight - containerHeight;
+    } else if (itemTop < scrollviewTop) {
+      this.scrollContainer.scrollTop = itemTop;
+    }
   }
 
   /**

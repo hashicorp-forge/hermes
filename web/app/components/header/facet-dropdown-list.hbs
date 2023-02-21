@@ -27,7 +27,7 @@
       />
     </div>
   {{/if}}
-  <div class="overflow-auto h-full">
+  <div class="overflow-auto h-full relative" {{did-insert this.registerScrollContainer}}>
     {{#if this.noMatchesFound}}
       <div
         data-test-facet-dropdown-menu-empty-state

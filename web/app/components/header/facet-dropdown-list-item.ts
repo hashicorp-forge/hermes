@@ -13,7 +13,10 @@ interface HeaderFacetDropdownListItemComponentSignature {
     role: string;
     count: number;
     selected: boolean;
-    setFocusedItemIndex: (focusDirection: FocusDirection | number) => void;
+    setFocusedItemIndex: (
+      focusDirection: FocusDirection | number,
+      maybeScrollIntoView?: boolean
+    ) => void;
   };
 }
 
@@ -92,7 +95,7 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
     let target = e.target;
     assert("target must be an element", target instanceof HTMLElement);
     this._element = target;
-    this.args.setFocusedItemIndex(this.id);
+    this.args.setFocusedItemIndex(this.id, false);
   }
 
   /**
