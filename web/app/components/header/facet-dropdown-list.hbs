@@ -27,7 +27,10 @@
       />
     </div>
   {{/if}}
-  <div class="overflow-auto h-full relative" {{did-insert @registerScrollContainer}}>
+  <div
+    class="overflow-auto h-full relative"
+    {{did-insert @registerScrollContainer}}
+  >
     {{#if this.noMatchesFound}}
       <div
         data-test-facet-dropdown-menu-empty-state
@@ -42,7 +45,7 @@
         role={{if @inputIsShown "listbox" "menu"}}
         class="py-3 list-none"
         aria-activedescendant={{unless
-          (or @inputIsShown (eq @focusedItemIndex -1))
+          (eq @focusedItemIndex -1)
           (concat "facet-dropdown-menu-item-" @focusedItemIndex)
         }}
       >

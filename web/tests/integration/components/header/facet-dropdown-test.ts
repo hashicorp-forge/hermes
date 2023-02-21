@@ -1,6 +1,13 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, render } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  focus,
+  render,
+  triggerKeyEvent,
+  waitFor,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 export const SHORT_FACET_LIST = {
@@ -112,5 +119,32 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
 
     assert.dom("[data-test-facet-dropdown-menu]").doesNotExist();
     assert.dom("[data-test-facet-dropdown-menu-empty-state]").exists();
+  });
+
+  test("popover trigger has keyboard support", async function (assert) {
+    this.set("facets", LONG_FACET_LIST);
+    await render(hbs`
+      <Header::FacetDropdown
+        @label="Type"
+        @facets={{this.facets}}
+      />
+    `);
+
+    assert.dom(".facet-dropdown-popover").doesNotExist();
+
+    await triggerKeyEvent(
+      "[data-test-facet-dropdown-trigger]",
+      "keydown",
+      "ArrowDown"
+    );
+
+
+    assert.dom(".facet-dropdown-popover").exists("The dropdown is shown");
+    let firstItemSelector = "#facet-dropdown-menu-item-0";
+
+    assert.dom(firstItemSelector).hasAttribute("aria-selected");
+    assert
+      .dom("[data-test-facet-dropdown-menu]")
+      .hasAttribute("aria-activedescendant", 'facet-dropdown-menu-item-0');
   });
 });

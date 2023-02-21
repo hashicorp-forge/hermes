@@ -8,13 +8,13 @@
     data-test-facet-dropdown-trigger
     {{did-insert this.registerTrigger}}
     {{on "click" this.toggleDropdown}}
+    {{on "keydown" this.onButtonKeydown}}
     @disabled={{@disabled}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"
     @text={{@label}}
     aria-haspopup="listbox"
-    {{on "keydown" this.onButtonKeydown}}
     aria-controls={{if
       @inputIsShown
       "facet-dropdown-popover"
@@ -37,6 +37,7 @@
       @listItemRole={{this.listItemRole}}
       @registerPopover={{this.registerPopover}}
       @popoverElement={{this.popoverElement}}
+      @triggerElement={{this.triggerElement}}
     />
   {{/if}}
 </div>

@@ -20,6 +20,7 @@ interface HeaderFacetDropdownListComponentSignature {
     onInput: (event: InputEvent) => void;
     registerPopover: (element: HTMLDivElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
+    triggerElement: HTMLButtonElement;
   };
 }
 

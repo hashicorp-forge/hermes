@@ -111,12 +111,6 @@ module(
           "facet-dropdown-menu-item-0",
           "When no items are aria-focused, ArrowDown moves aria-focus to the first item"
         );
-      assert
-        .dom("[data-test-facet-dropdown-menu]")
-        .doesNotHaveAttribute(
-          "aria-activedescendant",
-          "In the filterable menu, aria-activedescendant is not set on the menu"
-        );
 
       await triggerKeyEvent(input, "keydown", "ArrowDown");
       assert

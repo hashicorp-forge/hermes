@@ -153,16 +153,25 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
       return;
     }
 
-    if (event.key === "ArrowDown") {
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       event.preventDefault();
       this.dropdownIsShown = true;
-      this.setFocusedItemIndex(FocusDirection.First, false);
-    }
+      // Stop the event from bubbling to the popover's keydown handler.
+      event.stopPropagation();
+      schedule("afterRender", () => {
+        this.registerMenuItems(
+          this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
+        );
 
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      this.dropdownIsShown = true;
-      this.setFocusedItemIndex(FocusDirection.Last);
+        switch (event.key) {
+          case "ArrowDown":
+            this.setFocusedItemIndex(FocusDirection.First, false);
+            break;
+          case "ArrowUp":
+            this.setFocusedItemIndex(FocusDirection.Last);
+            break;
+        }
+      });
     }
   }
 
@@ -174,6 +183,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     focusDirectionOrNumber: FocusDirection | number,
     maybeScrollIntoView = true
   ) {
+    console.log("called");
     let { menuItems, focusedItemIndex } = this;
 
     let setFirst = () => {
