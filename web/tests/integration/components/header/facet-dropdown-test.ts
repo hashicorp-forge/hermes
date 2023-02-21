@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render } from "@ember/test-helpers";
+import { click, fillIn, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 export const SHORT_FACET_LIST = {
@@ -79,5 +79,38 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
     `);
     await click("[data-test-facet-dropdown-trigger]");
     assert.dom(".facet-dropdown-input").exists("The input is shown");
+  });
+
+  test("filtering works as expected", async function (assert) {
+    this.set("facets", LONG_FACET_LIST);
+    await render(hbs`
+      <Header::FacetDropdown
+        @label="Status"
+        @facets={{this.facets}}
+      />
+    `);
+
+    await click("[data-test-facet-dropdown-trigger]");
+
+    let firstItemSelector = "#facet-dropdown-menu-item-0";
+
+    assert.dom(firstItemSelector).hasText("Filter01 1");
+    assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
+    await fillIn(".facet-dropdown-input", "3");
+
+    assert
+      .dom("[data-test-facet-dropdown-menu-item]")
+      .exists({ count: 2 }, "The facets are filtered");
+    assert
+      .dom(firstItemSelector)
+      .hasText(
+        "Filter03 1",
+        "The facet IDs are updated when the list is filtered to match the new order"
+      );
+
+    await fillIn(".facet-dropdown-input", "foobar");
+
+    assert.dom("[data-test-facet-dropdown-menu]").doesNotExist();
+    assert.dom("[data-test-facet-dropdown-menu-empty-state]").exists();
   });
 });

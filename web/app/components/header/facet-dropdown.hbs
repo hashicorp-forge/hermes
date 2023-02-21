@@ -1,7 +1,7 @@
 <div
   class="relative"
   aria-owns="facet-dropdown-menu"
-  aria-expanded={{this.dropdownIsShown}}
+  aria-expanded={{@dropdownIsShown}}
   ...attributes
 >
   <Hds::Button
@@ -14,21 +14,29 @@
     @color="secondary"
     @text={{@label}}
     aria-haspopup="listbox"
+    {{on "keydown" this.onButtonKeydown}}
     aria-controls={{if
-      this.inputIsShown
+      @inputIsShown
       "facet-dropdown-popover"
       "facet-dropdown-menu"
     }}
   />
   {{#if this.dropdownIsShown}}
     <Header::FacetDropdownList
-      {{dismissible
-        dismiss=this.hideDropdown
-        related=this.triggerElement
-      }}
+      {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
+      @shownFacets={{this.shownFacets}}
       @label={{@label}}
-      @facets={{@facets}}
       @inputIsShown={{this.inputIsShown}}
+      @onInput={{perform this.onInput}}
+      @resetMenuItemIndex={{this.resetMenuItemIndex}}
+      @registerMenuItems={{this.registerMenuItems}}
+      @registerScrollContainer={{this.registerScrollContainer}}
+      @query={{this.query}}
+      @focusedItemIndex={{this.focusedItemIndex}}
+      @setFocusedItemIndex={{this.setFocusedItemIndex}}
+      @listItemRole={{this.listItemRole}}
+      @registerPopover={{this.registerPopover}}
+      @popoverElement={{this.popoverElement}}
     />
   {{/if}}
 </div>

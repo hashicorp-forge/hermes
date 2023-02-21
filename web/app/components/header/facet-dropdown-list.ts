@@ -3,16 +3,23 @@ import { FacetDropdownObjects } from "hermes/types/facets";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
-import { restartableTask } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { schedule } from "@ember/runloop";
+import { FocusDirection } from "./facet-dropdown";
 
 interface HeaderFacetDropdownListComponentSignature {
   Args: {
     inputIsShown: boolean;
     label: string;
-    facets: FacetDropdownObjects;
+    shownFacets: FacetDropdownObjects;
+    popoverElement: HTMLDivElement | null;
+    listItemRole: "option" | "menuitem";
+    registerMenuItems: (menuItems: NodeListOf<Element>) => void;
+    resetMenuItemIndex: () => void;
+    onInput: (event: InputEvent) => void;
+    registerPopover: (element: HTMLDivElement) => void;
+    setFocusedItemIndex: (direction: FocusDirection) => void;
   };
 }
 
@@ -23,26 +30,10 @@ export enum FacetNames {
   Product = "product",
 }
 
-export enum FocusDirection {
-  Previous = "previous",
-  Next = "next",
-  First = "first",
-  Last = "last",
-}
-
 export default class HeaderFacetDropdownListComponent extends Component<HeaderFacetDropdownListComponentSignature> {
   @service declare router: RouterService;
 
-  @tracked private _popoverElement: HTMLDivElement | null = null;
   @tracked private _inputElement: HTMLInputElement | null = null;
-  @tracked private _scrollContainer: HTMLElement | null = null;
-
-  @tracked private query: string = "";
-
-  @tracked protected focusedItemIndex = -1;
-  @tracked protected shownFacets = this.args.facets;
-
-  private listItemRole = this.args.inputIsShown ? "option" : "menuitem";
 
   /**
    * The name of the current route.
@@ -50,22 +41,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    */
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
-  }
-
-  /**
-   * TODO
-   */
-  private get popoverElement(): HTMLDivElement {
-    assert("_popoverElement must exist", this._popoverElement);
-    return this._popoverElement;
-  }
-
-  /**
-   * TODO
-   */
-  private get scrollContainer(): HTMLElement {
-    assert("_scrollContainer must exist", this._scrollContainer);
-    return this._scrollContainer;
   }
 
   /**
@@ -82,7 +57,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * TODO
    */
   protected get noMatchesFound(): boolean {
-    return Object.entries(this.shownFacets).length === 0;
+    return Object.entries(this.args.shownFacets).length === 0;
   }
 
   /**
@@ -102,32 +77,6 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
     }
   }
 
-  @tracked protected menuItems: NodeListOf<Element> | null = null;
-
-  @action registerMenuItems(items: NodeListOf<Element>): void {
-    this.menuItems = items;
-    for (let i = 0; i < items.length; i++) {
-      let item = items[i];
-      assert("item must exist", item instanceof HTMLElement);
-      item.id = `facet-dropdown-menu-item-${i}`;
-    }
-  }
-
-  @action registerScrollContainer(element: HTMLDivElement) {
-    this._scrollContainer = element;
-  }
-
-  /**
-   * Registers the popover element.
-   * Used to determine the focusable elements in the dropdown.
-   */
-  @action protected registerPopover(element: HTMLDivElement) {
-    this._popoverElement = element;
-    this.registerMenuItems(
-      this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
-    );
-  }
-
   /**
    * Registers the input element.
    * Used to assert that the element exists and can be focused.
@@ -141,131 +90,25 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
   }
 
   /**
-   * Sets the focus to the next or previous menu item.
-   * Used by the onKeydown action to navigate the dropdown.
-   */
-  @action protected setFocusedItemIndex(
-    focusDirectionOrNumber: FocusDirection | number,
-    maybeScrollIntoView = true
-  ) {
-    let { menuItems, focusedItemIndex } = this;
-
-    let setFirst = () => {
-      focusedItemIndex = 0;
-    };
-    let setLast = () => {
-      assert("menuItems must exist", menuItems);
-      focusedItemIndex = menuItems.length - 1;
-    };
-
-    if (!menuItems) {
-      return;
-    }
-
-    if (menuItems.length === 0) {
-      return;
-    }
-
-    switch (focusDirectionOrNumber) {
-      case FocusDirection.Previous:
-        if (focusedItemIndex === -1 || focusedItemIndex === 0) {
-          // When the first or no item is focused, "previous" focuses the last item.
-          setLast();
-        } else {
-          focusedItemIndex--;
-        }
-        break;
-      case FocusDirection.Next:
-        if (focusedItemIndex === menuItems.length - 1) {
-          // When the last item is focused, "next" focuses the first item.
-          setFirst();
-        } else {
-          focusedItemIndex++;
-        }
-        break;
-      case FocusDirection.First:
-        setFirst();
-        break;
-      case FocusDirection.Last:
-        setLast();
-        break;
-      default:
-        focusedItemIndex = focusDirectionOrNumber;
-        break;
-    }
-
-    this.focusedItemIndex = focusedItemIndex;
-    if (maybeScrollIntoView) {
-      this.maybeScrollIntoView();
-    }
-  }
-
-  maybeScrollIntoView() {
-    const focusedItem = this.menuItems?.item(this.focusedItemIndex);
-    assert("focusedItem must exist", focusedItem instanceof HTMLElement);
-
-    const containerTopPadding = 12;
-    const containerHeight = this.scrollContainer.offsetHeight;
-    const itemHeight = focusedItem.offsetHeight;
-    const itemTop = focusedItem.offsetTop;
-    const itemBottom = focusedItem.offsetTop + itemHeight;
-    const scrollviewTop = this.scrollContainer.scrollTop - containerTopPadding;
-    const scrollviewBottom = scrollviewTop + containerHeight;
-
-    if (itemBottom > scrollviewBottom) {
-      this.scrollContainer.scrollTop = itemTop + itemHeight - containerHeight;
-    } else if (itemTop < scrollviewTop) {
-      this.scrollContainer.scrollTop = itemTop;
-    }
-  }
-
-  /**
    * The action run when the user presses a key.
    * Handles the arrow keys to navigate the dropdown.
    */
   @action protected onKeydown(event: KeyboardEvent) {
-    this.registerMenuItems(
-      this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
+    assert("popoverElement must exist", this.args.popoverElement);
+
+    this.args.registerMenuItems(
+      this.args.popoverElement.querySelectorAll(
+        `[role=${this.args.listItemRole}]`
+      )
     );
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      this.setFocusedItemIndex(FocusDirection.Next);
+      this.args.setFocusedItemIndex(FocusDirection.Next);
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      this.setFocusedItemIndex(FocusDirection.Previous);
+      this.args.setFocusedItemIndex(FocusDirection.Previous);
     }
   }
-
-  /**
-   * Resets the focus index to its initial value.
-   * Called when the dropdown is closed, and when the input is focused.
-   */
-  @action protected resetMenuItemIndex() {
-    this.focusedItemIndex = -1;
-  }
-
-  /**
-   * The action run when the user types in the input.
-   * Filters the facets shown in the dropdown.
-   */
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.focusedItemIndex = -1;
-    let shownFacets: FacetDropdownObjects = {};
-    let facets = this.args.facets;
-    this.query = (inputEvent.target as HTMLInputElement).value;
-    for (const [key, value] of Object.entries(facets)) {
-      if (key.toLowerCase().includes(this.query.toLowerCase())) {
-        shownFacets[key] = value;
-      }
-    }
-    this.shownFacets = shownFacets;
-
-    schedule("afterRender", () => {
-      this.registerMenuItems(
-        this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
-      );
-    });
-  });
 }

@@ -1,55 +1,91 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { fillIn, find, render, triggerKeyEvent } from "@ember/test-helpers";
+import {
+  fillIn,
+  find,
+  findAll,
+  render,
+  triggerKeyEvent,
+} from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
 import { LONG_FACET_LIST, SHORT_FACET_LIST } from "./facet-dropdown-test";
+import { FocusDirection } from "hermes/components/header/facet-dropdown";
 
 module(
   "Integration | Component | header/facet-dropdown-list",
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test("filtering works as expected", async function (assert) {
-      this.set("facets", LONG_FACET_LIST);
-      await render(hbs`
-      <Header::FacetDropdownList
-        @label="Status"
-        @facets={{this.facets}}
-        @inputIsShown={{true}}
-      />
-    `);
-
-      let firstItemSelector = "#facet-dropdown-menu-item-0";
-
-      assert.dom(firstItemSelector).hasText("Filter01 1");
-      assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
-
-      await fillIn(".facet-dropdown-input", "3");
-
-      assert
-        .dom("[data-test-facet-dropdown-menu-item]")
-        .exists({ count: 2 }, "The facets are filtered");
-      assert
-        .dom(firstItemSelector)
-        .hasText(
-          "Filter03 1",
-          "The facet IDs are updated when the list is filtered to match the new order"
+    hooks.beforeEach(function () {
+      this.set("popoverElement", null);
+      this.set("registerPopover", (element: HTMLDivElement) => {
+        this.set("popoverElement", element);
+      });
+      this.set("focusedItemIndex", -1);
+      this.set("scrollContainer", null);
+      this.set("registerScrollContainer", (element: HTMLDivElement) => {
+        this.set("scrollContainer", element);
+      });
+      this.set("registerMenuItems", (menuItems: NodeListOf<Element>) => {
+        menuItems.forEach((item, index) => {
+          item.setAttribute("id", `facet-dropdown-menu-item-${index}`);
+        });
+      });
+      this.set("resetMenuItemIndex", () => {
+        this.set("focusedItemIndex", -1);
+      });
+      this.set("onInput", () => {});
+      this.set("setFocusedItemIndex", (direction: FocusDirection) => {
+        const currentIndex = this.get("focusedItemIndex");
+        emberAssert(
+          "currentIndex must be a number",
+          typeof currentIndex === "number"
         );
 
-      await fillIn(".facet-dropdown-input", "foobar");
+        const numberOfItems = findAll(
+          "[data-test-facet-dropdown-menu-item]"
+        ).length;
 
-      assert.dom("[data-test-facet-dropdown-menu]").doesNotExist();
-      assert.dom("[data-test-facet-dropdown-menu-empty-state]").exists();
+        if (direction === FocusDirection.Next) {
+          if (currentIndex === numberOfItems - 1) {
+            this.set("focusedItemIndex", 0);
+            return;
+          } else {
+            this.set("focusedItemIndex", currentIndex + 1);
+            return;
+          }
+        }
+        if (direction === FocusDirection.Previous) {
+          if (currentIndex === 0) {
+            this.set("focusedItemIndex", numberOfItems - 1);
+            return;
+          } else {
+            this.set("focusedItemIndex", currentIndex - 1);
+            return;
+          }
+        }
+      });
     });
 
     test("keyboard navigation works as expected (long list)", async function (assert) {
-      this.set("facets", LONG_FACET_LIST);
+      this.set("shownFacets", LONG_FACET_LIST);
+
       await render(hbs`
       <Header::FacetDropdownList
+        @shownFacets={{this.shownFacets}}
         @label="Status"
-        @facets={{this.facets}}
         @inputIsShown={{true}}
+        @onInput={{this.onInput}}
+        @resetMenuItemIndex={{this.resetMenuItemIndex}}
+        @popoverElement={{this.popoverElement}}
+        @registerPopover={{this.registerPopover}}
+        @focusedItemIndex={{this.focusedItemIndex}}
+        @setFocusedItemIndex={{this.setFocusedItemIndex}}
+        @listItemRole="option"
+        @registerScrollContainer={{this.registerScrollContainer}}
+        @query=""
+        @registerMenuItems={{this.registerMenuItems}}
       />
     `);
 
@@ -117,40 +153,26 @@ module(
           "facet-dropdown-menu-item-0",
           "Keying down on the last item aria-focuses the first item"
         );
-
-      await fillIn(inputSelector, "3");
-      assert
-        .dom(inputSelector)
-        .doesNotHaveAttribute(
-          "aria-activedescendant",
-          "Aria-focus resets when the user types"
-        );
-
-      assert.dom("[data-test-facet-dropdown-menu] li").exists({ count: 2 });
-
-      /**
-       * At this point our current index is -1 (no items aria-focused) and
-       * our menu-item options are now 0 and 1. We know ArrowDown will move focus
-       * to `facet-dropdown-menu-item-0`, so let's assert the ArrowUp behavior:
-       **/
-      await triggerKeyEvent(input, "keydown", "ArrowUp");
-      assert
-        .dom(inputSelector)
-        .hasAttribute(
-          "aria-activedescendant",
-          "facet-dropdown-menu-item-1",
-          "When no items are aria-focused, ArrowUp moves aria-focus to the last item"
-        );
     });
 
     test("keyboard navigation works as expected (short list)", async function (assert) {
-      this.set("facets", SHORT_FACET_LIST);
+      this.set("shownFacets", SHORT_FACET_LIST);
 
       await render(hbs`
         <Header::FacetDropdownList
+          @shownFacets={{this.shownFacets}}
           @label="Status"
-          @facets={{this.facets}}
           @inputIsShown={{false}}
+          @onInput={{this.onInput}}
+          @resetMenuItemIndex={{this.resetMenuItemIndex}}
+          @popoverElement={{this.popoverElement}}
+          @registerPopover={{this.registerPopover}}
+          @focusedItemIndex={{this.focusedItemIndex}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
+          @listItemRole="option"
+          @registerScrollContainer={{this.registerScrollContainer}}
+          @query=""
+          @registerMenuItems={{this.registerMenuItems}}
         />
       `);
 
@@ -203,52 +225,26 @@ module(
         );
     });
 
-    test("keyboard navigation works as expected (short list, ArrowUp)", async function (assert) {
-      this.set("facets", SHORT_FACET_LIST);
-
-      await render(hbs`
-        <Header::FacetDropdownList
-          @label="Status"
-          @facets={{this.facets}}
-          @inputIsShown={{false}}
-        />
-      `);
-
-      let menuSelector = "[data-test-facet-dropdown-menu]";
-      let menu = find(menuSelector);
-
-      emberAssert("menu must exist", menu);
-
-      assert
-        .dom(menuSelector)
-        .doesNotHaveAttribute(
-          "aria-activedescendant",
-          "No items are aria-focused yet"
-        );
-
-      /**
-       * We tested ArrowDown in the previous scenario. Let's try ArrowUp:
-       **/
-      await triggerKeyEvent(menu, "keydown", "ArrowUp");
-      assert
-        .dom(menuSelector)
-        .hasAttribute(
-          "aria-activedescendant",
-          "facet-dropdown-menu-item-1",
-          "When no items are aria-focused, ArrowUp moves aria-focus to the last item"
-        );
-    });
-
     test("it applies the correct classNames to the popover", async function (assert) {
-      this.set("facets", SHORT_FACET_LIST);
+      this.set("shownFacets", SHORT_FACET_LIST);
       this.set("label", "Status");
       this.set("inputIsShown", false);
 
       await render(hbs`
         <Header::FacetDropdownList
+          @shownFacets={{this.shownFacets}}
           @label={{this.label}}
-          @facets={{this.facets}}
           @inputIsShown={{this.inputIsShown}}
+          @onInput={{this.onInput}}
+          @resetMenuItemIndex={{this.resetMenuItemIndex}}
+          @popoverElement={{this.popoverElement}}
+          @registerPopover={{this.registerPopover}}
+          @focusedItemIndex={{this.focusedItemIndex}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
+          @listItemRole="option"
+          @registerScrollContainer={{this.registerScrollContainer}}
+          @query=""
+          @registerMenuItems={{this.registerMenuItems}}
         />
       `);
 

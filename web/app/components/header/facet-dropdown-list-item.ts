@@ -2,7 +2,7 @@ import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import { FocusDirection } from "./facet-dropdown-list";
+import { FocusDirection } from "./facet-dropdown";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 
