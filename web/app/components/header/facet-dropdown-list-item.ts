@@ -5,14 +5,17 @@ import Component from "@glimmer/component";
 import { FocusDirection } from "./facet-dropdown";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
+import { next } from "@ember/runloop";
 
 interface HeaderFacetDropdownListItemComponentSignature {
   Args: {
+    label: string;
     focusedItemIndex: number;
     value: string;
     role: string;
     count: number;
     selected: boolean;
+    hideDropdown: () => void;
     setFocusedItemIndex: (
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
@@ -96,6 +99,16 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
     assert("target must be an element", target instanceof HTMLElement);
     this._element = target;
     this.args.setFocusedItemIndex(this.id, false);
+  }
+
+  /**
+   * Closes the dropdown on the next run loop.
+   * Done so we don't interfere with Ember's <LinkTo> handling.
+   */
+  @action protected delayedCloseDropdown() {
+    next(() => {
+      this.args.hideDropdown();
+    });
   }
 
   /**

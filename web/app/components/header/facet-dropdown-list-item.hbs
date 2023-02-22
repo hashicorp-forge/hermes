@@ -1,13 +1,14 @@
 <li role="none" data-test-facet-dropdown-menu-item>
   <LinkTo
     {{did-insert this.registerElement}}
+    {{on "mouseenter" this.onMouseenter}}
+    {{on "click" this.delayedCloseDropdown}}
     role={{@role}}
     aria-selected={{this.isFocused}}
     tabindex="-1"
     aria-checked={{@selected}}
     @route={{this.currentRouteName}}
-    {{on "mouseenter" this.onMouseenter}}
-    {{! TODO: queryParam - pending a separate PR merge }}
+    @query={{get-facet-query-hash @label @value @selected}}
     class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
   >
     <FlightIcon @name="check" class={{if @selected "visible" "invisible"}} />

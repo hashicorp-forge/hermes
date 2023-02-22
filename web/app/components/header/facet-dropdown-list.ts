@@ -5,14 +5,15 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { schedule } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { FocusDirection } from "./facet-dropdown";
 
 interface HeaderFacetDropdownListComponentSignature {
   Args: {
-    inputIsShown: boolean;
     label: string;
+    inputIsShown: boolean;
     shownFacets: FacetDropdownObjects;
+    triggerElement: HTMLButtonElement;
     popoverElement: HTMLDivElement | null;
     listItemRole: "option" | "menuitem";
     registerMenuItems: (menuItems: NodeListOf<Element>) => void;
@@ -20,7 +21,7 @@ interface HeaderFacetDropdownListComponentSignature {
     onInput: (event: InputEvent) => void;
     registerPopover: (element: HTMLDivElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
-    triggerElement: HTMLButtonElement;
+    hideDropdown: () => void;
   };
 }
 
@@ -107,9 +108,20 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Next);
     }
+
     if (event.key === "ArrowUp") {
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Previous);
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const target = this.args.popoverElement.querySelector("[aria-selected]");
+
+      if (target instanceof HTMLAnchorElement) {
+        target.click();
+        this.args.hideDropdown();
+      }
     }
   }
 }

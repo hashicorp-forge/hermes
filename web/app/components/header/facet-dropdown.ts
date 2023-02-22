@@ -4,7 +4,7 @@ import { FacetDropdownObjects } from "hermes/types/facets";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
-import { next, schedule } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -140,15 +140,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
   }
 
-  /**
-   * Closes the dropdown on the next run loop.
-   * Done so we don't interfere with Ember's <LinkTo> handling.
-   */
-  @action protected delayedCloseDropdown(closeDropdown: () => void) {
-    next(() => {
-      closeDropdown();
-    });
-  }
 
   /**
    * The action run when the user clicks outside the dropdown.
