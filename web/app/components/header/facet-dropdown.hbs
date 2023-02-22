@@ -22,6 +22,7 @@
     }}
   />
   {{#if this.dropdownIsShown}}
+  {{!-- maybe this is just "DropdownList" and the FacetDropdownList comes later --}}
     <Header::FacetDropdownList
       {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
       @shownFacets={{this.shownFacets}}
@@ -39,6 +40,8 @@
       @popoverElement={{this.popoverElement}}
       @triggerElement={{this.triggerElement}}
       @hideDropdown={{this.hideDropdown}}
+      @anchorToRight={{@anchorToRight}}
+      @currentSortBy={{@currentSortBy}}
     />
   {{/if}}
 </div>

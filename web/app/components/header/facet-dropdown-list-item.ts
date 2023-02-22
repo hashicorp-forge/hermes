@@ -6,6 +6,7 @@ import { FocusDirection } from "./facet-dropdown";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { next } from "@ember/runloop";
+import { SortByValue } from "./toolbar";
 
 interface HeaderFacetDropdownListItemComponentSignature {
   Args: {
@@ -20,6 +21,7 @@ interface HeaderFacetDropdownListItemComponentSignature {
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
     ) => void;
+    currentSortBy?: SortByValue;
   };
 }
 
@@ -86,6 +88,18 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
     }
 
     return this.args.focusedItemIndex === this.id;
+  }
+
+  protected get sortByHash() {
+    if (this.args.currentSortBy) {
+      switch (this.args.value) {
+        case "Newest":
+          return { sortBy: SortByValue.DateDesc };
+        case "Oldest":
+          return { sortBy: SortByValue.DateAsc };
+      }
+    }
+    return;
   }
 
   /**

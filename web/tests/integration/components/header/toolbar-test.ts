@@ -3,6 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownObjects } from "hermes/types/facets";
+import RouterService from "@ember/routing/router-service";
 
 const FACETS = {
   docType: {
@@ -44,18 +45,21 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.dom(".facets").exists();
     assert
-      .dom(".sort-by-dropdown")
+      .dom("[data-test-facet-dropdown='sort']")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
     assert
       .dom(".facets [data-test-facet-dropdown-trigger]")
       .exists({ count: 4 });
+    assert
+      .dom('[data-test-facet-dropdown="sort"]')
+      .exists({ count: 1 })
+      .hasText("Sort: Newest");
 
-    assert.dom(".sort-by-dropdown").exists({ count: 1 });
-    assert.dom(".sort-by-dropdown").hasText("Sort: Newest");
-
-    await click("[data-test-sort-by-button]");
-    assert.dom(".hds-dropdown-list-item:nth-child(2)").hasText("Oldest");
+    await click("[data-test-facet-dropdown-trigger='Sort: Newest']");
+    assert
+      .dom("[data-test-facet-dropdown-menu-item]:nth-child(2)")
+      .hasText("Oldest");
 
     this.set("sortControlIsHidden", true);
     assert
@@ -92,7 +96,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.deepEqual(
       findAll(
-        "[data-test-facet-dropdown-menu-item] .facet-dropdown-list-item-value"
+        "[data-test-facet-dropdown-menu-item] [data-test-facet-dropdown-list-item-value]"
       )?.map((el) => el.textContent?.trim()),
       ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
       "Unsupported statuses are filtered out"
@@ -104,7 +108,9 @@ module("Integration | Component | header/toolbar", function (hooks) {
     await render(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
-    assert.dom("[data-test-facet-dropdown-trigger='Status']").hasAttribute("disabled");
+    assert
+      .dom("[data-test-facet-dropdown-trigger='Status']")
+      .hasAttribute("disabled");
   });
 
   test("it conditionally disables the sort control", async function (assert) {
@@ -113,10 +119,14 @@ module("Integration | Component | header/toolbar", function (hooks) {
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert.dom("[data-test-sort-by-button]").doesNotHaveAttribute("disabled");
+    assert
+      .dom("[data-test-facet-dropdown-trigger='Sort: Newest']")
+      .doesNotHaveAttribute("disabled");
     this.set("facets", {});
 
-    assert.dom("[data-test-sort-by-button]").hasAttribute("disabled");
+    assert
+      .dom("[data-test-facet-dropdown-trigger='Sort: Newest']")
+      .hasAttribute("disabled");
   });
 
   /**

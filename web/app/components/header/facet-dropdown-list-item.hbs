@@ -8,19 +8,25 @@
     tabindex="-1"
     aria-checked={{@selected}}
     @route={{this.currentRouteName}}
-    @query={{get-facet-query-hash @label @value @selected}}
+    @query={{or this.sortByHash (get-facet-query-hash @label @value @selected)}}
     class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
   >
-    <FlightIcon @name="check" class={{if @selected "visible" "invisible"}} />
+    {{#if this.sortByHash}}
+      <FlightIcon @name={{if (eq @value "Newest") "sort-desc" "sort-asc"}} class="sort-icon" />
+    {{else}}
+      <FlightIcon @name="check" class="check {{if @selected "visible" "invisible"}}" />
+    {{/if}}
     <div class="w-full flex justify-between overflow-hidden">
-      <span class="facet-dropdown-list-item-value">
+      <span data-test-facet-dropdown-list-item-value>
         {{@value}}
       </span>
-      <Hds::BadgeCount
-        @text={{@count}}
-        class="opacity-75 ml-8 shrink-0"
-        @size="small"
-      />
+      {{#unless this.sortByHash}}
+        <Hds::BadgeCount
+          @text={{@count}}
+          class="opacity-75 ml-8 shrink-0"
+          @size="small"
+        />
+      {{/unless}}
     </div>
   </LinkTo>
 </li>

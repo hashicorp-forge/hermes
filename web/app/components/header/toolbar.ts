@@ -38,10 +38,22 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @service declare router: RouterService;
   @service declare activeFilters: ActiveFiltersService;
 
-  @tracked sortBy: SortByValue = SortByValue.DateDesc;
+  get currentSortBy() {
+    if (!this.router.currentRoute) {
+      return SortByValue.DateDesc;
+    }
+    let sortBy = this.router.currentRoute.queryParams["sortBy"];
+
+    switch (sortBy) {
+      case SortByValue.DateAsc:
+        return sortBy;
+      default:
+        return SortByValue.DateDesc;
+    }
+  }
 
   protected get getSortByLabel() {
-    if (this.sortBy === SortByValue.DateDesc) {
+    if (this.currentSortBy === SortByValue.DateDesc) {
       return "Newest";
     } else {
       return "Oldest";
@@ -101,12 +113,24 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
+  get sortByFacets() {
+    return {
+      Newest: {
+        count: 0,
+        selected: this.currentSortBy === SortByValue.DateDesc,
+      },
+      Oldest: {
+        count: 0,
+        selected: this.currentSortBy === SortByValue.DateAsc,
+      },
+    };
+  }
+
   /**
    * Closes the dropdown on the next run loop.
    * Done so we don't interfere with Ember's <LinkTo> handling.
    */
-  @action protected delayedCloseDropdown(closeDropdown: () => void, sortByValue: SortByValue) {
-    this.sortBy = sortByValue;
+  @action protected delayedCloseDropdown(closeDropdown: () => void) {
     next(() => {
       closeDropdown();
     });

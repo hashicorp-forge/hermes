@@ -34,7 +34,15 @@
         </div>
 
         {{#if (and @facets (not @sortControlIsHidden))}}
-          {{! TODO: Use the custom component for the sort dropdown }}
+          <Header::FacetDropdown
+            @label="Sort: {{this.getSortByLabel}}"
+            @facets={{this.sortByFacets}}
+            @disabled={{this.sortControlIsDisabled}}
+            @anchorToRight={{true}}
+            @currentSortBy={{this.currentSortBy}}
+            data-test-facet-dropdown="sort"
+          />
+          <!--
           <Hds::Dropdown class="sort-by-dropdown" as |dd|>
             <dd.ToggleButton
               data-test-sort-by-button
@@ -57,6 +65,7 @@
               @icon="sort-asc"
             />
           </Hds::Dropdown>
+          -->
         {{/if}}
       </div>
       <Header::ActiveFilterList />
