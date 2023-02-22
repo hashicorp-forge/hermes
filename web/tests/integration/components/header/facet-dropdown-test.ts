@@ -1,13 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import {
-  click,
-  fillIn,
-  focus,
-  render,
-  triggerKeyEvent,
-  waitFor,
-} from "@ember/test-helpers";
+import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 export const SHORT_FACET_LIST = {
@@ -138,13 +131,12 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       "ArrowDown"
     );
 
-
     assert.dom(".facet-dropdown-popover").exists("The dropdown is shown");
     let firstItemSelector = "#facet-dropdown-menu-item-0";
 
     assert.dom(firstItemSelector).hasAttribute("aria-selected");
     assert
       .dom("[data-test-facet-dropdown-menu]")
-      .hasAttribute("aria-activedescendant", 'facet-dropdown-menu-item-0');
+      .hasAttribute("aria-activedescendant", "facet-dropdown-menu-item-0");
   });
 });
