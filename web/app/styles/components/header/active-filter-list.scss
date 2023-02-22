@@ -1,0 +1,19 @@
+.active-filter-list {
+  @apply pt-6 flex items-start;
+
+  h3 {
+    @apply h-[30px] flex items-center mr-4 font-semibold shrink-0;
+  }
+
+  .active-filter-list-container {
+    @apply min-h-[30px] flex items-center flex-wrap;
+  }
+
+  .clear-all-link {
+    @apply no-underline text-color-foreground-faint flex items-center h-[30px] ml-2 shrink-0;
+
+    &:hover {
+      @apply text-color-foreground-strong;
+    }
+  }
+}
