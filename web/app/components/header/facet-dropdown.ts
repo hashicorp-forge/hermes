@@ -30,7 +30,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected dropdownIsShown = false;
   @tracked protected focusedItemIndex = -1;
-  @tracked protected shownFacets = this.args.facets;
+  @tracked protected _shownFacets: FacetDropdownObjects | null = null;
 
   /**
    * TODO
@@ -44,6 +44,14 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   protected get triggerElement(): HTMLButtonElement {
     assert("_triggerElement must exist", this._triggerElement);
     return this._triggerElement;
+  }
+
+  protected get shownFacets(): FacetDropdownObjects {
+    if (this._shownFacets) {
+      return this._shownFacets;
+    } else {
+      return this.args.facets;
+    }
   }
 
   /**
@@ -140,13 +148,15 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
   }
 
-
   /**
    * The action run when the user clicks outside the dropdown.
    * Hides the dropdown.
    */
   @action protected hideDropdown(): void {
+    this.query = "";
     this.dropdownIsShown = false;
+    this._shownFacets = null;
+    this.resetMenuItemIndex();
   }
 
   @action protected onButtonKeydown(event: KeyboardEvent) {
@@ -184,7 +194,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     focusDirectionOrNumber: FocusDirection | number,
     maybeScrollIntoView = true
   ) {
-    console.log("called");
     let { menuItems, focusedItemIndex } = this;
 
     let setFirst = () => {
@@ -279,7 +288,7 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
         shownFacets[key] = value;
       }
     }
-    this.shownFacets = shownFacets;
+    this._shownFacets = shownFacets;
 
     schedule("afterRender", () => {
       this.registerMenuItems(

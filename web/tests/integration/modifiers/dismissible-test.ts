@@ -27,8 +27,6 @@ module("Integration | Modifier | it dismisses as expected", function (hooks) {
         Dismiss me
       </div>
 
-      {{log this.related}}
-
       <p>Related content</p>
       <span>Unrelated content</span>
     `);

@@ -5,7 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { next, schedule } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
 import { FocusDirection } from "./facet-dropdown";
 
 interface HeaderFacetDropdownListComponentSignature {
@@ -85,10 +85,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    */
   @action protected registerInput(element: HTMLInputElement) {
     this._inputElement = element;
-
-    schedule("afterRender", () => {
-      this.inputElement.focus();
-    });
+    this.inputElement.focus();
   }
 
   /**

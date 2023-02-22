@@ -5,11 +5,11 @@
   ...attributes
 >
   <Hds::Button
-    data-test-facet-dropdown-trigger
     {{did-insert this.registerTrigger}}
     {{on "click" this.toggleDropdown}}
     {{on "keydown" this.onButtonKeydown}}
-    @disabled={{@disabled}}
+    data-test-facet-dropdown-trigger={{@label}}
+    disabled={{@disabled}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"

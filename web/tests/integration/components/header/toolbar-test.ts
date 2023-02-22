@@ -47,7 +47,9 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .dom(".sort-by-dropdown")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
-    assert.dom(".facets .hds-dropdown").exists({ count: 4 });
+    assert
+      .dom(".facets [data-test-facet-dropdown-trigger]")
+      .exists({ count: 4 });
 
     assert.dom(".sort-by-dropdown").exists({ count: 1 });
     assert.dom(".sort-by-dropdown").hasText("Sort: Newest");
@@ -74,36 +76,35 @@ module("Integration | Component | header/toolbar", function (hooks) {
       "Submitted",
     ];
 
-    const STATUS_FACETS: FacetDropdownObjects = {};
+    let statusFacets: FacetDropdownObjects = {};
 
     STATUS_NAMES.forEach((status) => {
-      STATUS_FACETS[status] = { count: 1, selected: false };
+      statusFacets[status] = { count: 1, selected: false };
     });
 
-    this.set("facets", { status: STATUS_FACETS });
+    this.set("facets", { status: statusFacets });
 
     await render(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    await click("[data-test-facet-dropdown='status'] button");
+    await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(".hds-dropdown-list-item")?.map((el) => el.textContent?.trim()),
-      [
-        "Approved (1)",
-        "In-Review (1)",
-        "In Review (1)",
-        "Obsolete (1)",
-        "WIP (1)",
-      ]
+      findAll(
+        "[data-test-facet-dropdown-menu-item] .facet-dropdown-list-item-value"
+      )?.map((el) => el.textContent?.trim()),
+      ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
+      "Unsupported statuses are filtered out"
     );
+  });
 
+  test("it conditionally renders the status facet disabled", async function (assert) {
     this.set("facets", { status: {} });
-
-    assert
-      .dom("[data-test-facet-dropdown='status'] button")
-      .hasAttribute("disabled");
+    await render(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+    assert.dom("[data-test-facet-dropdown-trigger='Status']").hasAttribute("disabled");
   });
 
   test("it conditionally disables the sort control", async function (assert) {
