@@ -105,7 +105,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * Closes the dropdown on the next run loop.
    * Done so we don't interfere with Ember's <LinkTo> handling.
    */
-  @action protected delayedCloseDropdown(closeDropdown: () => void) {
+  @action protected delayedCloseDropdown(closeDropdown: () => void, sortByValue: SortByValue) {
+    this.sortBy = sortByValue;
     next(() => {
       closeDropdown();
     });

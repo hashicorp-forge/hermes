@@ -34,7 +34,7 @@
         </div>
 
         {{#if (and @facets (not @sortControlIsHidden))}}
-          {{!-- TODO: Use the custom component for the sort dropdown --}}
+          {{! TODO: Use the custom component for the sort dropdown }}
           <Hds::Dropdown class="sort-by-dropdown" as |dd|>
             <dd.ToggleButton
               data-test-sort-by-button
@@ -43,14 +43,14 @@
               disabled={{this.sortControlIsDisabled}}
             />
             <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close)}}
+              {{on "click" (fn this.delayedCloseDropdown dd.close "dateDesc")}}
               @route={{this.currentRouteName}}
               @query={{hash sortBy="dateDesc"}}
               @text="Newest"
               @icon="sort-desc"
             />
             <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close)}}
+              {{on "click" (fn this.delayedCloseDropdown dd.close "dateAsc")}}
               @route={{this.currentRouteName}}
               @query={{hash sortBy="dateAsc"}}
               @text="Oldest"
