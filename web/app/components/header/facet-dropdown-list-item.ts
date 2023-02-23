@@ -17,12 +17,8 @@ interface HeaderFacetDropdownListItemComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
     /**
-     * Whether the facet is disabled.
-     * Used in tests to disable the LinkTo.
-     */
-    disabled?: boolean;
-    /**
-     * The label of the facet, e.g., "Type" or "Owner"
+     * The label of the facet, e.g., "Type" or "Owner."
+     * Used to construct filter query params.
      */
     label: string;
     /**
@@ -43,10 +39,13 @@ interface HeaderFacetDropdownListItemComponentSignature {
     role: FacetDropdownAriaRole;
     /**
      * The number of matches associated with the filter.
+     * Used to display the badge count.
      */
     count: number;
     /**
      * Whether the item an actively applied filter.
+     * Used for checkmark-display logic, and as
+     * params for the `get-facet-query-hash` helper
      */
     selected: boolean;
     /**
@@ -63,7 +62,7 @@ interface HeaderFacetDropdownListItemComponentSignature {
     /**
      * The action called on mouseenter that sets the focused-item index value.
      * Includes a `maybeScrollIntoView` argument that we use to disable
-     * mouse-driven scroll-jacking.
+     * mouse-activated scroll manipulation.
      */
     setFocusedItemIndex: (
       focusDirection: FocusDirection | number,
@@ -122,11 +121,11 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
   }
 
   /**
-   * Whether the element is aria-focused.
+   * Whether the element is aria-selected.
    * Used to determine whether to apply the "focused" class
    * and to set the `aria-selected` attribute.
    */
-  protected get isFocused(): boolean {
+  protected get isAriaSelected(): boolean {
     if (!this._domElement) {
       // True when first computed, which happens
       // before the element is inserted and registered.

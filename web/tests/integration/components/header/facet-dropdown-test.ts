@@ -41,9 +41,9 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
         @facets={{this.facets}}
       />
     `);
-    assert.dom(".facet-dropdown-popover").doesNotExist();
+    assert.dom("[data-test-facet-dropdown-popover]").doesNotExist();
     await click("[data-test-facet-dropdown-trigger]");
-    assert.dom(".facet-dropdown-popover").exists("The dropdown is shown");
+    assert.dom("[data-test-facet-dropdown-popover]").exists("The dropdown is shown");
   });
 
   test("it renders the facets correctly", async function (assert) {
@@ -78,7 +78,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       />
     `);
     await click("[data-test-facet-dropdown-trigger]");
-    assert.dom(".facet-dropdown-input").exists("The input is shown");
+    assert.dom("[data-test-facet-dropdown-input]").exists("The input is shown");
   });
 
   test("filtering works as expected", async function (assert) {
@@ -96,7 +96,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
 
     assert.dom(firstItemSelector).hasText("Filter01 1");
     assert.dom("[data-test-facet-dropdown-menu-item]").exists({ count: 13 });
-    await fillIn(".facet-dropdown-input", "3");
+    await fillIn("[data-test-facet-dropdown-input]", "3");
 
     assert
       .dom("[data-test-facet-dropdown-menu-item]")
@@ -108,10 +108,12 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
         "The facet IDs are updated when the list is filtered to match the new order"
       );
 
-    await fillIn(".facet-dropdown-input", "foobar");
+    await fillIn("[data-test-facet-dropdown-input]", "foobar");
 
     assert.dom("[data-test-facet-dropdown-menu]").doesNotExist();
-    assert.dom("[data-test-facet-dropdown-menu-empty-state]").exists();
+    assert
+      .dom("[data-test-facet-dropdown-menu-empty-state]")
+      .exists('the "No matches" message is shown');
   });
 
   test("popover trigger has keyboard support", async function (assert) {
@@ -123,7 +125,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       />
     `);
 
-    assert.dom(".facet-dropdown-popover").doesNotExist();
+    assert.dom("[data-test-facet-dropdown-popover]").doesNotExist();
 
     await triggerKeyEvent(
       "[data-test-facet-dropdown-trigger]",
@@ -131,7 +133,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       "ArrowDown"
     );
 
-    assert.dom(".facet-dropdown-popover").exists("The dropdown is shown");
+    assert.dom("[data-test-facet-dropdown-popover]").exists("The dropdown is shown");
     let firstItemSelector = "#facet-dropdown-menu-item-0";
 
     assert.dom(firstItemSelector).hasAttribute("aria-selected");

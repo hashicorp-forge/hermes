@@ -1,12 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import {
-  fillIn,
-  find,
-  findAll,
-  render,
-  triggerKeyEvent,
-} from "@ember/test-helpers";
+import { find, findAll, render, triggerKeyEvent } from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
 import { LONG_FACET_LIST, SHORT_FACET_LIST } from "./facet-dropdown-test";
@@ -83,13 +77,13 @@ module(
       />
     `);
 
-      let inputSelector = ".facet-dropdown-input";
+      let inputSelector = "[data-test-facet-dropdown-input]";
       let input = find(inputSelector);
 
       emberAssert("input must exist", input);
 
       assert.equal(document.activeElement, input, "The input is autofocused");
-      assert.dom(".facet-dropdown-popover").hasAttribute("role", "combobox");
+      assert.dom("[data-test-facet-dropdown-popover]").hasAttribute("role", "combobox");
       assert
         .dom(inputSelector)
         .doesNotHaveAttribute(
@@ -234,7 +228,7 @@ module(
         />
       `);
 
-      let popoverSelector = ".facet-dropdown-popover";
+      let popoverSelector = "[data-test-facet-dropdown-popover]";
       let popover = find(popoverSelector);
 
       emberAssert("popover must exist", popover);

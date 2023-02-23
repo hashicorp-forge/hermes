@@ -34,12 +34,12 @@
         </div>
         {{#if (and @facets (not @sortControlIsHidden))}}
           <Header::FacetDropdown
+            data-test-facet-dropdown="sort"
             @label="Sort: {{this.getSortByLabel}}"
             @facets={{this.sortByFacets}}
             @disabled={{this.sortControlIsDisabled}}
             @anchorToRight={{true}}
             @currentSortByValue={{this.currentSortByValue}}
-            data-test-facet-dropdown="sort"
           />
         {{/if}}
       </div>

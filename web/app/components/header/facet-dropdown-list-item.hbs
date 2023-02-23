@@ -5,10 +5,10 @@
     {{on "mouseenter" this.focusMouseTarget}}
     {{on "click" this.delayedCloseDropdown}}
     role={{@role}}
-    aria-selected={{this.isFocused}}
+    aria-selected={{this.isAriaSelected}}
     tabindex="-1"
     aria-checked={{@selected}}
-    class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
+    class="facet-dropdown-menu-item-link {{if this.isAriaSelected 'is-aria-selected'}}"
     @route={{this.currentRouteName}}
     @query={{or
       this.sortByQueryParams
@@ -36,8 +36,8 @@
         <Hds::BadgeCount
           data-test-facet-dropdown-menu-item-count
           @text={{@count}}
-          class="opacity-75 ml-8 shrink-0"
           @size="small"
+          class="ml-8 shrink-0"
         />
       {{/unless}}
     </div>

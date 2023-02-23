@@ -157,11 +157,11 @@ module(
 
       const listItemSelector = "[data-test-facet-dropdown-menu-item-link]";
 
-      assert.dom(listItemSelector).doesNotHaveClass("is-focused");
+      assert.dom(listItemSelector).doesNotHaveClass("is-aria-selected");
       assert.dom(listItemSelector).doesNotHaveAttribute("aria-selected");
 
       await triggerEvent(listItemSelector, "mouseenter");
-      assert.dom(listItemSelector).hasClass("is-focused");
+      assert.dom(listItemSelector).hasClass("is-aria-selected");
       assert.dom(listItemSelector).hasAttribute("aria-selected");
     });
   }
