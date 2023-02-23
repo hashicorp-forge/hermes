@@ -33,9 +33,30 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   @tracked protected _shownFacets: FacetDropdownObjects | null = null;
 
   /**
-   * TODO
+   * The dropdown menu items. Registered on insert and
+   * updated with on keydown and filterInput events.
+   * Used to determine the list length, and to find the focused
+   * element by index.
    */
   @tracked protected menuItems: NodeListOf<Element> | null = null;
+
+  /**
+   * An asserted-true reference to the scroll container.
+   * Used in the `maybeScrollIntoView` calculations.
+   */
+  private get scrollContainer(): HTMLElement {
+    assert("_scrollContainer must exist", this._scrollContainer);
+    return this._scrollContainer;
+  }
+
+  /**
+   * An asserted-true reference to the popover div.
+   * Used to scope querySelectorAll calls.
+   */
+  private get popoverElement(): HTMLDivElement {
+    assert("_popoverElement must exist", this._popoverElement);
+    return this._popoverElement;
+  }
 
   /**
    * The dropdown trigger.
@@ -46,20 +67,17 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     return this._triggerElement;
   }
 
+  /**
+   * The facets that should be shown in the dropdown.
+   * Initially the same as the facets passed in and
+   * updated when the user types in the filter input.
+   */
   protected get shownFacets(): FacetDropdownObjects {
     if (this._shownFacets) {
       return this._shownFacets;
     } else {
       return this.args.facets;
     }
-  }
-
-  /**
-   * TODO
-   */
-  private get scrollContainer(): HTMLElement {
-    assert("_scrollContainer must exist", this._scrollContainer);
-    return this._scrollContainer;
   }
 
   /**
@@ -71,38 +89,34 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     return Object.entries(this.args.facets).length > 12;
   }
 
-  /**
-   * TODO
-   */
-  private get popoverElement(): HTMLDivElement {
-    assert("_popoverElement must exist", this._popoverElement);
-    return this._popoverElement;
-  }
-
-  /**
-   * Registers the trigger element.
-   * Used to pass the trigger to the dismissible modifier as a relative.
-   */
   @action protected registerTrigger(element: HTMLButtonElement) {
     this._triggerElement = element;
   }
 
-  /**
-   * Registers the popover element.
-   * Used to determine the focusable elements in the dropdown.
-   */
   @action protected registerPopover(element: HTMLDivElement) {
     this._popoverElement = element;
-    this.registerMenuItems(
+    this.assignMenuItemIDs(
       this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
     );
   }
 
-  /**
-   * TODO
-   */
-  @action registerScrollContainer(element: HTMLDivElement) {
+  @action protected registerScrollContainer(element: HTMLDivElement) {
     this._scrollContainer = element;
+  }
+
+  /**
+   * The action run when the popover is inserted, and when
+   * the user filters or navigates the dropdown.
+   * Loops through the menu items and assigns an id that
+   * matches the index of the item in the list.
+   */
+  @action assignMenuItemIDs(items: NodeListOf<Element>): void {
+    this.menuItems = items;
+    for (let i = 0; i < items.length; i++) {
+      let item = items[i];
+      assert("item must exist", item instanceof HTMLElement);
+      item.id = `facet-dropdown-menu-item-${i}`;
+    }
   }
 
   /**
@@ -110,10 +124,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
    * Handles the arrow keys to navigate the dropdown.
    */
   @action protected onKeydown(event: KeyboardEvent) {
-    this.registerMenuItems(
-      this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
-    );
-
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.setFocusedItemIndex(FocusDirection.Next);
@@ -125,18 +135,6 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   /**
-   * TODO
-   */
-  @action registerMenuItems(items: NodeListOf<Element>): void {
-    this.menuItems = items;
-    for (let i = 0; i < items.length; i++) {
-      let item = items[i];
-      assert("item must exist", item instanceof HTMLElement);
-      item.id = `facet-dropdown-menu-item-${i}`;
-    }
-  }
-
-  /**
    * Toggles the dropdown visibility.
    * Called when the user clicks on the dropdown trigger.
    */
@@ -144,36 +142,49 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     if (this.dropdownIsShown) {
       this.hideDropdown();
     } else {
-      this.dropdownIsShown = true;
+      this.showDropdown();
     }
+  }
+
+  @action protected showDropdown(): void {
+    this.dropdownIsShown = true;
+    schedule("afterRender", () => {
+      this.assignMenuItemIDs(
+        this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
+      );
+    });
   }
 
   /**
    * The action run when the user clicks outside the dropdown.
-   * Hides the dropdown.
+   * Hides the dropdown and resets the various tracked states.
    */
   @action protected hideDropdown(): void {
     this.query = "";
     this.dropdownIsShown = false;
     this._shownFacets = null;
-    this.resetMenuItemIndex();
+    this.resetFocusedItemIndex();
   }
 
-  @action protected onButtonKeydown(event: KeyboardEvent) {
+  /**
+   * The action run when the trigger is focused and the user
+   * presses the up or down arrow keys. Used to open and focus
+   * to the first or last item in the dropdown.
+   */
+  @action protected onTriggerKeydown(event: KeyboardEvent) {
     if (this.dropdownIsShown) {
       return;
     }
 
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       event.preventDefault();
-      this.dropdownIsShown = true;
+      this.showDropdown();
+
       // Stop the event from bubbling to the popover's keydown handler.
       event.stopPropagation();
-      schedule("afterRender", () => {
-        this.registerMenuItems(
-          this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
-        );
 
+      // Wait for the menuItems to be set by the showDropdown action.
+      schedule("afterRender", () => {
         switch (event.key) {
           case "ArrowDown":
             this.setFocusedItemIndex(FocusDirection.First, false);
@@ -188,7 +199,8 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   /**
    * Sets the focus to the next or previous menu item.
-   * Used by the onKeydown action to navigate the dropdown.
+   * Used by the onKeydown action to navigate the dropdown, and
+   * by the FacetDropdownListItem component on mouseenter.s
    */
   @action protected setFocusedItemIndex(
     focusDirectionOrNumber: FocusDirection | number,
@@ -242,12 +254,18 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     }
 
     this.focusedItemIndex = focusedItemIndex;
+
     if (maybeScrollIntoView) {
       this.maybeScrollIntoView();
     }
   }
 
-  maybeScrollIntoView() {
+  /**
+   * Checks whether the focused item is completely visible,
+   * and, if necessary, scrolls the dropdown to make it visible.
+   * Used by the setFocusedItemIndex action on keydown.
+   */
+  private maybeScrollIntoView() {
     const focusedItem = this.menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
 
@@ -270,28 +288,32 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
    * Resets the focus index to its initial value.
    * Called when the dropdown is closed, and when the input is focused.
    */
-  @action protected resetMenuItemIndex() {
+  @action protected resetFocusedItemIndex() {
     this.focusedItemIndex = -1;
   }
 
   /**
    * The action run when the user types in the input.
-   * Filters the facets shown in the dropdown.
+   * Filters the facets shown in the dropdown and schedules
+   * the menu items to be assigned their new IDs.
    */
   protected onInput = restartableTask(async (inputEvent: InputEvent) => {
     this.focusedItemIndex = -1;
+
     let shownFacets: FacetDropdownObjects = {};
     let facets = this.args.facets;
+
     this.query = (inputEvent.target as HTMLInputElement).value;
     for (const [key, value] of Object.entries(facets)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownFacets[key] = value;
       }
     }
+
     this._shownFacets = shownFacets;
 
     schedule("afterRender", () => {
-      this.registerMenuItems(
+      this.assignMenuItemIDs(
         this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
       );
     });

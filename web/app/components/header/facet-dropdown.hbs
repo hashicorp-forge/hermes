@@ -7,13 +7,13 @@
   <Hds::Button
     {{did-insert this.registerTrigger}}
     {{on "click" this.toggleDropdown}}
-    {{on "keydown" this.onButtonKeydown}}
-    data-test-facet-dropdown-trigger={{@label}}
-    disabled={{@disabled}}
+    {{on "keydown" this.onTriggerKeydown}}
     @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
     @iconPosition="trailing"
     @color="secondary"
     @text={{@label}}
+    data-test-facet-dropdown-trigger={{@label}}
+    disabled={{@disabled}}
     aria-haspopup="listbox"
     aria-controls={{if
       @inputIsShown
@@ -22,15 +22,13 @@
     }}
   />
   {{#if this.dropdownIsShown}}
-  {{!-- maybe this is just "DropdownList" and the FacetDropdownList comes later --}}
     <Header::FacetDropdownList
       {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
       @shownFacets={{this.shownFacets}}
       @label={{@label}}
       @inputIsShown={{this.inputIsShown}}
       @onInput={{perform this.onInput}}
-      @resetMenuItemIndex={{this.resetMenuItemIndex}}
-      @registerMenuItems={{this.registerMenuItems}}
+      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
       @registerScrollContainer={{this.registerScrollContainer}}
       @query={{this.query}}
       @focusedItemIndex={{this.focusedItemIndex}}
@@ -41,7 +39,7 @@
       @triggerElement={{this.triggerElement}}
       @hideDropdown={{this.hideDropdown}}
       @anchorToRight={{@anchorToRight}}
-      @currentSortBy={{@currentSortBy}}
+      @currentSortByValue={{@currentSortByValue}}
     />
   {{/if}}
 </div>

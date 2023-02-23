@@ -32,40 +32,15 @@
             />
           </div>
         </div>
-
         {{#if (and @facets (not @sortControlIsHidden))}}
           <Header::FacetDropdown
             @label="Sort: {{this.getSortByLabel}}"
             @facets={{this.sortByFacets}}
             @disabled={{this.sortControlIsDisabled}}
             @anchorToRight={{true}}
-            @currentSortBy={{this.currentSortBy}}
+            @currentSortByValue={{this.currentSortByValue}}
             data-test-facet-dropdown="sort"
           />
-          <!--
-          <Hds::Dropdown class="sort-by-dropdown" as |dd|>
-            <dd.ToggleButton
-              data-test-sort-by-button
-              @text="Sort: {{this.getSortByLabel}}"
-              @color="secondary"
-              disabled={{this.sortControlIsDisabled}}
-            />
-            <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close "dateDesc")}}
-              @route={{this.currentRouteName}}
-              @query={{hash sortBy="dateDesc"}}
-              @text="Newest"
-              @icon="sort-desc"
-            />
-            <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close "dateAsc")}}
-              @route={{this.currentRouteName}}
-              @query={{hash sortBy="dateAsc"}}
-              @text="Oldest"
-              @icon="sort-asc"
-            />
-          </Hds::Dropdown>
-          -->
         {{/if}}
       </div>
       <Header::ActiveFilterList />

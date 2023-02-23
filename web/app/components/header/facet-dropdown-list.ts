@@ -5,22 +5,63 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { schedule } from "@ember/runloop";
 import { FocusDirection } from "./facet-dropdown";
 
 interface HeaderFacetDropdownListComponentSignature {
   Args: {
+    /**
+     * The facet's label, e.g., "Type," "Status."
+     * Used to construct facet query hashes.
+     */
     label: string;
+    /**
+     * Whether the facet dropdown has a filter input.
+     * Used to set the correct aria role for the containers, lists, and list items,
+     * and to determine the correct className for the dropdown.
+     */
     inputIsShown: boolean;
+    /**
+     * The facets that should be shown in the dropdown.
+     * Looped through in the tamplate to render the list items.
+     * Used to determine whether a "No matches found" message should be shown.
+     */
     shownFacets: FacetDropdownObjects;
-    triggerElement: HTMLButtonElement;
+    /**
+     * The popover element, registered when its element is inserted.
+     * Used to scope our querySelector calls.
+     */
     popoverElement: HTMLDivElement | null;
+    /**
+     * The role of the list items.
+     * Used in querySelector calls to specify the correct list items.
+     */
     listItemRole: "option" | "menuitem";
-    registerMenuItems: (menuItems: NodeListOf<Element>) => void;
-    resetMenuItemIndex: () => void;
+    /**
+     * An action called to reset the focusedItem index.
+     * Used on input focusin, which happens on dropdown reveal.
+     **/
+    resetFocusedItemIndex: () => void;
+    /**
+     * The action run when the user types in the filter input.
+     * Used to filter the shownFacets.
+     */
     onInput: (event: InputEvent) => void;
+    /**
+     * The action run when the popover is inserted into the DOM.
+     * Used to register the popover element for use in querySelector calls.
+     */
     registerPopover: (element: HTMLDivElement) => void;
+    /**
+     * The action to move the focusedItemIndex within the dropdown.
+     * Used on ArrowUp/ArrowDown/Enter keydown events,
+     * and to pass to our child element for mouseenter events.
+     */
     setFocusedItemIndex: (direction: FocusDirection) => void;
+    /**
+     * The action to hide the dropdown.
+     * Called when the user presses the Enter key on a selection,
+     * and passed to our child element for click events.
+     */
     hideDropdown: () => void;
   };
 }
@@ -35,6 +76,10 @@ export enum FacetNames {
 export default class HeaderFacetDropdownListComponent extends Component<HeaderFacetDropdownListComponentSignature> {
   @service declare router: RouterService;
 
+  /**
+   * The input element, registered when its element is inserted
+   * and asserted to exist in the inputElement getter.
+   */
   @tracked private _inputElement: HTMLInputElement | null = null;
 
   /**
@@ -56,9 +101,13 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
   }
 
   /**
-   * TODO
+   * Whether there are no matches found for the user's input.
+   * Used to show a "No matches found" message in the template.
    */
   protected get noMatchesFound(): boolean {
+    if (!this.args.inputIsShown) {
+      return false;
+    }
     return Object.entries(this.args.shownFacets).length === 0;
   }
 
@@ -83,24 +132,17 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
    * Registers the input element.
    * Used to assert that the element exists and can be focused.
    */
-  @action protected registerInput(element: HTMLInputElement) {
+  @action protected registerAndFocusInput(element: HTMLInputElement) {
     this._inputElement = element;
     this.inputElement.focus();
   }
 
   /**
    * The action run when the user presses a key.
-   * Handles the arrow keys to navigate the dropdown.
+   * Handles the arrow keys to navigate the dropdown or
+   * hits Enter to select the focused item.
    */
-  @action protected onKeydown(event: KeyboardEvent) {
-    assert("popoverElement must exist", this.args.popoverElement);
-
-    this.args.registerMenuItems(
-      this.args.popoverElement.querySelectorAll(
-        `[role=${this.args.listItemRole}]`
-      )
-    );
-
+  @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Next);
@@ -113,6 +155,7 @@ export default class HeaderFacetDropdownListComponent extends Component<HeaderFa
 
     if (event.key === "Enter") {
       event.preventDefault();
+      assert("popoverElement must exist", this.args.popoverElement);
       const target = this.args.popoverElement.querySelector("[aria-selected]");
 
       if (target instanceof HTMLAnchorElement) {

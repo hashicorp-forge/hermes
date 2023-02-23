@@ -4,6 +4,7 @@ import { click, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownObjects } from "hermes/types/facets";
 import RouterService from "@ember/routing/router-service";
+import { SortByLabel } from "hermes/components/header/toolbar";
 
 const FACETS = {
   docType: {
@@ -54,9 +55,11 @@ module("Integration | Component | header/toolbar", function (hooks) {
     assert
       .dom('[data-test-facet-dropdown="sort"]')
       .exists({ count: 1 })
-      .hasText("Sort: Newest");
+      .hasText(`Sort: ${SortByLabel.Newest}`);
 
-    await click("[data-test-facet-dropdown-trigger='Sort: Newest']");
+    await click(
+      `[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`
+    );
     assert
       .dom("[data-test-facet-dropdown-menu-item]:nth-child(2)")
       .hasText("Oldest");
@@ -120,12 +123,12 @@ module("Integration | Component | header/toolbar", function (hooks) {
     `);
 
     assert
-      .dom("[data-test-facet-dropdown-trigger='Sort: Newest']")
+      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
       .doesNotHaveAttribute("disabled");
     this.set("facets", {});
 
     assert
-      .dom("[data-test-facet-dropdown-trigger='Sort: Newest']")
+      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
       .hasAttribute("disabled");
   });
 

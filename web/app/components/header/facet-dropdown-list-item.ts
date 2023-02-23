@@ -6,22 +6,63 @@ import { FocusDirection } from "./facet-dropdown";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { next } from "@ember/runloop";
-import { SortByValue } from "./toolbar";
+import { SortByLabel, SortByValue } from "./toolbar";
+
+enum FacetDropdownAriaRole {
+  Option = "option",
+  Menuitem = "menuitem",
+}
 
 interface HeaderFacetDropdownListItemComponentSignature {
   Args: {
+    /**
+     * The label of the facet, e.g., "Type" or "Owner"
+     */
     label: string;
+    /**
+     * The index of the currently focused item.
+     * Used to determine aria-focus.
+     */
     focusedItemIndex: number;
+    /**
+     * The name of the facet, e.g., "Approved" or "Newest."
+     * Used primarily to construct the query params.
+     */
     value: string;
-    role: string;
+    /**
+     * The role of the list item, e.g., "option" or "menuitem".
+     * The if the facetDropdown has a filter input, the role is "option".
+     * Otherwise, it's "menuitem".
+     */
+    role: FacetDropdownAriaRole;
+    /**
+     * The number of matches associated with the filter.
+     */
     count: number;
+    /**
+     * Whether the item an actively applied filter.
+     */
     selected: boolean;
+    /**
+     * If the dropdown list is the sort control, the current sort value.
+     * Used to determine whether to use the `get-facet-query-hash` helper
+     * or this class's sortByQueryParams getter.
+     */
+    currentSortByValue?: SortByValue;
+    /**
+     * The action called to hide the dropdown.
+     * Used to close the dropdown on the next run loop.
+     */
     hideDropdown: () => void;
+    /**
+     * The action called on mouseenter that sets the focused-item index value.
+     * Includes a `maybeScrollIntoView` argument that we use to disable
+     * mouse-driven scroll-jacking.
+     */
     setFocusedItemIndex: (
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
     ) => void;
-    currentSortBy?: SortByValue;
   };
 }
 
@@ -32,14 +73,14 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * The element reference, set on insertion and updated on mouseenter.
    * Used to compute the element's ID, which may change when the list is filtered.
    */
-  @tracked private _element: HTMLElement | null = null;
+  @tracked private _domElement: HTMLElement | null = null;
 
   /**
    * An asserted-true reference to the element.
    */
-  protected get element() {
-    assert("element must exist", this._element);
-    return this._element;
+  protected get domElement() {
+    assert("element must exist", this._domElement);
+    return this._domElement;
   }
 
   /**
@@ -48,8 +89,8 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * the FacetList is filtered. Parsed by `this.id` to get the
    * numeric identifier for the element.
    */
-  private get elementID() {
-    return this.element.id;
+  private get domElementID() {
+    return this.domElement.id;
   }
 
   /**
@@ -65,10 +106,13 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * the FacetList is filtered. Strips everything but the trailing number.
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
+   * Regex reference:
+   * \d = Any digit 0-9
+   * + = One or more of the preceding token
+   * $ = End of input
    */
-  protected get id(): number {
-    return parseInt(this.elementID.match(/\d+$/)?.[0] || "0", 10);
-    // TODO: can this be more human readable?
+  protected get itemIndexNumber(): number {
+    return parseInt(this.domElementID.match(/\d+$/)?.[0] || "0", 10);
   }
 
   /**
@@ -77,29 +121,32 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * and to set the `aria-selected` attribute.
    */
   protected get isFocused(): boolean {
-    if (!this._element) {
+    if (!this._domElement) {
       // True when first computed, which happens
       // before the element is inserted and registered.
       return false;
     }
-
     if (this.args.focusedItemIndex === -1) {
       return false;
     }
-
-    return this.args.focusedItemIndex === this.id;
+    return this.args.focusedItemIndex === this.itemIndexNumber;
   }
 
-  protected get sortByHash() {
-    if (this.args.currentSortBy) {
+  /**
+   * The query hash to use when the a sortBy filter is selected.
+   */
+  protected get sortByQueryParams(): { sortBy: SortByValue } | void {
+    //  The sortBy filter is the only facet that passes this argument.
+    if (!this.args.currentSortByValue) {
+      return;
+    } else {
       switch (this.args.value) {
-        case "Newest":
+        case SortByLabel.Newest:
           return { sortBy: SortByValue.DateDesc };
-        case "Oldest":
+        case SortByLabel.Oldest:
           return { sortBy: SortByValue.DateAsc };
       }
     }
-    return;
   }
 
   /**
@@ -108,11 +155,11 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * Then, calls the parent component's `setFocusedItemIndex` action,
    * directing focus to the current element.
    */
-  @action protected onMouseenter(e: MouseEvent) {
+  @action protected focusMouseTarget(e: MouseEvent) {
     let target = e.target;
     assert("target must be an element", target instanceof HTMLElement);
-    this._element = target;
-    this.args.setFocusedItemIndex(this.id, false);
+    this._domElement = target;
+    this.args.setFocusedItemIndex(this.itemIndexNumber, false);
   }
 
   /**
@@ -129,7 +176,7 @@ export default class HeaderFacetDropdownListItemComponent extends Component<Head
    * The action called on element insertion. Sets the local `element`
    * reference to the domElement we know to be our target.
    */
-  @action registerElement(element: HTMLElement) {
-    this._element = element;
+  @action protected registerElement(element: HTMLElement) {
+    this._domElement = element;
   }
 }

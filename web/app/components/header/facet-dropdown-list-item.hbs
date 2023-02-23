@@ -1,26 +1,35 @@
 <li role="none" data-test-facet-dropdown-menu-item>
   <LinkTo
     {{did-insert this.registerElement}}
-    {{on "mouseenter" this.onMouseenter}}
+    {{on "mouseenter" this.focusMouseTarget}}
     {{on "click" this.delayedCloseDropdown}}
     role={{@role}}
     aria-selected={{this.isFocused}}
     tabindex="-1"
     aria-checked={{@selected}}
-    @route={{this.currentRouteName}}
-    @query={{or this.sortByHash (get-facet-query-hash @label @value @selected)}}
     class="facet-dropdown-menu-item-link {{if this.isFocused 'is-focused'}}"
+    @route={{this.currentRouteName}}
+    @query={{or
+      this.sortByQueryParams
+      (get-facet-query-hash @label @value @selected)
+    }}
   >
-    {{#if this.sortByHash}}
-      <FlightIcon @name={{if (eq @value "Newest") "sort-desc" "sort-asc"}} class="sort-icon" />
+    {{#if this.sortByQueryParams}}
+      <FlightIcon
+        @name={{if (eq @value "Newest") "sort-desc" "sort-asc"}}
+        class="sort-icon"
+      />
     {{else}}
-      <FlightIcon @name="check" class="check {{if @selected "visible" "invisible"}}" />
+      <FlightIcon
+        @name="check"
+        class="check {{if @selected 'visible' 'invisible'}}"
+      />
     {{/if}}
     <div class="w-full flex justify-between overflow-hidden">
       <span data-test-facet-dropdown-list-item-value>
         {{@value}}
       </span>
-      {{#unless this.sortByHash}}
+      {{#unless this.sortByQueryParams}}
         <Hds::BadgeCount
           @text={{@count}}
           class="opacity-75 ml-8 shrink-0"

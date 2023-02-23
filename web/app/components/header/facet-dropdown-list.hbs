@@ -1,4 +1,5 @@
-{{on-document "keydown" this.onKeydown}}
+{{on-document "keydown" this.maybeKeyboardNavigate}}
+
 <div
   {{did-insert @registerPopover}}
   role={{if @inputIsShown "combobox"}}
@@ -12,13 +13,12 @@
   {{#if @inputIsShown}}
     <div class="relative px-1 pb-1 border-b border-b-color-border-faint">
       <Hds::Form::TextInput::Base
-        {{did-insert this.registerInput}}
+        {{did-insert this.registerAndFocusInput}}
         {{on "input" @onInput}}
-        {{on "focusin" @resetMenuItemIndex}}
+        {{on "focusin" @resetFocusedItemIndex}}
         @value={{@query}}
         @type="search"
         aria-controls="facet-dropdown-menu"
-        class="leading-none"
         placeholder="Filter..."
         class="facet-dropdown-input"
         aria-activedescendant={{unless
@@ -29,8 +29,8 @@
     </div>
   {{/if}}
   <div
-    class="overflow-auto h-full relative"
     {{did-insert @registerScrollContainer}}
+    class="overflow-auto h-full relative"
   >
     {{#if this.noMatchesFound}}
       <div
@@ -60,7 +60,7 @@
             @focusedItemIndex={{@focusedItemIndex}}
             @hideDropdown={{@hideDropdown}}
             @label={{@label}}
-            @currentSortBy={{@currentSortBy}}
+            @currentSortByValue={{@currentSortByValue}}
           />
         {{/each-in}}
       </ol>

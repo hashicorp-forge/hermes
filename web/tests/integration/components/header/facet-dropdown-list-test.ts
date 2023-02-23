@@ -27,12 +27,7 @@ module(
       this.set("registerScrollContainer", (element: HTMLDivElement) => {
         this.set("scrollContainer", element);
       });
-      this.set("registerMenuItems", (menuItems: NodeListOf<Element>) => {
-        menuItems.forEach((item, index) => {
-          item.setAttribute("id", `facet-dropdown-menu-item-${index}`);
-        });
-      });
-      this.set("resetMenuItemIndex", () => {
+      this.set("resetFocusedItemIndex", () => {
         this.set("focusedItemIndex", -1);
       });
       this.set("onInput", () => {});
@@ -77,7 +72,7 @@ module(
         @label="Status"
         @inputIsShown={{true}}
         @onInput={{this.onInput}}
-        @resetMenuItemIndex={{this.resetMenuItemIndex}}
+        @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
         @popoverElement={{this.popoverElement}}
         @registerPopover={{this.registerPopover}}
         @focusedItemIndex={{this.focusedItemIndex}}
@@ -85,7 +80,6 @@ module(
         @listItemRole="option"
         @registerScrollContainer={{this.registerScrollContainer}}
         @query=""
-        @registerMenuItems={{this.registerMenuItems}}
       />
     `);
 
@@ -158,7 +152,7 @@ module(
           @label="Status"
           @inputIsShown={{false}}
           @onInput={{this.onInput}}
-          @resetMenuItemIndex={{this.resetMenuItemIndex}}
+          @resetFocusItemIndex={{this.resetFocusItemIndex}}
           @popoverElement={{this.popoverElement}}
           @registerPopover={{this.registerPopover}}
           @focusedItemIndex={{this.focusedItemIndex}}
@@ -166,7 +160,6 @@ module(
           @listItemRole="option"
           @registerScrollContainer={{this.registerScrollContainer}}
           @query=""
-          @registerMenuItems={{this.registerMenuItems}}
         />
       `);
 
@@ -230,7 +223,7 @@ module(
           @label={{this.label}}
           @inputIsShown={{this.inputIsShown}}
           @onInput={{this.onInput}}
-          @resetMenuItemIndex={{this.resetMenuItemIndex}}
+          @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
           @popoverElement={{this.popoverElement}}
           @registerPopover={{this.registerPopover}}
           @focusedItemIndex={{this.focusedItemIndex}}
@@ -238,7 +231,6 @@ module(
           @listItemRole="option"
           @registerScrollContainer={{this.registerScrollContainer}}
           @query=""
-          @registerMenuItems={{this.registerMenuItems}}
         />
       `);
 
