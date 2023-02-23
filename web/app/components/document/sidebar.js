@@ -6,8 +6,7 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 
-export default class Sidebar extends Component {
-  @service("config") configSvc;
+export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
   @service router;
   @service session;
@@ -202,9 +201,6 @@ export default class Sidebar extends Component {
     }
   }
 
-  get shortLinkBaseURL() {
-    return this.configSvc.config.short_link_base_url;
-  }
 
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
