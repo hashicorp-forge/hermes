@@ -14,7 +14,13 @@ enum FacetDropdownAriaRole {
 }
 
 interface HeaderFacetDropdownListItemComponentSignature {
+  Element: HTMLAnchorElement;
   Args: {
+    /**
+     * Whether the facet is disabled.
+     * Used in tests to disable the LinkTo.
+     */
+    disabled?: boolean;
     /**
      * The label of the facet, e.g., "Type" or "Owner"
      */
@@ -25,7 +31,7 @@ interface HeaderFacetDropdownListItemComponentSignature {
      */
     focusedItemIndex: number;
     /**
-     * The name of the facet, e.g., "Approved" or "Newest."
+     * The name of the facet, e.g., "Approved," "In-Review."
      * Used primarily to construct the query params.
      */
     value: string;

@@ -1,5 +1,6 @@
 <li role="none" data-test-facet-dropdown-menu-item>
   <LinkTo
+    data-test-facet-dropdown-menu-item-link
     {{did-insert this.registerElement}}
     {{on "mouseenter" this.focusMouseTarget}}
     {{on "click" this.delayedCloseDropdown}}
@@ -16,11 +17,13 @@
   >
     {{#if this.sortByQueryParams}}
       <FlightIcon
+        data-test-facet-dropdown-list-item-sort-icon
         @name={{if (eq @value "Newest") "sort-desc" "sort-asc"}}
         class="sort-icon"
       />
     {{else}}
       <FlightIcon
+        data-test-facet-dropdown-list-item-check
         @name="check"
         class="check {{if @selected 'visible' 'invisible'}}"
       />
@@ -31,6 +34,7 @@
       </span>
       {{#unless this.sortByQueryParams}}
         <Hds::BadgeCount
+          data-test-facet-dropdown-menu-item-count
           @text={{@count}}
           class="opacity-75 ml-8 shrink-0"
           @size="small"
