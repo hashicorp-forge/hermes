@@ -9,12 +9,15 @@
 @use "components/page";
 @use "components/row-results";
 @use "components/template-card";
+@use "components/header/active-filter-list";
+@use "components/header/active-filter-list-item";
 @use "components/doc/tile-list";
 @use "components/doc/tile";
 @use "components/preview-card";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/hds-badge";
+@use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
 

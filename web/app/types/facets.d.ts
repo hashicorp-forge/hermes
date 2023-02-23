@@ -1,23 +1,26 @@
-export type FacetOption = {
+import { FacetName } from "hermes/components/header/toolbar";
+
+/**
+ * E.g., { docType: { "API": { count: 1, selected: false }}}
+ */
+export type FacetDropdownGroups = {
+  [name in FacetName]: FacetDropdownObjects;
+};
+
+/**
+ * E.g., { "API": { count: 1, selected: false }}
+ */
+export interface FacetDropdownObjects {
+  [key: string]: FacetDropdownObjectDetails;
+}
+
+/**
+ * E.g., {count: 1, selected: false}
+ */
+export type FacetDropdownObjectDetails = {
   count: number;
   selected: boolean;
 };
 
-enum SortByValues {
-  DateDesc = "dateDesc",
-  DateAsc = "dateAsc",
-}
-
-export enum FacetNames {
-  DocType = "docType",
-  Owners = "owners",
-  Product = "product",
-  Status = "status",
-}
-
-export type Facets = {
-  [name in FacetNames]: { [key: string]: FacetOption };
-};
-
-export type FacetRecord = Record<string, FacetOption>;
+export type FacetRecord = Record<string, FacetDropdownObjectDetails>;
 export type FacetRecords = Record<string, FacetRecord>;

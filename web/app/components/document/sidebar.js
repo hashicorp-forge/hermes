@@ -7,8 +7,7 @@ import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 
-export default class Sidebar extends Component {
-  @service("config") configSvc;
+export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
   @service router;
   @service session;
@@ -203,9 +202,6 @@ export default class Sidebar extends Component {
     }
   }
 
-  get shortLinkBaseURL() {
-    return this.configSvc.config.short_link_base_url;
-  }
 
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
@@ -278,7 +274,7 @@ export default class Sidebar extends Component {
         extendedTimeout: 1000,
       });
 
-      this.router.transitionTo("authenticated.document", this.docID, {
+      this.router.transitionTo({
         queryParams: { draft: false },
       });
 
@@ -286,7 +282,6 @@ export default class Sidebar extends Component {
     } catch (err) {
       this.showModalError("Error creating review", err);
     }
-
     this.refreshRoute();
   }
 
