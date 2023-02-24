@@ -12,7 +12,7 @@ interface DashboardNewFeaturesBannerSignature {
 export default class DashboardNewFeaturesBanner extends Component<DashboardNewFeaturesBannerSignature> {
   @tracked protected isDismissed = false;
 
-  isShown(): boolean {
+  get isShown(): boolean {
     const storageItem = window.localStorage.getItem(LOCAL_STORAGE_ITEM_NAME);
 
     if (storageItem === null) {

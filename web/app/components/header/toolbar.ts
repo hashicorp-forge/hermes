@@ -10,6 +10,7 @@ import {
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
+import { assert } from "@ember/debug";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -29,7 +30,7 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    facets: FacetDropdownGroups;
+    facets?: FacetDropdownGroups;
     sortControlIsHidden?: boolean;
   };
 }
@@ -71,6 +72,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * True when there are no drafts or docs.
    */
   protected get sortControlIsDisabled() {
+    if (!this.args.facets) {
+      return true;
+    }
     return Object.keys(this.args.facets).length === 0;
   }
 
@@ -79,6 +83,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get statuses(): FacetDropdownObjects | null {
     let statuses: FacetDropdownObjects = {};
+
+    assert("this.args.facets must exist", this.args.facets);
+
     for (let status in this.args.facets.status) {
       if (
         status === "Approved" ||

@@ -4,7 +4,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, render, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { task } from "ember-concurrency";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   productArea: string;
@@ -26,7 +25,7 @@ module(
     test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
@@ -57,7 +56,7 @@ module(
     test("it shows a temporary message when toggled", async function (assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />

@@ -20,7 +20,11 @@ interface BasicDropdownAPI {
   };
 }
 
-export default class Search extends Component {
+interface SearchComponentSignature {
+  Element: HTMLDivElement;
+}
+
+export default class SearchComponent extends Component<SearchComponentSignature> {
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
 

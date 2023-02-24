@@ -14,12 +14,14 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { HermesDocument } from "hermes/types/document";
 
-interface DraftResponseJSON {
+export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
-  Hits: Array<unknown>; // Documents, not yet typed
+  Hits: Array<HermesDocument>;
   params: string;
   page: number;
+  nbPages: number;
 }
 
 export default class DraftsRoute extends Route {

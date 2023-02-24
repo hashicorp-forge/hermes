@@ -4,7 +4,11 @@ import Component from "@glimmer/component";
 
 interface PaginationLinkComponentSignature {
   Element: HTMLAnchorElement;
-  Args: {};
+  Args: {
+    disabled?: boolean;
+    icon?: string;
+    page: string;
+  };
 }
 
 export default class PaginationLinkComponent extends Component<PaginationLinkComponentSignature> {

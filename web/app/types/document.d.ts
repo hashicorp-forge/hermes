@@ -7,8 +7,15 @@ export interface HermesDocument {
   product?: string;
   modifiedAgo: string;
   modifiedTime: number;
+  created: string;
   docNumber: string;
+  docType: string;
   title: string;
+  owners: string[];
+  ownerPhotos: string[];
+  googleMetadata?: {
+    thumbnailLink: string;
+  }
 
   thumbnail?: string;
   _snippetResult?: {

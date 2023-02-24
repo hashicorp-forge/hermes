@@ -3,20 +3,25 @@ import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
 import { setupWindowMock } from "ember-window-mock/test-support";
 import window from "ember-window-mock";
-import { click, render } from "@ember/test-helpers";
+import { TestContext, click, render } from "@ember/test-helpers";
 
 module("Integration | Component | modals/doc-created", function (hooks) {
   setupRenderingTest(hooks);
   setupWindowMock(hooks);
 
-  test("it functions as expected", async function (assert) {
+  interface DocCreatedTestContext extends TestContext {
+    isShown: boolean;
+    close: () => void;
+  }
+
+  test("it functions as expected", async function (this: DocCreatedTestContext, assert) {
     this.set("isShown", true);
 
     this.set("close", () => {
       this.set("isShown", false);
     });
 
-    await render(hbs`
+    await render<DocCreatedTestContext>(hbs`
       {{#if this.isShown}}
       <Modals::DocCreated
         @close={{this.close}}

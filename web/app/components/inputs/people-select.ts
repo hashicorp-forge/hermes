@@ -10,10 +10,13 @@ export interface Person {
 }
 
 interface PeopleSelectComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     selected: Person[];
     onBlur?: () => void;
     onChange: (people: Person[]) => void;
+    renderInPlace?: boolean;
+    disabled?: boolean;
   };
 }
 

@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
+import { HermesDocument } from "hermes/types/document";
 
 interface RowResultsComponentSignature {
   Args: {
-    // TODO: Add HermesDocument[] when we have a type for it.
-    docs: unknown[];
+    docs: HermesDocument[];
     isDraft?: boolean;
     nbPages: number;
     currentPage: number;
