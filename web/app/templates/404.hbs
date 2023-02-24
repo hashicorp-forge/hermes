@@ -1,0 +1,29 @@
+{{page-title "Page not found"}}
+{{set-body-class "bg-color-page-faint"}}
+<div class="flex items-center justify-center min-h-screen space-x-8">
+  <div
+    class="shadow-2xl mb-16 w-[200px] flex items-center h-[260px] bg-color-page-primary rounded-xl p-12 relative"
+  >
+
+  </div>
+  <div class="max-w-lg relative">
+    <div class="x-container">
+      <HermesLogo class="mb-8" />
+      <h1 class="text">
+        Page not found.
+      </h1>
+      <p class="mb-8 text-display-300">
+        The URL you're looking for does not exist. If you think this is a
+        mistake, please report it to us via GitHub.
+      </p>
+      <Hds::Button
+        @text="View dashboard"
+        @route="authenticated.dashboard"
+        @color="secondary"
+      />
+    </div>
+    <div class="flex">
+      <Footer />
+    </div>
+  </div>
+</div>
