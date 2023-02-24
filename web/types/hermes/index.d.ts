@@ -1,4 +1,11 @@
-import Ember from 'ember';
+import Ember from "ember";
+import "@glint/environment-ember-loose";
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    [key: string]: any;
+  }
+}
 
 declare global {
   // Prevents ESLint from "fixing" this via its auto-fix to turn it into a type

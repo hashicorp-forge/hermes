@@ -1,0 +1,4 @@
+environment: ember-loose
+
+include:
+  - "app/routes/**"
