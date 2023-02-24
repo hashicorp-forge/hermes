@@ -17,11 +17,6 @@ const FACETS = {
   },
 };
 
-interface ToolbarTestContext extends TestContext {
-  facets?: FacetDropdownObjects;
-  sortControlIsHidden?: boolean;
-}
-
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
 
@@ -36,11 +31,11 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .doesNotExist("Sort-by dropdown is hidden unless facets are provided");
   });
 
-  test("it renders facets when provided", async function (this: ToolbarTestContext, assert) {
+  test("it renders facets when provided", async function (assert) {
     this.set("facets", FACETS);
     this.set("sortControlIsHidden", false);
 
-    await render<ToolbarTestContext>(hbs`
+    await render(hbs`
       <Header::Toolbar
         @facets={{this.facets}}
         @sortControlIsHidden={{this.sortControlIsHidden}}
@@ -66,7 +61,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
   });
 
-  test("it handles status values correctly", async function (this: ToolbarTestContext, assert) {
+  test("it handles status values correctly", async function (assert) {
     const STATUS_NAMES = [
       "Approved",
       "In-Review",
@@ -87,7 +82,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     this.set("facets", { status: STATUS_FACETS });
 
-    await render<ToolbarTestContext>(hbs`
+    await render(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
@@ -111,9 +106,9 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .hasAttribute("disabled");
   });
 
-  test("it conditionally disables the sort control", async function (this: ToolbarTestContext, assert) {
+  test("it conditionally disables the sort control", async function (assert) {
     this.set("facets", FACETS);
-    await render<ToolbarTestContext>(hbs`
+    await render(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 

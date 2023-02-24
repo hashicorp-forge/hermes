@@ -14,14 +14,14 @@ module("Integration | Component | modals/doc-created", function (hooks) {
     close: () => void;
   }
 
-  test("it functions as expected", async function (this: DocCreatedTestContext, assert) {
+  test("it functions as expected", async function (assert) {
     this.set("isShown", true);
 
     this.set("close", () => {
       this.set("isShown", false);
     });
 
-    await render<DocCreatedTestContext>(hbs`
+    await render(hbs`
       {{#if this.isShown}}
       <Modals::DocCreated
         @close={{this.close}}
