@@ -1,8 +1,7 @@
 // https://www.ember-cli-mirage.com/docs/advanced/server-configuration
 
 import { Collection, Response, createServer } from "miragejs";
-// @ts-ignore
-import config from "hermes/config/environment";
+import config from "../config/environment";
 
 export default function (mirageConfig) {
   let finalConfig = {
