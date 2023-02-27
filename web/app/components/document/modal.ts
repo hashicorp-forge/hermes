@@ -6,13 +6,13 @@ import { task } from "ember-concurrency";
 interface DocumentModalComponentSignature {
   Args: {
     color?: string;
-    errorIsShown: boolean;
+    headerText: string;
+    bodyText?: string;
     errorTitle: string;
     taskButtonText: string;
     taskButtonLoadingText: string;
     taskButtonIcon?: string;
     taskButtonIsDisabled?: boolean;
-    dismissError: () => void;
     close: () => void;
     task: () => Promise<void>;
   };
@@ -25,13 +25,13 @@ export default class DocumentModalsArchiveComponent extends Component<DocumentMo
   @tracked protected errorTitle = "";
   @tracked protected errorDescription = "";
 
-  private showModalError(title: string, description: unknown | string) {
+  private showError(title: string, description: unknown | string) {
     this.errorIsShown = true;
     this.errorTitle = title;
     this.errorDescription = description as string;
   }
 
-  @action protected resetModalErrors() {
+  @action protected resetErrors() {
     this.errorIsShown = false;
     this.errorTitle = "";
     this.errorDescription = "";
@@ -44,7 +44,7 @@ export default class DocumentModalsArchiveComponent extends Component<DocumentMo
       this.args.close();
     } catch (error: unknown) {
       this.taskIsRunning = false;
-      this.showModalError(this.args.errorTitle, error);
+      this.showError(this.args.errorTitle, error);
     }
   });
 }

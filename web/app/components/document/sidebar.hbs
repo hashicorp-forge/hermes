@@ -521,7 +521,6 @@
       @headerText="Archive document?"
       @bodyText="Are you sure you want to archive this document?"
       @errorTitle="Error archiving document"
-      @dismissError={{this.resetModalErrors}}
       @close={{this.closeArchiveModal}}
       @task={{perform this.changeDocumentStatus "Obsolete"}}
       @taskButtonText="Yes, archive"
@@ -536,8 +535,6 @@
       @headerText="Delete draft?"
       @bodyText="Are you sure you want to archive this document?"
       @errorTitle="Error archiving document"
-      @errorDescription={{this.errorDescription}}
-      @dismissError={{this.resetModalErrors}}
       @close={{this.closeDeleteModal}}
       @task={{perform this.deleteDraft}}
       @taskButtonText="Yes, delete"
@@ -550,8 +547,6 @@
     <Document::Modal
       @headerText="Request review?"
       @errorTitle="Error requesting review"
-      @errorDescription={{this.errorDescription}}
-      @dismissError={{this.resetModalErrors}}
       @close={{this.closeRequestReviewModal}}
       @task={{perform this.requestReview}}
       @taskButtonText="Request review"

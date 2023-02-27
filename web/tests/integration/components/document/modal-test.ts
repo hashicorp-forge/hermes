@@ -30,9 +30,6 @@ module("Integration | Component | document/modal", function (hooks) {
     this.set("taskButtonText", "Yes, archive");
     this.set("taskButtonLoadingText", "Archiving...");
     this.set("taskButtonIcon", "archive");
-    this.set("dismissError", () => {
-      this.set("errorIsShown", false);
-    });
     this.set("task", async () => {
       return new Promise((resolve) => setTimeout(resolve, 10));
     });
@@ -45,10 +42,9 @@ module("Integration | Component | document/modal", function (hooks) {
         @headerText={{this.headerText}}
         @bodyText="Are you sure you want to archive this document?"
         @errorTitle={{this.errorTitle}}
-        @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @taskButtonText={{this.taskButtonText}}
         @taskButtonIcon={{this.taskButtonIcon}}
-        @dismissError={{this.dismissError}}
         @close={{this.close}}
         @task={{this.task}}
       />
@@ -107,12 +103,11 @@ module("Integration | Component | document/modal", function (hooks) {
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
-        @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @taskButtonText={{this.taskButtonText}}
+
         @taskButtonIcon={{this.taskButtonIcon}}
-        @dismissError={{this.dismissError}}
         @close={{this.close}}
         @task={{this.task}}
       >
@@ -147,23 +142,20 @@ module("Integration | Component | document/modal", function (hooks) {
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
-        @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @taskButtonText={{this.taskButtonText}}
         @taskButtonIcon={{this.taskButtonIcon}}
-        @dismissError={{this.dismissError}}
         @close={{this.close}}
         @task={{this.task}}
       />
     `);
 
     const buttonSelector = "[data-test-document-modal-primary-button]";
+    const iconSelector = buttonSelector + " .flight-icon";
 
     assert.dom(buttonSelector).hasText("Yes, archive");
-    assert
-      .dom("[data-test-document-modal-primary-button] .flight-icon")
-      .hasAttribute("data-test-icon", "archive");
+    assert.dom(iconSelector).hasAttribute("data-test-icon", "archive");
 
     const clickPromise = click(buttonSelector);
 
@@ -171,16 +163,7 @@ module("Integration | Component | document/modal", function (hooks) {
       return find(buttonSelector)?.textContent?.trim() === "Archiving...";
     });
 
-    assert
-      .dom(buttonSelector)
-      .hasText(
-        "Archiving...",
-        "the button text changes to @taskButtonLoadingText when the task is running"
-      );
-
-    assert
-      .dom("[data-test-document-modal-primary-button] .flight-icon")
-      .hasAttribute("data-test-icon", "loading");
+    assert.dom(iconSelector).hasAttribute("data-test-icon", "loading");
 
     await clickPromise;
   });
@@ -190,12 +173,11 @@ module("Integration | Component | document/modal", function (hooks) {
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
-        @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @taskButtonText={{this.taskButtonText}}
+
         @taskButtonIcon={{this.taskButtonIcon}}
-        @dismissError={{this.dismissError}}
         @close={{this.close}}
         @task={{this.task}}
         @taskButtonIsDisabled={{true}}
@@ -215,12 +197,11 @@ module("Integration | Component | document/modal", function (hooks) {
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
-        @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @taskButtonText={{this.taskButtonText}}
+
         @taskButtonIcon={{this.taskButtonIcon}}
-        @dismissError={{this.dismissError}}
         @close={{this.close}}
         @task={{this.task}}
       />

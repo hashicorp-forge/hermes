@@ -16,7 +16,7 @@
 
     {{#if this.errorIsShown}}
       <ModalAlertError
-        @onDismiss={{this.resetModalErrors}}
+        @onDismiss={{this.resetErrors}}
         @title={{this.errorTitle}}
         @description={{this.errorDescription}}
       />
