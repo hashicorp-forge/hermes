@@ -14,11 +14,11 @@
 
     {{yield (hash taskIsRunning=this.taskIsRunning)}}
 
-    {{#if @errorIsShown}}
+    {{#if this.errorIsShown}}
       <ModalAlertError
-        @onDismiss={{@dismissError}}
-        @title={{@errorTitle}}
-        @description={{@errorDescription}}
+        @onDismiss={{this.resetModalErrors}}
+        @title={{this.errorTitle}}
+        @description={{this.errorDescription}}
       />
     {{/if}}
   </M.Body>

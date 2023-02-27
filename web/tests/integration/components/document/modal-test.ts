@@ -2,6 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { click, find, render, waitFor, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { assert as emberAssert } from "@ember/debug";
 
 const FACETS = {
   one: {},
@@ -25,9 +26,7 @@ module("Integration | Component | document/modal", function (hooks) {
   hooks.beforeEach(function () {
     this.set("close", NOOP);
     this.set("headerText", "Archive document?");
-    this.set("errorIsShown", false);
     this.set("errorTitle", "Error title");
-    this.set("errorDescription", "Error description");
     this.set("taskButtonText", "Yes, archive");
     this.set("taskButtonLoadingText", "Archiving...");
     this.set("taskButtonIcon", "archive");
@@ -45,9 +44,7 @@ module("Integration | Component | document/modal", function (hooks) {
         @color="critical"
         @headerText={{this.headerText}}
         @bodyText="Are you sure you want to archive this document?"
-        @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @errorDescription={{this.errorDescription}}
         @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonIcon={{this.taskButtonIcon}}
@@ -72,11 +69,15 @@ module("Integration | Component | document/modal", function (hooks) {
       );
 
     const primaryButton = find("[data-test-document-modal-primary-button]");
+
+    emberAssert("primary button must exist", primaryButton);
+
     assert
       .dom(primaryButton)
       .hasText("Yes, archive", "can take a @taskButtonText argument");
 
-    const primaryButtonIcon = primaryButton?.querySelector(".flight-icon");
+    const primaryButtonIcon = primaryButton.querySelector(".flight-icon");
+
     assert
       .dom(primaryButtonIcon)
       .hasAttribute(
@@ -87,15 +88,14 @@ module("Integration | Component | document/modal", function (hooks) {
 
     assert.dom(".hds-alert").doesNotExist("error is not shown by default");
 
-    this.set("errorIsShown", true);
+    this.set("task", async () => {
+      throw new Error("error");
+    });
 
-    assert
-      .dom(".hds-alert")
-      .exists("error is shown when @errorIsShown is true");
+    await click(primaryButton);
+
+    assert.dom(".hds-alert").exists("failed tasks show an error");
     assert.dom(".hds-alert .hds-alert__title").hasText("Error title");
-    assert
-      .dom(".hds-alert .hds-alert__description")
-      .hasText("Error description");
 
     await click(".hds-alert__dismiss");
 
@@ -109,7 +109,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @headerText={{this.headerText}}
         @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @errorDescription={{this.errorDescription}}
         @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonIcon={{this.taskButtonIcon}}
@@ -150,7 +149,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @headerText={{this.headerText}}
         @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @errorDescription={{this.errorDescription}}
         @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonIcon={{this.taskButtonIcon}}
@@ -194,7 +192,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @headerText={{this.headerText}}
         @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @errorDescription={{this.errorDescription}}
         @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonIcon={{this.taskButtonIcon}}
@@ -220,7 +217,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @headerText={{this.headerText}}
         @errorIsShown={{this.errorIsShown}}
         @errorTitle={{this.errorTitle}}
-        @errorDescription={{this.errorDescription}}
         @taskButtonText={{this.taskButtonText}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonIcon={{this.taskButtonIcon}}
@@ -231,6 +227,8 @@ module("Integration | Component | document/modal", function (hooks) {
     `);
 
     await click("[data-test-document-modal-secondary-button]");
-    assert.equal(count, 1, "the close action runs when the modal is dismissed");
+    await waitUntil(() => count === 1);
+
+    assert.equal(count, 1);
   });
 });
