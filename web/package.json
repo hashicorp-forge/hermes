@@ -117,7 +117,7 @@
   },
   "dependencies": {
     "@csstools/postcss-sass": "^5.0.1",
-    "@hashicorp/design-system-components": "^1.4.0",
+    "@hashicorp/design-system-components": "^1.6.1",
     "@hashicorp/ember-flight-icons": "^3.0.2",
     "algoliasearch": "^4.13.0",
     "autoprefixer": "^10.4.4",

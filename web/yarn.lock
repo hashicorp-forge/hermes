@@ -2085,11 +2085,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hashicorp/design-system-components@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@hashicorp/design-system-components@npm:1.4.0"
+"@hashicorp/design-system-components@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@hashicorp/design-system-components@npm:1.6.1"
   dependencies:
-    "@hashicorp/design-system-tokens": ^1.2.0
+    "@hashicorp/design-system-tokens": ^1.4.0
     "@hashicorp/ember-flight-icons": ^3.0.2
     dialog-polyfill: ^0.5.6
     ember-auto-import: ^2.4.2
@@ -2104,14 +2104,14 @@ __metadata:
     ember-style-modifier: ^0.8.0
     ember-truth-helpers: ^3.0.0
     sass: ^1.43.4
-  checksum: b1b821efc16597ad862bd30a634adb379cad1816b568fbc519e884ba4c5069c75efe7db0f4a0317b922a9360972687b329456b5dc18e0de5c9c94d9829040523
+  checksum: cc9ed9b9652bc1f4591cf1a04accb7b6192386aa187824134652c2100923b2d1793a7b6a180f2830bd34ef0e25d80c492356745355d1182320e6bf3a4df30faa
   languageName: node
   linkType: hard
 
-"@hashicorp/design-system-tokens@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@hashicorp/design-system-tokens@npm:1.2.0"
-  checksum: 29a23eff8ef5cfbbdf7aa9ad1184a313d8bfb58cc4bf16d49d73782d54d0de64fa4a6024e13200a1ad6661ad7d5d4a5b83954d4d0a1622c9e838b2b66e46a65e
+"@hashicorp/design-system-tokens@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@hashicorp/design-system-tokens@npm:1.4.0"
+  checksum: a5e532b21b04505d0e59ea2f3044928aa87fd6b7f6777acb82b67f04cfc27ffa530563f63fcc83a212a8393668710d1ff91e7c3ce762e6581c95b78965bd8566
   languageName: node
   linkType: hard
 
@@ -10749,7 +10749,7 @@ __metadata:
     "@ember/test-helpers": ^2.6.0
     "@glimmer/component": ^1.0.4
     "@glimmer/tracking": ^1.0.4
-    "@hashicorp/design-system-components": ^1.4.0
+    "@hashicorp/design-system-components": ^1.6.1
     "@hashicorp/ember-flight-icons": ^3.0.2
     "@tsconfig/ember": latest
     "@types/ember": latest
