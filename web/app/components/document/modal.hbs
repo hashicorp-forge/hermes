@@ -25,6 +25,7 @@
   <M.Footer as |F|>
     <Hds::ButtonSet>
       <Hds::Button
+        data-test-document-modal-primary-button
         @text={{if this.taskIsRunning @taskButtonLoadingText @taskButtonText}}
         @color={{@color}}
         @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
@@ -32,6 +33,7 @@
         {{on "click" (perform this.task)}}
       />
       <Hds::Button
+        data-test-document-modal-secondary-button
         @text="Cancel"
         @color="secondary"
         disabled={{this.taskIsRunning}}

@@ -4,13 +4,14 @@ import { task } from "ember-concurrency";
 
 interface DocumentModalComponentSignature {
   Args: {
+    color?: string;
     errorIsShown: boolean;
     errorTitle: string;
     errorDescription: string;
     taskButtonText: string;
     taskButtonLoadingText: string;
     taskButtonIcon?: string;
-    taskButtonIsDisabled: boolean;
+    taskButtonIsDisabled?: boolean;
     dismissError: () => void;
     close: () => void;
     task: () => Promise<void>;
