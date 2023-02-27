@@ -516,50 +516,15 @@
   {{#in-element this.modalContainer insertBefore=null}}
 
     {{#if this.archiveModalIsActive}}
-      <Hds::Modal @color="critical" @onClose={{this.closeArchiveModal}} as |M|>
-        <M.Header>
-          Archive document?
-        </M.Header>
-        <M.Body>
-          Are you sure you want to move the document
-          <strong>{{this.title}}</strong>
-          to
-          <strong>Obsolete</strong>
-          status?
-          {{#if this.modalErrorIsShown}}
-            <ModalAlertError
-              @onDismiss={{this.resetModalErrors}}
-              @title={{this.errorTitle}}
-              @description={{this.errorDescription}}
-            />
-          {{/if}}
-        </M.Body>
-        <M.Footer as |F|>
-          <Hds::ButtonSet>
-            <Hds::Button
-              @text={{if
-                this.changeDocumentStatus.isRunning
-                "Archiving..."
-                "Yes, archive"
-              }}
-              @color="critical"
-              @icon={{if
-                this.changeDocumentStatus.isRunning
-                "loading"
-                "archive"
-              }}
-              disabled={{this.changeDocumentStatus.isRunning}}
-              {{on "click" (perform this.changeDocumentStatus "Obsolete")}}
-            />
-            <Hds::Button
-              @text="Cancel"
-              @color="secondary"
-              disabled={{this.changeDocumentStatus.isRunning}}
-              {{on "click" F.close}}
-            />
-          </Hds::ButtonSet>
-        </M.Footer>
-      </Hds::Modal>
+      <Document::Modals::Archive
+        @errorIsShown={{this.modalErrorIsShown}}
+        @errorTitle={{this.errorTitle}}
+        @errorDescription={{this.errorDescription}}
+        @dismissError={{this.resetModalErrors}}
+        @close={{this.closeArchiveModal}}
+        @archiveTask={{perform this.changeDocumentStatus "Obsolete"}}
+      />
+
     {{/if}}
 
     {{#if this.deleteModalIsActive}}

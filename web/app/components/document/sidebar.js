@@ -138,10 +138,6 @@ export default class DocumentSidebar extends Component {
   }
 
   get moveToStatusButtonText() {
-    if (this.changeDocumentStatus.isRunning) {
-      return "Working...";
-    }
-
     return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
