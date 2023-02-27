@@ -10,3 +10,9 @@ interface RowResultsComponentSignature {
   };
 }
 export default class RowResultsComponent extends Component<RowResultsComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    RowResults: typeof RowResultsComponent;
+  }
+}

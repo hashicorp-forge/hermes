@@ -2,7 +2,7 @@
   {{#if (eq @nbPages 1)}}
     {{! There is only one page of results }}
     <Pagination::Link @icon="chevron-left" @disabled={{true}} />
-    <Pagination::Link @page="1" @disabled={{true}} />
+    <Pagination::Link @page={{1}} @disabled={{true}} />
     <Pagination::Link @icon="chevron-right" @disabled={{true}} />
   {{else}}
     {{! There is more than one page of results }}

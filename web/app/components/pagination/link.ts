@@ -7,7 +7,7 @@ interface PaginationLinkComponentSignature {
   Args: {
     disabled?: boolean;
     icon?: string;
-    page: string;
+    page?: number;
   };
 }
 
@@ -16,5 +16,11 @@ export default class PaginationLinkComponent extends Component<PaginationLinkCom
 
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Pagination::Link": typeof PaginationLinkComponent;
   }
 }

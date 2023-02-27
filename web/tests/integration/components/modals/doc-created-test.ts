@@ -14,14 +14,14 @@ module("Integration | Component | modals/doc-created", function (hooks) {
     close: () => void;
   }
 
-  test("it functions as expected", async function (assert) {
+  test("it functions as expected", async function (this: DocCreatedTestContext, assert) {
     this.set("isShown", true);
 
     this.set("close", () => {
       this.set("isShown", false);
     });
 
-    await render(hbs`
+    await render<DocCreatedTestContext>(hbs`
       {{#if this.isShown}}
       <Modals::DocCreated
         @close={{this.close}}
@@ -51,11 +51,11 @@ module("Integration | Component | modals/doc-created", function (hooks) {
       .doesNotExist("Close action called");
   });
 
-  test("it doesn't show if the user has requested it not", async function (assert) {
+  test("it doesn't show if the user has requested it not", async function (this: DocCreatedTestContext, assert) {
     this.set("close", () => {});
     window.localStorage.setItem("docCreatedModalIsHidden", "true");
 
-    await render(hbs`
+    await render<DocCreatedTestContext>(hbs`
       <Modals::DocCreated
         @close={{this.close}}
       />

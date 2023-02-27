@@ -8,3 +8,9 @@ interface MultiselectUserEmailImageChipComponentSignature {
 }
 
 export default class MultiselectUserEmailImageChipComponent extends Component<MultiselectUserEmailImageChipComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Multiselect::UserEmailImageChip": typeof MultiselectUserEmailImageChipComponent;
+  }
+}

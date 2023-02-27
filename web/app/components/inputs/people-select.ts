@@ -9,7 +9,7 @@ export interface Person {
   photos: { url: string }[];
 }
 
-interface PeopleSelectComponentSignature {
+interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
     selected: Person[];
@@ -20,7 +20,7 @@ interface PeopleSelectComponentSignature {
   };
 }
 
-export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
+export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   // @ts-ignore
   // FetchService not yet in the registry
   @service("fetch") declare fetchSvc: any;
@@ -86,4 +86,10 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
       throw err;
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Inputs::PeopleSelect": typeof InputsPeopleSelectComponent;
+  }
 }

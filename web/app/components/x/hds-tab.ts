@@ -1,4 +1,4 @@
-import Component from '@glimmer/component';
+import Component from "@glimmer/component";
 
 interface XHdsTabComponentSignature {
   Args: {
@@ -10,8 +10,12 @@ interface XHdsTabComponentSignature {
     link?: string;
     query?: string;
   };
-
 }
 
-export default class XHdsTabComponent extends Component<XHdsTabComponentSignature> {
+export default class XHdsTabComponent extends Component<XHdsTabComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::HdsTab": typeof XHdsTabComponent;
+  }
 }

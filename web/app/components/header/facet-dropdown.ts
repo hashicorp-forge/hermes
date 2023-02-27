@@ -5,15 +5,16 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { next } from "@ember/runloop";
 
-interface FacetDropdownComponentSignature {
+interface HeaderFacetDropdownComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     label: string;
-    facets: FacetDropdownObjects;
+    facets?: FacetDropdownObjects | null;
     disabled: boolean;
   };
 }
 
-export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
+export default class HeaderFacetDropdownComponent extends Component<HeaderFacetDropdownComponentSignature> {
   @service declare router: RouterService;
 
   protected get currentRouteName(): string {
@@ -21,6 +22,9 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   protected get firstTenFacets(): FacetDropdownObjects {
+    if (!this.args.facets) {
+      return {};
+    }
     let firstTenEntries = Object.entries(this.args.facets).slice(0, 10);
     let firstTenFacetsObjects = Object.fromEntries(firstTenEntries);
     return firstTenFacetsObjects;
@@ -34,5 +38,11 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     next(() => {
       closeDropdown();
     });
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::FacetDropdown": typeof HeaderFacetDropdownComponent;
   }
 }

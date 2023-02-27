@@ -1,14 +1,14 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, pauseTest, render } from "@ember/test-helpers";
+import { click, fillIn, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { DocumentPerson } from "document";
+import { Person } from "hermes/components/inputs/people-select";
 
 interface PeopleSelectContext extends MirageTestContext {
-  people: DocumentPerson[];
-  onChange: (newValue: DocumentPerson[]) => void;
+  people: Person[];
+  onChange: (newValue: Person[]) => void;
 }
 
 module("Integration | Component | inputs/people-select", function (hooks) {
@@ -21,7 +21,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);
 
-    await render(hbs`
+    await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}

@@ -9,7 +9,7 @@ interface DashboardNewFeaturesBannerSignature {
   Args: {};
 }
 
-export default class DashboardNewFeaturesBanner extends Component<DashboardNewFeaturesBannerSignature> {
+export default class DashboardNewFeaturesBannerComponent extends Component<DashboardNewFeaturesBannerSignature> {
   @tracked protected isDismissed = false;
 
   get isShown(): boolean {
@@ -27,5 +27,11 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
   dismiss() {
     window.localStorage.setItem(LOCAL_STORAGE_ITEM_NAME, "false");
     this.isDismissed = true;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Dashboard::NewFeaturesBanner": typeof DashboardNewFeaturesBannerComponent;
   }
 }

@@ -5,7 +5,6 @@ import { click, render, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 
-
 module(
   "Integration | Component | settings/subscription-list-item",
   function (hooks) {
@@ -19,10 +18,15 @@ module(
       authenticatedUser.subscriptions = [];
     });
 
-    test("it renders and can be toggled", async function (assert) {
+    interface SettingsSubscriptionListItemTestContext
+      extends MirageTestContext {
+      productArea: string;
+    }
+
+    test("it renders and can be toggled", async function (this: SettingsSubscriptionListItemTestContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
+      await render<SettingsSubscriptionListItemTestContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
@@ -50,10 +54,10 @@ module(
       assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
     });
 
-    test("it shows a temporary message when toggled", async function (assert) {
+    test("it shows a temporary message when toggled", async function (this: SettingsSubscriptionListItemTestContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
+      await render<SettingsSubscriptionListItemTestContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />

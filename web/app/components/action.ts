@@ -9,3 +9,9 @@ interface ActionComponentSignature {
 }
 
 export default class ActionComponent extends Component<ActionComponentSignature> {}
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    Action: typeof ActionComponent;
+  }
+}

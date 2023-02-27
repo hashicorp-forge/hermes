@@ -28,14 +28,14 @@ export type ActiveFilters = {
   [name in FacetName]: string[];
 };
 
-interface ToolbarComponentSignature {
+interface HeaderToolbarComponentSignature {
   Args: {
     facets?: FacetDropdownGroups;
     sortControlIsHidden?: boolean;
   };
 }
 
-export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
+export default class HeaderToolbarComponent extends Component<HeaderToolbarComponentSignature> {
   @service declare router: RouterService;
   @service declare activeFilters: ActiveFiltersService;
 
@@ -116,5 +116,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     next(() => {
       closeDropdown();
     });
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::Toolbar": typeof HeaderToolbarComponent;
   }
 }

@@ -20,11 +20,11 @@ interface BasicDropdownAPI {
   };
 }
 
-interface SearchComponentSignature {
+interface HeaderSearchComponentSignature {
   Element: HTMLDivElement;
 }
 
-export default class SearchComponent extends Component<SearchComponentSignature> {
+export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
 
@@ -91,3 +91,10 @@ export default class SearchComponent extends Component<SearchComponentSignature>
     }
   );
 }
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    'Header::Search': typeof HeaderSearchComponent;
+  }
+}
+
