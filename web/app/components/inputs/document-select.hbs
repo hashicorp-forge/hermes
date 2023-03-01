@@ -1,0 +1,54 @@
+{{! should search be scoped to the current product/area? }}
+<EditableField
+  @value="test"
+  @onChange={{this.onChange}}
+  @loading={{false}}
+  @disabled={{this.selectedDocument}}
+>
+  <:default>
+    {{#if this.selectedDocument}}
+      {{this.selectedDocument.docNumber}}
+      {{this.selectedDocument.title}}
+
+      <Action {{on "click" (fn this.onChange null)}}>
+        Remove
+      </Action>
+    {{else}}
+      Search PRDs
+    {{/if}}
+  </:default>
+  <:editing as |F|>
+    <input
+      value={{this.query}}
+      {{on "input" (perform this.search)}}
+      type="text"
+      placeholder="Search PRDs"
+    />
+    {{! popover }}
+    <div class="absolute bg-yellow-50">
+      {{#if this.shownDocuments}}
+        <ul>
+          {{#each this.shownDocuments as |document|}}
+            <li>
+              <Action {{on "click" (fn F.update document)}}>
+                {{document.objectID}}
+                {{document.docNumber}}
+                {{document.title}}
+                {{document.product}}
+              </Action>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p>
+          {{if
+            this.userHasSearched
+            "No matches"
+            "Enter a title or document number"
+          }}
+        </p>
+      {{/if}}
+    </div>
+  </:editing>
+
+</EditableField>
