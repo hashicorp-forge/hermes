@@ -43,6 +43,13 @@ module.exports = {
       bold: "var(--token-typography-font-weight-bold)",
     },
 
+    boxShadow: {
+      "surface-low": "var(--token-surface-low-box-shadow)",
+      "surface-mid": "var(--token-surface-mid-box-shadow)",
+      "elevation-low": "var(--token-elevation-low-box-shadow)",
+      "elevation-mid": "var(--token-elevation-mid-box-shadow)",
+    },
+
     extend: {
       colors: {
         // Note: Because the tokens are HEX and not RGB values,

@@ -2,6 +2,7 @@
   <ol
     class="state--{{this.dasherizedName}}
       grid grid-cols-3 w-full items-center list-none gap-0.5"
+    ...attributes
   >
     <Doc::StateProgressBar class={{this.state.barOneClass}} />
     <Doc::StateProgressBar class={{this.state.barTwoClass}} />
@@ -12,5 +13,5 @@
 <Hds::Badge
   @text={{this.state.label}}
   @color={{this.state.color}}
-  ...attributes
+  class="whitespace-nowrap"
 />
