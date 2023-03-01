@@ -10,6 +10,8 @@ import { HermesDocument } from "hermes/types/document";
 interface InputsDocumentSelectSignature {
   Args: {
     productArea: string;
+    selectedDocument: HermesDocument | null;
+    onChange: (document: HermesDocument | null) => void;
   };
 }
 
@@ -19,10 +21,17 @@ export default class InputsDocumentSelect extends Component<InputsDocumentSelect
 
   @tracked shownDocuments: HermesDocument[] | null = null;
   @tracked query = "";
-  @tracked selectedDocument: HermesDocument | null = null;
 
-  @action onChange(document: HermesDocument) {
-    this.selectedDocument = document;
+  @action save(document: HermesDocument | null) {
+    this.args.onChange(document);
+    this.shownDocuments = null;
+    this.query = "";
+  }
+
+  @action remove(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.save(null);
   }
 
   protected search = restartableTask(async (inputEvent: InputEvent) => {
@@ -34,12 +43,9 @@ export default class InputsDocumentSelect extends Component<InputsDocumentSelect
       return;
     }
 
-    // can this be scoped to title searches?
-    // is there a need to search the body?
-
     let algoliaResponse = await this.algolia.search.perform(this.query, {
       hitsPerPage: 5,
-      attributesToRetrieve: ["title", 'product', 'docNumber'],
+      attributesToRetrieve: ["title", "product", "docNumber"],
       // give extra ranking to docs in the same product area
       optionalFilters: ["product:" + this.args.productArea],
     });

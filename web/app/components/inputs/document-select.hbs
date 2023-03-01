@@ -1,20 +1,25 @@
-{{! should search be scoped to the current product/area? }}
 <EditableField
   @value="test"
-  @onChange={{this.onChange}}
+  @onChange={{this.save}}
+  {{! do we need this condition? }}
   @loading={{false}}
-  @disabled={{this.selectedDocument}}
+  @disabled={{@selectedDocument}}
 >
-  <:default>
-    {{#if this.selectedDocument}}
-      {{this.selectedDocument.docNumber}}
-      {{this.selectedDocument.title}}
+  <:default as |F|>
+    {{#if @selectedDocument}}
+      <LinkTo
+        @route="authenticated.document"
+        @model={{@selectedDocument.objectID}}
+        class="flex"
+      >
+       {{@selectedDocument.title}}
+      </LinkTo>
 
-      <Action {{on "click" (fn this.onChange null)}}>
+      <Action {{on "click" this.remove}}>
         Remove
       </Action>
     {{else}}
-      Search PRDs
+      <CustomEditableFields::EmptyState/>
     {{/if}}
   </:default>
   <:editing as |F|>
@@ -24,29 +29,21 @@
       type="text"
       placeholder="Search PRDs"
     />
-    {{! popover }}
-    <div class="absolute bg-yellow-50">
+    {{! TODO: add dismissible modifier }}
+    <div class="absolute bg-yellow-50 z-10">
       {{#if this.shownDocuments}}
         <ul>
           {{#each this.shownDocuments as |document|}}
             <li>
               <Action {{on "click" (fn F.update document)}}>
-                {{document.objectID}}
                 {{document.docNumber}}
                 {{document.title}}
-                {{document.product}}
               </Action>
             </li>
           {{/each}}
         </ul>
-      {{else}}
-        <p>
-          {{if
-            this.userHasSearched
-            "No matches"
-            "Enter a title or document number"
-          }}
-        </p>
+      {{else if this.userHasSearched}}
+        <p>No matches</p>
       {{/if}}
     </div>
   </:editing>

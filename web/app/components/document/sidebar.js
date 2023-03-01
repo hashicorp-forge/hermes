@@ -23,6 +23,19 @@ export default class DocumentSidebar extends Component {
   @tracked errorTitle = null;
   @tracked errorDescription = null;
 
+  @tracked linkedRFC = null;
+
+  @task *saveLinkedRFC(rfc) {
+    this.linkedRFC = rfc;
+    if (this.linkedRFC) {
+      // FIXME: need the full URL
+      const rfcURL = `documents/${this.linkedRFC.objectID}`;
+      yield this.save.perform("prd", rfcURL);
+    } else {
+      yield this.save.perform("prd", null);
+    }
+  }
+
   get modalContainer() {
     return document.querySelector(".ember-application");
   }
@@ -201,7 +214,6 @@ export default class DocumentSidebar extends Component {
     }
   }
 
-
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -210,7 +222,7 @@ export default class DocumentSidebar extends Component {
 
   @task
   *save(field, val) {
-    if (field && val) {
+    if (field) {
       const oldVal = this[field];
       this[field] = val;
 
