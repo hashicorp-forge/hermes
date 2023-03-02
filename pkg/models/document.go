@@ -338,14 +338,16 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 		// data.
 		if c.DocumentTypeCustomFieldID != 0 {
 			if err := db.
-				Model(DocumentTypeCustomField{
+				Model(&c.DocumentTypeCustomField).
+				Where(DocumentTypeCustomField{
 					Model: gorm.Model{
 						ID: c.DocumentTypeCustomFieldID,
 					},
 				}).
 				First(&c.DocumentTypeCustomField).
 				Error; err != nil {
-				return fmt.Errorf("error getting document type custom field: %w", err)
+				return fmt.Errorf(
+					"error getting document type custom field with known ID: %w", err)
 			}
 		}
 		c.DocumentTypeCustomField.DocumentType.Name = d.DocumentType.Name

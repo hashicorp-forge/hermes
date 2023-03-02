@@ -656,6 +656,31 @@ func TestDocumentModel(t *testing.T) {
 				require.NoError(err)
 			})
 
+		t.Run("Create a second document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT2",
+				LongName: "DocumentType2",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a custom field for the second document type",
+			func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+
+				d := DocumentTypeCustomField{
+					Name: "CustomStringFieldDT2",
+					DocumentType: DocumentType{
+						Name: "DT2",
+					},
+					Type: StringDocumentTypeCustomFieldType,
+				}
+				err := d.Upsert(db)
+				require.NoError(err)
+			})
+
 		t.Run("Create a product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
@@ -681,16 +706,16 @@ func TestDocumentModel(t *testing.T) {
 				CustomFields: []*DocumentCustomField{
 					{
 						DocumentTypeCustomField: DocumentTypeCustomField{
-							Name: "CustomStringField",
+							Name: "CustomStringFieldDT2",
 							DocumentType: DocumentType{
-								Name: "DT1",
+								Name: "DT2",
 							},
 						},
 						Value: "string value 1",
 					},
 				},
 				DocumentType: DocumentType{
-					Name: "DT1",
+					Name: "DT2",
 				},
 				Product: Product{
 					Name: "Product1",
@@ -700,9 +725,9 @@ func TestDocumentModel(t *testing.T) {
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			require.Len(d.CustomFields, 1)
-			assert.Equal("CustomStringField",
+			assert.Equal("CustomStringFieldDT2",
 				d.CustomFields[0].DocumentTypeCustomField.Name)
-			assert.Equal("DT1",
+			assert.Equal("DT2",
 				d.CustomFields[0].DocumentTypeCustomField.DocumentType.Name)
 			assert.Equal("string value 1", d.CustomFields[0].Value)
 		})
@@ -716,9 +741,9 @@ func TestDocumentModel(t *testing.T) {
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			require.Len(d.CustomFields, 1)
-			assert.Equal("CustomStringField",
+			assert.Equal("CustomStringFieldDT2",
 				d.CustomFields[0].DocumentTypeCustomField.Name)
-			assert.Equal("DT1",
+			assert.Equal("DT2",
 				d.CustomFields[0].DocumentTypeCustomField.DocumentType.Name)
 			assert.Equal("string value 1", d.CustomFields[0].Value)
 		})
