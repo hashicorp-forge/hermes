@@ -4,7 +4,7 @@
   // Outer border / shadow
   &::after {
     content: "";
-    @apply absolute shadow-surface-low flex rounded z-50;
+    @apply absolute shadow-surface-low flex rounded-sm z-50;
 
     //  Make it less annoying to debug elements below it:
     @apply pointer-events-none;
@@ -15,19 +15,19 @@
   }
 
   .doc-thumbnail-status-icon {
-    @apply absolute opacity-75 w-10 h-10 -right-[9px] top-1 mix-blend-multiply;
+    @apply absolute opacity-75 w-9 h-9 -right-[7px] top-[5px] mix-blend-multiply;
 
     &.approved {
       @apply fill-color-palette-green-200 -rotate-6;
     }
 
     &.obsolete {
-      @apply fill-color-palette-neutral-200;
+      @apply fill-color-palette-neutral-300 opacity-60 -rotate-12;
     }
   }
 
   .doc-thumbnail-status-container {
-    @apply overflow-hidden w-full h-full absolute rounded-r;
+    @apply overflow-hidden w-full h-full absolute rounded-r-sm;
   }
 
   .doc-thumbnail-folder {
@@ -41,24 +41,11 @@
   }
 
   .doc-thumbnail-image-and-badge {
-    @apply relative flex;
-
-    &.obsolete {
-      @apply rounded-sm overflow-hidden left-[3px];
-
-      &::after {
-        content: "";
-        @apply absolute shadow-surface-base flex rounded-sm;
-
-        // Element is 1px smaller than the container so the border can pick up
-        // colors from the badges/icons/overlays rather than always rendering gray.
-        @apply top-px right-px bottom-px left-px;
-      }
-    }
+    @apply relative flex overflow-hidden left-0 rounded-sm;
   }
 
   .doc-thumbnail-product-badge {
-    @apply absolute grid place-items-center bottom-0 left-0 rounded-bl rounded-tr bg-gradient-to-br w-[26px] h-[24px] from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+    @apply absolute grid place-items-center bottom-0 left-0 rounded-bl-sm rounded-tr-sm bg-gradient-to-br w-[26px] h-[24px] from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
     &.nomad {
       @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;
@@ -98,18 +85,33 @@
   &.large {
     @apply shrink-0 w-[109px];
 
-    &::before {
-      @apply shadow-surface-mid;
+    &::after {
+      @apply shadow-surface-mid rounded;
     }
 
     .doc-thumbnail-image-and-badge {
       &.obsolete {
-        @apply left-[7px];
+        @apply rounded;
+      }
+    }
+
+    .doc-thumbnail-image-and-badge {
+      &.obsolete {
+        @apply left-[4px];
+
+        &::after {
+          content: "";
+          @apply absolute rounded shadow-surface-base flex;
+
+          // Element is 1px smaller than the container so the border can pick up
+          // colors from the badges/icons/overlays rather than always rendering gray.
+          @apply top-px right-px bottom-px left-px;
+        }
       }
     }
 
     .doc-thumbnail-product-badge {
-      @apply w-12 h-10;
+      @apply w-12 h-10 rounded-bl rounded-tr;
     }
 
     .doc-thumbnail-folder {
@@ -117,7 +119,7 @@
     }
 
     .doc-thumbnail-status-icon {
-      @apply block w-[84px] h-[84px] -right-4 top-2;
+      @apply block w-[84px] h-[84px] -right-3.5 top-[8px];
     }
   }
 }

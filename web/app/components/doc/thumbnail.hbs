@@ -1,10 +1,14 @@
 <div
   data-test-doc-thumbnail
-  class="doc-thumbnail {{if @isLarge 'large'}} bg-color-palette-neutral-100 rounded"
+  class="doc-thumbnail
+    {{if @isLarge 'large'}}
+    bg-color-palette-neutral-100 rounded"
   ...attributes
 >
   <div class="overflow-hidden relative rounded flex w-full">
-    <div class="doc-thumbnail-image-and-badge {{if this.isObsolete 'obsolete'}}">
+    <div
+      class="doc-thumbnail-image-and-badge {{if this.isObsolete 'obsolete'}}"
+    >
       <img src="/images/document.png" class="w-full h-auto" />
 
       {{#if this.productShortName}}
@@ -20,37 +24,7 @@
     {{#if (or this.isApproved this.isObsolete)}}
       <div class="doc-thumbnail-status-container">
         {{#if this.isObsolete}}
-          {{! Folder affordance }}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 96 145"
-            class="doc-thumbnail-folder"
-          >
-            <path
-              fill="url(#doc-thumbnail-folder-gradient)"
-              stroke="currentColor"
-              fill-rule="evenodd"
-              d="M6 0a6 6 0 0 0-6 6v37.04a6 6 0 0 0 2.659 4.983l10.29 6.898v83.389a6 6 0 0 0 6 6H96V0H6Z"
-              clip-rule="evenodd"
-            ></path>
-            <defs>
-              <linearGradient
-                id="doc-thumbnail-folder-gradient"
-                x1="8.176"
-                x2="8.176"
-                y1="0"
-                y2="43.965"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stop-color="var(--token-color-palette-neutral-50)"></stop>
-                <stop
-                  offset="1"
-                  stop-color="var(--token-color-palette-neutral-100)"
-                ></stop>
-              </linearGradient>
-            </defs>
-          </svg>
+          <Doc::FolderAffordance @isLarge={{@isLarge}} />
         {{/if}}
 
         {{#if (or this.isApproved this.isObsolete)}}
