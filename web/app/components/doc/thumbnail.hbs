@@ -1,66 +1,69 @@
 <div
-   data-test-doc-thumbnail
-   class="doc-thumbnail {{if @isLarge 'large'}}"
-   ...attributes
- >
-   <div class="overflow-hidden relative rounded flex w-full h-full">
+  data-test-doc-thumbnail
+  class="doc-thumbnail {{if @isLarge 'large'}} bg-color-palette-neutral-100 rounded"
+  ...attributes
+>
+  <div class="overflow-hidden relative rounded flex w-full">
+    <div class="doc-thumbnail-image-and-badge {{if this.isObsolete 'obsolete'}}">
+      <img src="/images/document.png" class="w-full h-auto" />
 
-     <img src="/images/document.png" class="w-full h-auto" />
+      {{#if this.productShortName}}
+        <div class="doc-thumbnail-product-badge {{this.productShortName}}">
+          <FlightIcon
+            @size={{if @isLarge "24" "16"}}
+            @name={{this.productShortName}}
+          />
+        </div>
+      {{/if}}
+    </div>
 
-     {{#if this.productShortName}}
-       <div class="doc-thumbnail-product-badge {{this.productShortName}}">
-         <FlightIcon
-           @size={{if @isLarge "24" "16"}}
-           @name={{this.productShortName}}
-         />
-       </div>
-     {{/if}}
+    {{#if (or this.isApproved this.isObsolete)}}
+      <div class="doc-thumbnail-status-container">
+        {{#if this.isObsolete}}
+          {{! Folder affordance }}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 96 145"
+            class="doc-thumbnail-folder"
+          >
+            <path
+              fill="url(#doc-thumbnail-folder-gradient)"
+              stroke="currentColor"
+              fill-rule="evenodd"
+              d="M6 0a6 6 0 0 0-6 6v37.04a6 6 0 0 0 2.659 4.983l10.29 6.898v83.389a6 6 0 0 0 6 6H96V0H6Z"
+              clip-rule="evenodd"
+            ></path>
+            <defs>
+              <linearGradient
+                id="doc-thumbnail-folder-gradient"
+                x1="8.176"
+                x2="8.176"
+                y1="0"
+                y2="43.965"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stop-color="var(--token-color-palette-neutral-50)"></stop>
+                <stop
+                  offset="1"
+                  stop-color="var(--token-color-palette-neutral-100)"
+                ></stop>
+              </linearGradient>
+            </defs>
+          </svg>
+        {{/if}}
 
-     <div class="doc-thumbnail-status-container">
+        {{#if (or this.isApproved this.isObsolete)}}
+          <div class="absolute w-full z-20">
+            <FlightIcon
+              @name={{if this.isApproved "check-circle" "archive"}}
+              @size="24"
+              class="doc-thumbnail-status-icon {{this.status}}"
+            />
+          </div>
+        {{/if}}
+      </div>
+    {{/if}}
 
-       {{#if this.isObsolete}}
-         {{! Folder affordance }}
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           fill="none"
-           viewBox="0 0 98 142"
-           class="doc-thumbnail-folder"
-         >
-           <path
-             fill="url(#doc-thumbnail-folder-gradient)"
-             stroke="currentColor"
-             d="M.216 9.77C-.919 4.765 2.886 0 8.018 0H98v142H36.601a8 8 0 0 1-7.801-6.23L.216 9.77Z"
-           ></path>
-           <defs>
-             <linearGradient
-               id="doc-thumbnail-folder-gradient"
-               x1="48"
-               x2="48"
-               y1="0"
-               y2="142"
-               gradientUnits="userSpaceOnUse"
-             >
-               <stop stop-color="var(--token-color-palette-neutral-50)"></stop>
-               <stop
-                 offset="1"
-                 stop-color="var(--token-color-palette-neutral-100)"
-               ></stop>
-             </linearGradient>
-           </defs>
-         </svg>
-       {{/if}}
-
-       {{#if (or this.isApproved this.isObsolete)}}
-         <div class="absolute w-full z-20">
-           <FlightIcon
-             @name={{if this.isApproved "check-circle" "archive"}}
-             @size="24"
-             class="doc-thumbnail-status-icon {{this.status}}"
-           />
-         </div>
-       {{/if}}
-
-     </div>
-
-   </div>
- </div>
+  </div>
+</div>

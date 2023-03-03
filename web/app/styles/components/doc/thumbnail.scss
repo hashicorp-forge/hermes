@@ -1,101 +1,123 @@
 .doc-thumbnail {
-   @apply relative w-12 shrink-0 flex;
+  @apply relative w-12 shrink-0 flex;
 
-   // Outer border / shadow
-   &::before {
-     content: "";
-     @apply absolute shadow-surface-low flex rounded z-50;
+  // Outer border / shadow
+  &::after {
+    content: "";
+    @apply absolute shadow-surface-low flex rounded z-50;
 
-     // Element is 1px smaller than the container so the border can pick up
-     // colors from the badges/icons/overlays rather than always rendering gray.
-     @apply top-px right-px bottom-px left-px;
-   }
+    //  Make it less annoying to debug elements below it:
+    @apply pointer-events-none;
 
-   .doc-thumbnail-status-icon {
-     @apply absolute opacity-75 w-10 h-10 -right-[9px] top-1 mix-blend-multiply;
+    // Element is 1px smaller than the container so the border can pick up
+    // colors from the badges/icons/overlays rather than always rendering gray.
+    @apply top-px right-px bottom-px left-px;
+  }
 
-     &.approved {
-       @apply fill-color-palette-green-200 -rotate-6;
-     }
+  .doc-thumbnail-status-icon {
+    @apply absolute opacity-75 w-10 h-10 -right-[9px] top-1 mix-blend-multiply;
 
-     &.obsolete {
-       @apply fill-color-palette-neutral-200 -rotate-12;
-     }
-   }
+    &.approved {
+      @apply fill-color-palette-green-200 -rotate-6;
+    }
 
-   .doc-thumbnail-status-container {
-     @apply overflow-hidden w-full h-full absolute rounded-r;
-   }
+    &.obsolete {
+      @apply fill-color-palette-neutral-200;
+    }
+  }
 
-   .doc-thumbnail-folder {
-     @apply overflow-visible w-auto absolute -right-1  text-color-border-primary;
+  .doc-thumbnail-status-container {
+    @apply overflow-hidden w-full h-full absolute rounded-r;
+  }
 
-     // Compensate for the 1px svg stroke
-     @apply h-[calc(100%+1px)];
+  .doc-thumbnail-folder {
+    @apply overflow-visible w-auto absolute -right-1  text-color-border-primary;
 
-     // Make sure the top and bottom strokes aren't visible
-     @apply -top-[0.5px];
-   }
+    // Compensate for the 1px svg stroke
+    @apply h-[calc(100%+1px)];
 
-   .doc-thumbnail-product-badge {
-     @apply absolute grid place-items-center bottom-0 left-0 rounded-bl rounded-tr bg-gradient-to-br w-[26px] h-[24px] from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+    // Make sure the top and bottom strokes aren't visible
+    @apply -top-[0.5px];
+  }
 
-     &.nomad {
-       @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;
-     }
+  .doc-thumbnail-image-and-badge {
+    @apply relative flex;
 
-     &.packer {
-       @apply from-color-packer-gradient-primary-start to-color-packer-gradient-primary-stop text-color-packer-foreground;
-     }
+    &.obsolete {
+      @apply rounded-sm overflow-hidden left-[3px];
 
-     &.vault {
-       @apply from-color-vault-gradient-primary-start to-color-vault-gradient-primary-stop text-color-vault-foreground;
-     }
+      &::after {
+        content: "";
+        @apply absolute shadow-surface-base flex rounded-sm;
 
-     &.vagrant {
-       @apply from-color-vagrant-gradient-primary-start to-color-vagrant-gradient-primary-stop text-color-vagrant-foreground;
-     }
+        // Element is 1px smaller than the container so the border can pick up
+        // colors from the badges/icons/overlays rather than always rendering gray.
+        @apply top-px right-px bottom-px left-px;
+      }
+    }
+  }
 
-     &.consul {
-       @apply from-color-consul-gradient-primary-start to-color-consul-gradient-primary-stop text-color-foreground-high-contrast;
-     }
+  .doc-thumbnail-product-badge {
+    @apply absolute grid place-items-center bottom-0 left-0 rounded-bl rounded-tr bg-gradient-to-br w-[26px] h-[24px] from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
-     &.terraform {
-       @apply from-color-terraform-gradient-primary-start to-color-terraform-gradient-primary-stop text-color-foreground-high-contrast;
-     }
+    &.nomad {
+      @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;
+    }
 
-     &.boundary {
-       @apply from-color-boundary-gradient-primary-start to-color-boundary-gradient-primary-stop text-color-foreground-high-contrast;
-     }
+    &.packer {
+      @apply from-color-packer-gradient-primary-start to-color-packer-gradient-primary-stop text-color-packer-foreground;
+    }
 
-     &.waypoint {
-       @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
-     }
+    &.vault {
+      @apply from-color-vault-gradient-primary-start to-color-vault-gradient-primary-stop text-color-vault-foreground;
+    }
 
-     // Note: The `.hcp` class uses the default badge styles
-   }
+    &.vagrant {
+      @apply from-color-vagrant-gradient-primary-start to-color-vagrant-gradient-primary-stop text-color-vagrant-foreground;
+    }
 
-   &.large {
-     @apply shrink-0 w-[109px];
+    &.consul {
+      @apply from-color-consul-gradient-primary-start to-color-consul-gradient-primary-stop text-color-foreground-high-contrast;
+    }
 
-     &::before {
-       @apply shadow-surface-mid;
-     }
+    &.terraform {
+      @apply from-color-terraform-gradient-primary-start to-color-terraform-gradient-primary-stop text-color-foreground-high-contrast;
+    }
 
-     .doc-thumbnail-product-badge {
-       @apply w-12 h-10;
-     }
+    &.boundary {
+      @apply from-color-boundary-gradient-primary-start to-color-boundary-gradient-primary-stop text-color-foreground-high-contrast;
+    }
 
-     .doc-thumbnail-status-container {
-       @apply h-full;
-     }
+    &.waypoint {
+      @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
+    }
 
-     .doc-thumbnail-folder {
-       @apply -right-px;
-     }
+    // Note: The `.hcp` class uses the default badge styles
+  }
 
-     .doc-thumbnail-status-icon {
-       @apply block w-[84px] h-[84px] -right-4 top-2;
-     }
-   }
- }
+  &.large {
+    @apply shrink-0 w-[109px];
+
+    &::before {
+      @apply shadow-surface-mid;
+    }
+
+    .doc-thumbnail-image-and-badge {
+      &.obsolete {
+        @apply left-[7px];
+      }
+    }
+
+    .doc-thumbnail-product-badge {
+      @apply w-12 h-10;
+    }
+
+    .doc-thumbnail-folder {
+      @apply -right-px;
+    }
+
+    .doc-thumbnail-status-icon {
+      @apply block w-[84px] h-[84px] -right-4 top-2;
+    }
+  }
+}
