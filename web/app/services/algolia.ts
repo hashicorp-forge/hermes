@@ -243,36 +243,6 @@ export default class AlgoliaService extends Service {
   }
 
   /**
-   * Returns an object of a given index and objectID.
-   * Used in the footer to show the date of the last full index.
-   */
-  getSearchIndexObject = task(
-    async (
-      indexName: string,
-      objectID: string
-    ): Promise<ObjectWithObjectID | undefined> => {
-      /**
-       * e.g., indexName = "hermes-staging"
-       * e.g., objectID = "LastFullIndex"
-       */
-      try {
-        let index: SearchIndex = this.client.initIndex(indexName);
-        return index.getObject(objectID).then(
-          (result) =>
-            /**
-             * e.g., result = {
-             *  lastFullIndexTime: "1995-01-06T20:58:17.59404Z",
-             *  objectID: "LastFullIndex",
-             * };
-             */
-            result
-        );
-      } catch (e: unknown) {
-        console.error(e);
-      }
-    }
-  );
-  /**
    * Returns a search response for a given query and params.
    * Restarts with every search input keystroke.
    */
