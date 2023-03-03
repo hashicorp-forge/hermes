@@ -22,7 +22,7 @@
     }
 
     &.obsolete {
-      @apply fill-color-palette-neutral-300 opacity-60 -rotate-12;
+      @apply fill-color-palette-neutral-300 opacity-60;
     }
   }
 
@@ -97,7 +97,7 @@
 
     .doc-thumbnail-image-and-badge {
       &.obsolete {
-        @apply left-[4px];
+        @apply left-1.5;
 
         &::after {
           content: "";
@@ -115,7 +115,7 @@
     }
 
     .doc-thumbnail-folder {
-      @apply -right-px;
+      @apply -right-1;
     }
 
     .doc-thumbnail-status-icon {
