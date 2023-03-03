@@ -32,7 +32,7 @@ export default class DocumentSidebar extends Component {
       const rfcURL = `documents/${this.linkedRFC.objectID}`;
       yield this.save.perform("prd", rfcURL);
     } else {
-      yield this.save.perform("prd", null);
+      yield this.save.perform("prd", "");
     }
   }
 
