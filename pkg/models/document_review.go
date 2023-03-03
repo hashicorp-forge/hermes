@@ -48,17 +48,9 @@ func (d *DocumentReview) BeforeSave(tx *gorm.DB) error {
 		return err
 	}
 
-	// Get document.
-	if err := d.Document.Get(tx); err != nil {
-		return fmt.Errorf("error getting document: %w", err)
+	if err := d.getAssociations(tx); err != nil {
+		return fmt.Errorf("error getting associations: %w", err)
 	}
-	d.DocumentID = d.Document.ID
-
-	// Get user.
-	if err := d.User.Get(tx); err != nil {
-		return fmt.Errorf("error getting user: %w", err)
-	}
-	d.UserID = d.User.ID
 
 	return nil
 }
@@ -129,17 +121,9 @@ func (d *DocumentReview) Get(db *gorm.DB) error {
 		return err
 	}
 
-	// Get document.
-	if err := d.Document.Get(db); err != nil {
-		return fmt.Errorf("error getting document: %w", err)
+	if err := d.getAssociations(db); err != nil {
+		return fmt.Errorf("error getting associations: %w", err)
 	}
-	d.DocumentID = d.Document.ID
-
-	// Get user.
-	if err := d.User.Get(db); err != nil {
-		return fmt.Errorf("error getting user: %w", err)
-	}
-	d.UserID = d.User.ID
 
 	return db.
 		Where(DocumentReview{
@@ -153,8 +137,30 @@ func (d *DocumentReview) Get(db *gorm.DB) error {
 
 // Update updates the document review in database db.
 func (d *DocumentReview) Update(db *gorm.DB) error {
+	if err := d.getAssociations(db); err != nil {
+		return fmt.Errorf("error getting associations: %w", err)
+	}
+
 	return db.
 		Model(&d).
+		Omit(clause.Associations).
 		Updates(*d).
 		Error
+}
+
+// getAssociations gets associations.
+func (d *DocumentReview) getAssociations(db *gorm.DB) error {
+	// Get document.
+	if err := d.Document.Get(db); err != nil {
+		return fmt.Errorf("error getting document: %w", err)
+	}
+	d.DocumentID = d.Document.ID
+
+	// Get user.
+	if err := d.User.Get(db); err != nil {
+		return fmt.Errorf("error getting user: %w", err)
+	}
+	d.UserID = d.User.ID
+
+	return nil
 }
