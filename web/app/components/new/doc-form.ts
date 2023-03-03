@@ -11,6 +11,7 @@ import ModalAlertsService from "hermes/services/modal-alerts";
 import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
+import cleanString from "hermes/utils/clean-string";
 
 interface DocFormErrors {
   title: string | null;
@@ -208,8 +209,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           owner: this.authenticatedUser.info.email,
           product: this.productArea,
           productAbbreviation: this.productAbbreviation,
-          summary: this.summary,
-          title: this.title,
+          summary: cleanString(this.summary),
+          title: cleanString(this.title),
         }),
       });
 
