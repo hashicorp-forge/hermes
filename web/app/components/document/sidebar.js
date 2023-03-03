@@ -5,6 +5,7 @@ import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
+import cleanString from "hermes/utils/clean-string";
 
 export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
@@ -212,13 +213,16 @@ export default class DocumentSidebar extends Component {
   *save(field, val) {
     if (field && val) {
       const oldVal = this[field];
-      this[field] = val;
+      this[field] = cleanString(val);
 
       try {
         const serializedValue = this.emailFields.includes(field)
           ? val.map((p) => p.email)
           : val;
-        yield this.patchDocument.perform({ [field]: serializedValue });
+
+        yield this.patchDocument.perform({
+          [field]: cleanString(serializedValue),
+        });
       } catch (err) {
         // revert field value on failure
         this[field] = oldVal;
