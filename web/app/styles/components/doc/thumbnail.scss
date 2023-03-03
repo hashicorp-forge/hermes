@@ -91,13 +91,7 @@
 
     .doc-thumbnail-image-and-badge {
       &.obsolete {
-        @apply rounded;
-      }
-    }
-
-    .doc-thumbnail-image-and-badge {
-      &.obsolete {
-        @apply left-1.5;
+        @apply left-[5px];
 
         &::after {
           content: "";
