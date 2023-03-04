@@ -10838,6 +10838,7 @@ __metadata:
     prettier: ^2.5.1
     qunit: ^2.17.2
     qunit-dom: ^1.6.0
+    replace-special-characters: ^1.2.7
     tailwindcss: ^3.0.23
     torii: ^0.10.1
     typescript: latest
@@ -15019,6 +15020,13 @@ __metadata:
   dependencies:
     is-finite: ^1.0.0
   checksum: d2db0b69c5cb0c14dd750036e0abcd6b3c3f7b2da3ee179786b755cf737ca15fa0fff417ca72de33d6966056f4695440e680a352401fc02c95ade59899afbdd0
+  languageName: node
+  linkType: hard
+
+"replace-special-characters@npm:^1.2.7":
+  version: 1.2.7
+  resolution: "replace-special-characters@npm:1.2.7"
+  checksum: cc7db80e2f63e27255cf9b3ef89c82260bb89335634f53fe8bfcd1a10bfc7603c583214dc105c05b7a6f9b97a2789ace16222664d160662ef332a02074b4c9f7
   languageName: node
   linkType: hard
 
