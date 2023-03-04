@@ -38,8 +38,8 @@ export default class AuthenticatedMyRoute extends Route {
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
     let [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
+      this.algolia.getFacets.perform(searchIndex, params, true),
+      this.algolia.getDocResults.perform(searchIndex, params, true),
     ]);
 
     this.activeFilters.update(params);
