@@ -40,6 +40,9 @@
         class="create-draft-button"
       />
       <div class="relative">
+        {{#if this.userMenuHighlightIsShown}}
+          <Header::UserMenuHighlight />
+        {{/if}}
         {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
         <img
           src={{this.profile.picture}}
@@ -49,14 +52,21 @@
         />
         <Hds::Dropdown as |dd|>
           <dd.ToggleIcon @text="User menu" @icon="user" />
-          <dd.Title @text={{this.profile.name}} class="text-body-200" />
+          <dd.Title
+            {{did-insert this.onDropdownOpen}}
+            @text={{this.profile.name}}
+            class="text-body-200"
+          />
           <dd.Description @text={{this.profile.email}} class="text-body-200" />
           <dd.Separator class="mt-2" />
           <dd.Interactive
             @route="authenticated.settings"
             @text="Email notifications"
+            class={{if
+              this.emailNotificationsHighlightIsShown
+              "highlighted-new"
+            }}
           />
-
           <dd.Interactive
             {{on "click" this.invalidateSession}}
             @text="Sign Out"
