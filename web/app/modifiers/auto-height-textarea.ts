@@ -29,9 +29,9 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
 
     this.element.setAttribute("rows", "1");
     this.element.style.resize = "none";
-    this.updateHeight();
 
-    // do we need to do an `onInput` on insert?
+    // set the initial height
+    this.updateHeight();
 
     this.element.addEventListener("input", () => {
       this.updateHeight();
@@ -41,11 +41,9 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
   }
 
   updateHeight() {
-    assert("element must exist", this.element);
-
-    let offset = this.element.offsetHeight - this.element.clientHeight;
-
-    this.element.style.height = "auto";
-    this.element.style.height = this.element.scrollHeight + offset + "px";
+    const { element } = this;
+    assert("element must exist", element);
+    const offset = element.offsetHeight - element.clientHeight;
+    element.style.height = element.scrollHeight + offset + "px";
   }
 }
