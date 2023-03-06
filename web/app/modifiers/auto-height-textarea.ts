@@ -29,8 +29,9 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
 
     this.element.setAttribute("rows", "1");
     this.element.style.resize = "none";
+    this.element.style.overflow = "hidden";
 
-    // set the initial height
+    // set initial height
     this.updateHeight();
 
     this.element.addEventListener("input", () => {
@@ -44,11 +45,13 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
     const { element } = this;
     assert("element must exist", element);
 
+    // measure any strokes
     const offset = element.offsetHeight - element.clientHeight;
 
-    // ensure the correct height in the case of deleted text:
-    element.style.height = "auto";
+    // temporarily set the textarea's height to 0 to force a scrollHeight
+    element.style.height = "0";
 
+    // set the height to the scrollHeight + offset
     element.style.height = element.scrollHeight + offset + "px";
   }
 }
