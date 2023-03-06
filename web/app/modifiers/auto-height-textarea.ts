@@ -43,7 +43,12 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
   updateHeight() {
     const { element } = this;
     assert("element must exist", element);
+
     const offset = element.offsetHeight - element.clientHeight;
+
+    // ensure the correct height in the case of deleted text:
+    element.style.height = "auto";
+
     element.style.height = element.scrollHeight + offset + "px";
   }
 }
