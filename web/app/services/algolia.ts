@@ -209,6 +209,14 @@ export default class AlgoliaService extends Service {
   );
 
   /**
+   * Clears Algolia's cache.
+   * Called by the dashboard to ensure an up-to-date index.
+   */
+  clearCache = task(async () => {
+    await this.client.clearCache();
+  });
+
+  /**
    * Returns an array of facet filters based on the current parameters,
    * and whether the owner is looking at their own docs.
    */
