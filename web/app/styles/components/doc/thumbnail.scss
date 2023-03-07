@@ -22,7 +22,7 @@
 
     &.obsolete {
       @apply fill-color-palette-neutral-300 opacity-60;
-      @apply -left-[8px] top-[4px];
+      @apply -left-[8px] top-[3px];
     }
   }
 
@@ -33,7 +33,7 @@
 
   &.obsolete {
     .product-badge {
-      @apply bg-none text-color-palette-neutral-300;
+      @apply bg-gradient-to-br from-color-palette-neutral-300 to-color-palette-neutral-400 text-color-palette-neutral-50;
     }
   }
 
