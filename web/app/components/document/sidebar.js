@@ -5,6 +5,7 @@ import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
+import cleanString from "hermes/utils/clean-string";
 
 export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
