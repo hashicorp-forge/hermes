@@ -16,6 +16,7 @@
     {{#if (or this.isApproved this.isObsolete)}}
       <div class="absolute w-full z-20">
         <FlightIcon
+          data-test-doc-status-icon
           @name={{if this.isApproved "check-circle" "archive"}}
           @size="24"
           class="status-icon {{this.status}}"
@@ -24,7 +25,10 @@
     {{/if}}
 
     {{#if this.productShortName}}
-      <div class="product-badge {{this.productShortName}}">
+      <div
+        data-test-doc-thumbnail-product-badge
+        class="product-badge {{this.productShortName}}"
+      >
         <FlightIcon @size="16" @name={{this.productShortName}} />
       </div>
     {{/if}}
