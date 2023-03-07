@@ -53,6 +53,7 @@ module.exports = {
         "color-surface-action": "var(--token-color-surface-action)",
         "color-surface-critical": "var(--token-color-surface-critical)",
         "color-surface-faint": "var(--token-color-surface-faint)",
+        "color-surface-highlight": "var(--token-color-surface-highlight)",
         "color-surface-interactive": "var(--token-color-surface-interactive)",
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
@@ -83,6 +84,7 @@ module.exports = {
         "color-foreground-faint": "var(--token-color-foreground-faint)",
         "color-foreground-high-contrast":
           "var(--token-color-foreground-high-contrast)",
+        "color-foreground-highlight": "var(--token-color-foreground-highlight)",
         "color-foreground-primary": "var(--token-color-foreground-primary)",
         "color-foreground-strong": "var(--token-color-foreground-strong)",
         "color-foreground-warning": "var(--token-color-foreground-warning)",
@@ -164,6 +166,7 @@ module.exports = {
         // Non-Semantic Color
         "color-palette-blue-200": "var(--token-color-palette-blue-200)",
         "color-palette-green-200": "var(--token-color-palette-green-200)",
+        "color-palette-purple-100": "var(--token-color-palette-purple-100)",
         "color-palette-purple-200": "var(--token-color-palette-purple-200)",
       },
     },
