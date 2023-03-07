@@ -214,8 +214,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
         }),
       });
 
-      throw new Error();
-
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
 
