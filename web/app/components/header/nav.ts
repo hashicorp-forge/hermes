@@ -66,7 +66,14 @@ export default class NavComponent extends Component<NavComponentSignature> {
   @action protected onDropdownOpen(): void {
     this.userMenuHighlightIsShown = false;
     window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
+  }
 
+  /**
+   * The actions to take when the dropdown menu is closed.
+   * Force-hides the emailNotificationsHighlight if it's visible.
+   */
+  @action protected onDropdownClose(): void {
+    this.emailNotificationsHighlightIsShown = false;
   }
 
   @action protected invalidateSession(): void {
