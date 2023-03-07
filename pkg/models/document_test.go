@@ -549,7 +549,6 @@ func TestDocumentModel(t *testing.T) {
 	*/
 
 	t.Run("Upsert Summary", func(t *testing.T) {
-		// assert, require := assert.New(t), require.New(t)
 		db, tearDownTest := setupTest(t, dsn)
 		defer tearDownTest(t)
 
@@ -625,6 +624,128 @@ func TestDocumentModel(t *testing.T) {
 			assert.EqualValues(1, d.ID)
 			assert.Equal("fileID1", d.GoogleFileID)
 			assert.Equal("summary2", d.Summary)
+		})
+	})
+
+	t.Run("Upsert a document with custom fields", func(t *testing.T) {
+		db, tearDownTest := setupTest(t, dsn)
+		defer tearDownTest(t)
+
+		t.Run("Create a document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT1",
+				LongName: "DocumentType1",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a document type custom field",
+			func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+
+				d := DocumentTypeCustomField{
+					Name: "CustomStringField",
+					DocumentType: DocumentType{
+						Name: "DT1",
+					},
+					Type: StringDocumentTypeCustomFieldType,
+				}
+				err := d.Upsert(db)
+				require.NoError(err)
+			})
+
+		t.Run("Create a second document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT2",
+				LongName: "DocumentType2",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a custom field for the second document type",
+			func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+
+				d := DocumentTypeCustomField{
+					Name: "CustomStringFieldDT2",
+					DocumentType: DocumentType{
+						Name: "DT2",
+					},
+					Type: StringDocumentTypeCustomFieldType,
+				}
+				err := d.Upsert(db)
+				require.NoError(err)
+			})
+
+		t.Run("Create a product", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Product{
+				Name:         "Product1",
+				Abbreviation: "P1",
+			}
+			err := p.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a document using Upsert", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+				Approvers: []*User{
+					{
+						EmailAddress: "a@approver.com",
+					},
+					{
+						EmailAddress: "b@approver.com",
+					},
+				},
+				CustomFields: []*DocumentCustomField{
+					{
+						DocumentTypeCustomField: DocumentTypeCustomField{
+							Name: "CustomStringFieldDT2",
+							DocumentType: DocumentType{
+								Name: "DT2",
+							},
+						},
+						Value: "string value 1",
+					},
+				},
+				DocumentType: DocumentType{
+					Name: "DT2",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err := d.Upsert(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			require.Len(d.CustomFields, 1)
+			assert.Equal("CustomStringFieldDT2",
+				d.CustomFields[0].DocumentTypeCustomField.Name)
+			assert.Equal("DT2",
+				d.CustomFields[0].DocumentTypeCustomField.DocumentType.Name)
+			assert.Equal("string value 1", d.CustomFields[0].Value)
+		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			require.Len(d.CustomFields, 1)
+			assert.Equal("CustomStringFieldDT2",
+				d.CustomFields[0].DocumentTypeCustomField.Name)
+			assert.Equal("DT2",
+				d.CustomFields[0].DocumentTypeCustomField.DocumentType.Name)
+			assert.Equal("string value 1", d.CustomFields[0].Value)
 		})
 	})
 }
