@@ -59,27 +59,29 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
    * Called onLoad and when tabs are changed.
    */
   fetchDocs = task(async () => {
-    let { currentTab } = this;
+    let facetFilters = "";
 
     // Translate the current tab to an Algolia facetFilter.
-    switch (currentTab) {
+    switch (this.currentTab) {
       case "new":
-        currentTab = "";
+        facetFilters = "";
         break;
       case "in-review":
-        currentTab = "status:In-Review";
+        facetFilters = "status:In-Review";
         break;
       case "approved":
-        currentTab = "status:approved";
+        facetFilters = "status:approved";
         break;
     }
+
+    await this.algolia.clearCache.perform();
 
     let newDocsToShow = await this.algolia.searchIndex
       .perform(
         this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc",
         "",
         {
-          facetFilters: [currentTab],
+          facetFilters: [facetFilters],
           hitsPerPage: 4,
         }
       )

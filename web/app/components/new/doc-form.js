@@ -3,7 +3,8 @@ import { task } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import Ember from 'ember';
+import Ember from "ember";
+import cleanString from "hermes/utils/clean-string";
 
 const FORM_ERRORS = {
   title: null,
@@ -144,8 +145,8 @@ export default class NewDocForm extends Component {
             owner: this.authenticatedUser.info.email,
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,
-            summary: this.summary,
-            title: this.title,
+            summary: cleanString(this.summary),
+            title: cleanString(this.title),
             tags: this.tags,
           }),
         })
@@ -160,12 +161,14 @@ export default class NewDocForm extends Component {
       yield wait(AWAIT_DOC_DELAY);
 
       // Set modal on a delay so it appears after transition.
-      this.modalAlerts.setActive.perform("docCreated", AWAIT_DOC_CREATED_MODAL_DELAY);
+      this.modalAlerts.setActive.perform(
+        "docCreated",
+        AWAIT_DOC_CREATED_MODAL_DELAY
+      );
 
       this.router.transitionTo("authenticated.document", doc.id, {
         queryParams: { draft: true },
       });
-
     } catch (err) {
       this.docIsBeingCreated = false;
       // TODO: Handle error by using a toast and showing the create form again with

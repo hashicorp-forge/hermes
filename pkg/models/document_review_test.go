@@ -260,4 +260,98 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert.Equal("b@approver.com", revs[1].User.EmailAddress)
 		})
 	})
+
+	t.Run("Update review status for a document with a custom field",
+		func(t *testing.T) {
+			db, tearDownTest := setupTest(t, dsn)
+			defer tearDownTest(t)
+
+			t.Run("Create a document type", func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+				dt := DocumentType{
+					Name:     "DT1",
+					LongName: "DocumentType1",
+				}
+				err := dt.FirstOrCreate(db)
+				require.NoError(err)
+			})
+
+			t.Run("Create a document type custom field",
+				func(t *testing.T) {
+					_, require := assert.New(t), require.New(t)
+
+					d := DocumentTypeCustomField{
+						Name: "CustomStringField",
+						DocumentType: DocumentType{
+							Name: "DT1",
+						},
+						Type: StringDocumentTypeCustomFieldType,
+					}
+					err := d.Upsert(db)
+					require.NoError(err)
+				})
+
+			t.Run("Create a product", func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+				p := Product{
+					Name:         "Product1",
+					Abbreviation: "P1",
+				}
+				err := p.FirstOrCreate(db)
+				require.NoError(err)
+			})
+
+			t.Run("Create a document", func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+				d := Document{
+					GoogleFileID: "fileID1",
+					Approvers: []*User{
+						{
+							EmailAddress: "a@approver.com",
+						},
+						{
+							EmailAddress: "b@approver.com",
+						},
+					},
+					CustomFields: []*DocumentCustomField{
+						{
+							DocumentTypeCustomField: DocumentTypeCustomField{
+								Name: "CustomStringField",
+								DocumentType: DocumentType{
+									Name: "DT1",
+								},
+							},
+							Value: "string value 1",
+						},
+					},
+					DocumentType: DocumentType{
+						Name: "DT1",
+					},
+					Product: Product{
+						Name: "Product1",
+					},
+				}
+				err := d.Create(db)
+				require.NoError(err)
+				assert.EqualValues(1, d.ID)
+			})
+
+			t.Run("Update review status to approved", func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+				dr := DocumentReview{
+					Document: Document{
+						GoogleFileID: "fileID1",
+					},
+					User: User{
+						EmailAddress: "b@approver.com",
+					},
+					Status: ApprovedDocumentReviewStatus,
+				}
+				err := dr.Update(db)
+				require.NoError(err)
+				assert.EqualValues(1, dr.DocumentID)
+				assert.EqualValues(2, dr.UserID)
+				assert.Equal(ApprovedDocumentReviewStatus, dr.Status)
+			})
+		})
 }
