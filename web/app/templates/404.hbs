@@ -16,7 +16,7 @@
         />
       </header>
       <div class="divider mb-6"></div>
-      <h1 class="title">[E-404] Page not found.</h1>
+      <h1 class="title">[E-404] Page not found</h1>
       <p class="summary">
         <strong class="mr-1">Summary:</strong>The address may be expired or the
         page may have moved. We apologize for any inconvenience.
@@ -29,7 +29,9 @@
           <p><strong>Type:</strong> Four hundred four</p>
         </div>
         <div>
-          <p><strong>Logged:</strong> {{this.currentDate}}</p>
+          <p data-test-404-logged-time>
+            <strong>Logged:</strong>
+            {{this.currentDate}}</p>
           <p><strong>Assignee:</strong> Admin</p>
         </div>
       </div>
