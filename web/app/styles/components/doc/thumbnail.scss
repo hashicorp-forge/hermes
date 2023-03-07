@@ -22,7 +22,7 @@
     }
 
     &.obsolete {
-      @apply fill-color-palette-neutral-300 opacity-60;
+      @apply fill-color-palette-neutral-300 -left-[8px] opacity-60 top-[4px];
     }
   }
 
@@ -31,13 +31,13 @@
   }
 
   .doc-thumbnail-folder {
-    @apply overflow-visible w-auto absolute -right-1  text-color-border-primary;
+    @apply overflow-visible w-auto absolute scale-x-[-1] -left-1  text-color-border-primary;
 
     // Compensate for the 1px svg stroke
-    @apply h-[calc(100%+1px)];
+    @apply h-[calc(100%+2px)];
 
     // Make sure the top and bottom strokes aren't visible
-    @apply -top-[0.5px];
+    @apply -top-[1px];
   }
 
   .doc-thumbnail-image-and-badge {
@@ -89,31 +89,20 @@
       @apply shadow-surface-mid rounded;
     }
 
-    .doc-thumbnail-image-and-badge {
-      &.obsolete {
-        @apply left-[5px];
-
-        &::after {
-          content: "";
-          @apply absolute rounded shadow-surface-base flex;
-
-          // Element is 1px smaller than the container so the border can pick up
-          // colors from the badges/icons/overlays rather than always rendering gray.
-          @apply top-px right-px bottom-px left-px;
-        }
-      }
-    }
-
     .doc-thumbnail-product-badge {
       @apply w-12 h-10 rounded-bl rounded-tr;
     }
 
     .doc-thumbnail-folder {
-      @apply -right-1;
+      @apply -left-1;
     }
 
     .doc-thumbnail-status-icon {
       @apply block w-[84px] h-[84px] -right-3.5 top-[8px];
+
+      &.obsolete {
+        @apply -left-5;
+      }
     }
   }
 }

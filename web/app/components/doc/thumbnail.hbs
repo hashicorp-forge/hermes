@@ -6,25 +6,28 @@
   ...attributes
 >
   <div class="overflow-hidden relative rounded flex w-full">
-    <div
-      class="doc-thumbnail-image-and-badge {{if this.isObsolete 'obsolete'}}"
-    >
-      <img src="/images/document.png" class="w-full h-auto" />
+    <img src="/images/document.png" class="w-full h-auto" />
 
-      {{#if this.productShortName}}
-        <div class="doc-thumbnail-product-badge {{this.productShortName}}">
-          <FlightIcon
-            @size={{if @isLarge "24" "16"}}
-            @name={{this.productShortName}}
-          />
-        </div>
-      {{/if}}
-    </div>
+    {{#if this.productShortName}}
+      <div class="doc-thumbnail-product-badge {{this.productShortName}}">
+        <FlightIcon
+          @size={{if @isLarge "24" "16"}}
+          @name={{this.productShortName}}
+        />
+      </div>
+    {{/if}}
 
     {{#if (or this.isApproved this.isObsolete)}}
       <div class="doc-thumbnail-status-container">
         {{#if this.isObsolete}}
           <Doc::FolderAffordance @isLarge={{@isLarge}} />
+          {{#if this.productShortName}}
+            <FlightIcon
+              @size={{if @isLarge "24" "16"}}
+              @name={{this.productShortName}}
+              class="absolute bottom-[3px] left-0.5 scale-75 opacity-80 text-color-palette-neutral-300"
+            />
+          {{/if}}
         {{/if}}
 
         {{#if (or this.isApproved this.isObsolete)}}
