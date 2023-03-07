@@ -28,7 +28,7 @@
 
   .product-badge {
     @apply bottom-0 left-0;
-    @apply w-[24px] h-[22px] rounded-bl-sm rounded-tr-sm;
+    @apply w-[24px] h-[22px] rounded-bl rounded-tr;
   }
 
   &.obsolete {
