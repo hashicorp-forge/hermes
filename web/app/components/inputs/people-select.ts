@@ -66,7 +66,9 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         }),
       });
 
-      const peopleJson = await res?.json();
+      assert('response expected', res);
+
+      const peopleJson = await res.json();
 
       if (peopleJson) {
         this.people = peopleJson.map((p: Person) => {
