@@ -2,8 +2,6 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import MockDate from "mockdate";
-import { equal } from "@ember/object/computed";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 module("Integration | Helper | get-facet-query-hash", function (hooks) {
