@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 
 interface DocFolderAffordanceSignature {
-  Element: null;
   Args: {
     isLarge?: boolean;
   };

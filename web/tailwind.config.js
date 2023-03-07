@@ -44,11 +44,8 @@ module.exports = {
     },
 
     boxShadow: {
-      "surface-base": "var(--token-surface-base-box-shadow)",
       "surface-low": "var(--token-surface-low-box-shadow)",
       "surface-mid": "var(--token-surface-mid-box-shadow)",
-      "elevation-low": "var(--token-elevation-low-box-shadow)",
-      "elevation-mid": "var(--token-elevation-mid-box-shadow)",
     },
 
     extend: {
