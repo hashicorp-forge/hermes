@@ -13,8 +13,10 @@
     min-width: 0;
   }
 
-  &.ember-power-select-trigger {
+  &.ember-power-select-trigger,
+  &.ember-power-select-trigger-multiple-input {
     line-height: 1;
+    @apply h-auto min-h-[36px];
   }
 
   &:hover,
@@ -34,8 +36,7 @@
   }
 
   .ember-power-select-multiple-options {
-    display: flex;
-    flex-wrap: wrap;
+    @apply flex flex-wrap h-full;
   }
 
   .ember-power-select-trigger-multiple-input {
