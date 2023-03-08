@@ -7,10 +7,10 @@ import MockDate from "mockdate";
 module("Integration | Helper | parse-date", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("the helper parses dates", async function (assert) {
-    // Make sure the date is always the same
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+  // Make sure the date is always the same
+  MockDate.set("2000-01-01T06:00:00.000-07:00");
 
+  test("", async function (assert) {
     await render(hbs`
       <div class="valid">
         {{parse-date 628021800000}}
