@@ -4,11 +4,11 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, pauseTest, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { DocumentPerson } from "document";
+import { HermesUser } from "hermes/types/document";
 
 interface PeopleSelectContext extends MirageTestContext {
-  people: DocumentPerson[];
-  onChange: (newValue: DocumentPerson[]) => void;
+  people: HermesUser[];
+  onChange: (newValue: HermesUser[]) => void;
 }
 
 module("Integration | Component | inputs/people-select", function (hooks) {
