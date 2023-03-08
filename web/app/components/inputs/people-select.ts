@@ -58,20 +58,18 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    */
   protected searchDirectory = task(async (query) => {
     try {
-      const res = await this.fetchSvc.fetch("/api/v1/people", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query,
-        }),
-      });
+      const people = await this.fetchSvc
+        .fetch("/api/v1/people", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: query,
+          }),
+        })
+        .then((response) => response?.json());
 
-      assert('response expected', res);
-
-      const peopleJson = await res.json();
-
-      if (peopleJson) {
-        this.people = peopleJson.map((p: GoogleUser) => {
+      if (people) {
+        this.people = people.map((p: GoogleUser) => {
           return {
             email: p.emailAddresses[0]?.value,
             imgURL: p.photos?.[0]?.url,
