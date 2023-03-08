@@ -7,6 +7,7 @@
 
     <div class="primary-links">
       <LinkTo
+        data-test-nav-link="all"
         @route="authenticated.all"
         @current-when="authenticated.all"
         @query={{this.defaultBrowseScreenQueryParams}}
@@ -14,6 +15,7 @@
         All Docs
       </LinkTo>
       <LinkTo
+        data-test-nav-link="my"
         @route="authenticated.my"
         @current-when="authenticated.my"
         @query={{this.defaultBrowseScreenQueryParams}}
@@ -21,6 +23,7 @@
         My Docs
       </LinkTo>
       <LinkTo
+        data-test-nav-link="drafts"
         @route="authenticated.drafts"
         @current-when="authenticated.drafts"
         @query={{this.defaultBrowseScreenQueryParams}}
@@ -29,7 +32,7 @@
       </LinkTo>
     </div>
 
-    <Header::Search class="search-bar" />
+    <Header::Search data-test-nav-search-bar class="search-bar" />
 
     <div class="user-buttons">
       <Hds::Button
@@ -40,6 +43,9 @@
         class="create-draft-button"
       />
       <div class="relative">
+        {{#if this.userMenuHighlightIsShown}}
+          <Header::UserMenuHighlight />
+        {{/if}}
         {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
         <img
           src={{this.profile.picture}}
@@ -48,18 +54,37 @@
           referrerpolicy="no-referrer"
         />
         <Hds::Dropdown as |dd|>
-          <dd.ToggleIcon @text="User menu" @icon="user" />
-          <dd.Title @text={{this.profile.name}} class="text-body-200" />
-          <dd.Description @text={{this.profile.email}} class="text-body-200" />
+          <dd.ToggleIcon
+            data-test-user-menu-toggle
+            @text="User menu"
+            @icon="user"
+          />
+          <dd.Title
+            data-test-user-menu-title
+            {{did-insert this.onDropdownOpen}}
+            {{will-destroy this.onDropdownClose}}
+            @text={{this.profile.name}}
+            class="text-body-200"
+          />
+          <dd.Description
+            data-test-user-menu-email
+            @text={{this.profile.email}}
+            class="text-body-200"
+          />
           <dd.Separator class="mt-2" />
           <dd.Interactive
+            data-test-user-menu-item="email-notifications"
             @route="authenticated.settings"
             @text="Email notifications"
+            class={{if
+              this.emailNotificationsHighlightIsShown
+              "highlighted-new"
+            }}
           />
-
           <dd.Interactive
+            data-test-user-menu-item="sign-out"
             {{on "click" this.invalidateSession}}
-            @text="Sign Out"
+            @text="Sign out"
           />
         </Hds::Dropdown>
       </div>

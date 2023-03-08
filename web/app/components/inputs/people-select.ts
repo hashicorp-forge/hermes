@@ -4,7 +4,7 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
 
-export interface Person {
+export interface GoogleUser {
   emailAddresses: { value: string }[];
   photos: { url: string }[];
 }
@@ -12,9 +12,9 @@ export interface Person {
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected: Person[];
+    selected: GoogleUser[];
     onBlur?: () => void;
-    onChange: (people: Person[]) => void;
+    onChange: (people: GoogleUser[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
   };
@@ -72,7 +72,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       const peopleJson = await res.json();
 
       if (peopleJson) {
-        this.people = peopleJson.map((p: Person) => {
+        this.people = peopleJson.map((p: GoogleUser) => {
           return {
             email: p.emailAddresses[0]?.value,
             imgURL: p.photos?.[0]?.url,
