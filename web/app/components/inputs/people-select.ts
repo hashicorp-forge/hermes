@@ -14,7 +14,7 @@ export interface GoogleUser {
 
 interface PeopleSelectComponentSignature {
   Args: {
-    selected: GoogleUser[];
+    selected: HermesUser[];
     onBlur?: () => void;
     onChange: (people: GoogleUser[]) => void;
   };
