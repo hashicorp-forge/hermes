@@ -54,4 +54,13 @@
   .create-draft-button {
     @apply rounded-full w-9 p-0;
   }
+
+  .highlighted-new {
+    .hds-dropdown-list-item__interactive-text {
+      &::after {
+        content: "New";
+        @apply text-body-100 px-2 py-1 rounded font-medium bg-color-surface-highlight text-color-foreground-highlight ml-0.5;
+      }
+    }
+  }
 }
