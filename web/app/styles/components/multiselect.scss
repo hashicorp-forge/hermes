@@ -6,6 +6,16 @@
   border: 0;
   padding: 0;
 
+  &--narrow {
+    min-width: 0;
+  }
+
+  &.ember-power-select-trigger,
+  &.ember-power-select-trigger-multiple-input {
+    line-height: 1;
+    @apply h-auto min-h-[36px];
+  }
+
   &:hover,
   &.mock-hover {
     border-color: var(--token-form-control-base-border-color-hover);
@@ -16,5 +26,59 @@
     border-color: var(--token-color-focus-action-internal);
     outline: 3px solid var(--token-color-focus-action-external);
     outline-offset: 0px;
+  }
+
+  .ember-power-select-status-icon {
+    display: none;
+  }
+
+  .ember-power-select-multiple-options {
+    @apply flex flex-wrap h-full;
+  }
+
+  .ember-power-select-trigger-multiple-input {
+    min-width: 80px;
+
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
+  }
+
+  .ember-power-select-multiple-option {
+    position: relative;
+    border: none;
+    padding: 3px 7px;
+    cursor: pointer;
+    flex-basis: 0;
+    white-space: nowrap;
+
+    // avoid overlapping the dropdown affordance
+    width: calc(100% - 28px);
+
+    &:hover {
+      background: var(--token-color-palette-neutral-200);
+    }
+
+    .flight-icon {
+      vertical-align: middle;
+    }
+
+    // This is an unremovable element used to remove selected options.
+    // We don't want the little x at all, but we need to continue to use this
+    // button, so we're hacking it a bit.
+    .ember-power-select-multiple-remove-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      color: transparent;
+      border-radius: var(--token-form-control-border-radius);
+
+      &:focus,
+      &:active {
+        outline: 2px solid var(--token-color-focus-action-internal);
+      }
+    }
   }
 }

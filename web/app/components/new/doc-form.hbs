@@ -6,12 +6,14 @@
       {{@docType}}
       draft...
     </div>
-    <div class="text-body-200 text-color-foreground-faint">This usually takes 10-20 seconds.</div>
+    <div class="text-body-200 text-color-foreground-faint">This usually takes
+      10-20 seconds.</div>
   </div>
 {{else}}
   <form
     class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
     {{on "submit" this.submit}}
+    {{did-insert this.registerForm}}
   >
     <div>
       <div class="space-y-4">
@@ -37,16 +39,27 @@
             proposing.</F.HelperText>
         </Hds::Form::TextInput::Field>
 
-        <Hds::Form::Textarea::Field
-          @value={{this.summary}}
-          rows="3"
-          name="summary"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Summary</F.Label>
-          <F.HelperText>One or two sentences outlining your doc.</F.HelperText>
-        </Hds::Form::Textarea::Field>
+        <div class="relative">
+          <Hds::Form::Textarea::Field
+            @value={{this.summary}}
+            rows="3"
+            name="summary"
+            {{on "input" this.updateForm}}
+            as |F|
+          >
+            <F.Label>Summary</F.Label>
+            <F.HelperText>
+              <span
+                class={{if
+                  this.summaryIsLong
+                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                }}
+              >One or two sentences</span>
+              outlining your doc.
+              {{if this.summaryIsLong "(Just a recommendation)"}}
+            </F.HelperText>
+          </Hds::Form::Textarea::Field>
+        </div>
 
         <Hds::Form::Select::Field
           @type="text"
@@ -64,7 +77,11 @@
             <F.Options>
               <option value=""></option>
               {{#each-in @productAbbrevMappings as |name|}}
-                <option value="{{name}}">{{name}}</option>
+                <option
+                  value="{{name}}"
+                  {{! This allows us to recover from errors: }}
+                  selected={{eq name this.productArea}}
+                >{{name}}</option>
               {{/each-in}}
             </F.Options>
           {{/if}}
@@ -77,7 +94,6 @@
           placeholder="Select product/area to populate abbreviation"
           @isInvalid={{this.formErrors.productAbbreviation}}
           name="productAbbreviation"
-          {{on "input" this.updateForm}}
           disabled
           as |F|
         >
@@ -129,7 +145,7 @@
           </F.HelperText>
         </Hds::Form::Field> --}}
 
-        <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
+        <Hds::Form::Field @layout="vertical" as |F|>
           {{yield
             (hash
               Error=F.Error
@@ -140,20 +156,11 @@
             )
           }}
           <F.Control>
-            <PowerSelectMultiple
-              class="hds-form-field__control multiselect"
-              @searchEnabled={{true}}
-              @search={{perform this.searchDirectory}}
-              @searchField="email"
-              @options={{this.people}}
+            <Inputs::PeopleSelect
+              class="multiselect mt-2 w-auto"
               @selected={{this.contributors}}
-              @placeholder="Search for your peers..."
               @onChange={{this.updateContributors}}
-              @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
-              as |value|
-            >
-              {{value.email}}
-            </PowerSelectMultiple>
+            />
           </F.Control>
           <F.Label><FlightIcon @name="users" />
             Add contributors
@@ -184,7 +191,7 @@
         <Hds::Button
           @text="Create {{@docType}} in Google Drive"
           type="submit"
-          disabled={{not this.isValid}}
+          disabled={{not this.formRequirementsMet}}
           class="w-full"
         />
       </div>
