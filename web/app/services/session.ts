@@ -2,12 +2,13 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
-import { task, timeout } from "ember-concurrency";
+import { keepLatestTask, timeout } from "ember-concurrency";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
+import simpleTimeout from "hermes/utils/simple-timeout";
 
-const TIMEOUT_VALUE = Ember.testing ? 0 : 60000;
+const TIMEOUT_VALUE = Ember.testing ? 500 : 30000;
 
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
@@ -15,10 +16,19 @@ export default class SessionService extends EmberSimpleAuthSessionService {
 
   readonly SESSION_STORAGE_KEY: string = "hermes.redirectTarget";
 
+  /**
+   * Whether the service should show a reauthentication message.
+   * True when the user has dismissed a previous re-auth message.
+   */
   @tracked preventReauthenticationMessage = false;
 
-  checkIfAuthTokenExpired = task(async () => {
-    await timeout(TIMEOUT_VALUE);
+  /**
+   * A persistent task that periodically checks if the user's
+   * session has expired, and shows a flash message if it has.
+   * Kicked off by the Authenticated route.
+   */
+  pollForExpiredAuth = keepLatestTask(async () => {
+    await simpleTimeout(TIMEOUT_VALUE);
 
     let tokenIsValid = await this.requireAuthentication(null, () => {});
 
@@ -37,7 +47,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         buttonAction: () => {
           this.authenticate("authenticator:torii", "google-oauth2-bearer");
           this.flashMessages.clearMessages();
-          this.preventReauthenticationMessage = false;
         },
         onDestroy: () => {
           this.preventReauthenticationMessage = true;
@@ -45,7 +54,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       });
     }
 
-    this.checkIfAuthTokenExpired.perform();
+    this.pollForExpiredAuth.perform();
   });
 
   // ember-simple-auth only uses a cookie to track redirect target if you're using fastboot, otherwise it keeps track of the redirect target as a parameter on the session service. See the source here: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L33-L50
