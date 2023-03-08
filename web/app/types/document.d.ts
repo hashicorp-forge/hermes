@@ -21,5 +21,5 @@ export interface HermesDocument {
 
 export interface HermesUser {
   email: string;
-  imgURL: string | null;
+  imgURL?: string | null;
 }
