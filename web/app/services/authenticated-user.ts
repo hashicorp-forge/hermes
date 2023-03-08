@@ -8,6 +8,7 @@ import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
 export interface AuthenticatedUser {
+  name: string;
   email: string;
   given_name: string;
   picture: string;
@@ -30,7 +31,7 @@ export default class AuthenticatedUserService extends Service {
   @service declare store: Store;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked private _info: AuthenticatedUser | null = null;
+  @tracked _info: AuthenticatedUser | null = null;
 
   get info(): AuthenticatedUser {
     assert("Authenticated must exist", this._info);
