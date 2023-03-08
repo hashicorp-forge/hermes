@@ -77,19 +77,19 @@ export default class AuthenticatedUserService extends Service {
    */
   fetchSubscriptions = task(async () => {
     try {
-      let response = await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-        method: "GET",
-        headers: {
-          "Hermes-Google-Access-Token":
-            this.session.data.authenticated.access_token,
-        },
-      });
-      let subscriptions: string[] = await response.json();
+      let subscriptions = await this.fetchSvc
+        .fetch("/api/v1/me/subscriptions", {
+          method: "GET",
+          headers: {
+            "Hermes-Google-Access-Token":
+              this.session.data.authenticated.access_token,
+          },
+        })
+        .then((response) => response?.json());
 
       let newSubscriptions: Subscription[] = [];
 
       if (subscriptions) {
-        // map
         newSubscriptions = subscriptions.map((subscription: string) => {
           return {
             productArea: subscription,
