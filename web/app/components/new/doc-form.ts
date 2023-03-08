@@ -200,19 +200,24 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.docIsBeingCreated = true;
 
     try {
-      const docResponse = await this.fetchSvc.fetch("/api/v1/drafts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contributors: this.getEmails(this.contributors),
-          docType: this.args.docType,
-          owner: this.authenticatedUser.info.email,
-          product: this.productArea,
-          productAbbreviation: this.productAbbreviation,
-          summary: cleanString(this.summary),
-          title: cleanString(this.title),
-        }),
-      });
+      const doc = await this.fetchSvc
+        .fetch("/api/v1/drafts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contributors: this.getEmails(this.contributors),
+            docType: this.args.docType,
+            owner: this.authenticatedUser.info.email,
+            product: this.productArea,
+            productAbbreviation: this.productAbbreviation,
+            summary: cleanString(this.summary),
+            title: cleanString(this.title),
+          }),
+        })
+        .then((response) => {
+          assert("response must exist", response);
+          return response.json();
+        });
 
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
@@ -223,11 +228,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
         AWAIT_DOC_CREATED_MODAL_DELAY
       );
 
-      assert("doc must exist", docResponse);
-
-      let docJson = await docResponse.json();
-
-      this.router.transitionTo("authenticated.document", docJson.id, {
+      this.router.transitionTo("authenticated.document", doc.id, {
         queryParams: { draft: true },
       });
     } catch (err: unknown) {
