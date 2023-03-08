@@ -200,7 +200,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.docIsBeingCreated = true;
 
     try {
-      const doc = await this.fetchSvc.fetch("/api/v1/drafts", {
+      const docResponse = await this.fetchSvc.fetch("/api/v1/drafts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -223,7 +223,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
         AWAIT_DOC_CREATED_MODAL_DELAY
       );
 
-      this.router.transitionTo("authenticated.document", doc.id, {
+      assert("doc must exist", docResponse);
+
+      let docJson = await docResponse.json();
+
+      this.router.transitionTo("authenticated.document", docJson.id, {
         queryParams: { draft: true },
       });
     } catch (err: unknown) {
