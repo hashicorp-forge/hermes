@@ -17,7 +17,7 @@ declare module "ember-simple-auth/services/session" {
     authenticate(...args: any[]): RSVP.Promise;
     invalidate(...args: any): RSVP.Promise;
     requireAuthentication(
-      transition: Transition,
+      transition: Transition | null,
       routeOrCallback: string | function
     ): RSVP.Promise;
     prohibitAuthentication(routeOrCallback: string | function): RSVP.Promise;

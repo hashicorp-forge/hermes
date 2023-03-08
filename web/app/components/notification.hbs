@@ -9,6 +9,13 @@
       >
         <T.Title>{{flash.title}}</T.Title>
         <T.Description>{{flash.message}}</T.Description>
+        {{#if (and flash.buttonText flash.buttonAction)}}
+          <T.Button
+            @text={{flash.buttonText}}
+            @icon={{flash.buttonIcon}}
+            {{on "click" flash.buttonAction}}
+          />
+        {{/if}}
       </Hds::Toast>
     </FlashMessage>
   {{/each}}
