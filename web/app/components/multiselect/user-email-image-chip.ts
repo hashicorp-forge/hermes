@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
-import { DocumentPerson } from "document";
+import { GoogleUser } from "../inputs/people-select";
 
 interface MultiselectUserEmailImageChipComponentSignature {
   Args: {
-    option: DocumentPerson;
+    option: GoogleUser;
   };
 }
 
