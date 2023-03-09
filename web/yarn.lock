@@ -1820,7 +1820,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@embroider/addon-shim@npm:^1.0.0, @embroider/addon-shim@npm:^1.5.0":
+"@embroider/addon-shim@npm:^1.0.0, @embroider/addon-shim@npm:^1.5.0, @embroider/addon-shim@npm:^1.8.4":
   version: 1.8.4
   resolution: "@embroider/addon-shim@npm:1.8.4"
   dependencies:
@@ -8401,6 +8401,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ember-modifier@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "ember-modifier@npm:4.1.0"
+  dependencies:
+    "@embroider/addon-shim": ^1.8.4
+    ember-cli-normalize-entity-name: ^1.0.0
+    ember-cli-string-utils: ^1.1.0
+  peerDependencies:
+    ember-source: "*"
+  peerDependenciesMeta:
+    ember-source:
+      optional: true
+  checksum: 5e14a864de2184c07e59fb9bc76a09ae25d1bd37722a94751a3cef6165df22027007696c4dda03e1862cb3bbeefb046772810dda3104d05c7fe8476389c34a77
+  languageName: node
+  linkType: hard
+
 "ember-named-blocks-polyfill@npm:^0.2.5":
   version: 0.2.5
   resolution: "ember-named-blocks-polyfill@npm:0.2.5"
@@ -10809,6 +10825,7 @@ __metadata:
     ember-focus-trap: ^1.0.1
     ember-load-initializers: ^2.1.2
     ember-maybe-import-regenerator: ^0.1.6
+    ember-modifier: ^4.1.0
     ember-on-helper: ^0.1.0
     ember-page-title: ^6.2.2
     ember-power-select-with-create: ^1.0.0

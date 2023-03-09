@@ -103,7 +103,9 @@
             </:default>
             <:editing as |F|>
               <Hds::Form::Textarea::Field
+                {{auto-height-textarea}}
                 @value={{F.value}}
+                class="primary-textarea"
                 name="title"
                 {{on "blur" F.update}}
                 as |F|
@@ -145,7 +147,9 @@
             </:default>
             <:editing as |F|>
               <Hds::Form::Textarea::Field
+                {{auto-height-textarea}}
                 @value={{F.value}}
+                class="primary-textarea"
                 name="summary"
                 {{on "blur" F.update}}
                 as |F|
