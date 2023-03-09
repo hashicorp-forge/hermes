@@ -7,8 +7,9 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
+import { getOwner } from "@ember/application";
 
-const TIMEOUT_VALUE = Ember.testing ? 500 : 30000;
+const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
 
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
@@ -22,6 +23,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   @tracked preventReauthenticationMessage = false;
 
+  @tracked tokenIsValid = true;
+
   /**
    * A persistent task that periodically checks if the user's
    * session has expired, and shows a flash message if it has.
@@ -30,13 +33,11 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(TIMEOUT_VALUE);
 
-    let tokenIsValid = await this.requireAuthentication(null, () => {});
-
-    if (tokenIsValid) {
+    if (this.tokenIsValid) {
       this.preventReauthenticationMessage = false;
     } else if (!this.preventReauthenticationMessage) {
       this.flashMessages.add({
-        title: "Google token expired",
+        title: "Login token expired",
         message: "Please reauthenticate to keep using Hermes.",
         type: "warning",
         sticky: true,
@@ -62,6 +63,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
+    console.log("handleAuthentication");
     let redirectTarget = window.sessionStorage.getItem(
       this.SESSION_STORAGE_KEY
     );
@@ -77,5 +79,18 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     transition.followRedirects().then(() => {
       window.sessionStorage.removeItem(this.SESSION_STORAGE_KEY);
     });
+  }
+
+  handleInvalidation(wasInitiatedManually?: boolean) {
+    console.log("handleInvalidation");
+
+    if (!wasInitiatedManually) {
+      this.tokenIsValid = false;
+      return;
+    }
+
+    this.invalidate();
+
+    this.router.transitionTo("authenticate");
   }
 }

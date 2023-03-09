@@ -4,12 +4,12 @@
       data-test-flash-notification
       @flash={{flash}}
       class="notification"
-      as |component flash|
+      as |component flash close|
     >
       <Hds::Toast
         @color={{flash.type}}
         @icon={{flash.icon}}
-        @onDismiss={{this.dismiss}}
+        @onDismiss={{close}}
         as |T|
       >
         <T.Title data-test-flash-notification-title>

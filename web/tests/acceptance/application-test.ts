@@ -29,7 +29,7 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    await invalidateSession();
+    session.handleInvalidation();
 
     await waitFor("[data-test-flash-notification]");
 
@@ -39,7 +39,7 @@ module("Acceptance | application", function (hooks) {
 
     assert
       .dom("[data-test-flash-notification-title]")
-      .hasText("Google token expired");
+      .hasText("Login token expired");
 
     assert
       .dom("[data-test-flash-notification-description]")
