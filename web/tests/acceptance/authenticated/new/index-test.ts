@@ -5,7 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-interface AllRouteContext extends MirageTestContext {}
+interface AuthenticatedNewRouteTestContext extends MirageTestContext {}
 
 module("Acceptance | authenticated/new", function (hooks) {
   setupApplicationTest(hooks);
@@ -15,7 +15,9 @@ module("Acceptance | authenticated/new", function (hooks) {
     authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AllRouteContext, assert) {
+  test("the page title is correct", async function (this: AuthenticatedNewRouteTestContext, assert) {
+    this.server.create("me");
+
     await visit("/new");
     await waitFor("h1");
     assert.equal(getPageTitle(), "New Doc | Hermes");

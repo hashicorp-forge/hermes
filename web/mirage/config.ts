@@ -125,15 +125,8 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", () => {
-        return {
-          id: "123456789",
-          email: "user@example.com",
-          name: "User",
-          given_name: "User",
-          picture: "",
-          subscriptions: [],
-        };
+      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+        return schema.mes.first().attrs;
       });
 
       /**
