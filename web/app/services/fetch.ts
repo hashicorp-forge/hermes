@@ -7,7 +7,7 @@ import { inject as service } from "@ember/service";
 export default class FetchService extends Service {
   @service session;
 
-  async fetch(url, options = {}) {
+  async fetch(url, options = {}, isPollCall = false) {
     // Add the Google access token in a header (for auth) if the URL starts with
     // a frontslash, which will only target the application backend.
     if (Array.from(url)[0] == "/") {
@@ -20,12 +20,18 @@ export default class FetchService extends Service {
     try {
       const resp = await fetch(url, options);
 
-      this.session.pollResponseIs401 = resp.status === 401;
+      this.session.pollResponseIs401 = resp.status === 401 && isPollCall;
 
       if (!resp.ok) {
-        if (!this.session.pollResponseIs401) {
-          throw new Error(`Bad response: ${resp.statusText}`);
+        if (resp.status === 401) {
+          if (isPollCall) {
+            // handle poll-call failures via the session service
+            return;
+          } else {
+            this.session.invalidate();
+          }
         }
+        throw new Error(`Bad response: ${resp.statusText}`);
       }
 
       return resp;

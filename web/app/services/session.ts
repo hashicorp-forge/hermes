@@ -37,13 +37,16 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(TIMEOUT_VALUE);
 
-    // check if the backend thinks the token is valid
-    this.fetch.fetch("/api/v1/me/subscriptions", {
-      method: "HEAD",
-      headers: {
-        "Hermes-Google-Access-Token": this.data.authenticated.access_token,
+    this.fetch.fetch(
+      "/api/v1/me/subscriptions",
+      {
+        method: "HEAD",
+        headers: {
+          "Hermes-Google-Access-Token": this.data.authenticated.access_token,
+        },
       },
-    });
+      true
+    );
 
     let isLoggedIn = await this.requireAuthentication(null, () => {});
 
