@@ -16,15 +16,11 @@ module("Acceptance | authenticated/new", function (hooks) {
   });
 
   test("the page title is correct (RFC)", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/new/doc?docType=RFC");
     assert.equal(getPageTitle(), "Create Your RFC | Hermes");
   });
 
   test("the page title is correct (PRD)", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/new/doc?docType=PRD");
     assert.equal(getPageTitle(), "Create Your PRD | Hermes");
   });

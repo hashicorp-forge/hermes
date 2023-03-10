@@ -16,8 +16,6 @@ module("Acceptance | authenticated/all", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/all");
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });

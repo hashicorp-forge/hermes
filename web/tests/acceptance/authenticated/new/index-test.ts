@@ -16,8 +16,6 @@ module("Acceptance | authenticated/new", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedNewRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/new");
     await waitFor("h1");
     assert.equal(getPageTitle(), "New Doc | Hermes");

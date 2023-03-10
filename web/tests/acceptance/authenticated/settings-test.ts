@@ -16,8 +16,6 @@ module("Acceptance | authenticated/settings", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedSettingsRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/settings");
     assert.equal(getPageTitle(), "Email Notifications | Hermes");
   });

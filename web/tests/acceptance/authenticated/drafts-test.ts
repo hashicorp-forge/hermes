@@ -16,8 +16,6 @@ module("Acceptance | authenticated/drafts", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedDraftsRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/drafts");
     assert.equal(getPageTitle(), "My Drafts | Hermes");
   });

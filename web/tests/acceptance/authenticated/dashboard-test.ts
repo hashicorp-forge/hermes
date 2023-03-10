@@ -16,8 +16,6 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedDashboardRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/dashboard");
     assert.equal(getPageTitle(), "Dashboard | Hermes");
   });

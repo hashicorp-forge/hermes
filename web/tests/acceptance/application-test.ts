@@ -18,8 +18,6 @@ module("Acceptance | application", function (hooks) {
   });
 
   test("a message shows when the front-end auth token expires", async function (this: ApplicationTestContext, assert) {
-    this.server.create("me");
-
     await authenticateSession({});
 
     await visit("/");
@@ -59,8 +57,6 @@ module("Acceptance | application", function (hooks) {
   });
 
   test("a message shows when the back-end auth token expires", async function (this: ApplicationTestContext, assert) {
-    this.server.create("me");
-
     await authenticateSession({});
 
     await visit("/");
@@ -90,7 +86,6 @@ module("Acceptance | application", function (hooks) {
 
   test("the authorize button works as expected", async function (this: ApplicationTestContext, assert) {
     let authCount = 0;
-    this.server.create("me");
 
     await authenticateSession({});
 

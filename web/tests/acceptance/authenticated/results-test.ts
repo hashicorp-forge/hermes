@@ -16,8 +16,6 @@ module("Acceptance | authenticated/results", function (hooks) {
   });
 
   test("the page title is correct", async function (this: AuthenticatedResultsRouteTestContext, assert) {
-    this.server.create("me");
-
     await visit("/results");
     assert.equal(getPageTitle(), "Search Results | Hermes");
   });
