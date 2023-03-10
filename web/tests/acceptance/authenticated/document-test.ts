@@ -16,14 +16,14 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("the page title is correct (published doc)", async function (this: AllRouteContext, assert) {
-    this.server.create("document", { objectID: 1, title: "Test Document" });
+    this.server.create("document", { id: 1, title: "Test Document" });
     await visit("/document/1");
     assert.equal(getPageTitle(), "Test Document | Hermes");
   });
 
   test("the page title is correct (draft)", async function (this: AllRouteContext, assert) {
     this.server.create("document", {
-      objectID: 1,
+      id: 1,
       title: "Test Document",
       status: "Draft",
     });

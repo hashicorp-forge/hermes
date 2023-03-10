@@ -20,7 +20,6 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
   });
 
   test("it adds viewed documents to an index in the expected order", async function (this: RecentlyViewedDocsContext, assert) {
-    this.server.create("recently-viewed-docs-database");
     this.server.createList("document", 10);
     assert.equal(this.recentDocs.all, null, "the index is empty");
     await this.recentDocs.markViewed.perform("doc-1");
@@ -71,7 +70,6 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
   });
 
   test("it handles legacy users", async function (this: RecentlyViewedDocsContext, assert) {
-    this.server.create("recently-viewed-docs-database");
     this.server.createList("document", 4);
     this.server.createList("recently-viewed-doc", 4, { isLegacy: true });
     await this.recentDocs.fetchAll.perform();
