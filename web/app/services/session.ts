@@ -11,11 +11,11 @@ import { getOwner } from "@ember/application";
 
 const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
 
+export const SESSION_STORAGE_KEY = "hermes.redirectTarget";
+
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
   @service declare flashMessages: FlashMessageService;
-
-  readonly SESSION_STORAGE_KEY: string = "hermes.redirectTarget";
 
   /**
    * Whether the service should show a reauthentication message.
@@ -63,10 +63,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    console.log("handleAuthentication");
-    let redirectTarget = window.sessionStorage.getItem(
-      this.SESSION_STORAGE_KEY
-    );
+    let redirectTarget = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
     let transition;
 
     if (redirectTarget) {
@@ -77,7 +74,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       );
     }
     transition.followRedirects().then(() => {
-      window.sessionStorage.removeItem(this.SESSION_STORAGE_KEY);
+      window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
     });
   }
 
