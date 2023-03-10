@@ -43,12 +43,9 @@ export default function (mirageConfig) {
       /**
        *  Used by the RecentlyViewedDocsService to log a viewed doc.
        */
-      this.post(
-        "https://www.googleapis.com/upload/drive/v3/files",
-        (schema, request) => {
-          return new Response(200, {});
-        }
-      );
+      this.post("https://www.googleapis.com/upload/drive/v3/files", () => {
+        return new Response(200, {});
+      });
 
       /**
        * Used by the AlgoliaSearchService to query Algolia.
@@ -183,20 +180,17 @@ export default function (mirageConfig) {
       });
 
       // RecentlyViewedDocsService / fetchIndexID
-      this.get(
-        "https://www.googleapis.com/drive/v3/files",
-        (schema, request) => {
-          let file = schema.recentlyViewedDocsDatabases.first()?.attrs;
+      this.get("https://www.googleapis.com/drive/v3/files", (schema) => {
+        let file = schema.recentlyViewedDocsDatabases.first()?.attrs;
 
-          if (!file) {
-            file = schema.recentlyViewedDocsDatabases.create({
-              name: "recently_viewed_docs.json",
-            }).attrs;
-          }
-
-          return new Response(200, {}, { files: [file] });
+        if (!file) {
+          file = schema.recentlyViewedDocsDatabases.create({
+            name: "recently_viewed_docs.json",
+          }).attrs;
         }
-      );
+
+        return new Response(200, {}, { files: [file] });
+      });
 
       // RecentlyViewedDocsService / fetchAll
       this.get("https://www.googleapis.com/drive/v3/files/:id", (schema) => {
