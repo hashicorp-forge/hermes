@@ -5,6 +5,8 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
+interface AuthenticatedAllRouteTestContext extends MirageTestContext {}
+
 module("Acceptance | authenticated/all", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
@@ -13,7 +15,7 @@ module("Acceptance | authenticated/all", function (hooks) {
     authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: MirageTestContext, assert) {
+  test("the page title is correct", async function (this: AuthenticatedAllRouteTestContext, assert) {
     this.server.create("me");
 
     await visit("/all");

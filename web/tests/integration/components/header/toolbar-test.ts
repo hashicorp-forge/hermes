@@ -3,6 +3,8 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownObjects } from "hermes/types/facets";
+import RouterService from "@ember/routing/router-service";
+import { SortByLabel } from "hermes/components/header/toolbar";
 
 const FACETS = {
   docType: {
@@ -44,16 +46,23 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.dom(".facets").exists();
     assert
-      .dom(".sort-by-dropdown")
+      .dom("[data-test-facet-dropdown='sort']")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
-    assert.dom(".facets .hds-dropdown").exists({ count: 4 });
+    assert
+      .dom(".facets [data-test-facet-dropdown-trigger]")
+      .exists({ count: 4 });
+    assert
+      .dom('[data-test-facet-dropdown="sort"]')
+      .exists({ count: 1 })
+      .hasText(`Sort: ${SortByLabel.Newest}`);
 
-    assert.dom(".sort-by-dropdown").exists({ count: 1 });
-    assert.dom(".sort-by-dropdown").hasText("Sort: Newest");
-
-    await click("[data-test-sort-by-button]");
-    assert.dom(".hds-dropdown-list-item:nth-child(2)").hasText("Oldest");
+    await click(
+      `[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`
+    );
+    assert
+      .dom("[data-test-facet-dropdown-menu-item]:nth-child(2)")
+      .hasText("Oldest");
 
     this.set("sortControlIsHidden", true);
     assert
@@ -74,35 +83,36 @@ module("Integration | Component | header/toolbar", function (hooks) {
       "Submitted",
     ];
 
-    const STATUS_FACETS: FacetDropdownObjects = {};
+    let statusFacets: FacetDropdownObjects = {};
 
     STATUS_NAMES.forEach((status) => {
-      STATUS_FACETS[status] = { count: 1, selected: false };
+      statusFacets[status] = { count: 1, selected: false };
     });
 
-    this.set("facets", { status: STATUS_FACETS });
+    this.set("facets", { status: statusFacets });
 
     await render(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    await click("[data-test-facet-dropdown='status'] button");
+    await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(".hds-dropdown-list-item")?.map((el) => el.textContent?.trim()),
-      [
-        "Approved (1)",
-        "In-Review (1)",
-        "In Review (1)",
-        "Obsolete (1)",
-        "WIP (1)",
-      ]
+      findAll(
+        "[data-test-facet-dropdown-menu-item] [data-test-facet-dropdown-list-item-value]"
+      )?.map((el) => el.textContent?.trim()),
+      ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
+      "Unsupported statuses are filtered out"
     );
+  });
 
+  test("it conditionally renders the status facet disabled", async function (assert) {
     this.set("facets", { status: {} });
-
+    await render(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
     assert
-      .dom("[data-test-facet-dropdown='status'] button")
+      .dom("[data-test-facet-dropdown-trigger='Status']")
       .hasAttribute("disabled");
   });
 
@@ -112,10 +122,14 @@ module("Integration | Component | header/toolbar", function (hooks) {
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert.dom("[data-test-sort-by-button]").doesNotHaveAttribute("disabled");
+    assert
+      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
+      .doesNotHaveAttribute("disabled");
     this.set("facets", {});
 
-    assert.dom("[data-test-sort-by-button]").hasAttribute("disabled");
+    assert
+      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
+      .hasAttribute("disabled");
   });
 
   /**

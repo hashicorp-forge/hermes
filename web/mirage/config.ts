@@ -141,12 +141,15 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get(
-        "https://www.googleapis.com/userinfo/v2/me",
-        (schema, request) => {
+      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+        // If the test has set a user, return it.
+        if (schema.mes.first()) {
           return schema.mes.first().attrs;
+        } else {
+          // Otherwise, create and return a new user.
+          return schema.mes.create().attrs;
         }
-      );
+      });
 
       /**
        * Used by the PeopleSelect component to get a list of people.
