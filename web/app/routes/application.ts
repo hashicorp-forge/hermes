@@ -13,6 +13,10 @@ export default class ApplicationRoute extends Route {
   @service declare flags: any;
   @service declare session: SessionService;
 
+  /**
+   * Catch-all for bubbled-up model errors.
+   * https://guides.emberjs.com/release/routing/loading-and-error-substates/#toc_the-error-event
+   */
   @action error(error: unknown) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
