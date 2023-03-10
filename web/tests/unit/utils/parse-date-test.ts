@@ -20,5 +20,7 @@ module("Unit | Utility | parse-date", function () {
     assert.equal(parseDate(undefined), null);
     assert.equal(parseDate("628021800000"), null);
     assert.equal(parseDate("4 days ago"), null);
+
+    MockDate.reset();
   });
 });
