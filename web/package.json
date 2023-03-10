@@ -82,6 +82,7 @@
     "ember-focus-trap": "^1.0.1",
     "ember-load-initializers": "^2.1.2",
     "ember-maybe-import-regenerator": "^0.1.6",
+    "ember-modifier": "^4.0.0",
     "ember-on-helper": "^0.1.0",
     "ember-page-title": "^6.2.2",
     "ember-qunit": "^5.1.5",
@@ -119,6 +120,7 @@
     "@csstools/postcss-sass": "^5.0.1",
     "@hashicorp/design-system-components": "^1.4.0",
     "@hashicorp/ember-flight-icons": "^3.0.2",
+    "@types/sinon": "^10.0.13",
     "algoliasearch": "^4.13.0",
     "autoprefixer": "^10.4.4",
     "ember-cli-postcss": "^8.0.0",
@@ -129,6 +131,7 @@
     "miragejs": "^0.1.47",
     "postcss-scss": "^4.0.3",
     "replace-special-characters": "^1.2.7",
+    "sinon": "^15.0.1",
     "tailwindcss": "^3.0.23",
     "torii": "^0.10.1",
     "webpack": "^5.70.0"
