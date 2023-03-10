@@ -18,3 +18,15 @@
     @apply text-body-100;
   }
 }
+/* Maintain contrast across hover and focus states */
+.hds-badge-count--color-neutral.hds-badge-count--type-filled {
+  @apply mix-blend-multiply;
+}
+
+.facet-dropdown-menu-item-link {
+  &.is-aria-selected {
+    .hds-badge-count--color-neutral.hds-badge-count--type-filled {
+      @apply bg-white bg-opacity-10 text-color-foreground-high-contrast mix-blend-screen;
+    }
+  }
+}
