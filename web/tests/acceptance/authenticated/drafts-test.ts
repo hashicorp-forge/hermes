@@ -5,7 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-interface AllRouteContext extends MirageTestContext {}
+interface AuthenticatedDraftsRouteTestContext extends MirageTestContext {}
 
 module("Acceptance | authenticated/drafts", function (hooks) {
   setupApplicationTest(hooks);
@@ -15,7 +15,9 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AllRouteContext, assert) {
+  test("the page title is correct", async function (this: AuthenticatedDraftsRouteTestContext, assert) {
+    this.server.create("me");
+
     await visit("/drafts");
     assert.equal(getPageTitle(), "My Drafts | Hermes");
   });
