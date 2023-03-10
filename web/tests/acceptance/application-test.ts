@@ -1,27 +1,26 @@
 import { click, teardownContext, visit, waitFor } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
-import {
-  authenticateSession,
-  invalidateSession,
-} from "ember-simple-auth/test-support";
-import { setupMirage } from "ember-cli-mirage/test-support";
+import { authenticateSession } from "ember-simple-auth/test-support";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
 
 module("Acceptance | application", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  test("a message shows when the user's auth token expires", async function (assert) {
-    const session = this.owner.lookup("service:session") as SessionService;
+  interface ApplicationTestContext extends MirageTestContext {
+    session: SessionService;
+  }
 
-    let authCount = 0;
+  hooks.beforeEach(function () {
+    this.set("session", this.owner.lookup("service:session"));
+  });
+
+  test("a message shows when the front-end auth token expires", async function (this: ApplicationTestContext, assert) {
+    this.server.create("me");
 
     await authenticateSession({});
-
-    session.authenticate = () => {
-      authCount++;
-    };
 
     await visit("/");
 
@@ -29,7 +28,7 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    session.handleInvalidation();
+    await this.session.invalidate();
 
     await waitFor("[data-test-flash-notification]");
 
@@ -48,7 +47,60 @@ module("Acceptance | application", function (hooks) {
     assert
       .dom("[data-test-flash-notification-button]")
       .hasText("Authenticate with Google");
+    /**
+     * FIXME: Investigate unresolved promises
+     *
+     * For reasons not yet clear, this test has unresolved promises
+     * that prevent it from completing naturally. Because of this,
+     * we handle teardown manually.
+     *
+     */
+    teardownContext(this);
+  });
 
+  test("a message shows when the back-end auth token expires", async function (this: ApplicationTestContext, assert) {
+    this.server.create("me");
+
+    await authenticateSession({});
+
+    await visit("/");
+
+    assert
+      .dom("[data-test-flash-notification]")
+      .doesNotExist("no flash notification when session is valid");
+
+    this.server.db.mes[0] = this.server.create("me", { isLoggedIn: false });
+
+    await waitFor("[data-test-flash-notification]");
+
+    assert
+      .dom("[data-test-flash-notification]")
+      .exists("flash notification is shown when session is invalid");
+
+    /**
+     * FIXME: Investigate unresolved promises
+     *
+     * For reasons not yet clear, this test has unresolved promises
+     * that prevent it from completing naturally. Because of this,
+     * we handle teardown manually.
+     *
+     */
+    teardownContext(this);
+  });
+
+  test("the authorize button works as expected", async function (this: ApplicationTestContext, assert) {
+    let authCount = 0;
+    this.server.create("me");
+
+    await authenticateSession({});
+
+    this.session.authenticate = () => {
+      authCount++;
+    };
+
+    await visit("/");
+    await this.session.invalidate();
+    await waitFor("[data-test-flash-notification]");
     await click("[data-test-flash-notification-button]");
 
     assert

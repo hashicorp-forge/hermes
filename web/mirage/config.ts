@@ -12,6 +12,22 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * HEAD requests
+       *
+       *************************************************************************/
+
+      this.head("/me/subscriptions", (schema, request) => {
+        let isLoggedIn = schema.db.mes[0].isLoggedIn;
+
+        if (isLoggedIn) {
+          return new Response(200, {});
+        } else {
+          return new Response(401, {});
+        }
+      });
+
+      /*************************************************************************
+       *
        * POST requests
        *
        *************************************************************************/
@@ -125,16 +141,12 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", () => {
-        return {
-          id: "123456789",
-          email: "user@example.com",
-          name: "User",
-          given_name: "User",
-          picture: "",
-          subscriptions: [],
-        };
-      });
+      this.get(
+        "https://www.googleapis.com/userinfo/v2/me",
+        (schema, request) => {
+          return schema.mes.first().attrs;
+        }
+      );
 
       /**
        * Used by the PeopleSelect component to get a list of people.

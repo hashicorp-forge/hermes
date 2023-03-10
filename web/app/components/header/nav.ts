@@ -77,6 +77,6 @@ export default class NavComponent extends Component<NavComponentSignature> {
   }
 
   @action protected invalidateSession(): void {
-    this.session.handleInvalidation(true);
+    this.session.invalidate();
   }
 }

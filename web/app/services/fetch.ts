@@ -20,11 +20,12 @@ export default class FetchService extends Service {
     try {
       const resp = await fetch(url, options);
 
+      this.session.pollResponseIs401 = resp.status === 401;
+
       if (!resp.ok) {
-        if (resp.status === 401) {
-          this.session.handleInvalidation();
+        if (!this.session.pollResponseIs401) {
+          throw new Error(`Bad response: ${resp.statusText}`);
         }
-        throw new Error(`Bad response: ${resp.statusText}`);
       }
 
       return resp;
@@ -37,7 +38,7 @@ export default class FetchService extends Service {
           err.message === "Failed to fetch")
       ) {
         // Swallow error and handle gracefully.
-        this.session.handleInvalidation(true);
+        this.session.invalidate();
       } else {
         // Re-throw the error to be handled at the call site.
         throw err;

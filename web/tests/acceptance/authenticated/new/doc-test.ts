@@ -5,8 +5,6 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-interface AllRouteContext extends MirageTestContext {}
-
 module("Acceptance | authenticated/new", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
@@ -15,12 +13,16 @@ module("Acceptance | authenticated/new", function (hooks) {
     authenticateSession({});
   });
 
-  test("the page title is correct (RFC)", async function (this: AllRouteContext, assert) {
+  test("the page title is correct (RFC)", async function (this: MirageTestContext, assert) {
+    this.server.create("me");
+
     await visit("/new/doc?docType=RFC");
     assert.equal(getPageTitle(), "Create Your RFC | Hermes");
   });
 
-  test("the page title is correct (PRD)", async function (this: AllRouteContext, assert) {
+  test("the page title is correct (PRD)", async function (this: MirageTestContext, assert) {
+    this.server.create("me");
+
     await visit("/new/doc?docType=PRD");
     assert.equal(getPageTitle(), "Create Your PRD | Hermes");
   });

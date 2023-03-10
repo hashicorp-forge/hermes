@@ -8,6 +8,7 @@ import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import { getOwner } from "@ember/application";
+import FetchService from "./fetch";
 
 const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
 
@@ -15,6 +16,8 @@ export const SESSION_STORAGE_KEY = "hermes.redirectTarget";
 
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
+  @service declare fetch: FetchService;
+  @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
 
   /**
@@ -24,6 +27,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @tracked preventReauthenticationMessage = false;
 
   @tracked tokenIsValid = true;
+  @tracked pollResponseIs401 = false;
 
   /**
    * A persistent task that periodically checks if the user's
@@ -32,6 +36,20 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(TIMEOUT_VALUE);
+
+    // check if the backend thinks the token is valid
+    this.fetch.fetch("/api/v1/me/subscriptions", {
+      method: "HEAD",
+      headers: {
+        "Hermes-Google-Access-Token": this.data.authenticated.access_token,
+      },
+    });
+
+    let isLoggedIn = await this.requireAuthentication(null, () => {});
+
+    if (this.pollResponseIs401 || !isLoggedIn) {
+      this.tokenIsValid = false;
+    }
 
     if (this.tokenIsValid) {
       this.preventReauthenticationMessage = false;
@@ -76,18 +94,5 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     transition.followRedirects().then(() => {
       window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
     });
-  }
-
-  handleInvalidation(wasInitiatedManually?: boolean) {
-    console.log("handleInvalidation");
-
-    if (!wasInitiatedManually) {
-      this.tokenIsValid = false;
-      return;
-    }
-
-    this.invalidate();
-
-    this.router.transitionTo("authenticate");
   }
 }
