@@ -54,11 +54,9 @@ export default class AuthenticatedUserService extends Service {
   /**
    * The headers to use in POST requests to the subscriptions endpoint.
    */
-  private get subscriptionsPostHeaders() {
+  private get subscriptionsPostHeader() {
     return {
       "Content-Type": "application/json",
-      "Hermes-Google-Access-Token":
-        this.session.data.authenticated.access_token,
     };
   }
 
@@ -80,10 +78,6 @@ export default class AuthenticatedUserService extends Service {
       let subscriptions = await this.fetchSvc
         .fetch("/api/v1/me/subscriptions", {
           method: "GET",
-          headers: {
-            "Hermes-Google-Access-Token":
-              this.session.data.authenticated.access_token,
-          },
         })
         .then((response) => response?.json());
 
@@ -128,7 +122,7 @@ export default class AuthenticatedUserService extends Service {
       try {
         await this.fetchSvc.fetch(`/api/v1/me/subscriptions`, {
           method: "POST",
-          headers: this.subscriptionsPostHeaders,
+          headers: this.subscriptionsPostHeader,
           body: this.subscriptionsPostBody,
         });
       } catch (e: unknown) {
@@ -167,7 +161,7 @@ export default class AuthenticatedUserService extends Service {
       try {
         await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
           method: "POST",
-          headers: this.subscriptionsPostHeaders,
+          headers: this.subscriptionsPostHeader,
           body: this.subscriptionsPostBody,
         });
       } catch (e: unknown) {
