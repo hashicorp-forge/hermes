@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import FetchService from "hermes/services/fetch";
+import Ember from "ember";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -19,6 +20,7 @@ interface PeopleSelectComponentSignature {
 }
 
 const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
@@ -59,7 +61,7 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    */
   protected searchDirectory = restartableTask(async (query: string) => {
     for (let i = 0; i < MAX_RETRIES; i++) {
-      let retryDelay = 500;
+      let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
         let response = await this.fetchSvc.fetch("/api/v1/people", {
@@ -82,8 +84,10 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         } else {
           this.people = [];
         }
+        // stop the loop if the query was successful
+        return;
       } catch (e) {
-        // Show the error if this is the last retry.
+        // Throw an error if this is the last retry.
         if (i === MAX_RETRIES - 1) {
           console.error(`Error querying people: ${e}`);
           throw e;
