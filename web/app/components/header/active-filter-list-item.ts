@@ -18,11 +18,14 @@ export default class HeaderActiveFilterListItemComponent extends Component<Heade
    * I.e., the ActiveFiltersService index minus the current filter.
    */
   get query() {
-    return Object.fromEntries(
-      Object.entries(this.activeFilters.index).map(([key, value]) => [
-        key,
-        value.filter((filter) => filter !== this.args.filter),
-      ])
-    );
+    return {
+      ...Object.fromEntries(
+        Object.entries(this.activeFilters.index).map(([key, value]) => [
+          key,
+          value.filter((filter) => filter !== this.args.filter),
+        ])
+      ),
+      page: 1,
+    };
   }
 }
