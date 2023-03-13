@@ -13,6 +13,7 @@
       "hermes/*": ["app/*"],
       "hermes/mirage/*": ["mirage/*"],
       "*": ["types/*"],
+      "fetch": ["node_modules/ember-fetch"],
       "ember-cli-flash/*": ["node_modules/ember-cli-flash"]
     }
   },
