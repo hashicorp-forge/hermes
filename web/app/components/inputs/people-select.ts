@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import { task } from "ember-concurrency";
+import { task, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 
@@ -17,6 +17,8 @@ interface PeopleSelectComponentSignature {
     onChange: (people: GoogleUser[]) => void;
   };
 }
+
+const MAX_RETRIES = 3;
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
   // @ts-ignore
@@ -58,38 +60,40 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    * Sets `this.people` to the results of the query.
    */
   protected searchDirectory = task(async (query: string) => {
-    try {
-      let fetchCall = this.fetchSvc.fetch("/api/v1/people", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query,
-        }),
-      });
+    let fetchCall, response;
 
-      let res = await fetchCall;
+    for (let i = 0; i < MAX_RETRIES; i++) {
+      let delay = 500;
 
-      if (!res) {
-        // If Google doesn't respond quickly, try one more time.
-        res = await fetchCall;
-      }
-
-      assert("response must be defined", res);
-      const peopleJson = await res.json();
-
-      if (peopleJson) {
-        this.people = peopleJson.map((p: GoogleUser) => {
-          return {
-            email: p.emailAddresses[0]?.value,
-            imgURL: p.photos?.[0]?.url,
-          };
+      try {
+        fetchCall = await this.fetchSvc.fetch("/api/v1/people", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: query,
+          }),
         });
-      } else {
-        this.people = [];
+        response = await fetchCall;
+        const peopleJson = await response.json();
+
+        if (peopleJson) {
+          this.people = peopleJson.map((p: GoogleUser) => {
+            return {
+              email: p.emailAddresses[0]?.value,
+              imgURL: p.photos?.[0]?.url,
+            };
+          });
+        } else {
+          this.people = [];
+        }
+      } catch (e) {
+        if (i === MAX_RETRIES - 1) {
+          console.error(`Error querying people: ${e}`);
+          throw e;
+        }
+        await timeout(delay);
+        delay *= 2;
       }
-    } catch (err) {
-      console.log(`Error querying people: ${err}`);
-      throw err;
     }
   });
 }
