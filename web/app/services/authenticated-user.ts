@@ -75,15 +75,15 @@ export default class AuthenticatedUserService extends Service {
    */
   fetchSubscriptions = task(async () => {
     try {
-      let response = await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-        method: "GET",
-      });
-      let subscriptions: string[] = await response.json();
+      let subscriptions = await this.fetchSvc
+        .fetch("/api/v1/me/subscriptions", {
+          method: "GET",
+        })
+        .then((response) => response?.json());
 
       let newSubscriptions: Subscription[] = [];
 
       if (subscriptions) {
-        // map
         newSubscriptions = subscriptions.map((subscription: string) => {
           return {
             productArea: subscription,
