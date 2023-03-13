@@ -3,6 +3,8 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { action } from "@ember/object";
+import FetchService from "hermes/services/fetch";
+import { assert } from "@ember/debug";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -18,9 +20,7 @@ interface PeopleSelectComponentSignature {
 }
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
-  // @ts-ignore
-  // FetchService not yet in the registry
-  @service("fetch") declare fetchSvc: any;
+  @service("fetch") declare fetchSvc: FetchService;
 
   /**
    * The list of people to display in the dropdown.
@@ -58,18 +58,18 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    */
   protected searchDirectory = task(async (query) => {
     try {
-      const res = await this.fetchSvc.fetch("/api/v1/people", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query,
-        }),
-      });
+      const people = await this.fetchSvc
+        .fetch("/api/v1/people", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: query,
+          }),
+        })
+        .then((response) => response?.json());
 
-      const peopleJson = await res.json();
-
-      if (peopleJson) {
-        this.people = peopleJson.map((p: GoogleUser) => {
+      if (people) {
+        this.people = people.map((p: GoogleUser) => {
           return {
             email: p.emailAddresses[0]?.value,
             imgURL: p.photos?.[0]?.url,
