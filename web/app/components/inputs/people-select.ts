@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import { task, timeout } from "ember-concurrency";
+import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import FetchService from "hermes/services/fetch";
 
@@ -57,9 +57,9 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
    */
-  protected searchDirectory = task(async (query: string) => {
+  protected searchDirectory = restartableTask(async (query: string) => {
     for (let i = 0; i < MAX_RETRIES; i++) {
-      let delay = 500;
+      let retryDelay = 500;
 
       try {
         let response = await this.fetchSvc.fetch("/api/v1/people", {
@@ -83,13 +83,17 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
           this.people = [];
         }
       } catch (e) {
+        // Show the error if this is the last retry.
         if (i === MAX_RETRIES - 1) {
           console.error(`Error querying people: ${e}`);
           throw e;
         }
 
-        await timeout(delay);
-        delay *= 2;
+        // Otherwise, wait and try again.
+        await timeout(retryDelay);
+
+        // Double the retry delay for the next retry.
+        retryDelay *= 2;
       }
     }
   });
