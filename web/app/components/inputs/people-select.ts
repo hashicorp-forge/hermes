@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { task, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
-import { assert } from "@ember/debug";
+import FetchService from "hermes/services/fetch";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -21,9 +21,7 @@ interface PeopleSelectComponentSignature {
 const MAX_RETRIES = 3;
 
 export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
-  // @ts-ignore
-  // FetchService not yet in the registry
-  @service("fetch") declare fetchSvc: any;
+  @service("fetch") declare fetchSvc: FetchService;
 
   /**
    * The list of people to display in the dropdown.
@@ -60,21 +58,19 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
    * Sets `this.people` to the results of the query.
    */
   protected searchDirectory = task(async (query: string) => {
-    let fetchCall, response;
-
     for (let i = 0; i < MAX_RETRIES; i++) {
       let delay = 500;
 
       try {
-        fetchCall = await this.fetchSvc.fetch("/api/v1/people", {
+        let response = await this.fetchSvc.fetch("/api/v1/people", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: query,
           }),
         });
-        response = await fetchCall;
-        const peopleJson = await response.json();
+
+        const peopleJson = await response?.json();
 
         if (peopleJson) {
           this.people = peopleJson.map((p: GoogleUser) => {
@@ -91,6 +87,7 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
           console.error(`Error querying people: ${e}`);
           throw e;
         }
+
         await timeout(delay);
         delay *= 2;
       }
