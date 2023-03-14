@@ -4,11 +4,11 @@ import { inject as service } from "@ember/service";
 
 export default class AuthenticatedDashboardController extends Controller {
   @alias("model.docsWaitingForReview") docsWaitingForReview;
-  @alias("model.recentlyViewedDocs") recentlyViewedDocs;
 
   @service router;
   @service authenticatedUser;
   @service("config") configSvc;
+  @service("recently-viewed-docs") recentDocs;
 
   queryParams = ["latestUpdates"];
   latestUpdates = "newDocs";
