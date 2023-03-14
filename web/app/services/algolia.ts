@@ -6,11 +6,7 @@ import { inject as service } from "@ember/service";
 import { restartableTask, task } from "ember-concurrency";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { RequestOptions } from "@algolia/transporter";
-import {
-  SearchOptions,
-  SearchResponse,
-  ObjectWithObjectID,
-} from "@algolia/client-search";
+import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import {
@@ -18,7 +14,6 @@ import {
   FacetRecord,
   FacetRecords,
 } from "hermes/types/facets";
-import FetchService from "./fetch";
 import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
@@ -30,7 +25,6 @@ export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 
 export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
-  @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
