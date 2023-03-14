@@ -23,6 +23,10 @@ export default class DocumentSidebarHeaderControlsComponent extends Component<Do
   }
   @tracked urlRecentlyCopied = false;
 
+  protected get tooltipPlacement() {
+    return this.args.isCollapsed ? "right" : "bottom";
+  }
+
   copyUrl = restartableTask(async () => {
     let url = this.shortLinkBaseURL
       ? `${

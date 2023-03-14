@@ -1,23 +1,30 @@
 <div class="sidebar-header flex w-full items-center justify-between">
 
-  {{! Remove xTab }}
-  <X::HdsTab
-    @label="Dashboard"
-    @icon="arrow-left"
-    @link="authenticated.dashboard"
-  />
+  <LinkTo
+    @route="authenticated.dashboard"
+    class="icon-link items-center text-inherit group hover:text-color-foreground-strong no-underline"
+  >
+    <FlightIcon
+      @name="arrow-left"
+      class="mr-1.5 text-color-foreground-faint group-hover:text-color-foreground-primary"
+    />
+    Dashboard
+  </LinkTo>
 
   <div class="flex items-center">
 
     {{#if @shareButtonIsShown}}
-      <Tooltip @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}>
+      <Tooltip
+        @placement={{this.tooltipPlacement}}
+        @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}
+      >
         <Action {{on "click" (perform this.copyUrl)}} class="icon-link">
           <FlightIcon @name={{if this.urlRecentlyCopied "check" "link"}} />
         </Action>
       </Tooltip>
     {{/if}}
 
-    <Tooltip @text="Open in Drive">
+    <Tooltip @placement={{this.tooltipPlacement}} @text="Open in Drive">
       <ExternalLink
         href="https://docs.google.com/document/d/{{@document.docID}}"
         class="icon-link"
@@ -26,7 +33,10 @@
       </ExternalLink>
     </Tooltip>
 
-    <Tooltip @text={{if @isCollapsed "Expand sidebar" "Collapse sidebar"}}>
+    <Tooltip
+      @placement={{this.tooltipPlacement}}
+      @text={{if @isCollapsed "Expand sidebar" "Collapse sidebar"}}
+    >
       <Action {{on "click" @toggleCollapsed}} class="icon-link">
         <FlightIcon @name={{if @isCollapsed "sidebar-show" "sidebar-hide"}} />
       </Action>

@@ -6,9 +6,13 @@
   }
 
   .body {
-    @apply space-y-8 pb-6;
+    @apply space-y-8 pb-6 pt-16 relative;
     overflow-y: auto;
     height: 100%;
+
+    .product-badge {
+      @apply top-0.5 bottom-auto;
+    }
   }
 
   .person-list {

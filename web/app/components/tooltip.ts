@@ -11,7 +11,6 @@ import {
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
-import { next, schedule } from "@ember/runloop";
 import { registerDestructor } from "@ember/destroyable";
 
 interface TooltipComponentSignature {
