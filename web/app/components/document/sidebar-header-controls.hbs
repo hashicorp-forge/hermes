@@ -1,4 +1,10 @@
 <div class="flex items-center">
+  {{!-- TODO: this is conditional --}}
+  <Tooltip @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}>
+    <Action {{on "click" (perform this.copyUrl)}} class="flex px-1.5 py-1">
+      <FlightIcon @name={{if this.urlRecentlyCopied "check" "link"}} />
+    </Action>
+  </Tooltip>
   <Tooltip @text="Open in Drive">
     <a
       href="https://docs.google.com/document/d/{{@document.docID}}"
@@ -8,12 +14,6 @@
     >
       <FlightIcon @name="external-link" />
     </a>
-  </Tooltip>
-
-  <Tooltip @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}>
-    <Action {{on "click" (perform this.copyUrl)}} class="flex px-1.5 py-1">
-      <FlightIcon @name={{if this.urlRecentlyCopied "check" "link"}} />
-    </Action>
   </Tooltip>
 
   <Tooltip @text={{if @isCollapsed "Expand sidebar" "Collapse sidebar"}}>
