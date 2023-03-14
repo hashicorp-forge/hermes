@@ -20,10 +20,6 @@ export default class DocumentSidebar extends Component {
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  @tracked modalErrorIsShown = false;
-  @tracked errorTitle = null;
-  @tracked errorDescription = null;
-
   get modalContainer() {
     return document.querySelector(".ember-application");
   }
@@ -139,10 +135,6 @@ export default class DocumentSidebar extends Component {
   }
 
   get moveToStatusButtonText() {
-    if (this.changeDocumentStatus.isRunning) {
-      return "Working...";
-    }
-
     return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
@@ -202,7 +194,6 @@ export default class DocumentSidebar extends Component {
     }
   }
 
-
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -234,16 +225,11 @@ export default class DocumentSidebar extends Component {
   *patchDocument(fields) {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
-    try {
-      yield this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
-      });
-    } catch (err) {
-      this.showModalError("Error updating document", err);
-      throw err;
-    }
+    yield this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fields),
+    });
 
     this.refreshRoute();
   }
@@ -251,47 +237,34 @@ export default class DocumentSidebar extends Component {
   @task
   *requestReview() {
     // Update approvers.
-    try {
-      yield this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
-      });
-    } catch (err) {
-      this.showModalError("Error updating approvers", err);
-      throw err;
-    }
+    yield this.patchDocument.perform({
+      approvers: this.approvers.compact().mapBy("email"),
+    });
 
-    // Create review.
-    try {
-      yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
-        method: "POST",
-      });
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: "Document review requested",
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+    yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
+      method: "POST",
+    });
 
-      this.router.transitionTo({
-        queryParams: { draft: false },
-      });
+    this.flashMessages.add({
+      message: "Document review requested",
+      title: "Done!",
+      type: "success",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
 
-      this.requestReviewModalIsActive = false;
-    } catch (err) {
-      this.showModalError("Error creating review", err);
-    }
+    this.router.transitionTo({
+      queryParams: { draft: false },
+    });
+
+    this.requestReviewModalIsActive = false;
+
     this.refreshRoute();
   }
 
   @task
   *deleteDraft() {
-    try {
-      yield this.args.deleteDraft.perform(this.docID);
-    } catch (err) {
-      this.showModalError("Error deleting draft", err);
-    }
+    yield this.args.deleteDraft.perform(this.docID);
   }
 
   @action
@@ -316,27 +289,18 @@ export default class DocumentSidebar extends Component {
 
   @action closeDeleteModal() {
     this.deleteModalIsActive = false;
-    this.resetModalErrors();
   }
 
   @action closeRequestReviewModal() {
     this.requestReviewModalIsActive = false;
-    this.resetModalErrors();
   }
 
   @action closeArchiveModal() {
     this.archiveModalIsActive = false;
-    this.resetModalErrors();
-  }
-
-  @action resetModalErrors() {
-    this.modalErrorIsShown = false;
-    this.errorTitle = null;
-    this.errorDescription = null;
   }
 
   @task
-  *approve(approver) {
+  *approve() {
     try {
       yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "POST",
@@ -352,14 +316,14 @@ export default class DocumentSidebar extends Component {
         extendedTimeout: 1000,
       });
     } catch (err) {
-      this.showModalError("Error approving document", err);
+      throw err;
     }
 
     this.refreshRoute();
   }
 
   @task
-  *requestChanges(approver) {
+  *requestChanges() {
     try {
       yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "DELETE",
@@ -379,7 +343,7 @@ export default class DocumentSidebar extends Component {
         extendedTimeout: 1000,
       });
     } catch (err) {
-      this.showModalError("Error requesting changes of document", err);
+      throw err;
     }
 
     this.refreshRoute();
@@ -387,32 +351,19 @@ export default class DocumentSidebar extends Component {
 
   @task
   *changeDocumentStatus(status) {
-    try {
-      yield this.patchDocument.perform({
-        status: status,
-      });
+    yield this.patchDocument.perform({
+      status: status,
+    });
 
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: `Document status changed to "${status}"`,
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
-
-      this.archiveModalIsActive = false;
-    } catch (err) {
-      this.showModalError(`Error marking document status as ${status}`, err);
-      throw err;
-    }
+    // Add a notification for the user
+    this.flashMessages.add({
+      message: `Document status changed to "${status}"`,
+      title: "Done!",
+      type: "success",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
 
     this.refreshRoute();
-  }
-
-  showModalError(errMsg, error) {
-    this.modalErrorIsShown = true;
-    this.errorTitle = errMsg;
-    this.errorDescription = error;
   }
 }
