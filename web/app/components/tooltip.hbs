@@ -1,0 +1,17 @@
+<div
+  class="relative inline-flex"
+  {{did-insert this.didInsertReference}}
+  {{on "mouseenter" this.showContent}}
+  {{on "mouseleave" this.hideContent}}
+  {{on "focusin" this.showContent}}
+  {{on "focusout" this.hideContent}}
+  {{on "click" this.toggleContent}}
+>
+  {{yield}}
+
+  {{#if this.contentIsShown}}
+    <div class="absolute w-max" {{did-insert this.didInsertContent}}>
+      {{@text}}
+    </div>
+  {{/if}}
+</div>
