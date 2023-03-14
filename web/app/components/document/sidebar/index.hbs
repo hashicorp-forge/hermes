@@ -1,19 +1,13 @@
 <aside class="sidebar {{if this.isCollapsed 'w-8' 'w-64'}}">
 
-  <div class="flex w-full items-center justify-between">
-    <X::HdsTab
-      @label="Dashboard"
-      @icon="arrow-left"
-      @link="authenticated.dashboard"
-    />
-    <Document::SidebarHeaderControls
+
+    <Document::Sidebar::Header
       @isCollapsed={{this.isCollapsed}}
       @toggleCollapsed={{this.toggleCollapsed}}
       @document={{@document}}
       @shareButtonIsShown={{this.shareButtonIsShown}}
     />
 
-  </div>
   {{#unless this.isCollapsed}}
     <header class="relative flex flex-col space-y-2 z-10">
 

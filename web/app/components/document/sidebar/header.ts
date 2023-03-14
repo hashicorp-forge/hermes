@@ -6,7 +6,7 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 
-interface DocumentSidebarHeaderControlsComponentSignature {
+interface DocumentSidebarHeaderComponentSignature {
   Args: {
     document: HermesDocument;
     shareButtonIsShown: boolean;
@@ -15,7 +15,7 @@ interface DocumentSidebarHeaderControlsComponentSignature {
   };
 }
 
-export default class DocumentSidebarHeaderControlsComponent extends Component<DocumentSidebarHeaderControlsComponentSignature> {
+export default class DocumentSidebarHeaderControlsComponent extends Component<DocumentSidebarHeaderComponentSignature> {
   @service("config") declare configSvc: ConfigService;
 
   protected get shortLinkBaseURL() {
