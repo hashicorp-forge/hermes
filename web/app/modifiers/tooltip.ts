@@ -15,6 +15,7 @@ import {
 
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
+import assertedHTMLElement from "hermes/utils/asserted-html-element";
 
 interface TooltipModifierSignature {
   Args: {
@@ -25,6 +26,8 @@ interface TooltipModifierSignature {
     };
   };
 }
+
+let DOM_PARENT = assertedHTMLElement(".ember-application");
 
 function cleanup(instance: TooltipModifier) {
   instance.reference.removeEventListener("focusin", instance.showContent);
@@ -51,15 +54,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
   @tracked _text: string | null = null;
   @tracked _reference: Element | null = null;
-  @tracked _tooltip: HTMLElement | null = null;
   @tracked _arrow: HTMLElement | null = null;
 
+  @tracked tooltip: HTMLElement | null = null;
   @tracked placement: Placement = "top";
-
-  get tooltip(): HTMLElement {
-    assert("tooltip must exist", this._tooltip);
-    return this._tooltip;
-  }
 
   get arrow(): HTMLElement {
     assert("arrow must exist", this._arrow);
@@ -77,30 +75,34 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   }
 
   @action showContent() {
-    if (this._tooltip) {
+    if (this.tooltip) {
       return;
     }
 
-    this._tooltip = document.createElement("div");
-    this._tooltip.classList.add("hermes-tooltip");
-    this._tooltip.setAttribute("role", "tooltip");
-    this._tooltip.setAttribute("id", `tooltip-${this.id}`);
+    this.tooltip = document.createElement("div");
+    this.tooltip.classList.add("hermes-tooltip");
+    this.tooltip.setAttribute("role", "tooltip");
+    this.tooltip.setAttribute("id", `tooltip-${this.id}`);
 
     this._arrow = document.createElement("div");
     this._arrow.classList.add("arrow");
 
-    this._tooltip.appendChild(this._arrow);
+    this.tooltip.appendChild(this._arrow);
 
     const textElement = document.createElement("div");
 
     textElement.classList.add("text");
     textElement.textContent = this.text;
 
-    this._tooltip.appendChild(textElement);
+    this.tooltip.appendChild(textElement);
 
-    document.body.appendChild(this._tooltip);
+    DOM_PARENT.appendChild(this.tooltip);
 
     let updatePosition = async () => {
+      if (!this.tooltip) {
+        return;
+      }
+
       computePosition(this.reference, this.tooltip, {
         platform: platform,
         placement: this.placement,
@@ -112,6 +114,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           }),
         ],
       }).then(({ x, y, middlewareData }) => {
+        assert("tooltip must exist", this.tooltip);
         Object.assign(this.tooltip.style, {
           left: `${x}px`,
           top: `${y}px`,
@@ -154,9 +157,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       return;
     }
 
-    if (this._tooltip) {
-      this._tooltip.remove();
-      this._tooltip = null;
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
     }
   }
 
