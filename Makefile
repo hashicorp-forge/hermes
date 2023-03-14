@@ -7,7 +7,7 @@ build: web/build
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
 .PHONY: bin
-bin:
+bin: build-ui
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
 .PHONY: bin/linux
