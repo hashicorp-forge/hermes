@@ -6,10 +6,13 @@ import {
   computePosition,
   flip,
   offset,
+  autoUpdate,
 } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
+import { next, schedule } from "@ember/runloop";
+import { registerDestructor } from "@ember/destroyable";
 
 interface TooltipComponentSignature {
   Element: null;
@@ -57,38 +60,42 @@ export default class TooltipComponent extends Component<TooltipComponentSignatur
     this.contentIsShown = false;
   }
 
-  @action toggleContent() {
-    this.contentIsShown = !this.contentIsShown;
-  }
-
   @action protected didInsertContent(element: HTMLElement) {
     this._content = element;
 
-    computePosition(this.reference, this.content, {
-      platform: platform,
-      placement: this.args.placement || "top",
-      middleware: [
-        offset(8),
-        flip(),
-        arrow({
-          element: this.arrow,
-        }),
-      ],
-    }).then(({ x, y, middlewareData }) => {
-      Object.assign(this.content.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-
-      // https://floating-ui.com/docs/arrow#usage
-      if (middlewareData.arrow) {
-        const { x } = middlewareData.arrow;
-        Object.assign(this.arrow.style, {
-          left: x != null ? `${x}px` : "",
-          top: `${-this.arrow.offsetWidth / 2}px`,
-          transform: "rotate(45deg)",
+    let updatePosition = async () => {
+      await computePosition(this.reference, this.content, {
+        platform: platform,
+        placement: this.args.placement || "top",
+        middleware: [
+          offset(8),
+          flip(),
+          arrow({
+            element: this.arrow,
+          }),
+        ],
+      }).then(({ x, y, middlewareData }) => {
+        Object.assign(this.content.style, {
+          left: `${x}px`,
+          top: `${y}px`,
         });
-      }
-    });
+
+        // https://floating-ui.com/docs/arrow#usage
+        if (middlewareData.arrow) {
+          const { x } = middlewareData.arrow;
+          Object.assign(this.arrow.style, {
+            left: x != null ? `${x}px` : "",
+            top: `${-this.arrow.offsetWidth / 2}px`,
+            transform: "rotate(45deg)",
+          });
+        }
+      });
+    };
+
+    updatePosition();
+
+    const cleanup = autoUpdate(this.reference, this.content, updatePosition);
+
+    registerDestructor(this, cleanup);
   }
 }
