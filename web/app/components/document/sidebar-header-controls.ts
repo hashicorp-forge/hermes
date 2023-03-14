@@ -9,6 +9,7 @@ import ConfigService from "hermes/services/config";
 interface DocumentSidebarHeaderControlsComponentSignature {
   Args: {
     document: HermesDocument;
+    shareButtonIsShown: boolean;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
   };

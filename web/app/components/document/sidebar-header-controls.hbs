@@ -1,10 +1,11 @@
 <div class="flex items-center">
-  {{!-- TODO: this is conditional --}}
-  <Tooltip @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}>
-    <Action {{on "click" (perform this.copyUrl)}} class="flex px-1.5 py-1">
-      <FlightIcon @name={{if this.urlRecentlyCopied "check" "link"}} />
-    </Action>
-  </Tooltip>
+  {{#if @shareButtonIsShown}}
+    <Tooltip @text={{if this.urlRecentlyCopied "Copied!" "Copy URL"}}>
+      <Action {{on "click" (perform this.copyUrl)}} class="flex px-1.5 py-1">
+        <FlightIcon @name={{if this.urlRecentlyCopied "check" "link"}} />
+      </Action>
+    </Tooltip>
+  {{/if}}
   <Tooltip @text="Open in Drive">
     <a
       href="https://docs.google.com/document/d/{{@document.docID}}"
