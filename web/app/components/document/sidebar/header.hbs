@@ -18,14 +18,12 @@
     {{/if}}
 
     <Tooltip @text="Open in Drive">
-      <a
+      <ExternalLink
         href="https://docs.google.com/document/d/{{@document.docID}}"
-        target="_blank"
-        rel="noopener nofollow"
         class="icon-link"
       >
         <FlightIcon @name="external-link" />
-      </a>
+      </ExternalLink>
     </Tooltip>
 
     <Tooltip @text={{if @isCollapsed "Expand sidebar" "Collapse sidebar"}}>
