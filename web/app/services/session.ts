@@ -7,7 +7,6 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
-import { getOwner } from "@ember/application";
 import FetchService from "./fetch";
 
 const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
