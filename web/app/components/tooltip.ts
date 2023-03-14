@@ -1,7 +1,12 @@
 import { action } from "@ember/object";
-import { computePosition } from "@floating-ui/dom";
 import { Placement } from "@floating-ui/core";
-import { platform } from "@floating-ui/dom";
+import {
+  platform,
+  arrow,
+  computePosition,
+  flip,
+  offset,
+} from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
@@ -15,13 +20,33 @@ interface TooltipComponentSignature {
 }
 
 export default class TooltipComponent extends Component<TooltipComponentSignature> {
-  @tracked reference: HTMLElement | null = null;
-  @tracked content: HTMLElement | null = null;
+  @tracked private _reference: HTMLElement | null = null;
+  @tracked private _content: HTMLElement | null = null;
+  @tracked private _arrow: HTMLElement | null = null;
 
-  @tracked contentIsShown = false;
+  @tracked protected contentIsShown = false;
 
-  @action didInsertReference(element: HTMLElement) {
-    this.reference = element;
+  protected get reference(): HTMLElement {
+    assert("reference must exist", this._reference);
+    return this._reference;
+  }
+
+  protected get content(): HTMLElement {
+    assert("content must exist", this._content);
+    return this._content;
+  }
+
+  protected get arrow(): HTMLElement {
+    assert("arrow must exist", this._arrow);
+    return this._arrow;
+  }
+
+  @action protected didInsertReference(element: HTMLElement) {
+    this._reference = element;
+  }
+
+  @action protected didInsertArrow(element: HTMLElement): void {
+    this._arrow = element;
   }
 
   @action showContent() {
@@ -36,20 +61,34 @@ export default class TooltipComponent extends Component<TooltipComponentSignatur
     this.contentIsShown = !this.contentIsShown;
   }
 
-  @action didInsertContent(element: HTMLElement) {
-    this.content = element;
-
-    assert("reference must exist", this.reference);
+  @action protected didInsertContent(element: HTMLElement) {
+    this._content = element;
 
     computePosition(this.reference, this.content, {
-      placement: this.args.placement || "top",
       platform: platform,
-    }).then(({ x, y }) => {
-      assert("content must exist", this.content);
+      placement: this.args.placement || "top",
+      middleware: [
+        offset(8),
+        flip(),
+        arrow({
+          element: this.arrow,
+        }),
+      ],
+    }).then(({ x, y, middlewareData }) => {
       Object.assign(this.content.style, {
         left: `${x}px`,
         top: `${y}px`,
       });
+
+      // https://floating-ui.com/docs/arrow#usage
+      if (middlewareData.arrow) {
+        const { x } = middlewareData.arrow;
+        Object.assign(this.arrow.style, {
+          left: x != null ? `${x}px` : "",
+          top: `${-this.arrow.offsetWidth / 2}px`,
+          transform: "rotate(45deg)",
+        });
+      }
     });
   }
 }

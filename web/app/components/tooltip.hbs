@@ -10,8 +10,17 @@
   {{yield}}
 
   {{#if this.contentIsShown}}
-    <div class="absolute w-max" {{did-insert this.didInsertContent}}>
-      {{@text}}
+    <div
+      class="absolute w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast"
+      {{did-insert this.didInsertContent}}
+    >
+      <div class="relative">
+        {{@text}}
+      </div>
+      <div
+        class="absolute bg-color-foreground-strong h-3 w-3 -z-10"
+        {{did-insert this.didInsertArrow}}
+      ></div>
     </div>
   {{/if}}
 </div>
