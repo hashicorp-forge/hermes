@@ -55,13 +55,8 @@ export default class DocumentSidebar extends Component {
   }
 
   @action
-  collapseSidebar() {
-    this.isCollapsed = true;
-  }
-
-  @action
-  expandSidebar() {
-    this.isCollapsed = false;
+  toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
   }
 
   // sidebarBodyIsShorter returns true in the case(s) where there are two
@@ -201,7 +196,6 @@ export default class DocumentSidebar extends Component {
       return true;
     }
   }
-
 
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`

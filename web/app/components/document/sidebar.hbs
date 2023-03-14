@@ -1,60 +1,20 @@
 <aside class="sidebar {{if this.isCollapsed 'w-8' 'w-64'}}">
-  {{#if this.isCollapsed}}
-    <nav class="relative flex flex-col space-y-2">
-      <div class="flex flex-col items-center space-y-3">
-        <X::HdsTab
-          @label="Expand"
-          @icon="sidebar-show"
-          @iconOnly="true"
-          @action={{this.expandSidebar}}
-        />
-        <div class="flex flex-col space-y-1">
-          <a
-            href="https://docs.google.com/document/d/{{this.docID}}"
-            target="_blank"
-            class="x-hds-tab--link"
-          >
-            <FlightIcon @name="external-link" />
-          </a>
-        </div>
-        {{#if this.shareButtonIsShown}}
-          <Document::ShareButton
-            @document={{@document}}
-            @isDownscaled={{true}}
-          />
-        {{/if}}
-      </div>
-    </nav>
-  {{else}}
+
+  <div class="flex w-full items-center justify-between">
+    <X::HdsTab
+      @label="Dashboard"
+      @icon="arrow-left"
+      @link="authenticated.dashboard"
+    />
+    <Document::SidebarHeaderControls
+      @isCollapsed={{this.isCollapsed}}
+      @toggleCollapsed={{this.toggleCollapsed}}
+      @document={{@document}}
+    />
+
+  </div>
+  {{#unless this.isCollapsed}}
     <header class="relative flex flex-col space-y-2 z-10">
-      <div class="flex w-full items-center justify-between">
-        <X::HdsTab
-          @label="Back to Dashboard"
-          @icon="arrow-left"
-          @link="authenticated.dashboard"
-        />
-        <X::HdsTab
-          @label="Collapse"
-          @icon="sidebar-hide"
-          @iconOnly="true"
-          @action={{this.collapseSidebar}}
-        />
-      </div>
-
-      <div class="flex w-full items-center justify-end space-x-1 pr-1">
-
-        {{#if this.shareButtonIsShown}}
-          <Document::ShareButton @document={{@document}} />
-        {{/if}}
-
-        <a
-          href="https://docs.google.com/document/d/{{this.docID}}"
-          target="_blank"
-          class="flex items-center justify-center w-[32px] h-[32px] rounded-full text-white bg-[color:var(--token-color-foreground-action)] hover:bg-[color:var(--token-color-foreground-action-hover)] active:bg-[color:var(--token-color-foreground-action-active)]"
-        >
-          <FlightIcon @name="external-link" class="relative ml-0.5 mt-0.5" />
-        </a>
-      </div>
 
       {{#let (get-product-id @document.product) as |productIcon|}}
         {{#if productIcon}}
@@ -507,7 +467,7 @@
 
       </div>
     {{/if}}
-  {{/if}}
+  {{/unless}}
 
   {{! Place modals at the end of the DOM so they don't inherit styles }}
 

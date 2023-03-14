@@ -1,5 +1,5 @@
 <div
-  class="relative inline-flex"
+  class="relative flex"
   {{did-insert this.didInsertReference}}
   {{on "mouseenter" this.showContent}}
   {{on "mouseleave" this.hideContent}}
@@ -10,17 +10,18 @@
   {{yield}}
 
   {{#if this.contentIsShown}}
+
     <div
-      class="absolute w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast"
+      class="absolute w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast z-50"
       {{did-insert this.didInsertContent}}
     >
+      <div
+        class="absolute bg-color-foreground-strong h-2.5 w-2.5 -z-10 pointer-events-none"
+        {{did-insert this.didInsertArrow}}
+      ></div>
       <div class="relative">
         {{@text}}
       </div>
-      <div
-        class="absolute bg-color-foreground-strong h-3 w-3 -z-10"
-        {{did-insert this.didInsertArrow}}
-      ></div>
     </div>
   {{/if}}
 </div>
