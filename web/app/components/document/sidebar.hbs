@@ -9,13 +9,12 @@
           @action={{this.expandSidebar}}
         />
         <div class="flex flex-col space-y-1">
-          <a
+          <ExternalLink
             href="https://docs.google.com/document/d/{{this.docID}}"
-            target="_blank"
             class="x-hds-tab--link"
           >
             <FlightIcon @name="external-link" />
-          </a>
+          </ExternalLink>
         </div>
         {{#if this.shareButtonIsShown}}
           <Document::ShareButton
@@ -47,13 +46,12 @@
           <Document::ShareButton @document={{@document}} />
         {{/if}}
 
-        <a
+        <ExternalLink
           href="https://docs.google.com/document/d/{{this.docID}}"
-          target="_blank"
           class="flex items-center justify-center w-[32px] h-[32px] rounded-full text-white bg-[color:var(--token-color-foreground-action)] hover:bg-[color:var(--token-color-foreground-action-hover)] active:bg-[color:var(--token-color-foreground-action-active)]"
         >
           <FlightIcon @name="external-link" class="relative ml-0.5 mt-0.5" />
-        </a>
+        </ExternalLink>
       </div>
 
       {{#let (get-product-id @document.product) as |productIcon|}}
@@ -319,17 +317,15 @@
             <small class="hds-typography-body-100 hds-foreground-faint">
               {{attributes.displayName}}
             </small>
-            {{#if this.isOwner}}
-              <CustomEditableField
-                @document={{@document}}
-                @field={{field}}
-                @attributes={{attributes}}
-                @onChange={{perform this.save field}}
-                @updateFieldValue={{this.updateCustomFieldValue}}
-                @loading={{this.save.isRunning}}
-                @disabled={{this.editingIsDisabled}}
-              />
-            {{/if}}
+            <CustomEditableField
+              @document={{@document}}
+              @field={{field}}
+              @attributes={{attributes}}
+              @onChange={{perform this.save field}}
+              @updateFieldValue={{this.updateCustomFieldValue}}
+              @loading={{this.save.isRunning}}
+              @disabled={{or this.editingIsDisabled (not this.isOwner)}}
+            />
           </div>
         {{/if}}
       {{/each-in}}
@@ -621,7 +617,6 @@
                 @onChange={{this.updateApprovers}}
                 @disabled={{this.requestReview.isRunning}}
                 class="mb-0"
-
               />
             </F.Control>
             <F.Label>Add approvers</F.Label>

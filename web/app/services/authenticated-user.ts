@@ -8,6 +8,7 @@ import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
 export interface AuthenticatedUser {
+  name: string;
   email: string;
   given_name: string;
   picture: string;
@@ -30,7 +31,7 @@ export default class AuthenticatedUserService extends Service {
   @service declare store: Store;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked private _info: AuthenticatedUser | null = null;
+  @tracked _info: AuthenticatedUser | null = null;
 
   get info(): AuthenticatedUser {
     assert("Authenticated must exist", this._info);
@@ -76,19 +77,19 @@ export default class AuthenticatedUserService extends Service {
    */
   fetchSubscriptions = task(async () => {
     try {
-      let response = await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-        method: "GET",
-        headers: {
-          "Hermes-Google-Access-Token":
-            this.session.data.authenticated.access_token,
-        },
-      });
-      let subscriptions: string[] = await response.json();
+      let subscriptions = await this.fetchSvc
+        .fetch("/api/v1/me/subscriptions", {
+          method: "GET",
+          headers: {
+            "Hermes-Google-Access-Token":
+              this.session.data.authenticated.access_token,
+          },
+        })
+        .then((response) => response?.json());
 
       let newSubscriptions: Subscription[] = [];
 
       if (subscriptions) {
-        // map
         newSubscriptions = subscriptions.map((subscription: string) => {
           return {
             productArea: subscription,

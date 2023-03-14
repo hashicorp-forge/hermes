@@ -30,5 +30,7 @@ module("Integration | Helper | parse-date", function (hooks) {
       .dom(".long")
       .hasText("25 November 1989", "The long format renders correctly");
     assert.dom(".invalid").hasText("Unknown", "An invalid date returns null");
+
+    MockDate.reset();
   });
 });
