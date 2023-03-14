@@ -1,7 +1,8 @@
 .sidebar {
   @apply flex flex-col max-h-full relative z-10;
 
-  header, nav {
+  header,
+  nav {
     @apply sticky top-0 mb-4;
   }
 
@@ -9,6 +10,10 @@
     @apply space-y-8 pb-6;
     overflow-y: auto;
     height: 100%;
+  }
+
+  .product-badge {
+    @apply bottom-0.5 -left-4  rounded-r w-9 h-7;
   }
 
   .person-list {

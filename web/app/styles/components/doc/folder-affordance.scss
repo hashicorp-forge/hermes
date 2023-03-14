@@ -1,0 +1,17 @@
+.doc-thumbnail {
+  .folder-affordance {
+    @apply w-auto absolute scale-x-[-1] -left-1;
+
+    // set border via currentColor
+    @apply text-color-border-primary;
+
+    // Allow strokes to show
+    @apply overflow-visible;
+
+    // Make it 100% tall plus 1px for each horizontal stroke
+    @apply h-[calc(100%+2px)];
+
+    // Offset it by 1px so the horizontal strokes aren't visible
+    @apply -top-[1px];
+  }
+}
