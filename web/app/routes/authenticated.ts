@@ -2,7 +2,9 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
-import SessionService, { REDIRECT_LOCAL_STORAGE_KEY } from "hermes/services/session";
+import SessionService, {
+  REDIRECT_LOCAL_STORAGE_KEY,
+} from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
@@ -28,7 +30,13 @@ export default class AuthenticatedRoute extends Route {
     ) {
       // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
 
-      window.localStorage.setItem(REDIRECT_LOCAL_STORAGE_KEY, transition.intent.url);
+      window.localStorage.setItem(
+        REDIRECT_LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          url: transition.intent.url,
+          expiresOn: Date.now() + 60 * 2000, // 2 minutes
+        })
+      );
     }
   }
 }

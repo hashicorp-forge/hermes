@@ -13,8 +13,19 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    let redirectTarget = window.localStorage.getItem(REDIRECT_LOCAL_STORAGE_KEY);
+    let redirectObject = window.localStorage.getItem(
+      REDIRECT_LOCAL_STORAGE_KEY
+    );
+
+    let redirectTarget: string | null = null;
     let transition;
+
+    if (redirectObject) {
+      // Check if the object is less than 2 minutes old
+      if (Date.now() < JSON.parse(redirectObject).expiresOn) {
+        redirectTarget = JSON.parse(redirectObject).url;
+      }
+    }
 
     if (redirectTarget) {
       transition = this.router.transitionTo(redirectTarget);
