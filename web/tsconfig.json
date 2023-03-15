@@ -12,7 +12,9 @@
       "hermes/tests/*": ["tests/*"],
       "hermes/*": ["app/*"],
       "hermes/mirage/*": ["mirage/*"],
-      "*": ["types/*"]
+      "*": ["types/*"],
+      "fetch": ["node_modules/ember-fetch"],
+      "ember-cli-flash/*": ["node_modules/ember-cli-flash"]
     }
   },
   "include": ["app/**/*", "tests/**/*", "types/**/*"]
