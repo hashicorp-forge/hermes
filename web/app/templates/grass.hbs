@@ -1,14 +1,52 @@
 {{page-title "Grass"}}
+{{set-body-class "grass"}}
 
-<div class="p-24 x-container mt-24">
-  <div class="flex flex-col items-start space-y-2 px-3">
-    <div class="hds-typography-body-100 hds-foreground-faint">
-      Related resources
-    </div>
-    <Inputs::DocumentSelect
-      @productArea="Consul"
-      @onChange={{this.noop}}
-      @selectedDocument={{this.linkedRFC}}
+<div class="mx-auto w-full max-w-sm mt-24">
+  <div class="hds-typography-body-100 hds-foreground-faint">
+    Related resources
+  </div>
+  <div class="relative">
+
+    <Hds::Form::TextInput::Base
+      @type="text"
+      @value={{this.inputValue}}
+      {{on "input" this.onInput}}
+      {{on "keydown" this.onKeydown}}
+      class="!pr-20 truncate"
     />
+    <div class="absolute top-1/2 -translate-y-1/2 right-1 h-7">
+      {{#if this.searchButtonIsShown}}
+        <Action class="related-resources-button" {{on "click" this.noop}}>
+          <FlightIcon @name="search" />
+          <FlightIcon
+            @name="chevron-down"
+            class="scale-75 text-color-foreground-faint origin-left -mr-1"
+          />
+        </Action>
+      {{else}}
+        <div class="flex h-full">
+          {{! REMEMBER: mostly this will be pasted }}
+
+          <Action {{on "click" this.clearSearch}} class="clear-input-button">
+            <FlightIcon @name="x" />
+          </Action>
+
+          <Action
+            {{on "click" this.addResource}}
+            class="related-resources-button primary"
+            disabled={{not this.inputValueIsValid}}
+          >
+            Add
+          </Action>
+        </div>
+
+      {{/if}}
+    </div>
   </div>
 </div>
+
+{{log}}
+
+{{#each this.relatedResources as |resource|}}
+  {{resource}} ❎
+{{/each}}
