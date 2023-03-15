@@ -12,14 +12,16 @@
         @model={{@selectedDocument.objectID}}
         class="flex"
       >
-       {{@selectedDocument.title}}
+        {{@selectedDocument.title}}
       </LinkTo>
 
       <Action {{on "click" this.remove}}>
         Remove
       </Action>
     {{else}}
-      <CustomEditableFields::EmptyState/>
+      <span class="text-color-foreground-faint">
+        Search docs or enter a URL...
+      </span>
     {{/if}}
   </:default>
   <:editing as |F|>

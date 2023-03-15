@@ -20,4 +20,5 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
+  this.route("grass");
 });

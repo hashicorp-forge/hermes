@@ -1,0 +1,14 @@
+{{page-title "Grass"}}
+
+<div class="p-24 x-container mt-24">
+  <div class="flex flex-col items-start space-y-2 px-3">
+    <div class="hds-typography-body-100 hds-foreground-faint">
+      Related resources
+    </div>
+    <Inputs::DocumentSelect
+      @productArea="Consul"
+      @onChange={{this.noop}}
+      @selectedDocument={{this.linkedRFC}}
+    />
+  </div>
+</div>
