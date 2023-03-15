@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 
-export default function assertedHTMLElement(selector: string): HTMLElement {
+export default function htmlElement(selector: string): HTMLElement {
   const element = document.querySelector(selector);
   assert(
     "selector target must be an HTMLElement",

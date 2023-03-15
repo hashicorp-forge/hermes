@@ -15,7 +15,7 @@ import {
 
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
-import assertedHTMLElement from "hermes/utils/asserted-html-element";
+import htmlElement from "hermes/utils/html-element";
 
 interface TooltipModifierSignature {
   Args: {
@@ -27,7 +27,7 @@ interface TooltipModifierSignature {
   };
 }
 
-let DOM_PARENT = assertedHTMLElement(".ember-application");
+let DOM_PARENT = htmlElement(".ember-application");
 
 function cleanup(instance: TooltipModifier) {
   instance.reference.removeEventListener("focusin", instance.showContent);

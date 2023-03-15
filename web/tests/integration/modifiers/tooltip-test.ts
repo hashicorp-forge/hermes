@@ -2,7 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render, triggerEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import assertedHTMLElement from "hermes/utils/asserted-html-element";
+import htmlElement from "hermes/utils/html-element";
 
 module("Integration | Modifier | tooltip", function (hooks) {
   setupRenderingTest(hooks);
@@ -36,10 +36,10 @@ module("Integration | Modifier | tooltip", function (hooks) {
       );
 
     let divTooltipId =
-      assertedHTMLElement("[data-test-div]").getAttribute("aria-describedby");
+      htmlElement("[data-test-div]").getAttribute("aria-describedby");
 
     let buttonTooltipId =
-      assertedHTMLElement("[data-test-button]").getAttribute(
+      htmlElement("[data-test-button]").getAttribute(
         "aria-describedby"
       );
 
@@ -49,7 +49,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
     assert.dom(".hermes-tooltip").exists("tooltip appears on mouseenter");
 
-    assert.equal(divTooltipId, assertedHTMLElement(".hermes-tooltip").id);
+    assert.equal(divTooltipId, htmlElement(".hermes-tooltip").id);
 
 
     await triggerEvent("[data-test-div]", "mouseleave");
@@ -71,7 +71,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
     await triggerEvent("[data-test-button]", "mouseenter");
 
     assert.dom(".hermes-tooltip").exists();
-    assert.equal(buttonTooltipId, assertedHTMLElement(".hermes-tooltip").id);
+    assert.equal(buttonTooltipId, htmlElement(".hermes-tooltip").id);
 
     assert.notEqual(
       divTooltipId,
