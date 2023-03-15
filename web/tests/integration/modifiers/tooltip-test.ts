@@ -33,80 +33,78 @@ module("Integration | Modifier | tooltip", function (hooks) {
         "button is focusable, so it's not given a tabindex"
       );
 
-    let divTooltipId =
-      htmlElement("[data-test-div]").getAttribute("aria-describedby");
+    let divTooltipSelector =
+      "#" + htmlElement("[data-test-div]").getAttribute("aria-describedby");
 
-    let buttonTooltipId =
-      htmlElement("[data-test-button]").getAttribute("aria-describedby");
+    let buttonTooltipSelector =
+      "#" + htmlElement("[data-test-button]").getAttribute("aria-describedby");
+
+    assert.notEqual(
+      divTooltipSelector,
+      buttonTooltipSelector,
+      "div and button have unique tooltip ids"
+    );
 
     assert.dom(".hermes-tooltip").doesNotExist("tooltips hidden by default");
 
     await triggerEvent("[data-test-div]", "mouseenter");
 
-    assert.dom(".hermes-tooltip").exists("tooltip appears on mouseenter");
-
-    assert.equal(divTooltipId, htmlElement(".hermes-tooltip").id);
+    assert.dom(divTooltipSelector).exists("tooltip appears on mouseenter");
 
     await triggerEvent("[data-test-div]", "mouseleave");
 
     assert
-      .dom(".hermes-tooltip")
+      .dom(divTooltipSelector)
       .doesNotExist("tooltip disappears on mouseleave");
 
     await triggerEvent("[data-test-div]", "focusin");
 
-    assert.dom(".hermes-tooltip").exists("tooltip appears on focusin");
+    assert.dom(divTooltipSelector).exists("tooltip appears on focusin");
 
     await triggerEvent("[data-test-div]", "focusout");
 
     assert
-      .dom(".hermes-tooltip")
+      .dom(divTooltipSelector)
       .doesNotExist("tooltip disappears on focusout");
 
     await triggerEvent("[data-test-button]", "mouseenter");
 
-    assert.dom(".hermes-tooltip").exists();
-    assert.equal(buttonTooltipId, htmlElement(".hermes-tooltip").id);
-
-    assert.notEqual(
-      divTooltipId,
-      buttonTooltipId,
-      "div and button have unique tooltip ids"
-    );
+    assert.dom(buttonTooltipSelector).exists();
   });
 
   test("it takes a placement argument", async function (assert) {
     await render(hbs`
       <div class="w-full h-full grid place-items-center">
         <div>
-          <div data-test-div-one {{tooltip "more information"}}>
+          <div data-test-one {{tooltip "more information"}}>
             Default ('top')
           </div>
-
-          <div data-test-div-two {{tooltip "more information" placement="left-end"}}>
+          <div data-test-two {{tooltip "more information" placement="left-end"}}>
             Custom ('left-end')
           </div>
-
         </div>
       </div>
     `);
 
-    await triggerEvent("[data-test-div-one]", "mouseenter");
+    let divOneTooltipSelector =
+      "#" + htmlElement("[data-test-one]").getAttribute("aria-describedby");
+    let divTwoTooltipSelector =
+      "#" + htmlElement("[data-test-two]").getAttribute("aria-describedby");
+
+    await triggerEvent("[data-test-one]", "mouseenter");
 
     assert
-      .dom(".hermes-tooltip")
+      .dom(divOneTooltipSelector)
       .hasAttribute(
         "data-tooltip-placement",
         "top",
         "tooltip is placed top by default"
       );
 
-    await triggerEvent("[data-test-div-one]", "mouseleave");
-
-    await triggerEvent("[data-test-div-two]", "mouseenter");
+    await triggerEvent("[data-test-two]", "mouseenter");
 
     assert
-      .dom(".hermes-tooltip")
+      .dom(divTwoTooltipSelector)
       .hasAttribute(
         "data-tooltip-placement",
         "left-end",
