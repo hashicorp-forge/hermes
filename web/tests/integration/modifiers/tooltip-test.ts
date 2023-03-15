@@ -8,8 +8,6 @@ module("Integration | Modifier | tooltip", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders", async function (assert) {
-    this.set("placement", undefined);
-
     await render(hbs`
       <div data-test-div {{tooltip "more information"}}>
         Hover or focus me
@@ -39,9 +37,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
       htmlElement("[data-test-div]").getAttribute("aria-describedby");
 
     let buttonTooltipId =
-      htmlElement("[data-test-button]").getAttribute(
-        "aria-describedby"
-      );
+      htmlElement("[data-test-button]").getAttribute("aria-describedby");
 
     assert.dom(".hermes-tooltip").doesNotExist("tooltips hidden by default");
 
@@ -50,7 +46,6 @@ module("Integration | Modifier | tooltip", function (hooks) {
     assert.dom(".hermes-tooltip").exists("tooltip appears on mouseenter");
 
     assert.equal(divTooltipId, htmlElement(".hermes-tooltip").id);
-
 
     await triggerEvent("[data-test-div]", "mouseleave");
 
@@ -78,5 +73,44 @@ module("Integration | Modifier | tooltip", function (hooks) {
       buttonTooltipId,
       "div and button have unique tooltip ids"
     );
+  });
+
+  test("it takes a placement argument", async function (assert) {
+    await render(hbs`
+      <div class="w-full h-full grid place-items-center">
+        <div>
+          <div data-test-div-one {{tooltip "more information"}}>
+            Default ('top')
+          </div>
+
+          <div data-test-div-two {{tooltip "more information" placement="left-end"}}>
+            Custom ('left-end')
+          </div>
+
+        </div>
+      </div>
+    `);
+
+    await triggerEvent("[data-test-div-one]", "mouseenter");
+
+    assert
+      .dom(".hermes-tooltip")
+      .hasAttribute(
+        "data-tooltip-placement",
+        "top",
+        "tooltip is placed top by default"
+      );
+
+    await triggerEvent("[data-test-div-one]", "mouseleave");
+
+    await triggerEvent("[data-test-div-two]", "mouseenter");
+
+    assert
+      .dom(".hermes-tooltip")
+      .hasAttribute(
+        "data-tooltip-placement",
+        "left-end",
+        "tooltip can be custom placed"
+      );
   });
 });
