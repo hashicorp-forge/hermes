@@ -54,7 +54,7 @@ export default class AuthenticatedUserService extends Service {
   /**
    * The headers to use in POST requests to the subscriptions endpoint.
    */
-  private get subscriptionsPostHeader() {
+  private get subscriptionsPostHeaders() {
     return {
       "Content-Type": "application/json",
     };
@@ -122,7 +122,7 @@ export default class AuthenticatedUserService extends Service {
       try {
         await this.fetchSvc.fetch(`/api/v1/me/subscriptions`, {
           method: "POST",
-          headers: this.subscriptionsPostHeader,
+          headers: this.subscriptionsPostHeaders,
           body: this.subscriptionsPostBody,
         });
       } catch (e: unknown) {
@@ -161,7 +161,7 @@ export default class AuthenticatedUserService extends Service {
       try {
         await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
           method: "POST",
-          headers: this.subscriptionsPostHeader,
+          headers: this.subscriptionsPostHeaders,
           body: this.subscriptionsPostBody,
         });
       } catch (e: unknown) {
