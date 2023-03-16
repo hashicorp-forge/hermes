@@ -1,0 +1,66 @@
+<div class="hds-typography-body-100 hds-foreground-faint">
+  Related docs
+</div>
+<div class="relative">
+  <Hds::Form::TextInput::Base
+    @type="text"
+    @value={{this.inputValue}}
+    {{did-insert this.registerPopoverTrigger}}
+    {{on "input" (perform this.search)}}
+    {{on "input" this.onInput}}
+    {{on "keydown" this.onKeydown}}
+    {{on "focusin" this.onInputFocusin}}
+    class="!pr-20 truncate"
+    placeholder="---"
+  />
+  {{#if this.popoverIsShown}}
+    <div
+      class="absolute -bottom-0.5 translate-y-full w-full border min-h-[48px] rounded-md border-color-border-strong"
+      {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
+    >
+
+      {{#if this.userHasSearched}}
+        {{#if this.inputValueIsValid}}
+          URL! Knew it!
+        {{else if this.shownDocuments}}
+          <ul>
+            {{#each this.shownDocuments as |d|}}
+              <li>
+                <Action class="w-full">
+                  <Doc::Inline
+                    @avatar="{{get d.ownerPhotos 0}}"
+                    @docID="{{d.objectID}}"
+                    @docNumber="{{d.docNumber}}"
+                    @isResult="{true}"
+                    @owner="{{get d.owners 0}}"
+                    @productArea="{{d.product}}"
+                    @status="{{d.status}}"
+                    @title="{{d.title}}"
+                  />
+                </Action>
+              </li>
+            {{/each}}
+          </ul>
+        {{else if this.search.isRunning}}
+          Searching...
+        {{else}}
+          No mattress
+        {{/if}}
+      {{else}}
+        <div class="w-full p-3">
+          <div class="flex text-color-foreground-faint">
+            <FlightIcon @name="corner-left-up" class="mr-2" />
+            Paste a URL or search for documents...
+          </div>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>
+
+{{#each this.relatedResources as |resource|}}
+  {{! either linkTos or external links }}
+  {{resource}}
+  {{! button to delete it from the document }}
+  ❎
+{{/each}}

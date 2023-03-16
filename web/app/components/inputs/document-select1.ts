@@ -1,6 +1,5 @@
+import Component from "@glimmer/component";
 import { A } from "@ember/array";
-import NativeArray from "@ember/array/-private/native-array";
-import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
@@ -8,8 +7,11 @@ import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 
 import { restartableTask } from "ember-concurrency";
+interface InputsDocumentSelect1ComponentSignature {
+  Args: {};
+}
 
-export default class GrassController extends Controller {
+export default class InputsDocumentSelect1Component extends Component<InputsDocumentSelect1ComponentSignature> {
   @service declare algolia: AlgoliaService;
 
   @tracked relatedResources = A();
@@ -103,5 +105,4 @@ export default class GrassController extends Controller {
       this.inputValueIsValid = false;
     }
   });
-
 }

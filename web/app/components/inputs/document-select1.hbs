@@ -1,0 +1,94 @@
+<div class="hds-typography-body-100 hds-foreground-faint">
+  Related docs
+</div>
+<div class="relative">
+  <Hds::Form::TextInput::Base
+    @type="text"
+    @value={{this.inputValue}}
+    {{on "input" this.onInput}}
+    {{on "keydown" this.onKeydown}}
+    class="!pr-20 truncate"
+  />
+  {{#if (and this.searchButtonIsShown this.popoverIsShown)}}
+    <div
+      class="absolute -bottom-0.5 translate-y-full w-full border h-80 rounded-md border-color-border-strong"
+      {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
+    >
+      <div class="p-1 border-b border-b-color-border-faint">
+        <Hds::Form::TextInput::Base
+          value={{this.query}}
+          {{on "input" (perform this.search)}}
+          {{did-insert this.registerAndFocusSearchInput}}
+          type="text"
+          placeholder="Search Hermes..."
+          {{!  TODO: autofocus input }}
+        />
+      </div>
+      <div class="absolute bg-yellow-50 z-10">
+        {{#if this.shownDocuments}}
+          <ul>
+            {{#each this.shownDocuments as |d|}}
+              <li>
+                <Action class="w-full">
+                  <Doc::Inline
+                    @avatar="{{get d.ownerPhotos 0}}"
+                    @docID="{{d.objectID}}"
+                    @docNumber="{{d.docNumber}}"
+                    @isResult="{true}"
+                    @owner="{{get d.owners 0}}"
+                    @productArea="{{d.product}}"
+                    @status="{{d.status}}"
+                    @title="{{d.title}}"
+                  />
+                </Action>
+              </li>
+            {{/each}}
+          </ul>
+        {{else if this.userHasSearched}}
+          <p>No matches</p>
+        {{else}}
+          Recent docs in "Consul"
+          <br />list of docs.
+        {{/if}}
+      </div>
+    </div>
+  {{/if}}
+  <div class="absolute top-1/2 -translate-y-1/2 right-1 h-7">
+    {{#if this.searchButtonIsShown}}
+      <Action
+        class="related-resources-button"
+        {{on "click" this.togglePopover}}
+        {{did-insert this.registerPopoverTrigger}}
+      >
+        <FlightIcon @name="search" />
+        <FlightIcon
+          @name="chevron-down"
+          class="scale-75 text-color-foreground-faint origin-left -mr-1"
+        />
+      </Action>
+    {{else}}
+      <div class="flex h-full">
+        {{! REMEMBER: mostly this will be pasted }}
+
+        <Action {{on "click" this.clearSearch}} class="clear-input-button">
+          <FlightIcon @name="x" />
+        </Action>
+
+        <Action
+          {{on "click" this.maybeAddResource}}
+          class="related-resources-button primary"
+        >
+          Add
+        </Action>
+      </div>
+
+    {{/if}}
+  </div>
+</div>
+
+{{#each this.relatedResources as |resource|}}
+  {{! either linkTos or external links }}
+  {{resource}}
+  {{! button to delete it from the document }}
+  ❎
+{{/each}}
