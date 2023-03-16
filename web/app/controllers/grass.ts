@@ -3,42 +3,64 @@ import NativeArray from "@ember/array/-private/native-array";
 import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
+import { inject as service } from "@ember/service";
+import AlgoliaService from "hermes/services/algolia";
+import { HermesDocument } from "hermes/types/document";
+
 import { restartableTask } from "ember-concurrency";
 
 export default class GrassController extends Controller {
+  @service declare algolia: AlgoliaService;
+
   @tracked relatedResources = A();
 
   @tracked inputValue = "";
+  @tracked query = "";
 
   @tracked inputValueIsValid = false;
+  @tracked popoverIsShown = false;
+  @tracked popoverTrigger: HTMLElement | null = null;
+  @tracked shownDocuments: HermesDocument[] | null = null;
+
+  @tracked searchInput: HTMLInputElement | null = null;
 
   get searchButtonIsShown() {
     return this.inputValue.length === 0;
   }
 
-  checkURL = restartableTask(async () => {
-    const url = this.inputValue;
-    try {
-      this.inputValueIsValid = Boolean(new URL(url));
-    } catch (e) {
-      this.inputValueIsValid = false;
+  @action maybeAddResource() {
+    if (!this.inputValueIsValid) {
+      alert("invalid url");
+    } else {
+      this.relatedResources.pushObject(this.inputValue);
+      this.clearSearch();
     }
-  });
-
-  @action addResource() {
-    this.relatedResources.pushObject(this.inputValue);
-    this.clearSearch();
   }
 
-  @action noop() {
-    return;
+  @action togglePopover() {
+    this.popoverIsShown = !this.popoverIsShown;
+  }
+
+  @action hidePopover() {
+    this.popoverIsShown = false;
+  }
+
+  @action registerPopoverTrigger(e: HTMLElement) {
+    this.popoverTrigger = e;
+  }
+
+  @action registerAndFocusSearchInput(e: HTMLInputElement) {
+    this.searchInput = e;
+    this.searchInput.focus();
   }
 
   @action onKeydown(event: KeyboardEvent) {
     if (event.key === "Enter") {
-      if (this.inputValueIsValid) {
-        this.addResource();
-      }
+      this.maybeAddResource();
+    }
+
+    if (event.key === "Escape") {
+      this.clearSearch();
     }
   }
 
@@ -50,4 +72,36 @@ export default class GrassController extends Controller {
   @action clearSearch() {
     this.inputValue = "";
   }
+
+  protected search = restartableTask(async (inputEvent: InputEvent) => {
+    const input = inputEvent.target as HTMLInputElement;
+    this.query = input.value;
+
+    if (this.query === "") {
+      this.shownDocuments = null;
+      return;
+    }
+
+    let algoliaResponse = await this.algolia.search.perform(this.query, {
+      hitsPerPage: 5,
+      attributesToRetrieve: ["title", "product", "docNumber"],
+      // give extra ranking to docs in the same product area
+      // optionalFilters: ["product:" + this.args.productArea],
+    });
+
+    if (algoliaResponse) {
+      this.shownDocuments = algoliaResponse.hits as HermesDocument[];
+    }
+  });
+
+
+  protected checkURL = restartableTask(async () => {
+    const url = this.inputValue;
+    try {
+      this.inputValueIsValid = Boolean(new URL(url));
+    } catch (e) {
+      this.inputValueIsValid = false;
+    }
+  });
+
 }

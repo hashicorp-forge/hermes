@@ -6,10 +6,6 @@
       @apply bg-color-foreground-action text-color-foreground-high-contrast;
     }
 
-    &:disabled {
-      @apply bg-alpha-200 text-color-foreground-faint;
-    }
-
     &:hover {
       @apply border-color-border-strong;
     }
