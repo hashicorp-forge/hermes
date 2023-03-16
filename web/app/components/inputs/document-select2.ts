@@ -7,12 +7,17 @@ import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 
 import { restartableTask } from "ember-concurrency";
+import FetchService from "hermes/services/fetch";
 interface InputsDocumentSelect2ComponentSignature {
   Args: {};
 }
 
+const GOOGLE_FAVICON_URL_PREFIX =
+  "https://s2.googleusercontent.com/s2/favicons?domain=";
+
 export default class InputsDocumentSelect2Component extends Component<InputsDocumentSelect2ComponentSignature> {
   @service declare algolia: AlgoliaService;
+  @service("fetch") declare fetchSvc: FetchService;
 
   @tracked relatedResources = A();
 
@@ -25,6 +30,12 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
   @tracked shownDocuments: HermesDocument[] | null = null;
 
   @tracked searchInput: HTMLInputElement | null = null;
+
+  @tracked faviconURL: string | null = null;
+
+  get faviconIsShown() {
+    return this.faviconURL || this.maybeLoadFavicon.isRunning;
+  }
 
   get userHasSearched() {
     return this.query.length > 0;
@@ -81,6 +92,23 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
     this.inputValue = "";
   }
 
+  protected maybeLoadFavicon = restartableTask(async () => {
+    const maybeFaviconURL = GOOGLE_FAVICON_URL_PREFIX + this.inputValue;
+    try {
+      const response = await this.fetchSvc.fetch(maybeFaviconURL);
+      if (response?.ok) {
+        this.faviconURL = maybeFaviconURL;
+      }
+      if (response?.status === 404) {
+        this.faviconURL = null;
+        console.log("nothing");
+      }
+    } catch (e) {
+      this.faviconURL = null;
+      console.error(e);
+    }
+  });
+
   protected search = restartableTask(async (inputEvent: InputEvent) => {
     const input = inputEvent.target as HTMLInputElement;
     this.query = input.value;
@@ -108,6 +136,10 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
       this.inputValueIsValid = Boolean(new URL(url));
     } catch (e) {
       this.inputValueIsValid = false;
+    } finally {
+      if (this.inputValueIsValid) {
+        this.maybeLoadFavicon.perform();
+      }
     }
   });
 }

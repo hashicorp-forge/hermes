@@ -21,21 +21,29 @@
 
       {{#if this.userHasSearched}}
         {{#if this.inputValueIsValid}}
-          URL! Knew it!
+          It's a URL
+          {{#if this.faviconIsShown}}
+            {{#if this.maybeLoadFavicon.isRunning}}
+              🌀
+            {{else}}
+              🟤
+              <img src={{this.faviconURL}} />
+            {{/if}}
+          {{/if}}
         {{else if this.shownDocuments}}
           <ul>
             {{#each this.shownDocuments as |d|}}
               <li>
                 <Action class="w-full">
                   <Doc::Inline
-                    @avatar="{{get d.ownerPhotos 0}}"
-                    @docID="{{d.objectID}}"
-                    @docNumber="{{d.docNumber}}"
-                    @isResult="{true}"
-                    @owner="{{get d.owners 0}}"
-                    @productArea="{{d.product}}"
-                    @status="{{d.status}}"
-                    @title="{{d.title}}"
+                    @avatar={{get d.ownerPhotos 0}}
+                    @docID={{d.objectID}}
+                    @docNumber={{d.docNumber}}
+                    @isResult={{true}}
+                    @owner={{get d.owners 0}}
+                    @productArea={{d.product}}
+                    @status={{d.status}}
+                    @title={{d.title}}
                   />
                 </Action>
               </li>
