@@ -16,8 +16,7 @@ export default class SettingsRoute extends Route {
     const allProducts = await this.fetchSvc
       .fetch("/api/v1/products")
       .then((resp) => {
-        assert("response must be defined", resp);
-        return resp.json();
+        return resp?.json();
       })
       .catch((err) => {
         console.log(`Error requesting products: ${err}`);

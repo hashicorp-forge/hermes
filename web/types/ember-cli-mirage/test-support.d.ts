@@ -1,5 +1,5 @@
+import { TestContext } from "@ember/test-helpers";
 import { Server } from "ember-cli-mirage";
-import { TestContext } from "ember-test-helpers";
 
 export function setupMirage(hooks: NestedHooks): void;
 

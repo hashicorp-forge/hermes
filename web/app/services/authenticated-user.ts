@@ -57,8 +57,6 @@ export default class AuthenticatedUserService extends Service {
   private get subscriptionsPostHeaders() {
     return {
       "Content-Type": "application/json",
-      "Hermes-Google-Access-Token":
-        this.session.data.authenticated.access_token,
     };
   }
 
@@ -77,21 +75,15 @@ export default class AuthenticatedUserService extends Service {
    */
   fetchSubscriptions = task(async () => {
     try {
-      let response = await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-        method: "GET",
-        headers: {
-          "Hermes-Google-Access-Token":
-            this.session.data.authenticated.access_token,
-        },
-      });
-
-      assert('response must be defined', response)
-      let subscriptions: string[] = await response.json();
+      let subscriptions = await this.fetchSvc
+        .fetch("/api/v1/me/subscriptions", {
+          method: "GET",
+        })
+        .then((response) => response?.json());
 
       let newSubscriptions: Subscription[] = [];
 
       if (subscriptions) {
-        // map
         newSubscriptions = subscriptions.map((subscription: string) => {
           return {
             productArea: subscription,

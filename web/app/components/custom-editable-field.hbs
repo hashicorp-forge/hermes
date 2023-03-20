@@ -25,6 +25,7 @@
       <Hds::Form::Textarea::Field
         @value={{F.value}}
         name={{field}}
+        {{auto-height-textarea}}
         {{on "blur" F.update}}
         data-test-custom-string-field-input
       />

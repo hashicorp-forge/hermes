@@ -32,30 +32,15 @@
             />
           </div>
         </div>
-
         {{#if (and @facets (not @sortControlIsHidden))}}
-          <Hds::Dropdown class="sort-by-dropdown" as |dd|>
-            <dd.ToggleButton
-              data-test-sort-by-button
-              @text="Sort: {{this.getSortByLabel}}"
-              @color="secondary"
-              disabled={{this.sortControlIsDisabled}}
-            />
-            <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close)}}
-              @route={{this.currentRouteName}}
-              @query={{hash sortBy="dateDesc"}}
-              @text="Newest"
-              @icon="sort-desc"
-            />
-            <dd.Interactive
-              {{on "click" (fn this.delayedCloseDropdown dd.close)}}
-              @route={{this.currentRouteName}}
-              @query={{hash sortBy="dateAsc"}}
-              @text="Oldest"
-              @icon="sort-asc"
-            />
-          </Hds::Dropdown>
+          <Header::FacetDropdown
+            data-test-facet-dropdown="sort"
+            @label="Sort: {{this.getSortByLabel}}"
+            @facets={{this.sortByFacets}}
+            @disabled={{this.sortControlIsDisabled}}
+            @anchorToRight={{true}}
+            @currentSortByValue={{this.currentSortByValue}}
+          />
         {{/if}}
       </div>
       <Header::ActiveFilterList />

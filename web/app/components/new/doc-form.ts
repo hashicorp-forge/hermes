@@ -214,10 +214,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             title: cleanString(this.title),
           }),
         })
-        .then((response) => {
-          assert("response must exist", response);
-          return response.json();
-        });
+        .then((response) => response?.json());
 
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
