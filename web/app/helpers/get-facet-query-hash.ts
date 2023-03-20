@@ -52,6 +52,7 @@ export default class GetFacetQueryHashHelper extends Helper {
           ...(this.activeFilters.index[translatedFacetName] || []),
           clickedFilter,
         ],
+        page: 1,
       };
     }
   }
