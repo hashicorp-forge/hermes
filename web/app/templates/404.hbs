@@ -1,0 +1,54 @@
+{{page-title "Page not found"}}
+{{set-body-class "error-404"}}
+
+<div class="flex w-full min-h-screen px-16">
+  <div class="x-container doc-page">
+    <div class="p-16">
+      <header class="flex items-center justify-between mb-16">
+        <LinkTo @route="authenticated.dashboard" class="no-underline">
+          <HermesLogo />
+        </LinkTo>
+        <Hds::Button
+          @text="View dashboard"
+          @icon="arrow-right"
+          @iconPosition="trailing"
+          @route="authenticated.dashboard"
+        />
+      </header>
+      <div class="divider mb-6"></div>
+      <h1 class="title">[E-404] Page not found</h1>
+      <p class="summary">
+        <strong class="mr-1">Summary:</strong>The address may be expired or the
+        page may have moved. We apologize for any inconvenience.
+      </p>
+      <div class="meta-information">
+        <div>
+          <p><strong>Status:</strong>
+            Loading | Success |
+            <strong>Error</strong></p>
+          <p><strong>Type:</strong> Four hundred four</p>
+        </div>
+        <div>
+          <p data-test-404-logged-time>
+            <strong>Logged:</strong>
+            {{this.currentDate}}</p>
+          <p><strong>Assignee:</strong> Admin</p>
+        </div>
+      </div>
+      <div class="divider mt-10 mb-14"></div>
+      <p class="mb-40">
+        <strong class="uppercase">Note:</strong>
+        If you think this is a mistake,
+        <Hds::Link::Inline
+          @isHrefExternal={{true}}
+          @href="https://github.com/hashicorp-forge/hermes/issues"
+          @icon="external-link"
+          class="hover:no-underline"
+        >
+          please create an issue on GitHub
+        </Hds::Link::Inline>
+      </p>
+    </div>
+  </div>
+  <div class="gradient-overlay"></div>
+</div>

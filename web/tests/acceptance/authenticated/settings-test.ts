@@ -5,7 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-interface AllRouteContext extends MirageTestContext {}
+interface AuthenticatedSettingsRouteTestContext extends MirageTestContext {}
 
 module("Acceptance | authenticated/settings", function (hooks) {
   setupApplicationTest(hooks);
@@ -15,7 +15,7 @@ module("Acceptance | authenticated/settings", function (hooks) {
     authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AllRouteContext, assert) {
+  test("the page title is correct", async function (this: AuthenticatedSettingsRouteTestContext, assert) {
     await visit("/settings");
     assert.equal(getPageTitle(), "Email Notifications | Hermes");
   });
