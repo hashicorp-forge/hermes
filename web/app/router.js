@@ -21,4 +21,5 @@ Router.map(function () {
   });
   this.route("authenticate");
   this.route("grass");
+  this.route('404', { path: '/*path' })
 });
