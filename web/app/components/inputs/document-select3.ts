@@ -33,7 +33,6 @@ createServer({
   },
 });
 
-
 export default class InputsDocumentSelect3Component extends Component<InputsDocumentSelect3ComponentSignature> {
   @service declare algolia: AlgoliaService;
   @service("fetch") declare fetchSvc: FetchService;
@@ -47,7 +46,6 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @tracked faviconURL: string | null = null;
 
-
   @tracked popoverTrigger: HTMLElement | null = null;
 
   // TODO: this needs to exclude selected documents (relatedResources)
@@ -57,6 +55,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action maybeAddResource() {
     if (!this.inputValueIsValid) {
+      // TODO: show error message
       alert("invalid url");
     } else {
       this.relatedResources.pushObject(this.query);
@@ -70,8 +69,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action hidePopover() {
     this.popoverIsShown = false;
-    this.query = "";
-    this.inputValueIsValid = false;
+    this.clearSearch();
   }
 
   @action registerPopoverTrigger(e: HTMLElement) {
@@ -96,6 +94,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action clearSearch() {
     this.query = "";
+    this.inputValueIsValid = false;
   }
 
   protected fetchURLInfo = restartableTask(async () => {
@@ -148,8 +147,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     const input = inputEvent.target as HTMLInputElement;
     this.query = input.value;
 
-    this.checkURL.perform();
-
+    void this.checkURL.perform();
     void this.search.perform(this.query);
   });
 

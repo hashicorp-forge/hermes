@@ -1,5 +1,4 @@
 <div class="relative flex items-center w-full max-w-[250px] justify-between">
-
   <div class="hds-typography-body-100 hds-foreground-faint">
     Related docs
   </div>
@@ -16,64 +15,95 @@
   </Action>
   {{#if this.popoverIsShown}}
     <div
-      class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border min-h-[100px] rounded-md border-color-border-strong"
+      class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border min-h-[100px] rounded-lg border-color-border-strong bg-color-foreground-high-contrast"
       {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
     >
       <div class="p-1 border-b border-b-color-border-faint">
         <Hds::Form::TextInput::Base
           value={{this.query}}
           {{on "input" (perform this.onInput)}}
+          {{on "keydown" this.onKeydown}}
           {{did-insert this.registerAndFocusSearchInput}}
           type="text"
           placeholder="Paste a URL or search documents..."
         />
       </div>
       <div>
-        {{#if this.query.length}}
-          Results
-        {{else if this.inputValueIsValid}}
-          Attach link
-        {{else}}
-          Suggestions
-        {{/if}}
+
+        <div
+          class="mt-2.5 mb-[5px] px-3 text-color-foreground-faint uppercase tracking-wide text-[12px]"
+        >
+          {{#if this.query.length}}
+            {{#if this.inputValueIsValid}}
+              {{! Attach link }}
+            {{else}}
+              Results
+            {{/if}}
+          {{else}}
+            Suggestions
+          {{/if}}
+        </div>
 
         {{#if this.inputValueIsValid}}
-          <div class="bg-yellow-50 p-2.5">
+          {{#if this.fetchURLInfo.isRunning}}
+            <div class="py-1.5 px-3">
+              <div class="w-full grid place-items-center pt-0.5 pb-[13px]">
 
-            {{#if this.fetchURLInfo.isRunning}}
-              <FlightIcon @name="loading" />
-            {{else}}
-              <div class="flex w-full justify-between">
-                <div class="flex items-center w-full">
-
+                <FlightIcon @name="loading" />
+              </div>
+            </div>
+            {{! <FlightIcon @name="loading" class="" /> }}
+          {{else}}
+            <Action
+              class="py-1.5 px-3 flex w-full"
+              {{on "click" this.maybeAddResource}}
+            >
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center">
                   <img
                     src={{this.faviconURL}}
                     width="16"
                     height="16"
                     class="mr-2.5"
                   />
-                  <span class="font-bold truncate">
-
-                    There will be a title here
+                  <span class="">
+                    Add external document
                   </span>
                 </div>
-                <Hds::Button
-                  @text="Add"
-                  @color="secondary"
-                  @size="small"
-                  class="shrink-0 ml-12"
-                  {{on "click" this.maybeAddResource}}
+                {{! if focused only }}
+                <FlightIcon
+                  @name="corner-down-left"
+                  class="text-color-foreground-faint"
                 />
               </div>
-            {{/if}}
-          </div>
+            </Action>
+          {{/if}}
         {{else}}
-          <ol>
-            {{#each this.shownDocuments as |d|}}
-              <li>
-                <Action class="w-full">
-                  {{! this needs to not be a link-to }}
-                  <Doc::Inline
+          {{#if this.shownDocuments.length}}
+            <ol class="list-none mb-1">
+              {{#each this.shownDocuments as |d|}}
+                <li>
+                  <Action
+                    class="w-full flex py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
+                  >
+                    <div
+                      class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-0.5 overflow-hidden"
+                    >
+                      <img src="/images/document.png" class="w-6" />
+                    </div>
+                    <div>
+                      <h4 class="inline-doc-title mb-0.5">
+                        {{d.title}}
+                      </h4>
+                      {{#if d.docNumber}}
+                        <span class="text-color-foreground-faint">
+                          {{d.docNumber}}
+                        </span>
+                      {{/if}}
+                    </div>
+
+                    {{! this needs to not be a link-to }}
+                    {{!-- <Doc::Inline
                     @avatar={{get d.ownerPhotos 0}}
                     @docID={{d.objectID}}
                     @docNumber={{d.docNumber}}
@@ -82,11 +112,24 @@
                     @productArea={{d.product}}
                     @status={{d.status}}
                     @title={{d.title}}
-                  />
-                </Action>
-              </li>
-            {{/each}}
-          </ol>
+                  /> --}}
+                  </Action>
+                </li>
+              {{/each}}
+            </ol>
+          {{else}}
+            <div class="px-3">
+              {{#if (or this.search.isRunning this.fetchURLInfo.isRunning)}}
+                <div class="w-full grid place-items-center h-[20px] mt-2 mb-4">
+                  <FlightIcon @name="loading" />
+                </div>
+              {{else}}
+                <div class="h-[20px] mt-2 mb-4 text-color-foreground-faint">
+                  No matches
+                </div>
+              {{/if}}
+            </div>
+          {{/if}}
         {{/if}}
       </div>
     </div>
@@ -100,7 +143,7 @@
     ❎
   {{/each}}
 {{else}}
-  <div class="mt-3.5">
+  <div class="mt-3.5 text-color-foreground-faint">
 
     None yet
   </div>
