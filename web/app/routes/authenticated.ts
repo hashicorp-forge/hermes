@@ -29,7 +29,18 @@ export default class AuthenticatedRoute extends Route {
     ) {
       // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
 
-      window.sessionStorage.setItem(SESSION_STORAGE_KEY, transition.intent.url);
+      /**
+       * We expect a `transition.intent.url`, but in rare cases, it's undefined,
+       * e.g., when clicking the "view dashboard" button from the 404 route.
+       * When this happens, we fall back to `transition.to.name`.
+       *
+       * For reference:
+       * `transition.intent.url` e.g., 'documents/1'
+       * `transition.to.name` e.g., 'authenticated.documents'
+       */
+      let transitionTo = transition.intent.url ?? transition.to.name;
+
+      window.sessionStorage.setItem(SESSION_STORAGE_KEY, transitionTo);
     }
   }
 }
