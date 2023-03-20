@@ -56,7 +56,7 @@
           {{else}}
             <Action
               class="py-1.5 px-3 flex w-full"
-              {{on "click" this.maybeAddResource}}
+              {{on "click" this.addRelatedExternalLink}}
             >
               <div class="flex items-center justify-between w-full">
                 <div class="flex items-center">
@@ -80,19 +80,20 @@
           {{/if}}
         {{else}}
           {{#if this.shownDocuments.length}}
-            <ol class="list-none mb-1">
+            <ol class="list-none mb-1.5">
               {{#each this.shownDocuments as |d|}}
                 <li>
                   <Action
+                    {{on "click" (fn this.addRelatedDocument d)}}
                     class="w-full flex py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
                   >
                     <div
-                      class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-0.5 overflow-hidden"
+                      class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-0.5 overflow-hidden bg-white"
                     >
                       <img src="/images/document.png" class="w-6" />
                     </div>
                     <div>
-                      <h4 class="inline-doc-title mb-0.5">
+                      <h4 class="inline-doc-title mb-0.5 pr-0.5">
                         {{d.title}}
                       </h4>
                       {{#if d.docNumber}}
@@ -136,12 +137,29 @@
   {{/if}}
 </div>
 {{#if this.relatedResources.length}}
-  {{#each this.relatedResources as |resource|}}
-    {{! either linkTos or external links }}
-    {{resource}}
-    {{! button to delete it from the document }}
-    ❎
-  {{/each}}
+  <ul>
+
+    {{#each this.relatedResources as |resource|}}
+      <li class="flex w-full">
+
+        {{#if resource.objectID}}
+          <LinkTo @route="authenticated.document" @model={{resource.objectID}}>
+            {{resource.title}}
+            {{#if resource.docNumber}}
+              {{resource.docNumber}}
+            {{/if}}
+          </LinkTo>
+        {{else}}
+          <ExternalLink href={{resource}}>
+            {{resource}}
+          </ExternalLink>
+        {{/if}}
+        ❎
+      </li>
+
+    {{/each}}
+  </ul>
+
 {{else}}
   <div class="mt-3.5 text-color-foreground-faint">
 
