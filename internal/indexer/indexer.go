@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -64,6 +65,12 @@ type Indexer struct {
 }
 
 type IndexerOption func(*Indexer)
+
+// safeTime is a time.Time that is safe to use concurrently.
+type safeTime struct {
+	time time.Time
+	sync.RWMutex
+}
 
 // NewIndexer creates a new indexer.
 func NewIndexer(opts ...IndexerOption) (*Indexer, error) {
@@ -180,7 +187,6 @@ func (idx *Indexer) Run() error {
 
 	for {
 		runStartedAt := time.Now().UTC()
-		runStartedAtStr := runStartedAt.UTC().Format(time.RFC3339Nano)
 
 		// Get indexer metadata.
 		md := models.IndexerMetadata{}
@@ -195,6 +201,126 @@ func (idx *Indexer) Run() error {
 				)
 				os.Exit(1)
 			}
+		}
+
+		// Update draft document headers, if configured.
+		if idx.UpdateDraftHeaders {
+			log.Info("refreshing draft document headers",
+				"folder_id", idx.DraftsFolderID,
+			)
+			currentTime := time.Now().UTC()
+
+			// Get drafts folder data (headers) from the database.
+			// Note: we add a "refreshHeaders:" prefix for the Google Drive ID here
+			// to not conflict with with the actual last indexed time of the folder
+			// (if we're indexing it, that is).
+			fd := models.IndexerFolder{
+				GoogleDriveID: fmt.Sprintf("refreshHeaders:%s", idx.DraftsFolderID),
+			}
+			if err := fd.Get(db); err != nil && !errors.Is(
+				err, gorm.ErrRecordNotFound) {
+				log.Error("error getting drafts headers folder indexer data",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// If the last indexed timestamp doesn't exist, set it to the Unix epoch.
+			if fd.LastIndexedAt.IsZero() {
+				fd.LastIndexedAt = time.Unix(0, 0).UTC()
+			}
+
+			// Create safe last indexed time for the folder so we can pass this to
+			// goroutines.
+			safeLastIndexedAt := &safeTime{
+				fd.LastIndexedAt,
+				sync.RWMutex{},
+			}
+
+			if err := refreshDocumentHeaders(
+				*idx,
+				idx.DraftsFolderID,
+				draftsFolderType,
+				safeLastIndexedAt,
+				currentTime,
+			); err != nil {
+				log.Error("error refreshing draft document headers",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// Save last indexed time for the drafts folder (headers).
+			fd.LastIndexedAt = safeLastIndexedAt.time
+			if err := fd.Upsert(db); err != nil {
+				log.Error(
+					"error upserting last indexed time for the drafts headers folder",
+					"folder_id", idx.DraftsFolderID,
+					"last_indexed_at", fd.LastIndexedAt,
+				)
+			}
+
+			log.Info("done refreshing draft document headers")
+		}
+
+		// Update published document headers, if configured.
+		if idx.UpdateDocumentHeaders {
+			log.Info("refreshing published document headers",
+				"folder_id", idx.DraftsFolderID,
+			)
+			currentTime := time.Now().UTC()
+
+			// Get documents folder data (headers) from the database.
+			// Note: we add a "refreshHeaders:" prefix for the Google Drive ID here
+			// to not conflict with with the actual last indexed time of the folder
+			// (if we're indexing it, that is).
+			fd := models.IndexerFolder{
+				GoogleDriveID: fmt.Sprintf("refreshHeaders:%s", idx.DocumentsFolderID),
+			}
+			if err := fd.Get(db); err != nil && !errors.Is(
+				err, gorm.ErrRecordNotFound) {
+				log.Error("error getting documents headers folder indexer data",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// If the last indexed timestamp doesn't exist, set it to the Unix epoch.
+			if fd.LastIndexedAt.IsZero() {
+				fd.LastIndexedAt = time.Unix(0, 0).UTC()
+			}
+
+			// Create safe last indexed time for the folder so we can pass this to
+			// goroutines.
+			safeLastIndexedAt := &safeTime{
+				fd.LastIndexedAt,
+				sync.RWMutex{},
+			}
+
+			if err := refreshDocumentHeaders(
+				*idx,
+				idx.DocumentsFolderID,
+				documentsFolderType,
+				safeLastIndexedAt,
+				currentTime,
+			); err != nil {
+				log.Error("error refreshing published document headers",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// Save last indexed time for the documents folder (headers).
+			fd.LastIndexedAt = safeLastIndexedAt.time
+			if err := fd.Upsert(db); err != nil {
+				log.Error(
+					"error upserting last indexed time for the documents headers folder",
+					"folder_id", idx.DocumentsFolderID,
+					"last_indexed_at", fd.LastIndexedAt,
+				)
+			}
+
+			log.Info("done refreshing published document headers")
 		}
 
 		// Get documents folder data from the database.
@@ -220,17 +346,19 @@ func (idx *Indexer) Run() error {
 			"folder_id", idx.DocumentsFolderID,
 			"last_indexed_at", lastIndexedAtStr,
 		)
+		currentTime := time.Now().UTC()
+		currentTimeStr := currentTime.UTC().Format(time.RFC3339Nano)
 
 		// Get documents that have been updated in the folder since it was last
 		// indexed.
 		docFiles, err := gwSvc.GetUpdatedDocsBetween(
-			idx.DocumentsFolderID, lastIndexedAtStr, runStartedAtStr)
+			idx.DocumentsFolderID, lastIndexedAtStr, currentTimeStr)
 		if err != nil {
 			log.Error("error getting updated document files",
 				"error", err,
 				"folder_id", idx.DocumentsFolderID,
-				"last_indexed_at", lastIndexedAtStr,
-				"run_started_at", runStartedAtStr,
+				"after_time", lastIndexedAtStr,
+				"before_time", currentTimeStr,
 			)
 			os.Exit(1)
 		}
@@ -337,42 +465,6 @@ func (idx *Indexer) Run() error {
 				"folder_id", idx.DocumentsFolderID,
 				"last_indexed_at", docsFolderData.LastIndexedAt,
 			)
-		}
-
-		// Update draft document headers, if configured.
-		if idx.UpdateDraftHeaders {
-			log.Info("refreshing draft document headers")
-			if err := refreshDocumentHeaders(
-				*idx,
-				idx.DraftsFolderID,
-				draftsFolderType,
-				md.LastFullIndexAt,
-				runStartedAt,
-			); err != nil {
-				log.Error("error refreshing draft document headers",
-					"error", err,
-				)
-				os.Exit(1)
-			}
-			log.Info("done refreshing draft document headers")
-		}
-
-		// Update published document headers, if configured.
-		if idx.UpdateDocumentHeaders {
-			log.Info("refreshing published document headers")
-			if err := refreshDocumentHeaders(
-				*idx,
-				idx.DocumentsFolderID,
-				documentsFolderType,
-				md.LastFullIndexAt,
-				runStartedAt,
-			); err != nil {
-				log.Error("error refreshing published document headers",
-					"error", err,
-				)
-				os.Exit(1)
-			}
-			log.Info("done published document headers")
 		}
 
 		// Update the last full index time.
