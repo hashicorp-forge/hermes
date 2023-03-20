@@ -16,17 +16,78 @@
   </Action>
   {{#if this.popoverIsShown}}
     <div
-      class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border h-80 rounded-md border-color-border-strong"
+      class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border min-h-[100px] rounded-md border-color-border-strong"
       {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
     >
       <div class="p-1 border-b border-b-color-border-faint">
         <Hds::Form::TextInput::Base
           value={{this.query}}
-          {{on "input" (perform this.search)}}
+          {{on "input" (perform this.onInput)}}
           {{did-insert this.registerAndFocusSearchInput}}
           type="text"
-          placeholder="Search Hermes..."
+          placeholder="Paste a URL or search documents..."
         />
+      </div>
+      <div>
+        {{#if this.query.length}}
+          Results
+        {{else if this.inputValueIsValid}}
+          Attach link
+        {{else}}
+          Suggestions
+        {{/if}}
+
+        {{#if this.inputValueIsValid}}
+          <div class="bg-yellow-50 p-2.5">
+
+            {{#if this.fetchURLInfo.isRunning}}
+              <FlightIcon @name="loading" />
+            {{else}}
+              <div class="flex w-full justify-between">
+                <div class="flex items-center w-full">
+
+                  <img
+                    src={{this.faviconURL}}
+                    width="16"
+                    height="16"
+                    class="mr-2.5"
+                  />
+                  <span class="font-bold truncate">
+
+                    There will be a title here
+                  </span>
+                </div>
+                <Hds::Button
+                  @text="Add"
+                  @color="secondary"
+                  @size="small"
+                  class="shrink-0 ml-12"
+                  {{on "click" this.maybeAddResource}}
+                />
+              </div>
+            {{/if}}
+          </div>
+        {{else}}
+          <ol>
+            {{#each this.shownDocuments as |d|}}
+              <li>
+                <Action class="w-full">
+                  {{! this needs to not be a link-to }}
+                  <Doc::Inline
+                    @avatar={{get d.ownerPhotos 0}}
+                    @docID={{d.objectID}}
+                    @docNumber={{d.docNumber}}
+                    @isResult={{true}}
+                    @owner={{get d.owners 0}}
+                    @productArea={{d.product}}
+                    @status={{d.status}}
+                    @title={{d.title}}
+                  />
+                </Action>
+              </li>
+            {{/each}}
+          </ol>
+        {{/if}}
       </div>
     </div>
   {{/if}}
