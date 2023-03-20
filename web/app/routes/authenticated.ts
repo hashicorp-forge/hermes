@@ -39,10 +39,7 @@ export default class AuthenticatedRoute extends Route {
        */
       let transitionTo = transition.intent.url ?? transition.to.name;
 
-      window.sessionStorage.setItem(
-        this.session.SESSION_STORAGE_KEY,
-        transitionTo
-      );
+      window.sessionStorage.setItem(SESSION_STORAGE_KEY, transitionTo);
     }
   }
 }
