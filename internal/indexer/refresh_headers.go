@@ -29,8 +29,8 @@ func refreshDocumentHeaders(
 	idx Indexer,
 	folderID string,
 	ft folderType,
-	LastFullIndexAt time.Time,
-	runStartedAt time.Time,
+	LastIndexedAt *safeTime,
+	currentTime time.Time,
 ) error {
 	log := idx.Logger
 
@@ -38,22 +38,13 @@ func refreshDocumentHeaders(
 		return fmt.Errorf("folder type cannot be unspecified")
 	}
 
-	// Last run we checked for any updated files up until 30 minutes before that
-	// so fromTime is 30 minutes before the last full index time.
-	fromTime := LastFullIndexAt.Add(time.Duration(-30) * time.Minute).UTC()
-
-	// If LastFullIndexAt was the Unix epoch, set fromTime to the epoch.
-	if LastFullIndexAt.Equal(time.Unix(0, 0)) {
-		fromTime = time.Unix(0, 0).UTC()
-	}
-
 	// Create from time string to use with Google Workspace APIs.
-	fromTimeStr := fromTime.Format(time.RFC3339Nano)
+	fromTimeStr := LastIndexedAt.time.UTC().Format(time.RFC3339Nano)
 
 	// untilTimeStr is 30 minutes ago in RFC 3339(Nano) format. We use this
 	// because we don't want to update the doc headers for files that are
 	// actively being modified by users.
-	untilTimeStr := runStartedAt.Add(time.Duration(-30) * time.Minute).UTC().
+	untilTimeStr := currentTime.Add(time.Duration(-30) * time.Minute).UTC().
 		Format(time.RFC3339Nano)
 
 	docs, err := idx.GoogleWorkspaceService.GetUpdatedDocsBetween(
@@ -102,6 +93,7 @@ func refreshDocumentHeaders(
 					idx,
 					file,
 					ft,
+					LastIndexedAt,
 				)
 			}
 		}()
@@ -122,6 +114,7 @@ func refreshDocumentHeader(
 	idx Indexer,
 	file *drive.File,
 	ft folderType,
+	lastIndexedAt *safeTime,
 ) {
 	algo := idx.AlgoliaClient
 	log := idx.Logger
@@ -164,8 +157,34 @@ func refreshDocumentHeader(
 			"google_file_id", file.Id,
 		)
 		os.Exit(1)
-
 	}
+
+	// Get the file again because we just modified it.
+	file, err = idx.GoogleWorkspaceService.GetFile(file.Id)
+	if err != nil {
+		log.Error("error getting the file after replacing the header",
+			"error", err,
+			"google_file_id", file.Id,
+		)
+		os.Exit(1)
+	}
+
+	// Parse the modified time of the document.
+	modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
+	if err != nil {
+		log.Error("error parsing file modified time",
+			"error", err,
+			"google_file_id", file.Id,
+		)
+		os.Exit(1)
+	}
+
+	// Update the last indexed time if this file's modified time is newer.
+	lastIndexedAt.Lock()
+	if modifiedTime.After(lastIndexedAt.time) {
+		lastIndexedAt.time = modifiedTime
+	}
+	lastIndexedAt.Unlock()
 
 	log.Info("refreshed document header",
 		"google_file_id", file.Id,
