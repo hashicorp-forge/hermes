@@ -2284,7 +2284,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sinonjs/fake-timers@npm:10.0.2, @sinonjs/fake-timers@npm:^10.0.2":
+"@sinonjs/commons@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@sinonjs/commons@npm:3.0.0"
+  dependencies:
+    type-detect: 4.0.8
+  checksum: b4b5b73d4df4560fb8c0c7b38c7ad4aeabedd362f3373859d804c988c725889cde33550e4bcc7cd316a30f5152a2d1d43db71b6d0c38f5feef71fd8d016763f8
+  languageName: node
+  linkType: hard
+
+"@sinonjs/fake-timers@npm:^10.0.2":
   version: 10.0.2
   resolution: "@sinonjs/fake-timers@npm:10.0.2"
   dependencies:
@@ -7249,7 +7258,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diff@npm:^5.0.0":
+"diff@npm:^5.0.0, diff@npm:^5.1.0":
   version: 5.1.0
   resolution: "diff@npm:5.1.0"
   checksum: c7bf0df7c9bfbe1cf8a678fd1b2137c4fb11be117a67bc18a0e03ae75105e8533dbfb1cda6b46beb3586ef5aed22143ef9d70713977d5fb1f9114e21455fba90
@@ -8453,9 +8462,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-modifier@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "ember-modifier@npm:4.0.0"
+"ember-modifier@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "ember-modifier@npm:4.1.0"
   dependencies:
     "@embroider/addon-shim": ^1.8.4
     ember-cli-normalize-entity-name: ^1.0.0
@@ -8465,7 +8474,7 @@ __metadata:
   peerDependenciesMeta:
     ember-source:
       optional: true
-  checksum: 8970eee22666426abed22414fc12f1547b4c02618297648ace0c22ec3db5299afe522ac2130148e6daeded0c70ad7005418c21888b8e4198e0c6b04c5f751312
+  checksum: 5e14a864de2184c07e59fb9bc76a09ae25d1bd37722a94751a3cef6165df22027007696c4dda03e1862cb3bbeefb046772810dda3104d05c7fe8476389c34a77
   languageName: node
   linkType: hard
 
@@ -10878,7 +10887,7 @@ __metadata:
     ember-focus-trap: ^1.0.1
     ember-load-initializers: ^2.1.2
     ember-maybe-import-regenerator: ^0.1.6
-    ember-modifier: ^4.0.0
+    ember-modifier: ^4.1.0
     ember-on-helper: ^0.1.0
     ember-page-title: ^6.2.2
     ember-power-select-with-create: ^1.0.0
@@ -13444,7 +13453,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nise@npm:^5.1.2":
+"nise@npm:^5.1.4":
   version: 5.1.4
   resolution: "nise@npm:5.1.4"
   dependencies:
@@ -15813,16 +15822,16 @@ __metadata:
   linkType: hard
 
 "sinon@npm:^15.0.1":
-  version: 15.0.1
-  resolution: "sinon@npm:15.0.1"
+  version: 15.0.2
+  resolution: "sinon@npm:15.0.2"
   dependencies:
-    "@sinonjs/commons": ^2.0.0
-    "@sinonjs/fake-timers": 10.0.2
+    "@sinonjs/commons": ^3.0.0
+    "@sinonjs/fake-timers": ^10.0.2
     "@sinonjs/samsam": ^7.0.1
-    diff: ^5.0.0
-    nise: ^5.1.2
+    diff: ^5.1.0
+    nise: ^5.1.4
     supports-color: ^7.2.0
-  checksum: 4b5acff291b4650cf736bf45fc9eceed44dceca63b663cbd55926dd688fe8e9baa4b4629e296ee5d5b64245aedec5c540fea0416b8bb35bccfb98ca9e9ed87f3
+  checksum: 98eb555442db3985d7fe0d90e23f081f3df71adffa0a50b049bcd2abbf5c2d71a43aeaa1e3c02500164cff5233d2f102f777356ebe8bfc257cb7059c1b2778b0
   languageName: node
   linkType: hard
 
