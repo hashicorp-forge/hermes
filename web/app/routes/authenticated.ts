@@ -2,7 +2,7 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
-import SessionService from "hermes/services/session";
+import SessionService, { SESSION_STORAGE_KEY } from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
@@ -19,9 +19,7 @@ export default class AuthenticatedRoute extends Route {
       "authenticate"
     );
 
-    let target = window.sessionStorage.getItem(
-      this.session.SESSION_STORAGE_KEY
-    );
+    let target = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
 
     if (
       !target &&
