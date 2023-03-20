@@ -19,6 +19,7 @@
 @use "components/notification";
 @use "components/sidebar";
 @use "components/hds-badge";
+@use "components/header/facet-dropdown";
 @use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
@@ -26,6 +27,7 @@
 @use "./ember-power-select-theme";
 
 @use "@hashicorp/design-system-components";
+@use "./error-404";
 @use "./hds-overrides";
 
 @use "tailwindcss/base";

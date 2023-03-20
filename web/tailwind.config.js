@@ -63,6 +63,7 @@ module.exports = {
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
         "color-surface-primary": "var(--token-color-surface-primary)",
+        "color-surface-strong": "var(--token-color-surface-strong)",
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border
