@@ -1,25 +1,53 @@
-<Hds::Dropdown
-  class="facets-dropdown"
-  @listPosition="left"
+{{!
+  Marked up with guidance from:
+  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
+  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-list/
+  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
+  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
+}}
+
+<div
+  class="relative"
+  aria-owns="facet-dropdown-menu"
+  aria-expanded={{@dropdownIsShown}}
   ...attributes
-  as |dd|
 >
-  <dd.ToggleButton
-    data-test-facet-dropdown-toggle-button
-    @text={{@label}}
+  <Hds::Button
+    {{did-insert this.registerTrigger}}
+    {{on "click" this.toggleDropdown}}
+    {{on "keydown" this.onTriggerKeydown}}
+    @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
+    @iconPosition="trailing"
     @color="secondary"
+    @text={{@label}}
+    data-test-facet-dropdown-trigger={{@label}}
     disabled={{@disabled}}
+    aria-haspopup="listbox"
+    aria-controls={{if
+      @inputIsShown
+      "facet-dropdown-popover"
+      "facet-dropdown-menu"
+    }}
   />
-  {{#if @facets}}
-    {{#each-in this.firstTenFacets as |value attrs|}}
-      <dd.Interactive
-        class="facet-interactive-item {{if attrs.selected 'checked'}}"
-        @route={{this.currentRouteName}}
-        @query={{get-facet-query-hash @label value attrs.selected}}
-        @text="{{value}} ({{attrs.count}})"
-        @icon={{if attrs.selected "check-square-fill" "square"}}
-        {{on "click" (fn this.delayedCloseDropdown dd.close)}}
-      />
-    {{/each-in}}
+  {{#if this.dropdownIsShown}}
+    <Header::FacetDropdownList
+      {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
+      @shownFacets={{this.shownFacets}}
+      @label={{@label}}
+      @inputIsShown={{this.inputIsShown}}
+      @onInput={{perform this.onInput}}
+      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+      @registerScrollContainer={{this.registerScrollContainer}}
+      @query={{this.query}}
+      @focusedItemIndex={{this.focusedItemIndex}}
+      @setFocusedItemIndex={{this.setFocusedItemIndex}}
+      @listItemRole={{this.listItemRole}}
+      @registerPopover={{this.registerPopover}}
+      @popoverElement={{this.popoverElement}}
+      @triggerElement={{this.triggerElement}}
+      @hideDropdown={{this.hideDropdown}}
+      @anchorToRight={{@anchorToRight}}
+      @currentSortByValue={{@currentSortByValue}}
+    />
   {{/if}}
-</Hds::Dropdown>
+</div>
