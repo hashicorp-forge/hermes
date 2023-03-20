@@ -2,7 +2,6 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { tracked } from "@glimmer/tracking";
 import {
   FacetDropdownGroups,
   FacetDropdownObjectDetails,
@@ -15,6 +14,11 @@ import { assert } from "@ember/debug";
 export enum SortByValue {
   DateDesc = "dateDesc",
   DateAsc = "dateAsc",
+}
+
+export enum SortByLabel {
+  Newest = "Newest",
+  Oldest = "Oldest",
 }
 
 export enum FacetName {
@@ -39,13 +43,25 @@ export default class HeaderToolbarComponent extends Component<HeaderToolbarCompo
   @service declare router: RouterService;
   @service declare activeFilters: ActiveFiltersService;
 
-  @tracked sortBy: SortByValue = SortByValue.DateDesc;
+  get currentSortByValue() {
+    if (!this.router.currentRoute) {
+      return SortByValue.DateDesc;
+    }
+    let sortBy = this.router.currentRoute.queryParams["sortBy"];
 
-  protected get getSortByLabel() {
-    if (this.sortBy === SortByValue.DateDesc) {
-      return "Newest";
+    switch (sortBy) {
+      case SortByValue.DateAsc:
+        return sortBy;
+      default:
+        return SortByValue.DateDesc;
+    }
+  }
+
+  protected get getSortByLabel(): SortByLabel {
+    if (this.currentSortByValue === SortByValue.DateDesc) {
+      return SortByLabel.Newest;
     } else {
-      return "Oldest";
+      return SortByLabel.Oldest;
     }
   }
 
@@ -106,6 +122,19 @@ export default class HeaderToolbarComponent extends Component<HeaderToolbarCompo
     } else {
       return statuses;
     }
+  }
+
+  get sortByFacets() {
+    return {
+      Newest: {
+        count: 0,
+        selected: this.currentSortByValue === SortByValue.DateDesc,
+      },
+      Oldest: {
+        count: 0,
+        selected: this.currentSortByValue === SortByValue.DateAsc,
+      },
+    };
   }
 
   /**
