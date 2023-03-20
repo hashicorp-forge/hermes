@@ -1,0 +1,46 @@
+<div class="relative flex items-center w-full max-w-[250px] justify-between">
+
+  <div class="hds-typography-body-100 hds-foreground-faint">
+    Related docs
+  </div>
+  <Action
+    {{on "click" this.togglePopover}}
+    {{did-insert this.registerPopoverTrigger}}
+    class="flex items-center"
+  >
+    <FlightIcon @name="plus" />
+    <FlightIcon
+      @name="chevron-down"
+      class="scale-75 text-color-foreground-faint origin-left -mr-1"
+    />
+  </Action>
+  {{#if this.popoverIsShown}}
+    <div
+      class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border h-80 rounded-md border-color-border-strong"
+      {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
+    >
+      <div class="p-1 border-b border-b-color-border-faint">
+        <Hds::Form::TextInput::Base
+          value={{this.query}}
+          {{on "input" (perform this.search)}}
+          {{did-insert this.registerAndFocusSearchInput}}
+          type="text"
+          placeholder="Search Hermes..."
+        />
+      </div>
+    </div>
+  {{/if}}
+</div>
+{{#if this.relatedResources.length}}
+  {{#each this.relatedResources as |resource|}}
+    {{! either linkTos or external links }}
+    {{resource}}
+    {{! button to delete it from the document }}
+    ❎
+  {{/each}}
+{{else}}
+  <div class="mt-3.5">
+
+    None yet
+  </div>
+{{/if}}

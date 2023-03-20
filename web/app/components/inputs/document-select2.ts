@@ -7,16 +7,36 @@ import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 
 import { restartableTask } from "ember-concurrency";
+import SessionService from "hermes/services/session";
 import FetchService from "hermes/services/fetch";
+import { assert } from "@ember/debug";
+import { Response, createServer } from "miragejs";
+import config from "hermes/config/environment";
+
 interface InputsDocumentSelect2ComponentSignature {
   Args: {};
 }
 
 const GOOGLE_FAVICON_URL_PREFIX =
-  "https://s2.googleusercontent.com/s2/favicons?domain=";
+  "https://s2.googleusercontent.com/s2/favicons";
+
+createServer({
+  routes() {
+    this.get(GOOGLE_FAVICON_URL_PREFIX, (schema, request) => {
+      // let url = request.queryParams["url"];
+
+      // need to respond
+      return new Response(200, {}, "");
+    });
+
+    this.passthrough();
+    this.passthrough(`https://${config.algolia.appID}-dsn.algolia.net/**`);
+  },
+});
 
 export default class InputsDocumentSelect2Component extends Component<InputsDocumentSelect2ComponentSignature> {
   @service declare algolia: AlgoliaService;
+  @service declare session: SessionService;
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked relatedResources = A();
@@ -33,10 +53,6 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
 
   @tracked faviconURL: string | null = null;
 
-  get faviconIsShown() {
-    return this.faviconURL || this.maybeLoadFavicon.isRunning;
-  }
-
   get userHasSearched() {
     return this.query.length > 0;
   }
@@ -49,9 +65,20 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
     if (!this.inputValueIsValid) {
       alert("invalid url");
     } else {
-      this.relatedResources.pushObject(this.inputValue);
-      this.clearSearch();
+      // if the object doesn't exist, add it
+      if (!this.relatedResources.includes(this.inputValue)) {
+        this.relatedResources.pushObject(this.inputValue);
+        this.clearSearch();
+        this.popoverIsShown = false;
+        this.faviconURL = null;
+      } else {
+        alert("already exists");
+      }
     }
+  }
+
+  @action removeResource(resource: string) {
+    this.relatedResources.removeObject(resource);
   }
 
   @action togglePopover() {
@@ -90,21 +117,35 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
 
   @action clearSearch() {
     this.inputValue = "";
+    this.query = "";
+    this.inputValueIsValid = false;
   }
 
-  protected maybeLoadFavicon = restartableTask(async () => {
-    const maybeFaviconURL = GOOGLE_FAVICON_URL_PREFIX + this.inputValue;
+  protected fetchURLInfo = restartableTask(async () => {
+    let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.inputValue;
+
+    // const urlToFetch = this.inputValue;
+    const urlToFetch = infoURL;
+
     try {
-      const response = await this.fetchSvc.fetch(maybeFaviconURL);
+      const response = await this.fetchSvc.fetch(urlToFetch, {
+        // For when we make a real request:
+        // headers: {
+        //   Authorization:
+        //     "Bearer " + this.session.data.authenticated.access_token,
+        //   "Content-Type": "application/json",
+        // },
+      });
+
       if (response?.ok) {
-        this.faviconURL = maybeFaviconURL;
+        this.faviconURL =
+          "https://www.google.com/s2/favicons?domain=" + this.inputValue;
       }
+
       if (response?.status === 404) {
         this.faviconURL = null;
-        console.log("nothing");
       }
     } catch (e) {
-      this.faviconURL = null;
       console.error(e);
     }
   });
@@ -116,6 +157,8 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
     if (this.query === "") {
       this.shownDocuments = null;
       return;
+    } else {
+      this.popoverIsShown = true;
     }
 
     let algoliaResponse = await this.algolia.search.perform(this.query, {
@@ -138,7 +181,7 @@ export default class InputsDocumentSelect2Component extends Component<InputsDocu
       this.inputValueIsValid = false;
     } finally {
       if (this.inputValueIsValid) {
-        this.maybeLoadFavicon.perform();
+        this.fetchURLInfo.perform();
       }
     }
   });

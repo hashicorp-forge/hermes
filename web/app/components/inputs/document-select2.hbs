@@ -1,7 +1,7 @@
 <div class="hds-typography-body-100 hds-foreground-faint">
   Related docs
 </div>
-<div class="relative">
+<div class="relative z-10">
   <Hds::Form::TextInput::Base
     @type="text"
     @value={{this.inputValue}}
@@ -15,26 +15,42 @@
   />
   {{#if this.popoverIsShown}}
     <div
-      class="absolute -bottom-0.5 translate-y-full w-full border min-h-[48px] rounded-md border-color-border-strong"
+      class="absolute -bottom-0.5 translate-y-full w-full border min-h-[48px] rounded-md border-color-border-strong bg-white"
       {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
     >
 
       {{#if this.userHasSearched}}
         {{#if this.inputValueIsValid}}
-          It's a URL
-          {{#if this.faviconIsShown}}
-            {{#if this.maybeLoadFavicon.isRunning}}
-              🌀
+          <div class="bg-yellow-50 p-2.5">
+
+            {{#if this.fetchURLInfo.isRunning}}
+              <FlightIcon @name="loading" />
             {{else}}
-              🟤
-              <img src={{this.faviconURL}} />
+              <div class="flex w-full justify-between">
+                <div class="flex items-center w-full">
+
+                  <img src={{this.faviconURL}} width="16" height="16" class="mr-2.5" />
+                  <span class="font-bold truncate">
+
+                    There will be a title here
+                  </span>
+                </div>
+                <Hds::Button
+                  @text="Add"
+                  @color="secondary"
+                  @size="small"
+                  class="shrink-0 ml-12"
+                  {{on "click" this.maybeAddResource}}
+                />
+              </div>
             {{/if}}
-          {{/if}}
+          </div>
         {{else if this.shownDocuments}}
           <ul>
             {{#each this.shownDocuments as |d|}}
               <li>
                 <Action class="w-full">
+                  {{! this needs to not be a link-to }}
                   <Doc::Inline
                     @avatar={{get d.ownerPhotos 0}}
                     @docID={{d.objectID}}
@@ -52,7 +68,7 @@
         {{else if this.search.isRunning}}
           Searching...
         {{else}}
-          No mattress
+          Invalid input
         {{/if}}
       {{else}}
         <div class="w-full p-3">
@@ -65,10 +81,12 @@
     </div>
   {{/if}}
 </div>
+<div class="mt-1">
 
 {{#each this.relatedResources as |resource|}}
-  {{! either linkTos or external links }}
-  {{resource}}
-  {{! button to delete it from the document }}
-  ❎
+  <Document::RelatedResourcesListItem
+    @resource={{resource}}
+    @removeResource={{this.removeResource}}
+  />
 {{/each}}
+</div>
