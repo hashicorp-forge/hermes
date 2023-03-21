@@ -648,7 +648,7 @@
                 </Hds::Form::Checkbox::Field>
               </div>
               {{#if check.links.length}}
-                <ul class="list-none pl-6 mt-1.5">
+                <ul class="pl-6 mt-1.5">
                   {{#each check.links as |link|}}
                     <li>
                       <Hds::Link::Inline
@@ -656,7 +656,7 @@
                         @iconPosition="trailing"
                         @hrefIsExternal={{true}}
                         @href={{link.url}}
-                        class="no-underline text-body-100"
+                        class="text-body-100"
                       >
                         {{link.text}}
                       </Hds::Link::Inline>
