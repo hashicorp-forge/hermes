@@ -17,6 +17,11 @@ interface InputsDocumentSelect3ComponentSignature {
   };
 }
 
+interface RelatedExternalLink {
+  url: string;
+  displayURL: string;
+}
+
 // const GOOGLE_FAVICON_URL_PREFIX =
 //   "https://s2.googleusercontent.com/s2/favicons";
 
@@ -26,11 +31,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @service declare algolia: AlgoliaService;
   @service declare flashMessages: FlashMessageService;
 
-  @tracked relatedLinks: NativeArray<string> = A();
+  @tracked relatedLinks: NativeArray<RelatedExternalLink> = A();
   @tracked relatedDocuments: NativeArray<HermesDocument> = A();
 
-  get relatedResources(): NativeArray<string | HermesDocument> {
-    let resources: NativeArray<string | HermesDocument> = A();
+  get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
+    let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
     resources.pushObjects(this.relatedDocuments);
     resources.pushObjects(this.relatedLinks);
     return resources;
@@ -45,22 +50,44 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @tracked popoverTrigger: HTMLElement | null = null;
 
-  // TODO: this needs to exclude selected documents (relatedResources)
   @tracked shownDocuments: HermesDocument[] | null = null;
 
   @tracked searchInput: HTMLInputElement | null = null;
 
   @action addRelatedExternalLink() {
-    if (this.relatedLinks.includes(this.query)) {
+    let displayURL;
+
+    if (this.query.startsWith("http://")) {
+      displayURL = this.query.replace("http://", "");
+    } else if (this.query.startsWith("https://")) {
+      displayURL = this.query.replace("https://", "");
+    } else {
+      displayURL = this.query;
+    }
+
+    if (displayURL.startsWith("www.")) {
+      displayURL = displayURL.replace("www.", "");
+    }
+
+    if (displayURL.endsWith("/")) {
+      displayURL = displayURL.slice(0, -1);
+    }
+
+    let externalLink = {
+      url: this.query,
+      displayURL: displayURL,
+    };
+
+    if (this.relatedLinks.includes(externalLink)) {
       this.showDuplicateMessage();
     } else {
-      this.relatedLinks.addObject(this.query);
+      this.relatedLinks.unshiftObject(externalLink);
     }
     this.hidePopover();
   }
 
   @action addRelatedDocument(document: HermesDocument) {
-    this.relatedDocuments.addObject(document);
+    this.relatedDocuments.unshiftObject(document);
     this.hidePopover();
 
     // Effectively refresh the search results
@@ -111,8 +138,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     this.inputValueIsValid = false;
   }
 
-  @action removeResource(resource: string | HermesDocument) {
-    if (typeof resource === "string") {
+  @action removeResource(resource: RelatedExternalLink | HermesDocument) {
+    // if the resource is a RelatedExternalLink, remove it from the relatedLinks array
+    // otherwise, remove it from the relatedDocuments array
+
+    if ("displayURL" in resource) {
       this.relatedLinks.removeObject(resource);
       return;
     } else {

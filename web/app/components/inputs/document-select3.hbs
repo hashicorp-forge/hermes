@@ -129,7 +129,7 @@
   </div>
 
   {{#if this.relatedResources.length}}
-    <ul class="mt-2">
+    <ul class="mt-1">
       {{#each this.relatedResources as |r|}}
         <li class="flex w-full relative group">
           {{#if r.objectID}}
@@ -140,7 +140,7 @@
             >
 
               <div
-                class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-0.5 overflow-hidden bg-white"
+                class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
               >
                 <img src="/images/document.png" class="w-6 h-auto" />
               </div>
@@ -153,25 +153,25 @@
                     {{r.title}}
                   </h4>
                 </div>
-                {{#if r.docNumber}}
+                {{!-- {{#if r.docNumber}}
                   <span class="text-color-foreground-faint">
                     {{r.docNumber}}
                   </span>
-                {{/if}}
+                {{/if}} --}}
               </div>
             </LinkTo>
           {{else}}
-            <ExternalLink href={{r}} class="py-1.5 flex w-full hover:underline">
+            <ExternalLink href={{r.url}} class="py-1.5 flex hover:underline mr-5">
               <div class="flex items-center justify-between w-full">
-                <div class="flex items-center w-full pr-5">
+                <div class="flex items-center w-full">
                   <img
-                    src="https://www.google.com/s2/favicons?domain={{r}}"
+                    src="https://www.google.com/s2/favicons?domain={{r.url}}"
                     width="16"
                     height="16"
                     class="mr-2.5"
                   />
                   <span class="truncate">
-                    {{r}}
+                    {{r.displayURL}}
                   </span>
                 </div>
               </div>
