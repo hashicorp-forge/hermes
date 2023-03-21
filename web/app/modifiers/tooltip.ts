@@ -199,12 +199,18 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         ],
       }).then(({ x, y, placement, middlewareData }) => {
         assert("tooltip expected", this.tooltip);
-        this.tooltip.setAttribute("data-tooltip-placement", placement);
+
+        /**
+         * Update and set the tooltip's placement attribute
+         * based on the calculated placement (which could differ from
+         * the named argument passed to the modifier)
+         */
+        this.placement = placement;
+        this.tooltip.setAttribute("data-tooltip-placement", this.placement);
 
         /**
          * Position the tooltip
          */
-        assert("tooltip must exist", this.tooltip);
         Object.assign(this.tooltip.style, {
           left: `${x}px`,
           top: `${y}px`,
@@ -215,7 +221,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
          * https://floating-ui.com/docs/arrow#usage
          * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
          */
-        const basicTooltipPlacement = placement.split("-")[0] as Side;
+        const basicTooltipPlacement = this.placement.split("-")[0] as Side;
         const arrowStaticSide = {
           top: "bottom",
           right: "left",
@@ -228,8 +234,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           Object.assign(this.arrow.style, {
             left: x != null ? `${x}px` : "",
             top: y != null ? `${y}px` : "",
-            // Ensure the static side gets unset when
-            // flipping to other placements' axes.
+            /**
+             * Ensure the static side gets unset when
+             * flipping to other placements' axes.
+             */
             right: "",
             bottom: "",
             [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
@@ -273,7 +281,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       placement?: Placement;
     }
   ) {
-    // check if we're receiving an element and if its the one we're expecting
     this._reference = element;
     this._tooltipText = positional[0];
 
@@ -283,6 +290,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);
 
+    /**
+     * If the reference isn't inherently focusable, make it focusable.
+     */
     if (!this._reference.matches(FOCUSABLE)) {
       this._reference.setAttribute("tabindex", "0");
     }
