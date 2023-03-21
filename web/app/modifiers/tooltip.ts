@@ -1,4 +1,4 @@
-import Modifier from "ember-modifier";
+import Modifier, { ArgsFor } from "ember-modifier";
 import { registerDestructor } from "@ember/destroyable";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
@@ -65,6 +65,11 @@ function cleanup(instance: TooltipModifier) {
 }
 
 export default class TooltipModifier extends Modifier<TooltipModifierSignature> {
+  constructor(owner: any, args: ArgsFor<TooltipModifierSignature>) {
+    super(owner, args);
+    registerDestructor(this, cleanup);
+  }
+
   /**
    * A unique ID used to associate the reference and the tooltip.
    * Applied to the reference's `aria-describedby` and the tooltip's `id`.
@@ -263,6 +268,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       placement?: Placement;
     }
   ) {
+    // check if we're receiving an element and if its the one we're expecting
     this._reference = element;
     this._tooltipText = positional[0];
 
@@ -280,7 +286,5 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this._reference.addEventListener("mouseenter", this.showContent);
     this._reference.addEventListener("focusout", this.maybeHideContent);
     this._reference.addEventListener("mouseleave", this.maybeHideContent);
-
-    registerDestructor(this, cleanup);
   }
 }
