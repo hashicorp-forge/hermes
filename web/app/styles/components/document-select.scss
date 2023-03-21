@@ -1,11 +1,11 @@
 .document-select {
-  @apply max-w-[250px];
+  @apply max-w-[250px] w-full;
 
   .related-doc-link {
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
 
     &:hover {
-      @apply border-color-border-primary;
+      // @apply border-color-border-primary;
     }
   }
 }

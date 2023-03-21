@@ -7,7 +7,7 @@
     <Action
       {{on "click" this.togglePopover}}
       {{did-insert this.registerPopoverTrigger}}
-      class="flex items-center ml-px border border-transparent -mr-px px-0.5 py-px rounded-sm hover:border-color-border-strong"
+      class="flex items-center ml-px -mr-px px-1 py-1 rounded border border-transparent hover:border-color-border-strong hover:bg-color-page-primary"
     >
       <FlightIcon @name="plus" />
       <FlightIcon
@@ -179,7 +179,7 @@
           {{/if}}
           <Action
             {{on "click" (fn this.removeResource r)}}
-            class="absolute -right-0.5 top-2 invisible group-hover:visible"
+            class="absolute flex rounded -right-1 py-1 px-1 top-1 invisible group-hover:visible hover:bg-color-page-primary border border-transparent hover:border-color-border-strong"
           >
             <FlightIcon
               @name="more-vertical"
@@ -190,8 +190,8 @@
       {{/each}}
     </ul>
   {{else}}
-    <div class="mt-3.5 text-color-foreground-faint">
-      None yet
+    <div class="mt-1.5 text-color-foreground-faint">
+      ---
     </div>
   {{/if}}
 </div>
