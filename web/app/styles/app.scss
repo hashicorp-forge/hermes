@@ -63,6 +63,11 @@ a {
   color: inherit;
 }
 
+ul,
+ol {
+  list-style: none;
+}
+
 .x-container {
   @apply w-full max-w-screen-lg mx-auto px-8;
 }
