@@ -129,14 +129,14 @@
   </div>
 
   {{#if this.relatedResources.length}}
-    <ul>
-      {{#each (reverse this.relatedResources) as |r|}}
-        <li class="flex w-full relative">
+    <ul class="mt-2">
+      {{#each this.relatedResources as |r|}}
+        <li class="flex w-full relative group">
           {{#if r.objectID}}
             <LinkTo
               @route="authenticated.document"
               @model={{r.objectID}}
-              class="w-full flex items-start py-1 space-x-3 hover:bg-color-surface-interactive-hover"
+              class="w-full flex items-start py-1 space-x-3"
             >
 
               <div
@@ -147,8 +147,7 @@
               <div>
                 <div>
                   {{! Create space for the "more" icon }}
-                  <div class="float-right mt-0.5 w-7 h-3 bg-red-500/5">
-                  </div>
+                  <div class="float-right mt-0.5 w-7 h-3"></div>
 
                   <h4 class="inline-doc-title mb-0.5 pr-0.5">
                     {{r.title}}
@@ -180,10 +179,10 @@
           {{/if}}
           <Action
             {{on "click" (fn this.removeResource r)}}
-            class="absolute right-0 top-1"
+            class="absolute -right-0.5 top-1 invisible group-hover:visible"
           >
             <FlightIcon
-              @name="more-horizontal"
+              @name="more-vertical"
               class="text-color-foreground-faint"
             />
           </Action>
