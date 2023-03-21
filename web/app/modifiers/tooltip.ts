@@ -44,12 +44,6 @@ interface TooltipModifierSignature {
 }
 
 /**
- * Use the `ember-application` container to ensure a consistent parent element
- * in tests as well as in the browser.
- */
-let DOM_PARENT = htmlElement(".ember-application");
-
-/**
  * The cleanup function that runs when the modifier is destroyed.
  * Removes the event listeners that were added on `modify`.
  * Called by the `registerDestructor` function.
@@ -62,6 +56,10 @@ function cleanup(instance: TooltipModifier) {
     "mouseleave",
     instance.maybeHideContent
   );
+
+  if (instance.floatingUICleanup) {
+    instance.floatingUICleanup();
+  }
 }
 
 export default class TooltipModifier extends Modifier<TooltipModifierSignature> {
@@ -130,6 +128,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     return this._arrow;
   }
 
+  @tracked floatingUICleanup: (() => void) | null = null;
   /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
@@ -150,7 +149,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      */
     this.tooltip = document.createElement("div");
     this.tooltip.classList.add("hermes-tooltip");
-    this.tooltip.setAttribute("data-tooltip-placement", this.placement);
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
@@ -170,10 +168,13 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this.tooltip.appendChild(textElement);
 
     /**
-     * Append the tooltip to the end of the DOM
+     * Append the tooltip to the end of the document.
+     * We use the `ember-application` selector to ensure
+     * a consistent cross-environment parent;
+     *
      * TODO: Add the ability to render the tooltip in place
      */
-    DOM_PARENT.appendChild(this.tooltip);
+    htmlElement(".ember-application").appendChild(this.tooltip);
 
     /**
      * The function that calculates, and updates the tooltip's position.
@@ -193,9 +194,13 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           flip(),
           arrow({
             element: this.arrow,
+            padding: 10,
           }),
         ],
-      }).then(({ x, y, middlewareData }) => {
+      }).then(({ x, y, placement, middlewareData }) => {
+        assert("tooltip expected", this.tooltip);
+        this.tooltip.setAttribute("data-tooltip-placement", placement);
+
         /**
          * Position the tooltip
          */
@@ -206,13 +211,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         });
 
         /**
-         * Position the tooltip
-         *
+         * Position the arrow
          * https://floating-ui.com/docs/arrow#usage
          * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
          */
-
-        const basicTooltipPlacement = this.placement.split("-")[0] as Side;
+        const basicTooltipPlacement = placement.split("-")[0] as Side;
         const arrowStaticSide = {
           top: "bottom",
           right: "left",
@@ -225,6 +228,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           Object.assign(this.arrow.style, {
             left: x != null ? `${x}px` : "",
             top: y != null ? `${y}px` : "",
+            // Ensure the static side gets unset when
+            // flipping to other placements' axes.
+            right: "",
+            bottom: "",
             [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
             transform: "rotate(45deg)",
           });
@@ -232,13 +239,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       });
     };
 
-    // https://floating-ui.com/docs/autoUpdate
-    autoUpdate(this.reference, this.tooltip, updatePosition);
-
-    // TODO: Investigate whether we need this cleanup
-    const cleanup = autoUpdate(this.reference, this.tooltip, updatePosition);
-
-    registerDestructor(this, cleanup);
+    this.floatingUICleanup = autoUpdate(
+      this.reference,
+      this.tooltip,
+      updatePosition
+    );
   }
 
   /**
