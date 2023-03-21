@@ -39,12 +39,12 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @tracked searchInput: HTMLInputElement | null = null;
 
   @action addRelatedExternalLink() {
-    this.relatedResources.pushObject(this.query);
+    this.relatedResources.addObject(this.query);
     this.hidePopover();
   }
 
   @action addRelatedDocument(document: HermesDocument) {
-    this.relatedResources.pushObject(document);
+    this.relatedResources.addObject(document);
     this.hidePopover();
   }
 
@@ -82,6 +82,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     this.inputValueIsValid = false;
   }
 
+  @action removeResource(resource: string | HermesDocument) {
+    this.relatedResources.removeObject(resource);
+  }
+
   protected fetchURLInfo = restartableTask(async () => {
     // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
     // const urlToFetch = this.inputValue;
@@ -107,6 +111,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   });
 
   protected search = restartableTask(async (query: string) => {
+
     try {
       let algoliaResponse = await this.algolia.search.perform(query, {
         hitsPerPage: 5,
