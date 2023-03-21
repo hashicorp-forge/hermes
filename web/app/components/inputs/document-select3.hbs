@@ -1,4 +1,4 @@
-<div class="max-w-[250px]">
+<div class="document-select">
 
   <div class="relative z-10 flex items-center w-full justify-between">
     <div class="hds-typography-body-100 hds-foreground-faint">
@@ -7,7 +7,7 @@
     <Action
       {{on "click" this.togglePopover}}
       {{did-insert this.registerPopoverTrigger}}
-      class="flex items-center"
+      class="flex items-center ml-px border border-transparent -mr-px px-0.5 py-px rounded-sm hover:border-color-border-strong"
     >
       <FlightIcon @name="plus" />
       <FlightIcon
@@ -17,7 +17,7 @@
     </Action>
     {{#if this.popoverIsShown}}
       <div
-        class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border min-h-[100px] rounded-lg border-color-border-strong bg-color-foreground-high-contrast"
+        class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast"
         {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
       >
         <div class="p-1 border-b border-b-color-border-faint">
@@ -32,31 +32,31 @@
         </div>
         <div>
 
-          <div
-            class="mt-2.5 mb-[5px] px-3 text-color-foreground-faint uppercase tracking-wide text-[12px]"
-          >
-            {{#if this.query.length}}
-              {{#if this.inputValueIsValid}}
-                {{! Attach link }}
+          {{#unless (and this.query.length this.inputValueIsValid)}}
+            <div
+              class="mt-2.5 mb-[5px] px-3 text-color-foreground-faint uppercase tracking-wide text-[12px]"
+            >
+              {{#if this.query.length}}
+                {{#unless this.inputValueIsValid}}
+                  Results
+                {{/unless}}
               {{else}}
-                Results
+                Suggestions
               {{/if}}
-            {{else}}
-              Suggestions
-            {{/if}}
-          </div>
+            </div>
+          {{/unless}}
 
           {{#if this.inputValueIsValid}}
             {{#if this.fetchURLInfo.isRunning}}
-              <div class="py-1.5 px-3">
-                <div class="w-full grid place-items-center pt-0.5 pb-[13px]">
-                  <FlightIcon @name="loading" />
-                </div>
+              <div
+                class="mt-1 mb-1.5 py-1.5 px-3 w-full grid place-items-center h-10"
+              >
+                <FlightIcon @name="loading" />
               </div>
               {{! <FlightIcon @name="loading" class="" /> }}
             {{else}}
               <Action
-                class="py-1.5 px-3 flex w-full"
+                class="mt-1 mb-1.5 py-1.5 px-3 flex w-full group hover:bg-color-surface-interactive-hover h-10 items-center"
                 {{on "click" this.addRelatedExternalLink}}
               >
                 <div class="flex items-center justify-between w-full">
@@ -74,19 +74,19 @@
                   {{! if focused only }}
                   <FlightIcon
                     @name="corner-down-left"
-                    class="text-color-foreground-faint"
+                    class="text-color-foreground-faint invisible group-hover:visible group-focus:visible"
                   />
                 </div>
               </Action>
             {{/if}}
           {{else}}
             {{#if this.shownDocuments.length}}
-              <ol class="mb-1.5">
+              <ol class="mb-2">
                 {{#each this.shownDocuments as |d|}}
                   <li>
                     <Action
                       {{on "click" (fn this.addRelatedDocument d)}}
-                      class="w-full flex items-start py-1.5 px-3 space-x-3"
+                      class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
                     >
                       <div
                         class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
@@ -136,7 +136,7 @@
             <LinkTo
               @route="authenticated.document"
               @model={{r.objectID}}
-              class="w-full flex items-start py-1 space-x-3"
+              class="related-doc-link"
             >
 
               <div
@@ -161,7 +161,7 @@
               </div>
             </LinkTo>
           {{else}}
-            <ExternalLink href={{r}} class="py-1.5 flex w-full">
+            <ExternalLink href={{r}} class="py-1.5 flex w-full hover:underline">
               <div class="flex items-center justify-between w-full">
                 <div class="flex items-center w-full pr-5">
                   <img
@@ -179,7 +179,7 @@
           {{/if}}
           <Action
             {{on "click" (fn this.removeResource r)}}
-            class="absolute -right-0.5 top-1 invisible group-hover:visible"
+            class="absolute -right-0.5 top-2 invisible group-hover:visible"
           >
             <FlightIcon
               @name="more-vertical"
