@@ -25,6 +25,7 @@
       <Hds::Form::Textarea::Field
         @value={{F.value}}
         name={{field}}
+        {{auto-height-textarea}}
         {{on "blur" F.update}}
         data-test-custom-string-field-input
       />
@@ -41,7 +42,7 @@
   >
     <:default>
       {{#if this.people.length}}
-        <ol class="list-none">
+        <ol>
           {{#each this.people as |person|}}
             <li class="whitespace-nowrap">
               {{#if person.imgURL}}
