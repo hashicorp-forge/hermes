@@ -58,7 +58,13 @@ body {
   color: var(--token-color-foreground-primary);
 }
 
-ul, ol {
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul,
+ol {
   list-style: none;
 }
 
