@@ -1,5 +1,5 @@
 <Action
-  class="more-button {{if this.popoverIsShown 'active'}}"
+  class="more-button"
   {{on "click" this.togglePopover}}
   {{did-insert this.didInsertTrigger}}
 >
@@ -13,7 +13,7 @@
   >
     <Action
       {{on "click" (fn @removeResource @resource)}}
-      class="py-2.5 px-4 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical"
+      class="py-1.5 pl-3 pr-3.5 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical rounded-sm"
     >
       <FlightIcon @name="trash" class="text-inherit" />
       <span>Remove</span>

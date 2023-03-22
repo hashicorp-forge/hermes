@@ -2,26 +2,15 @@
   @apply max-w-[250px] w-full;
 
   .popover {
-    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast z-50;
+    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[11px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast z-50;
 
     &.more-popover {
-      @apply -right-px top-[30px] left-auto bottom-auto rounded translate-y-0;
+      @apply -right-px top-[30px] p-1 left-auto bottom-auto rounded translate-y-0;
     }
   }
 
   .related-doc-link {
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
-  }
-
-  .related-docs-list-item {
-    a {
-      &:hover,
-      &:focus {
-        + .more-button {
-          @apply opacity-100;
-        }
-      }
-    }
   }
 
   .hermes-doc + .external-doc {
@@ -32,9 +21,12 @@
     @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
 
     &:hover,
-    &:focus,
-    &.active {
-      @apply opacity-100 bg-color-page-primary border-color-border-strong;
+    &:focus {
+      @apply opacity-100;
+    }
+
+    &:hover {
+      @apply border-color-border-strong;
     }
   }
 
