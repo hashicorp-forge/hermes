@@ -14,7 +14,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      @apply border-solid border-[5px] border-transparent bg-color-palette-neutral-300 rounded-t-full rounded-b-full bg-clip-padding;
+      @apply border-solid min-h-[40px] border-[4.5px] border-transparent bg-color-palette-neutral-300 rounded-t-full rounded-b-full bg-clip-padding;
 
       &:hover {
         @apply bg-color-palette-neutral-400;
@@ -36,6 +36,5 @@
 
   .sidebar-footer {
     @apply w-full bg-color-page-faint shrink-0 py-4 px-3.5;
-    // @apply border-t border-t-color-border-faint;
   }
 }
