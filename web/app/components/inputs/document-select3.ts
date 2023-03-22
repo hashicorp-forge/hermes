@@ -14,6 +14,7 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 interface InputsDocumentSelect3ComponentSignature {
   Args: {
     productArea?: string;
+    objectID?: string;
   };
 }
 
@@ -78,7 +79,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       displayURL: displayURL,
     };
 
-    if (this.relatedLinks.includes(externalLink)) {
+    const isDuplicate = this.relatedLinks.find((link) => {
+      return link.url === externalLink.url;
+    });
+
+    if (isDuplicate) {
       this.showDuplicateMessage();
     } else {
       this.relatedLinks.unshiftObject(externalLink);
@@ -184,15 +189,17 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       this.configSvc.config.algolia_docs_index_name +
       "_createdTime_desc__productRanked";
 
-    // TODO: this search needs to filter out already-selected relatedDocs
-    let relatedDocIDs = this.relatedDocuments.map((doc) => doc.objectID);
-    let filterString =
-      '(NOT objectID:"' + relatedDocIDs.join('" AND NOT objectID:"') + '")';
+    let filterString = `(NOT objectID:"${this.args.objectID}")`;
 
-    if (!this.relatedDocuments.length) {
-      filterString = "";
+    if (this.relatedDocuments.length) {
+      let relatedDocIDs = this.relatedDocuments.map((doc) => doc.objectID);
+
+      filterString = filterString.slice(0, -1) + " ";
+
+      filterString += `AND NOT objectID:"${relatedDocIDs.join(
+        '" AND NOT objectID:"'
+      )}")`;
     }
-    console.log(filterString);
 
     try {
       let algoliaResponse = await this.algolia.searchIndex
@@ -200,7 +207,6 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
           hitsPerPage: 5,
           filters: filterString,
           attributesToRetrieve: ["title", "product", "docNumber"],
-          // give extra ranking to docs in the same product area
           optionalFilters: ["product:" + this.args.productArea],
         })
         .then((response) => response);

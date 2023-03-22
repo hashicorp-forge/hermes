@@ -3,9 +3,16 @@
 
   .related-doc-link {
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
+  }
 
-    &:hover {
-      // @apply border-color-border-primary;
+  .related-docs-list-item {
+    a {
+      &:hover,
+      &:focus {
+        + .more-button {
+          @apply visible;
+        }
+      }
     }
   }
 
@@ -14,14 +21,22 @@
   }
 
   .more-button {
-    @apply absolute flex rounded -right-1 py-1 px-1 hover:bg-color-page-primary border border-transparent hover:border-color-border-strong;
+    @apply absolute invisible opacity-75 flex rounded -right-1 py-1 px-1 border border-transparent;
+
+    &:hover {
+      @apply visible opacity-100 bg-color-page-primary border-color-border-strong;
+    }
   }
 
   .hermes-doc {
-    @apply top-[3px];
+    .more-button {
+      @apply top-[3px];
+    }
   }
 
   .external-doc {
-    @apply top-0;
+    .more-button {
+      @apply -top-px;
+    }
   }
 }
