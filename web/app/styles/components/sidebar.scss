@@ -1,15 +1,29 @@
 .sidebar {
-  @apply flex flex-col max-h-full relative z-10;
+  @apply flex flex-col max-h-full relative z-10 pb-4;
 
   header,
   nav {
-    @apply sticky top-0 mb-4;
+    @apply sticky top-0 pb-4;
   }
 
   .body {
-    @apply space-y-8 pb-6;
-    overflow-y: auto;
-    height: 100%;
+    @apply space-y-8 pb-10 pl-7 pr-3 overflow-y-scroll h-full;
+
+    &::-webkit-scrollbar {
+      @apply w-4 bg-transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      @apply border-solid border-[5px] border-transparent bg-color-palette-neutral-300 rounded-t-full rounded-b-full bg-clip-padding;
+
+      &:hover {
+        @apply bg-color-palette-neutral-400;
+      }
+    }
+
+    /* Firefox */
+    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+    scrollbar-width: thin;
   }
 
   .primary-textarea {
@@ -21,7 +35,7 @@
   }
 
   .sidebar-footer {
-    @apply w-full shrink-0 pt-8 pb-6;
-    background-color: var(--token-color-page-faint);
+    @apply w-full bg-color-page-faint shrink-0 py-4 px-3.5;
+    // @apply border-t border-t-color-border-faint;
   }
 }
