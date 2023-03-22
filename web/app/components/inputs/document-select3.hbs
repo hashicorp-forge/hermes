@@ -153,33 +153,36 @@
                     {{r.title}}
                   </h4>
                 </div>
-                {{!-- {{#if r.docNumber}}
+                <!--
+                {{#if r.docNumber}}
                   <span class="text-color-foreground-faint">
                     {{r.docNumber}}
                   </span>
-                {{/if}} --}}
+                {{/if}}
+                -->
               </div>
             </LinkTo>
           {{else}}
-            <ExternalLink href={{r.url}} class="py-1.5 flex hover:underline mr-5">
-              <div class="flex items-center justify-between w-full">
-                <div class="flex items-center w-full">
-                  <img
-                    src="https://www.google.com/s2/favicons?domain={{r.url}}"
-                    width="16"
-                    height="16"
-                    class="mr-2.5"
-                  />
-                  <span class="truncate">
-                    {{r.displayURL}}
-                  </span>
-                </div>
+            <ExternalLink
+              href={{r.url}}
+              class="py-1.5 flex hover:underline mr-6 truncate"
+            >
+              <div class="flex items-center w-full">
+                <img
+                  src="https://www.google.com/s2/favicons?domain={{r.url}}"
+                  width="16"
+                  height="16"
+                  class="mr-2"
+                />
+                <span class="truncate">
+                  {{r.displayURL}}
+                </span>
               </div>
             </ExternalLink>
           {{/if}}
           <Action
             {{on "click" (fn this.removeResource r)}}
-            class="absolute flex rounded -right-1 py-1 px-1 top-1 invisible group-hover:visible hover:bg-color-page-primary border border-transparent hover:border-color-border-strong"
+            class="absolute flex rounded -right-1 py-1 px-1 top-[3px] invisible group-hover:visible hover:bg-color-page-primary border border-transparent hover:border-color-border-strong"
           >
             <FlightIcon
               @name="more-vertical"

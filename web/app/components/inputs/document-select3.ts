@@ -125,7 +125,9 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action onKeydown(event: KeyboardEvent) {
     if (event.key === "Enter") {
-      this.addRelatedExternalLink();
+      if (this.inputValueIsValid) {
+        this.addRelatedExternalLink();
+      }
     }
 
     if (event.key === "Escape") {
