@@ -8,4 +8,20 @@
       // @apply border-color-border-primary;
     }
   }
+
+  .hermes-doc + .external-doc {
+    @apply mt-1.5;
+  }
+
+  .more-button {
+    @apply absolute flex rounded -right-1 py-1 px-1 hover:bg-color-page-primary border border-transparent hover:border-color-border-strong;
+  }
+
+  .hermes-doc {
+    @apply top-[3px];
+  }
+
+  .external-doc {
+    @apply top-0;
+  }
 }

@@ -91,14 +91,16 @@
                       <div
                         class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
                       >
-                        <img src="/images/document.png" class="w-6 h-auto" />
+                        <img src="/images/document.png" class="w-5 h-auto" />
                       </div>
                       <div>
                         <h4 class="inline-doc-title mb-0.5 pr-0.5">
                           {{d.title}}
                         </h4>
                         {{#if d.docNumber}}
-                          <span class="text-color-foreground-faint">
+                          <span
+                            class="text-color-foreground-faint text-body-100"
+                          >
                             {{d.docNumber}}
                           </span>
                         {{/if}}
@@ -131,18 +133,20 @@
   {{#if this.relatedResources.length}}
     <ul class="mt-1">
       {{#each this.relatedResources as |r|}}
-        <li class="flex w-full relative group">
+        <li
+          class="flex w-full relative group
+            {{if r.objectID 'hermes-doc' 'external-doc'}}"
+        >
           {{#if r.objectID}}
             <LinkTo
               @route="authenticated.document"
               @model={{r.objectID}}
               class="related-doc-link"
             >
-
               <div
                 class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
               >
-                <img src="/images/document.png" class="w-6 h-auto" />
+                <img src="/images/document.png" class="w-5 h-auto" />
               </div>
               <div>
                 <div>
@@ -153,27 +157,26 @@
                     {{r.title}}
                   </h4>
                 </div>
-                <!--
                 {{#if r.docNumber}}
-                  <span class="text-color-foreground-faint">
+                  <span class="text-color-foreground-faint text-body-100">
                     {{r.docNumber}}
                   </span>
                 {{/if}}
-                -->
               </div>
             </LinkTo>
           {{else}}
             <ExternalLink
               href={{r.url}}
-              class="py-1.5 flex hover:underline mr-6 truncate"
+              class="py-0.5 flex underline mr-6 truncate"
             >
               <div class="flex items-center w-full">
-                <img
-                  src="https://www.google.com/s2/favicons?domain={{r.url}}"
-                  width="16"
-                  height="16"
-                  class="mr-2"
-                />
+                <div class="flex relative mr-2 w-4 h-4 shrink-0">
+                  <img
+                    src="https://www.google.com/s2/favicons?domain={{r.url}}"
+                    width="16"
+                    height="16"
+                  />
+                </div>
                 <span class="truncate">
                   {{r.displayURL}}
                 </span>
@@ -182,7 +185,7 @@
           {{/if}}
           <Action
             {{on "click" (fn this.removeResource r)}}
-            class="absolute flex rounded -right-1 py-1 px-1 top-[3px] invisible group-hover:visible hover:bg-color-page-primary border border-transparent hover:border-color-border-strong"
+            class="more-button invisible group-hover:visible"
           >
             <FlightIcon
               @name="more-vertical"
