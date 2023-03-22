@@ -146,10 +146,12 @@ export default function (mirageConfig) {
        * Used by the Document route to get a document.
        */
       this.get("/documents/:document_id", (schema, request) => {
+        debugger;
+
         return new Response(
           200,
           {},
-          schema.document.find(request.params.document_id).attrs
+          schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
 
@@ -160,7 +162,7 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.find(request.params.document_id).attrs
+          schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
       /**

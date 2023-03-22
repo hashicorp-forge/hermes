@@ -65,6 +65,7 @@ export default class DocumentRoute extends Route {
             },
           })
           .then((r) => r.json());
+
         doc.isDraft = params.draft;
       } catch (err) {
         const errorMessage = `Failed to get document: ${err}`;
@@ -82,6 +83,8 @@ export default class DocumentRoute extends Route {
         throw new Error(errorMessage);
       }
     }
+
+
     if (!!doc.createdTime) {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
     }
@@ -102,6 +105,8 @@ export default class DocumentRoute extends Route {
     } catch (err) {
       console.log("Error recording analytics: " + err);
     }
+
+
 
     // Record the doc with the RecentlyViewedDocs service.
     void this.recentDocs.markViewed.perform(params.document_id, params.draft);
@@ -131,6 +136,7 @@ export default class DocumentRoute extends Route {
         doc.approvers = [];
       }
     }
+
 
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")

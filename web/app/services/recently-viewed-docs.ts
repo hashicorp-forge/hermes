@@ -73,7 +73,7 @@ export default class RecentlyViewedDocsService extends Service {
       /**
        * Fetch the file IDs from the Google Index file.
        */
-      let fetchResponse: Response = await this.fetchSvc.fetch(
+      let fetchResponse = await this.fetchSvc.fetch(
         `https://www.googleapis.com/drive/v3/files/${this.indexID}?` +
           new URLSearchParams({
             alt: "media",
@@ -88,7 +88,7 @@ export default class RecentlyViewedDocsService extends Service {
         }
       );
 
-      this.index = await fetchResponse.json();
+      this.index = await fetchResponse?.json();
 
       assert("fetchAll expects index", this.index);
 
@@ -122,11 +122,11 @@ export default class RecentlyViewedDocsService extends Service {
       let docResponses = await Promise.allSettled(
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
-          let fetchResponse: Response = await this.fetchSvc.fetch(
+          let fetchResponse = await this.fetchSvc.fetch(
             `/api/v1/${endpoint}/${id}`
           );
           return {
-            doc: await fetchResponse.json(),
+            doc: await fetchResponse?.json(),
             isDraft,
           };
         })
@@ -199,7 +199,7 @@ export default class RecentlyViewedDocsService extends Service {
    */
   private fetchIndexID = restartableTask(async () => {
     try {
-      let fetchResponse: Response = await this.fetchSvc.fetch(
+      let fetchResponse = await this.fetchSvc.fetch(
         "https://www.googleapis.com/drive/v3/files?" +
           new URLSearchParams({
             fields: "files(id, name)",
@@ -217,7 +217,7 @@ export default class RecentlyViewedDocsService extends Service {
       /**
        * If the file does not exist, create it and rerun this task.
        */
-      if (fetchResponse.status !== 200) {
+      if (fetchResponse?.status !== 200) {
         await this.createIndexFile.perform();
         await this.fetchIndexID.perform();
         return;
