@@ -44,7 +44,7 @@
         data-test-facet-dropdown-menu
         id="facet-dropdown-menu"
         role={{if @inputIsShown "listbox" "menu"}}
-        class="py-3 list-none"
+        class="py-3"
         aria-activedescendant={{unless
           (eq @focusedItemIndex -1)
           (concat "facet-dropdown-menu-item-" @focusedItemIndex)
