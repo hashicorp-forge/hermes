@@ -1,6 +1,14 @@
 .document-select {
   @apply max-w-[250px] w-full;
 
+  .popover {
+    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast;
+
+    &.more-popover {
+      @apply -right-px top-[30px] left-auto bottom-auto rounded translate-y-0;
+    }
+  }
+
   .related-doc-link {
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
   }
@@ -10,7 +18,7 @@
       &:hover,
       &:focus {
         + .more-button {
-          @apply visible;
+          @apply opacity-100;
         }
       }
     }
@@ -21,10 +29,16 @@
   }
 
   .more-button {
-    @apply absolute invisible opacity-75 flex rounded -right-1 py-1 px-1 border border-transparent;
+    @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
 
-    &:hover {
-      @apply visible opacity-100 bg-color-page-primary border-color-border-strong;
+    &:hover,
+    &:focus,
+    &.active {
+      @apply opacity-100 bg-color-page-primary border-color-border-strong;
+    }
+
+    &.active {
+      @apply bg-color-surface-interactive-hover border-color-border-strong;
     }
   }
 

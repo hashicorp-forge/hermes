@@ -18,7 +18,7 @@ interface InputsDocumentSelect3ComponentSignature {
   };
 }
 
-interface RelatedExternalLink {
+export interface RelatedExternalLink {
   url: string;
   displayURL: string;
 }

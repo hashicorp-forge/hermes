@@ -17,7 +17,7 @@
     </Action>
     {{#if this.popoverIsShown}}
       <div
-        class="absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast"
+        class="popover"
         {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
       >
         <div class="p-1 border-b border-b-color-border-faint">
@@ -183,12 +183,10 @@
               </div>
             </ExternalLink>
           {{/if}}
-          <Action {{on "click" (fn this.removeResource r)}} class="more-button">
-            <FlightIcon
-              @name="more-vertical"
-              class="text-color-foreground-faint"
-            />
-          </Action>
+          <Inputs::DocumentSelect::MoreButton
+            @removeResource={{this.removeResource}}
+            @resource={{r}}
+          />
         </li>
       {{/each}}
     </ul>

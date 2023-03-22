@@ -1,0 +1,22 @@
+<Action
+  class="more-button {{if this.popoverIsShown 'active'}}"
+  {{on "click" this.togglePopover}}
+  {{did-insert this.didInsertTrigger}}
+>
+  <FlightIcon @name="more-vertical" class="text-color-foreground-faint" />
+</Action>
+
+{{#if this.popoverIsShown}}
+  <div
+    class="popover more-popover"
+    {{dismissible dismiss=this.togglePopover related=this.trigger}}
+  >
+    <Action
+      {{on "click" (fn @removeResource @resource)}}
+      class="py-2.5 px-4 flex space-x-1 text-color-foreground-critical"
+    >
+      <FlightIcon @name="trash" class="text-inherit" />
+      <span>Remove</span>
+    </Action>
+  </div>
+{{/if}}
