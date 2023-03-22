@@ -5486,7 +5486,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.8":
+"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.2, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.8":
   version: 3.0.8
   resolution: "broccoli-funnel@npm:3.0.8"
   dependencies:
@@ -8438,6 +8438,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ember-metrics@npm:^1.5.2":
+  version: 1.5.2
+  resolution: "ember-metrics@npm:1.5.2"
+  dependencies:
+    broccoli-funnel: ^3.0.2
+    ember-cli-babel: ^7.26.6
+    ember-cli-typescript: ^4.2.1
+  checksum: a8665a424de7e15f65dedfc8e3d8c1710669f443b062b289c5f201141b627303c30f862b3092ec3cef0e933e29c1af3ea912c8eb781896615b3ca8d4bf729a42
+  languageName: node
+  linkType: hard
+
 "ember-modifier-manager-polyfill@npm:^1.2.0":
   version: 1.2.0
   resolution: "ember-modifier-manager-polyfill@npm:1.2.0"
@@ -10887,6 +10898,7 @@ __metadata:
     ember-focus-trap: ^1.0.1
     ember-load-initializers: ^2.1.2
     ember-maybe-import-regenerator: ^0.1.6
+    ember-metrics: ^1.5.2
     ember-modifier: ^4.1.0
     ember-on-helper: ^0.1.0
     ember-page-title: ^6.2.2
