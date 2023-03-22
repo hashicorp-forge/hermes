@@ -1,7 +1,8 @@
 .sidebar {
   @apply flex flex-col max-h-full relative z-10;
 
-  header, nav {
+  header,
+  nav {
     @apply sticky top-0 mb-4;
   }
 
@@ -11,8 +12,12 @@
     height: 100%;
   }
 
+  .primary-textarea {
+    @apply min-h-[76px];
+  }
+
   .person-list {
-    @apply w-full list-none space-y-2;
+    @apply w-full space-y-2;
   }
 
   .sidebar-footer {
