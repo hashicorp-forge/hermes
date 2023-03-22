@@ -2,7 +2,7 @@
   @apply max-w-[250px] w-full;
 
   .popover {
-    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast;
+    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[13px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast z-50;
 
     &.more-popover {
       @apply -right-px top-[30px] left-auto bottom-auto rounded translate-y-0;
@@ -35,10 +35,6 @@
     &:focus,
     &.active {
       @apply opacity-100 bg-color-page-primary border-color-border-strong;
-    }
-
-    &.active {
-      @apply bg-color-surface-interactive-hover border-color-border-strong;
     }
   }
 

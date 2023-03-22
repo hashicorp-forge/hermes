@@ -8,12 +8,12 @@
 
 {{#if this.popoverIsShown}}
   <div
-    class="popover more-popover"
+    class="popover more-popover overflow-hidden"
     {{dismissible dismiss=this.togglePopover related=this.trigger}}
   >
     <Action
       {{on "click" (fn @removeResource @resource)}}
-      class="py-2.5 px-4 flex space-x-1 text-color-foreground-critical"
+      class="py-2.5 px-4 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical"
     >
       <FlightIcon @name="trash" class="text-inherit" />
       <span>Remove</span>
