@@ -40,7 +40,7 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   }
 
   get dismiss(): () => void {
-    assert("_action must exist", this._dismiss);
+    assert("_dismiss must exist", this._dismiss);
     return this._dismiss;
   }
 
