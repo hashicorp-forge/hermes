@@ -64,6 +64,23 @@
           />
         {{/each}}
       </div>
+    {{else if this.recentDocs.fetchAll.isRunning}}
+      <div class="h-[100px]">
+        <FlightIcon @name="loading" class="mt-1" />
+      </div>
+    {{else if (eq this.recentDocs.all null)}}
+      <div class="h-[100px]">
+        <p class="mb-7 text-color-foreground-faint text-body-300">
+          Error fetching documents.
+        </p>
+        <Hds::Button
+          @text="Retry"
+          @color="secondary"
+          @size="small"
+          @icon="reload"
+          {{on "click" (perform this.recentDocs.fetchAll)}}
+        />
+      </div>
     {{else}}
       <div class="text-display-200">
         You havenʼt viewed any documents yet.

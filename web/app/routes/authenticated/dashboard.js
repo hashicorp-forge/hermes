@@ -68,7 +68,14 @@ export default class DashboardRoute extends Route {
       });
 
     if (this.recentDocs.all === null) {
-      await this.recentDocs.fetchAll.perform();
+      try {
+        await this.recentDocs.fetchAll.perform();
+      } catch {
+        /**
+         * This tells our template to show the error state.
+         */
+        this.recentDocs.all = null;
+      }
     }
 
     return RSVP.hash({
