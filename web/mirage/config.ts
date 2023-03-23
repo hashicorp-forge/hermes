@@ -146,8 +146,6 @@ export default function (mirageConfig) {
        * Used by the Document route to get a document.
        */
       this.get("/documents/:document_id", (schema, request) => {
-        debugger;
-
         return new Response(
           200,
           {},

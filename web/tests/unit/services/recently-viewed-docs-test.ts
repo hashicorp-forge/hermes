@@ -1,4 +1,4 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import RecentlyViewedDocsService, {
   RecentlyViewedDoc,
