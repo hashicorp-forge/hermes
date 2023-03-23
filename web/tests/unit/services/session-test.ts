@@ -2,22 +2,15 @@ import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import window from "ember-window-mock";
-import MockDate from "mockdate";
-import { waitUntil } from "@ember/test-helpers";
 
 const TEST_STORAGE_KEY = `test-${REDIRECT_STORAGE_KEY}`;
 
 module("Unit | Service | session", function (hooks) {
   setupTest(hooks);
 
-  hooks.beforeEach(function () {
+  hooks.afterEach(function () {
     window.sessionStorage.removeItem(TEST_STORAGE_KEY);
     window.localStorage.removeItem(TEST_STORAGE_KEY);
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
-  });
-
-  hooks.afterEach(function () {
-    MockDate.reset();
   });
 
   test("it handles authentication", async function (assert) {
@@ -26,7 +19,6 @@ module("Unit | Service | session", function (hooks) {
     /**
      * Mock the handleAuthentication method
      */
-
     sessionSvc.handleAuthentication = (_routeAfterAuthentication: string) => {
       // See if there is a redirect object in sessionStorage
       let redirectObject = window.sessionStorage.getItem(TEST_STORAGE_KEY);
@@ -65,7 +57,6 @@ module("Unit | Service | session", function (hooks) {
     /**
      * Start assertions
      */
-
     assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
 
     window.sessionStorage.setItem(TEST_STORAGE_KEY, "testURL");
