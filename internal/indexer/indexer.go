@@ -266,7 +266,7 @@ func (idx *Indexer) Run() error {
 		// Update published document headers, if configured.
 		if idx.UpdateDocumentHeaders {
 			log.Info("refreshing published document headers",
-				"folder_id", idx.DraftsFolderID,
+				"folder_id", idx.DocumentsFolderID,
 			)
 			currentTime := time.Now().UTC()
 
