@@ -2,9 +2,7 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
-import SessionService, {
-  REDIRECT_LOCAL_STORAGE_KEY,
-} from "hermes/services/session";
+import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
@@ -21,10 +19,19 @@ export default class AuthenticatedRoute extends Route {
       "authenticate"
     );
 
-    let target = window.localStorage.getItem(REDIRECT_LOCAL_STORAGE_KEY);
+    let storageItem = window.sessionStorage.getItem(REDIRECT_STORAGE_KEY);
+
+    if (!storageItem) {
+      storageItem = window.localStorage.getItem(REDIRECT_STORAGE_KEY);
+
+      if (storageItem && Date.now() < JSON.parse(storageItem).expiresOn) {
+        window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
+        storageItem = null;
+      }
+    }
 
     if (
-      !target &&
+      !storageItem &&
       !requireAuthentication &&
       transition.to.name != "authenticated.index"
     ) {
@@ -41,8 +48,9 @@ export default class AuthenticatedRoute extends Route {
        */
       let transitionTo = transition.intent.url ?? transition.to.name;
 
+      window.sessionStorage.setItem(REDIRECT_STORAGE_KEY, transitionTo);
       window.localStorage.setItem(
-        REDIRECT_LOCAL_STORAGE_KEY,
+        REDIRECT_STORAGE_KEY,
         JSON.stringify({
           url: transitionTo,
           expiresOn: Date.now() + 60 * 2000, // 2 minutes

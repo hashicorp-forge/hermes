@@ -1,31 +1,59 @@
 import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import SessionService, {
-  REDIRECT_LOCAL_STORAGE_KEY,
-} from "hermes/services/session";
+import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import window from "ember-window-mock";
-import { settled, waitFor } from "@ember/test-helpers";
+import MockDate from "mockdate";
+import { waitUntil } from "@ember/test-helpers";
+
+const TEST_STORAGE_KEY = `test-${REDIRECT_STORAGE_KEY}`;
 
 module("Unit | Service | session", function (hooks) {
   setupTest(hooks);
 
+  hooks.beforeEach(function () {
+    window.sessionStorage.removeItem(TEST_STORAGE_KEY);
+    window.localStorage.removeItem(TEST_STORAGE_KEY);
+    MockDate.set("2000-01-01T06:00:00.000-07:00");
+  });
+
+  hooks.afterEach(function () {
+    MockDate.reset();
+  });
+
   test("it handles authentication", async function (assert) {
     const sessionSvc = this.owner.lookup("service:session") as SessionService;
 
-    // mock the service method
+    /**
+     * Mock the handleAuthentication method
+     */
+
     sessionSvc.handleAuthentication = (_routeAfterAuthentication: string) => {
-      let redirectObject = window.localStorage.getItem(
-        REDIRECT_LOCAL_STORAGE_KEY
-      );
+      // See if there is a redirect object in sessionStorage
+      let redirectObject = window.sessionStorage.getItem(TEST_STORAGE_KEY);
+
+      // If there's no redirect object in sessionStorage, check localStorage
+      if (!redirectObject) {
+        redirectObject = window.localStorage.getItem(TEST_STORAGE_KEY);
+
+        if (
+          // Handle if there's an object more than 2 minutes old
+          redirectObject &&
+          Date.now() > JSON.parse(redirectObject).expiresOn
+        ) {
+          window.localStorage.removeItem(TEST_STORAGE_KEY);
+          redirectObject = null;
+        }
+      }
 
       let returnValue: string | null = null;
 
       if (redirectObject) {
-        // Check if the object is less than 2 minutes old
-        if (Date.now() < JSON.parse(redirectObject).expiresOn) {
-          returnValue = `redirect valid: ${JSON.parse(redirectObject).url}`;
-        } else {
-          returnValue = "redirect expired";
+        if (!redirectObject.startsWith("{")) {
+          returnValue = `session-stored redirect: ${redirectObject}`;
+        } else if (Date.now() < JSON.parse(redirectObject).expiresOn) {
+          returnValue = `locally-stored redirect: ${
+            JSON.parse(redirectObject).url
+          }`;
         }
       } else {
         returnValue = "redirect not found";
@@ -34,10 +62,15 @@ module("Unit | Service | session", function (hooks) {
       return returnValue;
     };
 
+    /**
+     * Start assertions
+     */
+
     assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
 
+    window.sessionStorage.setItem(TEST_STORAGE_KEY, "testURL");
     window.localStorage.setItem(
-      REDIRECT_LOCAL_STORAGE_KEY,
+      TEST_STORAGE_KEY,
       JSON.stringify({
         url: "testURL",
         expiresOn: Date.now() + 60 * 2000, // 2 minutes
@@ -46,19 +79,32 @@ module("Unit | Service | session", function (hooks) {
 
     assert.equal(
       sessionSvc.handleAuthentication("none"),
-      "redirect valid: testURL"
+      "session-stored redirect: testURL",
+      "redirects from sessionStorage when possible"
+    );
+
+    window.sessionStorage.removeItem(TEST_STORAGE_KEY);
+
+    assert.equal(
+      sessionSvc.handleAuthentication("none"),
+      "locally-stored redirect: testURL",
+      "redirects from localStorage when sessionStorage is empty"
     );
 
     window.localStorage.setItem(
-      REDIRECT_LOCAL_STORAGE_KEY,
+      TEST_STORAGE_KEY,
       JSON.stringify({
         url: "testURL",
-        expiresOn: Date.now() - 60 * 2000, // -2 minutes
+        expiresOn: Date.now() - 1,
       })
     );
 
-    assert.equal(sessionSvc.handleAuthentication("none"), "redirect expired");
+    assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
 
-    window.localStorage.removeItem(REDIRECT_LOCAL_STORAGE_KEY);
+    assert.equal(
+      window.localStorage.getItem(TEST_STORAGE_KEY),
+      null,
+      'expired redirects are removed from "localStorage"'
+    );
   });
 });
