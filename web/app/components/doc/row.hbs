@@ -20,12 +20,9 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex space-x-4 no-underline items-start"
+      class="flex space-x-4 items-start"
     >
-      <Doc::Thumbnail
-        @status={{@status}}
-        @product={{@productArea}}
-      />
+      <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
       <div>
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
@@ -42,10 +39,7 @@
     {{@docType}}
   </Hds::Table::Td>
   <Hds::Table::Td class="status">
-    <Doc::State
-      @state={{@status}}
-      @hideProgress={{true}}
-    /></Hds::Table::Td>
+    <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
   <Hds::Table::Td class="product"><Hds::Badge
       @text={{this.productAreaName}}
       @icon={{this.productAreaIcon}}

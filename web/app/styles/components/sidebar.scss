@@ -16,8 +16,12 @@
     @apply bottom-0.5 -left-4  rounded-r w-9 h-7;
   }
 
+  .primary-textarea {
+    @apply min-h-[76px];
+  }
+
   .person-list {
-    @apply w-full list-none space-y-2;
+    @apply w-full space-y-2;
   }
 
   .sidebar-footer {
