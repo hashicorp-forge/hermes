@@ -17,10 +17,7 @@ export default class ApplicationRoute extends Route {
 
     // track page views
     this.router.on("routeDidChange", () => {
-      const { router } = this;
-      const page = router.currentURL;
-      const title = router.currentRouteName || "unknown";
-      this.metrics.trackPage({ page, title });
+      this.metrics.trackPage();
     });
   }
 

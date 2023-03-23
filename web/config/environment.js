@@ -39,10 +39,8 @@ module.exports = function (environment) {
         environments: ["development"],
         config: {
           id: getEnv("GOOGLE_ANALYTICS_ID"),
-          debug: environment === "development",
           options: {
             anonymize_ip: true,
-            send_page_view: false,
           },
         },
       },
