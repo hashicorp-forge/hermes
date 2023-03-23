@@ -9,6 +9,19 @@ export default class ApplicationRoute extends Route {
   @service("fetch") fetchSvc;
   @service flags;
   @service session;
+  @service metrics;
+  @service router;
+
+  constructor() {
+    super(...arguments);
+
+    this.router.on("routeDidChange", () => {
+      this.metrics.trackPage({
+        page: this.router.currentURL,
+        title: document.title || 'unknown',
+      });
+    });
+  }
 
   @action
   error(error) {

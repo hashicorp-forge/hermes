@@ -33,6 +33,20 @@ module.exports = function (environment) {
       // when it is created
     },
 
+    metricsAdapters: [
+      {
+        name: "GoogleAnalyticsFour",
+        environments: ["production"],
+        config: {
+          id: getEnv("GOOGLE_ANALYTICS_ID"),
+          options: {
+            anonymize_ip: true,
+            debug_mode: environment === "development",
+          },
+        },
+      },
+    ],
+
     algolia: {
       appID: getEnv("ALGOLIA_APP_ID"),
       docsIndexName: getEnv("ALGOLIA_DOCS_INDEX_NAME", "docs"),
