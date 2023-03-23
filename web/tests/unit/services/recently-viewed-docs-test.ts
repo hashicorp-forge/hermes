@@ -1,4 +1,4 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import RecentlyViewedDocsService, {
   RecentlyViewedDoc,
@@ -80,5 +80,19 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
       true,
       'the index was transformed from a list of strings to a list of objects with "doc" properties'
     );
+  });
+
+  test("deleted documents are removed from the index", async function (this: RecentlyViewedDocsContext, assert) {
+    this.server.createList("document", 4);
+    this.server.createList("recently-viewed-doc", 4, { isLegacy: true });
+    await this.recentDocs.fetchAll.perform();
+
+    assert.equal(this.recentDocs.all?.length, 4);
+    await this.recentDocs.remove.perform(
+      this.server.schema.document.first().attrs.id
+    );
+
+    await waitUntil(() => this.recentDocs.all?.length === 3);
+    assert.equal(this.recentDocs.all?.length, 3);
   });
 });
