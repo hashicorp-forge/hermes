@@ -19,12 +19,15 @@ export default class AuthenticatedRoute extends Route {
       "authenticate"
     );
 
+    // See if we have a redirect target stored in sessionStorage
     let storageItem = window.sessionStorage.getItem(REDIRECT_STORAGE_KEY);
 
     if (!storageItem) {
+      // If we don't have a redirect target in sessionStorage, check localStorage
       storageItem = window.localStorage.getItem(REDIRECT_STORAGE_KEY);
 
-      if (storageItem && Date.now() < JSON.parse(storageItem).expiresOn) {
+      // If the redirect target in localStorage is expired, remove it
+      if (storageItem && Date.now() > JSON.parse(storageItem).expiresOn) {
         window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
         storageItem = null;
       }
@@ -53,7 +56,7 @@ export default class AuthenticatedRoute extends Route {
         REDIRECT_STORAGE_KEY,
         JSON.stringify({
           url: transitionTo,
-          expiresOn: Date.now() + 60 * 5000, // 2 minutes
+          expiresOn: Date.now() + 60 * 5000, // 5 minutes
         })
       );
     }

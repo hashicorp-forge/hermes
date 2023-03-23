@@ -95,7 +95,7 @@ module("Unit | Service | session", function (hooks) {
     assert.equal(
       window.localStorage.getItem(TEST_STORAGE_KEY),
       null,
-      'expired redirects are removed from "localStorage"'
+      'expired redirects are removed from localStorage'
     );
   });
 });

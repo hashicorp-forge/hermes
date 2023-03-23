@@ -21,9 +21,9 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     let transition;
 
     if (redirectStorageValue) {
-      const isSessionStorageObject = !redirectStorageValue.startsWith("{");
+      const isObject = redirectStorageValue.startsWith("{");
 
-      if (isSessionStorageObject) {
+      if (!isObject) {
         redirectTarget = redirectStorageValue;
       } else if (Date.now() < JSON.parse(redirectStorageValue).expiresOn) {
         redirectTarget = JSON.parse(redirectStorageValue).url;
