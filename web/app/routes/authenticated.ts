@@ -53,7 +53,7 @@ export default class AuthenticatedRoute extends Route {
         REDIRECT_STORAGE_KEY,
         JSON.stringify({
           url: transitionTo,
-          expiresOn: Date.now() + 60 * 2000, // 2 minutes
+          expiresOn: Date.now() + 60 * 5000, // 2 minutes
         })
       );
     }
