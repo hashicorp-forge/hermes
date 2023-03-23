@@ -36,12 +36,13 @@ module.exports = function (environment) {
     metricsAdapters: [
       {
         name: "GoogleAnalyticsFour",
-        environments: ["production"],
+        environments: ["development"],
         config: {
           id: getEnv("GOOGLE_ANALYTICS_ID"),
+          debug: environment === "development",
           options: {
             anonymize_ip: true,
-            debug_mode: environment === "development",
+            send_page_view: false,
           },
         },
       },

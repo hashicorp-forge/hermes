@@ -7985,7 +7985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-cli-typescript@npm:^5.0.0, ember-cli-typescript@npm:^5.2.1":
+"ember-cli-typescript@npm:^5.0.0, ember-cli-typescript@npm:^5.1.1, ember-cli-typescript@npm:^5.2.1":
   version: 5.2.1
   resolution: "ember-cli-typescript@npm:5.2.1"
   dependencies:
@@ -8438,14 +8438,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-metrics@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "ember-metrics@npm:1.5.2"
+"ember-metrics@npm:^2.0.0-beta.2":
+  version: 2.0.0-beta.2
+  resolution: "ember-metrics@npm:2.0.0-beta.2"
   dependencies:
     broccoli-funnel: ^3.0.2
     ember-cli-babel: ^7.26.6
-    ember-cli-typescript: ^4.2.1
-  checksum: a8665a424de7e15f65dedfc8e3d8c1710669f443b062b289c5f201141b627303c30f862b3092ec3cef0e933e29c1af3ea912c8eb781896615b3ca8d4bf729a42
+    ember-cli-typescript: ^5.1.1
+  checksum: ffb0cd27b1b6f093167a668b7e1c83def8e7b35aeca52f2e2a155405c5e354c15d5f54bf9b92634c88e1ad7181d12d45813450c405852ca855fa03209f612d39
   languageName: node
   linkType: hard
 
@@ -10898,7 +10898,7 @@ __metadata:
     ember-focus-trap: ^1.0.1
     ember-load-initializers: ^2.1.2
     ember-maybe-import-regenerator: ^0.1.6
-    ember-metrics: ^1.5.2
+    ember-metrics: ^2.0.0-beta.2
     ember-modifier: ^4.1.0
     ember-on-helper: ^0.1.0
     ember-page-title: ^6.2.2

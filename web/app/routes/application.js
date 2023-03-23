@@ -15,11 +15,12 @@ export default class ApplicationRoute extends Route {
   constructor() {
     super(...arguments);
 
+    // track page views
     this.router.on("routeDidChange", () => {
-      this.metrics.trackPage({
-        page: this.router.currentURL,
-        title: document.title || 'unknown',
-      });
+      const { router } = this;
+      const page = router.currentURL;
+      const title = router.currentRouteName || "unknown";
+      this.metrics.trackPage({ page, title });
     });
   }
 
