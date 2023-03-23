@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cenkalti/backoff/v4"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/googleapi"
 )
@@ -234,22 +235,31 @@ func (s *Service) ListFiles(folderID, query string) ([]*drive.File, error) {
 	var nextPageToken string
 
 	for {
-		call := s.Drive.Files.List().
-			Fields(googleapi.Field(fmt.Sprintf("files(%s), nextPageToken", fileFields))).
-			IncludeItemsFromAllDrives(true).
-			PageSize(20).
-			Q(query).
-			SupportsAllDrives(true)
-		if nextPageToken != "" {
-			call = call.PageToken(nextPageToken)
-		}
-		resp, err := call.Do()
-		if err != nil {
-			return nil, fmt.Errorf("error listing files: %w", err)
-		}
-		files = append(files, resp.Files...)
+		op := func() error {
+			call := s.Drive.Files.List().
+				Fields(googleapi.Field(fmt.Sprintf("files(%s), nextPageToken", fileFields))).
+				IncludeItemsFromAllDrives(true).
+				PageSize(20).
+				Q(query).
+				SupportsAllDrives(true)
+			if nextPageToken != "" {
+				call = call.PageToken(nextPageToken)
+			}
+			resp, err := call.Do()
+			if err != nil {
+				return fmt.Errorf("error listing files: %w", err)
+			}
+			files = append(files, resp.Files...)
+			nextPageToken = resp.NextPageToken
 
-		nextPageToken = resp.NextPageToken
+			return nil
+		}
+
+		boErr := backoff.RetryNotify(op, defaultBackoff(), backoffNotify)
+		if boErr != nil {
+			return nil, boErr
+		}
+
 		if nextPageToken == "" {
 			break
 		}

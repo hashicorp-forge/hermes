@@ -19,6 +19,7 @@
 <LinkTo
   @route="authenticated.document"
   @model="{{@docID}}"
+  @query={{hash draft=@isDraft}}
   class="flex flex-col items-start space-y-2 no-underline p-4 -m-4 rounded-md hover:bg-[color:var(--token-color-palette-neutral-50)] active:bg-[color:var(--token-color-palette-neutral-100)] overflow-hidden"
 >
   <div class="flex flex-col items-start w-[108px] space-y-3">

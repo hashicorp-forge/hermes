@@ -1,13 +1,20 @@
-// @ts-nocheck
-// TODO: Type this file.
 import Service from "@ember/service";
 import fetch from "fetch";
 import { inject as service } from "@ember/service";
+import SessionService from "./session";
+
+interface FetchOptions {
+  method?: string;
+  headers?: {
+    [key: string]: string;
+  };
+  body?: string;
+}
 
 export default class FetchService extends Service {
-  @service session;
+  @service declare session: SessionService;
 
-  async fetch(url, options = {}) {
+  async fetch(url: string, options: FetchOptions = {}) {
     // Add the Google access token in a header (for auth) if the URL starts with
     // a frontslash, which will only target the application backend.
     if (Array.from(url)[0] == "/") {
@@ -18,7 +25,6 @@ export default class FetchService extends Service {
       };
     }
     try {
-
       const resp = await fetch(url, options);
 
       if (!resp.ok) {
