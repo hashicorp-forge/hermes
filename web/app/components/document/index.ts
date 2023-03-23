@@ -29,9 +29,9 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
       });
 
       if (!fetchResponse?.ok) {
-        throw new Error("Error deleting draft");
+        this.showError("Error deleting draft");
       } else {
-        void this.recentDocs.remove.perform(docID);
+        void this.recentDocs.fetchAll.perform();
 
         this.flashMessages.add({
           message: "Document draft deleted",
@@ -40,18 +40,29 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
           timeout: 6000,
           extendedTimeout: 1000,
         });
+
+        this.router.transitionTo("authenticated.drafts");
       }
-      this.router.transitionTo("authenticated.drafts");
-    } catch (err) {
+    } catch (e) {
       this.flashMessages.add({
         title: "Error deleting draft",
-        message: err as string,
+        message: e as string,
         type: "critical",
         timeout: 6000,
         extendedTimeout: 1000,
       });
 
-      throw err;
+      throw e;
     }
   });
+
+  protected showError(e: unknown) {
+    this.flashMessages.add({
+      title: "Error deleting draft",
+      message: e as string,
+      type: "critical",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
+  }
 }

@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import { inject as service } from "@ember/service";
-import { dropTask, restartableTask } from "ember-concurrency";
+import { restartableTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
@@ -307,44 +307,6 @@ export default class RecentlyViewedDocsService extends Service {
       }
     }
   );
-
-  /**
-   * Removes a doc from the recently viewed docs list.
-   * Called when a draft is successfully deleted.
-   */
-  remove = dropTask(async (docOrDraftID: string) => {
-    try {
-      assert("removeDoc expects an index", this.index);
-
-      let newIndex = this.index.filter((doc) => {
-        if (typeof doc === "string") {
-          return doc !== docOrDraftID;
-        } else {
-          return doc.id !== docOrDraftID;
-        }
-      });
-
-      this.index = newIndex;
-
-      await this.fetchSvc.fetch(
-        `https://www.googleapis.com/upload/drive/v3/files/${this.indexID}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization:
-              "Bearer " + this.session.data.authenticated.access_token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(this.index),
-        }
-      );
-
-      void this.fetchAll.perform();
-    } catch (error: unknown) {
-      console.error("error removing doc", error);
-      throw error;
-    }
-  });
 }
 
 declare module "@ember/service" {
