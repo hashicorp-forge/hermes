@@ -1,9 +1,11 @@
+// @ts-nocheck
+// TODO: Type this file
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { scheduleOnce } from "@ember/runloop";
 
-const FOCUSABLE =
+export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export default class EditableField extends Component {

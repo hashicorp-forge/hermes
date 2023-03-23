@@ -1,14 +1,16 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render } from "@ember/test-helpers";
+import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { GoogleUser } from "hermes/components/inputs/people-select";
+import { HermesUser } from "hermes/types/document";
+import FetchService from "hermes/services/fetch";
 
 interface PeopleSelectContext extends MirageTestContext {
-  people: GoogleUser[];
-  onChange: (newValue: GoogleUser[]) => void;
+  people: HermesUser[];
+  onChange: (newValue: HermesUser[]) => void;
+  isFirstFetchAttempt: boolean;
 }
 
 module("Integration | Component | inputs/people-select", function (hooks) {
@@ -66,5 +68,51 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 1 }, "People are removed from the list when clicked");
+  });
+
+  test("it will retry if the server returns an error", async function (this: PeopleSelectContext, assert) {
+    this.server.createList("person", 5);
+
+    this.set("people", []);
+    this.onChange = (newValue) => this.set("people", newValue);
+    this.set("isFirstFetchAttempt", true);
+
+    let fetchSvc = this.owner.lookup("service:fetch") as FetchService;
+
+    fetchSvc.set("fetch", async () => {
+      if (this.isFirstFetchAttempt) {
+        this.set("isFirstFetchAttempt", false);
+        return new Response(null, { status: 504 });
+      } else {
+        let people = JSON.stringify(this.server.schema.people.all().models);
+        return new Response(people, { status: 200 });
+      }
+    });
+
+    await render(hbs`
+      <Inputs::PeopleSelect
+        @selected={{this.people}}
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    await click(".ember-basic-dropdown-trigger");
+
+    let fillInPromise = fillIn(
+      ".ember-power-select-trigger-multiple-input",
+      "any text - we're not actually querying"
+    );
+
+    await waitFor(".ember-power-select-option--loading-message");
+
+    assert
+      .dom(".ember-power-select-option--loading-message")
+      .hasText("Loading options...");
+
+    await fillInPromise;
+
+    assert
+      .dom(".ember-power-select-option")
+      .exists({ count: 5 }, "Returns results after retrying");
   });
 });

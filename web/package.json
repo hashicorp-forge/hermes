@@ -85,7 +85,7 @@
     "ember-focus-trap": "^1.0.1",
     "ember-load-initializers": "^2.1.2",
     "ember-maybe-import-regenerator": "^0.1.6",
-    "ember-modifier": "^4.0.0",
+    "ember-modifier": "^4.1.0",
     "ember-on-helper": "^0.1.0",
     "ember-page-title": "^6.2.2",
     "ember-qunit": "^5.1.5",
@@ -121,6 +121,7 @@
   },
   "dependencies": {
     "@csstools/postcss-sass": "^5.0.1",
+    "@floating-ui/dom": "^1.2.4",
     "@hashicorp/design-system-components": "^1.4.0",
     "@hashicorp/ember-flight-icons": "^3.0.2",
     "@types/sinon": "^10.0.13",

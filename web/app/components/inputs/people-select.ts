@@ -1,8 +1,10 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import { task } from "ember-concurrency";
+import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
+import FetchService from "hermes/services/fetch";
+import Ember from "ember";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -20,10 +22,11 @@ interface InputsPeopleSelectComponentSignature {
   };
 }
 
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
+
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
-  // @ts-ignore
-  // FetchService not yet in the registry
-  @service("fetch") declare fetchSvc: any;
+  @service("fetch") declare fetchSvc: FetchService;
 
   /**
    * The list of people to display in the dropdown.
@@ -59,31 +62,46 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
    */
-  protected searchDirectory = task(async (query) => {
-    try {
-      const res = await this.fetchSvc.fetch("/api/v1/people", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query,
-        }),
-      });
+  protected searchDirectory = restartableTask(async (query: string) => {
+    for (let i = 0; i < MAX_RETRIES; i++) {
+      let retryDelay = INITIAL_RETRY_DELAY;
 
-      const peopleJson = await res.json();
-
-      if (peopleJson) {
-        this.people = peopleJson.map((p: GoogleUser) => {
-          return {
-            email: p.emailAddresses[0]?.value,
-            imgURL: p.photos?.[0]?.url,
-          };
+      try {
+        let response = await this.fetchSvc.fetch("/api/v1/people", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: query,
+          }),
         });
-      } else {
-        this.people = [];
+
+        const peopleJson = await response?.json();
+
+        if (peopleJson) {
+          this.people = peopleJson.map((p: GoogleUser) => {
+            return {
+              email: p.emailAddresses[0]?.value,
+              imgURL: p.photos?.[0]?.url,
+            };
+          });
+        } else {
+          this.people = [];
+        }
+        // stop the loop if the query was successful
+        return;
+      } catch (e) {
+        // Throw an error if this is the last retry.
+        if (i === MAX_RETRIES - 1) {
+          console.error(`Error querying people: ${e}`);
+          throw e;
+        }
+
+        // Otherwise, wait and try again.
+        await timeout(retryDelay);
+
+        // Double the retry delay for the next retry.
+        retryDelay *= 2;
       }
-    } catch (err) {
-      console.log(`Error querying people: ${err}`);
-      throw err;
     }
   });
 }
