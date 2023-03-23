@@ -29,7 +29,7 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
       });
 
       if (!fetchResponse?.ok) {
-        this.showError("Error deleting draft");
+        this.showError(fetchResponse?.statusText);
       } else {
         void this.recentDocs.fetchAll.perform();
 
@@ -44,19 +44,12 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
         this.router.transitionTo("authenticated.drafts");
       }
     } catch (e) {
-      this.flashMessages.add({
-        title: "Error deleting draft",
-        message: e as string,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
-
+      this.showError(e);
       throw e;
     }
   });
 
-  protected showError(e: unknown) {
+  protected showError(e?: unknown) {
     this.flashMessages.add({
       title: "Error deleting draft",
       message: e as string,
