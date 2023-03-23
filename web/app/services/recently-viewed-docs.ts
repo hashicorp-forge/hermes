@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import { inject as service } from "@ember/service";
-import { restartableTask } from "ember-concurrency";
+import { enqueueTask, restartableTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
@@ -244,7 +244,7 @@ export default class RecentlyViewedDocsService extends Service {
    * Adds a doc to the body of the recently viewed docs file.
    * Called by the `document` route on load.
    */
-  markViewed = restartableTask(
+  markViewed = enqueueTask({ maxConcurrency: 2 },
     async (docOrDraftID: string, isDraft = false) => {
       try {
         /**
