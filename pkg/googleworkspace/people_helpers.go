@@ -1,6 +1,8 @@
 package googleworkspace
 
 import (
+	"fmt"
+
 	"github.com/cenkalti/backoff/v4"
 	"google.golang.org/api/people/v1"
 )
@@ -19,7 +21,7 @@ func (s *Service) SearchPeople(query string) ([]*people.Person, error) {
 	op := func() error {
 		resp, err = call.Do()
 		if err != nil {
-			return err
+			return fmt.Errorf("error searching people directory: %w", err)
 		}
 
 		return nil
@@ -34,7 +36,7 @@ func (s *Service) SearchPeople(query string) ([]*people.Person, error) {
 			call = call.PageToken(nextPageToken)
 		}
 
-		boErr := backoff.Retry(op, backoff.NewExponentialBackOff())
+		boErr := backoff.RetryNotify(op, defaultBackoff(), backoffNotify)
 		if boErr != nil {
 			return nil, boErr
 		}
