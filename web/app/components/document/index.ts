@@ -28,8 +28,6 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
         headers: { "Content-Type": "application/json" },
       });
 
-      console.log(fetchResponse);
-
       if (!fetchResponse?.ok) {
         throw new Error("Error deleting draft");
       } else {
