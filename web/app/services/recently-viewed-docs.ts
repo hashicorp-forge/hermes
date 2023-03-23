@@ -242,9 +242,11 @@ export default class RecentlyViewedDocsService extends Service {
 
   /**
    * Adds a doc to the body of the recently viewed docs file.
-   * Called by the `document` route on load.
+   * Called by the `document` route on load. To avoid conflicts in cases
+   * where a user views many docs quickly, we enqueue up to 3 tasks.
    */
-  markViewed = enqueueTask({ maxConcurrency: 2 },
+  markViewed = enqueueTask(
+    { maxConcurrency: 3 },
     async (docOrDraftID: string, isDraft = false) => {
       try {
         /**
