@@ -28,7 +28,11 @@
 
   .product-badge {
     @apply bottom-0 left-0;
-    @apply w-[24px] h-[22px] rounded-bl rounded-tr;
+    @apply w-[19px] h-[17px] rounded-bl rounded-tr;
+
+    .flight-icon {
+      @apply scale-75;
+    }
   }
 
   &.obsolete {
@@ -47,6 +51,10 @@
 
     .product-badge {
       @apply w-[36px] h-[32px] rounded-bl rounded-tr;
+
+      .flight-icon {
+      @apply scale-100;
+    }
     }
 
     .status-icon {
