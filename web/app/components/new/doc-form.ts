@@ -103,7 +103,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * The product abbreviation for the selected product area.
    */
   protected get productAbbreviation() {
-    console.log(this.productArea);
     return this.args.productAbbrevMappings.get(this.productArea);
   }
   /**
