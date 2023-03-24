@@ -19,6 +19,7 @@ module("Unit | Service | session", function (hooks) {
     /**
      * Mock the handleAuthentication method
      */
+
     sessionSvc.handleAuthentication = (_routeAfterAuthentication: string) => {
       // See if there is a redirect object in sessionStorage
       let redirectObject = window.sessionStorage.getItem(TEST_STORAGE_KEY);
@@ -28,7 +29,7 @@ module("Unit | Service | session", function (hooks) {
         redirectObject = window.localStorage.getItem(TEST_STORAGE_KEY);
 
         if (
-          // Handle if there's an object more than 2 minutes old
+          // Handle if there's an object but it's expired
           redirectObject &&
           Date.now() > JSON.parse(redirectObject).expiresOn
         ) {
@@ -57,6 +58,7 @@ module("Unit | Service | session", function (hooks) {
     /**
      * Start assertions
      */
+
     assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
 
     window.sessionStorage.setItem(TEST_STORAGE_KEY, "testURL");
@@ -64,7 +66,7 @@ module("Unit | Service | session", function (hooks) {
       TEST_STORAGE_KEY,
       JSON.stringify({
         url: "testURL",
-        expiresOn: Date.now() + 60 * 2000, // 2 minutes
+        expiresOn: Date.now() + 60 * 5000,
       })
     );
 
@@ -95,7 +97,7 @@ module("Unit | Service | session", function (hooks) {
     assert.equal(
       window.localStorage.getItem(TEST_STORAGE_KEY),
       null,
-      'expired redirects are removed from localStorage'
+      "expired redirects are removed from localStorage"
     );
   });
 });
