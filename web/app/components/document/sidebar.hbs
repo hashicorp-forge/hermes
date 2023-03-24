@@ -1,4 +1,4 @@
-<aside class="sidebar {{if this.isCollapsed 'w-8' 'w-64'}}">
+<aside class="sidebar shrink-0 {{if this.isCollapsed 'w-16' 'w-72'}}">
   {{#if this.isCollapsed}}
     <nav class="relative flex flex-col space-y-2">
       <div class="flex flex-col items-center space-y-3">
@@ -25,7 +25,7 @@
       </div>
     </nav>
   {{else}}
-    <header class="relative flex flex-col space-y-2 z-10">
+    <header class="relative flex flex-col space-y-2 px-3.5 z-10">
       <div class="flex w-full items-center justify-between">
         <X::HdsTab
           @label="Back to Dashboard"
@@ -40,7 +40,7 @@
         />
       </div>
 
-      <div class="flex w-full items-center justify-end space-x-1 pr-1">
+      <div class="flex w-full items-center justify-end space-x-1 pl-3 pr-1">
 
         {{#if this.shareButtonIsShown}}
           <Document::ShareButton @document={{@document}} />
@@ -64,7 +64,7 @@
     </header>
 
     <div class="body {{if this.sidebarBodyIsShorter 'is-shorter'}}">
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         {{#if (is-empty @document.docNumber)}}
           <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
               (is-empty @document.docType)
@@ -113,9 +113,9 @@
         {{/if}}
       </div>
 
-      <hr class="border-0 border-b hds-border-faint mx-3" />
+      <hr class="border-0 border-b hds-border-faint" />
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Summary</small>
@@ -157,7 +157,7 @@
         {{/if}}
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Status</small>
@@ -168,7 +168,7 @@
         />
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Product/Area</small>
@@ -178,7 +178,7 @@
         />
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Owner</small>
@@ -188,7 +188,7 @@
         />
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Contributors</small>
@@ -242,7 +242,7 @@
         {{/if}}
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small
           class="hds-typography-body-100 hds-foreground-faint"
         >Approvers</small>
@@ -296,14 +296,14 @@
         {{/if}}
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small class="hds-typography-body-100 hds-foreground-faint">
           Created
         </small>
         <p>{{or @document.createdDate "Unknown"}}</p>
       </div>
 
-      <div class="flex flex-col items-start space-y-2 px-3">
+      <div class="flex flex-col items-start space-y-2">
         <small class="hds-typography-body-100 hds-foreground-faint">
           Last modified
         </small>
@@ -317,7 +317,7 @@
             attributes.value
           )
         }}
-          <div class="flex flex-col items-start space-y-2 px-3">
+          <div class="flex flex-col items-start space-y-2">
             <small class="hds-typography-body-100 hds-foreground-faint">
               {{attributes.displayName}}
             </small>
