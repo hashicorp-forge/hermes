@@ -5,7 +5,7 @@
     @apply w-16;
 
     .sidebar-header {
-      @apply bg-blue-200 flex-col px-0 relative h-full;
+      @apply flex-col px-0 relative h-full;
     }
 
     .sidebar-dashboard-link {
@@ -22,11 +22,21 @@
   }
 
   .sidebar-header-button {
-    @apply rounded py-2 px-3 space-x-2 flex items-center;
+    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent;
+
+    &:hover {
+      @apply border-color-border-strong bg-color-foreground-high-contrast;
+    }
   }
 
   .sidebar-header-icon-controls {
     @apply flex;
+
+    .sidebar-header-button {
+      &::hover {
+        @apply border-transparent  bg-color-surface-interactive-hover;
+      }
+    }
   }
 
   .sidebar-body {

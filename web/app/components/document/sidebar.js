@@ -54,25 +54,8 @@ export default class DocumentSidebar extends Component {
     return customEditableFields;
   }
 
-  @action
-  toggleCollapsed() {
+  @action toggleCollapsed() {
     this.isCollapsed = !this.isCollapsed;
-  }
-
-  // sidebarBodyIsShorter returns true in the case(s) where there are two
-  // vertically stacked buttons, making the body shorter.
-  get sidebarBodyIsShorter() {
-    // If you are an approver for a published FRD:
-    if (
-      !this.isDraft &&
-      !this.isOwner &&
-      this.isApprover &&
-      this.args.document.docType === "FRD"
-    ) {
-      return true;
-    }
-
-    return false;
   }
 
   get approveButtonText() {

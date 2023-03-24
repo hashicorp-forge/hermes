@@ -2,6 +2,9 @@
   <LinkTo
     class="sidebar-header-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
+    {{(if
+      @isCollapsed (modifier "tooltip" "Dashboard" placement="right")
+    )}}
   >
     <FlightIcon
       @name={{if @isCollapsed "hashicorp" "arrow-left"}}
@@ -22,7 +25,7 @@
         }}
         {{on "click" (perform this.copyURL)}}
       >
-        <FlightIcon @name="link" />
+        <FlightIcon @name={{if this.urlWasRecentlyCopied "check" "link"}} />
       </Action>
     {{/if}}
     <ExternalLink

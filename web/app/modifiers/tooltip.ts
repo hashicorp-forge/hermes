@@ -50,8 +50,9 @@ interface TooltipModifierSignature {
  * Called by the `registerDestructor` function.
  */
 function cleanup(instance: TooltipModifier) {
+  document.removeEventListener("keydown", instance.handleKeydown);
   instance.reference.removeEventListener("click", instance.handleClick);
-  instance.reference.removeEventListener("focusin", instance.showContent);
+  instance.reference.removeEventListener("focusin", instance.onFocusIn);
   instance.reference.removeEventListener("focusout", instance.maybeHideContent);
   instance.reference.removeEventListener("mouseenter", instance.showContent);
   instance.reference.removeEventListener(
@@ -142,6 +143,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * calculated by the `floating-ui` positioning library.
    */
   @action showContent() {
+    console.log("showContent");
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
@@ -273,6 +275,12 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     }
   }
 
+  @action handleKeydown(event: KeyboardEvent) {
+    if (this.tooltip && event.key === "Escape") {
+      this.hideContent();
+    }
+  }
+
   /**
    * Updates the tooltip's text content if it exists and needs updating.
    * Called in the `modify` hook to capture any text changes,
@@ -297,11 +305,21 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     if (this.reference.matches(":focus-visible")) {
       return;
     }
-
     if (this.tooltip) {
-      this.tooltip.remove();
-      this.tooltip = null;
+      this.hideContent();
     }
+  }
+
+  @action onFocusIn() {
+    if (this.reference.matches(":focus-visible")) {
+      this.showContent();
+    }
+  }
+
+  @action hideContent() {
+    assert("tooltip expected", this.tooltip);
+    this.tooltip.remove();
+    this.tooltip = null;
   }
 
   /**
@@ -338,8 +356,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this._reference.setAttribute("tabindex", "0");
     }
 
+    document.addEventListener("keydown", this.handleKeydown);
     this._reference.addEventListener("click", this.handleClick);
-    this._reference.addEventListener("focusin", this.showContent);
+    this._reference.addEventListener("focusin", this.onFocusIn);
     this._reference.addEventListener("mouseenter", this.showContent);
     this._reference.addEventListener("focusout", this.maybeHideContent);
     this._reference.addEventListener("mouseleave", this.maybeHideContent);

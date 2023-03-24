@@ -44,6 +44,9 @@ module.exports = {
     },
 
     extend: {
+      borderRadius: {
+        "button-md": '5px',
+      },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,
         // they can't be used with Tailwind's opacity modifiers
