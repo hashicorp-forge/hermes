@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import FetchService from "hermes/services/fetch";
+import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
 
 export interface GoogleUser {
@@ -13,7 +14,7 @@ export interface GoogleUser {
 
 interface PeopleSelectComponentSignature {
   Args: {
-    selected: GoogleUser[];
+    selected: HermesUser[];
     onBlur?: () => void;
     onChange: (people: GoogleUser[]) => void;
   };
@@ -80,6 +81,11 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
               email: p.emailAddresses[0]?.value,
               imgURL: p.photos?.[0]?.url,
             };
+          }).filter((person: HermesUser) => {
+            // filter out any people already selected
+            return !this.args.selected.find(
+              (selectedPerson) => selectedPerson.email === person.email
+            );
           });
         } else {
           this.people = [];
