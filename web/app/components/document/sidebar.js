@@ -6,6 +6,7 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
+import { debounce } from "@ember/runloop";
 
 export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
@@ -45,6 +46,9 @@ export default class DocumentSidebar extends Component {
 
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
+
+  @tracked userHasScrolled = false;
+  @tracked body = null;
 
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
@@ -302,6 +306,18 @@ export default class DocumentSidebar extends Component {
     this.modalErrorIsShown = false;
     this.errorTitle = null;
     this.errorDescription = null;
+  }
+
+  @action onScroll() {
+    let onScrollFunction = () => {
+      this.userHasScrolled = this.body?.scrollTop > 0;
+    };
+
+    debounce(this, onScrollFunction, 50);
+  }
+
+  @action registerBody(element) {
+    this.body = element;
   }
 
   @task

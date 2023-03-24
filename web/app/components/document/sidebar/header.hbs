@@ -1,10 +1,8 @@
-<div class="sidebar-header">
+<div class="sidebar-header {{if @userHasScrolled 'border-b border-black/20'}}">
   <LinkTo
     class="sidebar-header-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
-    {{(if
-      @isCollapsed (modifier "tooltip" "Dashboard" placement="right")
-    )}}
+    {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
     <FlightIcon
       @name={{if @isCollapsed "hashicorp" "arrow-left"}}
@@ -16,17 +14,11 @@
   </LinkTo>
   <div class="sidebar-header-icon-controls">
     {{#if this.shareButtonIsShown}}
-      <Action
+      <CopyURLButton
+        @url={{this.url}}
+        @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
         class="sidebar-header-button"
-        {{tooltip
-          (if this.urlWasRecentlyCopied "Copied!" "Copy URL")
-          placement=(if @isCollapsed "right" "bottom")
-          stayOpenOnClick=true
-        }}
-        {{on "click" (perform this.copyURL)}}
-      >
-        <FlightIcon @name={{if this.urlWasRecentlyCopied "check" "link"}} />
-      </Action>
+      />
     {{/if}}
     <ExternalLink
       class="sidebar-header-button"

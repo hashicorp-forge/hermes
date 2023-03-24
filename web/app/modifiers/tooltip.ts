@@ -134,7 +134,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   }
 
   @tracked floatingUICleanup: (() => void) | null = null;
-  @tracked updatePosition: (() => void) | null = null;
 
   /**
    * The action that runs on mouseenter and focusin.
@@ -256,8 +255,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       });
     };
 
-    this.updatePosition = updatePosition;
-
     this.floatingUICleanup = autoUpdate(
       this.reference,
       this.tooltip,
@@ -275,6 +272,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     }
   }
 
+  /**
+   * Action that runs on document.keydown. Hides the tooltip on `Escape`.
+   */
   @action handleKeydown(event: KeyboardEvent) {
     if (this.tooltip && event.key === "Escape") {
       this.hideContent();
@@ -297,9 +297,22 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   }
 
   /**
+   * The action that runs on focusin. Opens the tooltip if the reference
+   * is `focus-visible`. We check this to prevents the tooltip from opening when the
+   * reference is indeed focused, but not via keyboard, e.g., when clicking on a button.
+   * This specifically targets a case where switching windows and returning would reopen
+   * the tooltip if a previously clicked reference remained focused.
+   */
+  @action onFocusIn() {
+    if (this.reference.matches(":focus-visible")) {
+      this.showContent();
+    }
+  }
+
+  /**
    * The function to run on mouseleave and focusout.
    * Removes the tooltip element from the DOM if it exists
-   * and the reference element is not focused.
+   * and the reference element is not focus-visible.
    */
   @action maybeHideContent() {
     if (this.reference.matches(":focus-visible")) {
@@ -307,12 +320,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     }
     if (this.tooltip) {
       this.hideContent();
-    }
-  }
-
-  @action onFocusIn() {
-    if (this.reference.matches(":focus-visible")) {
-      this.showContent();
     }
   }
 

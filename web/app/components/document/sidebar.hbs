@@ -3,10 +3,15 @@
     @document={{@document}}
     @isCollapsed={{this.isCollapsed}}
     @toggleCollapsed={{this.toggleCollapsed}}
+    @userHasScrolled={{this.userHasScrolled}}
   />
 
   {{#unless this.isCollapsed}}
-    <div class="sidebar-body">
+    <div
+      class="sidebar-body"
+      {{on "scroll" this.onScroll}}
+      {{did-insert this.registerBody}}
+    >
       {{#let (get-product-id @document.product) as |productIcon|}}
         {{#if productIcon}}
           <div class="product-badge {{productIcon}}">
