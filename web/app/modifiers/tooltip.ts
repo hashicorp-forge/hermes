@@ -10,6 +10,7 @@ import {
   autoUpdate,
   computePosition,
   flip,
+  shift,
   offset,
   platform,
 } from "@floating-ui/dom";
@@ -49,6 +50,7 @@ interface TooltipModifierSignature {
  * Called by the `registerDestructor` function.
  */
 function cleanup(instance: TooltipModifier) {
+  instance.reference.removeEventListener("click", instance.handleClick);
   instance.reference.removeEventListener("focusin", instance.showContent);
   instance.reference.removeEventListener("focusout", instance.maybeHideContent);
   instance.reference.removeEventListener("mouseenter", instance.showContent);
@@ -104,6 +106,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  @tracked stayOpenOnClick = false;
+
   /**
    * An asserted-to-exist reference to the reference element.
    */
@@ -129,6 +133,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   }
 
   @tracked floatingUICleanup: (() => void) | null = null;
+  @tracked updatePosition: (() => void) | null = null;
+
   /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
@@ -192,6 +198,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         middleware: [
           offset(8),
           flip(),
+          shift(),
           arrow({
             element: this.arrow,
             padding: 10,
@@ -247,6 +254,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       });
     };
 
+    this.updatePosition = updatePosition;
+
     this.floatingUICleanup = autoUpdate(
       this.reference,
       this.tooltip,
@@ -255,12 +264,37 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   }
 
   /**
+   * A click listener added in the `modify` hook that hides the tooltip
+   * unless it's specifically configured to stay open on click.
+   */
+  @action handleClick() {
+    if (!this.stayOpenOnClick) {
+      this.maybeHideContent();
+    }
+  }
+
+  /**
+   * Updates the tooltip's text content if it exists and needs updating.
+   * Called in the `modify` hook to capture any text changes,
+   * e.g., "Copy" -> "Copied!", "Expand" -> "Collapse"
+   */
+  @action maybeUpdateTooltipText() {
+    if (this.tooltip) {
+      let text = this.tooltip.querySelector(".text");
+      if (text && text.textContent !== this.tooltipText) {
+        text.textContent = this.tooltipText;
+      }
+      return;
+    }
+  }
+
+  /**
    * The function to run on mouseleave and focusout.
    * Removes the tooltip element from the DOM if it exists
    * and the reference element is not focused.
    */
   @action maybeHideContent() {
-    if (this.reference.matches(":focus")) {
+    if (this.reference.matches(":focus-visible")) {
       return;
     }
 
@@ -279,13 +313,20 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     positional: [string],
     named: {
       placement?: Placement;
+      stayOpenOnClick?: boolean;
     }
   ) {
     this._reference = element;
     this._tooltipText = positional[0];
 
+    this.maybeUpdateTooltipText();
+
     if (named.placement) {
       this.placement = named.placement;
+    }
+
+    if (named.stayOpenOnClick) {
+      this.stayOpenOnClick = named.stayOpenOnClick;
     }
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);
@@ -297,6 +338,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this._reference.setAttribute("tabindex", "0");
     }
 
+    this._reference.addEventListener("click", this.handleClick);
     this._reference.addEventListener("focusin", this.showContent);
     this._reference.addEventListener("mouseenter", this.showContent);
     this._reference.addEventListener("focusout", this.maybeHideContent);

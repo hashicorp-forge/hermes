@@ -1,0 +1,46 @@
+<div class="sidebar-header">
+  <LinkTo
+    class="sidebar-header-button sidebar-dashboard-link"
+    @route="authenticated.dashboard"
+  >
+    <FlightIcon
+      @name={{if @isCollapsed "hashicorp" "arrow-left"}}
+      @size={{if @isCollapsed "24"}}
+    />
+    {{#unless @isCollapsed}}
+      <span>Dashboard</span>
+    {{/unless}}
+  </LinkTo>
+  <div class="sidebar-header-icon-controls">
+    {{#if this.shareButtonIsShown}}
+      <Action
+        class="sidebar-header-button"
+        {{tooltip
+          (if this.urlWasRecentlyCopied "Copied!" "Copy URL")
+          placement=(if @isCollapsed "right" "bottom")
+          stayOpenOnClick=true
+        }}
+        {{on "click" (perform this.copyURL)}}
+      >
+        <FlightIcon @name="link" />
+      </Action>
+    {{/if}}
+    <ExternalLink
+      class="sidebar-header-button"
+      {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
+    >
+      <FlightIcon @name="external-link" />
+    </ExternalLink>
+    <Action
+      class="sidebar-header-button"
+      href="https://docs.google.com/document/d/{{@document.objectID}}"
+      {{on "click" @toggleCollapsed}}
+      {{tooltip
+        (concat (if @isCollapsed "Expand" "Collapse") " sidebar")
+        placement=(if @isCollapsed "right" "bottom")
+      }}
+    >
+      <FlightIcon @name={{if @isCollapsed "sidebar-show" "sidebar-hide"}} />
+    </Action>
+  </div>
+</div>
