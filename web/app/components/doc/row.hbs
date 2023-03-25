@@ -20,40 +20,9 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex  space-x-4"
+      class="flex space-x-4 items-start"
     >
-      <div
-        class="relative flex flex-shrink-0 items-center w-[40px] h-[56px] hds-surface-mid
-          {{if
-            (eq @status 'obsolete')
-            'hds-surface-faint opacity-75'
-            'hds-surface-primary'
-          }}
-          rounded overflow-hidden"
-      >
-        <img src="/images/document.png" class="w-full mix-blend-multiply" />
-        {{#if (eq @status "approved")}}
-          <FlightIcon
-            @name="check-circle"
-            @size="24"
-            class="absolute -right-2 top-1 fill-[var(--token-color-palette-green-200)] w-8 h-8 -rotate-12 mix-blend-multiply opacity-75"
-          />
-        {{/if}}
-        {{#if (eq @status "obsolete")}}
-          <div
-            class="absolute top-0 left-0 right-1 bottom-0 flex items-center hds-surface-strong hds-surface-mid rounded overflow-hidden"
-          >
-            <FlightIcon
-              @name="archive"
-              @size="24"
-              class="absolute -left-2 top-1 fill-[var(--token-color-palette-neutral-200)] w-8 h-8 -rotate-12 mix-blend-multiply opacity-75"
-            />
-          </div>
-        {{/if}}
-        <div class="{{if (eq @status 'obsolete') 'opacity-50'}}">
-          <Doc::Tag @name={{@productArea}} @isSmall="{true}" />
-        </div>
-      </div>
+      <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
       <div>
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
@@ -70,11 +39,7 @@
     {{@docType}}
   </Hds::Table::Td>
   <Hds::Table::Td class="status">
-    <Doc::State
-      @state={{@status}}
-      @hideProgress={{true}}
-      class="whitespace-nowrap"
-    /></Hds::Table::Td>
+    <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
   <Hds::Table::Td class="product"><Hds::Badge
       @text={{this.productAreaName}}
       @icon={{this.productAreaIcon}}
