@@ -1,4 +1,4 @@
-<div class="flex flex-1 p-4 space-x-4 max-h-screen">
+<div class="flex flex-1 pt-4 space-x-px max-h-screen">
   <Document::Sidebar
     @profile={{this.authenticatedUser.info}}
     @document={{@document}}
@@ -6,20 +6,22 @@
     @docType={{@docType}}
   />
 
-  <Hds::Card::Container
-    @level="high"
-    @hasBorder="true"
-    @overflow="hidden"
-    class="flex items-center justify-center flex-1"
-  >
-    <iframe
-      title="Google Doc"
-      height="100%"
-      width="100%"
-      class="border-0"
-      src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
+  <div class="pb-4 pr-4 w-full">
+    <Hds::Card::Container
+      @level="high"
+      @hasBorder="true"
+      @overflow="hidden"
+      class="flex items-center justify-center h-full"
     >
-    </iframe>
-  </Hds::Card::Container>
+      <iframe
+        title="Google Doc"
+        height="100%"
+        width="100%"
+        class="border-0"
+        src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
+      >
+      </iframe>
+    </Hds::Card::Container>
+  </div>
 
 </div>
