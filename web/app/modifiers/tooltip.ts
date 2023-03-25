@@ -142,7 +142,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * calculated by the `floating-ui` positioning library.
    */
   @action showContent() {
-    console.log("showContent");
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
