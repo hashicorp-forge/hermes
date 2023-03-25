@@ -1,15 +1,33 @@
 .sidebar {
-  @apply flex flex-col max-h-full relative z-10;
+  @apply flex flex-col max-h-full relative z-10 pb-4;
 
   header,
   nav {
-    @apply sticky top-0 mb-4;
+    @apply sticky top-0 pb-4;
   }
 
   .body {
-    @apply space-y-8 pb-6;
-    overflow-y: auto;
-    height: 100%;
+    @apply space-y-8 pb-10 pl-7 pr-3 overflow-y-scroll h-full;
+
+    /* Style the scrollbar for Chrome, Safari, and Opera. */
+    &::-webkit-scrollbar {
+      @apply w-4 bg-transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      @apply border-solid min-h-[40px] border-[4.5px] border-transparent bg-color-palette-neutral-300 rounded-t-full rounded-b-full bg-clip-padding;
+
+      &:hover {
+        @apply bg-color-palette-neutral-400;
+      }
+    }
+
+    /* Style the scrollbar Firefox */
+    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+  }
+
+  .product-badge {
+    @apply bottom-5 left-0  rounded-r w-9 h-7;
   }
 
   .primary-textarea {
@@ -21,7 +39,6 @@
   }
 
   .sidebar-footer {
-    @apply w-full shrink-0 pt-8 pb-6;
-    background-color: var(--token-color-page-faint);
+    @apply w-full bg-color-page-faint shrink-0 py-4 px-3.5;
   }
 }
