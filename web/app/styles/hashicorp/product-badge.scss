@@ -1,6 +1,4 @@
 .product-badge {
-  // `.hcp` uses the default styles
-
   @apply absolute top-0 left-0 grid rounded-r place-items-center bg-gradient-to-br w-9 h-7 from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
   &.nomad {

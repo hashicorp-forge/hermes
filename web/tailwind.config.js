@@ -42,10 +42,13 @@ module.exports = {
       semibold: "var(--token-typography-font-weight-semibold)",
       bold: "var(--token-typography-font-weight-bold)",
     },
-
     extend: {
       borderRadius: {
-        "button-md": '5px',
+        "button-md": "5px",
+      },
+      boxShadow: {
+        "surface-low": "var(--token-surface-low-box-shadow)",
+        "surface-mid": "var(--token-surface-mid-box-shadow)",
       },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,

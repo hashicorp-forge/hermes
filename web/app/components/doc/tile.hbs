@@ -22,49 +22,8 @@
   @query={{hash draft=@isDraft}}
   class="flex flex-col items-start space-y-2 no-underline p-4 -m-4 rounded-md hover:bg-[color:var(--token-color-palette-neutral-50)] active:bg-[color:var(--token-color-palette-neutral-100)] overflow-hidden"
 >
-  <div class="flex flex-col items-start w-[108px] space-y-3">
-    <div
-      class="relative flex items-center w-[108px] h-[148px] hds-surface-mid
-        {{if
-          (eq @status 'obsolete')
-          'hds-surface-faint opacity-75'
-          'hds-surface-primary'
-        }}
-        rounded overflow-hidden"
-    >
-      {{#if (is-empty @thumbnail)}}
-        <img src="/images/document.png" class="w-full mix-blend-multiply" />
-      {{else}}
-        <img
-          src="{{@thumbnail}}"
-          class="w-full mix-blend-multiply"
-          referrerpolicy="no-referrer"
-        />
-      {{/if}}
-      {{#if (eq @status "approved")}}
-        <FlightIcon
-          @name="check-circle"
-          @size="24"
-          class="absolute -right-4 top-2 fill-[var(--token-color-palette-green-200)] w-20 h-20 -rotate-12 mix-blend-multiply opacity-75"
-        />
-      {{/if}}
-      {{#if (eq @status "obsolete")}}
-        <div
-          class="absolute top-0 left-0 right-5 bottom-0 flex items-center hds-surface-strong hds-surface-mid rounded overflow-hidden"
-        >
-          <FlightIcon
-            @name="archive"
-            @size="24"
-            class="absolute -left-4 top-2 fill-[var(--token-color-palette-neutral-200)] w-20 h-20 -rotate-12 mix-blend-multiply opacity-75"
-          />
-        </div>
-      {{/if}}
-      <div class="{{if (eq @status 'obsolete') 'opacity-50'}}">
-        <Doc::Tag @name={{@productArea}} />
-      </div>
-    </div>
-    <Doc::State @state="{{@status}}" />
-  </div>
+  <Doc::Thumbnail @status={{@status}} @product={{@productArea}} @isLarge={{true}} />
+  <Doc::State @state={{@status}} />
 
   <div class="flex flex-col items-start space-y-1">
     <h4 class="doc-tile-title">{{@title}}</h4>
