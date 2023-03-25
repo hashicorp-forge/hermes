@@ -26,6 +26,10 @@
     scrollbar-color: var(--token-color-palette-neutral-300) transparent;
   }
 
+  .product-badge {
+    @apply bottom-5 left-0  rounded-r w-9 h-7;
+  }
+
   .primary-textarea {
     @apply min-h-[76px];
   }
