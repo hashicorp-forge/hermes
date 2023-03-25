@@ -42,8 +42,11 @@ module.exports = {
       semibold: "var(--token-typography-font-weight-semibold)",
       bold: "var(--token-typography-font-weight-bold)",
     },
-
     extend: {
+      boxShadow: {
+        "surface-low": "var(--token-surface-low-box-shadow)",
+        "surface-mid": "var(--token-surface-mid-box-shadow)",
+      },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,
         // they can't be used with Tailwind's opacity modifiers
@@ -58,6 +61,7 @@ module.exports = {
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
         "color-surface-primary": "var(--token-color-surface-primary)",
+        "color-surface-strong": "var(--token-color-surface-strong)",
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border

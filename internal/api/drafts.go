@@ -483,11 +483,20 @@ func DraftsDocumentHandler(
 			return
 		}
 
-		// Authorize request (only the owner can access a document draft).
+		// Authorize request (only allow owners or contributors to get past this
+		// point in the handler). We further authorize some methods later that
+		// require owner access only.
 		userEmail := r.Context().Value("userEmail").(string)
-		if docObj.GetOwners()[0] != userEmail {
+		var isOwner, isContributor bool
+		if docObj.GetOwners()[0] == userEmail {
+			isOwner = true
+		}
+		if contains(docObj.GetContributors(), userEmail) {
+			isContributor = true
+		}
+		if !isOwner && !isContributor {
 			http.Error(w,
-				`{"error": "Not a document owner"}`,
+				`{"error": "Only owners or contributors can access a draft document"}`,
 				http.StatusUnauthorized)
 			return
 		}
@@ -540,6 +549,14 @@ func DraftsDocumentHandler(
 			l.Info("retrieved document draft", "doc_id", docId)
 
 		case "DELETE":
+			// Authorize request.
+			if !isOwner {
+				http.Error(w,
+					`{"error": "Only owners can delete a draft document"}`,
+					http.StatusUnauthorized)
+				return
+			}
+
 			// Delete document
 			err = s.DeleteFile(docId)
 			if err != nil {
