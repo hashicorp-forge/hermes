@@ -61,6 +61,11 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 2 }, "User 2 was successfully selected");
 
+    await fillIn(".ember-power-select-trigger-multiple-input", "2");
+    assert
+      .dom(".ember-power-select-option")
+      .hasText("No results found", "No duplicate users can be added");
+
     await click(
       ".ember-power-select-multiple-option .ember-power-select-multiple-remove-btn"
     );
