@@ -1,0 +1,35 @@
+<svg
+  data-test-doc-thumbnail-folder-affordance
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  viewBox={{if @isLarge "0 0 97 145" "0 0 43 63"}}
+  class="folder-affordance"
+>
+  <path
+    fill="url(#doc-thumbnail-folder-gradient)"
+    stroke="currentColor"
+    fill-rule="evenodd"
+    d={{if
+      @isLarge
+      "M6 0a6 6 0 0 0-6 6v41.04a6 6 0 0 0 2.659 4.983l8.29 5.558v80.729a6 6 0 0 0 6 6H97V0H6Z"
+      "M3 0a3 3 0 0 0-3 3v18.407a3 3 0 0 0 .91 2.152l2.18 2.117v33.746a3 3 0 0 0 3 3H43V0H3Z"
+    }}
+    clip-rule="evenodd"
+  ></path>
+  <defs>
+    <linearGradient
+      id="doc-thumbnail-folder-gradient"
+      x1={{if @isLarge "8.176" "4.746"}}
+      x2={{if @isLarge "8.176" "4.746"}}
+      y1="0"
+      y2={{if @isLarge "43.965" "19.018"}}
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="var(--token-color-palette-neutral-50)"></stop>
+      <stop
+        offset="1"
+        stop-color="var(--token-color-palette-neutral-100)"
+      ></stop>
+    </linearGradient>
+  </defs>
+</svg>

@@ -2,7 +2,9 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
-import SessionService, { SESSION_STORAGE_KEY } from "hermes/services/session";
+import SessionService, {
+  REDIRECT_LOCAL_STORAGE_KEY,
+} from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
@@ -19,7 +21,7 @@ export default class AuthenticatedRoute extends Route {
       "authenticate"
     );
 
-    let target = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    let target = window.localStorage.getItem(REDIRECT_LOCAL_STORAGE_KEY);
 
     if (
       !target &&
@@ -39,7 +41,13 @@ export default class AuthenticatedRoute extends Route {
        */
       let transitionTo = transition.intent.url ?? transition.to.name;
 
-      window.sessionStorage.setItem(SESSION_STORAGE_KEY, transitionTo);
+      window.localStorage.setItem(
+        REDIRECT_LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          url: transitionTo,
+          expiresOn: Date.now() + 60 * 2000, // 2 minutes
+        })
+      );
     }
   }
 }
