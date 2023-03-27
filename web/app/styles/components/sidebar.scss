@@ -26,7 +26,7 @@
   }
 
   .sidebar-header-button {
-    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent;
+    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent text-color-foreground-primary;
 
     &:hover {
       @apply border-color-border-strong bg-color-foreground-high-contrast;
