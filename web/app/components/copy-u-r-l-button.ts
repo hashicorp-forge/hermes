@@ -6,6 +6,8 @@ import { restartableTask } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
 import simpleTimeout from "hermes/utils/simple-timeout";
+import { action } from "@ember/object";
+import { assert } from "@ember/debug";
 
 interface CopyURLButtonComponentSignature {
   Element: HTMLButtonElement;
@@ -19,6 +21,11 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
   @service declare flashMessages: FlashMessageService;
 
   @tracked urlWasRecentlyCopied = false;
+  @tracked button: HTMLElement | null = null;
+
+  @action didInsertButton(e: HTMLElement) {
+    this.button = e;
+  }
 
   protected copyURL = restartableTask(async () => {
     try {
@@ -28,8 +35,19 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
         const result = await navigator.clipboard.readText();
         if (result === this.args.url) {
           this.urlWasRecentlyCopied = true;
-          await simpleTimeout(Ember.testing ? 10 : 2000);
+          assert('button must exist', this.button);
+
+          let tooltipId = this.button.getAttribute("aria-describedby");
+
+          assert('tooltipId must exist', tooltipId);
+
+          document.getElementById(tooltipId)?.setAttribute('data-url-copied', 'true')
+
+          await simpleTimeout(Ember.testing ? 100 : 2000);
+
           this.urlWasRecentlyCopied = false;
+
+          document.getElementById(tooltipId)?.setAttribute('data-url-copied', 'false')
         }
       }
     } catch (e) {

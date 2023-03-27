@@ -205,7 +205,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           }),
         ],
       }).then(({ x, y, placement, middlewareData }) => {
-        assert("tooltip expected", this.tooltip);
+        if (!this.tooltip) {
+          return;
+        }
 
         /**
          * Update and set the tooltip's placement attribute

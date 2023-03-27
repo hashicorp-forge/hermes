@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render, triggerEvent, waitUntil } from "@ember/test-helpers";
+import { click, render, triggerEvent, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 module("Integration | Component | copy-u-r-l-button", function (hooks) {
@@ -26,7 +26,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
       .hasClass("test-class")
       .exists("The component renders with the correct class name");
 
-    await triggerEvent(".test-class", "mouseenter");
+    await triggerEvent("[data-test-copy-url-button]", "mouseenter");
     assert
       .dom(".hermes-tooltip")
       .hasAttribute(
@@ -35,11 +35,11 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
         "The tooltip is rendered with the default placement"
       );
 
-    await triggerEvent(".test-class", "mouseleave");
+    await triggerEvent("[data-test-copy-url-button]", "mouseleave");
 
     this.set("tooltipPlacement", "bottom");
 
-    await triggerEvent(".test-class", "mouseenter");
+    await triggerEvent("[data-test-copy-url-button]", "mouseenter");
 
     assert
       .dom(".hermes-tooltip")
@@ -49,16 +49,11 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
         "The tooltip can be rendered custom placement"
       );
 
-    let clickPromise = click(".test-class");
-
     assert.dom(".hermes-tooltip .text").hasText("Copy URL");
 
-    await waitUntil(() => {
-      return (
-        document.querySelector(".hermes-tooltip .text")?.textContent ===
-        "Copied!"
-      );
-    });
+    let clickPromise = click("[data-test-copy-url-button]");
+
+    await waitFor("[data-url-copied='true']");
 
     assert.dom(".hermes-tooltip .text").hasText("Copied!");
 
