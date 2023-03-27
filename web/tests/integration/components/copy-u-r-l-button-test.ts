@@ -1,10 +1,22 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render, triggerEvent, waitFor } from "@ember/test-helpers";
+import {
+  TestContext,
+  click,
+  render,
+  triggerEvent,
+  waitFor,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import sinon from "sinon";
 
 module("Integration | Component | copy-u-r-l-button", function (hooks) {
   setupRenderingTest(hooks);
+
+  hooks.beforeEach(function () {
+    sinon.stub(navigator.clipboard, "writeText").resolves();
+    sinon.stub(navigator.clipboard, "readText").resolves("https://hashicorp.com");
+  });
 
   test("it renders as expected", async function (assert) {
     this.set("tooltipPlacement", null);
@@ -20,6 +32,8 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
         />
       </div>
     `);
+
+
 
     assert
       .dom("[data-test-copy-url-button]")
@@ -53,7 +67,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
 
     let clickPromise = click("[data-test-copy-url-button]");
 
-    await waitFor("[data-url-copied='true']");
+    await waitFor("[data-url-copied=true]");
 
     assert.dom(".hermes-tooltip .text").hasText("Copied!");
 
