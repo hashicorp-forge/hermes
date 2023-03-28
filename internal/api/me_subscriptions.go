@@ -81,22 +81,6 @@ func MeSubscriptionsHandler(
 				)
 				return
 			}
-		case "HEAD":
-			// Find or create user.
-			u := models.User{
-				EmailAddress: userEmail,
-			}
-			// Write response.
-			w.WriteHeader(http.StatusOK)
-			if err := u.FirstOrCreate(db); err != nil {
-				errResp(
-					http.StatusInternalServerError,
-					"Error authorizing the request",
-					"error finding or creating user",
-					err,
-				)
-				return
-			}
 
 		case "POST":
 			// Decode request.
