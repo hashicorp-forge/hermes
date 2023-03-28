@@ -16,7 +16,7 @@ export default function (mirageConfig) {
        *
        *************************************************************************/
 
-      this.head("/me/subscriptions", (schema, request) => {
+      this.head("/me", (schema, _request) => {
         let isLoggedIn = schema.db.mes[0].isLoggedIn;
 
         if (isLoggedIn) {

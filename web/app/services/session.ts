@@ -2,14 +2,12 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
-import { keepLatestTask, timeout } from "ember-concurrency";
+import { keepLatestTask } from "ember-concurrency";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import FetchService from "./fetch";
-
-const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
 
 export const REDIRECT_LOCAL_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -34,10 +32,10 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * Kicked off by the Authenticated route.
    */
   pollForExpiredAuth = keepLatestTask(async () => {
-    await simpleTimeout(TIMEOUT_VALUE);
+    await simpleTimeout(Ember.testing ? 100 : 10000);
 
     this.fetch.fetch(
-      "/api/v1/me/subscriptions",
+      "/api/v1/me",
       {
         method: "HEAD",
         headers: {
