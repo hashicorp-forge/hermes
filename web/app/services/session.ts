@@ -18,12 +18,23 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare flashMessages: FlashMessageService;
 
   /**
+   * Whether the current session is valid.
+   * Set false if our poll response is 401, and when the
+   * user requires authentication with EmberSimpleAuth.
+   */
+  @tracked tokenIsValid = true;
+
+  /**
    * Whether the service should show a reauthentication message.
    * True when the user has dismissed a previous re-auth message.
    */
   @tracked preventReauthenticationMessage = false;
 
-  @tracked tokenIsValid = true;
+
+  /**
+   * Whether the last poll response was a 401.
+   * Updated by the fetch service on every pollCall.
+   */
   @tracked pollResponseIs401 = false;
 
   /**

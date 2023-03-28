@@ -27,7 +27,10 @@ export default class FetchService extends Service {
     try {
       const resp = await fetch(url, options);
 
-      this.session.pollResponseIs401 = resp.status === 401 && isPollCall;
+      // if it's a poll call, tell the SessionService if the response was a 401
+      if (isPollCall) {
+        this.session.pollResponseIs401 = resp.status === 401;
+      }
 
       if (!resp.ok) {
         if (resp.status === 401) {
