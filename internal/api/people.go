@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -39,16 +40,33 @@ func PeopleDataHandler(
 			}
 
 			users, err := s.People.SearchDirectoryPeople().
+				PageSize(5).
 				Query(req.Query).
-				// Only query for photos and email addresses
-				// This may be expanded based on use case
-				// in the future
-				ReadMask("photos,emailAddresses").
+				// Google API bug: "names" read mask doesn't work:
+				//   https://issuetracker.google.com/issues/196235775
+				ReadMask("names,photos,emailAddresses").
 				Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 				Do()
 			if err != nil {
 				log.Error("error searching people directory", "error", err)
 				http.Error(w, fmt.Sprintf("Error searching people directory: %q", err),
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Replace the names in the People API result with data from the
+			// Admin Directory API.
+			// TODO: remove this when the bug in the People API is fixed:
+			// https://issuetracker.google.com/issues/196235775
+			if err := replaceNamesWithAdminAPIResponse(
+				users.People, s,
+			); err != nil {
+				log.Error(
+					"error searching people directory: error replacing names:",
+					"error", err,
+				)
+				http.Error(w,
+					"Error searching people directory",
 					http.StatusInternalServerError)
 				return
 			}
@@ -76,12 +94,32 @@ func PeopleDataHandler(
 
 				for _, email := range emails {
 					result, err := s.People.SearchDirectoryPeople().
+						PageSize(5).
 						Query(email).
-						ReadMask("photos,emailAddresses").
+						// Google API bug: "names" read mask doesn't work:
+						//   https://issuetracker.google.com/issues/196235775
+						ReadMask("names,photos,emailAddresses").
 						Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 						Do()
 
 					if err == nil && len(result.People) > 0 {
+						// Replace the names in the People API result with data from the
+						// Admin Directory API.
+						// TODO: remove this when the bug in the People API is fixed:
+						// https://issuetracker.google.com/issues/196235775
+						if err := replaceNamesWithAdminAPIResponse(
+							result.People, s,
+						); err != nil {
+							log.Error(
+								"error searching people directory: error replacing names:",
+								"error", err,
+							)
+							http.Error(w,
+								"Error searching people directory",
+								http.StatusInternalServerError)
+							return
+						}
+
 						people = append(people, result.People[0])
 					} else {
 						log.Warn("Email lookup miss", "error", err)
@@ -106,4 +144,32 @@ func PeopleDataHandler(
 			return
 		}
 	})
+}
+
+// Replace the names in the People API result with data from the Admin
+// Directory API.
+// TODO: remove this when the bug in the People API is fixed:
+// https://issuetracker.google.com/issues/196235775
+func replaceNamesWithAdminAPIResponse(
+	ppl []*people.Person, s *gw.Service,
+) error {
+	for _, p := range ppl {
+		if len(p.EmailAddresses) == 0 {
+			return errors.New("email address not found")
+		}
+		u, err := s.GetUser(p.EmailAddresses[0].Value)
+		if err != nil {
+			return fmt.Errorf("error getting user: %w", err)
+		}
+
+		p.Names = []*people.Name{
+			{
+				DisplayName: u.Name.FullName,
+				FamilyName:  u.Name.FamilyName,
+				GivenName:   u.Name.GivenName,
+			},
+		}
+	}
+
+	return nil
 }
