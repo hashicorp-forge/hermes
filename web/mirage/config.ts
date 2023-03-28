@@ -165,7 +165,7 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.find(request.params.document_id).attrs
+          schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
 
@@ -176,7 +176,7 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.find(request.params.document_id).attrs
+          schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
       /**
@@ -194,12 +194,47 @@ export default function (mirageConfig) {
         return;
       });
 
-      /**
-       * Used by the RecentlyViewedDocsService to get the user's recently viewed docs.
-       */
-      this.get("https://www.googleapis.com/drive/v3/files", () => {
-        return;
+      // RecentlyViewedDocsService / fetchIndexID
+      this.get("https://www.googleapis.com/drive/v3/files", (schema) => {
+        let file = schema.recentlyViewedDocsDatabases.first()?.attrs;
+
+        if (!file) {
+          file = schema.recentlyViewedDocsDatabases.create({
+            name: "recently_viewed_docs.json",
+          }).attrs;
+        }
+
+        return new Response(200, {}, { files: [file] });
       });
+
+      // RecentlyViewedDocsService / fetchAll
+      this.get("https://www.googleapis.com/drive/v3/files/:id", (schema) => {
+        let index = schema.recentlyViewedDocs.all().models.map((doc) => {
+          if (doc.attrs.isLegacy) {
+            return doc.attrs.id;
+          } else {
+            return doc.attrs;
+          }
+        });
+        return new Response(200, {}, index);
+      });
+
+      /*************************************************************************
+       *
+       * PATCH requests
+       *
+       *************************************************************************/
+
+      // RecentlyViewedDocsService / markViewed
+      this.patch(
+        "https://www.googleapis.com/upload/drive/v3/files/:id",
+        (schema, request) => {
+          let index = JSON.parse(request.requestBody);
+          schema.db.recentlyViewedDocs.remove();
+          schema.db.recentlyViewedDocs.insert(index);
+          return new Response(200, {}, schema.recentlyViewedDocs.all().models);
+        }
+      );
     },
   };
 

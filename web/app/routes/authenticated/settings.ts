@@ -4,6 +4,7 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
+import { assert } from "@ember/debug";
 
 export default class SettingsRoute extends Route {
   @service("config") declare configSvc: ConfigService;

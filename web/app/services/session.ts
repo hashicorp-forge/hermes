@@ -11,7 +11,7 @@ import FetchService from "./fetch";
 
 const TIMEOUT_VALUE = Ember.testing ? 500 : 5000;
 
-export const SESSION_STORAGE_KEY = "hermes.redirectTarget";
+export const REDIRECT_LOCAL_STORAGE_KEY = "hermes.redirectTarget";
 
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
@@ -83,8 +83,19 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    let redirectTarget = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    let redirectObject = window.localStorage.getItem(
+      REDIRECT_LOCAL_STORAGE_KEY
+    );
+
+    let redirectTarget: string | null = null;
     let transition;
+
+    if (redirectObject) {
+      // Check if the object is less than 2 minutes old
+      if (Date.now() < JSON.parse(redirectObject).expiresOn) {
+        redirectTarget = JSON.parse(redirectObject).url;
+      }
+    }
 
     if (redirectTarget) {
       transition = this.router.transitionTo(redirectTarget);
@@ -94,7 +105,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       );
     }
     transition.followRedirects().then(() => {
-      window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      window.localStorage.removeItem(REDIRECT_LOCAL_STORAGE_KEY);
     });
   }
 }
