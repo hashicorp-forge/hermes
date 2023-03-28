@@ -12,7 +12,6 @@ export default class DocumentSidebar extends Component {
   @service router;
   @service session;
   @service flashMessages;
-
   @tracked isCollapsed = false;
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
@@ -42,9 +41,10 @@ export default class DocumentSidebar extends Component {
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
   @tracked tags = this.args.document.tags || [];
-
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
+  @tracked product = this.args.document.product || "";
+  @tracked products = null;
 
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
@@ -202,11 +202,15 @@ export default class DocumentSidebar extends Component {
     }
   }
 
-
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
+  }
+
+  @action updateProduct(event) {
+    this.product = event.target.value;
+    this.save.perform("product", this.product);
   }
 
   @task
@@ -227,6 +231,18 @@ export default class DocumentSidebar extends Component {
         // revert field value on failure
         this[field] = oldVal;
       }
+    }
+  }
+
+  @task *fetchProducts() {
+    try {
+      let products = yield this.fetchSvc
+        .fetch("/api/v1/products")
+        .then((resp) => resp.json());
+      this.products = products;
+    } catch (err) {
+      console.error(err);
+      throw err;
     }
   }
 
