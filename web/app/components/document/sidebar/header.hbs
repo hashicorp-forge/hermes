@@ -1,5 +1,6 @@
 <div class="sidebar-header {{if @userHasScrolled 'scrolled'}}">
   <LinkTo
+    data-test-sidebar-dashboard-link
     class="sidebar-header-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
     {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
@@ -15,12 +16,14 @@
   <div class="sidebar-header-icon-controls">
     {{#if this.shareButtonIsShown}}
       <CopyURLButton
+        data-test-sidebar-copy-url-button
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
         class="sidebar-header-button"
       />
     {{/if}}
     <ExternalLink
+      data-test-sidebar-google-docs-link
       class="sidebar-header-button"
       href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
@@ -28,6 +31,8 @@
       <FlightIcon @name="external-link" />
     </ExternalLink>
     <Action
+      data-test-sidebar-toggle-button
+      data-test-is-collapsed={{@isCollapsed}}
       class="sidebar-header-button"
       {{on "click" @toggleCollapsed}}
       {{tooltip
