@@ -22,13 +22,13 @@
     {{/if}}
     <ExternalLink
       class="sidebar-header-button"
+      href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
     >
       <FlightIcon @name="external-link" />
     </ExternalLink>
     <Action
       class="sidebar-header-button"
-      href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{on "click" @toggleCollapsed}}
       {{tooltip
         (concat (if @isCollapsed "Expand" "Collapse") " sidebar")
