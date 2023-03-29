@@ -636,6 +636,7 @@ func DraftsDocumentHandler(
 			}
 
 			// Validate product if it is in the patch request.
+			var productAbbreviation string
 			if req.Product != "" {
 				p := models.Product{Name: req.Product}
 				if err := p.Get(db); err != nil {
@@ -649,6 +650,10 @@ func DraftsDocumentHandler(
 						http.StatusBadRequest)
 					return
 				}
+
+				// Set product abbreviation because we use this later to update the
+				// doc number in the Algolia object.
+				productAbbreviation = p.Abbreviation
 			}
 
 			// Compare contributors in request and stored object in Algolia
@@ -735,8 +740,9 @@ func DraftsDocumentHandler(
 					"contributors_count", len(contributorsToRemoveSharing))
 			}
 
-			// Update product in the database (if it is in the patch request).
+			// Update product (if it is in the patch request).
 			if req.Product != "" {
+				// Update in database.
 				d := models.Document{
 					GoogleFileID: docId,
 					Product:      models.Product{Name: req.Product},
@@ -752,6 +758,9 @@ func DraftsDocumentHandler(
 						http.StatusInternalServerError)
 					return
 				}
+
+				// Update doc number in Algolia object.
+				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 			}
 
 			// Save new modified draft doc object in Algolia.
