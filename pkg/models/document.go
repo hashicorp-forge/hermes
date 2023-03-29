@@ -306,6 +306,14 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 		d.OwnerID = &d.Owner.ID
 	}
 
+	// Get product if ProductID is not set.
+	if d.ProductID == 0 && d.Product.Name != "" {
+		if err := d.Product.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.ProductID = d.Product.ID
+	}
+
 	return nil
 }
 
