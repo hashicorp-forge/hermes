@@ -34,7 +34,7 @@ type Document struct {
 	DocumentModifiedAt time.Time
 
 	// DocumentNumber is a document number unique to each product/area. It
-	// with the product abbreviation to form a document identifier
+	// pairs with the product abbreviation to form a document identifier
 	// (e.g., "TF-123").
 	DocumentNumber int `gorm:"index:latest_product_number"`
 
