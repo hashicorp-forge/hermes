@@ -47,11 +47,20 @@
     @apply relative overflow-y-scroll h-full;
 
     .product-badge {
-      @apply rounded-r w-9 h-7 top-0;
+      @apply rounded-l w-8 h-7 relative;
+
+      + .text {
+        @apply h-7 px-2.5 rounded-r relative;
+
+        &::before {
+          content: '';
+          @apply absolute w-full h-full left-0 top-0 rounded-r -z-10;
+        }
+      }
     }
 
     .sidebar-body-container {
-      @apply pt-11 pb-10 pl-7 pr-3 space-y-8;
+      @apply pt-2 pb-10 pl-7 pr-3 space-y-8;
     }
 
     /* Style the scrollbar for Chrome, Safari, and Opera. */
