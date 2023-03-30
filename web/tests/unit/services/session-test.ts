@@ -1,6 +1,9 @@
 import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
+import SessionService, {
+  REDIRECT_STORAGE_KEY,
+  isJSON,
+} from "hermes/services/session";
 import window from "ember-window-mock";
 
 const TEST_STORAGE_KEY = `test-${REDIRECT_STORAGE_KEY}`;
@@ -41,7 +44,7 @@ module("Unit | Service | session", function (hooks) {
       let returnValue: string | null = null;
 
       if (redirectObject) {
-        if (!redirectObject.startsWith("{")) {
+        if (!isJSON(redirectObject)) {
           returnValue = `session-stored redirect: ${redirectObject}`;
         } else if (Date.now() < JSON.parse(redirectObject).expiresOn) {
           returnValue = `locally-stored redirect: ${

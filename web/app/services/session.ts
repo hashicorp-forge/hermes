@@ -5,7 +5,7 @@ import window from "ember-window-mock";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
-function isJSON(str: string) {
+export function isJSON(str: string) {
   try {
     JSON.parse(str);
   } catch (e) {
