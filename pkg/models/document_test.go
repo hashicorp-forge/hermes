@@ -627,6 +627,93 @@ func TestDocumentModel(t *testing.T) {
 		})
 	})
 
+	t.Run("Update Product field using Upsert", func(t *testing.T) {
+		db, tearDownTest := setupTest(t, dsn)
+		defer tearDownTest(t)
+
+		t.Run("Create a document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT1",
+				LongName: "DocumentType1",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a product", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Product{
+				Name:         "Product1",
+				Abbreviation: "P1",
+			}
+			err := p.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a document by Upsert", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+				DocumentType: DocumentType{
+					Name:     "DT1",
+					LongName: "DocumentType1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err := d.Upsert(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("Product1", d.Product.Name)
+			assert.Equal("P1", d.Product.Abbreviation)
+			assert.EqualValues(1, d.Product.ID)
+		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("Product1", d.Product.Name)
+			assert.Equal("P1", d.Product.Abbreviation)
+			assert.EqualValues(1, d.Product.ID)
+		})
+
+		t.Run("Create a second product", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Product{
+				Name:         "Product2",
+				Abbreviation: "P2",
+			}
+			err := p.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Update the Product field by Upsert", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+				Product: Product{
+					Name: "Product2",
+				},
+			}
+			err := d.Upsert(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("Product2", d.Product.Name)
+			assert.Equal("P2", d.Product.Abbreviation)
+			assert.EqualValues(2, d.Product.ID)
+		})
+	})
+
 	t.Run("Upsert a document with custom fields", func(t *testing.T) {
 		db, tearDownTest := setupTest(t, dsn)
 		defer tearDownTest(t)

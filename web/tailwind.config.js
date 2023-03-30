@@ -42,8 +42,11 @@ module.exports = {
       semibold: "var(--token-typography-font-weight-semibold)",
       bold: "var(--token-typography-font-weight-bold)",
     },
-
     extend: {
+      boxShadow: {
+        "surface-low": "var(--token-surface-low-box-shadow)",
+        "surface-mid": "var(--token-surface-mid-box-shadow)",
+      },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,
         // they can't be used with Tailwind's opacity modifiers
