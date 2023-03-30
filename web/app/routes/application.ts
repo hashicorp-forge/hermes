@@ -35,7 +35,7 @@ export default class ApplicationRoute extends Route {
     if (config.environment === "production") {
       return this.fetchSvc
         .fetch("/api/v1/web/config")
-        .then((response) => response.json())
+        .then((response) => response?.json())
         .then((json) => {
           this.config.setConfig(json);
         })
