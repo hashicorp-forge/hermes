@@ -75,7 +75,7 @@
               (is-empty @document.docType)
             }}{{@document.docType}}{{/unless}}
             &bullet;
-            {{@document.docNumber}}</small>
+            <span data-test-sidebar-doc-number>{{@document.docNumber}}</span></small>
         {{/if}}
         {{#if this.editingIsDisabled}}
           <h1
@@ -169,8 +169,9 @@
           class="hds-typography-body-100 hds-foreground-faint"
         >Product/Area</small>
         {{#if this.isDraft}}
-          {{!-- TODO: Do we need to save the product abbreviation? --}}
+
           <Hds::Form::Select::Field
+            data-test-sidebar-product-select
             {{did-insert (perform this.fetchProducts)}}
             {{on "input" this.updateProduct}}
             @type="text"
@@ -178,7 +179,7 @@
             @value={{this.product}}
             name="product"
             class="min-w-[66%]"
-            disabled={{this.save.isRunning}}
+            disabled={{or this.fetchProducts.isRunning this.save.isRunning}}
             as |F|
           >
             {{#if this.products}}

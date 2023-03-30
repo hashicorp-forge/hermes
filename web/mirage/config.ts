@@ -2,6 +2,7 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { getTestProductAbbreviation } from "./factories/document";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -172,10 +173,40 @@ export default function (mirageConfig) {
 
       /**
        * Used by /subscriptions to get all possible subscriptions.
-       * Also used by the NewDoc route to map the products to their abbreviations.
+       * Used by the NewDoc route to map the products to their abbreviations.
+       * Used by the sidebar to populate a draft's product/area dropdown.
        */
       this.get("/products", () => {
-        return;
+        let objects = this.schema.products.all().models.map((product) => {
+          return {
+            [product.attrs.name]: {
+              abbreviation: product.attrs.abbreviation,
+            },
+          };
+        });
+
+        // The objects currently look like:
+        // [
+        //  0: { "Labs": { abbreviation: "LAB" } },
+        //  1: { "Vault": { abbreviation: "VLT"} }
+        // ]
+
+        // We need to reformat them to match the API's response.
+
+        let formattedObjects = {};
+
+        objects.forEach((object) => {
+          let key = Object.keys(object)[0];
+          formattedObjects[key] = object[key];
+        });
+
+        // The formattedObjects now look look like:
+        // {
+        //  "Labs": { abbreviation: "LAB" },
+        //  "Vault": { abbreviation: "VLT" }
+        // }
+
+        return new Response(200, {}, formattedObjects);
       });
 
       // RecentlyViewedDocsService / fetchIndexID
@@ -219,6 +250,27 @@ export default function (mirageConfig) {
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
         }
       );
+
+      /**
+       * Used by the sidebar to save document properties, e.g., productArea.
+       */
+      this.patch("/drafts/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+
+          if ("product" in attrs) {
+            attrs.docNumber = getTestProductAbbreviation(attrs.product);
+          }
+
+          document.update(attrs);
+
+          return new Response(200, {}, document.attrs);
+        }
+      });
     },
   };
 
