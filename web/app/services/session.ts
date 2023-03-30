@@ -5,6 +5,15 @@ import window from "ember-window-mock";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
+function isJSON(str: string) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
 
@@ -21,9 +30,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     let transition;
 
     if (redirectStorageValue) {
-      const isObject = redirectStorageValue.startsWith("{");
-
-      if (!isObject) {
+      if (!isJSON(redirectStorageValue)) {
         redirectTarget = redirectStorageValue;
       } else if (Date.now() < JSON.parse(redirectStorageValue).expiresOn) {
         redirectTarget = JSON.parse(redirectStorageValue).url;
