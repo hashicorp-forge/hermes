@@ -39,6 +39,7 @@ type DraftsRequest struct {
 type DraftsPatchRequest struct {
 	Approvers    []string `json:"approvers,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
+	Product      string   `json:"product,omitempty"`
 	Summary      string   `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
 	Title string `json:"title,omitempty"`
@@ -432,7 +433,8 @@ func DraftsDocumentHandler(
 	l hclog.Logger,
 	ar *algolia.Client,
 	aw *algolia.Client,
-	s *gw.Service) http.Handler {
+	s *gw.Service,
+	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get document ID from URL path
@@ -633,6 +635,27 @@ func DraftsDocumentHandler(
 				return
 			}
 
+			// Validate product if it is in the patch request.
+			var productAbbreviation string
+			if req.Product != "" {
+				p := models.Product{Name: req.Product}
+				if err := p.Get(db); err != nil {
+					l.Error("error getting product",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"product", req.Product,
+						"doc_id", docId)
+					http.Error(w, "Bad request: invalid product",
+						http.StatusBadRequest)
+					return
+				}
+
+				// Set product abbreviation because we use this later to update the
+				// doc number in the Algolia object.
+				productAbbreviation = p.Abbreviation
+			}
+
 			// Compare contributors in request and stored object in Algolia
 			// before we save the patched objected
 			// Find out contributors to share the document with
@@ -715,6 +738,29 @@ func DraftsDocumentHandler(
 			if len(contributorsToRemoveSharing) > 0 {
 				l.Info("removed contributors from document",
 					"contributors_count", len(contributorsToRemoveSharing))
+			}
+
+			// Update product (if it is in the patch request).
+			if req.Product != "" {
+				// Update in database.
+				d := models.Document{
+					GoogleFileID: docId,
+					Product:      models.Product{Name: req.Product},
+				}
+				if err := d.Upsert(db); err != nil {
+					l.Error("error upserting document to update product",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"product", req.Product,
+						"doc_id", docId)
+					http.Error(w, "Error patching document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Update doc number in Algolia object.
+				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 			}
 
 			// Save new modified draft doc object in Algolia.
