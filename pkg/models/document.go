@@ -33,8 +33,9 @@ type Document struct {
 	// DocumentModifiedAt is the time the document was last modified.
 	DocumentModifiedAt time.Time
 
-	// DocumentNumber is a document identifier containing a product/area
-	// abbreviation and a number (e.g., "TF-123").
+	// DocumentNumber is a document number unique to each product/area. It
+	// pairs with the product abbreviation to form a document identifier
+	// (e.g., "TF-123").
 	DocumentNumber int `gorm:"index:latest_product_number"`
 
 	// DocumentType is the document type.
@@ -304,6 +305,14 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 			return fmt.Errorf("error finding or creating owner: %w", err)
 		}
 		d.OwnerID = &d.Owner.ID
+	}
+
+	// Get product if ProductID is not set.
+	if d.ProductID == 0 && d.Product.Name != "" {
+		if err := d.Product.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.ProductID = d.Product.ID
 	}
 
 	return nil
