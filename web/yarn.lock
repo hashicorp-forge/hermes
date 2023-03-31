@@ -1938,6 +1938,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/core@npm:^1.2.3":
+  version: 1.2.4
+  resolution: "@floating-ui/core@npm:1.2.4"
+  checksum: 1c163ea1804e2b0a28fda6e32efed0e242d0db8081fd24aab9d1cbb100f94a558709231c483bf74bf09a9204ea6e7845813d43b5322ceb6ee63285308f68f65b
+  languageName: node
+  linkType: hard
+
+"@floating-ui/dom@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@floating-ui/dom@npm:1.2.4"
+  dependencies:
+    "@floating-ui/core": ^1.2.3
+  checksum: 5c24a2e8f04e436390646c8a4431c6cb79e03711fbb0f818b87d613a6be8971bc560a830b702aaa51a0ebc4d0c45deb06f3140c14125dc1ac770365bf66ee903
+  languageName: node
+  linkType: hard
+
 "@gar/promisify@npm:^1.1.3":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -10835,6 +10851,7 @@ __metadata:
     "@csstools/postcss-sass": ^5.0.1
     "@ember/optional-features": ^2.0.0
     "@ember/test-helpers": ^2.6.0
+    "@floating-ui/dom": ^1.2.4
     "@glimmer/component": ^1.0.4
     "@glimmer/tracking": ^1.0.4
     "@hashicorp/design-system-components": ^1.4.0

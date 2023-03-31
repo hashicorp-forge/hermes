@@ -1,0 +1,11 @@
+.hermes-tooltip {
+  @apply absolute w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast z-50;
+
+  .arrow {
+    @apply absolute bg-color-foreground-strong h-2 w-2 -z-10 pointer-events-none;
+  }
+
+  .text {
+    @apply relative;
+  }
+}

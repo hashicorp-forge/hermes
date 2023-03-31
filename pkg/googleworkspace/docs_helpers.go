@@ -17,13 +17,13 @@ func (s *Service) GetDoc(id string) (*docs.Document, error) {
 	op := func() error {
 		d, err = s.Docs.Documents.Get(id).Do()
 		if err != nil {
-			return err
+			return fmt.Errorf("error getting document: %w", err)
 		}
 
 		return nil
 	}
 
-	boErr := backoff.Retry(op, backoff.NewExponentialBackOff())
+	boErr := backoff.RetryNotify(op, defaultBackoff(), backoffNotify)
 	if boErr != nil {
 		return nil, boErr
 	}

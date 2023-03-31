@@ -1,7 +1,9 @@
 .product-badge {
-  // `.hcp` uses the default styles
+  @apply grid place-items-center absolute bg-gradient-to-br from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
-  @apply absolute bottom-0.5 -left-4 grid rounded-r place-items-center bg-gradient-to-br w-9 h-7 from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+  @apply bottom-5 left-0 grid rounded-r place-items-center w-9 h-7;
+
+  // `.hcp` uses the default styles
 
   &.nomad {
     @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;

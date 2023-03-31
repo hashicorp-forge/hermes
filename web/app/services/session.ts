@@ -3,7 +3,16 @@ import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
 
-export const SESSION_STORAGE_KEY = "hermes.redirectTarget";
+export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
+
+export function isJSON(str: string) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
 
 export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
@@ -13,8 +22,20 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    let redirectTarget = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    let redirectStorageValue =
+      window.sessionStorage.getItem(REDIRECT_STORAGE_KEY) ||
+      window.localStorage.getItem(REDIRECT_STORAGE_KEY);
+
+    let redirectTarget: string | null = null;
     let transition;
+
+    if (redirectStorageValue) {
+      if (!isJSON(redirectStorageValue)) {
+        redirectTarget = redirectStorageValue;
+      } else if (Date.now() < JSON.parse(redirectStorageValue).expiresOn) {
+        redirectTarget = JSON.parse(redirectStorageValue).url;
+      }
+    }
 
     if (redirectTarget) {
       transition = this.router.transitionTo(redirectTarget);
@@ -24,7 +45,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       );
     }
     transition.followRedirects().then(() => {
-      window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      window.sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
+      window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
     });
   }
 }
