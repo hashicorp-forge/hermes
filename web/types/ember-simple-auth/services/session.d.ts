@@ -11,7 +11,7 @@ export interface Data {
 }
 
 declare module "ember-simple-auth/services/session" {
-  export default class EmberSimpleAuthSessionService extends Service.extend(Evented) {
+  export default class EmberSimpleAuthSessionService extends Service {
     data: Data;
     setup: () => void;
     authenticate(...args: any[]): RSVP.Promise;
