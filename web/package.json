@@ -127,7 +127,7 @@
     "ember-cli-postcss": "^8.0.0",
     "ember-concurrency": "^2.2.1",
     "ember-power-select-with-create": "^1.0.0",
-    "ember-simple-auth": "^4.2.1",
+    "ember-simple-auth": "^5.0.0",
     "instantsearch.js": "^4.40.2",
     "miragejs": "^0.1.47",
     "postcss-scss": "^4.0.3",
