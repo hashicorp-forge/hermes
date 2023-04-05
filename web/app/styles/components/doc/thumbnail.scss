@@ -4,7 +4,7 @@
   // Outer border / shadow
   &::after {
     content: "";
-    @apply absolute z-50 pointer-events-none;
+    @apply absolute z-10 pointer-events-none;
     // Make the element 1px smaller than its container
     // so its shadow picks up colors from the elements below it.
     @apply top-px right-px bottom-px left-px;
