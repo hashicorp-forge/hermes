@@ -6,6 +6,7 @@ import { inject as service } from "@ember/service";
 import { task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
+import { debounce } from "@ember/runloop";
 
 export default class DocumentSidebar extends Component {
   @service("fetch") fetchSvc;
@@ -46,6 +47,9 @@ export default class DocumentSidebar extends Component {
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
 
+  @tracked userHasScrolled = false;
+  @tracked body = null;
+
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
     for (const field in customEditableFields) {
@@ -54,30 +58,8 @@ export default class DocumentSidebar extends Component {
     return customEditableFields;
   }
 
-  @action
-  collapseSidebar() {
-    this.isCollapsed = true;
-  }
-
-  @action
-  expandSidebar() {
-    this.isCollapsed = false;
-  }
-
-  // sidebarBodyIsShorter returns true in the case(s) where there are two
-  // vertically stacked buttons, making the body shorter.
-  get sidebarBodyIsShorter() {
-    // If you are an approver for a published FRD:
-    if (
-      !this.isDraft &&
-      !this.isOwner &&
-      this.isApprover &&
-      this.args.document.docType === "FRD"
-    ) {
-      return true;
-    }
-
-    return false;
+  @action toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
   }
 
   get approveButtonText() {
@@ -86,14 +68,6 @@ export default class DocumentSidebar extends Component {
     } else {
       return "Already approved";
     }
-  }
-
-  get shareButtonIsShown() {
-    return (
-      !this.isDraft &&
-      this.args.document.docNumber &&
-      this.args.document.docType
-    );
   }
 
   get requestChangesButtonText() {
@@ -201,7 +175,6 @@ export default class DocumentSidebar extends Component {
       return true;
     }
   }
-
 
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
@@ -333,6 +306,18 @@ export default class DocumentSidebar extends Component {
     this.modalErrorIsShown = false;
     this.errorTitle = null;
     this.errorDescription = null;
+  }
+
+  @action onScroll() {
+    let onScrollFunction = () => {
+      this.userHasScrolled = this.body?.scrollTop > 0;
+    };
+
+    debounce(this, onScrollFunction, 50);
+  }
+
+  @action registerBody(element) {
+    this.body = element;
   }
 
   @task

@@ -57,11 +57,12 @@ module("Integration | Modifier | tooltip", function (hooks) {
       .dom(divTooltipSelector)
       .doesNotExist("tooltip disappears on mouseleave");
 
-    await triggerEvent("[data-test-div]", "focusin");
+    let dataTestDiv = htmlElement("[data-test-div]");
+    dataTestDiv.focus();
 
     assert.dom(divTooltipSelector).exists("tooltip appears on focusin");
 
-    await triggerEvent("[data-test-div]", "focusout");
+    dataTestDiv.blur();
 
     assert
       .dom(divTooltipSelector)
