@@ -23,9 +23,7 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
   protected get url() {
     const shortLinkBaseURL = this.configSvc.config.short_link_base_url;
     return shortLinkBaseURL
-      ? `/${shortLinkBaseURL + this.args.document.docType.toLowerCase()}/${
-          this.args.document.docNumber.toLowerCase()
-        }`
+      ? `${shortLinkBaseURL}/${this.args.document.docType.toLowerCase()}/${this.args.document.docNumber.toLowerCase()}`
       : window.location.href;
   }
 }
