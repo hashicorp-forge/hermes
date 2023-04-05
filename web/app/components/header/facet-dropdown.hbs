@@ -30,24 +30,34 @@
     }}
   />
   {{#if this.dropdownIsShown}}
-    <Header::FacetDropdownList
-      {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
-      @shownFacets={{this.shownFacets}}
-      @label={{@label}}
-      @inputIsShown={{this.inputIsShown}}
-      @onInput={{perform this.onInput}}
-      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-      @registerScrollContainer={{this.registerScrollContainer}}
-      @query={{this.query}}
-      @focusedItemIndex={{this.focusedItemIndex}}
-      @setFocusedItemIndex={{this.setFocusedItemIndex}}
-      @listItemRole={{this.listItemRole}}
-      @registerPopover={{this.registerPopover}}
-      @popoverElement={{this.popoverElement}}
-      @triggerElement={{this.triggerElement}}
-      @hideDropdown={{this.hideDropdown}}
-      @anchorToRight={{@anchorToRight}}
-      @currentSortByValue={{@currentSortByValue}}
-    />
+    {{#if this.loaderIsShown}}
+      <div
+        class="facet-dropdown-popover px-4 pt-3 pb-3.5 large hds-dropdown-list text-color-foreground-faint text-body-200"
+        data-test-facet-dropdown-loader
+        {{did-insert (perform this.removeLoader)}}
+      >
+        Loading...
+      </div>
+    {{else}}
+      <Header::FacetDropdownList
+        {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
+        @shownFacets={{this.shownFacets}}
+        @label={{@label}}
+        @inputIsShown={{this.inputIsShown}}
+        @onInput={{perform this.onInput}}
+        @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+        @registerScrollContainer={{this.registerScrollContainer}}
+        @query={{this.query}}
+        @focusedItemIndex={{this.focusedItemIndex}}
+        @setFocusedItemIndex={{this.setFocusedItemIndex}}
+        @listItemRole={{this.listItemRole}}
+        @registerPopover={{this.registerPopover}}
+        @popoverElement={{this.popoverElement}}
+        @triggerElement={{this.triggerElement}}
+        @hideDropdown={{this.hideDropdown}}
+        @anchorToRight={{@anchorToRight}}
+        @currentSortByValue={{@currentSortByValue}}
+      />
+    {{/if}}
   {{/if}}
 </div>

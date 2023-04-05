@@ -1,6 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  render,
+  triggerKeyEvent,
+  waitFor,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 export const SHORT_FACET_LIST = {
@@ -43,7 +49,9 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
     `);
     assert.dom("[data-test-facet-dropdown-popover]").doesNotExist();
     await click("[data-test-facet-dropdown-trigger]");
-    assert.dom("[data-test-facet-dropdown-popover]").exists("The dropdown is shown");
+    assert
+      .dom("[data-test-facet-dropdown-popover]")
+      .exists("The dropdown is shown");
   });
 
   test("it renders the facets correctly", async function (assert) {
@@ -125,20 +133,46 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
       />
     `);
 
-    assert.dom("[data-test-facet-dropdown-popover]").doesNotExist();
-
     await triggerKeyEvent(
       "[data-test-facet-dropdown-trigger]",
       "keydown",
       "ArrowDown"
     );
 
-    assert.dom("[data-test-facet-dropdown-popover]").exists("The dropdown is shown");
+    assert
+      .dom("[data-test-facet-dropdown-popover]")
+      .exists("The dropdown is shown");
     let firstItemSelector = "#facet-dropdown-menu-item-0";
 
     assert.dom(firstItemSelector).hasAttribute("aria-selected");
     assert
       .dom("[data-test-facet-dropdown-menu]")
       .hasAttribute("aria-activedescendant", "facet-dropdown-menu-item-0");
+  });
+
+  test("a loader is shown for long facet lists", async function (assert) {
+    // Surpass the facet-count loader threshold of 13 items
+    this.set("facets", { ...LONG_FACET_LIST, ...SHORT_FACET_LIST });
+    await render(hbs`
+      <Header::FacetDropdown
+        @label="Status"
+        @facets={{this.facets}}
+      />
+    `);
+
+    let clickPromise = click("[data-test-facet-dropdown-trigger]");
+
+    assert.dom("[data-test-facet-dropdown-popover]").doesNotExist();
+    assert.dom("[data-test-facet-dropdown-loader]").doesNotExist();
+
+
+    await waitFor("[data-test-facet-dropdown-loader]");
+
+    assert.dom("[data-test-facet-dropdown-loader]").exists();
+
+    await clickPromise;
+
+    assert.dom("[data-test-facet-dropdown-loader]").doesNotExist();
+    assert.dom("[data-test-facet-dropdown-popover]").exists();
   });
 });

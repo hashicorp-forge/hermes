@@ -17,7 +17,7 @@ import {
 import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
-export const MAX_VALUES_PER_FACET = 100;
+export const MAX_VALUES_PER_FACET = 1000; // Algolia max
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
 
 export type AlgoliaSearchParams = RequestOptions & SearchOptions;

@@ -3,8 +3,9 @@ import { action } from "@ember/object";
 import { FacetDropdownObjects } from "hermes/types/facets";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
-import { restartableTask } from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { schedule } from "@ember/runloop";
+import Ember from "ember";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -22,6 +23,8 @@ export enum FocusDirection {
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
+  readonly FACET_COUNT_LOADER_THRESHOLD = Ember.testing ? 13 : 250;
+
   @tracked private _triggerElement: HTMLButtonElement | null = null;
   @tracked private _scrollContainer: HTMLElement | null = null;
   @tracked private _popoverElement: HTMLDivElement | null = null;
@@ -31,6 +34,14 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   @tracked protected dropdownIsShown = false;
   @tracked protected focusedItemIndex = -1;
   @tracked protected _shownFacets: FacetDropdownObjects | null = null;
+
+  /**
+   * Whether a loader should be shown when the dropdown is opened.
+   * True when the dropdown has more objects than the threshold.
+   * Set false when the dropdown is opened and reset on close.
+   */
+  @tracked protected loaderIsShown =
+    Object.entries(this.args.facets).length > this.FACET_COUNT_LOADER_THRESHOLD;
 
   /**
    * The dropdown menu items. Registered on insert and
@@ -120,6 +131,20 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   }
 
   /**
+   * The task to run when the loader is inserted.
+   * Waits a tick and then triggers for the loader to be
+   * replaced with the dropdown list. Because the dropdown
+   * has may have up to 1000 facets, it takes a while to render,
+   * during which time the app appears unresponsive.
+   * By initially inserting a loading message, we give the user
+   * some feedback that the app is working.
+   */
+  protected removeLoader = task(async () => {
+    await timeout(0);
+    this.loaderIsShown = false;
+  });
+
+  /**
    * The action run when the user presses a key.
    * Handles the arrow keys to navigate the dropdown.
    */
@@ -148,11 +173,24 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
 
   @action protected showDropdown(): void {
     this.dropdownIsShown = true;
-    schedule("afterRender", () => {
+
+    let assignIDs = () =>
       this.assignMenuItemIDs(
         this.popoverElement.querySelectorAll(`[role=${this.listItemRole}]`)
       );
-    });
+
+    if (this.loaderIsShown) {
+      // Wait for the loader to be removed and the dropdown to be rendered
+      schedule("afterRender", async () => {
+        await timeout(0);
+        assignIDs();
+      });
+    } else {
+      // Wait for the dropdown to be renderedI
+      schedule("afterRender", () => {
+        assignIDs();
+      });
+    }
   }
 
   /**
@@ -163,6 +201,9 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
     this.query = "";
     this.dropdownIsShown = false;
     this._shownFacets = null;
+    this.loaderIsShown =
+      Object.entries(this.args.facets).length >
+      this.FACET_COUNT_LOADER_THRESHOLD;
     this.resetFocusedItemIndex();
   }
 
