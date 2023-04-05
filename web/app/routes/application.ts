@@ -7,6 +7,7 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
+import EmberMetricsService from "ember-metrics/index";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -14,12 +15,11 @@ export default class ApplicationRoute extends Route {
   @service declare flags: any;
   @service declare session: SessionService;
   @service declare router: RouterService;
-  @service declare metrics;
+  @service declare metrics: EmberMetricsService;
 
   constructor() {
     super(...arguments);
 
-    // track page views
     this.router.on("routeDidChange", () => {
       this.metrics.trackPage();
     });
