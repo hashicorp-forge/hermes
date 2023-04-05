@@ -39,7 +39,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   @tracked preventReauthenticationMessage = false;
 
-
   /**
    * Whether the last poll response was a 401.
    * Updated by the fetch service on every pollCall.
@@ -58,9 +57,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       "/api/v1/me",
       {
         method: "HEAD",
-        headers: {
-          "Hermes-Google-Access-Token": this.data.authenticated.access_token,
-        },
       },
       true
     );
