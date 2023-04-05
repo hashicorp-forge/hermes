@@ -11,13 +11,13 @@ export interface Data {
 }
 
 declare module "ember-simple-auth/services/session" {
-  export default class EmberSimpleAuthSessionService extends Service.extend(Evented) {
+  export default class EmberSimpleAuthSessionService extends Service {
     data: Data;
-    setup: () => void;
+    setup(): Promise<void>;
     authenticate(...args: any[]): RSVP.Promise;
     invalidate(...args: any): RSVP.Promise;
     requireAuthentication(
-      transition: Transition,
+      transition: Transition | null,
       routeOrCallback: string | function
     ): RSVP.Promise;
     prohibitAuthentication(routeOrCallback: string | function): RSVP.Promise;

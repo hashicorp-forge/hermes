@@ -10,6 +10,7 @@ export default class AuthenticatedRoute extends Route {
 
   async afterModel(): Promise<void> {
     await this.authenticatedUser.loadInfo.perform();
+    void this.session.pollForExpiredAuth.perform();
   }
 
   async beforeModel(transition: any): Promise<void> {

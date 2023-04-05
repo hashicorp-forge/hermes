@@ -2,11 +2,16 @@
  * Type declarations for
  *    import config from 'my-app/config/environment'
  */
+
+interface FeatureFlagObjects {
+  [key: string]: { enabled: boolean };
+}
+
 declare const config: {
   environment: string;
   modulePrefix: string;
   podModulePrefix: string;
-  locationType: 'history' | 'hash' | 'none' | 'auto';
+  locationType: "history" | "hash" | "none" | "auto";
   rootURL: string;
   APP: Record<string, unknown>;
   algolia: {
@@ -16,7 +21,7 @@ declare const config: {
     draftsIndexName: string;
     internalIndexName: string;
   };
-  featureFlags: Record<string, boolean>;
+  featureFlags: FeatureFlagObjects;
   google: {
     docFolders: string;
   };

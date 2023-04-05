@@ -3,14 +3,18 @@ import { UnauthorizedError } from "@ember-data/adapter/error";
 import { action } from "@ember/object";
 import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
+import ConfigService from "hermes/services/config";
+import FetchService from "hermes/services/fetch";
+import SessionService from "hermes/services/session";
+import RouterService from "@ember/routing/router-service";
 
 export default class ApplicationRoute extends Route {
-  @service config;
-  @service("fetch") fetchSvc;
-  @service flags;
-  @service session;
-  @service metrics;
-  @service router;
+  @service declare config: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
+  @service declare flags: any;
+  @service declare session: SessionService;
+  @service declare router: RouterService;
+  @service declare metrics;
 
   constructor() {
     super(...arguments);
@@ -21,8 +25,11 @@ export default class ApplicationRoute extends Route {
     });
   }
 
-  @action
-  error(error) {
+  /**
+   * Catch-all for bubbled-up model errors.
+   * https://guides.emberjs.com/release/routing/loading-and-error-substates/#toc_the-error-event
+   */
+  @action error(error: unknown) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
       return;
@@ -30,7 +37,7 @@ export default class ApplicationRoute extends Route {
   }
 
   async beforeModel() {
-    this.session.setup();
+    await this.session.setup();
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days
@@ -40,7 +47,7 @@ export default class ApplicationRoute extends Route {
     if (config.environment === "production") {
       return this.fetchSvc
         .fetch("/api/v1/web/config")
-        .then((response) => response.json())
+        .then((response) => response?.json())
         .then((json) => {
           this.config.setConfig(json);
         })

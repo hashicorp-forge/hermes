@@ -1,13 +1,58 @@
 .sidebar {
   @apply flex flex-col max-h-full relative z-10 pb-4;
 
-  header,
-  nav {
-    @apply sticky top-0 pb-4;
+  &.collapsed {
+    @apply w-16;
+
+    .sidebar-header {
+      @apply flex-col px-0 relative h-full;
+    }
+
+    .sidebar-dashboard-link {
+      @apply absolute left-1/2 -translate-x-1/2 bottom-4;
+    }
+
+    .sidebar-header-icon-controls {
+      @apply items-center space-y-2 space-y-reverse flex-col-reverse;
+    }
   }
 
-  .body {
-    @apply space-y-8 pb-10 pl-7 pr-3 overflow-y-scroll h-full;
+  .sidebar-header {
+    @apply sticky top-0 bg-color-page-faint flex justify-between px-3.5 py-4 z-10;
+
+    &.scrolled {
+      box-shadow: 0 1px 0 0 rgba(0, 0, 0, 15%);
+    }
+  }
+
+  .sidebar-header-button {
+    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent text-color-foreground-primary;
+
+    &:hover {
+      @apply border-color-border-strong bg-color-foreground-high-contrast;
+    }
+  }
+
+  .sidebar-header-icon-controls {
+    @apply flex;
+
+    .sidebar-header-button {
+      &::hover {
+        @apply border-transparent  bg-color-surface-interactive-hover;
+      }
+    }
+  }
+
+  .sidebar-body {
+    @apply relative overflow-y-scroll h-full;
+
+    .product-badge {
+      @apply rounded-r w-9 h-7 top-0;
+    }
+
+    .sidebar-body-container {
+      @apply pt-11 pb-10 pl-7 pr-3 space-y-8;
+    }
 
     /* Style the scrollbar for Chrome, Safari, and Opera. */
     &::-webkit-scrollbar {
@@ -24,10 +69,6 @@
 
     /* Style the scrollbar Firefox */
     scrollbar-color: var(--token-color-palette-neutral-300) transparent;
-  }
-
-  .product-badge {
-    @apply bottom-5 left-0  rounded-r w-9 h-7;
   }
 
   .primary-textarea {

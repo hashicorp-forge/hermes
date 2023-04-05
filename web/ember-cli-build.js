@@ -28,9 +28,6 @@ module.exports = function (defaults) {
         ],
       },
     },
-    "ember-simple-auth": {
-      useSessionSetupMethod: true,
-    },
   });
 
   // Use `app.import` to add additional libraries to the generated
