@@ -20,8 +20,9 @@ export default class ApplicationRoute extends Route {
   }
 
   async beforeModel() {
+    console.log('applicationBeforeModel pre-setup', this.session);
     await this.session.setup();
-    console.log('applicationBeforeModel this.session:', this.session);
+    console.log('applicationBeforeModel post-setup', this.session);
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days

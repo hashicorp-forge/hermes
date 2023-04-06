@@ -14,6 +14,8 @@ export default class AuthenticatedRoute extends Route {
   }
 
   async beforeModel(transition: any): Promise<void> {
+    console.log("beforeModel transition", transition);
+
     // If the user isn't authenticated, transition to the auth screen
     let isLoggedIn = this.session.requireAuthentication(
       transition,
