@@ -15,28 +15,48 @@ export default class AuthenticatedRoute extends Route {
 
   async beforeModel(transition: any): Promise<void> {
     // If the user isn't authenticated, transition to the auth screen
-    let requireAuthentication = this.session.requireAuthentication(
+    let isLoggedIn = this.session.requireAuthentication(
       transition,
       "authenticate"
+    );
+
+    console.log("requireAuthentication", isLoggedIn);
+    console.log("REDIRECT_STORAGE_KEY", REDIRECT_STORAGE_KEY);
+    console.log(
+      "this.session.REDIRECT_STORAGE_KEY",
+      this.session.REDIRECT_STORAGE_KEY
     );
 
     // See if we have a redirect target stored in sessionStorage
     let storageItem = window.sessionStorage.getItem(REDIRECT_STORAGE_KEY);
 
+    console.log("storageItem", storageItem);
+
     if (!storageItem) {
+      console.log("nothing in sessionStorage, trying localStorage");
+
       // If we don't have a redirect target in sessionStorage, check localStorage
       storageItem = window.localStorage.getItem(REDIRECT_STORAGE_KEY);
 
+      console.log("localStorage value:", storageItem);
+
       // If the redirect target in localStorage is expired, remove it
       if (storageItem && Date.now() > JSON.parse(storageItem).expiresOn) {
+        console.log("removing expired localStorage item");
         window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
         storageItem = null;
       }
     }
+    console.log("transition", transition);
+    console.log("transition.to.name", transition.to.name);
+    console.log(
+      'transition.to.name != "authenticated.index"',
+      transition.to.name != "authenticated.index"
+    );
 
     if (
       !storageItem &&
-      !requireAuthentication &&
+      !isLoggedIn &&
       transition.to.name != "authenticated.index"
     ) {
       // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
@@ -50,7 +70,13 @@ export default class AuthenticatedRoute extends Route {
        * `transition.intent.url` e.g., 'documents/1'
        * `transition.to.name` e.g., 'authenticated.documents'
        */
+      console.log("setting storage items");
+      console.log("transition.intent.url", transition.intent.url);
+      console.log("transition.to.name", transition.to.name);
+
       let transitionTo = transition.intent.url ?? transition.to.name;
+
+      console.log("transitionTo", transitionTo);
 
       window.sessionStorage.setItem(REDIRECT_STORAGE_KEY, transitionTo);
       window.localStorage.setItem(

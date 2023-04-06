@@ -13,6 +13,7 @@ export default class ApplicationRoute extends Route {
   @action
   error(error) {
     if (error instanceof UnauthorizedError) {
+      console.log('error caused the session to be invalidated')
       this.session.invalidate();
       return;
     }
@@ -20,6 +21,7 @@ export default class ApplicationRoute extends Route {
 
   async beforeModel() {
     await this.session.setup();
+    console.log('applicationBeforeModel this.session:', this.session);
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days
