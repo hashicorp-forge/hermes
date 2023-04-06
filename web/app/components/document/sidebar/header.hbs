@@ -17,6 +17,7 @@
     {{#if this.shareButtonIsShown}}
       <CopyURLButton
         data-test-sidebar-copy-url-button
+        data-test-copy-url-value={{this.url}}
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
         class="sidebar-header-button"

@@ -1,12 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render, rerender } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import window from "ember-window-mock";
 import { HermesDocument } from "hermes/types/document";
 import htmlElement from "hermes/utils/html-element";
+import ConfigService from "hermes/services/config";
 
 interface DocumentSidebarHeaderTestContext extends MirageTestContext {
   document: HermesDocument;
@@ -19,14 +19,17 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  test("it renders as expected", async function (this: DocumentSidebarHeaderTestContext, assert) {
-    this.server.create("document", { objectID: "400" });
-    this.set("document", this.server.schema.document.first().attrs);
+  hooks.beforeEach(function (this: DocumentSidebarHeaderTestContext) {
     this.set("isCollapsed", false);
     this.set("userHasScrolled", false);
     this.set("toggleCollapsed", () => {
       this.set("isCollapsed", !this.isCollapsed);
     });
+  });
+
+  test("it renders as expected", async function (this: DocumentSidebarHeaderTestContext, assert) {
+    this.server.create("document", { objectID: "400" });
+    this.set("document", this.server.schema.document.first().attrs);
 
     await render(hbs`
       <Document::Sidebar::Header
@@ -120,5 +123,102 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     assert
       .dom(".sidebar-header")
       .hasClass("scrolled", "scrolled class is applied when user scrolls");
+  });
+
+  test("it populates the correct share link (with ShortLinkBaseURL)", async function (this: DocumentSidebarHeaderTestContext, assert) {
+    this.server.create("document", { docType: "PRD", docNumber: "TST-001" });
+    this.set("document", this.server.schema.document.first().attrs);
+
+    let configService = this.owner.lookup("service:config") as ConfigService;
+
+    let shortLinkBaseURL = "http://short.link/";
+
+    configService.config.short_link_base_url = shortLinkBaseURL;
+
+    await render(hbs`
+      <Document::Sidebar::Header
+        @document={{this.document}}
+        @isCollapsed={{this.isCollapsed}}
+        @toggleCollapsed={{this.toggleCollapsed}}
+        @userHasScrolled={{this.userHasScrolled}}
+      />
+    `);
+
+    let copyURLButton: HTMLElement | null = null;
+    let url: string | null = null;
+
+    const captureBaseURL = () => {
+      copyURLButton = htmlElement("[data-test-copy-url-button]");
+      url = copyURLButton.getAttribute("data-test-copy-url-value");
+    };
+
+    captureBaseURL();
+
+    assert.equal(
+      url,
+      `${shortLinkBaseURL}prd/tst-001`,
+      "the correct share link is populated"
+    );
+
+    this.clearRender();
+
+    shortLinkBaseURL = "http://short.link";
+
+    await render(hbs`
+      <Document::Sidebar::Header
+        @document={{this.document}}
+        @isCollapsed={{this.isCollapsed}}
+        @toggleCollapsed={{this.toggleCollapsed}}
+        @userHasScrolled={{this.userHasScrolled}}
+      />
+    `);
+
+    captureBaseURL();
+
+    assert.equal(
+      url,
+      `${shortLinkBaseURL}/prd/tst-001`,
+      "a trailing slash is added to the ShortLinkBaseURL if it is missing"
+    );
+
+    this.clearRender();
+    configService.config.short_link_base_url = undefined as unknown as string;
+
+    await render(hbs`
+      <Document::Sidebar::Header
+        @document={{this.document}}
+        @isCollapsed={{this.isCollapsed}}
+        @toggleCollapsed={{this.toggleCollapsed}}
+        @userHasScrolled={{this.userHasScrolled}}
+      />
+    `);
+
+    captureBaseURL();
+
+    assert.equal(
+      url,
+      window.location.href,
+      "uses the current URL if ShortLinkBaseURL is undefined"
+    );
+
+    this.clearRender();
+    configService.config.short_link_base_url = "invalidURL";
+
+    await render(hbs`
+      <Document::Sidebar::Header
+        @document={{this.document}}
+        @isCollapsed={{this.isCollapsed}}
+        @toggleCollapsed={{this.toggleCollapsed}}
+        @userHasScrolled={{this.userHasScrolled}}
+      />
+    `);
+
+    captureBaseURL();
+
+    assert.equal(
+      url,
+      window.location.href,
+      "uses the current URL if ShortLinkBaseURL is invalid"
+    );
   });
 });
