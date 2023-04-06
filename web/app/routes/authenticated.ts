@@ -1,8 +1,8 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import window from "ember-window-mock";
+import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
