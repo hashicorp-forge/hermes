@@ -14,7 +14,7 @@ interface FetchOptions {
 export default class FetchService extends Service {
   @service declare session: SessionService;
 
-  async fetch(url: string, options: FetchOptions = {}) {
+  async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
     // Add the Google access token in a header (for auth) if the URL starts with
     // a frontslash, which will only target the application backend.
     if (Array.from(url)[0] == "/") {
@@ -27,7 +27,20 @@ export default class FetchService extends Service {
     try {
       const resp = await fetch(url, options);
 
+      // if it's a poll call, tell the SessionService if the response was a 401
+      if (isPollCall) {
+        this.session.pollResponseIs401 = resp.status === 401;
+      }
+
       if (!resp.ok) {
+        if (resp.status === 401) {
+          if (isPollCall) {
+            // handle poll-call failures via the session service
+            return;
+          } else {
+            this.session.invalidate();
+          }
+        }
         throw new Error(`Bad response: ${resp.statusText}`);
       }
 
