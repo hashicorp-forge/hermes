@@ -22,7 +22,7 @@ export default class AuthenticatedRoute extends Route {
       "authenticate"
     );
 
-    console.log("requireAuthentication", isLoggedIn);
+    console.log("isLoggedIn", isLoggedIn);
     console.log("REDIRECT_STORAGE_KEY", REDIRECT_STORAGE_KEY);
     console.log(
       "this.session.REDIRECT_STORAGE_KEY",
