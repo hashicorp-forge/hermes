@@ -45,6 +45,10 @@ export default class AuthenticatedRoute extends Route {
         storageItem = null;
       }
     }
+    //investigate what's happening in restore();
+
+    // look out for "undefined" (the string)
+
     console.log("transition", transition);
     console.log("transition.to.name", transition.to.name);
     console.log(
@@ -53,6 +57,7 @@ export default class AuthenticatedRoute extends Route {
     );
 
     if (
+      //consider ignoring the !storageItem call and just always assign an object
       !storageItem &&
       !requireAuthentication &&
       transition.to.name != "authenticated.index"

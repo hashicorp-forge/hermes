@@ -12,7 +12,7 @@ export default class ApplicationRoute extends Route {
 
   @action
   error(error) {
-    console.log('error caught', error);
+    console.log("error caught", error);
     if (error instanceof UnauthorizedError) {
       console.log("error caused the session to be invalidated");
       this.session.invalidate();
@@ -20,7 +20,10 @@ export default class ApplicationRoute extends Route {
     }
   }
 
-  async beforeModel() {
+  async beforeModel(transition) {
+    // consider doing the redirect storage here vs. authenticated
+    console.log("applicationBeforeModel transition", transition);
+
     console.log("applicationBeforeModel pre-setup", this.session);
     try {
       await this.session.setup();
