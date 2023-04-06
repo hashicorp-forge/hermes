@@ -1,4 +1,6 @@
 import Route from "@ember/routing/route";
+import { UnauthorizedError } from "@ember-data/adapter/error";
+import { action } from "@ember/object";
 import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
 
@@ -7,6 +9,14 @@ export default class ApplicationRoute extends Route {
   @service("fetch") fetchSvc;
   @service flags;
   @service session;
+
+  @action
+  error(error) {
+    if (error instanceof UnauthorizedError) {
+      this.session.invalidate();
+      return;
+    }
+  }
 
   async beforeModel() {
     await this.session.setup();
