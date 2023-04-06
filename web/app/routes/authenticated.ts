@@ -17,17 +17,13 @@ export default class AuthenticatedRoute extends Route {
     console.log("beforeModel transition", transition);
 
     // If the user isn't authenticated, transition to the auth screen
-    let isLoggedIn = this.session.requireAuthentication(
+    let requireAuthentication = this.session.requireAuthentication(
       transition,
       "authenticate"
     );
 
-    console.log("isLoggedIn", isLoggedIn);
+    console.log("is user logged in?", requireAuthentication);
     console.log("REDIRECT_STORAGE_KEY", REDIRECT_STORAGE_KEY);
-    console.log(
-      "this.session.REDIRECT_STORAGE_KEY",
-      this.session.REDIRECT_STORAGE_KEY
-    );
 
     // See if we have a redirect target stored in sessionStorage
     let storageItem = window.sessionStorage.getItem(REDIRECT_STORAGE_KEY);
@@ -58,7 +54,7 @@ export default class AuthenticatedRoute extends Route {
 
     if (
       !storageItem &&
-      !isLoggedIn &&
+      !requireAuthentication &&
       transition.to.name != "authenticated.index"
     ) {
       // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12

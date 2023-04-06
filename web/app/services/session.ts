@@ -26,8 +26,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
 
-  readonly REDIRECT_STORAGE_KEY = REDIRECT_STORAGE_KEY;
-
   /**
    * Whether the current session is valid.
    * Set false if our poll response is 401, and when the
@@ -104,8 +102,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       routeAfterAuthentication
     );
 
-    console.log('REDIRECT_STORAGE_KEY', REDIRECT_STORAGE_KEY);
-    console.log('this.REDIRECT_STORAGE_KEY', this.REDIRECT_STORAGE_KEY);
+    console.log("REDIRECT_STORAGE_KEY", REDIRECT_STORAGE_KEY);
 
     let redirectStorageValue =
       window.sessionStorage.getItem(REDIRECT_STORAGE_KEY) ||
