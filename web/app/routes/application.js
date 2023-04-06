@@ -12,17 +12,25 @@ export default class ApplicationRoute extends Route {
 
   @action
   error(error) {
+    console.log('error caught', error);
     if (error instanceof UnauthorizedError) {
-      console.log('error caused the session to be invalidated')
+      console.log("error caused the session to be invalidated");
       this.session.invalidate();
       return;
     }
   }
 
   async beforeModel() {
-    console.log('applicationBeforeModel pre-setup', this.session);
-    await this.session.setup();
-    console.log('applicationBeforeModel post-setup', this.session);
+    console.log("applicationBeforeModel pre-setup", this.session);
+    try {
+      await this.session.setup();
+    } catch (error) {
+      console.log("error in the session setup");
+    }
+
+    await this.session.setup(); // if this errors, expect ember to handle it
+
+    console.log("applicationBeforeModel post-setup", this.session);
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days
