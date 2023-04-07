@@ -6,10 +6,10 @@ export default class AuthenticateRoute extends Route {
   @service declare session: SessionService;
 
   beforeModel() {
-    console.log(
-      'authenticate this.session prohibitAuthentication("/")',
-      this.session.prohibitAuthentication("/")
-    );
+    /**
+     * Checks if the session is authenticated,
+     * and if it is, transitions to the specified route
+     */
     this.session.prohibitAuthentication("/");
   }
 }
