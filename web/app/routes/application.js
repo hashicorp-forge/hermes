@@ -23,17 +23,11 @@ export default class ApplicationRoute extends Route {
   async beforeModel(transition) {
     // consider doing the redirect storage here vs. authenticated
     console.log("applicationBeforeModel transition", transition);
-
-    console.log("applicationBeforeModel pre-setup", this.session);
-    try {
-      await this.session.setup();
-    } catch (error) {
-      console.log("error in the session setup");
-    }
+    console.log("applicationBeforeModel session pre-setup", this.session);
 
     await this.session.setup(); // if this errors, expect ember to handle it
 
-    console.log("applicationBeforeModel post-setup", this.session);
+    console.log("applicationBeforeModel session post-setup", this.session);
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days

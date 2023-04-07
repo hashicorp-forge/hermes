@@ -8,9 +8,19 @@ export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  async afterModel(): Promise<void> {
-    await this.authenticatedUser.loadInfo.perform();
-    void this.session.pollForExpiredAuth.perform();
+  async afterModel(transition: any): Promise<void> {
+    console.log("afterModel transition", transition);
+    // If the user isn't authenticated, transition to the auth screen
+    let isLoggedIn = this.session.requireAuthentication(
+      transition,
+      "authenticate"
+    );
+    console.log("afterModel isLoggedIn", isLoggedIn);
+
+    if (isLoggedIn) {
+      await this.authenticatedUser.loadInfo.perform();
+      void this.session.pollForExpiredAuth.perform();
+    }
   }
 
   async beforeModel(transition: any): Promise<void> {
