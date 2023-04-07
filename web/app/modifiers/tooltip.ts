@@ -63,6 +63,10 @@ function cleanup(instance: TooltipModifier) {
   if (instance.floatingUICleanup) {
     instance.floatingUICleanup();
   }
+
+  if (instance.tooltip) {
+    instance.tooltip.remove();
+  }
 }
 
 export default class TooltipModifier extends Modifier<TooltipModifierSignature> {
