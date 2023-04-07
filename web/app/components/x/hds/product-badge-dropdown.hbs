@@ -1,0 +1,61 @@
+{{#if @readOnly}}
+  <Hds::Badge
+    @text={{@currentProduct}}
+    @icon={{get-product-id @currentProduct}}
+  />
+{{else}}
+  <Action
+    {{did-insert this.didInsertTrigger}}
+    {{on "click" this.togglePopover}}
+    class="relative"
+  >
+    <div class="relative flex">
+      <Hds::Badge
+        class="hds-badge-dropdown"
+        @text={{@currentProduct}}
+        @icon={{get-product-id @currentProduct}}
+      />
+      <FlightIcon
+        class="dropdown-caret"
+        @name={{if this.popoverIsShown "chevron-up" "chevron-down"}}
+      />
+    </div>
+  </Action>
+  {{#if this.popoverIsShown}}
+    <X::Hds::Popover
+      @anchor={{this.trigger}}
+      @renderOut={{true}}
+      @placement="bottom-start"
+      class="w-72"
+      {{dismissible dismiss=this.hidePopover related=this.trigger}}
+    >
+      <div class="">
+        {{! TODO: Make this dependent on the number of products }}
+        {{#if this.inputIsShown}}
+          <div class="relative px-1 pb-1 border-b border-b-color-border-faint">
+            <Hds::Form::TextInput::Base
+              data-test-product-area-dropdown-input
+              {{did-insert this.registerAndFocusInput}}
+              {{on "input" this.onInput}}
+              {{!-- {{on "focusin" @resetFocusedItemIndex}} --}}
+              {{!-- @value={{@query}} --}}
+              @type="search"
+              @value=""
+              placeholder="Filter..."
+              {{! aria-controls="facet-dropdown-menu" }}
+              {{!-- aria-activedescendant={{unless
+                (eq @focusedItemIndex -1)
+                (concat "facet-dropdown-menu-item-" @focusedItemIndex)
+              }} --}}
+            />
+          </div>
+        {{/if}}
+        <ol>
+          {{#each-in this.shownProducts as |product|}}
+            <li>{{product}}</li>
+          {{/each-in}}
+        </ol>
+      </div>
+    </X::Hds::Popover>
+  {{/if}}
+{{/if}}

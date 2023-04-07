@@ -1,0 +1,23 @@
+{{#if @renderOut}}
+  {{#in-element (html-element ".ember-application") insertBefore=null}}
+    <div
+      {{will-destroy this.cleanup}}
+      {{did-insert this.didInsert}}
+      id="popover-{{this.id}}"
+      class="hermes-popover"
+      ...attributes
+    >
+      {{yield}}
+    </div>
+  {{/in-element}}
+{{else}}
+  <div
+    {{will-destroy this.cleanup}}
+    {{did-insert this.didInsert}}
+    id="popover-{{this.id}}"
+    class="hermes-popover"
+    ...attributes
+  >
+    {{yield}}
+  </div>
+{{/if}}

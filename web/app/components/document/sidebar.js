@@ -45,7 +45,6 @@ export default class DocumentSidebar extends Component {
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
-  @tracked products = null;
 
   @tracked userHasScrolled = false;
   @tracked body = null;
@@ -182,8 +181,8 @@ export default class DocumentSidebar extends Component {
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
   }
 
-  @action updateProduct(event) {
-    this.product = event.target.value;
+  @action updateProduct(product) {
+    this.product = product;
     this.save.perform("product", this.product);
   }
 
@@ -205,18 +204,6 @@ export default class DocumentSidebar extends Component {
         // revert field value on failure
         this[field] = oldVal;
       }
-    }
-  }
-
-  @task *fetchProducts() {
-    try {
-      let products = yield this.fetchSvc
-        .fetch("/api/v1/products")
-        .then((resp) => resp.json());
-      this.products = products;
-    } catch (err) {
-      console.error(err);
-      throw err;
     }
   }
 
