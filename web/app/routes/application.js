@@ -16,7 +16,6 @@ export default class ApplicationRoute extends Route {
   @action
   error(error) {
     if (error instanceof UnauthorizedError) {
-      console.log("an UnauthorizedError has bubbled to the application route");
       this.session.invalidate();
       this.router.transitionTo("authenticate");
       return;
