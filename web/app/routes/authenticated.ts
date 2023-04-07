@@ -10,8 +10,11 @@ export default class AuthenticatedRoute extends Route {
   @service declare router: RouterService;
 
   async beforeModel() {
-    // If this call returns a 401 the application error method
-    // will invalidate the session and redirect to the auth screen.
+    /**
+     * If the `loadInfo` task returns a 401, it will bubble up to the
+     * application error method which invalidates the session
+     * and redirects to the auth screen.
+     */
     await this.authenticatedUser.loadInfo.perform();
     void this.session.pollForExpiredAuth.perform();
   }

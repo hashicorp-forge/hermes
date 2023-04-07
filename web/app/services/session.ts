@@ -97,44 +97,31 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    console.log("REDIRECT_STORAGE_KEY", REDIRECT_STORAGE_KEY);
-
     let redirectStorageValue =
       window.sessionStorage.getItem(REDIRECT_STORAGE_KEY) ||
       window.localStorage.getItem(REDIRECT_STORAGE_KEY);
-
-    console.log("redirectStorageValue", redirectStorageValue);
 
     let redirectTarget: string | null = null;
     let transition;
 
     if (redirectStorageValue) {
-      console.log("redirectValue found");
       if (!isJSON(redirectStorageValue)) {
-        console.log("redirectStorageValue is not JSON");
         redirectTarget = redirectStorageValue;
       } else if (Date.now() < JSON.parse(redirectStorageValue).expiresOn) {
-        console.log("redirectStorageValue is JSON and not expired");
         redirectTarget = JSON.parse(redirectStorageValue).url;
       }
     }
 
-    console.log("redirectTarget", redirectTarget);
-
     if (redirectTarget) {
-      console.log("transitioning to redirectTarget");
       transition = this.router.transitionTo(redirectTarget);
     } else {
-      console.log("transitioning to routeAfterAuthentication");
       transition = this.router.transitionTo(
         `authenticated.${routeAfterAuthentication}`
       );
     }
     transition.followRedirects().then(() => {
-      console.log("removing storage items");
       window.sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
       window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
-      console.log("storageItems removed");
     });
   }
 }

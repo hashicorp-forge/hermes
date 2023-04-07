@@ -34,13 +34,8 @@ export default class ApplicationRoute extends Route {
         expiresOn: Date.now() + 60 * 5000, // 5 minutes
       })
     );
-    // consider doing the redirect storage here vs. authenticated
-    console.log("applicationBeforeModel transition", transition);
-    console.log("applicationBeforeModel session pre-setup", this.session);
 
     await this.session.setup();
-
-    console.log("applicationBeforeModel session post-setup", this.session);
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days
