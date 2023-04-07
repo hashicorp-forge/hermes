@@ -13,7 +13,10 @@ export default class AuthenticatedRoute extends Route {
      * If unauthenticated, it will redirect to the auth screen
      */
     this.session.requireAuthentication(transition, "authenticate");
+  }
 
+  // Note: Only called if the session is authenticated in the front end
+  async afterModel() {
     /**
      * Checks if the session is authenticated in the back end.
      * If the `loadInfo` task returns a 401, it will bubble up to the
