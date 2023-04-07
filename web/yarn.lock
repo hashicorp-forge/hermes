@@ -4994,13 +4994,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base-64@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "base-64@npm:0.1.0"
-  checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
-  languageName: node
-  linkType: hard
-
 "base64-js@npm:^1.0.2, base64-js@npm:^1.3.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -5481,7 +5474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"broccoli-funnel@npm:^1.2.0 || ^2.0.0, broccoli-funnel@npm:^2.0.0, broccoli-funnel@npm:^2.0.1, broccoli-funnel@npm:^2.0.2":
+"broccoli-funnel@npm:^2.0.0, broccoli-funnel@npm:^2.0.1, broccoli-funnel@npm:^2.0.2":
   version: 2.0.2
   resolution: "broccoli-funnel@npm:2.0.2"
   dependencies:
@@ -5573,7 +5566,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"broccoli-merge-trees@npm:^4.0.0, broccoli-merge-trees@npm:^4.2.0":
+"broccoli-merge-trees@npm:^4.2.0":
   version: 4.2.0
   resolution: "broccoli-merge-trees@npm:4.2.0"
   dependencies:
@@ -8645,21 +8638,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-simple-auth@npm:^4.2.1":
-  version: 4.2.2
-  resolution: "ember-simple-auth@npm:4.2.2"
+"ember-simple-auth@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "ember-simple-auth@npm:5.0.0"
   dependencies:
-    base-64: ^0.1.0
-    broccoli-file-creator: ^2.1.1
-    broccoli-funnel: ^1.2.0 || ^2.0.0
-    broccoli-merge-trees: ^4.0.0
     ember-cli-babel: ^7.20.5
     ember-cli-is-package-missing: ^1.0.0
     ember-cookies: ^0.5.0
     silent-error: ^1.0.0
   peerDependencies:
     ember-fetch: ^8.0.1
-  checksum: 47d86cdcfc884d8a80c9cb9f2fa9ff1ede06d0849d485df9062595d683bfa00d14e09c3bf48c6e4132f77c6cffe3dad0d40aa2d52ea3c414a6d019200204095b
+  checksum: bf48dc20566b66d325b701200665eaf8322348966be1df57c80f9d6225a886663307950ffda075e04705da4574972cca63a9d0564786a08a968916c4d10ce0e7
   languageName: node
   linkType: hard
 
@@ -10914,7 +10903,7 @@ __metadata:
     ember-select: ^0.8.3
     ember-set-body-class: ^1.0.2
     ember-set-helper: ^2.0.1
-    ember-simple-auth: ^4.2.1
+    ember-simple-auth: ^5.0.0
     ember-source: ~3.28.10
     ember-template-lint: ^3.15.0
     ember-test-selectors: ^6.0.0
