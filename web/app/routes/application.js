@@ -11,11 +11,13 @@ export default class ApplicationRoute extends Route {
   @service("fetch") fetchSvc;
   @service flags;
   @service session;
+  @service router;
 
   @action
   error(error) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
+      this.router.transitionTo("authenticate");
       return;
     }
   }
