@@ -16,13 +16,17 @@ export default class ApplicationRoute extends Route {
   @action
   error(error) {
     if (error instanceof UnauthorizedError) {
+      console.log("UnauthorizedError");
       this.session.invalidate();
+      console.log("session invalidated");
       this.router.transitionTo("authenticate");
+      console.log("transitioned to authenticate");
       return;
     }
   }
 
   async beforeModel(transition) {
+    console.log("applicationBeforeModel transition", transition);
     /**
      * We expect a `transition.intent.url`, but in rare cases, it's undefined,
      * e.g., when clicking the "view dashboard" button from the 404 route.
@@ -32,6 +36,9 @@ export default class ApplicationRoute extends Route {
      * `transition.intent.url` e.g., 'documents/1'
      * `transition.to.name` e.g., 'authenticated.documents'
      */
+    console.log("transition.intent.url", transition.intent.url);
+    console.log("transition.to.name", transition.to.name);
+
     let transitionTo = transition.intent.url ?? transition.to.name;
 
     /**
@@ -46,7 +53,12 @@ export default class ApplicationRoute extends Route {
       })
     );
 
+    console.log('storage items set');
+
     await this.session.setup();
+
+    console.log('session setup complete');
+
 
     // Flags read from the environment and set properties on the service this
     // could be done in an initializer, but this seems more natural these days
