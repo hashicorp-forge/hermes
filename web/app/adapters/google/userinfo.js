@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 
 export default class GoogleUserinfoAdapter extends RESTAdapter {
   @service session;
+  @service torii;
 
   host = "https://www.googleapis.com/userinfo";
   namespace = "v2";

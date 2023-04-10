@@ -13,17 +13,17 @@ export default class ApplicationRoute extends Route {
   @service session;
   @service router;
 
-  @action
-  error(error) {
-    if (error instanceof UnauthorizedError) {
-      console.log("UnauthorizedError");
-      this.session.invalidate();
-      console.log("session invalidated");
-      this.router.transitionTo("authenticate");
-      console.log("transitioned to authenticate");
-      return;
+    @action
+    error(error) {
+      if (error instanceof UnauthorizedError) {
+        console.log("UnauthorizedError");
+        this.session.invalidate();
+        console.log("session invalidated");
+        this.router.transitionTo("authenticate");
+        console.log("transitioned to authenticate");
+        return;
+      }
     }
-  }
 
   async beforeModel(transition) {
     console.log("applicationBeforeModel transition", transition);

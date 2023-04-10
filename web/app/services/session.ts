@@ -123,7 +123,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
 
     console.log("redirectTarget: ", redirectTarget);
 
-    if (redirectTarget) {
+    if (redirectTarget && redirectTarget !== "/authenticate") {
       transition = this.router.transitionTo(redirectTarget);
     } else {
       transition = this.router.transitionTo(
@@ -131,7 +131,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       );
     }
     transition.followRedirects().then(() => {
-      console.log('transition.followRedirects');
+      console.log("transition.followRedirects");
       window.sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
       window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
     });

@@ -6,6 +6,7 @@ import SessionService from "hermes/services/session";
 export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare torii: unknown;
 
   beforeModel(transition: any) {
     console.log("authenticated beforeModel transition", transition);
