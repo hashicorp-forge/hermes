@@ -17,14 +17,11 @@ export default class FetchService extends Service {
   async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
     // Add the Google access token in a header (for auth) if the URL starts with
     // a frontslash, which will only target the application backend.
-    console.log("fetching");
     if (Array.from(url)[0] == "/") {
       // ignore headers that already have the Hermes-Google-Access-Token
 
       if (options.headers && options.headers["Hermes-Google-Access-Token"]) {
         // In the authenticator's `restore` method, we pass the session's previous access token to check if it still works. In these cases, we don't want to overwrite the access token with the new one (which, at the point of )
-        console.log("skipping adding access token to headers");
-        console.log(options.headers);
       } else {
         console.log("adding access token to headers");
         console.log(options.headers);
@@ -45,15 +42,9 @@ export default class FetchService extends Service {
       }
 
       if (!resp.ok) {
-        if (resp.status === 401) {
-          if (isPollCall) {
-            // handle poll-call failures via the session service
-            return;
-          } else {
-            // let it bubble to the application route
-            // this.session.invalidate();
-            return
-          }
+        if (isPollCall && resp.status === 401) {
+          // handle poll-call failures via the session service
+          return;
         }
         throw new Error(`Bad response: ${resp.statusText}`);
       }
