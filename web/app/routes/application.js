@@ -11,15 +11,11 @@ export default class ApplicationRoute extends Route {
   @service("fetch") fetchSvc;
   @service flags;
   @service session;
-  @service torii;
   @service router;
 
   @action
   error(error) {
-    console.log("two");
     if (error instanceof UnauthorizedError) {
-      console.log('UnauthorizedError: Redirecting to "authenticate" route');
-      this.torii.invalidate();
       this.session.invalidate();
       return;
     }

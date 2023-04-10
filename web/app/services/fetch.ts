@@ -18,13 +18,13 @@ export default class FetchService extends Service {
     // Add the Google access token in a header (for auth) if the URL starts with
     // a frontslash, which will only target the application backend.
     if (Array.from(url)[0] == "/") {
-      // ignore headers that already have the Hermes-Google-Access-Token
-
       if (options.headers && options.headers["Hermes-Google-Access-Token"]) {
-        // In the authenticator's `restore` method, we pass the session's previous access token to check if it still works. In these cases, we don't want to overwrite the access token with the new one (which, at the point of )
+        /**
+         * Don't modify headers with a Hermes-Google-Access-Token.
+         * In other words, let the authenticator's `restore` method use
+         * the session's previous access token to check if it still works.
+         */
       } else {
-        console.log("adding access token to headers");
-        console.log(options.headers);
         options.headers = {
           ...options.headers,
           "Hermes-Google-Access-Token":

@@ -1,22 +1,16 @@
-// TODO: Add types
-// @ts-ignore
+// @ts-ignore -- TODO: Add Types
 import Torii from "ember-simple-auth/authenticators/torii";
 import { inject as service } from "@ember/service";
-import SessionService from "hermes/services/session";
 import FetchService from "hermes/services/fetch";
 
 export default class ToriiAuthenticator extends Torii {
-  // TODO: Add types
-  @service declare torii: unknown;
-  @service declare session: SessionService;
   @service("fetch") declare fetchSvc: FetchService;
 
+  // Appears unused, but necessary for the session service
+  @service declare torii: unknown;
+
   async restore(_arguments: unknown) {
-    let data;
-
-    data = await super.restore(_arguments);
-
-
+    const data = await super.restore(_arguments);
     /**
      * Try the restored credentials with the backend.
      * If the backend rejects the credentials, the error will bubble up
