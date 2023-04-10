@@ -7,21 +7,14 @@ export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  async beforeModel(transition: any) {
+  beforeModel(transition: any) {
     console.log("authenticated beforeModel transition", transition);
     /**
      * Checks if the session is authenticated in the front end.
      * If unauthenticated, it will redirect to the auth screen
      */
-    console.log(
-      "authenticated beforeModel requireAuthentication",
-      this.session.requireAuthentication(transition, "authenticate")
-    );
-    console.log(
-      "await authenticated beforeModel requireAuthentication",
-      await this.session.requireAuthentication(transition, "authenticate")
-    );
-    await this.session.requireAuthentication(transition, "authenticate");
+    console.log(this.session.requireAuthentication(transition, "authenticate"));
+    this.session.requireAuthentication(transition, "authenticate");
   }
 
   // Note: Only called if the session is authenticated in the front end

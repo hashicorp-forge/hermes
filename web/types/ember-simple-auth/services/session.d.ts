@@ -10,6 +10,10 @@ export interface Data {
   };
 }
 
+export interface Callback {
+  (): void;
+}
+
 declare module "ember-simple-auth/services/session" {
   export default class EmberSimpleAuthSessionService extends Service {
     data: Data;
@@ -18,8 +22,8 @@ declare module "ember-simple-auth/services/session" {
     invalidate(...args: any): RSVP.Promise;
     requireAuthentication(
       transition: Transition | null,
-      routeOrCallback: string | function
-    ): RSVP.Promise;
-    prohibitAuthentication(routeOrCallback: string | function): RSVP.Promise;
+      routeOrCallback: string | Callback
+    ): boolean;
+    prohibitAuthentication(routeOrCallback: string | Callback): boolean;
   }
 }
