@@ -1,7 +1,8 @@
-{{on-document "keydown" this.maybeKeyboardNavigate}}
+{{on-document "keydown" (fn this.maybeKeyboardNavigate @f)}}
 
 <div class="flex flex-col overflow-hidden" ...attributes>
-  {{#if this.inputIsShown}}
+  Nice!!
+  {{!-- {{#if this.inputIsShown}}
     <div class="relative p-1 border-b border-b-color-border-faint">
       <Hds::Form::TextInput::Base
         data-test-product-area-dropdown-input
@@ -19,9 +20,9 @@
         }}
       />
     </div>
-  {{/if}}
+  {{/if}} --}}
   <div class="overflow-auto w-full" {{did-insert @registerScrollContainer}}>
-    {{#if this.noMatchesFound}}
+    {{!-- {{#if this.noMatchesFound}}
       <div
         data-test-facet-dropdown-menu-empty-state
         class="p-12 text-center text-color-foreground-faint"
@@ -30,16 +31,16 @@
       </div>
     {{else}}
       <ol class="py-1">
-        {{#each-in @shownProducts as |product|}}
+        {{#each-in @shownItems as |product|}}
           <X::Hds::Popover::ListItem
             @role=""
             {{! TODO: type: button/link }}
             @value={{product}}
-            @selected={{eq @currentProduct product}}
-            @hideDropdown={{@hidePopover}}
+            @selected={{eq @selected product}}
+            @hideDropdown={{@f.hideContent}}
           />
         {{/each-in}}
       </ol>
-    {{/if}}
+    {{/if}} --}}
   </div>
 </div>

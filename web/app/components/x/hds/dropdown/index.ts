@@ -12,6 +12,7 @@ interface XHdsDropdownComponentSignature<T> {
     selected: any;
     items: any;
     onChange: (value: any) => void;
+    listIsOrdered?: boolean;
   };
 }
 
@@ -34,19 +35,8 @@ export default class XHdsDropdownComponent extends Component<
   @tracked protected focusedItemIndex = -1;
 
   @tracked filteredItems: unknown | null = null;
-
-  /**
-   * The dropdown menu items. Registered on insert and
-   * updated with on keydown and filterInput events.
-   * Used to determine the list length, and to find the focused
-   * element by index.
-   */
   @tracked protected menuItems: NodeListOf<Element> | null = null;
 
-  /**
-   * An asserted-true reference to the scroll container.
-   * Used in the `maybeScrollIntoView` calculations.
-   */
   private get scrollContainer(): HTMLElement {
     assert("_scrollContainer must exist", this._scrollContainer);
     return this._scrollContainer;
@@ -61,6 +51,10 @@ export default class XHdsDropdownComponent extends Component<
     return this._items;
   }
 
+  @action protected registerScrollContainer(element: HTMLDivElement) {
+    this._scrollContainer = element;
+  }
+
   @action willDestroyDropdown() {
     this.filteredItems = null;
   }
@@ -70,12 +64,6 @@ export default class XHdsDropdownComponent extends Component<
     hideDropdown();
   }
 
-  /**
-   * The action run when the popover is inserted, and when
-   * the user filters or navigates the dropdown.
-   * Loops through the menu items and assigns an id that
-   * matches the index of the item in the list.
-   */
   @action assignMenuItemIDs(items: NodeListOf<Element>): void {
     this.menuItems = items;
     for (let i = 0; i < items.length; i++) {
@@ -85,10 +73,116 @@ export default class XHdsDropdownComponent extends Component<
     }
   }
 
+  @action protected setFocusedItemIndex(
+    focusDirectionOrNumber: FocusDirection | number,
+    maybeScrollIntoView = true
+  ) {
+    let { menuItems, focusedItemIndex } = this;
+
+    let setFirst = () => {
+      focusedItemIndex = 0;
+    };
+
+    let setLast = () => {
+      assert("menuItems must exist", menuItems);
+      focusedItemIndex = menuItems.length - 1;
+    };
+
+    if (!menuItems) {
+      return;
+    }
+
+    if (menuItems.length === 0) {
+      return;
+    }
+
+    switch (focusDirectionOrNumber) {
+      case FocusDirection.Previous:
+        if (focusedItemIndex === -1 || focusedItemIndex === 0) {
+          // When the first or no item is focused, "previous" focuses the last item.
+          setLast();
+        } else {
+          focusedItemIndex--;
+        }
+        break;
+      case FocusDirection.Next:
+        if (focusedItemIndex === menuItems.length - 1) {
+          // When the last item is focused, "next" focuses the first item.
+          setFirst();
+        } else {
+          focusedItemIndex++;
+        }
+        break;
+      case FocusDirection.First:
+        setFirst();
+        break;
+      case FocusDirection.Last:
+        setLast();
+        break;
+      default:
+        focusedItemIndex = focusDirectionOrNumber;
+        break;
+    }
+
+    this.focusedItemIndex = focusedItemIndex;
+
+    if (maybeScrollIntoView) {
+      this.maybeScrollIntoView();
+    }
+  }
+
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
+  }
+
+  private maybeScrollIntoView() {
+    const focusedItem = this.menuItems?.item(this.focusedItemIndex);
+    assert("focusedItem must exist", focusedItem instanceof HTMLElement);
+
+    const containerTopPadding = 12;
+    const containerHeight = this.scrollContainer.offsetHeight;
+    const itemHeight = focusedItem.offsetHeight;
+    const itemTop = focusedItem.offsetTop;
+    const itemBottom = focusedItem.offsetTop + itemHeight;
+    const scrollviewTop = this.scrollContainer.scrollTop - containerTopPadding;
+    const scrollviewBottom = scrollviewTop + containerHeight;
+
+    if (itemBottom > scrollviewBottom) {
+      this.scrollContainer.scrollTop = itemTop + itemHeight - containerHeight;
+    } else if (itemTop < scrollviewTop) {
+      this.scrollContainer.scrollTop = itemTop;
+    }
+  }
+
+  @action protected onTriggerKeydown(event: KeyboardEvent, f: any) {
+    if (f.contentIsShown) {
+      return;
+    }
+
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      f.hideDropdown();
+
+      // Stop the event from bubbling to the popover's keydown handler.
+      event.stopPropagation();
+
+      // Wait for the menuItems to be set by the showDropdown action.
+      schedule("afterRender", () => {
+        switch (event.key) {
+          case "ArrowDown":
+            this.setFocusedItemIndex(FocusDirection.First, false);
+            break;
+          case "ArrowUp":
+            this.setFocusedItemIndex(FocusDirection.Last);
+            break;
+        }
+      });
+    }
+  }
+
   protected onInput = restartableTask(
     async (inputEvent: InputEvent, f: any) => {
       this.focusedItemIndex = -1;
-
 
       // TODO: type the API interface
 

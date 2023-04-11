@@ -1,24 +1,9 @@
 {{! This could be replaced with, e.g., <X::Hds::Badge::Dropdown/> }}
+<!--
 <FloatingUI @renderOut={{true}}>
   <:anchor as |f|>
     {{! how can i "tag" this as keyboard/mouse-navigable }}
-    <Action
-      {{did-insert f.registerAnchor}}
-      {{did-insert (perform this.fetchProducts)}}
-      {{on "click" f.toggleContent}}
-    >
-      <div class="relative flex">
-        <Hds::Badge
-          class="hds-badge-dropdown"
-          @text={{@selected}}
-          @icon={{get-product-id @selected}}
-        />
-        <FlightIcon
-          class="dropdown-caret"
-          @name={{if f.contentIsShown "chevron-up" "chevron-down"}}
-        />
-      </div>
-    </Action>
+
   </:anchor>
   <:content as |f|>
     <X::Hds::Dropdown::List
@@ -26,7 +11,29 @@
       @items={{this.products}}
       @isOrdered={{true}}
       @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+      @registerScrollContainer={{this.registerScrollContainer}}
       @onChange={{@onChange}}
     />
   </:content>
 </FloatingUI>
+-->
+<X::Hds::Dropdown
+  @items={{this.products}}
+  @listIsOrdered={{true}}
+  @onChange={{@onChange}}
+  @selected={{@selected}}
+>
+  <:toggleButton as |f|>
+    <div class="relative flex" {{did-insert (perform this.fetchProducts)}}>
+      <Hds::Badge
+        class="hds-badge-dropdown"
+        @text={{@selected}}
+        @icon={{get-product-id @selected}}
+      />
+      <FlightIcon
+        class="dropdown-caret"
+        @name={{if f.contentIsShown "chevron-up" "chevron-down"}}
+      />
+    </div>
+  </:toggleButton>
+</X::Hds::Dropdown>

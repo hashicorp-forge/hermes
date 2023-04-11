@@ -1,3 +1,4 @@
+<!--
 <Action
   data-test-popover-trigger
   {{did-insert this.didInsertTrigger}}
@@ -26,26 +27,33 @@
     @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
   />
 {{/if}}
+-->
 
 <FloatingUI @renderOut={{true}}>
   <:anchor as |f|>
     <Action
       {{did-insert f.registerAnchor}}
-      {{on "keydown" this.onTriggerKeydown}}
-      ...attributes
+      {{on "keydown" (fn this.onTriggerKeydown f)}}
+      {{on "click" f.toggleContent}}
     >
-      {{yield f to="anchor"}}
+      {{yield f to="toggleButton"}}
     </Action>
+
   </:anchor>
   <:content as |f|>
     <X::Hds::Dropdown::List
       {{will-destroy this.willDestroyDropdown}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
-      @items={{this.products}}
+      @items={{@items}}
       @onInput={{perform this.onInput f}}
-      @onSelect={{fn this.onSelect f.hideContent}}
+      @onChange={{@onChange}}
       @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
       @registerScrollContainer={{this.registerScrollContainer}}
+      @listIsOrdered={{@listIsOrdered}}
+      @setFocusedItemIndex={{this.setFocusedItemIndex}}
+      @shownItems={{this.shownItems}}
+      @selected={{@selected}}
+      @f={{f}}
     />
   </:content>
 </FloatingUI>
