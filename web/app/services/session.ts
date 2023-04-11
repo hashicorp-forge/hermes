@@ -112,7 +112,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       }
     }
 
-    if (redirectTarget) {
+    if (redirectTarget && redirectTarget !== "/authenticate") {
       transition = this.router.transitionTo(redirectTarget);
     } else {
       transition = this.router.transitionTo(
