@@ -1,0 +1,18 @@
+{{! yield an Anchor block }}
+{{! yield a Content block }}
+{{! yield `toggleContent`}}
+{{! yield `hideContent`}}
+{{! yield `showContent`}}
+{{! yield isShown, etc }}
+
+{{! accept placement options }}
+
+<div class="flex" {{did-insert this.registerAnchor}}>
+  {{yield this to="anchor"}}
+
+  {{#if this.contentIsShown}}
+    <div ...attributes class="absolute top-0 left-0">
+      {{yield this to="content"}}
+    </div>
+  {{/if}}
+</div>

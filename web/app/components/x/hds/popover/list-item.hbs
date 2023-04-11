@@ -1,0 +1,15 @@
+<li class="flex">
+  <Action
+    {{on "click" (fn @onSelect @value)}}
+    {{! TODO: rename to something more generic }}
+    class="facet-dropdown-menu-item-link"
+  >
+    <FlightIcon
+      @name="check"
+      class="check {{if @selected 'visible' 'invisible'}}"
+    />
+    <div class="truncate whitespace-nowrap">
+      {{@value}}
+    </div>
+  </Action>
+</li>

@@ -1,5 +1,6 @@
 .hermes-popover {
-  @apply absolute bg-color-foreground-high-contrast rounded z-50 hds-dropdown-list;
+  @apply absolute bg-color-foreground-high-contrast rounded z-50 hds-dropdown__content;
+  // hermes dropdown list styles
 
   /* These positioning styles are overwritten by FloatingUI,
    * but they ensure that the tooltip isn't added to the bottom of the page,

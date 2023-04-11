@@ -27,7 +27,6 @@ export default class XHdsBadgeDropdown extends Component<XHdsBadgeDropdownSignat
 
   @tracked _trigger: HTMLElement | null = null;
   @tracked _products: ProductAreas | undefined = undefined;
-  @tracked _input: HTMLInputElement | null = null;
 
   @tracked popoverIsShown = false;
 
@@ -47,11 +46,6 @@ export default class XHdsBadgeDropdown extends Component<XHdsBadgeDropdownSignat
     return this._products;
   }
 
-  get input() {
-    assert("input must exist", this._input);
-    return this._input;
-  }
-
   @action togglePopover() {
     if (this.popoverIsShown) {
       this.hidePopover();
@@ -65,10 +59,9 @@ export default class XHdsBadgeDropdown extends Component<XHdsBadgeDropdownSignat
     this.filteredProducts = null;
   }
 
-  get inputIsShown() {
-    // if the number of object keys in the products
-    // is greater than 1, then show the input
-    return Object.keys(this.products).length > 1;
+  @action onSelect(product: string) {
+    this.args.onChange(product);
+    this.hidePopover();
   }
 
   @action didInsertTrigger(e: HTMLElement) {
@@ -76,13 +69,9 @@ export default class XHdsBadgeDropdown extends Component<XHdsBadgeDropdownSignat
     void this.fetchProducts.perform();
   }
 
-  @action registerAndFocusInput(e: HTMLInputElement) {
-    this._input = e;
-    this.input.focus();
-  }
-
   @action onInput(e: InputEvent) {
     // filter the products by the input value
+    // @ts-ignore
     let value = this.input.value;
     if (value) {
       this.filteredProducts = Object.fromEntries(

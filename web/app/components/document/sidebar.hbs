@@ -134,7 +134,7 @@
             class="hds-typography-body-100 hds-foreground-faint"
           >Product/Area</small>
           {{#if this.isDraft}}
-            <X::Hds::ProductBadgeDropdown
+            <X::Hds::Popover
               @currentProduct={{this.product}}
               @onChange={{this.updateProduct}}
               @readOnly={{not this.isDraft}}

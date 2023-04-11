@@ -1,0 +1,43 @@
+<Action
+  data-test-popover-trigger
+  {{did-insert this.didInsertTrigger}}
+  {{on "click" this.togglePopover}}
+  class="relative"
+>
+  <div class="relative flex">
+    <Hds::Badge
+      class="hds-badge-dropdown"
+      @text={{@currentProduct}}
+      @icon={{get-product-id @currentProduct}}
+    />
+    <FlightIcon
+      class="dropdown-caret"
+      @name={{if this.popoverIsShown "chevron-up" "chevron-down"}}
+    />
+  </div>
+</Action>
+
+{{#if this.popoverIsShown}}
+  <X::Hds::Popover::List
+    @trigger={{this.trigger}}
+    @dismissPopover={{this.hidePopover}}
+    @items={{this.products}}
+    @onInput={{this.onInput}}
+    @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+  />
+{{/if}}
+
+{{#if this.popoverIsShown}}
+  <FloatingUI as |f|>
+    <f:anchor>
+      <Action {{on "click" f.toggleContent}}>
+        Toggle Content
+      </Action>
+    </f:anchor>
+    <f:content>
+      <div>
+        This is the content
+      </div>
+    </f:content>
+  </FloatingUI>
+{{/if}}

@@ -1,0 +1,13 @@
+Playground
+<FloatingUI>
+  <:anchor as |f|>
+    <Action {{on "click" f.toggleContent}}>
+      Toggle Content
+    </Action>
+  </:anchor>
+  <:content as |f|>
+    <div {{dismissible dismiss=f.hideContent related=f.anchor}}>
+      This is the content
+    </div>
+  </:content>
+</FloatingUI>
