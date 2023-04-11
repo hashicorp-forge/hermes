@@ -22,11 +22,8 @@ export default class ApplicationRoute extends Route {
     });
   }
 
-  /**
-   * Catch-all for bubbled-up model errors.
-   * https://guides.emberjs.com/release/routing/loading-and-error-substates/#toc_the-error-event
-   */
-  @action error(error: unknown) {
+  @action
+  error(error) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
       this.router.transitionTo("authenticate");
