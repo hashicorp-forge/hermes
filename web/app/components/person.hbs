@@ -1,24 +1,39 @@
 {{#unless this.isHidden}}
   <div class="flex space-x-2 w-full" ...attributes>
-    <div
-      class="w-5 h-5 shrink-0 overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
-    >
-      {{#if @imgURL}}
-        <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
-      {{else}}
-        <div class="hds-foreground-high-contrast hds-typography-body-100 flex">
-          {{#if @email}}
-            <span class="capitalize">
-              {{get-first-letter @email}}
-            </span>
-          {{else}}
-            <FlightIcon @name="user" class="scale-90" />
-          {{/if}}
+    <div class="relative">
+      {{#if (eq @badge "approved")}}
+        <div
+          data-test-person-approved-badge
+          class="bg-color-page-faint flex rounded-full absolute -bottom-1.5 -right-1.5 p-0.5 scale-[70%] origin-bottom-right"
+        >
+          <FlightIcon
+            @name="check-circle-fill"
+            class="text-color-palette-green-200"
+          />
         </div>
       {{/if}}
+      <div
+        class="w-5 h-5 shrink-0 overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
+      >
+        {{#if @imgURL}}
+          <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
+        {{else}}
+          <div
+            class="hds-foreground-high-contrast hds-typography-body-100 flex"
+          >
+            {{#if @email}}
+              <span class="capitalize">
+                {{get-first-letter @email}}
+              </span>
+            {{else}}
+              <FlightIcon @name="user" class="scale-90" />
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
     </div>
     <div
-      class="person-email hds-typography-body-200 truncate hds-foreground-primary"
+      class="person-email hds-typography-body-200 truncate hds-foreground-primary relative"
       title={{@email}}
     >
       {{or @email "Unknown"}}
