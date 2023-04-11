@@ -12,9 +12,8 @@ export default class ToriiAuthenticator extends Torii {
   async restore(_arguments: unknown) {
     const data = await super.restore(_arguments);
     /**
-     * Try the restored credentials with the backend.
-     * If the backend rejects the credentials, the error will bubble up
-     * to the application route's error method, which invalidates the session.
+     * A rejecting promise indicates invalid session data and will result
+     * in the session being invalidated or remaining unauthenticated.
      */
     await this.fetchSvc.fetch("/api/v1/me", {
       method: "HEAD",
