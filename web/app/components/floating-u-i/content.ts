@@ -25,6 +25,14 @@ interface FloatingUIContentSignature {
 export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
   @tracked _popover: HTMLElement | null = null;
 
+  get shouldRenderInPlace() {
+    if (this.args.renderOut) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   get id() {
     return guidFor(this);
   }

@@ -1,7 +1,7 @@
 Playground
-<FloatingUI>
+<FloatingUI @placement="bottom-start">
   <:anchor as |f|>
-    <Action {{on "click" f.toggleContent}}>
+    <Action {{on "click" f.toggleContent}} {{did-insert f.registerAnchor}}>
       Toggle Content
     </Action>
   </:anchor>
