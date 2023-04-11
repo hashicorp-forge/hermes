@@ -4,7 +4,7 @@
   {{did-insert @registerPopover}}
   role={{if @inputIsShown "combobox"}}
   id="facet-dropdown-popover"
-  class="facet-dropdown-popover hds-dropdown-list
+  class="facet-dropdown-popover hds-dropdown__content
     {{if @anchorToRight 'anchor-right'}}
     {{if @inputIsShown 'large'}}
     {{if (and (not @inputIsShown) (eq this.facetName 'status')) 'medium'}}"

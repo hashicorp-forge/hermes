@@ -7,8 +7,8 @@
 }
 
 .hds-dropdown-toggle-button .hds-button__icon,
-.hds-dropdown-toggle-icon__chevron {
-  transition: none;
+.hds-dropdown-toggle-chevron > svg {
+  transition: none !important;
 }
 
 .hds-link-standalone.small-external-link {
