@@ -1,59 +1,17 @@
-<aside class="sidebar shrink-0 {{if this.isCollapsed 'w-16' 'w-72'}}">
-  {{#if this.isCollapsed}}
-    <nav class="relative flex flex-col space-y-2">
-      <div class="flex flex-col items-center space-y-3">
-        <X::HdsTab
-          @label="Expand"
-          @icon="sidebar-show"
-          @iconOnly="true"
-          @action={{this.expandSidebar}}
-        />
-        <div class="flex flex-col space-y-1">
-          <ExternalLink
-            href="https://docs.google.com/document/d/{{this.docID}}"
-            class="x-hds-tab--link"
-          >
-            <FlightIcon @name="external-link" />
-          </ExternalLink>
-        </div>
-        {{#if this.shareButtonIsShown}}
-          <Document::ShareButton
-            @document={{@document}}
-            @isDownscaled={{true}}
-          />
-        {{/if}}
-      </div>
-    </nav>
-  {{else}}
-    <header class="relative flex flex-col space-y-2 px-3.5 z-10">
-      <div class="flex w-full items-center justify-between">
-        <X::HdsTab
-          @label="Back to Dashboard"
-          @icon="arrow-left"
-          @link="authenticated.dashboard"
-        />
-        <X::HdsTab
-          @label="Collapse"
-          @icon="sidebar-hide"
-          @iconOnly="true"
-          @action={{this.collapseSidebar}}
-        />
-      </div>
+<aside class="sidebar shrink-0 {{if this.isCollapsed 'collapsed' 'w-72'}}">
+  <Document::Sidebar::Header
+    @document={{@document}}
+    @isCollapsed={{this.isCollapsed}}
+    @toggleCollapsed={{this.toggleCollapsed}}
+    @userHasScrolled={{this.userHasScrolled}}
+  />
 
-      <div class="flex w-full items-center justify-end space-x-1 pl-3 pr-1">
-
-        {{#if this.shareButtonIsShown}}
-          <Document::ShareButton @document={{@document}} />
-        {{/if}}
-
-        <ExternalLink
-          href="https://docs.google.com/document/d/{{this.docID}}"
-          class="flex items-center justify-center w-[32px] h-[32px] rounded-full text-white bg-[color:var(--token-color-foreground-action)] hover:bg-[color:var(--token-color-foreground-action-hover)] active:bg-[color:var(--token-color-foreground-action-active)]"
-        >
-          <FlightIcon @name="external-link" class="relative ml-0.5 mt-0.5" />
-        </ExternalLink>
-      </div>
-
+  {{#unless this.isCollapsed}}
+    <div
+      class="sidebar-body"
+      {{on "scroll" this.onScroll}}
+      {{did-insert this.registerBody}}
+    >
       {{#let (get-product-id @document.product) as |productIcon|}}
         {{#if productIcon}}
           <div class="product-badge {{productIcon}}">
@@ -61,274 +19,286 @@
           </div>
         {{/if}}
       {{/let}}
-    </header>
 
-    <div class="body {{if this.sidebarBodyIsShorter 'is-shorter'}}">
-      <div class="flex flex-col items-start space-y-2">
-        {{#if (is-empty @document.docNumber)}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-          </small>
-        {{else}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-            &bullet;
-            {{@document.docNumber}}</small>
-        {{/if}}
-        {{#if this.editingIsDisabled}}
-          <h1
-            class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-          >{{this.title}}</h1>
-        {{else}}
-          <EditableField
-            @value={{this.title}}
-            @onChange={{perform this.save "title"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#unless (is-empty this.title)}}
-                <h1
-                  class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-                >{{this.title}}</h1>
-              {{else}}
-                <h1
-                  class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
-                >Enter a title here.</h1>
-              {{/unless}}
-            </:default>
-            <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                class="primary-textarea"
-                name="title"
-                {{on "blur" F.update}}
-                as |F|
-              />
-            </:editing>
-          </EditableField>
-        {{/if}}
-      </div>
-
-      <hr class="border-0 border-b hds-border-faint" />
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Summary</small>
-        {{#if this.editingIsDisabled}}
-          <p
-            class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-          >{{this.summary}}</p>
-        {{else}}
-          <EditableField
-            @value={{this.summary}}
-            @onChange={{perform this.save "summary"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#unless (is-empty this.summary)}}
-                <p
-                  class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-                >
-                  {{this.summary}}</p>
-              {{else}}
-                <p
-                  class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
-                >
-                  Enter a summary here.</p>
-              {{/unless}}
-            </:default>
-            <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                class="primary-textarea"
-                name="summary"
-                {{on "blur" F.update}}
-                as |F|
-              />
-            </:editing>
-          </EditableField>
-        {{/if}}
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Status</small>
-        <Doc::State @state={{@document.status}} @hideProgress={{true}} />
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Product/Area</small>
-        <Hds::Badge
-          @text={{@document.product}}
-          @icon={{get-product-id @document.product}}
-        />
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Owner</small>
-        <Person
-          @imgURL={{get @document.ownerPhotos 0}}
-          @email={{get @document.owners 0}}
-        />
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Contributors</small>
-        {{#if this.isOwner}}
-          <EditableField
-            @value={{this.contributors}}
-            @onChange={{perform this.save "contributors"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#if this.contributors.length}}
-                <ol class="person-list">
-                  {{#each this.contributors as |contributor|}}
-                    <li>
-                      <Person
-                        @imgURL={{contributor.imgURL}}
-                        @email={{contributor.email}}
-                      />
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <em>No contributors</em>
-              {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                class="multiselect--narrow"
-                @selected={{this.contributors}}
-                @onChange={{this.updateContributors}}
-                {{click-outside (fn F.update this.contributors)}}
-              />
-            </:editing>
-          </EditableField>
-        {{else}}
-          {{#if this.contributors.length}}
-            <ol class="person-list">
-              {{#each this.contributors as |contributor|}}
-                <li>
-                  <Person
-                    @imgURL={{contributor.imgURL}}
-                    @email={{contributor.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <em>No contributors</em>
-          {{/if}}
-        {{/if}}
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small
-          class="hds-typography-body-100 hds-foreground-faint"
-        >Approvers</small>
-        {{#if this.isOwner}}
-          <EditableField
-            @value={{this.approvers}}
-            @onChange={{perform this.save "approvers"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#if this.approvers.length}}
-                <ol class="person-list">
-                  {{#each this.approvers as |approver|}}
-                    <li>
-                      <Person
-                        @imgURL={{approver.imgURL}}
-                        @email={{approver.email}}
-                      />
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <em>No approvers</em>
-              {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                class="multiselect--narrow"
-                @selected={{this.approvers}}
-                @onChange={{this.updateApprovers}}
-                {{click-outside (fn F.update this.approvers)}}
-              />
-            </:editing>
-          </EditableField>
-        {{else}}
-          {{#if this.approvers.length}}
-            <ol class="person-list">
-              {{#each this.approvers as |approver|}}
-                <li>
-                  <Person
-                    @imgURL={{approver.imgURL}}
-                    @email={{approver.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <em>No approvers</em>
-          {{/if}}
-        {{/if}}
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small class="hds-typography-body-100 hds-foreground-faint">
-          Created
-        </small>
-        <p>{{or @document.createdDate "Unknown"}}</p>
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <small class="hds-typography-body-100 hds-foreground-faint">
-          Last modified
-        </small>
-        <p>{{@document.lastModified}}</p>
-      </div>
-
-      {{#each-in this.customEditableFields as |field attributes|}}
-        {{#if
-          (or
-            (and (not this.editingIsDisabled) (not this.docIsApproved))
-            attributes.value
-          )
-        }}
-          <div class="flex flex-col items-start space-y-2">
-            <small class="hds-typography-body-100 hds-foreground-faint">
-              {{attributes.displayName}}
+      <div class="sidebar-body-container">
+        <div class="flex flex-col items-start space-y-2">
+          {{#if (is-empty @document.docNumber)}}
+            <small
+              class="hds-typography-body-100 hds-foreground-faint"
+            >{{#unless
+                (is-empty @document.docType)
+              }}{{@document.docType}}{{/unless}}
             </small>
-            <CustomEditableField
-              @document={{@document}}
-              @field={{field}}
-              @attributes={{attributes}}
-              @onChange={{perform this.save field}}
-              @updateFieldValue={{this.updateCustomFieldValue}}
+          {{else}}
+            <small
+              class="hds-typography-body-100 hds-foreground-faint"
+            >{{#unless
+                (is-empty @document.docType)
+              }}{{@document.docType}}{{/unless}}
+              &bullet;
+              {{@document.docNumber}}</small>
+          {{/if}}
+          {{#if this.editingIsDisabled}}
+            <h1
+              class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+            >{{this.title}}</h1>
+          {{else}}
+            <EditableField
+              @value={{this.title}}
+              @onChange={{perform this.save "title"}}
               @loading={{this.save.isRunning}}
-              @disabled={{or this.editingIsDisabled (not this.isOwner)}}
-            />
-          </div>
-        {{/if}}
-      {{/each-in}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#unless (is-empty this.title)}}
+                  <h1
+                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+                  >{{this.title}}</h1>
+                {{else}}
+                  <h1
+                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
+                  >Enter a title here.</h1>
+                {{/unless}}
+              </:default>
+              <:editing as |F|>
+                <Hds::Form::Textarea::Field
+                  {{auto-height-textarea}}
+                  @value={{F.value}}
+                  class="primary-textarea"
+                  name="title"
+                  {{on "blur" F.update}}
+                  as |F|
+                />
+              </:editing>
+            </EditableField>
+          {{/if}}
+        </div>
+
+        <hr class="border-0 border-b hds-border-faint" />
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Summary</small>
+          {{#if this.editingIsDisabled}}
+            <p
+              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+            >{{this.summary}}</p>
+          {{else}}
+            <EditableField
+              @value={{this.summary}}
+              @onChange={{perform this.save "summary"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#unless (is-empty this.summary)}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+                  >
+                    {{this.summary}}</p>
+                {{else}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
+                  >
+                    Enter a summary here.</p>
+                {{/unless}}
+              </:default>
+              <:editing as |F|>
+                <Hds::Form::Textarea::Field
+                  {{auto-height-textarea}}
+                  @value={{F.value}}
+                  class="primary-textarea"
+                  name="summary"
+                  {{on "blur" F.update}}
+                  as |F|
+                />
+              </:editing>
+            </EditableField>
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Status</small>
+          <Doc::State
+            @state={{@document.status}}
+            @hideProgress={{true}}
+            class="whitespace-nowrap"
+          />
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Product/Area</small>
+          <Hds::Badge
+            @text={{@document.product}}
+            @icon={{get-product-id @document.product}}
+          />
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Owner</small>
+          <Person
+            @imgURL={{get @document.ownerPhotos 0}}
+            @email={{get @document.owners 0}}
+          />
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Contributors</small>
+          {{#if this.isOwner}}
+            <EditableField
+              @value={{this.contributors}}
+              @onChange={{perform this.save "contributors"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#if this.contributors.length}}
+                  <ol class="person-list">
+                    {{#each this.contributors as |contributor|}}
+                      <li>
+                        <Person
+                          @imgURL={{contributor.imgURL}}
+                          @email={{contributor.email}}
+                        />
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <em>No contributors</em>
+                {{/if}}
+              </:default>
+              <:editing as |F|>
+                <Inputs::PeopleSelect
+                  class="multiselect--narrow"
+                  @selected={{this.contributors}}
+                  @onChange={{this.updateContributors}}
+                  {{click-outside (fn F.update this.contributors)}}
+                />
+              </:editing>
+            </EditableField>
+          {{else}}
+            {{#if this.contributors.length}}
+              <ol class="person-list">
+                {{#each this.contributors as |contributor|}}
+                  <li>
+                    <Person
+                      @imgURL={{contributor.imgURL}}
+                      @email={{contributor.email}}
+                    />
+                  </li>
+                {{/each}}
+              </ol>
+            {{else}}
+              <em>No contributors</em>
+            {{/if}}
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Approvers</small>
+          {{#if this.isOwner}}
+            <EditableField
+              @value={{this.approvers}}
+              @onChange={{perform this.save "approvers"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#if this.approvers.length}}
+                  <ol class="person-list">
+                    {{#each this.approvers as |approver|}}
+                      <li>
+                        <Person
+                          @imgURL={{approver.imgURL}}
+                          @email={{approver.email}}
+                        />
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <em>No approvers</em>
+                {{/if}}
+              </:default>
+              <:editing as |F|>
+                <Inputs::PeopleSelect
+                  class="multiselect--narrow"
+                  @selected={{this.approvers}}
+                  @onChange={{this.updateApprovers}}
+                  {{click-outside (fn F.update this.approvers)}}
+                />
+              </:editing>
+            </EditableField>
+          {{else}}
+            {{#if this.approvers.length}}
+              <ol class="person-list">
+                {{#each this.approvers as |approver|}}
+                  <li>
+                    <Person
+                      @badge={{if
+                        (has-approved-doc @document approver.email)
+                        "approved"
+                      }}
+                      @imgURL={{approver.imgURL}}
+                      @email={{approver.email}}
+                    />
+                  </li>
+                {{/each}}
+              </ol>
+            {{else}}
+              <em>No approvers</em>
+            {{/if}}
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small class="hds-typography-body-100 hds-foreground-faint">
+            Created
+          </small>
+          <p>{{or @document.createdDate "Unknown"}}</p>
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small class="hds-typography-body-100 hds-foreground-faint">
+            Last modified
+          </small>
+          <p>{{@document.lastModified}}</p>
+        </div>
+
+        {{#each-in this.customEditableFields as |field attributes|}}
+          {{#if
+            (or
+              (and (not this.editingIsDisabled) (not this.docIsApproved))
+              attributes.value
+            )
+          }}
+            <div class="flex flex-col items-start space-y-2">
+              <small class="hds-typography-body-100 hds-foreground-faint">
+                {{attributes.displayName}}
+              </small>
+              <CustomEditableField
+                @document={{@document}}
+                @field={{field}}
+                @attributes={{attributes}}
+                @onChange={{perform this.save field}}
+                @updateFieldValue={{this.updateCustomFieldValue}}
+                @loading={{this.save.isRunning}}
+                @disabled={{or this.editingIsDisabled (not this.isOwner)}}
+              />
+            </div>
+          {{/if}}
+        {{/each-in}}
+      </div>
     </div>
 
     {{!-- <div class="flex flex-col items-start space-y-2 px-3">
@@ -505,7 +475,7 @@
 
       </div>
     {{/if}}
-  {{/if}}
+  {{/unless}}
 
   {{! Place modals at the end of the DOM so they don't inherit styles }}
 
