@@ -134,38 +134,10 @@
             class="hds-typography-body-100 hds-foreground-faint"
           >Product/Area</small>
           {{#if this.isDraft}}
-            <X::Hds::Popover
-              @currentProduct={{this.product}}
-              @onChange={{this.updateProduct}}
-              @readOnly={{not this.isDraft}}
+            <Inputs::ProductSelect
+              @selected={{@document.product}}
+              @onChange={{perform this.save "product"}}
             />
-            <!--
-            <Hds::Form::Select::Field
-              data-test-sidebar-product-select
-              {{did-insert (perform this.fetchProducts)}}
-              {{on "input" this.updateProduct}}
-              @type="text"
-              @isRequired={{true}}
-              @value={{this.product}}
-              name="product"
-              class="min-w-[66%]"
-              disabled={{or this.fetchProducts.isRunning this.save.isRunning}}
-              as |F|
-            >
-              {{#if this.products}}
-                <F.Options>
-                  <option value=""></option>
-                  {{#each-in this.products as |name|}}
-                    <option
-                      value={{name}}
-                      {{! This allows us to recover from errors: }}
-                      selected={{eq name @document.product}}
-                    >{{name}}</option>
-                  {{/each-in}}
-                </F.Options>
-              {{/if}}
-            </Hds::Form::Select::Field>
-            -->
           {{else}}
             <Hds::Badge
               @text={{@document.product}}

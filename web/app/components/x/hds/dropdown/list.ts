@@ -3,14 +3,19 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
-interface XHdsPopoverListSignature {
+interface XHdsDropdownListSignature<T> {
   Args: {
-    items: string[];
+    items: any;
+    isOrdered?: boolean;
+    onChange: (e: Event) => void;
     resetFocusedItemIndex: () => void;
+    registerScrollContainer?: (e: HTMLElement) => void;
   };
 }
 
-export default class XHdsPopoverList extends Component<XHdsPopoverListSignature> {
+export default class XHdsDropdownList extends Component<
+  XHdsDropdownListSignature<any>
+> {
   @tracked _input: HTMLInputElement | null = null;
 
   get inputIsShown() {

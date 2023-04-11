@@ -5,6 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import { schedule } from "@ember/runloop";
+import { FocusDirection } from "../x/hds/dropdown";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -12,13 +13,6 @@ interface FacetDropdownComponentSignature {
     facets: FacetDropdownObjects;
     disabled?: boolean;
   };
-}
-
-export enum FocusDirection {
-  Previous = "previous",
-  Next = "next",
-  First = "first",
-  Last = "last",
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {

@@ -27,17 +27,25 @@
   />
 {{/if}}
 
-{{#if this.popoverIsShown}}
-  <FloatingUI as |f|>
-    <f:anchor>
-      <Action {{on "click" f.toggleContent}}>
-        Toggle Content
-      </Action>
-    </f:anchor>
-    <f:content>
-      <div>
-        This is the content
-      </div>
-    </f:content>
-  </FloatingUI>
-{{/if}}
+<FloatingUI @renderOut={{true}}>
+  <:anchor as |f|>
+    <Action
+      {{did-insert f.registerAnchor}}
+      {{on "keydown" this.onTriggerKeydown}}
+      ...attributes
+    >
+      {{yield f to="anchor"}}
+    </Action>
+  </:anchor>
+  <:content as |f|>
+    <X::Hds::Dropdown::List
+      {{will-destroy this.willDestroyDropdown}}
+      {{dismissible dismiss=f.hideContent related=f.anchor}}
+      @items={{this.products}}
+      @onInput={{perform this.onInput f}}
+      @onSelect={{fn this.onSelect f.hideContent}}
+      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+      @registerScrollContainer={{this.registerScrollContainer}}
+    />
+  </:content>
+</FloatingUI>

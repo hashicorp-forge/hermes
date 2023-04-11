@@ -4,7 +4,7 @@ import { find, findAll, render, triggerKeyEvent } from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
 import { LONG_FACET_LIST, SHORT_FACET_LIST } from "./facet-dropdown-test";
-import { FocusDirection } from "hermes/components/header/facet-dropdown";
+import { FocusDirection } from "hermes/components/x/hds/dropdown";
 
 module(
   "Integration | Component | header/facet-dropdown-list",
@@ -83,7 +83,9 @@ module(
       emberAssert("input must exist", input);
 
       assert.equal(document.activeElement, input, "The input is autofocused");
-      assert.dom("[data-test-facet-dropdown-popover]").hasAttribute("role", "combobox");
+      assert
+        .dom("[data-test-facet-dropdown-popover]")
+        .hasAttribute("role", "combobox");
       assert
         .dom(inputSelector)
         .doesNotHaveAttribute(

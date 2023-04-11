@@ -2,11 +2,11 @@ import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import { FocusDirection } from "./facet-dropdown";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { next } from "@ember/runloop";
 import { SortByLabel, SortByValue } from "./toolbar";
+import { FocusDirection } from "../x/hds/dropdown";
 
 enum FacetDropdownAriaRole {
   Option = "option",

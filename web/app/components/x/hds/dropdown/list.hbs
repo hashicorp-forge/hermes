@@ -1,0 +1,45 @@
+{{on-document "keydown" this.maybeKeyboardNavigate}}
+
+<div class="flex flex-col overflow-hidden" ...attributes>
+  {{#if this.inputIsShown}}
+    <div class="relative p-1 border-b border-b-color-border-faint">
+      <Hds::Form::TextInput::Base
+        data-test-product-area-dropdown-input
+        {{did-insert this.registerAndFocusInput}}
+        {{on "input" @onInput}}
+        {{on "focusin" @resetFocusedItemIndex}}
+        @value={{@query}}
+        @type="search"
+        @value=""
+        placeholder="Filter..."
+        aria-controls="facet-dropdown-menu"
+        aria-activedescendant={{unless
+          (eq @focusedItemIndex -1)
+          (concat "facet-dropdown-menu-item-" @focusedItemIndex)
+        }}
+      />
+    </div>
+  {{/if}}
+  <div class="overflow-auto w-full" {{did-insert @registerScrollContainer}}>
+    {{#if this.noMatchesFound}}
+      <div
+        data-test-facet-dropdown-menu-empty-state
+        class="p-12 text-center text-color-foreground-faint"
+      >
+        No matches
+      </div>
+    {{else}}
+      <ol class="py-1">
+        {{#each-in @shownProducts as |product|}}
+          <X::Hds::Popover::ListItem
+            @role=""
+            {{! TODO: type: button/link }}
+            @value={{product}}
+            @selected={{eq @currentProduct product}}
+            @hideDropdown={{@hidePopover}}
+          />
+        {{/each-in}}
+      </ol>
+    {{/if}}
+  </div>
+</div>
