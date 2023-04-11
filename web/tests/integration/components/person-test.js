@@ -38,15 +38,35 @@ module("Integration | Component | person", function (hooks) {
 
     this.set("email", null);
 
-
     assert.dom(".person img").doesNotExist();
     assert.dom(".person .person-email").hasText("Unknown");
     assert.dom(".person span").doesNotExist();
     assert.dom(".person svg").exists();
 
-
     this.set("ignoreUnknown", true);
 
     assert.dom(".person").doesNotExist();
+  });
+
+  test("it renders a contextual checkmark", async function (assert) {
+    this.set("badge", null);
+
+    await render(hbs`
+      <Person
+        @badge={{this.badge}}
+      />
+    `);
+
+    assert.dom("[data-test-person-approved-badge]").doesNotExist();
+
+    this.set("badge", "approved");
+
+    assert.dom("[data-test-person-approved-badge]").exists();
+
+    this.set("badge", "pending");
+
+    assert
+      .dom("[data-test-person-approved-badge]")
+      .doesNotExist("only shows a badge if the correct value is passed in");
   });
 });
