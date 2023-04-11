@@ -14,7 +14,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import htmlElement from "hermes/utils/html-element";
 
-interface XHdsPopoverSignature {
+interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
     placement?: Placement;
@@ -22,7 +22,7 @@ interface XHdsPopoverSignature {
   };
 }
 
-export default class XHdsPopover extends Component<XHdsPopoverSignature> {
+export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
   @tracked _popover: HTMLElement | null = null;
 
   get id() {
