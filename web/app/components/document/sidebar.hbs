@@ -236,6 +236,10 @@
                 {{#each this.approvers as |approver|}}
                   <li>
                     <Person
+                      @badge={{if
+                        (has-approved-doc @document approver.email)
+                        "approved"
+                      }}
                       @imgURL={{approver.imgURL}}
                       @email={{approver.email}}
                     />

@@ -13,6 +13,7 @@ export interface HermesDocument {
   docType: string;
   title: string;
   isDraft?: boolean;
+  approvedBy?: string[];
 
   thumbnail?: string;
   _snippetResult?: {
