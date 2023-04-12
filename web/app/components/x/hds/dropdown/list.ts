@@ -6,8 +6,9 @@ import { FocusDirection } from ".";
 
 interface XHdsDropdownListSignature<T> {
   Args: {
-    items: any;
+    items?: any;
     shownItems: any;
+    selected: any;
     isOrdered?: boolean;
     onChange: (e: Event) => void;
     resetFocusedItemIndex: () => void;

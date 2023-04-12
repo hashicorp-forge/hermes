@@ -6,10 +6,9 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 
 interface InputsProductSelectSignatureSignature {
-  Element: null;
-  Args: {};
-  Blocks: {
-    default: [];
+  Args: {
+    selected?: any;
+    onChange: (value: any) => void;
   };
 }
 
@@ -21,25 +20,20 @@ type ProductAreas = {
 };
 
 export default class InputsProductSelectSignature extends Component<InputsProductSelectSignatureSignature> {
-  @tracked _products: ProductAreas | undefined = undefined;
+  @service("fetch") declare fetchSvc: FetchService;
+
+  @tracked products: ProductAreas | undefined = undefined;
   @tracked shownProducts: ProductAreas | null = null;
 
-  get products() {
-    assert("_products must exist", this._products);
-    return this._products;
-  }
-
-  @service("fetch") declare fetchSvc: FetchService;
   protected fetchProducts = task(async () => {
     try {
       let products = await this.fetchSvc
         .fetch("/api/v1/products")
         .then((resp) => resp?.json());
-      this._products = products;
+      this.products = products;
     } catch (err) {
       console.error(err);
       throw err;
     }
   });
-
 }

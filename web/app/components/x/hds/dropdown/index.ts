@@ -10,7 +10,7 @@ import FetchService from "hermes/services/fetch";
 interface XHdsDropdownComponentSignature<T> {
   Args: {
     selected: any;
-    items: any;
+    items?: any;
     onChange: (value: any) => void;
     listIsOrdered?: boolean;
   };
@@ -29,7 +29,6 @@ export default class XHdsDropdownComponent extends Component<
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked _trigger: HTMLElement | null = null;
-  @tracked _items: unknown | undefined = undefined;
   @tracked private _scrollContainer: HTMLElement | null = null;
 
   @tracked protected focusedItemIndex = -1;
@@ -43,12 +42,8 @@ export default class XHdsDropdownComponent extends Component<
   }
 
   get shownItems() {
-    return this.filteredItems || this.items;
-  }
-
-  get items() {
-    assert("products must exist", this._items);
-    return this._items;
+    console.log(this.args.items);
+    return this.filteredItems || this.args.items;
   }
 
   @action protected registerScrollContainer(element: HTMLDivElement) {

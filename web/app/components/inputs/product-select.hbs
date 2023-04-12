@@ -1,22 +1,7 @@
-{{! This could be replaced with, e.g., <X::Hds::Badge::Dropdown/> }}
-<!--
-<FloatingUI @renderOut={{true}}>
-  <:anchor as |f|>
-    {{! how can i "tag" this as keyboard/mouse-navigable }}
+{{#unless this.products}}
+  <div class="absolute" {{did-insert (perform this.fetchProducts)}}></div>
+{{/unless}}
 
-  </:anchor>
-  <:content as |f|>
-    <X::Hds::Dropdown::List
-      {{dismissible dismiss=f.hideContent related=f.anchor}}
-      @items={{this.products}}
-      @isOrdered={{true}}
-      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-      @registerScrollContainer={{this.registerScrollContainer}}
-      @onChange={{@onChange}}
-    />
-  </:content>
-</FloatingUI>
--->
 <X::Hds::Dropdown
   @items={{this.products}}
   @listIsOrdered={{true}}
@@ -24,7 +9,7 @@
   @selected={{@selected}}
 >
   <:toggleButton as |f|>
-    <div class="relative flex" {{did-insert (perform this.fetchProducts)}}>
+    <div class="relative flex">
       <Hds::Badge
         class="hds-badge-dropdown"
         @text={{@selected}}

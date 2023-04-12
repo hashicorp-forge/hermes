@@ -1,6 +1,6 @@
 <li class="flex">
   <Action
-    {{on "click" (fn @onSelect @value)}}
+    {{on "click" this.onClick}}
     {{! TODO: rename to something more generic }}
     class="facet-dropdown-menu-item-link"
   >
