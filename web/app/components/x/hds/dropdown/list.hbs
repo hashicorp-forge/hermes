@@ -1,8 +1,12 @@
-{{on-document "keydown" (fn this.maybeKeyboardNavigate @f)}}
+{{on-document "keydown" this.maybeKeyboardNavigate}}
 
-<div class="flex flex-col overflow-hidden" ...attributes>
-  Nice!!
-  {{#if this.inputIsShown}}
+<div
+  class="flex flex-col overflow-hidden"
+  role={{if @inputIsShown "combobox"}}
+  id="x-hds-dropdown-popover"
+  ...attributes
+>
+  {{#if @inputIsShown}}
     <div class="relative p-1 border-b border-b-color-border-faint">
       <Hds::Form::TextInput::Base
         data-test-product-area-dropdown-input
@@ -13,7 +17,7 @@
         @type="search"
         @value=""
         placeholder="Filter..."
-        aria-controls="facet-dropdown-menu"
+        aria-controls="x-hds-dropdown"
         aria-activedescendant={{unless
           (eq @focusedItemIndex -1)
           (concat "facet-dropdown-menu-item-" @focusedItemIndex)
@@ -31,15 +35,25 @@
       </div>
     {{else}}
       {{#if @listIsOrdered}}
-        <ol class="py-1">
+        <ol
+          class="py-1"
+          id="x-hds-dropdown-list"
+          role={{if @inputIsShown "listbox" "menu"}}
+          aria-activedescendant={{unless
+            (eq @focusedItemIndex -1)
+            (concat "x-hds-dropdown-list-item-" @focusedItemIndex)
+          }}
+        >
           {{#if @shownItems}}
             {{#each-in @shownItems as |product|}}
               <X::Hds::Dropdown::ListItem
-                @role=""
+                @role={{@listItemRole}}
                 @value={{product}}
                 @selected={{eq @selected product}}
                 @hideDropdown={{@f.hideContent}}
                 @onChange={{@onChange}}
+                @setFocusedItemIndex={{@setFocusedItemIndex}}
+                @focusedItemIndex={{@focusedItemIndex}}
               />
             {{/each-in}}
           {{/if}}

@@ -23,7 +23,7 @@ interface FloatingUIContentSignature {
 }
 
 export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
-  @tracked _popover: HTMLElement | null = null;
+  @tracked _content: HTMLElement | null = null;
 
   get shouldRenderInPlace() {
     if (this.args.renderOut) {
@@ -37,9 +37,9 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     return guidFor(this);
   }
 
-  get popover() {
-    assert("_popover must exist", this._popover);
-    return this._popover;
+  get content() {
+    assert("_content must exist", this._content);
+    return this._content;
   }
 
   get arrow() {
@@ -49,23 +49,25 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @tracked cleanup: (() => void) | null = null;
 
   @action didInsert(e: HTMLElement) {
-    this._popover = e;
+    this._content = e;
 
     let updatePosition = async () => {
-      computePosition(this.args.anchor, this.popover, {
+      computePosition(this.args.anchor, this.content, {
         platform: platform,
-        placement: this.args.placement || "bottom",
+        placement: this.args.placement || "bottom-start",
         middleware: [offset(5), flip(), shift()],
       }).then(({ x, y, placement }) => {
-        this.popover.setAttribute("data-popover-placement", placement);
+        this.content.setAttribute("data-popover-placement", placement);
 
-        Object.assign(this.popover.style, {
+        Object.assign(this.content.style, {
           left: `${x}px`,
           top: `${y}px`,
         });
       });
     };
 
-    this.cleanup = autoUpdate(this.args.anchor, this.popover, updatePosition);
+    updatePosition();
+
+    this.cleanup = autoUpdate(this.args.anchor, this.content, updatePosition);
   }
 }

@@ -1,40 +1,11 @@
-<!--
-<Action
-  data-test-popover-trigger
-  {{did-insert this.didInsertTrigger}}
-  {{on "click" this.togglePopover}}
-  class="relative"
->
-  <div class="relative flex">
-    <Hds::Badge
-      class="hds-badge-dropdown"
-      @text={{@currentProduct}}
-      @icon={{get-product-id @currentProduct}}
-    />
-    <FlightIcon
-      class="dropdown-caret"
-      @name={{if this.popoverIsShown "chevron-up" "chevron-down"}}
-    />
-  </div>
-</Action>
-
-{{#if this.popoverIsShown}}
-  <X::Hds::Popover::List
-    @trigger={{this.trigger}}
-    @dismissPopover={{this.hidePopover}}
-    @items={{this.products}}
-    @onInput={{this.onInput}}
-    @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-  />
-{{/if}}
--->
-
-<FloatingUI @renderOut={{true}}>
+<FloatingUI @renderOut={{true}} @placement={{@placement}}>
   <:anchor as |f|>
+    {{! default to a button if a toggleButton isn't used }}
     <Action
       {{did-insert f.registerAnchor}}
       {{on "keydown" (fn this.onTriggerKeydown f)}}
       {{on "click" f.toggleContent}}
+      aria-controls={{if @inputIsShown "x-hds-dropdown-popover" "x-hds-dropdown-list"}}
     >
       {{yield f to="toggleButton"}}
     </Action>
@@ -42,15 +13,20 @@
   </:anchor>
   <:content as |f|>
     <X::Hds::Dropdown::List
+      ...attributes
       {{will-destroy this.willDestroyDropdown}}
+      {{did-insert (fn this.didInsertList f)}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       @items={{@items}}
       @onInput={{perform this.onInput f}}
       @onChange={{@onChange}}
+      @listItemRole={{this.listItemRole}}
       @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
       @registerScrollContainer={{this.registerScrollContainer}}
       @listIsOrdered={{@listIsOrdered}}
+      @inputIsShown={{this.inputIsShown}}
       @setFocusedItemIndex={{this.setFocusedItemIndex}}
+      @focusedItemIndex={{this.focusedItemIndex}}
       @shownItems={{this.shownItems}}
       @selected={{@selected}}
       @f={{f}}

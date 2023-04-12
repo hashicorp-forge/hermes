@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { schedule } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -30,6 +30,9 @@ export default class XHdsDropdownComponent extends Component<
 
   @tracked _trigger: HTMLElement | null = null;
   @tracked private _scrollContainer: HTMLElement | null = null;
+  @tracked protected query: string = "";
+
+  @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
 
   @tracked protected focusedItemIndex = -1;
 
@@ -41,13 +44,29 @@ export default class XHdsDropdownComponent extends Component<
     return this._scrollContainer;
   }
 
+  get inputIsShown() {
+    return Object.keys(this.args.items).length > 7;
+  }
+
   get shownItems() {
-    console.log(this.args.items);
     return this.filteredItems || this.args.items;
   }
 
   @action protected registerScrollContainer(element: HTMLDivElement) {
     this._scrollContainer = element;
+  }
+
+  @action protected didInsertList(f: any) {
+    schedule(
+      "afterRender",
+      () => {
+        assert("floatingUI content must exist", f.content);
+        this.assignMenuItemIDs(
+          f.content.querySelectorAll(`[role=${this.listItemRole}]`)
+        );
+      },
+      f
+    );
   }
 
   @action willDestroyDropdown() {
@@ -176,30 +195,27 @@ export default class XHdsDropdownComponent extends Component<
   }
 
   protected onInput = restartableTask(
-    async (inputEvent: InputEvent, f: any) => {
+    async (f: any, inputEvent: InputEvent) => {
+      console.log(f);
       this.focusedItemIndex = -1;
 
-      // TODO: type the API interface
+      let showItems: any = {};
+      let { items } = this.args;
 
-      // need some handling whether it's an object or an array
+      this.query = (inputEvent.target as HTMLInputElement).value;
+      for (const [key, value] of Object.entries(items)) {
+        if (key.toLowerCase().includes(this.query.toLowerCase())) {
+          showItems[key] = value;
+        }
+      }
 
-      // let shownFacets: FacetDropdownObjects = {};
-      // let facets = this.args.facets;
+      this.filteredItems = showItems;
 
-      // this.query = (inputEvent.target as HTMLInputElement).value;
-      // for (const [key, value] of Object.entries(facets)) {
-      //   if (key.toLowerCase().includes(this.query.toLowerCase())) {
-      //     shownFacets[key] = value;
-      //   }
-      // }
-
-      // this.filteredItems = shownFacets;
-
-      // schedule("afterRender", () => {
-      //   this.assignMenuItemIDs(
-      //     f.content.querySelectorAll(`[role=${this.listItemRole}]`)
-      //   );
-      // });
+      schedule("afterRender", () => {
+        this.assignMenuItemIDs(
+          f.content.querySelectorAll(`[role=${this.listItemRole}]`)
+        );
+      });
     }
   );
 }

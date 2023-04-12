@@ -5,6 +5,7 @@
     @placement={{@placement}}
     @renderOut={{@renderOut}}
     @anchor={{this.anchor}}
+    {{did-insert this.registerContent}}
     ...attributes
   >
     {{yield this to="content"}}

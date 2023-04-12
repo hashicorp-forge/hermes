@@ -9,6 +9,7 @@ interface XHdsDropdownListSignature<T> {
     items?: any;
     shownItems: any;
     selected: any;
+    inputIsShown?: boolean;
     isOrdered?: boolean;
     onChange: (e: Event) => void;
     resetFocusedItemIndex: () => void;
@@ -23,17 +24,13 @@ export default class XHdsDropdownList extends Component<
 > {
   @tracked _input: HTMLInputElement | null = null;
 
-  get inputIsShown() {
-    return Object.keys(this.args.items).length > 7;
-  }
-
   get input() {
     assert("input must exist", this._input);
     return this._input;
   }
 
   protected get noMatchesFound(): boolean {
-    if (!this.inputIsShown) {
+    if (!this.args.inputIsShown) {
       return false;
     }
     return Object.entries(this.args.shownItems).length === 0;

@@ -13,10 +13,16 @@ interface FloatingUIComponentSignature {
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
   @tracked _anchor: HTMLElement | null = null;
+
+  @tracked content: HTMLElement | null = null;
   @tracked contentIsShown: boolean = false;
 
   @action registerAnchor(e: HTMLElement) {
     this._anchor = e;
+  }
+
+  @action registerContent(e: HTMLElement) {
+    this.content = e;
   }
 
   get anchor() {
