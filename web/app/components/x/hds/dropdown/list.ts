@@ -6,9 +6,11 @@ import { FocusDirection } from ".";
 
 interface XHdsDropdownListSignature<T> {
   Args: {
+    id: string;
     items?: any;
     shownItems: any;
     selected: any;
+    focusedItemIndex: number;
     inputIsShown?: boolean;
     isOrdered?: boolean;
     onChange: (e: Event) => void;
@@ -27,6 +29,20 @@ export default class XHdsDropdownList extends Component<
   get input() {
     assert("input must exist", this._input);
     return this._input;
+  }
+
+  get id(): string {
+    return `x-hds-dropdown-list-${this.id}`;
+  }
+
+  get role() {
+    return this.args.inputIsShown ? "listbox" : "menu";
+  }
+
+  get ariaActiveDescendant() {
+    if (this.args.focusedItemIndex !== -1) {
+      return `x-hds-dropdown-list-item-${this.args.focusedItemIndex}`;
+    }
   }
 
   protected get noMatchesFound(): boolean {

@@ -13,11 +13,11 @@
         {{did-insert f.registerAnchor}}
         {{on "keydown" (fn this.onTriggerKeydown f)}}
         {{on "click" f.toggleContent}}
-        aria-controls={{if
+        aria-controls="x-hds-dropdown-{{if
           @inputIsShown
-          "x-hds-dropdown-popover"
-          "x-hds-dropdown-list"
-        }}
+          'popover'
+          'list'
+        }}-{{f.id}}"
       >
         {{yield f to="toggleButton"}}
       </Action>
@@ -26,12 +26,15 @@
     {{/if}}
   </:anchor>
   <:content as |f|>
+    {{! action list }}
+    {{! link list }}
     <X::Hds::Dropdown::List
       ...attributes
       {{will-destroy this.willDestroyDropdown}}
       {{did-insert (fn this.didInsertList f)}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       @items={{@items}}
+      @id={{f.id}}
       @onInput={{perform this.onInput f}}
       @onChange={{@onChange}}
       @listItemRole={{this.listItemRole}}

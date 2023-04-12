@@ -1,0 +1,13 @@
+{{#if @shownItems}}
+  {{#each-in @shownItems as |item|}}
+    <X::Hds::Dropdown::ListItem
+      @role={{@listItemRole}}
+      @value={{item}}
+      @selected={{eq @selected item}}
+      @hideDropdown={{@hideDropdown}}
+      @onChange={{@onChange}}
+      @setFocusedItemIndex={{@setFocusedItemIndex}}
+      @focusedItemIndex={{@focusedItemIndex}}
+    />
+  {{/each-in}}
+{{/if}}

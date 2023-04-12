@@ -20,15 +20,18 @@
         aria-controls="x-hds-dropdown"
         aria-activedescendant={{unless
           (eq @focusedItemIndex -1)
-          (concat "facet-dropdown-menu-item-" @focusedItemIndex)
+          (concat "x-hds-dropdown-list-item-" @focusedItemIndex)
         }}
       />
     </div>
   {{/if}}
-  <div class="overflow-auto w-full relative" {{did-insert @registerScrollContainer}}>
+  <div
+    class="overflow-auto w-full relative"
+    {{did-insert @registerScrollContainer}}
+  >
     {{#if this.noMatchesFound}}
       <div
-        data-test-facet-dropdown-menu-empty-state
+        data-test-x-hds-dropdown-list-empty-state
         class="p-12 text-center text-color-foreground-faint"
       >
         No matches
@@ -36,28 +39,38 @@
     {{else}}
       {{#if @listIsOrdered}}
         <ol
+          data-test-x-hds-dropdown-ordered-list
           class="py-1"
-          id="x-hds-dropdown-list"
-          role={{if @inputIsShown "listbox" "menu"}}
-          aria-activedescendant={{unless
-            (eq @focusedItemIndex -1)
-            (concat "x-hds-dropdown-list-item-" @focusedItemIndex)
-          }}
+          id={{this.id}}
+          role={{this.role}}
+          aria-activedescendant={{this.ariaActiveDescendant}}
         >
-          {{#if @shownItems}}
-            {{#each-in @shownItems as |product|}}
-              <X::Hds::Dropdown::ListItem
-                @role={{@listItemRole}}
-                @value={{product}}
-                @selected={{eq @selected product}}
-                @hideDropdown={{@f.hideContent}}
-                @onChange={{@onChange}}
-                @setFocusedItemIndex={{@setFocusedItemIndex}}
-                @focusedItemIndex={{@focusedItemIndex}}
-              />
-            {{/each-in}}
-          {{/if}}
+          <X::Hds::Dropdown::ListItems
+            @id={{@id}}
+            @shownItems={{@shownItems}}
+            @role={{@listItemRole}}
+            @hideDropdown={{@f.hideContent}}
+            @setFocusedItemIndex={{@setFocusedItemIndex}}
+            @focusedItemIndex={{@focusedItemIndex}}
+          />
         </ol>
+      {{else}}
+        <ul
+          data-test-x-hds-dropdown-unordered-list
+          class="py-1"
+          id={{this.id}}
+          role={{this.role}}
+          aria-activedescendant={{this.ariaActiveDescendant}}
+        >
+          <X::Hds::Dropdown::ListItems
+            @id={{@id}}
+            @shownItems={{@shownItems}}
+            @role={{@listItemRole}}
+            @hideDropdown={{@f.hideContent}}
+            @setFocusedItemIndex={{@setFocusedItemIndex}}
+            @focusedItemIndex={{@focusedItemIndex}}
+          />
+        </ul>
       {{/if}}
     {{/if}}
   </div>

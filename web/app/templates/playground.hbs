@@ -1,13 +1,6 @@
 Playground
-<FloatingUI @placement="bottom-start">
-  <:anchor as |f|>
-    <Action {{on "click" f.toggleContent}} {{did-insert f.registerAnchor}}>
-      Toggle Content
-    </Action>
-  </:anchor>
-  <:content as |f|>
-    <div {{dismissible dismiss=f.hideContent related=f.anchor}}>
-      This is the content
-    </div>
-  </:content>
-</FloatingUI>
+<X::Hds::Dropdown>
+  <:toggleButton>
+    What did I do now
+  </:toggleButton>
+</X::Hds::Dropdown>

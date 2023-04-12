@@ -1,5 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
+import { guidFor } from "@ember/object/internals";
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -24,6 +25,8 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
   @action registerContent(e: HTMLElement) {
     this.content = e;
   }
+
+  readonly id = guidFor(this);
 
   get anchor() {
     assert("_anchor must exist", this._anchor);
