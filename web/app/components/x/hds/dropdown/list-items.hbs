@@ -1,7 +1,7 @@
 {{#if @shownItems}}
   {{#each-in @shownItems as |item|}}
     <X::Hds::Dropdown::ListItem
-      @role={{@listItemRole}}
+      @role={{@role}}
       @value={{item}}
       @selected={{eq @selected item}}
       @hideDropdown={{@hideDropdown}}

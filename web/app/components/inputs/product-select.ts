@@ -25,7 +25,6 @@ export default class InputsProductSelectSignature extends Component<InputsProduc
   @tracked selected = this.args.selected;
 
   @tracked products: ProductAreas | undefined = undefined;
-  @tracked shownProducts: ProductAreas | null = null;
 
   @action onChange(newValue: any) {
     this.selected = newValue;

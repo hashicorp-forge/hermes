@@ -136,7 +136,7 @@
           {{#if this.isDraft}}
             <Inputs::ProductSelect
               @selected={{@document.product}}
-              @onChange={{perform this.save "product"}}
+              @onChange={{this.updateProduct}}
             />
           {{else}}
             <Hds::Badge

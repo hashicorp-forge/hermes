@@ -52,6 +52,17 @@ export default class XHdsDropdownComponent extends Component<
     return this.filteredItems || this.args.items;
   }
 
+  get ariaControls() {
+    let value = "x-hds-dropdown-";
+    if (this.inputIsShown) {
+      value += "popover";
+    } else {
+      value += "list";
+    }
+
+    return `${value}-`;
+  }
+
   @action protected registerScrollContainer(element: HTMLDivElement) {
     this._scrollContainer = element;
   }
@@ -71,11 +82,6 @@ export default class XHdsDropdownComponent extends Component<
 
   @action willDestroyDropdown() {
     this.filteredItems = null;
-  }
-
-  @action onSelect(product: string, hideDropdown: () => void) {
-    this.args.onChange(product);
-    hideDropdown();
   }
 
   @action assignMenuItemIDs(items: NodeListOf<Element>): void {

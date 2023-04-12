@@ -1,6 +1,8 @@
 {{#unless this.products}}
-  <div class="absolute" {{did-insert (perform this.fetchProducts)}}></div>
+  <div class="absolute top-0 left-0" {{did-insert (perform this.fetchProducts)}}></div>
 {{/unless}}
+
+{{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 
 <X::Hds::Dropdown
   @items={{this.products}}
@@ -9,8 +11,19 @@
   @selected={{@selected}}
   class="max-h-[320px] w-80"
 >
-  <:toggleButton as |f|>
-    <div class="relative flex">
+  <:anchor as |d|>
+    <Action
+      {{! this could all be part of the modifier }}
+      {{on "keydown" (fn d.onTriggerKeydown d.floating)}}
+      {{on "click" d.floating.toggleContent}}
+      {{did-insert d.floating.registerAnchor}}
+      aria-controls="x-hds-dropdown-list-{{if
+        d.inputIsShown
+        'popover'
+        'list'
+      }}-{{d.floating.id}}"
+      class="relative flex"
+    >
       <Hds::Badge
         class="hds-badge-dropdown"
         @text={{this.selected}}
@@ -20,6 +33,6 @@
         class="dropdown-caret"
         @name={{if f.contentIsShown "chevron-up" "chevron-down"}}
       />
-    </div>
-  </:toggleButton>
+    </Action>
+  </:anchor>
 </X::Hds::Dropdown>

@@ -1,29 +1,9 @@
 <FloatingUI @renderOut={{true}} @placement={{@placement}}>
   <:anchor as |f|>
-    {{#if (has-block "toggleButton")}}
-      {{! if we weren't to yield a button but a couple modifiers, would that work? }}
-      <!--
-        {{yield (hash onTriggerKeydown=this.onTriggerKeydown floatingUI=f)}}
-
-        <:anchor as |f|>
-          <Action {{f.toggleButton}}>
-
-      -->
-      <Action
-        {{did-insert f.registerAnchor}}
-        {{on "keydown" (fn this.onTriggerKeydown f)}}
-        {{on "click" f.toggleContent}}
-        aria-controls="x-hds-dropdown-{{if
-          @inputIsShown
-          'popover'
-          'list'
-        }}-{{f.id}}"
-      >
-        {{yield f to="toggleButton"}}
-      </Action>
-    {{else}}
-
-    {{/if}}
+    {{yield
+      (hash onTriggerKeydown=this.onTriggerKeydown floating=f)
+      to="anchor"
+    }}
   </:anchor>
   <:content as |f|>
     {{! action list }}

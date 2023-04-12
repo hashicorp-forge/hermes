@@ -32,7 +32,7 @@ export default class XHdsDropdownList extends Component<
   }
 
   get id(): string {
-    return `x-hds-dropdown-list-${this.id}`;
+    return `x-hds-dropdown-list-${this.args.id}`;
   }
 
   get role() {
