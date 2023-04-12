@@ -1,15 +1,29 @@
 <FloatingUI @renderOut={{true}} @placement={{@placement}}>
   <:anchor as |f|>
-    {{! default to a button if a toggleButton isn't used }}
-    <Action
-      {{did-insert f.registerAnchor}}
-      {{on "keydown" (fn this.onTriggerKeydown f)}}
-      {{on "click" f.toggleContent}}
-      aria-controls={{if @inputIsShown "x-hds-dropdown-popover" "x-hds-dropdown-list"}}
-    >
-      {{yield f to="toggleButton"}}
-    </Action>
+    {{#if (has-block "toggleButton")}}
+      {{! if we weren't to yield a button but a couple modifiers, would that work? }}
+      <!--
+        {{yield (hash onTriggerKeydown=this.onTriggerKeydown floatingUI=f)}}
 
+        <:anchor as |f|>
+          <Action {{f.toggleButton}}>
+
+      -->
+      <Action
+        {{did-insert f.registerAnchor}}
+        {{on "keydown" (fn this.onTriggerKeydown f)}}
+        {{on "click" f.toggleContent}}
+        aria-controls={{if
+          @inputIsShown
+          "x-hds-dropdown-popover"
+          "x-hds-dropdown-list"
+        }}
+      >
+        {{yield f to="toggleButton"}}
+      </Action>
+    {{else}}
+
+    {{/if}}
   </:anchor>
   <:content as |f|>
     <X::Hds::Dropdown::List

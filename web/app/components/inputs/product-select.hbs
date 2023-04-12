@@ -5,7 +5,7 @@
 <X::Hds::Dropdown
   @items={{this.products}}
   @listIsOrdered={{true}}
-  @onChange={{@onChange}}
+  @onChange={{this.onChange}}
   @selected={{@selected}}
   class="max-h-[320px] w-80"
 >
@@ -13,8 +13,8 @@
     <div class="relative flex">
       <Hds::Badge
         class="hds-badge-dropdown"
-        @text={{@selected}}
-        @icon={{get-product-id @selected}}
+        @text={{this.selected}}
+        @icon={{get-product-id this.selected}}
       />
       <FlightIcon
         class="dropdown-caret"

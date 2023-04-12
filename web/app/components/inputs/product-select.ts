@@ -1,4 +1,4 @@
-import { assert } from "@ember/debug";
+import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -22,8 +22,15 @@ type ProductAreas = {
 export default class InputsProductSelectSignature extends Component<InputsProductSelectSignatureSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
+  @tracked selected = this.args.selected;
+
   @tracked products: ProductAreas | undefined = undefined;
   @tracked shownProducts: ProductAreas | null = null;
+
+  @action onChange(newValue: any) {
+    this.selected = newValue;
+    this.args.onChange(newValue);
+  }
 
   protected fetchProducts = task(async () => {
     try {

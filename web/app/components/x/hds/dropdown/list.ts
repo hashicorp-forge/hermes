@@ -54,10 +54,13 @@ export default class XHdsDropdownList extends Component<
 
     if (event.key === "Enter") {
       event.preventDefault();
-      assert("popoverElement must exist", this.args.f.content);
+      assert("floatingUI content must exist", this.args.f.content);
       const target = this.args.f.content.querySelector("[aria-selected]");
 
-      if (target instanceof HTMLAnchorElement) {
+      if (
+        target instanceof HTMLAnchorElement ||
+        target instanceof HTMLButtonElement
+      ) {
         target.click();
         this.args.f.hideContent();
       }

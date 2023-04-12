@@ -168,20 +168,20 @@ export default class XHdsDropdownComponent extends Component<
     }
   }
 
-  @action protected onTriggerKeydown(event: KeyboardEvent, f: any) {
+  @action protected onTriggerKeydown(f: any, event: KeyboardEvent) {
     if (f.contentIsShown) {
       return;
     }
 
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       event.preventDefault();
-      f.hideDropdown();
+      f.showContent();
 
       // Stop the event from bubbling to the popover's keydown handler.
-      event.stopPropagation();
+      // event.stopPropagation();
 
       // Wait for the menuItems to be set by the showDropdown action.
-      schedule("afterRender", () => {
+      next(() => {
         switch (event.key) {
           case "ArrowDown":
             this.setFocusedItemIndex(FocusDirection.First, false);
