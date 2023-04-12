@@ -17,7 +17,6 @@ export default class ApplicationRoute extends Route {
   error(error) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
-      this.router.transitionTo("authenticate");
       return;
     }
   }
