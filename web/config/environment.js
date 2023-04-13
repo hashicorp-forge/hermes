@@ -11,7 +11,7 @@ const getEnv = (key, defaultValue) => {
   return value != null ? value : defaultValue;
 };
 
-const hasGoogleAnalyticsID = !!getEnv("GOOGLE_ANALYTICS_ID", null);
+const hasGoogleAnalyticsID = !!getEnv("GOOGLE_ANALYTICS_TAG_ID", null);
 
 module.exports = function (environment) {
   let ENV = {
@@ -40,7 +40,7 @@ module.exports = function (environment) {
             name: "GoogleAnalyticsFour",
             environments: ["development", "production"],
             config: {
-              id: getEnv("GOOGLE_ANALYTICS_ID"),
+              id: getEnv("GOOGLE_ANALYTICS_TAG_ID"),
               options: {
                 anonymize_ip: true,
               },
