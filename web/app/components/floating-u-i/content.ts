@@ -1,6 +1,5 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { guidFor } from "@ember/object/internals";
 import {
   Placement,
   autoUpdate,
@@ -22,8 +21,6 @@ interface FloatingUIContentSignature {
 }
 
 export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
-  readonly id = guidFor(this);
-
   @tracked _content: HTMLElement | null = null;
   @tracked cleanup: (() => void) | null = null;
 

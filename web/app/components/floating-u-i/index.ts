@@ -13,7 +13,7 @@ interface FloatingUIComponentSignature {
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
-  readonly id = guidFor(this);
+  readonly contentID = guidFor(this);
 
   @tracked _anchor: HTMLElement | null = null;
   @tracked content: HTMLElement | null = null;
@@ -26,10 +26,6 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
 
   @action registerAnchor(e: HTMLElement) {
     this._anchor = e;
-  }
-
-  @action registerContent(e: HTMLElement) {
-    this.content = e;
   }
 
   @action toggleContent() {

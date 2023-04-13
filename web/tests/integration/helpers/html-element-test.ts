@@ -6,14 +6,15 @@ import { hbs } from "ember-cli-htmlbars";
 module("Integration | Helper | html-element", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("", async function (assert) {
+  test("it works as expected", async function (assert) {
     await render(hbs`
+      <div class="container"></div>
+
       {{#in-element (html-element ".container")}}
         <div class="content">
           Like magic
         </div>
       {{/in-element}}
-      <div class="container"></div>
     `);
 
     assert.dom(".container .content").hasText("Like magic");
