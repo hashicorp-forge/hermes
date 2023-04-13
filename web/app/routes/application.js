@@ -26,7 +26,6 @@ export default class ApplicationRoute extends Route {
   error(error) {
     if (error instanceof UnauthorizedError) {
       this.session.invalidate();
-      this.router.transitionTo("authenticate");
       return;
     }
   }
@@ -44,16 +43,23 @@ export default class ApplicationRoute extends Route {
     let transitionTo = transition.intent.url ?? transition.to.name;
 
     /**
-     * Capture the transition intent and save it to session/localStorage.
+     * If a transition intent exists and it isn't to the `/` or `authenticate` routes,
+     * capture and save it to session/localStorage for a later redirect.
      */
-    window.sessionStorage.setItem(REDIRECT_STORAGE_KEY, transitionTo);
-    window.localStorage.setItem(
-      REDIRECT_STORAGE_KEY,
-      JSON.stringify({
-        url: transitionTo,
-        expiresOn: Date.now() + 60 * 5000, // 5 minutes
-      })
-    );
+    if (
+      transitionTo &&
+      transitionTo !== "/" &&
+      transitionTo !== "authenticate"
+    ) {
+      window.sessionStorage.setItem(REDIRECT_STORAGE_KEY, transitionTo);
+      window.localStorage.setItem(
+        REDIRECT_STORAGE_KEY,
+        JSON.stringify({
+          url: transitionTo,
+          expiresOn: Date.now() + 60 * 5000, // 5 minutes
+        })
+      );
+    }
 
     await this.session.setup();
 
