@@ -23,7 +23,7 @@
         </span>
       {{/unless}}
       {{#if this.query}}
-        <dd.Content class="hds-dropdown-list search-dropdown">
+        <dd.Content class="hds-dropdown__content search-dropdown">
           {{#if this.bestMatches}}
             <div
               class="flex flex-col border-0 border-b hds-border-primary pb-1"
@@ -31,7 +31,7 @@
               <LinkTo
                 @route="authenticated.results"
                 @query={{hash q=this.query page=1}}
-                class="hds-dropdown-list-item--interactive"
+                class="hds-dropdown-list-item--variant-interactive"
               >
                 <FlightIcon @name="search" class="mr-1.5" />
                 <span>View all results for "{{this.query}}"</span>
@@ -44,7 +44,7 @@
                 <LinkTo
                   @route="authenticated.all"
                   @query={{hash product=(array product)}}
-                  class="hds-dropdown-list-item--interactive"
+                  class="hds-dropdown-list-item--variant-interactive"
                 >
                   <FlightIcon @name="folder" class="mr-1.5" />
                   <span class="flex items-center">View all
