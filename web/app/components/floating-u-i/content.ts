@@ -22,12 +22,10 @@ interface FloatingUIContentSignature {
 }
 
 export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
+  readonly id = guidFor(this);
+
   @tracked _content: HTMLElement | null = null;
   @tracked cleanup: (() => void) | null = null;
-
-  get id() {
-    return guidFor(this);
-  }
 
   get content() {
     assert("_content must exist", this._content);
