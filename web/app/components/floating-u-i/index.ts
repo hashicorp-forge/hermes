@@ -13,10 +13,16 @@ interface FloatingUIComponentSignature {
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
-  @tracked _anchor: HTMLElement | null = null;
+  readonly id = guidFor(this);
 
+  @tracked _anchor: HTMLElement | null = null;
   @tracked content: HTMLElement | null = null;
   @tracked contentIsShown: boolean = false;
+
+  get anchor() {
+    assert("_anchor must exist", this._anchor);
+    return this._anchor;
+  }
 
   @action registerAnchor(e: HTMLElement) {
     this._anchor = e;
@@ -24,13 +30,6 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
 
   @action registerContent(e: HTMLElement) {
     this.content = e;
-  }
-
-  readonly id = guidFor(this);
-
-  get anchor() {
-    assert("_anchor must exist", this._anchor);
-    return this._anchor;
   }
 
   @action toggleContent() {
