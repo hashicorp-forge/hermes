@@ -21,10 +21,6 @@ export default class DocumentSidebar extends Component {
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  get modalContainer() {
-    return document.querySelector(".ember-application");
-  }
-
   get isDraft() {
     return this.args.document?.isDraft;
   }

@@ -480,7 +480,7 @@
 
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
-{{#in-element this.modalContainer insertBefore=null}}
+{{#in-element (html-element '.ember-application') insertBefore=null}}
   {{#if this.archiveModalIsActive}}
     <Document::Modal
       @color="critical"
