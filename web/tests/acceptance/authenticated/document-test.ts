@@ -11,8 +11,8 @@ module("Acceptance | authenticated/document", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function () {
-    authenticateSession({});
+  hooks.beforeEach(async function () {
+    await authenticateSession({});
   });
 
   test("the page title is correct (published doc)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
