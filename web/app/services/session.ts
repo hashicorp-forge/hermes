@@ -156,7 +156,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   handleAuthentication(routeAfterAuthentication: string) {
     if (this.authenticatedUser.info) {
       /**
-       * This will be true when the reauthenticating via the "token expired" message.
+       * This will be true when reauthenticating via the "token expired" message.
        * Since we already have cached userInfo, we don't need to await it.
        */
       void this.authenticatedUser.loadInfo.perform();
