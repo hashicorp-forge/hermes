@@ -58,6 +58,7 @@ type ConfigResponse struct {
 	AlgoliaDraftsIndexName   string          `json:"algolia_drafts_index_name"`
 	AlgoliaInternalIndexName string          `json:"algolia_internal_index_name"`
 	FeatureFlags             map[string]bool `json:"feature_flags"`
+	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
@@ -103,6 +104,7 @@ func ConfigHandler(
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
 			AlgoliaInternalIndexName: cfg.Algolia.InternalIndexName,
 			FeatureFlags:             featureFlags,
+			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
 			ShortLinkBaseURL:         shortLinkBaseURL,

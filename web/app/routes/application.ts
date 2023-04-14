@@ -11,13 +11,23 @@ import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
+import EmberMetricsService from "ember-metrics/index";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flags: any;
   @service declare session: SessionService;
-  @service declare router: RouterService
+  @service declare router: RouterService;
+  @service declare metrics: EmberMetricsService;
+
+  constructor() {
+    super(...arguments);
+
+    this.router.on("routeDidChange", () => {
+      this.metrics.trackPage();
+    });
+  }
 
   /**
    * Catch-all for bubbled-up model errors.
