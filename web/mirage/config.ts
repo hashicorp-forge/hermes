@@ -146,8 +146,10 @@ export default function (mirageConfig) {
         if (schema.mes.first()) {
           return schema.mes.first().attrs;
         } else {
+          return schema.mes.create({
+            isLoggedIn: true,
+          }).attrs;
           // Otherwise, create and return a new user.
-          return schema.mes.create().attrs;
         }
       });
 

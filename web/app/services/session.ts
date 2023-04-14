@@ -2,12 +2,13 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
-import { keepLatestTask } from "ember-concurrency";
+import { dropTask, keepLatestTask, timeout } from "ember-concurrency";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import FetchService from "./fetch";
+import AuthenticatedUserService from "./authenticated-user";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -25,6 +26,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare fetch: FetchService;
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
+  @service declare authenticatedUser: AuthenticatedUserService;
 
   /**
    * Whether the current session is valid.
@@ -61,7 +63,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       true
     );
 
-    let isLoggedIn = await this.requireAuthentication(null, () => {});
+    let isLoggedIn = this.requireAuthentication(null, () => {});
 
     if (this.pollResponseIs401 || !isLoggedIn) {
       this.tokenIsValid = false;
@@ -70,26 +72,76 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     if (this.tokenIsValid) {
       this.preventReauthenticationMessage = false;
     } else if (!this.preventReauthenticationMessage) {
-      this.flashMessages.add({
-        title: "Login token expired",
-        message: "Please reauthenticate to keep using Hermes.",
-        type: "warning",
-        sticky: true,
-        destroyOnClick: false,
-        preventDuplicates: true,
-        buttonText: "Authenticate with Google",
-        buttonIcon: "google",
-        buttonAction: () => {
-          this.authenticate("authenticator:torii", "google-oauth2-bearer");
-          this.flashMessages.clearMessages();
-        },
-        onDestroy: () => {
+      /**
+       * Show a message and stop polling (If the user hasn't already dismissed
+       * a previous message). On re-auth,`handleAuthentication` will restart the task.
+       */
+      this.showFlashMessage(
+        "Login token expired",
+        "Please reauthenticate to keep using Hermes.",
+        "warning",
+        () => {
           this.preventReauthenticationMessage = true;
-        },
-      });
+        }
+      );
+
+      return;
     }
 
     this.pollForExpiredAuth.perform();
+  });
+
+  private showFlashMessage(
+    title: string,
+    message: string,
+    type: "success" | "warning" | "critical",
+    onDestroy?: () => void
+  ) {
+    this.flashMessages.add({
+      title,
+      message,
+      type,
+      sticky: true,
+      destroyOnClick: false,
+      preventDuplicates: true,
+      buttonText: "Authenticate with Google",
+      buttonIcon: "google",
+      buttonAction: () => {
+        this.reauthenticate.perform();
+      },
+      onDestroy,
+    });
+  }
+
+  protected reauthenticate = dropTask(async () => {
+    try {
+      await this.authenticate("authenticator:torii", "google-oauth2-bearer");
+
+      this.flashMessages.clearMessages();
+
+      await timeout(Ember.testing ? 0 : 1000);
+
+      this.flashMessages.add({
+        title: "Login successful",
+        message: `Welcome back${
+          this.authenticatedUser.info.name
+            ? `, ${this.authenticatedUser.info.name}`
+            : ""
+        }!`,
+        type: "success",
+        timeout: 3000,
+        destroyOnClick: true,
+      });
+
+      this.preventReauthenticationMessage = false;
+    } catch (error: unknown) {
+      this.flashMessages.clearMessages();
+      this.showFlashMessage(
+        "Login failed",
+        error as string,
+        "critical"
+      );
+    }
   });
 
   // ember-simple-auth only uses a cookie to track redirect target if you're using fastboot, otherwise it keeps track of the redirect target as a parameter on the session service. See the source here: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L33-L50
@@ -97,6 +149,15 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
+    if (this.authenticatedUser.info) {
+      /**
+       * This will be true when the reauthenticating via the "token expired" message.
+       * Since we already have cached userInfo, we don't need to await it.
+       */
+      void this.authenticatedUser.loadInfo.perform();
+      void this.pollForExpiredAuth.perform();
+    }
+
     let redirectStorageValue =
       window.sessionStorage.getItem(REDIRECT_STORAGE_KEY) ||
       window.localStorage.getItem(REDIRECT_STORAGE_KEY);
