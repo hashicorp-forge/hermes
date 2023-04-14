@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
-import { dropTask, keepLatestTask, task } from "ember-concurrency";
+import { keepLatestTask, task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
@@ -62,9 +62,9 @@ export default class AuthenticatedUserService extends Service {
 
   /**
    * Loads the user's info from the Google API.
-   * Called by the `authenticated` afterModel and `session.handleAuthentication`
-   * to ensure `authenticatedUser.info` is always defined.
-   * On error, will bubble up to the application route.
+   * Called by `session.handleAuthentication` and `authenticated.afterModel`.
+   * Ensures `authenticatedUser.info` is always defined and up-to-date
+   * in any route that needs it. On error, bubbles up to the application route.
    */
   loadInfo = keepLatestTask(async () => {
     this._info = await this.store.queryRecord("google.userinfo.me", {});

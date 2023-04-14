@@ -76,7 +76,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
        * Show a message and stop polling (If the user hasn't already dismissed
        * a previous message). On re-auth,`handleAuthentication` will restart the task.
        */
-      this.showFlashMessage(
+      this.showReauthMessage(
         "Login token expired",
         "Please reauthenticate to keep using Hermes.",
         "warning",
@@ -91,10 +91,15 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     this.pollForExpiredAuth.perform();
   });
 
-  private showFlashMessage(
+  /**
+   * Triggers a flash message with a button to reauthenticate.
+   * Used when the user's session has expired, or when the user
+   * unsuccessfully attempts to reauthenticate.
+   */
+  private showReauthMessage(
     title: string,
     message: string,
-    type: "success" | "warning" | "critical",
+    type: "warning" | "critical",
     onDestroy?: () => void
   ) {
     this.flashMessages.add({
@@ -136,7 +141,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       this.preventReauthenticationMessage = false;
     } catch (error: unknown) {
       this.flashMessages.clearMessages();
-      this.showFlashMessage(
+      this.showReauthMessage(
         "Login failed",
         error as string,
         "critical"
