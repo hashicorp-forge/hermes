@@ -298,6 +298,13 @@ export default class DocumentSidebar extends Component {
         extendedTimeout: 1000,
       });
     } catch (err) {
+      this.flashMessages.add({
+        title: "Unable to approve",
+        message: err,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
       throw err;
     }
 
@@ -325,6 +332,13 @@ export default class DocumentSidebar extends Component {
         extendedTimeout: 1000,
       });
     } catch (err) {
+      this.flashMessages.add({
+        title: "Change request failed",
+        message: err,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
       throw err;
     }
 
