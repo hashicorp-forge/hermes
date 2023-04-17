@@ -11,7 +11,7 @@ import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
-import EmberMetricsService from "ember-metrics/index";
+import MetricsService from "hermes/services/metrics";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -19,13 +19,15 @@ export default class ApplicationRoute extends Route {
   @service declare flags: any;
   @service declare session: SessionService;
   @service declare router: RouterService;
-  @service declare metrics: EmberMetricsService;
+  @service declare metrics: MetricsService;
 
   constructor() {
     super(...arguments);
 
     this.router.on("routeDidChange", () => {
-      this.metrics.trackPage();
+      if (this.config.config.google_analytics_tag_id) {
+        this.metrics.trackPage();
+      }
     });
   }
 
@@ -79,8 +81,8 @@ export default class ApplicationRoute extends Route {
     // could be done in an initializer, but this seems more natural these days
     this.flags.initialize();
 
-    // Get web config from backend if this is a production build.
-    if (config.environment === "production") {
+    if (config.environment !== "production") {
+      console.log("dog");
       return this.fetchSvc
         .fetch("/api/v1/web/config")
         .then((response) => response?.json())

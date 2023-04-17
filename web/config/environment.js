@@ -11,8 +11,6 @@ const getEnv = (key, defaultValue) => {
   return value != null ? value : defaultValue;
 };
 
-const hasGoogleAnalyticsID = !!getEnv("GOOGLE_ANALYTICS_TAG_ID", null);
-
 module.exports = function (environment) {
   let ENV = {
     modulePrefix: "hermes",
@@ -34,20 +32,15 @@ module.exports = function (environment) {
       // Here you can pass flags/options to your application instance
       // when it is created
     },
-    metricsAdapters: hasGoogleAnalyticsID
-      ? [
-          {
-            name: "GoogleAnalyticsFour",
-            environments: ["development", "production"],
-            config: {
-              id: getEnv("GOOGLE_ANALYTICS_TAG_ID"),
-              options: {
-                anonymize_ip: true,
-              },
-            },
-          },
-        ]
-      : [],
+    metricsAdapters: [
+      {
+        name: "GoogleAnalyticsFour",
+        environments: ["development", "production"],
+        config: {
+          // Configured in the GoogleAnalyticsFourAdapter
+        },
+      },
+    ],
 
     algolia: {
       appID: getEnv("ALGOLIA_APP_ID"),
