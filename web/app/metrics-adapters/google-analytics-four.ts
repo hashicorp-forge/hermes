@@ -1,7 +1,6 @@
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import GoogleAnalyticsFour from "ember-metrics/metrics-adapters/google-analytics-four";
-import { compact } from "ember-metrics/-private/utils/object-transforms";
 
 declare global {
   interface Window {
@@ -36,6 +35,6 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
     window.dataLayer = window.dataLayer || [];
 
     this.gtag("js", new Date());
-    this.gtag("config", GoogleAnalyticsTagID, compact(this.options));
+    this.gtag("config", GoogleAnalyticsTagID, this.options);
   }
 }
