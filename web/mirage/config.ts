@@ -181,6 +181,17 @@ export default function (mirageConfig) {
           schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
+
+      /**
+       * Used by the Dashboard route to get a user's recently viewed documents.
+       */
+      this.get("/me/recently-viewed-docs", (schema) => {
+        let index = schema.recentlyViewedDocs.all().models.map((doc) => {
+          return doc.attrs;
+        });
+        return new Response(200, {}, index);
+      });
+
       /**
        * Used by the AuthenticatedUserService to get the user's subscriptions.
        */

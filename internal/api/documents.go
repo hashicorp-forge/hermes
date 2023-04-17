@@ -159,64 +159,15 @@ func DocumentHandler(
 				// Get authenticated user's email address.
 				email := r.Context().Value("userEmail").(string)
 
-				// Get user (if exists).
-				u := models.User{
-					EmailAddress: email,
-				}
-				if err := u.Get(db); err != nil && !errors.Is(
-					err, gorm.ErrRecordNotFound) {
-					l.Error("error getting user in database",
+				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
+					// If we get an error, log it but don't return an error response
+					// because this would degrade UX.
+					l.Error("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
-					return
-				}
-
-				// Prepend document to recently viewed documents.
-				rvd := append(
-					[]models.Document{{GoogleFileID: docID}},
-					u.RecentlyViewedDocs...)
-
-				// Trim recently viewed documents to a length of 5.
-				if len(rvd) > 5 {
-					rvd = rvd[:5]
-				}
-
-				// Update user.
-				u.RecentlyViewedDocs = rvd
-				if err := u.Upsert(db); err != nil {
-					l.Error("error upserting user",
-						"error", err,
-						"doc_id", docID,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
-					return
-				}
-
-				// Update ViewedAt time for this document.
-				viewedDoc := models.RecentlyViewedDoc{
-					UserID:     int(u.ID),
-					DocumentID: int(u.RecentlyViewedDocs[0].ID),
-					ViewedAt:   now,
-				}
-				if err := db.Updates(&viewedDoc).Error; err != nil {
-					l.Error("error updating recently viewed document in database",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
 					return
 				}
 			}
@@ -393,4 +344,56 @@ Hermes
 			return
 		}
 	})
+}
+
+// updateRecentlyViewedDocs updates the recently viewed docs for a user with the
+// provided email address, using the document file ID and viewed at time for a
+// document view event.
+func updateRecentlyViewedDocs(
+	email, docID string, db *gorm.DB, viewedAt time.Time) error {
+	// Get user (if exists).
+	u := models.User{
+		EmailAddress: email,
+	}
+	if err := u.Get(db); err != nil && !errors.Is(
+		err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("error getting user in database: %w", err)
+	}
+
+	// Prepend document to recently viewed documents.
+	rvd := append(
+		[]models.Document{{GoogleFileID: docID}},
+		u.RecentlyViewedDocs...)
+
+	// Trim recently viewed documents to a length of 5.
+	if len(rvd) > 5 {
+		rvd = rvd[:5]
+	}
+
+	// Update user.
+	u.RecentlyViewedDocs = rvd
+	if err := u.Upsert(db); err != nil {
+		return fmt.Errorf("error upserting user: %w", err)
+	}
+
+	// Get document in database to get the ID.
+	doc := models.Document{
+		GoogleFileID: docID,
+	}
+	if err := doc.Get(db); err != nil {
+		return fmt.Errorf("error getting document: %w", err)
+	}
+
+	// Update ViewedAt time for this document.
+	viewedDoc := models.RecentlyViewedDoc{
+		UserID:     int(u.ID),
+		DocumentID: int(doc.ID),
+		ViewedAt:   viewedAt,
+	}
+	if err := db.Updates(&viewedDoc).Error; err != nil {
+		return fmt.Errorf(
+			"error updating recently viewed document in database: %w", err)
+	}
+
+	return nil
 }

@@ -74,18 +74,7 @@ export default class RecentlyViewedDocsService extends Service {
        * Fetch the file IDs from the Google Index file.
        */
       let fetchResponse = await this.fetchSvc.fetch(
-        `https://www.googleapis.com/drive/v3/files/${this.indexID}?` +
-          new URLSearchParams({
-            alt: "media",
-            fields: "files(id, name)",
-          }),
-        {
-          headers: {
-            Authorization:
-              "Bearer " + this.session.data.authenticated.access_token,
-            "Content-Type": "application/json",
-          },
-        }
+        "/api/v1/me/recently-viewed-docs"
       );
 
       this.index = await fetchResponse?.json();
