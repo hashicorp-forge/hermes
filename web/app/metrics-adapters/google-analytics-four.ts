@@ -15,6 +15,10 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
     super(config);
   }
 
+  /**
+   * Modified from its parent class:
+   * https://github.com/adopted-ember-addons/ember-metrics/blob/master/addon/metrics-adapters/google-analytics-four.js#L24-L28
+   */
   install(): void {
     const GoogleAnalyticsTagID = this.configSvc.config.google_analytics_tag_id;
 
@@ -26,9 +30,6 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
       id: GoogleAnalyticsTagID,
       anonymize_ip: true,
     };
-
-    // The rest is copied from the parent class:
-    // https://github.com/adopted-ember-addons/ember-metrics/blob/master/addon/metrics-adapters/google-analytics-four.js#L24-L28
 
     this._injectScript(GoogleAnalyticsTagID);
 
