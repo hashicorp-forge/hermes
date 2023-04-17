@@ -81,8 +81,8 @@ export default class ApplicationRoute extends Route {
     // could be done in an initializer, but this seems more natural these days
     this.flags.initialize();
 
-    if (config.environment !== "production") {
-      console.log("dog");
+    // Get web config from backend if this is a production build.
+    if (config.environment === "production") {
       return this.fetchSvc
         .fetch("/api/v1/web/config")
         .then((response) => response?.json())

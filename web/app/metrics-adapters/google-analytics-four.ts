@@ -20,15 +20,16 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
     const GoogleAnalyticsTagID = this.configSvc.config.google_analytics_tag_id;
 
     if (!GoogleAnalyticsTagID) {
-      console.log("Google Analytics Tag ID not set");
       return;
     }
 
-      console.log("Google Analytics Tagged!!");
     this.options = {
       id: GoogleAnalyticsTagID,
       anonymize_ip: true,
     };
+
+    // The rest is copied from the parent class:
+    // https://github.com/adopted-ember-addons/ember-metrics/blob/master/addon/metrics-adapters/google-analytics-four.js#L24-L28
 
     this._injectScript(GoogleAnalyticsTagID);
 
