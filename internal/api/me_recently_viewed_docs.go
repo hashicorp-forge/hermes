@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -23,14 +22,10 @@ func MeRecentlyViewedDocsHandler(
 ) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errResp := func(httpCode int, userErrMsg, logErrMsg string, err error) {
-			l.Error(logErrMsg,
-				"method", r.Method,
-				"path", r.URL.Path,
-				"error", err,
-			)
-			errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-			http.Error(w, errJSON, httpCode)
+		errResp := func(
+			httpCode int, userErrMsg, logErrMsg string, err error,
+			extraArgs ...interface{}) {
+			respondError(w, r, l, httpCode, userErrMsg, logErrMsg, err, extraArgs...)
 		}
 
 		// Authorize request.
