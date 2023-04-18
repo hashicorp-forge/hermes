@@ -1,18 +1,22 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
+import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
+  @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   beforeModel(transition: any) {
     /**
-     * Checks if the session is authenticated in the front end.
-     * If unauthenticated, it will redirect to the auth screen
+     * If using Google auth, check if the session is authenticated.
+     * If unauthenticated, it will redirect to the auth screen.
      */
-    this.session.requireAuthentication(transition, "authenticate");
+    if (!this.configSvc.config.bypass_google_auth) {
+      this.session.requireAuthentication(transition, "authenticate");
+    }
   }
 
   // Note: Only called if the session is authenticated in the front end
@@ -26,9 +30,10 @@ export default class AuthenticatedRoute extends Route {
     await this.authenticatedUser.loadInfo.perform();
 
     /**
-     * If the session is authenticated with the front- and back-ends,
-     * kick off the task to poll for expired auth.
+     * If using Google auth, kick off the task to poll for expired auth.
      */
-    void this.session.pollForExpiredAuth.perform();
+    if (!this.configSvc.config.bypass_google_auth) {
+      void this.session.pollForExpiredAuth.perform();
+    }
   }
 }

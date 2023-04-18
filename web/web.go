@@ -57,6 +57,7 @@ type ConfigResponse struct {
 	AlgoliaDocsIndexName     string          `json:"algolia_docs_index_name"`
 	AlgoliaDraftsIndexName   string          `json:"algolia_drafts_index_name"`
 	AlgoliaInternalIndexName string          `json:"algolia_internal_index_name"`
+	BypassGoogleAuth         bool            `json:"bypass_google_auth"`
 	FeatureFlags             map[string]bool `json:"feature_flags"`
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
@@ -99,10 +100,16 @@ func ConfigHandler(
 			shortLinkBaseURL = strings.TrimSuffix(cfg.BaseURL, "/") + "/l"
 		}
 
+		bypassGoogleAuth := false
+		if cfg.Okta == nil || (cfg.Okta != nil && !cfg.Okta.Disabled) {
+			bypassGoogleAuth = true
+		}
+
 		response := &ConfigResponse{
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
 			AlgoliaInternalIndexName: cfg.Algolia.InternalIndexName,
+			BypassGoogleAuth:         bypassGoogleAuth,
 			FeatureFlags:             featureFlags,
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,

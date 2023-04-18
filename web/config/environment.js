@@ -57,6 +57,8 @@ module.exports = function (environment) {
       apiKey: getEnv("ALGOLIA_SEARCH_API_KEY"),
     },
 
+    bypassGoogleAuth: getEnv("BYPASS_GOOGLE_AUTH"),
+
     google: {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },

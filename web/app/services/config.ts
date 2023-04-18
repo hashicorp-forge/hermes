@@ -9,6 +9,7 @@ export default class ConfigService extends Service {
     algolia_docs_index_name: config.algolia.docsIndexName,
     algolia_drafts_index_name: config.algolia.draftsIndexName,
     algolia_internal_index_name: config.algolia.internalIndexName,
+    bypass_google_auth: config.bypassGoogleAuth,
     feature_flags: config.featureFlags,
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
