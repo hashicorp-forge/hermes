@@ -81,13 +81,15 @@ func MeRecentlyViewedDocsHandler(
 					},
 				}
 				if err := doc.Get(db); err != nil {
-					errResp(
-						http.StatusInternalServerError,
-						"Error getting document",
-						"error getting document in database",
-						err,
+					// Log error but continue trying to get other recently viewed
+					// documents (for a better UX).
+					l.Error("error getting document in database",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"document_db_id", d.DocumentID,
 					)
-					return
+					continue
 				}
 
 				isDraft := false
