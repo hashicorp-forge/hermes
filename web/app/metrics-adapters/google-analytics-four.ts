@@ -13,7 +13,7 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
 
   /**
    * Modified from its parent class:
-   * https://github.com/adopted-ember-addons/ember-metrics/blob/master/addon/metrics-adapters/google-analytics-four.js#L11-L28
+   * https://github.com/adopted-ember-addons/ember-metrics/blob/01bb65e68f565fc48c2fa252d17a1b7d3d099e68/addon/metrics-adapters/google-analytics-four.js#L11-L28
    */
   install(): void {
     const GoogleAnalyticsTagID =
