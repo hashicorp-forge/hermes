@@ -1,6 +1,6 @@
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
 import GoogleAnalyticsFour from "ember-metrics/metrics-adapters/google-analytics-four";
+import ConfigService from "hermes/services/config";
 
 declare global {
   interface Window {
@@ -11,16 +11,13 @@ declare global {
 export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
   @service("config") declare configSvc: ConfigService;
 
-  constructor(config: any) {
-    super(config);
-  }
-
   /**
    * Modified from its parent class:
    * https://github.com/adopted-ember-addons/ember-metrics/blob/master/addon/metrics-adapters/google-analytics-four.js#L11-L28
    */
   install(): void {
-    const GoogleAnalyticsTagID = this.configSvc.config.google_analytics_tag_id;
+    const GoogleAnalyticsTagID =
+      this.config.id || this.configSvc.config.google_analytics_tag_id;
 
     if (!GoogleAnalyticsTagID) {
       return;
@@ -28,6 +25,7 @@ export default class GoogleAnalyticsFourAdapter extends GoogleAnalyticsFour {
 
     this.options = {
       id: GoogleAnalyticsTagID,
+      send_page_view: true,
       anonymize_ip: true,
     };
 

@@ -4,13 +4,14 @@ interface BaseMetricsAdapter {
 }
 
 declare module "ember-metrics/metrics-adapters/google-analytics-four" {
-  export default class GoogleAnalyticsFourAdapter extends BaseMetricsAdapter {
-    options: any;
-
-    _injectScript(GoogleAnalyticsTagID: string): void;
-
-    gtag(...args: any[]): void;
-    install(): void;
+  export default class GoogleAnalyticsFour extends BaseMetricsAdapter {
     constructor(config: any);
+    install(): void;
+    gtag(...args: any[]): void;
+    options: any;
+    config: {
+      id: string;
+    };
+    _injectScript(GoogleAnalyticsTagID: string): void;
   }
 }

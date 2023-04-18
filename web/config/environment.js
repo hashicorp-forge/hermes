@@ -37,11 +37,10 @@ module.exports = function (environment) {
         name: "GoogleAnalyticsFour",
         environments: ["development", "production"],
         config: {
-          // Configured in the GoogleAnalyticsFourAdapter
+          id: getEnv("GOOGLE_ANALYTICS_TAG_ID", null),
         },
       },
     ],
-
     algolia: {
       appID: getEnv("ALGOLIA_APP_ID"),
       docsIndexName: getEnv("ALGOLIA_DOCS_INDEX_NAME", "docs"),
