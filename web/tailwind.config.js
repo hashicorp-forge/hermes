@@ -43,6 +43,9 @@ module.exports = {
       bold: "var(--token-typography-font-weight-bold)",
     },
     extend: {
+      borderRadius: {
+        "button-md": "5px",
+      },
       boxShadow: {
         "surface-low": "var(--token-surface-low-box-shadow)",
         "surface-mid": "var(--token-surface-mid-box-shadow)",

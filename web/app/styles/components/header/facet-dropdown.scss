@@ -1,7 +1,7 @@
 .facet-dropdown-popover {
-  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full flex flex-col rounded-md w-full max-h-[400px] pt-0 z-10;
+  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full flex flex-col rounded-md w-full max-h-[400px] pt-0 z-50;
 
-  &.hds-dropdown-list {
+  &.hds-dropdown__content {
     @apply min-w-[175px];
   }
 

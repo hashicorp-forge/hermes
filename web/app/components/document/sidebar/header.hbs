@@ -1,0 +1,47 @@
+<div class="sidebar-header {{if @userHasScrolled 'scrolled'}}">
+  <LinkTo
+    data-test-sidebar-dashboard-link
+    class="sidebar-header-button sidebar-dashboard-link"
+    @route="authenticated.dashboard"
+    {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
+  >
+    <FlightIcon
+      @name={{if @isCollapsed "hashicorp" "arrow-left"}}
+      @size={{if @isCollapsed "24"}}
+    />
+    {{#unless @isCollapsed}}
+      <span>Dashboard</span>
+    {{/unless}}
+  </LinkTo>
+  <div class="sidebar-header-icon-controls">
+    {{#if this.shareButtonIsShown}}
+      <CopyURLButton
+        data-test-sidebar-copy-url-button
+        data-test-copy-url-value={{this.url}}
+        @url={{this.url}}
+        @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
+        class="sidebar-header-button"
+      />
+    {{/if}}
+    <ExternalLink
+      data-test-sidebar-google-docs-link
+      class="sidebar-header-button"
+      href="https://docs.google.com/document/d/{{@document.objectID}}"
+      {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
+    >
+      <FlightIcon @name="external-link" />
+    </ExternalLink>
+    <Action
+      data-test-sidebar-toggle-button
+      data-test-is-collapsed={{@isCollapsed}}
+      class="sidebar-header-button"
+      {{on "click" @toggleCollapsed}}
+      {{tooltip
+        (concat (if @isCollapsed "Expand" "Collapse") " sidebar")
+        placement=(if @isCollapsed "right" "bottom")
+      }}
+    >
+      <FlightIcon @name={{if @isCollapsed "sidebar-show" "sidebar-hide"}} />
+    </Action>
+  </div>
+</div>
