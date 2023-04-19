@@ -37,9 +37,8 @@
         No matches
       </div>
     {{else}}
-      {{#if @listIsOrdered}}
-        <ol
-          data-test-x-hds-dropdown-ordered-list
+      {{#let (element (if @listIsOrdered "ol" "ul")) as |List|}}
+        <List
           class="py-1"
           id={{this.id}}
           role={{this.role}}
@@ -54,26 +53,8 @@
             @setFocusedItemIndex={{@setFocusedItemIndex}}
             @focusedItemIndex={{@focusedItemIndex}}
           />
-        </ol>
-      {{else}}
-        <ul
-          data-test-x-hds-dropdown-unordered-list
-          class="py-1"
-          id={{this.id}}
-          role={{this.role}}
-          aria-activedescendant={{this.ariaActiveDescendant}}
-        >
-          <X::Hds::Dropdown::ListItems
-            @id={{@id}}
-            @onChange={{@onChange}}
-            @shownItems={{@shownItems}}
-            @role={{@listItemRole}}
-            @hideDropdown={{@f.hideContent}}
-            @setFocusedItemIndex={{@setFocusedItemIndex}}
-            @focusedItemIndex={{@focusedItemIndex}}
-          />
-        </ul>
-      {{/if}}
+        </List>
+      {{/let}}
     {{/if}}
   </div>
 </div>
