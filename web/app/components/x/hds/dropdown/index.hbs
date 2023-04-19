@@ -1,7 +1,7 @@
 <FloatingUI @renderOut={{true}} @placement={{@placement}}>
   <:anchor as |f|>
     {{yield
-      (hash onTriggerKeydown=this.onTriggerKeydown floating=f)
+      (hash onTriggerKeydown=this.onTriggerKeydown floatingUI=f)
       to="anchor"
     }}
   </:anchor>

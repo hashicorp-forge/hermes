@@ -10,14 +10,14 @@
     <:anchor as |d|>
       <Action
         {{! this could all be part of the modifier }}
-        {{on "keydown" (fn d.onTriggerKeydown d.floating)}}
-        {{on "click" d.floating.toggleContent}}
-        {{did-insert d.floating.registerAnchor}}
+        {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
+        {{on "click" d.floatingUI.toggleContent}}
+        {{did-insert d.floatingUI.registerAnchor}}
         aria-controls="x-hds-dropdown-list-{{if
           d.inputIsShown
           'popover'
           'list'
-        }}-{{d.floating.id}}"
+        }}-{{d.floatingUI.id}}"
         class="relative flex"
       >
         <Hds::Badge
