@@ -105,14 +105,6 @@ export default class DocumentRoute extends Route {
       console.log("Error recording analytics: " + err);
     }
 
-    // Update recently viewed docs for the dashboard route.
-    try {
-      await this.recentDocs.fetchAll.perform();
-    } catch (e) {
-      console.error("error updating recently viewed docs", e);
-      throw e;
-    }
-
     // Load the document as well as the logged in user info
 
     // Preload avatars for all approvers in the Algolia index.

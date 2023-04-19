@@ -67,6 +67,7 @@ export default class DashboardRoute extends Route {
         return result.hits;
       });
 
+    await this.recentDocs.fetchAll.perform();
     if (this.recentDocs.all === null) {
       try {
         await this.recentDocs.fetchAll.perform();
