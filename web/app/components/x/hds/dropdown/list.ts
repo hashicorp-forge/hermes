@@ -12,6 +12,7 @@ interface XHdsDropdownListSignature<T> {
     selected: any;
     focusedItemIndex: number;
     inputIsShown?: boolean;
+    inputPlaceholder?: string;
     isOrdered?: boolean;
     onChange: (e: Event) => void;
     resetFocusedItemIndex: () => void;

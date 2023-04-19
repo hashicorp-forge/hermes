@@ -1,12 +1,14 @@
+{{! Handle ArrowUp, ArrowDown and Enter: }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
 <div
+  id="x-hds-dropdown-popover-{{@id}}"
   class="flex flex-col overflow-hidden"
   role={{if @inputIsShown "combobox"}}
-  id="x-hds-dropdown-popover"
   ...attributes
 >
   {{#if @inputIsShown}}
+    {{! TODO: make this a class }}
     <div class="relative p-1 border-b border-b-color-border-faint">
       <Hds::Form::TextInput::Base
         data-test-product-area-dropdown-input
@@ -15,8 +17,10 @@
         {{on "focusin" @resetFocusedItemIndex}}
         @value={{@query}}
         @type="search"
+        placeholder={{or @inputPlaceholder "Filter..."}}
+        {{! TODO: make this more ...something }}
         @value=""
-        placeholder="Filter..."
+        {{! TODO: make this more specific }}
         aria-controls="x-hds-dropdown"
         aria-activedescendant={{unless
           (eq @focusedItemIndex -1)
@@ -26,34 +30,41 @@
     </div>
   {{/if}}
   <div
+    {{! TODO: make this a class }}
     class="overflow-auto w-full relative"
     {{did-insert @registerScrollContainer}}
   >
     {{#if this.noMatchesFound}}
       <div
         data-test-x-hds-dropdown-list-empty-state
+        {{! TODO: make this a class }}
         class="p-12 text-center text-color-foreground-faint"
       >
+        {{! Need to template-ize this }}
         No matches
       </div>
     {{else}}
-      {{#let (element (if @listIsOrdered "ol" "ul")) as |List|}}
-        <List
+      {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
+        <MaybeOrderedList
           class="py-1"
           id={{this.id}}
           role={{this.role}}
           aria-activedescendant={{this.ariaActiveDescendant}}
         >
-          <X::Hds::Dropdown::ListItems
-            @id={{@id}}
-            @onChange={{@onChange}}
-            @shownItems={{@shownItems}}
-            @role={{@listItemRole}}
-            @hideDropdown={{@f.hideContent}}
-            @setFocusedItemIndex={{@setFocusedItemIndex}}
-            @focusedItemIndex={{@focusedItemIndex}}
-          />
-        </List>
+          {{#if @shownItems}}
+            {{#each-in @shownItems as |item|}}
+              <X::Hds::Dropdown::ListItem
+                @role={{@listItemRole}}
+                @value={{item}}
+                @selected={{eq @selected item}}
+                @hideDropdown={{@f.hideContent}}
+                @onChange={{@onChange}}
+                @setFocusedItemIndex={{@setFocusedItemIndex}}
+                @focusedItemIndex={{@focusedItemIndex}}
+              />
+            {{/each-in}}
+          {{/if}}
+        </MaybeOrderedList>
       {{/let}}
     {{/if}}
   </div>
