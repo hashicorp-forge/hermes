@@ -127,7 +127,7 @@ indexer {
 }
 
 // okta configures Hermes to authenticate users using an AWS Application Load
-// Balancer and Okta.
+// Balancer and Okta instead of using Google OAuth.
 okta {
   // auth_server_url is the URL of the Okta authorization server.
   auth_server_url = ""
