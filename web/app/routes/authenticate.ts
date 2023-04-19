@@ -12,7 +12,7 @@ export default class AuthenticateRoute extends Route {
      * If using Google auth, checks if the session is authenticated,
      * and if it is, transitions to the specified route
      */
-    if (!this.configSvc.config.bypass_google_auth) {
+    if (!this.configSvc.config.skip_google_auth) {
       this.session.prohibitAuthentication("/");
     }
   }

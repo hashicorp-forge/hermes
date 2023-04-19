@@ -14,7 +14,7 @@ export default class AuthenticatedRoute extends Route {
      * If using Google auth, check if the session is authenticated.
      * If unauthenticated, it will redirect to the auth screen.
      */
-    if (!this.configSvc.config.bypass_google_auth) {
+    if (!this.configSvc.config.skip_google_auth) {
       this.session.requireAuthentication(transition, "authenticate");
     }
   }
@@ -32,7 +32,7 @@ export default class AuthenticatedRoute extends Route {
     /**
      * If using Google auth, kick off the task to poll for expired auth.
      */
-    if (!this.configSvc.config.bypass_google_auth) {
+    if (!this.configSvc.config.skip_google_auth) {
       void this.session.pollForExpiredAuth.perform();
     }
   }

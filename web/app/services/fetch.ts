@@ -19,7 +19,7 @@ export default class FetchService extends Service {
   async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
     // If using Google auth, add the Google access token in a header if the URL
     // starts with a frontslash, which will only target the application backend.
-    if (!this.configSvc.config.bypass_google_auth) {
+    if (!this.configSvc.config.skip_google_auth) {
       if (Array.from(url)[0] == "/") {
         if (options.headers && options.headers["Hermes-Google-Access-Token"]) {
           /**

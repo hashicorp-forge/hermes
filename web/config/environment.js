@@ -49,11 +49,11 @@ module.exports = function (environment) {
       apiKey: getEnv("ALGOLIA_SEARCH_API_KEY"),
     },
 
-    bypassGoogleAuth: getEnv("BYPASS_GOOGLE_AUTH"),
-
     google: {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },
+
+    skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
 
     torii: {
       sessionServiceName: "session",

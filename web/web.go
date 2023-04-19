@@ -57,12 +57,12 @@ type ConfigResponse struct {
 	AlgoliaDocsIndexName     string          `json:"algolia_docs_index_name"`
 	AlgoliaDraftsIndexName   string          `json:"algolia_drafts_index_name"`
 	AlgoliaInternalIndexName string          `json:"algolia_internal_index_name"`
-	BypassGoogleAuth         bool            `json:"bypass_google_auth"`
 	FeatureFlags             map[string]bool `json:"feature_flags"`
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
+	SkipGoogleAuth           bool            `json:"skip_google_auth"`
 }
 
 // ConfigHandler returns runtime configuration for the Hermes frontend.
@@ -100,21 +100,22 @@ func ConfigHandler(
 			shortLinkBaseURL = strings.TrimSuffix(cfg.BaseURL, "/") + "/l"
 		}
 
-		bypassGoogleAuth := false
+		// Skip Google auth if Okta is not disabled in the config.
+		skipGoogleAuth := false
 		if cfg.Okta == nil || (cfg.Okta != nil && !cfg.Okta.Disabled) {
-			bypassGoogleAuth = true
+			skipGoogleAuth = true
 		}
 
 		response := &ConfigResponse{
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
 			AlgoliaInternalIndexName: cfg.Algolia.InternalIndexName,
-			BypassGoogleAuth:         bypassGoogleAuth,
 			FeatureFlags:             featureFlags,
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
 			ShortLinkBaseURL:         shortLinkBaseURL,
+			SkipGoogleAuth:           skipGoogleAuth,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

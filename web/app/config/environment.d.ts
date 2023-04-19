@@ -16,12 +16,12 @@ declare const config: {
     draftsIndexName: string;
     internalIndexName: string;
   };
-  bypassGoogleAuth: boolean;
   featureFlags: Record<string, boolean>;
   google: {
     docFolders: string;
   };
   shortLinkBaseURL: string;
+  skipGoogleAuth: boolean;
 };
 
 export default config;

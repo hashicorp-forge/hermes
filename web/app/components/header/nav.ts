@@ -29,7 +29,7 @@ export default class NavComponent extends Component<NavComponentSignature> {
   }
 
   protected get showSignOut(): boolean {
-    return !this.configSvc.config.bypass_google_auth;
+    return !this.configSvc.config.skip_google_auth;
   }
 
   /**
