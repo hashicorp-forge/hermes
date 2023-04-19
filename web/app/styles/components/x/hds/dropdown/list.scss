@@ -1,0 +1,19 @@
+.x-hds-dropdown-list-container {
+  @apply flex flex-col overflow-hidden;
+}
+
+.x-hds-dropdown-list-input-container {
+  @apply relative p-1 border-b border-b-color-border-faint;
+}
+
+.x-hds-dropdown-list-scroll-container {
+  @apply overflow-auto w-full relative;
+}
+
+.x-hds-dropdown-list-empty-state {
+  @apply p-12 text-center text-color-foreground-faint;
+}
+
+.x-hds-dropdown-list {
+  @apply py-1;
+}

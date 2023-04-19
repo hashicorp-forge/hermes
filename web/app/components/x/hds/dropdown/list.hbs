@@ -2,14 +2,13 @@
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
 <div
-  id="x-hds-dropdown-popover-{{@id}}"
-  class="flex flex-col overflow-hidden"
+  id="x-hds-dropdown-list-container-{{@id}}"
+  class="x-hds-dropdown-list-container"
   role={{if @inputIsShown "combobox"}}
   ...attributes
 >
   {{#if @inputIsShown}}
-    {{! TODO: make this a class }}
-    <div class="relative p-1 border-b border-b-color-border-faint">
+    <div class="x-hds-dropdown-list-input-container">
       <Hds::Form::TextInput::Base
         data-test-product-area-dropdown-input
         {{did-insert this.registerAndFocusInput}}
@@ -30,25 +29,22 @@
     </div>
   {{/if}}
   <div
-    {{! TODO: make this a class }}
-    class="overflow-auto w-full relative"
     {{did-insert @registerScrollContainer}}
+    class="x-hds-dropdown-list-scroll-container"
   >
     {{#if this.noMatchesFound}}
       <div
         data-test-x-hds-dropdown-list-empty-state
-        {{! TODO: make this a class }}
-        class="p-12 text-center text-color-foreground-faint"
+        class="x-hds-dropdown-list-empty-state"
       >
-        {{! Need to template-ize this }}
         No matches
       </div>
     {{else}}
       {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
         <MaybeOrderedList
-          class="py-1"
-          id={{this.id}}
-          role={{this.role}}
+          id="x-hds-dropdown-list-{{@id}}"
+          class="x-hds-dropdown-list"
+          role={{if this.args.inputIsShown "listbox" "menu"}}
           aria-activedescendant={{this.ariaActiveDescendant}}
         >
           {{#if @shownItems}}

@@ -32,14 +32,6 @@ export default class XHdsDropdownList extends Component<
     return this._input;
   }
 
-  get id(): string {
-    return `x-hds-dropdown-list-${this.args.id}`;
-  }
-
-  get role() {
-    return this.args.inputIsShown ? "listbox" : "menu";
-  }
-
   get ariaActiveDescendant() {
     if (this.args.focusedItemIndex !== -1) {
       return `x-hds-dropdown-list-item-${this.args.focusedItemIndex}`;
