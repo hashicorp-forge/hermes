@@ -1,7 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 
 interface XHdsDropdownListItemsComponentSignature<T> {
@@ -25,13 +24,6 @@ interface XHdsDropdownListItemsComponentSignature<T> {
 export default class XHdsDropdownListItemsComponent extends Component<
   XHdsDropdownListItemsComponentSignature<any>
 > {
-  @tracked _input: HTMLInputElement | null = null;
-
-  get input() {
-    assert("input must exist", this._input);
-    return this._input;
-  }
-
   get ariaActiveDescendant() {
     if (this.args.focusedItemIndex !== -1) {
       return `x-hds-dropdown-list-item-${this.args.focusedItemIndex}`;
@@ -43,11 +35,6 @@ export default class XHdsDropdownListItemsComponent extends Component<
       return false;
     }
     return Object.entries(this.args.shownItems).length === 0;
-  }
-
-  @action registerAndFocusInput(e: HTMLInputElement) {
-    this._input = e;
-    this.input.focus();
   }
 
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {

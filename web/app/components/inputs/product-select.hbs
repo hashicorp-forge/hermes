@@ -1,6 +1,5 @@
 {{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 {{#if this.products}}
-  yut
   <X::Hds::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
@@ -10,10 +9,9 @@
   >
     <:anchor as |d|>
       <Action
-        {{! this could all be part of the modifier }}
+        {{did-insert d.floatingUI.registerAnchor}}
         {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
         {{on "click" d.floatingUI.toggleContent}}
-        {{did-insert d.floatingUI.registerAnchor}}
         aria-controls="x-hds-dropdown-list-{{if
           d.inputIsShown
           'popover'

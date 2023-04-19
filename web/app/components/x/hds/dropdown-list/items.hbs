@@ -1,64 +1,31 @@
 {{! Handle ArrowUp, ArrowDown and Enter: }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
-<div
-  id="x-hds-dropdown-list-container-{{@id}}"
-  class="x-hds-dropdown-list-container"
-  role={{if @inputIsShown "combobox"}}
-  ...attributes
->
-  {{#if @inputIsShown}}
-    <div class="x-hds-dropdown-list-input-container">
-      <Hds::Form::TextInput::Base
-        data-test-product-area-dropdown-input
-        {{did-insert this.registerAndFocusInput}}
-        {{on "input" @onInput}}
-        {{on "focusin" @resetFocusedItemIndex}}
-        @value={{@query}}
-        @type="search"
-        placeholder={{or @inputPlaceholder "Filter..."}}
-        {{! TODO: make this more ...something }}
-        @value=""
-        {{! TODO: make this more specific }}
-        aria-controls="x-hds-dropdown"
-        aria-activedescendant={{unless
-          (eq @focusedItemIndex -1)
-          (concat "x-hds-dropdown-list-item-" @focusedItemIndex)
-        }}
-      />
-    </div>
-  {{/if}}
-  <div
-    {{did-insert @registerScrollContainer}}
-    class="x-hds-dropdown-list-scroll-container"
-  >
-    {{#if this.noMatchesFound}}
-      <div class="x-hds-dropdown-list-empty-state">
-        No matches
-      </div>
-    {{else}}
-      {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
-        <MaybeOrderedList
-          id="x-hds-dropdown-list-{{@id}}"
-          class="x-hds-dropdown-list"
-          role={{if this.args.inputIsShown "listbox" "menu"}}
-          aria-activedescendant={{this.ariaActiveDescendant}}
-        >
-          {{#if @shownItems}}
-            {{#each-in @shownItems as |item|}}
-              <X::Hds::DropdownList::Item
-                @role={{@listItemRole}}
-                @value={{item}}
-                @selected={{eq @selected item}}
-                @hideDropdown={{@f.hideContent}}
-                @onChange={{@onChange}}
-                @setFocusedItemIndex={{@setFocusedItemIndex}}
-                @focusedItemIndex={{@focusedItemIndex}}
-              />
-            {{/each-in}}
-          {{/if}}
-        </MaybeOrderedList>
-      {{/let}}
-    {{/if}}
+{{#if this.noMatchesFound}}
+  <div class="x-hds-dropdown-list-empty-state">
+    No matches
   </div>
-</div>
+{{else}}
+  {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
+    <MaybeOrderedList
+      id="x-hds-dropdown-list-{{@id}}"
+      class="x-hds-dropdown-list"
+      role={{if this.args.inputIsShown "listbox" "menu"}}
+      aria-activedescendant={{this.ariaActiveDescendant}}
+    >
+      {{#if @shownItems}}
+        {{#each-in @shownItems as |item|}}
+          <X::Hds::DropdownList::Item
+            @role={{@listItemRole}}
+            @value={{item}}
+            @selected={{eq @selected item}}
+            @hideDropdown={{@f.hideContent}}
+            @onChange={{@onChange}}
+            @setFocusedItemIndex={{@setFocusedItemIndex}}
+            @focusedItemIndex={{@focusedItemIndex}}
+          />
+        {{/each-in}}
+      {{/if}}
+    </MaybeOrderedList>
+  {{/let}}
+{{/if}}

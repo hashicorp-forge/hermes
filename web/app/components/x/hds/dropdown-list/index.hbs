@@ -6,27 +6,59 @@
     }}
   </:anchor>
   <:content as |f|>
-    {{! action list }}
-    {{! link list }}
-    <X::Hds::DropdownList::Items
-      ...attributes
-      {{will-destroy this.willDestroyDropdown}}
+    <div
+      id="x-hds-dropdown-list-container-{{f.id}}"
+      class="x-hds-dropdown-list-container"
+      role={{if this.inputIsShown "combobox"}}
       {{did-insert (fn this.didInsertList f)}}
+      {{will-destroy this.willDestroyDropdown}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
-      @items={{@items}}
-      @id={{f.id}}
-      @onInput={{perform this.onInput f}}
-      @onChange={{@onChange}}
-      @listItemRole={{this.listItemRole}}
-      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-      @registerScrollContainer={{this.registerScrollContainer}}
-      @listIsOrdered={{@listIsOrdered}}
-      @inputIsShown={{this.inputIsShown}}
-      @setFocusedItemIndex={{this.setFocusedItemIndex}}
-      @focusedItemIndex={{this.focusedItemIndex}}
-      @shownItems={{this.shownItems}}
-      @selected={{@selected}}
-      @f={{f}}
-    />
+      ...attributes
+    >
+      {{#if this.inputIsShown}}
+        <div class="x-hds-dropdown-list-input-container">
+          <Hds::Form::TextInput::Base
+            data-test-product-area-dropdown-input
+            {{did-insert this.registerAndFocusInput}}
+            {{on "input" (perform this.onInput f)}}
+            {{on "focusin" this.resetFocusedItemIndex}}
+            @value={{this.query}}
+            @type="search"
+            placeholder="Filter..."
+            {{! TODO: make this more specific }}
+            aria-controls="x-hds-dropdown"
+            aria-activedescendant={{unless
+              (eq this.focusedItemIndex -1)
+              (concat "x-hds-dropdown-list-item-" this.focusedItemIndex)
+            }}
+          />
+        </div>
+      {{/if}}
+      <div
+        {{did-insert this.registerScrollContainer}}
+        class="x-hds-dropdown-list-scroll-container"
+      >
+        <X::Hds::DropdownList::Items
+          @items={{@items}}
+          @id={{f.id}}
+          @onInput={{perform this.onInput f}}
+          @onChange={{@onChange}}
+          @listItemRole={{this.listItemRole}}
+          @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+          @registerScrollContainer={{this.registerScrollContainer}}
+          @listIsOrdered={{@listIsOrdered}}
+          @inputIsShown={{this.inputIsShown}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
+          @focusedItemIndex={{this.focusedItemIndex}}
+          @shownItems={{this.shownItems}}
+          @selected={{@selected}}
+          @query={{this.query}}
+          @f={{f}}
+        />
+
+      </div>
+      {{! action list }}
+      {{! link list }}
+    </div>
   </:content>
 </FloatingUI>

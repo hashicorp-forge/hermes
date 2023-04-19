@@ -39,9 +39,16 @@ export default class XHdsDropdownListComponent extends Component<
   @tracked filteredItems: unknown | null = null;
   @tracked protected menuItems: NodeListOf<Element> | null = null;
 
+  @tracked _input: HTMLInputElement | null = null;
+
   private get scrollContainer(): HTMLElement {
     assert("_scrollContainer must exist", this._scrollContainer);
     return this._scrollContainer;
+  }
+
+  get input() {
+    assert("input must exist", this._input);
+    return this._input;
   }
 
   get inputIsShown() {
@@ -65,6 +72,11 @@ export default class XHdsDropdownListComponent extends Component<
 
   @action protected registerScrollContainer(element: HTMLDivElement) {
     this._scrollContainer = element;
+  }
+
+  @action registerAndFocusInput(e: HTMLInputElement) {
+    this._input = e;
+    this.input.focus();
   }
 
   @action protected didInsertList(f: any) {
