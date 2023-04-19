@@ -7,7 +7,7 @@ import { tracked } from "@glimmer/tracking";
 import { restartableTask, task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 
-interface XHdsDropdownComponentSignature<T> {
+interface XHdsDropdownListComponentSignature<T> {
   Args: {
     selected: any;
     items?: any;
@@ -23,8 +23,8 @@ export enum FocusDirection {
   Last = "last",
 }
 
-export default class XHdsDropdownComponent extends Component<
-  XHdsDropdownComponentSignature<any>
+export default class XHdsDropdownListComponent extends Component<
+  XHdsDropdownListComponentSignature<any>
 > {
   @service("fetch") declare fetchSvc: FetchService;
 

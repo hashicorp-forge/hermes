@@ -6,7 +6,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { next } from "@ember/runloop";
 import { SortByLabel, SortByValue } from "./toolbar";
-import { FocusDirection } from "../x/hds/dropdown";
+import { FocusDirection } from "../x/hds/dropdown-list";
 
 enum FacetDropdownAriaRole {
   Option = "option",

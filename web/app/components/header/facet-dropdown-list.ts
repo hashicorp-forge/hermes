@@ -5,7 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { FocusDirection } from "../x/hds/dropdown";
+import { FocusDirection } from "../x/hds/dropdown-list";
 
 interface HeaderFacetDropdownListComponentSignature {
   Args: {

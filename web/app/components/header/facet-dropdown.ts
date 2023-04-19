@@ -5,7 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import { schedule } from "@ember/runloop";
-import { FocusDirection } from "../x/hds/dropdown";
+import { FocusDirection } from "../x/hds/dropdown-list";
 
 interface FacetDropdownComponentSignature {
   Args: {

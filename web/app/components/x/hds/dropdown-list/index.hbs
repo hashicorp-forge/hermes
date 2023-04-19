@@ -8,7 +8,7 @@
   <:content as |f|>
     {{! action list }}
     {{! link list }}
-    <X::Hds::Dropdown::List
+    <X::Hds::DropdownList::Items
       ...attributes
       {{will-destroy this.willDestroyDropdown}}
       {{did-insert (fn this.didInsertList f)}}

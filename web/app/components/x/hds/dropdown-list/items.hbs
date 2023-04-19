@@ -46,7 +46,7 @@
         >
           {{#if @shownItems}}
             {{#each-in @shownItems as |item|}}
-              <X::Hds::Dropdown::ListItem
+              <X::Hds::DropdownList::Item
                 @role={{@listItemRole}}
                 @value={{item}}
                 @selected={{eq @selected item}}

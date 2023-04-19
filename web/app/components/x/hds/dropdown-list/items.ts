@@ -4,7 +4,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 
-interface XHdsDropdownListSignature<T> {
+interface XHdsDropdownListItemsComponentSignature<T> {
   Args: {
     id: string;
     items?: any;
@@ -22,8 +22,8 @@ interface XHdsDropdownListSignature<T> {
   };
 }
 
-export default class XHdsDropdownList extends Component<
-  XHdsDropdownListSignature<any>
+export default class XHdsDropdownListItemsComponent extends Component<
+  XHdsDropdownListItemsComponentSignature<any>
 > {
   @tracked _input: HTMLInputElement | null = null;
 

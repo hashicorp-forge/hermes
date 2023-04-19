@@ -4,7 +4,7 @@ import { find, findAll, render, triggerKeyEvent } from "@ember/test-helpers";
 import { assert as emberAssert } from "@ember/debug";
 import { hbs } from "ember-cli-htmlbars";
 import { LONG_FACET_LIST, SHORT_FACET_LIST } from "./facet-dropdown-test";
-import { FocusDirection } from "hermes/components/x/hds/dropdown";
+import { FocusDirection } from "hermes/components/x/hds/dropdown-list";
 
 module(
   "Integration | Component | header/facet-dropdown-list",

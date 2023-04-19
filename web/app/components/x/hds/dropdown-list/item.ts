@@ -6,7 +6,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 
-interface XHdsProductBadgeDropdownListSignature {
+interface XHdsDropdownListItemComponentSignature {
   Args: {
     role?: string;
     value?: any;
@@ -22,7 +22,7 @@ interface XHdsProductBadgeDropdownListSignature {
   };
 }
 
-export default class XHdsProductBadgeDropdownList extends Component<XHdsProductBadgeDropdownListSignature> {
+export default class XHdsDropdownListItemComponent extends Component<XHdsDropdownListItemComponentSignature> {
   @service declare router: RouterService;
   /**
    * The element reference, set on insertion and updated on mouseenter.

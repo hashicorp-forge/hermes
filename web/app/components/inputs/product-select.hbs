@@ -1,6 +1,7 @@
 {{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 {{#if this.products}}
-  <X::Hds::Dropdown
+  yut
+  <X::Hds::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
     @onChange={{this.onChange}}
@@ -31,7 +32,7 @@
         />
       </Action>
     </:anchor>
-  </X::Hds::Dropdown>
+  </X::Hds::DropdownList>
 {{else if this.fetchProducts.isRunning}}
   <FlightIcon @name="loading" />
 {{else}}
@@ -39,5 +40,4 @@
     class="absolute top-0 left-0"
     {{did-insert (perform this.fetchProducts)}}
   ></div>
-
 {{/if}}
