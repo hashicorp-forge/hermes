@@ -141,7 +141,7 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+      this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
         if (schema.mes.first()) {
           return schema.mes.first().attrs;
