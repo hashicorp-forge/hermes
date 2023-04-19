@@ -5,6 +5,7 @@ import RecentlyViewedDocsService, {
 } from "hermes/services/recently-viewed-docs";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
+import MockDate from "mockdate";
 
 interface RecentlyViewedDocsContext extends MirageTestContext {
   recentDocs: RecentlyViewedDocsService;
@@ -19,6 +20,8 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
   });
 
   test("it fetches recently viewed docs", async function (this: RecentlyViewedDocsContext, assert) {
+    MockDate.set("2000-01-01T06:00:00.000-07:00");
+
     this.server.createList("recently-viewed-doc", 10);
     this.server.createList("document", 10);
 
@@ -35,11 +38,19 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
     );
 
     this.recentDocs.all?.forEach((recentDoc: RecentlyViewedDoc) => {
+      /**
+       * The Mirage factory sets the modifiedTime to 1 (1970),
+       * while we set our MockDate to 2000. That's obviously a 30 year difference,
+       * but our `timeAgo` function is inexact, assuming 28-day months, so it computes
+       * the difference as 32 years.
+       */
       assert.equal(
         recentDoc.doc.modifiedAgo,
-        "Modified 1 second ago",
+        "Modified 32 years ago",
         "modifiedAgo property is added"
       );
     });
+
+    MockDate.reset();
   });
 });
