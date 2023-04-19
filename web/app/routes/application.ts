@@ -11,7 +11,8 @@ import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
-import EmberMetricsService from "ember-metrics/index";
+import MetricsService from "hermes/services/metrics";
+import GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/google-analytics-four";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -19,15 +20,7 @@ export default class ApplicationRoute extends Route {
   @service declare flags: any;
   @service declare session: SessionService;
   @service declare router: RouterService;
-  @service declare metrics: EmberMetricsService;
-
-  constructor() {
-    super(...arguments);
-
-    this.router.on("routeDidChange", () => {
-      this.metrics.trackPage();
-    });
-  }
+  @service declare metrics: MetricsService;
 
   /**
    * Catch-all for bubbled-up model errors.
@@ -75,13 +68,11 @@ export default class ApplicationRoute extends Route {
 
     await this.session.setup();
 
-    // Flags read from the environment and set properties on the service this
-    // could be done in an initializer, but this seems more natural these days
     this.flags.initialize();
 
-    // Get web config from backend if this is a production build.
+    // Set config from the backend in production
     if (config.environment === "production") {
-      return this.fetchSvc
+      await this.fetchSvc
         .fetch("/api/v1/web/config")
         .then((response) => response?.json())
         .then((json) => {
@@ -91,5 +82,8 @@ export default class ApplicationRoute extends Route {
           console.log("Error fetching and setting web config: " + err);
         });
     }
+
+    // Initialize the metrics service
+    this.metrics;
   }
 }
