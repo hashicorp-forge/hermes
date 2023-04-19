@@ -77,6 +77,7 @@
     "ember-click-outside-modifier": "^4.0.0",
     "ember-composable-helpers": "^5.0.0",
     "ember-data": "~3.28.6",
+    "ember-element-helper": "^0.6.1",
     "ember-export-application-global": "^2.0.1",
     "ember-fetch": "^8.1.1",
     "ember-focus-trap": "^1.0.1",
