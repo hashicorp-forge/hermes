@@ -21,6 +21,14 @@ export default class DocumentSidebar extends Component {
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
+  get modalIsActive() {
+    return (
+      this.archiveModalIsActive ||
+      this.deleteModalIsActive ||
+      this.requestReviewModalIsActive
+    );
+  }
+
   get isDraft() {
     return this.args.document?.isDraft;
   }
@@ -170,6 +178,28 @@ export default class DocumentSidebar extends Component {
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
   }
 
+  @action maybeShowFlashError(error, title) {
+    if (!this.modalIsActive) {
+      this.flashMessages.add({
+        title,
+        message: error.message,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+    }
+  }
+
+  @action showFlashSuccess(title, message) {
+    this.flashMessages.add({
+      message,
+      title,
+      type: "success",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
+  }
+
   @task
   *save(field, val) {
     if (field && val) {
@@ -195,46 +225,52 @@ export default class DocumentSidebar extends Component {
   *patchDocument(fields) {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
-    yield this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fields),
-    });
-
+    try {
+      yield this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+    } catch {
+      this.maybeShowFlashError(error, "Unable to save document");
+      throw error;
+    }
     this.refreshRoute();
   }
 
   @task
   *requestReview() {
-    // Update approvers.
-    yield this.patchDocument.perform({
-      approvers: this.approvers.compact().mapBy("email"),
-    });
+    try {
+      // Update approvers.
+      yield this.patchDocument.perform({
+        approvers: this.approvers.compact().mapBy("email"),
+      });
 
-    yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
-      method: "POST",
-    });
+      yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
+        method: "POST",
+      });
 
-    this.flashMessages.add({
-      message: "Document review requested",
-      title: "Done!",
-      type: "success",
-      timeout: 6000,
-      extendedTimeout: 1000,
-    });
+      this.showFlashSuccess("Done!", "Document review requested");
 
-    this.router.transitionTo({
-      queryParams: { draft: false },
-    });
-
+      this.router.transitionTo({
+        queryParams: { draft: false },
+      });
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to request review");
+      throw error;
+    }
     this.requestReviewModalIsActive = false;
-
     this.refreshRoute();
   }
 
   @task
   *deleteDraft() {
-    yield this.args.deleteDraft.perform(this.docID);
+    try {
+      yield this.args.deleteDraft.perform(this.docID);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to delete draft");
+      throw error;
+    }
   }
 
   @action
@@ -288,23 +324,9 @@ export default class DocumentSidebar extends Component {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: "Document approved",
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+      this.showFlashSuccess("Done!", "Document approved");
     } catch (err) {
-      this.flashMessages.add({
-        title: "Unable to approve",
-        message: err,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+      this.maybeShowFlashError(err, "Unable to approve");
       throw err;
     }
 
@@ -324,42 +346,24 @@ export default class DocumentSidebar extends Component {
       if (this.args.document.docType === "FRD") {
         msg = "Document marked as not approved";
       }
-      this.flashMessages.add({
-        message: msg,
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+      this.showFlashSuccess("Done!", msg);
     } catch (err) {
-      this.flashMessages.add({
-        title: "Change request failed",
-        message: err,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+      this.maybeShowFlashError(err, "Change request failed");
       throw err;
     }
-
     this.refreshRoute();
   }
 
   @task
   *changeDocumentStatus(status) {
-    yield this.patchDocument.perform({
-      status: status,
-    });
-
-    // Add a notification for the user
-    this.flashMessages.add({
-      message: `Document status changed to "${status}"`,
-      title: "Done!",
-      type: "success",
-      timeout: 6000,
-      extendedTimeout: 1000,
-    });
-
+    try {
+      yield this.patchDocument.perform({
+        status: status,
+      });
+      this.showFlashSuccess("Done!", `Document status changed to "${status}"`);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to change document status");
+    }
     this.refreshRoute();
   }
 }
