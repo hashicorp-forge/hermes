@@ -1,6 +1,7 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 
 interface XHdsDropdownListItemsComponentSignature<T> {
@@ -36,6 +37,7 @@ export default class XHdsDropdownListItemsComponent extends Component<
     }
     return Object.entries(this.args.shownItems).length === 0;
   }
+
 
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
     if (event.key === "ArrowDown") {

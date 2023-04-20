@@ -6,48 +6,76 @@
   https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
 }}
 
-<div
-  class="relative"
-  aria-owns="facet-dropdown-menu"
-  aria-expanded={{@dropdownIsShown}}
-  ...attributes
+<X::Hds::DropdownList
+  @items={{@facets}}
+  @listIsOrdered={{true}}
+  {{! TODO: figure out "selected" }}
 >
-  <Hds::Button
-    {{did-insert this.registerTrigger}}
-    {{on "click" this.toggleDropdown}}
-    {{on "keydown" this.onTriggerKeydown}}
-    @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
-    @iconPosition="trailing"
-    @color="secondary"
-    @text={{@label}}
-    data-test-facet-dropdown-trigger={{@label}}
-    disabled={{@disabled}}
-    aria-haspopup="listbox"
-    aria-controls={{if
-      @inputIsShown
-      "facet-dropdown-popover"
-      "facet-dropdown-menu"
-    }}
-  />
-  {{#if this.dropdownIsShown}}
-    <Header::FacetDropdownList
-      {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
-      @shownFacets={{this.shownFacets}}
-      @label={{@label}}
-      @inputIsShown={{this.inputIsShown}}
-      @onInput={{perform this.onInput}}
-      @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-      @registerScrollContainer={{this.registerScrollContainer}}
-      @query={{this.query}}
-      @focusedItemIndex={{this.focusedItemIndex}}
-      @setFocusedItemIndex={{this.setFocusedItemIndex}}
-      @listItemRole={{this.listItemRole}}
-      @registerPopover={{this.registerPopover}}
-      @popoverElement={{this.popoverElement}}
-      @triggerElement={{this.triggerElement}}
-      @hideDropdown={{this.hideDropdown}}
-      @anchorToRight={{@anchorToRight}}
-      @currentSortByValue={{@currentSortByValue}}
+  <:anchor as |d|>
+    <Hds::Button
+      {{did-insert d.floatingUI.registerAnchor}}
+      {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
+      {{on "click" d.floatingUI.toggleContent}}
+      @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
+      @iconPosition="trailing"
+      @color="secondary"
+      @text={{@label}}
+      data-test-facet-dropdown-trigger={{@label}}
+      disabled={{@disabled}}
+      aria-haspopup="listbox"
+      aria-controls="x-hds-dropdown-list-{{if
+        d.inputIsShown
+        'container'
+        'list'
+      }}-{{d.floatingUI.id}}"
     />
-  {{/if}}
-</div>
+  </:anchor>
+  <:item as |i|>
+    {{log i}}
+    <LinkTo
+      {{did-insert i.registerElement}}
+      {{on "mouseenter" i.focusMouseTarget}}
+      {{on "click" i.onClick}}
+      role={{i.role}}
+      aria-selected={{i.isAriaSelected}}
+      tabindex="-1"
+      aria-checked={{i.selected}}
+      class="x-hds-dropdown-list-item-link
+        {{if i.isAriaSelected 'is-aria-selected'}}"
+      @selected={{i.attrs.selected}}
+      @route={{this.currentRouteName}}
+      @query={{or
+        i.sortByQueryParams
+        (get-facet-query-hash @label i.value i.attrs.selected)
+      }}
+    >
+      <X::Hds::DropdownList::CheckableItem
+        @value={{i.value}}
+        @count={{i.attrs.count}}
+        @selected={{i.attrs.selected}}
+      />
+    </LinkTo>
+  </:item>
+</X::Hds::DropdownList>
+{{!--
+{{#if this.dropdownIsShown}}
+  <Header::FacetDropdownList
+    {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
+    @shownFacets={{this.shownFacets}}
+    @label={{@label}}
+    @inputIsShown={{this.inputIsShown}}
+    @onInput={{perform this.onInput}}
+    @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+    @registerScrollContainer={{this.registerScrollContainer}}
+    @query={{this.query}}
+    @focusedItemIndex={{this.focusedItemIndex}}
+    @setFocusedItemIndex={{this.setFocusedItemIndex}}
+    @listItemRole={{this.listItemRole}}
+    @registerPopover={{this.registerPopover}}
+    @popoverElement={{this.popoverElement}}
+    @triggerElement={{this.triggerElement}}
+    @hideDropdown={{this.hideDropdown}}
+    @anchorToRight={{@anchorToRight}}
+    @currentSortByValue={{@currentSortByValue}}
+  />
+{{/if}} --}}

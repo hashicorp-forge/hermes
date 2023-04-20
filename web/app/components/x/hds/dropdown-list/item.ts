@@ -9,10 +9,11 @@ import { next } from "@ember/runloop";
 
 interface XHdsDropdownListItemComponentSignature {
   Args: {
-    role?: string;
-    value?: any;
-    count?: number;
+    role: string;
     selected: boolean;
+    attrs?: unknown;
+    value: string;
+    count?: number;
     focusedItemIndex: number;
     listItemRole: string;
     hideDropdown: () => void;
@@ -46,6 +47,10 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
 
   get role(): string | undefined {
     return this.args.role;
+  }
+
+  get attrs() {
+    return this.args.attrs;
   }
 
   /**

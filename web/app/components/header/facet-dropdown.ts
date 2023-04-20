@@ -6,6 +6,8 @@ import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import { schedule } from "@ember/runloop";
 import { FocusDirection } from "../x/hds/dropdown-list";
+import { inject as service } from "@ember/service";
+import RouterService from "@ember/routing/router-service";
 
 interface FacetDropdownComponentSignature {
   Args: {
@@ -16,6 +18,8 @@ interface FacetDropdownComponentSignature {
 }
 
 export default class FacetDropdownComponent extends Component<FacetDropdownComponentSignature> {
+  @service declare router: RouterService;
+
   @tracked private _triggerElement: HTMLButtonElement | null = null;
   @tracked private _scrollContainer: HTMLElement | null = null;
   @tracked private _popoverElement: HTMLDivElement | null = null;
@@ -41,6 +45,10 @@ export default class FacetDropdownComponent extends Component<FacetDropdownCompo
   private get scrollContainer(): HTMLElement {
     assert("_scrollContainer must exist", this._scrollContainer);
     return this._scrollContainer;
+  }
+
+  protected get currentRouteName() {
+    return this.router.currentRouteName;
   }
 
   /**

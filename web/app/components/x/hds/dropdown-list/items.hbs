@@ -18,10 +18,11 @@
       aria-activedescendant={{this.ariaActiveDescendant}}
     >
       {{#if @shownItems}}
-        {{#each-in @shownItems as |item|}}
+        {{#each-in @shownItems as |item attrs|}}
           <X::Hds::DropdownList::Item
             @role={{@listItemRole}}
             @value={{item}}
+            @attrs={{attrs}}
             @selected={{eq @selected item}}
             @hideDropdown={{@f.hideContent}}
             @onItemClick={{@onItemClick}}
