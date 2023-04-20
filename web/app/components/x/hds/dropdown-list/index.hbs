@@ -38,6 +38,8 @@
         {{did-insert this.registerScrollContainer}}
         class="x-hds-dropdown-list-scroll-container"
       >
+        {{! So the problem is we want the flexibility to use LinkTos or Actions,
+        each perhaps with its own unique requirements. Need to find some way of yielding the list item with a quick way of tagging the interactive component with stuff }}
         <X::Hds::DropdownList::Items
           @items={{@items}}
           @id={{f.id}}
