@@ -325,9 +325,9 @@ export default class DocumentSidebar extends Component {
         headers: { "Content-Type": "application/json" },
       });
       this.showFlashSuccess("Done!", "Document approved");
-    } catch (err) {
-      this.maybeShowFlashError(err, "Unable to approve");
-      throw err;
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to approve");
+      throw error;
     }
 
     this.refreshRoute();
@@ -347,9 +347,9 @@ export default class DocumentSidebar extends Component {
         msg = "Document marked as not approved";
       }
       this.showFlashSuccess("Done!", msg);
-    } catch (err) {
-      this.maybeShowFlashError(err, "Change request failed");
-      throw err;
+    } catch (error) {
+      this.maybeShowFlashError(error, "Change request failed");
+      throw error;
     }
     this.refreshRoute();
   }
@@ -363,6 +363,7 @@ export default class DocumentSidebar extends Component {
       this.showFlashSuccess("Done!", `Document status changed to "${status}"`);
     } catch (error) {
       this.maybeShowFlashError(error, "Unable to change document status");
+      throw error;
     }
     this.refreshRoute();
   }
