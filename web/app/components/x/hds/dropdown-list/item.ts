@@ -11,7 +11,7 @@ interface XHdsDropdownListItemComponentSignature {
   Args: {
     role: string;
     selected: boolean;
-    attrs?: unknown;
+    attributes?: unknown;
     value: string;
     count?: number;
     focusedItemIndex: number;
@@ -32,26 +32,6 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
    * Used to compute the element's ID, which may change when the list is filtered.
    */
   @tracked private _domElement: HTMLElement | null = null;
-
-  get count(): number | undefined {
-    return this.args.count;
-  }
-
-  get value(): string {
-    return this.args.value;
-  }
-
-  get selected(): boolean {
-    return this.args.selected;
-  }
-
-  get role(): string | undefined {
-    return this.args.role;
-  }
-
-  get attrs() {
-    return this.args.attrs;
-  }
 
   /**
    * An asserted-true reference to the element.

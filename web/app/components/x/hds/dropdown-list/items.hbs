@@ -5,9 +5,9 @@
   {{#if (has-block "empty-state")}}
     {{yield to="empty-state"}}
   {{else}}
-  <div class="x-hds-dropdown-list-empty-state">
-    No matches
-  </div>
+    <div class="x-hds-dropdown-list-empty-state">
+      No matches
+    </div>
   {{/if}}
 {{else}}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
@@ -22,7 +22,7 @@
           <X::Hds::DropdownList::Item
             @role={{@listItemRole}}
             @value={{item}}
-            @attrs={{attrs}}
+            @attributes={{attrs}}
             @selected={{eq @selected item}}
             @hideDropdown={{@f.hideContent}}
             @onItemClick={{@onItemClick}}

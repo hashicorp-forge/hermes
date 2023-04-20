@@ -4,7 +4,7 @@
     @items={{this.products}}
     @listIsOrdered={{true}}
     @onItemClick={{this.onChange}}
-    {{!-- This sort of expects a single select --}}
+    {{! This sort of expects a single select }}
     @selected={{@selected}}
     class="max-h-[320px] w-80"
   >
@@ -33,23 +33,13 @@
       </Action>
     </:anchor>
     <:item as |i|>
-      <Action
-        {{did-insert i.registerElement}}
-        {{on "mouseenter" i.focusMouseTarget}}
-        {{on "click" i.onClick}}
-        role={{i.role}}
-        aria-selected={{i.isAriaSelected}}
-        tabindex="-1"
-        aria-checked={{i.selected}}
-        class="x-hds-dropdown-list-item-link
-          {{if i.isAriaSelected 'is-aria-selected'}}"
-      >
+      <i.Action>
         <X::Hds::DropdownList::CheckableItem
           @selected={{i.selected}}
           @value={{i.value}}
           @count={{i.count}}
         />
-      </Action>
+      </i.Action>
     </:item>
   </X::Hds::DropdownList>
 {{else if this.fetchProducts.isRunning}}

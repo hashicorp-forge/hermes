@@ -1,3 +1,29 @@
 <li class="x-hds-dropdown-list-item" role="none">
-  {{yield this}}
+  {{log @attributes}}
+  {{yield
+    (hash
+      Action=(component
+        "x/hds/dropdown-list/action"
+        role=@role
+        isAriaSelected=this.isAriaSelected
+        selected=@selected
+        registerElement=this.registerElement
+        focusMouseTarget=this.focusMouseTarget
+        onClick=this.onClick
+      )
+      LinkTo=(component
+        "x/hds/dropdown-list/link-to"
+        role=@role
+        isAriaSelected=this.isAriaSelected
+        selected=@selected
+        registerElement=this.registerElement
+        focusMouseTarget=this.focusMouseTarget
+        onClick=this.onClick
+      )
+      selected=@selected
+      value=@value
+      count=@count
+      attrs=@attributes
+    )
+  }}
 </li>

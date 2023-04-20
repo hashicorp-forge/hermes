@@ -31,21 +31,10 @@
     />
   </:anchor>
   <:item as |i|>
-    {{log i}}
-    <LinkTo
-      {{did-insert i.registerElement}}
-      {{on "mouseenter" i.focusMouseTarget}}
-      {{on "click" i.onClick}}
-      role={{i.role}}
-      aria-selected={{i.isAriaSelected}}
-      tabindex="-1"
-      aria-checked={{i.selected}}
-      class="x-hds-dropdown-list-item-link
-        {{if i.isAriaSelected 'is-aria-selected'}}"
-      @selected={{i.attrs.selected}}
+    <i.LinkTo
       @route={{this.currentRouteName}}
       @query={{or
-        i.sortByQueryParams
+        i.attrs.sortByQueryParams
         (get-facet-query-hash @label i.value i.attrs.selected)
       }}
     >
@@ -54,28 +43,6 @@
         @count={{i.attrs.count}}
         @selected={{i.attrs.selected}}
       />
-    </LinkTo>
+    </i.LinkTo>
   </:item>
 </X::Hds::DropdownList>
-{{!--
-{{#if this.dropdownIsShown}}
-  <Header::FacetDropdownList
-    {{dismissible dismiss=this.hideDropdown related=this.triggerElement}}
-    @shownFacets={{this.shownFacets}}
-    @label={{@label}}
-    @inputIsShown={{this.inputIsShown}}
-    @onInput={{perform this.onInput}}
-    @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-    @registerScrollContainer={{this.registerScrollContainer}}
-    @query={{this.query}}
-    @focusedItemIndex={{this.focusedItemIndex}}
-    @setFocusedItemIndex={{this.setFocusedItemIndex}}
-    @listItemRole={{this.listItemRole}}
-    @registerPopover={{this.registerPopover}}
-    @popoverElement={{this.popoverElement}}
-    @triggerElement={{this.triggerElement}}
-    @hideDropdown={{this.hideDropdown}}
-    @anchorToRight={{@anchorToRight}}
-    @currentSortByValue={{@currentSortByValue}}
-  />
-{{/if}} --}}
