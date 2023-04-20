@@ -3,7 +3,7 @@
   <X::Hds::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
-    @onChange={{this.onChange}}
+    @onItemClick={{this.onChange}}
     @selected={{@selected}}
     class="max-h-[320px] w-80"
   >
@@ -12,9 +12,10 @@
         {{did-insert d.floatingUI.registerAnchor}}
         {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
         {{on "click" d.floatingUI.toggleContent}}
+        aria-haspopup="listbox"
         aria-controls="x-hds-dropdown-list-{{if
           d.inputIsShown
-          'popover'
+          'container'
           'list'
         }}-{{d.floatingUI.id}}"
         class="relative flex"
@@ -30,6 +31,25 @@
         />
       </Action>
     </:anchor>
+    <:item as |i|>
+      <Action
+        {{did-insert i.registerElement}}
+        {{on "mouseenter" i.focusMouseTarget}}
+        {{on "click" i.onClick}}
+        role={{i.role}}
+        aria-selected={{i.isAriaSelected}}
+        tabindex="-1"
+        aria-checked={{i.selected}}
+        class="x-hds-dropdown-list-item-link
+          {{if i.isAriaSelected 'is-aria-selected'}}"
+      >
+        <X::Hds::DropdownList::CheckableItem
+          @selected={{i.selected}}
+          @value={{i.value}}
+          @count={{i.count}}
+        />
+      </Action>
+    </:item>
   </X::Hds::DropdownList>
 {{else if this.fetchProducts.isRunning}}
   <FlightIcon @name="loading" />

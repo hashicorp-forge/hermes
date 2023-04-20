@@ -44,7 +44,7 @@
           @items={{@items}}
           @id={{f.id}}
           @onInput={{perform this.onInput f}}
-          @onChange={{@onChange}}
+          @onItemClick={{@onItemClick}}
           @listItemRole={{this.listItemRole}}
           @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
           @registerScrollContainer={{this.registerScrollContainer}}
@@ -56,7 +56,11 @@
           @selected={{@selected}}
           @query={{this.query}}
           @f={{f}}
-        />
+        >
+          <:item as |i|>
+            {{yield i to="item"}}
+          </:item>
+        </X::Hds::DropdownList::Items>
 
       </div>
       {{! action list }}

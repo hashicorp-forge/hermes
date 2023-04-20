@@ -1,28 +1,3 @@
 <li class="x-hds-dropdown-list-item" role="none">
-  <Action
-    {{did-insert this.registerElement}}
-    {{on "mouseenter" this.focusMouseTarget}}
-    {{on "click" this.onClick}}
-    role={{@role}}
-    aria-selected={{this.isAriaSelected}}
-    tabindex="-1"
-    aria-checked={{@selected}}
-    class="x-hds-dropdown-list-item-link
-      {{if this.isAriaSelected 'is-aria-selected'}}"
-  >
-    <FlightIcon
-      @name="check"
-      class="check {{if @selected 'visible' 'invisible'}}"
-    />
-    <div class="x-hds-dropdown-list-item-value">
-      {{@value}}
-    </div>
-    {{#if @count}}
-      <Hds::BadgeCount
-        @text={{@count}}
-        @size="small"
-        class="x-hds-dropdown-list-item-count"
-      />
-    {{/if}}
-  </Action>
+  {{yield this}}
 </li>

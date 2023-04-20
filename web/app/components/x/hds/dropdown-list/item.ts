@@ -5,16 +5,18 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
+import { next } from "@ember/runloop";
 
 interface XHdsDropdownListItemComponentSignature {
   Args: {
     role?: string;
     value?: any;
+    count?: number;
     selected: boolean;
     focusedItemIndex: number;
     listItemRole: string;
     hideDropdown: () => void;
-    onChange: (value: any) => void;
+    onItemClick?: (value: any) => void;
     setFocusedItemIndex: (
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
@@ -29,6 +31,22 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
    * Used to compute the element's ID, which may change when the list is filtered.
    */
   @tracked private _domElement: HTMLElement | null = null;
+
+  get count(): number | undefined {
+    return this.args.count;
+  }
+
+  get value(): string {
+    return this.args.value;
+  }
+
+  get selected(): boolean {
+    return this.args.selected;
+  }
+
+  get role(): string | undefined {
+    return this.args.role;
+  }
 
   /**
    * An asserted-true reference to the element.
@@ -49,13 +67,6 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
   }
 
   /**
-   * The current route name, used to set the LinkTo's @route
-   */
-  protected get currentRouteName(): string {
-    return this.router.currentRouteName;
-  }
-
-  /**
    * A numeric identifier for the element based on its id,
    * as computed by the parent component on render and when
    * the FacetList is filtered. Strips everything but the trailing number.
@@ -66,11 +77,11 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
    * + = One or more of the preceding token
    * $ = End of input
    */
-  protected get itemIndexNumber(): number {
+  private get itemIndexNumber(): number {
     return parseInt(this.domElementID.match(/\d+$/)?.[0] || "0", 10);
   }
 
-  protected get isAriaSelected(): boolean {
+  get isAriaSelected(): boolean {
     if (!this._domElement) {
       // True when first computed, which happens
       // before the element is inserted and registered.
@@ -86,14 +97,22 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
    * The action called on element insertion. Sets the local `element`
    * reference to the domElement we know to be our target.
    */
-  @action protected registerElement(element: HTMLElement) {
+  @action registerElement(element: HTMLElement) {
     this._domElement = element;
   }
 
   @action onClick() {
-    this.args.onChange(this.args.value);
-    // if the click is on a link, this needs to happen in the next run loop so it doesn't interfere with embers LinkTo handling
-    this.args.hideDropdown();
+    if (this.args.onItemClick) {
+      this.args.onItemClick(this.args.value);
+    }
+
+    /**
+     * Closes the dropdown on the next run loop.
+     * Done so we don't interfere with Ember's <LinkTo> handling.
+     */
+    next(() => {
+      this.args.hideDropdown();
+    });
   }
 
   /**
@@ -102,7 +121,7 @@ export default class XHdsDropdownListItemComponent extends Component<XHdsDropdow
    * Then, calls the parent component's `setFocusedItemIndex` action,
    * directing focus to the current element.
    */
-  @action protected focusMouseTarget(e: MouseEvent) {
+  @action focusMouseTarget(e: MouseEvent) {
     let target = e.target;
     assert("target must be an element", target instanceof HTMLElement);
     this._domElement = target;
