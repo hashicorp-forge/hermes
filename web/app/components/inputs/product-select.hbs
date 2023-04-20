@@ -9,17 +9,24 @@
     class="max-h-[320px] w-80"
   >
     <:anchor as |d|>
-      <d.ToggleAction class="relative">
-        <Hds::Badge
-          class="hds-badge-dropdown"
-          @text={{this.selected}}
-          @icon={{get-product-id this.selected}}
-        />
-        <FlightIcon
-          class="dropdown-caret"
-          @name={{if d.contentIsShown "chevron-up" "chevron-down"}}
-        />
-      </d.ToggleAction>
+      <div class="relative w-full">
+        {{#if @isSaving}}
+          <div class="absolute right-0 top-1/2 -translate-y-1/2">
+            <FlightIcon @name="loading" />
+          </div>
+        {{/if}}
+        <d.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
+          <Hds::Badge
+            class="hds-badge-dropdown"
+            @text={{this.selected}}
+            @icon={{get-product-id this.selected}}
+          />
+          <FlightIcon
+            class="dropdown-caret"
+            @name={{if d.contentIsShown "chevron-up" "chevron-down"}}
+          />
+        </d.ToggleAction>
+      </div>
     </:anchor>
     <:item as |i|>
       <i.Action>

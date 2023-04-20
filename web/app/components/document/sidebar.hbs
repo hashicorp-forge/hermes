@@ -134,10 +134,14 @@
             class="hds-typography-body-100 hds-foreground-faint"
           >Product/Area</small>
           {{#if this.isDraft}}
-            <Inputs::ProductSelect
-              @selected={{@document.product}}
-              @onChange={{this.updateProduct}}
-            />
+            <div class="w-full relative">
+
+              <Inputs::ProductSelect
+                @selected={{@document.product}}
+                @onChange={{this.updateProduct}}
+                @isSaving={{this.save.isRunning}}
+              />
+            </div>
           {{else}}
             <Hds::Badge
               @text={{@document.product}}
