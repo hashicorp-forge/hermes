@@ -65,7 +65,7 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    this.server.db.mes[0] = this.server.create("me", { isLoggedIn: false });
+    this.server.schema.mes.first().update("isLoggedIn", false);
 
     await waitFor("[data-test-flash-notification]");
 

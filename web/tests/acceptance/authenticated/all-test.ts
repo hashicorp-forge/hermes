@@ -11,8 +11,8 @@ module("Acceptance | authenticated/all", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function () {
-    authenticateSession({});
+  hooks.beforeEach(async function () {
+    await authenticateSession({});
   });
 
   test("the page title is correct", async function (this: AuthenticatedAllRouteTestContext, assert) {
