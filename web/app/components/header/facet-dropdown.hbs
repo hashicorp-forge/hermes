@@ -12,23 +12,7 @@
   {{! TODO: figure out "selected" }}
 >
   <:anchor as |d|>
-    <Hds::Button
-      {{did-insert d.floatingUI.registerAnchor}}
-      {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
-      {{on "click" d.floatingUI.toggleContent}}
-      @icon={{if this.dropdownIsShown "chevron-up" "chevron-down"}}
-      @iconPosition="trailing"
-      @color="secondary"
-      @text={{@label}}
-      data-test-facet-dropdown-trigger={{@label}}
-      disabled={{@disabled}}
-      aria-haspopup="listbox"
-      aria-controls="x-hds-dropdown-list-{{if
-        d.inputIsShown
-        'container'
-        'list'
-      }}-{{d.floatingUI.id}}"
-    />
+    <d.ToggleButton @text={{@label}} />
   </:anchor>
   <:item as |i|>
     <i.LinkTo

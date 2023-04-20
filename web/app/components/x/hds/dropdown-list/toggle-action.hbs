@@ -1,0 +1,11 @@
+<Action
+  {{did-insert @registerAnchor}}
+  {{on "keydown" @onTriggerKeydown}}
+  {{on "click" @toggleContent}}
+  disabled={{@disabled}}
+  aria-controls={{@ariaControls}}
+  aria-haspopup="listbox"
+  ...attributes
+>
+  {{yield}}
+</Action>

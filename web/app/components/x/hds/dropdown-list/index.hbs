@@ -1,7 +1,38 @@
 <FloatingUI @renderOut={{true}} @placement={{@placement}}>
   <:anchor as |f|>
     {{yield
-      (hash onTriggerKeydown=this.onTriggerKeydown floatingUI=f)
+      (hash
+        ToggleButton=(component
+          "x/hds/dropdown-list/toggle-button"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          toggleContent=f.toggleContent
+          onTriggerKeydown=(fn this.onTriggerKeydown f)
+          color=(or @color "secondary")
+          disabled=@disabled
+          ariaControls=(concat
+            "x-hds-dropdown-list-"
+            (if this.inputIsShown "container" "list")
+            "-"
+            f.id
+          )
+          text=@label
+        )
+        ToggleAction=(component
+          "x/hds/dropdown-list/toggle-action"
+          registerAnchor=f.registerAnchor
+          onTriggerKeydown=(fn this.onTriggerKeydown f)
+          toggleContent=f.toggleContent
+          disabled=@disabled
+          ariaControls=(concat
+            "x-hds-dropdown-list-"
+            (if this.inputIsShown "container" "list")
+            "-"
+            f.id
+          )
+        )
+        contentIsShown=f.contentIsShown
+      )
       to="anchor"
     }}
   </:anchor>

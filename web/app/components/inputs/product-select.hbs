@@ -9,18 +9,7 @@
     class="max-h-[320px] w-80"
   >
     <:anchor as |d|>
-      <Action
-        {{did-insert d.floatingUI.registerAnchor}}
-        {{on "keydown" (fn d.onTriggerKeydown d.floatingUI)}}
-        {{on "click" d.floatingUI.toggleContent}}
-        aria-haspopup="listbox"
-        aria-controls="x-hds-dropdown-list-{{if
-          d.inputIsShown
-          'container'
-          'list'
-        }}-{{d.floatingUI.id}}"
-        class="relative flex"
-      >
+      <d.ToggleAction class="relative">
         <Hds::Badge
           class="hds-badge-dropdown"
           @text={{this.selected}}
@@ -28,9 +17,9 @@
         />
         <FlightIcon
           class="dropdown-caret"
-          @name={{if f.contentIsShown "chevron-up" "chevron-down"}}
+          @name={{if d.contentIsShown "chevron-up" "chevron-down"}}
         />
-      </Action>
+      </d.ToggleAction>
     </:anchor>
     <:item as |i|>
       <i.Action>
