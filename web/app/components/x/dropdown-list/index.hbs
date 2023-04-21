@@ -54,8 +54,8 @@
   </:anchor>
   <:content as |f|>
     <div
-      {{did-insert this.didInsertList}}
-      {{will-destroy this.willDestroyDropdown}}
+      {{did-insert this.didInsertContent}}
+      {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
       class="x-dropdown-list-container"
