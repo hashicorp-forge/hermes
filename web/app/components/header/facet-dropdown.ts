@@ -5,7 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import { schedule } from "@ember/runloop";
-import { FocusDirection } from "../x/hds/dropdown-list";
+import { FocusDirection } from "../x/dropdown-list";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 

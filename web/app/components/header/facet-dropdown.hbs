@@ -1,4 +1,4 @@
-<X::Hds::DropdownList @items={{@facets}} @listIsOrdered={{true}}>
+<X::DropdownList @items={{@facets}} @listIsOrdered={{true}}>
   <:anchor as |dd|>
     <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
   </:anchor>
@@ -7,11 +7,11 @@
       @route={{this.currentRouteName}}
       @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
     >
-      <X::Hds::DropdownList::CheckableItem
+      <X::DropdownList::CheckableItem
         @value={{dd.value}}
         @count={{dd.attrs.count}}
         @selected={{dd.attrs.selected}}
       />
     </dd.LinkTo>
   </:item>
-</X::Hds::DropdownList>
+</X::DropdownList>

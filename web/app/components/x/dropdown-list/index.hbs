@@ -15,7 +15,7 @@
     {{yield
       (hash
         ToggleButton=(component
-          "x/hds/dropdown-list/toggle-button"
+          "x/dropdown-list/toggle-button"
           contentIsShown=f.contentIsShown
           registerAnchor=f.registerAnchor
           toggleContent=f.toggleContent
@@ -25,7 +25,7 @@
           color=(or @color "secondary")
           disabled=@disabled
           ariaControls=(concat
-            "x-hds-dropdown-list-"
+            "x-dropdown-list-"
             (if this.inputIsShown "container" "list")
             "-"
             f.contentID
@@ -33,7 +33,7 @@
           text=@label
         )
         ToggleAction=(component
-          "x/hds/dropdown-list/toggle-action"
+          "x/dropdown-list/toggle-action"
           registerAnchor=f.registerAnchor
           onTriggerKeydown=(fn
             this.onTriggerKeydown f.contentIsShown f.showContent
@@ -41,7 +41,7 @@
           toggleContent=f.toggleContent
           disabled=@disabled
           ariaControls=(concat
-            "x-hds-dropdown-list-"
+            "x-dropdown-list-"
             (if this.inputIsShown "container" "list")
             "-"
             f.contentID
@@ -54,8 +54,8 @@
   </:anchor>
   <:content as |f|>
     <div
-      id="x-hds-dropdown-list-container-{{f.contentID}}"
-      class="x-hds-dropdown-list-container"
+      id="x-dropdown-list-container-{{f.contentID}}"
+      class="x-dropdown-list-container"
       role={{if this.inputIsShown "combobox"}}
       {{did-insert this.didInsertList}}
       {{will-destroy this.willDestroyDropdown}}
@@ -63,7 +63,7 @@
       ...attributes
     >
       {{#if this.inputIsShown}}
-        <div class="x-hds-dropdown-list-input-container">
+        <div class="x-dropdown-list-input-container">
           <Hds::Form::TextInput::Base
             data-test-product-area-dropdown-input
             {{did-insert this.registerAndFocusInput}}
@@ -73,19 +73,19 @@
             @type="search"
             placeholder="Filter..."
             {{! TODO: make this more specific }}
-            aria-controls="x-hds-dropdown"
+            aria-controls="x-dropdown"
             aria-activedescendant={{unless
               (eq this.focusedItemIndex -1)
-              (concat "x-hds-dropdown-list-item-" this.focusedItemIndex)
+              (concat "x-dropdown-list-item-" this.focusedItemIndex)
             }}
           />
         </div>
       {{/if}}
       <div
         {{did-insert this.registerScrollContainer}}
-        class="x-hds-dropdown-list-scroll-container"
+        class="x-dropdown-list-scroll-container"
       >
-        <X::Hds::DropdownList::Items
+        <X::DropdownList::Items
           @items={{@items}}
           @id={{f.contentID}}
           @onInput={{perform this.onInput f.content}}
@@ -106,7 +106,7 @@
           <:item as |i|>
             {{yield i to="item"}}
           </:item>
-        </X::Hds::DropdownList::Items>
+        </X::DropdownList::Items>
       </div>
     </div>
   </:content>

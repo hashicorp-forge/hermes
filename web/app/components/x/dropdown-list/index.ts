@@ -7,7 +7,7 @@ import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 
-interface XHdsDropdownListComponentSignature<T> {
+interface XDropdownListComponentSignature<T> {
   Args: {
     selected: any;
     items?: any;
@@ -23,8 +23,8 @@ export enum FocusDirection {
   Last = "last",
 }
 
-export default class XHdsDropdownListComponent extends Component<
-  XHdsDropdownListComponentSignature<any>
+export default class XDropdownListComponent extends Component<
+  XDropdownListComponentSignature<any>
 > {
   @service("fetch") declare fetchSvc: FetchService;
 
@@ -64,7 +64,7 @@ export default class XHdsDropdownListComponent extends Component<
   }
 
   get ariaControls() {
-    let value = "x-hds-dropdown-";
+    let value = "x-dropdown-";
     if (this.inputIsShown) {
       value += "popover";
     } else {

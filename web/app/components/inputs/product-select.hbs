@@ -1,7 +1,7 @@
 {{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 
 {{#if this.products}}
-  <X::Hds::DropdownList
+  <X::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
     @onItemClick={{this.onChange}}
@@ -30,14 +30,14 @@
     </:anchor>
     <:item as |dd|>
       <dd.Action>
-        <X::Hds::DropdownList::CheckableItem
+        <X::DropdownList::CheckableItem
           @selected={{dd.selected}}
           @value={{dd.value}}
           @count={{dd.count}}
         />
       </dd.Action>
     </:item>
-  </X::Hds::DropdownList>
+  </X::DropdownList>
 {{else if this.fetchProducts.isRunning}}
   <FlightIcon @name="loading" />
 {{else}}

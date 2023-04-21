@@ -5,21 +5,21 @@
   {{#if (has-block "empty-state")}}
     {{yield to="empty-state"}}
   {{else}}
-    <div class="x-hds-dropdown-list-empty-state">
+    <div class="x-dropdown-list-empty-state">
       No matches
     </div>
   {{/if}}
 {{else}}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     <MaybeOrderedList
-      id="x-hds-dropdown-list-{{@id}}"
-      class="x-hds-dropdown-list"
+      id="x-dropdown-list-{{@id}}"
+      class="x-dropdown-list"
       role={{if this.args.inputIsShown "listbox" "menu"}}
       aria-activedescendant={{this.ariaActiveDescendant}}
     >
       {{#if @shownItems}}
         {{#each-in @shownItems as |item attrs|}}
-          <X::Hds::DropdownList::Item
+          <X::DropdownList::Item
             @role={{@listItemRole}}
             @value={{item}}
             @attributes={{attrs}}
@@ -31,7 +31,7 @@
             as |i|
           >
             {{yield i to="item"}}
-          </X::Hds::DropdownList::Item>
+          </X::DropdownList::Item>
         {{/each-in}}
       {{/if}}
     </MaybeOrderedList>

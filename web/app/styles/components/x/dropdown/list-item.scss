@@ -1,8 +1,8 @@
-.x-hds-dropdown-list-item {
+.x-dropdown-list-item {
   @apply flex;
 }
 
-.x-hds-dropdown-list-item-link {
+.x-dropdown-list-item-link {
   @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
 
   &.is-aria-selected {
@@ -26,10 +26,10 @@
   }
 }
 
-.x-hds-dropdown-list-item-value {
+.x-dropdown-list-item-value {
   @apply truncate whitespace-nowrap;
 }
 
-.x-hds-dropdown-list-item-count {
+.x-dropdown-list-item-count {
   @apply ml-8 shrink-0;
 }

@@ -1,4 +1,4 @@
-<Action
+<LinkTo
   {{did-insert @registerElement}}
   {{on "mouseenter" @focusMouseTarget}}
   {{on "click" @onClick}}
@@ -6,9 +6,11 @@
   aria-selected={{@isAriaSelected}}
   tabindex="-1"
   aria-checked={{@selected}}
-  class="x-hds-dropdown-list-item-link
+  @route={{@route}}
+  @query={{or @query (hash)}}
+  class="x-dropdown-list-item-link
     {{if @isAriaSelected 'is-aria-selected'}}"
   ...attributes
 >
   {{yield}}
-</Action>
+</LinkTo>

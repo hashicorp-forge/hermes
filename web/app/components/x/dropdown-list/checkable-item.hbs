@@ -2,13 +2,13 @@
   @name="check"
   class="check {{if @selected 'visible' 'invisible'}}"
 />
-<div class="x-hds-dropdown-list-item-value">
+<div class="x-dropdown-list-item-value">
   {{@value}}
 </div>
 {{#if @count}}
   <Hds::BadgeCount
     @text={{@count}}
     @size="small"
-    class="x-hds-dropdown-list-item-count"
+    class="x-dropdown-list-item-count"
   />
 {{/if}}

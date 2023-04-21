@@ -3,7 +3,7 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { FocusDirection } from ".";
 
-interface XHdsDropdownListItemsComponentSignature<T> {
+interface XDropdownListItemsComponentSignature<T> {
   Args: {
     id: string;
     items?: any;
@@ -22,12 +22,12 @@ interface XHdsDropdownListItemsComponentSignature<T> {
   };
 }
 
-export default class XHdsDropdownListItemsComponent extends Component<
-  XHdsDropdownListItemsComponentSignature<any>
+export default class XDropdownListItemsComponent extends Component<
+  XDropdownListItemsComponentSignature<any>
 > {
   get ariaActiveDescendant() {
     if (this.args.focusedItemIndex !== -1) {
-      return `x-hds-dropdown-list-item-${this.args.focusedItemIndex}`;
+      return `x-dropdown-list-item-${this.args.focusedItemIndex}`;
     }
   }
 

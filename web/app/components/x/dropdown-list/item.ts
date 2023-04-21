@@ -7,7 +7,7 @@ import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 import { next } from "@ember/runloop";
 
-interface XHdsDropdownListItemComponentSignature {
+interface XDropdownListItemComponentSignature {
   Args: {
     role: string;
     selected: boolean;
@@ -25,7 +25,7 @@ interface XHdsDropdownListItemComponentSignature {
   };
 }
 
-export default class XHdsDropdownListItemComponent extends Component<XHdsDropdownListItemComponentSignature> {
+export default class XDropdownListItemComponent extends Component<XDropdownListItemComponentSignature> {
   @service declare router: RouterService;
   /**
    * The element reference, set on insertion and updated on mouseenter.

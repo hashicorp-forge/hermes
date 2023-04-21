@@ -1,8 +1,8 @@
-<li class="x-hds-dropdown-list-item" role="none">
+<li class="x-dropdown-list-item" role="none">
   {{yield
     (hash
       Action=(component
-        "x/hds/dropdown-list/action"
+        "x/dropdown-list/action"
         role=@role
         isAriaSelected=this.isAriaSelected
         selected=@selected
@@ -11,7 +11,7 @@
         onClick=this.onClick
       )
       LinkTo=(component
-        "x/hds/dropdown-list/link-to"
+        "x/dropdown-list/link-to"
         role=@role
         isAriaSelected=this.isAriaSelected
         selected=@selected

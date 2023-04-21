@@ -60,7 +60,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert
       .dom(
-        "[data-test-header-sort-by-dropdown] .x-hds-dropdown-list-item:nth-child(2)"
+        "[data-test-header-sort-by-dropdown] .x-dropdown-list-item:nth-child(2)"
       )
       .hasText("Oldest");
 
@@ -98,7 +98,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(".x-hds-dropdown-list-item-value")?.map((el) =>
+      findAll(".x-dropdown-list-item-value")?.map((el) =>
         el.textContent?.trim()
       ),
       ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
