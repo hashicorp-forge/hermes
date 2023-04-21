@@ -1,0 +1,16 @@
+{{#maybe-in-element
+  (html-element ".ember-application")
+  (not @renderOut)
+  insertBefore=null
+}}
+  <div
+    {{will-destroy this.cleanup}}
+    {{did-insert this.didInsert}}
+    data-test-floating-ui-placement={{@placement}}
+    id="floating-ui-content-{{@id}}"
+    class="hermes-floating-ui-content"
+    ...attributes
+  >
+    {{yield}}
+  </div>
+{{/maybe-in-element}}
