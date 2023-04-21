@@ -20,6 +20,5 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
-  this.route("playground");
   this.route("404", { path: "/*path" });
 });
