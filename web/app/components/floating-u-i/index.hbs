@@ -1,0 +1,13 @@
+{{yield this to="anchor"}}
+
+{{#if this.contentIsShown}}
+  <FloatingUI::Content
+    @placement={{@placement}}
+    @renderOut={{@renderOut}}
+    @anchor={{this.anchor}}
+    @id={{this.contentID}}
+    ...attributes
+  >
+    {{yield this to="content"}}
+  </FloatingUI::Content>
+{{/if}}
