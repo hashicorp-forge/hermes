@@ -382,10 +382,10 @@ func DraftsHandler(
 				opt.Facets(facets...),
 				// FacetFilters are supplied as follows:
 				// ['attribute1:value', 'attribute2:value'], 'owners:owner_email_value'
-				opt.FacetFilterAnd(facetFilters, "owners:"+ownerEmail),
-				// TagFilter allows to filter for a particular OIDC ID.
-				// This enables a user to only view their own documents
-				opt.TagFilter("o_id:" + id),
+				opt.FacetFilterAnd(
+					facetFilters,
+					opt.FacetFilterOr("owners:"+userEmail, "contributors:"+userEmail),
+				),
 				opt.HitsPerPage(hitsPerPage),
 				opt.MaxValuesPerFacet(maxValuesPerFacet),
 				opt.Page(page),
