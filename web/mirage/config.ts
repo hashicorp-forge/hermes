@@ -220,7 +220,11 @@ export default function (mirageConfig) {
         //  1: { "Vault": { abbreviation: "VLT"} }
         // ]
 
-        // We need to reformat them to match the API's response.
+        // We reformat them to match the API's response:
+        // {
+        //  "Labs": { abbreviation: "LAB" },
+        //  "Vault": { abbreviation: "VLT" }
+        // }
 
         let formattedObjects = {};
 
@@ -228,12 +232,6 @@ export default function (mirageConfig) {
           let key = Object.keys(object)[0];
           formattedObjects[key] = object[key];
         });
-
-        // The formattedObjects now look look like:
-        // {
-        //  "Labs": { abbreviation: "LAB" },
-        //  "Vault": { abbreviation: "VLT" }
-        // }
 
         return new Response(200, {}, formattedObjects);
       });
