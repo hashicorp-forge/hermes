@@ -64,7 +64,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get getSortByLabel(): SortByLabel {
-    console.log("it happen");
     if (this.currentSortByValue === SortByValue.DateDesc) {
       return SortByLabel.Newest;
     } else {

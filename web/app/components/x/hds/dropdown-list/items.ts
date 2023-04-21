@@ -1,7 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 
 interface XHdsDropdownListItemsComponentSignature<T> {
@@ -18,7 +17,8 @@ interface XHdsDropdownListItemsComponentSignature<T> {
     resetFocusedItemIndex: () => void;
     registerScrollContainer?: (e: HTMLElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
-    f: any;
+    content: HTMLElement | null;
+    hideContent: () => void;
   };
 }
 
@@ -38,7 +38,6 @@ export default class XHdsDropdownListItemsComponent extends Component<
     return Object.entries(this.args.shownItems).length === 0;
   }
 
-
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
@@ -52,15 +51,15 @@ export default class XHdsDropdownListItemsComponent extends Component<
 
     if (event.key === "Enter") {
       event.preventDefault();
-      assert("floatingUI content must exist", this.args.f.content);
-      const target = this.args.f.content.querySelector("[aria-selected]");
+      assert("floatingUI content must exist", this.args.content);
+      const target = this.args.content.querySelector("[aria-selected]");
 
       if (
         target instanceof HTMLAnchorElement ||
         target instanceof HTMLButtonElement
       ) {
         target.click();
-        this.args.f.hideContent();
+        this.args.hideContent();
       }
     }
   }

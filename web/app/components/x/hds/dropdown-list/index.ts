@@ -4,7 +4,7 @@ import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask, task } from "ember-concurrency";
+import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 
 interface XHdsDropdownListComponentSignature<T> {
@@ -83,17 +83,13 @@ export default class XHdsDropdownListComponent extends Component<
     this.input.focus();
   }
 
-  @action protected didInsertList(f: any) {
-    schedule(
-      "afterRender",
-      () => {
-        assert("floatingUI content must exist", f.content);
-        this.assignMenuItemIDs(
-          f.content.querySelectorAll(`[role=${this.listItemRole}]`)
-        );
-      },
-      f
-    );
+  @action protected didInsertList() {
+    schedule("afterRender", () => {
+      assert("didInsertList expects a _scrollContainer", this._scrollContainer);
+      this.assignMenuItemIDs(
+        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+      );
+    });
   }
 
   @action willDestroyDropdown() {
@@ -190,17 +186,20 @@ export default class XHdsDropdownListComponent extends Component<
     }
   }
 
-  @action protected onTriggerKeydown(f: any, event: KeyboardEvent) {
-    if (f.contentIsShown) {
+  @action protected onTriggerKeydown(
+    contentIsShown: boolean,
+    showContent: () => void,
+    event: KeyboardEvent
+  ) {
+    if (contentIsShown) {
       return;
     }
 
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault();
-      f.showContent();
-
       // Stop the event from bubbling to the popover's keydown handler.
-      // event.stopPropagation();
+      event.preventDefault();
+
+      showContent();
 
       // Wait for the menuItems to be set by the showDropdown action.
       next(() => {
@@ -217,8 +216,7 @@ export default class XHdsDropdownListComponent extends Component<
   }
 
   protected onInput = restartableTask(
-    async (f: any, inputEvent: InputEvent) => {
-      console.log(f);
+    async (content: HTMLElement | null, inputEvent: InputEvent) => {
       this.focusedItemIndex = -1;
 
       let showItems: any = {};
@@ -234,8 +232,9 @@ export default class XHdsDropdownListComponent extends Component<
       this.filteredItems = showItems;
 
       schedule("afterRender", () => {
+        assert("onInput expects floatingUI content", content);
         this.assignMenuItemIDs(
-          f.content.querySelectorAll(`[role=${this.listItemRole}]`)
+          content.querySelectorAll(`[role=${this.listItemRole}]`)
         );
       });
     }

@@ -19,28 +19,32 @@
           contentIsShown=f.contentIsShown
           registerAnchor=f.registerAnchor
           toggleContent=f.toggleContent
-          onTriggerKeydown=(fn this.onTriggerKeydown f)
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
           color=(or @color "secondary")
           disabled=@disabled
           ariaControls=(concat
             "x-hds-dropdown-list-"
             (if this.inputIsShown "container" "list")
             "-"
-            f.id
+            f.contentID
           )
           text=@label
         )
         ToggleAction=(component
           "x/hds/dropdown-list/toggle-action"
           registerAnchor=f.registerAnchor
-          onTriggerKeydown=(fn this.onTriggerKeydown f)
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
           toggleContent=f.toggleContent
           disabled=@disabled
           ariaControls=(concat
             "x-hds-dropdown-list-"
             (if this.inputIsShown "container" "list")
             "-"
-            f.id
+            f.contentID
           )
         )
         contentIsShown=f.contentIsShown
@@ -50,10 +54,10 @@
   </:anchor>
   <:content as |f|>
     <div
-      id="x-hds-dropdown-list-container-{{f.id}}"
+      id="x-hds-dropdown-list-container-{{f.contentID}}"
       class="x-hds-dropdown-list-container"
       role={{if this.inputIsShown "combobox"}}
-      {{did-insert (fn this.didInsertList f)}}
+      {{did-insert this.didInsertList}}
       {{will-destroy this.willDestroyDropdown}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       ...attributes
@@ -63,7 +67,7 @@
           <Hds::Form::TextInput::Base
             data-test-product-area-dropdown-input
             {{did-insert this.registerAndFocusInput}}
-            {{on "input" (perform this.onInput f)}}
+            {{on "input" (perform this.onInput f.content)}}
             {{on "focusin" this.resetFocusedItemIndex}}
             @value={{this.query}}
             @type="search"
@@ -81,12 +85,10 @@
         {{did-insert this.registerScrollContainer}}
         class="x-hds-dropdown-list-scroll-container"
       >
-        {{! So the problem is we want the flexibility to use LinkTos or Actions,
-        each perhaps with its own unique requirements. Need to find some way of yielding the list item with a quick way of tagging the interactive component with stuff }}
         <X::Hds::DropdownList::Items
           @items={{@items}}
-          @id={{f.id}}
-          @onInput={{perform this.onInput f}}
+          @id={{f.contentID}}
+          @onInput={{perform this.onInput f.content}}
           @onItemClick={{@onItemClick}}
           @listItemRole={{this.listItemRole}}
           @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
@@ -98,16 +100,14 @@
           @shownItems={{this.shownItems}}
           @selected={{@selected}}
           @query={{this.query}}
-          @f={{f}}
+          @content={{f.content}}
+          @hideContent={{f.hideContent}}
         >
           <:item as |i|>
             {{yield i to="item"}}
           </:item>
         </X::Hds::DropdownList::Items>
-
       </div>
-      {{! action list }}
-      {{! link list }}
     </div>
   </:content>
 </FloatingUI>
