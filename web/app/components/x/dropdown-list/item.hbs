@@ -1,28 +1,27 @@
 <li class="x-dropdown-list-item" role="none">
   {{yield
     (hash
+      value=@value
+      attrs=@attributes
+      selected=@selected
       Action=(component
         "x/dropdown-list/action"
-        role=@role
+        role=@listItemRole
         isAriaSelected=this.isAriaSelected
-        selected=@selected
+        isAriaChecked=@selected
         registerElement=this.registerElement
         focusMouseTarget=this.focusMouseTarget
         onClick=this.onClick
       )
       LinkTo=(component
         "x/dropdown-list/link-to"
-        role=@role
+        role=@listItemRole
         isAriaSelected=this.isAriaSelected
-        selected=@selected
+        isAriaChecked=@selected
         registerElement=this.registerElement
         focusMouseTarget=this.focusMouseTarget
         onClick=this.onClick
       )
-      selected=@selected
-      value=@value
-      count=@count
-      attrs=@attributes
     )
   }}
 </li>

@@ -20,5 +20,5 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
-  this.route("404", { path: "/*path" });
+  this.route('404', { path: '/*path' })
 });

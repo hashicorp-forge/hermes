@@ -9,11 +9,9 @@ import { next } from "@ember/runloop";
 
 interface XDropdownListItemComponentSignature {
   Args: {
-    role: string;
-    selected: boolean;
-    attributes?: unknown;
     value: string;
-    count?: number;
+    attributes?: unknown;
+    selected: boolean;
     focusedItemIndex: number;
     listItemRole: string;
     hideDropdown: () => void;

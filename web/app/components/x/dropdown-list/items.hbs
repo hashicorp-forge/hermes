@@ -2,17 +2,13 @@
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
 {{#if this.noMatchesFound}}
-  {{#if (has-block "empty-state")}}
-    {{yield to="empty-state"}}
-  {{else}}
-    <div class="x-dropdown-list-empty-state">
-      No matches
-    </div>
-  {{/if}}
+  <div class="x-dropdown-list-empty-state">
+    No matches
+  </div>
 {{else}}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     <MaybeOrderedList
-      id="x-dropdown-list-{{@id}}"
+      id="x-dropdown-list-{{@contentID}}"
       class="x-dropdown-list"
       role={{if this.args.inputIsShown "listbox" "menu"}}
       aria-activedescendant={{this.ariaActiveDescendant}}
@@ -20,14 +16,14 @@
       {{#if @shownItems}}
         {{#each-in @shownItems as |item attrs|}}
           <X::DropdownList::Item
-            @role={{@listItemRole}}
             @value={{item}}
             @attributes={{attrs}}
             @selected={{eq @selected item}}
+            @focusedItemIndex={{@focusedItemIndex}}
+            @listItemRole={{@listItemRole}}
             @hideDropdown={{@hideContent}}
             @onItemClick={{@onItemClick}}
             @setFocusedItemIndex={{@setFocusedItemIndex}}
-            @focusedItemIndex={{@focusedItemIndex}}
             as |i|
           >
             {{yield i to="item"}}

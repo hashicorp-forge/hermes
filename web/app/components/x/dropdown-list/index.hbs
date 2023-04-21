@@ -84,21 +84,22 @@
         class="x-dropdown-list-scroll-container"
       >
         <X::DropdownList::Items
+          @contentID={{f.contentID}}
+          @query={{this.query}}
           @items={{@items}}
-          @id={{f.contentID}}
-          @onInput={{perform this.onInput}}
-          @onItemClick={{@onItemClick}}
-          @listItemRole={{this.listItemRole}}
-          @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
-          @registerScrollContainer={{this.registerScrollContainer}}
-          @listIsOrdered={{@listIsOrdered}}
-          @inputIsShown={{this.inputIsShown}}
-          @setFocusedItemIndex={{this.setFocusedItemIndex}}
-          @focusedItemIndex={{this.focusedItemIndex}}
           @shownItems={{this.shownItems}}
           @selected={{@selected}}
-          @query={{this.query}}
+          @focusedItemIndex={{this.focusedItemIndex}}
+          @inputIsShown={{this.inputIsShown}}
+          @listIsOrdered={{@listIsOrdered}}
+          @listItemRole={{this.listItemRole}}
+          @onInput={{perform this.onInput}}
+          @onItemClick={{@onItemClick}}
+          @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
+          @registerScrollContainer={{this.registerScrollContainer}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
           @hideContent={{f.hideContent}}
+          @scrollContainer={{this.scrollContainer}}
         >
           <:item as |i|>
             {{yield i to="item"}}

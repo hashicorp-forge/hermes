@@ -4,10 +4,9 @@
   {{on "click" @onClick}}
   role={{@role}}
   aria-selected={{@isAriaSelected}}
+  aria-checked={{@isAriaChecked}}
   tabindex="-1"
-  aria-checked={{@selected}}
-  class="x-dropdown-list-item-link
-    {{if @isAriaSelected 'is-aria-selected'}}"
+  class="x-dropdown-list-item-link {{if @isAriaSelected 'is-aria-selected'}}"
   ...attributes
 >
   {{yield}}
