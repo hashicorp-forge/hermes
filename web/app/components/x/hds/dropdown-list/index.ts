@@ -52,7 +52,11 @@ export default class XHdsDropdownListComponent extends Component<
   }
 
   get inputIsShown() {
-    return Object.keys(this.args.items).length > 7;
+    if (!this.args.items) {
+      return false;
+    } else {
+      return Object.keys(this.args.items).length > 7;
+    }
   }
 
   get shownItems() {

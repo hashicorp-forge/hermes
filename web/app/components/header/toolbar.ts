@@ -64,7 +64,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get getSortByLabel(): SortByLabel {
-    console.log('it happen');
+    console.log("it happen");
     if (this.currentSortByValue === SortByValue.DateDesc) {
       return SortByLabel.Newest;
     } else {
@@ -74,6 +74,13 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
   get currentRouteName(): string {
     return this.router.currentRouteName;
+  }
+
+  get facetsAreShown() {
+    if (!this.args.facets) {
+      return false;
+    }
+    return Object.keys(this.args.facets).length > 0;
   }
 
   /**
