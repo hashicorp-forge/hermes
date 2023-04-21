@@ -32,7 +32,15 @@ module.exports = function (environment) {
       // Here you can pass flags/options to your application instance
       // when it is created
     },
-
+    metricsAdapters: [
+      {
+        name: "GoogleAnalyticsFour",
+        environments: ["development", "production"],
+        config: {
+          id: getEnv("GOOGLE_ANALYTICS_TAG_ID", null),
+        },
+      },
+    ],
     algolia: {
       appID: getEnv("ALGOLIA_APP_ID"),
       docsIndexName: getEnv("ALGOLIA_DOCS_INDEX_NAME", "docs"),

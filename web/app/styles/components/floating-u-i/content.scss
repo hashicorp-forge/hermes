@@ -1,0 +1,11 @@
+.hermes-floating-ui-content {
+  @apply absolute;
+
+  /* These positioning styles are overwritten by FloatingUI,
+   * but they ensure that the tooltip isn't added to the bottom of the page,
+   * where it could cause a reflow. This is especially important because
+   * the Google Docs iframe responds to layout changes and might
+   * otherwise jitter when a tooltip opened.
+   */
+  @apply top-0 left-0;
+}
