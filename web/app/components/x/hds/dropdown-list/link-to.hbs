@@ -7,7 +7,7 @@
   tabindex="-1"
   aria-checked={{@selected}}
   @route={{@route}}
-  @query={{@query}}
+  @query={{or @query (hash)}}
   class="x-hds-dropdown-list-item-link
     {{if @isAriaSelected 'is-aria-selected'}}"
   ...attributes

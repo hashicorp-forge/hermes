@@ -27,6 +27,13 @@ export enum FacetName {
   Product = "product",
 }
 
+export interface SortByFacets {
+  [name: string]: {
+    count: number;
+    selected: boolean;
+  };
+}
+
 export type ActiveFilters = {
   [name in FacetName]: string[];
 };
@@ -57,6 +64,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get getSortByLabel(): SortByLabel {
+    console.log('it happen');
     if (this.currentSortByValue === SortByValue.DateDesc) {
       return SortByLabel.Newest;
     } else {
@@ -117,7 +125,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  get sortByFacets() {
+  get sortByFacets(): SortByFacets {
     return {
       Newest: {
         count: 0,

@@ -11,22 +11,19 @@
   @listIsOrdered={{true}}
   {{! TODO: figure out "selected" }}
 >
-  <:anchor as |d|>
-    <d.ToggleButton @text={{@label}} />
+  <:anchor as |dd|>
+    <dd.ToggleButton @text={{@label}} />
   </:anchor>
-  <:item as |i|>
-    <i.LinkTo
+  <:item as |dd|>
+    <dd.LinkTo
       @route={{this.currentRouteName}}
-      @query={{or
-        i.attrs.sortByQueryParams
-        (get-facet-query-hash @label i.value i.attrs.selected)
-      }}
+      @query={{get-facet-query-hash @label i.value i.attrs.selected}}
     >
       <X::Hds::DropdownList::CheckableItem
         @value={{i.value}}
         @count={{i.attrs.count}}
         @selected={{i.attrs.selected}}
       />
-    </i.LinkTo>
+    </dd.LinkTo>
   </:item>
 </X::Hds::DropdownList>

@@ -1,0 +1,20 @@
+<X::Hds::DropdownList @items={{@facets}} @placement={{@dropdownPlacement}}>
+  <:anchor as |dd|>
+    <dd.ToggleButton @text="Sort: {{@label}}" disabled={{@disabled}} />
+  </:anchor>
+  <:item as |dd|>
+    <dd.LinkTo
+      @route={{this.currentRouteName}}
+      @query={{hash
+        sortBy=(if (eq dd.value "Newest") this.dateDesc this.dateAsc)
+      }}
+    >
+      <FlightIcon
+        data-test-facet-dropdown-list-item-sort-icon
+        @name={{if (eq dd.value "Newest") "sort-desc" "sort-asc"}}
+        class="sort-icon"
+      />
+      {{dd.value}}
+    </dd.LinkTo>
+  </:item>
+</X::Hds::DropdownList>
