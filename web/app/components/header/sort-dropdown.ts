@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { SortByFacets, SortByLabel, SortByValue } from "./toolbar";
+import { SortByFacets, SortByValue } from "./toolbar";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 
@@ -25,10 +25,5 @@ export default class HeaderSortDropdownComponent extends Component<HeaderSortDro
 
   get dateAsc() {
     return SortByValue.DateAsc;
-  }
-
-  get newestLabel() {
-    debugger;
-    return SortByLabel.Newest;
   }
 }

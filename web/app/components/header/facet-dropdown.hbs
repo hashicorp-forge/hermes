@@ -1,28 +1,16 @@
-{{!
-  Marked up with guidance from:
-  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
-  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-list/
-  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
-  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
-}}
-
-<X::Hds::DropdownList
-  @items={{@facets}}
-  @listIsOrdered={{true}}
-  {{! TODO: figure out "selected" }}
->
+<X::Hds::DropdownList @items={{@facets}} @listIsOrdered={{true}}>
   <:anchor as |dd|>
     <dd.ToggleButton @text={{@label}} />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
       @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label i.value i.attrs.selected}}
+      @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
     >
       <X::Hds::DropdownList::CheckableItem
-        @value={{i.value}}
-        @count={{i.attrs.count}}
-        @selected={{i.attrs.selected}}
+        @value={{dd.value}}
+        @count={{dd.attrs.count}}
+        @selected={{dd.attrs.selected}}
       />
     </dd.LinkTo>
   </:item>
