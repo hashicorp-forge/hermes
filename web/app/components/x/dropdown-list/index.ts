@@ -28,7 +28,6 @@ export default class XDropdownListComponent extends Component<
 > {
   @service("fetch") declare fetchSvc: FetchService;
 
-  @tracked _trigger: HTMLElement | null = null;
   @tracked private _scrollContainer: HTMLElement | null = null;
   @tracked protected query: string = "";
 
@@ -70,7 +69,6 @@ export default class XDropdownListComponent extends Component<
     } else {
       value += "list";
     }
-
     return `${value}-`;
   }
 
@@ -215,28 +213,26 @@ export default class XDropdownListComponent extends Component<
     }
   }
 
-  protected onInput = restartableTask(
-    async (content: HTMLElement | null, inputEvent: InputEvent) => {
-      this.focusedItemIndex = -1;
+  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+    this.focusedItemIndex = -1;
 
-      let showItems: any = {};
-      let { items } = this.args;
+    let showItems: any = {};
+    let { items } = this.args;
 
-      this.query = (inputEvent.target as HTMLInputElement).value;
-      for (const [key, value] of Object.entries(items)) {
-        if (key.toLowerCase().includes(this.query.toLowerCase())) {
-          showItems[key] = value;
-        }
+    this.query = (inputEvent.target as HTMLInputElement).value;
+    for (const [key, value] of Object.entries(items)) {
+      if (key.toLowerCase().includes(this.query.toLowerCase())) {
+        showItems[key] = value;
       }
-
-      this.filteredItems = showItems;
-
-      schedule("afterRender", () => {
-        assert("onInput expects floatingUI content", content);
-        this.assignMenuItemIDs(
-          content.querySelectorAll(`[role=${this.listItemRole}]`)
-        );
-      });
     }
-  );
+
+    this.filteredItems = showItems;
+
+    schedule("afterRender", () => {
+      assert("onInput expects a _scrollContainer", this._scrollContainer);
+      this.assignMenuItemIDs(
+        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+      );
+    });
+  });
 }
