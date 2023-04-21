@@ -5,9 +5,12 @@
     @placement={{@placement}}
     @renderOut={{@renderOut}}
     @anchor={{this.anchor}}
-    {{did-insert this.registerContent}}
+    @content={{this.content}}
+    @id={{this.contentID}}
+    @registerContent={{this.registerContent}}
     ...attributes
   >
+    {{!-- TODO: Make this yield more --}}
     {{yield this to="content"}}
   </FloatingUI::Content>
 {{/if}}

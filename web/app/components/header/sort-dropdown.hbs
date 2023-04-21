@@ -1,6 +1,14 @@
-<X::Hds::DropdownList @items={{@facets}} @placement={{@dropdownPlacement}}>
+<X::Hds::DropdownList
+  data-test-header-sort-by-dropdown
+  @items={{@facets}}
+  @placement={{@dropdownPlacement}}
+>
   <:anchor as |dd|>
-    <dd.ToggleButton @text="Sort: {{@label}}" disabled={{@disabled}} />
+    <dd.ToggleButton
+      data-test-header-sort-dropdown-trigger
+      @text="Sort: {{@label}}"
+      disabled={{@disabled}}
+    />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo

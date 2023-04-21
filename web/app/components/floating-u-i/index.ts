@@ -1,5 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
+import { guidFor } from "@ember/object/internals";
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -12,6 +13,8 @@ interface FloatingUIComponentSignature {
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
+  readonly contentID = guidFor(this);
+
   @tracked _anchor: HTMLElement | null = null;
   @tracked content: HTMLElement | null = null;
   @tracked contentIsShown: boolean = false;

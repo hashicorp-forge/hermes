@@ -76,13 +76,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     return this.router.currentRouteName;
   }
 
-  get facetsAreShown() {
-    if (!this.args.facets) {
-      return false;
-    }
-    return Object.keys(this.args.facets).length > 0;
-  }
-
   /**
    * Whether the owner facet is disabled.
    * True on the My Docs and My Drafts screens.

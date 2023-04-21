@@ -1,6 +1,6 @@
 <X::Hds::DropdownList @items={{@facets}} @listIsOrdered={{true}}>
   <:anchor as |dd|>
-    <dd.ToggleButton @text={{@label}} />
+    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo

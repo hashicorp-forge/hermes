@@ -16,24 +16,25 @@ import { tracked } from "@glimmer/tracking";
 interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
+    content: HTMLElement | null;
     placement?: Placement;
     renderOut?: boolean;
+    registerContent: (e: HTMLElement) => void;
   };
 }
 
 export default class FloatingUIContent extends Component<FloatingUIContentSignature> {
   readonly id = guidFor(this);
 
-  @tracked _content: HTMLElement | null = null;
   @tracked cleanup: (() => void) | null = null;
 
   get content() {
-    assert("_content must exist", this._content);
-    return this._content;
+    assert("_this.args.content must exist", this.args.content);
+    return this.args.content;
   }
 
   @action didInsert(e: HTMLElement) {
-    this._content = e;
+    this.args.registerContent(e);
 
     let updatePosition = async () => {
       computePosition(this.args.anchor, this.content, {
