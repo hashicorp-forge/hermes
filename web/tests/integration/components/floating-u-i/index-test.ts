@@ -41,6 +41,7 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
 
     assert.dom(".content").exists();
     const contentID = htmlElement(".content").id;
+
     assert.ok(contentID.startsWith("ember"), "a contentID was assigned");
 
     await click(".open-button");

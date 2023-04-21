@@ -11,13 +11,6 @@ const CONTENT_OFFSET = 5;
 module("Integration | Component | floating-u-i/content", function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(function (this: TestContext) {
-    this.set("content", null);
-    this.set("registerContent", (e: HTMLElement) => {
-      this.set("content", e);
-    });
-  });
-
   test("it can be rendered inline or outside", async function (assert) {
     this.set("renderOut", undefined);
 
@@ -28,11 +21,8 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
       <div class="container">
         <FloatingUI::Content
-          id="test-id"
           @anchor={{html-element '.anchor'}}
           @renderOut={{this.renderOut}}
-          @content={{this.content}}
-          @registerContent={{this.registerContent}}
         >
           Content
         </FloatingUI::Content>
@@ -84,8 +74,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             style="width: 100px"
             @anchor={{html-element '.anchor'}}
             @placement="left"
-            @content={{this.content}}
-            @registerContent={{this.registerContent}}
           >
             Content
           </FloatingUI::Content>
@@ -122,8 +110,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             style="width: 100px"
             @anchor={{html-element '.anchor'}}
             @placement="right"
-            @content={{this.content}}
-            @registerContent={{this.registerContent}}
           >
             Content
           </FloatingUI::Content>

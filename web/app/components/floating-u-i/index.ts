@@ -28,11 +28,6 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
     this._anchor = e;
   }
 
-  @action registerContent(e: HTMLElement) {
-    this.content = e;
-    console.log('content registered');
-  }
-
   @action toggleContent() {
     if (this.contentIsShown) {
       this.hideContent();
