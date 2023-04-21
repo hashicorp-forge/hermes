@@ -1,21 +1,21 @@
 {{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+
 {{#if this.products}}
   <X::Hds::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
     @onItemClick={{this.onChange}}
-    {{! This sort of expects a single select }}
     @selected={{@selected}}
     class="max-h-[320px] w-80"
   >
-    <:anchor as |d|>
+    <:anchor as |dd|>
       <div class="relative w-full">
         {{#if @isSaving}}
           <div class="absolute right-0 top-1/2 -translate-y-1/2">
             <FlightIcon @name="loading" />
           </div>
         {{/if}}
-        <d.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
+        <dd.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
           <Hds::Badge
             class="hds-badge-dropdown"
             @text={{this.selected}}
@@ -25,17 +25,17 @@
             class="dropdown-caret"
             @name={{if d.contentIsShown "chevron-up" "chevron-down"}}
           />
-        </d.ToggleAction>
+        </dd.ToggleAction>
       </div>
     </:anchor>
-    <:item as |i|>
-      <i.Action>
+    <:item as |dd|>
+      <dd.Action>
         <X::Hds::DropdownList::CheckableItem
-          @selected={{i.selected}}
-          @value={{i.value}}
-          @count={{i.count}}
+          @selected={{dd.selected}}
+          @value={{dd.value}}
+          @count={{dd.count}}
         />
-      </i.Action>
+      </dd.Action>
     </:item>
   </X::Hds::DropdownList>
 {{else if this.fetchProducts.isRunning}}
