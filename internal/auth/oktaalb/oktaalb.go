@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
 	verifier "github.com/okta/okta-jwt-verifier-golang"
 )
 
 const (
-	audience = "api://default"
+	albCookieName = "AWSELBAuthSessionCookie-0"
+	audience      = "api://default"
 )
 
 // OktaAuthorizer implements authorization using Okta.
@@ -62,6 +64,18 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
+
+			// Set the ALB auth cookie to an expired time so the user is prompted to
+			// log in again.
+			http.SetCookie(w, &http.Cookie{
+				Name:     albCookieName,
+				Value:    "expired",
+				Path:     "/",
+				Expires:  time.Unix(0, 0).UTC(),
+				Secure:   true,
+				HttpOnly: true,
+			})
+
 			http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
 			return
 		} else {
