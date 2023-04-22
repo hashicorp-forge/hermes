@@ -62,8 +62,14 @@ export default class FetchService extends Service {
         (err.message === "Network request failed" ||
           err.message === "Failed to fetch")
       ) {
-        // Swallow error and handle gracefully.
-        this.session.invalidate();
+        if (isPollCall) {
+          // Swallow error. The session service polling will prompt the user to
+          // reauthenticate.
+          this.session.pollResponseIs401 = true;
+        } else {
+          // Reload to redirect to Okta login.
+          window.location.reload();
+        }
       } else {
         // Re-throw the error to be handled at the call site.
         throw err;
