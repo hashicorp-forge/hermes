@@ -30,10 +30,8 @@ export default class AuthenticatedRoute extends Route {
     await this.authenticatedUser.loadInfo.perform();
 
     /**
-     * If using Google auth, kick off the task to poll for expired auth.
+     * Kick off the task to poll for expired auth.
      */
-    if (!this.configSvc.config.skip_google_auth) {
-      void this.session.pollForExpiredAuth.perform();
-    }
+    void this.session.pollForExpiredAuth.perform();
   }
 }
