@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { next, schedule } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";

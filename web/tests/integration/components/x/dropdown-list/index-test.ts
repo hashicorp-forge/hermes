@@ -30,6 +30,8 @@ export const LONG_ITEM_LIST = {
 };
 
 const FIRST_ITEM_SELECTOR = "x-dropdown-list-item-0";
+const SECOND_ITEM_SELECTOR = "x-dropdown-list-item-1";
+const LAST_ITEM_SELECTOR = "x-dropdown-list-item-7";
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
@@ -121,9 +123,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   });
 
   test("dropdown trigger has keyboard support", async function (assert) {
-    this.set("facets", LONG_ITEM_LIST);
+    this.set("items", LONG_ITEM_LIST);
     await render(hbs`
-      <X::DropdownList @items={{this.facets}}>
+      <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
@@ -158,9 +160,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   });
 
   test("the component's filter properties are reset on close", async function (assert) {
-    this.set("facets", LONG_ITEM_LIST);
+    this.set("items", LONG_ITEM_LIST);
     await render(hbs`
-      <X::DropdownList @items={{this.facets}}>
+      <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
@@ -191,9 +193,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   });
 
   test("the menu items are assigned IDs", async function (assert) {
-    this.set("facets", LONG_ITEM_LIST);
+    this.set("items", LONG_ITEM_LIST);
     await render(hbs`
-      <X::DropdownList @items={{this.facets}}>
+      <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
@@ -208,8 +210,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await click("button");
 
     const listItemIDs = findAll("[data-test-item-button]").map((item) => {
-      // the item's full id is "x-dropdown-list-item-0"
-      // but we only need the number
+      // grab the number from the item's ID (`x-dropdown-list-item-0`)
       return item.id.split("-").pop();
     });
 
@@ -218,5 +219,95 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       ["0", "1", "2", "3", "4", "5", "6", "7"],
       "the IDs are assigned in order"
     );
+  });
+
+  test("the list has keyboard support", async function (assert) {
+    this.set("items", LONG_ITEM_LIST);
+
+    await render(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-item-button>
+            {{dd.value}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    assert.false(
+      findAll("[data-test-item-button]").some(
+        (item) => item.getAttribute("aria-selected") === "true"
+      ),
+      "no items are aria-selected"
+    );
+
+    await triggerKeyEvent(
+      "[data-test-x-dropdown-list]",
+      "keydown",
+      "ArrowDown"
+    );
+
+    assert
+      .dom("#" + FIRST_ITEM_SELECTOR)
+      .hasAttribute("aria-selected", "true", "the first item is aria-selected");
+
+    await triggerKeyEvent(
+      "[data-test-x-dropdown-list]",
+      "keydown",
+      "ArrowDown"
+    );
+
+    assert.dom("#" + FIRST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
+
+    assert
+      .dom("#" + SECOND_ITEM_SELECTOR)
+      .hasAttribute(
+        "aria-selected",
+        "true",
+        "the second item is aria-selected"
+      );
+
+    await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
+
+    assert
+      .dom("#" + SECOND_ITEM_SELECTOR)
+      .doesNotHaveAttribute("aria-selected");
+
+    assert
+      .dom("#" + FIRST_ITEM_SELECTOR)
+      .hasAttribute("aria-selected", "true", "the first item is aria-selected");
+
+    await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
+
+    assert.dom("#" + FIRST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
+
+    assert
+      .dom("#" + LAST_ITEM_SELECTOR)
+      .hasAttribute(
+        "aria-selected",
+        "true",
+        "the last item is aria-selected when pressing up from the first"
+      );
+
+    await triggerKeyEvent(
+      "[data-test-x-dropdown-list]",
+      "keydown",
+      "ArrowDown"
+    );
+
+    assert.dom("#" + LAST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
+
+    assert
+      .dom("#" + FIRST_ITEM_SELECTOR)
+      .hasAttribute(
+        "aria-selected",
+        "true",
+        "the first item is aria-selected when pressing down from the last"
+      );
   });
 });
