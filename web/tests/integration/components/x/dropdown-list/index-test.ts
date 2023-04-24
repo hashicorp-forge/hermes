@@ -223,6 +223,10 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("the list has keyboard support", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
+    this.set("buttonWasClicked", false);
+    this.set("onButtonClick", () => {
+      this.set("buttonWasClicked", true);
+    });
 
     await render(hbs`
       <X::DropdownList @items={{this.items}}>
@@ -230,11 +234,15 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
         <:item as |dd|>
-          <dd.Action data-test-item-button>
+          <dd.Action data-test-item-button {{on "click" this.onButtonClick}}>
             {{dd.value}}
           </dd.Action>
         </:item>
       </X::DropdownList>
+
+      {{#if this.buttonWasClicked}}
+        <div data-test-button-clicked>Button was clicked</div>
+      {{/if}}
     `);
 
     await click("button");
@@ -308,6 +316,14 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
         "aria-selected",
         "true",
         "the first item is aria-selected when pressing down from the last"
+      );
+
+    await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "Enter");
+
+    assert
+      .dom("[data-test-button-clicked]")
+      .exists(
+        "keying Enter triggers the click action of the aria-selected item"
       );
   });
 });
