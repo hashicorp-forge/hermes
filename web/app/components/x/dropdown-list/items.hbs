@@ -2,12 +2,13 @@
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
 {{#if this.noMatchesFound}}
-  <div class="x-dropdown-list-empty-state">
+  <div class="x-dropdown-list-empty-state" data-test-dropdown-list-empty-state>
     No matches
   </div>
 {{else}}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     <MaybeOrderedList
+      data-test-x-dropdown-list
       id="x-dropdown-list-{{@contentID}}"
       class="x-dropdown-list"
       role={{if this.args.inputIsShown "listbox" "menu"}}

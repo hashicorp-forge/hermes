@@ -10,6 +10,8 @@
   @renderOut={{true}}
   @placement={{@placement}}
   class="hermes-popover"
+  data-test-x-dropdown-list-content
+  {{will-destroy this.onDestroy}}
 >
   <:anchor as |f|>
     {{yield
@@ -65,6 +67,7 @@
       {{#if this.inputIsShown}}
         <div class="x-dropdown-list-input-container">
           <Hds::Form::TextInput::Base
+            data-test-x-dropdown-list-input
             {{did-insert this.registerAndFocusInput}}
             {{on "input" (perform this.onInput)}}
             {{on "focusin" this.resetFocusedItemIndex}}

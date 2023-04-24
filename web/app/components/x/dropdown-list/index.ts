@@ -110,15 +110,19 @@ export default class XDropdownListComponent extends Component<
    * Used to assign ids to the menu items.
    */
   @action protected didInsertContent() {
-    schedule("afterRender", () => {
-      assert(
-        "didInsertContent expects a _scrollContainer",
-        this._scrollContainer
-      );
-      this.assignMenuItemIDs(
-        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
-      );
-    });
+    assert(
+      "didInsertContent expects a _scrollContainer",
+      this._scrollContainer
+    );
+    this.assignMenuItemIDs(
+      this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+    );
+  }
+
+  @action onDestroy() {
+    this.query = "";
+    this._filteredItems = null;
+    this.resetFocusedItemIndex();
   }
 
   /**
@@ -141,7 +145,7 @@ export default class XDropdownListComponent extends Component<
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
       assert("item must exist", item instanceof HTMLElement);
-      item.id = `facet-dropdown-menu-item-${i}`;
+      item.id = `x-dropdown-list-item-${i}`;
     }
   }
 
@@ -163,8 +167,8 @@ export default class XDropdownListComponent extends Component<
       event.preventDefault();
       showContent();
 
-      // Wait for the menuItems to be set by the showContent action.
-      next(() => {
+      // Wait for menuItemIDs to be set by `didInsertContent`.
+      schedule("afterRender", () => {
         switch (event.key) {
           case "ArrowDown":
             this.setFocusedItemIndex(FocusDirection.First, false);
