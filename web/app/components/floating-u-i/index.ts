@@ -26,6 +26,7 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
 
   @action registerAnchor(e: HTMLElement) {
     this._anchor = e;
+    this._anchor.setAttribute("data-anchor-id", this.contentID);
   }
 
   @action toggleContent() {

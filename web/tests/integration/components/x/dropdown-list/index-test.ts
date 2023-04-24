@@ -33,9 +33,11 @@ export const LONG_ITEM_LIST = {
   Filter08: { count: 1, selected: false },
 };
 
-const FIRST_ITEM_SELECTOR = "x-dropdown-list-item-0";
-const SECOND_ITEM_SELECTOR = "x-dropdown-list-item-1";
-const LAST_ITEM_SELECTOR = "x-dropdown-list-item-7";
+const CONTAINER_CLASS = "x-dropdown-list";
+const TOGGLE_BUTTON_SELECTOR = "[data-test-x-dropdown-list-toggle-button]";
+const FIRST_ITEM_ID = "x-dropdown-list-item-0";
+const SECOND_ITEM_ID = "x-dropdown-list-item-1";
+const LAST_ITEM_ID = "x-dropdown-list-item-7";
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
@@ -80,7 +82,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       find("[data-test-toggle]")?.getAttribute("aria-controls");
 
     assert.ok(
-      ariaControlsValue?.startsWith("x-dropdown-list-container"),
+      ariaControlsValue?.startsWith(CONTAINER_CLASS),
       "the correct aria-controls attribute is set"
     );
 
@@ -108,7 +110,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("button");
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).hasText("Filter01");
+    assert.dom("#" + FIRST_ITEM_ID).hasText("Filter01");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
 
@@ -117,7 +119,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
 
     assert
-      .dom("#" + FIRST_ITEM_SELECTOR)
+      .dom("#" + FIRST_ITEM_ID)
       .hasText("Filter02", "the list is filtered and the IDs are updated");
 
     await fillIn("[data-test-x-dropdown-list-input]", "foobar");
@@ -154,13 +156,13 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await waitFor(".is-aria-selected");
 
     assert
-      .dom("#" + FIRST_ITEM_SELECTOR)
+      .dom("#" + FIRST_ITEM_ID)
       .hasClass("is-aria-selected", "the aria-selected class is applied")
       .hasAttribute("aria-selected");
 
     assert
       .dom("[data-test-x-dropdown-list]")
-      .hasAttribute("aria-activedescendant", FIRST_ITEM_SELECTOR);
+      .hasAttribute("aria-activedescendant", FIRST_ITEM_ID);
   });
 
   test("the component's filter properties are reset on close", async function (assert) {
@@ -264,7 +266,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).hasAttribute("aria-selected");
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
@@ -272,20 +274,18 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
-    assert.dom("#" + SECOND_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).doesNotHaveAttribute("aria-selected");
+    assert.dom("#" + SECOND_ITEM_ID).hasAttribute("aria-selected");
 
     await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
 
-    assert
-      .dom("#" + SECOND_ITEM_SELECTOR)
-      .doesNotHaveAttribute("aria-selected");
-    assert.dom("#" + FIRST_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + SECOND_ITEM_ID).doesNotHaveAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).hasAttribute("aria-selected");
 
     await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
-    assert.dom("#" + LAST_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).doesNotHaveAttribute("aria-selected");
+    assert.dom("#" + LAST_ITEM_ID).hasAttribute("aria-selected");
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
@@ -293,9 +293,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    assert.dom("#" + LAST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
+    assert.dom("#" + LAST_ITEM_ID).doesNotHaveAttribute("aria-selected");
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).hasAttribute("aria-selected");
 
     assert
       .dom("[data-test-button-clicked]")
@@ -338,14 +338,14 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "no items are aria-selected"
     );
 
-    await triggerEvent("#" + FIRST_ITEM_SELECTOR, "mouseenter");
+    await triggerEvent("#" + FIRST_ITEM_ID, "mouseenter");
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).hasAttribute("aria-selected");
 
-    await triggerEvent("#" + SECOND_ITEM_SELECTOR, "mouseenter");
+    await triggerEvent("#" + SECOND_ITEM_ID, "mouseenter");
 
-    assert.dom("#" + FIRST_ITEM_SELECTOR).doesNotHaveAttribute("aria-selected");
-    assert.dom("#" + SECOND_ITEM_SELECTOR).hasAttribute("aria-selected");
+    assert.dom("#" + FIRST_ITEM_ID).doesNotHaveAttribute("aria-selected");
+    assert.dom("#" + SECOND_ITEM_ID).hasAttribute("aria-selected");
   });
 
   test("the list will scroll to the selected item when it is not visible", async function (assert) {
@@ -451,7 +451,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    updateMeasurements('#x-dropdown-list-item-4');
+    updateMeasurements("#x-dropdown-list-item-4");
 
     assert.equal(
       container.scrollTop,
@@ -459,7 +459,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "item five scrolled into view"
     );
 
-    updateMeasurements('#' + SECOND_ITEM_SELECTOR);
+    updateMeasurements("#" + SECOND_ITEM_ID);
 
     assert.ok(itemBottom > scrollviewTop, "item two is not fully visible");
 
@@ -484,5 +484,67 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     updateMeasurements();
 
     assert.equal(scrollviewTop, itemTop, "item two scrolled into view");
+  });
+
+  test("the list can be rendered with a toggle button", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+        {{dd.value}}
+        </:item>
+      </X::DropdownList>
+    `);
+
+    assert
+      .dom(TOGGLE_BUTTON_SELECTOR)
+      .exists()
+      .hasClass("hds-button", "the toggle button has the HDS style")
+      .hasAttribute("aria-haspopup", "listbox")
+      .doesNotHaveAttribute("aria-expanded");
+
+    assert.dom(CONTAINER_CLASS).doesNotExist();
+    assert.dom(".flight-icon-chevron-down").exists();
+    assert.dom(".flight-icon-chevron-up").doesNotExist();
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert.dom(TOGGLE_BUTTON_SELECTOR).hasAttribute("aria-expanded");
+
+    assert.dom("." + CONTAINER_CLASS).exists();
+    assert.dom(".flight-icon-chevron-down").doesNotExist();
+    assert.dom(".flight-icon-chevron-up").exists();
+
+    const ariaControlsValue = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
+      "aria-controls"
+    );
+
+    const dropdownListItemsID = htmlElement(".x-dropdown-list-items").getAttribute("id");
+
+    debugger
+    assert.equal(
+      ariaControlsValue,
+      dropdownListItemsID,
+      "the aria-controls value matches the dropdown list ID"
+    );
+
+    let dataAnchorID = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
+      "data-anchor-id"
+    );
+
+    let contentAnchoredTo = htmlElement("." + CONTAINER_CLASS).getAttribute(
+      "data-anchored-to"
+    );
+
+
+    assert.equal(
+      dataAnchorID,
+      contentAnchoredTo,
+      "the anchor is properly registered"
+    );
   });
 });
