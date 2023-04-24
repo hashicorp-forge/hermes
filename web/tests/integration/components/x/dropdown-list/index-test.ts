@@ -5,19 +5,16 @@ import {
   fillIn,
   find,
   findAll,
-  getSettledState,
   render,
-  settled,
   triggerEvent,
   triggerKeyEvent,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
-import { assert as emberAssert } from "@ember/debug";
 
 // TODO: Replace with Mirage factories
+
 export const SHORT_ITEM_LIST = {
   Filter01: { count: 1, selected: false },
   Filter02: { count: 1, selected: false },
@@ -35,9 +32,11 @@ export const LONG_ITEM_LIST = {
 
 const CONTAINER_CLASS = "x-dropdown-list";
 const TOGGLE_BUTTON_SELECTOR = "[data-test-x-dropdown-list-toggle-button]";
+const TOGGLE_ACTION_SELECTOR = "[data-test-x-dropdown-list-toggle-action]";
 const FIRST_ITEM_ID = "x-dropdown-list-item-0";
 const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
+const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
@@ -216,7 +215,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await click("button");
 
     const listItemIDs = findAll("[data-test-item-button]").map((item) => {
-      // grab the number from the item's ID (`x-dropdown-list-item-0`)
+      // grab the number from the item IDs (e.g., `x-dropdown-list-item-0`)
       return item.id.split("-").pop();
     });
 
@@ -366,7 +365,6 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("button");
 
-    // At 160px tall, the fourth item is cropped.
     let container = htmlElement(".x-dropdown-list-scroll-container");
     let item = htmlElement("#x-dropdown-list-item-3");
 
@@ -378,7 +376,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     let scrollviewTop = 0;
     let scrollviewBottom = 0;
 
-    function updateMeasurements(selector?: string) {
+    function measure(selector?: string) {
       if (selector) {
         item = htmlElement(selector);
       }
@@ -388,7 +386,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       scrollviewBottom = scrollviewTop + containerHeight;
     }
 
-    updateMeasurements();
+    measure();
+
+    // At 160px tall, the fourth item is cropped.
 
     assert.true(
       itemBottom > scrollviewBottom,
@@ -437,7 +437,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    updateMeasurements();
+    measure();
 
     assert.equal(
       container.scrollTop,
@@ -451,7 +451,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "ArrowDown"
     );
 
-    updateMeasurements("#x-dropdown-list-item-4");
+    measure("#x-dropdown-list-item-4");
 
     assert.equal(
       container.scrollTop,
@@ -459,7 +459,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "item five scrolled into view"
     );
 
-    updateMeasurements("#" + SECOND_ITEM_ID);
+    measure("#" + SECOND_ITEM_ID);
+
+    // At this point the second item is cropped:
 
     assert.ok(itemBottom > scrollviewTop, "item two is not fully visible");
 
@@ -481,9 +483,38 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
 
-    updateMeasurements();
+    measure();
 
     assert.equal(scrollviewTop, itemTop, "item two scrolled into view");
+  });
+
+  test("the list can be rendered with LinkTos", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.LinkTo @route="authenticated.all" @query={{hash products="Labs"}}>
+            {{dd.value}}
+          </dd.LinkTo>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    assert.dom(LINK_TO_SELECTOR).exists({ count: 3 });
+
+    const firstLink = htmlElement(LINK_TO_SELECTOR);
+
+    assert.equal(
+      firstLink.getAttribute("href"),
+      "/all?products=Labs",
+      "route and query are set"
+    );
   });
 
   test("the list can be rendered with a toggle button", async function (assert) {
@@ -523,9 +554,10 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "aria-controls"
     );
 
-    const dropdownListItemsID = htmlElement(".x-dropdown-list-items").getAttribute("id");
+    const dropdownListItemsID = htmlElement(
+      ".x-dropdown-list-items"
+    ).getAttribute("id");
 
-    debugger
     assert.equal(
       ariaControlsValue,
       dropdownListItemsID,
@@ -540,6 +572,66 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "data-anchored-to"
     );
 
+    assert.equal(
+      dataAnchorID,
+      contentAnchoredTo,
+      "the anchor is properly registered"
+    );
+  });
+
+  test("the list can be rendered with a toggle action", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleAction data-test-toggle>
+            <div data-test-custom-toggle>
+              I can be anything
+            </div>
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+        {{dd.value}}
+        </:item>
+      </X::DropdownList>
+    `);
+
+    assert
+      .dom(TOGGLE_ACTION_SELECTOR)
+      .exists()
+      .hasAttribute("aria-haspopup", "listbox")
+      .doesNotHaveAttribute("aria-expanded");
+
+    assert.dom(CONTAINER_CLASS).doesNotExist();
+
+    await click(TOGGLE_ACTION_SELECTOR);
+
+    assert.dom(TOGGLE_ACTION_SELECTOR).hasAttribute("aria-expanded");
+
+    assert.dom("." + CONTAINER_CLASS).exists();
+
+    const ariaControlsValue = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
+      "aria-controls"
+    );
+
+    const dropdownListItemsID = htmlElement(
+      ".x-dropdown-list-items"
+    ).getAttribute("id");
+
+    assert.equal(
+      ariaControlsValue,
+      dropdownListItemsID,
+      "the aria-controls value matches the dropdown list ID"
+    );
+
+    let dataAnchorID = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
+      "data-anchor-id"
+    );
+
+    let contentAnchoredTo = htmlElement("." + CONTAINER_CLASS).getAttribute(
+      "data-anchored-to"
+    );
 
     assert.equal(
       dataAnchorID,
