@@ -1,3 +1,7 @@
+.x-dropdown-list {
+  @apply max-h-[410px];
+}
+
 .x-dropdown-list-container {
   @apply flex flex-col overflow-hidden;
 }
@@ -15,5 +19,5 @@
 }
 
 .x-dropdown-list-items {
-  @apply py-1;
+  @apply pt-1 pb-1.5;
 }
