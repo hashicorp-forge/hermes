@@ -3,7 +3,7 @@
 }
 
 .x-dropdown-list-item-link {
-  @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
+  @apply no-underline flex text-body-200 items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
 
   &.is-aria-selected {
     @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;

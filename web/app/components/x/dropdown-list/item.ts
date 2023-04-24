@@ -55,13 +55,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * the FacetList is filtered. Strips everything but the trailing number.
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
-   * Regex reference:
-   * \d = Any digit 0-9
-   * + = One or more of the preceding token
-   * $ = End of input
    */
   private get itemIndexNumber(): number {
-    return parseInt(this.domElementID.match(/\d+$/)?.[0] || "0", 10);
+    let idNumber = this.domElementID.split("-").pop();
+    assert("itemIndexNumber expects an ID number", idNumber);
+    return parseInt(idNumber, 10);
   }
 
   get isAriaSelected(): boolean {

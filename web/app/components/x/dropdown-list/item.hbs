@@ -1,9 +1,6 @@
 <li data-test-x-dropdown-list-item class="x-dropdown-list-item" role="none">
   {{yield
     (hash
-      value=@value
-      attrs=@attributes
-      selected=@selected
       Action=(component
         "x/dropdown-list/action"
         role=@listItemRole
@@ -22,6 +19,9 @@
         focusMouseTarget=this.focusMouseTarget
         onClick=this.onClick
       )
+      value=@value
+      attrs=@attributes
+      selected=@selected
     )
   }}
 </li>

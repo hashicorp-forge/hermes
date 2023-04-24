@@ -240,12 +240,11 @@ export default class XDropdownListComponent extends Component<
     const focusedItem = this._menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
 
-    const containerTopPadding = 12;
     const containerHeight = this.scrollContainer.offsetHeight;
     const itemHeight = focusedItem.offsetHeight;
     const itemTop = focusedItem.offsetTop;
     const itemBottom = focusedItem.offsetTop + itemHeight;
-    const scrollviewTop = this.scrollContainer.scrollTop - containerTopPadding;
+    const scrollviewTop = this.scrollContainer.scrollTop;
     const scrollviewBottom = scrollviewTop + containerHeight;
 
     if (itemBottom > scrollviewBottom) {
