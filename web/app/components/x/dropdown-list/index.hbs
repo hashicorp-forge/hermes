@@ -28,7 +28,7 @@
           disabled=@disabled
           ariaControls=(concat
             "x-dropdown-list-"
-            (if this.inputIsShown "container" "list")
+            (if this.inputIsShown "container" "items")
             "-"
             f.contentID
           )
@@ -44,7 +44,7 @@
           disabled=@disabled
           ariaControls=(concat
             "x-dropdown-list-"
-            (if this.inputIsShown "container" "list")
+            (if this.inputIsShown "container" "items")
             "-"
             f.contentID
           )
@@ -70,7 +70,6 @@
             data-test-x-dropdown-list-input
             {{did-insert this.registerAndFocusInput}}
             {{on "input" (perform this.onInput)}}
-            {{on "focusin" this.resetFocusedItemIndex}}
             @value={{this.query}}
             @type="search"
             placeholder="Filter..."
@@ -98,7 +97,6 @@
           @listItemRole={{this.listItemRole}}
           @onInput={{perform this.onInput}}
           @onItemClick={{@onItemClick}}
-          @resetFocusedItemIndex={{this.resetFocusedItemIndex}}
           @registerScrollContainer={{this.registerScrollContainer}}
           @setFocusedItemIndex={{this.setFocusedItemIndex}}
           @hideContent={{f.hideContent}}

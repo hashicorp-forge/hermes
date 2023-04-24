@@ -76,19 +76,6 @@ export default class XDropdownListComponent extends Component<
   }
 
   /**
-   * The "aria-controls" value for the dropdown trigger.
-   */
-  get ariaControls() {
-    let value = "x-dropdown-";
-    if (this.inputIsShown) {
-      value += "popover";
-    } else {
-      value += "list";
-    }
-    return `${value}-`;
-  }
-
-  /**
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
@@ -122,7 +109,7 @@ export default class XDropdownListComponent extends Component<
   @action onDestroy() {
     this.query = "";
     this._filteredItems = null;
-    this.resetFocusedItemIndex();
+    this.focusedItemIndex = -1;
   }
 
   /**
@@ -267,15 +254,6 @@ export default class XDropdownListComponent extends Component<
       this.scrollContainer.scrollTop = itemTop;
     }
   }
-
-  /**
-   * Resets the focus index to its initial value.
-   * Called when the dropdown is closed, and when the input is focused.
-   */
-  @action protected resetFocusedItemIndex() {
-    this.focusedItemIndex = -1;
-  }
-
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules

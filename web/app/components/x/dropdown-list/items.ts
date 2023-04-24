@@ -17,7 +17,6 @@ interface XDropdownListItemsComponentSignature {
     scrollContainer: HTMLElement;
     onInput: () => void;
     onItemClick: () => void;
-    resetFocusedItemIndex: () => void;
     registerScrollContainer?: (e: HTMLElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
     hideContent: () => void;

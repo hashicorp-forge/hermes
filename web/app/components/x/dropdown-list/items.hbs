@@ -9,7 +9,7 @@
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     <MaybeOrderedList
       data-test-x-dropdown-list
-      id="x-dropdown-list-{{@contentID}}"
+      id="x-dropdown-list-items-{{@contentID}}"
       class="x-dropdown-list"
       role={{if this.args.inputIsShown "listbox" "menu"}}
       aria-activedescendant={{this.ariaActiveDescendant}}

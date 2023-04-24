@@ -3,6 +3,8 @@ import { setupRenderingTest } from "ember-qunit";
 import {
   click,
   fillIn,
+  find,
+  findAll,
   render,
   triggerKeyEvent,
   waitFor,
@@ -38,7 +40,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await render(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
-          <dd.ToggleButton @text="Toggle" />
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
         <:item as |dd|>
           <dd.Action>
@@ -48,7 +50,15 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click("button");
+    let ariaControlsValue =
+      find("[data-test-toggle]")?.getAttribute("aria-controls");
+
+    assert.ok(
+      ariaControlsValue?.startsWith("x-dropdown-list-items"),
+      "the correct aria-controls attribute is set"
+    );
+
+    await click("[data-test-toggle]");
 
     assert
       .dom("[data-test-x-dropdown-list-input]")
@@ -59,6 +69,20 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert
       .dom("[data-test-x-dropdown-list-input]")
       .exists("The input is shown");
+
+    ariaControlsValue =
+      find("[data-test-toggle]")?.getAttribute("aria-controls");
+
+    assert.ok(
+      ariaControlsValue?.startsWith("x-dropdown-list-container"),
+      "the correct aria-controls attribute is set"
+    );
+
+    assert.equal(
+      document.activeElement,
+      this.element.querySelector("[data-test-x-dropdown-list-input]"),
+      "the input is autofocused"
+    );
   });
 
   test("filtering works as expected", async function (assert) {
@@ -131,5 +155,68 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert
       .dom("[data-test-x-dropdown-list]")
       .hasAttribute("aria-activedescendant", FIRST_ITEM_SELECTOR);
+  });
+
+  test("the component's filter properties are reset on close", async function (assert) {
+    this.set("facets", LONG_ITEM_LIST);
+    await render(hbs`
+      <X::DropdownList @items={{this.facets}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action>
+            {{dd.value}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
+    assert.dom("[data-test-x-dropdown-list-input]").hasValue("");
+
+    await fillIn("[data-test-x-dropdown-list-input]", "2");
+
+    assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
+    assert.dom("[data-test-x-dropdown-list-input]").hasValue("2");
+
+    // close and reopen
+    await click("button");
+    await click("button");
+
+    assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
+    assert.dom("[data-test-x-dropdown-list-input]").hasValue("");
+  });
+
+  test("the menu items are assigned IDs", async function (assert) {
+    this.set("facets", LONG_ITEM_LIST);
+    await render(hbs`
+      <X::DropdownList @items={{this.facets}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-item-button>
+            {{dd.value}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    const listItemIDs = findAll("[data-test-item-button]").map((item) => {
+      // the item's full id is "x-dropdown-list-item-0"
+      // but we only need the number
+      return item.id.split("-").pop();
+    });
+
+    assert.deepEqual(
+      listItemIDs,
+      ["0", "1", "2", "3", "4", "5", "6", "7"],
+      "the IDs are assigned in order"
+    );
   });
 });
