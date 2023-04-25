@@ -183,6 +183,23 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the /drafts route's getDraftResults method to fetch
+       * a list of facets and draft results.
+       */
+      this.get("/drafts", () => {
+        return new Response(
+          200,
+          {},
+          {
+            facets: [],
+            Hits: [],
+            params: "",
+            page: 0,
+          }
+        );
+      });
+
+      /**
        * Used by the Dashboard route to get a user's recently viewed documents.
        */
       this.get("/me/recently-viewed-docs", (schema) => {
