@@ -91,13 +91,13 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error decoding JWT headers: %w", err)
 	}
-	var decodedJSON map[string]string
+	var decodedJSON map[string]interface{}
 	if err := json.Unmarshal(decodedJWTHeaders, &decodedJSON); err != nil {
 		return "", fmt.Errorf("error unmarshaling JSON: %w", err)
 	}
-	kid, ok := decodedJSON["kid"]
+	kid, ok := decodedJSON["kid"].(string)
 	if !ok {
-		return "", fmt.Errorf("kid not found in decoded JSON: %w", err)
+		return "", fmt.Errorf("kid not found in decoded JSON")
 	}
 
 	// Get the public key from the regional endpoint.
