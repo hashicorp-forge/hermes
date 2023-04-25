@@ -1,5 +1,9 @@
 .x-dropdown-list {
   @apply max-h-[410px];
+
+  &.hds-dropdown__content {
+    @apply min-w-[175px];
+  }
 }
 
 .x-dropdown-list-container {
