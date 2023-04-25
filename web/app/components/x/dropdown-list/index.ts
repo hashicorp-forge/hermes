@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { schedule } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -89,7 +89,11 @@ export default class XDropdownListComponent extends Component<
    */
   @action registerAndFocusInput(e: HTMLInputElement) {
     this._input = e;
-    this.input.focus();
+
+    // Wait until the content is positioned before focusing the input.
+    next(() => {
+      this.input.focus();
+    });
   }
 
   /**

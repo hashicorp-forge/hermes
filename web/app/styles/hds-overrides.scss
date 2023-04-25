@@ -34,10 +34,6 @@
 .hds-badge-dropdown {
   @apply pr-6;
 
-  .hds-badge__text {
-    @apply min-w-[120px];
-  }
-
   + .dropdown-caret {
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }

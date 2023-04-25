@@ -32,6 +32,9 @@
           as |F|
         >
           <F.Label>Title</F.Label>
+          <F.HelperText>
+            A succinct outline of the idea youʼre proposing.
+          </F.HelperText>
         </Hds::Form::TextInput::Field>
 
         <div class="relative">
@@ -62,9 +65,9 @@
             <Hds::Badge @size="small" @text="Required" />
           </span>
           <Inputs::ProductSelect
-            @badgeSize="large"
             @selected={{this.productArea}}
             @onChange={{this.onProductSelect}}
+            class="max-h-[305px]"
           />
         </div>
 
@@ -131,13 +134,11 @@
             </F.Error>
           {{/if}}
           <F.HelperText>
-            Your
-            {{@docType}}
-            will be shared with the collaborators specified here. You can also
-            add contributors later.
+            People to share your doc with. You can also add contributors later.
           </F.HelperText>
         </Hds::Form::Field>
       </div>
+      <div class="h-24"/>
     </div>
     <div>
       <div class="preview-card">

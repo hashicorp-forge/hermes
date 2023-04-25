@@ -1,3 +1,4 @@
+import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
@@ -9,7 +10,7 @@ import { BadgeSize } from "hermes/types/hds-badge";
 interface InputsProductSelectSignatureSignature {
   Args: {
     selected?: any;
-    onChange: (value: any) => void;
+    onChange: (value: string, abbreviation: string) => void;
     badgeSize?: BadgeSize;
     formatIsBadge?: boolean;
   };
@@ -31,7 +32,12 @@ export default class InputsProductSelectSignature extends Component<InputsProduc
 
   @action onChange(newValue: any) {
     this.selected = newValue;
-    this.args.onChange(newValue);
+    const productAbbreviation = this.products?.[newValue]?.abbreviation;
+    assert(
+      "onChange expects a valid productAbbreviation",
+      typeof productAbbreviation === "string"
+    );
+    this.args.onChange(newValue, productAbbreviation);
   }
 
   protected fetchProducts = task(async () => {

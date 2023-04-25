@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { task, timeout } from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
@@ -34,7 +34,6 @@ const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
   Args: {
-    productAbbrevMappings: Map<string, string>;
     docType: string;
   };
 }
@@ -49,6 +48,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
   @tracked protected productArea: string | null = null;
+  @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
@@ -118,6 +118,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   private validate() {
     const errors = { ...FORM_ERRORS };
+    if (this.productAbbreviation) {
+      if (/\d/.test(this.productAbbreviation)) {
+        errors.productAbbreviation =
+          "Product abbreviation can't include a number";
+      }
+    }
     this.formErrors = errors;
   }
 
@@ -166,8 +172,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.contributors = contributors;
   }
 
-  @action protected onProductSelect(productName: string) {
+  @action protected onProductSelect(productName: string, productAbbreviation: string) {
     this.productArea = productName;
+    this.productAbbreviation = productAbbreviation;
   }
 
   /**
@@ -200,6 +207,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             docType: this.args.docType,
             owner: this.authenticatedUser.info.email,
             product: this.productArea,
+            productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
           }),
