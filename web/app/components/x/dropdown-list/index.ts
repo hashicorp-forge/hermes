@@ -90,10 +90,12 @@ export default class XDropdownListComponent extends Component<
   @action registerAndFocusInput(e: HTMLInputElement) {
     this._input = e;
 
-    // Wait until the content is positioned before focusing the input.
-    schedule("afterRender", () => {
-      this.input.focus({ preventScroll: true });
-    });
+    /**
+     * The dropdown is initially positioned in the top of page-body,
+     * so we specify that the focus event should not scroll to it.
+     * Instead, we use FloatingUI to place the input in view.
+     */
+    this.input.focus({ preventScroll: true });
   }
 
   /**
