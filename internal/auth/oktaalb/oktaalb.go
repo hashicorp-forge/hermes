@@ -82,7 +82,7 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 		return "", fmt.Errorf("no OIDC data header found")
 	}
 	split := strings.Split(encodedJWT, ".")
-	if len(split) != 2 {
+	if len(split) != 3 {
 		return "", fmt.Errorf(
 			"bad OIDC data: wrong number of substrings, found %d", len(split))
 	}
