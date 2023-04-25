@@ -132,6 +132,9 @@ okta {
   // auth_server_url is the URL of the Okta authorization server.
   auth_server_url = ""
 
+  // AWSRegion is the region of the AWS Application Load Balancer.
+  aws_region = ""
+
   // ClientID is the Okta client ID.
   client_id = ""
 

@@ -2,17 +2,15 @@ package oktaalb
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"time"
+	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/hashicorp/go-hclog"
-	verifier "github.com/okta/okta-jwt-verifier-golang"
-)
-
-const (
-	albCookieName = "AWSELBAuthSessionCookie-0"
-	audience      = "api://default"
 )
 
 // OktaAuthorizer implements authorization using Okta.
@@ -28,6 +26,9 @@ type OktaAuthorizer struct {
 type Config struct {
 	// AuthServerURL is the URL of the Okta authorization server.
 	AuthServerURL string `hcl:"auth_server_url,optional"`
+
+	// AWSRegion is the region of the AWS Application Load Balancer.
+	AWSRegion string `hcl:"aws_region"`
 
 	// ClientID is the Okta client ID.
 	ClientID string `hcl:"client_id,optional"`
@@ -47,40 +48,18 @@ func New(cfg Config, l hclog.Logger) (*OktaAuthorizer, error) {
 // EnforceOktaAuth is HTTP middleware that enforces Okta authorization.
 func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := r.Header.Get("x-amzn-oidc-identity")
-		if id == "" {
-			oa.log.Error("no identity header found",
-				"method", r.Method,
-				"path", r.URL.Path,
-			)
-			http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
-			return
-		}
-
-		jwt, err := oa.verifyOIDCToken(r)
+		id, err := oa.verifyOIDCToken(r)
 		if err != nil {
-			oa.log.Error("error validating OIDC token",
+			oa.log.Error("error verifying OIDC token",
 				"error", err,
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
-
-			// Set the ALB auth cookie to an expired time so the user is prompted to
-			// log in again.
-			http.SetCookie(w, &http.Cookie{
-				Name:     albCookieName,
-				Value:    "expired",
-				Path:     "/",
-				Expires:  time.Unix(0, 0).UTC(),
-				Secure:   true,
-				HttpOnly: true,
-			})
-
 			http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
 			return
 		} else {
 			// Set user email from the OIDC claims.
-			ctx := context.WithValue(r.Context(), "userEmail", jwt.Claims["sub"])
+			ctx := context.WithValue(r.Context(), "userEmail", id)
 			r = r.WithContext(ctx)
 
 			next.ServeHTTP(w, r)
@@ -88,34 +67,74 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 	})
 }
 
-// verifyOIDCToken checks if the request is authorized.
-func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (*verifier.Jwt, error) {
-	tok := r.Header.Get("x-amzn-oidc-accesstoken")
-	if tok == "" {
-		oa.log.Error("no access token header found")
-		return nil, fmt.Errorf("no access token header found")
+// verifyOIDCToken checks if the request is authorized and returns the user
+// identity.
+func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
+	// Get OIDC identity from the ALB-added header.
+	id := r.Header.Get("x-amzn-oidc-identity")
+	if id == "" {
+		return "", fmt.Errorf("no OIDC identity header found")
 	}
 
-	return oa.verifyAccessToken(tok)
-}
-
-// verifyAccessToken verifies an Okta access token.
-func (oa *OktaAuthorizer) verifyAccessToken(t string) (*verifier.Jwt, error) {
-	claims := map[string]string{}
-	claims["aud"] = audience
-	claims["cid"] = oa.cfg.ClientID
-	jv := verifier.JwtVerifier{
-		Issuer:           oa.cfg.AuthServerURL,
-		ClaimsToValidate: claims,
+	// Get the key ID from JWT headers (the kid field).
+	encodedJWT := r.Header.Get("x-amzn-oidc-data")
+	if encodedJWT == "" {
+		return "", fmt.Errorf("no OIDC data header found")
 	}
-
-	resp, err := jv.New().VerifyAccessToken(t)
+	split := strings.Split(encodedJWT, ".")
+	if len(split) != 2 {
+		return "", fmt.Errorf(
+			"bad OIDC data: wrong number of substrings, found %d", len(split))
+	}
+	jwtHeaders := split[0]
+	decodedJWTHeaders, err := base64.StdEncoding.DecodeString(jwtHeaders)
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("error decoding JWT headers: %w", err)
 	}
-	if resp == nil {
-		return nil, fmt.Errorf("jwt verifier was nil")
+	var decodedJSON map[string]string
+	if err := json.Unmarshal(decodedJWTHeaders, &decodedJSON); err != nil {
+		return "", fmt.Errorf("error unmarshaling JSON: %w", err)
+	}
+	kid, ok := decodedJSON["kid"]
+	if !ok {
+		return "", fmt.Errorf("kid not found in decoded JSON: %w", err)
 	}
 
-	return resp, nil
+	// Get the public key from the regional endpoint.
+	url := fmt.Sprintf("https://public-keys.auth.elb.%s.amazonaws.com/%s",
+		oa.cfg.AWSRegion, kid)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("error getting ELB public key: %w", err)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error reading response body: %w", err)
+	}
+	pubKey := string(body)
+
+	// Get the token payload.
+	token, err := jwt.Parse(
+		encodedJWT, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := (token.Method.(*jwt.SigningMethodECDSA)); !ok {
+				return "", fmt.Errorf(
+					"unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(pubKey), nil
+		})
+	if err != nil {
+		return "", fmt.Errorf("error parsing JWT: %w", err)
+	}
+
+	// Verify claims.
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if claims["preferred_username"] != id {
+			return "", fmt.Errorf(
+				"preferred_username claim is different than OIDC identity")
+		}
+	} else {
+		return "", fmt.Errorf("claims not found")
+	}
+
+	return id, nil
 }
