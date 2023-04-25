@@ -1,42 +1,25 @@
 {{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 
 {{#if this.products}}
-  <X::DropdownList
-    @items={{this.products}}
-    @listIsOrdered={{true}}
-    @onItemClick={{this.onChange}}
-    @selected={{@selected}}
-    class="max-h-[340px] w-80"
-  >
-    <:anchor as |dd|>
-      <div class="relative w-full">
-        {{#if @isSaving}}
-          <div class="absolute right-0 top-1/2 -translate-y-1/2">
-            <FlightIcon @name="loading" />
-          </div>
-        {{/if}}
-        <dd.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
-          <Hds::Badge
-            class="hds-badge-dropdown"
-            @text={{this.selected}}
-            @icon={{get-product-id this.selected}}
-          />
-          <FlightIcon
-            class="dropdown-caret"
-            @name={{if d.contentIsShown "chevron-up" "chevron-down"}}
-          />
-        </dd.ToggleAction>
-      </div>
-    </:anchor>
-    <:item as |dd|>
-      <dd.Action>
-        <X::DropdownList::CheckableItem
-          @selected={{dd.selected}}
-          @value={{dd.value}}
-        />
-      </dd.Action>
-    </:item>
-  </X::DropdownList>
+  {{#if @formatIsBadge}}
+    <Inputs::BadgeDropdownList
+      @items={{this.products}}
+      @listIsOrdered={{true}}
+      @onItemClick={{this.onChange}}
+      @selected={{@selected}}
+      class="w-80"
+      ...attributes
+    />
+  {{else}}
+    <Inputs::SelectDropdownList
+      @items={{this.products}}
+      @listIsOrdered={{true}}
+      @onItemClick={{this.onChange}}
+      @selected={{@selected}}
+      class="w-80"
+      ...attributes
+    />
+  {{/if}}
 {{else if this.fetchProducts.isRunning}}
   <FlightIcon @name="loading" />
 {{else}}

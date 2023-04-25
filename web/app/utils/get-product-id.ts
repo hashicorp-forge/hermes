@@ -1,5 +1,11 @@
-export default function getProductId(productName: string): string | null {
+export default function getProductId(
+  productName: string | null
+): string | null {
+  if (!productName) {
+    return null;
+  }
   let product = productName.toLowerCase();
+
   switch (product) {
     case "boundary":
     case "consul":

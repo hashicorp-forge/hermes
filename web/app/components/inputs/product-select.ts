@@ -4,11 +4,14 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import { BadgeSize } from "hermes/types/hds-badge";
 
 interface InputsProductSelectSignatureSignature {
   Args: {
     selected?: any;
     onChange: (value: any) => void;
+    badgeSize?: BadgeSize;
+    formatIsBadge?: boolean;
   };
 }
 

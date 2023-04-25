@@ -1,0 +1,16 @@
+.x-dropdown-list-toggle-select {
+  @apply min-w-[200px] text-left;
+
+  &.hds-button--size-medium {
+    @apply pl-2.5 pr-1.5;
+  }
+
+  &.hds-button--color-secondary:not(:hover) {
+    @apply bg-color-surface-primary;
+
+    .flight-icon {
+      @apply text-color-foreground-faint;
+    }
+
+  }
+}

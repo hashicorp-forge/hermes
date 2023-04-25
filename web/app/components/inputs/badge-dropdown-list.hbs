@@ -1,0 +1,36 @@
+<X::DropdownList
+  @items={{@items}}
+  @listIsOrdered={{@listIsOrdered}}
+  @onItemClick={{@onItemClick}}
+  @selected={{@selected}}
+  ...attributes
+>
+  <:anchor as |dd|>
+    <div class="relative w-full">
+      {{#if @isSaving}}
+        <div class="absolute right-0 top-1/2 -translate-y-1/2">
+          <FlightIcon @name="loading" />
+        </div>
+      {{/if}}
+      <dd.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
+        <Hds::Badge
+          class="hds-badge-dropdown"
+          @text={{or @selected "--"}}
+          @icon={{if @selected (or (get-product-id @selected) "folder")}}
+        />
+        <FlightIcon
+          class="dropdown-caret"
+          @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+        />
+      </dd.ToggleAction>
+    </div>
+  </:anchor>
+  <:item as |dd|>
+    <dd.Action>
+      <X::DropdownList::CheckableItem
+        @selected={{dd.selected}}
+        @value={{dd.value}}
+      />
+    </dd.Action>
+  </:item>
+</X::DropdownList>

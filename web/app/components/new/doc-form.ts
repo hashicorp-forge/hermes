@@ -48,7 +48,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string = "";
+  @tracked protected productArea: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
@@ -100,12 +100,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   }
 
   /**
-   * The product abbreviation for the selected product area.
-   */
-  protected get productAbbreviation() {
-    return this.args.productAbbrevMappings.get(this.productArea);
-  }
-  /**
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
@@ -124,12 +118,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   private validate() {
     const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
     this.formErrors = errors;
   }
 
@@ -178,6 +166,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.contributors = contributors;
   }
 
+  @action protected onProductSelect(productName: string) {
+    this.productArea = productName;
+  }
+
   /**
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
@@ -208,7 +200,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             docType: this.args.docType,
             owner: this.authenticatedUser.info.email,
             product: this.productArea,
-            productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
           }),

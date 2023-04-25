@@ -1,0 +1,19 @@
+<X::DropdownList
+  @items={{@items}}
+  @listIsOrdered={{@listIsOrdered}}
+  @onItemClick={{@onItemClick}}
+  @selected={{@selected}}
+  ...attributes
+>
+  <:anchor as |dd|>
+      <dd.ToggleSelect @text={{or @selected "--"}} />
+  </:anchor>
+  <:item as |dd|>
+    <dd.Action>
+      <X::DropdownList::CheckableItem
+        @selected={{dd.selected}}
+        @value={{dd.value}}
+      />
+    </dd.Action>
+  </:item>
+</X::DropdownList>

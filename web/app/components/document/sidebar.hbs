@@ -135,11 +135,11 @@
           >Product/Area</small>
           {{#if this.isDraft}}
             <div class="w-full relative">
-
               <Inputs::ProductSelect
                 @selected={{@document.product}}
                 @onChange={{this.updateProduct}}
                 @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
               />
             </div>
           {{else}}

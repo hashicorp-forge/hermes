@@ -20,11 +20,8 @@
         <h1
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
         >Create your {{@docType}}</h1>
-        <p>Complete the following metadata to create your
-          {{@docType}}
-          and begin editing your draft.</p>
       </div>
-      <div class="pt-10 space-y-6">
+      <div class="pt-10 space-y-7">
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -35,8 +32,6 @@
           as |F|
         >
           <F.Label>Title</F.Label>
-          <F.HelperText>Your title should succinctly outline the idea you're
-            proposing.</F.HelperText>
         </Hds::Form::TextInput::Field>
 
         <div class="relative">
@@ -61,52 +56,17 @@
           </Hds::Form::Textarea::Field>
         </div>
 
-        <Hds::Form::Select::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productArea}}
-          name="productArea"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Product/Area</F.Label>
-          <F.HelperText>Specify the full name of the product or area this
-            {{@docType}}
-            belongs to.</F.HelperText>
-          {{#if @productAbbrevMappings}}
-            <F.Options>
-              <option value=""></option>
-              {{#each-in @productAbbrevMappings as |name|}}
-                <option
-                  value="{{name}}"
-                  {{! This allows us to recover from errors: }}
-                  selected={{eq name this.productArea}}
-                >{{name}}</option>
-              {{/each-in}}
-            </F.Options>
-          {{/if}}
-        </Hds::Form::Select::Field>
-
-        <Hds::Form::TextInput::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productAbbreviation}}
-          placeholder="Select product/area to populate abbreviation"
-          @isInvalid={{this.formErrors.productAbbreviation}}
-          name="productAbbreviation"
-          disabled
-          as |F|
-        >
-          <F.Label>Product/Area abbreviation</F.Label>
-          {{#if this.formErrors.productAbbreviation}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.productAbbreviation}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>Product/Area abbreviation is automatically populated on
-            selecting the "Product/Area" option.
-          </F.HelperText>
-        </Hds::Form::TextInput::Field>
+        <div>
+          <span class="hermes-form-label mb-2">
+            Product/Area &nbsp;
+            <Hds::Badge @size="small" @text="Required" />
+          </span>
+          <Inputs::ProductSelect
+            @badgeSize="large"
+            @selected={{this.productArea}}
+            @onChange={{this.onProductSelect}}
+          />
+        </div>
 
         {{! Note: We are still refining the subscribe/follow feature set.
                 As part of that effort we will be looking into how the concept
@@ -163,7 +123,7 @@
             />
           </F.Control>
           <F.Label><FlightIcon @name="users" />
-            Add contributors
+            Contributors
           </F.Label>
           {{#if this.formErrors.contributors}}
             <F.Error as |E|>
@@ -171,10 +131,10 @@
             </F.Error>
           {{/if}}
           <F.HelperText>
-            If you're collaborating with others on this
-            {{@docType}}, add them here. The document will automatically be
-            shared with the collaborators specified here. You can also add
-            contributors later.
+            Your
+            {{@docType}}
+            will be shared with the collaborators specified here. You can also
+            add contributors later.
           </F.HelperText>
         </Hds::Form::Field>
       </div>
