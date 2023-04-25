@@ -9,7 +9,7 @@ const COUNT_SELECTOR = "[data-test-x-dropdown-list-checkable-item-count]";
 module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("a filter input is shown for long lists", async function (assert) {
+  test("it renders as expected", async function (assert) {
     this.set("selected", false);
     this.set("count", null);
 
