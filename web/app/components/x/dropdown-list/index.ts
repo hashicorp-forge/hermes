@@ -91,8 +91,8 @@ export default class XDropdownListComponent extends Component<
     this._input = e;
 
     // Wait until the content is positioned before focusing the input.
-    next(() => {
-      this.input.focus();
+    schedule("afterRender", () => {
+      this.input.focus({ preventScroll: true });
     });
   }
 
