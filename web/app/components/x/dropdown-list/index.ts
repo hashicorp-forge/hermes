@@ -160,6 +160,9 @@ export default class XDropdownListComponent extends Component<
       event.preventDefault();
       showContent();
 
+      // Prevent the event from bubbling to the contentBody's keydown listener.
+      event.stopPropagation();
+
       // Wait for menuItemIDs to be set by `didInsertContent`.
       schedule("afterRender", () => {
         switch (event.key) {
