@@ -131,9 +131,22 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 
 	// Verify claims.
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if claims["preferred_username"] != id {
+		prefRaw, ok := claims["preferred_username"]
+		if !ok {
+			return "", fmt.Errorf("preferred_username claim not found")
+		}
+		pref, ok := prefRaw.(string)
+		if !ok {
+			return "", fmt.Errorf("preferred_username claim is invalid")
+		}
+
+		if pref != id {
 			return "", fmt.Errorf(
-				"preferred_username claim is different than OIDC identity")
+				"preferred_username claim is different than OIDC identity:"+
+					" preferred_username=%q"+
+					" id=%q",
+				pref, id,
+			)
 		}
 	} else {
 		return "", fmt.Errorf("claims not found")
