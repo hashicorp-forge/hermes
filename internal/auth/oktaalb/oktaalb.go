@@ -48,7 +48,7 @@ func New(cfg Config, l hclog.Logger) (*OktaAuthorizer, error) {
 // EnforceOktaAuth is HTTP middleware that enforces Okta authorization.
 func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := oa.verifyOIDCToken(r)
+		user, err := oa.verifyOIDCToken(r)
 		if err != nil {
 			oa.log.Error("error verifying OIDC token",
 				"error", err,
@@ -59,7 +59,7 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 			return
 		} else {
 			// Set user email from the OIDC claims.
-			ctx := context.WithValue(r.Context(), "userEmail", id)
+			ctx := context.WithValue(r.Context(), "userEmail", user)
 			r = r.WithContext(ctx)
 
 			next.ServeHTTP(w, r)
@@ -70,12 +70,6 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 // verifyOIDCToken checks if the request is authorized and returns the user
 // identity.
 func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
-	// Get OIDC identity from the ALB-added header.
-	id := r.Header.Get("x-amzn-oidc-identity")
-	if id == "" {
-		return "", fmt.Errorf("no OIDC identity header found")
-	}
-
 	// Get the key ID from JWT headers (the kid field).
 	encodedJWT := r.Header.Get("x-amzn-oidc-data")
 	if encodedJWT == "" {
@@ -130,27 +124,23 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 	}
 
 	// Verify claims.
+	var preferredUsername string
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		prefRaw, ok := claims["preferred_username"]
 		if !ok {
 			return "", fmt.Errorf("preferred_username claim not found")
 		}
-		pref, ok := prefRaw.(string)
+		preferredUsername, ok = prefRaw.(string)
 		if !ok {
 			return "", fmt.Errorf("preferred_username claim is invalid")
-		}
-
-		if pref != id {
-			return "", fmt.Errorf(
-				"preferred_username claim is different than OIDC identity:"+
-					" preferred_username=%q"+
-					" id=%q",
-				pref, id,
-			)
 		}
 	} else {
 		return "", fmt.Errorf("claims not found")
 	}
 
-	return id, nil
+	if preferredUsername == "" {
+		return "", fmt.Errorf("preferred_username claim is empty")
+	}
+
+	return preferredUsername, nil
 }
