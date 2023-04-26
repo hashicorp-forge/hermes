@@ -147,7 +147,15 @@ export default function (mirageConfig) {
           return schema.mes.first().attrs;
         } else {
           // Otherwise, create and return a new user.
-          return schema.mes.create().attrs;
+          return schema.mes.create({
+            id: "1",
+            name: "Test User",
+            email: "testuser@example.com",
+            given_name: "Test",
+            picture: "",
+            subscriptions: [],
+            isLoggedIn: true,
+          }).attrs;
         }
       });
 
@@ -179,6 +187,17 @@ export default function (mirageConfig) {
           schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
+
+      /**
+       * Used by the Dashboard route to get a user's recently viewed documents.
+       */
+      this.get("/me/recently-viewed-docs", (schema) => {
+        let index = schema.recentlyViewedDocs.all().models.map((doc) => {
+          return doc.attrs;
+        });
+        return new Response(200, {}, index);
+      });
+
       /**
        * Used by the AuthenticatedUserService to get the user's subscriptions.
        */

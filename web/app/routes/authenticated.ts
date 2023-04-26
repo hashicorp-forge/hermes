@@ -7,7 +7,7 @@ export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  async beforeModel(transition: any) {
+  beforeModel(transition: any) {
     /**
      * Checks if the session is authenticated in the front end.
      * If unauthenticated, it will redirect to the auth screen

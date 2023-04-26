@@ -505,6 +505,8 @@ func DraftsDocumentHandler(
 
 		switch r.Method {
 		case "GET":
+			now := time.Now()
+
 			// Get file from Google Drive so we can return the latest modified time.
 			file, err := s.GetFile(docId)
 			if err != nil {
@@ -546,6 +548,20 @@ func DraftsDocumentHandler(
 				http.Error(w, "Error requesting document draft",
 					http.StatusInternalServerError)
 				return
+			}
+
+			// Update recently viewed docs for the user.
+			if err := updateRecentlyViewedDocs(userEmail, docId, db, now); err != nil {
+				// If we get an error, log it but don't return an error response because
+				// this would degrade UX.
+				l.Error("error updating recently viewed docs",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+
 			}
 
 			l.Info("retrieved document draft", "doc_id", docId)
