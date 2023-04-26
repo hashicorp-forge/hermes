@@ -111,7 +111,10 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error reading response body: %w", err)
 	}
-	pubKey := string(body)
+	pubKey, err := jwt.ParseECPublicKeyFromPEM(body)
+	if err != nil {
+		return "", fmt.Errorf("error parsing public key: %w", err)
+	}
 
 	// Get the token payload.
 	token, err := jwt.Parse(
@@ -120,7 +123,7 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 				return "", fmt.Errorf(
 					"unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte(pubKey), nil
+			return pubKey, nil
 		}, jwt.WithPaddingAllowed())
 	if err != nil {
 		return "", fmt.Errorf("error parsing JWT: %w", err)
