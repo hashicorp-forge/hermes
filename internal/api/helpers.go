@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/go-hclog"
 )
 
 // contains returns true if a string is present in a slice of strings.
@@ -89,4 +91,21 @@ func parseResourceIDFromURL(url, apiPath string) (string, error) {
 
 	// Return resource ID.
 	return resultPath[0], nil
+}
+
+// respondError responds to an HTTP request and logs an error.
+func respondError(
+	w http.ResponseWriter, r *http.Request, l hclog.Logger,
+	httpCode int, userErrMsg, logErrMsg string, err error,
+	extraArgs ...interface{},
+) {
+	l.Error(logErrMsg,
+		append([]interface{}{
+			"error", err,
+			"method", r.Method,
+			"path", r.URL.Path,
+		}, extraArgs...)...,
+	)
+	errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
+	http.Error(w, errJSON, httpCode)
 }
