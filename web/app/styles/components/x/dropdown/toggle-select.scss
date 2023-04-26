@@ -1,6 +1,10 @@
 .x-dropdown-list-toggle-select {
   @apply min-w-[200px] text-left;
 
+  &.hds-button {
+    @apply justify-start;
+  }
+
   &.hds-button--size-medium {
     @apply pl-2.5 pr-1.5;
   }

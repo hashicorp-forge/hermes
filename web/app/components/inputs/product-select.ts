@@ -30,6 +30,10 @@ export default class InputsProductSelectSignature extends Component<InputsProduc
 
   @tracked products: ProductAreas | undefined = undefined;
 
+  get selectedProductAbbreviation() {
+    return this.products?.[this.selected]?.abbreviation;
+  }
+
   @action onChange(newValue: any) {
     this.selected = newValue;
     const productAbbreviation = this.products?.[newValue]?.abbreviation;
