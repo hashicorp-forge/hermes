@@ -121,7 +121,7 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 					"unexpected signing method: %v", token.Header["alg"])
 			}
 			return []byte(pubKey), nil
-		})
+		}, jwt.WithPaddingAllowed())
 	if err != nil {
 		return "", fmt.Errorf("error parsing JWT: %w", err)
 	}
