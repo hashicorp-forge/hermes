@@ -22,7 +22,16 @@
       @isSaving={{@isSaving}}
       class="w-80"
       ...attributes
-    />
+    >
+      <:item as |dd|>
+        <dd.Action>
+          {{dd.value}}
+          <span class="opacity-50 flex ml-2">
+          {{dd.attrs.abbreviation}}
+          </span>
+        </dd.Action>
+      </:item>
+    </Inputs::SelectDropdownList>
   {{/if}}
 {{else if this.fetchProducts.isRunning}}
   <FlightIcon @name="loading" />

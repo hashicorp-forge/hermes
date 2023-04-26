@@ -10,11 +10,6 @@
       <dd.ToggleSelect @text={{or @selected "--"}} />
   </:anchor>
   <:item as |dd|>
-    <dd.Action>
-      <X::DropdownList::CheckableItem
-        @selected={{dd.selected}}
-        @value={{dd.value}}
-      />
-    </dd.Action>
+    {{yield dd to="item"}}
   </:item>
 </X::DropdownList>
