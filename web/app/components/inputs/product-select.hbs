@@ -25,9 +25,10 @@
     >
       <:item as |dd|>
         <dd.Action>
-          {{dd.value}}
-          <span class="opacity-50 flex ml-2">
-          {{dd.attrs.abbreviation}}
+          <FlightIcon @name={{or (get-product-id dd.value) "folder"}} />
+          <span class="flex ml-2.5">{{dd.value}}</span>
+          <span class="opacity-50 flex ml-2 text-body-100">
+            {{dd.attrs.abbreviation}}
           </span>
         </dd.Action>
       </:item>

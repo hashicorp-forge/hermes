@@ -4,13 +4,15 @@
   &.hds-button--size-medium {
     @apply pl-2.5 pr-1.5;
   }
+  .hds-button__icon + .hds-button__text {
+    @apply ml-2.5;
+  }
 
   &.hds-button--color-secondary:not(:hover) {
     @apply bg-color-surface-primary;
 
-    .flight-icon {
+    .caret {
       @apply text-color-foreground-faint;
     }
-
   }
 }

@@ -14,10 +14,10 @@
   }
 
   .flight-icon {
-    @apply text-color-foreground-action shrink-0;
+    @apply shrink-0;
 
     &.check {
-      @apply mr-2.5;
+      @apply mr-2.5 text-color-foreground-action;
     }
 
     &.sort-icon {
