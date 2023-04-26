@@ -149,6 +149,12 @@ export default function (mirageConfig) {
         } else {
           // Otherwise, create and return a new user.
           return schema.mes.create({
+            id: "1",
+            name: "Test User",
+            email: "testuser@example.com",
+            given_name: "Test",
+            picture: "",
+            subscriptions: [],
             isLoggedIn: true,
           }).attrs;
         }
