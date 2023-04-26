@@ -26,6 +26,9 @@ type Config struct {
 	// FeatureFlags contain available feature flags.
 	FeatureFlags *FeatureFlags `hcl:"feature_flags,block"`
 
+	// GoogleAnalyticsTagID is the tag ID for Google Analytics
+	GoogleAnalyticsTagID string `hcl:"google_analytics_tag_id,optional"`
+
 	// GoogleWorkspace configures Hermes to work with Google Workspace.
 	GoogleWorkspace *GoogleWorkspace `hcl:"google_workspace,block"`
 
@@ -44,7 +47,7 @@ type Config struct {
 	// Server contains the configuration for the Hermes server.
 	Server *Server `hcl:"server,block"`
 
-	// Shortener base URL for building short links.
+	// ShortenerBaseURL is the base URL for building short links.
 	ShortenerBaseURL string `hcl:"shortener_base_url,optional"`
 }
 

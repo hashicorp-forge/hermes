@@ -267,6 +267,8 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/drafts/",
 			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/me", api.MeHandler(c.Log)},
+		{"/api/v1/me/recently-viewed-docs",
+			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
 		{"/api/v1/me/subscriptions",
 			api.MeSubscriptionsHandler(cfg, c.Log, goog, db)},
 		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},

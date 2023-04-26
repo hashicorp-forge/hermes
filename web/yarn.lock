@@ -5518,7 +5518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.8":
+"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.2, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.8":
   version: 3.0.8
   resolution: "broccoli-funnel@npm:3.0.8"
   dependencies:
@@ -7815,7 +7815,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-cli-htmlbars@npm:^6.2.0":
+"ember-cli-htmlbars@npm:^6.1.1, ember-cli-htmlbars@npm:^6.2.0":
   version: 6.2.0
   resolution: "ember-cli-htmlbars@npm:6.2.0"
   dependencies:
@@ -8078,7 +8078,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-cli-typescript@npm:^5.0.0, ember-cli-typescript@npm:^5.2.1":
+"ember-cli-typescript@npm:^5.0.0, ember-cli-typescript@npm:^5.1.1, ember-cli-typescript@npm:^5.2.1":
   version: 5.2.1
   resolution: "ember-cli-typescript@npm:5.2.1"
   dependencies:
@@ -8528,6 +8528,28 @@ __metadata:
     ember-cli-version-checker: ^5.1.1
     ember-in-element-polyfill: ^1.0.1
   checksum: 4bd0e66f748eac053dc2fed2b19a227bd159eb84cb1084bea2941af454a1135969a6efb36c298a9c06c36a7697e34819e9ff0ef1dcb18fa64d11dce09b75b523
+  languageName: node
+  linkType: hard
+
+"ember-maybe-in-element@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "ember-maybe-in-element@npm:2.1.0"
+  dependencies:
+    ember-cli-babel: ^7.26.11
+    ember-cli-htmlbars: ^6.1.1
+    ember-cli-version-checker: ^5.1.2
+  checksum: fbe6282329048c3b811c6f6df9acb821dcc085de96f5cf28135ed3e46186b72f0ce198a53ed3c3a451308eb3f77983c68db97ee1d0d406deda77faef1a89d777
+  languageName: node
+  linkType: hard
+
+"ember-metrics@npm:^2.0.0-beta.2":
+  version: 2.0.0-beta.2
+  resolution: "ember-metrics@npm:2.0.0-beta.2"
+  dependencies:
+    broccoli-funnel: ^3.0.2
+    ember-cli-babel: ^7.26.6
+    ember-cli-typescript: ^5.1.1
+  checksum: ffb0cd27b1b6f093167a668b7e1c83def8e7b35aeca52f2e2a155405c5e354c15d5f54bf9b92634c88e1ad7181d12d45813450c405852ca855fa03209f612d39
   languageName: node
   linkType: hard
 
@@ -10977,6 +10999,8 @@ __metadata:
     ember-focus-trap: ^1.0.1
     ember-load-initializers: ^2.1.2
     ember-maybe-import-regenerator: ^0.1.6
+    ember-maybe-in-element: ^2.1.0
+    ember-metrics: ^2.0.0-beta.2
     ember-modifier: ^4.1.0
     ember-on-helper: ^0.1.0
     ember-page-title: ^6.2.2
