@@ -20,12 +20,12 @@
       @selected={{@selected}}
       @placement={{@placement}}
       @isSaving={{@isSaving}}
-      class="w-80"
+      class="w-[300px] max-h-[305px]"
       ...attributes
     >
       <:anchor as |dd|>
         <dd.ToggleAction
-          class="x-dropdown-list-toggle-select relative flex items-center flex-start hds-button leading-none hds-button--color-secondary hds-button--size-medium"
+          class="x-dropdown-list-toggle-select w-[200px] relative flex items-center flex-start hds-button leading-none hds-button--color-secondary hds-button--size-medium"
         >
           <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
           <span class="flex ml-2.5 leading-none">{{or @selected "--"}}</span>
@@ -38,7 +38,7 @@
           {{/if}}
           <FlightIcon
             @name="caret"
-            class="absolute top-1/2 -translate-y-1/2 right-2"
+            class="absolute top-1/2 -translate-y-1/2 right-2 text-color-foreground-faint"
           />
         </dd.ToggleAction>
       </:anchor>
@@ -52,7 +52,7 @@
           {{#if dd.selected}}
             <FlightIcon
               @name="check"
-              class="absolute right-4 text-color-foreground-action top-1/2 -translate-y-1/2"
+              class="absolute right-5 text-color-foreground-action top-1/2 -translate-y-1/2"
             />
           {{/if}}
         </dd.Action>

@@ -60,14 +60,19 @@
         </div>
 
         <div>
-          <span class="hermes-form-label mb-2">
-            Product/Area &nbsp;
-            <Hds::Badge @size="small" @text="Required" />
-          </span>
+          <div class="mb-2">
+            <span class="hermes-form-label">
+              Product/Area &nbsp;
+              <Hds::Badge @size="small" @text="Required" />
+            </span>
+            <span class="text-body-100 mt-1 hds-form-helper-text">
+              Where your doc should be categorized.
+            </span>
+          </div>
           <Inputs::ProductSelect
             @selected={{this.productArea}}
             @onChange={{this.onProductSelect}}
-            class="max-h-[305px]"
+            class="w-[300px]"
           />
         </div>
 
@@ -134,11 +139,11 @@
             </F.Error>
           {{/if}}
           <F.HelperText>
-            People to share your doc with. You can also add contributors later.
+            People to share your doc with. You can always add more later.
           </F.HelperText>
         </Hds::Form::Field>
       </div>
-      <div class="h-24"/>
+      <div class="h-24"></div>
     </div>
     <div>
       <div class="preview-card">
