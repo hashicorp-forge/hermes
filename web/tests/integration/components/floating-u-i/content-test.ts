@@ -15,6 +15,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     this.set("renderOut", undefined);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="anchor">
         Attach here
       </div>
@@ -66,6 +67,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     // Center the anchor so the content can be flexibly positioned
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -103,6 +105,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     this.clearRender();
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
