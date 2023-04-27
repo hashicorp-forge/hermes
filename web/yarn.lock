@@ -2139,74 +2139,64 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@glint/config@npm:^0.9.7":
-  version: 0.9.7
-  resolution: "@glint/config@npm:0.9.7"
+"@glint/core@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@glint/core@npm:1.0.1"
   dependencies:
+    "@glimmer/syntax": ^0.84.2
     escape-string-regexp: ^4.0.0
-    minimatch: ^3.0.4
-    resolve: ^1.17.0
+    semver: ^7.3.8
     silent-error: ^1.1.1
-  checksum: 6587287e845c334cd280b9dd080571fa2d805ed1d4c71412f9f6a79a01721ce9151306312fd49cac602b57780cfb92f8c53d82e60fe6bba6a108e31d1c407782
-  languageName: node
-  linkType: hard
-
-"@glint/core@npm:^0.9.7":
-  version: 0.9.7
-  resolution: "@glint/core@npm:0.9.7"
-  dependencies:
-    "@glint/config": ^0.9.7
-    "@glint/transform": ^0.9.7
-    resolve: ^1.17.0
     uuid: ^8.3.2
     vscode-languageserver: ^8.0.1
     vscode-languageserver-textdocument: ^1.0.5
     vscode-uri: ^3.0.2
     yargs: ^17.5.1
   peerDependencies:
-    typescript: ^4.7.0
+    typescript: ">=4.8.0"
   bin:
     glint: bin/glint.js
     glint-language-server: bin/glint-language-server.js
-  checksum: db4e79d3f6819ab5a9c1d1c2ec04084742ecde71e760baec9feaba83d9c942cecc6eb961cd06757449fac5c2a3e5c73045d2491fd245f7790c23fbf6eb8a4288
+  checksum: d90315d9d778116c1acd4f6f40a00c9a36a0121f2903891fcb2043ca2ae9918c0cfd3d49f47255506c30c2cdca8cca4581db5951b7b5496764bb047b34a53909
   languageName: node
   linkType: hard
 
-"@glint/environment-ember-loose@npm:^0.9.7":
-  version: 0.9.7
-  resolution: "@glint/environment-ember-loose@npm:0.9.7"
-  dependencies:
-    "@glint/config": ^0.9.7
-    "@glint/template": ^0.9.7
+"@glint/environment-ember-loose@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@glint/environment-ember-loose@npm:1.0.1"
   peerDependencies:
     "@glimmer/component": ^1.1.2
+    "@glint/template": ^1.0.1
+    "@types/ember__array": ^4.0.2
+    "@types/ember__component": ^4.0.10
+    "@types/ember__controller": ^4.0.2
+    "@types/ember__object": ^4.0.4
+    "@types/ember__routing": ^4.0.11
     ember-cli-htmlbars: ^6.0.1
-    ember-modifier: ^3.2.7
+    ember-modifier: ^3.2.7 || ^4.0.0
   peerDependenciesMeta:
+    "@types/ember__array":
+      optional: true
+    "@types/ember__component":
+      optional: true
+    "@types/ember__controller":
+      optional: true
+    "@types/ember__object":
+      optional: true
+    "@types/ember__routing":
+      optional: true
     ember-cli-htmlbars:
       optional: true
     ember-modifier:
       optional: true
-  checksum: 88d7a48120252e4b62710894fb0d771bebdb71c8232b24174308b2de8200f7e8731f6c35bae277b70569cd44f9273f91af0793814ea4d161e5382846270f7f0c
+  checksum: caf1f749217ff658ed48751393a0d504defe3c5145687a60fece9f3ada98e5683e39bd50bd29730e11e2b1228985c92040c1b1f03140ca4d934251c10bef2b52
   languageName: node
   linkType: hard
 
-"@glint/template@npm:^0.9.7":
-  version: 0.9.7
-  resolution: "@glint/template@npm:0.9.7"
-  peerDependencies:
-    "@glimmer/component": ^1.1.2
-  checksum: cc8188d802b6f416cc1a778690aa766c708d654b64c8db40ddff00bc1ff455b771d7049065e2b683af86893a2de04f5f3a93f0a493429e0d78d9f1fff3a59070
-  languageName: node
-  linkType: hard
-
-"@glint/transform@npm:^0.9.7":
-  version: 0.9.7
-  resolution: "@glint/transform@npm:0.9.7"
-  dependencies:
-    "@glimmer/syntax": ^0.84.2
-    "@glint/config": ^0.9.7
-  checksum: 4528e03f82b125017b961147a40543a3841334c9035796a052503eb8566474b062d140d1a80b855c345027effeadd7d8bbd9512475ce22bbac6bbb7c57da319f
+"@glint/template@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@glint/template@npm:1.0.1"
+  checksum: 9ebaa4450e4ef318b1881f5ca1539832a394cd7397944d745cb7c4e40f44e65c9ed2999cc1ddc418fba0f3efc2086721983717b409f951bfd68e6c5bf2e5b436
   languageName: node
   linkType: hard
 
@@ -11059,9 +11049,9 @@ __metadata:
     "@floating-ui/dom": ^1.2.4
     "@glimmer/component": ^1.1.2
     "@glimmer/tracking": ^1.1.2
-    "@glint/core": ^0.9.7
-    "@glint/environment-ember-loose": ^0.9.7
-    "@glint/template": ^0.9.7
+    "@glint/core": ^1.0.0
+    "@glint/environment-ember-loose": ^1.0.0
+    "@glint/template": ^1.0.0
     "@hashicorp/design-system-components": ^2.0.0
     "@hashicorp/ember-flight-icons": ^3.0.2
     "@tsconfig/ember": latest
