@@ -96,7 +96,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         });
       } else {
         this.flashMessages.add({
-          title: "Okta session expired",
+          title: "Session expired",
           message: "Please reauthenticate to keep using Hermes.",
           type: "warning",
           sticky: true,
