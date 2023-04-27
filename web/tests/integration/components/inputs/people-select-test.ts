@@ -23,7 +23,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);
 
-    await render<PeopleSelectContext>(hbs`
+    await render(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}

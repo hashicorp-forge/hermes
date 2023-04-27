@@ -1,18 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, render } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 module("Integration | Component | results", function (hooks) {
   setupRenderingTest(hooks);
 
-  interface ResultsTestContext extends TestContext {
-    // TODO: Use Mirage to build a realistic object (SearchResults<HermesDocument>)
-    results: { page: number; hits: { product: string }[] };
-    query: string;
-  }
-
-  test("it conditionally shows a product link", async function (this: ResultsTestContext, assert) {
+  test("it conditionally shows a product link", async function (assert) {
     let hits = [{ product: "Consul" }, { product: "Terraform" }];
 
     this.set("results", {
@@ -22,7 +16,7 @@ module("Integration | Component | results", function (hooks) {
 
     this.set("query", "teRRaForM");
 
-    await render<ResultsTestContext>(hbs`
+    await render(hbs`
       <Results::Index @results={{this.results}} @query={{this.query}} />
     `);
 

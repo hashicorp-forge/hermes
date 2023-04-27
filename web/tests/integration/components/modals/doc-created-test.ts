@@ -3,31 +3,25 @@ import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
 import { setupWindowMock } from "ember-window-mock/test-support";
 import window from "ember-window-mock";
-import { TestContext, click, render } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 
 module("Integration | Component | modals/doc-created", function (hooks) {
   setupRenderingTest(hooks);
   setupWindowMock(hooks);
 
-  interface DocCreatedTestContext extends TestContext {
-    isShown: boolean;
-    close: () => void;
-  }
-
-  test("it functions as expected", async function (this: DocCreatedTestContext, assert) {
+  test("it functions as expected", async function (assert) {
     this.set("isShown", true);
 
     this.set("close", () => {
       this.set("isShown", false);
     });
 
-    await render<DocCreatedTestContext>(hbs`
+    await render(hbs`
       {{#if this.isShown}}
       <Modals::DocCreated
         @close={{this.close}}
       />
       {{/if}}
-
     `);
 
     assert.dom("[data-test-doc-created-modal]").exists("Modal is shown");
@@ -51,11 +45,11 @@ module("Integration | Component | modals/doc-created", function (hooks) {
       .doesNotExist("Close action called");
   });
 
-  test("it doesn't show if the user has requested it not", async function (this: DocCreatedTestContext, assert) {
+  test("it doesn't show if the user has requested it not", async function (assert) {
     this.set("close", () => {});
     window.localStorage.setItem("docCreatedModalIsHidden", "true");
 
-    await render<DocCreatedTestContext>(hbs`
+    await render(hbs`
       <Modals::DocCreated
         @close={{this.close}}
       />
