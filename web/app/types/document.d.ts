@@ -3,6 +3,8 @@
  * We are defining it incrementally as we expand TS coverage.
  */
 export interface HermesDocument {
+  readonly objectID: string;
+
   status: string;
   product?: string;
   modifiedAgo: string;
@@ -16,6 +18,8 @@ export interface HermesDocument {
   googleMetadata?: {
     thumbnailLink: string;
   }
+  isDraft?: boolean;
+  approvedBy?: string[];
 
   thumbnail?: string;
   _snippetResult?: {
@@ -23,7 +27,6 @@ export interface HermesDocument {
       value: string;
     };
   };
-  readonly objectID: string;
 }
 
 export interface HermesUser {

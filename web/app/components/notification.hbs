@@ -1,14 +1,31 @@
 <div class="notifications-container">
   {{#each this.flashMessages.queue as |flash|}}
-    <FlashMessage @flash={{flash}} class="notification" as |component flash|>
+    <FlashMessage
+      data-test-flash-notification
+      @flash={{flash}}
+      class="notification"
+      as |component flash close|
+    >
       <Hds::Toast
         @color={{flash.type}}
         @icon={{flash.icon}}
-        @onDismiss={{this.dismiss}}
+        @onDismiss={{close}}
         as |T|
       >
-        <T.Title>{{flash.title}}</T.Title>
-        <T.Description>{{flash.message}}</T.Description>
+        <T.Title data-test-flash-notification-title>
+          {{flash.title}}
+        </T.Title>
+        <T.Description data-test-flash-notification-description>
+          {{flash.message}}
+        </T.Description>
+        {{#if (and flash.buttonText flash.buttonAction)}}
+          <T.Button
+            data-test-flash-notification-button
+            @text={{flash.buttonText}}
+            @icon={{flash.buttonIcon}}
+            {{on "click" flash.buttonAction}}
+          />
+        {{/if}}
       </Hds::Toast>
     </FlashMessage>
   {{/each}}
