@@ -156,7 +156,7 @@ func DraftsHandler(
 
 			// Get owner photo by searching Google Workspace directory.
 			op := []string{}
-			people, err := s.SearchPeople(req.Owner, "photos")
+			people, err := s.SearchPeople(userEmail, "photos")
 			if err != nil {
 				l.Error(
 					"error searching directory for person",
