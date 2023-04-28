@@ -46,13 +46,15 @@
         {{#if this.userMenuHighlightIsShown}}
           <Header::UserMenuHighlight />
         {{/if}}
-        {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-        <img
-          src={{this.profile.picture}}
-          class="user-avatar"
-          role="presentation"
-          referrerpolicy="no-referrer"
-        />
+        {{#if this.profile.picture}}
+          {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
+          <img
+            src={{this.profile.picture}}
+            class="user-avatar"
+            role="presentation"
+            referrerpolicy="no-referrer"
+          />
+        {{/if}}
         <Hds::Dropdown as |dd|>
           <dd.ToggleIcon
             data-test-user-menu-toggle
