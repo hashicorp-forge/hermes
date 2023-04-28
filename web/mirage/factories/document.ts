@@ -16,7 +16,7 @@ export default Factory.extend({
   product: "Vault",
   docType: "RFC",
   modifiedAgo: 1000000000,
-  modifiedTime: 1000000000,
+  modifiedTime: 1,
   docNumber() {
     return getTestProductAbbreviation(this.product);
   },

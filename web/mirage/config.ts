@@ -142,7 +142,7 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+      this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
         if (schema.mes.first()) {
           return schema.mes.first().attrs;
@@ -186,6 +186,23 @@ export default function (mirageConfig) {
           200,
           {},
           schema.document.findBy({ objectID: request.params.document_id }).attrs
+        );
+      });
+
+      /**
+       * Used by the /drafts route's getDraftResults method to fetch
+       * a list of facets and draft results.
+       */
+      this.get("/drafts", () => {
+        return new Response(
+          200,
+          {},
+          {
+            facets: [],
+            Hits: [],
+            params: "",
+            page: 0,
+          }
         );
       });
 
