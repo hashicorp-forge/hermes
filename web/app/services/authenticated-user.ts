@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
-import { keepLatestTask, task } from "ember-concurrency";
+import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
