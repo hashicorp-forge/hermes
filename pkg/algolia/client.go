@@ -159,6 +159,7 @@ func New(cfg *Config) (*Client, error) {
 	err = configureMainIndex(cfg.DraftsIndexName, c.Drafts, search.Settings{
 		// Attributes
 		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
 			"docType",
 			"owners",
 			"product",
@@ -219,6 +220,7 @@ func configureReplicaIndexes(
 	// Configure the createdTime_asc replica for index.
 	_, err := createdTimeAscIndex.SetSettings(search.Settings{
 		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
 			"docType",
 			"owners",
 			"product",
@@ -238,6 +240,7 @@ func configureReplicaIndexes(
 	// Configure the createdTime_desc replica for index.
 	_, err = createdTimeDescIndex.SetSettings(search.Settings{
 		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
 			"docType",
 			"owners",
 			"product",
