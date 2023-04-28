@@ -129,7 +129,7 @@ func NewRFC(f *drive.File, s *gw.Service, allFolders []string) (*RFC, error) {
 		// URL if we can find it.
 		r.OwnerPhotos = append(r.OwnerPhotos, "")
 
-		people, err := s.SearchPeople(o)
+		people, err := s.SearchPeople(o, "photos")
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error searching directory for person: %w: owner=\"%s\"",

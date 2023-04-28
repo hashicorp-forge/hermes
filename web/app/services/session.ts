@@ -7,6 +7,7 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
+import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
@@ -21,6 +22,7 @@ export function isJSON(str: string) {
 }
 
 export default class SessionService extends EmberSimpleAuthSessionService {
+  @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare fetch: FetchService;
   @service declare session: SessionService;
@@ -61,32 +63,57 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       true
     );
 
-    let isLoggedIn = await this.requireAuthentication(null, () => {});
+    if (!this.configSvc.config.skip_google_auth) {
+      let isLoggedIn = await this.requireAuthentication(null, () => {});
 
-    if (this.pollResponseIs401 || !isLoggedIn) {
-      this.tokenIsValid = false;
+      if (this.pollResponseIs401 || !isLoggedIn) {
+        this.tokenIsValid = false;
+      }
+    } else {
+      this.tokenIsValid = !this.pollResponseIs401;
     }
 
     if (this.tokenIsValid) {
       this.preventReauthenticationMessage = false;
     } else if (!this.preventReauthenticationMessage) {
-      this.flashMessages.add({
-        title: "Login token expired",
-        message: "Please reauthenticate to keep using Hermes.",
-        type: "warning",
-        sticky: true,
-        destroyOnClick: false,
-        preventDuplicates: true,
-        buttonText: "Authenticate with Google",
-        buttonIcon: "google",
-        buttonAction: () => {
-          this.authenticate("authenticator:torii", "google-oauth2-bearer");
-          this.flashMessages.clearMessages();
-        },
-        onDestroy: () => {
-          this.preventReauthenticationMessage = true;
-        },
-      });
+      if (!this.configSvc.config.skip_google_auth) {
+        this.flashMessages.add({
+          title: "Login token expired",
+          message: "Please reauthenticate to keep using Hermes.",
+          type: "warning",
+          sticky: true,
+          destroyOnClick: false,
+          preventDuplicates: true,
+          buttonText: "Authenticate with Google",
+          buttonIcon: "google",
+          buttonAction: () => {
+            this.authenticate("authenticator:torii", "google-oauth2-bearer");
+            this.flashMessages.clearMessages();
+          },
+          onDestroy: () => {
+            this.preventReauthenticationMessage = true;
+          },
+        });
+      } else {
+        this.flashMessages.add({
+          title: "Session expired",
+          message: "Please reauthenticate to keep using Hermes.",
+          type: "warning",
+          sticky: true,
+          destroyOnClick: false,
+          preventDuplicates: true,
+          buttonText: "Authenticate with Okta",
+          buttonIcon: "okta",
+          buttonAction: () => {
+            // Reload to redirect to Okta login.
+            window.location.reload();
+            this.flashMessages.clearMessages();
+          },
+          onDestroy: () => {
+            this.preventReauthenticationMessage = true;
+          },
+        });
+      }
     }
 
     this.pollForExpiredAuth.perform();
