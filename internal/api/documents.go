@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -63,15 +64,27 @@ func DocumentHandler(
 		baseDocObj := &hcd.BaseDoc{}
 		err = ar.Docs.GetObject(docID, &baseDocObj)
 		if err != nil {
-			l.Error("error requesting base document object from Algolia",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w, "Error accessing document",
-				http.StatusInternalServerError)
-			return
+			// Handle 404 from Algolia and only log a warning.
+			if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+				l.Warn("base document object not found",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Document not found", http.StatusNotFound)
+				return
+			} else {
+				l.Error("error requesting base document object from Algolia",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Create new document object of the proper doc type.
