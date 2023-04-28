@@ -21,7 +21,7 @@
       @text="Authenticate with Google"
       @size="large"
       @icon="google"
-      {{on "click" this.authenticate}}
+      {{on "click" (perform this.authenticate)}}
     />
 
   </Hds::Card::Container>

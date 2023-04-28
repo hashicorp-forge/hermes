@@ -1,7 +1,10 @@
 import { click, teardownContext, visit, waitFor } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
-import { authenticateSession } from "ember-simple-auth/test-support";
+import {
+  authenticateSession,
+  invalidateSession,
+} from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
 
@@ -36,7 +39,7 @@ module("Acceptance | application", function (hooks) {
 
     assert
       .dom("[data-test-flash-notification-title]")
-      .hasText("Login token expired");
+      .hasText("Session expired");
 
     assert
       .dom("[data-test-flash-notification-description]")
@@ -90,7 +93,7 @@ module("Acceptance | application", function (hooks) {
 
     await authenticateSession({});
 
-    this.session.authenticate = () => {
+    this.session.authenticate = async () => {
       authCount++;
     };
 
@@ -98,16 +101,16 @@ module("Acceptance | application", function (hooks) {
     const successSelector = "[data-test-flash-notification-type='success']";
 
     await visit("/");
-    await this.session.invalidate();
+    await invalidateSession();
 
     await waitFor(warningSelector);
+
     await click("[data-test-flash-notification-button]");
+    await waitFor(successSelector);
 
     assert
       .dom(warningSelector)
-      .doesNotExist("flash notification is dismissed on buttonClick");
-
-    await waitFor(successSelector);
+      .doesNotExist("flash notification is dismissed on reauth buttonClick");
 
     assert
       .dom(successSelector)
@@ -119,7 +122,7 @@ module("Acceptance | application", function (hooks) {
 
     assert
       .dom(`${successSelector} [data-test-flash-notification-description]`)
-      .hasText("Welcome back!");
+      .hasText("Welcome back, Test User!");
 
     assert.equal(authCount, 1, "session.authenticate() was called");
 
@@ -137,7 +140,7 @@ module("Acceptance | application", function (hooks) {
   test("the reauthenticate button works as expected (failure)", async function (this: ApplicationTestContext, assert) {
     await authenticateSession({});
 
-    this.session.authenticate = () => {
+    this.session.authenticate = async () => {
       throw new Error("Authentication failed");
     };
 

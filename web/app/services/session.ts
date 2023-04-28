@@ -10,6 +10,7 @@ import simpleTimeout from "hermes/utils/simple-timeout";
 import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 import AuthenticatedUserService from "./authenticated-user";
+import { capitalize } from "@ember/string";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -37,6 +38,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   @tracked tokenIsValid = true;
 
+  @tracked reauthenticationMessageIsShown = false;
+
   /**
    * Whether the service should show a reauthentication message.
    * True when the user has dismissed a previous re-auth message.
@@ -57,16 +60,18 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(Ember.testing ? 100 : 10000);
 
-    this.fetch.fetch(
-      "/api/v1/me",
-      {
-        method: "HEAD",
-      },
-      true
-    );
+    // If the reauth message is shown, do nothing but restart the counter.
+    if (this.reauthenticationMessageIsShown) {
+      this.pollForExpiredAuth.perform();
+      return;
+    }
+
+    // Make a HEAD request to the back end.
+    // On 401, the fetch service will set `this.pollResponseIs401` true.
+    await this.fetch.fetch("/api/v1/me", { method: "HEAD" }, true);
 
     if (!this.configSvc.config.skip_google_auth) {
-      let isLoggedIn = await this.requireAuthentication(null, () => {});
+      let isLoggedIn = this.requireAuthentication(null, () => {});
 
       if (this.pollResponseIs401 || !isLoggedIn) {
         this.tokenIsValid = false;
@@ -78,46 +83,22 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     if (this.tokenIsValid) {
       this.preventReauthenticationMessage = false;
     } else if (!this.preventReauthenticationMessage) {
-      if (!this.configSvc.config.skip_google_auth) {
-        this.flashMessages.add({
-          title: "Login token expired",
-          message: "Please reauthenticate to keep using Hermes.",
-          type: "warning",
-          sticky: true,
-          destroyOnClick: false,
-          preventDuplicates: true,
-          buttonText: "Authenticate with Google",
-          buttonIcon: "google",
-          buttonAction: () => {
-            this.authenticate("authenticator:torii", "google-oauth2-bearer");
-            this.flashMessages.clearMessages();
-          },
-          onDestroy: () => {
-            this.preventReauthenticationMessage = true;
-          },
-        });
-      } else {
-        this.flashMessages.add({
-          title: "Session expired",
-          message: "Please reauthenticate to keep using Hermes.",
-          type: "warning",
-          sticky: true,
-          destroyOnClick: false,
-          preventDuplicates: true,
-          buttonText: "Authenticate with Okta",
-          buttonIcon: "okta",
-          buttonAction: () => {
-            // Reload to redirect to Okta login.
-            window.location.reload();
-            this.flashMessages.clearMessages();
-          },
-          onDestroy: () => {
-            this.preventReauthenticationMessage = true;
-          },
-        });
-      }
+      this.showReauthMessage(
+        "Session expired",
+        "Please reauthenticate to keep using Hermes.",
+        "warning",
+        () => {
+          this.preventReauthenticationMessage = true;
+          this.reauthenticationMessageIsShown = false;
+        }
+      );
+
+      // Set this to true to prevent additional HEAD requests.
+      // When the user successfully reauthenticates, this will be set back to false.
+      this.reauthenticationMessageIsShown = true;
     }
 
+    // Restart this very task.
     this.pollForExpiredAuth.perform();
   });
 
@@ -132,6 +113,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     type: "warning" | "critical",
     onDestroy?: () => void
   ) {
+    const buttonIcon = this.configSvc.config.skip_google_auth
+      ? "okta"
+      : "google";
+
+    const buttonText = `Authenticate with ${capitalize(buttonIcon)}`;
+
     this.flashMessages.add({
       title,
       message,
@@ -139,18 +126,28 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       sticky: true,
       destroyOnClick: false,
       preventDuplicates: true,
-      buttonText: "Authenticate with Google",
-      buttonIcon: "google",
-      buttonAction: () => {
-        this.reauthenticate.perform();
-      },
+      buttonText,
+      buttonIcon,
+      buttonAction: async () => await this.reauthenticate.perform(),
       onDestroy,
     });
   }
 
+  /**
+   * Makes an attempt to reauthenticate the user. Triggered by the button in the
+   * "session expired" flash message. On re-auth, shows a success message
+   * and resets the locally tracked parameters. On failure, shows a "critical"
+   * error message with a button to retry.
+   */
   protected reauthenticate = dropTask(async () => {
     try {
-      await this.authenticate("authenticator:torii", "google-oauth2-bearer");
+      if (this.configSvc.config.skip_google_auth) {
+        // Reload to redirect to Okta login.
+        window.location.reload();
+      } else {
+        await this.authenticate("authenticator:torii", "google-oauth2-bearer");
+        console.log("wait");
+      }
 
       this.flashMessages.clearMessages();
 
@@ -169,13 +166,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       });
 
       this.preventReauthenticationMessage = false;
+      this.reauthenticationMessageIsShown = false;
+
+      this.pollForExpiredAuth.perform();
     } catch (error: unknown) {
       this.flashMessages.clearMessages();
-      this.showReauthMessage(
-        "Login failed",
-        error as string,
-        "critical"
-      );
+      this.showReauthMessage("Login failed", error as string, "critical");
     }
   });
 
