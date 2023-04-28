@@ -145,7 +145,7 @@ func DraftsHandler(
 
 			// Get owner photo by searching Google Workspace directory.
 			op := []string{}
-			people, err := s.SearchPeople(req.Owner)
+			people, err := s.SearchPeople(req.Owner, "photos")
 			if err != nil {
 				l.Error(
 					"error searching directory for person",
@@ -505,6 +505,8 @@ func DraftsDocumentHandler(
 
 		switch r.Method {
 		case "GET":
+			now := time.Now()
+
 			// Get file from Google Drive so we can return the latest modified time.
 			file, err := s.GetFile(docId)
 			if err != nil {
@@ -546,6 +548,22 @@ func DraftsDocumentHandler(
 				http.Error(w, "Error requesting document draft",
 					http.StatusInternalServerError)
 				return
+			}
+
+			// Update recently viewed docs for the user.
+			if err := updateRecentlyViewedDocs(userEmail, docId, db, now); err != nil {
+				// If we get an error, log it but don't return an error response because
+				// this would degrade UX.
+				// TODO: change this log back to an error when this handles incomplete
+				// data in the database.
+				l.Warn("error updating recently viewed docs",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+
 			}
 
 			l.Info("retrieved document draft", "doc_id", docId)

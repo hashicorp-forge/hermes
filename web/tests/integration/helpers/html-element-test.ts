@@ -6,7 +6,7 @@ import { hbs } from "ember-cli-htmlbars";
 module("Integration | Helper | html-element", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("", async function (assert) {
+  test("it works as expected", async function (assert) {
     await render(hbs`
       <div class="container"></div>
 

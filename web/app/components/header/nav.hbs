@@ -81,11 +81,13 @@
               "highlighted-new"
             }}
           />
-          <dd.Interactive
-            data-test-user-menu-item="sign-out"
-            {{on "click" this.invalidateSession}}
-            @text="Sign out"
-          />
+          {{#if this.showSignOut}}
+            <dd.Interactive
+              data-test-user-menu-item="sign-out"
+              {{on "click" this.invalidateSession}}
+              @text="Sign out"
+            />
+          {{/if}}
         </Hds::Dropdown>
       </div>
     </div>

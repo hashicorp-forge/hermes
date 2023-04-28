@@ -141,13 +141,19 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+      this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
         if (schema.mes.first()) {
           return schema.mes.first().attrs;
         } else {
           // Otherwise, create and return a new user.
           return schema.mes.create({
+            id: "1",
+            name: "Test User",
+            email: "testuser@example.com",
+            given_name: "Test",
+            picture: "",
+            subscriptions: [],
             isLoggedIn: true,
           }).attrs;
         }
@@ -181,6 +187,34 @@ export default function (mirageConfig) {
           schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
+
+      /**
+       * Used by the /drafts route's getDraftResults method to fetch
+       * a list of facets and draft results.
+       */
+      this.get("/drafts", () => {
+        return new Response(
+          200,
+          {},
+          {
+            facets: [],
+            Hits: [],
+            params: "",
+            page: 0,
+          }
+        );
+      });
+
+      /**
+       * Used by the Dashboard route to get a user's recently viewed documents.
+       */
+      this.get("/me/recently-viewed-docs", (schema) => {
+        let index = schema.recentlyViewedDocs.all().models.map((doc) => {
+          return doc.attrs;
+        });
+        return new Response(200, {}, index);
+      });
+
       /**
        * Used by the AuthenticatedUserService to get the user's subscriptions.
        */
@@ -190,10 +224,38 @@ export default function (mirageConfig) {
 
       /**
        * Used by /subscriptions to get all possible subscriptions.
-       * Also used by the NewDoc route to map the products to their abbreviations.
+       * Used by the NewDoc route to map the products to their abbreviations.
+       * Used by the sidebar to populate a draft's product/area dropdown.
        */
       this.get("/products", () => {
-        return;
+        let objects = this.schema.products.all().models.map((product) => {
+          return {
+            [product.attrs.name]: {
+              abbreviation: product.attrs.abbreviation,
+            },
+          };
+        });
+
+        // The objects currently look like:
+        // [
+        //  0: { "Labs": { abbreviation: "LAB" } },
+        //  1: { "Vault": { abbreviation: "VLT"} }
+        // ]
+
+        // We reformat them to match the API's response:
+        // {
+        //  "Labs": { abbreviation: "LAB" },
+        //  "Vault": { abbreviation: "VLT" }
+        // }
+
+        let formattedObjects = {};
+
+        objects.forEach((object) => {
+          let key = Object.keys(object)[0];
+          formattedObjects[key] = object[key];
+        });
+
+        return new Response(200, {}, formattedObjects);
       });
 
       // RecentlyViewedDocsService / fetchIndexID
