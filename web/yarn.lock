@@ -8357,7 +8357,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-element-helper@npm:^0.6.0":
+"ember-element-helper@npm:^0.6.0, ember-element-helper@npm:^0.6.1":
   version: 0.6.1
   resolution: "ember-element-helper@npm:0.6.1"
   dependencies:
@@ -10994,6 +10994,7 @@ __metadata:
     ember-composable-helpers: ^5.0.0
     ember-concurrency: ^2.2.1
     ember-data: ~3.28.6
+    ember-element-helper: ^0.6.1
     ember-export-application-global: ^2.0.1
     ember-fetch: ^8.1.1
     ember-focus-trap: ^1.0.1
