@@ -13,7 +13,7 @@ export default class ConfigService extends Service {
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
     skip_google_auth: config.skipGoogleAuth,
-    google_analytics_tag_id: config.googleAnalyticsTagId,
+    google_analytics_tag_id: undefined,
     // google_oauth2_client_id:
     //   config.torii.providers["google-oauth2-bearer"].apiKey ?? "",
     // google_oauth2_hd: config.torii.providers["google-oauth2-bearer"].hd ?? "",
