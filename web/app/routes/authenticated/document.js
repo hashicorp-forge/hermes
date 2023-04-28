@@ -84,7 +84,6 @@ export default class DocumentRoute extends Route {
       }
     }
 
-
     if (!!doc.createdTime) {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
     }
@@ -105,11 +104,6 @@ export default class DocumentRoute extends Route {
     } catch (err) {
       console.log("Error recording analytics: " + err);
     }
-
-
-
-    // Record the doc with the RecentlyViewedDocs service.
-    void this.recentDocs.markViewed.perform(params.document_id, params.draft);
 
     // Load the document as well as the logged in user info
 
@@ -136,7 +130,6 @@ export default class DocumentRoute extends Route {
         doc.approvers = [];
       }
     }
-
 
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")
