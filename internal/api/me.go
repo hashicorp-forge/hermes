@@ -136,15 +136,6 @@ func MeHandler(
 				)
 				return
 			}
-			if len(p.Photos) == 0 {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					"no photos in result",
-					err,
-				)
-				return
-			}
 
 			// Write response.
 			resp := MeGetResponse{
@@ -154,7 +145,9 @@ func MeHandler(
 				Name:          p.Names[0].DisplayName,
 				GivenName:     p.Names[0].GivenName,
 				FamilyName:    p.Names[0].FamilyName,
-				Picture:       p.Photos[0].Url,
+			}
+			if len(p.Photos) > 0 {
+				resp.Picture = p.Photos[0].Url
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
