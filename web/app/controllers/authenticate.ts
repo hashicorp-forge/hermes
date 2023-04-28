@@ -1,6 +1,5 @@
 import Controller from "@ember/controller";
 import { inject as service } from "@ember/service";
-import { action } from "@ember/object";
 import SessionService from "hermes/services/session";
 import { dropTask } from "ember-concurrency";
 

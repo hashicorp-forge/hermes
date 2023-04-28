@@ -38,6 +38,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   @tracked tokenIsValid = true;
 
+  /**
+   * Whether the reauthentication message is shown.
+   * Dictates if we poll the back end for a 401.
+   * Set true when the user's session has expired.
+   * Set false when the user successfully reauthenticates.
+   */
   @tracked reauthenticationMessageIsShown = false;
 
   /**
@@ -93,8 +99,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         }
       );
 
-      // Set this to true to prevent additional HEAD requests.
-      // When the user successfully reauthenticates, this will be set back to false.
+      // Set this true to prevent additional HEAD requests.
+      // On successful reauth, this will be reset false.
       this.reauthenticationMessageIsShown = true;
     }
 
@@ -106,6 +112,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * Triggers a flash message with a button to reauthenticate.
    * Used when the user's session has expired, or when the user
    * unsuccessfully attempts to reauthenticate.
+   * Functions in accordance with the `skip_google_auth` config.
    */
   private showReauthMessage(
     title: string,
@@ -146,12 +153,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         window.location.reload();
       } else {
         await this.authenticate("authenticator:torii", "google-oauth2-bearer");
-        console.log("wait");
       }
 
       this.flashMessages.clearMessages();
 
-      await timeout(Ember.testing ? 0 : 1000);
+      // Wait a bit to show the success message.
+      await timeout(Ember.testing ? 0 : 1500);
 
       this.flashMessages.add({
         title: "Login successful",
@@ -165,9 +172,9 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         destroyOnClick: true,
       });
 
+      // Reset the local parameters.
       this.preventReauthenticationMessage = false;
       this.reauthenticationMessageIsShown = false;
-
       this.pollForExpiredAuth.perform();
     } catch (error: unknown) {
       this.flashMessages.clearMessages();
