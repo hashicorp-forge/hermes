@@ -206,7 +206,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           body: JSON.stringify({
             contributors: this.getEmails(this.contributors),
             docType: this.args.docType,
-            owner: this.authenticatedUser.info.email,
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
