@@ -1,13 +1,10 @@
 package googleworkspace
 
-/*
 import (
-	"fmt"
-	"strings"
-
 	admin "google.golang.org/api/admin/directory/v1"
 )
 
+/*
 // CreateGroup creates a Google Group.
 func (s *Service) CreateGroup(
 	id, name, description, email string) (*admin.Group, error) {
@@ -54,3 +51,14 @@ func (s *Service) GetGroup(groupKey string) (*admin.Group, error) {
 	return resp, nil
 }
 */
+
+// GetUser gets a user.
+func (s *Service) GetUser(userKey string) (*admin.User, error) {
+	resp, err := s.Admin.Users.Get(userKey).
+		ViewType("domain_public").
+		Do()
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

@@ -8,7 +8,8 @@ import (
 )
 
 // SearchPeople searches the Google People API.
-func (s *Service) SearchPeople(query string) ([]*people.Person, error) {
+func (s *Service) SearchPeople(
+	query, readMask string) ([]*people.Person, error) {
 
 	var (
 		call          *people.PeopleSearchDirectoryPeopleCall
@@ -29,7 +30,7 @@ func (s *Service) SearchPeople(query string) ([]*people.Person, error) {
 
 	for {
 		call = s.People.SearchDirectoryPeople().Query(query).
-			ReadMask("photos").
+			ReadMask(readMask).
 			Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE")
 
 		if nextPageToken != "" {
