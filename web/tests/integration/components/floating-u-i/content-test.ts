@@ -21,7 +21,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
       <div class="container">
         <FloatingUI::Content
-          @id="test-id"
           @anchor={{html-element '.anchor'}}
           @renderOut={{this.renderOut}}
         >
@@ -73,7 +72,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
           </div>
           <FloatingUI::Content
             style="width: 100px"
-            @id="test-id"
             @anchor={{html-element '.anchor'}}
             @placement="left"
           >
@@ -109,7 +107,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             Attach
           </div>
           <FloatingUI::Content
-            @id="floating-ui-test-content"
             style="width: 100px"
             @anchor={{html-element '.anchor'}}
             @placement="right"

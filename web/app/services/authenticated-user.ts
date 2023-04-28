@@ -67,7 +67,14 @@ export default class AuthenticatedUserService extends Service {
    * On error, will bubble up to the application route.
    */
   loadInfo = task(async () => {
-    this._info = await this.store.queryRecord("google.userinfo.me", {});
+    try {
+      this._info = await this.fetchSvc
+        .fetch("/api/v1/me")
+        .then((response) => response?.json());
+    } catch (e: unknown) {
+      console.error("Error getting user information: ", e);
+      throw e;
+    }
   });
 
   /**
