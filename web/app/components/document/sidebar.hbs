@@ -14,19 +14,6 @@
     >
 
       <div class="sidebar-body-container">
-        <div class="flex items-center justify-between space-x-1.5">
-          {{#let (get-product-id @document.product) as |productIcon|}}
-            <div class="flex">
-
-              <div class="product-badge {{productIcon}}">
-                <FlightIcon @name={{or productIcon "folder"}} />
-              </div>
-              <div class="text flex items-center font-bold">
-                {{@document.product}}
-              </div>
-            </div>
-          {{/let}}
-        </div>
         <div class="flex flex-col items-start space-y-2">
           {{#if (is-empty @document.docNumber)}}
             <small
@@ -128,6 +115,29 @@
             @hideProgress={{true}}
             class="whitespace-nowrap mix-blend-multiply"
           />
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Product/Area</small>
+          <div class="flex items-center justify-between space-x-1.5">
+            {{#let (get-product-id @document.product) as |productIcon|}}
+              <LinkTo
+                @route="authenticated.all"
+                @query={{hash product=(array @document.product)}}
+                class="flex"
+              >
+
+                <div class="product-badge flex {{or productIcon 'unbranded'}}">
+                  <FlightIcon @name={{or productIcon "folder"}} />
+                  <div class="text flex items-center font-medium text-body-100">
+                    {{@document.product}}
+                  </div>
+                </div>
+              </LinkTo>
+            {{/let}}
+          </div>
         </div>
 
         <div class="flex flex-col items-start space-y-2">

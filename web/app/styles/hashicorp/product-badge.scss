@@ -1,12 +1,22 @@
 .product-badge {
-  @apply grid place-items-center absolute bg-gradient-to-br from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+  @apply grid place-items-center absolute bg-gradient-to-br from-color-palette-neutral-100 to-color-palette-neutral-100;
 
   + .text {
     @apply text-white;
+  }
 
-    &::before {
-      @apply bg-color-palette-neutral-600;
+  &.unbranded {
+    + .text {
+      @apply text-color-foreground-strong;
+
+      &::before {
+        @apply bg-color-palette-neutral-100;
+      }
     }
+  }
+
+  &.hcp {
+    @apply from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
   }
 
   // `.hcp` uses the default styles
@@ -14,64 +24,44 @@
   &.nomad {
     @apply from-color-nomad-gradient-primary-start to-color-nomad-gradient-primary-stop text-color-nomad-foreground;
 
-    + .text::before {
-      @apply bg-color-nomad-foreground;
+    .text {
+      @apply text-color-foreground-primary mix-blend-multiply;
     }
   }
 
   &.packer {
     @apply from-color-packer-gradient-primary-start to-color-packer-gradient-primary-stop text-color-packer-foreground;
 
-    + .text::before {
-      @apply bg-color-packer-foreground;
+    .text {
+      @apply text-color-foreground-primary mix-blend-multiply;
     }
   }
 
   &.vault {
     @apply from-color-vault-gradient-primary-start to-color-vault-gradient-primary-stop text-color-vault-foreground;
 
-    + .text::before {
-      @apply bg-color-foreground-primary;
+    .text {
+      @apply text-color-foreground-primary mix-blend-multiply;
     }
   }
 
   &.vagrant {
     @apply from-color-vagrant-gradient-primary-start to-color-vagrant-gradient-primary-stop text-color-vagrant-foreground;
-
-    + .text::before {
-      @apply bg-color-vagrant-foreground;
-    }
   }
 
   &.consul {
     @apply from-color-consul-gradient-primary-start to-color-consul-gradient-primary-stop text-color-foreground-high-contrast;
-
-    + .text::before {
-      @apply bg-color-consul-foreground;
-    }
   }
 
   &.terraform {
     @apply from-color-terraform-gradient-primary-start to-color-terraform-gradient-primary-stop text-color-foreground-high-contrast;
-
-    + .text::before {
-      @apply bg-color-terraform-foreground;
-    }
   }
 
   &.boundary {
     @apply from-color-boundary-gradient-primary-start to-color-boundary-gradient-primary-stop text-color-foreground-high-contrast;
-
-    + .text::before {
-      @apply bg-color-boundary-foreground;
-    }
   }
 
   &.waypoint {
     @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
-
-    + .text::before {
-      @apply bg-color-waypoint-foreground;
-    }
   }
 }
