@@ -1,7 +1,5 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import RouterService from "@ember/routing/router-service";
-import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
@@ -24,7 +22,6 @@ interface XDropdownListItemComponentSignature {
 }
 
 export default class XDropdownListItemComponent extends Component<XDropdownListItemComponentSignature> {
-  @service declare router: RouterService;
   /**
    * The element reference, set on insertion and updated on mouseenter.
    * Used to compute the element's ID, which may change when the list is filtered.

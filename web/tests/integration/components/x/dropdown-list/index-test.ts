@@ -9,7 +9,6 @@ import {
   triggerEvent,
   triggerKeyEvent,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
