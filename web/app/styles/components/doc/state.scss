@@ -1,0 +1,29 @@
+.doc-state {
+  .progress-bar {
+    @apply h-0.5 rounded-full bg-color-palette-neutral-200;
+  }
+
+  &--wip {
+    li:nth-child(1) {
+      @apply bg-color-palette-blue-200;
+    }
+  }
+
+  &--in-review {
+    li:nth-child(1) {
+      @apply bg-color-palette-purple-200 opacity-75;
+    }
+    li:nth-child(2) {
+      @apply bg-color-palette-purple-200 h-1;
+    }
+  }
+
+  &--approved {
+    .progress-bar {
+      @apply bg-color-palette-green-200 opacity-75;
+    }
+    li:nth-child(3) {
+      @apply opacity-100 h-1;
+    }
+  }
+}

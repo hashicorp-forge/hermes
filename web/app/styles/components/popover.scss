@@ -1,0 +1,7 @@
+.hermes-popover {
+  @apply bg-color-foreground-high-contrast rounded z-50 hds-dropdown__content;
+
+  .text {
+    @apply relative;
+  }
+}

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -63,15 +64,27 @@ func DocumentHandler(
 		baseDocObj := &hcd.BaseDoc{}
 		err = ar.Docs.GetObject(docID, &baseDocObj)
 		if err != nil {
-			l.Error("error requesting base document object from Algolia",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w, "Error accessing document",
-				http.StatusInternalServerError)
-			return
+			// Handle 404 from Algolia and only log a warning.
+			if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+				l.Warn("base document object not found",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Document not found", http.StatusNotFound)
+				return
+			} else {
+				l.Error("error requesting base document object from Algolia",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Create new document object of the proper doc type.
@@ -162,7 +175,9 @@ func DocumentHandler(
 				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
-					l.Error("error updating recently viewed docs",
+					// TODO: change this log back to an error when this handles incomplete
+					// data in the database.
+					l.Warn("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,

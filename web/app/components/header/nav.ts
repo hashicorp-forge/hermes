@@ -28,6 +28,10 @@ export default class NavComponent extends Component<NavComponentSignature> {
     return this.router.currentRouteName;
   }
 
+  protected get showSignOut(): boolean {
+    return !this.configSvc.config.skip_google_auth;
+  }
+
   /**
    * The default query params for the browse screens.
    * Ensures a clear filter state when navigating tabs.

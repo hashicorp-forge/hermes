@@ -1,9 +1,12 @@
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
+@use "components/popover";
 @use "components/footer";
 @use "components/nav";
 @use "components/x-hds-tab";
+@use "components/x/dropdown/list";
+@use "components/x/dropdown/list-item";
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
@@ -16,6 +19,7 @@
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
 @use "components/doc/tile";
+@use "components/doc/state";
 @use "components/preview-card";
 @use "components/notification";
 @use "components/sidebar";

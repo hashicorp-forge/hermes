@@ -125,7 +125,6 @@
           <Doc::State
             @state={{@document.status}}
             @hideProgress={{true}}
-            class="whitespace-nowrap"
           />
         </div>
 
@@ -476,201 +475,108 @@
       </div>
     {{/if}}
   {{/unless}}
-
-  {{! Place modals at the end of the DOM so they don't inherit styles }}
-
-  {{#in-element this.modalContainer insertBefore=null}}
-
-    {{#if this.archiveModalIsActive}}
-      <Hds::Modal @color="critical" @onClose={{this.closeArchiveModal}} as |M|>
-        <M.Header>
-          Archive document?
-        </M.Header>
-        <M.Body>
-          Are you sure you want to move the document
-          <strong>{{this.title}}</strong>
-          to
-          <strong>Obsolete</strong>
-          status?
-          {{#if this.modalErrorIsShown}}
-            <ModalAlertError
-              @onDismiss={{this.resetModalErrors}}
-              @title={{this.errorTitle}}
-              @description={{this.errorDescription}}
-            />
-          {{/if}}
-        </M.Body>
-        <M.Footer as |F|>
-          <Hds::ButtonSet>
-            <Hds::Button
-              @text={{if
-                this.changeDocumentStatus.isRunning
-                "Archiving..."
-                "Yes, archive"
-              }}
-              @color="critical"
-              @icon={{if
-                this.changeDocumentStatus.isRunning
-                "loading"
-                "archive"
-              }}
-              disabled={{this.changeDocumentStatus.isRunning}}
-              {{on "click" (perform this.changeDocumentStatus "Obsolete")}}
-            />
-            <Hds::Button
-              @text="Cancel"
-              @color="secondary"
-              disabled={{this.changeDocumentStatus.isRunning}}
-              {{on "click" F.close}}
-            />
-          </Hds::ButtonSet>
-        </M.Footer>
-      </Hds::Modal>
-    {{/if}}
-
-    {{#if this.deleteModalIsActive}}
-      <Hds::Modal @color="critical" @onClose={{this.closeDeleteModal}} as |M|>
-        <M.Header>
-          Delete document draft?
-        </M.Header>
-        <M.Body>
-          Are you sure you want to delete the draft
-          <strong>{{this.title}}</strong>?
-
-          {{#if this.modalErrorIsShown}}
-            <ModalAlertError
-              @onDismiss={{this.resetModalErrors}}
-              @title={{this.errorTitle}}
-              @description={{this.errorDescription}}
-            />
-          {{/if}}
-        </M.Body>
-        <M.Footer as |F|>
-          <Hds::ButtonSet>
-            <Hds::Button
-              @text={{if
-                this.deleteDraft.isRunning
-                "Deleting..."
-                "Yes, delete"
-              }}
-              @color="critical"
-              @icon={{if this.deleteDraft.isRunning "loading" "trash"}}
-              disabled={{this.deleteDraft.isRunning}}
-              {{on "click" (perform this.deleteDraft)}}
-            />
-            <Hds::Button
-              @text="Cancel"
-              @color="secondary"
-              disabled={{this.deleteDraft.isRunning}}
-              {{on "click" F.close}}
-            />
-          </Hds::ButtonSet>
-        </M.Footer>
-      </Hds::Modal>
-    {{/if}}
-
-    {{#if this.requestReviewModalIsActive}}
-      <Hds::Modal @onClose={{this.closeRequestReviewModal}} as |M|>
-        <M.Header>
-          Request review?
-        </M.Header>
-        <M.Body>
-          <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">This
-            will publish your document company-wide, and anyone you request
-            below will receive a notification to review.</p>
-
-          <Hds::Form::Field @layout="vertical" as |F|>
-            <F.Control>
-              <Inputs::PeopleSelect
-                @renderInPlace={{true}}
-                @selected={{this.approvers}}
-                @onChange={{this.updateApprovers}}
-                @disabled={{this.requestReview.isRunning}}
-                class="mb-0"
-              />
-            </F.Control>
-            <F.Label>Add approvers</F.Label>
-          </Hds::Form::Field>
-
-          {{#if @docType.checks.length}}
-            {{! For now, we only support one check }}
-            {{#each (take 1 @docType.checks) as |check|}}
-              <div class="mt-3.5">
-                <Hds::Form::Checkbox::Field
-                  {{on "change" this.onDocTypeCheckboxChange}}
-                  checked={{this.docTypeCheckboxValue}}
-                  disabled={{this.requestReview.isRunning}}
-                  required
-                  as |F|
-                >
-                  <F.Label>
-                    {{check.label}}
-                  </F.Label>
-                  {{#if check.helperText}}
-                    <F.HelperText>
-                      {{check.helperText}}
-                    </F.HelperText>
-                  {{/if}}
-                </Hds::Form::Checkbox::Field>
-              </div>
-              {{#if check.links.length}}
-                <ul class="pl-6 mt-1.5">
-                  {{#each check.links as |link|}}
-                    <li>
-                      <Hds::Link::Inline
-                        @icon="external-link"
-                        @iconPosition="trailing"
-                        @hrefIsExternal={{true}}
-                        @href={{link.url}}
-                        class="text-body-100"
-                      >
-                        {{link.text}}
-                      </Hds::Link::Inline>
-                    </li>
-                  {{/each}}
-                </ul>
-              {{/if}}
-            {{/each}}
-
-          {{/if}}
-
-          {{#if this.modalErrorIsShown}}
-            <ModalAlertError
-              @onDismiss={{this.resetModalErrors}}
-              @title={{this.errorTitle}}
-              @description={{this.errorDescription}}
-            />
-          {{/if}}
-        </M.Body>
-        <M.Footer as |F|>
-          <Hds::ButtonSet>
-            <Hds::Button
-              {{! TODO: In the future may be use a flash message to show the
-        "Takes about a minute to complete" message instead of the text in the button?}}
-              @text={{if
-                this.requestReview.isRunning
-                "Takes about a minute to complete"
-                "Request Review"
-              }}
-              @color="primary"
-              @icon={{if this.requestReview.isRunning "loading"}}
-              disabled={{or
-                this.requestReview.isRunning
-                (and @docType.checks.length (not this.docTypeCheckboxValue))
-              }}
-              {{on "click" (perform this.requestReview)}}
-            />
-            <Hds::Button
-              @text="Cancel"
-              @color="secondary"
-              disabled={{@deleteDraftIsRunning}}
-              disabled={{this.requestReview.isRunning}}
-              {{on "click" F.close}}
-            />
-          </Hds::ButtonSet>
-        </M.Footer>
-      </Hds::Modal>
-    {{/if}}
-
-  {{/in-element}}
 </aside>
+
+{{! Place modals at the end of the DOM so they don't inherit styles }}
+
+{{#in-element (html-element '.ember-application') insertBefore=null}}
+  {{#if this.archiveModalIsActive}}
+    <Document::Modal
+      @color="critical"
+      @headerText="Archive document?"
+      @bodyText="Are you sure you want to archive this document?"
+      @errorTitle="Error archiving document"
+      @close={{this.closeArchiveModal}}
+      @task={{perform this.changeDocumentStatus "Obsolete"}}
+      @taskButtonText="Yes, archive"
+      @taskButtonLoadingText="Archiving..."
+      @taskButtonIcon="archive"
+    />
+  {{/if}}
+
+  {{#if this.deleteModalIsActive}}
+    <Document::Modal
+      @color="critical"
+      @headerText="Delete draft?"
+      @bodyText="Are you sure you want to archive this document?"
+      @errorTitle="Error archiving document"
+      @close={{this.closeDeleteModal}}
+      @task={{perform this.deleteDraft}}
+      @taskButtonText="Yes, delete"
+      @taskButtonLoadingText="Deleting..."
+      @taskButtonIcon="trash"
+    />
+  {{/if}}
+
+  {{#if this.requestReviewModalIsActive}}
+    <Document::Modal
+      @headerText="Request review?"
+      @errorTitle="Error requesting review"
+      @close={{this.closeRequestReviewModal}}
+      @task={{perform this.requestReview}}
+      @taskButtonText="Request review"
+      @taskButtonLoadingText="Requesting review..."
+      @taskButtonIcon="test"
+      @taskButtonIsDisabled={{not this.docTypeCheckboxValue}}
+    >
+      <:default as |M|>
+        <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
+          This will publish your document company-wide, and anyone you request
+          below will receive a notification to review.
+        </p>
+        <Hds::Form::Field @layout="vertical" as |F|>
+          <F.Control>
+            <Inputs::PeopleSelect
+              @renderInPlace={{true}}
+              @selected={{this.approvers}}
+              @onChange={{this.updateApprovers}}
+              @disabled={{M.taskIsRunning}}
+              class="mb-0"
+            />
+          </F.Control>
+          <F.Label>Add approvers</F.Label>
+        </Hds::Form::Field>
+        {{#if @docType.checks.length}}
+          {{! For now, we only support one check }}
+          {{#each (take 1 @docType.checks) as |check|}}
+            <div class="mt-3.5">
+              <Hds::Form::Checkbox::Field
+                {{on "change" this.onDocTypeCheckboxChange}}
+                checked={{this.docTypeCheckboxValue}}
+                disabled={{M.taskIsRunning}}
+                required
+                as |F|
+              >
+                <F.Label>
+                  {{check.label}}
+                </F.Label>
+                {{#if check.helperText}}
+                  <F.HelperText>
+                    {{check.helperText}}
+                  </F.HelperText>
+                {{/if}}
+              </Hds::Form::Checkbox::Field>
+            </div>
+            {{#if check.links.length}}
+              <ul class="list-none pl-6 mt-1.5">
+                {{#each check.links as |link|}}
+                  <li>
+                    <Hds::Link::Inline
+                      @icon="external-link"
+                      @iconPosition="trailing"
+                      @hrefIsExternal={{true}}
+                      @href={{link.url}}
+                      class="no-underline text-body-100"
+                    >
+                      {{link.text}}
+                    </Hds::Link::Inline>
+                  </li>
+                {{/each}}
+              </ul>
+            {{/if}}
+          {{/each}}
+        {{/if}}
+      </:default>
+    </Document::Modal>
+  {{/if}}
+{{/in-element}}

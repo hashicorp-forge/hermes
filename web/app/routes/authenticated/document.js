@@ -28,6 +28,16 @@ export default class DocumentRoute extends Route {
   //   },
   // };
 
+  showErrorMessage(err) {
+    this.flashMessages.add({
+      title: "Error fetching document",
+      message: err.message,
+      type: "critical",
+      sticky: true,
+      extendedTimeout: 1000,
+    });
+  }
+
   async model(params) {
     let doc = {};
 
@@ -39,15 +49,7 @@ export default class DocumentRoute extends Route {
           .then((r) => r.json());
         doc.isDraft = params.draft;
       } catch (err) {
-        const errorMessage = `Failed to get document draft: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
+        this.showErrorMessage(err);
 
         // Transition to dashboard
         this.router.transitionTo("authenticated.dashboard");
@@ -68,22 +70,13 @@ export default class DocumentRoute extends Route {
 
         doc.isDraft = params.draft;
       } catch (err) {
-        const errorMessage = `Failed to get document: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
+        this.showErrorMessage(err);
 
         // Transition to dashboard
         this.router.transitionTo("authenticated.dashboard");
         throw new Error(errorMessage);
       }
     }
-
 
     if (!!doc.createdTime) {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
@@ -105,11 +98,6 @@ export default class DocumentRoute extends Route {
     } catch (err) {
       console.log("Error recording analytics: " + err);
     }
-
-
-
-    // Record the doc with the RecentlyViewedDocs service.
-    void this.recentDocs.markViewed.perform(params.document_id, params.draft);
 
     // Load the document as well as the logged in user info
 
@@ -136,7 +124,6 @@ export default class DocumentRoute extends Route {
         doc.approvers = [];
       }
     }
-
 
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")
