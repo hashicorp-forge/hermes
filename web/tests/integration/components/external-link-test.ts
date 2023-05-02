@@ -8,6 +8,7 @@ module("Integration | Component | external-link", function (hooks) {
 
   test("it renders an external link", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <ExternalLink href="https://hashicorp.com" class="font-bold">
         HashiCorp
       </ExternalLink>

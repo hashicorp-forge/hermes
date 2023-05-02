@@ -15,6 +15,7 @@ module("Integration | Helper | has-approved-doc", function (hooks) {
     this.set("email", email);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div>
         {{#if (has-approved-doc this.document this.email)}}
           Has approved

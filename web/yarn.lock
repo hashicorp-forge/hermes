@@ -2028,6 +2028,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@glimmer/interfaces@npm:0.84.3":
+  version: 0.84.3
+  resolution: "@glimmer/interfaces@npm:0.84.3"
+  dependencies:
+    "@simple-dom/interface": ^1.4.0
+  checksum: f6a6757a2fc6fc0a8aeb9c1ce4acaec7adf03b31130c9c3149265a401d8fc4773dfb1ff6a567fc008c669cb3c5b9a94f505c68298f72f283d03a46bc0dcb1121
+  languageName: node
+  linkType: hard
+
 "@glimmer/reference@npm:^0.65.0":
   version: 0.65.4
   resolution: "@glimmer/reference@npm:0.65.4"
@@ -2053,6 +2062,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@glimmer/syntax@npm:^0.84.2":
+  version: 0.84.3
+  resolution: "@glimmer/syntax@npm:0.84.3"
+  dependencies:
+    "@glimmer/interfaces": 0.84.3
+    "@glimmer/util": 0.84.3
+    "@handlebars/parser": ~2.0.0
+    simple-html-tokenizer: ^0.5.11
+  checksum: afadea62f1c54735df723120a94f4da3cb663d762be1c9b130f8d22584ccc93a037198b60759706d3cf0d3658268170eae687dfdc7cb21e5c0a9af7005ebc727
+  languageName: node
+  linkType: hard
+
 "@glimmer/tracking@npm:^1.0.4, @glimmer/tracking@npm:^1.1.2":
   version: 1.1.2
   resolution: "@glimmer/tracking@npm:1.1.2"
@@ -2071,6 +2092,17 @@ __metadata:
     "@glimmer/interfaces": 0.65.4
     "@simple-dom/interface": ^1.4.0
   checksum: 4b58b56416debd672e5d79a2c3e347d80eace7475c9ef99e989420655f63c4283dc05438659b7a1f89e56d8400fbd020ae92bb801f08474679cc6554475610d1
+  languageName: node
+  linkType: hard
+
+"@glimmer/util@npm:0.84.3":
+  version: 0.84.3
+  resolution: "@glimmer/util@npm:0.84.3"
+  dependencies:
+    "@glimmer/env": 0.1.7
+    "@glimmer/interfaces": 0.84.3
+    "@simple-dom/interface": ^1.4.0
+  checksum: d0f8d461a7653a113e630ee45aa57e4efbc33f78ab7b7ce12bdaa699b3513df93a7ffba96b1863883fafe566b650dfb01c4122f79207d6267d1655255b9baa4a
   languageName: node
   linkType: hard
 
@@ -2107,10 +2139,78 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@glint/core@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@glint/core@npm:1.0.1"
+  dependencies:
+    "@glimmer/syntax": ^0.84.2
+    escape-string-regexp: ^4.0.0
+    semver: ^7.3.8
+    silent-error: ^1.1.1
+    uuid: ^8.3.2
+    vscode-languageserver: ^8.0.1
+    vscode-languageserver-textdocument: ^1.0.5
+    vscode-uri: ^3.0.2
+    yargs: ^17.5.1
+  peerDependencies:
+    typescript: ">=4.8.0"
+  bin:
+    glint: bin/glint.js
+    glint-language-server: bin/glint-language-server.js
+  checksum: d90315d9d778116c1acd4f6f40a00c9a36a0121f2903891fcb2043ca2ae9918c0cfd3d49f47255506c30c2cdca8cca4581db5951b7b5496764bb047b34a53909
+  languageName: node
+  linkType: hard
+
+"@glint/environment-ember-loose@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@glint/environment-ember-loose@npm:1.0.1"
+  peerDependencies:
+    "@glimmer/component": ^1.1.2
+    "@glint/template": ^1.0.1
+    "@types/ember__array": ^4.0.2
+    "@types/ember__component": ^4.0.10
+    "@types/ember__controller": ^4.0.2
+    "@types/ember__object": ^4.0.4
+    "@types/ember__routing": ^4.0.11
+    ember-cli-htmlbars: ^6.0.1
+    ember-modifier: ^3.2.7 || ^4.0.0
+  peerDependenciesMeta:
+    "@types/ember__array":
+      optional: true
+    "@types/ember__component":
+      optional: true
+    "@types/ember__controller":
+      optional: true
+    "@types/ember__object":
+      optional: true
+    "@types/ember__routing":
+      optional: true
+    ember-cli-htmlbars:
+      optional: true
+    ember-modifier:
+      optional: true
+  checksum: caf1f749217ff658ed48751393a0d504defe3c5145687a60fece9f3ada98e5683e39bd50bd29730e11e2b1228985c92040c1b1f03140ca4d934251c10bef2b52
+  languageName: node
+  linkType: hard
+
+"@glint/template@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@glint/template@npm:1.0.1"
+  checksum: 9ebaa4450e4ef318b1881f5ca1539832a394cd7397944d745cb7c4e40f44e65c9ed2999cc1ddc418fba0f3efc2086721983717b409f951bfd68e6c5bf2e5b436
+  languageName: node
+  linkType: hard
+
 "@handlebars/parser@npm:^1.1.0":
   version: 1.1.0
   resolution: "@handlebars/parser@npm:1.1.0"
   checksum: f1ded58182780e1fdc0a9d40fe8485785118f7cf684210d538ea3847198d454cb2c122fd1849dfde545aba69502b382c4711cb084c82ca96c1f313178528dd17
+  languageName: node
+  linkType: hard
+
+"@handlebars/parser@npm:~2.0.0":
+  version: 2.0.0
+  resolution: "@handlebars/parser@npm:2.0.0"
+  checksum: add32d6678b18db73fb88266138bc358abf94c255f4464b936b5b66e3108205c6cc3b611a726e0a691633552b94c0f9f65aed43fd4c51ecbbfb562179c967d88
   languageName: node
   linkType: hard
 
@@ -6571,6 +6671,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cliui@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "cliui@npm:8.0.1"
+  dependencies:
+    string-width: ^4.2.0
+    strip-ansi: ^6.0.1
+    wrap-ansi: ^7.0.0
+  checksum: 79648b3b0045f2e285b76fb2e24e207c6db44323581e421c3acbd0e86454cba1b37aea976ab50195a49e7384b871e6dfb2247ad7dec53c02454ac6497394cb56
+  languageName: node
+  linkType: hard
+
 "clone@npm:^1.0.2":
   version: 1.0.4
   resolution: "clone@npm:1.0.4"
@@ -10938,6 +11049,9 @@ __metadata:
     "@floating-ui/dom": ^1.2.4
     "@glimmer/component": ^1.0.4
     "@glimmer/tracking": ^1.0.4
+    "@glint/core": ^1.0.1
+    "@glint/environment-ember-loose": ^1.0.1
+    "@glint/template": ^1.0.1
     "@hashicorp/design-system-components": ^2.0.0
     "@hashicorp/ember-flight-icons": ^3.0.2
     "@tsconfig/ember": latest
@@ -15942,7 +16056,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-html-tokenizer@npm:^0.5.10":
+"simple-html-tokenizer@npm:^0.5.10, simple-html-tokenizer@npm:^0.5.11":
   version: 0.5.11
   resolution: "simple-html-tokenizer@npm:0.5.11"
   checksum: f834a5a0b169ffe10f74bd479a071a7161e0186669e28a1cd662efacdaedd27667469e2b965d5a8538d9d8e7373cb741ea8d748259221f40fa3e4bda2efbdbfc
@@ -17562,6 +17676,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vscode-jsonrpc@npm:8.1.0":
+  version: 8.1.0
+  resolution: "vscode-jsonrpc@npm:8.1.0"
+  checksum: 8980037cc0014802e6ac1e5dfcff9a65e8292727096dfd23c92d2039c0c45de74a00d6ee06938cf1a671286dd8258a5f418cf048c26ad0fcb0c44f96c9e0f278
+  languageName: node
+  linkType: hard
+
+"vscode-languageserver-protocol@npm:3.17.3":
+  version: 3.17.3
+  resolution: "vscode-languageserver-protocol@npm:3.17.3"
+  dependencies:
+    vscode-jsonrpc: 8.1.0
+    vscode-languageserver-types: 3.17.3
+  checksum: ffea508b2efd7f4853f1cef5e5eac58672f0ae71a9ec275ad37a4a2a24cdc3ff023f941e759951aee01c79da3f3279f10e034f19d875f081eb387181241bd836
+  languageName: node
+  linkType: hard
+
+"vscode-languageserver-textdocument@npm:^1.0.5":
+  version: 1.0.10
+  resolution: "vscode-languageserver-textdocument@npm:1.0.10"
+  checksum: 605ff0662535088567a145b48d28f0c41844d28269fa0b3fca3a1e179dd14baf7181150b274bf3840ef2a043ed8474a9227aaf169a6fae574516349a1b371a18
+  languageName: node
+  linkType: hard
+
+"vscode-languageserver-types@npm:3.17.3":
+  version: 3.17.3
+  resolution: "vscode-languageserver-types@npm:3.17.3"
+  checksum: fbc8221297261f659a6482875ff2a419dc9d55965dc53745797da569ff9f819cd832e6f2699017baadd946548bbfe212e3f6971f3d960f12dc0ee9c629dacc07
+  languageName: node
+  linkType: hard
+
+"vscode-languageserver@npm:^8.0.1":
+  version: 8.1.0
+  resolution: "vscode-languageserver@npm:8.1.0"
+  dependencies:
+    vscode-languageserver-protocol: 3.17.3
+  bin:
+    installServerIntoExtension: bin/installServerIntoExtension
+  checksum: 38810619d0a7c587e7e84fc55d9897a0ac235b80a0a8c0ab1faf4283ec6ca1c25f80c0116bcc54aa99d0d9f202f69119fd8cb1264ffb5825eabf45af9bd6793d
+  languageName: node
+  linkType: hard
+
+"vscode-uri@npm:^3.0.2":
+  version: 3.0.7
+  resolution: "vscode-uri@npm:3.0.7"
+  checksum: c899a0334f9f6ba53021328e083f6307978c09b94407d7e5fe86fcd8fcb8f1da0cb344123a335e55769055007a46d51aff83f9ee1dfc0296ee54b78f34ef0e4f
+  languageName: node
+  linkType: hard
+
 "walk-sync@npm:^0.2.5":
   version: 0.2.7
   resolution: "walk-sync@npm:0.2.7"
@@ -18028,6 +18191,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yargs-parser@npm:^21.1.1":
+  version: 21.1.1
+  resolution: "yargs-parser@npm:21.1.1"
+  checksum: ed2d96a616a9e3e1cc7d204c62ecc61f7aaab633dcbfab2c6df50f7f87b393993fe6640d017759fe112d0cb1e0119f2b4150a87305cc873fd90831c6a58ccf1c
+  languageName: node
+  linkType: hard
+
 "yargs@npm:^16.2.0":
   version: 16.2.0
   resolution: "yargs@npm:16.2.0"
@@ -18040,6 +18210,21 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^20.2.2
   checksum: b14afbb51e3251a204d81937c86a7e9d4bdbf9a2bcee38226c900d00f522969ab675703bee2a6f99f8e20103f608382936034e64d921b74df82b63c07c5e8f59
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^17.5.1":
+  version: 17.7.1
+  resolution: "yargs@npm:17.7.1"
+  dependencies:
+    cliui: ^8.0.1
+    escalade: ^3.1.1
+    get-caller-file: ^2.0.5
+    require-directory: ^2.1.1
+    string-width: ^4.2.3
+    y18n: ^5.0.5
+    yargs-parser: ^21.1.1
+  checksum: 3d8a43c336a4942bc68080768664aca85c7bd406f018bad362fd255c41c8f4e650277f42fd65d543fce99e084124ddafee7bbfc1a5c6a8fda4cec78609dcf8d4
   languageName: node
   linkType: hard
 

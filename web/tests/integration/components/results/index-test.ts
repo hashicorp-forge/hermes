@@ -17,6 +17,7 @@ module("Integration | Component | results", function (hooks) {
     this.set("query", "teRRaForM");
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Results::Index @results={{this.results}} @query={{this.query}} />
     `);
 

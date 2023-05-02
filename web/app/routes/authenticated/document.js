@@ -38,8 +38,9 @@ export default class DocumentRoute extends Route {
     });
   }
 
-  async model(params) {
+  async model(params, transition) {
     let doc = {};
+    let draftFetched = false;
 
     // Get doc data from the app backend.
     if (params.draft) {
@@ -48,14 +49,21 @@ export default class DocumentRoute extends Route {
           .fetch("/api/v1/drafts/" + params.document_id)
           .then((r) => r.json());
         doc.isDraft = params.draft;
+        draftFetched = true;
       } catch (err) {
-        this.showErrorMessage(err);
-
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
-        throw new Error(errorMessage);
+        /**
+         * The doc may have been published since the user last viewed it
+         * (i.e., it moved from /drafts to /documents in the back end),
+         * so we retry the model hook without the draft param.
+         * Any subsequent errors are handled in the catch block below.
+         */
+        transition.abort();
+        this.router.transitionTo("authenticated.document", params.document_id);
+        return;
       }
-    } else {
+    }
+
+    if (!draftFetched) {
       try {
         doc = await this.fetchSvc
           .fetch("/api/v1/documents/" + params.document_id, {
@@ -68,7 +76,7 @@ export default class DocumentRoute extends Route {
           })
           .then((r) => r.json());
 
-        doc.isDraft = params.draft;
+        doc.isDraft = false;
       } catch (err) {
         this.showErrorMessage(err);
 

@@ -17,5 +17,8 @@
       "ember-cli-flash/*": ["node_modules/ember-cli-flash"]
     }
   },
+  "glint": {
+    "environment": "ember-loose"
+  },
   "include": ["app/**/*", "tests/**/*", "types/**/*"]
 }
