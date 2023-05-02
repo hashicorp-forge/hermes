@@ -32,6 +32,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     this.set("document", this.server.schema.document.first().attrs);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Document::Sidebar::Header
         @document={{this.document}}
         @isCollapsed={{this.isCollapsed}}
@@ -136,6 +137,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     configService.config.short_link_base_url = shortLinkBaseURL;
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Document::Sidebar::Header
         @document={{this.document}}
         @isCollapsed={{this.isCollapsed}}
@@ -165,6 +167,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     shortLinkBaseURL = "http://short.link";
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Document::Sidebar::Header
         @document={{this.document}}
         @isCollapsed={{this.isCollapsed}}
@@ -185,6 +188,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     configService.config.short_link_base_url = undefined as unknown as string;
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Document::Sidebar::Header
         @document={{this.document}}
         @isCollapsed={{this.isCollapsed}}
@@ -205,6 +209,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     configService.config.short_link_base_url = "invalidURL";
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Document::Sidebar::Header
         @document={{this.document}}
         @isCollapsed={{this.isCollapsed}}

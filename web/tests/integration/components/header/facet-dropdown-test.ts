@@ -36,6 +36,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
   test("it toggles when the trigger is clicked", async function (assert) {
     this.set("facets", SHORT_FACET_LIST);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdown
         @label="Type"
         @facets={{this.facets}}
@@ -49,6 +50,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
   test("it renders the facets correctly", async function (assert) {
     this.set("facets", SHORT_FACET_LIST);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdown
         @label="Type"
         @facets={{this.facets}}
@@ -72,6 +74,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
   test("an input is shown when there are more than 12 facets", async function (assert) {
     this.set("facets", LONG_FACET_LIST);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdown
         @label="Status"
         @facets={{this.facets}}
@@ -84,6 +87,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
   test("filtering works as expected", async function (assert) {
     this.set("facets", LONG_FACET_LIST);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdown
         @label="Status"
         @facets={{this.facets}}
@@ -119,6 +123,7 @@ module("Integration | Component | header/facet-dropdown", function (hooks) {
   test("popover trigger has keyboard support", async function (assert) {
     this.set("facets", LONG_FACET_LIST);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdown
         @label="Type"
         @facets={{this.facets}}

@@ -12,6 +12,7 @@ module("Integration | Helper | parse-date", function (hooks) {
 
   test("", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="valid">
         {{parse-date 628021800000}}
       </div>

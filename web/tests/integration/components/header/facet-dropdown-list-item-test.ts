@@ -28,6 +28,7 @@ module(
       this.set("isSelected", false);
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownListItem
           @label="Status"
           @role="option"
@@ -57,6 +58,7 @@ module(
       this.set("currentSortByValue", undefined);
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownListItem
           @label="Status"
           @value="Oldest"
@@ -104,6 +106,7 @@ module(
       };
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownListItem
           @label="Status"
           @value={{this.value}}
@@ -145,6 +148,7 @@ module(
       });
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownListItem
           @label="Status"
           @value="Filter01"
