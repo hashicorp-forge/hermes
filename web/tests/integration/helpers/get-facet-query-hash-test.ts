@@ -20,6 +20,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
     };
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <LinkTo
         @route="authenticated.all"
         @query={{get-facet-query-hash "Type" "foo" false}}

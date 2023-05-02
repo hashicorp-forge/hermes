@@ -1,3 +1,5 @@
+{{! @glint-nocheck: not typesafe yet }}
+
 {{yield
   (hash
     contentIsShown=this.contentIsShown
@@ -9,6 +11,7 @@
   )
   to="anchor"
 }}
+
 
 {{#if this.contentIsShown}}
   <FloatingUI::Content
