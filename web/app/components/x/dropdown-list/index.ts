@@ -97,6 +97,7 @@ export default class XDropdownListComponent extends Component<
      */
     this.input.focus({ preventScroll: true });
   }
+
   /**
    * The action run when the content div is inserted.
    * Used to assign ids to the menu items.
@@ -158,6 +159,9 @@ export default class XDropdownListComponent extends Component<
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       event.preventDefault();
       showContent();
+
+      // Prevent the event from bubbling to the contentBody's keydown listener.
+      event.stopPropagation();
 
       // Wait for menuItemIDs to be set by `didInsertContent`.
       schedule("afterRender", () => {
