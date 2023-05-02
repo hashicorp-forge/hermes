@@ -1,46 +1,25 @@
-<!--
-  Used to render a document in a compact inline format eg. for use in dropdown menus
-
-  <Doc::Inline /> requires 2 properties, with 2 optional properties:
-  @avatar (string): link to avatar image
-  @docID (string): document ID
-  @docNumber (string): document number
-  @productArea eg. 'Waypoint' or 'Design Systems' etc
-  @status eg. 'approved', 'review', 'obsolete'
-  @isResult eg. 'true' (false by default) - optional
-  @isOwner eg. 'true' (false by default) - optional
-  @snippet: HTML string - optional
--->
-
 <LinkTo
   @route="authenticated.document"
   @model="{{@docID}}"
-  class="flex items-center space-x-3 py-2 px-3 hover:bg-[color:var(--token-color-palette-neutral-100)]"
+  class="flex items-center space-x-3 py-2 px-3 hover:bg-color-palette-neutral-100"
 >
   <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
 
   <div class="flex flex-col space-y-1 overflow-hidden">
-    <h4
-      class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
-    >{{@title}}</h4>
+    <h4 class="text-body-200 font-semibold text-color-foreground-strong">
+      {{@title}}
+    </h4>
+
     {{#if (not (is-empty @docNumber))}}
-      <small
-        class="hds-typography-body-100 hds-foreground-faint"
-      >{{@docNumber}}</small>
+      <small class="text-body-100 text-color-foreground-faint">
+        {{@docNumber}}
+      </small>
     {{/if}}
 
-    <Person
-      @ignoreUnknown={{true}}
-      @imgURL={{@avatar}}
-      @email={{@owner}}
-    />
+    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
 
-    {{#if @isResult}}
-      {{#if @snippet}}
-        <p
-          class="hds-typography-body-100 hds-foreground-faint truncate"
-        >{{{@snippet}}}</p>
-      {{/if}}
+    {{#if (and @isResult @snippet)}}
+      <Doc::Snippet @snippet={{@snippet}} class="truncate" />
     {{/if}}
   </div>
 </LinkTo>
