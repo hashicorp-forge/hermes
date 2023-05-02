@@ -1,0 +1,18 @@
+{{! TODO: add @model support }}
+
+<LinkTo
+  data-test-x-dropdown-list-item-link-to
+  {{did-insert @registerElement}}
+  {{on "mouseenter" @focusMouseTarget}}
+  {{on "click" @onClick}}
+  role={{@role}}
+  aria-selected={{@isAriaSelected}}
+  tabindex="-1"
+  aria-checked={{@isAriaChecked}}
+  @route={{@route}}
+  @query={{or @query (hash)}}
+  class="x-dropdown-list-item-link {{if @isAriaSelected 'is-aria-selected'}}"
+  ...attributes
+>
+  {{yield}}
+</LinkTo>

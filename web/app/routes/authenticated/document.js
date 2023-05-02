@@ -28,6 +28,16 @@ export default class DocumentRoute extends Route {
   //   },
   // };
 
+  showErrorMessage(err) {
+    this.flashMessages.add({
+      title: "Error fetching document",
+      message: err.message,
+      type: "critical",
+      sticky: true,
+      extendedTimeout: 1000,
+    });
+  }
+
   async model(params, transition) {
     let doc = {};
     let draftFetched = false;
@@ -68,15 +78,7 @@ export default class DocumentRoute extends Route {
 
         doc.isDraft = false;
       } catch (err) {
-        const errorMessage = `Failed to get document: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
+        this.showErrorMessage(err);
 
         // Transition to dashboard
         this.router.transitionTo("authenticated.dashboard");
