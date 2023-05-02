@@ -1,55 +1,44 @@
-<!--
-  Used to render a document tile in a card format
-
-  <Doc::Tile /> properties:
-  @avatar (string): link to avatar image
-  @docID (string): document ID
-  @docNumber (string): document number
-  @isOwner eg. 'true' (false by default) - optional
-  @isResult eg. 'true' (false by default) - optional
-  @modifiedAgo (string): e.g. 'Modified 3 days ago'
-  @owner (string): owner of document
-  @productArea eg. 'Waypoint' or 'Design Systems' etc
-  @snippet: HTML string - optional
-  @status eg. 'approved', 'review', 'obsolete'
-  @thumbnail (string): link to thumbnail image
-  @title (string): title of document
--->
-
 <LinkTo
   @route="authenticated.document"
-  @model="{{@docID}}"
+  @model={{@docID}}
   @query={{hash draft=@isDraft}}
-  class="flex flex-col items-start space-y-2 no-underline p-4 -m-4 rounded-md hover:bg-[color:var(--token-color-palette-neutral-50)] active:bg-[color:var(--token-color-palette-neutral-100)] overflow-hidden"
+  class="flex flex-col items-start space-y-2 p-4 -m-4 rounded-md hover:bg-color-palette-neutral-50 active:bg-color-palette-neutral-100 overflow-hidden"
 >
-  <Doc::Thumbnail @status={{@status}} @product={{@productArea}} @isLarge={{true}} />
-  <Doc::State @state={{@status}} />
+  <div class="space-y-2">
+    <Doc::Thumbnail
+      @status={{@status}}
+      @product={{@productArea}}
+      @isLarge={{true}}
+    />
+    <Doc::State @state={{@status}} />
+  </div>
 
   <div class="flex flex-col items-start space-y-1">
-    <h4 class="doc-tile-title">{{@title}}</h4>
+    <h4 class="doc-tile-title">
+      {{@title}}
+    </h4>
     {{#if (not (is-empty @docNumber))}}
-      <small
-        class="hds-typography-body-100 hds-font-weight-medium hds-foreground-faint"
-      >{{@docNumber}}</small>
+      <small class="text-body-100 text-color-foreground-faint">
+        {{@docNumber}}
+      </small>
     {{/if}}
   </div>
 
   <div class="flex flex-col items-start space-y-1 pb-1 max-w-full">
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
     {{#if (not (is-empty @modifiedAgo))}}
-      <p
-        class="hds-typography-body-100 hds-foreground-faint"
-      >{{@modifiedAgo}}</p>
+      <p class="text-body-100 text-color-foreground-faint">
+        {{@modifiedAgo}}
+      </p>
     {{/if}}
   </div>
 
-  <Hds::Badge @text={{this.productAreaName}} @icon={{this.productAreaIcon}} />
+  <Hds::Badge
+    @text={{this.productAreaName}}
+    @icon={{or (get-product-id this.this.args.productArea) "folder"}}
+  />
 
-  {{#if @isResult}}
-    {{#if @snippet}}
-      <p
-        class="hds-typography-body-100 hds-foreground-faint pt-2"
-      >{{{@snippet}}}</p>
-    {{/if}}
+  {{#if (and @isResult @snippet)}}
+    <Doc::Snippet @snippet={{@snippet}} class="pt-2" />
   {{/if}}
 </LinkTo>
