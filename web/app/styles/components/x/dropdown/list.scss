@@ -15,7 +15,7 @@
 }
 
 .x-dropdown-list-scroll-container {
-  @apply overflow-auto w-full relative;
+  @apply overflow-auto w-full relative rounded-b-md;
 }
 
 .x-dropdown-list-empty-state {
