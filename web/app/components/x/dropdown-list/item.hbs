@@ -1,0 +1,27 @@
+<li data-test-x-dropdown-list-item class="x-dropdown-list-item" role="none">
+  {{yield
+    (hash
+      Action=(component
+        "x/dropdown-list/action"
+        role=@listItemRole
+        isAriaSelected=this.isAriaSelected
+        isAriaChecked=@selected
+        registerElement=this.registerElement
+        focusMouseTarget=this.focusMouseTarget
+        onClick=this.onClick
+      )
+      LinkTo=(component
+        "x/dropdown-list/link-to"
+        role=@listItemRole
+        isAriaSelected=this.isAriaSelected
+        isAriaChecked=@selected
+        registerElement=this.registerElement
+        focusMouseTarget=this.focusMouseTarget
+        onClick=this.onClick
+      )
+      value=@value
+      attrs=@attributes
+      selected=@selected
+    )
+  }}
+</li>
