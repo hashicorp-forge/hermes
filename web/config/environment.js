@@ -53,6 +53,8 @@ module.exports = function (environment) {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },
 
+    skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
+
     torii: {
       sessionServiceName: "session",
       providers: {

@@ -6,7 +6,7 @@ declare const config: {
   environment: string;
   modulePrefix: string;
   podModulePrefix: string;
-  locationType: 'history' | 'hash' | 'none' | 'auto';
+  locationType: "history" | "hash" | "none" | "auto";
   rootURL: string;
   APP: Record<string, unknown>;
   algolia: {
@@ -21,6 +21,7 @@ declare const config: {
     docFolders: string;
   };
   shortLinkBaseURL: string;
+  skipGoogleAuth: boolean;
 };
 
 export default config;

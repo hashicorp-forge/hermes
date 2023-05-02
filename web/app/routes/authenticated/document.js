@@ -105,9 +105,6 @@ export default class DocumentRoute extends Route {
       console.log("Error recording analytics: " + err);
     }
 
-    // Record the doc with the RecentlyViewedDocs service.
-    void this.recentDocs.markViewed.perform(params.document_id, params.draft);
-
     // Load the document as well as the logged in user info
 
     // Preload avatars for all approvers in the Algolia index.
