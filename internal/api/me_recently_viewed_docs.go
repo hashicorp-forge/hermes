@@ -81,9 +81,11 @@ func MeRecentlyViewedDocsHandler(
 					},
 				}
 				if err := doc.Get(db); err != nil {
-					// Log error but continue trying to get other recently viewed
-					// documents (for a better UX).
-					l.Error("error getting document in database",
+					// If we get an error, log it but don't return an error response
+					// because this would degrade UX.
+					// TODO: change this log back to an error when this handles incomplete
+					// data in the database.
+					l.Warn("error getting document in database",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,

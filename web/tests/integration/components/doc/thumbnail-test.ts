@@ -12,6 +12,7 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
     this.set("product", "Labs");
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Doc::Thumbnail
         @isLarge={{this.isLarge}}
         @status={{this.status}}

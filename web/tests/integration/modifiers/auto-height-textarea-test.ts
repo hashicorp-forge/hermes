@@ -9,6 +9,7 @@ module("Integration | Modifier | auto-height-textarea", function (hooks) {
 
   test("it updates the height of the textarea", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <textarea {{auto-height-textarea}} rows="5" style="line-height: 16px" />
     `);
 
@@ -41,6 +42,7 @@ module("Integration | Modifier | auto-height-textarea", function (hooks) {
     this.set("value", "foo\nbar\nbaz");
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <textarea
         {{auto-height-textarea}}
         value={{this.value}}

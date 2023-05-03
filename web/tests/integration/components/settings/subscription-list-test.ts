@@ -24,6 +24,7 @@ module(
 
     test("it renders a filterable subscription list", async function (this: SubscriptionListItemContext, assert) {
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Settings::SubscriptionList
           @allProductAreas={{array 'one' 'two' 'three'}}
         />

@@ -1,0 +1,113 @@
+{{!
+  Marked up with guidance from:
+  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
+  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-list/
+  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
+  https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
+}}
+
+<FloatingUI
+  @renderOut={{true}}
+  @placement={{@placement}}
+  class="hermes-popover x-dropdown-list"
+  data-test-x-dropdown-list-content
+  {{will-destroy this.onDestroy}}
+>
+  <:anchor as |f|>
+    {{yield
+      (hash
+        ToggleButton=(component
+          "x/dropdown-list/toggle-button"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          toggleContent=f.toggleContent
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
+          color=(or @color "secondary")
+          disabled=@disabled
+          ariaControls=(concat
+            "x-dropdown-list-"
+            (if this.inputIsShown "container" "items")
+            "-"
+            f.contentID
+          )
+          text=@label
+        )
+        ToggleAction=(component
+          "x/dropdown-list/toggle-action"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
+          toggleContent=f.toggleContent
+          disabled=@disabled
+          ariaControls=(concat
+            "x-dropdown-list-"
+            (if this.inputIsShown "container" "items")
+            "-"
+            f.contentID
+          )
+        )
+        contentIsShown=f.contentIsShown
+      )
+      to="anchor"
+    }}
+  </:anchor>
+  <:content as |f|>
+    <div
+      {{did-insert this.didInsertContent}}
+      {{will-destroy this.resetFilteredItems}}
+      {{dismissible dismiss=f.hideContent related=f.anchor}}
+      id="x-dropdown-list-container-{{f.contentID}}"
+      class="x-dropdown-list-container"
+      role={{if this.inputIsShown "combobox"}}
+      ...attributes
+    >
+      {{#if this.inputIsShown}}
+        <div class="x-dropdown-list-input-container">
+          <Hds::Form::TextInput::Base
+            data-test-x-dropdown-list-input
+            {{did-insert this.registerAndFocusInput}}
+            {{on "input" (perform this.onInput)}}
+            @value={{this.query}}
+            @type="search"
+            placeholder="Filter..."
+            aria-controls="x-dropdown-list-{{f.contentID}}"
+            aria-activedescendant={{unless
+              (eq this.focusedItemIndex -1)
+              (concat "x-dropdown-list-item-" this.focusedItemIndex)
+            }}
+          />
+        </div>
+      {{/if}}
+      <div
+        {{did-insert this.registerScrollContainer}}
+        class="x-dropdown-list-scroll-container"
+      >
+        <X::DropdownList::Items
+          @contentID={{f.contentID}}
+          @query={{this.query}}
+          @items={{@items}}
+          @shownItems={{this.shownItems}}
+          @selected={{@selected}}
+          @focusedItemIndex={{this.focusedItemIndex}}
+          @inputIsShown={{this.inputIsShown}}
+          @listIsOrdered={{@listIsOrdered}}
+          @listItemRole={{this.listItemRole}}
+          @onInput={{perform this.onInput}}
+          @onItemClick={{@onItemClick}}
+          @registerScrollContainer={{this.registerScrollContainer}}
+          @setFocusedItemIndex={{this.setFocusedItemIndex}}
+          @hideContent={{f.hideContent}}
+          @scrollContainer={{this.scrollContainer}}
+        >
+          <:item as |i|>
+            {{yield i to="item"}}
+          </:item>
+        </X::DropdownList::Items>
+      </div>
+    </div>
+  </:content>
+</FloatingUI>

@@ -9,6 +9,7 @@ module("Integration | Component | doc/folder-affordance", function (hooks) {
   test("it renders as expected", async function (assert) {
     this.set("isLarge", false);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Doc::FolderAffordance
         @isLarge={{this.isLarge}}
       />
