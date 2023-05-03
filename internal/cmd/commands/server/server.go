@@ -331,7 +331,7 @@ func (c *Command) Run(args []string) int {
 // healthHandler responds with the health of the service.
 func healthHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
 }
