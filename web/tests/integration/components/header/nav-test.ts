@@ -28,6 +28,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
   test("it renders correctly", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Nav />
     `);
 
@@ -52,6 +53,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
   test("it shows an icon when the user menu has something to highlight", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Nav />
     `);
 

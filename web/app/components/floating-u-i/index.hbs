@@ -1,4 +1,17 @@
-{{yield this to="anchor"}}
+{{! @glint-nocheck: not typesafe yet }}
+
+{{yield
+  (hash
+    contentIsShown=this.contentIsShown
+    registerAnchor=this.registerAnchor
+    toggleContent=this.toggleContent
+    showContent=this.showContent
+    hideContent=this.hideContent
+    contentID=this.contentID
+  )
+  to="anchor"
+}}
+
 
 {{#if this.contentIsShown}}
   <FloatingUI::Content
@@ -8,6 +21,11 @@
     @id={{this.contentID}}
     ...attributes
   >
-    {{yield this to="content"}}
+    {{yield
+      (hash
+        contentID=this.contentID hideContent=this.hideContent anchor=this.anchor
+      )
+      to="content"
+    }}
   </FloatingUI::Content>
 {{/if}}

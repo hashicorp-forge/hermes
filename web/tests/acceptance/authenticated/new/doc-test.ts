@@ -7,12 +7,13 @@ import { getPageTitle } from "ember-page-title/test-support";
 
 interface AuthenticatedNewDocRouteTestContext extends MirageTestContext {}
 
-module("Acceptance | authenticated/new", function (hooks) {
+module("Acceptance | authenticated/new/doc", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(async function () {
+  hooks.beforeEach(async function (this: AuthenticatedNewDocRouteTestContext) {
     await authenticateSession({});
+    this.server.createList("product", 5);
   });
 
   test("the page title is correct (RFC)", async function (this: AuthenticatedNewDocRouteTestContext, assert) {

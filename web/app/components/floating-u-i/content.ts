@@ -15,6 +15,7 @@ import { tracked } from "@glimmer/tracking";
 interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
+    id: string;
     placement?: Placement;
     renderOut?: boolean;
   };

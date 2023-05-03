@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 <div class="x-container">
 
   <nav class="header-nav">
@@ -46,13 +47,15 @@
         {{#if this.userMenuHighlightIsShown}}
           <Header::UserMenuHighlight />
         {{/if}}
-        {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-        <img
-          src={{this.profile.picture}}
-          class="user-avatar"
-          role="presentation"
-          referrerpolicy="no-referrer"
-        />
+        {{#if this.profile.picture}}
+          {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
+          <img
+            src={{this.profile.picture}}
+            class="user-avatar"
+            role="presentation"
+            referrerpolicy="no-referrer"
+          />
+        {{/if}}
         <Hds::Dropdown as |dd|>
           <dd.ToggleIcon
             data-test-user-menu-toggle
@@ -81,11 +84,13 @@
               "highlighted-new"
             }}
           />
-          <dd.Interactive
-            data-test-user-menu-item="sign-out"
-            {{on "click" this.invalidateSession}}
-            @text="Sign out"
-          />
+          {{#if this.showSignOut}}
+            <dd.Interactive
+              data-test-user-menu-item="sign-out"
+              {{on "click" this.invalidateSession}}
+              @text="Sign out"
+            />
+          {{/if}}
         </Hds::Dropdown>
       </div>
     </div>

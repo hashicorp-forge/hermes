@@ -24,6 +24,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     this.onChange = (newValue) => this.set("people", newValue);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
@@ -95,6 +96,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     });
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}

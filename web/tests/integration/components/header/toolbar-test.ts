@@ -24,6 +24,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
   test("it renders a search input by default", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar />
     `);
 
@@ -38,6 +39,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     this.set("sortControlIsHidden", false);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar
         @facets={{this.facets}}
         @sortControlIsHidden={{this.sortControlIsHidden}}
@@ -92,6 +94,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     this.set("facets", { status: statusFacets });
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
@@ -109,6 +112,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
   test("it conditionally renders the status facet disabled", async function (assert) {
     this.set("facets", { status: {} });
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar @facets={{this.facets}} />
     `);
     assert
@@ -119,6 +123,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
   test("it conditionally disables the sort control", async function (assert) {
     this.set("facets", FACETS);
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar @facets={{this.facets}} />
     `);
 

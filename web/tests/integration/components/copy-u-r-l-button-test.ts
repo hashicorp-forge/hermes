@@ -24,6 +24,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
     // Render with padding so the tooltip has room on all sides:
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div style="padding: 300px">
         <CopyURLButton
           class="test-class"
