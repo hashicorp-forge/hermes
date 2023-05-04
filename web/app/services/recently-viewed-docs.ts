@@ -50,7 +50,7 @@ export default class RecentlyViewedDocsService extends Service {
         "/api/v1/me/recently-viewed-docs"
       );
 
-      this.index = await fetchResponse?.json();
+      this.index = (await fetchResponse?.json()) || [];
 
       assert("fetchAll expects index", this.index);
 
