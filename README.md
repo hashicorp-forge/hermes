@@ -102,11 +102,6 @@ cp configs/config.hcl ./
 ### Build the Project
 
 ```sh
-# OAuth client ID of the “web application”
-export HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID=”{OAUTH_CLIENT_ID_HERE}”
-```
-
-```sh
 make build
 ```
 
@@ -123,6 +118,12 @@ make docker/postgres/start
 
 ```sh
 ./hermes server -config=config.hcl
+```
+
+### Run the Indexer
+
+```sh
+./hermes indexer -config=config.hcl
 ```
 
 NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send emails, etc.
@@ -146,7 +147,7 @@ The server process serves web content. Of note, there are API endpoints for an a
 
 ### Indexer
 
-The indexer is a process that is run alongside the server that continually polls for published document updates and reindexes their content in Algolia for search. Additionally, it will rewrite the document headers with Hermes metadata in case they are manually changed to incorrect values. While not strictly required, it is recommended to run the indexer so the search index and Google Docs stay up-to-date.
+The indexer is a process that is run alongside the server that continually polls for published document updates and reindexes their content in Algolia for search. Additionally, it will rewrite the document headers with Hermes metadata in case they are manually changed to incorrect values. While not strictly required, it is recommended to run the indexer so search index data and Google Docs stay up-to-date.
 
 ### Frontend
 
