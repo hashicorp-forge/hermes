@@ -28,8 +28,19 @@ export default class DocumentRoute extends Route {
   //   },
   // };
 
-  async model(params) {
+  showErrorMessage(err) {
+    this.flashMessages.add({
+      title: "Error fetching document",
+      message: err.message,
+      type: "critical",
+      sticky: true,
+      extendedTimeout: 1000,
+    });
+  }
+
+  async model(params, transition) {
     let doc = {};
+    let draftFetched = false;
 
     // Get doc data from the app backend.
     if (params.draft) {
@@ -38,22 +49,21 @@ export default class DocumentRoute extends Route {
           .fetch("/api/v1/drafts/" + params.document_id)
           .then((r) => r.json());
         doc.isDraft = params.draft;
+        draftFetched = true;
       } catch (err) {
-        const errorMessage = `Failed to get document draft: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
-
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
-        throw new Error(errorMessage);
+        /**
+         * The doc may have been published since the user last viewed it
+         * (i.e., it moved from /drafts to /documents in the back end),
+         * so we retry the model hook without the draft param.
+         * Any subsequent errors are handled in the catch block below.
+         */
+        transition.abort();
+        this.router.transitionTo("authenticated.document", params.document_id);
+        return;
       }
-    } else {
+    }
+
+    if (!draftFetched) {
       try {
         doc = await this.fetchSvc
           .fetch("/api/v1/documents/" + params.document_id, {
@@ -66,24 +76,15 @@ export default class DocumentRoute extends Route {
           })
           .then((r) => r.json());
 
-        doc.isDraft = params.draft;
+        doc.isDraft = false;
       } catch (err) {
-        const errorMessage = `Failed to get document: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
+        this.showErrorMessage(err);
 
         // Transition to dashboard
         this.router.transitionTo("authenticated.dashboard");
         throw new Error(errorMessage);
       }
     }
-
 
     if (!!doc.createdTime) {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
@@ -105,11 +106,6 @@ export default class DocumentRoute extends Route {
     } catch (err) {
       console.log("Error recording analytics: " + err);
     }
-
-
-
-    // Record the doc with the RecentlyViewedDocs service.
-    void this.recentDocs.markViewed.perform(params.document_id, params.draft);
 
     // Load the document as well as the logged in user info
 
@@ -136,7 +132,6 @@ export default class DocumentRoute extends Route {
         doc.approvers = [];
       }
     }
-
 
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")

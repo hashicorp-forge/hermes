@@ -27,6 +27,7 @@ module(
       this.set("productArea", "Waypoint");
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
@@ -58,6 +59,7 @@ module(
       this.set("productArea", "Waypoint");
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />

@@ -61,6 +61,7 @@ module(
       this.set("shownFacets", LONG_FACET_LIST);
 
       await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Header::FacetDropdownList
         @shownFacets={{this.shownFacets}}
         @label="Status"
@@ -141,6 +142,7 @@ module(
       this.set("shownFacets", SHORT_FACET_LIST);
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownList
           @shownFacets={{this.shownFacets}}
           @label="Status"
@@ -212,6 +214,7 @@ module(
       this.set("inputIsShown", false);
 
       await render(hbs`
+        {{! @glint-nocheck: not typesafe yet }}
         <Header::FacetDropdownList
           @shownFacets={{this.shownFacets}}
           @label={{this.label}}

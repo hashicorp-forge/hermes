@@ -11,6 +11,7 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
     this.set("renderOut", undefined);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <FloatingUI>
         <:anchor as |f|>
           <Action

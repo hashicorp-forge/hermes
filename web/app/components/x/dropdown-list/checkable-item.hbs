@@ -1,0 +1,16 @@
+<FlightIcon
+  data-test-x-dropdown-list-checkable-item-check
+  @name="check"
+  class="check {{if @selected 'visible' 'invisible'}}"
+/>
+<div class="x-dropdown-list-item-value">
+  {{@value}}
+</div>
+{{#if @count}}
+  <Hds::BadgeCount
+    data-test-x-dropdown-list-checkable-item-count
+    @text={{@count}}
+    @size="small"
+    class="x-dropdown-list-item-count"
+  />
+{{/if}}

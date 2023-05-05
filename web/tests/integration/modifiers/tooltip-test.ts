@@ -9,6 +9,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
   test("it renders", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div data-test-div {{tooltip "more information"}}>
         Hover or focus me
       </div>
@@ -75,6 +76,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
   test("it takes a placement argument", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="w-full h-full grid place-items-center">
         <div>
           <div data-test-one {{tooltip "more information"}}>

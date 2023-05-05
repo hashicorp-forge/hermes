@@ -1,11 +1,11 @@
 {{#unless @hideProgress}}
   <ol
-    class="state--{{this.dasherizedName}}
-      grid grid-cols-3 items-center list-none gap-0.5 w-28 whitespace-nowrap"
+    class="doc-state doc-state--{{this.dasherizedName}}
+      grid grid-cols-3 w-full items-center list-none gap-0.5"
   >
-    <Doc::StateProgressBar class={{this.state.barOneClass}} />
-    <Doc::StateProgressBar class={{this.state.barTwoClass}} />
-    <Doc::StateProgressBar class={{this.state.barThreeClass}} />
+    <li class="progress-bar"></li>
+    <li class="progress-bar"></li>
+    <li class="progress-bar"></li>
   </ol>
 {{/unless}}
 

@@ -141,7 +141,7 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to get the user's profile.
        */
-      this.get("https://www.googleapis.com/userinfo/v2/me", (schema) => {
+      this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
         if (schema.mes.first()) {
           return schema.mes.first().attrs;
@@ -189,6 +189,23 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the /drafts route's getDraftResults method to fetch
+       * a list of facets and draft results.
+       */
+      this.get("/drafts", () => {
+        return new Response(
+          200,
+          {},
+          {
+            facets: [],
+            Hits: [],
+            params: "",
+            page: 0,
+          }
+        );
+      });
+
+      /**
        * Used by the Dashboard route to get a user's recently viewed documents.
        */
       this.get("/me/recently-viewed-docs", (schema) => {
@@ -207,10 +224,38 @@ export default function (mirageConfig) {
 
       /**
        * Used by /subscriptions to get all possible subscriptions.
-       * Also used by the NewDoc route to map the products to their abbreviations.
+       * Used by the NewDoc route to map the products to their abbreviations.
+       * Used by the sidebar to populate a draft's product/area dropdown.
        */
       this.get("/products", () => {
-        return;
+        let objects = this.schema.products.all().models.map((product) => {
+          return {
+            [product.attrs.name]: {
+              abbreviation: product.attrs.abbreviation,
+            },
+          };
+        });
+
+        // The objects currently look like:
+        // [
+        //  0: { "Labs": { abbreviation: "LAB" } },
+        //  1: { "Vault": { abbreviation: "VLT"} }
+        // ]
+
+        // We reformat them to match the API's response:
+        // {
+        //  "Labs": { abbreviation: "LAB" },
+        //  "Vault": { abbreviation: "VLT" }
+        // }
+
+        let formattedObjects = {};
+
+        objects.forEach((object) => {
+          let key = Object.keys(object)[0];
+          formattedObjects[key] = object[key];
+        });
+
+        return new Response(200, {}, formattedObjects);
       });
 
       // RecentlyViewedDocsService / fetchIndexID

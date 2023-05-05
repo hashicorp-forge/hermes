@@ -15,13 +15,13 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     this.set("renderOut", undefined);
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="anchor">
         Attach here
       </div>
 
       <div class="container">
         <FloatingUI::Content
-          @id="test-id"
           @anchor={{html-element '.anchor'}}
           @renderOut={{this.renderOut}}
         >
@@ -66,6 +66,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     // Center the anchor so the content can be flexibly positioned
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -73,7 +74,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
           </div>
           <FloatingUI::Content
             style="width: 100px"
-            @id="test-id"
             @anchor={{html-element '.anchor'}}
             @placement="left"
           >
@@ -103,13 +103,13 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     this.clearRender();
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
             Attach
           </div>
           <FloatingUI::Content
-            @id="floating-ui-test-content"
             style="width: 100px"
             @anchor={{html-element '.anchor'}}
             @placement="right"
