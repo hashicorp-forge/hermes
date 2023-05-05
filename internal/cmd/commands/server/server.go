@@ -165,6 +165,10 @@ func (c *Command) Run(args []string) int {
 			c.UI.Error("error initializing server: Okta authorization server URL is required")
 			return 1
 		}
+		if cfg.Okta.AWSRegion == "" {
+			c.UI.Error("error initializing server: Okta AWS region is required")
+			return 1
+		}
 		if cfg.Okta.ClientID == "" {
 			c.UI.Error("error initializing server: Okta client ID is required")
 			return 1
