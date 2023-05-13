@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 {{!
   Marked up with guidance from:
   https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
@@ -50,7 +51,22 @@
             f.contentID
           )
         )
+        ariaControls=(concat
+          "x-dropdown-list-"
+          (if this.inputIsShown "container" "items")
+          "-"
+          f.contentID
+        )
+        resetFocusedItemIndex=this.resetFocusedItemIndex
+        scheduleAssignMenuItemIDs=this.scheduleAssignMenuItemIDs
+        registerAnchor=f.registerAnchor
         contentIsShown=f.contentIsShown
+        toggleContent=f.toggleContent
+        onTriggerKeydown=(fn
+          this.onTriggerKeydown f.contentIsShown f.showContent
+        )
+        hideContent=f.hideContent
+        showContent=f.showContent
       )
       to="anchor"
     }}

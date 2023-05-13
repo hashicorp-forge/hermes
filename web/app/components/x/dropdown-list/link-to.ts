@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 
 interface XDropdownListLinkToComponentSignature {
-  Element: HTMLButtonElement;
+  Element: HTMLAnchorElement;
   Args: {
     registerElement: () => void;
     focusMouseTarget: () => void;

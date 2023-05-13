@@ -20,13 +20,33 @@ interface BasicDropdownAPI {
   };
 }
 
+interface SearchResultObjects {
+  [key: string]: unknown | HermesDocumentObjects;
+}
+
+interface HermesDocumentObjects {
+  [key: string]: HermesDocument;
+}
+
 export default class Search extends Component {
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
 
   @tracked protected searchInput: HTMLInputElement | null = null;
-  @tracked protected bestMatches: HermesDocument[] = [];
+  @tracked protected _bestMatches: HermesDocument[] = [];
   @tracked protected query: string = "";
+
+  get bestMatches(): SearchResultObjects {
+    return this._bestMatches.reduce(
+      (acc, doc) => {
+        acc[doc.objectID] = doc;
+        return acc;
+      },
+      {
+        viewAllResultsObject: {},
+      } as SearchResultObjects
+    );
+  }
 
   @action protected registerInput(element: HTMLInputElement): void {
     this.searchInput = element;
@@ -45,9 +65,9 @@ export default class Search extends Component {
    * Uses mousedown instead of click to get ahead of the focusin event.
    * This allows users to click the search input to dismiss the dropdown.
    */
-  @action protected maybeCloseDropdown(dd: BasicDropdownAPI): void {
-    if (dd.isOpen) {
-      dd.actions.close();
+  @action protected maybeCloseDropdown(dd: any): void {
+    if (dd.contentIsShown) {
+      dd.hideContent();
     }
   }
 
@@ -59,7 +79,7 @@ export default class Search extends Component {
   }
 
   protected search = restartableTask(
-    async (dd: BasicDropdownAPI, inputEvent: InputEvent): Promise<void> => {
+    async (dd: any, inputEvent: InputEvent): Promise<void> => {
       let input = inputEvent.target;
 
       assert(
@@ -76,14 +96,16 @@ export default class Search extends Component {
         const response = await this.algolia.search.perform(this.query, params);
 
         if (response) {
-          this.bestMatches = response.hits as HermesDocument[];
+          this._bestMatches = response.hits as HermesDocument[];
         }
       }
 
       // Reopen the dropdown if it was closed on mousedown
-      if (!dd.isOpen) {
-        dd.actions.open();
+      if (!dd.contentIsShown) {
+        dd.showContent();
       }
+      dd.resetFocusedItemIndex();
+      dd.scheduleAssignMenuItemIDs();
     }
   );
 }

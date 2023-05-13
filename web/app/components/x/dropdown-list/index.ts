@@ -115,7 +115,7 @@ export default class XDropdownListComponent extends Component<
   @action onDestroy() {
     this.query = "";
     this._filteredItems = null;
-    this.focusedItemIndex = -1;
+    this.resetFocusedItemIndex();
   }
 
   /**
@@ -262,13 +262,17 @@ export default class XDropdownListComponent extends Component<
       this.scrollContainer.scrollTop = itemTop;
     }
   }
+
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
+  }
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
   protected onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.focusedItemIndex = -1;
+    this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
@@ -281,12 +285,18 @@ export default class XDropdownListComponent extends Component<
     }
 
     this._filteredItems = shownItems;
+    this.scheduleAssignMenuItemIDs();
+  });
 
+  @action protected scheduleAssignMenuItemIDs() {
     schedule("afterRender", () => {
-      assert("onInput expects a _scrollContainer", this._scrollContainer);
+      assert(
+        "scheduleAssignMenuItemIDs expects a _scrollContainer",
+        this._scrollContainer
+      );
       this.assignMenuItemIDs(
         this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
       );
     });
-  });
+  }
 }

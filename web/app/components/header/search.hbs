@@ -2,41 +2,89 @@
 {{on-document "keydown" this.onKeydown}}
 <div ...attributes>
   <form class="w-full" {{on "submit" this.goToResults}}>
-    <BasicDropdown @renderInPlace={{true}} @horizontalPosition="right" as |dd|>
-      <Hds::Form::TextInput::Base
-        @type="search"
-        @value={{this.query}}
-        name="query"
-        size="25"
-        placeholder="Find a document..."
-        aria-label="Find a document..."
-        data-ebd-id="{{dd.uniqueId}}-trigger"
-        {{on "focusin" dd.actions.open}}
-        {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
-        {{on "input" (perform this.search dd)}}
-        {{did-insert this.registerInput}}
-      />
-      {{#unless this.query}}
-        <span
-          class="absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint"
-        >
-          ⌘K
-        </span>
-      {{/unless}}
-      {{#if this.query}}
-        <dd.Content class="hds-dropdown__content search-dropdown">
+    {{! TODO: add array support to dropdownList }}
+    <X::DropdownList @items={{this.bestMatches}}>
+      <:anchor as |dd|>
+        <Hds::Form::TextInput::Base
+          {{did-insert dd.registerAnchor}}
+          {{did-insert this.registerInput}}
+          {{on "input" (perform this.search dd)}}
+          {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
+          {{on "keydown" dd.onTriggerKeydown}}
+          @type="search"
+          @value={{this.query}}
+          name="query"
+          size="25"
+          placeholder="Find a document..."
+          aria-label="Find a document..."
+          aria-controls={{dd.ariaControls}}
+          aria-expanded={{dd.contentIsShown}}
+          aria-haspopup="listbox"
+        />
+        {{#unless this.query}}
+          <span
+            class="absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint"
+          >
+            ⌘K
+          </span>
+        {{/unless}}
+      </:anchor>
+      <:item as |dd|>
+        {{#if (eq dd.value "viewAllResultsObject")}}
+          <dd.LinkTo
+            @route="authenticated.results"
+            @query={{hash q=this.query page=1}}
+          >
+            <FlightIcon @name="search" class="mr-1.5" />
+            <span>View all results for "{{this.query}}"</span>
+          </dd.LinkTo>
+        {{else}}
+          <dd.LinkTo
+            @route="authenticated.document"
+            @model={{dd.value}}
+            class="flex items-center space-x-3 py-2 px-3 hover:bg-color-palette-neutral-100"
+          >
+            <Doc::Thumbnail
+              @status={{dd.attrs.status}}
+              @product={{dd.attrs.product}}
+            />
+            <div class="flex flex-col space-y-1 overflow-hidden">
+              <h4
+                class="text-body-200 font-semibold text-color-foreground-strong"
+              >
+                {{dd.attrs.title}}
+              </h4>
+
+              {{#if (not (is-empty dd.attrs.docNumber))}}
+                <small class="text-body-100 text-color-foreground-faint">
+                  {{dd.attrs.docNumber}}
+                </small>
+              {{/if}}
+
+              <Person
+                @ignoreUnknown={{true}}
+                @imgURL={{get dd.attrs.ownerPhotos 0}}
+                @email={{get dd.attrs.owners 0}}
+              />
+
+              {{#if dd.attrs._snippetResult.content.value}}
+                <Doc::Snippet
+                  @snippet={{dd.attrs._snippetResult.content.value}}
+                  class="truncate"
+                />
+              {{/if}}
+            </div>
+          </dd.LinkTo>
+        {{/if}}
+      </:item>
+    </X::DropdownList>
+
+    {{!-- <dd.Content class="hds-dropdown__content search-dropdown">
           {{#if this.bestMatches}}
             <div
               class="flex flex-col border-0 border-b hds-border-primary pb-1"
             >
-              <LinkTo
-                @route="authenticated.results"
-                @query={{hash q=this.query page=1}}
-                class="hds-dropdown-list-item--variant-interactive"
-              >
-                <FlightIcon @name="search" class="mr-1.5" />
-                <span>View all results for "{{this.query}}"</span>
-              </LinkTo>
+
             </div>
             <div
               class="flex flex-col border-0 border-b hds-border-primary py-1"
@@ -84,8 +132,6 @@
               </div>
             </div>
           {{/if}}
-        </dd.Content>
-      {{/if}}
-    </BasicDropdown>
+        </dd.Content> --}}
   </form>
 </div>
