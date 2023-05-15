@@ -36,6 +36,10 @@ export default class Search extends Component {
   @tracked protected _bestMatches: HermesDocument[] = [];
   @tracked protected query: string = "";
 
+  get bestMatchesHeaderIsShown(): boolean {
+    return Object.keys(this.bestMatches).length > 1;
+  }
+
   get bestMatches(): SearchResultObjects {
     return this._bestMatches.reduce(
       (acc, doc) => {

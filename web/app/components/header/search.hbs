@@ -33,6 +33,9 @@
         <div id="hermes-search-popover-header">
           {{! content is placed by in-element }}
         </div>
+        {{#if this.bestMatchesHeaderIsShown}}
+          <h5>Best matches</h5>
+        {{/if}}
       </:header>
       <:item as |dd|>
         {{#if (eq dd.value "viewAllResultsObject")}}
