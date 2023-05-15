@@ -29,15 +29,27 @@
           </span>
         {{/unless}}
       </:anchor>
+      <:header>
+        <div id="hermes-search-popover-header">
+          {{! content is placed by in-element }}
+        </div>
+      </:header>
       <:item as |dd|>
         {{#if (eq dd.value "viewAllResultsObject")}}
-          <dd.LinkTo
-            @route="authenticated.results"
-            @query={{hash q=this.query page=1}}
-          >
-            <FlightIcon @name="search" class="mr-1.5" />
-            <span>View all results for "{{this.query}}"</span>
-          </dd.LinkTo>
+          {{#in-element
+            (html-element "#hermes-search-popover-header")
+            insertBefore=null
+          }}
+            <div class="bg-red-500">
+              <dd.LinkTo
+                @route="authenticated.results"
+                @query={{hash q=this.query page=1}}
+              >
+                <FlightIcon @name="search" class="mr-1.5" />
+                <span>View all results for "{{this.query}}"</span>
+              </dd.LinkTo>
+            </div>
+          {{/in-element}}
         {{else}}
           <dd.LinkTo
             @route="authenticated.document"

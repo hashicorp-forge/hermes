@@ -19,6 +19,7 @@
         {{#each-in @shownItems as |item attrs|}}
           <X::DropdownList::Item
             @value={{item}}
+            @contentID={{@contentID}}
             @attributes={{attrs}}
             @selected={{eq @selected item}}
             @focusedItemIndex={{@focusedItemIndex}}
