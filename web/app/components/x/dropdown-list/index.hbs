@@ -8,11 +8,12 @@
 }}
 
 <FloatingUI
-  @renderOut={{true}}
+  @renderOut={{@renderOut}}
   @placement={{@placement}}
   class="hermes-popover x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
+  ...attributes
 >
   <:anchor as |f|>
     {{yield
