@@ -1,5 +1,3 @@
-{{! TODO: add @model support }}
-
 <LinkTo
   data-test-x-dropdown-list-item-link-to
   {{did-insert @registerElement}}
@@ -10,8 +8,8 @@
   tabindex="-1"
   aria-checked={{@isAriaChecked}}
   @route={{@route}}
-  @model={{@model}}
-  @query={{or @query (hash)}}
+  @models={{this.models}}
+  @query={{this.query}}
   class="x-dropdown-list-item-link {{if @isAriaSelected 'is-aria-selected'}}"
   ...attributes
 >
