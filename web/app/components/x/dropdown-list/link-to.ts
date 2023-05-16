@@ -12,7 +12,7 @@ interface XDropdownListLinkToComponentSignature {
     isAriaSelected: boolean;
     isAriaChecked: boolean;
     route: string;
-    query?: string;
+    query?: Record<string, unknown>;
     model?: unknown;
     models?: unknown[];
   };
@@ -21,28 +21,7 @@ interface XDropdownListLinkToComponentSignature {
   }
 }
 
-export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {
-  /**
-   * The models, if any, to pass to the route.
-   * Allows the component to support all model scenarios without
-   * hitting internal Ember assertions.
-   */
-  protected get models() {
-    if (this.args.models) {
-      return this.args.models;
-    } else {
-      return this.args.model ? [this.args.model] : [];
-    }
-  }
-  /**
-   * The query, if any, to pass to the route.
-   * Workaround for https://github.com/emberjs/ember.js/issues/19693
-   * Can be removed when we upgrade to Ember 3.28+
-   */
-  protected get query() {
-    return this.args.query || {};
-  }
-}
+export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
