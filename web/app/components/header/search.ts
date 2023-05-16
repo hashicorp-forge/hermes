@@ -22,7 +22,12 @@ interface HermesDocumentObjects {
 const POPOVER_CROSS_AXIS_OFFSET = 3;
 const POPOVER_BORDER_WIDTH = 1;
 
-export default class Search extends Component {
+interface HeaderSearchComponentSignature {
+  Element: HTMLDivElement;
+  Args: {};
+}
+
+export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;

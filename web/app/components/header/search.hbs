@@ -1,7 +1,8 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{on-document "keydown" this.onDocumentKeydown}}
+
 <div ...attributes>
   <form class="w-full relative" {{on "submit" this.viewAllResults}}>
+    {{! @glint-ignore - not yet registered}}
     <X::DropdownList
       @items={{this.bestMatches}}
       @offset={{this.popoverOffset}}
@@ -11,6 +12,7 @@
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
       <:anchor as |dd|>
+        {{! @glint-ignore - not yet registered}}
         <Hds::Form::TextInput::Base
           {{did-insert dd.registerAnchor}}
           {{did-insert this.registerInput}}
@@ -69,6 +71,7 @@
                   @query={{hash q=this.query page=1}}
                   class="search-popover-header-link"
                 >
+                  {{! @glint-ignore - not yet registered}}
                   <FlightIcon @name="search" class="mr-1.5" />
                   <span>View all results for "{{this.query}}"</span>
                 </dd.LinkTo>
@@ -78,12 +81,14 @@
                   @query={{hash product=(array dd.attrs.product) page=1}}
                   class="search-popover-header-link border-t border-t-color-border-primary"
                 >
-                  {{log dd.attrs.product}}
+                  {{! @glint-ignore - not yet registered}}
                   <FlightIcon @name="folder" class="mr-1.5" />
                   <span class="flex items-center">
                     View all
+                    {{! @glint-ignore - not yet registered}}
                     <Hds::Badge
                       @text={{dd.attrs.product}}
+                      {{! @glint-ignore - not yet registered}}
                       @icon={{get-product-id dd.attrs.product}}
                       class="mx-2 mix-blend-multiply"
                     />
@@ -99,6 +104,7 @@
             @model={{dd.value}}
             class="flex items-center space-x-3 py-2 px-3 h-20"
           >
+            {{! @glint-ignore - not yet registered}}
             <Doc::Thumbnail
               @status={{dd.attrs.status}}
               @product={{dd.attrs.product}}
@@ -110,6 +116,7 @@
                 {{dd.attrs.title}}
               </h4>
 
+              {{! @glint-ignore - not yet registered}}
               <Person
                 @ignoreUnknown={{true}}
                 @imgURL={{get dd.attrs.ownerPhotos 0}}
@@ -117,6 +124,7 @@
               />
 
               {{#if dd.attrs._snippetResult.content.value}}
+                {{! @glint-ignore - not yet registered}}
                 <Doc::Snippet
                   @snippet={{dd.attrs._snippetResult.content.value}}
                   class="truncate"
