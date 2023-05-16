@@ -58,7 +58,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @tracked reauthFlashMessage: FlashObject | null = null;
 
   /**
-   * Whether the app is configured to skip Google auth.
+   * Whether the app is configured to use Okta.
    * Dictates reauthButton text and behavior.
    * Determines whether we poll the back end for a 401
    * while the reauthentication message is shown.
@@ -75,7 +75,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(Ember.testing ? 100 : 10000);
 
-    // If using Google auth (i.e., Ember Simple Auth) and the reauthentication
+    // If using [Ember Simple Auth] and the reauthentication
     // message is shown, do nothing but restart the counter.
     if (!this.isUsingOkta && this.reauthFlashMessage) {
       this.pollForExpiredAuth.perform();
@@ -98,6 +98,9 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     if (this.tokenIsValid) {
       this.preventReauthMessage = false;
 
+      // In case the user reauthenticates while the message is shown,
+      // e.g., in another tab, destroy the message.
+      // (Only relevant when using Okta.)
       if (this.reauthFlashMessage) {
         this.reauthFlashMessage.destroyMessage();
       }
@@ -181,7 +184,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         destroyOnClick: true,
       });
 
-      // Reset the local parameters.
       this.preventReauthMessage = false;
       this.pollForExpiredAuth.perform();
     } catch (error: unknown) {
