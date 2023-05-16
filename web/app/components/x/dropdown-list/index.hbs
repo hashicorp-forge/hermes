@@ -10,6 +10,7 @@
 <FloatingUI
   @renderOut={{@renderOut}}
   @placement={{@placement}}
+  @offset={{@offset}}
   class="hermes-popover x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
@@ -66,6 +67,7 @@
         onTriggerKeydown=(fn
           this.onTriggerKeydown f.contentIsShown f.showContent
         )
+        focusedItemIndex=this.focusedItemIndex
         hideContent=f.hideContent
         showContent=f.showContent
       )
@@ -80,7 +82,6 @@
       id="x-dropdown-list-container-{{f.contentID}}"
       class="x-dropdown-list-container"
       role={{if this.inputIsShown "combobox"}}
-      ...attributes
     >
       {{#if this.inputIsShown}}
         <div class="x-dropdown-list-input-container">

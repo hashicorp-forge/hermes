@@ -1,5 +1,6 @@
 .x-dropdown-list.search-popover {
-  @apply w-full max-h-[none] max-w-none min-w-[400px];
+  // width calculated in the component class
+  @apply max-h-[none] min-w-[420px] max-w-[none];
 
   &.no-best-matches {
     .x-dropdown-list-items {
@@ -9,8 +10,8 @@
   .x-dropdown-list-item-link {
     @apply items-start;
 
-    &.all-results-link {
-      @apply pt-2.5 pb-[9px] items-center;
+    &.search-popover-header-link {
+      @apply pt-2.5 pb-[10px] items-center;
     }
 
     &.is-aria-selected {

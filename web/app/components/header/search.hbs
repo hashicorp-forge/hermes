@@ -1,10 +1,11 @@
 {{! @glint-nocheck: not typesafe yet }}
-{{on-document "keydown" this.onKeydown}}
+{{on-document "keydown" this.onDocumentKeydown}}
 <div ...attributes>
-  <form class="w-full relative" {{on "submit" this.goToResults}}>
-    {{! TODO: add array support to dropdownList }}
+  <form class="w-full relative" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
       @items={{this.bestMatches}}
+      @offset={{this.popoverOffset}}
+      style={{{this.dropdownListStyle}}}
       @placement="bottom-end"
       class="search-popover
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
@@ -15,7 +16,8 @@
           {{did-insert this.registerInput}}
           {{on "input" (perform this.search dd)}}
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
-          {{on "keydown" dd.onTriggerKeydown}}
+          {{on "keydown" (fn this.onInputKeydown dd)}}
+          {{on "focusin" (fn this.maybeOpenDropdown dd)}}
           @type="search"
           @value={{this.query}}
           name="query"
@@ -49,20 +51,43 @@
         {{/if}}
       </:header>
       <:item as |dd|>
-        {{#if (eq dd.value "viewAllResultsObject")}}
-          {{#in-element
-            (html-element "#hermes-search-popover-header")
-            insertBefore=null
-          }}
-            <dd.LinkTo
-              @route="authenticated.results"
-              @query={{hash q=this.query page=1}}
-              class="all-results-link"
-            >
-              <FlightIcon @name="search" class="mr-1.5" />
-              <span>View all results for "{{this.query}}"</span>
-            </dd.LinkTo>
-          {{/in-element}}
+        {{#if
+          (or
+            (eq dd.value "viewAllResultsObject")
+            (eq dd.value "productAreaMatch")
+          )
+        }}
+          {{#unless this.searchInputIsEmpty}}
+            {{#in-element
+              (html-element "#hermes-search-popover-header")
+              insertBefore=null
+            }}
+              {{#if (eq dd.value "viewAllResultsObject")}}
+                <dd.LinkTo
+                  {{did-insert this.registerViewAllResultsLink}}
+                  @route="authenticated.results"
+                  @query={{hash q=this.query page=1}}
+                  class="search-popover-header-link"
+                >
+                  <FlightIcon @name="search" class="mr-1.5" />
+                  <span>View all results for "{{this.query}}"</span>
+                </dd.LinkTo>
+              {{else}}
+                <dd.LinkTo
+                  @route="authenticated.all"
+                  @query={{hash product=(array dd.attrs.product) page=1}}
+                  class="search-popover-header-link border-t border-t-color-border-primary"
+                >
+                  {{log dd.attrs.product}}
+                  <FlightIcon
+                    @name={{or (get-product-id dd.attrs.product) "folder"}}
+                    class="mr-1.5"
+                  />
+                  <span>View all {{dd.attrs.product}} documents</span>
+                </dd.LinkTo>
+              {{/if}}
+            {{/in-element}}
+          {{/unless}}
         {{else}}
           <dd.LinkTo
             @route="authenticated.document"
