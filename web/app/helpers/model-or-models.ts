@@ -3,9 +3,9 @@ import { assert } from "@ember/debug";
 
 export interface ModelOrModelsSignature {
   Args: {
-    Positional: [unknown | undefined, Array<unknown> | undefined];
+    Positional: [unknown | undefined, unknown[] | undefined];
   };
-  Return: Array<unknown>;
+  Return: unknown[];
 }
 
 /**

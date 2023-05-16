@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 
 interface XDropdownListLinkToComponentSignature {
-  Element: HTMLButtonElement;
+  Element: HTMLAnchorElement;
   Args: {
     registerElement: () => void;
     focusMouseTarget: () => void;
@@ -12,8 +12,19 @@ interface XDropdownListLinkToComponentSignature {
     isAriaSelected: boolean;
     isAriaChecked: boolean;
     route: string;
-    query?: unknown;
+    query?: Record<string, unknown>;
+    model?: unknown;
+    models?: unknown[];
+  };
+  Blocks: {
+    default: [];
   };
 }
 
 export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "x/dropdown-list/link-to": typeof XDropdownListLinkToComponent;
+  }
+}

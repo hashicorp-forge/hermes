@@ -50,7 +50,7 @@ module("Integration | Helper | model-or-models", function (hooks) {
     await render<ModelOrModelsTestContext>(hbs`
       <div>
         {{#each (model-or-models this.model this.models) as |model|}}
-          {{! @glint-nocheck }}
+          {{! @glint-ignore }}
           {{model.name}}
         {{/each}}
       </div>
