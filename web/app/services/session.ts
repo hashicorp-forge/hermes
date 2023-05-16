@@ -75,13 +75,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(Ember.testing ? 100 : 10000);
 
-    // If using [Ember Simple Auth] and the reauthentication
-    // message is shown, do nothing but restart the counter.
-    if (!this.isUsingOkta && this.reauthFlashMessage) {
-      this.pollForExpiredAuth.perform();
-      return;
-    }
-
     // Make a HEAD request to the back end.
     // On 401, the fetch service will set `this.pollResponseIs401` true.
     await this.fetch.fetch("/api/v1/me", { method: "HEAD" }, true);
@@ -100,7 +93,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
 
       // In case the user reauthenticates while the message is shown,
       // e.g., in another tab, destroy the message.
-      // (Only relevant when using Okta.)
       if (this.reauthFlashMessage) {
         this.reauthFlashMessage.destroyMessage();
       }
@@ -113,7 +105,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
           this.preventReauthMessage = true;
         }
       );
-      return;
     }
 
     // Restart this very task.
@@ -166,6 +157,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       } else {
         await this.authenticate("authenticator:torii", "google-oauth2-bearer");
       }
+
       this.reauthFlashMessage?.destroyMessage();
 
       // Wait a bit to show the success message.
@@ -185,7 +177,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       });
 
       this.preventReauthMessage = false;
-      this.pollForExpiredAuth.perform();
     } catch (error: unknown) {
       this.reauthFlashMessage?.destroyMessage();
       this.showReauthMessage("Login failed", error as string, "critical");
