@@ -1,12 +1,10 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, find, render } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
-import FloatingUIContent from "hermes/components/floating-u-i/content";
 
-const CONTENT_OFFSET = 5;
+const DEFAULT_CONTENT_OFFSET = 5;
 
 module("Integration | Component | floating-u-i/content", function (hooks) {
   setupRenderingTest(hooks);
@@ -90,7 +88,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
     assert.ok(content.getAttribute("data-floating-ui-placement") === "left");
     assert.ok(
-      contentRight === anchorLeft - CONTENT_OFFSET,
+      contentRight === anchorLeft - DEFAULT_CONTENT_OFFSET,
       "content is offset to the left of the anchor"
     );
     assert.ok(
@@ -127,8 +125,75 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
     assert.ok(content.getAttribute("data-floating-ui-placement") === "right");
     assert.ok(
-      contentLeft === anchorRight + CONTENT_OFFSET,
+      contentLeft === anchorRight + DEFAULT_CONTENT_OFFSET,
       "content is offset to the right of anchor"
+    );
+  });
+
+  test("it can use a custom offset", async function (assert) {
+    await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
+      <div class="grid place-items-center w-full h-full">
+        <div>
+          <div class="anchor" style="width: 100px">
+            Attach
+          </div>
+          <FloatingUI::Content
+            style="width: 100px"
+            @anchor={{html-element '.anchor'}}
+            @placement="left"
+          >
+            Content
+          </FloatingUI::Content>
+        </div>
+      </div>
+    `);
+
+    let anchor = htmlElement(".anchor");
+    let content = htmlElement(".hermes-floating-ui-content");
+    let contentWidth = content.offsetWidth;
+    let contentRight = content.offsetLeft + contentWidth;
+    let anchorLeft = anchor.offsetLeft;
+
+    assert.equal(
+      contentRight,
+      anchorLeft - DEFAULT_CONTENT_OFFSET,
+      "content is offset to the left of the anchor"
+    );
+
+    // Clear and set the offset to 10
+    this.clearRender();
+    this.set("offset", 10);
+
+    await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
+      <div class="grid place-items-center w-full h-full">
+        <div>
+          <div class="anchor" style="width: 100px">
+            Attach
+          </div>
+          <FloatingUI::Content
+            style="width: 100px"
+            @anchor={{html-element '.anchor'}}
+            @placement="left"
+            @offset={{this.offset}}
+          >
+            Content
+          </FloatingUI::Content>
+        </div>
+      </div>
+    `);
+
+    anchor = htmlElement(".anchor");
+    content = htmlElement(".hermes-floating-ui-content");
+    contentWidth = content.offsetWidth;
+    contentRight = content.offsetLeft + contentWidth;
+    anchorLeft = anchor.offsetLeft;
+
+    assert.equal(
+      contentRight,
+      anchorLeft - 10,
+      "content is offset by the passed-in value"
     );
   });
 
