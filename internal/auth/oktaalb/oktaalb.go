@@ -28,7 +28,7 @@ type Config struct {
 	AuthServerURL string `hcl:"auth_server_url,optional"`
 
 	// AWSRegion is the region of the AWS Application Load Balancer.
-	AWSRegion string `hcl:"aws_region"`
+	AWSRegion string `hcl:"aws_region,optional"`
 
 	// ClientID is the Okta client ID.
 	ClientID string `hcl:"client_id,optional"`

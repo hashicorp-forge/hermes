@@ -122,10 +122,7 @@
           <small
             class="hds-typography-body-100 hds-foreground-faint"
           >Status</small>
-          <Doc::State
-            @state={{@document.status}}
-            @hideProgress={{true}}
-          />
+          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
         </div>
 
         <div class="flex flex-col items-start space-y-2">
@@ -490,7 +487,7 @@
 
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
-{{#in-element (html-element '.ember-application') insertBefore=null}}
+{{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.archiveModalIsActive}}
     <Document::Modal
       @color="critical"
@@ -528,7 +525,10 @@
       @taskButtonText="Request review"
       @taskButtonLoadingText="Requesting review..."
       @taskButtonIcon="test"
-      @taskButtonIsDisabled={{not this.docTypeCheckboxValue}}
+      @taskButtonIsDisabled={{and
+        (not this.docTypeCheckboxValue)
+        @docType.checks.length
+      }}
     >
       <:default as |M|>
         <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
