@@ -79,11 +79,16 @@
                   class="search-popover-header-link border-t border-t-color-border-primary"
                 >
                   {{log dd.attrs.product}}
-                  <FlightIcon
-                    @name={{or (get-product-id dd.attrs.product) "folder"}}
-                    class="mr-1.5"
-                  />
-                  <span>View all {{dd.attrs.product}} documents</span>
+                  <FlightIcon @name="folder" class="mr-1.5" />
+                  <span class="flex items-center">
+                    View all
+                    <Hds::Badge
+                      @text={{dd.attrs.product}}
+                      @icon={{get-product-id dd.attrs.product}}
+                      class="mx-2 mix-blend-multiply"
+                    />
+                    documents
+                  </span>
                 </dd.LinkTo>
               {{/if}}
             {{/in-element}}
