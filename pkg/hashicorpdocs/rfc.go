@@ -438,6 +438,8 @@ func buildLabelAndValueString(label string, p *docs.Paragraph) string {
 		for _, e := range p.Elements {
 			if e.TextRun != nil {
 				s += e.TextRun.Content
+			} else if e.Person != nil && e.Person.PersonProperties != nil {
+				s += e.Person.PersonProperties.Email
 			}
 		}
 	}

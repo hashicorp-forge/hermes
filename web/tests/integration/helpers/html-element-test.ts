@@ -8,6 +8,7 @@ module("Integration | Helper | html-element", function (hooks) {
 
   test("it works as expected", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="container"></div>
 
       {{#in-element (html-element ".container")}}

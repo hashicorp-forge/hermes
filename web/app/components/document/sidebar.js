@@ -21,12 +21,12 @@ export default class DocumentSidebar extends Component {
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  @tracked modalErrorIsShown = false;
-  @tracked errorTitle = null;
-  @tracked errorDescription = null;
-
-  get modalContainer() {
-    return document.querySelector(".ember-application");
+  get modalIsActive() {
+    return (
+      this.archiveModalIsActive ||
+      this.deleteModalIsActive ||
+      this.requestReviewModalIsActive
+    );
   }
 
   get isDraft() {
@@ -113,10 +113,6 @@ export default class DocumentSidebar extends Component {
   }
 
   get moveToStatusButtonText() {
-    if (this.changeDocumentStatus.isRunning) {
-      return "Working...";
-    }
-
     return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
@@ -182,6 +178,28 @@ export default class DocumentSidebar extends Component {
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
   }
 
+  @action maybeShowFlashError(error, title) {
+    if (!this.modalIsActive) {
+      this.flashMessages.add({
+        title,
+        message: error.message,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+    }
+  }
+
+  @action showFlashSuccess(title, message) {
+    this.flashMessages.add({
+      message,
+      title,
+      type: "success",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
+  }
+
   @task
   *save(field, val) {
     if (field && val) {
@@ -213,48 +231,35 @@ export default class DocumentSidebar extends Component {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),
       });
-    } catch (err) {
-      this.showModalError("Error updating document", err);
-      throw err;
+    } catch {
+      this.maybeShowFlashError(error, "Unable to save document");
+      throw error;
     }
-
     this.refreshRoute();
   }
 
   @task
   *requestReview() {
-    // Update approvers.
     try {
+      // Update approvers.
       yield this.patchDocument.perform({
         approvers: this.approvers.compact().mapBy("email"),
       });
-    } catch (err) {
-      this.showModalError("Error updating approvers", err);
-      throw err;
-    }
 
-    // Create review.
-    try {
       yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
         method: "POST",
       });
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: "Document review requested",
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+
+      this.showFlashSuccess("Done!", "Document review requested");
 
       this.router.transitionTo({
         queryParams: { draft: false },
       });
-
-      this.requestReviewModalIsActive = false;
-    } catch (err) {
-      this.showModalError("Error creating review", err);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to request review");
+      throw error;
     }
+    this.requestReviewModalIsActive = false;
     this.refreshRoute();
   }
 
@@ -262,8 +267,9 @@ export default class DocumentSidebar extends Component {
   *deleteDraft() {
     try {
       yield this.args.deleteDraft.perform(this.docID);
-    } catch (err) {
-      this.showModalError("Error deleting draft", err);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to delete draft");
+      throw error;
     }
   }
 
@@ -289,23 +295,14 @@ export default class DocumentSidebar extends Component {
 
   @action closeDeleteModal() {
     this.deleteModalIsActive = false;
-    this.resetModalErrors();
   }
 
   @action closeRequestReviewModal() {
     this.requestReviewModalIsActive = false;
-    this.resetModalErrors();
   }
 
   @action closeArchiveModal() {
     this.archiveModalIsActive = false;
-    this.resetModalErrors();
-  }
-
-  @action resetModalErrors() {
-    this.modalErrorIsShown = false;
-    this.errorTitle = null;
-    this.errorDescription = null;
   }
 
   @action onScroll() {
@@ -321,30 +318,23 @@ export default class DocumentSidebar extends Component {
   }
 
   @task
-  *approve(approver) {
+  *approve() {
     try {
       yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: "Document approved",
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
-    } catch (err) {
-      this.showModalError("Error approving document", err);
+      this.showFlashSuccess("Done!", "Document approved");
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to approve");
+      throw error;
     }
 
     this.refreshRoute();
   }
 
   @task
-  *requestChanges(approver) {
+  *requestChanges() {
     try {
       yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "DELETE",
@@ -356,17 +346,11 @@ export default class DocumentSidebar extends Component {
       if (this.args.document.docType === "FRD") {
         msg = "Document marked as not approved";
       }
-      this.flashMessages.add({
-        message: msg,
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
-    } catch (err) {
-      this.showModalError("Error requesting changes of document", err);
+      this.showFlashSuccess("Done!", msg);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Change request failed");
+      throw error;
     }
-
     this.refreshRoute();
   }
 
@@ -376,28 +360,11 @@ export default class DocumentSidebar extends Component {
       yield this.patchDocument.perform({
         status: status,
       });
-
-      // Add a notification for the user
-      this.flashMessages.add({
-        message: `Document status changed to "${status}"`,
-        title: "Done!",
-        type: "success",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
-
-      this.archiveModalIsActive = false;
-    } catch (err) {
-      this.showModalError(`Error marking document status as ${status}`, err);
-      throw err;
+      this.showFlashSuccess("Done!", `Document status changed to "${status}"`);
+    } catch (error) {
+      this.maybeShowFlashError(error, "Unable to change document status");
+      throw error;
     }
-
     this.refreshRoute();
-  }
-
-  showModalError(errMsg, error) {
-    this.modalErrorIsShown = true;
-    this.errorTitle = errMsg;
-    this.errorDescription = error;
   }
 }

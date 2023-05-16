@@ -23,6 +23,7 @@ module("Integration | Modifier | it dismisses as expected", function (hooks) {
     });
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div {{dismissible dismiss=this.dismiss related=this.related}}>
         Dismiss me
       </div>
@@ -64,6 +65,7 @@ module("Integration | Modifier | it dismisses as expected", function (hooks) {
     this.set("inputValue", "");
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <input
         type="search"
         value={{this.inputValue}}

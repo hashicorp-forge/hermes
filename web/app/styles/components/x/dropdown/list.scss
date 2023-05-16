@@ -1,0 +1,27 @@
+.x-dropdown-list {
+  @apply max-h-[410px];
+
+  &.hds-dropdown__content {
+    @apply min-w-[175px];
+  }
+}
+
+.x-dropdown-list-container {
+  @apply flex flex-col overflow-hidden;
+}
+
+.x-dropdown-list-input-container {
+  @apply relative p-1 border-b border-b-color-border-faint;
+}
+
+.x-dropdown-list-scroll-container {
+  @apply overflow-auto w-full relative rounded-b-md;
+}
+
+.x-dropdown-list-empty-state {
+  @apply p-12 text-center text-color-foreground-faint;
+}
+
+.x-dropdown-list-items {
+  @apply pt-1 pb-1.5;
+}

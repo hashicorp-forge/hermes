@@ -1,0 +1,13 @@
+<Action
+  {{did-insert @registerElement}}
+  {{on "mouseenter" @focusMouseTarget}}
+  {{on "click" @onClick}}
+  role={{@role}}
+  aria-selected={{@isAriaSelected}}
+  aria-checked={{@isAriaChecked}}
+  tabindex="-1"
+  class="x-dropdown-list-item-link {{if @isAriaSelected 'is-aria-selected'}}"
+  ...attributes
+>
+  {{yield}}
+</Action>

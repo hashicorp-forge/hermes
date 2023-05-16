@@ -1,0 +1,36 @@
+{{! Listen for ArrowUp/ArrowDown/Enter }}
+{{on-document "keydown" this.maybeKeyboardNavigate}}
+
+{{#if this.noMatchesFound}}
+  <div class="x-dropdown-list-empty-state" data-test-dropdown-list-empty-state>
+    No matches
+  </div>
+{{else}}
+  {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
+    <MaybeOrderedList
+      data-test-x-dropdown-list
+      id="x-dropdown-list-items-{{@contentID}}"
+      class="x-dropdown-list-items"
+      role={{if this.args.inputIsShown "listbox" "menu"}}
+      aria-activedescendant={{this.ariaActiveDescendant}}
+    >
+      {{#if @shownItems}}
+        {{#each-in @shownItems as |item attrs|}}
+          <X::DropdownList::Item
+            @value={{item}}
+            @attributes={{attrs}}
+            @selected={{eq @selected item}}
+            @focusedItemIndex={{@focusedItemIndex}}
+            @listItemRole={{@listItemRole}}
+            @hideDropdown={{@hideContent}}
+            @onItemClick={{@onItemClick}}
+            @setFocusedItemIndex={{@setFocusedItemIndex}}
+            as |i|
+          >
+            {{yield i to="item"}}
+          </X::DropdownList::Item>
+        {{/each-in}}
+      {{/if}}
+    </MaybeOrderedList>
+  {{/let}}
+{{/if}}

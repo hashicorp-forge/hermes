@@ -1,0 +1,16 @@
+<Hds::Button
+  data-test-x-dropdown-list-toggle-button
+  {{did-insert @registerAnchor}}
+  {{on "keydown" @onTriggerKeydown}}
+  {{on "click" @toggleContent}}
+  @icon={{if @contentIsShown "chevron-up" "chevron-down"}}
+  @iconPosition="trailing"
+  @color={{@color}}
+  @text={{@text}}
+  data-test-facet-dropdown-trigger={{@text}}
+  disabled={{@disabled}}
+  aria-controls={{@ariaControls}}
+  aria-expanded={{@contentIsShown}}
+  aria-haspopup="listbox"
+  ...attributes
+/>

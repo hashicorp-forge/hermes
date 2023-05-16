@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 {{#maybe-in-element
   (html-element ".ember-application")
   (not @renderOut)
@@ -7,6 +8,7 @@
     {{will-destroy this.cleanup}}
     {{did-insert this.didInsert}}
     data-test-floating-ui-placement={{@placement}}
+    data-anchored-to={{@id}}
     id="floating-ui-content-{{@id}}"
     class="hermes-floating-ui-content"
     ...attributes

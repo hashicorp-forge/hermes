@@ -17,6 +17,7 @@ module("Integration | Component | modals/doc-created", function (hooks) {
     });
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       {{#if this.isShown}}
       <Modals::DocCreated
         @close={{this.close}}
@@ -51,6 +52,7 @@ module("Integration | Component | modals/doc-created", function (hooks) {
     window.localStorage.setItem("docCreatedModalIsHidden", "true");
 
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <Modals::DocCreated
         @close={{this.close}}
       />
