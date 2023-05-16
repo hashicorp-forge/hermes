@@ -373,6 +373,27 @@
                 best results</div>
             </div>
           </div>
+        {{else if this.docIsUneditable}}
+          <div class="px-3 -mb-1">
+            <div class="w-full pt-3.5 border-t border-color-border-primary">
+              <div class="text-body-200 text-color-foreground-faint">
+                <h5
+                  class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
+                >
+                  Editing is locked
+                  <FlightIcon
+                    @name="lock"
+                    class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
+                  />
+                </h5>
+                <p class="mb-1.5">
+                  Weʼre unable to parse this document for editing.
+                </p>
+              </div>
+              <div class="text-[12px] opacity-60 italic">Create docs in-app for
+                best results</div>
+            </div>
+          </div>
         {{else}}
           {{#if this.isDraft}}
             {{#if this.isOwner}}

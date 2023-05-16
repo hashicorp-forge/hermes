@@ -50,6 +50,10 @@ export default class DocumentSidebar extends Component {
   @tracked userHasScrolled = false;
   @tracked body = null;
 
+  get docIsUneditable() {
+    return true;
+  }
+
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
     for (const field in customEditableFields) {
