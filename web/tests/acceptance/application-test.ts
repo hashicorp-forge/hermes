@@ -90,7 +90,6 @@ module("Acceptance | application", function (hooks) {
 
   test("the reauthenticate button works as expected (success)", async function (this: ApplicationTestContext, assert) {
     let authCount = 0;
-
     await authenticateSession({});
 
     this.session.authenticate = async () => {
@@ -101,12 +100,14 @@ module("Acceptance | application", function (hooks) {
     const successSelector = "[data-test-flash-notification-type='success']";
 
     await visit("/");
+
     await invalidateSession();
 
     await waitFor(warningSelector);
 
     await click("[data-test-flash-notification-button]");
     await waitFor(successSelector);
+
 
     assert
       .dom(warningSelector)
@@ -122,7 +123,7 @@ module("Acceptance | application", function (hooks) {
 
     assert
       .dom(`${successSelector} [data-test-flash-notification-description]`)
-      .hasText("Welcome back, Test User!");
+      .hasText("Welcome back, Test!");
 
     assert.equal(authCount, 1, "session.authenticate() was called");
 

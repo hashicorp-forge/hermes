@@ -11,6 +11,7 @@ import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 import AuthenticatedUserService from "./authenticated-user";
 import { capitalize } from "@ember/string";
+import FlashObject from "ember-cli-flash/flash/object";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -37,26 +38,34 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * user requires authentication with EmberSimpleAuth.
    */
   @tracked tokenIsValid = true;
-
-  /**
-   * Whether the reauthentication message is shown.
-   * Dictates if we poll the back end for a 401.
-   * Set true when the user's session has expired.
-   * Set false when the user successfully reauthenticates.
-   */
-  @tracked reauthenticationMessageIsShown = false;
-
   /**
    * Whether the service should show a reauthentication message.
    * True when the user has dismissed a previous re-auth message.
    */
-  @tracked preventReauthenticationMessage = false;
+  @tracked preventReauthMessage = false;
 
   /**
    * Whether the last poll response was a 401.
    * Updated by the fetch service on every pollCall.
    */
   @tracked pollResponseIs401 = false;
+
+  /**
+   * The flash object for the reauthentication message.
+   * Partly dictates if we poll the back end for a 401.
+   * Removed when the user successfully reauthenticates.
+   */
+  @tracked reauthFlashMessage: FlashObject | null = null;
+
+  /**
+   * Whether the app is configured to skip Google auth.
+   * Dictates reauthButton text and behavior.
+   * Determines whether we poll the back end for a 401
+   * while the reauthentication message is shown.
+   */
+  get isUsingOkta(): boolean {
+    return this.configSvc.config.skip_google_auth;
+  }
 
   /**
    * A persistent task that periodically checks if the user's
@@ -66,8 +75,9 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   pollForExpiredAuth = keepLatestTask(async () => {
     await simpleTimeout(Ember.testing ? 100 : 10000);
 
-    // If the reauth message is shown, do nothing but restart the counter.
-    if (this.reauthenticationMessageIsShown) {
+    // If using Google auth (i.e., Ember Simple Auth) and the reauthentication
+    // message is shown, do nothing but restart the counter.
+    if (!this.isUsingOkta && this.reauthFlashMessage) {
       this.pollForExpiredAuth.perform();
       return;
     }
@@ -76,32 +86,31 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     // On 401, the fetch service will set `this.pollResponseIs401` true.
     await this.fetch.fetch("/api/v1/me", { method: "HEAD" }, true);
 
-    if (!this.configSvc.config.skip_google_auth) {
+    if (this.isUsingOkta) {
+      this.tokenIsValid = !this.pollResponseIs401;
+    } else {
       let isLoggedIn = this.requireAuthentication(null, () => {});
-
       if (this.pollResponseIs401 || !isLoggedIn) {
         this.tokenIsValid = false;
       }
-    } else {
-      this.tokenIsValid = !this.pollResponseIs401;
     }
 
     if (this.tokenIsValid) {
-      this.preventReauthenticationMessage = false;
-    } else if (!this.preventReauthenticationMessage) {
+      this.preventReauthMessage = false;
+
+      if (this.reauthFlashMessage) {
+        this.reauthFlashMessage.destroyMessage();
+      }
+    } else if (!this.preventReauthMessage) {
       this.showReauthMessage(
         "Session expired",
         "Please reauthenticate to keep using Hermes.",
         "warning",
         () => {
-          this.preventReauthenticationMessage = true;
-          this.reauthenticationMessageIsShown = false;
+          this.preventReauthMessage = true;
         }
       );
-
-      // Set this true to prevent additional HEAD requests.
-      // On successful reauth, this will be reset false.
-      this.reauthenticationMessageIsShown = true;
+      return;
     }
 
     // Restart this very task.
@@ -120,24 +129,24 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     type: "warning" | "critical",
     onDestroy?: () => void
   ) {
-    const buttonIcon = this.configSvc.config.skip_google_auth
-      ? "okta"
-      : "google";
+    const buttonIcon = this.isUsingOkta ? "okta" : "google";
 
     const buttonText = `Authenticate with ${capitalize(buttonIcon)}`;
 
-    this.flashMessages.add({
-      title,
-      message,
-      type,
-      sticky: true,
-      destroyOnClick: false,
-      preventDuplicates: true,
-      buttonText,
-      buttonIcon,
-      buttonAction: async () => await this.reauthenticate.perform(),
-      onDestroy,
-    });
+    this.reauthFlashMessage = this.flashMessages
+      .add({
+        title,
+        message,
+        type,
+        sticky: true,
+        destroyOnClick: false,
+        preventDuplicates: true,
+        buttonText,
+        buttonIcon,
+        buttonAction: async () => await this.reauthenticate.perform(),
+        onDestroy,
+      })
+      .getFlashObject();
   }
 
   /**
@@ -148,36 +157,35 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   protected reauthenticate = dropTask(async () => {
     try {
-      if (this.configSvc.config.skip_google_auth) {
+      if (this.isUsingOkta) {
         // Reload to redirect to Okta login.
         window.location.reload();
       } else {
         await this.authenticate("authenticator:torii", "google-oauth2-bearer");
       }
-
-      this.flashMessages.clearMessages();
+      this.reauthFlashMessage?.destroyMessage();
 
       // Wait a bit to show the success message.
-      await timeout(Ember.testing ? 0 : 1500);
+      await timeout(Ember.testing ? 0 : 1000);
 
       this.flashMessages.add({
         title: "Login successful",
         message: `Welcome back${
-          this.authenticatedUser.info.name
-            ? `, ${this.authenticatedUser.info.name}`
+          this.authenticatedUser.info.given_name
+            ? `, ${this.authenticatedUser.info.given_name}`
             : ""
         }!`,
         type: "success",
-        timeout: 3000,
+        timeout: 1500,
+        extendedTimeout: 1000,
         destroyOnClick: true,
       });
 
       // Reset the local parameters.
-      this.preventReauthenticationMessage = false;
-      this.reauthenticationMessageIsShown = false;
+      this.preventReauthMessage = false;
       this.pollForExpiredAuth.perform();
     } catch (error: unknown) {
-      this.flashMessages.clearMessages();
+      this.reauthFlashMessage?.destroyMessage();
       this.showReauthMessage("Login failed", error as string, "critical");
     }
   });
