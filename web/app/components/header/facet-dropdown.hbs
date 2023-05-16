@@ -1,6 +1,11 @@
 {{! @glint-nocheck: not typesafe yet }}
 
-<X::DropdownList @items={{@facets}} @listIsOrdered={{true}}>
+<X::DropdownList
+  @items={{@facets}}
+  @listIsOrdered={{true}}
+  class="facet-dropdown-popover"
+  ...attributes
+>
   <:anchor as |dd|>
     <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
   </:anchor>

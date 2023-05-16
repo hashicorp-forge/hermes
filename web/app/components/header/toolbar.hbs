@@ -14,12 +14,13 @@
               @label="Type"
               @facets={{@facets.docType}}
               @disabled={{not @facets.docType}}
+              class=""
             />
             <Header::FacetDropdown
-              data-test-facet-dropdown="status"
               @label="Status"
               @facets={{this.statuses}}
               @disabled={{not this.statuses}}
+              class="medium"
             />
             <Header::FacetDropdown
               @label="Product/Area"
