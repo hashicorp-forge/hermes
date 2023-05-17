@@ -50,8 +50,9 @@ export default class DocumentSidebar extends Component {
   @tracked userHasScrolled = false;
   @tracked body = null;
 
-  get docIsUneditable() {
-    return true;
+  get docStateIsBad() {
+    // TODO: Need a criteria for when a document is uneditable.
+    return false;
   }
 
   get customEditableFields() {

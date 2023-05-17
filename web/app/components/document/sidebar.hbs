@@ -351,47 +351,48 @@
     </div> --}}
 
     {{#if this.userHasEditPrivileges}}
-      <div class="sidebar-footer">
-        {{#if (not @document.appCreated)}}
+      <div
+        class="sidebar-footer
+          {{if (or (not @document.appCreated) this.docStateIsBad) 'locked'}}"
+      >
+        {{#if (or (not @document.appCreated) this.docStateIsBad)}}
           <div class="px-3 -mb-1">
             <div class="w-full pt-3.5 border-t border-color-border-primary">
               <div class="text-body-200 text-color-foreground-faint">
                 <h5
                   class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
                 >
-                  Read-only headers
+                  {{if
+                    this.docStateIsBad
+                    "Editing is locked"
+                    "Read-only headers"
+                  }}
                   <FlightIcon
                     @name="lock"
                     class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
                   />
                 </h5>
                 <p class="mb-1.5">
-                  Weʼre unable to edit the metadata of files created offsite.
+                  {{if
+                    this.docStateIsBad
+                    "Weʼre sorry; a bug is preventing us from editing this document."
+                    "Weʼre unable to edit the metadata of files created offsite."
+                  }}
                 </p>
               </div>
-              <div class="text-[12px] opacity-60 italic">Create docs in-app for
-                best results</div>
-            </div>
-          </div>
-        {{else if this.docIsUneditable}}
-          <div class="px-3 -mb-1">
-            <div class="w-full pt-3.5 border-t border-color-border-primary">
-              <div class="text-body-200 text-color-foreground-faint">
-                <h5
-                  class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
-                >
-                  Editing is locked
-                  <FlightIcon
-                    @name="lock"
-                    class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
-                  />
-                </h5>
-                <p class="mb-1.5">
-                  Weʼre unable to parse this document for editing.
-                </p>
-              </div>
-              <div class="text-[12px] opacity-60 italic">Create docs in-app for
-                best results</div>
+              {{#if this.docStateIsBad}}
+                <Hds::Link::Standalone
+                  @icon="arrow-right"
+                  @iconPosition="trailing"
+                  @text="See issues on GitHub"
+                  @size="small"
+                  @href="https://github.com/hashicorp-forge/hermes/issues"
+                />
+              {{else}}
+                <div class="text-body-100 text-color-foreground-faint">
+                  Create docs in-app for best results.
+                </div>
+              {{/if}}
             </div>
           </div>
         {{else}}
