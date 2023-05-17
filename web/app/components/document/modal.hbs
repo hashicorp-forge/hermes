@@ -1,3 +1,4 @@
+{{! @glint-nocheck - not typesafe yet }}
 <Hds::Modal
   @color={{@color}}
   @onClose={{@close}}
@@ -22,23 +23,31 @@
       />
     {{/if}}
   </M.Body>
-  <M.Footer as |F|>
-    <Hds::ButtonSet>
-      <Hds::Button
-        data-test-document-modal-primary-button
-        @text={{if this.taskIsRunning @taskButtonLoadingText @taskButtonText}}
-        @color={{@color}}
-        @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
-        disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
-        {{on "click" (perform this.task)}}
-      />
-      <Hds::Button
-        data-test-document-modal-secondary-button
-        @text="Cancel"
-        @color="secondary"
-        disabled={{this.taskIsRunning}}
-        {{on "click" F.close}}
-      />
-    </Hds::ButtonSet>
-  </M.Footer>
+  {{#unless (and @hideFooterWhileSaving this.taskIsRunning)}}
+    <M.Footer data-test-document-modal-footer as |F|>
+      <Hds::ButtonSet>
+        <Hds::Button
+          data-test-document-modal-primary-button
+          @text={{if this.taskIsRunning @taskButtonLoadingText @taskButtonText}}
+          @color={{@color}}
+          @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
+          disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
+          {{on "click" (perform this.task)}}
+        />
+        {{#if (and this.taskIsRunning @savingMessage)}}
+          <span class="text-body-100">
+            {{@savingMessage}}
+          </span>
+        {{else}}
+          <Hds::Button
+            data-test-document-modal-secondary-button
+            @text="Cancel"
+            @color="secondary"
+            disabled={{this.taskIsRunning}}
+            {{on "click" F.close}}
+          />
+        {{/if}}
+      </Hds::ButtonSet>
+    </M.Footer>
+  {{/unless}}
 </Hds::Modal>

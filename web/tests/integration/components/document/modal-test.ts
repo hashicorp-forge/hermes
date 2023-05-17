@@ -1,22 +1,29 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, find, render, waitFor, waitUntil } from "@ember/test-helpers";
+import {
+  TestContext,
+  click,
+  find,
+  render,
+  waitFor,
+  waitUntil,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { assert as emberAssert } from "@ember/debug";
 
-const FACETS = {
-  one: {},
-  two: {},
-  three: {},
-  four: {},
-  five: {},
-  six: {},
-  seven: {},
-  eight: {},
-  nine: {},
-  ten: {},
-  eleven: {},
-};
+interface DocumentModalTestContext extends TestContext {
+  color?: string;
+  headerText: string;
+  errorTitle: string;
+  bodyText?: string;
+  taskButtonText: string;
+  taskButtonLoadingText: string;
+  taskButtonIcon?: string;
+  taskButtonIsDisabled?: boolean;
+  hideFooterWhileSaving?: boolean;
+  close: () => void;
+  task: () => Promise<void>;
+}
 
 const NOOP = () => {};
 
@@ -35,8 +42,8 @@ module("Integration | Component | document/modal", function (hooks) {
     });
   });
 
-  test("it renders correctly", async function (assert) {
-    await render(hbs`
+  test("it renders correctly", async function (this: DocumentModalTestContext, assert) {
+    await render<DocumentModalTestContext>(hbs`
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
@@ -99,7 +106,7 @@ module("Integration | Component | document/modal", function (hooks) {
   });
 
   test("it yields a body block with a taskIsRunning property", async function (assert) {
-    await render(hbs`
+    await render<DocumentModalTestContext>(hbs`
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
@@ -113,6 +120,7 @@ module("Integration | Component | document/modal", function (hooks) {
       >
         <:default as |modal|>
           <div data-test-body-block>
+            {{! @glint-ignore - blocks not yet typed}}
             {{#if modal.taskIsRunning}}
               <span>running</span>
             {{else}}
@@ -138,7 +146,7 @@ module("Integration | Component | document/modal", function (hooks) {
   });
 
   test("it shows a loading state when the primary task is running", async function (assert) {
-    await render(hbs`
+    await render<DocumentModalTestContext>(hbs`
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
@@ -169,7 +177,7 @@ module("Integration | Component | document/modal", function (hooks) {
   });
 
   test("the task button can be disabled by the parent component", async function (assert) {
-    await render(hbs`
+    await render<DocumentModalTestContext>(hbs`
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
@@ -193,7 +201,7 @@ module("Integration | Component | document/modal", function (hooks) {
     let count = 0;
     this.set("close", () => count++);
 
-    await render(hbs`
+    await render<DocumentModalTestContext>(hbs`
       <Document::Modal
         @color="critical"
         @headerText={{this.headerText}}
@@ -211,5 +219,31 @@ module("Integration | Component | document/modal", function (hooks) {
     await waitUntil(() => count === 1);
 
     assert.equal(count, 1);
+  });
+
+  test("the footer can be hidden while saving", async function (assert) {
+    await render<DocumentModalTestContext>(hbs`
+      <Document::Modal
+        @headerText={{this.headerText}}
+        @errorTitle={{this.errorTitle}}
+        @taskButtonText={{this.taskButtonText}}
+        @taskButtonLoadingText={{this.taskButtonLoadingText}}
+        @hideFooterWhileSaving={{true}}
+        @close={{this.close}}
+        @task={{this.task}}
+      />
+    `);
+
+    assert.dom("[data-test-document-modal-footer]").exists();
+
+    const clickPromise = click("[data-test-document-modal-primary-button]");
+
+    await waitUntil(() => {
+      return find("[data-test-document-modal-footer]") === null;
+    });
+
+    assert.dom("[data-test-document-modal-footer]").doesNotExist();
+
+    await clickPromise;
   });
 });
