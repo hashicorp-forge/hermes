@@ -3,6 +3,7 @@
   {{#each this.flashMessages.queue as |flash|}}
     <FlashMessage
       data-test-flash-notification
+      data-test-flash-notification-type={{flash.type}}
       @flash={{flash}}
       class="notification"
       as |component flash close|
