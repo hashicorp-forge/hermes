@@ -27,6 +27,13 @@ export enum FacetName {
   Product = "product",
 }
 
+export interface SortByFacets {
+  [name: string]: {
+    count: number;
+    selected: boolean;
+  };
+}
+
 export type ActiveFilters = {
   [name in FacetName]: string[];
 };
@@ -117,7 +124,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  get sortByFacets() {
+  get sortByFacets(): SortByFacets {
     return {
       Newest: {
         count: 0,
