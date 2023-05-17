@@ -1,9 +1,8 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, find, findAll, render } from "@ember/test-helpers";
+import { click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownObjects } from "hermes/types/facets";
-import RouterService from "@ember/routing/router-service";
 import { SortByLabel } from "hermes/components/header/toolbar";
 
 const FACETS = {
@@ -48,27 +47,28 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.dom(".facets").exists();
     assert
-      .dom("[data-test-facet-dropdown='sort']")
+      .dom("[data-test-header-sort-dropdown-trigger]")
       .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
     assert
       .dom(".facets [data-test-facet-dropdown-trigger]")
       .exists({ count: 4 });
     assert
-      .dom('[data-test-facet-dropdown="sort"]')
+      .dom("[data-test-header-sort-dropdown-trigger]")
       .exists({ count: 1 })
       .hasText(`Sort: ${SortByLabel.Newest}`);
 
-    await click(
-      `[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`
-    );
+    await click(`[data-test-header-sort-dropdown-trigger]`);
+
     assert
-      .dom("[data-test-facet-dropdown-menu-item]:nth-child(2)")
+      .dom(
+        "[data-test-header-sort-by-dropdown] .x-dropdown-list-item:nth-child(2)"
+      )
       .hasText("Oldest");
 
     this.set("sortControlIsHidden", true);
     assert
-      .dom(".sort-by-dropdown")
+      .dom("[data-test-header-sort-by-dropdown]")
       .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
   });
 
@@ -101,9 +101,9 @@ module("Integration | Component | header/toolbar", function (hooks) {
     await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(
-        "[data-test-facet-dropdown-menu-item] [data-test-facet-dropdown-list-item-value]"
-      )?.map((el) => el.textContent?.trim()),
+      findAll(".x-dropdown-list-item-value")?.map((el) =>
+        el.textContent?.trim()
+      ),
       ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
       "Unsupported statuses are filtered out"
     );
@@ -128,12 +128,12 @@ module("Integration | Component | header/toolbar", function (hooks) {
     `);
 
     assert
-      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
+      .dom(`[data-test-header-sort-dropdown-trigger]`)
       .doesNotHaveAttribute("disabled");
-    this.set("facets", {});
 
+    this.set("facets", {});
     assert
-      .dom(`[data-test-facet-dropdown-trigger='Sort: ${SortByLabel.Newest}']`)
+      .dom(`[data-test-header-sort-dropdown-trigger]`)
       .hasAttribute("disabled");
   });
 
