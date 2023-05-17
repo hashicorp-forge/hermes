@@ -17,7 +17,6 @@ interface PeopleSelectComponentSignature {
     selected: HermesUser[];
     onBlur?: () => void;
     onChange: (people: GoogleUser[]) => void;
-    onNewProductClick?: () => void;
   };
 }
 
@@ -77,19 +76,17 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         const peopleJson = await response?.json();
 
         if (peopleJson) {
-          this.people = peopleJson
-            .map((p: GoogleUser) => {
-              return {
-                email: p.emailAddresses[0]?.value,
-                imgURL: p.photos?.[0]?.url,
-              };
-            })
-            .filter((person: HermesUser) => {
-              // filter out any people already selected
-              return !this.args.selected.find(
-                (selectedPerson) => selectedPerson.email === person.email
-              );
-            });
+          this.people = peopleJson.map((p: GoogleUser) => {
+            return {
+              email: p.emailAddresses[0]?.value,
+              imgURL: p.photos?.[0]?.url,
+            };
+          }).filter((person: HermesUser) => {
+            // filter out any people already selected
+            return !this.args.selected.find(
+              (selectedPerson) => selectedPerson.email === person.email
+            );
+          });
         } else {
           this.people = [];
         }
