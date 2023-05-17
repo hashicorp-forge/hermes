@@ -13,12 +13,16 @@ interface DocumentModalComponentSignature {
     taskButtonLoadingText: string;
     taskButtonIcon?: string;
     taskButtonIsDisabled?: boolean;
+    hideFooterWhileSaving?: boolean;
     close: () => void;
     task: () => Promise<void>;
   };
+  Blocks: {
+    default: [taskIsRunning: boolean];
+  };
 }
 
-export default class DocumentModalsArchiveComponent extends Component<DocumentModalComponentSignature> {
+export default class DocumentModalComponent extends Component<DocumentModalComponentSignature> {
   @tracked taskIsRunning = false;
 
   @tracked protected errorIsShown = false;
@@ -47,4 +51,10 @@ export default class DocumentModalsArchiveComponent extends Component<DocumentMo
       this.showError(this.args.errorTitle, error);
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Document::Modal": typeof DocumentModalComponent;
+  }
 }
