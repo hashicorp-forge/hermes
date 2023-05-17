@@ -40,7 +40,10 @@
                 (is-empty @document.docType)
               }}{{@document.docType}}{{/unless}}
               &bullet;
-              {{@document.docNumber}}</small>
+              <span data-test-sidebar-doc-number>
+                {{@document.docNumber}}
+              </span>
+            </small>
           {{/if}}
           {{#if this.editingIsDisabled}}
             <h1

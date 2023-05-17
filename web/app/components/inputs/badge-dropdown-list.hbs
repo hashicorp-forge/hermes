@@ -13,11 +13,13 @@
           <FlightIcon @name="loading" />
         </div>
       {{/if}}
-      <dd.ToggleAction class="relative {{if @isSaving 'opacity-50'}}">
+      <dd.ToggleAction
+        data-test-badge-dropdown-trigger
+        class="relative {{if @isSaving 'opacity-50'}}"
+      >
         {{! @glint-ignore - not registered yet }}
         <Hds::Badge
           class="hds-badge-dropdown"
-          {{! @glint-ignore - not registered yet }}
           @text={{or @selected "--"}}
           {{! @glint-ignore - not registered yet }}
           @icon={{if @selected (or (get-product-id @selected) "folder")}}
