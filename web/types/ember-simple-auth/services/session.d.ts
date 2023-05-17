@@ -18,8 +18,8 @@ declare module "ember-simple-auth/services/session" {
   export default class EmberSimpleAuthSessionService extends Service {
     data: Data;
     setup(): Promise<void>;
-    authenticate(...args: any[]): RSVP.Promise;
-    invalidate(...args: any): RSVP.Promise;
+    authenticate(authenticator: string, ...args: unknown[]): Promise<void>;
+    invalidate(...args: unknown[]): Promise<unknown>;
     requireAuthentication(
       transition: Transition | null,
       routeOrCallback: string | Callback
