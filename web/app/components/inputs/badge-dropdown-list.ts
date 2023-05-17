@@ -8,7 +8,7 @@ interface InputsBadgeDropdownListComponentSignature {
     selected?: any;
     listIsOrdered?: boolean;
     isSaving?: boolean;
-    onItemClick: (e: Event) => void;
+    onItemClick: ((e: Event) => void) | ((e: string) => void);
     placement?: Placement;
   };
   Blocks: {

@@ -89,6 +89,7 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      * Done so we don't interfere with Ember's <LinkTo> handling.
      */
     next(() => {
+      console.log('uh');
       this.args.hideDropdown();
     });
   }

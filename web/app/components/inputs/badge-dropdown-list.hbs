@@ -10,7 +10,10 @@
       {{#if @isSaving}}
         <div class="absolute right-0 top-1/2 -translate-y-1/2">
           {{! @glint-ignore - not registered yet }}
-          <FlightIcon @name="loading" />
+          <FlightIcon
+            data-test-badge-dropdown-list-saving-icon
+            @name="loading"
+          />
         </div>
       {{/if}}
       <dd.ToggleAction
@@ -19,6 +22,9 @@
       >
         {{! @glint-ignore - not registered yet }}
         <Hds::Badge
+          data-test-badge-dropdown-list-icon
+          {{! @glint-ignore - not registered yet }}
+          data-test-icon={{if @selected (get-product-id @selected)}}
           class="hds-badge-dropdown"
           @text={{or @selected "--"}}
           {{! @glint-ignore - not registered yet }}
@@ -26,6 +32,8 @@
         />
         {{! @glint-ignore - not registered yet }}
         <FlightIcon
+          data-test-badge-dropdown-list-chevron-icon
+          data-test-chevron-position={{if dd.contentIsShown "up" "down"}}
           class="dropdown-caret"
           @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
         />
@@ -36,7 +44,7 @@
     {{#if (has-block "item")}}
       {{yield dd to="item"}}
     {{else}}
-      <dd.Action>
+      <dd.Action data-test-badge-dropdown-list-default-action>
         <X::DropdownList::CheckableItem
           @selected={{dd.selected}}
           @value={{dd.value}}
