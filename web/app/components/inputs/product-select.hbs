@@ -1,4 +1,5 @@
-{{!  https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+{{! @glint-nocheck - not typesafe yet }}
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 
 {{#if this.products}}
   {{#if @formatIsBadge}}
@@ -11,7 +12,16 @@
       @isSaving={{@isSaving}}
       class="w-80"
       ...attributes
-    />
+    >
+      <:item as |dd|>
+        <dd.Action>
+          <Inputs::ProductSelect::Item
+            @product={{dd.value}}
+            @selected={{dd.selected}}
+          />
+        </dd.Action>
+      </:item>
+    </Inputs::BadgeDropdownList>
   {{else}}
     <X::DropdownList
       @items={{this.products}}
@@ -43,18 +53,12 @@
         </dd.ToggleAction>
       </:anchor>
       <:item as |dd|>
-        <dd.Action class="relative">
-          <FlightIcon @name={{or (get-product-id dd.value) "folder"}} />
-          <span class="flex ml-2.5 leading-none">{{dd.value}}</span>
-          <span class="opacity-50 inline-flex ml-2 text-body-100 leading-none">
-            {{dd.attrs.abbreviation}}
-          </span>
-          {{#if dd.selected}}
-            <FlightIcon
-              @name="check"
-              class="absolute right-5 text-color-foreground-action top-1/2 -translate-y-1/2"
-            />
-          {{/if}}
+        <dd.Action>
+          <Inputs::ProductSelect::Item
+            @product={{dd.value}}
+            @selected={{dd.selected}}
+            @abbreviation={{dd.attrs.abbreviation}}
+          />
         </dd.Action>
       </:item>
     </X::DropdownList>

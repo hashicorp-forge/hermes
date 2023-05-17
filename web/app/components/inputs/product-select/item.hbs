@@ -1,0 +1,19 @@
+<div class="relative flex w-full product-select-item">
+  {{!  @glint-ignore - not yet registered }}
+  <FlightIcon @name={{or (get-product-id @product) "folder"}} />
+  <span class="flex ml-2.5 leading-none">
+    {{@product}}
+  </span>
+  {{#if @abbreviation}}
+    <span class="opacity-50 inline-flex ml-2 text-body-100 leading-none">
+      {{@abbreviation}}
+    </span>
+  {{/if}}
+  {{#if @selected}}
+    {{!  @glint-ignore - not yet registered }}
+    <FlightIcon
+      @name="check"
+      class="check absolute right-0 top-1/2 -translate-y-1/2"
+    />
+  {{/if}}
+</div>

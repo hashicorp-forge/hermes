@@ -49,6 +49,12 @@ export default class DocumentSidebar extends Component {
   @tracked userHasScrolled = false;
   @tracked body = null;
 
+  @tracked _newProduct = null;
+
+  get selectedProductArea() {
+    return this._newProduct || this.args.document.product;
+  }
+
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
     for (const field in customEditableFields) {
@@ -178,6 +184,7 @@ export default class DocumentSidebar extends Component {
   }
 
   @action updateProduct(product) {
+    this._newProduct = product;
     this.product = product;
     this.save.perform("product", this.product);
   }
@@ -221,6 +228,9 @@ export default class DocumentSidebar extends Component {
       } catch (err) {
         // revert field value on failure
         this[field] = oldVal;
+        if (field === "product") {
+          this._newProduct = null;
+        }
       }
     }
   }

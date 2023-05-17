@@ -7,7 +7,8 @@ import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 
-interface XDropdownListComponentSignature<T> {
+interface XDropdownListComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     selected: any;
     items?: any;
@@ -23,9 +24,7 @@ export enum FocusDirection {
   Last = "last",
 }
 
-export default class XDropdownListComponent extends Component<
-  XDropdownListComponentSignature<any>
-> {
+export default class XDropdownListComponent extends Component<XDropdownListComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked private _scrollContainer: HTMLElement | null = null;

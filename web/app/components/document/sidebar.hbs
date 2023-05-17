@@ -12,9 +12,13 @@
       {{on "scroll" this.onScroll}}
       {{did-insert this.registerBody}}
     >
-      {{#let (get-product-id @document.product) as |productIcon|}}
+      {{#let (get-product-id this.selectedProductArea) as |productIcon|}}
         {{#if productIcon}}
-          <div class="product-badge {{productIcon}}">
+          <div
+            class="product-badge
+              {{productIcon}}
+              {{if this.save.isRunning 'opacity-50'}}"
+          >
             <FlightIcon @name={{productIcon}} />
           </div>
         {{/if}}
@@ -132,7 +136,7 @@
           {{#if this.isDraft}}
             <div class="w-full relative">
               <Inputs::ProductSelect
-                @selected={{@document.product}}
+                @selected={{this.selectedProductArea}}
                 @onChange={{this.updateProduct}}
                 @isSaving={{this.save.isRunning}}
                 @formatIsBadge={{true}}

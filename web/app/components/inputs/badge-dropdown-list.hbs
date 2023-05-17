@@ -1,3 +1,4 @@
+{{! @glint-nocheck - not typesafe yet }}
 <X::DropdownList
   @items={{@items}}
   @listIsOrdered={{@listIsOrdered}}
@@ -26,11 +27,15 @@
     </div>
   </:anchor>
   <:item as |dd|>
-    <dd.Action>
-      <X::DropdownList::CheckableItem
-        @selected={{dd.selected}}
-        @value={{dd.value}}
-      />
-    </dd.Action>
+    {{#if (has-block "item")}}
+      {{yield dd to="item"}}
+    {{else}}
+      <dd.Action>
+        <X::DropdownList::CheckableItem
+          @selected={{dd.selected}}
+          @value={{dd.value}}
+        />
+      </dd.Action>
+    {{/if}}
   </:item>
 </X::DropdownList>
