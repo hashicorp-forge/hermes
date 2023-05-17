@@ -16,10 +16,10 @@
               @disabled={{not @facets.docType}}
             />
             <Header::FacetDropdown
-              data-test-facet-dropdown="status"
               @label="Status"
               @facets={{this.statuses}}
               @disabled={{not this.statuses}}
+              class="medium"
             />
             <Header::FacetDropdown
               @label="Product/Area"
@@ -34,13 +34,12 @@
           </div>
         </div>
         {{#if (and @facets (not @sortControlIsHidden))}}
-          <Header::FacetDropdown
-            data-test-facet-dropdown="sort"
-            @label="Sort: {{this.getSortByLabel}}"
+          <Header::SortDropdown
+            @label={{this.getSortByLabel}}
             @facets={{this.sortByFacets}}
             @disabled={{this.sortControlIsDisabled}}
-            @anchorToRight={{true}}
             @currentSortByValue={{this.currentSortByValue}}
+            @dropdownPlacement="bottom-end"
           />
         {{/if}}
       </div>

@@ -80,7 +80,7 @@
       {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
-      class="x-dropdown-list-container"
+      class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
       role={{if this.inputIsShown "combobox"}}
     >
       {{#if this.inputIsShown}}
