@@ -1,6 +1,7 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
+import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
@@ -8,11 +9,14 @@ import FetchService from "hermes/services/fetch";
 import { BadgeSize } from "hermes/types/hds-badge";
 
 interface InputsProductSelectSignatureSignature {
+  Element: HTMLDivElement;
   Args: {
     selected?: any;
     onChange: (value: string, abbreviation: string) => void;
     badgeSize?: BadgeSize;
     formatIsBadge?: boolean;
+    placement?: Placement;
+    isSaving?: boolean;
   };
 }
 
@@ -55,4 +59,10 @@ export default class InputsProductSelectSignature extends Component<InputsProduc
       throw err;
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Inputs::ProductSelect": typeof InputsProductSelectSignature;
+  }
 }

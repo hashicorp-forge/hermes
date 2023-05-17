@@ -172,7 +172,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.contributors = contributors;
   }
 
-  @action protected onProductSelect(productName: string, productAbbreviation: string) {
+  @action protected onProductSelect(
+    productName: string,
+    productAbbreviation: string
+  ) {
     this.productArea = productName;
     this.productAbbreviation = productAbbreviation;
   }
@@ -236,4 +239,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       });
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "New::DocForm": typeof NewDocFormComponent;
+  }
 }

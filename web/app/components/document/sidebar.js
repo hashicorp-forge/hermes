@@ -228,9 +228,7 @@ export default class DocumentSidebar extends Component {
       } catch (err) {
         // revert field value on failure
         this[field] = oldVal;
-        if (field === "product") {
-          this._newProduct = null;
-        }
+        this._newProduct = null;
       }
     }
   }

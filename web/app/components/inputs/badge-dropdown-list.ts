@@ -1,12 +1,19 @@
+import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 
 interface InputsBadgeDropdownListComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     items: any;
     selected?: any;
     listIsOrdered?: boolean;
     isSaving?: boolean;
-    onItemClick: () => void;
+    onItemClick: (e: Event) => void;
+    placement?: Placement;
+  };
+  Blocks: {
+    default: [];
+    item: [dd: any];
   };
 }
 

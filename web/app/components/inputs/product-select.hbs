@@ -1,4 +1,3 @@
-{{! @glint-nocheck - not typesafe yet }}
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 
 {{#if this.products}}
@@ -37,8 +36,12 @@
         <dd.ToggleAction
           class="x-dropdown-list-toggle-select w-[200px] relative flex items-center flex-start hds-button leading-none hds-button--color-secondary hds-button--size-medium"
         >
+          {{! @glint-ignore - not registered yet }}
           <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
-          <span class="flex ml-2.5 leading-none">{{or @selected "--"}}</span>
+          <span class="flex ml-2.5 leading-none">
+            {{! @glint-ignore - not registered yet }}
+            {{or @selected "--"}}
+          </span>
           {{#if this.selectedProductAbbreviation}}
             <span
               class="opacity-50 inline-flex ml-2 text-body-100 leading-none"
@@ -46,6 +49,7 @@
               {{this.selectedProductAbbreviation}}
             </span>
           {{/if}}
+          {{! @glint-ignore - not registered yet }}
           <FlightIcon
             @name="caret"
             class="absolute top-1/2 -translate-y-1/2 right-2 text-color-foreground-faint"
@@ -64,10 +68,12 @@
     </X::DropdownList>
   {{/if}}
 {{else if this.fetchProducts.isRunning}}
+  {{! @glint-ignore - not registered yet }}
   <FlightIcon @name="loading" />
 {{else}}
   <div
     class="absolute top-0 left-0"
+    {{! @glint-ignore - not registered yet }}
     {{did-insert (perform this.fetchProducts)}}
   ></div>
 {{/if}}
