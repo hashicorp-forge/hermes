@@ -46,6 +46,24 @@ func ReviewHandler(
 				return
 			}
 
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
+				return
+			}
+
 			// Get base document object from Algolia so we can determine the doc type.
 			baseDocObj := &hcd.BaseDoc{}
 			err = ar.Drafts.GetObject(docID, &baseDocObj)

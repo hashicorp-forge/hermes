@@ -9,6 +9,7 @@ import (
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp/go-hclog"
+	"gorm.io/gorm"
 )
 
 func ApprovalHandler(
@@ -16,7 +17,8 @@ func ApprovalHandler(
 	l hclog.Logger,
 	ar *algolia.Client,
 	aw *algolia.Client,
-	s *gw.Service) http.Handler {
+	s *gw.Service,
+	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -30,6 +32,24 @@ func ApprovalHandler(
 					"path", r.URL.Path,
 				)
 				http.Error(w, "Document ID not found", http.StatusNotFound)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 

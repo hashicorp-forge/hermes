@@ -262,7 +262,7 @@ func (c *Command) Run(args []string) int {
 		{"/1/indexes/",
 			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
 		{"/api/v1/approvals/",
-			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog)},
+			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
 		{"/api/v1/documents/",
 			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
