@@ -512,6 +512,7 @@ func ReviewHandler(
 								DocumentOwner:     docObj.GetOwners()[0],
 								DocumentShortName: docObj.GetDocNumber(),
 								DocumentTitle:     docObj.GetTitle(),
+								DocumentType:      docObj.GetDocType(),
 								DocumentURL:       docURL,
 								Product:           docObj.GetProduct(),
 							},
