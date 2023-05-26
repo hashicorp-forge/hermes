@@ -131,9 +131,11 @@ func (d *Document) Create(db *gorm.DB) error {
 
 // Find finds all documents from database db with the provided query, and
 // assigns them to the receiver.
-func (d *Documents) Find(db *gorm.DB, query string) error {
+func (d *Documents) Find(
+	db *gorm.DB, query interface{}, queryArgs ...interface{}) error {
+
 	return db.
-		Where(query).
+		Where(query, queryArgs...).
 		Preload(clause.Associations).
 		Find(&d).Error
 }
