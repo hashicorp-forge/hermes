@@ -45,6 +45,9 @@ type Document struct {
 	// Imported is true if the document was not created through the application.
 	Imported bool
 
+	// Locked is true if the document cannot be updated (may be in a bad state).
+	Locked bool
+
 	// Owner is the owner of the document.
 	Owner   *User `gorm:"default:null;not null"`
 	OwnerID *uint `gorm:"default:null"`
