@@ -364,7 +364,7 @@
                 >
                   {{if
                     this.docStateIsBad
-                    "Editing is locked"
+                    "Document is locked"
                     "Read-only headers"
                   }}
                   <FlightIcon
@@ -375,7 +375,7 @@
                 <p class="mb-1.5">
                   {{if
                     this.docStateIsBad
-                    "Weʼre sorry; a bug is preventing us from editing this document."
+                    "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
                     "Weʼre unable to edit the metadata of files created offsite."
                   }}
                 </p>
@@ -384,9 +384,9 @@
                 <Hds::Link::Standalone
                   @icon="arrow-right"
                   @iconPosition="trailing"
-                  @text="See issues on GitHub"
+                  @text="See the issue on GitHub"
                   @size="small"
-                  @href="https://github.com/hashicorp-forge/hermes/issues"
+                  @href="https://github.com/hashicorp-forge/hermes/issues/181"
                 />
               {{else}}
                 <div class="text-body-100 text-color-foreground-faint">
