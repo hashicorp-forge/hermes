@@ -235,7 +235,7 @@ export default class DocumentSidebar extends Component {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),
       });
-    } catch {
+    } catch (error) {
       this.maybeShowFlashError(error, "Unable to save document");
       throw error;
     }
