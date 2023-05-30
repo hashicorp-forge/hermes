@@ -29,6 +29,7 @@ type SubscriberDocumentPublishedEmailData struct {
 	DocumentOwner     string
 	DocumentShortName string
 	DocumentTitle     string
+	DocumentType      string
 	DocumentURL       string
 	Product           string
 }
@@ -105,9 +106,11 @@ func SendSubscriberDocumentPublishedEmail(
 	_, err = s.SendEmail(
 		to,
 		from,
-		fmt.Sprintf("New document published for %s: %s",
-			d.Product,
-			d.DocumentShortName),
+		fmt.Sprintf("New %s: [%s] %s",
+			d.DocumentType,
+			d.DocumentShortName,
+			d.DocumentTitle,
+		),
 		body.String(),
 	)
 	return err
