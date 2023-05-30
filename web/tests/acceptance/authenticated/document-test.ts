@@ -39,7 +39,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     const initialProduct = this.server.schema.products.find(2).attrs;
 
     const initialProductName = initialProduct.name;
-    const initialProductAbbreviation = initialProduct.abbreviation;
+    const initialProductAbbreviation = initialProduct.abbreviation + "-001";
 
     const targetProductAbbreviation =
       this.server.schema.products.find(1).attrs.abbreviation;
@@ -53,7 +53,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit(`/document/${docID}?draft=true`);
 
     const docNumberSelector = "[data-test-sidebar-doc-number]";
-    const productSelectSelector = "[data-test-sidebar-product-select]";
+    const productSelectSelector = "[data-test-product-select]";
     const productSelectTriggerSelector = "[data-test-badge-dropdown-trigger]";
     const productSelectDropdownItemSelector =
       "[data-test-product-select-badge-dropdown-item]";
@@ -89,7 +89,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(docNumberSelector)
       .hasText(
-        targetProductAbbreviation,
+        targetProductAbbreviation + "-001",
         "The document is patched with the correct docNumber"
       );
 
@@ -109,7 +109,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1");
 
     assert
-      .dom("[data-test-sidebar-product-select]")
+      .dom("[data-test-product-select]")
       .doesNotExist("published docs don't show a product select element");
   });
 });

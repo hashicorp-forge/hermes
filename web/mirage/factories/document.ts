@@ -1,14 +1,23 @@
 import { Factory } from "miragejs";
 
-export function getTestProductAbbreviation(product: string) {
+export function getTestDocNumber(product: string) {
+  let abbreviation = "";
+
   switch (product) {
     case "Test Product 0":
-      return "TST-0";
+      abbreviation = "TP0";
+      break;
     case "Test Product 1":
-      return "TST-1";
+      abbreviation = "TP1";
+      break;
     case "Test Product 2":
-      return "TST-2";
+      abbreviation = "TP2-001";
+      break;
+    default:
+      abbreviation = "HCP";
+      break;
   }
+  return `${abbreviation}-001`;
 }
 
 export default Factory.extend({
@@ -20,6 +29,6 @@ export default Factory.extend({
   modifiedAgo: 1000000000,
   modifiedTime: 1,
   docNumber() {
-    return getTestProductAbbreviation(this.product);
+    return getTestDocNumber(this.product);
   },
 });

@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import { task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
