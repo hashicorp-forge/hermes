@@ -353,9 +353,9 @@
     {{#if this.userHasEditPrivileges}}
       <div
         class="sidebar-footer
-          {{if (or (not @document.appCreated) this.docStateIsBad) 'locked'}}"
+          {{if this.editingIsDisabled 'locked'}}"
       >
-        {{#if (or (not @document.appCreated) this.docStateIsBad)}}
+        {{#if this.editingIsDisabled}}
           <div class="px-3 -mb-1">
             <div class="w-full pt-3.5 border-t border-color-border-primary">
               <div class="text-body-200 text-color-foreground-faint">
@@ -363,7 +363,7 @@
                   class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
                 >
                   {{if
-                    this.docStateIsBad
+                    this.docIsLocked
                     "Document is locked"
                     "Read-only headers"
                   }}
@@ -374,13 +374,13 @@
                 </h5>
                 <p class="mb-1.5">
                   {{if
-                    this.docStateIsBad
+                    this.docIsLocked
                     "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
                     "Weʼre unable to edit the metadata of files created offsite."
                   }}
                 </p>
               </div>
-              {{#if this.docStateIsBad}}
+              {{#if this.docIsLocked}}
                 <Hds::Link::Standalone
                   @icon="arrow-right"
                   @iconPosition="trailing"

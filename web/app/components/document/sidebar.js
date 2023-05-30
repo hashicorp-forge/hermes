@@ -50,7 +50,7 @@ export default class DocumentSidebar extends Component {
   @tracked userHasScrolled = false;
   @tracked body = null;
 
-  get docStateIsBad() {
+  get docIsLocked() {
     return this.args.document?.locked;
   }
 
@@ -164,8 +164,8 @@ export default class DocumentSidebar extends Component {
   }
 
   get editingIsDisabled() {
-    if (!this.args.document.appCreated || this.docStateIsBad) {
-      // true is the doc wasn't appCreated or is in a bad state
+    if (!this.args.document.appCreated || this.docIsLocked) {
+      // true is the doc wasn't appCreated or is in a locked state
       return true;
     } else if (this.isDraft || this.docIsInReview || this.docIsApproved) {
       // true is the doc is a draft/in review/approved and the user is not an owner, contributor, or approver
