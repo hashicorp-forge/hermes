@@ -1,4 +1,3 @@
-import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
@@ -12,7 +11,7 @@ interface InputsProductSelectSignature {
   Element: HTMLDivElement;
   Args: {
     selected?: any;
-    onChange: (value: string, abbreviation: string) => void;
+    onChange: (value: string) => void;
     badgeSize?: BadgeSize;
     formatIsBadge?: boolean;
     placement?: Placement;
@@ -40,12 +39,7 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
 
   @action onChange(newValue: any) {
     this.selected = newValue;
-    const productAbbreviation = this.products?.[newValue]?.abbreviation;
-    assert(
-      "onChange expects a valid productAbbreviation",
-      typeof productAbbreviation === "string"
-    );
-    this.args.onChange(newValue, productAbbreviation);
+    this.args.onChange(newValue);
   }
 
   protected fetchProducts = task(async () => {
