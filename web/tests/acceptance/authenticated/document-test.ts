@@ -80,7 +80,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       assert.equal(
         option.textContent?.trim(),
         expectedProducts[index],
-        "the product is correct"
+        "the product list item is correct"
       );
     });
 

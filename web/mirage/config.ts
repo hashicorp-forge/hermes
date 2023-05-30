@@ -2,7 +2,7 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
-import { getTestProductAbbreviation } from "./factories/document";
+import { getTestDocNumber } from "./factories/document";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -308,12 +308,11 @@ export default function (mirageConfig) {
         let document = schema.document.findBy({
           objectID: request.params.document_id,
         });
-
         if (document) {
           let attrs = JSON.parse(request.requestBody);
 
           if ("product" in attrs) {
-            attrs.docNumber = getTestProductAbbreviation(attrs.product);
+            attrs.docNumber = getTestDocNumber(attrs.product);
           }
 
           document.update(attrs);

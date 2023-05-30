@@ -11,7 +11,7 @@ export function getTestDocNumber(product: string) {
       abbreviation = "TP1";
       break;
     case "Test Product 2":
-      abbreviation = "TP2-001";
+      abbreviation = "TP2";
       break;
     default:
       abbreviation = "HCP";
