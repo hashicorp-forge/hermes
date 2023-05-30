@@ -3,7 +3,8 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
+import Ember from "ember";
 
 interface XDropdownListItemComponentSignature {
   Args: {
@@ -85,12 +86,22 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     }
 
     /**
-     * Closes the dropdown on the next run loop.
-     * Done so we don't interfere with Ember's <LinkTo> handling.
+     * In production, close the dropdown on the next run loop
+     * so that we don't interfere with Ember's <LinkTo> handling.
+     * This approach causes issues when testing, so we
+     * use `schedule` as an approximation.
+     *
+     * TODO: Improve this.
      */
-    next(() => {
-      this.args.hideDropdown();
-    });
+    if (Ember.testing) {
+      schedule("afterRender", () => {
+        this.args.hideDropdown();
+      });
+    } else {
+      next(() => {
+        this.args.hideDropdown();
+      });
+    }
   }
 
   /**
