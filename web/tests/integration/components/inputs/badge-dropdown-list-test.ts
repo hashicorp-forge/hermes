@@ -107,7 +107,6 @@ module(
         .dom(DEFAULT_ACTION_SELECTOR)
         .doesNotExist("default action is not rendered");
 
-      // assert that the second item is selected
       assert.dom(`${ITEM_SELECTOR}:nth-child(2)`).hasText("Labs (selected)");
     });
   }
