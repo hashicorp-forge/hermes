@@ -51,6 +51,11 @@ export default class DocumentSidebar extends Component {
 
   @tracked _newProduct = null;
 
+  /**
+   * The currently selected product. If the user is saving a new product,
+   * this will be the new product. Otherwise, it will be the product that the
+   * saved document is associated with.
+   */
   get selectedProductArea() {
     return this._newProduct || this.args.document.product;
   }
@@ -183,10 +188,11 @@ export default class DocumentSidebar extends Component {
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
   }
 
-  @action updateProduct(product) {
+  @task({ restartable: true })
+  *updateProduct(product) {
     this._newProduct = product;
     this.product = product;
-    this.save.perform("product", this.product);
+    yield this.save.perform("product", this.product);
   }
 
   @action maybeShowFlashError(error, title) {

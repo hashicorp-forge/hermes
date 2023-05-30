@@ -140,7 +140,7 @@
             <div class="w-full relative">
               <Inputs::ProductSelect
                 @selected={{this.selectedProductArea}}
-                @onChange={{this.updateProduct}}
+                @onChange={{this.updateProduct.perform}}
                 @isSaving={{this.save.isRunning}}
                 @formatIsBadge={{true}}
               />

@@ -8,7 +8,7 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { BadgeSize } from "hermes/types/hds-badge";
 
-interface InputsProductSelectSignatureSignature {
+interface InputsProductSelectSignature {
   Element: HTMLDivElement;
   Args: {
     selected?: any;
@@ -27,7 +27,7 @@ type ProductAreas = {
   };
 };
 
-export default class InputsProductSelectSignature extends Component<InputsProductSelectSignatureSignature> {
+export default class InputsProductSelectComponent extends Component<InputsProductSelectSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked selected = this.args.selected;
@@ -63,6 +63,6 @@ export default class InputsProductSelectSignature extends Component<InputsProduc
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::ProductSelect": typeof InputsProductSelectSignature;
+    "Inputs::ProductSelect": typeof InputsProductSelectComponent;
   }
 }
