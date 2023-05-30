@@ -1,3 +1,4 @@
+{{!  @glint-nocheck - not typesafe yet }}
 <X::DropdownList
   @items={{@items}}
   @listIsOrdered={{@listIsOrdered}}
@@ -9,7 +10,6 @@
     <div class="relative w-full">
       {{#if @isSaving}}
         <div class="absolute right-0 top-1/2 -translate-y-1/2">
-          {{! @glint-ignore - not registered yet }}
           <FlightIcon
             data-test-badge-dropdown-list-saving-icon
             @name="loading"
@@ -20,17 +20,13 @@
         data-test-badge-dropdown-trigger
         class="relative {{if @isSaving 'opacity-50'}}"
       >
-        {{! @glint-ignore - not registered yet }}
         <Hds::Badge
           data-test-badge-dropdown-list-icon
-          {{! @glint-ignore - not registered yet }}
           data-test-icon={{if @selected (get-product-id @selected)}}
           class="hds-badge-dropdown"
           @text={{or @selected "--"}}
-          {{! @glint-ignore - not registered yet }}
           @icon={{if @selected (or (get-product-id @selected) "folder")}}
         />
-        {{! @glint-ignore - not registered yet }}
         <FlightIcon
           data-test-badge-dropdown-list-chevron-icon
           data-test-chevron-position={{if dd.contentIsShown "up" "down"}}

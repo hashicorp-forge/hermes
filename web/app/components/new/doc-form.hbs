@@ -1,6 +1,6 @@
+{{!  @glint-nocheck - not typesafe yet }}
 {{#if this.docIsBeingCreated}}
   <div class="text-center hds-typography-display-400 mt-3">
-    {{! @glint-ignore: not yet registered }}
     <FlightIcon @name="loading" @size="24" />
     <div class="mt-8 text-display-200 font-semibold">
       Creating
@@ -14,7 +14,6 @@
   <form
     class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
     {{on "submit" this.submit}}
-    {{! @glint-ignore: not yet registered }}
     {{did-insert this.registerForm}}
   >
     <div>
@@ -24,7 +23,6 @@
         >Create your {{@docType}}</h1>
       </div>
       <div class="pt-10 space-y-7">
-        {{! @glint-ignore: not yet registered }}
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -41,7 +39,6 @@
         </Hds::Form::TextInput::Field>
 
         <div class="relative">
-          {{! @glint-ignore: not yet registered }}
           <Hds::Form::Textarea::Field
             @value={{this.summary}}
             rows="3"
@@ -67,7 +64,6 @@
           <div class="mb-2">
             <span class="hermes-form-label">
               Product/Area &nbsp;
-              {{! @glint-ignore - not registered yet }}
               <Hds::Badge @size="small" @text="Required" />
             </span>
             <span class="text-body-100 mt-1 hds-form-helper-text">
@@ -118,7 +114,6 @@
           </F.HelperText>
         </Hds::Form::Field> --}}
 
-        {{! @glint-ignore - not registered yet }}
         <Hds::Form::Field @layout="vertical" as |F|>
           {{yield
             (hash
@@ -130,7 +125,6 @@
             )
           }}
           <F.Control>
-            {{! @glint-ignore - not registered yet }}
             <Inputs::PeopleSelect
               class="multiselect mt-2 w-auto"
               @selected={{this.contributors}}
@@ -138,7 +132,6 @@
             />
           </F.Control>
           <F.Label>
-            {{! @glint-ignore - not registered yet }}
             <FlightIcon @name="users" />
             Contributors
           </F.Label>
@@ -157,22 +150,18 @@
     <div>
       <div class="preview-card">
         <h3>
-          {{! @glint-ignore - not registered yet }}
           <FlightIcon @name="eye" />
           Preview
         </h3>
-        {{! @glint-ignore - not registered yet }}
         <Doc::Tile
           @productArea={{this.productArea}}
           @status="draft"
           @title={{this.title}}
           @owner={{this.authenticatedUser.info.email}}
         />
-        {{! @glint-ignore - not registered yet }}
         <Hds::Button
           @text="Create {{@docType}} in Google Drive"
           type="submit"
-          {{! @glint-ignore - not registered yet }}
           disabled={{not this.formRequirementsMet}}
           class="w-full"
         />
