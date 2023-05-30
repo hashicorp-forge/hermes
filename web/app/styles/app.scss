@@ -7,6 +7,7 @@
 @use "components/x-hds-tab";
 @use "components/x/dropdown/list";
 @use "components/x/dropdown/list-item";
+@use "components/x/dropdown/toggle-select";
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
@@ -24,7 +25,6 @@
 @use "components/notification";
 @use "components/sidebar";
 @use "components/hds-badge";
-@use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
 @use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
