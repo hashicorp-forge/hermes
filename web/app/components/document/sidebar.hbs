@@ -215,7 +215,7 @@
                   <ol class="person-list">
                     {{#each this.approvers as |approver|}}
                       <li>
-                        <Person
+                        <Person::Approver
                           @imgURL={{approver.imgURL}}
                           @email={{approver.email}}
                         />
@@ -240,11 +240,7 @@
               <ol class="person-list">
                 {{#each this.approvers as |approver|}}
                   <li>
-                    <Person
-                      @badge={{if
-                        (has-approved-doc @document approver.email)
-                        "approved"
-                      }}
+                    <Person::Approver
                       @imgURL={{approver.imgURL}}
                       @email={{approver.email}}
                     />
