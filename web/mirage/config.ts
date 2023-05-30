@@ -317,7 +317,6 @@ export default function (mirageConfig) {
           }
 
           document.update(attrs);
-
           return new Response(200, {}, document.attrs);
         }
       });

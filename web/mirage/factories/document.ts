@@ -3,9 +3,11 @@ import { Factory } from "miragejs";
 export function getTestProductAbbreviation(product: string) {
   switch (product) {
     case "Test Product 0":
-      return "TST-000";
+      return "TST-0";
     case "Test Product 1":
-      return "TST-001";
+      return "TST-1";
+    case "Test Product 2":
+      return "TST-2";
   }
 }
 
