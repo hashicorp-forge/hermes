@@ -7,6 +7,7 @@ import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { BadgeSize } from "hermes/types/hds-badge";
+import getProductId from "hermes/utils/get-product-id";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
@@ -35,6 +36,14 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   @tracked selected = this.args.selected;
 
   @tracked products: ProductAreas | undefined = undefined;
+
+  get icon(): string {
+    let icon = "folder";
+    if (this.selected && getProductId(this.selected)) {
+      icon = getProductId(this.selected) as string;
+    }
+    return icon;
+  }
 
   get selectedProductAbbreviation(): string | undefined {
     if (!this.selected) {
