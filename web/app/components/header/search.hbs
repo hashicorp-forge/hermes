@@ -71,6 +71,7 @@
             }}
               {{#if (eq dd.value "viewAllResultsObject")}}
                 <dd.LinkTo
+                  data-test-view-all-results-link
                   {{did-insert this.registerViewAllResultsLink}}
                   @route="authenticated.results"
                   @query={{hash q=this.query page=1}}
@@ -82,6 +83,7 @@
                 </dd.LinkTo>
               {{else}}
                 <dd.LinkTo
+                  data-test-product-match-link
                   @route="authenticated.all"
                   @query={{hash product=(array dd.attrs.product) page=1}}
                   class="search-popover-header-link border-t border-t-color-border-primary"
@@ -105,6 +107,7 @@
           {{/unless}}
         {{else}}
           <dd.LinkTo
+            data-test-search-result
             @route="authenticated.document"
             @model={{dd.value}}
             class="flex items-center space-x-3 py-2 px-3 h-20"
@@ -116,6 +119,7 @@
             />
             <div class="flex flex-col space-y-1 overflow-hidden">
               <h4
+                data-test-search-result-title
                 class="text-body-200 font-semibold text-color-foreground-strong truncate"
               >
                 {{dd.attrs.title}}
@@ -123,6 +127,7 @@
 
               {{! @glint-ignore - not yet registered}}
               <Person
+                data-test-search-result-owner
                 @ignoreUnknown={{true}}
                 @imgURL={{get dd.attrs.ownerPhotos 0}}
                 @email={{get dd.attrs.owners 0}}
@@ -131,6 +136,7 @@
               {{#if dd.attrs._snippetResult.content.value}}
                 {{! @glint-ignore - not yet registered}}
                 <Doc::Snippet
+                  data-test-search-result-snippet
                   @snippet={{dd.attrs._snippetResult.content.value}}
                   class="truncate"
                 />

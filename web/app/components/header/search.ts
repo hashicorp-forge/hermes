@@ -95,7 +95,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   }
 
   @action protected onDocumentKeydown(e: KeyboardEvent): void {
-    if (e.metaKey && e.key === "k") {
+    if (e.metaKey && (e.key === "k" || e.key === "K")) {
       e.preventDefault();
       assert("searchInput is expected", this.searchInput);
       this.searchInput.focus();
@@ -159,9 +159,6 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         );
 
         let [productAreas, docs] = algoliaResults;
-
-        console.log("productAreas", productAreas);
-        console.log("docs", docs);
 
         this._bestMatches = docs
           ? (docs.hits.slice(0, 5) as HermesDocument[])

@@ -16,6 +16,14 @@ const KEYBOARD_SHORTCUT_SELECTOR = "[data-test-search-keyboard-shortcut]";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
 const POPOVER_SELECTOR = ".search-popover";
 const BEST_MATCHES_HEADER_SELECTOR = "[data-test-search-best-matches-header]";
+const SEARCH_RESULT_SELECTOR = "[data-test-search-result]";
+const SEARCH_RESULT_TITLE_SELECTOR = "[data-test-search-result-title]";
+const SEARCH_RESULT_OWNER_SELECTOR = "[data-test-search-result-owner]";
+const SEARCH_RESULT_SNIPPET_SELECTOR = "[data-test-search-result-snippet]";
+const VIEW_ALL_RESULTS_LINK_SELECTOR = "[data-test-view-all-results-link]";
+const PRODUCT_MATCH_LINK_SELECTOR = "[data-test-product-match-link]";
+const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+
 interface HeaderSearchTestContext extends MirageTestContext {}
 
 module("Integration | Component | header/search", function (hooks) {
@@ -50,16 +58,6 @@ module("Integration | Component | header/search", function (hooks) {
       .doesNotExist(
         "the keyboard shortcut icon is hidden when the user enters a query"
       );
-
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    // teardownContext(this);
   });
 
   test("it conditionally shows a popover", async function (this: HeaderSearchTestContext, assert) {
@@ -76,20 +74,18 @@ module("Integration | Component | header/search", function (hooks) {
       .dom(POPOVER_SELECTOR)
       .exists("the popover is shown when a query is entered");
 
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    // teardownContext(this);
+    await click(".clickaway-target");
+
+    assert.dom(POPOVER_SELECTOR).doesNotExist("the popover is hidden");
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "t");
+
+    assert
+      .dom(POPOVER_SELECTOR)
+      .exists("the popover is shown when a query is entered");
   });
 
   test('it conditionally shows a "best matches" header', async function (this: HeaderSearchTestContext, assert) {
-    // probably need to seed some products
-
     await render<HeaderSearchTestContext>(hbs`
       <Header::Search />
     `);
@@ -102,18 +98,94 @@ module("Integration | Component | header/search", function (hooks) {
 
     assert
       .dom(BEST_MATCHES_HEADER_SELECTOR)
-      .exists(
-        'the "best matches" header is shown when a product/area is matched'
-      );
+      .exists('the "best matches" header is shown when matches are found');
+  });
 
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    // teardownContext(this);
+  test("it renders matches in the popover", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "test");
+
+    assert.dom(SEARCH_RESULT_SELECTOR).exists({ count: 5 });
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "3");
+    assert
+      .dom(SEARCH_RESULT_SELECTOR)
+      .exists({ count: 1 })
+      .hasAttribute("href", "/document/doc-3");
+    assert.dom(SEARCH_RESULT_TITLE_SELECTOR).hasText("Test Document 3");
+    assert.dom(SEARCH_RESULT_OWNER_SELECTOR).exists();
+    assert.dom(SEARCH_RESULT_SNIPPET_SELECTOR).exists();
+  });
+
+  test('a "view all results for..." link is shown', async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    const query = "hashicorp";
+
+    await fillIn(SEARCH_INPUT_SELECTOR, query);
+
+    assert
+      .dom(VIEW_ALL_RESULTS_LINK_SELECTOR)
+      .exists()
+      .hasText(`View all results for "${query}"`)
+      .hasAttribute("href", `/results?q=${query}`);
+  });
+
+  test("a product/area link is conditionally shown", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "vault");
+
+    assert
+      .dom(PRODUCT_MATCH_LINK_SELECTOR)
+      .exists()
+      .hasText("View all Vault documents")
+      .hasAttribute("href", "/all?product=%5B%22Vault%22%5D");
+  });
+
+  test("the input can be focused with a keyboard shortcut", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    assert.dom(SEARCH_INPUT_SELECTOR).isNotFocused();
+
+    await triggerKeyEvent(document, "keydown", "K", { metaKey: true });
+
+    assert.dom(SEARCH_INPUT_SELECTOR).isFocused();
+  });
+
+  test("the arrow keys work as expected", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "test");
+
+    assert.dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]").doesNotExist();
+
+    await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+    assert
+      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .hasText('View all results for "test"');
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "test 3");
+
+    assert
+      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .doesNotExist("aria selection is updated");
+
+    await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+
+    assert
+      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .hasText('View all results for "test 3"');
   });
 });
