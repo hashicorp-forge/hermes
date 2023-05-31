@@ -18,7 +18,7 @@ interface XDropdownListLinkToComponentSignature {
   };
   Blocks: {
     default: [];
-  }
+  };
 }
 
 export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {}
