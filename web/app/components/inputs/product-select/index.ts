@@ -1,3 +1,4 @@
+import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
@@ -10,7 +11,7 @@ import { BadgeSize } from "hermes/types/hds-badge";
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
   Args: {
-    selected?: any;
+    selected?: string;
     onChange: (value: string) => void;
     badgeSize?: BadgeSize;
     formatIsBadge?: boolean;
@@ -20,10 +21,12 @@ interface InputsProductSelectSignature {
 }
 
 type ProductAreas = {
-  [key: string]: {
-    abbreviation: string;
-    perDocDataType: unknown;
-  };
+  [key: string]: ProductArea;
+};
+
+type ProductArea = {
+  abbreviation: string;
+  perDocDataType: unknown;
 };
 
 export default class InputsProductSelectComponent extends Component<InputsProductSelectSignature> {
@@ -33,8 +36,12 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
 
   @tracked products: ProductAreas | undefined = undefined;
 
-  get selectedProductAbbreviation() {
-    return this.products?.[this.selected]?.abbreviation;
+  get selectedProductAbbreviation(): string | undefined {
+    if (!this.selected) {
+      return undefined;
+    }
+    assert("products must be loaded", this.products);
+    return this.products[this.selected]?.abbreviation;
   }
 
   @action onChange(newValue: any) {
