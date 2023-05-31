@@ -4,7 +4,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { BadgeSize } from "hermes/types/hds-badge";
 import { Placement } from "@floating-ui/dom";
 
 const DEFAULT_DROPDOWN_SELECTOR =
@@ -15,7 +14,6 @@ const LIST_ITEM_SELECTOR = "[data-test-product-select-item]";
 interface InputsProductSelectContext extends MirageTestContext {
   selected?: any;
   onChange: (value: string) => void;
-  badgeSize?: BadgeSize;
   formatIsBadge?: boolean;
   placement?: Placement;
   isSaving?: boolean;
