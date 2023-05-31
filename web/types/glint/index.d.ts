@@ -1,4 +1,5 @@
 import "@glint/environment-ember-loose";
+import { FlightIconComponent } from "hds/flight-icon";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -10,5 +11,7 @@ declare module "@glint/environment-ember-loose/registry" {
     and: typeof import("@gavant/glint-template-types/types/ember-truth-helpers/and").default;
     not: typeof import("@gavant/glint-template-types/types/ember-truth-helpers/not").default;
     "is-empty": typeof import("@gavant/glint-template-types/types/ember-truth-helpers/is-empty").default;
+
+    FlightIcon: FlightIconComponent;
   }
 }
