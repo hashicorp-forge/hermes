@@ -47,6 +47,7 @@
             >
               {{or @selected "--"}}
             </span>
+
             {{#if this.selectedProductAbbreviation}}
               <span
                 data-test-product-select-toggle-abbreviation
@@ -63,7 +64,7 @@
           </dd.ToggleAction>
         </:anchor>
         <:item as |dd|>
-          <dd.Action>
+          <dd.Action class="pr-5">
             <Inputs::ProductSelect::Item
               @product={{dd.value}}
               @selected={{dd.selected}}
