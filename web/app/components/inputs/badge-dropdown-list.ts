@@ -10,6 +10,7 @@ interface InputsBadgeDropdownListComponentSignature {
     isSaving?: boolean;
     onItemClick: ((e: Event) => void) | ((e: string) => void);
     placement?: Placement;
+    icon: string;
   };
   Blocks: {
     default: [];

@@ -7,7 +7,7 @@
   ...attributes
 >
   <:anchor as |dd|>
-    <div class="relative w-full" data-test-badge-dropdown-list>
+    <div class="relative w-full">
       {{#if @isSaving}}
         <div class="absolute right-0 top-1/2 -translate-y-1/2">
           <FlightIcon
@@ -24,7 +24,7 @@
           data-test-badge-dropdown-list-icon
           data-test-icon={{if @selected (get-product-id @selected)}}
           @text={{or @selected "--"}}
-          @icon={{if @selected (or (get-product-id @selected) "folder")}}
+          @icon={{@icon}}
           class="hds-badge-dropdown"
         />
         <FlightIcon
