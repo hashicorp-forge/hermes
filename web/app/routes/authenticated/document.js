@@ -46,8 +46,16 @@ export default class DocumentRoute extends Route {
     if (params.draft) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/drafts/" + params.document_id)
+          .fetch("/api/v1/drafts/" + params.document_id, {
+            method: "GET",
+            headers: {
+              // We set this header to differentiate between document views and
+              // requests to only retrieve document metadata.
+              "Add-To-Recently-Viewed": "true",
+            },
+          })
           .then((r) => r.json());
+
         doc.isDraft = params.draft;
         draftFetched = true;
       } catch (err) {

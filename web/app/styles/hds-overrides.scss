@@ -30,3 +30,11 @@
     }
   }
 }
+
+.hds-badge-dropdown {
+  @apply pr-6;
+
+  + .dropdown-caret {
+    @apply absolute right-1.5 top-1/2 -translate-y-1/2;
+  }
+}
