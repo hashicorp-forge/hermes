@@ -1,12 +1,17 @@
 .x-dropdown-list-toggle-select {
   @apply text-left;
 
+  .flight-icon {
+    @apply shrink-0;
+  }
+
   &.hds-button {
     @apply justify-start;
   }
 
   &.hds-button--size-medium {
-    @apply pl-2.5 pr-1.5;
+    @apply px-2.5;
+
   }
   .hds-button__icon + .hds-button__text {
     @apply ml-2.5;

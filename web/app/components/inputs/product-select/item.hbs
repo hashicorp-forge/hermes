@@ -1,7 +1,8 @@
 {{!  @glint-nocheck - not typesafe yet }}
-<div class="relative flex w-full product-select-item" ...attributes>
+<div data-test-product-select-item class="relative flex w-full product-select-item" ...attributes>
   <FlightIcon
     data-test-product-select-item-icon
+    data-test-icon={{or (get-product-id @product) "folder"}}
     @name={{or (get-product-id @product) "folder"}}
   />
   <span data-test-product-select-item-value class="flex ml-2.5 leading-none">
