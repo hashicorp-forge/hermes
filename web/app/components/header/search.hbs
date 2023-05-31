@@ -14,6 +14,7 @@
       <:anchor as |dd|>
         {{! @glint-ignore - not yet registered}}
         <Hds::Form::TextInput::Base
+          data-test-global-search-input
           {{did-insert dd.registerAnchor}}
           {{did-insert this.registerInput}}
           {{on "input" (perform this.search dd)}}
@@ -32,6 +33,7 @@
         />
         {{#unless this.query}}
           <span
+            data-test-search-keyboard-shortcut
             class="absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint"
           >
             ⌘K
@@ -43,7 +45,10 @@
           {{! content is placed here by the in-element helper below }}
         </div>
         {{#if this.bestMatchesHeaderIsShown}}
-          <div class="border-t border-t-color-border-primary pt-2 px-3">
+          <div
+            data-test-search-best-matches-header
+            class="border-t border-t-color-border-primary pt-2 px-3"
+          >
             <h5
               class="text-display-100 text-color-foreground-faint font-medium"
             >

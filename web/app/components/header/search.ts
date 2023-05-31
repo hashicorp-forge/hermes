@@ -11,11 +11,11 @@ import { OffsetOptions } from "@floating-ui/dom";
 import ConfigService from "hermes/services/config";
 import { next } from "@ember/runloop";
 
-interface SearchResultObjects {
+export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects;
 }
 
-interface HermesDocumentObjects {
+export interface HermesDocumentObjects {
   [key: string]: HermesDocument;
 }
 
@@ -160,7 +160,12 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
         let [productAreas, docs] = algoliaResults;
 
-        this._bestMatches = docs ? (docs.hits as HermesDocument[]) : [];
+        console.log("productAreas", productAreas);
+        console.log("docs", docs);
+
+        this._bestMatches = docs
+          ? (docs.hits.slice(0, 5) as HermesDocument[])
+          : [];
         this._productAreaMatch = productAreas
           ? (productAreas.hits[0] as HermesDocument)
           : null;
@@ -185,4 +190,10 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       });
     }
   );
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::Search": typeof HeaderSearchComponent;
+  }
 }

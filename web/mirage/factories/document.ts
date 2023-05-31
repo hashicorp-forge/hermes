@@ -7,6 +7,12 @@ export default Factory.extend({
   product: "Vault",
   docType: "RFC",
   modifiedTime: 1,
-  docNumber: "RFC-0000",
-  title: "My Document",
+  docNumber: (i: number) => `RFC-00${i}`,
+  title: (i: number) => `Test Document ${i}`,
+  _snippetResult: {
+    content: {
+      value: "This is a test document",
+    },
+  },
+  owners: ["Test user"]
 });
