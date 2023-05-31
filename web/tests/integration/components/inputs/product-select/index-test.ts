@@ -119,8 +119,29 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     await click(DEFAULT_DROPDOWN_SELECTOR);
 
-    // In Mirage, when there are no products, we return a single default product
+    // In Mirage, we return a default product when there are no products in the database.
+    // This simulates the `fetchProducts` task being run.
     assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
     assert.dom(LIST_ITEM_SELECTOR).hasText("Default Fetched Product NONE");
+  });
+
+  test("it performs the passed-in action on click", async function (this: InputsProductSelectContext, assert) {
+    let count = 0;
+    this.set("onChange", () => {
+      count++;
+    });
+
+    await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
+      <Inputs::ProductSelect
+        @selected={{this.selected}}
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    await click(DEFAULT_DROPDOWN_SELECTOR);
+    await click(LIST_ITEM_SELECTOR);
+
+    assert.equal(count, 1, "the action was called once");
   });
 });
