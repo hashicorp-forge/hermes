@@ -122,10 +122,7 @@
           <small
             class="hds-typography-body-100 hds-foreground-faint"
           >Status</small>
-          <Doc::State
-            @state={{@document.status}}
-            @hideProgress={{true}}
-          />
+          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
         </div>
 
         <div class="flex flex-col items-start space-y-2">
@@ -225,7 +222,7 @@
                   <ol class="person-list">
                     {{#each this.approvers as |approver|}}
                       <li>
-                        <Person
+                        <Person::Approver
                           @imgURL={{approver.imgURL}}
                           @email={{approver.email}}
                         />
@@ -250,11 +247,7 @@
               <ol class="person-list">
                 {{#each this.approvers as |approver|}}
                   <li>
-                    <Person
-                      @badge={{if
-                        (has-approved-doc @document approver.email)
-                        "approved"
-                      }}
+                    <Person::Approver
                       @imgURL={{approver.imgURL}}
                       @email={{approver.email}}
                     />
@@ -486,7 +479,7 @@
 
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
-{{#in-element (html-element '.ember-application') insertBefore=null}}
+{{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.archiveModalIsActive}}
     <Document::Modal
       @color="critical"
@@ -517,71 +510,96 @@
 
   {{#if this.requestReviewModalIsActive}}
     <Document::Modal
-      @headerText="Request review?"
+      @headerText="Request review"
       @errorTitle="Error requesting review"
       @close={{this.closeRequestReviewModal}}
       @task={{perform this.requestReview}}
       @taskButtonText="Request review"
       @taskButtonLoadingText="Requesting review..."
       @taskButtonIcon="test"
-      @taskButtonIsDisabled={{not this.docTypeCheckboxValue}}
+      @hideFooterWhileSaving={{true}}
+      @taskButtonIsDisabled={{and
+        (not this.docTypeCheckboxValue)
+        @docType.checks.length
+      }}
     >
       <:default as |M|>
-        <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
-          This will publish your document company-wide, and anyone you request
-          below will receive a notification to review.
-        </p>
-        <Hds::Form::Field @layout="vertical" as |F|>
-          <F.Control>
-            <Inputs::PeopleSelect
-              @renderInPlace={{true}}
-              @selected={{this.approvers}}
-              @onChange={{this.updateApprovers}}
-              @disabled={{M.taskIsRunning}}
-              class="mb-0"
-            />
-          </F.Control>
-          <F.Label>Add approvers</F.Label>
-        </Hds::Form::Field>
-        {{#if @docType.checks.length}}
-          {{! For now, we only support one check }}
-          {{#each (take 1 @docType.checks) as |check|}}
-            <div class="mt-3.5">
-              <Hds::Form::Checkbox::Field
-                {{on "change" this.onDocTypeCheckboxChange}}
-                checked={{this.docTypeCheckboxValue}}
-                disabled={{M.taskIsRunning}}
-                required
-                as |F|
-              >
-                <F.Label>
-                  {{check.label}}
-                </F.Label>
-                {{#if check.helperText}}
-                  <F.HelperText>
-                    {{check.helperText}}
-                  </F.HelperText>
-                {{/if}}
-              </Hds::Form::Checkbox::Field>
+        {{#if M.taskIsRunning}}
+          <div class="grid place-items-center pt-1 pb-12">
+            <div class="text-center">
+              <FlightIcon @name="loading" @size={{24}} class="mb-5" />
+              <h2>Submitting for review...</h2>
+              <p class="text-body-300 mb-2">This usually takes about a minute.</p>
+              <span
+                class="block text-[12px] text-color-foreground-faint mb-8"
+              >We appreciate your patience.</span>
+              <div class="flex justify-center space-x-2 items-center">
+                <div class="h-px w-4 bg-color-border-primary"></div>
+                <FlightIcon
+                  @name="hashicorp"
+                  class="text-color-foreground-faint"
+                />
+                <div class="h-px w-4 bg-color-border-primary"></div>
+              </div>
             </div>
-            {{#if check.links.length}}
-              <ul class="list-none pl-6 mt-1.5">
-                {{#each check.links as |link|}}
-                  <li>
-                    <Hds::Link::Inline
-                      @icon="external-link"
-                      @iconPosition="trailing"
-                      @hrefIsExternal={{true}}
-                      @href={{link.url}}
-                      class="no-underline text-body-100"
-                    >
-                      {{link.text}}
-                    </Hds::Link::Inline>
-                  </li>
-                {{/each}}
-              </ul>
-            {{/if}}
-          {{/each}}
+          </div>
+        {{else}}
+          <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
+            This will publish your document company-wide, and anyone you request
+            below will receive a notification to review.
+          </p>
+          <Hds::Form::Field @layout="vertical" as |F|>
+            <F.Control>
+              <Inputs::PeopleSelect
+                @renderInPlace={{true}}
+                @selected={{this.approvers}}
+                @onChange={{this.updateApprovers}}
+                @disabled={{M.taskIsRunning}}
+                class="mb-0"
+              />
+            </F.Control>
+            <F.Label>Add approvers</F.Label>
+          </Hds::Form::Field>
+          {{#if @docType.checks.length}}
+            {{! For now, we only support one check }}
+            {{#each (take 1 @docType.checks) as |check|}}
+              <div class="mt-3.5">
+                <Hds::Form::Checkbox::Field
+                  {{on "change" this.onDocTypeCheckboxChange}}
+                  checked={{this.docTypeCheckboxValue}}
+                  disabled={{M.taskIsRunning}}
+                  required
+                  as |F|
+                >
+                  <F.Label>
+                    {{check.label}}
+                  </F.Label>
+                  {{#if check.helperText}}
+                    <F.HelperText>
+                      {{check.helperText}}
+                    </F.HelperText>
+                  {{/if}}
+                </Hds::Form::Checkbox::Field>
+              </div>
+              {{#if check.links.length}}
+                <ul class="list-none pl-6 mt-1.5">
+                  {{#each check.links as |link|}}
+                    <li>
+                      <Hds::Link::Inline
+                        @icon="external-link"
+                        @iconPosition="trailing"
+                        @hrefIsExternal={{true}}
+                        @href={{link.url}}
+                        class="no-underline text-body-100"
+                      >
+                        {{link.text}}
+                      </Hds::Link::Inline>
+                    </li>
+                  {{/each}}
+                </ul>
+              {{/if}}
+            {{/each}}
+          {{/if}}
         {{/if}}
       </:default>
     </Document::Modal>

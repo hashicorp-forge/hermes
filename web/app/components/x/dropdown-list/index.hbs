@@ -1,3 +1,5 @@
+{{! @glint-nocheck: not typesafe yet }}
+
 {{!
   Marked up with guidance from:
   https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
@@ -61,7 +63,7 @@
       {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
-      class="x-dropdown-list-container"
+      class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
       role={{if this.inputIsShown "combobox"}}
       ...attributes
     >

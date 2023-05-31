@@ -375,28 +375,53 @@ func updateRecentlyViewedDocs(
 		return fmt.Errorf("error getting user in database: %w", err)
 	}
 
-	// Prepend document to recently viewed documents.
-	rvd := append(
-		[]models.Document{{GoogleFileID: docID}},
-		u.RecentlyViewedDocs...)
-
-	// Trim recently viewed documents to a length of 5.
-	if len(rvd) > 5 {
-		rvd = rvd[:5]
-	}
-
-	// Update user.
-	u.RecentlyViewedDocs = rvd
-	if err := u.Upsert(db); err != nil {
-		return fmt.Errorf("error upserting user: %w", err)
-	}
-
-	// Get document in database to get the ID.
+	// Get viewed document in database.
 	doc := models.Document{
 		GoogleFileID: docID,
 	}
 	if err := doc.Get(db); err != nil {
-		return fmt.Errorf("error getting document: %w", err)
+		return fmt.Errorf("error getting viewed document: %w", err)
+	}
+
+	// Find recently viewed documents.
+	var rvd []models.RecentlyViewedDoc
+	if err := db.Where(&models.RecentlyViewedDoc{UserID: int(u.ID)}).
+		Order("viewed_at desc").
+		Find(&rvd).Error; err != nil {
+		return fmt.Errorf("error finding recently viewed docs for user: %w", err)
+	}
+
+	// Prepend viewed document to recently viewed documents.
+	rvd = append(
+		[]models.RecentlyViewedDoc{{
+			DocumentID: int(doc.ID),
+			UserID:     int(u.ID),
+		}},
+		rvd...)
+
+	// Get document records for recently viewed docs.
+	docs := []models.Document{}
+	for _, d := range rvd {
+		dd := models.Document{
+			Model: gorm.Model{
+				ID: uint(d.DocumentID),
+			},
+		}
+		if err := dd.Get(db); err != nil {
+			return fmt.Errorf("error getting document: %w", err)
+		}
+		docs = append(docs, dd)
+	}
+
+	// Trim recently viewed documents to a length of 5.
+	if len(docs) > 5 {
+		docs = docs[:5]
+	}
+
+	// Update user.
+	u.RecentlyViewedDocs = docs
+	if err := u.Upsert(db); err != nil {
+		return fmt.Errorf("error upserting user: %w", err)
 	}
 
 	// Update ViewedAt time for this document.

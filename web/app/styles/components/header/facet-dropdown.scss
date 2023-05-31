@@ -1,47 +1,11 @@
 .facet-dropdown-popover {
-  @apply absolute -bottom-1 left-0 bg-color-page-primary translate-y-full flex flex-col rounded-md w-full max-h-[400px] pt-0 z-50;
+  @apply min-w-[175px];
 
-  &.hds-dropdown__content {
-    @apply min-w-[175px];
-  }
-
-  &.anchor-right {
-    @apply right-0 left-auto;
-  }
-
-  &.medium:not(.large) {
+  &.medium:not(.has-input) {
     @apply w-[240px];
   }
 
-  &.large {
+  &.has-input {
     @apply w-[320px];
   }
-}
-
-.facet-dropdown-menu-item-link {
-  @apply no-underline flex items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
-
-  &.is-aria-selected {
-    @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;
-
-    .flight-icon {
-      @apply text-inherit;
-    }
-  }
-
-  .flight-icon {
-    @apply text-color-foreground-action shrink-0;
-
-    &.check {
-      @apply mr-2.5;
-    }
-
-    &.sort-icon {
-      @apply ml-3 mr-4;
-    }
-  }
-}
-
-.facet-dropdown-menu-item-value {
-  @apply text-color-foreground-strong whitespace-nowrap truncate;
 }

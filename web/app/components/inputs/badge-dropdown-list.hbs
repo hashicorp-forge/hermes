@@ -1,0 +1,51 @@
+{{!  @glint-nocheck - not typesafe yet }}
+<X::DropdownList
+  @items={{@items}}
+  @listIsOrdered={{@listIsOrdered}}
+  @onItemClick={{@onItemClick}}
+  @selected={{@selected}}
+  ...attributes
+>
+  <:anchor as |dd|>
+    <div class="relative w-full">
+      {{#if @isSaving}}
+        <div class="absolute right-0 top-1/2 -translate-y-1/2">
+          <FlightIcon
+            data-test-badge-dropdown-list-saving-icon
+            @name="loading"
+          />
+        </div>
+      {{/if}}
+      <dd.ToggleAction
+        data-test-badge-dropdown-trigger
+        class="relative {{if @isSaving 'opacity-50'}}"
+      >
+        <Hds::Badge
+          data-test-badge-dropdown-list-icon
+          data-test-icon={{if @selected (get-product-id @selected)}}
+          @text={{or @selected "--"}}
+          @icon={{@icon}}
+          class="hds-badge-dropdown"
+        />
+        <FlightIcon
+          data-test-badge-dropdown-list-chevron-icon
+          data-test-chevron-position={{if dd.contentIsShown "up" "down"}}
+          @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+          class="dropdown-caret"
+        />
+      </dd.ToggleAction>
+    </div>
+  </:anchor>
+  <:item as |dd|>
+    {{#if (has-block "item")}}
+      {{yield dd to="item"}}
+    {{else}}
+      <dd.Action data-test-badge-dropdown-list-default-action>
+        <X::DropdownList::CheckableItem
+          @selected={{dd.selected}}
+          @value={{dd.value}}
+        />
+      </dd.Action>
+    {{/if}}
+  </:item>
+</X::DropdownList>

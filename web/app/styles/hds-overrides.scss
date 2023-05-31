@@ -23,10 +23,18 @@
   @apply mix-blend-multiply;
 }
 
-.facet-dropdown-menu-item-link {
+.x-dropdown-list-item-link {
   &.is-aria-selected {
     .hds-badge-count--color-neutral.hds-badge-count--type-filled {
       @apply bg-white bg-opacity-10 text-color-foreground-high-contrast mix-blend-screen;
     }
+  }
+}
+
+.hds-badge-dropdown {
+  @apply pr-6;
+
+  + .dropdown-caret {
+    @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }
 }

@@ -1,5 +1,7 @@
+{{! @glint-nocheck - not typesafe yet}}
 <FlightIcon
   data-test-x-dropdown-list-checkable-item-check
+  data-test-is-checked={{@selected}}
   @name="check"
   class="check {{if @selected 'visible' 'invisible'}}"
 />
