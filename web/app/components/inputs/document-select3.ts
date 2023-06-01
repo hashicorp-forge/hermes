@@ -51,9 +51,39 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @tracked popoverTrigger: HTMLElement | null = null;
 
-  @tracked shownDocuments: HermesDocument[] | null = null;
+  @tracked _shownDocuments: HermesDocument[] | null = null;
 
   @tracked searchInput: HTMLInputElement | null = null;
+
+  get shownDocuments(): unknown {
+    /**
+     * Currently the array looks like this:
+     * [{title: "foo", objectID: "bar"...}, ...]
+     *
+     * We need it to look like:
+     * { "bar": {title: "foo", objectID: "bar"...}, ...}
+     */
+
+    let documents: any = {};
+
+    if (this._shownDocuments) {
+      this._shownDocuments.forEach((doc) => {
+        documents[doc.objectID] = doc;
+      });
+    }
+
+    return documents;
+  }
+
+  protected maybeLoadSuggestions = restartableTask(
+    async (dd: any) => {
+      if (!dd.contentIsShown) {
+        await this.search.perform("");
+        // FIXME
+        dd.assignMenuItems();
+      }
+    }
+  );
 
   @action addRelatedExternalLink() {
     let displayURL;
@@ -88,12 +118,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     } else {
       this.relatedLinks.unshiftObject(externalLink);
     }
-    this.hidePopover();
   }
 
   @action addRelatedDocument(document: HermesDocument) {
+    console.log(document);
     this.relatedDocuments.unshiftObject(document);
-    this.hidePopover();
 
     // Effectively refresh the search results
     void this.search.perform("");
@@ -109,40 +138,12 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     });
   }
 
-  @action togglePopover() {
-    this.popoverIsShown = !this.popoverIsShown;
-  }
-
-  @action hidePopover() {
-    this.popoverIsShown = false;
-    this.clearSearch();
-  }
-
-  @action registerPopoverTrigger(e: HTMLElement) {
-    this.popoverTrigger = e;
-  }
-
-  @action registerAndFocusSearchInput(e: HTMLInputElement) {
-    this.searchInput = e;
-    this.searchInput.focus();
-    void this.search.perform("");
-  }
-
   @action onKeydown(event: KeyboardEvent) {
     if (event.key === "Enter") {
       if (this.inputValueIsValid) {
         this.addRelatedExternalLink();
       }
     }
-
-    if (event.key === "Escape") {
-      this.clearSearch();
-    }
-  }
-
-  @action clearSearch() {
-    this.query = "";
-    this.inputValueIsValid = false;
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
@@ -212,7 +213,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
         .then((response) => response);
 
       if (algoliaResponse) {
-        this.shownDocuments = algoliaResponse.hits as HermesDocument[];
+        this._shownDocuments = algoliaResponse.hits as HermesDocument[];
       }
     } catch (e) {
       console.error(e);

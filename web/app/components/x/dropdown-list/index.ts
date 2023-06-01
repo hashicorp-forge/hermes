@@ -9,7 +9,7 @@ import FetchService from "hermes/services/fetch";
 
 interface XDropdownListComponentSignature<T> {
   Args: {
-    selected: any;
+    selected?: any;
     items?: any;
     onChange: (value: any) => void;
     listIsOrdered?: boolean;

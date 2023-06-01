@@ -4,195 +4,209 @@
     <div class="hds-typography-body-100 hds-foreground-faint">
       Related docs
     </div>
-    <Action
-      {{on "click" this.togglePopover}}
-      {{did-insert this.registerPopoverTrigger}}
-      class="flex items-center ml-px -mr-px px-1 py-1 rounded border border-transparent hover:border-color-border-strong"
+    {{! @glint-ignore}}
+    <X::DropdownList
+      @items={{this.shownDocuments}}
+      @onItemClick={{this.addRelatedDocument}}
+      {{! TODO: Add "auto" and `false` conditions }}
+      @isInputShown={{true}}
     >
-      <FlightIcon @name="plus" />
-      <FlightIcon
-        @name="chevron-down"
-        class="scale-75 text-color-foreground-faint origin-left -mr-1"
-      />
-    </Action>
-    {{#if this.popoverIsShown}}
-      <div
-        class="popover"
-        {{dismissible dismiss=this.hidePopover related=this.popoverTrigger}}
-      >
-        <div class="p-1 border-b border-b-color-border-faint">
-          <Hds::Form::TextInput::Base
-            value={{this.query}}
-            {{on "input" (perform this.onInput)}}
-            {{on "keydown" this.onKeydown}}
-            {{did-insert this.registerAndFocusSearchInput}}
-            type="text"
-            placeholder="Paste a URL or search documents..."
-          />
-        </div>
-        <div>
-
-          {{#unless (and this.query.length this.inputValueIsValid)}}
-            <div
-              class="mt-2.5 mb-[5px] px-3 text-color-foreground-faint uppercase tracking-wide text-[12px]"
-            >
-              {{#if this.query.length}}
-                {{#unless this.inputValueIsValid}}
-                  Results
-                {{/unless}}
-              {{else}}
-                Suggestions
-              {{/if}}
-            </div>
-          {{/unless}}
-
-          {{#if this.inputValueIsValid}}
-            {{#if this.fetchURLInfo.isRunning}}
-              <div
-                class="mt-1 mb-1.5 py-1.5 px-3 w-full grid place-items-center h-10"
-              >
-                <FlightIcon @name="loading" />
-              </div>
-              {{! <FlightIcon @name="loading" class="" /> }}
-            {{else}}
-              <Action
-                class="mt-1 mb-1.5 py-1.5 px-3 flex w-full group hover:bg-color-surface-interactive-hover h-10 items-center"
-                {{on "click" this.addRelatedExternalLink}}
-              >
-                <div class="flex items-center justify-between w-full">
-                  <div class="flex items-center">
-                    <img
-                      src={{this.faviconURL}}
-                      width="16"
-                      height="16"
-                      class="mr-2.5"
-                    />
-                    <span class="">
-                      Add external document
-                    </span>
-                  </div>
-                  {{! if focused only }}
-                  <FlightIcon
-                    @name="corner-down-left"
-                    class="text-color-foreground-faint"
-                  />
-                </div>
-              </Action>
-            {{/if}}
-          {{else}}
-            {{#if this.shownDocuments.length}}
-              <ol class="mb-2">
-                {{#each this.shownDocuments as |d|}}
-                  <li>
-                    <Action
-                      {{on "click" (fn this.addRelatedDocument d)}}
-                      class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
-                    >
-                      <div
-                        class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
-                      >
-                        <img src="/images/document.png" class="w-5 h-auto" />
-                      </div>
-                      <div>
-                        <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                          {{d.title}}
-                        </h4>
-                        {{#if d.docNumber}}
-                          <span
-                            class="text-color-foreground-faint text-body-100"
-                          >
-                            {{d.docNumber}}
-                          </span>
-                        {{/if}}
-                      </div>
-                    </Action>
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <div class="px-3">
-                {{#if (or this.search.isRunning this.fetchURLInfo.isRunning)}}
-                  <div
-                    class="w-full grid place-items-center h-[20px] mt-2 mb-4"
-                  >
-                    <FlightIcon @name="loading" />
-                  </div>
-                {{else}}
-                  <div class="h-[20px] mt-2 mb-4 text-color-foreground-faint">
-                    No matches
-                  </div>
-                {{/if}}
-              </div>
-            {{/if}}
-          {{/if}}
-        </div>
-      </div>
-    {{/if}}
-  </div>
-
-  {{#if this.relatedResources.length}}
-    <ul class="mt-1">
-      {{#each this.relatedResources as |r|}}
-        <li
-          class="flex w-full relative group related-docs-list-item
-            {{if r.objectID 'hermes-doc' 'external-doc'}}"
+      <:anchor as |dd|>
+        <dd.ToggleAction
+          class="flex items-center ml-px -mr-px px-1 py-1 rounded border border-transparent hover:border-color-border-strong"
+          {{on "click" (perform this.maybeLoadSuggestions dd)}}
         >
-          {{#if r.objectID}}
-            <LinkTo
-              @route="authenticated.document"
-              @model={{r.objectID}}
-              class="related-doc-link"
-            >
-              <div
-                class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
-              >
-                <img src="/images/document.png" class="w-5 h-auto" />
-              </div>
-              <div>
-                <div>
-                  {{! Create space for the "more" icon }}
-                  <div class="float-right mt-0.5 w-7 h-3"></div>
+          <FlightIcon @name="plus" />
+          <FlightIcon
+            @name="chevron-down"
+            class="scale-75 text-color-foreground-faint origin-left -mr-1"
+          />
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action
+          class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
+        >
+          <div
+            class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
+          >
+            <img src="/images/document.png" class="w-5 h-auto" />
+          </div>
+          <div>
+            <h4 class="inline-doc-title mb-0.5 pr-0.5">
+              {{dd.attrs.title}}
+            </h4>
+            {{#if dd.attrs.docNumber}}
+              <span class="text-color-foreground-faint text-body-100">
+                {{dd.attrs.docNumber}}
+              </span>
+            {{/if}}
+          </div>
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+    <!--
+    {{#if this.popoverIsShown}}
+      <div>
+        {{#unless (and this.query.length this.inputValueIsValid)}}
+          <div
+            class="mt-2.5 mb-[5px] px-3 text-color-foreground-faint uppercase tracking-wide text-[12px]"
+          >
+            {{#if this.query.length}}
+              {{#unless this.inputValueIsValid}}
+                Results
+              {{/unless}}
+            {{else}}
+              Suggestions
+            {{/if}}
+          </div>
+        {{/unless}}
 
-                  <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                    {{r.title}}
-                  </h4>
-                </div>
-                {{#if r.docNumber}}
-                  <span class="text-color-foreground-faint text-body-100">
-                    {{r.docNumber}}
-                  </span>
-                {{/if}}
-              </div>
-            </LinkTo>
-          {{else}}
-            <ExternalLink
-              href={{r.url}}
-              class="py-0.5 flex underline mr-6 truncate"
+        {{#if this.inputValueIsValid}}
+          {{#if this.fetchURLInfo.isRunning}}
+            <div
+              class="mt-1 mb-1.5 py-1.5 px-3 w-full grid place-items-center h-10"
             >
-              <div class="flex items-center w-full">
-                <div class="flex relative mr-2 w-4 h-4 shrink-0">
+              <FlightIcon @name="loading" />
+            </div>
+            {{! <FlightIcon @name="loading" class="" /> }}
+          {{else}}
+            <Action
+              class="mt-1 mb-1.5 py-1.5 px-3 flex w-full group hover:bg-color-surface-interactive-hover h-10 items-center"
+              {{on "click" this.addRelatedExternalLink}}
+            >
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center">
                   <img
-                    src="https://www.google.com/s2/favicons?domain={{r.url}}"
+                    src={{this.faviconURL}}
                     width="16"
                     height="16"
+                    class="mr-2.5"
                   />
+                  <span class="">
+                    Add external document
+                  </span>
                 </div>
-                <span class="truncate">
-                  {{r.displayURL}}
-                </span>
+                {{! if focused only }}
+                <FlightIcon
+                  @name="corner-down-left"
+                  class="text-color-foreground-faint"
+                />
               </div>
-            </ExternalLink>
+            </Action>
           {{/if}}
-          <Inputs::DocumentSelect::MoreButton
-            @removeResource={{this.removeResource}}
-            @resource={{r}}
-          />
-        </li>
-      {{/each}}
-    </ul>
-  {{else}}
-    <div class="mt-1.5 text-color-foreground-faint">
-      ---
-    </div>
-  {{/if}}
+        {{else}}
+          {{#if this.shownDocuments.length}}
+            <ol class="mb-2">
+              {{#each this.shownDocuments as |d|}}
+                <li>
+                  <Action
+                    {{on "click" (fn this.addRelatedDocument d)}}
+                    class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
+                  >
+                    <div
+                      class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
+                    >
+                      <img src="/images/document.png" class="w-5 h-auto" />
+                    </div>
+                    <div>
+                      <h4 class="inline-doc-title mb-0.5 pr-0.5">
+                        {{d.title}}
+                      </h4>
+                      {{#if d.docNumber}}
+                        <span class="text-color-foreground-faint text-body-100">
+                          {{d.docNumber}}
+                        </span>
+                      {{/if}}
+                    </div>
+                  </Action>
+                </li>
+              {{/each}}
+            </ol>
+          {{else}}
+            <div class="px-3">
+              {{#if (or this.search.isRunning this.fetchURLInfo.isRunning)}}
+                <div class="w-full grid place-items-center h-[20px] mt-2 mb-4">
+                  <FlightIcon @name="loading" />
+                </div>
+              {{else}}
+                <div class="h-[20px] mt-2 mb-4 text-color-foreground-faint">
+                  No matches
+                </div>
+              {{/if}}
+            </div>
+          {{/if}}
+        {{/if}}
+      </div>
+    {{/if}}
+    -->
+  </div>
 </div>
+
+{{! TODO: move this out of the component }}
+
+{{#if this.relatedResources.length}}
+  <ul class="mt-1">
+    {{#each this.relatedResources as |r|}}
+      <li
+        class="flex w-full relative group related-docs-list-item
+          {{if r.objectID 'hermes-doc' 'external-doc'}}"
+      >
+        {{#if r.objectID}}
+          <LinkTo
+            @route="authenticated.document"
+            @model={{r.objectID}}
+            class="related-doc-link"
+          >
+            <div
+              class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
+            >
+              <img src="/images/document.png" class="w-5 h-auto" />
+            </div>
+            <div>
+              <div>
+                {{! Create space for the "more" icon }}
+                <div class="float-right mt-0.5 w-7 h-3"></div>
+
+                <h4 class="inline-doc-title mb-0.5 pr-0.5">
+                  {{r.title}}
+                </h4>
+              </div>
+              {{#if r.docNumber}}
+                <span class="text-color-foreground-faint text-body-100">
+                  {{r.docNumber}}
+                </span>
+              {{/if}}
+            </div>
+          </LinkTo>
+        {{else}}
+          <ExternalLink
+            href={{r.url}}
+            class="py-0.5 flex underline mr-6 truncate"
+          >
+            <div class="flex items-center w-full">
+              <div class="flex relative mr-2 w-4 h-4 shrink-0">
+                <img
+                  src="https://www.google.com/s2/favicons?domain={{r.url}}"
+                  width="16"
+                  height="16"
+                />
+              </div>
+              <span class="truncate">
+                {{r.displayURL}}
+              </span>
+            </div>
+          </ExternalLink>
+        {{/if}}
+        <Inputs::DocumentSelect::MoreButton
+          @removeResource={{this.removeResource}}
+          @resource={{r}}
+        />
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <div class="mt-1.5 text-color-foreground-faint">
+    ---
+  </div>
+{{/if}}
