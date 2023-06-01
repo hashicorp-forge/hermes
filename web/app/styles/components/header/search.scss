@@ -1,0 +1,25 @@
+.x-dropdown-list.search-popover {
+  // width calculated in the component class
+  @apply max-h-[none] min-w-[420px] max-w-[none];
+
+  &.no-best-matches {
+    .x-dropdown-list-items {
+      @apply hidden;
+    }
+  }
+  .x-dropdown-list-item-link {
+    @apply items-start;
+
+    &.search-popover-header-link {
+      @apply pt-2.5 pb-[10px] items-center;
+    }
+
+    &.is-aria-selected {
+      @apply bg-color-surface-interactive-hover text-inherit;
+    }
+
+    .flight-icon {
+      @apply text-inherit;
+    }
+  }
+}

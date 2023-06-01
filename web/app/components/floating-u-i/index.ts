@@ -6,6 +6,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
 interface FloatingUIComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     renderOut?: boolean;
     placement?: Placement;

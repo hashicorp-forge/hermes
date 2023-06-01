@@ -2,6 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { assert } from "@ember/debug";
+import { SearchResultObjects } from "hermes/components/header/search";
+import { SearchResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -63,18 +66,61 @@ export default function (mirageConfig) {
         return new Response(200, {});
       });
 
+      const getAlgoliaSearchResults = (schema, request) => {
+        const requestBody = JSON.parse(request.requestBody);
+        const { query, hitsPerPage } = requestBody;
+
+        let matches: [];
+
+        if (hitsPerPage === 1) {
+          matches = schema.document.all().models.filter((doc) => {
+            return doc.attrs.product
+              .toLowerCase()
+              .includes(query.toLowerCase());
+          });
+        } else {
+          matches = schema.document.all().models.filter((doc) => {
+            return (
+              doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+              doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+            );
+          });
+        }
+
+        let algoliaResults: Partial<SearchResponse> = {
+          hits: matches,
+        };
+
+        return new Response(200, {}, algoliaResults);
+      };
+
       /**
        * Used by the AlgoliaSearchService to query Algolia.
        */
       this.post(
         `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-        () => {
-          return {
-            facets: [],
-            hits: [],
-          };
+        (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
         }
       );
+
+      /**
+       * Used by the global search input to query Algolia.
+       */
+
+      let algoliaSearchHosts = [];
+
+      for (let i = 1; i <= 9; i++) {
+        algoliaSearchHosts.push(
+          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
+        );
+      }
+
+      algoliaSearchHosts.forEach((host) => {
+        this.post(host, (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
+        });
+      });
 
       /**
        * Called by the Document route to log a document view.

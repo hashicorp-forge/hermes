@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 <li data-test-x-dropdown-list-item class="x-dropdown-list-item" role="none">
   {{yield
     (hash
@@ -19,6 +20,7 @@
         focusMouseTarget=this.focusMouseTarget
         onClick=this.onClick
       )
+      contentID=@contentID
       value=@value
       attrs=@attributes
       selected=@selected
