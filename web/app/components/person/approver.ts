@@ -1,8 +1,10 @@
 import Component from "@glimmer/component";
+import { HermesDocument } from "hermes/types/document";
 
 interface PersonApproverComponentSignature {
   Element: HTMLDivElement;
   Args: {
+    document: HermesDocument;
     email: string;
     imgURL?: string;
   };

@@ -216,6 +216,7 @@
                     {{#each this.approvers as |approver|}}
                       <li>
                         <Person::Approver
+                          @document={{@document}}
                           @imgURL={{approver.imgURL}}
                           @email={{approver.email}}
                         />
@@ -241,6 +242,7 @@
                 {{#each this.approvers as |approver|}}
                   <li>
                     <Person::Approver
+                      @document={{@document}}
                       @imgURL={{approver.imgURL}}
                       @email={{approver.email}}
                     />
