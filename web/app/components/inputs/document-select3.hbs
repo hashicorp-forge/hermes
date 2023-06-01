@@ -1,4 +1,4 @@
-<div class="document-select">
+<div class="w-full">
 
   <div class="relative z-10 flex items-center w-full justify-between">
     <div class="hds-typography-body-100 hds-foreground-faint">
@@ -8,13 +8,23 @@
     <X::DropdownList
       @items={{this.shownDocuments}}
       @onItemClick={{this.addRelatedDocument}}
-      {{! TODO: Add "auto" and `false` conditions }}
-      @isInputShown={{true}}
+      @inputVisibility="hidden"
       @renderOut={{true}}
+      @placement="bottom-start"
+      @offset={{hash mainAxis=3 crossAxis=-6}}
+      @isLoading={{or this.search.isRunning this.fetchURLInfo.isRunning}}
+      class="w-full"
+
     >
       <:anchor as |dd|>
         <dd.ToggleAction
-          class="flex items-center ml-px -mr-px px-1 py-1 rounded border border-transparent hover:border-color-border-strong"
+          class="flex items-center ml-px -mr-px px-1 py-1 rounded border
+            {{if
+              dd.contentIsShown
+              'border-color-border-strong'
+              'border-transparent'
+            }}
+            hover:border-color-border-strong"
           {{on "click" (perform this.maybeLoadSuggestions dd)}}
         >
           <FlightIcon @name="plus" />
@@ -147,16 +157,18 @@
 {{! TODO: move this out of the component }}
 
 {{#if this.relatedResources.length}}
-  <ul class="mt-1">
-    {{#each this.relatedResources as |r|}}
+  <ul class="mt-1 related-docs">
+    {{#each-in this.relatedResources as |i doc|}}
+      {{log i}}
+      {{log doc}}
       <li
         class="flex w-full relative group related-docs-list-item
-          {{if r.objectID 'hermes-doc' 'external-doc'}}"
+          {{if doc.objectID 'hermes-doc' 'external-doc'}}"
       >
-        {{#if r.objectID}}
+        {{#if doc.objectID}}
           <LinkTo
             @route="authenticated.document"
-            @model={{r.objectID}}
+            @model={{doc.objectID}}
             class="related-doc-link"
           >
             <div
@@ -170,41 +182,41 @@
                 <div class="float-right mt-0.5 w-7 h-3"></div>
 
                 <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                  {{r.title}}
+                  {{doc.title}}
                 </h4>
               </div>
-              {{#if r.docNumber}}
+              {{#if doc.docNumber}}
                 <span class="text-color-foreground-faint text-body-100">
-                  {{r.docNumber}}
+                  {{doc.docNumber}}
                 </span>
               {{/if}}
             </div>
           </LinkTo>
         {{else}}
           <ExternalLink
-            href={{r.url}}
+            href={{doc.url}}
             class="py-0.5 flex underline mr-6 truncate"
           >
             <div class="flex items-center w-full">
               <div class="flex relative mr-2 w-4 h-4 shrink-0">
                 <img
-                  src="https://www.google.com/s2/favicons?domain={{r.url}}"
+                  src="https://www.google.com/s2/favicons?domain={{doc.url}}"
                   width="16"
                   height="16"
                 />
               </div>
               <span class="truncate">
-                {{r.displayURL}}
+                {{doc.displayURL}}
               </span>
             </div>
           </ExternalLink>
         {{/if}}
         <Inputs::DocumentSelect::MoreButton
           @removeResource={{this.removeResource}}
-          @resource={{r}}
+          @resource={{doc}}
         />
       </li>
-    {{/each}}
+    {{/each-in}}
   </ul>
 {{else}}
   <div class="mt-1.5 text-color-foreground-faint">

@@ -10,6 +10,7 @@ import { restartableTask, timeout } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import { next } from "@ember/runloop";
 
 interface InputsDocumentSelect3ComponentSignature {
   Args: {
@@ -32,8 +33,12 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @service declare algolia: AlgoliaService;
   @service declare flashMessages: FlashMessageService;
 
+  @tracked query = "";
+  @tracked inputValueIsValid = false;
   @tracked relatedLinks: NativeArray<RelatedExternalLink> = A();
   @tracked relatedDocuments: NativeArray<HermesDocument> = A();
+  @tracked faviconURL: string | null = null;
+  @tracked _shownDocuments: HermesDocument[] | null = null;
 
   get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
     let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
@@ -42,20 +47,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     return resources;
   }
 
-  @tracked query = "";
-
-  @tracked inputValueIsValid = false;
-  @tracked popoverIsShown = false;
-
-  @tracked faviconURL: string | null = null;
-
-  @tracked popoverTrigger: HTMLElement | null = null;
-
-  @tracked _shownDocuments: HermesDocument[] | null = null;
-
-  @tracked searchInput: HTMLInputElement | null = null;
-
-  get shownDocuments(): unknown {
+  get shownDocuments(): { [key: string]: HermesDocument } {
     /**
      * Currently the array looks like this:
      * [{title: "foo", objectID: "bar"...}, ...]
@@ -78,7 +70,9 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   protected maybeLoadSuggestions = restartableTask(async (dd: any) => {
     if (!dd.contentIsShown) {
       await this.search.perform("");
-      dd.scheduleAssignMenuItemIDs();
+      next(() => {
+        dd.scheduleAssignMenuItemIDs();
+      });
     }
   });
 
@@ -117,12 +111,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     }
   }
 
-  @action addRelatedDocument(document: HermesDocument) {
-    console.log(document);
-    this.relatedDocuments.unshiftObject(document);
-
-    // Effectively refresh the search results
-    void this.search.perform("");
+  @action addRelatedDocument(documentObjectID: string) {
+    let document = this.shownDocuments[documentObjectID];
+    if (document) {
+      this.relatedDocuments.unshiftObject(document);
+    }
   }
 
   @action showDuplicateMessage() {
@@ -152,8 +145,6 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       return;
     } else {
       this.relatedDocuments.removeObject(resource);
-      // Effectively refresh the search results
-      void this.search.perform("");
       return;
     }
   }

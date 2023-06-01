@@ -2,6 +2,7 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
+import { OffsetOptions } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
@@ -11,8 +12,12 @@ interface XDropdownListComponentSignature<T> {
   Args: {
     selected?: any;
     items?: any;
-    onChange: (value: any) => void;
     listIsOrdered?: boolean;
+    inputVisibility?: "shown" | "hidden";
+    onItemClick: (value: any) => void;
+    offset?: OffsetOptions;
+    renderOut?: boolean;
+    isLoading?: boolean;
   };
 }
 
@@ -59,6 +64,14 @@ export default class XDropdownListComponent extends Component<
    * aria-roles for various elements.
    */
   get inputIsShown() {
+    if (this.args.inputVisibility === "shown") {
+      return true;
+    }
+
+    if (this.args.inputVisibility === "hidden") {
+      return false;
+    }
+
     if (!this.args.items) {
       return false;
     } else {
@@ -134,6 +147,7 @@ export default class XDropdownListComponent extends Component<
    * matches the index of the item in the list.
    */
   @action assignMenuItemIDs(items: NodeListOf<Element>): void {
+    console.log("assignMenuItemIDs");
     this._menuItems = items;
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
@@ -289,14 +303,18 @@ export default class XDropdownListComponent extends Component<
   });
 
   @action protected scheduleAssignMenuItemIDs() {
-    schedule("afterRender", () => {
-      assert(
-        "scheduleAssignMenuItemIDs expects a _scrollContainer",
-        this._scrollContainer
-      );
-      this.assignMenuItemIDs(
-        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
-      );
-    });
+    if (!this._scrollContainer) {
+      this.scheduleAssignMenuItemIDs();
+    } else {
+      schedule("afterRender", () => {
+        assert(
+          "scheduleAssignMenuItemIDs expects a _scrollContainer",
+          this._scrollContainer
+        );
+        this.assignMenuItemIDs(
+          this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+        );
+      });
+    }
   }
 }

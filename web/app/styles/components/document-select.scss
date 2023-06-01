@@ -1,14 +1,4 @@
-.document-select {
-  @apply max-w-[250px] w-full;
-
-  .popover {
-    @apply absolute -bottom-px translate-y-full -left-[13px] -right-[11px] border rounded-lg border-color-border-strong bg-color-foreground-high-contrast z-50;
-
-    &.more-popover {
-      @apply -right-px top-[30px] p-1 left-auto bottom-auto rounded translate-y-0;
-    }
-  }
-
+.related-docs {
   .related-doc-link {
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
   }
