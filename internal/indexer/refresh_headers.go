@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"google.golang.org/api/drive/v3"
 )
 
@@ -54,6 +55,25 @@ func refreshDocumentHeaders(
 	)
 	if err != nil {
 		return fmt.Errorf("error getting updated documents in folder: %w", err)
+	}
+
+	// Add any locked documents to the slice of documents to refresh.
+	lockedDocs := models.Documents{}
+	switch ft {
+	case draftsFolderType:
+		lockedDocs.Find(idx.Database,
+			"locked = ? AND status = ?", true, models.WIPDocumentStatus)
+	case documentsFolderType:
+		lockedDocs.Find(idx.Database,
+			// All document statuses > WIPDocumentStatus are for published documents.
+			"locked = ? AND status > ?", true, models.WIPDocumentStatus)
+	}
+	for _, d := range lockedDocs {
+		f, err := idx.GoogleWorkspaceService.GetFile(d.GoogleFileID)
+		if err != nil {
+			return fmt.Errorf("error getting file (%s): %w", d.GoogleFileID, err)
+		}
+		docs = append(docs, f)
 	}
 
 	// Return if there are no updated documents.
@@ -118,6 +138,20 @@ func refreshDocumentHeader(
 ) {
 	algo := idx.AlgoliaClient
 	log := idx.Logger
+
+	// Check if document is locked.
+	locked, err := hcd.IsLocked(file.Id, idx.Database, idx.GoogleWorkspaceService)
+	if err != nil {
+		log.Error("error checking document locked status",
+			"error", err,
+			"google_file_id", file.Id,
+		)
+		os.Exit(1)
+	}
+	// Don't continue if document is locked.
+	if locked {
+		return
+	}
 
 	// Get base document object from Algolia so we can determine the document
 	// type.

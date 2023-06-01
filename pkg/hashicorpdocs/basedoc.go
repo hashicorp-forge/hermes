@@ -56,6 +56,9 @@ type BaseDoc struct {
 	// TODO: LinkedDocs is not used yet.
 	LinkedDocs []string `json:"linkedDocs,omitempty"`
 
+	// Locked is true if the document is locked for editing.
+	Locked bool `json:"locked,omitempty"`
+
 	// MetaTags contains metadata tags that can be used for filtering in Algolia.
 	MetaTags []string `json:"_tags,omitempty"`
 
@@ -178,6 +181,10 @@ func (d *BaseDoc) SetFileRevision(revisionID, revisionName string) {
 	} else {
 		d.FileRevisions[revisionID] = revisionName
 	}
+}
+
+func (d *BaseDoc) SetLocked(l bool) {
+	d.Locked = l
 }
 
 func (d *BaseDoc) SetModifiedTime(i int64) {
