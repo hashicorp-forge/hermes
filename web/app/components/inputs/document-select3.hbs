@@ -14,7 +14,6 @@
       @offset={{hash mainAxis=3 crossAxis=-6}}
       @isLoading={{or this.search.isRunning this.fetchURLInfo.isRunning}}
       class="w-full"
-
     >
       <:anchor as |dd|>
         <dd.ToggleAction
@@ -34,6 +33,17 @@
           />
         </dd.ToggleAction>
       </:anchor>
+      <:header>
+        {{! @glint-ignore - not yet registered}}
+        <Hds::Form::TextInput::Base
+          value={{this.query}}
+          {{on "input" (perform this.onInput)}}
+          {{on "keydown" this.onKeydown}}
+          {{did-insert this.registerAndFocusSearchInput}}
+          type="text"
+          placeholder="Paste a URL or search documents..."
+        />
+      </:header>
       <:item as |dd|>
         <dd.Action
           class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"

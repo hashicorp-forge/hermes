@@ -39,6 +39,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @tracked relatedDocuments: NativeArray<HermesDocument> = A();
   @tracked faviconURL: string | null = null;
   @tracked _shownDocuments: HermesDocument[] | null = null;
+  @tracked searchInput: HTMLInputElement | null = null;
 
   get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
     let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
@@ -75,6 +76,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       });
     }
   });
+
+  @action registerAndFocusSearchInput(e: HTMLInputElement) {
+    this.searchInput = e;
+    this.searchInput.focus();
+  }
 
   @action addRelatedExternalLink() {
     let displayURL;

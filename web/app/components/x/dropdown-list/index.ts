@@ -147,7 +147,6 @@ export default class XDropdownListComponent extends Component<
    * matches the index of the item in the list.
    */
   @action assignMenuItemIDs(items: NodeListOf<Element>): void {
-    console.log("assignMenuItemIDs");
     this._menuItems = items;
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
