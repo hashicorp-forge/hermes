@@ -75,15 +75,12 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     return documents;
   }
 
-  protected maybeLoadSuggestions = restartableTask(
-    async (dd: any) => {
-      if (!dd.contentIsShown) {
-        await this.search.perform("");
-        // FIXME
-        dd.assignMenuItems();
-      }
+  protected maybeLoadSuggestions = restartableTask(async (dd: any) => {
+    if (!dd.contentIsShown) {
+      await this.search.perform("");
+      dd.scheduleAssignMenuItemIDs();
     }
-  );
+  });
 
   @action addRelatedExternalLink() {
     let displayURL;
