@@ -45,6 +45,9 @@ type Document struct {
 	// Imported is true if the document was not created through the application.
 	Imported bool
 
+	// Locked is true if the document cannot be updated (may be in a bad state).
+	Locked bool
+
 	// Owner is the owner of the document.
 	Owner   *User `gorm:"default:null;not null"`
 	OwnerID *uint `gorm:"default:null"`
@@ -131,9 +134,11 @@ func (d *Document) Create(db *gorm.DB) error {
 
 // Find finds all documents from database db with the provided query, and
 // assigns them to the receiver.
-func (d *Documents) Find(db *gorm.DB, query string) error {
+func (d *Documents) Find(
+	db *gorm.DB, query interface{}, queryArgs ...interface{}) error {
+
 	return db.
-		Where(query).
+		Where(query, queryArgs...).
 		Preload(clause.Associations).
 		Find(&d).Error
 }
