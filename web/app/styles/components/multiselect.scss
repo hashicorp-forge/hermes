@@ -8,6 +8,7 @@
   background-size: var(--token-form-select-background-image-size);
   background-repeat: no-repeat;
   box-shadow: var(--token-elevation-low-box-shadow);
+  @apply p-1;
 
   &--narrow {
     min-width: 0;
@@ -36,7 +37,7 @@
   }
 
   .ember-power-select-multiple-options {
-    @apply flex flex-wrap h-full;
+    @apply flex flex-wrap h-full mr-6;
   }
 
   .ember-power-select-trigger-multiple-input {
@@ -48,35 +49,14 @@
   }
 
   .ember-power-select-multiple-option {
-    position: relative;
-    border: none;
-    padding: 3px 7px;
-    cursor: pointer;
-    flex-basis: 0;
-    white-space: nowrap;
+    @apply flex items-center px-0 m-0.5 max-w-[100%] relative pr-7 pl-1.5 py-1 border-0;
 
-    // avoid overlapping the dropdown affordance
-    width: calc(100% - 28px);
-
-    &:hover {
-      background: var(--token-color-palette-neutral-200);
-    }
-
-    .flight-icon {
-      vertical-align: middle;
-    }
-
-    // This is an unremovable element used to remove selected options.
-    // We don't want the little x at all, but we need to continue to use this
-    // button, so we're hacking it a bit.
     .ember-power-select-multiple-remove-btn {
-      position: absolute;
-      left: 0;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      color: transparent;
-      border-radius: var(--token-form-control-border-radius);
+      @apply absolute right-1 grid place-items-center h-5 w-5 shrink-0 z-10 rounded-sm text-color-foreground-primary pb-px;
+
+      &:hover {
+        @apply bg-neutral-200;
+      }
 
       &:focus,
       &:active {
