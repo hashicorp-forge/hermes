@@ -1974,6 +1974,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gavant/glint-template-types@npm:^0.3.3":
+  version: 0.3.3
+  resolution: "@gavant/glint-template-types@npm:0.3.3"
+  checksum: 9f80128b67635e93ecb951053812a2c2ce47119384941b76b5c446f2d920568642412ee049d6b1720bc6379adfa8d1b3edb2120112c32ab3862ec5edccde3ab6
+  languageName: node
+  linkType: hard
+
 "@glimmer/component@npm:^1.0.4, @glimmer/component@npm:^1.1.0, @glimmer/component@npm:^1.1.2":
   version: 1.1.2
   resolution: "@glimmer/component@npm:1.1.2"
@@ -11047,6 +11054,7 @@ __metadata:
     "@ember/optional-features": ^2.0.0
     "@ember/test-helpers": ^2.6.0
     "@floating-ui/dom": ^1.2.4
+    "@gavant/glint-template-types": ^0.3.3
     "@glimmer/component": ^1.0.4
     "@glimmer/tracking": ^1.0.4
     "@glint/core": ^1.0.1
