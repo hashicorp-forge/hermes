@@ -3,8 +3,8 @@ import { helper } from "@ember/component/helper";
 interface AddHelperSignature {
   Args: {
     Positional: [first: string | number, second: string | number];
-    Return: number;
   };
+  Return: number;
 }
 
 const addHelper = helper<AddHelperSignature>(

@@ -3,8 +3,8 @@ import { helper } from "@ember/component/helper";
 export interface GetFirstLetterSignature {
   Args: {
     Positional: [maybeString: string | null | undefined];
-    Return: string | null;
   };
+  Return: string | null;
 }
 
 const getFirstLetter = helper<GetFirstLetterSignature>(

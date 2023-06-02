@@ -3,8 +3,8 @@ import { helper } from "@ember/component/helper";
 export interface LowercaseHelperSignature {
   Args: {
     Positional: [value: string | number | boolean | undefined];
-    Return: string;
   };
+  Return: string;
 }
 
 const lowercaseHelper = helper<LowercaseHelperSignature>(

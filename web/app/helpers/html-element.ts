@@ -4,8 +4,8 @@ import htmlElement from "hermes/utils/html-element";
 interface HtmlElementHelperSignature {
   Args: {
     Positional: [selector: string];
-    Return: HTMLElement;
   };
+  Return: HTMLElement;
 }
 
 const htmlElementHelper = helper<HtmlElementHelperSignature>(
