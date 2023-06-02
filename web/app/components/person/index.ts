@@ -4,7 +4,7 @@ interface PersonComponentSignature {
   Element: HTMLDivElement;
   Args: {
     email: string;
-    imgURL?: string;
+    imgURL?: string | null;
     ignoreUnknown?: boolean;
     badge?: string;
   };

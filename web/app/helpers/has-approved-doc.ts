@@ -1,14 +1,14 @@
 import { helper } from "@ember/component/helper";
 import { HermesDocument } from "hermes/types/document";
 
-export interface HasApprovedDocSignature {
+interface HasApprovedDocHelperSignature {
   Args: {
-    Positional: [HermesDocument, string];
+    Positional: [document: HermesDocument, approverEmail: string];
   };
   Return: boolean;
 }
 
-const hasApprovedDoc = helper<HasApprovedDocSignature>(
+const hasApprovedDocHelper = helper<HasApprovedDocHelperSignature>(
   ([document, approverEmail]: [HermesDocument, string]) => {
     if (document.approvedBy) {
       return document.approvedBy.some((email) => email === approverEmail);
@@ -18,10 +18,10 @@ const hasApprovedDoc = helper<HasApprovedDocSignature>(
   }
 );
 
-export default hasApprovedDoc;
+export default hasApprovedDocHelper;
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "has-approved-doc": typeof hasApprovedDoc;
+    "has-approved-doc": typeof hasApprovedDocHelper;
   }
 }

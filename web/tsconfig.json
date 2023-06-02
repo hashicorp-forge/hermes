@@ -20,5 +20,13 @@
   "glint": {
     "environment": "ember-loose"
   },
-  "include": ["app/**/*", "tests/**/*", "types/**/*"]
+  "include": [
+    "app/**/*",
+    "tests/**/*",
+    "types/**/*",
+    "node_modules/@gavant/glint-template-types/types/ember-concurrency/perform.d.ts",
+    "node_modules/@gavant/glint-template-types/types/ember-on-helper/on-document.d.ts",
+    "node_modules/@gavant/glint-template-types/types/ember-render-modifiers/*",
+    "node_modules/@gavant/glint-template-types/types/ember-truth-helpers/*"
+  ]
 }

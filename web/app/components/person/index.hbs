@@ -1,7 +1,7 @@
 {{! @glint-nocheck - not typesafe yet}}
 {{#unless this.isHidden}}
   <div class="flex space-x-2 w-full" ...attributes>
-    <div class="relative">
+    <div class="relative shrink-0">
       {{#if (eq @badge "approved")}}
         <div
           data-test-person-approved-badge
@@ -14,7 +14,7 @@
         </div>
       {{/if}}
       <div
-        class="w-5 h-5 shrink-0 overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
+        class="w-5 h-5 overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
       >
         {{#if @imgURL}}
           <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />

@@ -4,23 +4,26 @@ import { inject as service } from "@ember/service";
 import { FacetName } from "hermes/components/header/toolbar";
 import ActiveFiltersService from "hermes/services/active-filters";
 
+interface GetFacetQueryHashHelperSignature {
+  Args: {
+    Positional: [facetName: string, clickedFilter: string, isSelected: boolean];
+  };
+}
 /**
  * Generates a query hash appropriate for the facet item.
  * If the facet is in the ActiveFiltersService index, it will
  * be removed from the query hash. Otherwise, it'll be added.
  * Used by the FacetDropdown to add/remove filters on click.
  */
-export default class GetFacetQueryHashHelper extends Helper {
+export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHelperSignature> {
   @service declare activeFilters: ActiveFiltersService;
 
-  compute([facetName, clickedFilter, isSelected]: [
-    string,
-    string,
-    boolean,
-    () => void
-  ]) {
+  compute(
+    positional: [facetName: string, clickedFilter: string, isSelected: boolean]
+  ) {
     // Translate the UI facetName to the one used in the query hash.
     let translatedFacetName;
+    let [facetName, clickedFilter, isSelected] = positional;
 
     switch (facetName) {
       case "Type":
@@ -55,5 +58,11 @@ export default class GetFacetQueryHashHelper extends Helper {
         page: 1,
       };
     }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "get-facet-query-hash": typeof GetFacetQueryHashHelper;
   }
 }
