@@ -1,26 +1,19 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import {
-  click,
-  fillIn,
-  render,
-  triggerKeyEvent,
-  teardownContext,
-  triggerEvent,
-} from "@ember/test-helpers";
+import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 
-const KEYBOARD_SHORTCUT_SELECTOR = "[data-test-search-keyboard-shortcut]";
+const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
 const POPOVER_SELECTOR = ".search-popover";
-const BEST_MATCHES_HEADER_SELECTOR = "[data-test-search-best-matches-header]";
+const BEST_MATCHES_HEADER_SELECTOR = ".global-search-best-matches-header";
 const SEARCH_RESULT_SELECTOR = "[data-test-search-result]";
-const SEARCH_RESULT_TITLE_SELECTOR = "[data-test-search-result-title]";
+const SEARCH_RESULT_TITLE_SELECTOR = ".global-search-result-title";
 const SEARCH_RESULT_OWNER_SELECTOR = "[data-test-search-result-owner]";
 const SEARCH_RESULT_SNIPPET_SELECTOR = "[data-test-search-result-snippet]";
-const VIEW_ALL_RESULTS_LINK_SELECTOR = "[data-test-view-all-results-link]";
+const VIEW_ALL_RESULTS_LINK_SELECTOR = ".global-search-popover-header-link";
 const PRODUCT_MATCH_LINK_SELECTOR = "[data-test-product-match-link]";
 const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 
