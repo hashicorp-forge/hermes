@@ -68,13 +68,28 @@ func refreshDocumentHeaders(
 			// All document statuses > WIPDocumentStatus are for published documents.
 			"locked = ? AND status > ?", true, models.WIPDocumentStatus)
 	}
+	var lockedDocIDs []string
 	for _, d := range lockedDocs {
 		f, err := idx.GoogleWorkspaceService.GetFile(d.GoogleFileID)
 		if err != nil {
 			return fmt.Errorf("error getting file (%s): %w", d.GoogleFileID, err)
 		}
-		docs = append(docs, f)
+
+		// Find if locked document is already in slice of updated documents and
+		// append it if not.
+		alreadyInDocs := false
+		for _, doc := range docs {
+			if doc.Id == d.GoogleFileID {
+				alreadyInDocs = true
+				break
+			}
+		}
+		if !alreadyInDocs {
+			docs = append(docs, f)
+		}
+		lockedDocIDs = append(lockedDocIDs, d.GoogleFileID)
 	}
+	log.Info(fmt.Sprintf("locked document IDs: %v", lockedDocIDs))
 
 	// Return if there are no updated documents.
 	if len(docs) == 0 {
@@ -140,7 +155,8 @@ func refreshDocumentHeader(
 	log := idx.Logger
 
 	// Check if document is locked.
-	locked, err := hcd.IsLocked(file.Id, idx.Database, idx.GoogleWorkspaceService)
+	locked, err := hcd.IsLocked(
+		file.Id, idx.Database, idx.GoogleWorkspaceService, log)
 	if err != nil {
 		log.Error("error checking document locked status",
 			"error", err,

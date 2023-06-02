@@ -249,7 +249,7 @@ func DocumentHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s)
+			locked, err := hcd.IsLocked(docID, db, s, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,

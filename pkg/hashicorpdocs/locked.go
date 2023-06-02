@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/docs/v1"
 	"gorm.io/gorm"
 )
@@ -12,7 +13,11 @@ import (
 // IsLocked checks if a document contains one or more suggestions in the header,
 // locks/unlocks the document accordingly, and returns the lock status.
 func IsLocked(
-	fileID string, db *gorm.DB, goog *googleworkspace.Service) (bool, error) {
+	fileID string,
+	db *gorm.DB,
+	goog *googleworkspace.Service,
+	log hclog.Logger,
+) (bool, error) {
 
 	// Get document from database.
 	doc := models.Document{
@@ -39,6 +44,13 @@ func IsLocked(
 				return false, fmt.Errorf(
 					"error upserting document in database to lock it: %w", err)
 			}
+			log.Info("locked document",
+				"google_file_id", fileID,
+			)
+		} else {
+			log.Warn("locked document still contains suggestions in header",
+				"google_file_id", fileID,
+			)
 		}
 	} else {
 		// Unlock document if it was locked and doesn't contain a suggestion in the
@@ -53,6 +65,13 @@ func IsLocked(
 				return false, fmt.Errorf(
 					"error updating document in database to unlock it: %w", err)
 			}
+			log.Info("unlocked document",
+				"google_file_id", fileID,
+			)
+		} else {
+			log.Warn("document was already unlocked",
+				"google_file_id", fileID,
+			)
 		}
 	}
 
