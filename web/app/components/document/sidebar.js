@@ -13,7 +13,6 @@ export default class DocumentSidebar extends Component {
   @service router;
   @service session;
   @service flashMessages;
-
   @tracked isCollapsed = false;
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
@@ -43,12 +42,27 @@ export default class DocumentSidebar extends Component {
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
   @tracked tags = this.args.document.tags || [];
-
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
+  @tracked product = this.args.document.product || "";
 
   @tracked userHasScrolled = false;
   @tracked body = null;
+
+  /**
+   * If the user is saving a new product, this will be the new product.
+   * Reset when the save task fails.
+   */
+  @tracked _newProduct = null;
+
+  /**
+   * The currently selected product. If the user is saving a new product,
+   * this will be the new product. Otherwise, it will be the product that the
+   * saved document is associated with.
+   */
+  get selectedProductArea() {
+    return this._newProduct || this.args.document.product;
+  }
 
   get docIsLocked() {
     return this.args.document?.locked;
@@ -204,6 +218,12 @@ export default class DocumentSidebar extends Component {
     });
   }
 
+  @task({ restartable: true })
+  *updateProduct(product) {
+    this._newProduct = product;
+    yield this.save.perform("product", this._newProduct);
+  }
+
   @task
   *save(field, val) {
     if (field && val) {
@@ -221,6 +241,7 @@ export default class DocumentSidebar extends Component {
       } catch (err) {
         // revert field value on failure
         this[field] = oldVal;
+        this._newProduct = null;
       }
     }
   }
