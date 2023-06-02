@@ -128,6 +128,7 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
+	ui.Info("starting indexer...")
 	go func() int {
 		if err := idx.Run(); err != nil {
 			ui.Error(err.Error())
