@@ -188,7 +188,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   // Because we redirect as part of the authentication flow, the parameter storing the transition gets reset. Instead, we keep track of the redirectTarget in browser sessionStorage and override the handleAuthentication method as recommended by ember-simple-auth.
 
   handleAuthentication(routeAfterAuthentication: string) {
-    if (this.authenticatedUser.info) {
+    if (this.authenticatedUser._info) {
       /**
        * This will be true when reauthenticating via the "token expired" message.
        * Since we already have cached userInfo, we don't need to await it.
