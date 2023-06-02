@@ -1,0 +1,85 @@
+{{! @glint-nocheck - not typesafe yet }}
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div data-test-product-select>
+  {{#if this.products}}
+    {{#if @formatIsBadge}}
+      <Inputs::BadgeDropdownList
+        @items={{this.products}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        @icon={{this.icon}}
+        class="w-80"
+        ...attributes
+      >
+        <:item as |dd|>
+          <dd.Action data-test-product-select-badge-dropdown-item>
+            <Inputs::ProductSelect::Item
+              @product={{dd.value}}
+              @selected={{dd.selected}}
+            />
+          </dd.Action>
+        </:item>
+      </Inputs::BadgeDropdownList>
+    {{else}}
+      <X::DropdownList
+        @items={{this.products}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        class="w-[300px] max-h-[305px]"
+        ...attributes
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            data-test-product-select-default-dropdown-toggle
+            class="x-dropdown-list-toggle-select min-w-[250px] relative flex items-center flex-start hds-button leading-none hds-button--color-secondary hds-button--size-medium"
+          >
+            <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
+
+            <span
+              data-test-product-select-selected-value
+              class="flex ml-2.5 leading-none"
+            >
+              {{or @selected "--"}}
+            </span>
+
+            {{#if this.selectedProductAbbreviation}}
+              <span
+                data-test-product-select-toggle-abbreviation
+                class="opacity-50 inline-flex ml-2 text-body-100 leading-none"
+              >
+                {{this.selectedProductAbbreviation}}
+              </span>
+            {{/if}}
+
+            <FlightIcon
+              @name="caret"
+              class="absolute top-1/2 -translate-y-1/2 right-2 text-color-foreground-faint"
+            />
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action class="pr-5">
+            <Inputs::ProductSelect::Item
+              @product={{dd.value}}
+              @selected={{dd.selected}}
+              @abbreviation={{dd.attrs.abbreviation}}
+            />
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    {{/if}}
+  {{else if this.fetchProducts.isRunning}}
+    <FlightIcon data-test-product-select-spinner @name="loading" />
+  {{else}}
+    <div
+      class="absolute top-0 left-0"
+      {{did-insert (perform this.fetchProducts)}}
+    ></div>
+  {{/if}}
+</div>
