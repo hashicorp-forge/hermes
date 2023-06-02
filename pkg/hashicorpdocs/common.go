@@ -44,6 +44,7 @@ type Doc interface {
 	SetContent(s string)
 	SetDocNumber(string)
 	SetFileRevision(string, string)
+	SetLocked(bool)
 	SetModifiedTime(int64)
 	SetStatus(string)
 

@@ -81,5 +81,9 @@
 
   .sidebar-footer {
     @apply w-full bg-color-page-faint shrink-0 py-4 px-3.5;
+
+    &.locked {
+      @apply pt-0;
+    }
   }
 }
