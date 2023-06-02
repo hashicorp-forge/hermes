@@ -4,8 +4,8 @@ import { HermesDocument } from "hermes/types/document";
 interface HasApprovedDocHelperSignature {
   Args: {
     Positional: [document: HermesDocument, approverEmail: string];
-    Return: boolean;
   };
+  Return: boolean;
 }
 
 const hasApprovedDocHelper = helper<HasApprovedDocHelperSignature>(
