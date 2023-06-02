@@ -1,12 +1,13 @@
 import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import SessionService, {
-  REDIRECT_STORAGE_KEY,
-  isJSON,
-} from "hermes/services/session";
+import { REDIRECT_STORAGE_KEY, isJSON } from "hermes/services/session";
 import window from "ember-window-mock";
 
 const TEST_STORAGE_KEY = `test-${REDIRECT_STORAGE_KEY}`;
+
+interface MockSessionService {
+  handleAuthentication(): string | null;
+}
 
 module("Unit | Service | session", function (hooks) {
   setupTest(hooks);
@@ -17,13 +18,14 @@ module("Unit | Service | session", function (hooks) {
   });
 
   test("it handles authentication", async function (assert) {
-    const sessionSvc = this.owner.lookup("service:session") as SessionService;
+    const sessionSvc = this.owner.lookup(
+      "service:session"
+    ) as MockSessionService;
 
     /**
      * Mock the handleAuthentication method
      */
-
-    sessionSvc.handleAuthentication = (_routeAfterAuthentication: string) => {
+    sessionSvc.handleAuthentication = () => {
       // See if there is a redirect object in sessionStorage
       let redirectObject = window.sessionStorage.getItem(TEST_STORAGE_KEY);
 
@@ -62,7 +64,7 @@ module("Unit | Service | session", function (hooks) {
      * Start assertions
      */
 
-    assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
+    assert.equal(sessionSvc.handleAuthentication(), "redirect not found");
 
     window.sessionStorage.setItem(TEST_STORAGE_KEY, "testURL");
     window.localStorage.setItem(
@@ -74,7 +76,7 @@ module("Unit | Service | session", function (hooks) {
     );
 
     assert.equal(
-      sessionSvc.handleAuthentication("none"),
+      sessionSvc.handleAuthentication(),
       "session-stored redirect: testURL",
       "redirects from sessionStorage when possible"
     );
@@ -82,7 +84,7 @@ module("Unit | Service | session", function (hooks) {
     window.sessionStorage.removeItem(TEST_STORAGE_KEY);
 
     assert.equal(
-      sessionSvc.handleAuthentication("none"),
+      sessionSvc.handleAuthentication(),
       "locally-stored redirect: testURL",
       "redirects from localStorage when sessionStorage is empty"
     );
@@ -95,7 +97,7 @@ module("Unit | Service | session", function (hooks) {
       })
     );
 
-    assert.equal(sessionSvc.handleAuthentication("none"), "redirect not found");
+    assert.equal(sessionSvc.handleAuthentication(), "redirect not found");
 
     assert.equal(
       window.localStorage.getItem(TEST_STORAGE_KEY),
