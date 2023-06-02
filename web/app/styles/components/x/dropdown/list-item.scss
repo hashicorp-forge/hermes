@@ -22,10 +22,6 @@
   .flight-icon {
     @apply shrink-0;
 
-    &.check {
-      @apply mr-2.5;
-    }
-
     .x-dropdown-list-item {
       @apply flex;
     }

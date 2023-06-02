@@ -44,7 +44,6 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
         middleware: [offset(this.offset), flip(), shift()],
       }).then(({ x, y, placement }) => {
         this.content.setAttribute("data-floating-ui-placement", placement);
-
         Object.assign(this.content.style, {
           left: `${x}px`,
           top: `${y}px`,
