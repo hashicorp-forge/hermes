@@ -148,6 +148,26 @@ func DocumentHandler(
 			// Set custom editable fields.
 			docObj.SetCustomEditableFields()
 
+			// Get document from database.
+			doc := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := doc.Get(db); err != nil {
+				l.Error("error getting document from database",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error requesting document",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Set locked value for response to value from the database (this value
+			// isn't stored in Algolia).
+			docObj.SetLocked(doc.Locked)
+
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -225,6 +245,24 @@ func DocumentHandler(
 				l.Error("error decoding document patch request", "error", err)
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 
