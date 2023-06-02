@@ -12,7 +12,7 @@
       @renderOut={{true}}
       @placement="bottom-start"
       @offset={{hash mainAxis=3 crossAxis=-6}}
-      @isLoading={{or this.search.isRunning this.fetchURLInfo.isRunning}}
+      @isLoading={{this.maybeLoadSuggestions.isRunning}}
       class="w-full"
     >
       <:anchor as |dd|>
@@ -33,16 +33,22 @@
           />
         </dd.ToggleAction>
       </:anchor>
-      <:header>
-        {{! @glint-ignore - not yet registered}}
-        <Hds::Form::TextInput::Base
-          value={{this.query}}
-          {{on "input" (perform this.onInput)}}
-          {{on "keydown" this.onKeydown}}
-          {{did-insert this.registerAndFocusSearchInput}}
-          type="text"
-          placeholder="Paste a URL or search documents..."
-        />
+      <:header as |dd|>
+        <div
+          class="x-dropdown-list-input-container"
+          {{will-destroy this.willDestroy}}
+        >
+
+          {{! @glint-ignore - not yet registered}}
+          <Hds::Form::TextInput::Base
+            value={{this.query}}
+            {{on "input" (perform this.onInput dd)}}
+            {{on "keydown" this.onKeydown}}
+            {{did-insert this.registerAndFocusSearchInput}}
+            type="text"
+            placeholder="Paste a URL or search documents..."
+          />
+        </div>
       </:header>
       <:item as |dd|>
         <dd.Action
