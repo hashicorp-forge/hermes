@@ -49,6 +49,10 @@ export default class DocumentSidebar extends Component {
   @tracked userHasScrolled = false;
   @tracked body = null;
 
+  /**
+   * If the user is saving a new product, this will be the new product.
+   * Reset when the save task fails.
+   */
   @tracked _newProduct = null;
 
   /**
@@ -192,13 +196,6 @@ export default class DocumentSidebar extends Component {
     getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
   }
 
-  @task({ restartable: true })
-  *updateProduct(product) {
-    this._newProduct = product;
-    this.product = product;
-    yield this.save.perform("product", this.product);
-  }
-
   @action maybeShowFlashError(error, title) {
     if (!this.modalIsActive) {
       this.flashMessages.add({
@@ -219,6 +216,12 @@ export default class DocumentSidebar extends Component {
       timeout: 6000,
       extendedTimeout: 1000,
     });
+  }
+
+  @task({ restartable: true })
+  *updateProduct(product) {
+    this._newProduct = product;
+    yield this.save.perform("product", this._newProduct);
   }
 
   @task
