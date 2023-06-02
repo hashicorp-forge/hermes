@@ -716,7 +716,7 @@ func DraftsDocumentHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docId, db, s)
+			locked, err := hcd.IsLocked(docId, db, s, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
