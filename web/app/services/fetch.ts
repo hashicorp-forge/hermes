@@ -50,6 +50,7 @@ export default class FetchService extends Service {
           // handle poll-call failures via the session service
           return;
         }
+        console.error("fetch error:", resp);
         throw new Error(`Bad response: ${resp.statusText}`);
       }
 
