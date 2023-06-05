@@ -28,11 +28,15 @@ export default Factory.extend({
   docType: "RFC",
   modifiedAgo: 1000000000,
   modifiedTime: 1,
-  docNumber: (i: number) => `RFC-00${i}`,
+  docNumber() {
+    // @ts-ignore - Mirage types are wrong
+    // See discussion at https://github.com/miragejs/miragejs/pull/525
+    return getTestDocNumber(this.product);
+  },
   _snippetResult: {
     content: {
       value: "This is a test document",
     },
   },
-  owners: ["Test user"]
+  owners: ["Test user"],
 });
