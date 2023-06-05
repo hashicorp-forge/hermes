@@ -50,7 +50,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   get shownDocuments(): { [key: string]: HermesDocument } {
     /**
-     * Currently the array looks like this:
+     * The array initially looks like this:
      * [{title: "foo", objectID: "bar"...}, ...]
      *
      * We need it to look like:
@@ -214,13 +214,13 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     }
   });
 
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+  @action protected onInput(inputEvent: Event) {
     const input = inputEvent.target as HTMLInputElement;
     this.query = input.value;
 
     void this.checkURL.perform();
     void this.search.perform(this.query);
-  });
+  }
 
   protected checkURL = restartableTask(async () => {
     const url = this.query;

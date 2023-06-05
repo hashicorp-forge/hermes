@@ -42,7 +42,7 @@
           {{! @glint-ignore - not yet registered}}
           <Hds::Form::TextInput::Base
             value={{this.query}}
-            {{on "input" (perform this.onInput dd)}}
+            {{on "input" this.onInput}}
             {{on "keydown" this.onKeydown}}
             {{did-insert this.registerAndFocusSearchInput}}
             type="text"
