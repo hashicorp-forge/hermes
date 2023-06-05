@@ -186,7 +186,7 @@ export default class DocumentSidebar extends Component {
     if (!this.modalIsActive) {
       this.flashMessages.add({
         title,
-        message: error.message,
+        message: `${error}`,
         type: "critical",
         timeout: 6000,
         extendedTimeout: 1000,
