@@ -10,7 +10,7 @@ import { restartableTask, timeout } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 
 interface InputsDocumentSelect3ComponentSignature {
   Args: {
@@ -40,6 +40,8 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @tracked faviconURL: string | null = null;
   @tracked _shownDocuments: HermesDocument[] | null = null;
   @tracked searchInput: HTMLInputElement | null = null;
+
+  @tracked contentIsShown = false;
 
   get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
     let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
@@ -76,6 +78,17 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       });
     }
   });
+
+  @action showContent() {
+    this.contentIsShown = true;
+  }
+
+  @action didInsertContent(e: HTMLElement) {
+    next(() => {
+      e.click();
+      void this.search.perform("");
+    });
+  }
 
   @action registerAndFocusSearchInput(e: HTMLInputElement) {
     this.searchInput = e;
