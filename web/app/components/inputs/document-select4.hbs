@@ -10,7 +10,7 @@
       @onItemClick={{this.addRelatedDocument}}
       @inputVisibility="hidden"
       @renderOut={{true}}
-      @placement="bottom-start"
+      @placement="none"
       @offset={{hash mainAxis=3 crossAxis=-6}}
       @isLoading={{this.maybeLoadSuggestions.isRunning}}
       class="w-full"
@@ -27,16 +27,10 @@
           {{on "click" (perform this.maybeLoadSuggestions dd)}}
         >
           <FlightIcon @name="plus" />
-          <FlightIcon
-            @name="chevron-down"
-            class="scale-75 text-color-foreground-faint origin-left -mr-1"
-          />
         </dd.ToggleAction>
       </:anchor>
-      <:header as |dd|>
-        <div
-          class="x-dropdown-list-input-container"
-        >
+      <:header>
+        <div class="x-dropdown-list-input-container">
 
           {{! @glint-ignore - not yet registered}}
           <Hds::Form::TextInput::Base

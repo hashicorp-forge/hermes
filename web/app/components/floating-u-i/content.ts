@@ -17,9 +17,10 @@ interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
     id: string;
-    placement?: Placement;
+    placement?: Placement | "none";
     renderOut?: boolean;
     offset?: OffsetOptions;
+    isModal?: boolean;
   };
 }
 
@@ -37,10 +38,18 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
+    if (this.args.placement === "none") {
+      this.content.setAttribute("data-floating-ui-placement", "none");
+      this.cleanup = () => {};
+      return;
+    }
+
     let updatePosition = async () => {
+      let placement = this.args.placement || "bottom-start";
+
       computePosition(this.args.anchor, this.content, {
-        platform: platform,
-        placement: this.args.placement || "bottom-start",
+        platform,
+        placement: placement as Placement,
         middleware: [offset(this.offset), flip(), shift()],
       }).then(({ x, y, placement }) => {
         this.content.setAttribute("data-floating-ui-placement", placement);
