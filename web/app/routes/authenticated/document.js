@@ -31,7 +31,7 @@ export default class DocumentRoute extends Route {
   showErrorMessage(err) {
     this.flashMessages.add({
       title: "Error fetching document",
-      message: `${err}`,
+      message: err.message,
       type: "critical",
       sticky: true,
       extendedTimeout: 1000,
