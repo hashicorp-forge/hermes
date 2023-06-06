@@ -1,22 +1,25 @@
-<Action
-  class="more-button"
-  {{on "click" this.togglePopover}}
-  {{did-insert this.didInsertTrigger}}
->
-  <FlightIcon @name="more-vertical" class="text-color-foreground-faint" />
-</Action>
-
-{{#if this.popoverIsShown}}
-  <div
-    class="popover more-popover overflow-hidden"
-    {{dismissible dismiss=this.togglePopover related=this.trigger}}
-  >
+<FloatingUI @renderOut={{true}} @placement="bottom" class="z-10">
+  <:anchor as |dd|>
     <Action
-      {{on "click" (fn @removeResource @resource)}}
-      class="py-1.5 pl-3 pr-3.5 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical rounded-sm"
+      class="more-button"
+      {{did-insert dd.registerAnchor}}
+      {{on "click" dd.toggleContent}}
     >
-      <FlightIcon @name="trash" class="text-inherit" />
-      <span>Remove</span>
+      <FlightIcon @name="more-vertical" class="text-color-foreground-primary" />
     </Action>
-  </div>
-{{/if}}
+  </:anchor>
+  <:content as |dd|>
+    <div
+      class="hermes-popover p-2"
+      {{dismissible dismiss=dd.hideContent related=dd.anchor}}
+    >
+      <Action
+        {{on "click" (fn @removeResource @resource)}}
+        class="py-1.5 pl-3 pr-3.5 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical rounded-sm"
+      >
+        <FlightIcon @name="trash" class="text-inherit" />
+        <span>Remove</span>
+      </Action>
+    </div>
+  </:content>
+</FloatingUI>

@@ -6,9 +6,19 @@ interface XDropdownListToggleActionComponentSignature {
     registerAnchor: () => void;
     onTriggerKeydown: () => void;
     toggleContent: () => void;
+    contentIsShown: boolean;
     disabled?: boolean;
     ariaControls: string;
+  };
+  Blocks: {
+    default: [];
   };
 }
 
 export default class XDropdownListToggleActionComponent extends Component<XDropdownListToggleActionComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "x/dropdown-list/toggle-action": typeof XDropdownListToggleActionComponent;
+  }
+}

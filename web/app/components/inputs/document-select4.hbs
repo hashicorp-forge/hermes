@@ -1,10 +1,8 @@
 <div class="w-full">
-
   <div class="relative z-10 flex items-center w-full justify-between">
     <div class="hds-typography-body-100 hds-foreground-faint">
       Related docs
     </div>
-    {{! @glint-ignore}}
     <Action
       class="flex items-center ml-px -mr-px px-1 py-1 rounded border hover:border-color-border-strong"
       {{on "click" this.showModal}}
@@ -17,7 +15,7 @@
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
     {{! @glint-ignore}}
-    <Hds::Modal as |M|>
+    <Hds::Modal @onClose={{this.hideModal}} as |M|>
       <M.Header>Add related documents</M.Header>
       <M.Body>
         <X::DropdownList
@@ -81,8 +79,6 @@
 {{#if this.relatedResources.length}}
   <ul class="mt-1 related-docs">
     {{#each-in this.relatedResources as |i doc|}}
-      {{log i}}
-      {{log doc}}
       <li
         class="flex w-full relative group related-docs-list-item
           {{if doc.objectID 'hermes-doc' 'external-doc'}}"

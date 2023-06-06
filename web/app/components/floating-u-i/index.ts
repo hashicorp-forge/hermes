@@ -12,6 +12,18 @@ interface FloatingUIComponentSignature {
     placement?: Placement | "none";
     disableClose?: boolean;
   };
+  Blocks: {
+    anchor: [dd: {
+      ToggleAction: any; // FIXME
+      registerAnchor: (element: HTMLElement) => void;
+      toggleContent: () => void;
+    }];
+    content: [dd: {
+      hideContent: () => void;
+      anchor: HTMLElement;
+      contentID: string;
+    }];
+  }
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
@@ -53,5 +65,11 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
       return;
     }
     this.contentIsShown = false;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    FloatingUI: typeof FloatingUIComponent;
   }
 }

@@ -74,6 +74,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     this.modalIsShown = true;
   }
 
+  @action hideModal() {
+    this.modalIsShown = false;
+  }
+
   @action addRelatedExternalLink() {
     let displayURL;
 
@@ -114,6 +118,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     if (document) {
       this.relatedDocuments.unshiftObject(document);
     }
+    this.hideModal();
   }
 
   @action showDuplicateMessage() {
