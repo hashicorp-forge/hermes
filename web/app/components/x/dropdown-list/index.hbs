@@ -6,12 +6,12 @@
   https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
   https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
 }}
-{{log @isLoading}}
 <FloatingUI
   @renderOut={{@renderOut}}
   @placement={{@placement}}
   @offset={{@offset}}
-  class="hermes-popover x-dropdown-list"
+  @disableClose={{@disableClose}}
+  class="{{unless (eq @placement 'none') 'hermes-popover'}} x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -83,7 +83,6 @@
       role={{if this.inputIsShown "combobox"}}
     >
       {{#if @isLoading}}
-            {{log "shit"}}
         {{#if (has-block "loading")}}
           {{yield to="loading"}}
         {{else}}

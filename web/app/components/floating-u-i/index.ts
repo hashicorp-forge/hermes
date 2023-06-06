@@ -9,7 +9,8 @@ interface FloatingUIComponentSignature {
   Element: HTMLDivElement;
   Args: {
     renderOut?: boolean;
-    placement?: Placement;
+    placement?: Placement | "none";
+    disableClose?: boolean;
   };
 }
 
@@ -18,7 +19,7 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
 
   @tracked _anchor: HTMLElement | null = null;
   @tracked content: HTMLElement | null = null;
-  @tracked contentIsShown: boolean = false;
+  @tracked contentIsShown: boolean = this.args.disableClose || false;
 
   get anchor() {
     assert("_anchor must exist", this._anchor);
@@ -41,10 +42,16 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
   }
 
   @action showContent() {
+    if (this.args.disableClose) {
+      return;
+    }
     this.contentIsShown = true;
   }
 
   @action hideContent() {
+    if (this.args.disableClose) {
+      return;
+    }
     this.contentIsShown = false;
   }
 }

@@ -2,14 +2,12 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import { OffsetOptions } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
-import XDropdownListActionComponent from "./action";
-import { ComponentLike, WithBoundArgs } from "@glint/template";
 
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
@@ -22,6 +20,8 @@ interface XDropdownListComponentSignature {
     offset?: OffsetOptions;
     renderOut?: boolean;
     isLoading?: boolean;
+    placement?: Placement | "none";
+    disableClose?: boolean;
   };
   Blocks: {
     anchor: [
@@ -270,6 +270,10 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
   }
 
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
+  }
+
   /**
    * Checks whether the focused item is completely visible,
    * and, if necessary, scrolls the dropdown to make it visible.
@@ -293,9 +297,6 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
   }
 
-  @action protected resetFocusedItemIndex() {
-    this.focusedItemIndex = -1;
-  }
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules

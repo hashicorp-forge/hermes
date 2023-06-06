@@ -6,11 +6,11 @@ import { inject as service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
-import { dropTask, restartableTask, timeout } from "ember-concurrency";
+import { dropTask, restartableTask } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { next, schedule } from "@ember/runloop";
+import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
 
 interface InputsDocumentSelect3ComponentSignature {
@@ -72,7 +72,6 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action showModal() {
     this.modalIsShown = true;
-    void this.loadInitialData.perform();
   }
 
   @action addRelatedExternalLink() {
@@ -144,8 +143,9 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     dd.onTriggerKeydown(dd.contentIsShown, dd.showContent, e);
   }
 
-  @action registerInput(e: HTMLInputElement) {
+  @action didInsertInput(dd: any, e: HTMLInputElement) {
     this.searchInput = e;
+    void this.loadInitialData.perform(dd);
 
     next(() => {
       assert("searchInput expected", this.searchInput);
@@ -160,7 +160,6 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   }
 
   @action maybeOpenDropdown(dd: any) {
-    console.log("showing content");
     if (!dd.contentIsShown) {
       dd.showContent();
     }
@@ -179,10 +178,8 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     }
   }
 
-  protected loadInitialData = dropTask(async () => {
-    console.log("loadInitialData");
-    await this.search.perform(null, "");
-    await timeout(300)
+  protected loadInitialData = dropTask(async (dd: any) => {
+    await this.search.perform(dd, "");
   });
 
   protected search = restartableTask(async (dd: any, query: string) => {
@@ -211,10 +208,14 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
           optionalFilters: ["product:" + this.args.productArea],
         })
         .then((response) => response);
-
       if (algoliaResponse) {
         this._shownDocuments = algoliaResponse.hits as HermesDocument[];
+        dd.resetFocusedItemIndex();
       }
+
+      next(() => {
+        dd.scheduleAssignMenuItemIDs();
+      });
     } catch (e) {
       console.error(e);
     }

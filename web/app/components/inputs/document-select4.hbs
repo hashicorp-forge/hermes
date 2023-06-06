@@ -18,9 +18,7 @@
   {{#in-element (html-element ".ember-application") insertBefore=null}}
     {{! @glint-ignore}}
     <Hds::Modal as |M|>
-      <M.Header>
-        Add related documents
-      </M.Header>
+      <M.Header>Add related documents</M.Header>
       <M.Body>
         <X::DropdownList
           @items={{this.shownDocuments}}
@@ -28,16 +26,17 @@
           @inputVisibility="hidden"
           @offset={{hash mainAxis=1 crossAxis=0}}
           @isLoading={{this.loadInitialData.isRunning}}
-          class="w-full max-w-none"
+          @placement="none"
+          @disableClose={{true}}
+          class="w-full max-w-none relative h-72"
         >
           <:anchor as |dd|>
             {{! @glint-ignore - not yet registered}}
             <Hds::Form::TextInput::Base
               data-test-global-search-input
               {{did-insert dd.registerAnchor}}
-              {{did-insert this.registerInput}}
+              {{did-insert (fn this.didInsertInput dd)}}
               {{on "input" (fn this.onInput dd)}}
-              {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
               {{on "keydown" (fn this.onInputKeydown dd)}}
               {{on "focusin" (fn this.maybeOpenDropdown dd)}}
               @type="search"

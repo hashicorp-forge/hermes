@@ -12,6 +12,9 @@ interface XDropdownListActionComponentSignature {
     isAriaSelected: boolean;
     isAriaChecked: boolean;
   };
+  Blocks: {
+    default: [];
+  }
 }
 
 export default class XDropdownListActionComponent extends Component<XDropdownListActionComponentSignature> {}
