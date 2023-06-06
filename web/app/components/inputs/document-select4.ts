@@ -11,6 +11,7 @@ import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { next, schedule } from "@ember/runloop";
+import { assert } from "@ember/debug";
 
 interface InputsDocumentSelect3ComponentSignature {
   Args: {
@@ -71,7 +72,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action showModal() {
     this.modalIsShown = true;
-    void this.search.perform(null, "");
+    void this.loadInitialData.perform();
   }
 
   @action addRelatedExternalLink() {
@@ -146,6 +147,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @action registerInput(e: HTMLInputElement) {
     this.searchInput = e;
 
+    next(() => {
+      assert("searchInput expected", this.searchInput);
+      this.searchInput.focus();
+    });
   }
 
   @action maybeCloseDropdown(dd: any) {
@@ -175,7 +180,9 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   }
 
   protected loadInitialData = dropTask(async () => {
+    console.log("loadInitialData");
     await this.search.perform(null, "");
+    await timeout(300)
   });
 
   protected search = restartableTask(async (dd: any, query: string) => {
