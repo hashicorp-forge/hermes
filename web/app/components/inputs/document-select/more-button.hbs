@@ -1,4 +1,8 @@
-<FloatingUI @renderOut={{true}} @placement="bottom" class="z-10">
+<FloatingUI
+  @renderOut={{true}}
+  @placement="bottom-end"
+  class="z-10 min-w-[100px] hermes-popover p-1"
+>
   <:anchor as |dd|>
     <Action
       class="more-button"
@@ -9,17 +13,13 @@
     </Action>
   </:anchor>
   <:content as |dd|>
-    <div
-      class="hermes-popover p-2"
+    <Action
       {{dismissible dismiss=dd.hideContent related=dd.anchor}}
+      {{on "click" (fn @removeResource @resource)}}
+      class="py-1.5 pl-3 pr-3.5 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical rounded-sm"
     >
-      <Action
-        {{on "click" (fn @removeResource @resource)}}
-        class="py-1.5 pl-3 pr-3.5 flex space-x-1 text-color-foreground-critical hover:bg-color-surface-critical rounded-sm"
-      >
-        <FlightIcon @name="trash" class="text-inherit" />
-        <span>Remove</span>
-      </Action>
-    </div>
+      <FlightIcon @name="trash" class="text-inherit" />
+      <span>Remove</span>
+    </Action>
   </:content>
 </FloatingUI>
