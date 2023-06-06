@@ -29,8 +29,7 @@ func AuthenticateRequest(
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
-			http.Error(w,
-				`{"error": "Unauthorized"}`, http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 		if ti.Email == "" {
@@ -38,8 +37,7 @@ func AuthenticateRequest(
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
-			http.Error(w,
-				`{"error": "Unauthorized"}`, http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 

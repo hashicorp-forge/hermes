@@ -37,8 +37,7 @@ func MeHandler(
 				"path", r.URL.Path,
 				"error", err,
 			)
-			errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-			http.Error(w, errJSON, httpCode)
+			http.Error(w, userErrMsg, httpCode)
 		}
 
 		// Authorize request.
@@ -67,8 +66,7 @@ func MeHandler(
 					"path", r.URL.Path,
 					"error", err,
 				)
-				errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-				http.Error(w, errJSON, httpCode)
+				http.Error(w, userErrMsg, httpCode)
 			}
 
 			ppl, err := s.SearchPeople(userEmail, "emailAddresses,names,photos")

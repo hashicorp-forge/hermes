@@ -21,8 +21,7 @@ func AuthenticateRequest(
 		if err != nil {
 			log.Error("error creating Okta authenticator")
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w,
-					`{"error": "Internal server error"}`, http.StatusInternalServerError)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			})
 		}
@@ -55,8 +54,7 @@ func validateUserEmail(
 		log.Error("userEmail is not set in the request context",
 			"method", r.Method,
 			"path", r.URL.Path)
-		http.Error(w,
-			`{"error": "Internal server error"}`, http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 }

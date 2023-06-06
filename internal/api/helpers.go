@@ -106,6 +106,5 @@ func respondError(
 			"path", r.URL.Path,
 		}, extraArgs...)...,
 	)
-	errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-	http.Error(w, errJSON, httpCode)
+	http.Error(w, userErrMsg, httpCode)
 }
