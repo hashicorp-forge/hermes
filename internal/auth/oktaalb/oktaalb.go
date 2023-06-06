@@ -55,7 +55,7 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
-			http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		} else {
 			// Set user email from the OIDC claims.
