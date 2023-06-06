@@ -7,69 +7,73 @@
     {{! @glint-ignore}}
     <Action
       class="flex items-center ml-px -mr-px px-1 py-1 rounded border hover:border-color-border-strong"
-      {{on "click" this.showContent}}
+      {{on "click" this.showModal}}
     >
       <FlightIcon @name="plus" />
     </Action>
   </div>
 </div>
 
-{{#if this.contentIsShown}}
+{{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
-    <div
-      class="absolute top-32 w-[600px] h-96 left-1/2 -translate-x-1/2 bg-red-400 z-50"
-    >
-      {{! @glint-ignore}}
-      <X::DropdownList
-        @items={{this.shownDocuments}}
-        @onItemClick={{this.addRelatedDocument}}
-        @inputVisibility="hidden"
-        @renderOut={{true}}
-        @offset={{hash mainAxis=3 crossAxis=-6}}
-        @isLoading={{this.maybeLoadSuggestions.isRunning}}
-        class="w-full"
-      >
-        <:anchor as |dd|>
-          {{log dd}}
-          <dd.ToggleAction {{did-insert this.didInsertContent}} />
-        </:anchor>
-        <:header>
-          <div class="x-dropdown-list-input-container">
-
+    {{! @glint-ignore}}
+    <Hds::Modal as |M|>
+      <M.Header>
+        Add related documents
+      </M.Header>
+      <M.Body>
+        <X::DropdownList
+          @items={{this.shownDocuments}}
+          @onItemClick={{this.addRelatedDocument}}
+          @inputVisibility="hidden"
+          @offset={{hash mainAxis=1 crossAxis=0}}
+          class="w-full max-w-none"
+          @isLoading={{this.loadInitialData.isRunning}}
+        >
+          <:anchor as |dd|>
             {{! @glint-ignore - not yet registered}}
             <Hds::Form::TextInput::Base
-              value={{this.query}}
-              {{on "input" this.onInput}}
-              {{on "keydown" this.onKeydown}}
-              {{did-insert this.registerAndFocusSearchInput}}
-              type="text"
+              data-test-global-search-input
+              {{did-insert dd.registerAnchor}}
+              {{did-insert this.registerInput}}
+              {{on "input" (fn this.onInput dd)}}
+              {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
+              {{on "keydown" (fn this.onInputKeydown dd)}}
+              {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+              @type="search"
+              @value={{this.query}}
+              size="25"
               placeholder="Paste a URL or search documents..."
+              aria-label="Paste a URL or search documents..."
+              aria-controls={{dd.ariaControls}}
+              aria-expanded={{dd.contentIsShown}}
+              aria-haspopup="listbox"
             />
-          </div>
-        </:header>
-        <:item as |dd|>
-          <dd.Action
-            class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
-          >
-            <div
-              class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
+          </:anchor>
+          <:item as |dd|>
+            <dd.Action
+              class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
             >
-              <img src="/images/document.png" class="w-5 h-auto" />
-            </div>
-            <div>
-              <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                {{dd.attrs.title}}
-              </h4>
-              {{#if dd.attrs.docNumber}}
-                <span class="text-color-foreground-faint text-body-100">
-                  {{dd.attrs.docNumber}}
-                </span>
-              {{/if}}
-            </div>
-          </dd.Action>
-        </:item>
-      </X::DropdownList>
-    </div>
+              <div
+                class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
+              >
+                <img src="/images/document.png" class="w-5 h-auto" />
+              </div>
+              <div>
+                <h4 class="inline-doc-title mb-0.5 pr-0.5">
+                  {{dd.attrs.title}}
+                </h4>
+                {{#if dd.attrs.docNumber}}
+                  <span class="text-color-foreground-faint text-body-100">
+                    {{dd.attrs.docNumber}}
+                  </span>
+                {{/if}}
+              </div>
+            </dd.Action>
+          </:item>
+        </X::DropdownList>
+      </M.Body>
+    </Hds::Modal>
   {{/in-element}}
 {{/if}}
 

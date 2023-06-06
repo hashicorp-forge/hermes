@@ -83,6 +83,7 @@
       role={{if this.inputIsShown "combobox"}}
     >
       {{#if @isLoading}}
+            {{log "shit"}}
         {{#if (has-block "loading")}}
           {{yield to="loading"}}
         {{else}}

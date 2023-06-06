@@ -6,7 +6,7 @@ import { inject as service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
-import { restartableTask, timeout } from "ember-concurrency";
+import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
@@ -41,7 +41,7 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   @tracked _shownDocuments: HermesDocument[] | null = null;
   @tracked searchInput: HTMLInputElement | null = null;
 
-  @tracked contentIsShown = false;
+  @tracked modalIsShown = false;
 
   get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
     let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
@@ -66,33 +66,12 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
         documents[doc.objectID] = doc;
       });
     }
-
     return documents;
   }
 
-  protected maybeLoadSuggestions = restartableTask(async (dd: any) => {
-    if (!dd.contentIsShown) {
-      await this.search.perform("");
-      next(() => {
-        dd.scheduleAssignMenuItemIDs();
-      });
-    }
-  });
-
-  @action showContent() {
-    this.contentIsShown = true;
-  }
-
-  @action didInsertContent(e: HTMLElement) {
-    next(() => {
-      e.click();
-      void this.search.perform("");
-    });
-  }
-
-  @action registerAndFocusSearchInput(e: HTMLInputElement) {
-    this.searchInput = e;
-    this.searchInput.focus();
+  @action showModal() {
+    this.modalIsShown = true;
+    void this.search.perform(null, "");
   }
 
   @action addRelatedExternalLink() {
@@ -147,11 +126,38 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     });
   }
 
-  @action onKeydown(event: KeyboardEvent) {
-    if (event.key === "Enter") {
+  @action onInputKeydown(dd: any, e: KeyboardEvent) {
+    if (e.key === "Enter") {
       if (this.inputValueIsValid) {
         this.addRelatedExternalLink();
+        dd.hideContent();
       }
+    }
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      if (!this.query.length) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    dd.onTriggerKeydown(dd.contentIsShown, dd.showContent, e);
+  }
+
+  @action registerInput(e: HTMLInputElement) {
+    this.searchInput = e;
+
+  }
+
+  @action maybeCloseDropdown(dd: any) {
+    if (dd.contentIsShown) {
+      dd.hideContent();
+    }
+  }
+
+  @action maybeOpenDropdown(dd: any) {
+    console.log("showing content");
+    if (!dd.contentIsShown) {
+      dd.showContent();
     }
   }
 
@@ -168,31 +174,11 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     }
   }
 
-  protected fetchURLInfo = restartableTask(async () => {
-    // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
-    // const urlToFetch = this.inputValue;
-    // const urlToFetch = infoURL;
-
-    try {
-      // Simulate a request
-      await timeout(300);
-      // const response = await this.fetchSvc.fetch(urlToFetch, {
-      //   // For when we make a real request:
-      //   // headers: {
-      //   //   Authorization:
-      //   //     "Bearer " + this.session.data.authenticated.access_token,
-      //   //   "Content-Type": "application/json",
-      //   // },
-      // });
-
-      this.faviconURL =
-        "https://www.google.com/s2/favicons?domain=" + this.query;
-    } catch (e) {
-      console.error(e);
-    }
+  protected loadInitialData = dropTask(async () => {
+    await this.search.perform(null, "");
   });
 
-  protected search = restartableTask(async (query: string) => {
+  protected search = restartableTask(async (dd: any, query: string) => {
     let index =
       this.configSvc.config.algolia_docs_index_name +
       "_createdTime_desc__productRanked";
@@ -227,24 +213,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     }
   });
 
-  @action protected onInput(inputEvent: Event) {
-    const input = inputEvent.target as HTMLInputElement;
+  @action protected onInput(dd: any, e: Event) {
+    const input = e.target as HTMLInputElement;
     this.query = input.value;
 
-    void this.checkURL.perform();
-    void this.search.perform(this.query);
+    void this.search.perform(dd, this.query);
   }
-
-  protected checkURL = restartableTask(async () => {
-    const url = this.query;
-    try {
-      this.inputValueIsValid = Boolean(new URL(url));
-    } catch (e) {
-      this.inputValueIsValid = false;
-    } finally {
-      if (this.inputValueIsValid) {
-        this.fetchURLInfo.perform();
-      }
-    }
-  });
 }

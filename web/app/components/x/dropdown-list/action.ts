@@ -15,3 +15,9 @@ interface XDropdownListActionComponentSignature {
 }
 
 export default class XDropdownListActionComponent extends Component<XDropdownListActionComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    'x/dropdown-list/action': typeof XDropdownListActionComponent;
+  }
+}
