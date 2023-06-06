@@ -188,8 +188,7 @@ func ReviewHandler(
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, `{"error": "Error creating review"}`,
-					http.StatusInternalServerError)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
 				return
 			}
 
@@ -202,8 +201,7 @@ func ReviewHandler(
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, `{"error": "Error creating review"}`,
-					http.StatusInternalServerError)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
 				return
 			}
 			docObj.SetModifiedTime(modifiedTime.Unix())
@@ -515,7 +513,7 @@ func ReviewHandler(
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					http.Error(w, `{"error": "Error sending subscriber email"}`,
+					http.Error(w, "Error sending subscriber email",
 						http.StatusInternalServerError)
 					return
 				}
@@ -545,7 +543,7 @@ func ReviewHandler(
 								"method", r.Method,
 								"path", r.URL.Path,
 							)
-							http.Error(w, `{"error": "Error sending subscriber email"}`,
+							http.Error(w, "Error sending subscriber email",
 								http.StatusInternalServerError)
 							return
 						}

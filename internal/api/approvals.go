@@ -289,19 +289,19 @@ func ApprovalHandler(
 			userEmail := r.Context().Value("userEmail").(string)
 			if docObj.GetStatus() != "In-Review" && docObj.GetStatus() != "In Review" {
 				http.Error(w,
-					`{"error": "Only documents in the "In-Review" status can be approved"}`,
+					"Only documents in the \"In-Review\" status can be approved",
 					http.StatusBadRequest)
 				return
 			}
 			if !contains(docObj.GetApprovers(), userEmail) {
 				http.Error(w,
-					`{"error": "Not authorized as a document approver"}`,
+					"Not authorized as a document approver",
 					http.StatusUnauthorized)
 				return
 			}
 			if contains(docObj.GetApprovedBy(), userEmail) {
 				http.Error(w,
-					`{"error": "Document already approved by user"}`,
+					"Document already approved by user",
 					http.StatusBadRequest)
 				return
 			}

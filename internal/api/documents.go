@@ -215,9 +215,7 @@ func DocumentHandler(
 			// Authorize request (only the owner can PATCH the doc).
 			userEmail := r.Context().Value("userEmail").(string)
 			if docObj.GetOwners()[0] != userEmail {
-				http.Error(w,
-					`{"error": "Not a document owner"}`,
-					http.StatusUnauthorized)
+				http.Error(w, "Not a document owner", http.StatusUnauthorized)
 				return
 			}
 
