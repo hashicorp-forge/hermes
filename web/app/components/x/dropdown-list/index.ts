@@ -313,3 +313,9 @@ declare module "@glint/environment-ember-loose/registry" {
     "X::DropdownList": typeof XDropdownListComponent;
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList": typeof XDropdownListComponent;
+  }
+}

@@ -72,8 +72,7 @@ func DraftsHandler(
 				"path", r.URL.Path,
 				"error", err,
 			)
-			errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-			http.Error(w, errJSON, httpCode)
+			http.Error(w, userErrMsg, httpCode)
 		}
 
 		// Authorize request.
@@ -515,7 +514,7 @@ func DraftsDocumentHandler(
 		}
 		if !isOwner && !isContributor {
 			http.Error(w,
-				`{"error": "Only owners or contributors can access a draft document"}`,
+				"Only owners or contributors can access a draft document",
 				http.StatusUnauthorized)
 			return
 		}
@@ -613,7 +612,7 @@ func DraftsDocumentHandler(
 			// Authorize request.
 			if !isOwner {
 				http.Error(w,
-					`{"error": "Only owners can delete a draft document"}`,
+					"Only owners can delete a draft document",
 					http.StatusUnauthorized)
 				return
 			}

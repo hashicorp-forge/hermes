@@ -50,7 +50,8 @@ export default class FetchService extends Service {
           // handle poll-call failures via the session service
           return;
         }
-        throw new Error(`Bad response: ${resp.statusText}`);
+        const errText = await resp.text();
+        throw new Error(`Bad response: ${errText}`);
       }
 
       return resp;
