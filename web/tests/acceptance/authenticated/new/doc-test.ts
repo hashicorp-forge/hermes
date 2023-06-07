@@ -40,7 +40,7 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     const thumbnailBadgeSelector = "[data-test-doc-thumbnail-product-badge]";
 
     assert.dom(toggleSelector).exists();
-    assert.dom(`${toggleSelector} span`).hasText("--");
+    assert.dom(`${toggleSelector} span`).hasText("Select a product/area");
     assert
       .dom(`${toggleSelector} .flight-icon`)
       .hasAttribute("data-test-icon", "folder");
