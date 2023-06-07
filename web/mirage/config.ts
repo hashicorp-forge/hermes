@@ -2,6 +2,7 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { getTestDocNumber } from "./factories/document";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -308,6 +309,25 @@ export default function (mirageConfig) {
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
         }
       );
+
+      /**
+       * Used by the sidebar to save document properties, e.g., productArea.
+       */
+      this.patch("/drafts/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+
+          if ("product" in attrs) {
+            attrs.docNumber = getTestDocNumber(attrs.product);
+          }
+
+          document.update(attrs);
+          return new Response(200, {}, document.attrs);
+        }
+      });
     },
   };
 

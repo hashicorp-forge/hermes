@@ -1,3 +1,5 @@
+@use "./typography";
+
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -16,6 +18,7 @@
 @use "components/template-card";
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
+@use "components/inputs/product-select/index.scss";
 @use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
