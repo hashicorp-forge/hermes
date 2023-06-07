@@ -643,4 +643,60 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "the anchor is properly registered"
     );
   });
+
+  test("items can conditionally be rendered outside of the list element", async function (assert) {
+    this.set("items", {
+      "View all items": {
+        count: 1,
+        selected: false,
+        itemShouldRenderOut: true,
+      },
+      ...SHORT_ITEM_LIST,
+    });
+
+    await render(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:header>
+          <div class="target-div">
+            {{! Rendered-out items will be go here}}
+          </div>
+        </:header>
+        <:item as |dd|>
+          {{#if dd.attrs.itemShouldRenderOut}}
+            {{#in-element (html-element ".target-div") insertBefore=null}}
+              <div class="rendered-out-div">
+                {{dd.value}}
+              </div>
+            {{/in-element}}
+          {{else}}
+            <div class="rendered-in-div">{{dd.value}}</div>
+          {{/if}}
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert
+      .dom(".rendered-in-div")
+      .exists({ count: 3 }, "the in-list items are rendered");
+
+    assert
+      .dom(".rendered-out-div")
+      .exists({ count: 1 }, "the out-of-list items are rendered");
+
+    assert
+      .dom(".target-div")
+      .hasText(
+        "View all items",
+        "the rendered-out item was place into the target div"
+      );
+
+    assert
+      .dom("li")
+      .exists({ count: 3 }, "there are a correct number of list items");
+  });
 });
