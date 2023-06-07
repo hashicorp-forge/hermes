@@ -125,7 +125,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert
       .dom(VIEW_ALL_RESULTS_LINK_SELECTOR)
       .exists()
-      .hasText(`View all results for "${query}"`)
+      .hasText(`View all results for “${query}”`)
       .hasAttribute("href", `/results?q=${query}`);
   });
 
@@ -167,7 +167,7 @@ module("Integration | Component | header/search", function (hooks) {
     await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText('View all results for "test"');
+      .hasText('View all results for “test”');
 
     await fillIn(SEARCH_INPUT_SELECTOR, "test 3");
 
@@ -179,6 +179,6 @@ module("Integration | Component | header/search", function (hooks) {
 
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText('View all results for "test 3"');
+      .hasText('View all results for “test 3”');
   });
 });
