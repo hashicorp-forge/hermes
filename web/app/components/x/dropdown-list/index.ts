@@ -2,7 +2,7 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
@@ -13,14 +13,17 @@ interface XDropdownListComponentSignature {
   Args: {
     items?: any;
     listIsOrdered?: boolean;
-    selected: any;
+    selected?: any;
     placement?: Placement;
     isSaving?: boolean;
-    onItemClick: (value: any) => void;
+    onItemClick?: (value: any) => void;
+    offset?: OffsetOptions;
   };
+  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
     default: [];
     anchor: [dd: any];
+    header: [dd: any];
     item: [dd: any];
   };
 }
@@ -270,9 +273,14 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
   }
 
+  /**
+   * Sets the focusItemIndex to -1.
+   * Called onInput and when the popover is closed.
+   */
   @action protected resetFocusedItemIndex() {
     this.focusedItemIndex = -1;
   }
+
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules
@@ -295,6 +303,18 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     this.scheduleAssignMenuItemIDs();
   });
 
+  /**
+   * The action that assigns menu item IDs.
+   * Scheduled after render to ensure that the menu items
+   * have been rendered and are available to query, including
+   * after being filtered.
+   *
+   * In cases where items are loaded asynchronously,
+   * e.g., when querying Algolia, the menu items are not
+   * available immediately after render. In these cases,
+   * the component should call `scheduleAssignMenuItemIDs`
+   * in the `next` runloop.
+   */
   @action protected scheduleAssignMenuItemIDs() {
     schedule("afterRender", () => {
       assert(
@@ -305,12 +325,6 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
       );
     });
-  }
-}
-
-declare module "@glint/environment-ember-loose/registry" {
-  export default interface Registry {
-    "X::DropdownList": typeof XDropdownListComponent;
   }
 }
 

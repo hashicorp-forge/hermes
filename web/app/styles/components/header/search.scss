@@ -1,6 +1,5 @@
 .x-dropdown-list.search-popover {
-  // width calculated in the component class
-  @apply max-h-[none] min-w-[420px] max-w-[none];
+  @apply w-[calc(100%+4px)] max-h-[none] min-w-[420px] max-w-[none];
 
   &.no-best-matches {
     .x-dropdown-list-items {

@@ -1,29 +1,43 @@
 {{! @glint-nocheck: not typesafe yet }}
-<li data-test-x-dropdown-list-item class="x-dropdown-list-item" role="none">
-  {{yield
-    (hash
-      Action=(component
-        "x/dropdown-list/action"
-        role=@listItemRole
-        isAriaSelected=this.isAriaSelected
-        isAriaChecked=@selected
-        registerElement=this.registerElement
-        focusMouseTarget=this.focusMouseTarget
-        onClick=this.onClick
-      )
-      LinkTo=(component
-        "x/dropdown-list/link-to"
-        role=@listItemRole
-        isAriaSelected=this.isAriaSelected
-        isAriaChecked=@selected
-        registerElement=this.registerElement
-        focusMouseTarget=this.focusMouseTarget
-        onClick=this.onClick
-      )
-      contentID=@contentID
-      value=@value
-      attrs=@attributes
-      selected=@selected
-    )
+{{#let (element (if @attributes.renderOut "div" "li")) as |MaybeListItem|}}
+  {{#maybe-in-element
+    (html-element ".ember-application")
+    (not @attributes.renderOut)
+    insertBefore=null
   }}
-</li>
+    <MaybeListItem
+      data-test-x-dropdown-list-item
+      class="x-dropdown-list-item
+        {{if @attributes.renderOut 'absolute top-0 left-0'}}"
+      role="none"
+      aria-hidden={{@attributes.renderOut}}
+    >
+      {{yield
+        (hash
+          Action=(component
+            "x/dropdown-list/action"
+            role=@listItemRole
+            isAriaSelected=this.isAriaSelected
+            isAriaChecked=@selected
+            registerElement=this.registerElement
+            focusMouseTarget=this.focusMouseTarget
+            onClick=this.onClick
+          )
+          LinkTo=(component
+            "x/dropdown-list/link-to"
+            role=@listItemRole
+            isAriaSelected=this.isAriaSelected
+            isAriaChecked=@selected
+            registerElement=this.registerElement
+            focusMouseTarget=this.focusMouseTarget
+            onClick=this.onClick
+          )
+          contentID=@contentID
+          value=@value
+          attrs=@attributes
+          selected=@selected
+        )
+      }}
+    </MaybeListItem>
+  {{/maybe-in-element}}
+{{/let}}

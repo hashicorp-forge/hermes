@@ -1,17 +1,13 @@
-{{! @glint-nocheck - not typesafe yet}}
-
-{{on-document "keydown" this.onDocumentKeydown}}
+{{on-document "keydown" this.maybeFocusInput}}
 
 <div ...attributes>
   <form class="w-full relative" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
-      @items={{this.bestMatches}}
-      @offset={{this.popoverOffset}}
+      @items={{this.itemsToShow}}
+      @offset={{hash mainAxis=0 crossAxis=3}}
       @placement="bottom-end"
       class="search-popover
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
-      {{! Triple-stashed to escape the HTML }}
-      style={{{this.dropdownListStyle}}}
     >
       <:anchor as |dd|>
         <Hds::Form::TextInput::Base
@@ -20,7 +16,7 @@
           {{did-insert this.registerInput}}
           {{on "input" (perform this.search dd)}}
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
-          {{on "keydown" (fn this.onInputKeydown dd)}}
+          {{on "keydown" (fn this.maybeSubmitForm dd)}}
           {{on "focusin" (fn this.maybeOpenDropdown dd)}}
           @type="search"
           @value={{this.query}}
@@ -49,12 +45,11 @@
         {{/if}}
       </:header>
       <:item as |dd|>
-        {{#if
-          (or
-            (eq dd.value "viewAllResultsObject")
-            (eq dd.value "productAreaMatch")
-          )
-        }}
+
+        {{#if dd.attrs.renderOut}}
+          {{!
+            If the item is has the `renderOut` attribute, e.g., the "View all results" object, we render it in the popover header using the in-element helper, separating them semantically from the Best Matches.
+           }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
               (html-element "#global-search-popover-header")
@@ -68,9 +63,9 @@
                   class="global-search-popover-header-link"
                 >
                   <FlightIcon @name="search" class="mr-1.5" />
-                  <span>View all results for "{{this.query}}"</span>
+                  <span>View all results for “{{this.query}}”</span>
                 </dd.LinkTo>
-              {{else}}
+              {{else if (eq dd.value "productAreaMatch")}}
                 <dd.LinkTo
                   data-test-product-match-link
                   @route="authenticated.all"
