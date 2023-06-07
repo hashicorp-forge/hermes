@@ -12,9 +12,13 @@
       {{on "scroll" this.onScroll}}
       {{did-insert this.registerBody}}
     >
-      {{#let (get-product-id @document.product) as |productIcon|}}
+      {{#let (get-product-id this.product) as |productIcon|}}
         {{#if productIcon}}
-          <div class="product-badge {{productIcon}}">
+          <div
+            class="product-badge
+              {{productIcon}}
+              {{if this.save.isRunning 'opacity-50'}}"
+          >
             <FlightIcon @name={{productIcon}} />
           </div>
         {{/if}}
@@ -36,7 +40,10 @@
                 (is-empty @document.docType)
               }}{{@document.docType}}{{/unless}}
               &bullet;
-              {{@document.docNumber}}</small>
+              <span data-test-sidebar-doc-number>
+                {{@document.docNumber}}
+              </span>
+            </small>
           {{/if}}
           {{#if this.editingIsDisabled}}
             <h1
@@ -129,10 +136,21 @@
           <small
             class="hds-typography-body-100 hds-foreground-faint"
           >Product/Area</small>
-          <Hds::Badge
-            @text={{@document.product}}
-            @icon={{get-product-id @document.product}}
-          />
+          {{#if this.isDraft}}
+            <div class="w-full relative">
+              <Inputs::ProductSelect
+                @selected={{this.product}}
+                @onChange={{this.updateProduct.perform}}
+                @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
+              />
+            </div>
+          {{else}}
+            <Hds::Badge
+              @text={{@document.product}}
+              @icon={{get-product-id @document.product}}
+            />
+          {{/if}}
         </div>
 
         <div class="flex flex-col items-start space-y-2">

@@ -1,0 +1,19 @@
+.product-select-dropdown-list {
+  @apply max-h-[217px];
+}
+
+.product-select-default-toggle {
+  @apply min-w-[250px] relative flex items-center justify-start leading-none;
+}
+
+.product-select-toggle-abbreviation {
+  @apply opacity-50 inline-flex ml-2 text-body-100 leading-none;
+}
+
+.product-select-selected-value {
+  @apply flex ml-2.5 leading-none;
+}
+
+.product-select-toggle-caret {
+  @apply absolute top-1/2 -translate-y-1/2 right-2 text-color-foreground-faint;
+}

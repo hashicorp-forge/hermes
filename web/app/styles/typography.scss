@@ -1,0 +1,11 @@
+.hermes-form-label {
+  @apply text-body-200 font-semibold flex text-color-foreground-strong;
+
+  + .hermes-form-helper-text {
+    @apply mt-1;
+  }
+}
+
+.hermes-form-helper-text {
+  @apply text-body-100;
+}

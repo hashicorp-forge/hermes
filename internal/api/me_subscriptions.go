@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -30,8 +29,7 @@ func MeSubscriptionsHandler(
 				"path", r.URL.Path,
 				"error", err,
 			)
-			errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-			http.Error(w, errJSON, httpCode)
+			http.Error(w, userErrMsg, httpCode)
 		}
 
 		// Authorize request.

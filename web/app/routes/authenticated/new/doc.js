@@ -33,33 +33,6 @@ export default class AuthenticatedNewDocRoute extends Route {
 
     return RSVP.hash({
       docType: params?.docType,
-      productAbbrevMappings: this.getProductAbbrevMappings(),
     });
-  }
-
-  async getProductAbbrevMappings() {
-    const products = await this.fetchSvc
-      .fetch("/api/v1/products")
-      .then((resp) => resp.json())
-      .catch((err) => {
-        console.log(`Error requesting products: ${err}`);
-      });
-
-    // Sort product names alphabetically
-    const sortedProducts = Object.keys(products)
-      .sort()
-      .reduce((accum, key) => {
-        accum[key] = products[key];
-        return accum;
-      }, {});
-
-    // Convert to map of product or area name
-    // and abbreviation to make look ups easier
-    const productAbbrevMappings = new Map();
-    Object.keys(sortedProducts).forEach((key) => {
-      productAbbrevMappings.set(key, products[key].abbreviation);
-    });
-
-    return productAbbrevMappings;
   }
 }

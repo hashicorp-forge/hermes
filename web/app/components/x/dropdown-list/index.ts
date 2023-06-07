@@ -16,7 +16,7 @@ interface XDropdownListComponentSignature {
     items?: any;
     listIsOrdered?: boolean;
     inputVisibility?: "shown" | "hidden";
-    onItemClick: (value: any) => void;
+    onItemClick?: (value: any) => void;
     offset?: OffsetOptions;
     renderOut?: boolean;
     isLoading?: boolean;
@@ -333,6 +333,12 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         );
       });
     }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList": typeof XDropdownListComponent;
   }
 }
 

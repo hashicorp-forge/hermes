@@ -1,14 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, render, waitFor } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
 
-const DEFAULT_DROPDOWN_SELECTOR =
-  "[data-test-product-select-default-dropdown-toggle]";
-
+const DEFAULT_DROPDOWN_SELECTOR = ".product-select-default-toggle";
 const LIST_ITEM_SELECTOR = "[data-test-product-select-item]";
 
 interface InputsProductSelectContext extends MirageTestContext {
@@ -69,9 +67,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    assert
-      .dom("[data-test-product-select-toggle-abbreviation]")
-      .hasText("TST-0");
+    assert.dom(".product-select-toggle-abbreviation").hasText("TP0");
   });
 
   test("it shows an empty state when nothing is selected (default toggle)", async function (this: InputsProductSelectContext, assert) {
@@ -84,7 +80,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
         @onChange={{this.onChange}}
       />
     `);
-    assert.dom("[data-test-product-select-selected-value]").hasText("--");
+    assert.dom(".product-select-selected-value").hasText("--");
   });
 
   test("it displays the products in a dropdown list with abbreviations", async function (this: InputsProductSelectContext, assert) {
@@ -101,7 +97,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     assert.dom(LIST_ITEM_SELECTOR).exists({ count: 3 });
 
     let firstListItem = this.element.querySelector(LIST_ITEM_SELECTOR);
-    assert.dom(firstListItem).hasText("Test Product 0 TST-0");
+    assert.dom(firstListItem).hasText("Test Product 0 TP0");
   });
 
   test("it fetches the products if they aren't already loaded", async function (this: InputsProductSelectContext, assert) {
