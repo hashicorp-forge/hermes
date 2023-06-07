@@ -57,11 +57,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       },
       {
         viewAllResultsObject: {
-          renderOut: true,
+          itemShouldRenderOut: true,
         },
         ...(this._productAreaMatch && {
           productAreaMatch: {
-            renderOut: true,
+            itemShouldRenderOut: true,
             ...this._productAreaMatch,
           },
         }),

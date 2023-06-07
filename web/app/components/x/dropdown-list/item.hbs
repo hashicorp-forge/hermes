@@ -1,16 +1,42 @@
 {{! @glint-nocheck: not typesafe yet }}
-{{#let (element (if @attributes.renderOut "div" "li")) as |MaybeListItem|}}
+
+{{!
+  If an item has the `itemShouldRenderOut` property, we render it outside of the `ul/ol` element not as a list item, but a hidden container div at the bottom of DOM, the contents of which should be `in-element`ed into the DOM in the appropriate place when invoked by the parent component.
+
+  For example:
+  (in single-mustached syntax to avoid VSCode colorization bugs)
+  https://github.com/andrejunges/vscode-handlebars/issues/7
+
+  <:item as |i|>
+  {#if i.attrs.itemShouldRenderOut}
+    {#in-element (html-element ".target-div") insertBefore=null}
+      <div>...</div>
+    {/in-element}
+  {else}
+    <i.LinkTo>...</i.LinkTo>
+  {/if}
+  </:item>
+
+  These rendered-out items retain their keyboard-navigation order relative to other items in the list, but not affected by placement. It is up to the consumer to ensure that the passed-in `items` are arranged in the order that corresponds to their placement.
+
+  See `components/search.hbs` for an example.
+}}
+
+{{#let
+  (element (if @attributes.itemShouldRenderOut "div" "li"))
+  as |MaybeListItem|
+}}
   {{#maybe-in-element
     (html-element ".ember-application")
-    (not @attributes.renderOut)
+    (not @attributes.itemShouldRenderOut)
     insertBefore=null
   }}
     <MaybeListItem
       data-test-x-dropdown-list-item
       class="x-dropdown-list-item
-        {{if @attributes.renderOut 'absolute top-0 left-0'}}"
+        {{if @attributes.itemShouldRenderOut 'absolute top-0 left-0'}}"
       role="none"
-      aria-hidden={{@attributes.renderOut}}
+      aria-hidden={{@attributes.itemShouldRenderOut}}
     >
       {{yield
         (hash

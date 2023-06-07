@@ -46,9 +46,9 @@
       </:header>
       <:item as |dd|>
 
-        {{#if dd.attrs.renderOut}}
+        {{#if dd.attrs.itemShouldRenderOut}}
           {{!
-            If the item is has the `renderOut` attribute, e.g., the "View all results" object, we render it in the popover header using the in-element helper, separating them semantically from the Best Matches.
+            We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
            }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
