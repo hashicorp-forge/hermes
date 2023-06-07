@@ -28,7 +28,11 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
   });
 
   test("it renders as expected", async function (this: DocumentSidebarHeaderTestContext, assert) {
-    this.server.create("document", { objectID: "400" });
+    this.server.create("document", {
+      objectID: "400",
+      status: "in-review",
+      docNumber: "001",
+    });
     this.set("document", this.server.schema.document.first().attrs);
 
     await render(hbs`

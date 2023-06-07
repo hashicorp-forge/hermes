@@ -71,7 +71,11 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .dom("[data-test-x-dropdown-list-input]")
       .doesNotExist("The input is not shown");
 
+    await click("[data-test-toggle]");
+
     this.set("items", LONG_ITEM_LIST);
+
+    await click("[data-test-toggle]");
 
     assert
       .dom("[data-test-x-dropdown-list-input]")

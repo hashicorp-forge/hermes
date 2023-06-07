@@ -11,7 +11,7 @@
         @placement={{@placement}}
         @isSaving={{@isSaving}}
         @icon={{this.icon}}
-        class="w-80"
+        class="w-80 product-select-dropdown-list"
         ...attributes
       >
         <:item as |dd|>
@@ -31,36 +31,26 @@
         @selected={{@selected}}
         @placement={{@placement}}
         @isSaving={{@isSaving}}
-        class="w-[300px] max-h-[305px]"
+        class="w-[300px] product-select-dropdown-list"
         ...attributes
       >
         <:anchor as |dd|>
           <dd.ToggleAction
-            data-test-product-select-default-dropdown-toggle
-            class="x-dropdown-list-toggle-select min-w-[250px] relative flex items-center flex-start hds-button leading-none hds-button--color-secondary hds-button--size-medium"
+            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
           >
             <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
 
-            <span
-              data-test-product-select-selected-value
-              class="flex ml-2.5 leading-none"
-            >
+            <span class="product-select-selected-value">
               {{or @selected "--"}}
             </span>
 
             {{#if this.selectedProductAbbreviation}}
-              <span
-                data-test-product-select-toggle-abbreviation
-                class="opacity-50 inline-flex ml-2 text-body-100 leading-none"
-              >
+              <span class="product-select-toggle-abbreviation">
                 {{this.selectedProductAbbreviation}}
               </span>
             {{/if}}
 
-            <FlightIcon
-              @name="caret"
-              class="absolute top-1/2 -translate-y-1/2 right-2 text-color-foreground-faint"
-            />
+            <FlightIcon @name="caret" class="product-select-toggle-caret" />
           </dd.ToggleAction>
         </:anchor>
         <:item as |dd|>

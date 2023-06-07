@@ -13,7 +13,6 @@ export default class DocumentSidebar extends Component {
   @service router;
   @service session;
   @service flashMessages;
-
   @tracked isCollapsed = false;
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
@@ -43,9 +42,9 @@ export default class DocumentSidebar extends Component {
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
   @tracked tags = this.args.document.tags || [];
-
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
+  @tracked product = this.args.document.product || "";
 
   @tracked userHasScrolled = false;
   @tracked body = null;
@@ -202,6 +201,12 @@ export default class DocumentSidebar extends Component {
       timeout: 6000,
       extendedTimeout: 1000,
     });
+  }
+
+  @task({ restartable: true })
+  *updateProduct(product) {
+    this.product = product;
+    yield this.save.perform("product", this.product);
   }
 
   @task
