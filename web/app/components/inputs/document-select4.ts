@@ -44,11 +44,33 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @tracked modalIsShown = false;
 
-  get relatedResources(): NativeArray<RelatedExternalLink | HermesDocument> {
-    let resources: NativeArray<RelatedExternalLink | HermesDocument> = A();
-    resources.pushObjects(this.relatedDocuments);
-    resources.pushObjects(this.relatedLinks);
-    return resources;
+  get relatedResourcesAreShown(): boolean {
+    return Object.keys(this.relatedResources).length > 0;
+  }
+
+  get relatedResources(): {
+    [key: string]: RelatedExternalLink | HermesDocument;
+  } {
+    let resourcesArray: NativeArray<RelatedExternalLink | HermesDocument> = A();
+    resourcesArray.pushObjects(this.relatedDocuments);
+    resourcesArray.pushObjects(this.relatedLinks);
+
+    let resourcesObject: {
+      [key: string]: RelatedExternalLink | HermesDocument;
+    } = {};
+
+    resourcesArray.forEach((resource: RelatedExternalLink | HermesDocument) => {
+      let key = "";
+
+      if ("url" in resource) {
+        key = resource.url;
+      } else if ("objectID" in resource) {
+        key = resource.objectID;
+      }
+      resourcesObject[key] = resource;
+    });
+
+    return resourcesObject;
   }
 
   get shownDocuments(): { [key: string]: HermesDocument } {

@@ -14,7 +14,6 @@
 
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
-    {{! @glint-ignore}}
     <Hds::Modal @onClose={{this.hideModal}} as |M|>
       <M.Header>Add related documents</M.Header>
       <M.Body>
@@ -29,7 +28,6 @@
           class="w-full max-w-none relative h-72"
         >
           <:anchor as |dd|>
-            {{! @glint-ignore - not yet registered}}
             <Hds::Form::TextInput::Base
               data-test-global-search-input
               {{did-insert dd.registerAnchor}}
@@ -48,9 +46,7 @@
             />
           </:anchor>
           <:item as |dd|>
-            <dd.Action
-              class="w-full flex items-start py-1.5 px-3 space-x-3 hover:bg-color-surface-interactive-hover"
-            >
+            <dd.Action class="w-full flex items-start py-1.5 px-3 space-x-3">
               <div
                 class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
               >
@@ -76,17 +72,18 @@
 
 {{! TODO: move this out of the component }}
 
-{{#if this.relatedResources.length}}
+{{#if this.relatedResourcesAreShown}}
+  {{log this.relatedResources}}
   <ul class="mt-1 related-docs">
-    {{#each-in this.relatedResources as |i doc|}}
+    {{#each-in this.relatedResources as |_resourceId resource|}}
       <li
         class="flex w-full relative group related-docs-list-item
-          {{if doc.objectID 'hermes-doc' 'external-doc'}}"
+          {{if resource.objectID 'hermes-doc' 'external-doc'}}"
       >
-        {{#if doc.objectID}}
+        {{#if resource.objectID}}
           <LinkTo
             @route="authenticated.document"
-            @model={{doc.objectID}}
+            @model={{resource.objectID}}
             class="related-doc-link"
           >
             <div
@@ -100,38 +97,38 @@
                 <div class="float-right mt-0.5 w-7 h-3"></div>
 
                 <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                  {{doc.title}}
+                  {{resource.title}}
                 </h4>
               </div>
-              {{#if doc.docNumber}}
+              {{#if resource.docNumber}}
                 <span class="text-color-foreground-faint text-body-100">
-                  {{doc.docNumber}}
+                  {{resource.docNumber}}
                 </span>
               {{/if}}
             </div>
           </LinkTo>
         {{else}}
           <ExternalLink
-            href={{doc.url}}
+            href={{resource.url}}
             class="py-0.5 flex underline mr-6 truncate"
           >
             <div class="flex items-center w-full">
               <div class="flex relative mr-2 w-4 h-4 shrink-0">
                 <img
-                  src="https://www.google.com/s2/favicons?domain={{doc.url}}"
+                  src="https://www.google.com/s2/favicons?domain={{resource.url}}"
                   width="16"
                   height="16"
                 />
               </div>
               <span class="truncate">
-                {{doc.displayURL}}
+                {{resource.displayURL}}
               </span>
             </div>
           </ExternalLink>
         {{/if}}
         <Inputs::DocumentSelect::MoreButton
           @removeResource={{this.removeResource}}
-          @resource={{doc}}
+          @resource={{resource}}
         />
       </li>
     {{/each-in}}

@@ -34,9 +34,7 @@
         </dd.ToggleAction>
       </:anchor>
       <:header as |dd|>
-        <div
-          class="x-dropdown-list-input-container"
-        >
+        <div class="x-dropdown-list-input-container">
 
           {{! @glint-ignore - not yet registered}}
           <Hds::Form::TextInput::Base
@@ -173,17 +171,16 @@
 
 {{#if this.relatedResources.length}}
   <ul class="mt-1 related-docs">
-    {{#each-in this.relatedResources as |i doc|}}
-      {{log i}}
-      {{log doc}}
+    {{#each-in this.relatedResources as |_id resource|}}
+      {{! TODO: Move to separate component, improve types }}
       <li
         class="flex w-full relative group related-docs-list-item
-          {{if doc.objectID 'hermes-doc' 'external-doc'}}"
+          {{if resource.objectID 'hermes-doc' 'external-doc'}}"
       >
-        {{#if doc.objectID}}
+        {{#if resource.objectID}}
           <LinkTo
             @route="authenticated.document"
-            @model={{doc.objectID}}
+            @model={{resource.objectID}}
             class="related-doc-link"
           >
             <div
@@ -197,38 +194,38 @@
                 <div class="float-right mt-0.5 w-7 h-3"></div>
 
                 <h4 class="inline-doc-title mb-0.5 pr-0.5">
-                  {{doc.title}}
+                  {{resource.title}}
                 </h4>
               </div>
-              {{#if doc.docNumber}}
+              {{#if resource.docNumber}}
                 <span class="text-color-foreground-faint text-body-100">
-                  {{doc.docNumber}}
+                  {{resource.docNumber}}
                 </span>
               {{/if}}
             </div>
           </LinkTo>
         {{else}}
           <ExternalLink
-            href={{doc.url}}
+            href={{resource.url}}
             class="py-0.5 flex underline mr-6 truncate"
           >
             <div class="flex items-center w-full">
               <div class="flex relative mr-2 w-4 h-4 shrink-0">
                 <img
-                  src="https://www.google.com/s2/favicons?domain={{doc.url}}"
+                  src="https://www.google.com/s2/favicons?domain={{resource.url}}"
                   width="16"
                   height="16"
                 />
               </div>
               <span class="truncate">
-                {{doc.displayURL}}
+                {{resource.displayURL}}
               </span>
             </div>
           </ExternalLink>
         {{/if}}
         <Inputs::DocumentSelect::MoreButton
           @removeResource={{this.removeResource}}
-          @resource={{doc}}
+          @resource={{resource}}
         />
       </li>
     {{/each-in}}

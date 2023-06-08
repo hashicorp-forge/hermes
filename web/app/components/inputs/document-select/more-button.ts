@@ -32,3 +32,9 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
     this.trigger = e;
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Inputs::DocumentSelect::MoreButton": typeof InputsDocumentSelectMoreButton;
+  }
+}
