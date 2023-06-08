@@ -49,3 +49,9 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
     }
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Doc::State": typeof DocStateComponent;
+  }
+}
