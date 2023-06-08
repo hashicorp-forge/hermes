@@ -4,6 +4,13 @@
   &.hds-dropdown__content {
     @apply min-w-[175px];
   }
+
+  &.modal-list {
+    .x-dropdown-list-container,
+    .x-dropdown-list-scroll-container {
+      @apply overflow-visible;
+    }
+  }
 }
 
 .x-dropdown-list-container {

@@ -34,6 +34,10 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
     }
   }
 
+  get listIsShown(): boolean {
+    return this.args.shownItems && Object.keys(this.args.shownItems).length > 0;
+  }
+
   /**
    * Whether the "no matches found" message should be shown.
    * True if the input is shown and there are no items to show.
@@ -73,5 +77,11 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
         this.args.hideContent();
       }
     }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Items": typeof XDropdownListItemsComponent;
   }
 }

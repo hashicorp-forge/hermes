@@ -25,7 +25,7 @@
           @isLoading={{this.loadInitialData.isRunning}}
           @placement="none"
           @disableClose={{true}}
-          class="w-full max-w-none relative h-80"
+          class="w-full max-w-none relative h-[310px] modal-list"
         >
           <:anchor as |dd|>
             <Hds::Form::TextInput::Base
@@ -61,6 +61,11 @@
               </div>
             {{/unless}}
             {{#if this.inputValueIsValid}}
+              <div
+                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+              >
+                External doc
+              </div>
               {{#if this.fetchURLInfo.isRunning}}
                 <div
                   class="mt-1 mb-1.5 py-1.5 px-3 w-full grid place-items-center h-10"
@@ -68,11 +73,6 @@
                   <FlightIcon @name="loading" />
                 </div>
               {{else}}
-                <div
-                  class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-                >
-                  External doc
-                </div>
                 <Action
                   class="mt-1 mb-1.5 py-1.5 px-3 flex w-full group hover:bg-color-surface-interactive-hover h-10 items-center"
                   {{on "click" this.addRelatedExternalLink}}
@@ -89,15 +89,10 @@
                         Add external document
                       </span>
                     </div>
-                    {{! if focused only }}
-                    <FlightIcon
-                      @name="corner-down-left"
-                      class="text-color-foreground-faint"
-                    />
                   </div>
                 </Action>
                 <Hds::ButtonSet>
-                  <Hds::Button @size="small" @text="Add" />
+                  <Hds::Button @text="Add" />
                 </Hds::ButtonSet>
               {{/if}}
             {{/if}}

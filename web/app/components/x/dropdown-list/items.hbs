@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
@@ -7,16 +6,18 @@
     No matches
   </div>
 {{else}}
+  {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
-    <MaybeOrderedList
-      data-test-x-dropdown-list
-      id="x-dropdown-list-items-{{@contentID}}"
-      class="x-dropdown-list-items"
-      role={{if this.args.inputIsShown "listbox" "menu"}}
-      aria-activedescendant={{this.ariaActiveDescendant}}
-    >
-      {{#if @shownItems}}
+    {{#if this.listIsShown}}
+      <MaybeOrderedList
+        data-test-x-dropdown-list
+        id="x-dropdown-list-items-{{@contentID}}"
+        class="x-dropdown-list-items"
+        role={{if this.args.inputIsShown "listbox" "menu"}}
+        aria-activedescendant={{this.ariaActiveDescendant}}
+      >
         {{#each-in @shownItems as |item attrs|}}
+          {{! @glint-ignore - not yet typed }}
           <X::DropdownList::Item
             @value={{item}}
             @contentID={{@contentID}}
@@ -32,7 +33,7 @@
             {{yield i to="item"}}
           </X::DropdownList::Item>
         {{/each-in}}
-      {{/if}}
-    </MaybeOrderedList>
+      </MaybeOrderedList>
+    {{/if}}
   {{/let}}
 {{/if}}
