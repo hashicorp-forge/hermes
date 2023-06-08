@@ -29,3 +29,9 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
     page: 1,
   };
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::ActiveFilterList": typeof HeaderActiveFilterListComponent;
+  }
+}

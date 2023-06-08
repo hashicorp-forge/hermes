@@ -147,3 +147,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     });
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::Toolbar": typeof ToolbarComponent;
+  }
+}
