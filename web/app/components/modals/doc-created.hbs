@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{#if this.modalIsShown}}
   <Hds::Modal data-test-doc-created-modal as |M|>
     <M.Header>
@@ -17,7 +16,7 @@
         <Hds::Link::Inline
           @icon="external-link"
           @iconPosition="trailing"
-          @hrefIsExternal={{true}}
+          @isHrefExternal={{true}}
           @href="https://support.google.com/docs/answer/91588"
         >manage your notifications</Hds::Link::Inline>
         on Google.
