@@ -7,3 +7,9 @@ interface DocFolderAffordanceSignature {
 }
 
 export default class DocFolderAffordance extends Component<DocFolderAffordanceSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Doc::FolderAffordance": typeof DocFolderAffordance;
+  }
+}
