@@ -5,6 +5,9 @@ import { ComponentLike } from "@glint/template";
 interface HdsButtonSetComponentSignature {
   Element: HTMLDivElement;
   Args: {};
+  Blocks: {
+    default: [];
+  };
 }
 
 export type HdsButtonSetComponent =

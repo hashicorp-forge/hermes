@@ -6,7 +6,7 @@ import { inject as service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
-import { dropTask, restartableTask } from "ember-concurrency";
+import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
@@ -252,6 +252,44 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     const input = e.target as HTMLInputElement;
     this.query = input.value;
 
+    void this.checkURL.perform();
     void this.search.perform(dd, this.query);
   }
+
+  protected fetchURLInfo = restartableTask(async () => {
+    // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
+    // const urlToFetch = this.inputValue;
+    // const urlToFetch = infoURL;
+
+    try {
+      // Simulate a request
+      await timeout(1000);
+      // const response = await this.fetchSvc.fetch(urlToFetch, {
+      //   // For when we make a real request:
+      //   // headers: {
+      //   //   Authorization:
+      //   //     "Bearer " + this.session.data.authenticated.access_token,
+      //   //   "Content-Type": "application/json",
+      //   // },
+      // });
+
+      this.faviconURL =
+        "https://www.google.com/s2/favicons?domain=" + this.query;
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  protected checkURL = restartableTask(async () => {
+    const url = this.query;
+    try {
+      this.inputValueIsValid = Boolean(new URL(url));
+    } catch (e) {
+      this.inputValueIsValid = false;
+    } finally {
+      if (this.inputValueIsValid) {
+        void this.fetchURLInfo.perform();
+      }
+    }
+  });
 }
