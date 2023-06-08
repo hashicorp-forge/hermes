@@ -25,7 +25,7 @@
           @isLoading={{this.loadInitialData.isRunning}}
           @placement="none"
           @disableClose={{true}}
-          class="w-full max-w-none relative h-72"
+          class="w-full max-w-none relative h-80"
         >
           <:anchor as |dd|>
             <Hds::Form::TextInput::Base
@@ -45,7 +45,23 @@
               aria-haspopup="listbox"
             />
           </:anchor>
+          <:header>
+            {{#unless (and this.query.length this.inputValueIsValid)}}
+              <div
+                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+              >
+                {{#if this.query.length}}
+                  {{#unless this.inputValueIsValid}}
+                    Results
+                  {{/unless}}
+                {{else}}
+                  Suggestions
+                {{/if}}
+              </div>
+            {{/unless}}
+          </:header>
           <:item as |dd|>
+
             <dd.Action class="w-full flex items-start py-1.5 px-3 space-x-3">
               <div
                 class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"

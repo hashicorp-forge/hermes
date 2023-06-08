@@ -37,6 +37,7 @@ interface XDropdownListComponentSignature {
         attrs: HermesDocument;
       }
     ];
+    header: [];
   };
 }
 
