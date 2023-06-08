@@ -10,6 +10,8 @@ export default class DocRowComponent extends Component<DocRowComponentSignature>
   get productAreaName() {
     let productAreaName;
 
+    // TODO: Convert this to a switch statement
+
     if (this.args.productArea == "Boundary") {
       productAreaName = "Boundary";
     } else if (this.args.productArea == "Consul") {
@@ -37,6 +39,8 @@ export default class DocRowComponent extends Component<DocRowComponentSignature>
 
   get productAreaIcon() {
     let productAreaIcon;
+
+    // TODO: Convert this to a switch statement
 
     if (this.args.productArea == "Boundary") {
       productAreaIcon = "boundary";
