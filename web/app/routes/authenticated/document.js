@@ -28,32 +28,50 @@ export default class DocumentRoute extends Route {
   //   },
   // };
 
-  async model(params) {
+  showErrorMessage(err) {
+    this.flashMessages.add({
+      title: "Error fetching document",
+      message: err.message,
+      type: "critical",
+      sticky: true,
+      extendedTimeout: 1000,
+    });
+  }
+
+  async model(params, transition) {
     let doc = {};
+    let draftFetched = false;
 
     // Get doc data from the app backend.
     if (params.draft) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/drafts/" + params.document_id)
+          .fetch("/api/v1/drafts/" + params.document_id, {
+            method: "GET",
+            headers: {
+              // We set this header to differentiate between document views and
+              // requests to only retrieve document metadata.
+              "Add-To-Recently-Viewed": "true",
+            },
+          })
           .then((r) => r.json());
+
         doc.isDraft = params.draft;
+        draftFetched = true;
       } catch (err) {
-        const errorMessage = `Failed to get document draft: ${err}`;
-
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
-
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
-        throw new Error(errorMessage);
+        /**
+         * The doc may have been published since the user last viewed it
+         * (i.e., it moved from /drafts to /documents in the back end),
+         * so we retry the model hook without the draft param.
+         * Any subsequent errors are handled in the catch block below.
+         */
+        transition.abort();
+        this.router.transitionTo("authenticated.document", params.document_id);
+        return;
       }
-    } else {
+    }
+
+    if (!draftFetched) {
       try {
         doc = await this.fetchSvc
           .fetch("/api/v1/documents/" + params.document_id, {
@@ -65,27 +83,19 @@ export default class DocumentRoute extends Route {
             },
           })
           .then((r) => r.json());
-        doc.isDraft = params.draft;
-      } catch (err) {
-        const errorMessage = `Failed to get document: ${err}`;
 
-        this.flashMessages.add({
-          message: errorMessage,
-          title: "Error",
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
-        });
+        doc.isDraft = false;
+      } catch (err) {
+        this.showErrorMessage(err);
 
         // Transition to dashboard
         this.router.transitionTo("authenticated.dashboard");
         throw new Error(errorMessage);
       }
     }
+
     if (!!doc.createdTime) {
-      doc.createdDate =
-        parseDate(doc.createdTime * 1000) +
-        ` (${timeAgo(new Date(doc.createdTime * 1000))})`;
+      doc.createdDate = parseDate(doc.createdTime * 1000, "long");
     }
 
     // Build strings for created and last-modified.
@@ -103,11 +113,6 @@ export default class DocumentRoute extends Route {
       });
     } catch (err) {
       console.log("Error recording analytics: " + err);
-    }
-
-    // If not a draft, record the doc as recently viewed.
-    if (!params.draft) {
-      this.recentDocs.addDoc.perform(params.document_id);
     }
 
     // Load the document as well as the logged in user info

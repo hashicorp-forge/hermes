@@ -165,6 +165,10 @@ func (c *Command) Run(args []string) int {
 			c.UI.Error("error initializing server: Okta authorization server URL is required")
 			return 1
 		}
+		if cfg.Okta.AWSRegion == "" {
+			c.UI.Error("error initializing server: Okta AWS region is required")
+			return 1
+		}
 		if cfg.Okta.ClientID == "" {
 			c.UI.Error("error initializing server: Okta client ID is required")
 			return 1
@@ -258,14 +262,17 @@ func (c *Command) Run(args []string) int {
 		{"/1/indexes/",
 			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
 		{"/api/v1/approvals/",
-			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog)},
+			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
 		{"/api/v1/documents/",
 			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts",
 			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts/",
-			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog)},
+			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+		{"/api/v1/me", api.MeHandler(c.Log, goog)},
+		{"/api/v1/me/recently-viewed-docs",
+			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
 		{"/api/v1/me/subscriptions",
 			api.MeSubscriptionsHandler(cfg, c.Log, goog, db)},
 		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},
@@ -328,7 +335,7 @@ func (c *Command) Run(args []string) int {
 // healthHandler responds with the health of the service.
 func healthHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
 }

@@ -129,7 +129,7 @@ func NewRFC(f *drive.File, s *gw.Service, allFolders []string) (*RFC, error) {
 		// URL if we can find it.
 		r.OwnerPhotos = append(r.OwnerPhotos, "")
 
-		people, err := s.SearchPeople(o)
+		people, err := s.SearchPeople(o, "photos")
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error searching directory for person: %w: owner=\"%s\"",
@@ -438,6 +438,8 @@ func buildLabelAndValueString(label string, p *docs.Paragraph) string {
 		for _, e := range p.Elements {
 			if e.TextRun != nil {
 				s += e.TextRun.Content
+			} else if e.Person != nil && e.Person.PersonProperties != nil {
+				s += e.Person.PersonProperties.Email
 			}
 		}
 	}

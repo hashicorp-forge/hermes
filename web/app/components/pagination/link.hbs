@@ -1,6 +1,7 @@
+{{! @glint-nocheck: not typesafe yet }}
 {{#if @disabled}}
   <span
-    class="w-9 h-12 grid place-items-center no-underline text-color-foreground-primary relative
+    class="w-9 h-12 grid place-items-center relative
       {{if @icon 'opacity-50' 'text-color-foreground-action'}}"
   >
     {{#if @icon}}
@@ -16,7 +17,7 @@
   <LinkTo
     @route={{this.currentRouteName}}
     @query={{hash page=@page}}
-    class="w-9 h-12 hover:text-color-foreground-strong grid place-items-center no-underline text-color-foreground-primary"
+    class="w-9 h-12 hover:text-color-foreground-strong grid place-items-center"
   >
     {{#if @icon}}
       <FlightIcon @name={{@icon}} />

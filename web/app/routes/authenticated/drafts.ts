@@ -1,5 +1,4 @@
 import Route from "@ember/routing/route";
-import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
 import AlgoliaService, {
   AlgoliaFacetsObject,
@@ -14,6 +13,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
+import ActiveFiltersService from "hermes/services/active-filters";
 
 interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -23,9 +23,10 @@ interface DraftResponseJSON {
 }
 
 export default class DraftsRoute extends Route {
-  @service declare algolia: AlgoliaService;
-  @service declare authenticatedUser: AuthenticatedUserService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare algolia: AlgoliaService;
+  @service declare activeFilters: ActiveFiltersService;
+  @service declare authenticatedUser: AuthenticatedUserService;
 
   queryParams = {
     docType: {
@@ -92,7 +93,7 @@ export default class DraftsRoute extends Route {
             "/api/v1/drafts?" +
               this.createDraftURLSearchParams(params, ownerFacetOnly)
           )
-          .then((response) => response.json());
+          .then((response) => response?.json());
         return response;
       } catch (e: unknown) {
         console.error(e);
@@ -132,9 +133,13 @@ export default class DraftsRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams) {
-    return RSVP.hash({
-      facets: this.getDraftFacets.perform(params),
-      results: this.getDraftResults.perform(params),
-    });
+    let [facets, results] = await Promise.all([
+      this.getDraftFacets.perform(params),
+      this.getDraftResults.perform(params),
+    ]);
+
+    this.activeFilters.update(params);
+
+    return { facets, results };
   }
 }

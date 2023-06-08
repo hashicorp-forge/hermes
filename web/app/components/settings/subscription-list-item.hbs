@@ -1,4 +1,5 @@
-<li class="group" data-test-subscription-list-item>
+{{! @glint-nocheck: not typesafe yet }}
+<li class="subscription-list-item">
   <button
     class="text-body-300 text-color-foreground-primary flex items-center space-x-6 hover:cursor-pointer bg-transparent hover:bg-color-surface-action border-0 w-full h-full justify-between py-3 px-3.5 transition-colors"
     type="button"
@@ -24,6 +25,14 @@
         @value="enable"
         checked={{this.isChecked}}
       />
+      {{#if this.confirmationIsShown}}
+        <div
+          class="subscription-list-popover
+            {{if this.confirmationIsClosing 'out'}}"
+        >
+          {{if this.isChecked "Subscribed" "Unsubscribed"}}
+        </div>
+      {{/if}}
     </div>
   </button>
 </li>

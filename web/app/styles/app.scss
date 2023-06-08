@@ -1,26 +1,43 @@
+@use "./typography";
+
 @use "components/action";
 @use "components/toolbar";
+@use "components/tooltip";
+@use "components/popover";
 @use "components/footer";
 @use "components/nav";
 @use "components/x-hds-tab";
+@use "components/x/dropdown/list";
+@use "components/x/dropdown/list-item";
+@use "components/x/dropdown/toggle-select";
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
 @use "components/page";
 @use "components/row-results";
 @use "components/template-card";
+@use "components/header/active-filter-list";
+@use "components/header/active-filter-list-item";
+@use "components/inputs/product-select/index.scss";
 @use "components/doc/tile-list";
+@use "components/doc/thumbnail";
+@use "components/doc/folder-affordance";
 @use "components/doc/tile";
+@use "components/doc/state";
 @use "components/preview-card";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/hds-badge";
+@use "components/header/facet-dropdown";
+@use "components/floating-u-i/content";
+@use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
 
 @use "./ember-power-select-theme";
 
 @use "@hashicorp/design-system-components";
+@use "./error-404";
 @use "./hds-overrides";
 
 @use "tailwindcss/base";
@@ -51,6 +68,16 @@ button {
 body {
   line-height: var(--token-typography-body-200-line-height);
   color: var(--token-color-foreground-primary);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
 }
 
 .x-container {

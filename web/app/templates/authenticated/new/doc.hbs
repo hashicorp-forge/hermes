@@ -1,4 +1,3 @@
-<New::DocForm
-  @docType={{@model.docType}}
-  @productAbbrevMappings={{@model.productAbbrevMappings}}
-/>
+{{page-title (concat "Create Your " @model.docType)}}
+
+<New::DocForm @docType={{@model.docType}} />

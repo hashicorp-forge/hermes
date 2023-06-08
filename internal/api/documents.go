@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -63,15 +64,27 @@ func DocumentHandler(
 		baseDocObj := &hcd.BaseDoc{}
 		err = ar.Docs.GetObject(docID, &baseDocObj)
 		if err != nil {
-			l.Error("error requesting base document object from Algolia",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w, "Error accessing document",
-				http.StatusInternalServerError)
-			return
+			// Handle 404 from Algolia and only log a warning.
+			if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+				l.Warn("base document object not found",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Document not found", http.StatusNotFound)
+				return
+			} else {
+				l.Error("error requesting base document object from Algolia",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Create new document object of the proper doc type.
@@ -135,6 +148,26 @@ func DocumentHandler(
 			// Set custom editable fields.
 			docObj.SetCustomEditableFields()
 
+			// Get document from database.
+			doc := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := doc.Get(db); err != nil {
+				l.Error("error getting document from database",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error requesting document",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Set locked value for response to value from the database (this value
+			// isn't stored in Algolia).
+			docObj.SetLocked(doc.Locked)
+
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -159,64 +192,17 @@ func DocumentHandler(
 				// Get authenticated user's email address.
 				email := r.Context().Value("userEmail").(string)
 
-				// Get user (if exists).
-				u := models.User{
-					EmailAddress: email,
-				}
-				if err := u.Get(db); err != nil && !errors.Is(
-					err, gorm.ErrRecordNotFound) {
-					l.Error("error getting user in database",
+				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
+					// If we get an error, log it but don't return an error response
+					// because this would degrade UX.
+					// TODO: change this log back to an error when this handles incomplete
+					// data in the database.
+					l.Warn("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
-					return
-				}
-
-				// Prepend document to recently viewed documents.
-				rvd := append(
-					[]models.Document{{GoogleFileID: docID}},
-					u.RecentlyViewedDocs...)
-
-				// Trim recently viewed documents to a length of 5.
-				if len(rvd) > 5 {
-					rvd = rvd[:5]
-				}
-
-				// Update user.
-				u.RecentlyViewedDocs = rvd
-				if err := u.Upsert(db); err != nil {
-					l.Error("error upserting user",
-						"error", err,
-						"doc_id", docID,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
-					return
-				}
-
-				// Update ViewedAt time for this document.
-				viewedDoc := models.RecentlyViewedDoc{
-					UserID:     int(u.ID),
-					DocumentID: int(u.RecentlyViewedDocs[0].ID),
-					ViewedAt:   now,
-				}
-				if err := db.Updates(&viewedDoc).Error; err != nil {
-					l.Error("error updating recently viewed document in database",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					// TODO: return an error response when this is required.
-					// http.Error(w, "Error requesting document",
-					// 	http.StatusInternalServerError)
 					return
 				}
 			}
@@ -229,9 +215,7 @@ func DocumentHandler(
 			// Authorize request (only the owner can PATCH the doc).
 			userEmail := r.Context().Value("userEmail").(string)
 			if docObj.GetOwners()[0] != userEmail {
-				http.Error(w,
-					`{"error": "Not a document owner"}`,
-					http.StatusUnauthorized)
+				http.Error(w, "Not a document owner", http.StatusUnauthorized)
 				return
 			}
 
@@ -259,6 +243,24 @@ func DocumentHandler(
 				l.Error("error decoding document patch request", "error", err)
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 
@@ -393,4 +395,81 @@ Hermes
 			return
 		}
 	})
+}
+
+// updateRecentlyViewedDocs updates the recently viewed docs for a user with the
+// provided email address, using the document file ID and viewed at time for a
+// document view event.
+func updateRecentlyViewedDocs(
+	email, docID string, db *gorm.DB, viewedAt time.Time) error {
+	// Get user (if exists).
+	u := models.User{
+		EmailAddress: email,
+	}
+	if err := u.Get(db); err != nil && !errors.Is(
+		err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("error getting user in database: %w", err)
+	}
+
+	// Get viewed document in database.
+	doc := models.Document{
+		GoogleFileID: docID,
+	}
+	if err := doc.Get(db); err != nil {
+		return fmt.Errorf("error getting viewed document: %w", err)
+	}
+
+	// Find recently viewed documents.
+	var rvd []models.RecentlyViewedDoc
+	if err := db.Where(&models.RecentlyViewedDoc{UserID: int(u.ID)}).
+		Order("viewed_at desc").
+		Find(&rvd).Error; err != nil {
+		return fmt.Errorf("error finding recently viewed docs for user: %w", err)
+	}
+
+	// Prepend viewed document to recently viewed documents.
+	rvd = append(
+		[]models.RecentlyViewedDoc{{
+			DocumentID: int(doc.ID),
+			UserID:     int(u.ID),
+		}},
+		rvd...)
+
+	// Get document records for recently viewed docs.
+	docs := []models.Document{}
+	for _, d := range rvd {
+		dd := models.Document{
+			Model: gorm.Model{
+				ID: uint(d.DocumentID),
+			},
+		}
+		if err := dd.Get(db); err != nil {
+			return fmt.Errorf("error getting document: %w", err)
+		}
+		docs = append(docs, dd)
+	}
+
+	// Trim recently viewed documents to a length of 5.
+	if len(docs) > 5 {
+		docs = docs[:5]
+	}
+
+	// Update user.
+	u.RecentlyViewedDocs = docs
+	if err := u.Upsert(db); err != nil {
+		return fmt.Errorf("error upserting user: %w", err)
+	}
+
+	// Update ViewedAt time for this document.
+	viewedDoc := models.RecentlyViewedDoc{
+		UserID:     int(u.ID),
+		DocumentID: int(doc.ID),
+		ViewedAt:   viewedAt,
+	}
+	if err := db.Updates(&viewedDoc).Error; err != nil {
+		return fmt.Errorf(
+			"error updating recently viewed document in database: %w", err)
+	}
+
+	return nil
 }

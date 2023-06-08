@@ -8,6 +8,7 @@ import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
 export interface AuthenticatedUser {
+  name: string;
   email: string;
   given_name: string;
   picture: string;
@@ -30,7 +31,7 @@ export default class AuthenticatedUserService extends Service {
   @service declare store: Store;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked private _info: AuthenticatedUser | null = null;
+  @tracked _info: AuthenticatedUser | null = null;
 
   get info(): AuthenticatedUser {
     assert("Authenticated must exist", this._info);
@@ -56,18 +57,24 @@ export default class AuthenticatedUserService extends Service {
   private get subscriptionsPostHeaders() {
     return {
       "Content-Type": "application/json",
-      "Hermes-Google-Access-Token":
-        this.session.data.authenticated.access_token,
     };
   }
 
   /**
    * Loads the user's info from the Google API.
-   * Called by the `authenticated` route on load.
-   * Ensures `authenticatedUser.info` is always defined.
+   * Called by `session.handleAuthentication` and `authenticated.afterModel`.
+   * Ensures `authenticatedUser.info` is always defined and up-to-date
+   * in any route that needs it. On error, bubbles up to the application route.
    */
   loadInfo = task(async () => {
-    this._info = await this.store.queryRecord("google.userinfo.me", {});
+    try {
+      this._info = await this.fetchSvc
+        .fetch("/api/v1/me")
+        .then((response) => response?.json());
+    } catch (e: unknown) {
+      console.error("Error getting user information: ", e);
+      throw e;
+    }
   });
 
   /**
@@ -76,19 +83,15 @@ export default class AuthenticatedUserService extends Service {
    */
   fetchSubscriptions = task(async () => {
     try {
-      let response = await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-        method: "GET",
-        headers: {
-          "Hermes-Google-Access-Token":
-            this.session.data.authenticated.access_token,
-        },
-      });
-      let subscriptions: string[] = await response.json();
+      let subscriptions = await this.fetchSvc
+        .fetch("/api/v1/me/subscriptions", {
+          method: "GET",
+        })
+        .then((response) => response?.json());
 
       let newSubscriptions: Subscription[] = [];
 
       if (subscriptions) {
-        // map
         newSubscriptions = subscriptions.map((subscription: string) => {
           return {
             productArea: subscription,

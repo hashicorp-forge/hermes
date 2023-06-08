@@ -1,0 +1,15 @@
+{{! @glint-nocheck: not typesafe yet }}
+{{#if this.shownFilters.length}}
+  <div class="active-filter-list">
+    <h3>Showing</h3>
+    <div class="active-filter-list-container">
+      {{#each this.shownFilters as |filter|}}
+        <Header::ActiveFilterListItem @filter={{filter}} />
+      {{/each}}
+    </div>
+    <LinkTo @query={{this.defaultQuery}} class="clear-all-link">
+      <FlightIcon @name="x-circle" class="mr-1" />
+      Clear all
+    </LinkTo>
+  </div>
+{{/if}}

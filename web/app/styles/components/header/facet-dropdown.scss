@@ -1,0 +1,11 @@
+.facet-dropdown-popover {
+  @apply min-w-[175px];
+
+  &.medium:not(.has-input) {
+    @apply w-[240px];
+  }
+
+  &.has-input {
+    @apply w-[320px];
+  }
+}

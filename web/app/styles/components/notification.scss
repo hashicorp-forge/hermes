@@ -1,24 +1,24 @@
 .notifications-container {
-  @apply fixed;
-  z-index: 20;
-  bottom: 8px;
-  right: 8px;
+  @apply fixed z-20 bottom-6 right-6;
+}
+
+@keyframes notificationIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .notification {
-  // Animation example taken from: https://github.com/adopted-ember-addons/ember-cli-flash#animated-example
-  opacity: 0;
+  animation: notificationIn 700ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
+    forwards;
 
-  transition: all 700ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  margin: 16px;
-
-  &.active {
-    opacity: 1;
-    @apply left-2;
-
-    &.exiting {
-      opacity: 0;
-      @apply left-0;
-    }
+  &.exiting {
+    animation: notificationIn 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
+      reverse forwards;
   }
 }

@@ -1,38 +1,37 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import window from "ember-window-mock";
+import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
+  @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  async afterModel(): Promise<void> {
-    await this.authenticatedUser.loadInfo.perform();
+  beforeModel(transition: any) {
+    /**
+     * If using Google auth, check if the session is authenticated.
+     * If unauthenticated, it will redirect to the auth screen.
+     */
+    if (!this.configSvc.config.skip_google_auth) {
+      this.session.requireAuthentication(transition, "authenticate");
+    }
   }
 
-  async beforeModel(transition: any): Promise<void> {
-    // If the user isn't authenticated, transition to the auth screen
-    let requireAuthentication = this.session.requireAuthentication(
-      transition,
-      "authenticate"
-    );
+  // Note: Only called if the session is authenticated in the front end
+  async afterModel() {
+    /**
+     * Checks if the session is authenticated in the back end.
+     * If the `loadInfo` task returns a 401, it will bubble up to the
+     * application error method which invalidates the session
+     * and redirects to the auth screen.
+     */
+    await this.authenticatedUser.loadInfo.perform();
 
-    let target = window.sessionStorage.getItem(
-      this.session.SESSION_STORAGE_KEY
-    );
-    if (
-      !target &&
-      !requireAuthentication &&
-      transition.to.name != "authenticated"
-    ) {
-      // ember-simple-auth uses this value to set cookies when fastboot is enabled: https://github.com/mainmatter/ember-simple-auth/blob/a7e583cf4d04d6ebc96b198a8fa6dde7445abf0e/packages/ember-simple-auth/addon/-internals/routing.js#L12
-
-      window.sessionStorage.setItem(
-        this.session.SESSION_STORAGE_KEY,
-        transition.intent.url
-      );
-    }
+    /**
+     * Kick off the task to poll for expired auth.
+     */
+    void this.session.pollForExpiredAuth.perform();
   }
 }

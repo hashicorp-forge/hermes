@@ -12,8 +12,12 @@ module("Integration | Helper | parse-date", function (hooks) {
 
   test("", async function (assert) {
     await render(hbs`
+      {{! @glint-nocheck: not typesafe yet }}
       <div class="valid">
         {{parse-date 628021800000}}
+      </div>
+      <div class="long">
+        {{parse-date 628021800000 "long"}}
       </div>
       <div class="invalid">
         {{or (parse-date undefined) "Unknown"}}
@@ -22,7 +26,12 @@ module("Integration | Helper | parse-date", function (hooks) {
 
     assert
       .dom(".valid")
-      .hasText("11/25/1989", "A valid date renders correctly");
+      .hasText("25 Nov. 1989", "A valid date renders correctly");
+    assert
+      .dom(".long")
+      .hasText("25 November 1989", "The long format renders correctly");
     assert.dom(".invalid").hasText("Unknown", "An invalid date returns null");
+
+    MockDate.reset();
   });
 });

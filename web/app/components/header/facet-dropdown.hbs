@@ -1,24 +1,24 @@
-<Hds::Dropdown
-  class="facets-dropdown"
-  @listPosition="left"
+{{! @glint-ignore: not typesafe yet }}
+<X::DropdownList
+  @items={{@facets}}
+  @listIsOrdered={{true}}
+  class="facet-dropdown-popover"
+  {{! @glint-ignore: not typesafe yet }}
   ...attributes
-  as |dd|
 >
-  <dd.ToggleButton
-    data-test-facets-dropdown-toggle-button
-    @text={{@label}}
-    @color="secondary"
-    disabled={{@disabled}}
-  />
-  {{#if @facets}}
-    {{#each-in this.firstTenFacets as |value attrs|}}
-      <dd.Interactive
-        class="facet-interactive-item"
-        {{on "click" (fn this.onClick value dd.close)}}
-        @text="{{value}} ({{attrs.count}})"
-        @icon={{if attrs.selected "check-square-fill" "square"}}
-        class={{if attrs.selected "checked"}}
+  <:anchor as |dd|>
+    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
+  </:anchor>
+  <:item as |dd|>
+    <dd.LinkTo
+      @route={{this.currentRouteName}}
+      @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
+    >
+      <X::DropdownList::CheckableItem
+        @value={{dd.value}}
+        @count={{dd.attrs.count}}
+        @selected={{dd.attrs.selected}}
       />
-    {{/each-in}}
-  {{/if}}
-</Hds::Dropdown>
+    </dd.LinkTo>
+  </:item>
+</X::DropdownList>

@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 <Hds::Form::TextInput::Field
   data-test-subscription-list-filter-input
   @type="search"
@@ -8,7 +9,7 @@
 />
 <ol
   data-test-subscription-list
-  class="list-none mt-5 w-full divide-y divide-color-border-primary"
+  class="mt-5 w-full divide-y divide-color-border-primary"
 >
   {{#each this.shownItems as |listItem|}}
     <Settings::SubscriptionListItem @productArea={{listItem}} />

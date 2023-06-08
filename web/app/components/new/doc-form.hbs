@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 {{#if this.docIsBeingCreated}}
   <div class="text-center hds-typography-display-400 mt-3">
     <FlightIcon @name="loading" @size="24" />
@@ -6,23 +7,22 @@
       {{@docType}}
       draft...
     </div>
-    <div class="text-body-200 text-color-foreground-faint">This usually takes 10-20 seconds.</div>
+    <div class="text-body-200 text-color-foreground-faint">This usually takes
+      10-20 seconds.</div>
   </div>
 {{else}}
   <form
     class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
     {{on "submit" this.submit}}
+    {{did-insert this.registerForm}}
   >
     <div>
       <div class="space-y-4">
         <h1
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
         >Create your {{@docType}}</h1>
-        <p>Complete the following metadata to create your
-          {{@docType}}
-          and begin editing your draft.</p>
       </div>
-      <div class="pt-10 space-y-6">
+      <div class="pt-10 space-y-7">
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -33,64 +33,49 @@
           as |F|
         >
           <F.Label>Title</F.Label>
-          <F.HelperText>Your title should succinctly outline the idea you're
-            proposing.</F.HelperText>
-        </Hds::Form::TextInput::Field>
-
-        <Hds::Form::Textarea::Field
-          @value={{this.summary}}
-          rows="3"
-          name="summary"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Summary</F.Label>
-          <F.HelperText>One or two sentences outlining your doc.</F.HelperText>
-        </Hds::Form::Textarea::Field>
-
-        <Hds::Form::Select::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productArea}}
-          name="productArea"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Product/Area</F.Label>
-          <F.HelperText>Specify the full name of the product or area this
-            {{@docType}}
-            belongs to.</F.HelperText>
-          {{#if @productAbbrevMappings}}
-            <F.Options>
-              <option value=""></option>
-              {{#each-in @productAbbrevMappings as |name|}}
-                <option value="{{name}}">{{name}}</option>
-              {{/each-in}}
-            </F.Options>
-          {{/if}}
-        </Hds::Form::Select::Field>
-
-        <Hds::Form::TextInput::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productAbbreviation}}
-          placeholder="Select product/area to populate abbreviation"
-          @isInvalid={{this.formErrors.productAbbreviation}}
-          name="productAbbreviation"
-          {{on "input" this.updateForm}}
-          disabled
-          as |F|
-        >
-          <F.Label>Product/Area abbreviation</F.Label>
-          {{#if this.formErrors.productAbbreviation}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.productAbbreviation}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>Product/Area abbreviation is automatically populated on
-            selecting the "Product/Area" option.
+          <F.HelperText>
+            A succinct outline of the idea youʼre proposing.
           </F.HelperText>
         </Hds::Form::TextInput::Field>
+
+        <div class="relative">
+          <Hds::Form::Textarea::Field
+            @value={{this.summary}}
+            rows="3"
+            name="summary"
+            {{on "input" this.updateForm}}
+            as |F|
+          >
+            <F.Label>Summary</F.Label>
+            <F.HelperText>
+              <span
+                class={{if
+                  this.summaryIsLong
+                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                }}
+              >One or two sentences</span>
+              outlining your doc.
+              {{if this.summaryIsLong "(Just a recommendation)"}}
+            </F.HelperText>
+          </Hds::Form::Textarea::Field>
+        </div>
+
+        <div>
+          <div class="mb-2">
+            <span class="hermes-form-label">
+              Product/Area &nbsp;
+              <Hds::Badge @size="small" @text="Required" />
+            </span>
+            <span class="hermes-form-helper-text hds-form-helper-text">
+              Where your doc should be categorized.
+            </span>
+          </div>
+          <Inputs::ProductSelect
+            @selected={{this.productArea}}
+            @onChange={{this.onProductSelect}}
+            class="w-[300px]"
+          />
+        </div>
 
         {{! Note: We are still refining the subscribe/follow feature set.
                 As part of that effort we will be looking into how the concept
@@ -129,7 +114,7 @@
           </F.HelperText>
         </Hds::Form::Field> --}}
 
-        <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
+        <Hds::Form::Field @layout="vertical" as |F|>
           {{yield
             (hash
               Error=F.Error
@@ -140,23 +125,15 @@
             )
           }}
           <F.Control>
-            <PowerSelectMultiple
-              class="hds-form-field__control multiselect"
-              @searchEnabled={{true}}
-              @search={{perform this.searchDirectory}}
-              @searchField="email"
-              @options={{this.people}}
+            <Inputs::PeopleSelect
+              class="multiselect mt-2 w-auto"
               @selected={{this.contributors}}
-              @placeholder="Search for your peers..."
               @onChange={{this.updateContributors}}
-              @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
-              as |value|
-            >
-              {{value.email}}
-            </PowerSelectMultiple>
+            />
           </F.Control>
-          <F.Label><FlightIcon @name="users" />
-            Add contributors
+          <F.Label>
+            <FlightIcon @name="users" />
+            Contributors
           </F.Label>
           {{#if this.formErrors.contributors}}
             <F.Error as |E|>
@@ -164,17 +141,18 @@
             </F.Error>
           {{/if}}
           <F.HelperText>
-            If you're collaborating with others on this
-            {{@docType}}, add them here. The document will automatically be
-            shared with the collaborators specified here. You can also add
-            contributors later.
+            People to share your doc with. You can always add more later.
           </F.HelperText>
         </Hds::Form::Field>
       </div>
+      <div class="h-24"></div>
     </div>
     <div>
       <div class="preview-card">
-        <h3><FlightIcon @name="eye" /> Preview</h3>
+        <h3>
+          <FlightIcon @name="eye" />
+          Preview
+        </h3>
         <Doc::Tile
           @productArea={{this.productArea}}
           @status="draft"
@@ -184,7 +162,7 @@
         <Hds::Button
           @text="Create {{@docType}} in Google Drive"
           type="submit"
-          disabled={{not this.isValid}}
+          disabled={{not this.formRequirementsMet}}
           class="w-full"
         />
       </div>

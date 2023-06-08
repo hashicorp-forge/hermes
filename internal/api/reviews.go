@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
@@ -42,6 +43,24 @@ func ReviewHandler(
 					"path", r.URL.Path,
 				)
 				http.Error(w, "Document ID not found", http.StatusNotFound)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 
@@ -159,6 +178,33 @@ func ReviewHandler(
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
+
+			// Get file from Google Drive so we can get the latest modified time.
+			file, err := s.GetFile(docID)
+			if err != nil {
+				l.Error("error getting document file from Google",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
+				return
+			}
+
+			// Parse and set modified time.
+			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
+			if err != nil {
+				l.Error("error parsing modified time",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
+				return
+			}
+			docObj.SetModifiedTime(modifiedTime.Unix())
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
@@ -467,7 +513,7 @@ func ReviewHandler(
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					http.Error(w, `{"error": "Error sending subscriber email"}`,
+					http.Error(w, "Error sending subscriber email",
 						http.StatusInternalServerError)
 					return
 				}
@@ -482,6 +528,7 @@ func ReviewHandler(
 								DocumentOwner:     docObj.GetOwners()[0],
 								DocumentShortName: docObj.GetDocNumber(),
 								DocumentTitle:     docObj.GetTitle(),
+								DocumentType:      docObj.GetDocType(),
 								DocumentURL:       docURL,
 								Product:           docObj.GetProduct(),
 							},
@@ -496,7 +543,7 @@ func ReviewHandler(
 								"method", r.Method,
 								"path", r.URL.Path,
 							)
-							http.Error(w, `{"error": "Error sending subscriber email"}`,
+							http.Error(w, "Error sending subscriber email",
 								http.StatusInternalServerError)
 							return
 						}

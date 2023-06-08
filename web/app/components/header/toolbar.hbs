@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 {{#if @facets}}
   <div class="toolbar mb-7">
     <div class="x-container">
@@ -12,49 +13,37 @@
             <Header::FacetDropdown
               @label="Type"
               @facets={{@facets.docType}}
-              @onClick={{this.handleClick}}
               @disabled={{not @facets.docType}}
             />
             <Header::FacetDropdown
               @label="Status"
               @facets={{this.statuses}}
-              @onClick={{this.handleClick}}
               @disabled={{not this.statuses}}
+              class="medium"
             />
             <Header::FacetDropdown
               @label="Product/Area"
               @facets={{@facets.product}}
-              @onClick={{this.handleClick}}
               @disabled={{not @facets.product}}
             />
             <Header::FacetDropdown
               @label="Owner"
               @facets={{@facets.owners}}
-              @onClick={{this.handleClick}}
               @disabled={{this.ownerFacetIsDisabled}}
             />
           </div>
         </div>
-
         {{#if (and @facets (not @sortControlIsHidden))}}
-          <Hds::Dropdown class="sort-by-dropdown" as |dd|>
-            <dd.ToggleButton
-              @text="Sort: {{this.getSortByLabel}}"
-              @color="secondary"
-            />
-            <dd.Interactive
-              {{on "click" (fn this.updateSortBy "dateDesc" dd.close)}}
-              @text="Newest"
-              @icon="sort-desc"
-            />
-            <dd.Interactive
-              {{on "click" (fn this.updateSortBy "dateAsc" dd.close)}}
-              @text="Oldest"
-              @icon="sort-asc"
-            />
-          </Hds::Dropdown>
+          <Header::SortDropdown
+            @label={{this.getSortByLabel}}
+            @facets={{this.sortByFacets}}
+            @disabled={{this.sortControlIsDisabled}}
+            @currentSortByValue={{this.currentSortByValue}}
+            @dropdownPlacement="bottom-end"
+          />
         {{/if}}
       </div>
+      <Header::ActiveFilterList />
     </div>
   </div>
 {{/if}}

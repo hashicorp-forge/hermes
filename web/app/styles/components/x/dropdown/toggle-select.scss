@@ -1,0 +1,27 @@
+.x-dropdown-list-toggle-select {
+  @apply text-left;
+
+  .flight-icon {
+    @apply shrink-0;
+  }
+
+  &.hds-button {
+    @apply justify-start;
+  }
+
+  &.hds-button--size-medium {
+    @apply px-2.5;
+  }
+
+  .hds-button__icon + .hds-button__text {
+    @apply ml-2.5;
+  }
+
+  &.hds-button--color-secondary:not(:hover) {
+    @apply bg-color-surface-primary;
+
+    .caret {
+      @apply text-color-foreground-faint;
+    }
+  }
+}

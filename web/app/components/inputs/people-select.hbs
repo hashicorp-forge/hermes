@@ -1,3 +1,4 @@
+{{! @glint-nocheck: not typesafe yet }}
 <PowerSelectMultiple
   class="hds-form-field__control multiselect w-full"
   @searchEnabled={{true}}
@@ -10,6 +11,7 @@
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
+  @disabled={{@disabled}}
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
   ...attributes
   as |value|

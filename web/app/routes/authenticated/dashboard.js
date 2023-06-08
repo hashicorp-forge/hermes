@@ -67,52 +67,20 @@ export default class DashboardRoute extends Route {
         return result.hits;
       });
 
-    // Get recently viewed docs from app data.
-    const recentlyViewedDocIDs = await this.recentDocs.get.perform();
-
-    // For each recently viewed doc (max 4 docs), fetch doc metadata from the
-    // app backend.
-    const recentlyViewedPromises = recentlyViewedDocIDs
-      .slice(0, 4)
-      .map((docID) =>
-        this.fetchSvc
-          .fetch("/api/v1/documents/" + docID)
-          .then((resp) => resp.json())
-          .catch((err) => {
-            console.log(
-              `Error getting recently updated document (${hit.objectID}):`,
-              err
-            );
-          })
-      );
-
-    // Create promise for all Algolia recently viewed docs promises.
-    const recentlyViewedDocsPromise = Promise.allSettled(
-      recentlyViewedPromises
-    );
-
-    // Create array of docs that we also indexed in Algolia.
-    // We can't display documents without this data.
-    const recentlyViewedDocs = recentlyViewedDocsPromise.then((promises) => {
-      let recentlyViewedDocs = [];
-
-      promises.forEach((promise, index) => {
-        if (promise.status == "fulfilled") {
-          let doc = promise.value;
-          doc.modifiedAgo = `Modified ${timeAgo(
-            new Date(doc.modifiedTime * 1000)
-          )}`;
-
-          recentlyViewedDocs.push(promise.value);
-        }
-      });
-
-      return recentlyViewedDocs;
-    });
+    await this.recentDocs.fetchAll.perform();
+    if (this.recentDocs.all === null) {
+      try {
+        await this.recentDocs.fetchAll.perform();
+      } catch {
+        /**
+         * This tells our template to show the error state.
+         */
+        this.recentDocs.all = null;
+      }
+    }
 
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,
-      recentlyViewedDocs: recentlyViewedDocs,
     });
   }
 

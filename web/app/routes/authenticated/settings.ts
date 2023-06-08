@@ -4,6 +4,7 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
+import { assert } from "@ember/debug";
 
 export default class SettingsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -15,7 +16,8 @@ export default class SettingsRoute extends Route {
     const allProducts = await this.fetchSvc
       .fetch("/api/v1/products")
       .then((resp) => {
-        return resp.json()})
+        return resp?.json();
+      })
       .catch((err) => {
         console.log(`Error requesting products: ${err}`);
       });

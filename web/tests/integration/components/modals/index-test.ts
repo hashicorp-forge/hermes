@@ -12,7 +12,7 @@ module("Integration | Component | modals", function (hooks) {
       "service:modal-alerts"
     ) as ModalAlertsService;
 
-    await render(hbs`<Modals />`);
+    await render(hbs`{{! @glint-nocheck }}<Modals />`);
 
     assert.dom("dialog").doesNotExist();
     await modalAlerts.setActive.perform("docCreated");

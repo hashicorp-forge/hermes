@@ -1,0 +1,33 @@
+{{!  @glint-nocheck - not typesafe yet }}
+<div
+  data-test-product-select-item
+  class="relative flex w-full product-select-item"
+  ...attributes
+>
+  <FlightIcon
+    data-test-product-select-item-icon
+    data-test-icon={{or (get-product-id @product) "folder"}}
+    @name={{or (get-product-id @product) "folder"}}
+  />
+
+  <span data-test-product-select-item-value class="flex ml-2.5 leading-none">
+    {{@product}}
+  </span>
+
+  {{#if @abbreviation}}
+    <span
+      data-test-product-select-item-abbreviation
+      class="opacity-50 inline-flex ml-2 text-body-100 leading-none"
+    >
+      {{@abbreviation}}
+    </span>
+  {{/if}}
+
+  {{#if @selected}}
+    <FlightIcon
+      data-test-product-select-item-selected
+      @name="check"
+      class="check absolute right-0 top-1/2 -translate-y-1/2"
+    />
+  {{/if}}
+</div>

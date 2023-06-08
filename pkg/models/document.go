@@ -33,8 +33,9 @@ type Document struct {
 	// DocumentModifiedAt is the time the document was last modified.
 	DocumentModifiedAt time.Time
 
-	// DocumentNumber is a document identifier containing a product/area
-	// abbreviation and a number (e.g., "TF-123").
+	// DocumentNumber is a document number unique to each product/area. It
+	// pairs with the product abbreviation to form a document identifier
+	// (e.g., "TF-123").
 	DocumentNumber int `gorm:"index:latest_product_number"`
 
 	// DocumentType is the document type.
@@ -43,6 +44,9 @@ type Document struct {
 
 	// Imported is true if the document was not created through the application.
 	Imported bool
+
+	// Locked is true if the document cannot be updated (may be in a bad state).
+	Locked bool
 
 	// Owner is the owner of the document.
 	Owner   *User `gorm:"default:null;not null"`
@@ -80,59 +84,8 @@ const (
 
 // BeforeSave is a hook used to find associations before saving.
 func (d *Document) BeforeSave(tx *gorm.DB) error {
-	// Get approvers.
-	var approvers []*User
-	for _, a := range d.Approvers {
-		if err := a.Get(tx); err != nil {
-			return fmt.Errorf("error getting approver: %w", err)
-		}
-		approvers = append(approvers, a)
-	}
-	d.Approvers = approvers
-
-	// Get contributors.
-	var contributors []*User
-	for _, c := range d.Contributors {
-		if err := c.FirstOrCreate(tx); err != nil {
-			return fmt.Errorf("error getting contributor: %w", err)
-		}
-		contributors = append(contributors, c)
-	}
-	d.Contributors = contributors
-
-	// Get custom fields.
-	var customFields []*DocumentCustomField
-	for _, c := range d.CustomFields {
-		if err := c.DocumentTypeCustomField.Get(tx); err != nil {
-			return fmt.Errorf("error getting document type custom field: %w", err)
-		}
-		c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.DocumentType.ID
-		customFields = append(customFields, c)
-	}
-	d.CustomFields = customFields
-
-	// Get document type.
-	dt := d.DocumentType
-	if err := dt.Get(tx); err != nil {
-		return fmt.Errorf("error getting document type: %w", err)
-	}
-	d.DocumentType = dt
-	d.DocumentTypeID = dt.ID
-
-	// Get owner.
-	if d.Owner != nil && d.Owner.EmailAddress != "" {
-		if err := d.Owner.Get(tx); err != nil {
-			return fmt.Errorf("error getting owner: %w", err)
-		}
-		d.OwnerID = &d.Owner.ID
-	}
-
-	// Get product.
-	if d.Product.Name != "" {
-		if err := d.Product.Get(tx); err != nil {
-			return fmt.Errorf("error getting product: %w", err)
-		}
-		d.ProductID = d.Product.ID
+	if err := d.getAssociations(tx); err != nil {
+		return fmt.Errorf("error getting associations: %w", err)
 	}
 
 	return nil
@@ -181,9 +134,11 @@ func (d *Document) Create(db *gorm.DB) error {
 
 // Find finds all documents from database db with the provided query, and
 // assigns them to the receiver.
-func (d *Documents) Find(db *gorm.DB, query string) error {
+func (d *Documents) Find(
+	db *gorm.DB, query interface{}, queryArgs ...interface{}) error {
+
 	return db.
-		Where(query).
+		Where(query, queryArgs...).
 		Preload(clause.Associations).
 		Find(&d).Error
 }
@@ -217,10 +172,19 @@ func (d *Document) Get(db *gorm.DB) error {
 		return err
 	}
 
-	return db.
+	if err := db.
 		Where(Document{GoogleFileID: d.GoogleFileID}).
 		Preload(clause.Associations).
-		First(&d).Error
+		First(&d).
+		Error; err != nil {
+		return err
+	}
+
+	if err := d.getAssociations(db); err != nil {
+		return fmt.Errorf("error getting associations: %w", err)
+	}
+
+	return nil
 }
 
 // GetLatestProductNumber gets the latest document number for a product.
@@ -311,7 +275,7 @@ func (d *Document) Upsert(db *gorm.DB) error {
 		}
 
 		if err := d.Get(tx); err != nil {
-			return fmt.Errorf("error getting the document after upsert")
+			return fmt.Errorf("error getting the document after upsert: %w", err)
 		}
 
 		return nil
@@ -346,6 +310,91 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 			return fmt.Errorf("error finding or creating owner: %w", err)
 		}
 		d.OwnerID = &d.Owner.ID
+	}
+
+	// Get product if ProductID is not set.
+	if d.ProductID == 0 && d.Product.Name != "" {
+		if err := d.Product.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.ProductID = d.Product.ID
+	}
+
+	return nil
+}
+
+// getAssociations gets associations.
+func (d *Document) getAssociations(db *gorm.DB) error {
+	// Get approvers.
+	var approvers []*User
+	for _, a := range d.Approvers {
+		if err := a.Get(db); err != nil {
+			return fmt.Errorf("error getting approver: %w", err)
+		}
+		approvers = append(approvers, a)
+	}
+	d.Approvers = approvers
+
+	// Get contributors.
+	var contributors []*User
+	for _, c := range d.Contributors {
+		if err := c.FirstOrCreate(db); err != nil {
+			return fmt.Errorf("error getting contributor: %w", err)
+		}
+		contributors = append(contributors, c)
+	}
+	d.Contributors = contributors
+
+	// Get custom fields.
+	var customFields []*DocumentCustomField
+	for _, c := range d.CustomFields {
+		// If we already know the document type custom field ID, get the rest of its
+		// data.
+		if c.DocumentTypeCustomFieldID != 0 {
+			if err := db.
+				Model(&c.DocumentTypeCustomField).
+				Where(DocumentTypeCustomField{
+					Model: gorm.Model{
+						ID: c.DocumentTypeCustomFieldID,
+					},
+				}).
+				First(&c.DocumentTypeCustomField).
+				Error; err != nil {
+				return fmt.Errorf(
+					"error getting document type custom field with known ID: %w", err)
+			}
+		}
+		c.DocumentTypeCustomField.DocumentType.Name = d.DocumentType.Name
+		if err := c.DocumentTypeCustomField.Get(db); err != nil {
+			return fmt.Errorf("error getting document type custom field: %w", err)
+		}
+		c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.DocumentType.ID
+		customFields = append(customFields, c)
+	}
+	d.CustomFields = customFields
+
+	// Get document type.
+	dt := d.DocumentType
+	if err := dt.Get(db); err != nil {
+		return fmt.Errorf("error getting document type: %w", err)
+	}
+	d.DocumentType = dt
+	d.DocumentTypeID = dt.ID
+
+	// Get owner.
+	if d.Owner != nil && d.Owner.EmailAddress != "" {
+		if err := d.Owner.Get(db); err != nil {
+			return fmt.Errorf("error getting owner: %w", err)
+		}
+		d.OwnerID = &d.Owner.ID
+	}
+
+	// Get product.
+	if d.Product.Name != "" {
+		if err := d.Product.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.ProductID = d.Product.ID
 	}
 
 	return nil

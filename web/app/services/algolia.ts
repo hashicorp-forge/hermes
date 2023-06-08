@@ -6,15 +6,14 @@ import { inject as service } from "@ember/service";
 import { restartableTask, task } from "ember-concurrency";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { RequestOptions } from "@algolia/transporter";
-import {
-  SearchOptions,
-  SearchResponse,
-  ObjectWithObjectID,
-} from "@algolia/client-search";
+import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
-import { FacetDropdownObjectDetails, FacetRecord, FacetRecords } from "hermes/types/facets";
-import FetchService from "./fetch";
+import {
+  FacetDropdownObjectDetails,
+  FacetRecord,
+  FacetRecords,
+} from "hermes/types/facets";
 import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
@@ -26,10 +25,8 @@ export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 
 export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
-  @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
-
 
   /**
    * A shorthand getter for the authenticatedUser's email.
@@ -206,6 +203,14 @@ export default class AlgoliaService extends Service {
   );
 
   /**
+   * Clears Algolia's cache.
+   * Called by the dashboard to ensure an up-to-date index.
+   */
+  clearCache = task(async () => {
+    await this.client.clearCache();
+  });
+
+  /**
    * Returns an array of facet filters based on the current parameters,
    * and whether the owner is looking at their own docs.
    */
@@ -231,36 +236,6 @@ export default class AlgoliaService extends Service {
     return facetFilters;
   }
 
-  /**
-   * Returns an object of a given index and objectID.
-   * Used in the footer to show the date of the last full index.
-   */
-  getSearchIndexObject = task(
-    async (
-      indexName: string,
-      objectID: string
-    ): Promise<ObjectWithObjectID | undefined> => {
-      /**
-       * e.g., indexName = "hermes-staging"
-       * e.g., objectID = "LastFullIndex"
-       */
-      try {
-        let index: SearchIndex = this.client.initIndex(indexName);
-        return index.getObject(objectID).then(
-          (result) =>
-            /**
-             * e.g., result = {
-             *  lastFullIndexTime: "1995-01-06T20:58:17.59404Z",
-             *  objectID: "LastFullIndex",
-             * };
-             */
-            result
-        );
-      } catch (e: unknown) {
-        console.error(e);
-      }
-    }
-  );
   /**
    * Returns a search response for a given query and params.
    * Restarts with every search input keystroke.

@@ -1,15 +1,8 @@
 .PHONY: default
 default: help
 
-.PHONY: build-ui
-build-ui:
-	cd web; \
-	yarn install; \
-	rm -rf dist/; \
-	yarn build;
-
 .PHONY: build
-build: build-ui
+build: web/build
 	rm -f ./hermes
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
@@ -39,11 +32,11 @@ docker/postgres/stop: ## Stop PostgreSQL in Docker
 	docker-compose down
 
 .PHONY: go/build
-go/build:
+go/build: ## Run Go build
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
 .PHONY: go/test
-go/test:
+go/test: ## Run Go test
 	go test ./...
 
 .PHONY: go/test/with-docker-postgres
@@ -66,6 +59,18 @@ run:
 test:
 	go test ./...
 
+.PHONY: web/build
+web/build:
+	cd web; \
+	yarn install; \
+	rm -rf dist/; \
+	yarn build;
+
+.PHONY: web/test
+web/test: ## Run web test
+	cd web; \
+	yarn test:ember;
+
 .PHONY: web/install-deps
 web/install-deps: ## Install web application dependencies
 	cd web \
@@ -76,3 +81,7 @@ web/run: ## Run web application while proxying backend requests
 web/run: web/install-deps
 	cd web \
 		&& yarn start:with-proxy
+
+web/set-yarn-version: ## Set yarn version
+	cd web \
+		&& yarn set version 3.3.0

@@ -59,35 +59,39 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
    * Called onLoad and when tabs are changed.
    */
   fetchDocs = task(async () => {
-    let { currentTab } = this;
+    let facetFilters = "";
 
     // Translate the current tab to an Algolia facetFilter.
-    switch (currentTab) {
+    switch (this.currentTab) {
       case "new":
-        currentTab = "";
+        facetFilters = "";
         break;
       case "in-review":
-        currentTab = "status:In-Review";
+        facetFilters = "status:In-Review";
         break;
       case "approved":
-        currentTab = "status:approved";
+        facetFilters = "status:approved";
         break;
     }
+
+    await this.algolia.clearCache.perform();
 
     let newDocsToShow = await this.algolia.searchIndex
       .perform(
         this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc",
         "",
         {
-          facetFilters: [currentTab],
+          facetFilters: [facetFilters],
           hitsPerPage: 4,
         }
       )
       .then((result: SearchResponse<unknown>) => {
         // Add modifiedAgo for each doc.
         for (const hit of result.hits as HermesDocument[]) {
-          const modifiedAgo = new Date(hit.modifiedTime * 1000);
-          hit.modifiedAgo = `Modified ${timeAgo(modifiedAgo)}`;
+          if (hit.modifiedTime) {
+            const modifiedAgo = new Date(hit.modifiedTime * 1000);
+            hit.modifiedAgo = `Modified ${timeAgo(modifiedAgo)}`;
+          }
         }
         return result.hits;
       });
