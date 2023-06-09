@@ -238,11 +238,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   updateProduct = restartableTask(
-    async (product: string, productArea: ProductArea) => {
+    async (product: string) => {
       this.product = product;
-      // TODO: Allow multiple parameters to be patched at once
       await this.save.perform("product", this.product);
-      await this.save.perform("productAbbreviation", productArea.abbreviation);
     }
   );
 

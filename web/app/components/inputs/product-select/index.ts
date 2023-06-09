@@ -12,7 +12,7 @@ interface InputsProductSelectSignature {
   Element: HTMLDivElement;
   Args: {
     selected?: string;
-    onChange: (value: string, attributes: ProductArea) => void;
+    onChange: (value: string, attributes?: ProductArea) => void;
     formatIsBadge?: boolean;
     placement?: Placement;
     isSaving?: boolean;
@@ -52,7 +52,7 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     return selectedProduct.abbreviation;
   }
 
-  @action onChange(newValue: any, attributes: ProductArea) {
+  @action onChange(newValue: any, attributes?: ProductArea) {
     this.selected = newValue;
     this.args.onChange(newValue, attributes);
   }
