@@ -10,11 +10,11 @@ import AuthenticatedUserService, {
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 
-interface NavComponentSignature {
+interface HeaderNavComponentSignature {
   Args: {};
 }
 
-export default class NavComponent extends Component<NavComponentSignature> {
+export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
   @service declare router: RouterService;
@@ -84,3 +84,10 @@ export default class NavComponent extends Component<NavComponentSignature> {
     this.session.invalidate();
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    'Header::Nav': typeof HeaderNavComponent;
+  }
+}
+
