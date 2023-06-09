@@ -1,7 +1,13 @@
 import Component from "@glimmer/component";
 
-interface HeaderUserMenuHighlightsSignature {
+interface HeaderUserMenuHighlightSignature {
   Args: {};
 }
 
-export default class HeaderUserMenuHighlights extends Component<HeaderUserMenuHighlightsSignature> {}
+export default class HeaderUserMenuHighlight extends Component<HeaderUserMenuHighlightSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::UserMenuHighlight": typeof HeaderUserMenuHighlight;
+  }
+}
