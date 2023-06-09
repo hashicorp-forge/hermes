@@ -12,7 +12,7 @@ interface InputsProductSelectSignature {
   Element: HTMLDivElement;
   Args: {
     selected?: string;
-    onChange: (value: string) => void;
+    onChange: (value: string, attributes?: ProductArea) => void;
     formatIsBadge?: boolean;
     placement?: Placement;
     isSaving?: boolean;
@@ -23,7 +23,7 @@ type ProductAreas = {
   [key: string]: ProductArea;
 };
 
-type ProductArea = {
+export type ProductArea = {
   abbreviation: string;
   perDocDataType: unknown;
 };
@@ -43,17 +43,18 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     return icon;
   }
 
-  get selectedProductAbbreviation(): string | undefined {
+  get selectedProductAbbreviation(): string | null {
     if (!this.selected) {
-      return undefined;
+      return null;
     }
-    assert("products must be loaded", this.products);
-    return this.products[this.selected]?.abbreviation;
+    const selectedProduct = this.products?.[this.selected];
+    assert("selected product must exist", selectedProduct);
+    return selectedProduct.abbreviation;
   }
 
-  @action onChange(newValue: any) {
+  @action onChange(newValue: any, attributes?: ProductArea) {
     this.selected = newValue;
-    this.args.onChange(newValue);
+    this.args.onChange(newValue, attributes);
   }
 
   protected fetchProducts = task(async () => {

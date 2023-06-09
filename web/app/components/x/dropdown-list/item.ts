@@ -14,7 +14,7 @@ interface XDropdownListItemComponentSignature {
     focusedItemIndex: number;
     listItemRole: string;
     hideDropdown: () => void;
-    onItemClick?: (value: any) => void;
+    onItemClick?: (value: any, attributes: any) => void;
     setFocusedItemIndex: (
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
@@ -82,7 +82,7 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
 
   @action onClick() {
     if (this.args.onItemClick) {
-      this.args.onItemClick(this.args.value);
+      this.args.onItemClick(this.args.value, this.args.attributes);
     }
 
     /**

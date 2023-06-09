@@ -12,6 +12,7 @@ import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
+import { ProductArea } from "../inputs/product-select";
 
 interface DocFormErrors {
   title: string | null;
@@ -174,10 +175,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    productAbbreviation: string
+    attributes: ProductArea
   ) {
     this.productArea = productName;
-    this.productAbbreviation = productAbbreviation;
+    this.productAbbreviation = attributes.abbreviation;
+    this.maybeValidate();
   }
 
   /**
