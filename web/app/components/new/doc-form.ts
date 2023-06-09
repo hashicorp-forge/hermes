@@ -179,6 +179,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   ) {
     this.productArea = productName;
     this.productAbbreviation = attributes.abbreviation;
+    this.maybeValidate();
   }
 
   /**
