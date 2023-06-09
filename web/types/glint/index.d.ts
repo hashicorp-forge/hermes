@@ -6,10 +6,29 @@ import WillDestroyModifier from "ember-render-modifiers/modifiers/will-destroy";
 import AndHelper from "ember-truth-helpers/helpers/and";
 import EqHelper from "ember-truth-helpers/helpers/eq";
 import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
-import LtHelper from "ember-truth-helpers/helpers/lt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
 import { FlightIconComponent } from "hds/flight-icon";
+import { HdsButtonComponent } from "hds/button";
+import { HdsBadgeCountComponent } from "hds/badge-count";
+import { HdsFormTextInputBaseComponent } from "hds/form/text-input/base";
+import { HdsFormTextInputFieldComponent } from "hds/form/text-input/field";
+import { HdsAlertComponent } from "hds/alert";
+import { HdsLinkInlineComponent } from "hds/link/inline";
+import { HdsLinkStandaloneComponent } from "hds/link/standalone";
+import { HdsModalComponent } from "hds/modal";
+import { HdsFormCheckboxFieldComponent } from "hds/form/checkbox/fields";
+import { HdsFormTextareaFieldComponent } from "hds/form/textarea/field";
+import { HdsFormToggleBaseComponent } from "hds/form/toggle/base";
+import { HdsFormFieldComponent } from "hds/form/field";
+import { HdsToastComponent } from "hds/toast";
+import { HdsBadgeComponent } from "hds/badge";
+import { HdsButtonSetComponent } from "hds/button-set";
+import { HdsIconTileComponent } from "hds/icon-tile";
+import { HdsCardContainerComponent } from "hds/card/container";
+import { HdsTableTdComponent } from "hds/table/td";
+import { HdsTableTrComponent } from "hds/table/tr";
+import { HdsTableComponent } from "hds/table";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -21,8 +40,27 @@ declare module "@glint/environment-ember-loose/registry" {
     eq: typeof EqHelper;
     and: typeof AndHelper;
     not: typeof NotHelper;
-    lt: typeof LtHelper
     "is-empty": IsEmptyHelper;
     FlightIcon: FlightIconComponent;
+    "Hds::Button": HdsButtonComponent;
+    "Hds::BadgeCount": HdsBadgeCountComponent;
+    "Hds::Form::TextInput::Base": HdsFormTextInputBaseComponent;
+    "Hds::Form::TextInput::Field": HdsFormTextInputFieldComponent;
+    "Hds::Alert": HdsAlertComponent;
+    "Hds::Link::Inline": HdsLinkInlineComponent;
+    "Hds::Link::Standalone": HdsLinkStandaloneComponent;
+    "Hds::Modal": HdsModalComponent;
+    "Hds::Form::Checkbox::Field": HdsFormCheckboxFieldComponent;
+    "Hds::Form::Textarea::Field": HdsFormTextareaFieldComponent;
+    "Hds::Form::Toggle::Base": HdsFormToggleBaseComponent;
+    "Hds::Form::Field": HdsFormFieldComponent;
+    "Hds::Toast": HdsToastComponent;
+    "Hds::Badge": HdsBadgeComponent;
+    "Hds::ButtonSet": HdsButtonSetComponent;
+    "Hds::IconTile": HdsIconTileComponent;
+    "Hds::Card::Container": HdsCardContainerComponent;
+    "Hds::Table::Td": HdsTableTdComponent;
+    "Hds::Table::Tr": HdsTableTrComponent;
+    "Hds::Table": HdsTableComponent;
   }
 }

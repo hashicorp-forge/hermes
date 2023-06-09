@@ -313,64 +313,8 @@
       </div>
     </div>
 
-    {{!-- <div class="flex flex-col items-start space-y-2 px-3">
-      <small class="hds-typography-body-100 hds-foreground-faint">Tags</small>
-      {{#if this.isOwner}}
-        <EditableField
-          @value={{this.tags}}
-          @onChange={{perform this.save "tags"}}
-          @loading={{this.save.isRunning}}
-        >
-          <:default>
-            {{#if this.tags.length}}
-              <ol>
-                {{#each this.tags as |tag|}}
-                  <li>
-                    <FlightIcon
-                      @name="tag"
-                      @color="var(--token-color-palette-neutral-500)"
-                    />
-                    {{tag}}
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No tags</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::TagSelect
-              class="multiselect--narrow"
-              @selected={{this.tags}}
-              @onChange={{this.updateTags}}
-              {{click-outside (fn F.update this.tags)}}
-            />
-          </:editing>
-        </EditableField>
-      {{else}}
-        {{#if this.tags.length}}
-          <ol>
-            {{#each this.tags as |tag|}}
-              <li>
-                <FlightIcon
-                  @name="tag"
-                  @color="var(--token-color-palette-neutral-500)"
-                />
-                {{tag}}
-              </li>
-            {{/each}}
-          </ol>
-        {{else}}
-          <em>No tags</em>
-        {{/if}}
-      {{/if}}
-    </div> --}}
-
     {{#if this.userHasEditPrivileges}}
-      <div
-        class="sidebar-footer
-          {{if this.editingIsDisabled 'locked'}}"
-      >
+      <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
         {{#if this.editingIsDisabled}}
           <div class="px-3 -mb-1">
             <div class="w-full pt-3.5 border-t border-color-border-primary">
