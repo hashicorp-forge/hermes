@@ -15,6 +15,7 @@ import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
+import { ProductArea } from "../inputs/product-select";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -237,11 +238,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   updateProduct = restartableTask(
-    async (product: string, productAbbreviation: string) => {
+    async (product: string, productArea: ProductArea) => {
       this.product = product;
       // TODO: Allow multiple parameters to be patched at once
       await this.save.perform("product", this.product);
-      await this.save.perform("productAbbreviation", productAbbreviation);
+      await this.save.perform("productAbbreviation", productArea.abbreviation);
     }
   );
 
