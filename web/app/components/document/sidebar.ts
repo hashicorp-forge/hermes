@@ -260,7 +260,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           [field]: serializedValue,
         });
       } catch (err) {
+        // revert field value on failure
         (this as any)[field] = val;
+        console.error(err);
       }
     }
   });
