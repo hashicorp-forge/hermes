@@ -29,3 +29,9 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
     this.isDismissed = true;
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Dashboard::NewFeaturesBanner": typeof DashboardNewFeaturesBanner;
+  }
+}
