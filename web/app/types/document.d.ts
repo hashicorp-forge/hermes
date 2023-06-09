@@ -19,10 +19,10 @@ export interface HermesDocument {
   appCreated?: boolean;
   contributors?: HermesUser[];
   approvers?: HermesUser[];
-  changesRequestedBy?: unknown[]; // TODO: Define this
+  changesRequestedBy?: string[];
+  approvedBy?: string[];
   summary?: string;
   isDraft?: boolean;
-  approvedBy?: string[];
   customEditableFields?: CustomEditableFields;
 
   thumbnail?: string;
