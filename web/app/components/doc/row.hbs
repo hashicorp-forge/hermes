@@ -42,7 +42,7 @@
     <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
   <Hds::Table::Td class="product"><Hds::Badge
       @text={{this.productAreaName}}
-      @icon={{this.productAreaIcon}}
+      @icon={{or (get-product-id @productArea) "folder"}}
       title={{this.productAreaName}}
     /></Hds::Table::Td>
   <Hds::Table::Td class="owner">
