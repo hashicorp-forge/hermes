@@ -15,14 +15,16 @@ interface XDropdownListComponentSignature {
     selected?: any;
     items?: any;
     listIsOrdered?: boolean;
-    inputVisibility?: "shown" | "hidden";
-    onItemClick?: (value: any) => void;
-    offset?: OffsetOptions;
     renderOut?: boolean;
     isLoading?: boolean;
-    placement?: Placement | "none";
     disableClose?: boolean;
     listIsHidden?: boolean;
+    offset?: OffsetOptions;
+    inputVisibility?: "shown" | "hidden";
+    selected?: any;
+    placement?: Placement | "none";
+    isSaving?: boolean;
+    onItemClick: (value: any, attributes: any) => void;
   };
   Blocks: {
     anchor: [

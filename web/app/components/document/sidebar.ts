@@ -249,29 +249,32 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  updateProduct = restartableTask(async (product: string) => {
-    this.product = product;
-    await this.save.perform("product", this.product);
-  });
+  updateProduct = restartableTask(
+    async (product: string) => {
+      this.product = product;
+      await this.save.perform("product", this.product);
+      // productAbbreviation is computed by the back end
+    }
+  );
 
-  save = task(async (field, val) => {
+  save = task(async (field: string, val: string | HermesUser[]) => {
     if (field && val) {
-      let targetField = field;
-      assert("targetField must exist", targetField);
-      const oldVal = targetField;
-      targetField = cleanString(val);
+      let serializedValue;
+
+      if (typeof val === "string") {
+        serializedValue = cleanString(val);
+      } else {
+        serializedValue = val.map((p: HermesUser) => p.email);
+      }
 
       try {
-        const serializedValue = this.emailFields.includes(field)
-          ? val.map((p: HermesUser) => p.email)
-          : val;
-
         await this.patchDocument.perform({
-          [field]: cleanString(serializedValue),
+          [field]: serializedValue,
         });
       } catch (err) {
         // revert field value on failure
-        targetField = oldVal;
+        (this as any)[field] = val;
+        console.error(err);
       }
     }
   });
