@@ -69,15 +69,18 @@
                 <dd.LinkTo
                   data-test-product-match-link
                   @route="authenticated.all"
-                  @query={{hash product=(array dd.attrs.product) page=1}}
+                  @query={{hash
+                    product=(array dd.attrs.productAreaName)
+                    page=1
+                  }}
                   class="global-search-popover-header-link border-t border-t-color-border-primary"
                 >
                   <FlightIcon @name="folder" class="mr-1.5" />
                   <span class="flex items-center">
                     View all
                     <Hds::Badge
-                      @text={{dd.attrs.product}}
-                      @icon={{get-product-id dd.attrs.product}}
+                      @text={{dd.attrs.productAreaName}}
+                      @icon={{or (get-product-id dd.attrs.productAreaName) ""}}
                       class="mx-2 mix-blend-multiply"
                     />
                     documents

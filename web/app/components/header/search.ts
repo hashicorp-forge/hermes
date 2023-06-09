@@ -31,7 +31,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
   @tracked protected _bestMatches: HermesDocument[] = [];
-  @tracked protected _productAreaMatch: HermesDocument | null = null;
+  @tracked protected _productAreaMatch: string | null = null;
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = "";
 
@@ -62,7 +62,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         ...(this._productAreaMatch && {
           productAreaMatch: {
             itemShouldRenderOut: true,
-            ...this._productAreaMatch,
+            productAreaName: this._productAreaMatch,
           },
         }),
       } as SearchResultObjects
@@ -168,8 +168,9 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.searchInputIsEmpty = false;
 
         try {
-          const productSearch = this.algolia.searchIndex.perform(
-            this.configSvc.config.algolia_docs_index_name + "_product_areas",
+          const productSearch = this.algolia.searchForFacetValues.perform(
+            this.configSvc.config.algolia_docs_index_name,
+            "product",
             this.query,
             {
               hitsPerPage: 1,
@@ -190,9 +191,14 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           this._bestMatches = docs
             ? (docs.hits.slice(0, 5) as HermesDocument[])
             : [];
-          this._productAreaMatch = productAreas
-            ? (productAreas.hits[0] as HermesDocument)
-            : null;
+          if (productAreas) {
+            const firstHit = productAreas.facetHits[0];
+            if (firstHit) {
+              this._productAreaMatch = firstHit.value;
+            } else {
+              this._productAreaMatch = null;
+            }
+          }
         } catch (e: unknown) {
           console.error(e);
         }
