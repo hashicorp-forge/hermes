@@ -20,6 +20,7 @@ interface XDropdownListItemsComponentSignature {
     registerScrollContainer?: (e: HTMLElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
     hideContent: () => void;
+    listIsHidden?: boolean;
   };
 }
 
@@ -35,7 +36,13 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
   }
 
   get listIsShown(): boolean {
-    return this.args.shownItems && Object.keys(this.args.shownItems).length > 0;
+    if (this.args.listIsHidden) {
+      return false;
+    } else {
+      return (
+        this.args.shownItems && Object.keys(this.args.shownItems).length > 0
+      );
+    }
   }
 
   /**

@@ -134,6 +134,7 @@
               @setFocusedItemIndex={{this.setFocusedItemIndex}}
               @hideContent={{f.hideContent}}
               @scrollContainer={{this.scrollContainer}}
+              @listIsHidden={{@listIsHidden}}
             >
               <:item as |i|>
                 {{yield i to="item"}}

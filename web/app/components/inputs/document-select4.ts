@@ -98,6 +98,8 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
 
   @action hideModal() {
     this.modalIsShown = false;
+    this.query = "";
+    this.inputValueIsValid = false;
   }
 
   @action addRelatedExternalLink() {
@@ -206,7 +208,13 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
   }
 
   protected loadInitialData = dropTask(async (dd: any) => {
-    await this.search.perform(dd, "");
+    if (this._shownDocuments) {
+      // if we already have data, don't fetch it again
+      void this.search.perform(dd, "");
+    } else {
+      await this.search.perform(dd, "");
+      await timeout(250);
+    }
   });
 
   protected search = restartableTask(async (dd: any, query: string) => {

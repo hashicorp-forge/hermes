@@ -22,6 +22,7 @@ interface XDropdownListComponentSignature {
     isLoading?: boolean;
     placement?: Placement | "none";
     disableClose?: boolean;
+    listIsHidden?: boolean;
   };
   Blocks: {
     anchor: [
@@ -334,12 +335,6 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         );
       });
     }
-  }
-}
-
-declare module "@glint/environment-ember-loose/registry" {
-  export default interface Registry {
-    "X::DropdownList": typeof XDropdownListComponent;
   }
 }
 

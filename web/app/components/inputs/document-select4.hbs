@@ -15,7 +15,7 @@
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
     <Hds::Modal @onClose={{this.hideModal}} as |M|>
-      <M.Header>Add related documents</M.Header>
+      <M.Header>Add a related document</M.Header>
       <M.Body>
         <X::DropdownList
           @items={{this.shownDocuments}}
@@ -25,6 +25,7 @@
           @isLoading={{this.loadInitialData.isRunning}}
           @placement="none"
           @disableClose={{true}}
+          @listIsHidden={{this.inputValueIsValid}}
           class="w-full max-w-none relative h-[310px] modal-list"
         >
           <:anchor as |dd|>
@@ -47,56 +48,65 @@
           </:anchor>
           <:header>
             {{! TODO: improve this logic }}
-            {{#unless (and this.query.length this.inputValueIsValid)}}
-              <div
-                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-              >
-                {{#if this.query.length}}
-                  {{#unless this.inputValueIsValid}}
-                    Results
-                  {{/unless}}
+            <div
+              class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+            >
+              {{#if this.query.length}}
+                {{#if this.inputValueIsValid}}
+                  External doc
                 {{else}}
-                  Suggestions
+                  Results
                 {{/if}}
-              </div>
-            {{/unless}}
-            {{#if this.inputValueIsValid}}
-              <div
-                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-              >
-                External doc
-              </div>
-              {{#if this.fetchURLInfo.isRunning}}
-                <div
-                  class="mt-1 mb-1.5 py-1.5 px-3 w-full grid place-items-center h-10"
-                >
-                  <FlightIcon @name="loading" />
-                </div>
               {{else}}
-                <Action
-                  class="mt-1 mb-1.5 py-1.5 px-3 flex w-full group hover:bg-color-surface-interactive-hover h-10 items-center"
-                  {{on "click" this.addRelatedExternalLink}}
-                >
-                  <div class="flex items-center justify-between w-full">
-                    <div class="flex items-center">
-                      <img
-                        src={{this.faviconURL}}
-                        width="16"
-                        height="16"
-                        class="mr-2.5"
-                      />
-                      <span class="">
-                        Add external document
-                      </span>
+                Suggestions
+              {{/if}}
+            </div>
+
+            {{#if this.inputValueIsValid}}
+              <div class="mt-3 px-3 mb-4 w-full">
+                <div class="shadow-surface-low py-4 px-6 rounded">
+                  <div class="flex relative">
+                    <div class="absolute left-0 top-0">
+                      {{#if this.fetchURLInfo.isRunning}}
+                        <FlightIcon @name="loading" />
+                      {{/if}}
+                    </div>
+                    <div class="w-full">
+                      <Hds::Form::TextInput::Field
+                        @value="Text Input | Helios Design System"
+                        class="flex text-display-300 font-semibold mb-2.5"
+                        as |F|
+                      >
+                        <F.Label>Title</F.Label>
+                      </Hds::Form::TextInput::Field>
+                      {{! <Action class="ml-2 text-color-foreground-faint">
+                        <FlightIcon @name="pencil-tool" />
+                      </Action> }}
+                      <div
+                        class="text-body-200 text-color-foreground-faint flex items-center"
+                      >
+                        <img src={{this.faviconURL}} width="16" height="16" class="mr-2" />
+                        helios.hashicorp.design
+                      </div>
                     </div>
                   </div>
-                </Action>
-                <Hds::ButtonSet>
-                  <Hds::Button @text="Add" />
-                </Hds::ButtonSet>
-              {{/if}}
+                  <Hds::Button
+                    class="mt-4 mb-2"
+                    @text="Add external doc"
+                    {{on "click" this.addRelatedExternalLink}}
+                  />
+                </div>
+              </div>
             {{/if}}
           </:header>
+          <:loading>
+            <div
+              class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+            >
+              Suggestions
+            </div>
+            <FlightIcon @name="loading" class="mt-2" />
+          </:loading>
           <:item as |dd|>
             <dd.Action class="w-full flex items-start py-1.5 px-3 space-x-3">
               <div
@@ -105,7 +115,7 @@
                 <img src="/images/document.png" class="w-5 h-auto" />
               </div>
               <div>
-                <h4 class="inline-doc-title mb-0.5 pr-0.5">
+                <h4 class="text-display-300 font-semibold text-color-foreground-strong mb-0.5 pr-0.5">
                   {{dd.attrs.title}}
                 </h4>
                 {{#if dd.attrs.docNumber}}
