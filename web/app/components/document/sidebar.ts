@@ -3,16 +3,34 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import { task } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce } from "@ember/runloop";
+import FetchService from "hermes/services/fetch";
+import RouterService from "@ember/routing/router-service";
+import SessionService from "hermes/services/session";
+import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import { AuthenticatedUser } from "hermes/services/authenticated-user";
+import { HermesDocument, HermesUser } from "hermes/types/document";
+import { assert } from "@ember/debug";
+import Route from "@ember/routing/route";
 
-export default class DocumentSidebar extends Component {
-  @service("fetch") fetchSvc;
-  @service router;
-  @service session;
-  @service flashMessages;
+interface DocumentSidebarComponentSignature {
+  Args: {
+    profile: AuthenticatedUser;
+    document: HermesDocument;
+    docType: string;
+    deleteDraft: (docId: string) => void;
+  };
+}
+
+export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
+  @service("fetch") declare fetchSvc: FetchService;
+  @service declare router: RouterService;
+  @service declare session: SessionService;
+  @service declare flashMessages: FlashMessageService;
+
   @tracked isCollapsed = false;
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
@@ -20,9 +38,9 @@ export default class DocumentSidebar extends Component {
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  @tracked linkedRFC = null;
+  @tracked linkedRFC: HermesDocument | null = null;
 
-  @task *saveLinkedRFC(rfc) {
+  @task *saveLinkedRFC(rfc: HermesDocument) {
     this.linkedRFC = rfc;
     if (this.linkedRFC) {
       // FIXME: need the full URL
@@ -54,13 +72,17 @@ export default class DocumentSidebar extends Component {
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked tags = this.args.document.tags || [];
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
 
   @tracked userHasScrolled = false;
-  @tracked body = null;
+  @tracked _body: HTMLElement | null = null;
+
+  get body() {
+    assert("_body must exist", this._body);
+    return this._body;
+  }
 
   get docIsLocked() {
     return this.args.document?.locked;
@@ -69,6 +91,7 @@ export default class DocumentSidebar extends Component {
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
     for (const field in customEditableFields) {
+      // @ts-ignore - TODO: Type this
       customEditableFields[field]["value"] = this.args.document[field];
     }
     return customEditableFields;
@@ -103,9 +126,13 @@ export default class DocumentSidebar extends Component {
     }
   }
 
-  @action
-  onDocTypeCheckboxChange(event) {
-    this.docTypeCheckboxValue = event.target.checked;
+  @action onDocTypeCheckboxChange(event: Event) {
+    const eventTarget = event.target;
+    assert(
+      "event.target must be an HTMLInputElement",
+      eventTarget instanceof HTMLInputElement
+    );
+    this.docTypeCheckboxValue = eventTarget.checked;
   }
 
   get moveToStatusButtonColor() {
@@ -191,10 +218,16 @@ export default class DocumentSidebar extends Component {
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
-    getOwner(this).lookup(`route:${this.router.currentRouteName}`).refresh();
+    const owner = getOwner(this);
+    assert("owner must exist", owner);
+    const route = owner.lookup(
+      `route:${this.router.currentRouteName}`
+    ) as Route;
+    assert("route must exist", route);
+    route.refresh();
   }
 
-  @action maybeShowFlashError(error, title) {
+  @action maybeShowFlashError(error: Error, title: string) {
     if (!this.modalIsActive) {
       this.flashMessages.add({
         title,
@@ -206,7 +239,7 @@ export default class DocumentSidebar extends Component {
     }
   }
 
-  @action showFlashSuccess(title, message) {
+  @action showFlashSuccess(title: string, message: string) {
     this.flashMessages.add({
       message,
       title,
@@ -216,59 +249,57 @@ export default class DocumentSidebar extends Component {
     });
   }
 
-  @task({ restartable: true })
-  *updateProduct(product) {
+  updateProduct = restartableTask(async (product: string) => {
     this.product = product;
-    yield this.save.perform("product", this.product);
-  }
+    await this.save.perform("product", this.product);
+  });
 
-  @task
-  *save(field, val) {
-    if (field) {
-      const oldVal = this[field];
-      this[field] = cleanString(val);
+  save = task(async (field, val) => {
+    if (field && val) {
+      let targetField = field;
+      assert("targetField must exist", targetField);
+      const oldVal = targetField;
+      targetField = cleanString(val);
 
       try {
         const serializedValue = this.emailFields.includes(field)
-          ? val.map((p) => p.email)
+          ? val.map((p: HermesUser) => p.email)
           : val;
 
-        yield this.patchDocument.perform({
+        await this.patchDocument.perform({
           [field]: cleanString(serializedValue),
         });
       } catch (err) {
         // revert field value on failure
-        this[field] = oldVal;
+        targetField = oldVal;
       }
     }
-  }
+  });
 
-  @task
-  *patchDocument(fields) {
+  patchDocument = task(async (fields) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {
-      yield this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
+      await this.fetchSvc.fetch(`/api/v1/${endpoint}/${this.docID}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),
       });
-    } catch (error) {
-      this.maybeShowFlashError(error, "Unable to save document");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to save document");
       throw error;
     }
     this.refreshRoute();
-  }
+  });
 
-  @task
-  *requestReview() {
+  requestReview = task(async () => {
     try {
       // Update approvers.
-      yield this.patchDocument.perform({
+      await this.patchDocument.perform({
         approvers: this.approvers.compact().mapBy("email"),
       });
 
-      yield this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
+      await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
         method: "POST",
       });
 
@@ -277,42 +308,44 @@ export default class DocumentSidebar extends Component {
       this.router.transitionTo({
         queryParams: { draft: false },
       });
-    } catch (error) {
-      this.maybeShowFlashError(error, "Unable to request review");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to request review");
       throw error;
     }
     this.requestReviewModalIsActive = false;
     this.refreshRoute();
-  }
+  });
 
-  @task
-  *deleteDraft() {
+  deleteDraft = task(async () => {
     try {
-      yield this.args.deleteDraft.perform(this.docID);
-    } catch (error) {
-      this.maybeShowFlashError(error, "Unable to delete draft");
+      await this.args.deleteDraft(this.docID);
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to delete draft");
       throw error;
     }
-  }
+  });
 
   @action
-  updateApprovers(approvers) {
+  updateApprovers(approvers: HermesUser[]) {
     this.approvers = approvers;
   }
 
   @action
-  updateContributors(contributors) {
+  updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
 
   @action
-  updateCustomFieldValue(field, value) {
-    this.customEditableFields[field].value = value;
-  }
+  updateCustomFieldValue(field: string, value: string) {
+    assert("customEditableFields must exist", this.customEditableFields);
 
-  @action
-  updateTags(tags) {
-    this.tags = tags;
+    const customEditableField = this.customEditableFields[field];
+    assert("customEditableField must exist", customEditableField);
+
+    let customEditableFieldValue = customEditableField.value;
+    assert("customEditableFieldValue must exist", customEditableFieldValue);
+
+    customEditableFieldValue = value;
   }
 
   @action closeDeleteModal() {
@@ -329,36 +362,34 @@ export default class DocumentSidebar extends Component {
 
   @action onScroll() {
     let onScrollFunction = () => {
-      this.userHasScrolled = this.body?.scrollTop > 0;
+      this.userHasScrolled = this.body.scrollTop > 0;
     };
 
     debounce(this, onScrollFunction, 50);
   }
 
-  @action registerBody(element) {
-    this.body = element;
+  @action registerBody(element: HTMLElement) {
+    this._body = element;
   }
 
-  @task
-  *approve() {
+  approve = task(async () => {
     try {
-      yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
+      await this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
       this.showFlashSuccess("Done!", "Document approved");
-    } catch (error) {
-      this.maybeShowFlashError(error, "Unable to approve");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to approve");
       throw error;
     }
 
     this.refreshRoute();
-  }
+  });
 
-  @task
-  *requestChanges() {
+  requestChanges = task(async () => {
     try {
-      yield this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
+      await this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -369,24 +400,26 @@ export default class DocumentSidebar extends Component {
         msg = "Document marked as not approved";
       }
       this.showFlashSuccess("Done!", msg);
-    } catch (error) {
-      this.maybeShowFlashError(error, "Change request failed");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Change request failed");
       throw error;
     }
     this.refreshRoute();
-  }
+  });
 
-  @task
-  *changeDocumentStatus(status) {
+  changeDocumentStatus = task(async (status) => {
     try {
-      yield this.patchDocument.perform({
+      await this.patchDocument.perform({
         status: status,
       });
       this.showFlashSuccess("Done!", `Document status changed to "${status}"`);
-    } catch (error) {
-      this.maybeShowFlashError(error, "Unable to change document status");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(
+        error as Error,
+        "Unable to change document status"
+      );
       throw error;
     }
     this.refreshRoute();
-  }
+  });
 }
