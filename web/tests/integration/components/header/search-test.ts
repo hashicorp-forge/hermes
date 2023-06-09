@@ -94,11 +94,10 @@ module("Integration | Component | header/search", function (hooks) {
       .exists('the "best matches" header is shown when matches are found');
   });
 
-  test("it renders matches in the popover", async function (this: HeaderSearchTestContext, assert) {
+  test("it renders filterable results in a popover", async function (this: HeaderSearchTestContext, assert) {
     await render<HeaderSearchTestContext>(hbs`
       <Header::Search />
     `);
-
     await fillIn(SEARCH_INPUT_SELECTOR, "test");
 
     assert.dom(SEARCH_RESULT_SELECTOR).exists({ count: 5 });
@@ -167,7 +166,7 @@ module("Integration | Component | header/search", function (hooks) {
     await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText('View all results for “test”');
+      .hasText("View all results for “test”");
 
     await fillIn(SEARCH_INPUT_SELECTOR, "test 3");
 
@@ -179,6 +178,6 @@ module("Integration | Component | header/search", function (hooks) {
 
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText('View all results for “test 3”');
+      .hasText("View all results for “test 3”");
   });
 });

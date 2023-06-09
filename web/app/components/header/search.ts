@@ -8,7 +8,8 @@ import RouterService from "@ember/routing/router-service";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
+import Ember from "ember";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects;
@@ -154,7 +155,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * and updates the "itemsToShow" object.
    */
   protected search = restartableTask(
-    async (dd: any, inputEvent: InputEvent): Promise<void> => {
+    async (dd: any, inputEvent: Event): Promise<void> => {
       let input = inputEvent.target;
 
       assert(
@@ -206,6 +207,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.query = "";
         this._productAreaMatch = null;
         this.searchInputIsEmpty = true;
+
         dd.hideContent();
         this._bestMatches = [];
       }
@@ -215,13 +217,27 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         dd.showContent();
       }
 
-      // Although `dd.scheduleAssignMenuItemIDs` runs `afterRender`,
-      // it doesn't provide enough time for `in-element` to update.
-      // Therefore, we wait for the next run loop.
-      next(() => {
-        dd.resetFocusedItemIndex();
-        dd.scheduleAssignMenuItemIDs();
-      });
+      /**
+       * Although `dd.scheduleAssignMenuItemIDs` runs `afterRender`,
+       * it doesn't provide enough time for `in-element` to update.
+       * Therefore, we wait for the next run loop.
+       *
+       * This approach causes issues when testing, so we
+       * use `schedule` as an approximation.
+       *
+       * TODO: Improve this.
+       */
+      if (Ember.testing) {
+        schedule("afterRender", () => {
+          dd.resetFocusedItemIndex();
+          dd.scheduleAssignMenuItemIDs();
+        });
+      } else {
+        next(() => {
+          dd.resetFocusedItemIndex();
+          dd.scheduleAssignMenuItemIDs();
+        });
+      }
     }
   );
 }

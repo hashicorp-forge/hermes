@@ -4,6 +4,7 @@ import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
 import { SearchResponse } from "@algolia/client-search";
 import { getTestDocNumber } from "./factories/document";
+import { SearchForFacetValuesResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -67,30 +68,35 @@ export default function (mirageConfig) {
 
       const getAlgoliaSearchResults = (schema, request) => {
         const requestBody = JSON.parse(request.requestBody);
-        const { query, hitsPerPage } = requestBody;
+        const { facetQuery, query } = requestBody;
 
-        let matches: [];
+        console.log("requestBody", requestBody);
 
-        if (hitsPerPage === 1) {
-          matches = schema.document.all().models.filter((doc) => {
+        if (facetQuery) {
+          let facetMatch = schema.document.all().models.filter((doc) => {
             return doc.attrs.product
               .toLowerCase()
-              .includes(query.toLowerCase());
-          });
+              .includes(facetQuery.toLowerCase());
+          })[0];
+
+          if (!facetMatch) {
+            return new Response(200, {}, { facetHits: [] });
+          } else {
+            return new Response(
+              200,
+              {},
+              { facetHits: [{ value: facetMatch.attrs.product }] }
+            );
+          }
         } else {
-          matches = schema.document.all().models.filter((doc) => {
+          let docMatches = schema.document.all().models.filter((doc) => {
             return (
               doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
               doc.attrs.product.toLowerCase().includes(query.toLowerCase())
             );
           });
+          return new Response(200, {}, { hits: docMatches });
         }
-
-        let algoliaResults: Partial<SearchResponse> = {
-          hits: matches,
-        };
-
-        return new Response(200, {}, algoliaResults);
       };
 
       /**
@@ -104,7 +110,9 @@ export default function (mirageConfig) {
       );
 
       /**
-       * Used by the global search input to query Algolia.
+       * Algolia has several search hosts, e.g., appID-1.algolianet.com,
+       * and Mirage doesn't support wildcards in routes.
+       * So, we create a route for each host.
        */
 
       let algoliaSearchHosts = [];
