@@ -16,7 +16,7 @@ interface XDropdownListComponentSignature {
     selected: any;
     placement?: Placement;
     isSaving?: boolean;
-    onItemClick: (value: any) => void;
+    onItemClick: (value: any, attributes: any) => void;
   };
   Blocks: {
     default: [];
