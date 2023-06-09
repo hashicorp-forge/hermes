@@ -15,7 +15,6 @@ import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
-import { ProductArea } from "../inputs/product-select";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -241,6 +240,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (product: string) => {
       this.product = product;
       await this.save.perform("product", this.product);
+      // productAbbreviation is computed by the back end
     }
   );
 
