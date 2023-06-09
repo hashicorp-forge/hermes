@@ -48,7 +48,7 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
       return null;
     }
     const selectedProduct = this.products?.[this.selected];
-    assert("products must be loaded", selectedProduct);
+    assert("selected product must exist", selectedProduct);
     return selectedProduct.abbreviation;
   }
 
