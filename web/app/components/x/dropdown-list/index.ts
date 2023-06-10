@@ -12,7 +12,6 @@ import { HermesDocument } from "hermes/types/document";
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected?: any;
     items?: any;
     listIsOrdered?: boolean;
     renderOut?: boolean;
