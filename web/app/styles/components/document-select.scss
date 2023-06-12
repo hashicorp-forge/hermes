@@ -1,8 +1,17 @@
 .related-docs {
   @apply w-full;
 
+  .related-doc-link-container {
+    &:hover {
+    .related-doc-link {
+      @apply bg-color-surface-interactive-hover;
+      // @apply bg-white border-color-border-primary;
+    }
+    }
+  }
+
   .related-doc-link {
-    @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent truncate;
+    @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded-md -mr-[4px] border border-transparent py-1.5;
   }
 
   .inline-doc-title {
@@ -14,7 +23,7 @@
   }
 
   .more-button {
-    @apply shrink-0 opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
+    @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
 
     &:hover,
     &:focus {
@@ -22,7 +31,7 @@
     }
 
     &:hover {
-      @apply border-color-border-strong;
+      @apply border-color-border-strong bg-color-surface-faint;
     }
   }
 

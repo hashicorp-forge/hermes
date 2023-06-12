@@ -8,7 +8,13 @@
   &.modal-list {
     .x-dropdown-list-container,
     .x-dropdown-list-scroll-container {
-      @apply overflow-visible;
+      // @apply overflow-visible;
+    }
+
+    .x-dropdown-list-item-link {
+      &.is-aria-selected {
+        @apply bg-color-surface-action;
+      }
     }
   }
 }

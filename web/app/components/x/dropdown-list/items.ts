@@ -56,7 +56,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
     return Object.entries(this.args.shownItems).length === 0;
   }
   /**
-   * Keyboard listener for the ArrowUp/ArrowDown/Enter keys.
+   * Document keyboard listener for the ArrowUp/ArrowDown/Enter keys.
    * ArrowUp/ArrowDown change the focused item.
    * Enter selects the focused item.
    */

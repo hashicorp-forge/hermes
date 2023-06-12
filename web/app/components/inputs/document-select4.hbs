@@ -1,3 +1,4 @@
+{{on-document "keydown" this.onDocumentKeydown}}
 <div class="w-full">
   <div class="relative z-10 flex items-center w-full justify-between">
     <div class="hds-typography-body-100 hds-foreground-faint">
@@ -14,153 +15,243 @@
 
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
-    <Hds::Modal @onClose={{this.hideModal}} as |M|>
-      <M.Header>Add a related document or link</M.Header>
-      <M.Body>
-        <X::DropdownList
-          @items={{this.shownDocuments}}
-          @onItemClick={{this.addRelatedDocument}}
-          @inputVisibility="hidden"
-          @offset={{hash mainAxis=1 crossAxis=0}}
-          @isLoading={{this.loadInitialData.isRunning}}
-          @placement="none"
-          @disableClose={{true}}
-          @listIsHidden={{this.inputValueIsValid}}
-          class="w-full max-w-none relative h-[310px] modal-list"
-        >
-          <:anchor as |dd|>
-            <Hds::Form::TextInput::Base
-              data-test-global-search-input
-              {{did-insert dd.registerAnchor}}
-              {{did-insert (fn this.didInsertInput dd)}}
-              {{on "input" (fn this.onInput dd)}}
-              {{on "keydown" (fn this.onInputKeydown dd)}}
-              {{on "focusin" (fn this.maybeOpenDropdown dd)}}
-              @type="search"
-              @value={{this.query}}
-              size="25"
-              placeholder="Paste a URL or search documents..."
-              aria-label="Paste a URL or search documents..."
-              aria-controls={{dd.ariaControls}}
-              aria-expanded={{dd.contentIsShown}}
-              aria-haspopup="listbox"
-            />
-          </:anchor>
-          <:header>
-            {{! TODO: improve this logic }}
-            <div
-              class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-            >
-              {{#if this.query.length}}
-                {{#if this.inputValueIsValid}}
-                  External resource
-                {{else}}
-                  Results
-                {{/if}}
-              {{else}}
-                Suggestions
-              {{/if}}
-            </div>
+    <Hds::Modal @onClose={{this.hideModal}} class="h-[420px]" as |M|>
+      <M.Header>
+        <div class="flex w-full items-center">
 
-            {{#if this.inputValueIsValid}}
-              <div class="mt-3 px-3 mb-4 w-full">
-                <div class="shadow-surface-low pt-5 pb-7 px-6 rounded">
-                  <div class="flex relative">
-                    <div class="w-full">
-                      <div class="flex w-full justify-between items-start">
-                        <div class="shrink-0 -ml-1 mr-3 mt-1 flex">
+          {{#if this.editModeIsEnabled}}
+            <Action
+              {{on "click" this.disableEditMode}}
+              class="flex items-center"
+            >
+              <FlightIcon
+                @name="arrow-left"
+                class="text-color-foreground-faint mr-4"
+              />
+            </Action>
+          {{/if}}
+          <div class="{{if this.editModeIsEnabled 'text-center'}} w-full">
+
+            {{if
+              this.editModeIsEnabled
+              "Edit link"
+              "Add a related document or link"
+            }}
+          </div>
+        </div>
+      </M.Header>
+      <M.Body>
+        <div>
+
+          <X::DropdownList
+            @items={{this.shownDocuments}}
+            @onItemClick={{this.addRelatedDocument}}
+            @inputVisibility="hidden"
+            @offset={{hash mainAxis=1 crossAxis=0}}
+            @isLoading={{this.loadInitialData.isRunning}}
+            @placement="none"
+            @disableClose={{true}}
+            @listIsHidden={{this.inputValueIsValid}}
+            class="w-full max-w-none relative modal-list"
+          >
+            <:anchor as |dd|>
+
+              <Hds::Form::TextInput::Base
+                data-test-global-search-input
+                {{did-insert dd.registerAnchor}}
+                {{did-insert (fn this.didInsertInput dd)}}
+                {{on "input" (fn this.onInput dd)}}
+                {{on "keydown" (fn this.onInputKeydown dd)}}
+                {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+                @type="search"
+                @value={{this.query}}
+                size="25"
+                placeholder="Paste a URL or search documents..."
+                aria-label="Paste a URL or search documents..."
+                aria-controls={{dd.ariaControls}}
+                aria-expanded={{dd.contentIsShown}}
+                aria-haspopup="listbox"
+                class={{if this.editModeIsEnabled "hidden"}}
+              />
+            </:anchor>
+            <:header>
+              {{! TODO: improve this logic }}
+              {{#unless this.editModeIsEnabled}}
+                <div
+                  class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+                >
+                  {{#if this.query.length}}
+                    {{#if this.inputValueIsValid}}
+                      External resource
+                    {{else}}
+                      Results
+                    {{/if}}
+                  {{else}}
+                    Suggestions
+                  {{/if}}
+                </div>
+              {{/unless}}
+
+              {{#if this.inputValueIsValid}}
+                <div
+                  class="mt-1 px-3 mb-4 w-full py-1.5 items-center
+                    {{unless
+                      this.editModeIsEnabled
+                      'h-14 bg-color-surface-action text-color-foreground-action rounded-md'
+                    }}"
+                >
+                  <div class="flex relative h-full items-center">
+                    <div class="w-full h-full">
+                      <div
+                        class="w-full h-full
+                          {{unless
+                            this.editModeIsEnabled
+                            'flex justify-between items-center'
+                          }}"
+                      >
+                        {{#unless this.editModeIsEnabled}}
+                          <div class="shrink-0 flex ml-2 mr-3.5">
+                            <FlightIcon
+                              @name="plus"
+                              @size="24"
+                              class="text-color-foreground-action"
+                            />
+                          </div>
+                        {{/unless}}
+                        <div
+                          class="{{if this.editModeIsEnabled 'w-full mb-5'}}
+                            shrink-0 mr-3 w-7 justify-center flex items-center"
+                        >
 
                           {{#if this.faviconIsShown}}
-                            {{#if this.defaultFaviconIsShown}}
-                              <FlightIcon @name="globe" />
-                            {{else}}
-                              <img
-                                src={{this.faviconURL}}
-                                width="16"
-                                height="16"
-                              />
-                            {{/if}}
+                            <FlightIcon
+                              @name="globe"
+                              @size="24"
+                              class="text-color-foreground-faint"
+                            />
                           {{else}}
                             <FlightIcon @name="loading" />
                           {{/if}}
                         </div>
                         <div class="w-full">
                           <div
-                            class="flex items-center space-x-2 text-display-300 font-semibold mb-1"
+                            class="flex items-center space-x-2 text-display-200 font-semibold"
                           >
-                            <div>
-                              {{if
+                            {{#if this.editModeIsEnabled}}
+                              <Hds::Form::TextInput::Field
+                                @value={{this.externalLinkTitle}}
+                                class="mb-4"
+                                as |F|
+                              >
+                                <F.Label>
+                                  Title
+                                </F.Label>
+                              </Hds::Form::TextInput::Field>
+                            {{else}}
+                              <div>
+                                {{unless
+                                  this.fetchURLInfo.isRunning
+                                  this.externalLinkTitle
+                                }}
+                              </div>
+                            {{/if}}
+                          </div>
+                          {{#if this.editModeIsEnabled}}
+                            <Hds::Form::TextInput::Field
+                              @value={{this.query}}
+                              as |F|
+                            >
+                              <F.Label>
+                                URL
+                              </F.Label>
+                            </Hds::Form::TextInput::Field>
+                          {{else}}
+                            <div
+                              class="text-body-200 text-color-foreground-faint"
+                            >
+                              {{unless
                                 this.fetchURLInfo.isRunning
-                                ""
-                                "Text Input | Helios Design System"
+                                this.displayURL
                               }}
                             </div>
-                          </div>
-                          <div
-                            class="text-body-200 text-color-foreground-faint"
-                          >
-                            {{if
-                              this.fetchURLInfo.isRunning
-                              ""
-                              "helios.hashicorp.design"
-                            }}
-                          </div>
+                          {{/if}}
                         </div>
-                        {{#unless this.fetchURLInfo.isRunning}}
-                          <Hds::Button
-                            @color="tertiary"
-                            @text="Rename"
-                            @icon="pencil-tool"
-                            class="shrink-0 ml-4 -mt-2 -mr-3"
-                          />
-                        {{/unless}}
                       </div>
                     </div>
                   </div>
                 </div>
-                {{#unless this.fetchURLInfo.isRunning}}
-                  <Hds::Button
-                    class="mt-5"
-                    @color="secondary"
-                    @text="Add this link"
-                    @isFullWidth={{true}}
-                    {{on "click" this.addRelatedExternalLink}}
-                  />
-                {{/unless}}
-              </div>
-            {{/if}}
-          </:header>
-          <:loading>
-            <div
-              class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-            >
-              Suggestions
-            </div>
-            <FlightIcon @name="loading" class="mt-2" />
-          </:loading>
-          <:item as |dd|>
-            <dd.Action class="w-full flex items-start py-1.5 px-3 space-x-3">
-              <div
-                class="shrink-0 flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white"
+
+              {{/if}}
+            </:header>
+            <:loading>
+              <FlightIcon @name="loading" class="ml-2 mt-4" />
+            </:loading>
+            <:item as |dd|>
+              <dd.Action
+                class="w-full flex items-center justify-between py-1.5 px-3 h-14"
               >
-                <img src="/images/document.png" class="w-5 h-auto" />
-              </div>
-              <div>
-                <h4
-                  class="text-display-300 font-semibold text-color-foreground-strong mb-0.5 pr-0.5"
-                >
-                  {{dd.attrs.title}}
-                </h4>
-                {{#if dd.attrs.docNumber}}
-                  <span class="text-color-foreground-faint text-body-100">
-                    {{dd.attrs.docNumber}}
-                  </span>
-                {{/if}}
-              </div>
-            </dd.Action>
-          </:item>
-        </X::DropdownList>
+                <div class="shrink-0 flex items-center ml-2 mr-3">
+                  <FlightIcon
+                    @name="plus"
+                    @size="24"
+                    class="text-color-foreground-action"
+                  />
+                </div>
+                <div class="flex w-full overflow-hidden space-x-3">
+                  <div
+                    class="shrink-0 w-auto h-full flex p-px hds-surface-mid rounded-sm mt-0.5 overflow-hidden bg-white ml-px mb-px"
+                  >
+                    <img src="/images/document.png" class="w-7 h-auto" />
+                  </div>
+                  <div class="w-full overflow-hidden pr-8">
+                    <h4
+                      class="text-display-200 font-semibold text-color-foreground-strong pr-0.5 truncate"
+                    >
+                      {{dd.attrs.title}}
+                    </h4>
+                    {{#if dd.attrs.docNumber}}
+                      <span class="text-color-foreground-faint text-body-100">
+                        {{dd.attrs.docNumber}}
+                      </span>
+                    {{/if}}
+                  </div>
+                </div>
+
+              </dd.Action>
+            </:item>
+          </X::DropdownList>
+        </div>
+
       </M.Body>
+      {{#if this.inputValueIsValid}}
+        <M.Footer>
+          {{!-- <Hds::Button
+              @color="primary"
+              @text="Add this link"
+              @icon=""
+              class=""
+              {{on "click" this.addRelatedExternalLink}}
+            /> --}}
+          <Hds::ButtonSet>
+
+            {{#if this.editModeIsEnabled}}
+              <Hds::Button
+                @color="primary"
+                @text="Save and add link"
+                {{on "click" this.addRelatedExternalLink}}
+              />
+            {{else}}
+              <Hds::Button
+                @color="tertiary"
+                @text="Edit link"
+                @icon="pencil-tool"
+                class=""
+                {{on "click" this.enableEditMode}}
+              />
+            {{/if}}
+          </Hds::ButtonSet>
+        </M.Footer>
+      {{/if}}
     </Hds::Modal>
   {{/in-element}}
 {{/if}}
@@ -168,28 +259,26 @@
 {{! TODO: move this out of the component }}
 
 {{#if this.relatedResourcesAreShown}}
-  {{log this.relatedResources}}
-  <ul class="mt-1 related-docs">
+  <ul class="!mt-0.5 related-docs">
     {{#each-in this.relatedResources as |_resourceId resource|}}
       <li
         class="flex w-full relative group related-docs-list-item
           {{if resource.objectID 'hermes-doc' 'external-doc'}}"
       >
-        {{#if resource.objectID}}
-          <div class="outline-dotted w-full">
-
+        <div class="w-full related-doc-link-container">
+          {{#if resource.objectID}}
             <LinkTo
               @route="authenticated.document"
               @model={{resource.objectID}}
-              class="related-doc-link outline-double"
+              class="related-doc-link"
             >
               <div
                 class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
               >
                 <img src="/images/document.png" class="w-5 h-auto" />
               </div>
-              <div class="outline w-full overflow-hidden">
-                <h4 class="inline-doc-title mb-0.5 pr-0.5 truncate">
+              <div class="w-full overflow-hidden pr-6">
+                <h4 class="inline-doc-title mb-0.5 truncate">
                   {{resource.title}}
                 </h4>
                 {{#if resource.docNumber}}
@@ -198,30 +287,42 @@
                   </div>
                 {{/if}}
               </div>
-              <Inputs::DocumentSelect::MoreButton
-                @removeResource={{this.removeResource}}
-                @resource={{resource}}
-              />
             </LinkTo>
-          </div>
 
-        {{else}}
-          <ExternalLink href={{resource.url}} class="py-0.5 flex pr-6 w-full">
-            <div class="flex items-center w-full">
-              <div class="flex relative mr-2 w-4 h-4 shrink-0">
-                <img
-                  src="https://www.google.com/s2/favicons?domain={{resource.url}}"
-                  width="16"
-                  height="16"
-                />
+          {{else}}
+            <ExternalLink
+              href={{resource.url}}
+              class="related-doc-link py-0.5 flex pr-6 w-full"
+            >
+              <div class="flex items-center w-full">
+                <div class="flex relative mr-2 w-4 h-4 shrink-0">
+                  <img
+                    src="https://www.google.com/s2/favicons?domain={{resource.url}}"
+                    width="16"
+                    height="16"
+                  />
+                </div>
+                <div class="w-full pr-6">
+                  <div class="truncate inline-doc-title">
+                    {{resource.title}}
+                  </div>
+
+                  <div
+                    class="truncate text-body-100 text-color-foreground-faint"
+                  >
+                    {{resource.displayURL}}
+                  </div>
+                </div>
               </div>
-              <span class="truncate">
-                {{resource.displayURL}}
-              </span>
-            </div>
-          </ExternalLink>
-        {{/if}}
+            </ExternalLink>
+          {{/if}}
 
+          {{! This needs to be outside the LinkTo }}
+          <Inputs::DocumentSelect::MoreButton
+            @removeResource={{this.removeResource}}
+            @resource={{resource}}
+          />
+        </div>
       </li>
     {{/each-in}}
   </ul>

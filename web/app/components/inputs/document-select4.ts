@@ -23,6 +23,7 @@ interface InputsDocumentSelect4ComponentSignature {
 export interface RelatedExternalLink {
   url: string;
   displayURL: string;
+  title: string;
 }
 
 // const GOOGLE_FAVICON_URL_PREFIX =
@@ -42,9 +43,14 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
   @tracked _shownDocuments: HermesDocument[] | null = null;
   @tracked searchInput: HTMLInputElement | null = null;
 
+  @tracked displayURL = "";
+
   @tracked modalIsShown = false;
   @tracked faviconHasLoaded = false;
   @tracked defaultFaviconIsShown = false;
+  @tracked editModeIsEnabled = false;
+
+  @tracked externalLinkTitle = "Text Input | Helios Design System";
 
   get faviconIsShown() {
     return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
@@ -106,10 +112,14 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     this.modalIsShown = false;
     this.query = "";
     this.inputValueIsValid = false;
+    this.editModeIsEnabled = false;
+
+    // This updates the suggestions for the next time the modal is opened
+    void this.search.perform(null, "");
   }
 
-  @action addRelatedExternalLink() {
-    let displayURL;
+  @action prepareRelatedExternalLink() {
+    let displayURL = "";
 
     if (this.query.startsWith("http://")) {
       displayURL = this.query.replace("http://", "");
@@ -123,15 +133,16 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
       displayURL = displayURL.replace("www.", "");
     }
 
-    if (displayURL.endsWith("/")) {
-      displayURL = displayURL.slice(0, -1);
-    }
+    displayURL = displayURL.split("/")[0] as string;
 
+    this.displayURL = displayURL;
+  }
+
+  @action addRelatedExternalLink() {
     let externalLink = {
       url: this.query,
-      displayURL: displayURL,
-      title: "",
-      // TODO: add edited title
+      displayURL: this.displayURL,
+      title: this.externalLinkTitle,
     };
 
     const isDuplicate = this.relatedLinks.find((link) => {
@@ -168,8 +179,19 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     });
   }
 
+  @action onDocumentKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      const activeElement = document.activeElement;
+      if (activeElement !== this.searchInput) {
+        e.stopImmediatePropagation();
+        return;
+      }
+    }
+  }
+
   @action onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
+      // this probably never fires
       if (this.inputValueIsValid) {
         this.addRelatedExternalLink();
         dd.hideContent();
@@ -207,6 +229,14 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     }
   }
 
+  @action enableEditMode() {
+    this.editModeIsEnabled = true;
+  }
+
+  @action disableEditMode() {
+    this.editModeIsEnabled = false;
+  }
+
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
     // if the resource is a RelatedExternalLink, remove it from the relatedLinks array
     // otherwise, remove it from the relatedDocuments array
@@ -222,7 +252,7 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
 
   protected loadInitialData = dropTask(async (dd: any) => {
     if (this._shownDocuments) {
-      // if we already have data, don't fetch it again
+      // if we already have data, don't await it again
       void this.search.perform(dd, "");
     } else {
       await this.search.perform(dd, "");
@@ -250,7 +280,7 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     try {
       let algoliaResponse = await this.algolia.searchIndex
         .perform(index, query, {
-          hitsPerPage: 5,
+          hitsPerPage: 4,
           filters: filterString,
           attributesToRetrieve: ["title", "product", "docNumber"],
           optionalFilters: ["product:" + this.args.productArea],
@@ -258,12 +288,15 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
         .then((response) => response);
       if (algoliaResponse) {
         this._shownDocuments = algoliaResponse.hits as HermesDocument[];
-        dd.resetFocusedItemIndex();
+        if (dd) {
+          dd.resetFocusedItemIndex();
+        }
       }
-
-      next(() => {
-        dd.scheduleAssignMenuItemIDs();
-      });
+      if (dd) {
+        next(() => {
+          dd.scheduleAssignMenuItemIDs();
+        });
+      }
     } catch (e) {
       console.error(e);
     }
@@ -278,6 +311,7 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
   }
 
   protected fetchURLInfo = restartableTask(async () => {
+    this.prepareRelatedExternalLink();
     // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
     // const urlToFetch = this.inputValue;
     // const urlToFetch = infoURL;
@@ -291,6 +325,11 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
       const favicon = new Image();
       favicon.addEventListener("load", () => {
         this.faviconHasLoaded = true;
+      });
+
+      favicon.addEventListener("error", () => {
+        this.faviconHasLoaded = true;
+        this.defaultFaviconIsShown = true;
       });
 
       favicon.src = this.faviconURL as string;
