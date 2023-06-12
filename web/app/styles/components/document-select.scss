@@ -5,12 +5,16 @@
     @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent truncate;
   }
 
+  .inline-doc-title {
+    display: block;
+  }
+
   .hermes-doc + .external-doc {
     @apply mt-1.5;
   }
 
   .more-button {
-    @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
+    @apply shrink-0 opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
 
     &:hover,
     &:focus {

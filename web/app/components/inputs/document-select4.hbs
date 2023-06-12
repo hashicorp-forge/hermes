@@ -176,32 +176,35 @@
           {{if resource.objectID 'hermes-doc' 'external-doc'}}"
       >
         {{#if resource.objectID}}
-          <LinkTo
-            @route="authenticated.document"
-            @model={{resource.objectID}}
-            class="related-doc-link"
-          >
-            <div
-              class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
-            >
-              <img src="/images/document.png" class="w-5 h-auto" />
-            </div>
-            <div>
-              <div>
-                {{! Create space for the "more" icon }}
-                <div class="float-right mt-0.5 w-7 h-3"></div>
+          <div class="outline-dotted w-full">
 
-                <h4 class="inline-doc-title mb-0.5 pr-0.5">
+            <LinkTo
+              @route="authenticated.document"
+              @model={{resource.objectID}}
+              class="related-doc-link outline-double"
+            >
+              <div
+                class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
+              >
+                <img src="/images/document.png" class="w-5 h-auto" />
+              </div>
+              <div class="outline w-full overflow-hidden">
+                <h4 class="inline-doc-title mb-0.5 pr-0.5 truncate">
                   {{resource.title}}
                 </h4>
+                {{#if resource.docNumber}}
+                  <div class="text-color-foreground-faint text-body-100">
+                    {{resource.docNumber}}
+                  </div>
+                {{/if}}
               </div>
-              {{#if resource.docNumber}}
-                <span class="text-color-foreground-faint text-body-100">
-                  {{resource.docNumber}}
-                </span>
-              {{/if}}
-            </div>
-          </LinkTo>
+              <Inputs::DocumentSelect::MoreButton
+                @removeResource={{this.removeResource}}
+                @resource={{resource}}
+              />
+            </LinkTo>
+          </div>
+
         {{else}}
           <ExternalLink href={{resource.url}} class="py-0.5 flex pr-6 w-full">
             <div class="flex items-center w-full">
@@ -218,10 +221,7 @@
             </div>
           </ExternalLink>
         {{/if}}
-        <Inputs::DocumentSelect::MoreButton
-          @removeResource={{this.removeResource}}
-          @resource={{resource}}
-        />
+
       </li>
     {{/each-in}}
   </ul>
