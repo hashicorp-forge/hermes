@@ -43,6 +43,12 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
   @tracked searchInput: HTMLInputElement | null = null;
 
   @tracked modalIsShown = false;
+  @tracked faviconHasLoaded = false;
+  @tracked defaultFaviconIsShown = false;
+
+  get faviconIsShown() {
+    return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
+  }
 
   get relatedResourcesAreShown(): boolean {
     return Object.keys(this.relatedResources).length > 0;
@@ -124,6 +130,8 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     let externalLink = {
       url: this.query,
       displayURL: displayURL,
+      title: "",
+      // TODO: add edited title
     };
 
     const isDuplicate = this.relatedLinks.find((link) => {
@@ -134,6 +142,7 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
       this.showDuplicateMessage();
     } else {
       this.relatedLinks.unshiftObject(externalLink);
+      void this.search.perform(null, "");
     }
 
     this.hideModal();
@@ -217,7 +226,7 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
       void this.search.perform(dd, "");
     } else {
       await this.search.perform(dd, "");
-      await timeout(250);
+      await timeout(200);
     }
   });
 
@@ -272,10 +281,21 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
     // const urlToFetch = this.inputValue;
     // const urlToFetch = infoURL;
+    this.faviconHasLoaded = false;
 
     try {
+      this.faviconURL =
+        "https://www.google.com/s2/favicons?domain=" + this.query;
+
       // Simulate a request
-      await timeout(1000);
+      const favicon = new Image();
+      favicon.addEventListener("load", () => {
+        this.faviconHasLoaded = true;
+      });
+
+      favicon.src = this.faviconURL as string;
+      await timeout(200);
+
       // const response = await this.fetchSvc.fetch(urlToFetch, {
       //   // For when we make a real request:
       //   // headers: {
@@ -284,9 +304,6 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
       //   //   "Content-Type": "application/json",
       //   // },
       // });
-
-      this.faviconURL =
-        "https://www.google.com/s2/favicons?domain=" + this.query;
     } catch (e) {
       console.error(e);
     }
@@ -308,6 +325,6 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    'Inputs::DocumentSelect4': typeof InputsDocumentSelect4Component;
+    "Inputs::DocumentSelect4": typeof InputsDocumentSelect4Component;
   }
 }

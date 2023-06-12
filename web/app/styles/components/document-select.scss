@@ -1,6 +1,8 @@
 .related-docs {
+  @apply w-full;
+
   .related-doc-link {
-    @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent;
+    @apply w-[calc(100%+16px)] -ml-[8px] px-[8px] rounded -mr-[8px] flex items-start py-1 space-x-3 border border-transparent truncate;
   }
 
   .hermes-doc + .external-doc {
