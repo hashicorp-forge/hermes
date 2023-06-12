@@ -46,7 +46,7 @@
               aria-haspopup="listbox"
             />
           </:anchor>
-          <:header>
+          <:header as |dd|>
             {{! TODO: improve this logic }}
             <div
               class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
@@ -64,38 +64,66 @@
 
             {{#if this.inputValueIsValid}}
               <div class="mt-3 px-3 mb-4 w-full">
-                <div class="shadow-surface-low py-4 px-6 rounded">
+                <div class="shadow-surface-low pt-5 pb-7 px-6 rounded">
                   <div class="flex relative">
-                    <div class="absolute left-0 top-0">
-                      {{#if this.fetchURLInfo.isRunning}}
-                        <FlightIcon @name="loading" />
-                      {{/if}}
-                    </div>
                     <div class="w-full">
-                      <Hds::Form::TextInput::Field
-                        @value="Text Input | Helios Design System"
-                        class="flex text-display-300 font-semibold mb-2.5"
-                        as |F|
-                      >
-                        <F.Label>Title</F.Label>
-                      </Hds::Form::TextInput::Field>
-                      {{! <Action class="ml-2 text-color-foreground-faint">
-                        <FlightIcon @name="pencil-tool" />
-                      </Action> }}
-                      <div
-                        class="text-body-200 text-color-foreground-faint flex items-center"
-                      >
-                        <img src={{this.faviconURL}} width="16" height="16" class="mr-2" />
-                        helios.hashicorp.design
+                      <div class="flex w-full justify-between items-start">
+                        <div class="shrink-0 -ml-1 mr-3 mt-1 flex">
+
+                          {{#if this.fetchURLInfo.isRunning}}
+                            <FlightIcon @name="loading" />
+                          {{else}}
+                            {{! Need to make sure this is actually loaded before displaying it }}
+                            <img
+                              src={{this.faviconURL}}
+                              width="16"
+                              height="16"
+                            />
+                          {{/if}}
+                        </div>
+                        <div class="w-full">
+                          <div
+                            class="flex items-center space-x-2 text-display-300 font-semibold mb-1"
+                          >
+                            <div>
+                              {{if
+                                this.fetchURLInfo.isRunning
+                                "..."
+                                "Text Input | Helios Design System"
+                              }}
+                            </div>
+                          </div>
+                          <div
+                            class="text-body-200 text-color-foreground-faint"
+                          >
+                            {{if
+                              this.fetchURLInfo.isRunning
+                              "..."
+                              "helios.hashicorp.design"
+                            }}
+                          </div>
+                        </div>
+                        {{#unless this.fetchURLInfo.isRunning}}
+                          <Hds::Button
+                            @color="tertiary"
+                            @text="Edit title"
+                            @icon="pencil-tool"
+                            class="shrink-0 ml-4 -mt-2 -mr-3"
+                          />
+                        {{/unless}}
                       </div>
                     </div>
                   </div>
-                  <Hds::Button
-                    class="mt-4 mb-2"
-                    @text="Add external doc"
-                    {{on "click" this.addRelatedExternalLink}}
-                  />
                 </div>
+                {{#unless this.fetchURLInfo.isRunning}}
+                  <Hds::Button
+                    class="mt-5"
+                    @color="secondary"
+                    @text="Add this link"
+                    @isFullWidth={{true}}
+                    {{on "click" (fn this.addRelatedExternalLink dd)}}
+                  />
+                {{/unless}}
               </div>
             {{/if}}
           </:header>
@@ -115,7 +143,9 @@
                 <img src="/images/document.png" class="w-5 h-auto" />
               </div>
               <div>
-                <h4 class="text-display-300 font-semibold text-color-foreground-strong mb-0.5 pr-0.5">
+                <h4
+                  class="text-display-300 font-semibold text-color-foreground-strong mb-0.5 pr-0.5"
+                >
                   {{dd.attrs.title}}
                 </h4>
                 {{#if dd.attrs.docNumber}}

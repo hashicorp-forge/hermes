@@ -13,7 +13,7 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
 
-interface InputsDocumentSelect3ComponentSignature {
+interface InputsDocumentSelect4ComponentSignature {
   Args: {
     productArea?: string;
     objectID?: string;
@@ -28,7 +28,7 @@ export interface RelatedExternalLink {
 // const GOOGLE_FAVICON_URL_PREFIX =
 //   "https://s2.googleusercontent.com/s2/favicons";
 
-export default class InputsDocumentSelect3Component extends Component<InputsDocumentSelect3ComponentSignature> {
+export default class InputsDocumentSelect4Component extends Component<InputsDocumentSelect4ComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
@@ -135,6 +135,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
     } else {
       this.relatedLinks.unshiftObject(externalLink);
     }
+
+    this.hideModal();
+
+    // TODO: show a success affordance
   }
 
   @action addRelatedDocument(documentObjectID: string) {
@@ -300,4 +304,10 @@ export default class InputsDocumentSelect3Component extends Component<InputsDocu
       }
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    'Inputs::DocumentSelect4': typeof InputsDocumentSelect4Component;
+  }
 }
