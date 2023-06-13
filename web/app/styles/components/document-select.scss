@@ -3,15 +3,32 @@
 
   .related-doc-link-container {
     &:hover {
-    .related-doc-link {
-      @apply bg-color-surface-interactive-hover;
-      // @apply bg-white border-color-border-primary;
-    }
+      .related-doc-link {
+        @apply bg-color-surface-interactive-hover;
+        // @apply bg-white border-color-border-primary;
+      }
     }
   }
 
   .related-doc-link {
-    @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded-md -mr-[4px] border border-transparent py-1.5;
+    @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded-md -mr-[4px] border border-transparent py-1.5 relative;
+
+    &::before {
+      @apply absolute top-0 left-0 w-full h-full rounded-md z-[-1];
+      @apply bg-color-surface-highlight border border-color-border-highlight;
+      content: "";
+
+      animation: fadeOut 0.4s ease-in-out 2.5s forwards;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
 
   .inline-doc-title {
