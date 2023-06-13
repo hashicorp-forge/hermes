@@ -13,7 +13,11 @@
 
     .x-dropdown-list-item-link {
       &.is-aria-selected {
-        @apply bg-color-surface-action;
+        @apply bg-color-surface-interactive-hover;
+
+        .flight-icon {
+          @apply text-color-foreground-action;
+        }
       }
     }
   }

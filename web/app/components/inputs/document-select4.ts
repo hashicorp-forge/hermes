@@ -161,6 +161,12 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
     // TODO: show a success affordance
   }
 
+  @action maybeAddRelatedExternalLink() {
+    if (!this.editModeIsEnabled) {
+      this.addRelatedExternalLink();
+    }
+  }
+
   @action addRelatedDocument(documentObjectID: string) {
     let document = this.shownDocuments[documentObjectID];
     if (document) {
@@ -282,7 +288,14 @@ export default class InputsDocumentSelect4Component extends Component<InputsDocu
         .perform(index, query, {
           hitsPerPage: 4,
           filters: filterString,
-          attributesToRetrieve: ["title", "product", "docNumber"],
+          attributesToRetrieve: [
+            "title",
+            "product",
+            "docNumber",
+            "docType",
+            "status",
+            "owners"
+          ],
           optionalFilters: ["product:" + this.args.productArea],
         })
         .then((response) => response);
