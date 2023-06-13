@@ -80,7 +80,9 @@ Example shared drive organization
 
 1. [Sign up](https://www.algolia.com/users/sign_up) for a free Algolia account.
 
-1. The Application ID, Search API Key, and Write API Key in Algolia's [API Keys settings](https://www.algolia.com/account/api-keys) are required for the Hermes server and the indexer. You will later add them to the [config.hcl configuration file](https://github.com/hashicorp-forge/hermes#configuration-file) under `algolia.application_id`, `algolia.search_api_key`, and `algolia.write_api_key`.
+The Application ID, Search API Key, and Write API Key in Algolia's [API Keys settings](https://www.algolia.com/account/api-keys) are required for the Hermes server and the indexer. You will later add them to the [config.hcl configuration file](https://github.com/hashicorp-forge/hermes#configuration-file).
+
+Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` environment variables at build time.
 
 ## Development and Usage
 
