@@ -221,14 +221,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action maybeShowFlashError(error: Error, title: string) {
     if (!this.modalIsActive) {
-      this.flashMessages.add({
-        title,
-        message: error.message,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
-      });
+      this.showFlashError(error, title);
     }
+  }
+
+  showFlashError(error: Error, title: string) {
+    this.flashMessages.add({
+      title,
+      message: error.message,
+      type: "critical",
+      timeout: 6000,
+      extendedTimeout: 1000,
+    });
   }
 
   @action showFlashSuccess(title: string, message: string) {
@@ -264,7 +268,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       } catch (err) {
         // revert field value on failure
         (this as any)[field] = val;
-        console.error(err);
+
+        this.showFlashError(err as Error, "Unable to save document");
       }
     }
   });
