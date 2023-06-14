@@ -104,6 +104,7 @@ func containsSuggestionInHeader(doc *docs.Document) bool {
 
 	// Navigate through all table contents to look for suggestions.
 	for _, row := range t.TableRows {
+		// Check table rows for suggestions.
 		if len(row.SuggestedDeletionIds) > 0 ||
 			len(row.SuggestedInsertionIds) > 0 ||
 			len(row.SuggestedTableRowStyleChanges) > 0 {
@@ -111,12 +112,14 @@ func containsSuggestionInHeader(doc *docs.Document) bool {
 			return true
 		}
 		for _, cell := range row.TableCells {
+			// Check table cells for suggestions.
 			if len(cell.SuggestedDeletionIds) > 0 ||
 				len(cell.SuggestedInsertionIds) > 0 ||
 				len(cell.SuggestedTableCellStyleChanges) > 0 {
 				return true
 			}
 			for _, content := range cell.Content {
+				// Check table cell content for suggestions.
 				if para := content.Paragraph; para != nil {
 					if len(para.SuggestedBulletChanges) > 0 ||
 						len(para.SuggestedParagraphStyleChanges) > 0 ||
@@ -124,6 +127,7 @@ func containsSuggestionInHeader(doc *docs.Document) bool {
 						return true
 					}
 					for _, elem := range para.Elements {
+						// Check table cell paragraphs for suggestions.
 						if auto := elem.AutoText; auto != nil {
 							if len(auto.SuggestedDeletionIds) > 0 ||
 								len(auto.SuggestedInsertionIds) > 0 ||
