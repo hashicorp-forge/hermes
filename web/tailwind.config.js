@@ -75,6 +75,7 @@ module.exports = {
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
+        "color-border-highlight": "var(--token-color-border-highlight)",
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",

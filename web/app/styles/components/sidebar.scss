@@ -26,10 +26,37 @@
   }
 
   .sidebar-header-button {
-    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent text-color-foreground-primary;
+    @apply rounded-button-md py-2 px-3 flex items-center border border-transparent text-color-foreground-primary;
 
     &:hover {
       @apply border-color-border-strong bg-color-foreground-high-contrast;
+    }
+
+    &.in {
+      @apply relative;
+      animation: fadeIn 120ms ease-in-out, scaleIn 150ms ease-in-out,
+        slideUp 160ms ease-in-out;
+
+      &::before {
+        @apply hds-elevation-mid;
+        @apply absolute top-0 left-0 w-full h-full rounded border border-color-palette-purple-200 bg-color-surface-highlight z-[-1];
+        content: "";
+        animation: fadeIn 150ms ease-in-out,
+          scaleIn 2600ms cubic-bezier(0, 1, 1, 1),
+          fadeOut 400ms ease-in-out 2200ms forwards;
+      }
+    }
+
+    &.in:hover {
+      @apply bg-transparent;
+    }
+  }
+
+  .draft-visibility-button {
+    @apply h-[30px] px-2;
+
+    [class*=" flight-icon-chevron"] {
+      @apply ml-px -mr-px;
     }
   }
 

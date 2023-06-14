@@ -11,7 +11,7 @@
       @size={{if @isCollapsed "24"}}
     />
     {{#unless @isCollapsed}}
-      <span>Dashboard</span>
+      <span class="ml-2">Dashboard</span>
     {{/unless}}
   </LinkTo>
   <div class="sidebar-header-icon-controls">
@@ -22,6 +22,7 @@
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
         class="sidebar-header-button"
+        id="sidebar-header-copy-url-button"
       />
     {{/if}}
     <ExternalLink

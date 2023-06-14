@@ -9,6 +9,7 @@ interface DocumentSidebarHeaderComponentSignature {
     isCollapsed: boolean;
     toggleCollapsed: () => void;
     userHasScrolled: boolean;
+    shareButtonIsShown?: boolean;
   };
 }
 
@@ -25,6 +26,10 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
   @service("config") declare configSvc: ConfigService;
 
   protected get shareButtonIsShown() {
+    if (this.args.shareButtonIsShown) {
+      return this.args.shareButtonIsShown;
+    }
+
     let { document } = this.args;
     return !document.isDraft && document.docNumber && document.docType;
   }

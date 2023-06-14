@@ -4,6 +4,7 @@
     @isCollapsed={{this.isCollapsed}}
     @toggleCollapsed={{this.toggleCollapsed}}
     @userHasScrolled={{this.userHasScrolled}}
+    @shareButtonIsShown={{eq this.draftVisibility "2"}}
   />
 
   {{#unless this.isCollapsed}}
@@ -26,22 +27,59 @@
 
       <div class="sidebar-body-container">
         <div>
-          <div class="flex items-center space-x-3 mt-2 mb-6">
+          <div class="flex items-center space-x-1.5 mt-2 mb-6">
 
             <Hds::Badge
               @text={{if this.isDraft "Draft" @document.docNumber}}
-              class="uppercase !bg-color-palette-neutral-500 !text-white"
+              class="uppercase !text-white
+                {{if
+                  @document.isDraft
+                  '!bg-color-palette-neutral-500'
+                  '!bg-color-palette-neutral-700'
+                }}
+                "
             />
             {{#if this.isDraft}}
-              <X::DropdownList>
+              <X::DropdownList
+                @items={{this.draftVisibilityOptions}}
+                @selected={{this.draftVisibility}}
+                class="w-[340px]"
+              >
                 <:anchor as |dd|>
                   <dd.ToggleAction
-                    class="flex items-center text-color-foreground-faint sidebar-header-button"
+                    class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
                   >
-                    <FlightIcon @name="lock" />
+                    <FlightIcon
+                      @name={{if (eq dd.selected "1") "lock" "enterprise"}}
+                    />
                     <FlightIcon @name="chevron-down" />
                   </dd.ToggleAction>
                 </:anchor>
+                <:item as |dd|>
+                  <dd.Action
+                    class="flex items-start gap-3 py-2.5 pl-4 pr-6"
+                    {{on "click" (fn this.setDraftVisibility dd.value)}}
+                  >
+                    <FlightIcon
+                      @name={{dd.attrs.icon}}
+                      class="shrink-0 mt-0.5"
+                    />
+                    <div class="w-full">
+                      <h4>
+                        {{dd.attrs.title}}
+                      </h4>
+                      <p>
+                        {{dd.attrs.description}}
+                      </p>
+                    </div>
+                    <FlightIcon
+                      @name="check"
+                      class="check shrink-0
+                        {{if dd.selected 'visible' 'invisible'}}"
+                    />
+                  </dd.Action>
+
+                </:item>
 
               </X::DropdownList>
             {{/if}}

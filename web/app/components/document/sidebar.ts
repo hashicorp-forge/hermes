@@ -6,7 +6,7 @@ import { inject as service } from "@ember/service";
 import { restartableTask, task } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce } from "@ember/runloop";
+import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -65,6 +65,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  @tracked protected draftVisibility = "1";
 
   get body() {
     assert("_body must exist", this._body);
@@ -145,6 +147,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   protected get statusIsShown(): boolean {
     console.log(this.args.document.status);
     return this.args.document.status !== "WIP";
+  }
+
+  protected get draftVisibilityOptions() {
+    return {
+      "1": {
+        title: "Invite-only",
+        icon: "lock",
+        description:
+          "Only you and the people you add can view and edit this doc.",
+      },
+      "2": {
+        title: "Anyone with the link",
+        icon: "enterprise",
+        description:
+          "Editing is invite-only, but anyone in the organization with the link can view.  ",
+      },
+    };
   }
 
   get moveToStatusButtonText() {
@@ -242,6 +261,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       type: "success",
       timeout: 6000,
       extendedTimeout: 1000,
+    });
+  }
+
+  @action protected setDraftVisibility(visibility: string) {
+    this.draftVisibility = visibility;
+    // target the link button and add a "in" class to it.
+    schedule("afterRender", () => {
+      const shareButton = document.getElementById(
+        "sidebar-header-copy-url-button"
+      );
+      assert("shareButton is expected", shareButton);
+      shareButton.classList.add("in");
     });
   }
 
