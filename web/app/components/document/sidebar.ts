@@ -3,7 +3,12 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import { restartableTask, task } from "ember-concurrency";
+import {
+  keepLatestTask,
+  restartableTask,
+  task,
+  timeout,
+} from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
@@ -15,6 +20,7 @@ import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
+import Ember from "ember";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -144,6 +150,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
+  @tracked protected draftVisibilityIcon = "lock";
+
   protected get statusIsShown(): boolean {
     console.log(this.args.document.status);
     return this.args.document.status !== "WIP";
@@ -152,16 +160,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   protected get draftVisibilityOptions() {
     return {
       "1": {
-        title: "Invite-only",
+        title: "Restricted",
         icon: "lock",
         description:
           "Only you and the people you add can view and edit this doc.",
       },
       "2": {
-        title: "Anyone with the link",
+        title: "Shareable",
         icon: "enterprise",
         description:
-          "Editing is invite-only, but anyone in the organization with the link can view.  ",
+          "Editing is restricted, but anyone in the organization with the link can view.  ",
       },
     };
   }
@@ -264,17 +272,36 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  @action protected setDraftVisibility(visibility: string) {
-    this.draftVisibility = visibility;
-    // target the link button and add a "in" class to it.
-    schedule("afterRender", () => {
+  protected setDraftVisibility = keepLatestTask(async (visibility: string) => {
+    if (this.draftVisibility === visibility) {
+      return;
+    }
+
+    if (visibility === "1") {
+      // user is disabling the link button
       const shareButton = document.getElementById(
         "sidebar-header-copy-url-button"
       );
       assert("shareButton is expected", shareButton);
-      shareButton.classList.add("in");
-    });
-  }
+      shareButton.classList.remove("in");
+      shareButton.classList.add("out");
+
+      this.draftVisibilityIcon = "lock";
+      // allow time for the animation to conclude
+      await timeout(Ember.testing ? 0 : 300);
+    } else {
+      this.draftVisibilityIcon = "enterprise";
+      schedule("afterRender", () => {
+        console.log("afterRender");
+        const shareButton = document.getElementById(
+          "sidebar-header-copy-url-button"
+        );
+        assert("shareButton is expected", shareButton);
+        shareButton.classList.add("in");
+      });
+    }
+    this.draftVisibility = visibility;
+  });
 
   updateProduct = restartableTask(async (product: string) => {
     this.product = product;

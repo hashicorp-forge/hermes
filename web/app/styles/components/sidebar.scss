@@ -26,25 +26,42 @@
   }
 
   .sidebar-header-button {
-    @apply rounded-button-md py-2 px-3 flex items-center border border-transparent text-color-foreground-primary;
+    @apply relative rounded-button-md py-2 px-3 flex items-center border border-transparent text-color-foreground-primary;
 
     &:hover {
       @apply border-color-border-strong bg-color-foreground-high-contrast;
     }
 
     &.in {
-      @apply relative;
-      animation: fadeIn 120ms ease-in-out, scaleIn 150ms ease-in-out,
-        slideUp 160ms ease-in-out;
+      .flight-icon {
+        @apply opacity-0;
+        animation: fadeIn 200ms ease-in forwards,
+          slideUpScaleUp 250ms cubic-bezier(0, 1, 0.5, 1);
+      }
+
+      &::before,
+      &::after {
+        content: "";
+        @apply opacity-0 absolute top-0 left-0 w-full h-full rounded border bg-color-surface-highlight z-[-1];
+      }
 
       &::before {
-        @apply hds-elevation-mid;
-        @apply absolute top-0 left-0 w-full h-full rounded border border-color-palette-purple-200 bg-color-surface-highlight z-[-1];
-        content: "";
-        animation: fadeIn 150ms ease-in-out,
-          scaleIn 2600ms cubic-bezier(0, 1, 1, 1),
-          fadeOut 400ms ease-in-out 2200ms forwards;
+        animation: fadeIn 150ms ease-in forwards 50ms,
+          scaleIn 250ms cubic-bezier(0, 1, 0.5, 1) forwards,
+          fadeOut 500ms ease-out 2000ms forwards;
       }
+
+      &::after {
+        animation: fadeIn 300ms ease-in forwards 50ms,
+          scaleIn 250ms cubic-bezier(0, 1, 0.5, 1) forwards,
+          fadeOut 1500ms ease-out 1000ms forwards;
+        border-color: #cf9cf8b4;
+      }
+    }
+
+    &.out {
+      animation: fadeOut 60ms ease-out 80ms forwards,
+        slideDownAndRotateLeft 140ms ease-out forwards;
     }
 
     &.in:hover {

@@ -43,22 +43,23 @@
               <X::DropdownList
                 @items={{this.draftVisibilityOptions}}
                 @selected={{this.draftVisibility}}
-                class="w-[340px]"
+                {{! TODO: add offset }}
+                class="w-[350px]"
               >
                 <:anchor as |dd|>
                   <dd.ToggleAction
                     class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
                   >
+                    <FlightIcon @name={{this.draftVisibilityIcon}} />
                     <FlightIcon
-                      @name={{if (eq dd.selected "1") "lock" "enterprise"}}
+                      @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
                     />
-                    <FlightIcon @name="chevron-down" />
                   </dd.ToggleAction>
                 </:anchor>
                 <:item as |dd|>
                   <dd.Action
                     class="flex items-start gap-3 py-2.5 pl-4 pr-6"
-                    {{on "click" (fn this.setDraftVisibility dd.value)}}
+                    {{on "click" (perform this.setDraftVisibility dd.value)}}
                   >
                     <FlightIcon
                       @name={{dd.attrs.icon}}
@@ -74,7 +75,7 @@
                     </div>
                     <FlightIcon
                       @name="check"
-                      class="check shrink-0
+                      class="check shrink-0 mt-0.5
                         {{if dd.selected 'visible' 'invisible'}}"
                     />
                   </dd.Action>

@@ -16,14 +16,51 @@
   }
 }
 
-@keyframes slideUp {
+@keyframes slideUpScaleUp {
   from {
-    transform: translateY(3px);
+    transform: translateY(5px) scale(0.8);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-3px);
   }
 }
 
 @keyframes scaleIn {
   from {
-    transform: scale(0.9);
+    transform: scale(0.3);
+  }
+}
+
+@keyframes scaleDownToNormal {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleUpToNormalWithBounce {
+  0% {
+    transform: scale(5);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDownAndRotateLeft {
+  to {
+    transform: translateY(8px) rotate(-70deg);
+  }
+}
+
+@keyframes slideUpAndRotateRight {
+  from {
+    transform: translateY(8px) rotate(-70deg);
   }
 }

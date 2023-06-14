@@ -1,7 +1,7 @@
 import Helper from "@ember/component/helper";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
-import { FacetName } from "hermes/components/header/toolbar";
+import { FacetName } from "hermes/components/floating-u-i/header/toolbar";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface GetFacetQueryHashHelperSignature {

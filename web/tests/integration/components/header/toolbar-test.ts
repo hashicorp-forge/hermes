@@ -3,7 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownObjects } from "hermes/types/facets";
-import { SortByLabel } from "hermes/components/header/toolbar";
+import { SortByLabel } from "hermes/components/floating-u-i/header/toolbar";
 
 const FACETS = {
   docType: {
