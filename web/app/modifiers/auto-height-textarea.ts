@@ -55,3 +55,9 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
     element.style.height = element.scrollHeight + offset + "px";
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "auto-height-textarea": typeof AutoHeightTextareaModifier;
+  }
+}

@@ -115,3 +115,9 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
     document.addEventListener("keydown", this.maybeDismiss);
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    dismissible: typeof DismissibleModifier;
+  }
+}
