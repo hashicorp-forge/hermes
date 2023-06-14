@@ -21,6 +21,8 @@
         data-test-copy-url-value={{this.url}}
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
+        @isLoading={{@shareButtonIsLoading}}
+        @loadingText="Creating link..."
         class="sidebar-header-button"
         id="sidebar-header-copy-url-button"
       />

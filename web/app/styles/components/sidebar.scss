@@ -33,11 +33,11 @@
     }
 
     &.in {
-      .flight-icon {
-        @apply opacity-0;
-        animation: fadeIn 200ms ease-in forwards,
-          slideUpScaleUp 250ms cubic-bezier(0, 1, 0.5, 1);
-      }
+      // .flight-icon {
+      //   @apply opacity-0;
+      //   animation: fadeIn 200ms ease-in forwards,
+      //     slideUpScaleUp 250ms cubic-bezier(0, 1, 0.5, 1);
+      // }
 
       &::before,
       &::after {

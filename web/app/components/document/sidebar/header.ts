@@ -10,6 +10,7 @@ interface DocumentSidebarHeaderComponentSignature {
     toggleCollapsed: () => void;
     userHasScrolled: boolean;
     shareButtonIsShown?: boolean;
+    shareButtonIsLoading?: boolean;
   };
 }
 
@@ -54,5 +55,11 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
           shortLinkBaseURL + this.args.document.docType.toLowerCase()
         }/${this.args.document.docNumber.toLowerCase()}`
       : window.location.href;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Document::Sidebar::Header": typeof DocumentSidebarHeaderComponent;
   }
 }

@@ -292,7 +292,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } else {
       this.draftVisibilityIcon = "enterprise";
       schedule("afterRender", () => {
-        console.log("afterRender");
         const shareButton = document.getElementById(
           "sidebar-header-copy-url-button"
         );
@@ -300,7 +299,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         shareButton.classList.add("in");
       });
     }
+
     this.draftVisibility = visibility;
+
+    await timeout(3000);
   });
 
   updateProduct = restartableTask(async (product: string) => {
