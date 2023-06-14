@@ -7,7 +7,7 @@
 }
 
 .x-dropdown-list-container {
-  @apply flex flex-col overflow-hidden;
+  @apply flex flex-col overflow-hidden rounded-md;
 }
 
 .x-dropdown-list-input-container {
