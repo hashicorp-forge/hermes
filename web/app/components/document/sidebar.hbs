@@ -25,112 +25,125 @@
       {{/let}}
 
       <div class="sidebar-body-container">
-        <div class="flex flex-col items-start space-y-2">
-          {{#if (is-empty @document.docNumber)}}
-            <small
-              class="hds-typography-body-100 hds-foreground-faint"
-            >{{#unless
-                (is-empty @document.docType)
-              }}{{@document.docType}}{{/unless}}
-            </small>
-          {{else}}
-            <small
-              class="hds-typography-body-100 hds-foreground-faint"
-            >{{#unless
-                (is-empty @document.docType)
-              }}{{@document.docType}}{{/unless}}
-              &bullet;
-              <span data-test-sidebar-doc-number>
-                {{@document.docNumber}}
-              </span>
-            </small>
-          {{/if}}
+        <div>
+          <div class="flex items-center space-x-3 mt-2 mb-6">
+
+            <Hds::Badge
+              @text={{if this.isDraft "Draft" @document.docNumber}}
+              class="uppercase !bg-color-palette-neutral-500 !text-white"
+            />
+            {{#if this.isDraft}}
+              <X::DropdownList>
+                <:anchor as |dd|>
+                  <dd.ToggleAction
+                    class="flex items-center text-color-foreground-faint sidebar-header-button"
+                  >
+                    <FlightIcon @name="lock" />
+                    <FlightIcon @name="chevron-down" />
+                  </dd.ToggleAction>
+                </:anchor>
+
+              </X::DropdownList>
+            {{/if}}
+          </div>
           {{#if this.editingIsDisabled}}
             <h1
               class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
             >{{this.title}}</h1>
           {{else}}
-            <EditableField
-              @value={{this.title}}
-              @onChange={{perform this.save "title"}}
-              @loading={{this.save.isRunning}}
-              @disabled={{this.editingIsDisabled}}
-            >
-              <:default>
-                {{#unless (is-empty this.title)}}
-                  <h1
-                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-                  >{{this.title}}</h1>
-                {{else}}
-                  <h1
-                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
-                  >Enter a title here.</h1>
-                {{/unless}}
-              </:default>
-              <:editing as |F|>
-                <Hds::Form::Textarea::Field
-                  {{auto-height-textarea}}
-                  @value={{F.value}}
-                  class="primary-textarea"
-                  name="title"
-                  {{on "blur" F.update}}
-                  as |F|
-                />
-              </:editing>
-            </EditableField>
+            <div class="mb-2">
+
+              <EditableField
+                @value={{this.title}}
+                @onChange={{perform this.save "title"}}
+                @loading={{this.save.isRunning}}
+                @disabled={{this.editingIsDisabled}}
+              >
+                <:default>
+                  {{#unless (is-empty this.title)}}
+                    <h1
+                      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+                    >{{this.title}}</h1>
+                  {{else}}
+                    <h1
+                      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
+                    >Enter a title here.</h1>
+                  {{/unless}}
+                </:default>
+                <:editing as |F|>
+                  <Hds::Form::Textarea::Field
+                    {{auto-height-textarea}}
+                    @value={{F.value}}
+                    class="primary-textarea"
+                    name="title"
+                    {{on "blur" F.update}}
+                    as |F|
+                  />
+                </:editing>
+              </EditableField>
+            </div>
           {{/if}}
-        </div>
 
-        <hr class="border-0 border-b hds-border-faint" />
+          {{! Summary }}
+          <div class="mb-5">
+            {{#if this.editingIsDisabled}}
+              <p
+                class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+              >{{this.summary}}</p>
+            {{else}}
+              <EditableField
+                @value={{this.summary}}
+                @onChange={{perform this.save "summary"}}
+                @loading={{this.save.isRunning}}
+                @disabled={{this.editingIsDisabled}}
+              >
+                <:default>
+                  {{#unless (is-empty this.summary)}}
+                    <p
+                      class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+                    >
+                      {{this.summary}}</p>
+                  {{else}}
+                    <p
+                      class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
+                    >
+                      Enter a summary here.</p>
+                  {{/unless}}
+                </:default>
+                <:editing as |F|>
+                  <Hds::Form::Textarea::Field
+                    {{auto-height-textarea}}
+                    @value={{F.value}}
+                    class="primary-textarea"
+                    name="summary"
+                    {{on "blur" F.update}}
+                    as |F|
+                  />
+                </:editing>
+              </EditableField>
+            {{/if}}
+          </div>
 
-        <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Summary</small>
-          {{#if this.editingIsDisabled}}
-            <p
-              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-            >{{this.summary}}</p>
-          {{else}}
-            <EditableField
-              @value={{this.summary}}
-              @onChange={{perform this.save "summary"}}
-              @loading={{this.save.isRunning}}
-              @disabled={{this.editingIsDisabled}}
+          {{! pills }}
+          <div class="flex space-x-0.5 -ml-0.5">
+            <div
+              class="rounded-l-full rounded-r-full bg-color-surface-action border border-color-border-action px-3 py-0.5 text-color-foreground-action-hover"
             >
-              <:default>
-                {{#unless (is-empty this.summary)}}
-                  <p
-                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-                  >
-                    {{this.summary}}</p>
-                {{else}}
-                  <p
-                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
-                  >
-                    Enter a summary here.</p>
-                {{/unless}}
-              </:default>
-              <:editing as |F|>
-                <Hds::Form::Textarea::Field
-                  {{auto-height-textarea}}
-                  @value={{F.value}}
-                  class="primary-textarea"
-                  name="summary"
-                  {{on "blur" F.update}}
-                  as |F|
-                />
-              </:editing>
-            </EditableField>
-          {{/if}}
+              {{@document.docType}}
+            </div>
+            {{#if this.statusIsShown}}
+              <div
+                class="rounded-l-full rounded-r-full bg-color-surface-action border border-color-border-action"
+              >
+                {{@document.status}}
+              </div>
+            {{/if}}
+          </div>
         </div>
 
-        <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Status</small>
-          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
-        </div>
+        <p>Created {{or @document.createdDate "Unknown"}}</p>
+
+        <hr class="w-full h-px bg-color-border-primary -mb-2" />
 
         <div class="flex flex-col items-start space-y-2">
           <small
@@ -271,13 +284,6 @@
               <em>No approvers</em>
             {{/if}}
           {{/if}}
-        </div>
-
-        <div class="flex flex-col items-start space-y-2">
-          <small class="hds-typography-body-100 hds-foreground-faint">
-            Created
-          </small>
-          <p>{{or @document.createdDate "Unknown"}}</p>
         </div>
 
         <div class="flex flex-col items-start space-y-2">

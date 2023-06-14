@@ -69,6 +69,7 @@ module.exports = {
 
         // Border
         "color-border-faint": "var(--token-color-border-faint)",
+        "color-border-action": "var(--token-color-border-action)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-primary": "var(--token-color-border-primary)",

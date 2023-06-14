@@ -142,6 +142,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
+  protected get statusIsShown(): boolean {
+    console.log(this.args.document.status);
+    return this.args.document.status !== "WIP";
+  }
+
   get moveToStatusButtonText() {
     return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
@@ -236,13 +241,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  updateProduct = restartableTask(
-    async (product: string) => {
-      this.product = product;
-      await this.save.perform("product", this.product);
-      // productAbbreviation is computed by the back end
-    }
-  );
+  updateProduct = restartableTask(async (product: string) => {
+    this.product = product;
+    await this.save.perform("product", this.product);
+    // productAbbreviation is computed by the back end
+  });
 
   save = task(async (field: string, val: string | HermesUser[]) => {
     if (field && val) {
