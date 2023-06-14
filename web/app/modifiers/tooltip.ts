@@ -376,3 +376,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this._reference.addEventListener("mouseleave", this.maybeHideContent);
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    tooltip: typeof TooltipModifier;
+  }
+}
