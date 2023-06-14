@@ -5,6 +5,7 @@ export interface GetProductIDSignature {
   Args: {
     Positional: [string | undefined];
   };
+  Return: string | null;
 }
 
 const getProductIDHelper = helper<GetProductIDSignature>(([productName]) => {

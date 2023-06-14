@@ -92,6 +92,7 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     /**
      * In production, close the dropdown on the next run loop
      * so that we don't interfere with Ember's <LinkTo> handling.
+     *
      * This approach causes issues when testing, so we
      * use `schedule` as an approximation.
      *

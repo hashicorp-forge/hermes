@@ -1,25 +1,22 @@
-{{on-document "keydown" this.onDocumentKeydown}}
+{{on-document "keydown" this.maybeFocusInput}}
 
 <div ...attributes>
   <form class="w-full relative" {{on "submit" this.viewAllResults}}>
-    {{! @glint-ignore - not yet registered}}
     <X::DropdownList
-      @items={{this.bestMatches}}
-      @offset={{this.popoverOffset}}
-      style={{{this.dropdownListStyle}}}
+      @items={{this.itemsToShow}}
+      @offset={{hash mainAxis=0 crossAxis=3}}
       @placement="bottom-end"
       class="search-popover
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
       <:anchor as |dd|>
-        {{! @glint-ignore - not yet registered}}
         <Hds::Form::TextInput::Base
           data-test-global-search-input
           {{did-insert dd.registerAnchor}}
           {{did-insert this.registerInput}}
           {{on "input" (perform this.search dd)}}
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
-          {{on "keydown" (fn this.onInputKeydown dd)}}
+          {{on "keydown" (fn this.maybeSubmitForm dd)}}
           {{on "focusin" (fn this.maybeOpenDropdown dd)}}
           @type="search"
           @value={{this.query}}
@@ -32,71 +29,58 @@
           aria-haspopup="listbox"
         />
         {{#unless this.query}}
-          <span
-            data-test-search-keyboard-shortcut
-            class="absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint"
-          >
+          <span class="global-search-shortcut-affordance">
             ⌘K
           </span>
         {{/unless}}
       </:anchor>
       <:header>
-        <div id="hermes-search-popover-header">
+        <div id="global-search-popover-header">
           {{! content is placed here by the in-element helper below }}
         </div>
         {{#if this.bestMatchesHeaderIsShown}}
-          <div
-            data-test-search-best-matches-header
-            class="border-t border-t-color-border-primary pt-2 px-3"
-          >
-            <h5
-              class="text-display-100 text-color-foreground-faint font-medium"
-            >
-              Best matches
-            </h5>
+          <div class="global-search-best-matches-header">
+            <h5>Best matches</h5>
           </div>
         {{/if}}
       </:header>
       <:item as |dd|>
-        {{#if
-          (or
-            (eq dd.value "viewAllResultsObject")
-            (eq dd.value "productAreaMatch")
-          )
-        }}
+
+        {{#if dd.attrs.itemShouldRenderOut}}
+          {{!
+            We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
+           }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
-              (html-element "#hermes-search-popover-header")
+              (html-element "#global-search-popover-header")
               insertBefore=null
             }}
               {{#if (eq dd.value "viewAllResultsObject")}}
                 <dd.LinkTo
-                  data-test-view-all-results-link
                   {{did-insert this.registerViewAllResultsLink}}
                   @route="authenticated.results"
                   @query={{hash q=this.query page=1}}
-                  class="search-popover-header-link"
+                  class="global-search-popover-header-link"
                 >
-                  {{! @glint-ignore - not yet registered}}
                   <FlightIcon @name="search" class="mr-1.5" />
-                  <span>View all results for "{{this.query}}"</span>
+                  <span>View all results for “{{this.query}}”</span>
                 </dd.LinkTo>
-              {{else}}
+              {{else if (eq dd.value "productAreaMatch")}}
                 <dd.LinkTo
                   data-test-product-match-link
                   @route="authenticated.all"
-                  @query={{hash product=(array dd.attrs.product) page=1}}
-                  class="search-popover-header-link border-t border-t-color-border-primary"
+                  @query={{hash
+                    product=(array dd.attrs.productAreaName)
+                    page=1
+                  }}
+                  class="global-search-popover-header-link border-t border-t-color-border-primary"
                 >
-                  {{! @glint-ignore - not yet registered}}
                   <FlightIcon @name="folder" class="mr-1.5" />
                   <span class="flex items-center">
                     View all
-                    {{! @glint-ignore - not yet registered}}
                     <Hds::Badge
-                      @text={{dd.attrs.product}}
-                      {{! @glint-ignore - not yet registered}}
-                      @icon={{get-product-id dd.attrs.product}}
+                      @text={{dd.attrs.productAreaName}}
+                      @icon={{or (get-product-id dd.attrs.productAreaName) ""}}
                       class="mx-2 mix-blend-multiply"
                     />
                     documents
@@ -110,31 +94,23 @@
             data-test-search-result
             @route="authenticated.document"
             @model={{dd.value}}
-            class="flex items-center space-x-3 py-2 px-3 h-20"
+            class="global-search-result"
           >
-            {{! @glint-ignore - not yet registered}}
             <Doc::Thumbnail
               @status={{dd.attrs.status}}
               @product={{dd.attrs.product}}
             />
-            <div class="flex flex-col space-y-1 overflow-hidden">
-              <h4
-                data-test-search-result-title
-                class="text-body-200 font-semibold text-color-foreground-strong truncate"
-              >
+            <div class="global-search-result-text-content">
+              <h4 class="global-search-result-title">
                 {{dd.attrs.title}}
               </h4>
-
-              {{! @glint-ignore - not yet registered}}
               <Person
                 data-test-search-result-owner
                 @ignoreUnknown={{true}}
                 @imgURL={{get dd.attrs.ownerPhotos 0}}
                 @email={{get dd.attrs.owners 0}}
               />
-
               {{#if dd.attrs._snippetResult.content.value}}
-                {{! @glint-ignore - not yet registered}}
                 <Doc::Snippet
                   data-test-search-result-snippet
                   @snippet={{dd.attrs._snippetResult.content.value}}

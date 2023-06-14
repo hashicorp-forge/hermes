@@ -329,8 +329,8 @@ export default class AlgoliaService extends Service {
   );
 
   /**
-   * CURRENTLY UNUSED
-   * Mocked for use in `TagSelect` component
+   * Searches the values of a given index and facet.
+   * Used by the search input to query productAreas.
    */
   searchForFacetValues = restartableTask(
     async (

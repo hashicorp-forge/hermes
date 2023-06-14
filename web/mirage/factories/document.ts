@@ -22,20 +22,21 @@ export function getTestDocNumber(product: string) {
 
 export default Factory.extend({
   objectID: (i: number) => `doc-${i}`,
+  title: (i: number) => `Test Document ${i}`,
   status: "Draft",
   product: "Vault",
   docType: "RFC",
   modifiedAgo: 1000000000,
   modifiedTime: 1,
-  title: (i: number) => `Test Document ${i}`,
+  docNumber() {
+    // @ts-ignore - Mirage types are wrong
+    // See discussion at https://github.com/miragejs/miragejs/pull/525
+    return getTestDocNumber(this.product);
+  },
   _snippetResult: {
     content: {
       value: "This is a test document",
     },
   },
   owners: ["Test user"],
-  docNumber() {
-    // @ts-ignore - Mirage types are wrong
-    return getTestDocNumber(this.product);
-  },
 });

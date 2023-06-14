@@ -18,13 +18,14 @@ interface XDropdownListComponentSignature {
     isLoading?: boolean;
     disableClose?: boolean;
     listIsHidden?: boolean;
-    offset?: OffsetOptions;
     inputVisibility?: "shown" | "hidden";
     selected?: any;
     placement?: Placement | "none";
     isSaving?: boolean;
+    offset?: OffsetOptions;
     onItemClick: (value: any, attributes: any) => void;
   };
+  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
     anchor: [
       dd: {
@@ -322,6 +323,18 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     this.scheduleAssignMenuItemIDs();
   });
 
+  /**
+   * The action that assigns menu item IDs.
+   * Scheduled after render to ensure that the menu items
+   * have been rendered and are available to query, including
+   * after being filtered.
+   *
+   * In cases where items are loaded asynchronously,
+   * e.g., when querying Algolia, the menu items are not
+   * available immediately after render. In these cases,
+   * the component should call `scheduleAssignMenuItemIDs`
+   * in the `next` runloop.
+   */
   @action protected scheduleAssignMenuItemIDs() {
     if (!this._scrollContainer) {
       this.scheduleAssignMenuItemIDs();
