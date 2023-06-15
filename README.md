@@ -163,7 +163,7 @@ This project is under active development and in the alpha stage. There may be br
 
 If you think that you've found a security issue, please contact us via email at security@hashicorp.com instead of filing a GitHub issue.
 
-Found a non-security-related bug or have a feature request? Please [open a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new).
+Found a non-security-related bug or have a feature request or other feedback? Please [open a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new).
 
 > Please note that it may take us up to a week to respond to GitHub issues as we continue to work on the project.
 
