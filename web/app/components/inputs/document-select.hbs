@@ -32,12 +32,12 @@
           {{/if}}
           <div class="{{if this.editModeIsEnabled 'text-center'}} w-full">
 
-            {{if this.editModeIsEnabled "Edit resource" "Add resource"}}
+            {{if this.editModeIsEnabled "Add external resource" "Add resource"}}
           </div>
         </div>
       </M.Header>
       <M.Body>
-        <div>
+        <div class="">
 
           <X::DropdownList
             @items={{this.shownDocuments}}
@@ -47,7 +47,7 @@
             @isLoading={{this.loadInitialData.isRunning}}
             @placement="none"
             @disableClose={{true}}
-            @listIsHidden={{this.inputValueIsValid}}
+            @listIsHidden={{this.queryIsThirdPartyURL}}
             class="w-full max-w-none relative modal-list"
           >
             <:anchor as |dd|>
@@ -71,134 +71,94 @@
               />
             </:anchor>
             <:header>
-              {{! TODO: improve this logic }}
-              {{#unless this.editModeIsEnabled}}
+              {{#unless (or this.editModeIsEnabled this.queryIsThirdPartyURL)}}
                 <div
                   class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
                 >
                   {{#if this.query.length}}
-                    {{#if this.inputValueIsValid}}
-                      External link
-                    {{else}}
-                      Results
-                    {{/if}}
+                    Results
                   {{else}}
                     Suggestions
                   {{/if}}
                 </div>
               {{/unless}}
               <div class="relative">
+                {{#if
+                  (and this.queryIsThirdPartyURL (not this.editModeIsEnabled))
+                }}
+                  <FlightIcon @name="loading" class="ml-2 mt-4" />
+                {{/if}}
 
-                {{#if this.inputValueIsValid}}
-                  <Action
-                    {{on "click" this.maybeAddRelatedExternalLink}}
-                    class="mt-1 px-3 mb-4 w-full py-1.5 items-center
-                      {{unless
-                        this.editModeIsEnabled
-                        'h-[74px] rounded-md bg-color-surface-interactive-hover'
-                      }}"
-                  >
-                    <div class="flex relative h-full items-center">
-                      <div class="w-full h-full">
-                        <div
-                          class="w-full h-full
-                            {{unless
-                              this.editModeIsEnabled
-                              'flex justify-between items-center'
-                            }}"
+                {{#if (and this.queryIsThirdPartyURL this.editModeIsEnabled)}}
+                  <div class="mt-5 px-3 mb-4 w-full grid place-items-center">
+                    {{!-- <div class="relative inline-flex mb-1.5">
+                      <div
+                        class="doc-thumbnail mx-auto bg-white w-12 h-[62px] grid place-items-center relative"
+                      >
+                        <FlightIcon
+                          @name="globe"
+                          @size="24"
+                          class="text-color-foreground-faint"
+                        />
+                      </div>
+                      <div
+                        class="absolute top-1.5 -right-6 text-color-foreground-faint bg-gradient-to-br from-color-palette-neutral-400 to-color-palette-neutral-300 w-7 h-7 rounded-full grid place-items-center z-10"
+                      >
+                        <FlightIcon @name="figma" class="text-white" />
+                      </div>
+                    </div> --}}
+                    <div
+                      class="text-display-300 w-full text-color-foreground-primary font-semibold"
+                    >
+                      <div class="flexX gap-4 items-center mb-3.5 px-8">
+                        <label
+                          {{! TODO: semantics }}
+                          class="hermes-form-label mb-1 shrink-0 w-12"
                         >
-                          {{#unless this.editModeIsEnabled}}
-                            <div
-                              class="{{if this.editModeIsEnabled 'w-full mb-5'}}
-                                shrink-0 mr-3"
-                            >
-
-                              {{#if this.faviconIsShown}}
-                                <div
-                                  class="doc-thumbnail bg-white w-12 h-[62px] grid place-items-center"
-                                >
-                                  <FlightIcon
-                                    @name="globe"
-                                    @size="24"
-                                    class="text-color-foreground-faint"
-                                  />
-                                </div>
-                              {{else}}
-                                <FlightIcon @name="loading" />
-                              {{/if}}
-                            </div>
-                          {{/unless}}
-
-                          <div class="w-full">
-                            <div
-                              class="flex items-center space-x-2 text-display-300 text-color-foreground-primary font-semibold"
-                            >
-                              {{#if this.editModeIsEnabled}}
-                                <Hds::Form::TextInput::Field
-                                  @value={{this.externalLinkTitle}}
-                                  class="mb-4 text-display-300"
-                                  as |F|
-                                >
-                                  <F.Label>
-                                    Title
-                                  </F.Label>
-                                </Hds::Form::TextInput::Field>
-                              {{else}}
-                                <div>
-                                  {{unless
-                                    this.fetchURLInfo.isRunning
-                                    this.externalLinkTitle
-                                  }}
-                                </div>
-                              {{/if}}
-                            </div>
-                            {{#if this.editModeIsEnabled}}
-                              <Hds::Form::TextInput::Field
-                                @value={{this.query}}
-                                class="mb-4"
-                                as |F|
-                              >
-                                <F.Label>
-                                  URL
-                                </F.Label>
-                              </Hds::Form::TextInput::Field>
-
-                              {{! <div class="hermes-form-label mb-2">
-                                Icon
-                              </div>
-                              <div
-                                class="doc-thumbnail bg-white w-12 h-[62px] grid place-items-center"
-                              >
-                                <FlightIcon
-                                  @name="globe"
-                                  @size="24"
-                                  class="text-color-foreground-faint"
-                                />
-                              </div> }}
-                            {{else}}
-                              <div
-                                class="text-body-200 text-color-foreground-faint"
-                              >
-                                {{unless
-                                  this.fetchURLInfo.isRunning
-                                  this.displayURL
-                                }}
-                              </div>
-                            {{/if}}
-                          </div>
-                          {{#unless this.editModeIsEnabled}}
-                            <div class="shrink-0 flex ml-2 mr-3.5">
-                              <FlightIcon
-                                @name="plus"
-                                @size="24"
-                                class="text-color-foreground-faint plus"
-                              />
-                            </div>
-                          {{/unless}}
+                          Title
+                        </label>
+                        <Hds::Form::TextInput::Base
+                          @value={{this.externalLinkTitle}}
+                          class=""
+                        />
+                      </div>
+                    </div>
+                    <div class="flexX w-full gap-4 items-center mb-5 px-8">
+                      <label
+                        {{! TODO: semantics }}
+                        class="hermes-form-label mb-1 shrink-0 w-12"
+                      >
+                        URL
+                      </label>
+                      <div class="relative w-full">
+                        <Hds::Form::TextInput::Base
+                          @value={{this.query}}
+                          class="pl-7 text-color-foreground-faint"
+                        />
+                        <div
+                          class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4"
+                        >
+                          {{#if this.defaultFaviconIsShown}}
+                            <FlightIcon @name="globe" />
+                          {{else}}
+                            <img
+                              src={{this.faviconURL}}
+                              width="16"
+                              height="16"
+                            />
+                          {{/if}}
                         </div>
                       </div>
                     </div>
-                  </Action>
+                    <div class="px-8 w-full">
+                      <Hds::Button
+                        @color="primary"
+                        @text="Add"
+                        @isFullWidth={{true}}
+                        {{on "click" this.addRelatedExternalLink}}
+                      />
+                    </div>
+                  </div>
                 {{/if}}
               </div>
             </:header>
@@ -217,7 +177,6 @@
                   />
                   <div class="w-full overflow-hidden pr-8 flex items-center">
                     <div>
-
                       <h4
                         class="text-display-300 font-semibold text-color-foreground-strong pr-0.5 truncate"
                       >
@@ -226,11 +185,6 @@
                       <div
                         class="text-color-foreground-faint text-body-200 flex space-x-3"
                       >
-                        {{log dd.attrs}}
-                        {{!--
-                      {{#if dd.attrs.docType}}
-                        <span>{{dd.attrs.docType}}</span>
-                      {{/if}} --}}
                         <span>
                           {{get dd.attrs.owners 0}}
                         </span>
@@ -249,12 +203,13 @@
         </div>
 
       </M.Body>
-      {{#if this.editModeIsEnabled}}
+      {{#if this.eXditModeIsEnabled}}
         <M.Footer>
 
           <Hds::Button
             @color="primary"
             @text="Save and add"
+            @isFullWidth={{true}}
             {{on "click" this.addRelatedExternalLink}}
           />
 

@@ -36,7 +36,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @service declare flashMessages: FlashMessageService;
 
   @tracked query = "";
-  @tracked inputValueIsValid = false;
+  @tracked queryIsThirdPartyURL = false;
   @tracked relatedLinks: NativeArray<RelatedExternalLink> = A();
   @tracked relatedDocuments: NativeArray<HermesDocument> = A();
   @tracked faviconURL: string | null = null;
@@ -111,7 +111,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @action hideModal() {
     this.modalIsShown = false;
     this.query = "";
-    this.inputValueIsValid = false;
+    this.queryIsThirdPartyURL = false;
     this.editModeIsEnabled = false;
 
     // This updates the suggestions for the next time the modal is opened
@@ -198,7 +198,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @action onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
       // this probably never fires
-      if (this.inputValueIsValid) {
+      if (this.queryIsThirdPartyURL) {
         this.addRelatedExternalLink();
         dd.hideContent();
       }
@@ -242,7 +242,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @action disableEditMode() {
     this.editModeIsEnabled = false;
     this.query = "";
-    this.inputValueIsValid = false;
+    this.queryIsThirdPartyURL = false;
     void this.search.perform(null, "");
 
   }
@@ -340,17 +340,19 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
 
       // Simulate a request
       const favicon = new Image();
+
       favicon.addEventListener("load", () => {
         this.faviconHasLoaded = true;
       });
 
       favicon.addEventListener("error", () => {
+        console.log("error");
         this.faviconHasLoaded = true;
         this.defaultFaviconIsShown = true;
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(2000);
+      await timeout(1000);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
@@ -369,11 +371,11 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   protected checkURL = restartableTask(async () => {
     const url = this.query;
     try {
-      this.inputValueIsValid = Boolean(new URL(url));
+      this.queryIsThirdPartyURL = Boolean(new URL(url));
     } catch (e) {
-      this.inputValueIsValid = false;
+      this.queryIsThirdPartyURL = false;
     } finally {
-      if (this.inputValueIsValid) {
+      if (this.queryIsThirdPartyURL) {
         void this.fetchURLInfo.perform();
       }
     }
