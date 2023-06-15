@@ -167,8 +167,6 @@ Found a non-security-related bug or have a feature request? Please [open a GitHu
 
 > Please note that it may take us up to a week to respond to GitHub issues as we continue to work on the project.
 
-Have other feedback? Please contact us via email at hermes-feedback@hashicorp.com.
-
 ## Contributing
 
 In the short term, there are several large changes planned for the Hermes project. To make sure there aren’t any conflicts with the upcoming plans for the project, before submitting a PR please [create a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new) so we can validate the change you may want to propose.
