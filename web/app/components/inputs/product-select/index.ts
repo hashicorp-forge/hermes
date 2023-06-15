@@ -16,6 +16,7 @@ interface InputsProductSelectSignature {
     formatIsBadge?: boolean;
     placement?: Placement;
     isSaving?: boolean;
+    renderOut?: boolean;
   };
 }
 
