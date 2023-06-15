@@ -227,6 +227,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       type: "critical",
       timeout: 6000,
       extendedTimeout: 1000,
+      preventDuplicates: true,
     });
   }
 
