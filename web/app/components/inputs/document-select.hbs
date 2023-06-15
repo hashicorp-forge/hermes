@@ -91,7 +91,7 @@
 
                 {{#if (and this.queryIsThirdPartyURL this.editModeIsEnabled)}}
                   <div class="mt-5 px-3 mb-4 w-full grid place-items-center">
-                    {{!-- <div class="relative inline-flex mb-1.5">
+                    {{! <div class="relative inline-flex mb-1.5">
                       <div
                         class="doc-thumbnail mx-auto bg-white w-12 h-[62px] grid place-items-center relative"
                       >
@@ -106,7 +106,7 @@
                       >
                         <FlightIcon @name="figma" class="text-white" />
                       </div>
-                    </div> --}}
+                    </div> }}
                     <div
                       class="text-display-300 w-full text-color-foreground-primary font-semibold"
                     >
@@ -222,73 +222,83 @@
 {{! TODO: move this out of the component }}
 
 {{#if this.relatedResourcesAreShown}}
-  <ul class="!mt-0.5 related-docs">
-    {{#each-in this.relatedResources as |_resourceId resource|}}
-      <li
-        class="flex w-full relative group related-docs-list-item
-          {{if resource.objectID 'hermes-doc' 'external-doc'}}"
-      >
-        <div class="w-full related-doc-link-container">
-          {{#if resource.objectID}}
-            <LinkTo
-              @route="authenticated.document"
-              @model={{resource.objectID}}
-              class="related-doc-link"
-            >
-              <div
-                class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
-              >
-                <img src="/images/document.png" class="w-5 h-auto" />
-              </div>
-              <div class="w-full overflow-hidden pr-6">
-                <h4 class="inline-doc-title mb-0.5 truncate">
-                  {{resource.title}}
-                </h4>
-                {{#if resource.docNumber}}
-                  <div class="text-color-foreground-faint text-body-100">
-                    {{resource.docNumber}}
-                  </div>
-                {{/if}}
-              </div>
-            </LinkTo>
+  <AnimatedContainer class="w-full">
+    <ul class="!mt-0.5 related-docs">
+      {{#each-in this.relatedResources as |_resourceId resource|}}
+        <li
+          class="flex w-full relative group related-docs-list-item
+            {{if resource.objectID 'hermes-doc' 'external-doc'}}"
+        >
+          <AnimatedValue
+            @value={{resource.objectID}}
+            @rules={{this.rules}}
+            @duration={{500}}
+          >
 
-          {{else}}
-            <ExternalLink
-              href={{resource.url}}
-              class="related-doc-link py-0.5 flex pr-6 w-full"
-            >
-              <div class="flex items-center w-full">
-                <div class="flex relative mr-2 w-4 h-4 shrink-0">
-                  <img
-                    src="https://www.google.com/s2/favicons?domain={{resource.url}}"
-                    width="16"
-                    height="16"
-                  />
-                </div>
-                <div class="w-full pr-6">
-                  <div class="truncate inline-doc-title">
-                    {{resource.title}}
-                  </div>
-
+            <div class="w-full related-doc-link-container">
+              {{#if resource.objectID}}
+                <LinkTo
+                  @route="authenticated.document"
+                  @model={{resource.objectID}}
+                  class="related-doc-link"
+                >
                   <div
-                    class="truncate text-body-100 text-color-foreground-faint"
+                    class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
                   >
-                    {{resource.displayURL}}
+                    <img src="/images/document.png" class="w-5 h-auto" />
                   </div>
-                </div>
-              </div>
-            </ExternalLink>
-          {{/if}}
+                  <div class="w-full overflow-hidden pr-6">
+                    <h4 class="inline-doc-title mb-0.5 truncate">
+                      {{resource.title}}
+                    </h4>
+                    {{#if resource.docNumber}}
+                      <div class="text-color-foreground-faint text-body-100">
+                        {{resource.docNumber}}
+                      </div>
+                    {{/if}}
+                  </div>
+                </LinkTo>
 
-          {{! This needs to be outside the LinkTo }}
-          <Inputs::DocumentSelect::MoreButton
-            @removeResource={{this.removeResource}}
-            @resource={{resource}}
-          />
-        </div>
-      </li>
-    {{/each-in}}
-  </ul>
+              {{else}}
+                <ExternalLink
+                  href={{resource.url}}
+                  class="related-doc-link py-0.5 flex pr-6 w-full"
+                >
+                  <div class="flex items-center w-full">
+                    <div class="flex relative mr-2 w-4 h-4 shrink-0">
+                      <img
+                        src="https://www.google.com/s2/favicons?domain={{resource.url}}"
+                        width="16"
+                        height="16"
+                      />
+                    </div>
+                    <div class="w-full pr-6">
+                      <div class="truncate inline-doc-title">
+                        {{resource.title}}
+                      </div>
+
+                      <div
+                        class="truncate text-body-100 text-color-foreground-faint"
+                      >
+                        {{resource.displayURL}}
+                      </div>
+                    </div>
+                  </div>
+                </ExternalLink>
+              {{/if}}
+
+              {{! This needs to be outside the LinkTo }}
+              <Inputs::DocumentSelect::MoreButton
+                @removeResource={{this.removeResource}}
+                @resource={{resource}}
+              />
+            </div>
+          </AnimatedValue>
+        </li>
+      {{/each-in}}
+    </ul>
+  </AnimatedContainer>
+
 {{else}}
   <div class="mt-1.5 text-color-foreground-faint">
     ---

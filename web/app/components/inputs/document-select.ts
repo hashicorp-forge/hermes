@@ -60,6 +60,19 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     return Object.keys(this.relatedResources).length > 0;
   }
 
+  @action rules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }): void {
+    debugger
+    return;
+  }
+
   get relatedResources(): {
     [key: string]: RelatedExternalLink | HermesDocument;
   } {
@@ -244,7 +257,6 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     this.query = "";
     this.queryIsThirdPartyURL = false;
     void this.search.perform(null, "");
-
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {

@@ -29,12 +29,18 @@ import { HdsCardContainerComponent } from "hds/card/container";
 import { HdsTableTdComponent } from "hds/table/td";
 import { HdsTableTrComponent } from "hds/table/tr";
 import { HdsTableComponent } from "hds/table";
+import AnimatedContainer from "ember-animated/components/animated-container";
+import { AnimatedEachCurly } from "ember-animated/components/animated-each";
+import AnimatedValue from "ember-animated/components/animated-value";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
+    AnimatedContainer: typeof AnimatedContainer;
+    AnimatedValue: typeof AnimatedValue;
+    "animated-each": typeof AnimatedEachCurly;
     perform: typeof PerformHelper;
     or: typeof OrHelper;
     eq: typeof EqHelper;
