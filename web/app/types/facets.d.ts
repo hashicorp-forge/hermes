@@ -1,4 +1,4 @@
-import { FacetName } from "hermes/components/floating-u-i/header/toolbar";
+import { FacetName } from "hermes/components/header/toolbar";
 
 /**
  * E.g., { docType: { "API": { count: 1, selected: false }}}
