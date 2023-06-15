@@ -3,12 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import {
-  keepLatestTask,
-  restartableTask,
-  task,
-  timeout,
-} from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
@@ -273,7 +268,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  protected setDraftVisibility = keepLatestTask(async (visibility: string) => {
+  protected setDraftVisibility = restartableTask(async (visibility: string) => {
     if (this.draftVisibility === visibility) {
       return;
     }

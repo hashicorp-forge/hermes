@@ -44,7 +44,8 @@
               <X::DropdownList
                 @items={{this.draftVisibilityOptions}}
                 @selected={{this.draftVisibility}}
-                {{! TODO: add offset }}
+                @renderOut={{true}}
+                @offset={{hash mainAxis=0 crossAxis=-7}}
                 class="w-[350px]"
               >
                 <:anchor as |dd|>
