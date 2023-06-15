@@ -172,9 +172,6 @@ module.exports = {
         "color-palette-neutral-600": "var(--token-color-palette-neutral-600)",
         "color-palette-neutral-700": "var(--token-color-palette-neutral-700)",
 
-        // Alpha
-        "alpha-200": "var(--token-color-palette-alpha-200)",
-
         // Non-Semantic Color
         "color-palette-blue-200": "var(--token-color-palette-blue-200)",
         "color-palette-green-200": "var(--token-color-palette-green-200)",

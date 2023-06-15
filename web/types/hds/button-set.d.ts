@@ -7,7 +7,7 @@ interface HdsButtonSetComponentSignature {
   Args: {};
   Blocks: {
     default: [];
-  };
+  }
 }
 
 export type HdsButtonSetComponent =
