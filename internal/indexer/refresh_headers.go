@@ -89,7 +89,11 @@ func refreshDocumentHeaders(
 		}
 		lockedDocIDs = append(lockedDocIDs, d.GoogleFileID)
 	}
-	log.Info(fmt.Sprintf("locked document IDs: %v", lockedDocIDs))
+	if ft == draftsFolderType {
+		log.Info(fmt.Sprintf("locked draft document IDs: %v", lockedDocIDs))
+	} else {
+		log.Info(fmt.Sprintf("locked document IDs: %v", lockedDocIDs))
+	}
 
 	// Return if there are no updated documents.
 	if len(docs) == 0 {

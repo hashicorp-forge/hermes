@@ -2,7 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { SearchResponse } from "@algolia/client-search";
 import { getTestDocNumber } from "./factories/document";
+import { SearchForFacetValuesResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
   let finalConfig = {

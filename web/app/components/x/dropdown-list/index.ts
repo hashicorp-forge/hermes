@@ -274,10 +274,6 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
   }
 
-  @action protected resetFocusedItemIndex() {
-    this.focusedItemIndex = -1;
-  }
-
   /**
    * Checks whether the focused item is completely visible,
    * and, if necessary, scrolls the dropdown to make it visible.
@@ -299,6 +295,14 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     } else if (itemTop < scrollviewTop) {
       this.scrollContainer.scrollTop = itemTop;
     }
+  }
+
+  /**
+   * Sets the focusItemIndex to -1.
+   * Called onInput and when the popover is closed.
+   */
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
   }
 
   /**

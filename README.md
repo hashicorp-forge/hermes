@@ -76,11 +76,13 @@ Example shared drive organization
     - All Documents (this is the "documents" folder)
     - Drafts (this is the "drafts" folder)
 
-### Algolia
+### Algolia (required)
 
 1. [Sign up](https://www.algolia.com/users/sign_up) for a free Algolia account.
 
-1. Take note of the Admin API Key and Search-Only API Key in the [API Keys](https://www.algolia.com/account/api-keys) section. The admin API and search-only API keys are required for the Hermes server and the indexer.
+The Application ID, Search API Key, and Write API Key in Algolia's [API Keys settings](https://www.algolia.com/account/api-keys) are required for the Hermes server and the indexer. You will later add them to the [config.hcl configuration file](https://github.com/hashicorp-forge/hermes#configuration-file).
+
+Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` environment variables at build time.
 
 ## Development and Usage
 
