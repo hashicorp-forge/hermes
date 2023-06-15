@@ -85,6 +85,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       let isLoggedIn = this.requireAuthentication(null, () => {});
       if (this.pollResponseIs401 || !isLoggedIn) {
         this.tokenIsValid = false;
+      } else {
+        this.tokenIsValid = true;
       }
     }
 
