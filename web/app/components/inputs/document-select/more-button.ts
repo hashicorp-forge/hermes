@@ -1,8 +1,8 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { RelatedExternalLink } from "../document-select3";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { RelatedExternalLink } from "../document-select";
 
 interface InputsDocumentSelectMoreButtonSignature {
   Args: {

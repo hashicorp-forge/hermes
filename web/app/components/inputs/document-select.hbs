@@ -15,11 +15,7 @@
 
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
-    <Hds::Modal
-      @onClose={{this.hideModal}}
-      class="h-[475px]"
-      as |M|
-    >
+    <Hds::Modal @onClose={{this.hideModal}} class="h-[475px]" as |M|>
       <M.Header>
         <div class="flex w-full items-center">
 
@@ -253,50 +249,14 @@
         </div>
 
       </M.Body>
-      {{#if this.inputValueIsValid}}
+      {{#if this.editModeIsEnabled}}
         <M.Footer>
-          <Hds::ButtonSet>
 
-            {{#if this.editModeIsEnabled}}
-
-              <Hds::Button
-                @color="primary"
-                @text="Save and add"
-                {{on "click" this.addRelatedExternalLink}}
-              />
-            {{else}}
-              <div class="flex items-center space-x-3">
-
-                {{! TODO: make this conditional to the "inputIsFocused" context }}
-                <span
-                  class="ml-3 text-color-foreground-faint flex items-center space-x-3"
-                >
-                  Press
-                  <span
-                    class="flex items-center mx-1.5 pl-1.5 pr-1 py-0.5 rounded border border-color-border-primary"
-                  >
-                    <span>
-
-                      Enter
-                    </span>
-
-                    {{! <FlightIcon
-                      @name="corner-down-left"
-                      class="opacity-60 ml-0.5"
-                    /> }}
-                  </span>
-                  to add
-                </span>
-              </div>
-              <Hds::Button
-                @color="tertiary"
-                @text="Edit metadata"
-                @icon="pencil-tool"
-                class=""
-                {{on "click" this.enableEditMode}}
-              />
-            {{/if}}
-          </Hds::ButtonSet>
+          <Hds::Button
+            @color="primary"
+            @text="Save and add"
+            {{on "click" this.addRelatedExternalLink}}
+          />
 
         </M.Footer>
       {{/if}}

@@ -241,6 +241,10 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
 
   @action disableEditMode() {
     this.editModeIsEnabled = false;
+    this.query = "";
+    this.inputValueIsValid = false;
+    void this.search.perform(null, "");
+
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
@@ -294,7 +298,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
             "docNumber",
             "docType",
             "status",
-            "owners"
+            "owners",
           ],
           optionalFilters: ["product:" + this.args.productArea],
         })
@@ -346,7 +350,8 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(200);
+      await timeout(2000);
+      this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
       //   // For when we make a real request:
