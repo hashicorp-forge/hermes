@@ -1,27 +1,69 @@
-<li data-test-x-dropdown-list-item class="x-dropdown-list-item" role="none">
-  {{yield
-    (hash
-      Action=(component
-        "x/dropdown-list/action"
-        role=@listItemRole
-        isAriaSelected=this.isAriaSelected
-        isAriaChecked=@selected
-        registerElement=this.registerElement
-        focusMouseTarget=this.focusMouseTarget
-        onClick=this.onClick
-      )
-      LinkTo=(component
-        "x/dropdown-list/link-to"
-        role=@listItemRole
-        isAriaSelected=this.isAriaSelected
-        isAriaChecked=@selected
-        registerElement=this.registerElement
-        focusMouseTarget=this.focusMouseTarget
-        onClick=this.onClick
-      )
-      value=@value
-      attrs=@attributes
-      selected=@selected
-    )
+{{! @glint-nocheck: not typesafe yet }}
+
+{{!
+  If an item has the `itemShouldRenderOut` property, we render it outside of the `ul/ol` element not as a list item, but a hidden container div at the bottom of DOM, the contents of which should be `in-element`ed into the DOM in the appropriate place when invoked by the parent component.
+
+  For example:
+  (in single-mustached syntax to avoid VSCode colorization bugs)
+  https://github.com/andrejunges/vscode-handlebars/issues/7
+
+  <:item as |i|>
+  {#if i.attrs.itemShouldRenderOut}
+    {#in-element (html-element ".target-div") insertBefore=null}
+      <div>...</div>
+    {/in-element}
+  {else}
+    <i.LinkTo>...</i.LinkTo>
+  {/if}
+  </:item>
+
+  These rendered-out items retain their keyboard-navigation order relative to other items in the list, but not affected by placement. It is up to the consumer to ensure that the passed-in `items` are arranged in the order that corresponds to their placement.
+
+  See `components/search.hbs` for an example.
+}}
+
+{{#let
+  (element (if @attributes.itemShouldRenderOut "div" "li"))
+  as |MaybeListItem|
+}}
+  {{#maybe-in-element
+    (html-element ".ember-application")
+    (not @attributes.itemShouldRenderOut)
+    insertBefore=null
   }}
-</li>
+    <MaybeListItem
+      data-test-x-dropdown-list-item
+      class="x-dropdown-list-item
+        {{if @attributes.itemShouldRenderOut 'absolute top-0 left-0'}}"
+      role="none"
+      aria-hidden={{@attributes.itemShouldRenderOut}}
+    >
+      {{yield
+        (hash
+          Action=(component
+            "x/dropdown-list/action"
+            role=@listItemRole
+            isAriaSelected=this.isAriaSelected
+            isAriaChecked=@selected
+            registerElement=this.registerElement
+            focusMouseTarget=this.focusMouseTarget
+            onClick=this.onClick
+          )
+          LinkTo=(component
+            "x/dropdown-list/link-to"
+            role=@listItemRole
+            isAriaSelected=this.isAriaSelected
+            isAriaChecked=@selected
+            registerElement=this.registerElement
+            focusMouseTarget=this.focusMouseTarget
+            onClick=this.onClick
+          )
+          contentID=@contentID
+          value=@value
+          attrs=@attributes
+          selected=@selected
+        )
+      }}
+    </MaybeListItem>
+  {{/maybe-in-element}}
+{{/let}}

@@ -2,7 +2,7 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
@@ -13,14 +13,17 @@ interface XDropdownListComponentSignature {
   Args: {
     items?: any;
     listIsOrdered?: boolean;
-    selected: any;
+    selected?: any;
     placement?: Placement;
     isSaving?: boolean;
+    offset?: OffsetOptions;
     onItemClick: (value: any, attributes: any) => void;
   };
+  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
     default: [];
     anchor: [dd: any];
+    header: [dd: any];
     item: [dd: any];
   };
 }
@@ -122,7 +125,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @action onDestroy() {
     this.query = "";
     this._filteredItems = null;
-    this.focusedItemIndex = -1;
+    this.resetFocusedItemIndex();
   }
 
   /**
@@ -269,13 +272,22 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
       this.scrollContainer.scrollTop = itemTop;
     }
   }
+
+  /**
+   * Sets the focusItemIndex to -1.
+   * Called onInput and when the popover is closed.
+   */
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
+  }
+
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
   protected onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.focusedItemIndex = -1;
+    this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
@@ -288,14 +300,32 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
 
     this._filteredItems = shownItems;
+    this.scheduleAssignMenuItemIDs();
+  });
 
+  /**
+   * The action that assigns menu item IDs.
+   * Scheduled after render to ensure that the menu items
+   * have been rendered and are available to query, including
+   * after being filtered.
+   *
+   * In cases where items are loaded asynchronously,
+   * e.g., when querying Algolia, the menu items are not
+   * available immediately after render. In these cases,
+   * the component should call `scheduleAssignMenuItemIDs`
+   * in the `next` runloop.
+   */
+  @action protected scheduleAssignMenuItemIDs() {
     schedule("afterRender", () => {
-      assert("onInput expects a _scrollContainer", this._scrollContainer);
+      assert(
+        "scheduleAssignMenuItemIDs expects a _scrollContainer",
+        this._scrollContainer
+      );
       this.assignMenuItemIDs(
         this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
       );
     });
-  });
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

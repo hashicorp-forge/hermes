@@ -37,7 +37,7 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom('[data-test-nav-link="my"]').hasAttribute("href", "/my");
     assert.dom('[data-test-nav-link="drafts"]').hasAttribute("href", "/drafts");
 
-    assert.dom("[data-test-nav-search-bar]").exists();
+    assert.dom(".global-search").exists();
 
     await click("[data-test-user-menu-toggle]");
 

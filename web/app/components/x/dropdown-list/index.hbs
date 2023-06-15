@@ -1,5 +1,4 @@
 {{! @glint-nocheck: not typesafe yet }}
-
 {{!
   Marked up with guidance from:
   https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
@@ -9,11 +8,13 @@
 }}
 
 <FloatingUI
-  @renderOut={{true}}
+  @renderOut={{@renderOut}}
   @placement={{@placement}}
+  @offset={{@offset}}
   class="hermes-popover x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
+  ...attributes
 >
   <:anchor as |f|>
     {{yield
@@ -52,8 +53,24 @@
             f.contentID
           )
         )
+        ariaControls=(concat
+          "x-dropdown-list-"
+          (if this.inputIsShown "container" "items")
+          "-"
+          f.contentID
+        )
+        resetFocusedItemIndex=this.resetFocusedItemIndex
+        scheduleAssignMenuItemIDs=this.scheduleAssignMenuItemIDs
+        registerAnchor=f.registerAnchor
         contentIsShown=f.contentIsShown
         selected=@selected
+        toggleContent=f.toggleContent
+        onTriggerKeydown=(fn
+          this.onTriggerKeydown f.contentIsShown f.showContent
+        )
+        focusedItemIndex=this.focusedItemIndex
+        hideContent=f.hideContent
+        showContent=f.showContent
       )
       to="anchor"
     }}
@@ -66,7 +83,6 @@
       id="x-dropdown-list-container-{{f.contentID}}"
       class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
       role={{if this.inputIsShown "combobox"}}
-      ...attributes
     >
       {{#if this.inputIsShown}}
         <div class="x-dropdown-list-input-container">
@@ -89,6 +105,10 @@
         {{did-insert this.registerScrollContainer}}
         class="x-dropdown-list-scroll-container"
       >
+        {{#if (has-block "header")}}
+          {{yield to="header"}}
+        {{/if}}
+
         <X::DropdownList::Items
           @contentID={{f.contentID}}
           @query={{this.query}}
@@ -110,6 +130,10 @@
             {{yield i to="item"}}
           </:item>
         </X::DropdownList::Items>
+
+        {{#if (has-block "footer")}}
+          {{yield to="footer"}}
+        {{/if}}
       </div>
     </div>
   </:content>

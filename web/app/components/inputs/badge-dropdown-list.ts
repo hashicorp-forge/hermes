@@ -11,6 +11,7 @@ interface InputsBadgeDropdownListComponentSignature {
     onItemClick: ((e: Event) => void) | ((e: string) => void);
     placement?: Placement;
     icon: string;
+    renderOut?: boolean;
   };
   Blocks: {
     default: [];

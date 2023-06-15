@@ -2,7 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { SearchResponse } from "@algolia/client-search";
 import { getTestDocNumber } from "./factories/document";
+import { SearchForFacetValuesResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -64,18 +66,68 @@ export default function (mirageConfig) {
         return new Response(200, {});
       });
 
+      const getAlgoliaSearchResults = (schema, request) => {
+        const requestBody = JSON.parse(request.requestBody);
+        const { facetQuery, query } = requestBody;
+
+        console.log("requestBody", requestBody);
+
+        if (facetQuery) {
+          let facetMatch = schema.document.all().models.filter((doc) => {
+            return doc.attrs.product
+              .toLowerCase()
+              .includes(facetQuery.toLowerCase());
+          })[0];
+
+          if (!facetMatch) {
+            return new Response(200, {}, { facetHits: [] });
+          } else {
+            return new Response(
+              200,
+              {},
+              { facetHits: [{ value: facetMatch.attrs.product }] }
+            );
+          }
+        } else {
+          let docMatches = schema.document.all().models.filter((doc) => {
+            return (
+              doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+              doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+            );
+          });
+          return new Response(200, {}, { hits: docMatches });
+        }
+      };
+
       /**
        * Used by the AlgoliaSearchService to query Algolia.
        */
       this.post(
         `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-        () => {
-          return {
-            facets: [],
-            hits: [],
-          };
+        (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
         }
       );
+
+      /**
+       * Algolia has several search hosts, e.g., appID-1.algolianet.com,
+       * and Mirage doesn't support wildcards in routes.
+       * So, we create a route for each host.
+       */
+
+      let algoliaSearchHosts = [];
+
+      for (let i = 1; i <= 9; i++) {
+        algoliaSearchHosts.push(
+          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
+        );
+      }
+
+      algoliaSearchHosts.forEach((host) => {
+        this.post(host, (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
+        });
+      });
 
       /**
        * Called by the Document route to log a document view.
