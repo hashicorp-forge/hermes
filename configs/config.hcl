@@ -14,6 +14,12 @@ algolia {
   write_api_key             = ""
 }
 
+// datadog configures Hermes to send metrics to Datadog.
+datadog {
+  enabled = false
+  env     = "local"
+}
+
 // document_types configures document types. Currently this block should not be
 // modified, but Hermes will support custom document types in the near future.
 // *** DO NOT MODIFY document_types ***
