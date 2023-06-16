@@ -32,6 +32,8 @@ import { HdsTableComponent } from "hds/table";
 import AnimatedContainer from "ember-animated/components/animated-container";
 import { AnimatedEachCurly } from "ember-animated/components/animated-each";
 import AnimatedValue from "ember-animated/components/animated-value";
+import AnimatedOrphans from "ember-animated/components/animated-orphans";
+import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -40,7 +42,9 @@ declare module "@glint/environment-ember-loose/registry" {
     "on-document": typeof OnDocumentHelper;
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;
+    AnimatedOrphans: typeof AnimatedOrphans;
     "animated-each": typeof AnimatedEachCurly;
+    "animated-if": typeof AnimatedIfCurly;
     perform: typeof PerformHelper;
     or: typeof OrHelper;
     eq: typeof EqHelper;

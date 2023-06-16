@@ -9,18 +9,43 @@
       }
     }
   }
+}
 
-  .related-doc-link {
-    @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded-md -mr-[4px] border border-transparent py-1.5 relative;
+.sidebar-more-button {
+  @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
 
-    &::before {
-      @apply hds-elevation-mid;
-      @apply absolute top-0 left-0 w-full h-full rounded-md z-[-1];
-      @apply bg-color-surface-highlight border border-color-border-highlight;
-      content: "";
+  &:hover,
+  &:focus {
+    @apply opacity-100;
+  }
 
-      animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
-    }
+  &:hover {
+    @apply border-color-border-strong bg-color-surface-faint;
+  }
+}
+
+.hermes-doc {
+  .sidebar-more-button {
+    @apply top-[3px];
+  }
+}
+
+.external-doc {
+  .sidebar-more-button {
+    @apply -top-px;
+  }
+}
+
+.related-doc-link {
+  @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded-md -mr-[4px] border border-transparent py-1.5 relative;
+
+  &::before {
+    @apply hds-elevation-mid;
+    @apply absolute top-0 left-0 w-full h-full rounded-md z-[-1];
+    @apply bg-color-surface-highlight border border-color-border-highlight;
+    content: "";
+
+    animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
   }
 
   @keyframes fadeOut {
@@ -47,30 +72,5 @@
 
   .hermes-doc + .external-doc {
     @apply mt-1.5;
-  }
-
-  .more-button {
-    @apply absolute opacity-50 flex rounded -right-px py-1 px-1 border border-transparent;
-
-    &:hover,
-    &:focus {
-      @apply opacity-100;
-    }
-
-    &:hover {
-      @apply border-color-border-strong bg-color-surface-faint;
-    }
-  }
-
-  .hermes-doc {
-    .more-button {
-      @apply top-[3px];
-    }
-  }
-
-  .external-doc {
-    .more-button {
-      @apply -top-px;
-    }
   }
 }

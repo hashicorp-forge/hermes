@@ -12,6 +12,10 @@ import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { next, schedule } from "@ember/runloop";
 import { assert } from "@ember/debug";
+import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import move from "ember-animated/motions/move";
+import { TransitionContext, wait } from "ember-animated/.";
+import { EmberAnimatedTransition } from "ember-animated/transition";
 
 interface InputsDocumentSelectComponentSignature {
   Args: {
@@ -62,17 +66,35 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     return Object.keys(this.relatedResources).length > 0;
   }
 
-  @action rules({
-    firstTime,
-    oldItems,
-    newItems,
-  }: {
-    firstTime: boolean;
-    oldItems: unknown[];
-    newItems: unknown[];
-  }): void {
-    // TODO: add animation rules
-    return;
+  *transition({
+    insertedSprites,
+    keptSprites,
+    removedSprites,
+  }: TransitionContext) {
+    for (let sprite of insertedSprites) {
+      sprite.applyStyles({
+        opacity: "0",
+      });
+      sprite.startTranslatedBy(0, -3);
+      void fadeIn(sprite, { duration: 0 });
+      void move(sprite, { duration: 150 });
+    }
+
+    for (let sprite of keptSprites) {
+      void move(sprite, { duration: 150 });
+    }
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 0 });
+    }
+  }
+
+  get relatedResourcesObjectEntries() {
+    const objectEntries = Object.entries(this.relatedResources);
+
+    // we only need the attributes, not the keys
+    return objectEntries.map((entry) => {
+      return entry[1];
+    });
   }
 
   get relatedResources(): {
@@ -257,7 +279,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     this.queryIsThirdPartyURL = false;
     schedule("afterRender", () => {
       void this.search.perform(this.dd, "");
-    })
+    });
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
