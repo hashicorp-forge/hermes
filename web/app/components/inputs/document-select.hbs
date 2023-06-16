@@ -146,11 +146,13 @@
             class="w-full max-w-none relative modal-list"
           >
             <:anchor as |dd|>
-              <Hds::Form::TextInput::Base
+              {{!-- <Hds::Form::TextInput::Base
                 @type="text"
                 @value={{this.title}}
                 disabled={{not this.editModeIsEnabled}}
-              />
+                class="mb-2"
+                  placeholder="Title"
+              /> --}}
 
               <Hds::Form::TextInput::Base
                 data-test-global-search-input
@@ -171,22 +173,24 @@
               />
             </:anchor>
             <:header>
-              {{#unless (or this.editModeIsEnabled this.queryIsThirdPartyURL)}}
-                <div
-                  class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-                >
-                  {{#if this.query.length}}
-                    Results
-                  {{else}}
-                    Suggestions
-                  {{/if}}
-                </div>
+              {{#unless this.editModeIsEnabled}}
+                {{#unless this.fetchURLInfo.isRunning}}
+                  <div
+                    class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+                  >
+                    {{#if this.query.length}}
+                      Results
+                    {{else}}
+                      Suggestions
+                    {{/if}}
+                  </div>
+                {{/unless}}
               {{/unless}}
               <div
                 class="relative
                   {{if
                     (and this.queryIsThirdPartyURL (not this.editModeIsEnabled))
-                    'text-center pt-36'
+                    'text-center pt-28'
                   }}"
               >
                 {{#if
@@ -196,8 +200,12 @@
                 {{/if}}
 
                 {{#if (and this.queryIsThirdPartyURL this.editModeIsEnabled)}}
-                  <div class="mt-5 px-3 mb-4 w-full grid place-items-center">
-                    {{! <div class="relative inline-flex mb-1.5">
+                  <div class="px-3 w-full">
+
+                    <div
+                      class="mt-6 px-3 mb-4 w-full bg-color-surface-interactive-hover pt-7 pb-10 rounded-lg"
+                    >
+                      {{! <div class="relative inline-flex mb-1.5">
                       <div
                         class="doc-thumbnail mx-auto bg-white w-12 h-[62px] grid place-items-center relative"
                       >
@@ -213,56 +221,62 @@
                         <FlightIcon @name="figma" class="text-white" />
                       </div>
                     </div> }}
-                    <div
-                      class="text-display-300 w-full text-color-foreground-primary font-semibold"
-                    >
-                      <div class="flexX gap-4 items-center mb-3.5 px-8">
-                        <label
-                          {{! TODO: semantics }}
-                          class="hermes-form-label mb-1 shrink-0 w-12"
-                        >
-                          Title
-                        </label>
-                        <Hds::Form::TextInput::Base
-                          @value={{this.externalLinkTitle}}
-                          class=""
-                        />
+                      <div
+                        class="text-display-300 w-full text-color-foreground-primary font-semibold"
+                      >
+                        <div class="flexX gap-4 items-center mb-2.5 px-8">
+                          <div
+                            class="text-color-foreground-faint uppercase tracking-wide font-medium text-[12px] mb-2"
+                          >
+                            External resource
+                          </div>
+                          {{!-- <label
+                            {{! TODO: semantics }}
+                            class="hermes-form-label mb-1 shrink-0 w-12"
+                          >
+                            Title
+                          </label> --}}
+                          <Hds::Form::TextInput::Base
+                            {{on "input" this.onExternalLinkTitleInput}}
+                            @value={{this.externalLinkTitle}}
+                            class="text-display-300 font-semibold h-11 px-2.5"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div class="flexX w-full gap-4 items-center mb-5 px-8">
-                      <label
+                      <div class="flexX w-full gap-4 items-center mb-5 px-8">
+                        {{!-- <label
                         {{! TODO: semantics }}
                         class="hermes-form-label mb-1 shrink-0 w-12"
                       >
                         URL
-                      </label>
-                      <div class="relative w-full">
-                        <Hds::Form::TextInput::Base
-                          @value={{this.query}}
-                          class="pl-7 text-color-foreground-faint"
-                        />
+                      </label> --}}
                         <div
-                          class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4"
+                          class="relative w-full pl-6 text-color-foreground-faint"
                         >
-                          {{#if this.defaultFaviconIsShown}}
-                            <FlightIcon @name="globe" />
-                          {{else}}
-                            <img
-                              src={{this.faviconURL}}
-                              width="16"
-                              height="16"
-                            />
-                          {{/if}}
+                          <div class="truncate">{{this.query}}</div>
+                          <div
+                            class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4"
+                          >
+                            {{#if this.defaultFaviconIsShown}}
+                              <FlightIcon @name="globe" />
+                            {{else}}
+                              <img
+                                src={{this.faviconURL}}
+                                width="16"
+                                height="16"
+                              />
+                            {{/if}}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="px-8 w-full">
-                      <Hds::Button
-                        @color="primary"
-                        @text="Add"
-                        @isFullWidth={{true}}
-                        {{on "click" this.addRelatedExternalLink}}
-                      />
+                      <div class="px-8 w-full">
+                        <Hds::Button
+                          @color="primary"
+                          @text="Add"
+                          @isFullWidth={{true}}
+                          {{on "click" this.addRelatedExternalLink}}
+                        />
+                      </div>
                     </div>
                   </div>
                 {{/if}}

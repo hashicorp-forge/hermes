@@ -30,6 +30,13 @@ export interface RelatedExternalLink {
   title: string;
 }
 
+const FAKE_TITLES = [
+  "Text Input | Helios Design System",
+  "Storybook",
+  "Zoom | Sign in | The World's Leader in Video Communications",
+  "Terraform Labs | Asana",
+];
+
 // const GOOGLE_FAVICON_URL_PREFIX =
 //   "https://s2.googleusercontent.com/s2/favicons";
 
@@ -54,7 +61,9 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @tracked defaultFaviconIsShown = false;
   @tracked editModeIsEnabled = false;
 
-  @tracked externalLinkTitle = "Text Input | Helios Design System";
+  @tracked externalLinkTitle = FAKE_TITLES[
+    Math.floor(Math.random() * 4)
+  ] as string;
 
   @tracked dd: any = null;
 
@@ -175,6 +184,11 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     this.displayURL = displayURL;
   }
 
+  @action onExternalLinkTitleInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.externalLinkTitle = input.value;
+  }
+
   @action addRelatedExternalLink() {
     let externalLink = {
       url: this.query,
@@ -194,6 +208,10 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     }
 
     this.hideModal();
+
+    this.externalLinkTitle = FAKE_TITLES[
+      Math.floor(Math.random() * 4)
+    ] as string;
 
     // TODO: show a success affordance
   }
@@ -360,6 +378,9 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
 
     void this.checkURL.perform();
     void this.search.perform(dd, this.query);
+    if (this.query === "") {
+      this.disableEditMode();
+    }
   }
 
   protected fetchURLInfo = restartableTask(async () => {
@@ -387,7 +408,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(1000);
+      await timeout(700);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
