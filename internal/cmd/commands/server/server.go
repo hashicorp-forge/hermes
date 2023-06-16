@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/auth"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
@@ -24,6 +25,8 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/web"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 	"gorm.io/gorm"
 )
 
@@ -175,6 +178,26 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
+	// Initialize Datadog.
+	dd := datadog.NewConfig(*cfg)
+	if dd.Enabled {
+		tracerOpts := []tracer.StartOption{}
+		if dd.Env != "" {
+			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
+		}
+		if dd.Service != "" {
+			tracerOpts = append(tracerOpts, tracer.WithService(dd.Service))
+		}
+		if dd.ServiceVersion != "" {
+			tracerOpts = append(
+				tracerOpts,
+				tracer.WithServiceVersion(dd.ServiceVersion),
+			)
+		}
+
+		tracer.Start(tracerOpts...)
+	}
+
 	// Initialize Google Workspace service.
 	var goog *gw.Service
 	if cfg.GoogleWorkspace.Auth != nil {
@@ -215,7 +238,7 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Initialize database.
-	db, err := db.NewDB(*cfg.Postgres)
+	db, err := db.NewDB(*cfg.Postgres, *dd)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing database: %v", err))
 		return 1
@@ -253,7 +276,16 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
-	mux := http.NewServeMux()
+	type serveMux interface {
+		Handle(pattern string, handler http.Handler)
+		ServeHTTP(http.ResponseWriter, *http.Request)
+	}
+	var mux serveMux
+	if dd.Enabled {
+		mux = httptrace.NewServeMux()
+	} else {
+		mux = http.NewServeMux()
+	}
 
 	// Define handlers for authenticated endpoints.
 	// TODO: stop passing around all these arguments to handlers and use a struct
