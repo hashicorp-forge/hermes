@@ -1,5 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
-
 {{!
   If an item has the `itemShouldRenderOut` property, we render it outside of the `ul/ol` element not as a list item, but a hidden container div at the bottom of DOM, the contents of which should be `in-element`ed into the DOM in the appropriate place when invoked by the parent component.
 
@@ -21,11 +19,11 @@
 
   See `components/search.hbs` for an example.
 }}
-
 {{#let
   (element (if @attributes.itemShouldRenderOut "div" "li"))
   as |MaybeListItem|
 }}
+  {{! @glint-ignore - maybe-in-element helper not yet typed}}
   {{#maybe-in-element
     (html-element ".ember-application")
     (not @attributes.itemShouldRenderOut)

@@ -2,6 +2,10 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { FocusDirection } from ".";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListActionComponent from "./action";
+import { XDropdownListInteractiveComponentArgs } from "./item";
+import XDropdownListLinkToComponent from "./link-to";
 
 interface XDropdownListItemsComponentSignature {
   Args: {
@@ -15,11 +19,31 @@ interface XDropdownListItemsComponentSignature {
     listIsOrdered?: boolean;
     listItemRole: string;
     scrollContainer: HTMLElement;
-    onInput: () => void;
+    onInput: (event: Event) => void;
     onItemClick: (value: any, attributes?: any) => void;
     registerScrollContainer?: (e: HTMLElement) => void;
-    setFocusedItemIndex: (direction: FocusDirection) => void;
+    setFocusedItemIndex: (
+      direction: FocusDirection | number,
+      maybeScrollIntoView?: boolean
+    ) => void;
     hideContent: () => void;
+  };
+  Blocks: {
+    item: [
+      dd: {
+        Action: WithBoundArgs<
+          typeof XDropdownListActionComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        LinkTo: WithBoundArgs<
+          typeof XDropdownListLinkToComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        value: string;
+        selected: boolean;
+        attrs?: unknown;
+      }
+    ];
   };
 }
 
@@ -73,5 +97,11 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
         this.args.hideContent();
       }
     }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Items": typeof XDropdownListItemsComponent;
   }
 }

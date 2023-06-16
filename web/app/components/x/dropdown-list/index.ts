@@ -5,26 +5,81 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
+import { WithBoundArgs } from "@glint/template";
 import FetchService from "hermes/services/fetch";
+import XDropdownListToggleActionComponent from "./toggle-action";
+import XDropdownListToggleButtonComponent from "./toggle-button";
+import { HdsButtonColor } from "hds/_shared";
+import XDropdownListActionComponent, {
+  XDropdownListActionComponentArgs,
+} from "./action";
+import { XDropdownListInteractiveComponentArgs } from "./item";
+import XDropdownListLinkToComponent from "./link-to";
+
+type XDropdownListToggleComponentBoundArgs =
+  | "contentIsShown"
+  | "registerAnchor"
+  | "toggleContent"
+  | "onTriggerKeydown"
+  | "disabled"
+  | "ariaControls";
 
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items?: any;
     listIsOrdered?: boolean;
+    color?: HdsButtonColor;
     selected?: any;
+    disabled?: boolean;
     placement?: Placement;
     isSaving?: boolean;
     offset?: OffsetOptions;
+    label?: string;
+    renderOut?: boolean;
     onItemClick: (value: any, attributes: any) => void;
   };
-  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
     default: [];
-    anchor: [dd: any];
-    header: [dd: any];
-    item: [dd: any];
+    anchor: [
+      dd: {
+        ToggleAction: WithBoundArgs<
+          typeof XDropdownListToggleActionComponent,
+          XDropdownListToggleComponentBoundArgs
+        >;
+        ToggleButton: WithBoundArgs<
+          typeof XDropdownListToggleButtonComponent,
+          XDropdownListToggleComponentBoundArgs | "color" | "text"
+        >;
+        ariaControls: string;
+        resetFocusedItemIndex: () => void;
+        scheduleAssignMenuItemIDs: () => void;
+        registerAnchor: (element: HTMLElement) => void;
+        contentIsShown: boolean;
+        toggleContent: () => void;
+        onTriggerKeydown: (event: KeyboardEvent) => void;
+        focusedItemIndex: number;
+        hideContent: () => void;
+        showContent: () => void;
+      }
+    ];
+    item: [
+      dd: {
+        Action: WithBoundArgs<
+          typeof XDropdownListActionComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        LinkTo: WithBoundArgs<
+          typeof XDropdownListLinkToComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        value: any;
+        selected?: any;
+        attrs?: any;
+      }
+    ];
+    header: [];
+    footer: [];
   };
 }
 
@@ -89,7 +144,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
-  @action protected registerScrollContainer(element: HTMLDivElement) {
+  @action protected registerScrollContainer(element: HTMLElement) {
     this._scrollContainer = element;
   }
 
@@ -286,13 +341,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+  @action onInput(event: Event) {
     this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
 
-    this.query = (inputEvent.target as HTMLInputElement).value;
+    this.query = (event.target as HTMLInputElement).value;
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
@@ -301,7 +356,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
 
     this._filteredItems = shownItems;
     this.scheduleAssignMenuItemIDs();
-  });
+  }
 
   /**
    * The action that assigns menu item IDs.

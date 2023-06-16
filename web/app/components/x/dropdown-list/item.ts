@@ -5,11 +5,23 @@ import { tracked } from "@glimmer/tracking";
 import { FocusDirection } from ".";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListActionComponent from "./action";
+import XDropdownListLinkToComponent from "./link-to";
+
+export type XDropdownListInteractiveComponentArgs =
+  | "role"
+  | "isAriaSelected"
+  | "isAriaChecked"
+  | "registerElement"
+  | "focusMouseTarget"
+  | "onClick";
 
 interface XDropdownListItemComponentSignature {
   Args: {
     value: string;
-    attributes?: unknown;
+    attributes?: any;
+    contentID: string;
     selected: boolean;
     focusedItemIndex: number;
     listItemRole: string;
@@ -19,6 +31,24 @@ interface XDropdownListItemComponentSignature {
       focusDirection: FocusDirection | number,
       maybeScrollIntoView?: boolean
     ) => void;
+  };
+  Blocks: {
+    default: [
+      {
+        Action: WithBoundArgs<
+          typeof XDropdownListActionComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        LinkTo: WithBoundArgs<
+          typeof XDropdownListLinkToComponent,
+          XDropdownListInteractiveComponentArgs
+        >;
+        contentID: string;
+        value: string;
+        attrs?: unknown;
+        selected: boolean;
+      }
+    ];
   };
 }
 
@@ -116,5 +146,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     assert("target must be an element", target instanceof HTMLElement);
     this._domElement = target;
     this.args.setFocusedItemIndex(this.itemIndexNumber, false);
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Item": typeof XDropdownListItemComponent;
   }
 }
