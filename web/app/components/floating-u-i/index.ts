@@ -1,15 +1,35 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { guidFor } from "@ember/object/internals";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+
+interface FloatingUIAnchorAPI {
+  contentIsShown: boolean;
+  registerAnchor: (element: HTMLElement) => void;
+  toggleContent: () => void;
+  showContent: () => void;
+  hideContent: () => void;
+  contentID: string;
+}
+
+interface FloatingUIContentAPI {
+  anchor: HTMLElement;
+  contentID: string;
+  hideContent: () => void;
+}
 
 interface FloatingUIComponentSignature {
   Element: HTMLDivElement;
   Args: {
     renderOut?: boolean;
     placement?: Placement;
+    offset?: OffsetOptions;
+  };
+  Blocks: {
+    anchor: [dd: FloatingUIAnchorAPI];
+    content: [dd: FloatingUIContentAPI];
   };
 }
 
@@ -46,5 +66,11 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
 
   @action hideContent() {
     this.contentIsShown = false;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    FloatingUI: typeof FloatingUIComponent;
   }
 }
