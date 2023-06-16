@@ -10,7 +10,7 @@ import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { assert } from "@ember/debug";
 
 interface InputsDocumentSelectComponentSignature {
@@ -52,6 +52,8 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
 
   @tracked externalLinkTitle = "Text Input | Helios Design System";
 
+  @tracked dd: any = null;
+
   get faviconIsShown() {
     return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
   }
@@ -69,7 +71,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     oldItems: unknown[];
     newItems: unknown[];
   }): void {
-    debugger
+    // TODO: add animation rules
     return;
   }
 
@@ -227,6 +229,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   }
 
   @action didInsertInput(dd: any, e: HTMLInputElement) {
+    this.dd = dd;
     this.searchInput = e;
     void this.loadInitialData.perform(dd);
 
@@ -248,15 +251,13 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     }
   }
 
-  @action enableEditMode() {
-    this.editModeIsEnabled = true;
-  }
-
   @action disableEditMode() {
     this.editModeIsEnabled = false;
     this.query = "";
     this.queryIsThirdPartyURL = false;
-    void this.search.perform(null, "");
+    schedule("afterRender", () => {
+      void this.search.perform(this.dd, "");
+    })
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {

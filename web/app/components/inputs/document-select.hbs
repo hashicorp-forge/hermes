@@ -82,11 +82,17 @@
                   {{/if}}
                 </div>
               {{/unless}}
-              <div class="relative">
+              <div
+                class="relative
+                  {{if
+                    (and this.queryIsThirdPartyURL (not this.editModeIsEnabled))
+                    'text-center pt-36'
+                  }}"
+              >
                 {{#if
                   (and this.queryIsThirdPartyURL (not this.editModeIsEnabled))
                 }}
-                  <FlightIcon @name="loading" class="ml-2 mt-4" />
+                  <FlightIcon @name="loading" @size="24" />
                 {{/if}}
 
                 {{#if (and this.queryIsThirdPartyURL this.editModeIsEnabled)}}

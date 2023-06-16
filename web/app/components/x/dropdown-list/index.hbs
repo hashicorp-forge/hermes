@@ -91,7 +91,10 @@
           </div>
         {{/if}}
       {{else}}
-        <div {{did-insert this.didInsertContent}}>
+        <div
+          class="overflow-hidden flex flex-col"
+          {{did-insert this.didInsertContent}}
+        >
 
           {{#if this.inputIsShown}}
             <div class="x-dropdown-list-input-container">
