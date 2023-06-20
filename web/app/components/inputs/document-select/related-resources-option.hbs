@@ -8,22 +8,23 @@
       class="shrink-0 w-12 h-[62px]"
     />
     <div class="w-full overflow-hidden pr-8 flex items-center">
-      <div>
+      <div class="w-full overflow-hidden">
         <h4
-          class="text-display-300 font-semibold text-color-foreground-strong pr-0.5 truncate"
+          class="font-regular text-body-100 text-color-foreground-faint truncate"
         >
-          {{@document.title}}
+          <span
+            class="overflow-hidden text-display-300 font-semibold text-color-foreground-strong"
+          >
+            {{@document.title}}
+          </span>
         </h4>
-        <div class="text-color-foreground-faint text-body-200 flex space-x-3">
-          <span>
-            {{get @document.owners 0}}
-          </span>
+        <div class="text-color-foreground-faint text-body-100 mt-0.5">
+          {{@document.docType}}
+          ·
+          {{@document.docNumber}}
+          ·
+          {{get @document.owners 0}}
         </div>
-        {{#if @document.docNumber}}
-          <span class="absolute right-0 top-0">
-            {{@document.docNumber}}
-          </span>
-        {{/if}}
       </div>
     </div>
   </div>
