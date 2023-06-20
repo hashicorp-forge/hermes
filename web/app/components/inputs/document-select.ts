@@ -75,6 +75,12 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     return Object.keys(this.relatedResources).length > 0;
   }
 
+  *linkCardTransition({ insertedSprites, removedSprites }: TransitionContext) {
+    for (let sprite of insertedSprites) {
+      void fadeIn(sprite, { duration: 100 });
+    }
+  }
+
   *transition({
     insertedSprites,
     keptSprites,
@@ -408,7 +414,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(700);
+      await timeout(1200);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
