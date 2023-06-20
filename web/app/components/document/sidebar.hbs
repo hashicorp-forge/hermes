@@ -155,13 +155,6 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <Inputs::DocumentSelect
-            @productArea={{@product}}
-            @objectID={{@document.objectID}}
-          />
-        </div>
-
-        <div class="flex flex-col items-start space-y-2">
           <small
             class="hds-typography-body-100 hds-foreground-faint"
           >Owner</small>
@@ -195,7 +188,7 @@
                     {{/each}}
                   </ol>
                 {{else}}
-                  <em>No contributors</em>
+                  <CustomEditableFields::EmptyState />
                 {{/if}}
               </:default>
               <:editing as |F|>
@@ -220,7 +213,7 @@
                 {{/each}}
               </ol>
             {{else}}
-              <em>No contributors</em>
+              <CustomEditableFields::EmptyState />
             {{/if}}
           {{/if}}
         </div>
@@ -250,7 +243,7 @@
                     {{/each}}
                   </ol>
                 {{else}}
-                  <em>No approvers</em>
+                  <CustomEditableFields::EmptyState />
                 {{/if}}
               </:default>
               <:editing as |F|>
@@ -276,7 +269,7 @@
                 {{/each}}
               </ol>
             {{else}}
-              <em>No approvers</em>
+              <CustomEditableFields::EmptyState />
             {{/if}}
           {{/if}}
         </div>
@@ -293,6 +286,13 @@
             Last modified
           </small>
           <p>{{@document.lastModified}}</p>
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <Inputs::DocumentSelect
+            @productArea={{@product}}
+            @objectID={{@document.objectID}}
+          />
         </div>
 
         {{#each-in this.customEditableFields as |field attributes|}}
