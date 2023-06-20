@@ -20,7 +20,6 @@ interface FloatingUIContentSignature {
     placement?: Placement | "none";
     renderOut?: boolean;
     offset?: OffsetOptions;
-    isModal?: boolean;
   };
 }
 

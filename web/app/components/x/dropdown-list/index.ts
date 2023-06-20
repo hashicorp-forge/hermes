@@ -18,7 +18,7 @@ interface XDropdownListComponentSignature {
     isLoading?: boolean;
     disableClose?: boolean;
     listIsHidden?: boolean;
-    inputVisibility?: "shown" | "hidden";
+    inputIsHidden?: boolean;
     selected?: any;
     placement?: Placement | "none";
     isSaving?: boolean;
@@ -86,11 +86,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * aria-roles for various elements.
    */
   get inputIsShown() {
-    if (this.args.inputVisibility === "shown") {
-      return true;
-    }
-
-    if (this.args.inputVisibility === "hidden") {
+    if (this.args.inputIsHidden) {
       return false;
     }
 
