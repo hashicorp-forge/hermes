@@ -1,19 +1,20 @@
 <FloatingUI
   @renderOut={{true}}
   @placement="bottom-end"
-  @offset={{hash mainAxis=0 crossAxis=0}}
-  class="z-10 min-w-[90px] hermes-popover p-1"
+  @offset={{hash mainAxis=-3 crossAxis=-3}}
+  class="z-10 min-w-[90px] hermes-popover rounded p-1"
 >
   <:anchor as |dd|>
     {{! TODO: Use X::DropdownList for this }}
     <div
       class="absolute flex
         {{if dd.contentIsShown 'visible' 'invisible'}}
-        group-hover:visible group-focus-within:visible hover:visible focus-within:visible top-0 -right-1 rounded-tr bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent w-14 p-0.5 justify-end"
+        group-hover:visible group-focus-within:visible hover:visible focus-within:visible top-0 -right-1 rounded-tr bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover w-14 to-transparent justify-end pointer-events-none"
     >
 
       <Action
-        class="sidebar-more-button {{if dd.contentIsShown 'open'}}"
+        class="sidebar-more-button pointer-events-auto
+          {{if dd.contentIsShown 'open'}}"
         {{did-insert dd.registerAnchor}}
         {{on "click" dd.toggleContent}}
       >

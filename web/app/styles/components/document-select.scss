@@ -14,8 +14,10 @@
   }
 }
 .sidebar-more-button {
+  @apply relative p-[3px];
+
   .button-affordance {
-    @apply flex rounded top-[3px] -right-px p-1 border border-transparent;
+    @apply flex rounded top-[4px] right-0 p-1 border border-transparent;
   }
 
   &:hover,
@@ -31,6 +33,7 @@
 
 .related-resource {
   @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded -mr-[4px] border border-transparent pt-1.5 pb-1.5 relative;
+
   @apply outline-offset-[3px];
 
   &::before {
