@@ -95,13 +95,13 @@
           class="overflow-hidden flex flex-col"
           {{did-insert this.didInsertContent}}
         >
-
           {{#if this.inputIsShown}}
             <div class="x-dropdown-list-input-container">
               <Hds::Form::TextInput::Base
                 data-test-x-dropdown-list-input
                 {{did-insert this.registerAndFocusInput}}
                 {{on "input" (perform this.onInput)}}
+                {{! TODO: add focusin/focusout listeners to conditionally disable the ArrowUp/Down function of the ::Items component  }}
                 @value={{this.query}}
                 @type="search"
                 placeholder="Filter..."

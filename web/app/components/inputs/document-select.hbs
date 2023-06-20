@@ -201,7 +201,7 @@
             <FlightIcon @name="loading" class="ml-2 mt-4" />
           </:loading>
           <:item as |dd|>
-            <dd.Action class="p-0">
+            <dd.Action class="p-0 rounded">
               <Inputs::DocumentSelect::RelatedResourcesOption
                 @document={{dd.attrs}}
               />
