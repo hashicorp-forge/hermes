@@ -32,12 +32,12 @@
           >
             {{! TODO: figure out animation }}
 
-            <div class="w-full related-resource-container">
+            <div class="w-full related-resource-container group">
               {{#if resource.objectID}}
                 <LinkTo
                   @route="authenticated.document"
                   @model={{resource.objectID}}
-                  class="related-resource"
+                  class="related-resource pr-3 peer"
                 >
                   <Document::RelatedResource
                     @resource={{resource}}
@@ -48,7 +48,7 @@
               {{else}}
                 <ExternalLink
                   href={{resource.url}}
-                  class="related-resource items-center"
+                  class="related-resource pr-3 peer items-center"
                 >
                   <Document::RelatedResource
                     @resource={{resource}}
@@ -56,8 +56,6 @@
                   />
                 </ExternalLink>
               {{/if}}
-
-              {{! This needs to be outside the LinkTo }}
               <Inputs::DocumentSelect::MoreButton
                 @removeResource={{this.removeResource}}
                 @resource={{resource}}
@@ -208,37 +206,10 @@
               <FlightIcon @name="loading" class="ml-2 mt-4" />
             </:loading>
             <:item as |dd|>
-              <dd.Action
-                class="w-full flex items-center justify-between py-1.5 px-3 rounded h-[74px]"
-              >
-                <div class="flex w-full overflow-hidden space-x-3 relative">
-                  <Doc::Thumbnail
-                    @status={{dd.attrs.status}}
-                    @product={{dd.attrs.product}}
-                    class="shrink-0 w-12 h-[62px]"
-                  />
-                  <div class="w-full overflow-hidden pr-8 flex items-center">
-                    <div>
-                      <h4
-                        class="text-display-300 font-semibold text-color-foreground-strong pr-0.5 truncate"
-                      >
-                        {{dd.attrs.title}}
-                      </h4>
-                      <div
-                        class="text-color-foreground-faint text-body-200 flex space-x-3"
-                      >
-                        <span>
-                          {{get dd.attrs.owners 0}}
-                        </span>
-                      </div>
-                      {{#if dd.attrs.docNumber}}
-                        <span class="absolute right-0 top-0">
-                          {{dd.attrs.docNumber}}
-                        </span>
-                      {{/if}}
-                    </div>
-                  </div>
-                </div>
+              <dd.Action class="p-0">
+                <Inputs::DocumentSelect::RelatedResourcesOption
+                  @document={{dd.attrs}}
+                />
               </dd.Action>
             </:item>
           </X::DropdownList>

@@ -4,7 +4,8 @@
   .related-resource-container {
     @apply relative;
 
-    &:hover {
+    &:hover,
+    &:focus-within {
       .related-resource {
         @apply bg-color-surface-interactive-hover;
         // @apply bg-white border-color-border-primary;
@@ -12,22 +13,25 @@
     }
   }
 }
-
 .sidebar-more-button {
-  @apply absolute opacity-50 flex rounded top-[3px] -right-px py-1 px-1 border border-transparent;
-
-  &:hover,
-  &:focus {
-    @apply opacity-100;
+  .button-affordance {
+    @apply flex rounded top-[3px] -right-px p-1 border border-transparent;
   }
 
-  &:hover {
-    @apply border-color-border-strong bg-color-surface-faint;
+  &:hover,
+  &:focus,
+  &:active,
+  &:focus-visible,
+  &.open {
+    .button-affordance {
+      @apply border-color-border-strong bg-color-surface-faint;
+    }
   }
 }
 
 .related-resource {
   @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded -mr-[4px] border border-transparent pt-1.5 pb-1.5 relative;
+  @apply outline-offset-[3px];
 
   &::before {
     @apply hds-elevation-mid;
