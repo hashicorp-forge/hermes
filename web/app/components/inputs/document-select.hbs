@@ -18,7 +18,7 @@
   {{#if this.relatedResourcesAreShown}}
 
     <AnimatedContainer class="w-full">
-      <ul class="!mt-0.5 related-docs">
+      <ul class="!mt-0.5 related-resources">
         {{#animated-each
           this.relatedResourcesObjectEntries
           use=this.transition
@@ -32,55 +32,28 @@
           >
             {{! TODO: figure out animation }}
 
-            <div class="w-full related-doc-link-container">
+            <div class="w-full related-resource-container">
               {{#if resource.objectID}}
                 <LinkTo
                   @route="authenticated.document"
                   @model={{resource.objectID}}
-                  class="related-doc-link"
+                  class="related-resource"
                 >
-                  <div
-                    class="shrink-0 p-px hds-surface-mid rounded-sm flex mt-1 overflow-hidden bg-white"
-                  >
-                    <img src="/images/document.png" class="w-5 h-auto" />
-                  </div>
-                  <div class="w-full overflow-hidden pr-6">
-                    <h4 class="inline-doc-title mb-0.5 truncate">
-                      {{resource.title}}
-                    </h4>
-                    {{#if resource.docNumber}}
-                      <div class="text-color-foreground-faint text-body-100">
-                        {{resource.docNumber}}
-                      </div>
-                    {{/if}}
-                  </div>
+                  <Document::RelatedResource
+                    @resource={{resource}}
+                    @removeResource={{this.removeResource}}
+                  />
                 </LinkTo>
 
               {{else}}
                 <ExternalLink
                   href={{resource.url}}
-                  class="related-doc-link py-0.5 flex pr-6 w-full"
+                  class="related-resource items-center"
                 >
-                  <div class="flex items-center w-full">
-                    <div class="flex relative mr-2 w-4 h-4 shrink-0">
-                      <img
-                        src="https://www.google.com/s2/favicons?domain={{resource.url}}"
-                        width="16"
-                        height="16"
-                      />
-                    </div>
-                    <div class="w-full pr-6">
-                      <div class="truncate inline-doc-title">
-                        {{resource.title}}
-                      </div>
-
-                      <div
-                        class="truncate text-body-100 text-color-foreground-faint"
-                      >
-                        {{resource.displayURL}}
-                      </div>
-                    </div>
-                  </div>
+                  <Document::RelatedResource
+                    @resource={{resource}}
+                    @removeResource={{this.removeResource}}
+                  />
                 </ExternalLink>
               {{/if}}
 
@@ -88,6 +61,7 @@
               <Inputs::DocumentSelect::MoreButton
                 @removeResource={{this.removeResource}}
                 @resource={{resource}}
+                @showEditAction={{resource.displayURL}}
               />
             </div>
           </li>
@@ -109,31 +83,13 @@
     <Hds::Modal @onClose={{this.hideModal}} class="h-[475px]" as |M|>
       <M.Header>
         <div class="flex w-full items-center">
-
-          {{#if this.ediXXtModeIsEnabled}}
-            <Action
-              {{on "click" this.disableEditMode}}
-              class="flex items-center"
-            >
-              <FlightIcon
-                @name="arrow-left"
-                class="text-color-foreground-faint mr-4"
-              />
-            </Action>
-          {{/if}}
-          <div class="{{if this.edXXitModeIsEnabled 'text-center'}} w-full">
-
-            {{if
-              this.edXXitModeIsEnabled
-              "Add external resource"
-              "Add resource"
-            }}
+          <div class="w-full">
+            Add resource
           </div>
         </div>
       </M.Header>
       <M.Body>
         <div class="">
-
           <X::DropdownList
             @items={{this.shownDocuments}}
             @onItemClick={{this.addRelatedDocument}}
@@ -146,14 +102,6 @@
             class="w-full max-w-none relative modal-list"
           >
             <:anchor as |dd|>
-              {{!-- <Hds::Form::TextInput::Base
-                @type="text"
-                @value={{this.title}}
-                disabled={{not this.editModeIsEnabled}}
-                class="mb-2"
-                  placeholder="Title"
-              /> --}}
-
               <Hds::Form::TextInput::Base
                 data-test-global-search-input
                 {{did-insert dd.registerAnchor}}
@@ -169,7 +117,6 @@
                 aria-controls={{dd.ariaControls}}
                 aria-expanded={{dd.contentIsShown}}
                 aria-haspopup="listbox"
-                class={{if this.edXXitModeIsEnabled "hidden"}}
               />
             </:anchor>
             <:header>
@@ -190,7 +137,7 @@
                 class="relative
                   {{if
                     (and this.queryIsThirdPartyURL (not this.editModeIsEnabled))
-                    'text-center pt-28'
+                    'text-center pt-24'
                   }}"
               >
                 {{#if
@@ -297,20 +244,7 @@
             </:item>
           </X::DropdownList>
         </div>
-
       </M.Body>
-      {{#if this.eXditModeIsEnabled}}
-        <M.Footer>
-
-          <Hds::Button
-            @color="primary"
-            @text="Save and add"
-            @isFullWidth={{true}}
-            {{on "click" this.addRelatedExternalLink}}
-          />
-
-        </M.Footer>
-      {{/if}}
     </Hds::Modal>
   {{/in-element}}
 {{/if}}

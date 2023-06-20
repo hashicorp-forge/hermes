@@ -8,6 +8,7 @@ interface InputsDocumentSelectMoreButtonSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     removeResource: (resource: RelatedExternalLink | HermesDocument) => void;
+    showEditAction?: boolean;
   };
 }
 

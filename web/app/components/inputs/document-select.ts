@@ -414,7 +414,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(1200);
+      await timeout(1000);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {

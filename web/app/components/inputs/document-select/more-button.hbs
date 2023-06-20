@@ -1,8 +1,8 @@
 <FloatingUI
   @renderOut={{true}}
-  @placement="bottom-start"
-  @offset={{hash mainAxis=0 crossAxis=-8}}
-  class="z-10 min-w-[100px] hermes-popover p-1"
+  @placement="bottom-end"
+  @offset={{hash mainAxis=0 crossAxis=0}}
+  class="z-10 min-w-[90px] hermes-popover p-1"
 >
   <:anchor as |dd|>
     {{! TODO: Use X::DropdownList for this }}
@@ -16,13 +16,15 @@
   </:anchor>
   <:content as |dd|>
     <div {{dismissible dismiss=dd.hideContent related=dd.anchor}} class="w-28">
-      <Action
-        {{on "click" (fn @removeResource @resource)}}
-        class="py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
-      >
-        <FlightIcon @name="pencil-tool" class="text-inherit" />
-        <span>Edit</span>
-      </Action>
+      {{#if @showEditAction}}
+        <Action
+          {{on "click" (fn @removeResource @resource)}}
+          class="py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
+        >
+          <FlightIcon @name="pencil-tool" class="text-inherit" />
+          <span>Edit</span>
+        </Action>
+      {{/if}}
       <Action
         {{on "click" (fn @removeResource @resource)}}
         class="py-2 px-2 flex space-x-2 text-color-foreground-primary hover:text-color-foreground-critical hover:bg-color-surface-critical rounded-sm w-full"

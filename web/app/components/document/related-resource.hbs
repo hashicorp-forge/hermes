@@ -1,0 +1,29 @@
+<div class="flex shrink-0 w-5">
+  {{#if @resource.objectID}}
+    <div class="flex p-px hds-surface-mid rounded-sm overflow-hidden bg-white">
+      <img src="/images/document.png" class="w-full h-auto" />
+    </div>
+  {{else}}
+    <div class="flex self-center w-5">
+      <img
+        src="https://www.google.com/s2/favicons?domain={{@resource.url}}"
+        width="16"
+        height="16"
+      />
+    </div>
+  {{/if}}
+</div>
+
+<div class="w-full overflow-hidden pr-6">
+  <h4 class="inline-doc-title truncate leading-tight">
+    {{@resource.title}}
+  </h4>
+  {{#if @resource.docNumber}}
+    <div class="text-color-foreground-faint text-body-100 mt-0.5">
+      {{@resource.docNumber}}
+      <!--
+      {{@resource.displayURL}}
+      -->
+    </div>
+  {{/if}}
+</div>
