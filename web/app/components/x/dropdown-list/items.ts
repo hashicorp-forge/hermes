@@ -16,11 +16,12 @@ interface XDropdownListItemsComponentSignature {
     listItemRole: string;
     scrollContainer: HTMLElement;
     onInput: () => void;
-    onItemClick: (value: any, attributes?: any) => void;
+    onItemClick?: (value: any, attributes?: any) => void;
     registerScrollContainer?: (e: HTMLElement) => void;
     setFocusedItemIndex: (direction: FocusDirection) => void;
     hideContent: () => void;
     listIsHidden?: boolean;
+    shouldAutofocusMenu?: boolean;
   };
 }
 
@@ -55,12 +56,21 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
     }
     return Object.entries(this.args.shownItems).length === 0;
   }
+
+  @action onKeydown(event: KeyboardEvent) {
+    if (this.args.shouldAutofocusMenu) {
+      this.maybeKeyboardNavigate(event);
+    }
+  }
+
   /**
    * Document keyboard listener for the ArrowUp/ArrowDown/Enter keys.
    * ArrowUp/ArrowDown change the focused item.
    * Enter selects the focused item.
    */
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
+    console.log("maybeKeyboardNavigate", event.key);
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Next);
@@ -75,7 +85,6 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
       event.preventDefault();
       assert("floatingUI content must exist", this.args.scrollContainer);
       const target = this.args.scrollContainer.querySelector("[aria-selected]");
-
       if (
         target instanceof HTMLAnchorElement ||
         target instanceof HTMLButtonElement

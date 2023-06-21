@@ -1,0 +1,136 @@
+{{on-document "keydown" this.onDocumentKeydown}}
+
+{{#in-element (html-element ".ember-application") insertBefore=null}}
+  <Hds::Modal @onClose={{@onClose}} class="h-[475px]" as |M|>
+    <M.Header>
+      Add resource
+    </M.Header>
+    <M.Body>
+      <X::DropdownList
+        @items={{@shownDocuments}}
+        @onItemClick={{@addRelatedDocument}}
+        @inputIsHidden={{true}}
+        @offset={{hash mainAxis=1 crossAxis=0}}
+        @isLoading={{this.loadInitialData.isRunning}}
+        @placement="none"
+        @disableClose={{true}}
+        @listIsHidden={{this.queryIsThirdPartyURL}}
+        class="w-full max-w-none relative modal-list"
+      >
+        <:anchor as |dd|>
+          <Hds::Form::TextInput::Base
+            data-test-global-search-input
+            {{did-insert dd.registerAnchor}}
+            {{did-insert (fn this.didInsertInput dd)}}
+            {{on "input" (fn this.onInput dd)}}
+            {{on "keydown" (fn this.onInputKeydown dd)}}
+            {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+            @type="search"
+            @value={{this.query}}
+            size="25"
+            placeholder="Paste a URL or search documents..."
+            aria-label="Paste a URL or search documents..."
+            aria-controls={{dd.ariaControls}}
+            aria-expanded={{dd.contentIsShown}}
+            aria-haspopup="listbox"
+          />
+        </:anchor>
+        <:header>
+          {{#unless this.editModeIsEnabled}}
+            {{#unless this.fetchURLInfo.isRunning}}
+              <div
+                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+              >
+                {{#if this.query.length}}
+                  Results
+                {{else}}
+                  Suggestions
+                {{/if}}
+              </div>
+            {{/unless}}
+          {{/unless}}
+          <div class="relative">
+
+            {{#if this.queryIsThirdPartyURL}}
+              <div class="px-3 w-full">
+
+                <div
+                  class="mt-6 px-2 mb-4 w-full bg-color-page-faint border border-color-border-primary pt-7 pb-10 rounded-lg hds-elevation-low relative"
+                >
+                  {{#if this.editModeIsEnabled}}
+                    <div
+                      class="text-display-300 w-full text-color-foreground-primary font-semibold"
+                    >
+                      <div class="flexX gap-4 items-center mb-2.5 px-8">
+                        <div
+                          class="text-color-foreground-faint uppercase tracking-wide font-medium text-[12px] mb-2"
+                        >
+                          {{! TODO: semantics }}
+                          Link title
+                        </div>
+                        <Hds::Form::TextInput::Base
+                          {{on "input" this.onExternalLinkTitleInput}}
+                          @value={{this.externalLinkTitle}}
+                          class="text-display-300 font-semibold h-11 px-2.5"
+                        />
+                      </div>
+                    </div>
+                    <div class="flexX w-full gap-4 items-center mb-5 px-8">
+                      <div
+                        class="relative w-full pl-6 text-color-foreground-faint"
+                      >
+                        <div class="truncate">{{this.query}}</div>
+                        <div
+                          class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4"
+                        >
+                          {{#if this.defaultFaviconIsShown}}
+                            <FlightIcon @name="globe" />
+                          {{else}}
+                            <img
+                              src={{this.faviconURL}}
+                              width="16"
+                              height="16"
+                            />
+                          {{/if}}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="px-8 w-full">
+                      <Hds::Button
+                        @color="primary"
+                        @text="Add"
+                        @isFullWidth={{true}}
+                        {{on "click" this.addRelatedExternalLink}}
+                      />
+                    </div>
+                  {{else}}
+                    <div
+                      class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex items-center space-x-3"
+                    >
+                      <FlightIcon @name="loading" />
+                      <div
+                        class="text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+                      >
+                        Reading URL...
+                      </div>
+                    </div>
+                  {{/if}}
+                </div>
+              </div>
+            {{/if}}
+          </div>
+        </:header>
+        <:loading>
+          <FlightIcon @name="loading" class="ml-2 mt-4" />
+        </:loading>
+        <:item as |dd|>
+          <dd.Action class="p-0 rounded">
+            <Inputs::DocumentSelect::RelatedResourcesOption
+              @document={{dd.attrs}}
+            />
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    </M.Body>
+  </Hds::Modal>
+{{/in-element}}

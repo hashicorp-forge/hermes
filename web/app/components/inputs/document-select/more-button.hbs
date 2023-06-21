@@ -1,4 +1,30 @@
-<FloatingUI
+<X::DropdownList
+  @items={{this.items}}
+  @renderOut={{true}}
+  @placement="bottom-end"
+  @offset={{hash mainAxis=-3 crossAxis=-3}}
+  @shouldAutofocusMenu={{true}}
+>
+  <:anchor as |dd|>
+    <Action
+      {{did-insert dd.registerAnchor}}
+      {{on "click" (fn this.onAnchorClick dd)}}
+    >
+      booop
+    </Action>
+  </:anchor>
+  <:item as |dd|>
+    <dd.Action
+      {{on "click" dd.attrs.action}}
+      class="leading-none py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
+    >
+      <FlightIcon @name={{dd.attrs.icon}} class="text-inherit" />
+      <span>{{dd.attrs.label}}</span>
+    </dd.Action>
+  </:item>
+</X::DropdownList>
+
+{{!-- <FloatingUI
   @renderOut={{true}}
   @placement="bottom-end"
   @offset={{hash mainAxis=-3 crossAxis=-3}}
@@ -48,4 +74,4 @@
       </Action>
     </div>
   </:content>
-</FloatingUI>
+</FloatingUI> --}}

@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
@@ -16,6 +15,8 @@
         class="x-dropdown-list-items"
         role={{if this.args.inputIsShown "listbox" "menu"}}
         aria-activedescendant={{this.ariaActiveDescendant}}
+        {{autofocus (or @shouldAutofocusMenu false)}}
+        {{on "keydown" this.onKeydown}}
       >
         {{#each-in @shownItems as |item attrs|}}
           {{! @glint-ignore - not yet typed }}
@@ -31,6 +32,7 @@
             @setFocusedItemIndex={{@setFocusedItemIndex}}
             as |i|
           >
+            {{! @glint-ignore - not yet typed }}
             {{yield i to="item"}}
           </X::DropdownList::Item>
         {{/each-in}}

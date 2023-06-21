@@ -1,37 +1,68 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { tracked } from "@glimmer/tracking";
-import { action } from "@ember/object";
 import { RelatedExternalLink } from "../document-select";
+import { assert } from "@ember/debug";
+import { action } from "@ember/object";
+import { next, schedule } from "@ember/runloop";
+import { tracked } from "@glimmer/tracking";
+import htmlElement from "hermes/utils/html-element";
 
 interface InputsDocumentSelectMoreButtonSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     removeResource: (resource: RelatedExternalLink | HermesDocument) => void;
     showEditAction?: boolean;
+    onEdit?: () => void;
   };
 }
 
 export default class InputsDocumentSelectMoreButton extends Component<InputsDocumentSelectMoreButtonSignature> {
-  @tracked popoverIsShown = false;
+  get items() {
+    let deleteItem = {
+      delete: {
+        label: "Delete",
+        icon: "trash",
+        action: this.removeResource,
+      },
+    };
 
-  @tracked trigger: HTMLElement | null = null;
+    let maybeEditItem = null;
 
-  @action openPopover() {
-    this.popoverIsShown = true;
+    if (this.args.showEditAction && this.args.onEdit) {
+      maybeEditItem = {
+        edit: {
+          label: "Edit",
+          icon: "edit",
+          action: this.onEdit,
+        },
+      };
+    }
+
+    return {
+      ...maybeEditItem,
+      ...deleteItem,
+    };
   }
 
-  @action hidePopover() {
-    this.popoverIsShown = false;
+  @action removeResource() {
+    this.args.removeResource(this.args.resource);
   }
 
-  @action togglePopover() {
-    this.popoverIsShown = !this.popoverIsShown;
+  @action onEdit() {
+    assert("onEdit function must exist", this.args.onEdit);
+    this.args.onEdit();
   }
 
-  @action didInsertTrigger(e: HTMLElement): void {
-    this.trigger = e;
+  @action onAnchorClick(dd: any) {
+    this.dd = dd;
+    if (dd.contentIsShown) {
+      dd.hideContent();
+    } else {
+      dd.showContent();
+    }
   }
+
+  @tracked dd = null;
 }
 
 declare module "@glint/environment-ember-loose/registry" {

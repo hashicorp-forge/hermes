@@ -76,6 +76,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    */
   @action maybeSubmitForm(dd: any, e: KeyboardEvent): void {
     if (e.key === "Enter") {
+      console.log('twin');
       // Prevent the form from submitting
       e.preventDefault();
 
