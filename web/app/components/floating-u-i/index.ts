@@ -1,9 +1,24 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { guidFor } from "@ember/object/internals";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+
+interface FloatingUIAnchorAPI {
+  contentIsShown: boolean;
+  registerAnchor: (element: HTMLElement) => void;
+  toggleContent: () => void;
+  showContent: () => void;
+  hideContent: () => void;
+  contentID: string;
+}
+
+interface FloatingUIContentAPI {
+  anchor: HTMLElement;
+  contentID: string;
+  hideContent: () => void;
+}
 
 interface FloatingUIComponentSignature {
   Element: HTMLDivElement;
@@ -11,19 +26,12 @@ interface FloatingUIComponentSignature {
     renderOut?: boolean;
     placement?: Placement | "none";
     disableClose?: boolean;
+    offset?: OffsetOptions;
   };
   Blocks: {
-    anchor: [dd: {
-      ToggleAction: any; // FIXME
-      registerAnchor: (element: HTMLElement) => void;
-      toggleContent: () => void;
-    }];
-    content: [dd: {
-      hideContent: () => void;
-      anchor: HTMLElement;
-      contentID: string;
-    }];
-  }
+    anchor: [dd: FloatingUIAnchorAPI];
+    content: [dd: FloatingUIContentAPI];
+  };
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {

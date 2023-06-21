@@ -14,12 +14,16 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
 interface FloatingUIContentSignature {
+  Element: HTMLDivElement;
   Args: {
     anchor: HTMLElement;
     id: string;
     placement?: Placement | "none";
     renderOut?: boolean;
     offset?: OffsetOptions;
+  };
+  Blocks: {
+    default: [];
   };
 }
 
@@ -61,5 +65,11 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     };
 
     this.cleanup = autoUpdate(this.args.anchor, this.content, updatePosition);
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "FloatingUI::Content": typeof FloatingUIContent;
   }
 }
