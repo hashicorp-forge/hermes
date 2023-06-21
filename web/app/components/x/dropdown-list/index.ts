@@ -17,6 +17,7 @@ interface XDropdownListComponentSignature {
     placement?: Placement;
     isSaving?: boolean;
     offset?: OffsetOptions;
+    renderOut?: boolean;
     onItemClick: (value: any, attributes: any) => void;
   };
   // TODO: Replace using Glint's `withBoundArgs` types
