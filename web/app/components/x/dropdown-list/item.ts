@@ -17,38 +17,42 @@ export type XDropdownListInteractiveComponentArgs =
   | "focusMouseTarget"
   | "onClick";
 
+export interface XDropdownListItemAPI {
+  Action: WithBoundArgs<
+    typeof XDropdownListActionComponent,
+    XDropdownListInteractiveComponentArgs
+  >;
+  LinkTo: WithBoundArgs<
+    typeof XDropdownListLinkToComponent,
+    XDropdownListInteractiveComponentArgs
+  >;
+  contentID: string;
+  value: any;
+  selected?: any;
+  isSelected?: boolean;
+  attrs?: any;
+}
+
+export interface XDropdownListItemSharedArgs {
+  contentID: string;
+  attributes?: any;
+  isSelected?: boolean;
+  focusedItemIndex: number;
+  listItemRole: string;
+  onItemClick?: (value: any, attributes: any) => void;
+  setFocusedItemIndex: (
+    focusDirection: FocusDirection | number,
+    maybeScrollIntoView?: boolean
+  ) => void;
+  hideContent: () => void;
+}
+
 interface XDropdownListItemComponentSignature {
-  Args: {
+  Args: XDropdownListItemSharedArgs & {
     value: string;
-    attributes?: any;
-    contentID: string;
-    isSelected: boolean;
-    focusedItemIndex: number;
-    listItemRole: string;
-    hideDropdown: () => void;
-    onItemClick?: (value: any, attributes: any) => void;
-    setFocusedItemIndex: (
-      focusDirection: FocusDirection | number,
-      maybeScrollIntoView?: boolean
-    ) => void;
   };
   Blocks: {
-    default: [
-      {
-        Action: WithBoundArgs<
-          typeof XDropdownListActionComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        LinkTo: WithBoundArgs<
-          typeof XDropdownListLinkToComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        contentID: string;
-        value: string;
-        attrs?: unknown;
-        isSelected: boolean;
-      }
-    ];
+    default: [dd: XDropdownListItemAPI];
   };
 }
 
@@ -126,11 +130,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      */
     if (Ember.testing) {
       schedule("afterRender", () => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     } else {
       next(() => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     }
   }

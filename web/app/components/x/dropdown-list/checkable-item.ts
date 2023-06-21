@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 
 interface XDropdownListCheckableItemComponentSignature {
   Args: {
-    isSelected: boolean;
+    isSelected?: boolean;
     value: string;
     count?: number;
   };

@@ -24,12 +24,11 @@
             @isSelected={{eq @selected item}}
             @focusedItemIndex={{@focusedItemIndex}}
             @listItemRole={{@listItemRole}}
-            @hideDropdown={{@hideContent}}
+            @hideContent={{@hideContent}}
             @onItemClick={{@onItemClick}}
             @setFocusedItemIndex={{@setFocusedItemIndex}}
             as |i|
           >
-            {{log i}}
             {{yield i to="item"}}
           </X::DropdownList::Item>
         {{/each-in}}

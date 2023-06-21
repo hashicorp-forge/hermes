@@ -10,9 +10,7 @@ import FetchService from "hermes/services/fetch";
 import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { HdsButtonColor } from "hds/_shared";
-import XDropdownListActionComponent from "./action";
-import { XDropdownListInteractiveComponentArgs } from "./item";
-import XDropdownListLinkToComponent from "./link-to";
+import { XDropdownListItemAPI } from "./item";
 
 type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -22,60 +20,50 @@ type XDropdownListToggleComponentBoundArgs =
   | "disabled"
   | "ariaControls";
 
+interface XDropdownListAnchorAPI {
+  ToggleAction: WithBoundArgs<
+    typeof XDropdownListToggleActionComponent,
+    XDropdownListToggleComponentBoundArgs
+  >;
+  ToggleButton: WithBoundArgs<
+    typeof XDropdownListToggleButtonComponent,
+    XDropdownListToggleComponentBoundArgs | "color" | "text"
+  >;
+  ariaControls: string;
+  contentIsShown: boolean;
+  focusedItemIndex: number;
+  registerAnchor: (element: HTMLElement) => void;
+  onTriggerKeydown: (event: KeyboardEvent) => void;
+  resetFocusedItemIndex: () => void;
+  scheduleAssignMenuItemIDs: () => void;
+  toggleContent: () => void;
+  hideContent: () => void;
+  showContent: () => void;
+}
+
+export interface XDropdownListSharedArgs {
+  items?: any;
+  selected?: any;
+  listIsOrdered?: boolean;
+}
+
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
-  Args: {
-    items?: any;
-    listIsOrdered?: boolean;
-    color?: HdsButtonColor;
-    selected?: any;
-    disabled?: boolean;
-    placement?: Placement;
+  Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
+    placement?: Placement;
+    renderOut?: boolean;
+
+    onItemClick?: (value: any, attributes: any) => void;
+    color?: HdsButtonColor;
+    disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
-    renderOut?: boolean;
-    onItemClick: (value: any, attributes: any) => void;
   };
   Blocks: {
     default: [];
-    anchor: [
-      dd: {
-        ToggleAction: WithBoundArgs<
-          typeof XDropdownListToggleActionComponent,
-          XDropdownListToggleComponentBoundArgs
-        >;
-        ToggleButton: WithBoundArgs<
-          typeof XDropdownListToggleButtonComponent,
-          XDropdownListToggleComponentBoundArgs | "color" | "text"
-        >;
-        ariaControls: string;
-        resetFocusedItemIndex: () => void;
-        scheduleAssignMenuItemIDs: () => void;
-        registerAnchor: (element: HTMLElement) => void;
-        contentIsShown: boolean;
-        toggleContent: () => void;
-        onTriggerKeydown: (event: KeyboardEvent) => void;
-        focusedItemIndex: number;
-        hideContent: () => void;
-        showContent: () => void;
-      }
-    ];
-    item: [
-      dd: {
-        Action: WithBoundArgs<
-          typeof XDropdownListActionComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        LinkTo: WithBoundArgs<
-          typeof XDropdownListLinkToComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        value: any;
-        selected?: any;
-        attrs?: any;
-      }
-    ];
+    anchor: [dd: XDropdownListAnchorAPI];
+    item: [dd: XDropdownListItemAPI];
     header: [];
     footer: [];
   };

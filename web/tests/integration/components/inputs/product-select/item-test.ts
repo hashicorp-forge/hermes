@@ -7,7 +7,7 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
-  isSelected: boolean;
+  isSelected?: boolean;
   abbreviation?: boolean;
 }
 

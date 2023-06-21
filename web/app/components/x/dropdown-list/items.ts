@@ -1,49 +1,22 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { FocusDirection } from ".";
-import { WithBoundArgs } from "@glint/template";
-import XDropdownListActionComponent from "./action";
-import { XDropdownListInteractiveComponentArgs } from "./item";
-import XDropdownListLinkToComponent from "./link-to";
+import { FocusDirection, XDropdownListSharedArgs } from ".";
+import { XDropdownListItemAPI, XDropdownListItemSharedArgs } from "./item";
 
 interface XDropdownListItemsComponentSignature {
-  Args: {
-    contentID: string;
-    query?: string;
-    items?: any;
-    shownItems?: any;
-    selected?: any;
-    focusedItemIndex: number;
-    inputIsShown?: boolean;
-    listIsOrdered?: boolean;
-    listItemRole: string;
-    scrollContainer: HTMLElement;
-    onInput: (event: Event) => void;
-    onItemClick: (value: any, attributes?: any) => void;
-    registerScrollContainer?: (e: HTMLElement) => void;
-    setFocusedItemIndex: (
-      direction: FocusDirection | number,
-      maybeScrollIntoView?: boolean
-    ) => void;
-    hideContent: () => void;
-  };
+  Args: XDropdownListSharedArgs &
+    XDropdownListItemSharedArgs & {
+      contentID: string;
+      query?: string;
+      shownItems?: any;
+      inputIsShown?: boolean;
+      scrollContainer: HTMLElement;
+      onInput: (event: Event) => void;
+      registerScrollContainer: (element: HTMLElement) => void;
+    };
   Blocks: {
-    item: [
-      dd: {
-        Action: WithBoundArgs<
-          typeof XDropdownListActionComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        LinkTo: WithBoundArgs<
-          typeof XDropdownListLinkToComponent,
-          XDropdownListInteractiveComponentArgs
-        >;
-        value: string;
-        isSelected: boolean;
-        attrs?: unknown;
-      }
-    ];
+    item: [dd: XDropdownListItemAPI];
   };
 }
 
