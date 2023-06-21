@@ -10,9 +10,7 @@ import FetchService from "hermes/services/fetch";
 import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { HdsButtonColor } from "hds/_shared";
-import XDropdownListActionComponent, {
-  XDropdownListActionComponentArgs,
-} from "./action";
+import XDropdownListActionComponent from "./action";
 import { XDropdownListInteractiveComponentArgs } from "./item";
 import XDropdownListLinkToComponent from "./link-to";
 
