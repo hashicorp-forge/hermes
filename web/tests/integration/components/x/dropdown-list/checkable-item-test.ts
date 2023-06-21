@@ -15,7 +15,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await render(hbs`
       <X::DropdownList::CheckableItem
-        @selected={{this.selected}}
+        @isSelected={{this.selected}}
         @value="foo"
         @count={{this.count}}
       />

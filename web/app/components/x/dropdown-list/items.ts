@@ -40,7 +40,7 @@ interface XDropdownListItemsComponentSignature {
           XDropdownListInteractiveComponentArgs
         >;
         value: string;
-        selected: boolean;
+        isSelected: boolean;
         attrs?: unknown;
       }
     ];
