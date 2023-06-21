@@ -55,25 +55,19 @@
               <div class="px-3 w-full">
 
                 <div
-                  class="mt-6 px-2 mb-4 w-full bg-color-page-faint border border-color-border-primary pt-7 pb-10 rounded-lg hds-elevation-low relative {{unless this.editModeIsEnabled "h-32"}}"
+                  class="mt-6 px-2 mb-4 w-full bg-color-page-faint border border-color-border-primary pt-6 pb-10 rounded-lg hds-elevation-low relative
+                    {{unless this.editModeIsEnabled 'h-32'}}"
                 >
                   {{#if this.editModeIsEnabled}}
-                    <div
-                      class="text-display-300 w-full text-color-foreground-primary font-semibold"
-                    >
-                      <div class="flexX gap-4 items-center mb-2.5 px-8">
-                        <div
-                          class="text-color-foreground-faint uppercase tracking-wide font-medium text-[12px] mb-2"
-                        >
-                          {{! TODO: semantics }}
-                          Link title
-                        </div>
-                        <Hds::Form::TextInput::Base
-                          {{on "input" this.onExternalLinkTitleInput}}
-                          @value={{this.externalLinkTitle}}
-                          class="text-display-300 font-semibold h-11 px-2.5"
-                        />
-                      </div>
+                    <div class="mb-2.5 px-8">
+                      <Hds::Form::TextInput::Field
+                        {{on "input" this.onExternalLinkTitleInput}}
+                        @value={{this.externalLinkTitle}}
+                        class="text-display-300 font-semibold h-11 px-2.5"
+                        as |F|
+                      >
+                        <F.Label>Title</F.Label>
+                      </Hds::Form::TextInput::Field>
                     </div>
                     <div class="flexX w-full gap-4 items-center mb-5 px-8">
                       <div

@@ -1,0 +1,80 @@
+<li
+  class="flex w-full relative group related-docs-list-item
+    {{if @resource.objectID 'hermes-doc' 'external-doc'}}"
+>
+  <div class="w-full related-resource-container group">
+    {{#if @resource.objectID}}
+      <LinkTo
+        @route="authenticated.document"
+        @model={{@resource.objectID}}
+        class="related-resource pr-3 peer"
+      >
+        <Document::RelatedResource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </LinkTo>
+
+    {{else}}
+      <ExternalLink
+        href={{@resource.url}}
+        class="related-resource pr-3 peer items-center"
+      >
+        <Document::RelatedResource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </ExternalLink>
+    {{/if}}
+    <Inputs::DocumentSelect::MoreButton
+      @resource={{@resource}}
+      @removeResource={{@removeResource}}
+      @editResource={{this.showModal}}
+    />
+  </div>
+
+</li>
+
+{{#if this.modalIsShown}}
+  {{#in-element (html-element ".ember-application") insertBefore=null}}
+    <Hds::Modal @onClose={{this.hideModal}} as |M|>
+      <M.Header>Edit resource</M.Header>
+      <M.Body>
+        <div class="px-6">
+
+          <Hds::Form::TextInput::Field
+            @value={{@resource.title}}
+            class="text-display-300 font-semibold h-11 px-2.5 mb-4"
+            as |F|
+          >
+            <F.Label>Title</F.Label>
+          </Hds::Form::TextInput::Field>
+          <Hds::Form::TextInput::Field
+            @value={{@resource.url}}
+            class="mb-6"
+            as |F|
+          >
+            <F.Label>URL</F.Label>
+          </Hds::Form::TextInput::Field>
+        </div>
+      </M.Body>
+      <M.Footer>
+        <Hds::ButtonSet>
+          <Hds::Button
+            @text="Save changes"
+            @color="primary"
+            {{! TODO: this needs to save }}
+            {{! Should it show a flashMessage? }}
+            {{on "click" (fn @editResource @resource)}}
+          />
+          <Hds::Button
+            @text="Cancel"
+            {{! TODO: this may need some change-revert logic }}
+            {{on "click" this.hideModal}}
+            @color="secondary"
+          />
+        </Hds::ButtonSet>
+      </M.Footer>
+    </Hds::Modal>
+  {{/in-element}}
+{{/if}}

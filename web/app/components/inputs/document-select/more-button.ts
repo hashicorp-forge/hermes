@@ -9,7 +9,7 @@ interface InputsDocumentSelectMoreButtonSignature {
     resource: RelatedExternalLink | HermesDocument;
     removeResource: (resource: RelatedExternalLink | HermesDocument) => void;
     showEditAction?: boolean;
-    onEdit?: (resource: RelatedExternalLink) => void;
+    editResource?: (resource: RelatedExternalLink) => void;
   };
 }
 
@@ -25,12 +25,12 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
 
     let maybeEditItem = null;
 
-    if ("url" in this.args.resource && this.args.onEdit) {
+    if ("url" in this.args.resource && this.args.editResource) {
       maybeEditItem = {
         edit: {
           label: "Edit",
           icon: "edit",
-          action: this.onEdit,
+          action: this.editResource,
         },
       };
     }
@@ -45,11 +45,11 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
     this.args.removeResource(this.args.resource);
   }
 
-  @action onEdit() {
-    assert("onEdit function must exist", this.args.onEdit);
+  @action editResource() {
+    assert("editResource function must exist", this.args.editResource);
     assert('resource must have "url" property', "url" in this.args.resource);
 
-    this.args.onEdit(this.args.resource as RelatedExternalLink);
+    this.args.editResource(this.args.resource as RelatedExternalLink);
   }
 }
 

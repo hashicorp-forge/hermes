@@ -40,7 +40,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
   @tracked relatedDocuments: NativeArray<HermesDocument> = A();
   @tracked _shownDocuments: HermesDocument[] | null = null;
 
-  @tracked modalIsShown = false;
+  @tracked addResourceModalIsShown = false;
 
   // @tracked dd: any = null;
 
@@ -185,15 +185,21 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     return documents;
   }
 
-  @action showModal() {
-    this.modalIsShown = true;
+
+
+  @action showAddResourceModal() {
+    this.addResourceModalIsShown = true;
   }
 
-  @action hideModal() {
-    this.modalIsShown = false;
+  @action hideAddResourceModal() {
+    this.addResourceModalIsShown = false;
 
     // This updates the suggestions for the next time the modal is opened
     // void this.search.perform(null, "");
+  }
+
+  @action editResource(resource: RelatedExternalLink) {
+    alert("time to save the donuts");
   }
 
   @action addRelatedExternalLink(link: RelatedExternalLink) {
@@ -205,12 +211,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     if (document) {
       this.relatedDocuments.unshiftObject(document);
     }
-    this.hideModal();
-  }
-
-  @action editExternalLink(resource: RelatedExternalLink) {
-    // TODO: show an edit modal
-
+    this.hideAddResourceModal();
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {

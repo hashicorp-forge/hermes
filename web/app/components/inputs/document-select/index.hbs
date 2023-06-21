@@ -5,7 +5,7 @@
     </div>
     <Action
       class="flex items-center ml-px -mr-px px-1 py-1 rounded border hover:border-color-border-strong"
-      {{on "click" this.showModal}}
+      {{on "click" this.showAddResourceModal}}
     >
       <FlightIcon @name="plus" />
     </Action>
@@ -20,41 +20,12 @@
           finalRemoval=true
           as |resource|
         }}
-          <li
-            class="flex w-full relative group related-docs-list-item
-              {{if resource.objectID 'hermes-doc' 'external-doc'}}"
-          >
-            <div class="w-full related-resource-container group">
-              {{#if resource.objectID}}
-                <LinkTo
-                  @route="authenticated.document"
-                  @model={{resource.objectID}}
-                  class="related-resource pr-3 peer"
-                >
-                  <Document::RelatedResource
-                    @resource={{resource}}
-                    @removeResource={{this.removeResource}}
-                  />
-                </LinkTo>
-
-              {{else}}
-                <ExternalLink
-                  href={{resource.url}}
-                  class="related-resource pr-3 peer items-center"
-                >
-                  <Document::RelatedResource
-                    @resource={{resource}}
-                    @removeResource={{this.removeResource}}
-                  />
-                </ExternalLink>
-              {{/if}}
-              <Inputs::DocumentSelect::MoreButton
-                @removeResource={{this.removeResource}}
-                @resource={{resource}}
-                @onEdit={{this.editExternalLink}}
-              />
-            </div>
-          </li>
+          <Inputs::DocumentSelect::ListItem
+            @resource={{resource}}
+            @removeResource={{this.removeResource}}
+            {{!-- TODO: --}}
+            @editResource={{this.editResource}}
+          />
         {{/animated-each}}
       </ul>
     </div>
@@ -65,9 +36,9 @@
   {{/if}}
 </AnimatedContainer>
 
-{{#if this.modalIsShown}}
+{{#if this.addResourceModalIsShown}}
   <Inputs::DocumentSelect::Modal
-    @onClose={{this.hideModal}}
+    @onClose={{this.hideAddResourceModal}}
     @addRelatedExternalLink={{this.addRelatedExternalLink}}
     @addRelatedDocument={{this.addRelatedDocument}}
     @shownDocuments={{this.shownDocuments}}
