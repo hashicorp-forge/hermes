@@ -16,6 +16,7 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
 import { TransitionContext, wait } from "ember-animated/.";
 import { EmberAnimatedTransition } from "ember-animated/transition";
+import animateScale from "hermes/utils/ember-animated/animate-scale";
 
 interface InputsDocumentSelectComponentSignature {
   Args: {
@@ -86,18 +87,21 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     keptSprites,
     removedSprites,
   }: TransitionContext) {
+    for (let sprite of keptSprites) {
+      void move(sprite, { duration: 200 });
+    }
+
     for (let sprite of insertedSprites) {
+      // sprite.startTranslatedBy(0, -4);
       sprite.applyStyles({
         opacity: "0",
       });
-      sprite.startTranslatedBy(0, -3);
-      void fadeIn(sprite, { duration: 0 });
-      void move(sprite, { duration: 150 });
+      yield wait(120);
+      void animateScale(sprite, { from: 0.95, to: 1, duration: 120 });
+      void fadeIn(sprite, { duration: 50 });
+      // void move(sprite, { duration: 120 });
     }
 
-    for (let sprite of keptSprites) {
-      void move(sprite, { duration: 150 });
-    }
     for (let sprite of removedSprites) {
       void fadeOut(sprite, { duration: 0 });
     }

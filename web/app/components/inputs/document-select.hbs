@@ -1,6 +1,6 @@
 {{on-document "keydown" this.onDocumentKeydown}}
 
-<div class="w-full">
+<AnimatedContainer class="w-full">
   <div class="relative z-10 flex items-center w-full justify-between">
     <div class="hds-typography-body-100 hds-foreground-faint">
       Related resources
@@ -17,7 +17,7 @@
 
   {{#if this.relatedResourcesAreShown}}
 
-    <AnimatedContainer class="w-full">
+    <div class="w-full">
       <ul class="!mt-0.5 related-resources">
         {{#animated-each
           this.relatedResourcesObjectEntries
@@ -65,16 +65,14 @@
           </li>
         {{/animated-each}}
       </ul>
-
-    </AnimatedContainer>
-
+    </div>
   {{else}}
     <div class="mt-1.5 text-color-foreground-faint">
       ---
     </div>
   {{/if}}
 
-</div>
+</AnimatedContainer>
 
 {{#if this.modalIsShown}}
   {{#in-element (html-element ".ember-application") insertBefore=null}}
