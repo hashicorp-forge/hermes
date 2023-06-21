@@ -185,6 +185,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     event: KeyboardEvent
   ) {
     if (contentIsShown) {
+      if (event.key === "Enter") {
+        const ariaFocusedItem =
+          this.scrollContainer.querySelector(`[aria-selected]`);
+        if (ariaFocusedItem instanceof HTMLElement) {
+          ariaFocusedItem.click();
+        }
+      }
       return;
     }
 

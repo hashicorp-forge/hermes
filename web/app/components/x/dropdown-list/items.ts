@@ -56,13 +56,6 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
     }
     return Object.entries(this.args.shownItems).length === 0;
   }
-
-  @action onKeydown(event: KeyboardEvent) {
-    if (this.args.shouldAutofocusMenu) {
-      this.maybeKeyboardNavigate(event);
-    }
-  }
-
   /**
    * Document keyboard listener for the ArrowUp/ArrowDown/Enter keys.
    * ArrowUp/ArrowDown change the focused item.
@@ -90,8 +83,8 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
         target instanceof HTMLButtonElement
       ) {
         target.click();
-        this.args.hideContent();
       }
+      this.args.hideContent();
     }
   }
 }

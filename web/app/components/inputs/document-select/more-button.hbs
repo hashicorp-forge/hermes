@@ -6,12 +6,9 @@
   @shouldAutofocusMenu={{true}}
 >
   <:anchor as |dd|>
-    <Action
-      {{did-insert dd.registerAnchor}}
-      {{on "click" (fn this.onAnchorClick dd)}}
-    >
+    <dd.ToggleAction>
       booop
-    </Action>
+    </dd.ToggleAction>
   </:anchor>
   <:item as |dd|>
     <dd.Action
@@ -23,55 +20,3 @@
     </dd.Action>
   </:item>
 </X::DropdownList>
-
-{{!-- <FloatingUI
-  @renderOut={{true}}
-  @placement="bottom-end"
-  @offset={{hash mainAxis=-3 crossAxis=-3}}
-  class="z-10 min-w-[90px] hermes-popover rounded p-1"
->
-  <:anchor as |dd|>
-    {{! TODO: Use X::DropdownList for this }}
-    <div
-      class="absolute flex
-        {{if dd.contentIsShown 'visible' 'invisible'}}
-        group-hover:visible group-focus-within:visible hover:visible focus-within:visible top-0 -right-1 rounded-tr bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover w-16 to-transparent justify-end pointer-events-none"
-    >
-
-      <Action
-        class="sidebar-more-button pointer-events-auto
-          {{if dd.contentIsShown 'open'}}"
-        {{did-insert dd.registerAnchor}}
-        {{on "click" dd.toggleContent}}
-      >
-        <div class="button-affordance">
-
-          <FlightIcon
-            @name="more-vertical"
-            class="text-color-foreground-primary"
-          />
-        </div>
-      </Action>
-    </div>
-  </:anchor>
-  <:content as |dd|>
-    <div {{dismissible dismiss=dd.hideContent related=dd.anchor}} class="w-28">
-      {{#if @showEditAction}}
-        <Action
-          {{on "click" (fn @removeResource @resource)}}
-          class="leading-none py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
-        >
-          <FlightIcon @name="pencil-tool" class="text-inherit" />
-          <span>Edit</span>
-        </Action>
-      {{/if}}
-      <Action
-        {{on "click" (fn @removeResource @resource)}}
-        class="leading-none py-2 px-2 flex space-x-2 text-color-foreground-primary hover:text-color-foreground-critical hover:bg-color-surface-critical rounded-sm w-full"
-      >
-        <FlightIcon @name="trash" class="text-inherit" />
-        <span>Remove</span>
-      </Action>
-    </div>
-  </:content>
-</FloatingUI> --}}

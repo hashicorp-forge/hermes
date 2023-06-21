@@ -15,8 +15,6 @@
         class="x-dropdown-list-items"
         role={{if this.args.inputIsShown "listbox" "menu"}}
         aria-activedescendant={{this.ariaActiveDescendant}}
-        {{autofocus (or @shouldAutofocusMenu false)}}
-        {{on "keydown" this.onKeydown}}
       >
         {{#each-in @shownItems as |item attrs|}}
           {{! @glint-ignore - not yet typed }}

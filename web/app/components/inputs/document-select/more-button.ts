@@ -52,17 +52,6 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
     assert("onEdit function must exist", this.args.onEdit);
     this.args.onEdit();
   }
-
-  @action onAnchorClick(dd: any) {
-    this.dd = dd;
-    if (dd.contentIsShown) {
-      dd.hideContent();
-    } else {
-      dd.showContent();
-    }
-  }
-
-  @tracked dd = null;
 }
 
 declare module "@glint/environment-ember-loose/registry" {
