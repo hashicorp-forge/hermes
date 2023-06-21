@@ -208,6 +208,11 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     this.hideModal();
   }
 
+  @action editExternalLink(resource: RelatedExternalLink) {
+    // TODO: show an edit modal
+
+  }
+
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
     // if the resource is a RelatedExternalLink, remove it from the relatedLinks array
     // otherwise, remove it from the relatedDocuments array

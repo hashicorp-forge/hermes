@@ -3,16 +3,13 @@ import { HermesDocument } from "hermes/types/document";
 import { RelatedExternalLink } from "../document-select";
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { next, schedule } from "@ember/runloop";
-import { tracked } from "@glimmer/tracking";
-import htmlElement from "hermes/utils/html-element";
 
 interface InputsDocumentSelectMoreButtonSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     removeResource: (resource: RelatedExternalLink | HermesDocument) => void;
     showEditAction?: boolean;
-    onEdit?: () => void;
+    onEdit?: (resource: RelatedExternalLink) => void;
   };
 }
 
@@ -20,7 +17,7 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
   get items() {
     let deleteItem = {
       delete: {
-        label: "Delete",
+        label: "Remove",
         icon: "trash",
         action: this.removeResource,
       },
@@ -28,7 +25,7 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
 
     let maybeEditItem = null;
 
-    if (this.args.showEditAction && this.args.onEdit) {
+    if ("url" in this.args.resource && this.args.onEdit) {
       maybeEditItem = {
         edit: {
           label: "Edit",
@@ -50,7 +47,9 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
 
   @action onEdit() {
     assert("onEdit function must exist", this.args.onEdit);
-    this.args.onEdit();
+    assert('resource must have "url" property', "url" in this.args.resource);
+
+    this.args.onEdit(this.args.resource as RelatedExternalLink);
   }
 }
 

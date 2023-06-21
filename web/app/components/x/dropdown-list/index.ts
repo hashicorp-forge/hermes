@@ -24,7 +24,6 @@ interface XDropdownListComponentSignature {
     isSaving?: boolean;
     offset?: OffsetOptions;
     onItemClick?: (value: any, attributes: any) => void;
-    shouldAutofocusMenu?: boolean;
   };
   // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {

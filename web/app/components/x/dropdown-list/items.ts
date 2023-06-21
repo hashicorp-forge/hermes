@@ -21,7 +21,6 @@ interface XDropdownListItemsComponentSignature {
     setFocusedItemIndex: (direction: FocusDirection) => void;
     hideContent: () => void;
     listIsHidden?: boolean;
-    shouldAutofocusMenu?: boolean;
   };
 }
 

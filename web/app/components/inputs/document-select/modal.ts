@@ -94,10 +94,12 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
     this.args.onClose();
   }
 
-  @action
-  onDocumentKeydown(e: KeyboardEvent) {
+  /**
+   * TODO: Explain this
+   * TODO: Rename this
+   */
+  @action protected onDocumentKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
-      console.log('dangit rubber');
       const activeElement = document.activeElement;
       if (activeElement !== this.searchInput) {
         e.stopImmediatePropagation();
@@ -106,26 +108,15 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
     }
   }
 
-  @action disableEditMode() {
-    this.editModeIsEnabled = false;
-    this.query = "";
-    this.queryIsThirdPartyURL = false;
-    schedule("afterRender", () => {
-      void this.args.search(this.dd, "");
-    });
-  }
-
   @action onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
-      // this probably never fires
       if (this.queryIsThirdPartyURL) {
-        this.args.addRelatedExternalLink({
-          url: this.query,
-          title: this.externalLinkTitle,
-        });
-        dd.hideContent();
+        this.addRelatedExternalLink();
+        this.args.onClose();
+        return;
       }
     }
+
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       if (!this.query.length) {
         e.preventDefault();
@@ -163,9 +154,6 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
 
     void this.checkURL.perform();
     void this.args.search(dd, this.query);
-    if (this.query === "") {
-      this.disableEditMode();
-    }
   }
 
   @action maybeOpenDropdown(dd: any) {

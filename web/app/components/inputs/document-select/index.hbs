@@ -10,11 +10,7 @@
       <FlightIcon @name="plus" />
     </Action>
   </div>
-
-  {{! TODO: move this out of the component }}
-
   {{#if this.relatedResourcesAreShown}}
-
     <div class="w-full">
       <ul class="!mt-0.5 related-resources">
         {{#animated-each
@@ -28,8 +24,6 @@
             class="flex w-full relative group related-docs-list-item
               {{if resource.objectID 'hermes-doc' 'external-doc'}}"
           >
-            {{! TODO: figure out animation }}
-
             <div class="w-full related-resource-container group">
               {{#if resource.objectID}}
                 <LinkTo
@@ -57,7 +51,7 @@
               <Inputs::DocumentSelect::MoreButton
                 @removeResource={{this.removeResource}}
                 @resource={{resource}}
-                @showEditAction={{if resource.displayURL true false}}
+                @onEdit={{this.editExternalLink}}
               />
             </div>
           </li>
@@ -69,8 +63,8 @@
       ---
     </div>
   {{/if}}
-
 </AnimatedContainer>
+
 {{#if this.modalIsShown}}
   <Inputs::DocumentSelect::Modal
     @onClose={{this.hideModal}}

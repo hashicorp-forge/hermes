@@ -55,7 +55,7 @@
               <div class="px-3 w-full">
 
                 <div
-                  class="mt-6 px-2 mb-4 w-full bg-color-page-faint border border-color-border-primary pt-7 pb-10 rounded-lg hds-elevation-low relative"
+                  class="mt-6 px-2 mb-4 w-full bg-color-page-faint border border-color-border-primary pt-7 pb-10 rounded-lg hds-elevation-low relative {{unless this.editModeIsEnabled "h-32"}}"
                 >
                   {{#if this.editModeIsEnabled}}
                     <div

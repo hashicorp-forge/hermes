@@ -8,7 +8,6 @@
     &:focus-within {
       .related-resource {
         @apply bg-color-surface-interactive-hover;
-        // @apply bg-white border-color-border-primary;
       }
     }
   }
@@ -32,7 +31,7 @@
 }
 
 .related-resource {
-  @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded -mr-[4px] border border-transparent pt-1.5 pb-1.5 relative;
+  @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded -mr-[4px] border border-transparent py-[5px] relative;
 
   @apply outline-offset-[3px];
 
