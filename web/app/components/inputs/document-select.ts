@@ -15,8 +15,8 @@ import { assert } from "@ember/debug";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
 import { TransitionContext, wait } from "ember-animated/.";
-import { EmberAnimatedTransition } from "ember-animated/transition";
 import animateScale from "hermes/utils/ember-animated/animate-scale";
+import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 
 interface InputsDocumentSelectComponentSignature {
   Args: {
@@ -88,7 +88,11 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     removedSprites,
   }: TransitionContext) {
     for (let sprite of keptSprites) {
-      void move(sprite, { duration: 200 });
+      void move(sprite, { duration: 250, easing: easeOutQuad });
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 0 });
     }
 
     for (let sprite of insertedSprites) {
@@ -96,14 +100,14 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       sprite.applyStyles({
         opacity: "0",
       });
-      yield wait(120);
-      void animateScale(sprite, { from: 0.95, to: 1, duration: 120 });
+      yield wait(100);
+      void animateScale(sprite, {
+        from: 0.95,
+        to: 1,
+        duration: 200,
+        easing: easeOutQuad,
+      });
       void fadeIn(sprite, { duration: 50 });
-      // void move(sprite, { duration: 120 });
-    }
-
-    for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 0 });
     }
   }
 
@@ -418,7 +422,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(1000);
+      await timeout(750);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {

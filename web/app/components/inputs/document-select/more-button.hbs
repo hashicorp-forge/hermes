@@ -33,7 +33,7 @@
       {{#if @showEditAction}}
         <Action
           {{on "click" (fn @removeResource @resource)}}
-          class="py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
+          class="leading-none py-2 px-2 flex space-x-2 text-color-foreground-primary hover:bg-color-surface-interactive-hover rounded-sm w-full"
         >
           <FlightIcon @name="pencil-tool" class="text-inherit" />
           <span>Edit</span>
@@ -41,7 +41,7 @@
       {{/if}}
       <Action
         {{on "click" (fn @removeResource @resource)}}
-        class="py-2 px-2 flex space-x-2 text-color-foreground-primary hover:text-color-foreground-critical hover:bg-color-surface-critical rounded-sm w-full"
+        class="leading-none py-2 px-2 flex space-x-2 text-color-foreground-primary hover:text-color-foreground-critical hover:bg-color-surface-critical rounded-sm w-full"
       >
         <FlightIcon @name="trash" class="text-inherit" />
         <span>Remove</span>
