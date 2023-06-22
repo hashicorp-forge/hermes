@@ -97,8 +97,8 @@ Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and 
 Copy the example configuration file to the root of this repo and edit the file (it contains sensible defaults and comments to hopefully provide enough information to update necessary values).
 
 ```sh
-cp configs/config.hcl ./
-# Edit config.hcl...
+cp configs/config_indexer.hcl ./
+# Edit config_indexer.hcl...
 ```
 
 ### Build the Project
@@ -119,13 +119,13 @@ make docker/postgres/start
 ### Run the Server
 
 ```sh
-./hermes server -config=config.hcl
+./hermes server -config=config_indexer.hcl
 ```
 
 ### Run the Indexer
 
 ```sh
-./hermes indexer -config=config.hcl
+./hermes indexer -config=config_indexer.hcl
 ```
 
 NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send emails, etc.
@@ -137,7 +137,7 @@ NOTE: when not using a Google service account, this will automatically open a br
 - Create a new key (JSON type) for the service account and download it.
 - Go to [Delegating domain-wide authority to the service account](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority) and follow the instructions to enter the OAuth scopes.
 - Add the following OAuth scopes (comma-delimited list):
-  `https://www.googleapis.com/auth/directory.readonly,https://www.googleapis.com/auth/documents,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/gmail.send`
+  `https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/directory.readonly,https://www.googleapis.com/auth/documents,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/gmail.send`
 
 More to come here...
 
