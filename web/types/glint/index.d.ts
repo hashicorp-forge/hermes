@@ -34,6 +34,7 @@ import { AnimatedEachCurly } from "ember-animated/components/animated-each";
 import AnimatedValue from "ember-animated/components/animated-value";
 import AnimatedOrphans from "ember-animated/components/animated-orphans";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
+import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -51,6 +52,7 @@ declare module "@glint/environment-ember-loose/registry" {
     and: typeof AndHelper;
     not: typeof NotHelper;
     "is-empty": IsEmptyHelper;
+    FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;
     "Hds::Button": HdsButtonComponent;
     "Hds::BadgeCount": HdsBadgeCountComponent;
