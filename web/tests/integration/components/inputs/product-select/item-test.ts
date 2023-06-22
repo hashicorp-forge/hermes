@@ -7,7 +7,7 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
-  selected: boolean;
+  isSelected?: boolean;
   abbreviation?: boolean;
 }
 
@@ -25,7 +25,7 @@ module(
       {{! @glint-nocheck: not typesafe yet }}
       <Inputs::ProductSelect::Item
         @product={{this.product}}
-        @selected={{this.selected}}
+        @isSelected={{this.selected}}
       />
     `);
 
