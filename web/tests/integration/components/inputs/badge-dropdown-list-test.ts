@@ -107,7 +107,7 @@ module(
           <:item as |dd|>
             <dd.Action>
               {{dd.value}}
-              {{#if dd.selected}}
+              {{#if dd.isSelected}}
                 <span>(selected)</span>
               {{/if}}
             </dd.Action>
