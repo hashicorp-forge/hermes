@@ -1,6 +1,18 @@
+{{! @glint-nocheck: not typesafe yet }}
 <div class="x-hds-tab {{if @isSelected 'x-hds-tab--selected'}}">
-  <button {{on "click" @action}} class="x-hds-tab--button">
-    <FlightIcon @name={{@icon}} />
-    <span>{{@label}}</span>
-  </button>
+  {{#if @action}}
+    <button {{on "click" @action}} class="x-hds-tab--button">
+      <FlightIcon @name={{@icon}} />
+      {{#unless @iconOnly}}
+        <span>{{@label}}</span>
+      {{/unless}}
+    </button>
+  {{else}}
+    <LinkTo @route={{@link}} @query={{hds-link-to-query @query}} class="x-hds-tab--link">
+      <FlightIcon @name={{@icon}} />
+      {{#unless @iconOnly}}
+        <span>{{@label}}</span>
+      {{/unless}}
+    </LinkTo>
+  {{/if}}
 </div>
