@@ -42,6 +42,7 @@ interface XDropdownListComponentSignature {
     ];
     header: [];
     loading: [];
+    "no-matches": [];
   };
 }
 

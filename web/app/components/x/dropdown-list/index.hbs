@@ -139,6 +139,11 @@
               @scrollContainer={{this.scrollContainer}}
               @listIsHidden={{@listIsHidden}}
             >
+              <:no-matches>
+                {{#unless @isLoading}}
+                  {{yield to="no-matches"}}
+                {{/unless}}
+              </:no-matches>
               <:item as |i|>
                 {{yield i to="item"}}
               </:item>

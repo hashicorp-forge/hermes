@@ -55,6 +55,17 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
     return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
   }
 
+  get noMatchesFound(): boolean {
+    return (
+      Object.entries(this.args.shownDocuments).length === 0 &&
+      !this.queryIsThirdPartyURL
+    );
+  }
+
+  get queryIsEmpty(): boolean {
+    return this.query.length === 0;
+  }
+
   @action private showDuplicateMessage() {
     this.flashMessages.add({
       title: "Duplicate URL",
@@ -139,7 +150,7 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
   }
 
   protected loadInitialData = dropTask(async (dd: any) => {
-    if (this.args.shownDocuments) {
+    if (Object.entries(this.args.shownDocuments).length > 0) {
       // if we already have data, don't await it again
       void this.args.search(dd, "");
     } else {

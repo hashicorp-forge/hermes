@@ -65,7 +65,7 @@
             @color="primary"
             {{! TODO: this needs to save }}
             {{! Should it show a flashMessage? }}
-            {{on "click" (fn @editResource @resource)}}
+            {{on "click" this.saveChanges}}
           />
           <Hds::Button
             @text="Cancel"

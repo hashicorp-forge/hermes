@@ -38,15 +38,17 @@
         <:header>
           {{#unless this.editModeIsEnabled}}
             {{#unless this.fetchURLInfo.isRunning}}
-              <div
-                class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
-              >
-                {{#if this.query.length}}
-                  Results
-                {{else}}
-                  Suggestions
-                {{/if}}
-              </div>
+              {{#unless this.noMatchesFound}}
+                <div
+                  class="mt-3.5 px-3 text-color-foreground-faint uppercase tracking-wide font-medium text-[12px]"
+                >
+                  {{#if this.query.length}}
+                    Results
+                  {{else}}
+                    Suggestions
+                  {{/if}}
+                </div>
+              {{/unless}}
             {{/unless}}
           {{/unless}}
           <div class="relative">
@@ -117,6 +119,15 @@
         <:loading>
           <FlightIcon @name="loading" class="ml-2 mt-4" />
         </:loading>
+        <:no-matches>
+          <div class="px-3 {{if (or this.queryIsThirdPartyURL this.queryIsEmpty) 'hidden'}}">
+            <h3
+              class="mt-20 text-color-foreground-faint text-display-300 font-regular text-center"
+            >
+              No results found
+            </h3>
+          </div>
+        </:no-matches>
         <:item as |dd|>
           <dd.Action class="p-0 rounded">
             <Inputs::DocumentSelect::RelatedResourcesOption

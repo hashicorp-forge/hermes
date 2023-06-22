@@ -3,6 +3,7 @@ import { HermesDocument } from "hermes/types/document";
 import { RelatedExternalLink } from ".";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { assert } from "@ember/debug";
 
 interface InputsDocumentSelectListItemSignature {
   Element: HTMLLIElement;
@@ -25,6 +26,12 @@ export default class InputsDocumentSelectListItem extends Component<InputsDocume
 
   @action hideModal() {
     this.modalIsShown = false;
+  }
+
+  @action saveChanges() {
+    assert("resource must have a URL value", "url" in this.args.resource);
+    this.args.editResource(this.args.resource as RelatedExternalLink);
+    this.hideModal();
   }
 }
 
