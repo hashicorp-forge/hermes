@@ -5,44 +5,74 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
+import { WithBoundArgs } from "@glint/template";
 import FetchService from "hermes/services/fetch";
-import { HermesDocument } from "hermes/types/document";
+import XDropdownListToggleActionComponent from "./toggle-action";
+import XDropdownListToggleButtonComponent from "./toggle-button";
+import { HdsButtonColor } from "hds/_shared";
+import { XDropdownListItemAPI } from "./item";
+
+type XDropdownListToggleComponentBoundArgs =
+  | "contentIsShown"
+  | "registerAnchor"
+  | "toggleContent"
+  | "onTriggerKeydown"
+  | "disabled"
+  | "ariaControls";
+
+interface XDropdownListAnchorAPI {
+  ToggleAction: WithBoundArgs<
+    typeof XDropdownListToggleActionComponent,
+    XDropdownListToggleComponentBoundArgs
+  >;
+  ToggleButton: WithBoundArgs<
+    typeof XDropdownListToggleButtonComponent,
+    XDropdownListToggleComponentBoundArgs | "color" | "text"
+  >;
+  ariaControls: string;
+  contentIsShown: boolean;
+  focusedItemIndex: number;
+  registerAnchor: (element: HTMLElement) => void;
+  onTriggerKeydown: (event: KeyboardEvent) => void;
+  resetFocusedItemIndex: () => void;
+  scheduleAssignMenuItemIDs: () => void;
+  toggleContent: () => void;
+  hideContent: () => void;
+  showContent: () => void;
+}
+
+export interface XDropdownListSharedArgs {
+  items?: any;
+  selected?: any;
+  listIsOrdered?: boolean;
+}
 
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
-  Args: {
-    items?: any;
-    listIsOrdered?: boolean;
+  Args: XDropdownListSharedArgs & {
+    isSaving?: boolean;
+    placement?: Placement | "none";
     renderOut?: boolean;
+
+    onItemClick?: (value: any, attributes: any) => void;
+    color?: HdsButtonColor;
+    disabled?: boolean;
+    offset?: OffsetOptions;
+    label?: string;
+
     isLoading?: boolean;
     disableClose?: boolean;
     listIsHidden?: boolean;
     inputIsHidden?: boolean;
-    selected?: any;
-    placement?: Placement | "none";
-    isSaving?: boolean;
-    offset?: OffsetOptions;
-    onItemClick?: (value: any, attributes: any) => void;
   };
-  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
-    anchor: [
-      dd: {
-        registerAnchor: (element: HTMLElement) => void;
-        contentIsShown: boolean;
-        ariaControls: string;
-      }
-    ];
-    item: [
-      dd: {
-        Action: any; // FIXME
-        attrs: HermesDocument;
-      }
-    ];
+    default: [];
+    anchor: [dd: XDropdownListAnchorAPI];
+    item: [dd: XDropdownListItemAPI];
     header: [];
     loading: [];
     "no-matches": [];
+    footer: [];
   };
 }
 
@@ -111,7 +141,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
-  @action protected registerScrollContainer(element: HTMLDivElement) {
+  @action protected registerScrollContainer(element: HTMLElement) {
     this._scrollContainer = element;
   }
 
@@ -315,13 +345,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+  @action onInput(event: Event) {
     this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
 
-    this.query = (inputEvent.target as HTMLInputElement).value;
+    this.query = (event.target as HTMLInputElement).value;
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
@@ -330,7 +360,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
 
     this._filteredItems = shownItems;
     this.scheduleAssignMenuItemIDs();
-  });
+  }
 
   /**
    * The action that assigns menu item IDs.

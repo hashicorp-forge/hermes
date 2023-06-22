@@ -1,4 +1,3 @@
-{{!  @glint-nocheck - not typesafe yet }}
 <X::DropdownList
   @items={{@items}}
   @listIsOrdered={{@listIsOrdered}}
@@ -44,7 +43,7 @@
     {{else}}
       <dd.Action data-test-badge-dropdown-list-default-action>
         <X::DropdownList::CheckableItem
-          @selected={{dd.selected}}
+          @isSelected={{dd.isSelected}}
           @value={{dd.value}}
         />
       </dd.Action>

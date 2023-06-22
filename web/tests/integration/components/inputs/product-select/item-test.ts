@@ -7,7 +7,7 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
-  selected: boolean;
+  isSelected?: boolean;
   abbreviation?: boolean;
 }
 
@@ -19,13 +19,13 @@ module(
 
     test("it functions as expected", async function (this: InputsProductSelectItemContext, assert) {
       this.set("product", "Vault");
-      this.set("selected", false);
+      this.set("isSelected", false);
 
       await render(hbs`
       {{! @glint-nocheck: not typesafe yet }}
       <Inputs::ProductSelect::Item
         @product={{this.product}}
-        @selected={{this.selected}}
+        @isSelected={{this.isSelected}}
       />
     `);
 
@@ -51,7 +51,7 @@ module(
         .doesNotExist("check icon only rendered when selected");
 
       this.set("product", "Engineering");
-      this.set("selected", true);
+      this.set("isSelected", true);
 
       assert
         .dom("[data-test-product-select-item-icon]")
@@ -60,7 +60,6 @@ module(
           "folder",
           "the correct product icon is shown"
         );
-
     });
   }
 );

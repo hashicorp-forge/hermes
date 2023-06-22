@@ -1,29 +1,24 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { FocusDirection } from ".";
+import { FocusDirection, XDropdownListSharedArgs } from ".";
+import { XDropdownListItemAPI, XDropdownListItemSharedArgs } from "./item";
 
 interface XDropdownListItemsComponentSignature {
-  Args: {
-    contentID: string;
-    query?: string;
-    items?: any;
-    shownItems?: any;
-    selected?: any;
-    focusedItemIndex: number;
-    inputIsShown?: boolean;
-    listIsOrdered?: boolean;
-    listItemRole: string;
-    scrollContainer: HTMLElement;
-    onInput: () => void;
-    onItemClick?: (value: any, attributes?: any) => void;
-    registerScrollContainer?: (e: HTMLElement) => void;
-    setFocusedItemIndex: (direction: FocusDirection) => void;
-    hideContent: () => void;
+  Args: XDropdownListSharedArgs &
+    XDropdownListItemSharedArgs & {
+      contentID: string;
+      query?: string;
+      shownItems?: any;
+      inputIsShown?: boolean;
+      scrollContainer: HTMLElement;
     listIsHidden?: boolean;
-  };
+      onInput: (event: Event) => void;
+      registerScrollContainer: (element: HTMLElement) => void;
+    };
   Blocks: {
     "no-matches": [];
+    item: [dd: XDropdownListItemAPI];
   };
 }
 

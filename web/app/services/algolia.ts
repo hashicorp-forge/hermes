@@ -129,7 +129,7 @@ export default class AlgoliaService extends Service {
         let newVal: FacetRecord = {};
         let mapper = (count: number) => ({
           count,
-          selected: false,
+          isSelected: false,
         });
         for (let prop in val) {
           /**
@@ -140,7 +140,7 @@ export default class AlgoliaService extends Service {
           if (valProp) {
             /**
              * Use the mapper to transform the count into a `FacetDropdownObjectDetails` object:
-             * { "meg@hashicorp.com": { count: 10, selected: false }}
+             * { "meg@hashicorp.com": { count: 10, isSelected: false }}
              */
             newVal[prop] = mapper(valProp);
           }
@@ -153,11 +153,11 @@ export default class AlgoliaService extends Service {
     /**
      * e.g., entries === {
      *  owners: {
-     *   "meg@hashicorp.com": { count: 10, selected: false },
+     *   "meg@hashicorp.com": { count: 10, isSelected: false },
      *  },
      *  status: {
-     *    Obsolete: { count: 4, selected: false },
-     *    Approved: { count: 6, selected: false },
+     *    Obsolete: { count: 4, isSelected: false },
+     *    Approved: { count: 6, isSelected: false },
      *  }, and so on ...
      * }
      */
@@ -170,8 +170,8 @@ export default class AlgoliaService extends Service {
   markSelected = (facet: FacetRecord, selection?: string[]): void => {
     /**
      * e.g., facet === {
-     *  Obsolete: { count: 4, selected: false },
-     *  Approved: { count: 6, selected: false },
+     *  Obsolete: { count: 4, isSelected: false },
+     *  Approved: { count: 6, isSelected: false },
      * }
      */
     if (selection) {
@@ -179,10 +179,10 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetDropdownObjectDetails).selected = true;
+        (facet[param] as FacetDropdownObjectDetails).isSelected = true;
       }
       /**
-       * e.g., facet["Approved"] === { count: 6, selected: true }
+       * e.g., facet["Approved"] === { count: 6, isSelected: true }
        */
     }
   };
@@ -289,7 +289,7 @@ export default class AlgoliaService extends Service {
         Object.entries(facets).forEach(([name, facet]) => {
           /**
            * e.g., name === "owner"
-           * e.g., facet === { "meg@hashicorp.com": { count: 1, selected: false }}
+           * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
            */
           this.markSelected(facet, params[name]);
         });
