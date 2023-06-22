@@ -36,22 +36,22 @@ jobs:
       - name: Run Go test
         run: make go/test
 
-  cancel:
-    runs-on: [ self-hosted ]
-    name: Cancel Previous Runs
-    if: always()
-    steps:
-      - uses: styfle/cancel-workflow-action@d57d93c3a8110b00c3a2c0b64b8516013c9fd4c9
-        if: github.ref != 'refs/heads/master'
-        name: cancel old workflows
-        id: cancel
-        with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-      - if: github.ref == 'refs/heads/master'
-        name: Don't cancel old workflows
-        id: dont_cancel
-        run: |
-          echo "Don't cancel old workflow"
+#   cancel:
+#     runs-on: [ self-hosted ]
+#     name: Cancel Previous Runs
+#     if: always()
+#     steps:
+#       - uses: styfle/cancel-workflow-action@d57d93c3a8110b00c3a2c0b64b8516013c9fd4c9
+#         if: github.ref != 'refs/heads/master'
+#         name: cancel old workflows
+#         id: cancel
+#         with:
+#           access_token: ${{ secrets.GITHUB_TOKEN }}
+#       - if: github.ref == 'refs/heads/master'
+#         name: Don't cancel old workflows
+#         id: dont_cancel
+#         run: |
+#           echo "Don't cancel old workflow"
 
   build-docker-server:
     runs-on: [self-hosted]
