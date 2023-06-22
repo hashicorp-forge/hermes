@@ -21,6 +21,7 @@ export default class InputsDocumentSelectListItem extends Component<InputsDocume
   @tracked modalIsShown = false;
 
   @action showModal() {
+    console.log("show modal");
     this.modalIsShown = true;
   }
 
@@ -29,6 +30,7 @@ export default class InputsDocumentSelectListItem extends Component<InputsDocume
   }
 
   @action saveChanges() {
+    console.log("save changes");
     assert("resource must have a URL value", "url" in this.args.resource);
     this.args.editResource(this.args.resource as RelatedExternalLink);
     this.hideModal();

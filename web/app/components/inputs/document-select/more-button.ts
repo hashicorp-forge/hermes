@@ -7,33 +7,33 @@ import { action } from "@ember/object";
 interface InputsDocumentSelectMoreButtonSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
-    removeResource: (resource: RelatedExternalLink | HermesDocument) => void;
     showEditAction?: boolean;
-    editResource?: (resource: RelatedExternalLink) => void;
+    onRemoveClick: (resource: RelatedExternalLink | HermesDocument) => void;
+    onEditClick?: () => void;
   };
 }
 
 export default class InputsDocumentSelectMoreButton extends Component<InputsDocumentSelectMoreButtonSignature> {
   get items() {
-    let deleteItem = {
+    let maybeEditItem = null;
+
+    if ("url" in this.args.resource && this.args.onEditClick) {
+      maybeEditItem = {
+        edit: {
+          label: "Edit",
+          icon: "edit",
+          action: this.args.onEditClick,
+        },
+      };
+    }
+
+    const deleteItem = {
       delete: {
         label: "Remove",
         icon: "trash",
         action: this.removeResource,
       },
     };
-
-    let maybeEditItem = null;
-
-    if ("url" in this.args.resource && this.args.editResource) {
-      maybeEditItem = {
-        edit: {
-          label: "Edit",
-          icon: "edit",
-          action: this.editResource,
-        },
-      };
-    }
 
     return {
       ...maybeEditItem,
@@ -42,14 +42,7 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
   }
 
   @action removeResource() {
-    this.args.removeResource(this.args.resource);
-  }
-
-  @action editResource() {
-    assert("editResource function must exist", this.args.editResource);
-    assert('resource must have "url" property', "url" in this.args.resource);
-
-    this.args.editResource(this.args.resource as RelatedExternalLink);
+    this.args.onRemoveClick(this.args.resource);
   }
 }
 
