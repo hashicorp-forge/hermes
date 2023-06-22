@@ -150,13 +150,7 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
   }
 
   protected loadInitialData = dropTask(async (dd: any) => {
-    if (Object.entries(this.args.shownDocuments).length > 0) {
-      // if we already have data, don't await it again
-      void this.args.search(dd, "");
-    } else {
-      await this.args.search(dd, "");
-      await timeout(200);
-    }
+    await this.args.search(dd, "");
   });
 
   @action protected onInput(dd: any, e: Event) {
