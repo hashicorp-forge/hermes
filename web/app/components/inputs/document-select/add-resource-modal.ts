@@ -11,7 +11,7 @@ import NativeArray from "@ember/array/-private/native-array";
 import { RelatedExternalLink } from ".";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 
-interface InputsDocumentSelectModalComponentSignature {
+interface InputsDocumentSelectAddResourceModalComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
@@ -34,7 +34,7 @@ const FAKE_TITLES = [
   "Terraform Labs | Asana",
 ];
 
-export default class InputsDocumentSelectModalComponent extends Component<InputsDocumentSelectModalComponentSignature> {
+export default class InputsDocumentSelectAddResourceModalComponent extends Component<InputsDocumentSelectAddResourceModalComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: FlashMessageService;
 
@@ -187,7 +187,7 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(750);
+      await timeout(1500);
       this.editModeIsEnabled = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
@@ -219,6 +219,6 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect::Modal": typeof InputsDocumentSelectModalComponent;
+    "Inputs::DocumentSelect::AddResourceModal": typeof InputsDocumentSelectAddResourceModalComponent;
   }
 }

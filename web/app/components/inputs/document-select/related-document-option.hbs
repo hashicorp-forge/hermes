@@ -1,0 +1,29 @@
+<div class="w-full flex space-x-3 overflow-hidden">
+  <Doc::Thumbnail
+    @status={{@document.status}}
+    @product={{@document.product}}
+    class="shrink-0 w-12 h-[62px]"
+  />
+  <div class="w-full flex items-center overflow-hidden pr-8">
+    <div class="w-full overflow-hidden">
+      <h4 class="truncated-text-container">
+        <span
+          class="text-display-300 font-semibold text-color-foreground-strong overflow-hidden"
+        >
+          {{@document.title}}
+        </span>
+      </h4>
+      <div class="text-color-foreground-faint text-body-200 mt-0.5">
+        {{@document.docType}}
+        {{#if @document.docNumber}}
+          ·
+          {{@document.docNumber}}
+        {{/if}}
+        {{#if (get @document.owners 0)}}
+          ·
+          {{get @document.owners 0}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>

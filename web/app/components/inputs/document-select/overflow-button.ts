@@ -1,10 +1,9 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { RelatedExternalLink } from "../document-select";
-import { assert } from "@ember/debug";
+import { RelatedExternalLink } from ".";
 import { action } from "@ember/object";
 
-interface InputsDocumentSelectMoreButtonSignature {
+interface InputsDocumentSelectOverflowButtonSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     showEditAction?: boolean;
@@ -13,7 +12,7 @@ interface InputsDocumentSelectMoreButtonSignature {
   };
 }
 
-export default class InputsDocumentSelectMoreButton extends Component<InputsDocumentSelectMoreButtonSignature> {
+export default class InputsDocumentSelectOverflowButton extends Component<InputsDocumentSelectOverflowButtonSignature> {
   get items() {
     let maybeEditItem = null;
 
@@ -48,6 +47,6 @@ export default class InputsDocumentSelectMoreButton extends Component<InputsDocu
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect::MoreButton": typeof InputsDocumentSelectMoreButton;
+    "Inputs::DocumentSelect::OverflowButton": typeof InputsDocumentSelectOverflowButton;
   }
 }

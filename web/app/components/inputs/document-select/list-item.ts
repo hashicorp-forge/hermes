@@ -20,18 +20,34 @@ interface InputsDocumentSelectListItemSignature {
 export default class InputsDocumentSelectListItem extends Component<InputsDocumentSelectListItemSignature> {
   @tracked modalIsShown = false;
 
-  @action showModal() {
-    console.log("show modal");
+  private _itemIsExternalResource = "url" in this.args.resource;
+
+  protected get documentObjectID(): string | null {
+    if ("objectID" in this.args.resource) {
+      return (this.args.resource as HermesDocument).objectID;
+    } else {
+      return null;
+    }
+  }
+
+  protected get externalResourceURL(): string {
+    assert("external resource expected", this._itemIsExternalResource);
+    return (this.args.resource as RelatedExternalLink).url;
+  }
+
+  @action protected showModal() {
     this.modalIsShown = true;
   }
 
-  @action hideModal() {
+  @action protected hideModal() {
     this.modalIsShown = false;
   }
 
-  @action saveChanges() {
-    console.log("save changes");
-    assert("resource must have a URL value", "url" in this.args.resource);
+  @action protected saveChanges() {
+    assert(
+      "only external resources can be saved",
+      this._itemIsExternalResource
+    );
     this.args.editResource(this.args.resource as RelatedExternalLink);
     this.hideModal();
   }

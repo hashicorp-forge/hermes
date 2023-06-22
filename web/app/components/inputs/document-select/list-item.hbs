@@ -1,24 +1,23 @@
 <li
-  class="flex w-full relative group related-docs-list-item
-    {{if @resource.objectID 'hermes-doc' 'external-doc'}}"
+  class="related-resource group
+    {{if this.documentObjectID 'hermes-doc' 'external-doc'}}"
 >
-  <div class="w-full related-resource-container group">
-    {{#if @resource.objectID}}
+  <div class="related-resource-container group">
+    {{#if this.documentObjectID}}
       <LinkTo
+        @model={{this.documentObjectID}}
         @route="authenticated.document"
-        @model={{@resource.objectID}}
-        class="related-resource pr-3 peer"
+        class="related-resource-link peer"
       >
         <Document::RelatedResource
           @resource={{@resource}}
           @removeResource={{@removeResource}}
         />
       </LinkTo>
-
     {{else}}
       <ExternalLink
-        href={{@resource.url}}
-        class="related-resource pr-3 peer items-center"
+        href={{this.externalResourceURL}}
+        class="related-resource-link peer"
       >
         <Document::RelatedResource
           @resource={{@resource}}
@@ -26,13 +25,13 @@
         />
       </ExternalLink>
     {{/if}}
-    <Inputs::DocumentSelect::MoreButton
+    {{! TODO: move this component out of /inputs }}
+    <Inputs::DocumentSelect::OverflowButton
       @resource={{@resource}}
       @onRemoveClick={{@removeResource}}
       @onEditClick={{this.showModal}}
     />
   </div>
-
 </li>
 
 {{#if this.modalIsShown}}
@@ -40,17 +39,16 @@
     <Hds::Modal @onClose={{this.hideModal}} as |M|>
       <M.Header>Edit resource</M.Header>
       <M.Body>
-        <form class="px-6" {{on "submit" this.saveChanges}}>
+        <form class="px-6 pb-6" {{on "submit" this.saveChanges}}>
           <Hds::Form::TextInput::Field
             @value={{@resource.title}}
-            class="text-display-300 font-semibold h-11 px-2.5 mb-4"
+            class="external-resource-title-input mb-4"
             as |F|
           >
             <F.Label>Title</F.Label>
           </Hds::Form::TextInput::Field>
           <Hds::Form::TextInput::Field
-            @value={{@resource.url}}
-            class="mb-6"
+            @value={{this.externalResourceURL}}
             as |F|
           >
             <F.Label>URL</F.Label>
@@ -70,9 +68,9 @@
           />
           <Hds::Button
             @text="Cancel"
+            @color="secondary"
             {{! TODO: this may need some change-revert logic }}
             {{on "click" this.hideModal}}
-            @color="secondary"
           />
         </Hds::ButtonSet>
       </M.Footer>

@@ -1,43 +1,41 @@
 <AnimatedContainer class="w-full">
-  <div class="relative z-10 flex items-center w-full justify-between">
-    <div class="hds-typography-body-100 hds-foreground-faint">
+  <div class="sidebar-section-header-container">
+    <div class="sidebar-section-header">
       Related resources
     </div>
     <Action
-      class="flex items-center ml-px -mr-px px-1 py-1 rounded border hover:border-color-border-strong"
       {{on "click" this.showAddResourceModal}}
+      class="sidebar-section-header-button"
+      aria-label="Add related resource"
     >
       <FlightIcon @name="plus" />
     </Action>
   </div>
   {{#if this.relatedResourcesAreShown}}
-    <div class="w-full">
-      <ul class="!mt-0.5 related-resources">
-        {{#animated-each
-          this.relatedResourcesObjectEntries
-          use=this.transition
-          initialInsertion=true
-          finalRemoval=true
-          as |resource|
-        }}
-          <Inputs::DocumentSelect::ListItem
-            @resource={{resource}}
-            @removeResource={{this.removeResource}}
-            {{!-- TODO: --}}
-            @editResource={{this.editResource}}
-          />
-        {{/animated-each}}
-      </ul>
-    </div>
+    <ul class="related-resources">
+      {{#animated-each
+        this.relatedResourcesObjectEntries
+        use=this.transition
+        initialInsertion=true
+        finalRemoval=true
+        as |resource|
+      }}
+        <Inputs::DocumentSelect::ListItem
+          @resource={{resource}}
+          @removeResource={{this.removeResource}}
+          @editResource={{this.editResource}}
+        />
+      {{/animated-each}}
+    </ul>
   {{else}}
-    <div class="mt-1.5 text-color-foreground-faint">
-      ---
+    <div class="mt-1.5">
+      <CustomEditableFields::EmptyState />
     </div>
   {{/if}}
 </AnimatedContainer>
 
 {{#if this.addResourceModalIsShown}}
-  <Inputs::DocumentSelect::Modal
+  <Inputs::DocumentSelect::AddResourceModal
     @onClose={{this.hideAddResourceModal}}
     @addRelatedExternalLink={{this.addRelatedExternalLink}}
     @addRelatedDocument={{this.addRelatedDocument}}

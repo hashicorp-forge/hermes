@@ -5,11 +5,8 @@
     @apply min-w-[175px];
   }
 
-  &.modal-list {
-    .x-dropdown-list-container,
-    .x-dropdown-list-scroll-container {
-      // @apply overflow-visible;
-    }
+  &.non-floating-list {
+    @apply w-full relative max-w-none;
 
     .x-dropdown-list-item-link {
       &.is-aria-selected {

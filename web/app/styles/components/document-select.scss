@@ -1,23 +1,72 @@
 .related-resources {
-  @apply w-full space-y-0.5;
+  @apply w-full mt-0.5 space-y-0.5;
 
   .related-resource-container {
-    @apply relative;
+    @apply w-full relative;
 
     &:hover,
     &:focus-within {
-      .related-resource {
+      .related-resource-link {
         @apply bg-color-surface-interactive-hover;
       }
     }
   }
-}
-.sidebar-more-button {
-  @apply relative p-[3px];
 
-  .button-affordance {
-    @apply flex rounded top-[4px] right-0 p-1 border border-transparent;
+  .related-resource {
+    @apply flex w-full relative;
   }
+}
+
+.related-resources-modal-container {
+  @apply px-3 w-full;
+}
+
+.add-external-resource-container {
+  @apply w-full relative flex items-center;
+  @apply px-10 mt-6;
+  @apply h-[228px];
+  @apply hds-elevation-low;
+
+  &::before {
+    @apply absolute top-0 left-0 w-full h-full rounded-lg;
+    @apply bg-color-page-faint border border-color-border-primary;
+    @apply content-[''];
+    @apply z-[-1];
+    animation: fadeIn 600ms ease-out, scaleInX 800ms ease-out;
+  }
+
+  @keyframes scaleInX {
+    from {
+      transform: scale(0.95);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+}
+
+.related-resources-overflow-popover-menu-item-button {
+  @apply w-full flex space-x-2 py-2 px-4 leading-none;
+
+  > .flight-icon {
+    @apply text-inherit;
+  }
+}
+
+.related-resources-overflow-button-container {
+  @apply absolute top-0 -right-1 pointer-events-none;
+  @apply w-16 flex justify-end rounded-tr;
+  @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+  @apply group-hover:visible group-focus-within:visible;
+
+  &:hover,
+  &:focus-within {
+    @apply visible;
+  }
+}
+
+.related-resource-overflow-button {
+  @apply relative pointer-events-auto p-[3px];
 
   &:hover,
   &:focus,
@@ -28,10 +77,16 @@
       @apply border-color-border-strong bg-color-surface-faint;
     }
   }
+
+  .button-affordance {
+    @apply flex top-[4px] right-0 rounded p-1;
+    @apply border border-transparent text-color-foreground-primary;
+  }
 }
 
-.related-resource {
-  @apply flex items-start space-x-2 w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-[4px] rounded -mr-[4px] border border-transparent py-[5px] relative;
+.related-resource-link {
+  @apply relative flex items-start bg-red-500 rounded border border-transparent space-x-2 py-[5px];
+  @apply w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-3 -mr-[4px];
 
   @apply outline-offset-[3px];
 
@@ -69,4 +124,32 @@
   .hermes-doc + .external-doc {
     @apply mt-1.5;
   }
+
+  .external-doc {
+    .related-resource-link {
+      @apply items-center;
+    }
+  }
+}
+
+.external-resource-title-input {
+  @apply text-display-300 font-semibold h-11 px-2.5;
+}
+
+.external-resource-url {
+  @apply relative w-full text-color-foreground-faint;
+  @apply pl-6 mb-5;
+
+  .external-resource-favicon {
+    @apply w-4 h-4;
+    @apply absolute left-0 top-1/2 -translate-y-1/2;
+  }
+}
+
+.related-resources-modal-loading-text {
+  @apply w-full text-color-foreground-faint text-display-300 opacity-75 font-semibold text-center;
+}
+
+.related-document-option {
+  @apply w-full rounded grid place-items-center py-1.5 px-3 h-[74px];
 }
