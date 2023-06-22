@@ -80,7 +80,6 @@ module(
         ["Waypoint", "Labs", "Boundary"],
         "correct list items are rendered"
       );
-
       assert
         .dom(
           `${ITEM_SELECTOR}:nth-child(2) [data-test-x-dropdown-list-checkable-item-check]`
