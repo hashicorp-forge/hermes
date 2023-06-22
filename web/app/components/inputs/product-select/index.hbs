@@ -18,7 +18,7 @@
           <dd.Action data-test-product-select-badge-dropdown-item>
             <Inputs::ProductSelect::Item
               @product={{dd.value}}
-              @isSelected={{dd.selected}}
+              @isSelected={{dd.isSelected}}
             />
           </dd.Action>
         </:item>
@@ -61,7 +61,7 @@
           <dd.Action class="pr-5">
             <Inputs::ProductSelect::Item
               @product={{dd.value}}
-              @isSelected={{dd.selected}}
+              @isSelected={{dd.isSelected}}
               @abbreviation={{dd.attrs.abbreviation}}
             />
           </dd.Action>
