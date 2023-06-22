@@ -40,8 +40,7 @@
     <Hds::Modal @onClose={{this.hideModal}} as |M|>
       <M.Header>Edit resource</M.Header>
       <M.Body>
-        <div class="px-6">
-
+        <form class="px-6" {{on "submit" this.saveChanges}}>
           <Hds::Form::TextInput::Field
             @value={{@resource.title}}
             class="text-display-300 font-semibold h-11 px-2.5 mb-4"
@@ -56,7 +55,9 @@
           >
             <F.Label>URL</F.Label>
           </Hds::Form::TextInput::Field>
-        </div>
+          {{! This adds enter-to-submit functionality }}
+          <input type="submit" class="hidden" />
+        </form>
       </M.Body>
       <M.Footer>
         <Hds::ButtonSet>

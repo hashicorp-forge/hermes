@@ -2,7 +2,7 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
-import { next, schedule } from "@ember/runloop";
+import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
@@ -168,9 +168,6 @@ export default class InputsDocumentSelectModalComponent extends Component<Inputs
   }
 
   protected fetchURLInfo = restartableTask(async () => {
-    // let infoURL = GOOGLE_FAVICON_URL_PREFIX + "?url=" + this.query;
-    // const urlToFetch = this.inputValue;
-    // const urlToFetch = infoURL;
     this.faviconHasLoaded = false;
 
     try {

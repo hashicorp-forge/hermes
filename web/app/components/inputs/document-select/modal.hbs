@@ -61,7 +61,10 @@
                     {{unless this.editModeIsEnabled 'h-32'}}"
                 >
                   {{#if this.editModeIsEnabled}}
-                    <div class="mb-2.5 px-8">
+                    <form
+                      class="mb-2.5 px-8"
+                      {{on "submit" this.addRelatedExternalLink}}
+                    >
                       <Hds::Form::TextInput::Field
                         {{on "input" this.onExternalLinkTitleInput}}
                         @value={{this.externalLinkTitle}}
@@ -70,7 +73,7 @@
                       >
                         <F.Label>Title</F.Label>
                       </Hds::Form::TextInput::Field>
-                    </div>
+                    </form>
                     <div class="flexX w-full gap-4 items-center mb-5 px-8">
                       <div
                         class="relative w-full pl-6 text-color-foreground-faint"
