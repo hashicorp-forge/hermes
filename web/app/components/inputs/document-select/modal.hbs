@@ -36,7 +36,7 @@
           />
         </:anchor>
         <:header>
-          {{#unless this.editModeIsEnabled}}
+          {{#unless this.queryIsThirdPartyURL}}
             {{#unless this.fetchURLInfo.isRunning}}
               {{#unless this.noMatchesFound}}
                 <div
@@ -120,9 +120,12 @@
           <FlightIcon @name="loading" class="ml-2 mt-4" />
         </:loading>
         <:no-matches>
-          <div class="px-3 {{if (or this.queryIsThirdPartyURL this.queryIsEmpty) 'hidden'}}">
+          <div
+            class="px-3
+              {{if (or this.queryIsThirdPartyURL this.queryIsEmpty) 'hidden'}}"
+          >
             <h3
-              class="mt-20 text-color-foreground-faint text-display-300 font-regular text-center"
+              class="mt-36 text-color-foreground-faint text-display-300 opacity-75 font-regular text-center"
             >
               No results found
             </h3>
