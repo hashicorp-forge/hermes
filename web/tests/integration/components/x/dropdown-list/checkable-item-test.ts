@@ -10,12 +10,12 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders as expected", async function (assert) {
-    this.set("selected", false);
+    this.set("isSelected", false);
     this.set("count", null);
 
     await render(hbs`
       <X::DropdownList::CheckableItem
-        @selected={{this.selected}}
+        @isSelected={{this.isSelected}}
         @value="foo"
         @count={{this.count}}
       />
@@ -25,7 +25,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom(".x-dropdown-list-item-value").hasText("foo");
     assert.dom(COUNT_SELECTOR).doesNotExist();
 
-    this.set("selected", true);
+    this.set("isSelected", true);
 
     assert.dom(CHECK_SELECTOR).hasClass("visible");
 

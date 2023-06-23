@@ -30,7 +30,7 @@ export enum FacetName {
 export interface SortByFacets {
   [name: string]: {
     count: number;
-    selected: boolean;
+    isSelected: boolean;
   };
 }
 
@@ -128,11 +128,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     return {
       Newest: {
         count: 0,
-        selected: this.currentSortByValue === SortByValue.DateDesc,
+        isSelected: this.currentSortByValue === SortByValue.DateDesc,
       },
       Oldest: {
         count: 0,
-        selected: this.currentSortByValue === SortByValue.DateAsc,
+        isSelected: this.currentSortByValue === SortByValue.DateAsc,
       },
     };
   }

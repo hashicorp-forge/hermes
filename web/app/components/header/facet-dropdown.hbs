@@ -14,12 +14,12 @@
   <:item as |dd|>
     <dd.LinkTo
       @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
+      @query={{get-facet-query-hash @label dd.value dd.attrs.isSelected}}
     >
       <X::DropdownList::CheckableItem
         @value={{dd.value}}
         @count={{dd.attrs.count}}
-        @selected={{dd.attrs.selected}}
+        @isSelected={{dd.attrs.isSelected}}
       />
     </dd.LinkTo>
   </:item>

@@ -23,7 +23,7 @@ export const mapKeys = (obj, mapper) =>
  * to an object that has count and selected properties
  */
 export const statefulFacet = (facet) =>
-  mapKeys(facet, (count) => ({ count, selected: false }));
+  mapKeys(facet, (count) => ({ count, isSelected: false }));
 
 export const markSelected = (facet, selection) =>
-  (selection || []).forEach((param) => (facet[param].selected = true));
+  (selection || []).forEach((param) => (facet[param].isSelected = true));

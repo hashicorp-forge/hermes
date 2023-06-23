@@ -16,18 +16,18 @@ import htmlElement from "hermes/utils/html-element";
 // TODO: Replace with Mirage factories
 
 export const SHORT_ITEM_LIST = {
-  Filter01: { count: 1, selected: false },
-  Filter02: { count: 1, selected: false },
-  Filter03: { count: 1, selected: false },
+  Filter01: { count: 1, isSelected: false },
+  Filter02: { count: 1, isSelected: false },
+  Filter03: { count: 1, isSelected: false },
 };
 
 export const LONG_ITEM_LIST = {
   ...SHORT_ITEM_LIST,
-  Filter04: { count: 1, selected: false },
-  Filter05: { count: 1, selected: false },
-  Filter06: { count: 1, selected: false },
-  Filter07: { count: 1, selected: false },
-  Filter08: { count: 1, selected: false },
+  Filter04: { count: 1, isSelected: false },
+  Filter05: { count: 1, isSelected: false },
+  Filter06: { count: 1, isSelected: false },
+  Filter07: { count: 1, isSelected: false },
+  Filter08: { count: 1, isSelected: false },
 };
 
 const CONTAINER_CLASS = "x-dropdown-list";
@@ -648,7 +648,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     this.set("items", {
       "View all items": {
         count: 1,
-        selected: false,
+        isSelected: false,
         itemShouldRenderOut: true,
       },
       ...SHORT_ITEM_LIST,

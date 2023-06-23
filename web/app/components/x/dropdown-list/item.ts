@@ -10,7 +10,7 @@ interface XDropdownListItemComponentSignature {
   Args: {
     value: string;
     attributes?: unknown;
-    selected: boolean;
+    isSelected: boolean;
     focusedItemIndex: number;
     listItemRole: string;
     hideDropdown: () => void;
