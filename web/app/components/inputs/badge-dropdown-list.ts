@@ -1,7 +1,7 @@
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
-import { XDropdownListSharedArgs } from "../x/dropdown-list";
 import { XDropdownListItemAPI } from "../x/dropdown-list/item";
+import { XDropdownListSharedArgs } from "../x/dropdown-list/_shared";
 
 interface InputsBadgeDropdownListComponentSignature {
   Element: HTMLDivElement;
