@@ -20,7 +20,7 @@
         finalRemoval=true
         as |resource|
       }}
-        <Inputs::DocumentSelect::ListItem
+        <Document::RelatedResources::List::Item
           @resource={{resource}}
           @removeResource={{this.removeResource}}
           @editResource={{this.editResource}}
@@ -35,7 +35,7 @@
 </AnimatedContainer>
 
 {{#if this.addResourceModalIsShown}}
-  <Inputs::DocumentSelect::AddResourceModal
+  <Document::RelatedResources::AddResource::Modal
     @onClose={{this.hideAddResourceModal}}
     @addRelatedExternalLink={{this.addRelatedExternalLink}}
     @addRelatedDocument={{this.addRelatedDocument}}

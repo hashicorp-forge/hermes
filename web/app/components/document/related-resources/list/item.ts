@@ -5,7 +5,7 @@ import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
-interface InputsDocumentSelectListItemSignature {
+interface DocumentRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
     resource: HermesDocument | RelatedExternalLink;
@@ -17,7 +17,7 @@ interface InputsDocumentSelectListItemSignature {
   };
 }
 
-export default class InputsDocumentSelectListItem extends Component<InputsDocumentSelectListItemSignature> {
+export default class DocumentRelatedResourcesListItemComponent extends Component<DocumentRelatedResourcesListItemComponentSignature> {
   @tracked modalIsShown = false;
 
   private _itemIsExternalResource = "url" in this.args.resource;
@@ -55,6 +55,6 @@ export default class InputsDocumentSelectListItem extends Component<InputsDocume
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect::ListItem": typeof InputsDocumentSelectListItem;
+    "Document::RelatedResources::List::Item": typeof DocumentRelatedResourcesListItemComponent;
   }
 }

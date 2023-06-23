@@ -11,7 +11,7 @@ import NativeArray from "@ember/array/-private/native-array";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
-interface InputsDocumentSelectAddResourceModalComponentSignature {
+interface DocumentRelatedResourcesAddResourceModalComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
@@ -34,7 +34,7 @@ const FAKE_TITLES = [
   "Terraform Labs | Asana",
 ];
 
-export default class InputsDocumentSelectAddResourceModalComponent extends Component<InputsDocumentSelectAddResourceModalComponentSignature> {
+export default class DocumentRelatedResourcesAddResourceModalComponent extends Component<DocumentRelatedResourcesAddResourceModalComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: FlashMessageService;
 
@@ -219,6 +219,6 @@ export default class InputsDocumentSelectAddResourceModalComponent extends Compo
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect::AddResourceModal": typeof InputsDocumentSelectAddResourceModalComponent;
+    "Document::RelatedResources::AddResource::Modal": typeof DocumentRelatedResourcesAddResourceModalComponent;
   }
 }

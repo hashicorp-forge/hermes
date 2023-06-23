@@ -25,8 +25,7 @@
         />
       </ExternalLink>
     {{/if}}
-    {{! TODO: move this component out of /inputs }}
-    <Inputs::DocumentSelect::OverflowButton
+    <Document::RelatedResources::List::ItemOverflowMenu
       @resource={{@resource}}
       @onRemoveClick={{@removeResource}}
       @onEditClick={{this.showModal}}

@@ -3,7 +3,7 @@ import { HermesDocument } from "hermes/types/document";
 import { action } from "@ember/object";
 import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
-interface InputsDocumentSelectOverflowButtonSignature {
+interface DocumentRelatedResourcesListItemOverflowMenuComponentSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     showEditAction?: boolean;
@@ -12,7 +12,7 @@ interface InputsDocumentSelectOverflowButtonSignature {
   };
 }
 
-export default class InputsDocumentSelectOverflowButton extends Component<InputsDocumentSelectOverflowButtonSignature> {
+export default class DocumentRelatedResourcesListItemOverflowMenuComponent extends Component<DocumentRelatedResourcesListItemOverflowMenuComponentSignature> {
   get items() {
     let maybeEditItem = null;
 
@@ -47,6 +47,6 @@ export default class InputsDocumentSelectOverflowButton extends Component<Inputs
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect::OverflowButton": typeof InputsDocumentSelectOverflowButton;
+    "Document::RelatedResources::List::ItemOverflowMenu": typeof DocumentRelatedResourcesListItemOverflowMenuComponent;
   }
 }
