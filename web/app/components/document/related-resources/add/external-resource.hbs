@@ -1,0 +1,43 @@
+<div class="related-resources-modal-container">
+  <div class="add-external-resource-container">
+    {{#if @editModeIsEnabled}}
+      <div class="w-full">
+        <form {{on "submit" @onSubmit}} class="mb-2.5">
+          <Hds::Form::TextInput::Field
+            {{on "input" @onInput}}
+            @value={{@title}}
+            required={{true}}
+            class="external-resource-title-input"
+            as |F|
+          >
+            <F.Label>Title</F.Label>
+          </Hds::Form::TextInput::Field>
+        </form>
+        <div class="external-resource-url">
+          <div class="truncate">{{@url}}</div>
+          <div class="external-resource-favicon">
+            {{#if @defaultFaviconIsShown}}
+              <FlightIcon @name="globe" />
+            {{else}}
+              <img src={{@faviconURL}} width="16" height="16" />
+            {{/if}}
+          </div>
+        </div>
+        <Hds::Button
+          {{on "click" @onSubmit}}
+          @isFullWidth={{true}}
+          @color="primary"
+          @text="Add"
+          class="mb-2.5"
+        />
+      </div>
+    {{else}}
+      <div class="block w-full text-center">
+        <FlightIcon @name="loading" @size="24" class="mb-2" />
+        <h3 class="related-resources-modal-loading-text">
+          Reading URL...
+        </h3>
+      </div>
+    {{/if}}
+  </div>
+</div>

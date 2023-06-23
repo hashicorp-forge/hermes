@@ -53,60 +53,13 @@
               {{/unless}}
             {{/unless}}
           {{/unless}}
-          <div class="relative">
-            {{#if this.queryIsThirdPartyURL}}
-              <div class="related-resources-modal-container">
-                <div class="add-external-resource-container">
-                  {{#if this.editModeIsEnabled}}
-                    <div class="w-full">
-                      <form
-                        {{on "submit" this.addRelatedExternalLink}}
-                        class="mb-2.5"
-                      >
-                        <Hds::Form::TextInput::Field
-                          {{on "input" this.onExternalLinkTitleInput}}
-                          @value={{this.externalLinkTitle}}
-                          required={{true}}
-                          class="external-resource-title-input"
-                          as |F|
-                        >
-                          <F.Label>Title</F.Label>
-                        </Hds::Form::TextInput::Field>
-                      </form>
-                      <div class="external-resource-url">
-                        <div class="truncate">{{this.query}}</div>
-                        <div class="external-resource-favicon">
-                          {{#if this.defaultFaviconIsShown}}
-                            <FlightIcon @name="globe" />
-                          {{else}}
-                            <img
-                              src={{this.faviconURL}}
-                              width="16"
-                              height="16"
-                            />
-                          {{/if}}
-                        </div>
-                      </div>
-                      <Hds::Button
-                        {{on "click" this.addRelatedExternalLink}}
-                        @isFullWidth={{true}}
-                        @color="primary"
-                        @text="Add"
-                        class="mb-2.5"
-                      />
-                    </div>
-                  {{else}}
-                    <div class="block w-full text-center">
-                      <FlightIcon @name="loading" @size="24" class="mb-2" />
-                      <h3 class="related-resources-modal-loading-text">
-                        Reading URL...
-                      </h3>
-                    </div>
-                  {{/if}}
-                </div>
-              </div>
-            {{/if}}
-          </div>
+
+          {{#if this.queryIsThirdPartyURL}}
+            <Document::RelatedResources::Add::ExternalResource
+              @onSubmit={{this.addRelatedExternalLink}}
+              @url={{this.query}}
+            />
+          {{/if}}
         </:header>
         <:loading>
           <FlightIcon @name="loading" class="ml-2 mt-4" />
