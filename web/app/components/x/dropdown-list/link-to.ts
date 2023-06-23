@@ -5,7 +5,7 @@ interface XDropdownListLinkToComponentSignature {
   Element: HTMLAnchorElement;
   Args: XDropdownListInteractiveComponentArgs & {
     route: string;
-    query?: Record<string, unknown> | unknown;
+    query?: Record<string, unknown>;
     model?: unknown;
     models?: unknown[];
   };
