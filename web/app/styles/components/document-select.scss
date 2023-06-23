@@ -27,12 +27,21 @@
   @apply h-[228px];
   @apply hds-elevation-low;
 
+  &::before,
+  &::after {
+    content: "";
+    @apply absolute top-0 left-0 w-full h-full rounded-lg border z-[-1];
+  }
+
   &::before {
-    @apply absolute top-0 left-0 w-full h-full rounded-lg;
-    @apply bg-color-page-faint border border-color-border-primary;
-    @apply content-[''];
-    @apply z-[-1];
-    animation: fadeIn 600ms ease-out, scaleInX 800ms ease-out;
+    @apply opacity-0 bg-color-page-faint border-color-border-primary;
+    animation: fadeIn 0ms ease-out 600ms forwards;
+  }
+
+  &::after {
+    @apply bg-color-surface-highlight border-color-border-highlight;
+    animation: fadeIn 600ms ease-out, scaleInX 800ms ease-out,
+      fadeOut 500ms ease-out 1200ms forwards;
   }
 
   @keyframes scaleInX {
@@ -85,7 +94,7 @@
 }
 
 .related-resource-link {
-  @apply relative flex items-start bg-red-500 rounded border border-transparent space-x-2 py-[5px];
+  @apply relative flex items-start rounded border border-transparent space-x-2 py-[5px];
   @apply w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-3 -mr-[4px];
 
   @apply outline-offset-[3px];

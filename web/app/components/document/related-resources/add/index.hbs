@@ -56,7 +56,12 @@
 
           {{#if this.queryIsThirdPartyURL}}
             <Document::RelatedResources::Add::ExternalResource
+              @editModeIsEnabled={{this.editModeIsEnabled}}
+              @defaultFaviconIsShown={{this.defaultFaviconIsShown}}
+              @faviconURL={{this.faviconURL}}
+              @onInput={{this.onExternalLinkTitleInput}}
               @onSubmit={{this.addRelatedExternalLink}}
+              @title={{this.externalLinkTitle}}
               @url={{this.query}}
             />
           {{/if}}
