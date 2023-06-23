@@ -66,7 +66,9 @@ module.exports = function (environment) {
       },
     },
 
-    featureFlags: {},
+    featureFlags: {
+      showEmberAnimatedTools: getEnv("SHOW_EMBER_ANIMATED_TOOLS", false),
+    },
   };
 
   if (environment === "development") {
