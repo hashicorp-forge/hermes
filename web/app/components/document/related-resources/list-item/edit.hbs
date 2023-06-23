@@ -1,0 +1,39 @@
+{{#in-element (html-element ".ember-application") insertBefore=null}}
+  <Hds::Modal @onClose={{@hideModal}} as |M|>
+    <M.Header>Edit resource</M.Header>
+    <M.Body>
+      <form class="px-6 pb-6" {{on "submit" @onSave}}>
+        <Hds::Form::TextInput::Field
+          @value={{@resource.title}}
+          required={{true}}
+          class="external-resource-title-input mb-4"
+          as |F|
+        >
+          <F.Label>Title</F.Label>
+        </Hds::Form::TextInput::Field>
+        <Hds::Form::TextInput::Field @value={{@url}} required={{true}} as |F|>
+          <F.Label>URL</F.Label>
+        </Hds::Form::TextInput::Field>
+        {{! This adds enter-to-submit functionality }}
+        <input type="submit" class="hidden" />
+      </form>
+    </M.Body>
+    <M.Footer>
+      <Hds::ButtonSet>
+        <Hds::Button
+          @text="Save changes"
+          @color="primary"
+          {{! TODO: this needs to save }}
+          {{! Should it show a flashMessage? }}
+          {{on "click" @onSave}}
+        />
+        <Hds::Button
+          @text="Cancel"
+          @color="secondary"
+          {{! TODO: this may need some change-revert logic }}
+          {{on "click" @hideModal}}
+        />
+      </Hds::ButtonSet>
+    </M.Footer>
+  </Hds::Modal>
+{{/in-element}}

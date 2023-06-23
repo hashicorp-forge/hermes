@@ -1,14 +1,14 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
-interface DocumentRelatedResourceComponentSignature {
+interface DocumentRelatedResourcesListItemResourceComponentSignature {
   Args: {
     resource: any;
     removeResource: (resource: any) => void;
   };
 }
 
-export default class DocumentRelatedResourceComponent extends Component<DocumentRelatedResourceComponentSignature> {
+export default class DocumentRelatedResourcesListItemResourceComponent extends Component<DocumentRelatedResourcesListItemResourceComponentSignature> {
   @action removeResource() {
     this.args.removeResource(this.args.resource);
   }
@@ -20,6 +20,6 @@ export default class DocumentRelatedResourceComponent extends Component<Document
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResource": typeof DocumentRelatedResourceComponent;
+    "Document::RelatedResources::ListItem::Resource": typeof DocumentRelatedResourcesListItemResourceComponent;
   }
 }

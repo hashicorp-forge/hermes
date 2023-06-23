@@ -1,0 +1,44 @@
+<li
+  class="related-resource group
+    {{if this.documentObjectID 'hermes-doc' 'external-doc'}}"
+>
+  <div class="related-resource-container group">
+    {{#if this.documentObjectID}}
+      <LinkTo
+        @model={{this.documentObjectID}}
+        @route="authenticated.document"
+        class="related-resource-link peer"
+      >
+        <Document::RelatedResources::ListItem::Resource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </LinkTo>
+    {{else}}
+      <ExternalLink
+        href={{this.externalResourceURL}}
+        class="related-resource-link peer"
+      >
+        <Document::RelatedResources::ListItem::Resource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </ExternalLink>
+    {{/if}}
+    <Document::RelatedResources::ListItem::OverflowMenu
+      @resource={{@resource}}
+      @onRemoveClick={{@removeResource}}
+      @onEditClick={{this.showModal}}
+    />
+  </div>
+</li>
+
+{{#if this.modalIsShown}}
+  <Document::RelatedResources::ListItem::Edit
+    @resource={{@resource}}
+    @hideModal={{this.hideModal}}
+    @onSave={{this.saveChanges}}
+    @url={{this.externalResourceURL}}
+
+  />
+{{/if}}

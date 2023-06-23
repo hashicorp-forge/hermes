@@ -55,6 +55,6 @@ export default class DocumentRelatedResourcesListItemComponent extends Component
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::List::Item": typeof DocumentRelatedResourcesListItemComponent;
+    "Document::RelatedResources::ListItem": typeof DocumentRelatedResourcesListItemComponent;
   }
 }

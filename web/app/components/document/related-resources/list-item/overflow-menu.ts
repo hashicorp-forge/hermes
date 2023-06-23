@@ -47,6 +47,6 @@ export default class DocumentRelatedResourcesListItemOverflowMenuComponent exten
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::List::ItemOverflowMenu": typeof DocumentRelatedResourcesListItemOverflowMenuComponent;
+    "Document::RelatedResources::ListItem::OverflowMenu": typeof DocumentRelatedResourcesListItemOverflowMenuComponent;
   }
 }
