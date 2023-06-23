@@ -1,15 +1,9 @@
 import Component from "@glimmer/component";
+import { XDropdownListToggleComponentArgs } from "./_shared";
 
 interface XDropdownListToggleActionComponentSignature {
   Element: HTMLButtonElement;
-  Args: {
-    registerAnchor: (element: HTMLElement) => void;
-    onTriggerKeydown: (event: KeyboardEvent) => void;
-    toggleContent: () => void;
-    contentIsShown: boolean;
-    disabled?: boolean;
-    ariaControls: string;
-  };
+  Args: XDropdownListToggleComponentArgs;
   Blocks: {
     default: [];
   };

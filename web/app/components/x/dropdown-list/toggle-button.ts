@@ -1,15 +1,10 @@
 import Component from "@glimmer/component";
 import { HdsButtonColor } from "hds/_shared";
+import { XDropdownListToggleComponentArgs } from "./_shared";
 
 interface XDropdownListToggleButtonComponentSignature {
   Element: HTMLButtonElement;
-  Args: {
-    registerAnchor: (element: HTMLElement) => void;
-    onTriggerKeydown: (event: KeyboardEvent) => void;
-    toggleContent: () => void;
-    contentIsShown: boolean;
-    disabled?: boolean;
-    ariaControls: string;
+  Args: XDropdownListToggleComponentArgs & {
     color: HdsButtonColor;
     text: string;
   };

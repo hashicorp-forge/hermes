@@ -1,11 +1,13 @@
 import Component from "@glimmer/component";
 
+export interface XDropdownListCheckableItemComponentArgs {
+  value: string;
+  isSelected?: boolean;
+  count?: number;
+}
+
 interface XDropdownListCheckableItemComponentSignature {
-  Args: {
-    isSelected?: boolean;
-    value: string;
-    count?: number;
-  };
+  Args: XDropdownListCheckableItemComponentArgs;
 }
 
 export default class XDropdownListCheckableItemComponent extends Component<XDropdownListCheckableItemComponentSignature> {}
