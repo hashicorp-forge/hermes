@@ -289,8 +289,8 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <Inputs::DocumentSelect
-            @productArea={{@product}}
+          <Document::RelatedResources
+            @productArea={{@document.product}}
             @objectID={{@document.objectID}}
           />
         </div>

@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { RelatedExternalLink } from ".";
 import { action } from "@ember/object";
+import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
 interface InputsDocumentSelectOverflowButtonSignature {
   Args: {

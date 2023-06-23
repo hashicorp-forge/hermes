@@ -1,18 +1,9 @@
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
-{{#if this.noMatchesFound}}
-  {{#if (has-block "no-matches")}}
-    {{yield to="no-matches"}}
-  {{else}}
-    <div
-      class="x-dropdown-list-empty-state"
-      data-test-dropdown-list-empty-state
-    >
-      No matches
-    </div>
-  {{/if}}
-{{else}}
+{{yield (hash isShown=this.noMatchesFound) to="no-matches"}}
+
+{{#unless this.noMatchesFound}}
   {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     {{#if this.listIsShown}}
@@ -44,4 +35,4 @@
       </MaybeOrderedList>
     {{/if}}
   {{/let}}
-{{/if}}
+{{/unless}}

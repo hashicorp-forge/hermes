@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { RelatedExternalLink } from ".";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
+import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
 interface InputsDocumentSelectListItemSignature {
   Element: HTMLLIElement;

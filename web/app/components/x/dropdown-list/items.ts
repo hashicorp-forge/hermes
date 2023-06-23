@@ -12,12 +12,13 @@ interface XDropdownListItemsComponentSignature {
       shownItems?: any;
       inputIsShown?: boolean;
       scrollContainer: HTMLElement;
-    listIsHidden?: boolean;
+      listIsHidden?: boolean;
       onInput: (event: Event) => void;
       registerScrollContainer: (element: HTMLElement) => void;
     };
   Blocks: {
-    "no-matches": [];
+    default: [];
+    "no-matches": [{ isShown: boolean }];
     item: [dd: XDropdownListItemAPI];
   };
 }

@@ -99,7 +99,7 @@
               <Hds::Form::TextInput::Base
                 data-test-x-dropdown-list-input
                 {{did-insert this.registerAndFocusInput}}
-                {{on "input" (perform this.onInput)}}
+                {{on "input" this.onInput}}
                 {{! TODO: add focusin/focusout listeners to conditionally disable the ArrowUp/Down function of the ::Items component  }}
                 @value={{this.query}}
                 @type="search"
@@ -138,10 +138,17 @@
               @scrollContainer={{this.scrollContainer}}
               @listIsHidden={{@listIsHidden}}
             >
-              <:no-matches>
-                {{#unless @isLoading}}
-                  {{yield to="no-matches"}}
-                {{/unless}}
+              <:no-matches as |n|>
+                {{#if (has-block "no-matches")}}
+                  {{yield n to="no-matches"}}
+                {{else if n.isShown}}
+                  <div
+                    class="x-dropdown-list-empty-state"
+                    data-test-dropdown-list-empty-state
+                  >
+                    No matches
+                  </div>
+                {{/if}}
               </:no-matches>
               <:item as |i|>
                 {{yield i to="item"}}

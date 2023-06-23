@@ -8,8 +8,8 @@ import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import NativeArray from "@ember/array/-private/native-array";
-import { RelatedExternalLink } from ".";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import { RelatedExternalLink } from "hermes/components/document/related-resources";
 
 interface InputsDocumentSelectAddResourceModalComponentSignature {
   Element: null;

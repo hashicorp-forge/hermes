@@ -16,7 +16,7 @@ import AlgoliaService from "hermes/services/algolia";
 import { restartableTask } from "ember-concurrency";
 import { next } from "@ember/runloop";
 
-interface InputsDocumentSelectComponentSignature {
+interface DocumentRelatedResourcesComponentSignature {
   Args: {
     productArea?: string;
     objectID?: string;
@@ -31,7 +31,7 @@ export interface RelatedExternalLink {
 // const GOOGLE_FAVICON_URL_PREFIX =
 //   "https://s2.googleusercontent.com/s2/favicons";
 
-export default class InputsDocumentSelectComponent extends Component<InputsDocumentSelectComponentSignature> {
+export default class DocumentRelatedResourcesComponent extends Component<DocumentRelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
@@ -113,6 +113,7 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
             "status",
             "owners",
           ],
+          // TODO: investigate why this doesn't work
           optionalFilters: ["product:" + this.args.productArea],
         })
         .then((response) => response);
@@ -185,8 +186,6 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
     return documents;
   }
 
-
-
   @action showAddResourceModal() {
     this.addResourceModalIsShown = true;
   }
@@ -231,6 +230,6 @@ export default class InputsDocumentSelectComponent extends Component<InputsDocum
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::DocumentSelect": typeof InputsDocumentSelectComponent;
+    "Document::RelatedResources": typeof DocumentRelatedResourcesComponent;
   }
 }

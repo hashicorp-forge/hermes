@@ -71,7 +71,7 @@ interface XDropdownListComponentSignature {
     item: [dd: XDropdownListItemAPI];
     header: [];
     loading: [];
-    "no-matches": [];
+    "no-matches": [{ isShown: boolean }];
     footer: [];
   };
 }

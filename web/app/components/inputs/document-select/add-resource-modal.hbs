@@ -110,15 +110,20 @@
         <:loading>
           <FlightIcon @name="loading" class="ml-2 mt-4" />
         </:loading>
-        <:no-matches>
-          <div
-            class="related-resources-modal-container mt-36
-              {{if (or this.queryIsThirdPartyURL this.queryIsEmpty) 'hidden'}}"
-          >
-            <h3 class="related-resources-modal-loading-text">
-              No results found
-            </h3>
-          </div>
+        <:no-matches as |n|>
+          {{#if n.isShown}}
+            <div
+              class="related-resources-modal-container mt-36
+                {{if
+                  (or this.queryIsThirdPartyURL this.queryIsEmpty)
+                  'hidden'
+                }}"
+            >
+              <h3 class="related-resources-modal-loading-text">
+                No results found
+              </h3>
+            </div>
+          {{/if}}
         </:no-matches>
         <:item as |dd|>
           <dd.Action class="related-document-option">
