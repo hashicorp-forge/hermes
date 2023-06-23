@@ -2,14 +2,14 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { FocusDirection } from ".";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
 import { WithBoundArgs } from "@glint/template";
 import XDropdownListActionComponent from "./action";
 import XDropdownListLinkToComponent from "./link-to";
+import { FocusDirection } from ".";
 
-export type XDropdownListInteractiveComponentArgs =
+type XDropdownListInteractiveComponentBoundArgs =
   | "role"
   | "isAriaSelected"
   | "isAriaChecked"
@@ -20,11 +20,11 @@ export type XDropdownListInteractiveComponentArgs =
 export interface XDropdownListItemAPI {
   Action: WithBoundArgs<
     typeof XDropdownListActionComponent,
-    XDropdownListInteractiveComponentArgs
+    XDropdownListInteractiveComponentBoundArgs
   >;
   LinkTo: WithBoundArgs<
     typeof XDropdownListLinkToComponent,
-    XDropdownListInteractiveComponentArgs
+    XDropdownListInteractiveComponentBoundArgs
   >;
   contentID: string;
   value: any;
@@ -33,7 +33,7 @@ export interface XDropdownListItemAPI {
   attrs?: any;
 }
 
-export interface XDropdownListItemSharedArgs {
+export interface XDropdownListItemComponentArgs {
   contentID: string;
   attributes?: any;
   isSelected?: boolean;
@@ -48,7 +48,7 @@ export interface XDropdownListItemSharedArgs {
 }
 
 interface XDropdownListItemComponentSignature {
-  Args: XDropdownListItemSharedArgs & {
+  Args: XDropdownListItemComponentArgs & {
     value: string;
   };
   Blocks: {

@@ -5,14 +5,15 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { WithBoundArgs } from "@glint/template";
 import FetchService from "hermes/services/fetch";
+import { HdsButtonColor } from "hds/_shared";
+import { XDropdownListSharedArgs } from "./_shared";
+import { WithBoundArgs } from "@glint/template";
 import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
-import { HdsButtonColor } from "hds/_shared";
 import { XDropdownListItemAPI } from "./item";
 
-type XDropdownListToggleComponentBoundArgs =
+export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
   | "registerAnchor"
   | "toggleContent"
@@ -20,7 +21,7 @@ type XDropdownListToggleComponentBoundArgs =
   | "disabled"
   | "ariaControls";
 
-interface XDropdownListAnchorAPI {
+export interface XDropdownListAnchorAPI {
   ToggleAction: WithBoundArgs<
     typeof XDropdownListToggleActionComponent,
     XDropdownListToggleComponentBoundArgs
@@ -41,24 +42,17 @@ interface XDropdownListAnchorAPI {
   showContent: () => void;
 }
 
-export interface XDropdownListSharedArgs {
-  items?: any;
-  selected?: any;
-  listIsOrdered?: boolean;
-}
-
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
     placement?: Placement;
     renderOut?: boolean;
-
-    onItemClick?: (value: any, attributes: any) => void;
     color?: HdsButtonColor;
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+    onItemClick?: (value: any, attributes: any) => void;
   };
   Blocks: {
     default: [];

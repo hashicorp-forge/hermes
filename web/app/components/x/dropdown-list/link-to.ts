@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
-import { XDropdownListActionComponentArgs } from "./action";
+import { XDropdownListInteractiveComponentArgs } from "./_shared";
 
 interface XDropdownListLinkToComponentSignature {
   Element: HTMLAnchorElement;
-  Args: XDropdownListActionComponentArgs & {
+  Args: XDropdownListInteractiveComponentArgs & {
     route: string;
     query?: Record<string, unknown> | unknown;
     model?: unknown;

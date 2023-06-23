@@ -1,18 +1,9 @@
 import Component from "@glimmer/component";
-
-export type XDropdownListActionComponentArgs = {
-  registerElement: (e: HTMLElement) => void;
-  focusMouseTarget: (e: MouseEvent) => void;
-  onClick: () => void;
-  disabled?: boolean;
-  role: string;
-  isAriaSelected: boolean;
-  isAriaChecked: boolean;
-};
+import { XDropdownListInteractiveComponentArgs } from "./_shared";
 
 interface XDropdownListActionComponentSignature {
   Element: HTMLButtonElement;
-  Args: XDropdownListActionComponentArgs;
+  Args: XDropdownListInteractiveComponentArgs;
   Blocks: {
     default: [];
   };
