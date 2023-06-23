@@ -127,9 +127,7 @@
         </:no-matches>
         <:item as |dd|>
           <dd.Action class="related-document-option">
-            <Document::RelatedResources::AddResource::DocumentOption
-              @document={{dd.attrs}}
-            />
+            <Document::RelatedResources::Add::Document @document={{dd.attrs}} />
           </dd.Action>
         </:item>
       </X::DropdownList>
