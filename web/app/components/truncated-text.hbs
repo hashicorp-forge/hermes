@@ -1,0 +1,8 @@
+{{! @glint-ignore - element helper not yet typed }}
+{{#let (element (or @tagName "p")) as |Container|}}
+  <Container class="truncated-text-container">
+    <span class="overflow-hidden" ...attributes>
+      {{yield}}
+    </span>
+  </Container>
+{{/let}}
