@@ -1,14 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render } from "@ember/test-helpers";
+import { TestContext, click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import window from "ember-window-mock";
-import { HermesDocument } from "hermes/types/document";
-import htmlElement from "hermes/utils/html-element";
-import ConfigService from "hermes/services/config";
 
-interface DocumentSidebarSectionHeaderTestContext extends MirageTestContext {
+const CONTAINER_SELECTOR = ".sidebar-section-header-container";
+const BUTTON_SELECTOR = ".sidebar-section-header-button";
+
+interface DocumentSidebarSectionHeaderTestContext extends TestContext {
   title: string;
   buttonLabel?: string;
   buttonAction?: () => void;
@@ -26,7 +24,12 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
       />
     `);
 
-    assert.dom(".foo .sidebar-section-header").hasText("Hello World");
+    assert
+      .dom(`.foo${CONTAINER_SELECTOR}`)
+      .hasText(
+        "Hello World",
+        'renders the title in the "container" element with the correct class and className'
+      );
   });
 
   test("it renders as expected (title and button)", async function (this: DocumentSidebarSectionHeaderTestContext, assert) {
@@ -45,13 +48,13 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
       />
     `);
 
-    assert.dom(".foo").hasText("Click the plus to check");
-    assert.dom('.flight-icon-plus').exists();
-    assert.dom('.flight-icon-check').doesNotExist();
+    assert.dom(BUTTON_SELECTOR).exists().hasAttribute("aria-label", "Click me");
+    assert.dom(".flight-icon-plus").exists();
+    assert.dom(".flight-icon-check").doesNotExist();
 
     // test that the action works
-    await click(".foo .sidebar-section-header button");
-    assert.dom('.flight-icon-plus').doesNotExist();
-    assert.dom('.flight-icon-check').exists();
+    await click(BUTTON_SELECTOR);
+    assert.dom(".flight-icon-plus").doesNotExist();
+    assert.dom(".flight-icon-check").exists();
   });
 });
