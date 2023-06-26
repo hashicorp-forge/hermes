@@ -22,6 +22,7 @@ declare const config: {
   };
   shortLinkBaseURL: string;
   skipGoogleAuth: boolean;
+  showEmberAnimatedTools: boolean;
 };
 
 export default config;

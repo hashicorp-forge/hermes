@@ -7572,7 +7572,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-animated@npm:^1.0.4":
+"ember-animated-tools@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "ember-animated-tools@npm:1.0.0"
+  dependencies:
+    "@embroider/addon-shim": ^1.5.0
+    ember-animated: ^1.0.0
+  checksum: faa4f4eda84d51ec4fbd3a420f8cfd515f0301502793f5844a70fd3be801ede843d1ef51d44cd1a42e678e5137e4de3a79f8955f433f73717067a7570bbac77d
+  languageName: node
+  linkType: hard
+
+"ember-animated@npm:^1.0.0, ember-animated@npm:^1.0.4":
   version: 1.0.4
   resolution: "ember-animated@npm:1.0.4"
   dependencies:
@@ -11151,6 +11161,7 @@ __metadata:
     babel-eslint: ^10.1.0
     broccoli-asset-rev: ^3.0.0
     ember-animated: ^1.0.4
+    ember-animated-tools: ^1.0.0
     ember-auto-import: ^2.4.0
     ember-basic-dropdown: ^4.0.5
     ember-cli: ~3.28.6
