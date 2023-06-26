@@ -18,6 +18,7 @@ interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
     id: string;
+    // TODO: Move "none" logic to a parent component.
     placement?: Placement | "none";
     renderOut?: boolean;
     offset?: OffsetOptions;
