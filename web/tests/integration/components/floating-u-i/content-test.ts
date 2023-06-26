@@ -230,7 +230,10 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       "content has the `non-floating-content` class"
     );
 
-    assert.true(content.style.position === "static", "content is static");
+    assert.true(
+      getComputedStyle(content).position === "static",
+      "content is static"
+    );
 
     const inlineStyle = content.getAttribute("style");
 

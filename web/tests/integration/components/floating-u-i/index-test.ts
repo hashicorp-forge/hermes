@@ -67,6 +67,7 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
       <FloatingUI @disableClose={{true}}>
         <:anchor as |f|>
           <Action
+            class="open-button"
             {{on "click" f.showContent}}
             {{did-insert f.registerAnchor}}
           >
@@ -83,10 +84,10 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
 
     await click(".open-button");
 
-    assert.dom(".content").exists();
+    assert.dom(".close-button").exists();
 
     await click(".close-button");
 
-    assert.dom(".content").exists('the "close" action was disabled');
+    assert.dom(".close-button").exists('the "close" action was disabled');
   });
 });
