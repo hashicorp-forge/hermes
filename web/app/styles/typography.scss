@@ -15,6 +15,5 @@
 }
 
 .truncated-text-container {
-  @apply truncate;
-  @apply font-regular text-body-100 text-color-foreground-faint;
+  @apply truncate block font-regular text-body-100 text-color-foreground-faint;
 }
