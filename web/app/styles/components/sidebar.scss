@@ -71,6 +71,24 @@
     scrollbar-color: var(--token-color-palette-neutral-300) transparent;
   }
 
+  .sidebar-section-header-container {
+    @apply w-full flex items-center justify-between;
+  }
+
+  .sidebar-section-header {
+    @apply text-body-100 hds-foreground-faint font-regular;
+  }
+
+  .sidebar-section-header-button {
+    @apply grid place-items-center rounded border border-transparent;
+    @apply w-[26px] h-[26px];
+    @apply -mr-0.5;
+
+    &:hover {
+      @apply border-color-border-strong;
+    }
+  }
+
   .primary-textarea {
     @apply min-h-[76px];
   }
