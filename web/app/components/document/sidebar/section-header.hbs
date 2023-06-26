@@ -1,12 +1,12 @@
-<div class="sidebar-section-header-container">
-  <div class="sidebar-section-header">
+<div class="sidebar-section-header-container" ...attributes>
+  <h5 class="sidebar-section-header">
     {{@title}}
-  </div>
+  </h5>
   {{#if @buttonAction}}
     <Action
-      {{on "click" this.buttonAction}}
+      {{on "click" @buttonAction}}
       class="sidebar-section-header-button"
-      aria-label={{@buttonLabel}}
+      aria-label={{or @buttonLabel "Add"}}
     >
       <FlightIcon @name={{or @buttonIcon "plus"}} />
     </Action>

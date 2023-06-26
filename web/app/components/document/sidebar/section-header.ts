@@ -1,9 +1,7 @@
-import { assert } from "@ember/debug";
-import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
 interface DocumentSidebarSectionHeaderComponentSignature {
-  Element: null;
+  Element: HTMLDivElement;
   Args: {
     title: string;
     buttonLabel?: string;
@@ -12,18 +10,7 @@ interface DocumentSidebarSectionHeaderComponentSignature {
   };
 }
 
-export default class DocumentSidebarSectionHeaderComponent extends Component<DocumentSidebarSectionHeaderComponentSignature> {
-  get buttonIsShown() {
-    return (
-      this.args.buttonLabel && this.args.buttonAction && this.args.buttonIcon
-    );
-  }
-
-  @action buttonAction() {
-    assert("buttonAction must be defined", this.args.buttonAction);
-    this.args.buttonAction();
-  }
-}
+export default class DocumentSidebarSectionHeaderComponent extends Component<DocumentSidebarSectionHeaderComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
