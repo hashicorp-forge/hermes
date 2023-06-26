@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
@@ -7,6 +6,7 @@
     No matches
   </div>
 {{else}}
+  {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     <MaybeOrderedList
       data-test-x-dropdown-list
@@ -24,7 +24,7 @@
             @isSelected={{eq @selected item}}
             @focusedItemIndex={{@focusedItemIndex}}
             @listItemRole={{@listItemRole}}
-            @hideDropdown={{@hideContent}}
+            @hideContent={{@hideContent}}
             @onItemClick={{@onItemClick}}
             @setFocusedItemIndex={{@setFocusedItemIndex}}
             as |i|

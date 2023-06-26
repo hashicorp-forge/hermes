@@ -1,17 +1,18 @@
 import Component from "@glimmer/component";
+import { XDropdownListInteractiveComponentArgs } from "./_shared";
 
 interface XDropdownListActionComponentSignature {
   Element: HTMLButtonElement;
-  Args: {
-    registerElement: () => void;
-    focusMouseTarget: () => void;
-    onClick: () => void;
-    disabled?: boolean;
-    ariaControls: string;
-    role: string;
-    isAriaSelected: boolean;
-    isAriaChecked: boolean;
+  Args: XDropdownListInteractiveComponentArgs;
+  Blocks: {
+    default: [];
   };
 }
 
 export default class XDropdownListActionComponent extends Component<XDropdownListActionComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "x/dropdown-list/action": typeof XDropdownListActionComponent;
+  }
+}

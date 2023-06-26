@@ -2,24 +2,22 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { FocusDirection } from ".";
+import { XDropdownListSharedArgs } from "./_shared";
+import { XDropdownListItemAPI, XDropdownListItemComponentArgs } from "./item";
 
 interface XDropdownListItemsComponentSignature {
-  Args: {
-    contentID: string;
-    query?: string;
-    items?: any;
-    shownItems?: any;
-    selected?: any;
-    focusedItemIndex: number;
-    inputIsShown?: boolean;
-    listIsOrdered?: boolean;
-    listItemRole: string;
-    scrollContainer: HTMLElement;
-    onInput: () => void;
-    onItemClick: (value: any, attributes?: any) => void;
-    registerScrollContainer?: (e: HTMLElement) => void;
-    setFocusedItemIndex: (direction: FocusDirection) => void;
-    hideContent: () => void;
+  Args: XDropdownListSharedArgs &
+    XDropdownListItemComponentArgs & {
+      contentID: string;
+      query?: string;
+      shownItems?: any;
+      inputIsShown?: boolean;
+      scrollContainer: HTMLElement;
+      onInput: (event: Event) => void;
+      registerScrollContainer: (element: HTMLElement) => void;
+    };
+  Blocks: {
+    item: [dd: XDropdownListItemAPI];
   };
 }
 
@@ -73,5 +71,11 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
         this.args.hideContent();
       }
     }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Items": typeof XDropdownListItemsComponent;
   }
 }

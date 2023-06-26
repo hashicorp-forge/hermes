@@ -1,16 +1,9 @@
 import Component from "@glimmer/component";
+import { XDropdownListInteractiveComponentArgs } from "./_shared";
 
 interface XDropdownListLinkToComponentSignature {
   Element: HTMLAnchorElement;
-  Args: {
-    registerElement: () => void;
-    focusMouseTarget: () => void;
-    onClick: () => void;
-    disabled?: boolean;
-    ariaControls: string;
-    role: string;
-    isAriaSelected: boolean;
-    isAriaChecked: boolean;
+  Args: XDropdownListInteractiveComponentArgs & {
     route: string;
     query?: Record<string, unknown>;
     model?: unknown;

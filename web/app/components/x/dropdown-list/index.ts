@@ -5,27 +5,61 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import { HdsButtonColor } from "hds/_shared";
+import { XDropdownListSharedArgs } from "./_shared";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListToggleActionComponent from "./toggle-action";
+import XDropdownListToggleButtonComponent from "./toggle-button";
+import { XDropdownListItemAPI } from "./item";
+
+export type XDropdownListToggleComponentBoundArgs =
+  | "contentIsShown"
+  | "registerAnchor"
+  | "toggleContent"
+  | "onTriggerKeydown"
+  | "disabled"
+  | "ariaControls";
+
+export interface XDropdownListAnchorAPI {
+  ToggleAction: WithBoundArgs<
+    typeof XDropdownListToggleActionComponent,
+    XDropdownListToggleComponentBoundArgs
+  >;
+  ToggleButton: WithBoundArgs<
+    typeof XDropdownListToggleButtonComponent,
+    XDropdownListToggleComponentBoundArgs | "color" | "text"
+  >;
+  ariaControls: string;
+  contentIsShown: boolean;
+  focusedItemIndex: number;
+  registerAnchor: (element: HTMLElement) => void;
+  onTriggerKeydown: (event: KeyboardEvent) => void;
+  resetFocusedItemIndex: () => void;
+  scheduleAssignMenuItemIDs: () => void;
+  toggleContent: () => void;
+  hideContent: () => void;
+  showContent: () => void;
+}
 
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
-  Args: {
-    items?: any;
-    listIsOrdered?: boolean;
-    selected?: any;
-    placement?: Placement;
+  Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
-    offset?: OffsetOptions;
+    placement?: Placement;
     renderOut?: boolean;
-    onItemClick: (value: any, attributes: any) => void;
+    color?: HdsButtonColor;
+    disabled?: boolean;
+    offset?: OffsetOptions;
+    label?: string;
+    onItemClick?: (value: any, attributes: any) => void;
   };
-  // TODO: Replace using Glint's `withBoundArgs` types
   Blocks: {
     default: [];
-    anchor: [dd: any];
-    header: [dd: any];
-    item: [dd: any];
+    anchor: [dd: XDropdownListAnchorAPI];
+    item: [dd: XDropdownListItemAPI];
+    header: [];
+    footer: [];
   };
 }
 
@@ -90,7 +124,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
-  @action protected registerScrollContainer(element: HTMLDivElement) {
+  @action protected registerScrollContainer(element: HTMLElement) {
     this._scrollContainer = element;
   }
 
@@ -287,13 +321,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
+  @action onInput(event: Event) {
     this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
 
-    this.query = (inputEvent.target as HTMLInputElement).value;
+    this.query = (event.target as HTMLInputElement).value;
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
@@ -302,7 +336,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
 
     this._filteredItems = shownItems;
     this.scheduleAssignMenuItemIDs();
-  });
+  }
 
   /**
    * The action that assigns menu item IDs.

@@ -2,23 +2,57 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { FocusDirection } from ".";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListActionComponent from "./action";
+import XDropdownListLinkToComponent from "./link-to";
+import { FocusDirection } from ".";
+
+type XDropdownListInteractiveComponentBoundArgs =
+  | "role"
+  | "isAriaSelected"
+  | "isAriaChecked"
+  | "registerElement"
+  | "focusMouseTarget"
+  | "onClick";
+
+export interface XDropdownListItemAPI {
+  Action: WithBoundArgs<
+    typeof XDropdownListActionComponent,
+    XDropdownListInteractiveComponentBoundArgs
+  >;
+  LinkTo: WithBoundArgs<
+    typeof XDropdownListLinkToComponent,
+    XDropdownListInteractiveComponentBoundArgs
+  >;
+  contentID: string;
+  value: any;
+  selected?: any;
+  isSelected?: boolean;
+  attrs?: any;
+}
+
+export interface XDropdownListItemComponentArgs {
+  contentID: string;
+  attributes?: any;
+  isSelected?: boolean;
+  focusedItemIndex: number;
+  listItemRole: string;
+  onItemClick?: (value: any, attributes: any) => void;
+  setFocusedItemIndex: (
+    focusDirection: FocusDirection | number,
+    maybeScrollIntoView?: boolean
+  ) => void;
+  hideContent: () => void;
+}
 
 interface XDropdownListItemComponentSignature {
-  Args: {
+  Args: XDropdownListItemComponentArgs & {
     value: string;
-    attributes?: unknown;
-    isSelected: boolean;
-    focusedItemIndex: number;
-    listItemRole: string;
-    hideDropdown: () => void;
-    onItemClick?: (value: any, attributes: any) => void;
-    setFocusedItemIndex: (
-      focusDirection: FocusDirection | number,
-      maybeScrollIntoView?: boolean
-    ) => void;
+  };
+  Blocks: {
+    default: [dd: XDropdownListItemAPI];
   };
 }
 
@@ -96,11 +130,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      */
     if (Ember.testing) {
       schedule("afterRender", () => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     } else {
       next(() => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     }
   }
@@ -116,5 +150,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     assert("target must be an element", target instanceof HTMLElement);
     this._domElement = target;
     this.args.setFocusedItemIndex(this.itemIndexNumber, false);
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Item": typeof XDropdownListItemComponent;
   }
 }
