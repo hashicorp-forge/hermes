@@ -15,15 +15,12 @@
 </div>
 
 <div class="w-full overflow-hidden">
-  <h4
-    class="font-regular text-body-100 text-color-foreground-faint truncate leading-tight"
+  <TruncatedText
+    @tagName="h4"
+    class="text-body-200 text-color-foreground-strong font-medium"
   >
-    <span
-      class="overflow-hidden text-body-200 text-color-foreground-strong font-medium"
-    >
-      {{@resource.title}}
-    </span>
-  </h4>
+    {{@resource.title}}
+  </TruncatedText>
   {{#if @resource.docNumber}}
     <div class="text-color-foreground-faint text-body-100 mt-px">
       {{@resource.docType}}
