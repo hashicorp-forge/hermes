@@ -1,0 +1,20 @@
+<AnimatedContainer class="w-full">
+  {{#if this.listIsEmpty}}
+    <div class="mt-1.5">
+      {{! do we need this mt1.5 }}
+      <CustomEditableFields::EmptyState />
+    </div>
+  {{else}}
+    <ul class="related-resources" ...attributes>
+      {{#animated-each
+        @items
+        use=this.transition
+        initialInsertion=true
+        finalRemoval=true
+        as |resource|
+      }}
+        {{yield resource to="resource"}}
+      {{/animated-each}}
+    </ul>
+  {{/if}}
+</AnimatedContainer>

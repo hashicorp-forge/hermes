@@ -1,38 +1,18 @@
-<AnimatedContainer class="w-full">
-  <div class="sidebar-section-header-container">
-    <div class="sidebar-section-header">
-      Related resources
-    </div>
-    <Action
-      {{on "click" this.showAddResourceModal}}
-      class="sidebar-section-header-button"
-      aria-label="Add related resource"
-    >
-      <FlightIcon @name="plus" />
-    </Action>
-  </div>
-  {{#if this.relatedResourcesAreShown}}
-    <ul class="related-resources">
-      {{#animated-each
-        this.relatedResourcesObjectEntries
-        use=this.transition
-        initialInsertion=true
-        finalRemoval=true
-        as |resource|
-      }}
-        <Document::RelatedResources::ListItem
-          @resource={{resource}}
-          @removeResource={{this.removeResource}}
-          @editResource={{this.editResource}}
-        />
-      {{/animated-each}}
-    </ul>
-  {{else}}
-    <div class="mt-1.5">
-      <CustomEditableFields::EmptyState />
-    </div>
-  {{/if}}
-</AnimatedContainer>
+<Document::Sidebar::SectionHeader
+  @title="Related resources"
+  @buttonLabel="Add related resource"
+  @buttonAction={{this.showAddResourceModal}}
+/>
+
+<Document::Sidebar::ResourceList @items={{this.relatedResourcesObjectEntries}}>
+  <:resource as |r|>
+    <Document::RelatedResources::ListItem
+      @resource={{r}}
+      @removeResource={{this.removeResource}}
+      @editResource={{this.editResource}}
+    />
+  </:resource>
+</Document::Sidebar::ResourceList>
 
 {{#if this.addResourceModalIsShown}}
   <Document::RelatedResources::Add

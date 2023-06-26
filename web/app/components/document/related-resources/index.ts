@@ -7,11 +7,8 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
-import move from "ember-animated/motions/move";
-import { TransitionContext, wait } from "ember-animated/.";
-import animateScale from "hermes/utils/ember-animated/animate-scale";
-import { easeOutQuad } from "hermes/utils/ember-animated/easings";
+import { fadeIn } from "ember-animated/motions/opacity";
+import { TransitionContext } from "ember-animated/.";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask } from "ember-concurrency";
 import { next } from "@ember/runloop";
@@ -28,9 +25,6 @@ export interface RelatedExternalLink {
   title: string;
 }
 
-// const GOOGLE_FAVICON_URL_PREFIX =
-//   "https://s2.googleusercontent.com/s2/favicons";
-
 export default class DocumentRelatedResourcesComponent extends Component<DocumentRelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
@@ -42,44 +36,13 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
 
   @tracked addResourceModalIsShown = false;
 
-  // @tracked dd: any = null;
-
   get relatedResourcesAreShown(): boolean {
     return Object.keys(this.relatedResources).length > 0;
   }
 
-  *linkCardTransition({ insertedSprites, removedSprites }: TransitionContext) {
+  *linkCardTransition({ insertedSprites }: TransitionContext) {
     for (let sprite of insertedSprites) {
       void fadeIn(sprite, { duration: 100 });
-    }
-  }
-
-  *transition({
-    insertedSprites,
-    keptSprites,
-    removedSprites,
-  }: TransitionContext) {
-    for (let sprite of keptSprites) {
-      void move(sprite, { duration: 250, easing: easeOutQuad });
-    }
-
-    for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 0 });
-    }
-
-    for (let sprite of insertedSprites) {
-      // sprite.startTranslatedBy(0, -4);
-      sprite.applyStyles({
-        opacity: "0",
-      });
-      yield wait(100);
-      void animateScale(sprite, {
-        from: 0.95,
-        to: 1,
-        duration: 200,
-        easing: easeOutQuad,
-      });
-      void fadeIn(sprite, { duration: 50 });
     }
   }
 

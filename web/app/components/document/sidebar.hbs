@@ -295,6 +295,13 @@
           />
         </div>
 
+        <div class="flex flex-col items-start space-y-2">
+          <Document::RelatedResources
+            @productArea={{@document.product}}
+            @objectID={{@document.objectID}}
+          />
+        </div>
+
         {{#each-in this.customEditableFields as |field attributes|}}
           {{#if
             (or
