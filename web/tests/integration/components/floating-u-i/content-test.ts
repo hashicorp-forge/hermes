@@ -203,22 +203,18 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     );
   });
 
-  test('it can be positioned "none"', async function (this: FloatingUIComponentTestContext, assert) {
+  test('it can be positioned "none"', async function (assert) {
     await render(hbs`
-      <div class="grid place-items-center w-full h-full">
-        <div>
-          <div class="anchor" style="width: 100px">
-            Attach
-          </div>
-          <FloatingUI::Content
-            @id="1"
-            @anchor={{html-element '.anchor'}}
-            @placement="none"
-          >
-            Content
-          </FloatingUI::Content>
-        </div>
+      <div class="anchor">
+        Attach
       </div>
+      <FloatingUI::Content
+        @id="1"
+        @anchor={{html-element '.anchor'}}
+        @placement="none"
+      >
+        Content
+      </FloatingUI::Content>
     `);
 
     let content = htmlElement(".hermes-floating-ui-content");
