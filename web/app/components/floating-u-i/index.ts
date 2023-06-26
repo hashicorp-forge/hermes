@@ -24,8 +24,8 @@ interface FloatingUIComponentSignature {
   Element: HTMLDivElement;
   Args: {
     renderOut?: boolean;
-    // TODO: Move "none" logic to a parent component.
-    placement?: Placement | "none";
+    // TODO: Move null logic to a parent component.
+    placement?: Placement | null;
     disableClose?: boolean;
     offset?: OffsetOptions;
   };

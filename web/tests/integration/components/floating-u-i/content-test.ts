@@ -6,6 +6,7 @@ import htmlElement from "hermes/utils/html-element";
 import { OffsetOptions } from "@floating-ui/dom";
 
 const DEFAULT_CONTENT_OFFSET = 5;
+const CONTENT_SELECTOR = ".hermes-floating-ui-content";
 
 interface FloatingUIComponentTestContext extends TestContext {
   renderOut?: boolean;
@@ -35,17 +36,17 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     `);
 
     assert
-      .dom(".container .hermes-floating-ui-content")
+      .dom(`.container ${CONTENT_SELECTOR}`)
       .exists("content is rendered inline by default");
 
     this.set("renderOut", true);
 
     assert
-      .dom(".container .hermes-floating-ui-content")
+      .dom(`.container ${CONTENT_SELECTOR}`)
       .doesNotExist("content is rendered outside its container");
 
     assert
-      .dom(".ember-application .hermes-floating-ui-content")
+      .dom(`.ember-application ${CONTENT_SELECTOR}`)
       .exists("content is rendered in the root element");
   });
 
@@ -88,7 +89,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     `);
 
     let anchor = htmlElement(".anchor");
-    let content = htmlElement(".hermes-floating-ui-content");
+    let content = htmlElement(CONTENT_SELECTOR);
 
     setVariables(anchor, content);
 
@@ -125,7 +126,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     `);
 
     anchor = htmlElement(".anchor");
-    content = htmlElement(".hermes-floating-ui-content");
+    content = htmlElement(CONTENT_SELECTOR);
 
     setVariables(anchor, content);
 
@@ -156,7 +157,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     `);
 
     let anchor = htmlElement(".anchor");
-    let content = htmlElement(".hermes-floating-ui-content");
+    let content = htmlElement(CONTENT_SELECTOR);
     let contentWidth = content.offsetWidth;
     let contentRight = content.offsetLeft + contentWidth;
     let anchorLeft = anchor.offsetLeft;
@@ -191,7 +192,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     `);
 
     anchor = htmlElement(".anchor");
-    content = htmlElement(".hermes-floating-ui-content");
+    content = htmlElement(CONTENT_SELECTOR);
     contentWidth = content.offsetWidth;
     contentRight = content.offsetLeft + contentWidth;
     anchorLeft = anchor.offsetLeft;
@@ -203,7 +204,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     );
   });
 
-  test('it can be positioned "none"', async function (assert) {
+  test("it can ignore dynamic positioning", async function (assert) {
     await render(hbs`
       <div class="anchor">
         Attach
@@ -211,19 +212,17 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       <FloatingUI::Content
         @id="1"
         @anchor={{html-element '.anchor'}}
-        @placement="none"
+        @placement={{null}}
       >
         Content
       </FloatingUI::Content>
     `);
 
-    let content = htmlElement(".hermes-floating-ui-content");
+    assert
+      .dom(CONTENT_SELECTOR)
+      .doesNotHaveAttribute("data-floating-ui-placement");
 
-    assert.equal(
-      content.getAttribute("data-floating-ui-placement"),
-      "none",
-      "content is not positioned"
-    );
+    const content = htmlElement(CONTENT_SELECTOR);
 
     assert.true(
       content.classList.contains("non-floating-content"),

@@ -18,8 +18,8 @@ interface FloatingUIContentSignature {
   Args: {
     anchor: HTMLElement;
     id: string;
-    // TODO: Move "none" logic to a parent component.
-    placement?: Placement | "none";
+    // TODO: Move null logic to a parent component.
+    placement?: Placement | null;
     renderOut?: boolean;
     offset?: OffsetOptions;
   };
@@ -42,8 +42,8 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
-    if (this.args.placement === "none") {
-      this.content.setAttribute("data-floating-ui-placement", "none");
+    if (this.args.placement === null) {
+      this.content.removeAttribute("data-floating-ui-placement");
       this.content.classList.add("non-floating-content");
       this.cleanup = () => {};
       return;
