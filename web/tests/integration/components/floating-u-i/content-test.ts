@@ -211,7 +211,6 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             Attach
           </div>
           <FloatingUI::Content
-            style="width: 100px"
             @id="1"
             @anchor={{html-element '.anchor'}}
             @placement="none"
@@ -230,7 +229,20 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       "content is not positioned"
     );
 
-    await this.pauseTest();
+    assert.true(
+      content.classList.contains("non-floating-content"),
+      "content has the `non-floating-content` class"
+    );
+
+    assert.true(content.style.position === "static", "content is static");
+
+    const inlineStyle = content.getAttribute("style");
+
+    assert.strictEqual(
+      inlineStyle,
+      null,
+      "content not positioned by floatingUI"
+    );
   });
 
   todo("it runs a cleanup function on teardown", async function (assert) {
