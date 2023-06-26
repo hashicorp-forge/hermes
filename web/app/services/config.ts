@@ -13,7 +13,6 @@ export default class ConfigService extends Service {
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
     skip_google_auth: config.skipGoogleAuth,
-    feature_flags: config.featureFlags,
     google_analytics_tag_id: undefined,
   };
 
