@@ -9,3 +9,7 @@
 .hermes-form-helper-text {
   @apply text-body-100;
 }
+
+.truncated-text-container {
+  @apply truncate block font-regular text-body-100 text-color-foreground-faint;
+}
