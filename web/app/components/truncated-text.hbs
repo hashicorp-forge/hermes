@@ -1,4 +1,11 @@
+{{!
+  Truncates a single line of text with a small, gray, regularly weighted ellipsis.
+  Reduces the visual emphasis of ellipses when working with medium-sized, dark, bold text.
+  Not recommended for display type in its current configuration.
+ }}
+
 {{! @glint-ignore - element helper not yet typed }}
+
 {{#let (element (or @tagName "p")) as |Container|}}
   <Container class="truncated-text-container">
     <span class="overflow-hidden" ...attributes>
