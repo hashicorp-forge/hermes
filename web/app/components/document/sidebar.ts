@@ -282,8 +282,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to save document");
       throw error;
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   requestReview = task(async () => {
