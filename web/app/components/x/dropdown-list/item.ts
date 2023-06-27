@@ -165,7 +165,11 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
         this.args.setFocusedItemIndex(this.itemIndexNumber, false);
         return;
       } else {
-        await timeout(1);
+        if (i === 3) {
+          throw new Error("itemIndexNumber can not be undefined");
+        } else {
+          await timeout(1);
+        }
       }
     }
   });

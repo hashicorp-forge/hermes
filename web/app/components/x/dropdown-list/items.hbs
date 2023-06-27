@@ -1,9 +1,9 @@
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
-{{yield (hash isShown=this.noMatchesFound) to="no-matches"}}
+{{yield (hash isShown=this.shownItemsIsNone) to="no-matches"}}
 
-{{#unless this.noMatchesFound}}
+{{#unless this.shownItemsIsNone}}
   <div class="x-dropdown-list-empty-state" data-test-dropdown-list-empty-state>
     No matches
   </div>

@@ -59,7 +59,7 @@
           f.contentID
         )
         resetFocusedItemIndex=this.resetFocusedItemIndex
-        scheduleAssignMenuItemIDs=this.scheduleAssignMenuItemIDs
+        scheduleAssignMenuItemIDs=(perform this.scheduleAssignMenuItemIDs)
         registerAnchor=f.registerAnchor
         contentIsShown=f.contentIsShown
         toggleContent=f.toggleContent
@@ -136,7 +136,7 @@
               @setFocusedItemIndex={{this.setFocusedItemIndex}}
               @hideContent={{f.hideContent}}
               @scrollContainer={{this.scrollContainer}}
-              @listIsHidden={{@listIsHidden}}
+              @listIsShown={{@listIsShown}}
             >
               <:no-matches as |n|>
                 {{#if (has-block "no-matches")}}
