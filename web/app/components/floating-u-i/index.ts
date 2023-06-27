@@ -24,7 +24,8 @@ interface FloatingUIComponentSignature {
   Element: HTMLDivElement;
   Args: {
     renderOut?: boolean;
-    placement?: Placement | "none";
+    // TODO: Move null logic to a parent component.
+    placement?: Placement | null;
     disableClose?: boolean;
     offset?: OffsetOptions;
   };
@@ -69,10 +70,9 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
   }
 
   @action hideContent() {
-    if (this.args.disableClose) {
-      return;
+    if (this.args.disableClose !== true) {
+      this.contentIsShown = false;
     }
-    this.contentIsShown = false;
   }
 }
 
