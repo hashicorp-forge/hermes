@@ -89,13 +89,13 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
    */
-  private get itemIndexNumber(): number | undefined {
+  private get itemIndexNumber(): number | null {
     let idNumber = this.domElementID.split("-").pop();
     if (idNumber) {
       return parseInt(idNumber, 10);
     } else {
-      // TODO: can this be null?
-      return undefined;
+      return null;
+
     }
   }
 
@@ -158,7 +158,7 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    */
   protected maybeFocusMouseTarget = restartableTask(async (e: MouseEvent) => {
     for (let i = 0; i <= 3; i++) {
-      if (this.itemIndexNumber !== undefined) {
+      if (this.itemIndexNumber !== null) {
         let target = e.target;
         assert("target must be an element", target instanceof HTMLElement);
         this._domElement = target;
