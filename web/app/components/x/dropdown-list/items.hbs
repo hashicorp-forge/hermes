@@ -4,9 +4,6 @@
 {{yield (hash isShown=this.itemsAreShown) to="no-matches"}}
 
 {{#unless this.itemsAreShown}}
-  <div class="x-dropdown-list-empty-state" data-test-dropdown-list-empty-state>
-    No matches
-  </div>
   {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     {{#if this.listIsShown}}
