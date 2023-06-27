@@ -83,14 +83,20 @@
     >
       {{#if @isLoading}}
         {{#if (has-block "loading")}}
-          {{yield to="loading"}}
+          <div class="w-full" data-test-x-dropdown-list-loading-block>
+            {{yield to="loading"}}
+          </div>
         {{else}}
-          <div class="w-full grid place-items-center h-[20px] mt-2 mb-4">
+          <div
+            data-test-x-dropdown-list-default-loader
+            class="w-full grid place-items-center h-[20px] mt-2 mb-4"
+          >
             <FlightIcon @name="loading" />
           </div>
         {{/if}}
       {{else}}
         <div
+          data-test-x-dropdown-list-loaded-content
           class="overflow-hidden flex flex-col"
           {{did-insert this.didInsertContent}}
         >
@@ -139,12 +145,14 @@
             >
               <:no-matches as |n|>
                 {{#if (has-block "no-matches")}}
-                  {{yield n to="no-matches"}}
-                {{else if n.isShown}}
                   <div
-                    class="x-dropdown-list-empty-state"
-                    data-test-dropdown-list-empty-state
+                    class="w-full"
+                    data-test-x-dropdown-list-no-matches-block
                   >
+                    {{yield n to="no-matches"}}
+                  </div>
+                {{else if n.isShown}}
+                  <div class="x-dropdown-list-default-empty-state">
                     No matches
                   </div>
                 {{/if}}

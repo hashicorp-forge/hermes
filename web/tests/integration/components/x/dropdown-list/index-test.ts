@@ -39,11 +39,19 @@ const FIRST_ITEM_ID = "x-dropdown-list-item-0";
 const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
 const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+const FILTER_INPUT_SELECTOR = "[data-test-x-dropdown-list-input]";
+const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
+const NO_MATCHES_BLOCK_SELECTOR =
+  "[data-test-x-dropdown-list-no-matches-block]";
+const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
+const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
+const DEFAULT_LOADER_SELECTOR = "[data-test-x-dropdown-list-default-loader]";
 
 interface XDropdownListComponentTestContext extends TestContext {
   items: Record<string, { count: number; isSelected: boolean }>;
   onListItemClick: (e: MouseEvent) => void;
-  buttonWasClicked: boolean;
+  buttonWasClicked?: boolean;
+  isLoading?: boolean;
   placement?: Placement | null;
 }
 
@@ -76,9 +84,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("[data-test-toggle]");
 
-    assert
-      .dom("[data-test-x-dropdown-list-input]")
-      .doesNotExist("The input is not shown");
+    assert.dom(FILTER_INPUT_SELECTOR).doesNotExist("The input is not shown");
 
     await click("[data-test-toggle]");
 
@@ -86,9 +92,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("[data-test-toggle]");
 
-    assert
-      .dom("[data-test-x-dropdown-list-input]")
-      .exists("The input is shown");
+    assert.dom(FILTER_INPUT_SELECTOR).exists("The input is shown");
 
     ariaControlsValue =
       find("[data-test-toggle]")?.getAttribute("aria-controls");
@@ -100,7 +104,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       document.activeElement,
-      this.element.querySelector("[data-test-x-dropdown-list-input]"),
+      this.element.querySelector(FILTER_INPUT_SELECTOR),
       "the input is autofocused"
     );
   });
@@ -126,7 +130,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
 
-    await fillIn("[data-test-x-dropdown-list-input]", "2");
+    await fillIn(FILTER_INPUT_SELECTOR, "2");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
 
@@ -134,10 +138,10 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .dom("#" + FIRST_ITEM_ID)
       .hasText("Filter02", "the list is filtered and the IDs are updated");
 
-    await fillIn("[data-test-x-dropdown-list-input]", "foobar");
+    await fillIn(FILTER_INPUT_SELECTOR, "foobar");
 
     assert.dom("[data-test-x-dropdown-list]").doesNotExist();
-    assert.dom("[data-test-dropdown-list-empty-state]").hasText("No matches");
+    assert.dom(DEFAULT_NO_MATCHES_SELECTOR).hasText("No matches");
   });
 
   test("dropdown trigger has keyboard support", async function (assert) {
@@ -195,19 +199,19 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await click("button");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
-    assert.dom("[data-test-x-dropdown-list-input]").hasValue("");
+    assert.dom(FILTER_INPUT_SELECTOR).hasValue("");
 
-    await fillIn("[data-test-x-dropdown-list-input]", "2");
+    await fillIn(FILTER_INPUT_SELECTOR, "2");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
-    assert.dom("[data-test-x-dropdown-list-input]").hasValue("2");
+    assert.dom(FILTER_INPUT_SELECTOR).hasValue("2");
 
     // close and reopen
     await click("button");
     await click("button");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
-    assert.dom("[data-test-x-dropdown-list-input]").hasValue("");
+    assert.dom(FILTER_INPUT_SELECTOR).hasValue("");
   });
 
   test("the menu items are assigned IDs", async function (assert) {
@@ -735,5 +739,116 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert
       .dom("." + CONTAINER_CLASS)
       .doesNotHaveClass("hermes-popover", "the popover class is removed");
+  });
+
+  test('it yields a "loading" block', async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+    this.set("isLoading", true);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}} @isLoading={{this.isLoading}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:loading>
+          Loading...
+        </:loading>
+        <:item>
+          <div>Item</div>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert
+      .dom(LOADED_CONTENT_SELECTOR)
+      .doesNotExist("the loaded content is not shown");
+
+    assert.dom(LOADING_BLOCK_SELECTOR).exists("the loading block is shown");
+
+    this.set("isLoading", false);
+
+    assert
+      .dom(LOADED_CONTENT_SELECTOR)
+      .exists("the loaded content is shown after loading is complete");
+
+    assert
+      .dom(LOADING_BLOCK_SELECTOR)
+      .doesNotExist("the loading block is not shown");
+  });
+
+  test('it shows a loading spinner if no "loading" block is provided', async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}} @isLoading={{true}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item>
+          <div>Item</div>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert.dom(LOADING_BLOCK_SELECTOR).doesNotExist("no custom block rendered");
+    assert.dom(LOADED_CONTENT_SELECTOR).doesNotExist("content not shown");
+
+    assert.dom(DEFAULT_LOADER_SELECTOR).exists("the default loader is shown");
+  });
+
+  test("it can force the input to be hidden", async function (assert) {
+    this.set("items", LONG_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}} @inputIsShown={{false}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item>
+          <div>Item</div>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert.dom(FILTER_INPUT_SELECTOR).doesNotExist();
+  });
+
+  test('it yields a "no matches" block', async function (assert) {
+    this.set("items", LONG_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:no-matches as |n|>
+          {{#if n.isShown}}
+            Nothing...
+          {{/if}}
+        </:no-matches>
+        <:item>
+          <div>Item</div>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    // fill in the filter input with a string that won't match any items
+    await fillIn(FILTER_INPUT_SELECTOR, "foobar");
+
+    assert
+      .dom(DEFAULT_NO_MATCHES_SELECTOR)
+      .doesNotExist("the default empty state is not shown");
+
+    assert
+      .dom(NO_MATCHES_BLOCK_SELECTOR)
+      .exists("the custom empty state is shown");
   });
 });
