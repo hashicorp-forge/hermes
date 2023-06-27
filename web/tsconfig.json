@@ -24,6 +24,7 @@
     "app/**/*",
     "tests/**/*",
     "types/**/*",
+    "node_modules/@gavant/glint-template-types/types/ember-animated/*",
     "node_modules/@gavant/glint-template-types/types/ember-click-outside/modifier.d.ts",
     "node_modules/@gavant/glint-template-types/types/ember-concurrency/perform.d.ts",
     "node_modules/@gavant/glint-template-types/types/ember-on-helper/on-document.d.ts",
