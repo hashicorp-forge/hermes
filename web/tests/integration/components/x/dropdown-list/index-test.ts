@@ -1,6 +1,7 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import {
+  TestContext,
   click,
   fillIn,
   find,
@@ -12,6 +13,7 @@ import {
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
+import { Placement } from "@floating-ui/dom";
 
 // TODO: Replace with Mirage factories
 
@@ -38,13 +40,20 @@ const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
 const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 
+interface XDropdownListComponentTestContext extends TestContext {
+  items: Record<string, { count: number; isSelected: boolean }>;
+  onListItemClick: (e: MouseEvent) => void;
+  buttonWasClicked: boolean;
+  placement?: Placement | null;
+}
+
 module("Integration | Component | x/dropdown-list", function (hooks) {
   setupRenderingTest(hooks);
 
   test("a filter input is shown for long lists", async function (assert) {
     this.set("items", SHORT_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -98,7 +107,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("filtering works as expected", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" />
@@ -133,7 +142,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("dropdown trigger has keyboard support", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -170,7 +179,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("the component's filter properties are reset on close", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -203,7 +212,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("the menu items are assigned IDs", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -237,7 +246,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       this.set("buttonWasClicked", true);
     });
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -319,7 +328,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   test("the list responds to hover events", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -354,7 +363,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   test("the list will scroll to the selected item when it is not visible", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}} style="max-height:160px">
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -495,7 +504,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   test("the list can be rendered with LinkTos", async function (assert) {
     this.set("items", SHORT_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -524,7 +533,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   test("the list can be rendered with a toggle button", async function (assert) {
     this.set("items", SHORT_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -586,7 +595,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
   test("the list can be rendered with a toggle action", async function (assert) {
     this.set("items", SHORT_ITEM_LIST);
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleAction data-test-toggle>
@@ -654,7 +663,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       ...SHORT_ITEM_LIST,
     });
 
-    await render(hbs`
+    await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList @items={{this.items}}>
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
@@ -698,5 +707,33 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert
       .dom("li")
       .exists({ count: 3 }, "there are a correct number of list items");
+  });
+
+  test('"null" placement removes the "hermes-popover" class', async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+    this.set("placement", undefined);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}} @placement={{this.placement}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item>
+          <div>Item</div>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert
+      .dom("." + CONTAINER_CLASS)
+      .hasClass("hermes-popover", "the popover class is applied");
+
+    this.set("placement", null);
+
+    assert
+      .dom("." + CONTAINER_CLASS)
+      .doesNotHaveClass("hermes-popover", "the popover class is removed");
   });
 });
