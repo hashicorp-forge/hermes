@@ -46,7 +46,7 @@ interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
-    placement?: Placement | "none";
+    placement?: Placement | null;
     renderOut?: boolean;
     color?: HdsButtonColor;
     disabled?: boolean;
