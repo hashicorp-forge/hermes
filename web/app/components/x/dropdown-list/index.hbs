@@ -121,7 +121,7 @@
             {{#if (has-block "header")}}
               {{yield to="header"}}
             {{/if}}
-
+            {{log this.shownItems}}
             <X::DropdownList::Items
               @contentID={{f.contentID}}
               @query={{this.query}}
@@ -140,15 +140,10 @@
               @scrollContainer={{this.scrollContainer}}
               @listIsShown={{@listIsShown}}
             >
-              <:no-matches as |n|>
+              <:no-matches>
                 {{#if (has-block "no-matches")}}
-                  <div
-                    class="w-full"
-                    data-test-x-dropdown-list-no-matches-block
-                  >
-                    {{yield n to="no-matches"}}
-                  </div>
-                {{else if n.isShown}}
+                  {{yield to="no-matches"}}
+                {{else}}
                   <div class="x-dropdown-list-default-empty-state">
                     No matches
                   </div>

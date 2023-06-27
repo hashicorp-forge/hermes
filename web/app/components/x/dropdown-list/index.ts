@@ -88,7 +88,7 @@ interface XDropdownListComponentSignature {
     item: [dd: XDropdownListItemAPI];
     header: [];
     loading: [];
-    "no-matches": [{ isShown: boolean }];
+    "no-matches": [];
     footer: [];
   };
 }

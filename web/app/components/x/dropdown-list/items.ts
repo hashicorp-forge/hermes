@@ -19,7 +19,7 @@ interface XDropdownListItemsComponentSignature {
     };
   Blocks: {
     default: [];
-    "no-matches": [{ isShown: boolean }];
+    "no-matches": [];
     item: [dd: XDropdownListItemAPI];
   };
 }
@@ -53,7 +53,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * "no matches found" message should be shown.
    */
   protected get itemsAreShown(): boolean {
-    return Object.entries(this.args.shownItems).length === 0;
+    return Object.entries(this.args.shownItems).length !== 0;
   }
 
   /**

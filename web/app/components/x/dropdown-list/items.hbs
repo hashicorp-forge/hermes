@@ -1,9 +1,7 @@
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
-{{yield (hash isShown=this.itemsAreShown) to="no-matches"}}
-
-{{#unless this.itemsAreShown}}
+{{#if this.itemsAreShown}}
   {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     {{#if this.listIsShown}}
@@ -35,4 +33,6 @@
       </MaybeOrderedList>
     {{/if}}
   {{/let}}
-{{/unless}}
+{{else}}
+  {{yield to="no-matches"}}
+{{/if}}

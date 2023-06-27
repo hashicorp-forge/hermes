@@ -41,8 +41,6 @@ const LAST_ITEM_ID = "x-dropdown-list-item-7";
 const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 const FILTER_INPUT_SELECTOR = "[data-test-x-dropdown-list-input]";
 const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
-const NO_MATCHES_BLOCK_SELECTOR =
-  "[data-test-x-dropdown-list-no-matches-block]";
 const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
 const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
 const DEFAULT_LOADER_SELECTOR = ".x-dropdown-list-default-loading-container";
@@ -827,10 +825,10 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
         <:anchor as |dd|>
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
-        <:no-matches as |n|>
-          {{#if n.isShown}}
+        <:no-matches>
+          <div data-test-nothing>
             Nothing...
-          {{/if}}
+          </div>
         </:no-matches>
         <:item>
           <div>Item</div>
@@ -845,8 +843,6 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .dom(DEFAULT_NO_MATCHES_SELECTOR)
       .doesNotExist("the default empty state is not shown");
 
-    assert
-      .dom(NO_MATCHES_BLOCK_SELECTOR)
-      .exists("the custom empty state is shown");
+    assert.dom("[data-test-nothing]").exists("the custom empty state is shown");
   });
 });
