@@ -13,10 +13,13 @@ interface XDropdownListItemsComponentSignature {
       shownItems?: any;
       inputIsShown?: boolean;
       scrollContainer: HTMLElement;
+      listIsShown?: boolean;
       onInput: (event: Event) => void;
       registerScrollContainer: (element: HTMLElement) => void;
     };
   Blocks: {
+    default: [];
+    "no-matches": [];
     item: [dd: XDropdownListItemAPI];
   };
 }
@@ -26,24 +29,35 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * The `aria-activedescendant` attribute of the list.
    * Used to indicate which item is currently focused.
    */
-  get ariaActiveDescendant() {
+  protected get ariaActiveDescendant() {
     if (this.args.focusedItemIndex !== -1) {
       return `x-dropdown-list-item-${this.args.focusedItemIndex}`;
     }
   }
+  /**
+   * Whether the itemsList is shown. False if the component has explicitly
+   * marked itself as hidden, or if there are no items to show.
+   */
+  protected get listIsShown(): boolean {
+    if (this.args.listIsShown === false) {
+      return false;
+    } else {
+      return (
+        this.args.shownItems && Object.keys(this.args.shownItems).length > 0
+      );
+    }
+  }
 
   /**
-   * Whether the "no matches found" message should be shown.
-   * True if the input is shown and there are no items to show.
+   * Whether there are any items to show. Determines if the
+   * "no matches found" message should be shown.
    */
-  protected get noMatchesFound(): boolean {
-    if (!this.args.inputIsShown) {
-      return false;
-    }
-    return Object.entries(this.args.shownItems).length === 0;
+  protected get itemsAreShown(): boolean {
+    return Object.entries(this.args.shownItems).length !== 0;
   }
+
   /**
-   * Keyboard listener for the ArrowUp/ArrowDown/Enter keys.
+   * Document keyboard listener for the ArrowUp/ArrowDown/Enter keys.
    * ArrowUp/ArrowDown change the focused item.
    * Enter selects the focused item.
    */
