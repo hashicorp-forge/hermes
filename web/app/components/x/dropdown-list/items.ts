@@ -76,6 +76,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
       event.preventDefault();
       assert("floatingUI content must exist", this.args.scrollContainer);
       const target = this.args.scrollContainer.querySelector("[aria-selected]");
+
       if (
         target instanceof HTMLAnchorElement ||
         target instanceof HTMLButtonElement
