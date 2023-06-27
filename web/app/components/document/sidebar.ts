@@ -330,19 +330,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.contributors = contributors;
   }
 
-  @action
-  updateCustomFieldValue(field: string, value: string) {
-    assert("customEditableFields must exist", this.customEditableFields);
-
-    const customEditableField = this.customEditableFields[field];
-    assert("customEditableField must exist", customEditableField);
-
-    let customEditableFieldValue = customEditableField.value;
-    assert("customEditableFieldValue must exist", customEditableFieldValue);
-
-    customEditableFieldValue = value;
-  }
-
   @action closeDeleteModal() {
     this.deleteModalIsActive = false;
   }

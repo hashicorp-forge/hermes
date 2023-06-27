@@ -5,6 +5,7 @@ import { ComponentLike } from "@glint/template";
 interface HdsFormTextareaFieldComponentSignature {
   Element: HTMLTextAreaElement;
   Args: {
+    value?: string;
     id?: string;
     isInvalid?: boolean;
     isRequired?: boolean;
