@@ -95,7 +95,6 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
       return parseInt(idNumber, 10);
     } else {
       return null;
-
     }
   }
 
@@ -149,12 +148,12 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * If menuItemIDs have been assigned, sets our local `element`
    * reference to the mouse target and aria-focuses it.
    *
-   * For component-specific reasons, MenuItemIDs are sometimes assigned
-   * in the next run loop. This means they're not always available on mouseenter.
-   * For example, if a cursor is hovering a menu item and the list is filtered,
+   * Depending on the component, MenuItemIDs are sometimes assigned
+   * in the next run loop, which means they're not always available on mouseenter.
+   * For example, if a cursor hovers a menu item and the list is filtered,
    * the mouseenter event will fire before the ID is assigned.
    *
-   * In these cases, we retry up to three more times.
+   * In these cases, we wait a tick and try again (up to 3 times).
    */
   protected maybeFocusMouseTarget = restartableTask(async (e: MouseEvent) => {
     for (let i = 0; i <= 3; i++) {

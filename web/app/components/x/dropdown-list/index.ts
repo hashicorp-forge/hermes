@@ -373,7 +373,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   }
 
   /**
-   * The action that assigns menu item IDs.
+   * The task that assigns menu item IDs.
    * Scheduled after render to ensure that the menu items
    * have been rendered and are available to query, including
    * after being filtered.
@@ -381,8 +381,9 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * In cases where items are loaded asynchronously,
    * e.g., when querying Algolia, the menu items are not
    * available immediately after render. In these cases,
-   * the component should call `scheduleAssignMenuItemIDs`
-   * in the next runloop.
+   * the parent component should call `scheduleAssignMenuItemIDs`
+   * in the next runloop, but we also have a fallback that
+   * will try again up to three times.
    */
   protected scheduleAssignMenuItemIDs = restartableTask(async () => {
     for (let i = 0; i <= 3; i++) {
