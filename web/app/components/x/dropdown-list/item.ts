@@ -89,12 +89,12 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
    */
-  private get itemIndexNumber(): number | undefined {
+  private get itemIndexNumber(): number | null {
     let idNumber = this.domElementID.split("-").pop();
     if (idNumber) {
       return parseInt(idNumber, 10);
     } else {
-      return undefined;
+      return null;
     }
   }
 
@@ -144,36 +144,34 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
   }
 
   /**
-   * The action run when the mouse enters the element.
+   * The task run when the mouse enters the element.
    * If menuItemIDs have been assigned, sets our local `element`
-   * reference to the mouse target and calls aria-focuses it.
+   * reference to the mouse target and aria-focuses it.
    *
-   * For component-specific reasons, MenuItemIDs are sometimes assigned
-   * in the next run loop. This means they're not always available on mouseenter.
-   * For example, if a cursor is hovering a menu item and the list is filtered,
+   * Depending on the component, MenuItemIDs are sometimes assigned
+   * in the next run loop, which means they're not always available on mouseenter.
+   * For example, if a cursor hovers a menu item and the list is filtered,
    * the mouseenter event will fire before the ID is assigned.
    *
-   * In these cases, we retry up to three more times.
+   * In these cases, we wait a tick and try again (up to 3 times).
    */
   protected maybeFocusMouseTarget = restartableTask(async (e: MouseEvent) => {
     for (let i = 0; i <= 3; i++) {
-      if (this.itemIndexNumber !== undefined) {
+      if (this.itemIndexNumber !== null) {
         let target = e.target;
         assert("target must be an element", target instanceof HTMLElement);
         this._domElement = target;
         this.args.setFocusedItemIndex(this.itemIndexNumber, false);
         return;
       } else {
-        await timeout(1);
+        if (i === 3) {
+          throw new Error("itemIndexNumber can not be undefined");
+        } else {
+          await timeout(1);
+        }
       }
     }
   });
-}
-
-declare module "@glint/environment-ember-loose/registry" {
-  export default interface Registry {
-    "X::DropdownList::Item": typeof XDropdownListItemComponent;
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

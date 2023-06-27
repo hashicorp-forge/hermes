@@ -12,6 +12,7 @@ import { WithBoundArgs } from "@glint/template";
 import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
+import { restartableTask, timeout } from "ember-concurrency";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -52,10 +53,33 @@ interface XDropdownListComponentSignature {
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+
+    /**
+     * Whether an asynchronous list is loading.
+     * Used to determine if a loading UI is shown.
+     */
     isLoading?: boolean;
+
+    /**
+     * Whether the "hide dropdown" function is disabled.
+     * Used in cases where closing the dropdown would be destructive,
+     * such as when a user is awaiting an interior task to finish.
+     */
     disableClose?: boolean;
-    listIsHidden?: boolean;
-    inputIsHidden?: boolean;
+
+    /**
+     * Whether the list element should be rendered.
+     * Set `false` by parent components to hide the list without
+     * destroying the entire content element.
+     */
+    listIsShown?: boolean;
+
+    /**
+     * Whether the filter input should be shown.
+     * Set `false` by parent components to explicitly hide the input,
+     * even in cases where the list is long enough to show it.
+     */
+    inputIsShown?: boolean;
     onItemClick?: (value: any, attributes: any) => void;
   };
   Blocks: {
@@ -64,7 +88,7 @@ interface XDropdownListComponentSignature {
     item: [dd: XDropdownListItemAPI];
     header: [];
     loading: [];
-    "no-matches": [{ isShown: boolean }];
+    "no-matches": [];
     footer: [];
   };
 }
@@ -110,7 +134,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * aria-roles for various elements.
    */
   get inputIsShown() {
-    if (this.args.inputIsHidden) {
+    if (this.args.inputIsShown === false) {
       return false;
     }
 
@@ -345,11 +369,11 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
 
     this._filteredItems = shownItems;
-    this.scheduleAssignMenuItemIDs();
+    this.scheduleAssignMenuItemIDs.perform();
   }
 
   /**
-   * The action that assigns menu item IDs.
+   * The task that assigns menu item IDs.
    * Scheduled after render to ensure that the menu items
    * have been rendered and are available to query, including
    * after being filtered.
@@ -357,24 +381,35 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * In cases where items are loaded asynchronously,
    * e.g., when querying Algolia, the menu items are not
    * available immediately after render. In these cases,
-   * the component should call `scheduleAssignMenuItemIDs`
-   * in the `next` runloop.
+   * the parent component should call `scheduleAssignMenuItemIDs`
+   * in the next runloop, but we also have a fallback that
+   * will try again up to three times.
    */
-  @action protected scheduleAssignMenuItemIDs() {
-    if (!this._scrollContainer) {
-      this.scheduleAssignMenuItemIDs();
-    } else {
-      schedule("afterRender", () => {
-        assert(
-          "scheduleAssignMenuItemIDs expects a _scrollContainer",
-          this._scrollContainer
-        );
-        this.assignMenuItemIDs(
-          this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
-        );
-      });
+  protected scheduleAssignMenuItemIDs = restartableTask(async () => {
+    for (let i = 0; i <= 3; i++) {
+      if (this._scrollContainer) {
+        schedule("afterRender", () => {
+          assert(
+            "scheduleAssignMenuItemIDs expects a _scrollContainer",
+            this._scrollContainer
+          );
+          this.assignMenuItemIDs(
+            this._scrollContainer.querySelectorAll(
+              `[role=${this.listItemRole}]`
+            )
+          );
+        });
+      } else {
+        if (i === 3) {
+          throw new Error(
+            "scheduleAssignMenuItemIDs expects a _scrollContainer"
+          );
+        } else {
+          await timeout(1);
+        }
+      }
     }
-  }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

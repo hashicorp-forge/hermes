@@ -1,9 +1,7 @@
 {{! Listen for ArrowUp/ArrowDown/Enter }}
 {{on-document "keydown" this.maybeKeyboardNavigate}}
 
-{{yield (hash isShown=this.noMatchesFound) to="no-matches"}}
-
-{{#unless this.noMatchesFound}}
+{{#if this.itemsAreShown}}
   {{! @glint-ignore - element helper not yet typed }}
   {{#let (element (if @listIsOrdered "ol" "ul")) as |MaybeOrderedList|}}
     {{#if this.listIsShown}}
@@ -14,25 +12,27 @@
         role={{if this.args.inputIsShown "listbox" "menu"}}
         aria-activedescendant={{this.ariaActiveDescendant}}
       >
-        {{#each-in @shownItems as |item attrs|}}
-          {{! @glint-ignore - not yet typed }}
-          <X::DropdownList::Item
-            @value={{item}}
-            @contentID={{@contentID}}
-            @attributes={{attrs}}
-            @isSelected={{eq @selected item}}
-            @focusedItemIndex={{@focusedItemIndex}}
-            @listItemRole={{@listItemRole}}
-            @hideContent={{@hideContent}}
-            @onItemClick={{@onItemClick}}
-            @setFocusedItemIndex={{@setFocusedItemIndex}}
-            as |i|
-          >
-            {{! @glint-ignore - not yet typed }}
-            {{yield i to="item"}}
-          </X::DropdownList::Item>
-        {{/each-in}}
+        {{#if @shownItems}}
+          {{#each-in @shownItems as |item attrs|}}
+            <X::DropdownList::Item
+              @value={{item}}
+              @contentID={{@contentID}}
+              @attributes={{attrs}}
+              @isSelected={{eq @selected item}}
+              @focusedItemIndex={{@focusedItemIndex}}
+              @listItemRole={{@listItemRole}}
+              @hideContent={{@hideContent}}
+              @onItemClick={{@onItemClick}}
+              @setFocusedItemIndex={{@setFocusedItemIndex}}
+              as |i|
+            >
+              {{yield i to="item"}}
+            </X::DropdownList::Item>
+          {{/each-in}}
+        {{/if}}
       </MaybeOrderedList>
     {{/if}}
   {{/let}}
-{{/unless}}
+{{else}}
+  {{yield to="no-matches"}}
+{{/if}}

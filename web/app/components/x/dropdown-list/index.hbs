@@ -10,7 +10,7 @@
   @placement={{@placement}}
   @offset={{@offset}}
   @disableClose={{@disableClose}}
-  class="{{unless (eq @placement 'none') 'hermes-popover'}} x-dropdown-list"
+  class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -59,7 +59,7 @@
           f.contentID
         )
         resetFocusedItemIndex=this.resetFocusedItemIndex
-        scheduleAssignMenuItemIDs=this.scheduleAssignMenuItemIDs
+        scheduleAssignMenuItemIDs=(perform this.scheduleAssignMenuItemIDs)
         registerAnchor=f.registerAnchor
         contentIsShown=f.contentIsShown
         toggleContent=f.toggleContent
@@ -83,14 +83,17 @@
     >
       {{#if @isLoading}}
         {{#if (has-block "loading")}}
-          {{yield to="loading"}}
+          <div class="w-full" data-test-x-dropdown-list-loading-block>
+            {{yield to="loading"}}
+          </div>
         {{else}}
-          <div class="w-full grid place-items-center h-[20px] mt-2 mb-4">
+          <div class="x-dropdown-list-default-loading-container">
             <FlightIcon @name="loading" />
           </div>
         {{/if}}
       {{else}}
         <div
+          data-test-x-dropdown-list-loaded-content
           class="overflow-hidden flex flex-col"
           {{did-insert this.didInsertContent}}
         >
@@ -119,7 +122,6 @@
             {{#if (has-block "header")}}
               {{yield to="header"}}
             {{/if}}
-
             <X::DropdownList::Items
               @contentID={{f.contentID}}
               @query={{this.query}}
@@ -136,16 +138,13 @@
               @setFocusedItemIndex={{this.setFocusedItemIndex}}
               @hideContent={{f.hideContent}}
               @scrollContainer={{this.scrollContainer}}
-              @listIsHidden={{@listIsHidden}}
+              @listIsShown={{@listIsShown}}
             >
-              <:no-matches as |n|>
+              <:no-matches>
                 {{#if (has-block "no-matches")}}
-                  {{yield n to="no-matches"}}
-                {{else if n.isShown}}
-                  <div
-                    class="x-dropdown-list-empty-state"
-                    data-test-dropdown-list-empty-state
-                  >
+                  {{yield to="no-matches"}}
+                {{else}}
+                  <div class="x-dropdown-list-default-empty-state">
                     No matches
                   </div>
                 {{/if}}
