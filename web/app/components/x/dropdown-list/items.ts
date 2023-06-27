@@ -13,10 +13,13 @@ interface XDropdownListItemsComponentSignature {
       shownItems?: any;
       inputIsShown?: boolean;
       scrollContainer: HTMLElement;
+      listIsHidden?: boolean;
       onInput: (event: Event) => void;
       registerScrollContainer: (element: HTMLElement) => void;
     };
   Blocks: {
+    default: [];
+    "no-matches": [{ isShown: boolean }];
     item: [dd: XDropdownListItemAPI];
   };
 }
@@ -32,18 +35,29 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
     }
   }
 
+  get listIsShown(): boolean {
+    if (this.args.listIsHidden) {
+      return false;
+    } else {
+      return (
+        this.args.shownItems && Object.keys(this.args.shownItems).length > 0
+      );
+    }
+  }
+
   /**
    * Whether the "no matches found" message should be shown.
    * True if the input is shown and there are no items to show.
    */
   protected get noMatchesFound(): boolean {
-    if (!this.args.inputIsShown) {
-      return false;
-    }
+    // TODO: confirm ramifications of this change
+    // if (!this.args.inputIsShown) {
+    //   return false;
+    // }
     return Object.entries(this.args.shownItems).length === 0;
   }
   /**
-   * Keyboard listener for the ArrowUp/ArrowDown/Enter keys.
+   * Document keyboard listener for the ArrowUp/ArrowDown/Enter keys.
    * ArrowUp/ArrowDown change the focused item.
    * Enter selects the focused item.
    */

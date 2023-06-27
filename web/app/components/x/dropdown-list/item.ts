@@ -7,6 +7,7 @@ import Ember from "ember";
 import { WithBoundArgs } from "@glint/template";
 import XDropdownListActionComponent from "./action";
 import XDropdownListLinkToComponent from "./link-to";
+import { restartableTask, timeout } from "ember-concurrency";
 import { FocusDirection } from ".";
 
 type XDropdownListInteractiveComponentBoundArgs =
@@ -88,10 +89,14 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
    */
-  private get itemIndexNumber(): number {
+  private get itemIndexNumber(): number | undefined {
     let idNumber = this.domElementID.split("-").pop();
-    assert("itemIndexNumber expects an ID number", idNumber);
-    return parseInt(idNumber, 10);
+    if (idNumber) {
+      return parseInt(idNumber, 10);
+    } else {
+      // TODO: can this be null?
+      return undefined;
+    }
   }
 
   get isAriaSelected(): boolean {
@@ -140,17 +145,30 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
   }
 
   /**
-   * Sets our local `element` reference to mouse target,
-   * to capture its ID, which may change when the list is filtered.
-   * Then, calls the parent component's `setFocusedItemIndex` action,
-   * directing focus to the current element.
+   * The task run when the mouse enters the element.
+   * If menuItemIDs have been assigned, sets our local `element`
+   * reference to the mouse target and aria-focuses it.
+   *
+   * For component-specific reasons, MenuItemIDs are sometimes assigned
+   * in the next run loop. This means they're not always available on mouseenter.
+   * For example, if a cursor is hovering a menu item and the list is filtered,
+   * the mouseenter event will fire before the ID is assigned.
+   *
+   * In these cases, we retry up to three more times.
    */
-  @action focusMouseTarget(e: MouseEvent) {
-    let target = e.target;
-    assert("target must be an element", target instanceof HTMLElement);
-    this._domElement = target;
-    this.args.setFocusedItemIndex(this.itemIndexNumber, false);
-  }
+  protected maybeFocusMouseTarget = restartableTask(async (e: MouseEvent) => {
+    for (let i = 0; i <= 3; i++) {
+      if (this.itemIndexNumber !== undefined) {
+        let target = e.target;
+        assert("target must be an element", target instanceof HTMLElement);
+        this._domElement = target;
+        this.args.setFocusedItemIndex(this.itemIndexNumber, false);
+        return;
+      } else {
+        await timeout(1);
+      }
+    }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

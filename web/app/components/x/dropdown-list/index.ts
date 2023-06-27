@@ -46,12 +46,16 @@ interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
-    placement?: Placement;
+    placement?: Placement | null;
     renderOut?: boolean;
     color?: HdsButtonColor;
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+    isLoading?: boolean;
+    disableClose?: boolean;
+    listIsHidden?: boolean;
+    inputIsHidden?: boolean;
     onItemClick?: (value: any, attributes: any) => void;
   };
   Blocks: {
@@ -59,6 +63,8 @@ interface XDropdownListComponentSignature {
     anchor: [dd: XDropdownListAnchorAPI];
     item: [dd: XDropdownListItemAPI];
     header: [];
+    loading: [];
+    "no-matches": [{ isShown: boolean }];
     footer: [];
   };
 }
@@ -104,6 +110,10 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * aria-roles for various elements.
    */
   get inputIsShown() {
+    if (this.args.inputIsHidden) {
+      return false;
+    }
+
     if (!this.args.items) {
       return false;
     } else {
@@ -351,15 +361,20 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * in the `next` runloop.
    */
   @action protected scheduleAssignMenuItemIDs() {
-    schedule("afterRender", () => {
-      assert(
-        "scheduleAssignMenuItemIDs expects a _scrollContainer",
-        this._scrollContainer
-      );
-      this.assignMenuItemIDs(
-        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
-      );
-    });
+    if (!this._scrollContainer) {
+      // TODO: this needs a limit
+      this.scheduleAssignMenuItemIDs();
+    } else {
+      schedule("afterRender", () => {
+        assert(
+          "scheduleAssignMenuItemIDs expects a _scrollContainer",
+          this._scrollContainer
+        );
+        this.assignMenuItemIDs(
+          this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+        );
+      });
+    }
   }
 }
 
