@@ -37,6 +37,7 @@ export class AnimatedScale extends Motion<AnimateScaleOptions> {
         : 0;
 
     this.tween = new Tween(from, to, duration);
+
     while (!this.tween.done) {
       sprite.applyStyles({
         transform: `scale(${this.tween.currentValue})`,
