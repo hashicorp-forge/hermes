@@ -1,5 +1,5 @@
 // Modified from
-// https://github.com/ember-animation/ember-animated/issues/38
+// https://github.com/ember-animation/ember-animated/issues/38#issuecomment-392276685
 
 import { Motion, rAF, Sprite, Tween } from 'ember-animated';
 import { BaseOptions } from 'ember-animated/-private/motion';
