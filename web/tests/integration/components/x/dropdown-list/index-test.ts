@@ -45,7 +45,7 @@ const NO_MATCHES_BLOCK_SELECTOR =
   "[data-test-x-dropdown-list-no-matches-block]";
 const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
 const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
-const DEFAULT_LOADER_SELECTOR = "[data-test-x-dropdown-list-default-loader]";
+const DEFAULT_LOADER_SELECTOR = ".x-dropdown-list-default-loading-container";
 
 interface XDropdownListComponentTestContext extends TestContext {
   items: Record<string, { count: number; isSelected: boolean }>;
@@ -839,8 +839,6 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     `);
 
     await click(TOGGLE_BUTTON_SELECTOR);
-
-    // fill in the filter input with a string that won't match any items
     await fillIn(FILTER_INPUT_SELECTOR, "foobar");
 
     assert

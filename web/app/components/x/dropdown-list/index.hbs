@@ -87,10 +87,7 @@
             {{yield to="loading"}}
           </div>
         {{else}}
-          <div
-            data-test-x-dropdown-list-default-loader
-            class="w-full grid place-items-center h-[20px] mt-2 mb-4"
-          >
+          <div class="x-dropdown-list-default-loading-container">
             <FlightIcon @name="loading" />
           </div>
         {{/if}}

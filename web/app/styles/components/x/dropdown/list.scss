@@ -10,6 +10,10 @@
   @apply flex flex-col overflow-hidden rounded-md;
 }
 
+.x-dropdown-list-default-loading-container {
+  @apply w-full grid place-items-center h-[20px] mt-2 mb-4;
+}
+
 .x-dropdown-list-input-container {
   @apply relative p-1 border-b border-b-color-border-faint;
 }
