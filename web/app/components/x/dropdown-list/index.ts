@@ -80,6 +80,8 @@ interface XDropdownListComponentSignature {
      * even in cases where the list is long enough to show it.
      */
     inputIsShown?: boolean;
+
+    keyboardNavIsEnabled?: boolean;
     onItemClick?: (value: any, attributes: any) => void;
   };
   Blocks: {
@@ -111,6 +113,8 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @tracked protected query: string = "";
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected focusedItemIndex = -1;
+  @tracked protected keyboardNavIsEnabled =
+    this.args.keyboardNavIsEnabled ?? true;
 
   /**
    * An asserted-true reference to the scroll container.
@@ -160,6 +164,17 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    */
   @action protected registerScrollContainer(element: HTMLElement) {
     this._scrollContainer = element;
+  }
+
+  @action protected enableKeyboardNav() {
+    if (this.args.keyboardNavIsEnabled === false) {
+      return;
+    }
+    this.keyboardNavIsEnabled = true;
+  }
+
+  @action protected disableKeyboardNav() {
+    this.keyboardNavIsEnabled = false;
   }
 
   /**

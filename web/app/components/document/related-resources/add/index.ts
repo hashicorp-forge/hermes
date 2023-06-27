@@ -47,6 +47,7 @@ export default class DocumentRelatedResourcesAddComponent extends Component<Docu
   @tracked searchInput: HTMLInputElement | null = null;
   @tracked faviconHasLoaded = false;
   @tracked editModeIsEnabled = false;
+  @tracked keyboardNavIsEnabled = true;
   @tracked externalLinkTitle = FAKE_TITLES[
     Math.floor(Math.random() * 4)
   ] as string;
@@ -74,6 +75,14 @@ export default class DocumentRelatedResourcesAddComponent extends Component<Docu
       timeout: 6000,
       extendedTimeout: 1000,
     });
+  }
+
+  @action protected disableKeyboardNav() {
+    this.keyboardNavIsEnabled = false;
+  }
+
+  @action protected enableKeyboardNav() {
+    this.keyboardNavIsEnabled = true;
   }
 
   @action onExternalLinkTitleInput(e: Event) {

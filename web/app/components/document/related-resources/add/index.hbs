@@ -11,10 +11,11 @@
         @onItemClick={{@addRelatedDocument}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
-        @listIsHidden={{this.queryIsThirdPartyURL}}
-        @inputIsHidden={{true}}
+        @listIsShown={{not this.queryIsThirdPartyURL}}
+        @inputIsShown={{false}}
         @disableClose={{true}}
         @placement={{null}}
+        @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
         class="non-floating-list"
       >
         <:anchor as |dd|>
@@ -25,6 +26,8 @@
             {{on "input" (fn this.onInput dd)}}
             {{on "keydown" (fn this.onInputKeydown dd)}}
             {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+            {{on "focusin" this.enableKeyboardNav}}
+            {{on "focusout" this.disableKeyboardNav}}
             @type="search"
             @value={{this.query}}
             size="25"

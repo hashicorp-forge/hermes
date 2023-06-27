@@ -14,6 +14,7 @@ interface XDropdownListItemsComponentSignature {
       inputIsShown?: boolean;
       scrollContainer: HTMLElement;
       listIsShown?: boolean;
+      keyboardNavIsEnabled?: boolean;
       onInput: (event: Event) => void;
       registerScrollContainer: (element: HTMLElement) => void;
     };
@@ -62,6 +63,11 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * Enter selects the focused item.
    */
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
+    if (this.args.keyboardNavIsEnabled === false) {
+      event.preventDefault();
+      return;
+    }
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Next);
