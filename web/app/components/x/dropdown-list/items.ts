@@ -29,7 +29,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * The `aria-activedescendant` attribute of the list.
    * Used to indicate which item is currently focused.
    */
-  get ariaActiveDescendant() {
+  protected get ariaActiveDescendant() {
     if (this.args.focusedItemIndex !== -1) {
       return `x-dropdown-list-item-${this.args.focusedItemIndex}`;
     }
@@ -38,7 +38,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * Whether the itemsList is shown. False if the component has explicitly
    * marked itself as hidden, or if there are no items to show.
    */
-  get listIsShown(): boolean {
+  protected get listIsShown(): boolean {
     if (this.args.listIsShown === false) {
       return false;
     } else {
@@ -52,7 +52,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * Whether there are any items to show. Determines if the
    * "no matches found" message should be shown.
    */
-  protected get shownItemsIsNone(): boolean {
+  protected get itemsAreShown(): boolean {
     return Object.entries(this.args.shownItems).length === 0;
   }
 

@@ -382,7 +382,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * e.g., when querying Algolia, the menu items are not
    * available immediately after render. In these cases,
    * the component should call `scheduleAssignMenuItemIDs`
-   * in the `next` runloop.
+   * in the next runloop.
    */
   protected scheduleAssignMenuItemIDs = restartableTask(async () => {
     for (let i = 0; i <= 3; i++) {
