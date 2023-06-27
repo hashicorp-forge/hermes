@@ -63,9 +63,6 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
   }
 
   @action showContent() {
-    if (this.args.disableClose) {
-      return;
-    }
     this.contentIsShown = true;
   }
 
