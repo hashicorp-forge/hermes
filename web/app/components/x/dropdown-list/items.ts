@@ -62,8 +62,6 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * Enter selects the focused item.
    */
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
-    console.log("maybeKeyboardNavigate", event.key);
-
     if (event.key === "ArrowDown") {
       event.preventDefault();
       this.args.setFocusedItemIndex(FocusDirection.Next);
@@ -83,8 +81,8 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
         target instanceof HTMLButtonElement
       ) {
         target.click();
+        this.args.hideContent();
       }
-      this.args.hideContent();
     }
   }
 }

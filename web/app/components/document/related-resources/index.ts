@@ -135,7 +135,7 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
      * The array initially looks like this:
      * [{title: "foo", objectID: "bar"...}, ...]
      *
-     * We need it to look like:
+     * We transform it to look like:
      * { "bar": {title: "foo", objectID: "bar"...}, ...}
      */
 
@@ -155,9 +155,6 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
 
   @action hideAddResourceModal() {
     this.addResourceModalIsShown = false;
-
-    // This updates the suggestions for the next time the modal is opened
-    // void this.search.perform(null, "");
   }
 
   @action editResource(resource: RelatedExternalLink) {
@@ -177,10 +174,6 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
-    // if the resource is a RelatedExternalLink, remove it from the relatedLinks array
-    // otherwise, remove it from the relatedDocuments array
-
-    // TODO: make this more precise
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
       return;
