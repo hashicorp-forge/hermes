@@ -1,6 +1,13 @@
 <div class="related-resources-modal-container">
   <div class="add-external-resource-container">
-    {{#if @editModeIsEnabled}}
+    {{#if @urlIsLoading}}
+      <div class="block w-full text-center">
+        <FlightIcon @name="loading" @size="24" class="mb-2" />
+        <h3 class="related-resources-modal-loading-text">
+          Reading URL...
+        </h3>
+      </div>
+    {{else}}
       <div class="w-full">
         <form {{on "submit" @onSubmit}} class="mb-2.5">
           <Hds::Form::TextInput::Field
@@ -30,13 +37,6 @@
           @text="Add"
           class="mb-2.5"
         />
-      </div>
-    {{else}}
-      <div class="block w-full text-center">
-        <FlightIcon @name="loading" @size="24" class="mb-2" />
-        <h3 class="related-resources-modal-loading-text">
-          Reading URL...
-        </h3>
       </div>
     {{/if}}
   </div>

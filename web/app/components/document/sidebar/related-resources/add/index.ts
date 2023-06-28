@@ -41,14 +41,17 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @service declare flashMessages: FlashMessageService;
 
   @tracked query = "";
-  @tracked queryIsThirdPartyURL = false;
+  @tracked queryIsURL = false;
   @tracked faviconURL: string | null = null;
   @tracked defaultFaviconIsShown = false;
 
   @tracked searchInput: HTMLInputElement | null = null;
   @tracked faviconHasLoaded = false;
-  @tracked editModeIsEnabled = false;
+  @tracked urlWasProcessed = false;
+
   @tracked keyboardNavIsEnabled = true;
+
+  // TODO: Replace this
   @tracked externalLinkTitle = FAKE_TITLES[
     Math.floor(Math.random() * 4)
   ] as string;
@@ -62,7 +65,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       Object.entries(this.args.shownDocuments).length === 0;
 
     if (this.args.allowAddingExternalLinks) {
-      return objectEntriesLengthIsZero && !this.queryIsThirdPartyURL;
+      return objectEntriesLengthIsZero && !this.queryIsURL;
     } else {
       return objectEntriesLengthIsZero;
     }
@@ -70,7 +73,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   get listIsShown(): boolean {
     if (this.args.allowAddingExternalLinks) {
-      return !this.queryIsThirdPartyURL;
+      return !this.queryIsURL;
     } else {
       return true;
     }
@@ -82,7 +85,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
 
     if (this.args.allowAddingExternalLinks) {
-      return !this.queryIsThirdPartyURL && !this.fetchURLInfo.isRunning;
+      return !this.queryIsURL && !this.fetchURLInfo.isRunning;
     }
 
     return true;
@@ -94,7 +97,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   protected get noMatchesHeaderIsHidden(): boolean {
     if (this.args.allowAddingExternalLinks) {
-      return this.queryIsThirdPartyURL || this.queryIsEmpty;
+      return this.queryIsURL || this.queryIsEmpty;
     } else {
       return false;
     }
@@ -163,7 +166,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @action onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
-      if (this.queryIsThirdPartyURL) {
+      if (this.queryIsURL) {
         this.addRelatedExternalLink();
         this.args.onClose();
         return;
@@ -229,7 +232,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
       favicon.src = this.faviconURL as string;
       await timeout(1500);
-      this.editModeIsEnabled = true;
+      this.urlWasProcessed = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {
       //   // For when we make a real request:
@@ -247,11 +250,11 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   protected checkURL = restartableTask(async () => {
     const url = this.query;
     try {
-      this.queryIsThirdPartyURL = Boolean(new URL(url));
+      this.queryIsURL = Boolean(new URL(url));
     } catch (e) {
-      this.queryIsThirdPartyURL = false;
+      this.queryIsURL = false;
     } finally {
-      if (this.queryIsThirdPartyURL) {
+      if (this.queryIsURL) {
         void this.fetchURLInfo.perform();
       }
     }

@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
   Element: null;
   Args: {
-    editModeIsEnabled: boolean;
+    urlIsLoading: boolean;
     title: string;
     url: string;
     defaultFaviconIsShown: boolean;
