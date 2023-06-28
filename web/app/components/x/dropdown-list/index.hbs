@@ -103,7 +103,7 @@
                 data-test-x-dropdown-list-input
                 {{did-insert this.registerAndFocusInput}}
                 {{on "input" this.onInput}}
-                {{on "focusin" this.enableKeyboardNav}}
+                {{on "focusin" this.maybeEnableKeyboardNav}}
                 {{on "focusout" this.disableKeyboardNav}}
                 @value={{this.query}}
                 @type="search"

@@ -174,7 +174,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * The action to enable keyboard navigation, if allowed by the parent component.
    * Called when the filter input is focused.
    */
-  @action protected enableKeyboardNav() {
+  @action protected maybeEnableKeyboardNav() {
     if (this.args.keyboardNavIsEnabled === false) {
       return;
     }
@@ -209,7 +209,6 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Used to assign ids to the menu items.
    */
   @action protected didInsertContent() {
-    console.log("isKeyboard", this.args.keyboardNavIsEnabled);
     assert(
       "didInsertContent expects a _scrollContainer",
       this._scrollContainer
