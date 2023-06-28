@@ -40,17 +40,8 @@
 
   &::after {
     @apply bg-color-surface-highlight border-color-border-highlight;
-    animation: fadeIn 600ms ease-out, scaleInX 800ms ease-out,
+    animation: fadeIn 600ms ease-out, scaleIn 800ms ease-out,
       fadeOut 500ms ease-out 1200ms forwards;
-  }
-
-  @keyframes scaleInX {
-    from {
-      transform: scale(0.95);
-    }
-    to {
-      transform: scale(1);
-    }
   }
 }
 
@@ -106,24 +97,6 @@
     content: "";
 
     animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
-  }
-
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
   }
 
   .inline-doc-title {
