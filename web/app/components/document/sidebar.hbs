@@ -278,7 +278,7 @@
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
             @allowAddingExternalLinks={{true}}
-            @searchFilters={{array (concat "product:" @document.product)}}
+            @optionalSearchFilters={{array (concat "product:" @document.product)}}
             @headerTitle="Related resources"
             @modalHeaderTitle="Add related resource"
           />
@@ -289,7 +289,7 @@
             @headerTitle="PRD"
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
-            @searchFilters={{array "docType:PRD"}}
+            @searchFilters="docType:PRD"
             @modalHeaderTitle="Add PRD"
             @itemLimit={{1}}
           />

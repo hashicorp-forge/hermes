@@ -25,7 +25,8 @@ interface DocumentRelatedResourcesComponentSignature {
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     modalHeaderTitle: string;
-    searchFilters?: string[];
+    searchFilters?: string;
+    optionalSearchFilters?: string[];
     itemLimit?: number;
   };
 }
@@ -76,6 +77,10 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
       )}")`;
     }
 
+    if (this.args.searchFilters) {
+      filterString += ` AND (${this.args.searchFilters})`;
+    }
+
     try {
       let algoliaResponse = await this.algolia.searchIndex
         .perform(index, query, {
@@ -89,8 +94,7 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
             "status",
             "owners",
           ],
-          // TODO: investigate why this doesn't work
-          optionalFilters: this.args.searchFilters,
+          optionalFilters: this.args.optionalSearchFilters,
         })
         .then((response) => response);
       if (algoliaResponse) {
