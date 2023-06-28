@@ -17,6 +17,7 @@ interface DocumentRelatedResourcesComponentSignature {
   Args: {
     productArea?: string;
     objectID?: string;
+    allowAddingExternalLinks?: boolean;
   };
 }
 

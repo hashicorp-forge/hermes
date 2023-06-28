@@ -11,7 +11,7 @@
         @onItemClick={{@addRelatedDocument}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
-        @listIsShown={{not this.queryIsThirdPartyURL}}
+        @listIsShown={{this.listIsShown}}
         @inputIsShown={{false}}
         @disableClose={{true}}
         @placement={{null}}
@@ -39,25 +39,19 @@
           />
         </:anchor>
         <:header>
-          {{! TODO: clean up these conditions }}
-          {{! TODO: make sure fetchURLInfo is cancelled on queryClear }}
-          {{#unless this.queryIsThirdPartyURL}}
-            {{#unless this.fetchURLInfo.isRunning}}
-              {{#unless this.noMatchesFound}}
-                <div class="related-resources-modal-container mt-3.5">
-                  <h4 class="hermes-h4">
-                    {{#if this.query.length}}
-                      Results
-                    {{else}}
-                      Suggestions
-                    {{/if}}
-                  </h4>
-                </div>
-              {{/unless}}
-            {{/unless}}
-          {{/unless}}
+          {{#if this.listHeaderIsShown}}
+            <div class="related-resources-modal-container mt-3.5">
+              <h4 class="hermes-h4">
+                {{#if this.query.length}}
+                  Results
+                {{else}}
+                  Suggestions
+                {{/if}}
+              </h4>
+            </div>
+          {{/if}}
 
-          {{#if this.queryIsThirdPartyURL}}
+          {{#if (and @allowAddingExternalLinks this.queryIsThirdPartyURL)}}
             <Document::RelatedResources::Add::ExternalResource
               @editModeIsEnabled={{this.editModeIsEnabled}}
               @defaultFaviconIsShown={{this.defaultFaviconIsShown}}
@@ -72,20 +66,16 @@
         <:loading>
           <FlightIcon @name="loading" class="ml-2 mt-4" />
         </:loading>
-        <:no-matches as |n|>
-          {{#if n.isShown}}
-            <div
-              class="related-resources-modal-container mt-36
-                {{if
-                  (or this.queryIsThirdPartyURL this.queryIsEmpty)
-                  'hidden'
-                }}"
-            >
-              <h3 class="related-resources-modal-loading-text">
-                No results found
-              </h3>
-            </div>
-          {{/if}}
+        <:no-matches>
+          <div
+            class="related-resources-modal-container mt-36
+              {{if this.noMatchesHeaderIsHidden "hidden"}}
+              "
+          >
+            <h3 class="related-resources-modal-loading-text">
+              No results found
+            </h3>
+          </div>
         </:no-matches>
         <:item as |dd|>
           <dd.Action class="related-document-option">

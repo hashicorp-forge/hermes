@@ -22,6 +22,7 @@ interface DocumentRelatedResourcesAddComponentSignature {
     relatedDocuments: NativeArray<HermesDocument>;
     relatedLinks: NativeArray<RelatedExternalLink>;
     search: (dd: any, query: string) => Promise<void>;
+    allowAddingExternalLinks?: boolean;
   };
   Blocks: {
     default: [];
@@ -57,14 +58,46 @@ export default class DocumentRelatedResourcesAddComponent extends Component<Docu
   }
 
   get noMatchesFound(): boolean {
-    return (
-      Object.entries(this.args.shownDocuments).length === 0 &&
-      !this.queryIsThirdPartyURL
-    );
+    const objectEntriesLengthIsZero =
+      Object.entries(this.args.shownDocuments).length === 0;
+
+    if (this.args.allowAddingExternalLinks) {
+      return objectEntriesLengthIsZero && !this.queryIsThirdPartyURL;
+    } else {
+      return objectEntriesLengthIsZero;
+    }
+  }
+
+  get listIsShown(): boolean {
+    if (this.args.allowAddingExternalLinks) {
+      return !this.queryIsThirdPartyURL;
+    } else {
+      return true;
+    }
+  }
+
+  get listHeaderIsShown(): boolean {
+    if (this.noMatchesFound) {
+      return false;
+    }
+
+    if (this.args.allowAddingExternalLinks) {
+      return !this.queryIsThirdPartyURL && !this.fetchURLInfo.isRunning;
+    }
+
+    return true;
   }
 
   get queryIsEmpty(): boolean {
     return this.query.length === 0;
+  }
+
+  protected get noMatchesHeaderIsHidden(): boolean {
+    if (this.args.allowAddingExternalLinks) {
+      return this.queryIsThirdPartyURL || this.queryIsEmpty;
+    } else {
+      return false;
+    }
   }
 
   @action private showDuplicateMessage() {
