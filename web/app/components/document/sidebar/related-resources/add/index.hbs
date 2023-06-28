@@ -65,7 +65,11 @@
           {{/if}}
         </:header>
         <:loading>
-          <FlightIcon @name="loading" class="ml-2 mt-4" />
+          <FlightIcon
+            data-test-add-related-resource-spinner
+            @name="loading"
+            class="ml-2 mt-4"
+          />
         </:loading>
         <:no-matches>
           <div
@@ -73,7 +77,7 @@
               {{if this.noMatchesHeaderIsHidden 'hidden'}}
               "
           >
-            <h3 class="related-resources-modal-loading-text">
+            <h3 class="related-resources-modal-body-header">
               No results found
             </h3>
           </div>

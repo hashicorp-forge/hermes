@@ -1,22 +1,27 @@
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, fillIn, render } from "@ember/test-helpers";
+import { fillIn, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
-import { assert } from "@ember/debug";
 
 const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
 const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
 const LIST_HEADER_SELECTOR = "[data-test-related-resources-list-header]";
 const DOCUMENT_OPTION_SELECTOR = ".related-document-option";
+const NO_MATCHES_SELECTOR = ".related-resources-modal-body-header";
+const EXTERNAL_RESOURCE_FORM_SELECTOR =
+  "[data-test-add-external-resource-form]";
+const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
+const EXTERNAL_RESOURCE_URL_SELECTOR =
+  "[data-test-add-external-resource-truncated-url]";
 
 interface DocumentSidebarRelatedResourcesAddTestContext
   extends MirageTestContext {
   noop: () => void;
   search: (dd: any, query: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
-  testArray: any[];
+  allowAddingExternalLinks: boolean;
 }
 
 module(
@@ -29,7 +34,6 @@ module(
       this: DocumentSidebarRelatedResourcesAddTestContext
     ) {
       this.server.createList("document", 10);
-      this.set("testArray", []);
       this.set("noop", () => {});
 
       let suggestions = this.server.schema.document.all().models;
@@ -82,8 +86,8 @@ module(
           @addRelatedDocument={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @objectID="test"
-          @relatedDocuments={{this.testArray}}
-          @relatedLinks={{this.testArray}}
+          @relatedDocuments={{array}}
+          @relatedLinks={{array}}
           @search={{this.search}}
         />
       `);
@@ -107,8 +111,8 @@ module(
           @shownDocuments={{this.shownDocuments}}
           @allowAddingExternalLinks={{true}}
           @objectID="test"
-          @relatedDocuments={{this.testArray}}
-          @relatedLinks={{this.testArray}}
+          @relatedDocuments={{array}}
+          @relatedLinks={{array}}
           @search={{this.search}}
         />
       `);
@@ -128,16 +132,140 @@ module(
       assert.dom(LIST_HEADER_SELECTOR).doesNotExist();
     });
 
-    test("it renders a loading spinner", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+    test("it renders a loading spinner", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      // The `search` task ultimately determines the loading state.
+      // Here, we set it to resolve a promise after a timeout to
+      // allow us to capture its `isRunning` state.
+      this.set("search", () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, 10);
+        }) as Promise<void>;
+      });
 
-    test("it renders a list as expected", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+        <Document::Sidebar::RelatedResources::Add
+          @headerTitle="Test title"
+          @inputPlaceholder="Test placeholder"
+          @onClose={{this.noop}}
+          @addRelatedExternalLink={{this.noop}}
+          @addRelatedDocument={{this.noop}}
+          @shownDocuments={{this.shownDocuments}}
+          @objectID="test"
+          @relatedDocuments={{array}}
+          @relatedLinks={{array}}
+          @search={{this.search}}
+        />
+      `);
 
-    test("it renders a 'no matches' message when there are no results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+      assert.dom("[data-test-add-related-resource-spinner]").exists();
+    });
 
-    test("it conditionally enables keyboard navigation", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+    test("it renders a 'no matches' message when there are no results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      this.set("allowAddingExternalLinks", false);
 
-    test("it searches for documents", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+        <Document::Sidebar::RelatedResources::Add
+          @headerTitle="Test title"
+          @inputPlaceholder="Test placeholder"
+          @onClose={{this.noop}}
+          @addRelatedExternalLink={{this.noop}}
+          @addRelatedDocument={{this.noop}}
+          @shownDocuments={{this.shownDocuments}}
+          @allowAddingExternalLinks={{this.allowAddingExternalLinks}}
+          @objectID="test"
+          @relatedDocuments={{array}}
+          @relatedLinks={{array}}
+          @search={{this.search}}
+        />
+      `);
 
-    test("it can add external links", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});
+      await fillIn(SEARCH_INPUT_SELECTOR, "foobar");
+
+      assert
+        .dom(NO_MATCHES_SELECTOR)
+        .exists('shows "No matches" when there are no results');
+
+      this.set("allowAddingExternalLinks", true);
+
+      await fillIn(SEARCH_INPUT_SELECTOR, "foobar");
+
+      assert
+        .dom(NO_MATCHES_SELECTOR)
+        .exists('shows "No matches" when there are no results');
+
+      await fillIn(SEARCH_INPUT_SELECTOR, "https://www.hashicorp.com");
+
+      assert
+        .dom(NO_MATCHES_SELECTOR)
+        .doesNotExist(
+          'does not show "No matches" when adding an external link'
+        );
+    });
+
+    todo(
+      "it conditionally enables keyboard navigation",
+      async function (
+        this: DocumentSidebarRelatedResourcesAddTestContext,
+        assert
+      ) {
+        assert.true(false);
+      }
+    );
+
+    test("it returns query results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+          <Document::Sidebar::RelatedResources::Add
+            @headerTitle="Test title"
+            @inputPlaceholder="Test placeholder"
+            @onClose={{this.noop}}
+            @addRelatedExternalLink={{this.noop}}
+            @addRelatedDocument={{this.noop}}
+            @shownDocuments={{this.shownDocuments}}
+            @objectID="test"
+            @relatedDocuments={{array}}
+            @relatedLinks={{array}}
+            @search={{this.search}}
+          />
+        `);
+
+      assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 4 });
+
+      await fillIn(SEARCH_INPUT_SELECTOR, "3");
+
+      assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 1 });
+    });
+
+    test("it can add external links", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+          <Document::Sidebar::RelatedResources::Add
+            @headerTitle="Test title"
+            @inputPlaceholder="Test placeholder"
+            @onClose={{this.noop}}
+            @addRelatedExternalLink={{this.noop}}
+            @addRelatedDocument={{this.noop}}
+            @shownDocuments={{this.shownDocuments}}
+            @allowAddingExternalLinks={{true}}
+            @objectID="test"
+            @relatedDocuments={{array}}
+            @relatedLinks={{array}}
+            @search={{this.search}}
+          />
+        `);
+
+      await fillIn(SEARCH_INPUT_SELECTOR, "https://www.hashicorp.com");
+
+      assert.dom(EXTERNAL_RESOURCE_FORM_SELECTOR).exists();
+      assert
+        .dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR)
+        .hasValue("Placeholder Title");
+
+      assert
+        .dom(EXTERNAL_RESOURCE_URL_SELECTOR)
+        .hasText("https://www.hashicorp.com");
+
+      // TODO: Test that it saves on submit
+    });
   }
 );

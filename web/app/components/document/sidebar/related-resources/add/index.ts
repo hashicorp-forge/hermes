@@ -31,12 +31,6 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     default: [];
   };
 }
-const FAKE_TITLES = [
-  "Text Input | Helios Design System",
-  "Storybook",
-  "Zoom | Sign in | The World's Leader in Video Communications",
-  "Terraform Labs | Asana",
-];
 
 export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
@@ -53,9 +47,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @tracked keyboardNavIsEnabled = true;
 
-  @tracked externalLinkTitle = FAKE_TITLES[
-    Math.floor(Math.random() * 4)
-  ] as string;
+  @tracked externalLinkTitle = 'Placeholder Title';
 
   get faviconIsShown() {
     return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
