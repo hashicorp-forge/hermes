@@ -65,6 +65,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const objectEntriesLengthIsZero =
       Object.entries(this.args.shownDocuments).length === 0;
 
+
     if (this.args.allowAddingExternalLinks) {
       return objectEntriesLengthIsZero && !this.queryIsURL;
     } else {
@@ -201,7 +202,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action protected onInput(dd: any, e: Event) {
     const input = e.target as HTMLInputElement;
     this.query = input.value;
-
     void this.checkURL.perform();
     void this.args.search(dd, this.query);
   }

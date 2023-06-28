@@ -27,9 +27,17 @@
           <div class="truncate">{{@url}}</div>
           <div class="external-resource-favicon">
             {{#if @defaultFaviconIsShown}}
-              <FlightIcon @name="globe" />
+              <FlightIcon
+                @name="globe"
+                data-test-external-resource-default-favicon
+              />
             {{else}}
-              <img src={{@faviconURL}} width="16" height="16" />
+              <img
+                data-test-external-resource-custom-favicon
+                src={{@faviconURL}}
+                width="16"
+                height="16"
+              />
             {{/if}}
           </div>
         </div>
