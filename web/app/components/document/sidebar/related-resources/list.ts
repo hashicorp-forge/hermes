@@ -8,7 +8,7 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
   Args: {
-    items: any;
+    items: any[];
   };
   Blocks: {
     resource: [resource: any];
@@ -17,7 +17,7 @@ interface DocumentSidebarRelatedResourcesListComponentSignature {
 
 export default class DocumentSidebarRelatedResourcesListComponent extends Component<DocumentSidebarRelatedResourcesListComponentSignature> {
   get listIsEmpty() {
-    return Object.keys(this.args.items).length === 0;
+    return this.args.items.length === 0;
   }
 
   *transition({
