@@ -273,17 +273,26 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
+
           <Document::RelatedResources
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
             @allowAddingExternalLinks={{true}}
+            @searchFilters={{array (concat "product:" @document.product)}}
+            @headerTitle="Related resources"
+            @modalHeaderTitle="Add related resource"
           />
         </div>
 
         <div class="flex flex-col items-start space-y-2">
           <Document::RelatedResources
+            @headerTitle="PRD"
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
+            @searchFilters={{array "docType:PRD"}}
+            @modalHeaderTitle="Add PRD"
+            {{! This will be eventually based on the number of Object entries being 1 }}
+            @sectionHeaderButtonIsHidden={{true}}
           />
         </div>
 

@@ -23,6 +23,7 @@ interface DocumentRelatedResourcesAddComponentSignature {
     relatedLinks: NativeArray<RelatedExternalLink>;
     search: (dd: any, query: string) => Promise<void>;
     allowAddingExternalLinks?: boolean;
+    headerTitle: string;
   };
   Blocks: {
     default: [];

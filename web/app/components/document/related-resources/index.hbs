@@ -1,7 +1,8 @@
 <Document::Sidebar::SectionHeader
-  @title="Related resources"
-  @buttonLabel="Add related resource"
+  @title={{@headerTitle}}
+  @buttonIsHidden={{@sectionHeaderButtonIsHidden}}
   @buttonAction={{this.showAddResourceModal}}
+  @buttonLabel="Add..."
 />
 
 <Document::Sidebar::ResourceList @items={{this.relatedResourcesObjectEntries}}>
@@ -16,6 +17,7 @@
 
 {{#if this.addResourceModalIsShown}}
   <Document::RelatedResources::Add
+    @headerTitle={{@modalHeaderTitle}}
     @onClose={{this.hideAddResourceModal}}
     @addRelatedExternalLink={{this.addRelatedExternalLink}}
     @addRelatedDocument={{this.addRelatedDocument}}

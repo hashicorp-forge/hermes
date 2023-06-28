@@ -13,17 +13,21 @@ import AlgoliaService from "hermes/services/algolia";
 import { restartableTask } from "ember-concurrency";
 import { next } from "@ember/runloop";
 
+export interface RelatedExternalLink {
+  url: string;
+  title: string;
+}
+
 interface DocumentRelatedResourcesComponentSignature {
   Args: {
     productArea?: string;
     objectID?: string;
     allowAddingExternalLinks?: boolean;
+    headerTitle: string;
+    modalHeaderTitle: string;
+    searchFilters?: string[];
+    sectionHeaderButtonIsHidden?: boolean;
   };
-}
-
-export interface RelatedExternalLink {
-  url: string;
-  title: string;
 }
 
 export default class DocumentRelatedResourcesComponent extends Component<DocumentRelatedResourcesComponentSignature> {
@@ -78,7 +82,7 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
             "owners",
           ],
           // TODO: investigate why this doesn't work
-          optionalFilters: ["product:" + this.args.productArea],
+          optionalFilters: this.args.searchFilters,
         })
         .then((response) => response);
       if (algoliaResponse) {

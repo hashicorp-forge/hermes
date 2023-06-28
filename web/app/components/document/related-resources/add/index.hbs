@@ -3,7 +3,7 @@
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   <Hds::Modal @onClose={{@onClose}} class="h-[475px]" as |M|>
     <M.Header>
-      Add resource
+      {{@headerTitle}}
     </M.Header>
     <M.Body>
       <X::DropdownList
