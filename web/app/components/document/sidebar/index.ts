@@ -38,19 +38,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  @tracked linkedRFC: HermesDocument | null = null;
-
-  @task *saveLinkedRFC(rfc: HermesDocument) {
-    this.linkedRFC = rfc;
-    if (this.linkedRFC) {
-      // FIXME: need the full URL
-      const rfcURL = `documents/${this.linkedRFC.objectID}`;
-      yield this.save.perform("prd", rfcURL);
-    } else {
-      yield this.save.perform("prd", "");
-    }
-  }
-
   get modalIsActive() {
     return (
       this.archiveModalIsActive ||
