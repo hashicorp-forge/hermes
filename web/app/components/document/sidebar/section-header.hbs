@@ -6,7 +6,7 @@
     <Action
       {{on "click" this.buttonAction}}
       class="sidebar-section-header-button"
-      aria-label="Add"
+      aria-label={{or @buttonLabel "Add"}}
     >
       <FlightIcon @name={{or @buttonIcon "plus"}} />
     </Action>

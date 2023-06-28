@@ -6,6 +6,7 @@ interface DocumentSidebarSectionHeaderComponentSignature {
   Element: HTMLDivElement;
   Args: {
     title: string;
+    buttonLabel?: string;
     buttonAction?: () => void;
     buttonIcon?: string;
     buttonIsHidden?: boolean;
