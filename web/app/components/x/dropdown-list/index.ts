@@ -80,6 +80,12 @@ interface XDropdownListComponentSignature {
      * even in cases where the list is long enough to show it.
      */
     inputIsShown?: boolean;
+
+    /**
+     * Whether the keyboard should be used to navigate the list,
+     * as determined by the parent component.
+     */
+    keyboardNavIsEnabled?: boolean;
     onItemClick?: (value: any, attributes: any) => void;
   };
   Blocks: {
@@ -111,6 +117,8 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @tracked protected query: string = "";
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected focusedItemIndex = -1;
+  @tracked protected keyboardNavIsEnabled =
+    this.args.keyboardNavIsEnabled ?? true;
 
   /**
    * An asserted-true reference to the scroll container.
@@ -163,6 +171,25 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   }
 
   /**
+   * The action to enable keyboard navigation, if allowed by the parent component.
+   * Called when the filter input is focused.
+   */
+  @action protected enableKeyboardNav() {
+    if (this.args.keyboardNavIsEnabled === false) {
+      return;
+    }
+    this.keyboardNavIsEnabled = true;
+  }
+
+  /**
+   * The action to disable keyboard navigation.
+   * Called when the filter input loses focus.
+   */
+  @action protected disableKeyboardNav() {
+    this.keyboardNavIsEnabled = false;
+  }
+
+  /**
    * The action performed when the filter input is inserted.
    * Registers the input locally and focuses it for the user.
    */
@@ -182,6 +209,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Used to assign ids to the menu items.
    */
   @action protected didInsertContent() {
+    console.log("isKeyboard", this.args.keyboardNavIsEnabled);
     assert(
       "didInsertContent expects a _scrollContainer",
       this._scrollContainer

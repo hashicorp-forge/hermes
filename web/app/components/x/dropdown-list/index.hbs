@@ -103,6 +103,8 @@
                 data-test-x-dropdown-list-input
                 {{did-insert this.registerAndFocusInput}}
                 {{on "input" this.onInput}}
+                {{on "focusin" this.enableKeyboardNav}}
+                {{on "focusout" this.disableKeyboardNav}}
                 @value={{this.query}}
                 @type="search"
                 placeholder="Filter..."
@@ -121,7 +123,6 @@
             {{#if (has-block "header")}}
               {{yield to="header"}}
             {{/if}}
-            {{log this.shownItems}}
             <X::DropdownList::Items
               @contentID={{f.contentID}}
               @query={{this.query}}
@@ -139,6 +140,7 @@
               @hideContent={{f.hideContent}}
               @scrollContainer={{this.scrollContainer}}
               @listIsShown={{@listIsShown}}
+              @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
             >
               <:no-matches>
                 {{#if (has-block "no-matches")}}
