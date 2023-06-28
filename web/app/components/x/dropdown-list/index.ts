@@ -81,6 +81,10 @@ interface XDropdownListComponentSignature {
      */
     inputIsShown?: boolean;
 
+    /**
+     * Whether the keyboard should be used to navigate the list,
+     * as determined by the parent component.
+     */
     keyboardNavIsEnabled?: boolean;
     onItemClick?: (value: any, attributes: any) => void;
   };
@@ -166,13 +170,21 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     this._scrollContainer = element;
   }
 
-  @action protected enableKeyboardNav() {
+  /**
+   * The action to enable keyboard navigation, if allowed by the parent component.
+   * Called when the filter input is focused.
+   */
+  @action protected maybeEnableKeyboardNav() {
     if (this.args.keyboardNavIsEnabled === false) {
       return;
     }
     this.keyboardNavIsEnabled = true;
   }
 
+  /**
+   * The action to disable keyboard navigation.
+   * Called when the filter input loses focus.
+   */
   @action protected disableKeyboardNav() {
     this.keyboardNavIsEnabled = false;
   }
