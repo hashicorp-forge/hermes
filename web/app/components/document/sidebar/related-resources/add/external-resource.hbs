@@ -1,14 +1,17 @@
 <div class="related-resources-modal-container">
   <div class="add-external-resource-container">
     {{#if @urlIsLoading}}
-      <div class="block w-full text-center">
+      <div
+        class="block w-full text-center"
+        data-test-external-resource-url-is-loading
+      >
         <FlightIcon @name="loading" @size="24" class="mb-2" />
         <h3 class="related-resources-modal-loading-text">
           Reading URL...
         </h3>
       </div>
     {{else}}
-      <div class="w-full">
+      <div class="w-full" data-test-external-resource-form>
         <form {{on "submit" @onSubmit}} class="mb-2.5">
           <Hds::Form::TextInput::Field
             {{on "input" @onInput}}
