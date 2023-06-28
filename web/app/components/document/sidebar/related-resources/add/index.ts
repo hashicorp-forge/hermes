@@ -40,7 +40,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: FlashMessageService;
 
-  @tracked dd: any = null;
   @tracked query = "";
   @tracked queryIsThirdPartyURL = false;
   @tracked faviconURL: string | null = null;
@@ -182,7 +181,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   }
 
   @action didInsertInput(dd: any, e: HTMLInputElement) {
-    this.dd = dd;
     this.searchInput = e;
     void this.loadInitialData.perform(dd);
 
