@@ -10,6 +10,7 @@ import { inject as service } from "@ember/service";
 import NativeArray from "@ember/array/-private/native-array";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import Ember from "ember";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
@@ -52,7 +53,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @tracked keyboardNavIsEnabled = true;
 
-  // TODO: Replace this
   @tracked externalLinkTitle = FAKE_TITLES[
     Math.floor(Math.random() * 4)
   ] as string;
@@ -64,7 +64,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   get noMatchesFound(): boolean {
     const objectEntriesLengthIsZero =
       Object.entries(this.args.shownDocuments).length === 0;
-
 
     if (this.args.allowAddingExternalLinks) {
       return objectEntriesLengthIsZero && !this.queryIsURL;
@@ -232,7 +231,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       });
 
       favicon.src = this.faviconURL as string;
-      await timeout(1500);
+      await timeout(Ember.testing ? 0 : 1250);
       this.urlWasProcessed = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {

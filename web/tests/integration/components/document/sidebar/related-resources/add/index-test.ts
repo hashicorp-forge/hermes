@@ -1,16 +1,22 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, render } from "@ember/test-helpers";
+import { TestContext, fillIn, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
+const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
+const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
+const LIST_HEADER_SELECTOR = "[data-test-related-resources-list-header]";
+const DOCUMENT_OPTION_SELECTOR = ".related-document-option";
+
 interface DocumentSidebarRelatedResourcesAddTestContext
   extends MirageTestContext {
   noop: () => void;
-  searchNoop: (dd: any, query: string) => Promise<void>;
+  search: (dd: any, query: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
+  testArray: any[];
 }
 
 module(
@@ -23,22 +29,20 @@ module(
       this: DocumentSidebarRelatedResourcesAddTestContext
     ) {
       this.server.createList("document", 10);
+      this.set("testArray", []);
       this.set("noop", () => {});
 
-      let shownDocuments = this.server.schema.document.all().models;
+      let suggestions = this.server.schema.document.all().models;
 
       const reducerFunction = (
         acc: Record<string, HermesDocument>,
         document: { attrs: HermesDocument }
       ) => {
-        console.log("called");
         acc[document.attrs.objectID] = document.attrs;
         return acc;
       };
 
-      shownDocuments = shownDocuments.reduce(reducerFunction, {});
-
-      console.log(shownDocuments);
+      suggestions = suggestions.reduce(reducerFunction, {});
 
       const getFirstFourRecords = (documents: any) => {
         return Object.keys(documents)
@@ -49,13 +53,13 @@ module(
           }, {} as Record<string, HermesDocument>);
       };
 
-      // slice to 4 because that's the max number of results we show
-      shownDocuments = getFirstFourRecords(shownDocuments);
+      suggestions = getFirstFourRecords(suggestions);
 
-      this.set("shownDocuments", shownDocuments);
-      this.set("searchNoop", (dd: any, query: string) => {
+      this.set("shownDocuments", suggestions);
+
+      this.set("search", (dd: any, query: string) => {
         if (query === "") {
-          this.set("shownDocuments", shownDocuments);
+          this.set("shownDocuments", suggestions);
         } else {
           let matches = this.server.schema.document
             .where((document: HermesDocument) => {
@@ -68,7 +72,7 @@ module(
       });
     });
 
-    test("it conditionally renders a list header", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+    test("it renders correctly (initial load)", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
       await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
         <Document::Sidebar::RelatedResources::Add
           @headerTitle="Test title"
@@ -78,17 +82,50 @@ module(
           @addRelatedDocument={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @objectID="test"
-          @relatedDocuments={{array}}
-          @relatedLinks={{array}}
-          @search={{this.searchNoop}}
+          @relatedDocuments={{this.testArray}}
+          @relatedLinks={{this.testArray}}
+          @search={{this.search}}
         />
       `);
 
-      // assert that the title is correct
-      // assert that the placeholder is correct
-      // assert that the list header is rendered
+      assert.dom(MODAL_TITLE_SELECTOR).hasText("Test title");
+      assert.dom(LIST_HEADER_SELECTOR).hasText("Suggestions");
+      assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 4 });
+      assert
+        .dom(SEARCH_INPUT_SELECTOR)
+        .hasAttribute("placeholder", "Test placeholder");
+    });
 
-      await this.pauseTest();
+    test("it conditionally renders a list header", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+        <Document::Sidebar::RelatedResources::Add
+          @headerTitle="Test title"
+          @inputPlaceholder="Test placeholder"
+          @onClose={{this.noop}}
+          @addRelatedExternalLink={{this.noop}}
+          @addRelatedDocument={{this.noop}}
+          @shownDocuments={{this.shownDocuments}}
+          @allowAddingExternalLinks={{true}}
+          @objectID="test"
+          @relatedDocuments={{this.testArray}}
+          @relatedLinks={{this.testArray}}
+          @search={{this.search}}
+        />
+      `);
+
+      assert.dom(LIST_HEADER_SELECTOR).hasText("Suggestions");
+
+      // Create a search with results
+      await fillIn(SEARCH_INPUT_SELECTOR, "3");
+      assert.dom(LIST_HEADER_SELECTOR).hasText("Results");
+
+      // Create a search with no results
+      await fillIn(SEARCH_INPUT_SELECTOR, "foobar");
+      assert.dom(LIST_HEADER_SELECTOR).doesNotExist();
+
+      // Create an external link
+      await fillIn(SEARCH_INPUT_SELECTOR, "https://www.hashicorp.com");
+      assert.dom(LIST_HEADER_SELECTOR).doesNotExist();
     });
 
     test("it renders a loading spinner", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {});

@@ -2,7 +2,7 @@
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   <Hds::Modal @onClose={{@onClose}} class="h-[475px]" as |M|>
-    <M.Header>
+    <M.Header data-test-add-related-resource-modal-title>
       {{@headerTitle}}
     </M.Header>
     <M.Body>
@@ -20,7 +20,7 @@
       >
         <:anchor as |dd|>
           <Hds::Form::TextInput::Base
-            data-test-resource-search-input
+            data-test-related-resources-search-input
             {{did-insert dd.registerAnchor}}
             {{did-insert (fn this.didInsertInput dd)}}
             {{on "input" (fn this.onInput dd)}}
@@ -30,6 +30,7 @@
             {{on "focusout" this.disableKeyboardNav}}
             @type="search"
             @value={{this.query}}
+            name="related-resources-search"
             size="25"
             placeholder={{@inputPlaceholder}}
             aria-label={{@inputPlaceholder}}
@@ -41,7 +42,7 @@
         <:header>
           {{#if this.listHeaderIsShown}}
             <div class="related-resources-modal-container mt-3.5">
-              <h4 class="hermes-h4">
+              <h4 class="hermes-h4" data-test-related-resources-list-header>
                 {{#if this.query.length}}
                   Results
                 {{else}}

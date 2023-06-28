@@ -41,9 +41,10 @@ module(
           'shows "Reading URL..." when the URL is loading'
         );
 
+      this.set("urlIsLoading", false);
+
       assert.dom("[data-test-external-resource-default-favicon]").exists();
 
-      this.set("urlIsLoading", false);
       this.set("defaultFaviconIsShown", false);
 
       assert
