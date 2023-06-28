@@ -99,10 +99,6 @@
     animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
   }
 
-  .inline-doc-title {
-    display: block;
-  }
-
   .hermes-doc + .external-doc {
     @apply mt-1.5;
   }
