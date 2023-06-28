@@ -24,6 +24,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     search: (dd: any, query: string) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
+    inputPlaceholder: string;
   };
   Blocks: {
     default: [];

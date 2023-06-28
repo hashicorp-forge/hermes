@@ -279,22 +279,24 @@
             @objectID={{@document.objectID}}
             @onChange={{this.onRelatedResourcesChange}}
             @allowAddingExternalLinks={{true}}
+            @headerTitle="Related resources"
+            @modalHeaderTitle="Add related resource"
+            @modalInputPlaceholder="Paste a URL or search documents..."
             @optionalSearchFilters={{array
               (concat "product:" @document.product)
             }}
-            @headerTitle="Related resources"
-            @modalHeaderTitle="Add related resource"
           />
         </div>
 
         <div class="flex flex-col items-start">
           <Document::Sidebar::RelatedResources
-            @headerTitle="PRD"
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
             @onChange={{this.onRelatedResourcesChange}}
-            @searchFilters="docType:PRD"
+            @headerTitle="PRD"
             @modalHeaderTitle="Add PRD"
+            @modalInputPlaceholder="Search PRDs..."
+            @searchFilters="docType:PRD"
             @itemLimit={{1}}
           />
         </div>

@@ -7,8 +7,6 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
-import { fadeIn } from "ember-animated/motions/opacity";
-import { TransitionContext } from "ember-animated/.";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask } from "ember-concurrency";
 import { next } from "@ember/runloop";
@@ -28,7 +26,7 @@ interface DocumentSidebarRelatedResourcesComponentSignature {
     searchFilters?: string;
     optionalSearchFilters?: string[];
     itemLimit?: number;
-    // this is probably wrong, confirm
+    modalInputPlaceholder: string;
     onChange: () => void;
   };
 }
