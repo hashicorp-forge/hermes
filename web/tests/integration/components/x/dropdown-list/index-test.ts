@@ -179,6 +179,54 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .hasAttribute("aria-activedescendant", FIRST_ITEM_ID);
   });
 
+  test("keyboard navigation can be disabled", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}} @keyboardNavIsEnabled={{false}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action>Item</dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    await triggerKeyEvent("[data-test-toggle]", "keydown", "ArrowDown");
+
+    assert
+      .dom("#" + FIRST_ITEM_ID)
+      .doesNotHaveAttribute("aria-selected", "no item is selected");
+  });
+
+  test("keyboard navigation stops when the filter input loses focus", async function (assert) {
+    this.set("items", LONG_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle/>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action>Item</dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    await click(".x-dropdown-list-input-container");
+
+    await triggerKeyEvent("[data-test-toggle]", "keydown", "ArrowDown");
+
+    assert
+      .dom("#" + FIRST_ITEM_ID)
+      .doesNotHaveAttribute("aria-selected", "no item is selected");
+  });
+
   test("the component's filter properties are reset on close", async function (assert) {
     this.set("items", LONG_ITEM_LIST);
     await render<XDropdownListComponentTestContext>(hbs`
