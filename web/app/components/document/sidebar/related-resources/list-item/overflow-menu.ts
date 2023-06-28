@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { action } from "@ember/object";
-import { RelatedExternalLink } from "hermes/components/document/related-resources";
+import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
 
-interface DocumentRelatedResourcesListItemOverflowMenuComponentSignature {
+interface DocumentSidebarRelatedResourcesListItemOverflowMenuComponentSignature {
   Args: {
     resource: RelatedExternalLink | HermesDocument;
     showEditAction?: boolean;
@@ -12,7 +12,7 @@ interface DocumentRelatedResourcesListItemOverflowMenuComponentSignature {
   };
 }
 
-export default class DocumentRelatedResourcesListItemOverflowMenuComponent extends Component<DocumentRelatedResourcesListItemOverflowMenuComponentSignature> {
+export default class DocumentSidebarRelatedResourcesListItemOverflowMenuComponent extends Component<DocumentSidebarRelatedResourcesListItemOverflowMenuComponentSignature> {
   get items() {
     let maybeEditItem = null;
 
@@ -47,6 +47,6 @@ export default class DocumentRelatedResourcesListItemOverflowMenuComponent exten
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::ListItem::OverflowMenu": typeof DocumentRelatedResourcesListItemOverflowMenuComponent;
+    "Document::Sidebar::RelatedResources::ListItem::OverflowMenu": typeof DocumentSidebarRelatedResourcesListItemOverflowMenuComponent;
   }
 }

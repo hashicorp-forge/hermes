@@ -431,3 +431,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Document::Sidebar": typeof DocumentSidebarComponent;
+  }
+}

@@ -5,7 +5,7 @@ import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 
-interface DocumentSidebarResourceListComponentSignature {
+interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
   Args: {
     items: any;
@@ -15,7 +15,7 @@ interface DocumentSidebarResourceListComponentSignature {
   };
 }
 
-export default class DocumentSidebarResourceListComponent extends Component<DocumentSidebarResourceListComponentSignature> {
+export default class DocumentSidebarRelatedResourcesListComponent extends Component<DocumentSidebarRelatedResourcesListComponentSignature> {
   get listIsEmpty() {
     return Object.keys(this.args.items).length === 0;
   }
@@ -51,6 +51,6 @@ export default class DocumentSidebarResourceListComponent extends Component<Docu
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::Sidebar::ResourceList": typeof DocumentSidebarResourceListComponent;
+    "Document::Sidebar::RelatedResources::List": typeof DocumentSidebarRelatedResourcesListComponent;
   }
 }

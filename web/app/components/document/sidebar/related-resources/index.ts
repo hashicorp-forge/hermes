@@ -18,7 +18,7 @@ export interface RelatedExternalLink {
   title: string;
 }
 
-interface DocumentRelatedResourcesComponentSignature {
+interface DocumentSidebarRelatedResourcesComponentSignature {
   Args: {
     productArea?: string;
     objectID?: string;
@@ -31,7 +31,7 @@ interface DocumentRelatedResourcesComponentSignature {
   };
 }
 
-export default class DocumentRelatedResourcesComponent extends Component<DocumentRelatedResourcesComponentSignature> {
+export default class DocumentSidebarRelatedResourcesComponent extends Component<DocumentSidebarRelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
@@ -203,6 +203,6 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources": typeof DocumentRelatedResourcesComponent;
+    "Document::Sidebar::RelatedResources": typeof DocumentSidebarRelatedResourcesComponent;
   }
 }

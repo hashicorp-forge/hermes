@@ -5,18 +5,18 @@
   @buttonLabel="Add..."
 />
 
-<Document::Sidebar::ResourceList @items={{this.relatedResourcesObjectEntries}}>
+<Document::Sidebar::RelatedResources::List @items={{this.relatedResourcesObjectEntries}}>
   <:resource as |r|>
-    <Document::RelatedResources::ListItem
+    <Document::Sidebar::RelatedResources::ListItem
       @resource={{r}}
       @removeResource={{this.removeResource}}
       @editResource={{this.editResource}}
     />
   </:resource>
-</Document::Sidebar::ResourceList>
+</Document::Sidebar::RelatedResources::List>
 
 {{#if this.addResourceModalIsShown}}
-  <Document::RelatedResources::Add
+  <Document::Sidebar::RelatedResources::Add
     @headerTitle={{@modalHeaderTitle}}
     @onClose={{this.hideAddResourceModal}}
     @addRelatedExternalLink={{this.addRelatedExternalLink}}

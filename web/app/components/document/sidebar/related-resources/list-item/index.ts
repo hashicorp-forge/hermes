@@ -3,9 +3,9 @@ import { HermesDocument } from "hermes/types/document";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
-import { RelatedExternalLink } from "hermes/components/document/related-resources";
+import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
 
-interface DocumentRelatedResourcesListItemComponentSignature {
+interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
     resource: HermesDocument | RelatedExternalLink;
@@ -17,7 +17,7 @@ interface DocumentRelatedResourcesListItemComponentSignature {
   };
 }
 
-export default class DocumentRelatedResourcesListItemComponent extends Component<DocumentRelatedResourcesListItemComponentSignature> {
+export default class DocumentSidebarRelatedResourcesListItemComponent extends Component<DocumentSidebarRelatedResourcesListItemComponentSignature> {
   @tracked modalIsShown = false;
 
   private _itemIsExternalResource = "url" in this.args.resource;
@@ -55,6 +55,6 @@ export default class DocumentRelatedResourcesListItemComponent extends Component
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::ListItem": typeof DocumentRelatedResourcesListItemComponent;
+    "Document::Sidebar::RelatedResources::ListItem": typeof DocumentSidebarRelatedResourcesListItemComponent;
   }
 }

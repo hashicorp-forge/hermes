@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 
-interface DocumentRelatedResourcesAddExternalResourceSignature {
+interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
   Element: null;
   Args: {
     editModeIsEnabled: boolean;
@@ -13,10 +13,10 @@ interface DocumentRelatedResourcesAddExternalResourceSignature {
   };
 }
 
-export default class DocumentRelatedResourcesAddExternalResource extends Component<DocumentRelatedResourcesAddExternalResourceSignature> {}
+export default class DocumentSidebarRelatedResourcesAddExternalResource extends Component<DocumentSidebarRelatedResourcesAddExternalResourceSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::Add::ExternalResource": typeof DocumentRelatedResourcesAddExternalResource;
+    "Document::Sidebar::RelatedResources::Add::ExternalResource": typeof DocumentSidebarRelatedResourcesAddExternalResource;
   }
 }

@@ -9,7 +9,7 @@
         @route="authenticated.document"
         class="related-resource-link peer"
       >
-        <Document::RelatedResources::ListItem::Resource
+        <Document::Sidebar::RelatedResources::ListItem::Resource
           @resource={{@resource}}
           @removeResource={{@removeResource}}
         />
@@ -19,13 +19,13 @@
         href={{this.externalResourceURL}}
         class="related-resource-link peer"
       >
-        <Document::RelatedResources::ListItem::Resource
+        <Document::Sidebar::RelatedResources::ListItem::Resource
           @resource={{@resource}}
           @removeResource={{@removeResource}}
         />
       </ExternalLink>
     {{/if}}
-    <Document::RelatedResources::ListItem::OverflowMenu
+    <Document::Sidebar::RelatedResources::ListItem::OverflowMenu
       @resource={{@resource}}
       @onRemoveClick={{@removeResource}}
       @onEditClick={{this.showModal}}
@@ -34,7 +34,7 @@
 </li>
 
 {{#if this.modalIsShown}}
-  <Document::RelatedResources::ListItem::Edit
+  <Document::Sidebar::RelatedResources::ListItem::Edit
     @resource={{@resource}}
     @hideModal={{this.hideModal}}
     @onSave={{this.saveChanges}}

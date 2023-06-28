@@ -9,9 +9,9 @@ import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import NativeArray from "@ember/array/-private/native-array";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { RelatedExternalLink } from "hermes/components/document/related-resources";
+import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
 
-interface DocumentRelatedResourcesAddComponentSignature {
+interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
@@ -36,7 +36,7 @@ const FAKE_TITLES = [
   "Terraform Labs | Asana",
 ];
 
-export default class DocumentRelatedResourcesAddComponent extends Component<DocumentRelatedResourcesAddComponentSignature> {
+export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: FlashMessageService;
 
@@ -262,6 +262,6 @@ export default class DocumentRelatedResourcesAddComponent extends Component<Docu
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::RelatedResources::Add": typeof DocumentRelatedResourcesAddComponent;
+    "Document::Sidebar::RelatedResources::Add": typeof DocumentSidebarRelatedResourcesAddComponent;
   }
 }
