@@ -26,7 +26,7 @@ interface DocumentRelatedResourcesComponentSignature {
     headerTitle: string;
     modalHeaderTitle: string;
     searchFilters?: string[];
-    sectionHeaderButtonIsHidden?: boolean;
+    itemLimit?: number;
   };
 }
 
@@ -43,6 +43,14 @@ export default class DocumentRelatedResourcesComponent extends Component<Documen
 
   get relatedResourcesAreShown(): boolean {
     return Object.keys(this.relatedResources).length > 0;
+  }
+
+  get sectionHeaderButtonIsHidden(): boolean {
+    if (this.args.itemLimit) {
+      return Object.keys(this.relatedResources).length >= this.args.itemLimit;
+    } else {
+      return false;
+    }
   }
 
   *linkCardTransition({ insertedSprites }: TransitionContext) {

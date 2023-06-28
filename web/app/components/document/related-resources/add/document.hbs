@@ -1,5 +1,4 @@
 <div class="w-full flex space-x-3 overflow-hidden">
-  {{! TODO: Could this be a configuration of the DocTile component? }}
   <Doc::Thumbnail
     @status={{@document.status}}
     @product={{@document.product}}
@@ -8,7 +7,7 @@
   <div class="w-full flex items-center pr-8 overflow-hidden">
     <div class="w-full">
       <TruncatedText
-        @tagName="h4"
+        @tagName="h5"
         class="text-display-300 font-semibold text-color-foreground-strong"
       >
         {{@document.title}}
