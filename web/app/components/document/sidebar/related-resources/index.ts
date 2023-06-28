@@ -28,6 +28,8 @@ interface DocumentSidebarRelatedResourcesComponentSignature {
     searchFilters?: string;
     optionalSearchFilters?: string[];
     itemLimit?: number;
+    // this is probably wrong, confirm
+    onChange: () => void;
   };
 }
 
@@ -51,12 +53,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       return Object.keys(this.relatedResources).length >= this.args.itemLimit;
     } else {
       return false;
-    }
-  }
-
-  *linkCardTransition({ insertedSprites }: TransitionContext) {
-    for (let sprite of insertedSprites) {
-      void fadeIn(sprite, { duration: 100 });
     }
   }
 
@@ -115,8 +111,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   get relatedResourcesObjectEntries() {
     const objectEntries = Object.entries(this.relatedResources);
-
-    // we only need the attributes, not the keys
     return objectEntries.map((entry) => {
       return entry[1];
     });
@@ -155,7 +149,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
      * We transform it to look like:
      * { "bar": {title: "foo", objectID: "bar"...}, ...}
      */
-
     let documents: any = {};
 
     if (this._shownDocuments) {
@@ -175,14 +168,17 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   @action editResource(resource: RelatedExternalLink) {
-    alert("time to save the donuts");
+    // TODO: call `onChange` here
+    alert("TODO");
   }
 
   @action addRelatedExternalLink(link: RelatedExternalLink) {
+    // TODO: call `onChange` here
     this.relatedLinks.unshiftObject(link);
   }
 
   @action addRelatedDocument(documentObjectID: string) {
+    // TODO: call `onChange` here
     let document = this.shownDocuments[documentObjectID];
     if (document) {
       this.relatedDocuments.unshiftObject(document);
@@ -191,6 +187,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   @action removeResource(resource: RelatedExternalLink | HermesDocument) {
+    // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
       return;

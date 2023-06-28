@@ -277,6 +277,7 @@
           <Document::Sidebar::RelatedResources
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
+            @onChange={{this.onRelatedResourcesChange}}
             @allowAddingExternalLinks={{true}}
             @optionalSearchFilters={{array
               (concat "product:" @document.product)
@@ -291,6 +292,7 @@
             @headerTitle="PRD"
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
+            @onChange={{this.onRelatedResourcesChange}}
             @searchFilters="docType:PRD"
             @modalHeaderTitle="Add PRD"
             @itemLimit={{1}}
