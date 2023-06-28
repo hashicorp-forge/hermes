@@ -45,13 +45,22 @@ module(
 
       assert.dom("[data-test-external-resource-default-favicon]").exists();
 
+      assert
+        .dom("[data-test-add-external-resource-form]")
+        .exists("shows the form when the URL is not loading");
+
+      assert.dom(".external-resource-title-input").hasValue("Test");
+
+      assert
+        .dom("[data-test-add-external-resource-truncated-url]")
+        .hasText("https://example.com");
+
       this.set("defaultFaviconIsShown", false);
 
       assert
-        .dom("[data-test-external-resource-form]")
-        .exists("shows the form when the URL is not loading");
-
-      assert.dom("[data-test-external-resource-custom-favicon]").exists();
+        .dom("[data-test-external-resource-custom-favicon]")
+        .exists()
+        .hasAttribute("src", "https://example.com/favicon.ico");
     });
   }
 );

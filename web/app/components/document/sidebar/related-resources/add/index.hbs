@@ -72,15 +72,13 @@
           />
         </:loading>
         <:no-matches>
-          <div
-            class="related-resources-modal-container mt-36
-              {{if this.noMatchesHeaderIsHidden 'hidden'}}
-              "
-          >
-            <h3 class="related-resources-modal-body-header">
-              No results found
-            </h3>
-          </div>
+          {{#unless this.noMatchesHeaderIsHidden}}
+            <div class="related-resources-modal-container mt-36">
+              <h3 class="related-resources-modal-body-header">
+                No results found
+              </h3>
+            </div>
+          {{/unless}}
         </:no-matches>
         <:item as |dd|>
           <dd.Action class="related-document-option">

@@ -47,7 +47,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @tracked keyboardNavIsEnabled = true;
 
-  @tracked externalLinkTitle = 'Placeholder Title';
+  @tracked externalLinkTitle = "Placeholder Title";
 
   get faviconIsShown() {
     return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
@@ -136,9 +136,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       void this.args.search(null, "");
     }
 
-    this.externalLinkTitle = FAKE_TITLES[
-      Math.floor(Math.random() * 4)
-    ] as string;
+    this.externalLinkTitle = "Placeholder Title";
 
     this.args.onClose();
   }

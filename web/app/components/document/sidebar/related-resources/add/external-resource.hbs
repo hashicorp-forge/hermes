@@ -11,7 +11,7 @@
         </h3>
       </div>
     {{else}}
-      <div class="w-full" data-test-external-resource-form>
+      <div class="w-full" data-test-add-external-resource-form>
         <form {{on "submit" @onSubmit}} class="mb-2.5">
           <Hds::Form::TextInput::Field
             {{on "input" @onInput}}
@@ -24,7 +24,7 @@
           </Hds::Form::TextInput::Field>
         </form>
         <div class="external-resource-url">
-          <div class="truncate">{{@url}}</div>
+          <div class="truncate" data-test-add-external-resource-truncated-url>{{@url}}</div>
           <div class="external-resource-favicon">
             {{#if @defaultFaviconIsShown}}
               <FlightIcon
@@ -42,6 +42,7 @@
           </div>
         </div>
         <Hds::Button
+          data-test-add-external-resource-button
           {{on "click" @onSubmit}}
           @isFullWidth={{true}}
           @color="primary"

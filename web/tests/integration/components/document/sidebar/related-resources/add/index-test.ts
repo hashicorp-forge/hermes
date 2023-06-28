@@ -1,6 +1,6 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, render } from "@ember/test-helpers";
+import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
@@ -137,7 +137,7 @@ module(
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 10);
+          }, 1000);
         }) as Promise<void>;
       });
 
@@ -155,7 +155,6 @@ module(
           @search={{this.search}}
         />
       `);
-
       assert.dom("[data-test-add-related-resource-spinner]").exists();
     });
 
