@@ -178,7 +178,7 @@
                     {{/each}}
                   </ol>
                 {{else}}
-                  <CustomEditableFields::EmptyState />
+                  <em>No contributors</em>
                 {{/if}}
               </:default>
               <:editing as |F|>
@@ -203,7 +203,7 @@
                 {{/each}}
               </ol>
             {{else}}
-              <CustomEditableFields::EmptyState />
+              <em>No contributors</em>
             {{/if}}
           {{/if}}
         </div>
@@ -231,7 +231,7 @@
                     {{/each}}
                   </ol>
                 {{else}}
-                  <CustomEditableFields::EmptyState />
+                  <em>No approvers</em>
                 {{/if}}
               </:default>
               <:editing as |F|>
@@ -257,7 +257,7 @@
                 {{/each}}
               </ol>
             {{else}}
-              <CustomEditableFields::EmptyState />
+              <em>No approvers</em>
             {{/if}}
           {{/if}}
         </div>
@@ -278,7 +278,9 @@
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
             @allowAddingExternalLinks={{true}}
-            @optionalSearchFilters={{array (concat "product:" @document.product)}}
+            @optionalSearchFilters={{array
+              (concat "product:" @document.product)
+            }}
             @headerTitle="Related resources"
             @modalHeaderTitle="Add related resource"
           />
