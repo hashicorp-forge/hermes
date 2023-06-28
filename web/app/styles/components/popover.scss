@@ -1,5 +1,5 @@
 .hermes-popover {
-  @apply bg-color-foreground-high-contrast rounded z-50 hds-dropdown__content;
+  @apply z-50 rounded-md bg-color-foreground-high-contrast min-w-[200px] max-w-[400px] flex flex-col overflow-auto hds-surface-high;
 
   .text {
     @apply relative;
