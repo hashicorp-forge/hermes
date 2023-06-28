@@ -1,19 +1,3 @@
-{{!
-  Used to render a document in a table row format
-
-  <Doc::Row /> properties:
-  @avatar (string): link to avatar image
-  @createdDate (string): created date
-  @docNumber (string): document number
-  @docID (string): document ID
-  @docType (string): document type
-  @isDraft (bool): document is a draft
-  @productArea eg. 'Waypoint' or 'Design Systems' etc
-  @status eg. 'approved', 'review', 'obsolete'
-  @isResult eg. 'true' (false by default) - optional
-  @isOwner eg. 'true' (false by default) - optional
-}}
-
 <Hds::Table::Tr class="row-results__table__row">
   <Hds::Table::Td class="name">
     <LinkTo
@@ -42,7 +26,7 @@
     <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
   <Hds::Table::Td class="product"><Hds::Badge
       @text={{this.productAreaName}}
-      @icon={{this.productAreaIcon}}
+      @icon={{or (get-product-id @productArea) "folder"}}
       title={{this.productAreaName}}
     /></Hds::Table::Td>
   <Hds::Table::Td class="owner">

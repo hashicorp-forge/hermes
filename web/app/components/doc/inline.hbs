@@ -10,6 +10,7 @@
       {{@title}}
     </h4>
 
+    {{! @glint-ignore - possibly wrong types for is-empty  }}
     {{#if (not (is-empty @docNumber))}}
       <small class="text-body-100 text-color-foreground-faint">
         {{@docNumber}}
@@ -18,8 +19,10 @@
 
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
 
-    {{#if (and @isResult @snippet)}}
-      <Doc::Snippet @snippet={{@snippet}} class="truncate" />
+    {{#if @isResult}}
+      {{#if @snippet}}
+        <Doc::Snippet @snippet={{@snippet}} class="truncate" />
+      {{/if}}
     {{/if}}
   </div>
 </LinkTo>

@@ -26,6 +26,7 @@
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.6.0",
+    "@gavant/glint-template-types": "^0.3.3",
     "@glimmer/component": "^1.0.4",
     "@glimmer/tracking": "^1.0.4",
     "@glint/core": "^1.0.1",
@@ -62,6 +63,8 @@
     "@types/rsvp": "latest",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
+    "ember-animated": "^1.0.4",
+    "ember-animated-tools": "^1.0.0",
     "ember-auto-import": "^2.4.0",
     "ember-basic-dropdown": "^4.0.5",
     "ember-cli": "~3.28.6",

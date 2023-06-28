@@ -76,11 +76,13 @@ Example shared drive organization
     - All Documents (this is the "documents" folder)
     - Drafts (this is the "drafts" folder)
 
-### Algolia
+### Algolia (required)
 
 1. [Sign up](https://www.algolia.com/users/sign_up) for a free Algolia account.
 
-1. Take note of the Admin API Key and Search-Only API Key in the [API Keys](https://www.algolia.com/account/api-keys) section. The admin API and search-only API keys are required for the Hermes server and the indexer.
+The Application ID, Search API Key, and Write API Key in Algolia's [API Keys settings](https://www.algolia.com/account/api-keys) are required for the Hermes server and the indexer. You will later add them to the [config.hcl configuration file](https://github.com/hashicorp-forge/hermes#configuration-file).
+
+Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` environment variables at build time.
 
 ## Development and Usage
 
@@ -102,11 +104,6 @@ cp configs/config.hcl ./
 ### Build the Project
 
 ```sh
-# OAuth client ID of the “web application”
-export HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID=”{OAUTH_CLIENT_ID_HERE}”
-```
-
-```sh
 make build
 ```
 
@@ -123,6 +120,12 @@ make docker/postgres/start
 
 ```sh
 ./hermes server -config=config.hcl
+```
+
+### Run the Indexer
+
+```sh
+./hermes indexer -config=config.hcl
 ```
 
 NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send emails, etc.
@@ -146,7 +149,7 @@ The server process serves web content. Of note, there are API endpoints for an a
 
 ### Indexer
 
-The indexer is a process that is run alongside the server that continually polls for published document updates and reindexes their content in Algolia for search. Additionally, it will rewrite the document headers with Hermes metadata in case they are manually changed to incorrect values. While not strictly required, it is recommended to run the indexer so the search index and Google Docs stay up-to-date.
+The indexer is a process that is run alongside the server that continually polls for published document updates and reindexes their content in Algolia for search. Additionally, it will rewrite the document headers with Hermes metadata in case they are manually changed to incorrect values. While not strictly required, it is recommended to run the indexer so search index data and Google Docs stay up-to-date.
 
 ### Frontend
 
@@ -160,15 +163,17 @@ This project is under active development and in the alpha stage. There may be br
 
 If you think that you've found a security issue, please contact us via email at security@hashicorp.com instead of filing a GitHub issue.
 
-Found a non-security-related bug or have a feature request? Please open a GitHub issue.
+Found a non-security-related bug or have a feature request or other feedback? Please [open a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new).
 
-Have other feedback? Please contact us via email at hermes-feedback@hashicorp.com.
+> Please note that it may take us up to a week to respond to GitHub issues as we continue to work on the project.
 
 ## Contributing
 
-In the short term, there are several large changes planned for the Hermes project. To make sure there aren’t any conflicts with the upcoming plans for the project, before submitting a PR please create a GitHub issue so we can validate the change you may want to propose.
+In the short term, there are several large changes planned for the Hermes project. To make sure there aren’t any conflicts with the upcoming plans for the project, before submitting a PR please [create a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new) so we can validate the change you may want to propose.
 
 As the project becomes more stable over the next several releases, we think it will become much easier to contribute.
+
+> Please note that it may take us up to a week to respond to PRs that are submitted as we continue to work on the project.
 
 ## Upcoming Plans
 

@@ -27,6 +27,13 @@ export enum FacetName {
   Product = "product",
 }
 
+export interface SortByFacets {
+  [name: string]: {
+    count: number;
+    isSelected: boolean;
+  };
+}
+
 export type ActiveFilters = {
   [name in FacetName]: string[];
 };
@@ -117,15 +124,15 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   }
 
-  get sortByFacets() {
+  get sortByFacets(): SortByFacets {
     return {
       Newest: {
         count: 0,
-        selected: this.currentSortByValue === SortByValue.DateDesc,
+        isSelected: this.currentSortByValue === SortByValue.DateDesc,
       },
       Oldest: {
         count: 0,
-        selected: this.currentSortByValue === SortByValue.DateAsc,
+        isSelected: this.currentSortByValue === SortByValue.DateAsc,
       },
     };
   }
@@ -138,5 +145,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     next(() => {
       closeDropdown();
     });
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Header::Toolbar": typeof ToolbarComponent;
   }
 }

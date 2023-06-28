@@ -12,9 +12,13 @@
       {{on "scroll" this.onScroll}}
       {{did-insert this.registerBody}}
     >
-      {{#let (get-product-id @document.product) as |productIcon|}}
+      {{#let (get-product-id this.product) as |productIcon|}}
         {{#if productIcon}}
-          <div class="product-badge {{productIcon}}">
+          <div
+            class="product-badge
+              {{productIcon}}
+              {{if this.save.isRunning 'opacity-50'}}"
+          >
             <FlightIcon @name={{productIcon}} />
           </div>
         {{/if}}
@@ -36,7 +40,10 @@
                 (is-empty @document.docType)
               }}{{@document.docType}}{{/unless}}
               &bullet;
-              {{@document.docNumber}}</small>
+              <span data-test-sidebar-doc-number>
+                {{@document.docNumber}}
+              </span>
+            </small>
           {{/if}}
           {{#if this.editingIsDisabled}}
             <h1
@@ -77,9 +84,7 @@
         <hr class="border-0 border-b hds-border-faint" />
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Summary</small>
+          <Document::Sidebar::SectionHeader @title="Summary" />
           {{#if this.editingIsDisabled}}
             <p
               class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
@@ -119,29 +124,32 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Status</small>
-          <Doc::State
-            @state={{@document.status}}
-            @hideProgress={{true}}
-          />
+          <Document::Sidebar::SectionHeader @title="Status" />
+          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Product/Area</small>
-          <Hds::Badge
-            @text={{@document.product}}
-            @icon={{get-product-id @document.product}}
-          />
+          <Document::Sidebar::SectionHeader @title="Product/Area" />
+          {{#if this.isDraft}}
+            <div class="w-full relative">
+              <Inputs::ProductSelect
+                @selected={{this.product}}
+                @onChange={{this.updateProduct.perform}}
+                @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
+                @renderOut={{true}}
+              />
+            </div>
+          {{else}}
+            <Hds::Badge
+              @text={{@document.product}}
+              @icon={{get-product-id @document.product}}
+            />
+          {{/if}}
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Owner</small>
+          <Document::Sidebar::SectionHeader @title="Owner" />
           <Person
             @imgURL={{get @document.ownerPhotos 0}}
             @email={{get @document.owners 0}}
@@ -149,9 +157,7 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Contributors</small>
+          <Document::Sidebar::SectionHeader @title="Contributors" />
           {{#if this.isOwner}}
             <EditableField
               @value={{this.contributors}}
@@ -203,9 +209,7 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Approvers</small>
+          <Document::Sidebar::SectionHeader @title="Approvers" />
           {{#if this.isOwner}}
             <EditableField
               @value={{this.approvers}}
@@ -218,7 +222,8 @@
                   <ol class="person-list">
                     {{#each this.approvers as |approver|}}
                       <li>
-                        <Person
+                        <Person::Approver
+                          @document={{@document}}
                           @imgURL={{approver.imgURL}}
                           @email={{approver.email}}
                         />
@@ -243,11 +248,8 @@
               <ol class="person-list">
                 {{#each this.approvers as |approver|}}
                   <li>
-                    <Person
-                      @badge={{if
-                        (has-approved-doc @document approver.email)
-                        "approved"
-                      }}
+                    <Person::Approver
+                      @document={{@document}}
                       @imgURL={{approver.imgURL}}
                       @email={{approver.email}}
                     />
@@ -261,16 +263,12 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small class="hds-typography-body-100 hds-foreground-faint">
-            Created
-          </small>
+          <Document::Sidebar::SectionHeader @title="Created" />
           <p>{{or @document.createdDate "Unknown"}}</p>
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small class="hds-typography-body-100 hds-foreground-faint">
-            Last modified
-          </small>
+          <Document::Sidebar::SectionHeader @title="Last modified" />
           <p>{{@document.lastModified}}</p>
         </div>
 
@@ -282,9 +280,9 @@
             )
           }}
             <div class="flex flex-col items-start space-y-2">
-              <small class="hds-typography-body-100 hds-foreground-faint">
-                {{attributes.displayName}}
-              </small>
+              <Document::Sidebar::SectionHeader
+                @title={{attributes.displayName}}
+              />
               <CustomEditableField
                 @document={{@document}}
                 @field={{field}}
@@ -300,80 +298,46 @@
       </div>
     </div>
 
-    {{!-- <div class="flex flex-col items-start space-y-2 px-3">
-      <small class="hds-typography-body-100 hds-foreground-faint">Tags</small>
-      {{#if this.isOwner}}
-        <EditableField
-          @value={{this.tags}}
-          @onChange={{perform this.save "tags"}}
-          @loading={{this.save.isRunning}}
-        >
-          <:default>
-            {{#if this.tags.length}}
-              <ol>
-                {{#each this.tags as |tag|}}
-                  <li>
-                    <FlightIcon
-                      @name="tag"
-                      @color="var(--token-color-palette-neutral-500)"
-                    />
-                    {{tag}}
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No tags</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::TagSelect
-              class="multiselect--narrow"
-              @selected={{this.tags}}
-              @onChange={{this.updateTags}}
-              {{click-outside (fn F.update this.tags)}}
-            />
-          </:editing>
-        </EditableField>
-      {{else}}
-        {{#if this.tags.length}}
-          <ol>
-            {{#each this.tags as |tag|}}
-              <li>
-                <FlightIcon
-                  @name="tag"
-                  @color="var(--token-color-palette-neutral-500)"
-                />
-                {{tag}}
-              </li>
-            {{/each}}
-          </ol>
-        {{else}}
-          <em>No tags</em>
-        {{/if}}
-      {{/if}}
-    </div> --}}
-
     {{#if this.userHasEditPrivileges}}
-      <div class="sidebar-footer">
-        {{#if (not @document.appCreated)}}
+      <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
+        {{#if this.editingIsDisabled}}
           <div class="px-3 -mb-1">
             <div class="w-full pt-3.5 border-t border-color-border-primary">
               <div class="text-body-200 text-color-foreground-faint">
                 <h5
                   class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
                 >
-                  Read-only headers
+                  {{if
+                    this.docIsLocked
+                    "Document is locked"
+                    "Read-only headers"
+                  }}
                   <FlightIcon
                     @name="lock"
                     class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
                   />
                 </h5>
                 <p class="mb-1.5">
-                  Weʼre unable to edit the metadata of files created offsite.
+                  {{if
+                    this.docIsLocked
+                    "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
+                    "Weʼre unable to edit the metadata of files created offsite."
+                  }}
                 </p>
               </div>
-              <div class="text-[12px] opacity-60 italic">Create docs in-app for
-                best results</div>
+              {{#if this.docIsLocked}}
+                <Hds::Link::Standalone
+                  @icon="arrow-right"
+                  @iconPosition="trailing"
+                  @text="See the issue on GitHub"
+                  @size="small"
+                  @href="https://github.com/hashicorp-forge/hermes/issues/181"
+                />
+              {{else}}
+                <div class="text-body-100 text-color-foreground-faint">
+                  Create docs in-app for best results.
+                </div>
+              {{/if}}
             </div>
           </div>
         {{else}}
@@ -479,7 +443,7 @@
 
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
-{{#in-element (html-element '.ember-application') insertBefore=null}}
+{{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.archiveModalIsActive}}
     <Document::Modal
       @color="critical"
@@ -510,71 +474,96 @@
 
   {{#if this.requestReviewModalIsActive}}
     <Document::Modal
-      @headerText="Request review?"
+      @headerText="Request review"
       @errorTitle="Error requesting review"
       @close={{this.closeRequestReviewModal}}
       @task={{perform this.requestReview}}
       @taskButtonText="Request review"
       @taskButtonLoadingText="Requesting review..."
       @taskButtonIcon="test"
-      @taskButtonIsDisabled={{not this.docTypeCheckboxValue}}
+      @hideFooterWhileSaving={{true}}
+      @taskButtonIsDisabled={{and
+        (not this.docTypeCheckboxValue)
+        @docType.checks.length
+      }}
     >
       <:default as |M|>
-        <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
-          This will publish your document company-wide, and anyone you request
-          below will receive a notification to review.
-        </p>
-        <Hds::Form::Field @layout="vertical" as |F|>
-          <F.Control>
-            <Inputs::PeopleSelect
-              @renderInPlace={{true}}
-              @selected={{this.approvers}}
-              @onChange={{this.updateApprovers}}
-              @disabled={{M.taskIsRunning}}
-              class="mb-0"
-            />
-          </F.Control>
-          <F.Label>Add approvers</F.Label>
-        </Hds::Form::Field>
-        {{#if @docType.checks.length}}
-          {{! For now, we only support one check }}
-          {{#each (take 1 @docType.checks) as |check|}}
-            <div class="mt-3.5">
-              <Hds::Form::Checkbox::Field
-                {{on "change" this.onDocTypeCheckboxChange}}
-                checked={{this.docTypeCheckboxValue}}
-                disabled={{M.taskIsRunning}}
-                required
-                as |F|
-              >
-                <F.Label>
-                  {{check.label}}
-                </F.Label>
-                {{#if check.helperText}}
-                  <F.HelperText>
-                    {{check.helperText}}
-                  </F.HelperText>
-                {{/if}}
-              </Hds::Form::Checkbox::Field>
+        {{#if M.taskIsRunning}}
+          <div class="grid place-items-center pt-1 pb-12">
+            <div class="text-center">
+              <FlightIcon @name="loading" @size={{24}} class="mb-5" />
+              <h2>Submitting for review...</h2>
+              <p class="text-body-300 mb-2">This usually takes about a minute.</p>
+              <span
+                class="block text-[12px] text-color-foreground-faint mb-8"
+              >We appreciate your patience.</span>
+              <div class="flex justify-center space-x-2 items-center">
+                <div class="h-px w-4 bg-color-border-primary"></div>
+                <FlightIcon
+                  @name="hashicorp"
+                  class="text-color-foreground-faint"
+                />
+                <div class="h-px w-4 bg-color-border-primary"></div>
+              </div>
             </div>
-            {{#if check.links.length}}
-              <ul class="list-none pl-6 mt-1.5">
-                {{#each check.links as |link|}}
-                  <li>
-                    <Hds::Link::Inline
-                      @icon="external-link"
-                      @iconPosition="trailing"
-                      @hrefIsExternal={{true}}
-                      @href={{link.url}}
-                      class="no-underline text-body-100"
-                    >
-                      {{link.text}}
-                    </Hds::Link::Inline>
-                  </li>
-                {{/each}}
-              </ul>
-            {{/if}}
-          {{/each}}
+          </div>
+        {{else}}
+          <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
+            This will publish your document company-wide, and anyone you request
+            below will receive a notification to review.
+          </p>
+          <Hds::Form::Field @layout="vertical" as |F|>
+            <F.Control>
+              <Inputs::PeopleSelect
+                @renderInPlace={{true}}
+                @selected={{this.approvers}}
+                @onChange={{this.updateApprovers}}
+                @disabled={{M.taskIsRunning}}
+                class="mb-0"
+              />
+            </F.Control>
+            <F.Label>Add approvers</F.Label>
+          </Hds::Form::Field>
+          {{#if @docType.checks.length}}
+            {{! For now, we only support one check }}
+            {{#each (take 1 @docType.checks) as |check|}}
+              <div class="mt-3.5">
+                <Hds::Form::Checkbox::Field
+                  {{on "change" this.onDocTypeCheckboxChange}}
+                  checked={{this.docTypeCheckboxValue}}
+                  disabled={{M.taskIsRunning}}
+                  required
+                  as |F|
+                >
+                  <F.Label>
+                    {{check.label}}
+                  </F.Label>
+                  {{#if check.helperText}}
+                    <F.HelperText>
+                      {{check.helperText}}
+                    </F.HelperText>
+                  {{/if}}
+                </Hds::Form::Checkbox::Field>
+              </div>
+              {{#if check.links.length}}
+                <ul class="list-none pl-6 mt-1.5">
+                  {{#each check.links as |link|}}
+                    <li>
+                      <Hds::Link::Inline
+                        @icon="external-link"
+                        @iconPosition="trailing"
+                        @isHrefExternal={{true}}
+                        @href={{link.url}}
+                        class="no-underline text-body-100"
+                      >
+                        {{link.text}}
+                      </Hds::Link::Inline>
+                    </li>
+                  {{/each}}
+                </ul>
+              {{/if}}
+            {{/each}}
+          {{/if}}
         {{/if}}
       </:default>
     </Document::Modal>

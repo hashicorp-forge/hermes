@@ -100,3 +100,9 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
     this.docsToShow = newDocsToShow as HermesDocument[];
   });
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Dashboard::LatestUpdates": typeof DashboardLatestUpdatesComponent;
+  }
+}

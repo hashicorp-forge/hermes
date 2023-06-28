@@ -12,6 +12,7 @@ import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
+import { ProductArea } from "../inputs/product-select";
 
 interface DocFormErrors {
   title: string | null;
@@ -34,7 +35,6 @@ const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
   Args: {
-    productAbbrevMappings: Map<string, string>;
     docType: string;
   };
 }
@@ -48,7 +48,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string = "";
+  @tracked protected productArea: string | null = null;
+  @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
@@ -99,12 +100,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     return Object.values(this.formErrors).filter(defined).length > 0;
   }
 
-  /**
-   * The product abbreviation for the selected product area.
-   */
-  protected get productAbbreviation() {
-    return this.args.productAbbrevMappings.get(this.productArea);
-  }
   /**
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
@@ -178,6 +173,15 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.contributors = contributors;
   }
 
+  @action protected onProductSelect(
+    productName: string,
+    attributes: ProductArea
+  ) {
+    this.productArea = productName;
+    this.productAbbreviation = attributes.abbreviation;
+    this.maybeValidate();
+  }
+
   /**
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
@@ -237,4 +241,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       });
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "New::DocForm": typeof NewDocFormComponent;
+  }
 }

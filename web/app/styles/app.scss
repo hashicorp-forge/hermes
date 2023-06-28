@@ -1,3 +1,7 @@
+@use "@hashicorp/design-system-components";
+
+@use "./typography";
+
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -7,6 +11,7 @@
 @use "components/x-hds-tab";
 @use "components/x/dropdown/list";
 @use "components/x/dropdown/list-item";
+@use "components/x/dropdown/toggle-select";
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
@@ -15,6 +20,8 @@
 @use "components/template-card";
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
+@use "components/header/search";
+@use "components/inputs/product-select/index.scss";
 @use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
@@ -32,7 +39,6 @@
 
 @use "./ember-power-select-theme";
 
-@use "@hashicorp/design-system-components";
 @use "./error-404";
 @use "./hds-overrides";
 

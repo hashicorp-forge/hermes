@@ -1,6 +1,7 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import {
+  OffsetOptions,
   Placement,
   autoUpdate,
   computePosition,
@@ -13,11 +14,17 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
 interface FloatingUIContentSignature {
+  Element: HTMLDivElement;
   Args: {
     anchor: HTMLElement;
     id: string;
-    placement?: Placement;
+    // TODO: Move null logic to a parent component.
+    placement?: Placement | null;
     renderOut?: boolean;
+    offset?: OffsetOptions;
+  };
+  Blocks: {
+    default: [];
   };
 }
 
@@ -30,14 +37,25 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     return this._content;
   }
 
+  private offset: OffsetOptions = this.args.offset || 5;
+
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
+    if (this.args.placement === null) {
+      this.content.removeAttribute("data-floating-ui-placement");
+      this.content.classList.add("non-floating-content");
+      this.cleanup = () => {};
+      return;
+    }
+
     let updatePosition = async () => {
+      let placement = this.args.placement || "bottom-start";
+
       computePosition(this.args.anchor, this.content, {
-        platform: platform,
-        placement: this.args.placement || "bottom-start",
-        middleware: [offset(5), flip(), shift()],
+        platform,
+        placement: placement as Placement,
+        middleware: [offset(this.offset), flip(), shift()],
       }).then(({ x, y, placement }) => {
         this.content.setAttribute("data-floating-ui-placement", placement);
 
@@ -49,5 +67,11 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     };
 
     this.cleanup = autoUpdate(this.args.anchor, this.content, updatePosition);
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "FloatingUI::Content": typeof FloatingUIContent;
   }
 }

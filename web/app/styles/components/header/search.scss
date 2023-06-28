@@ -1,0 +1,48 @@
+.x-dropdown-list.search-popover {
+  @apply w-[calc(100%+4px)] max-h-[none] min-w-[420px] max-w-[none];
+
+  &.no-best-matches {
+    .x-dropdown-list-items {
+      @apply hidden;
+    }
+  }
+  .x-dropdown-list-item-link {
+    @apply items-start;
+
+    &.global-search-popover-header-link {
+      @apply pt-2.5 pb-[10px] items-center;
+    }
+
+    &.is-aria-selected {
+      @apply bg-color-surface-interactive-hover text-inherit;
+    }
+
+    .flight-icon {
+      @apply text-inherit;
+    }
+  }
+}
+
+.global-search-shortcut-affordance {
+  @apply absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint;
+}
+
+.global-search-best-matches-header {
+  @apply border-t border-t-color-border-primary pt-2 px-3;
+
+  h5 {
+    @apply text-display-100 text-color-foreground-faint font-medium;
+  }
+}
+
+.global-search-result {
+  @apply flex items-center space-x-3 py-2 px-3 h-20;
+}
+
+.global-search-result-text-content {
+  @apply flex flex-col space-y-1 overflow-hidden;
+}
+
+.global-search-result-title {
+  @apply text-body-200 font-semibold text-color-foreground-strong truncate;
+}

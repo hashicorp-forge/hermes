@@ -2,17 +2,100 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import { HdsButtonColor } from "hds/_shared";
+import { XDropdownListSharedArgs } from "./_shared";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListToggleActionComponent from "./toggle-action";
+import XDropdownListToggleButtonComponent from "./toggle-button";
+import { XDropdownListItemAPI } from "./item";
+import { restartableTask, timeout } from "ember-concurrency";
 
-interface XDropdownListComponentSignature<T> {
-  Args: {
-    selected: any;
-    items?: any;
-    onChange: (value: any) => void;
-    listIsOrdered?: boolean;
+export type XDropdownListToggleComponentBoundArgs =
+  | "contentIsShown"
+  | "registerAnchor"
+  | "toggleContent"
+  | "onTriggerKeydown"
+  | "disabled"
+  | "ariaControls";
+
+export interface XDropdownListAnchorAPI {
+  ToggleAction: WithBoundArgs<
+    typeof XDropdownListToggleActionComponent,
+    XDropdownListToggleComponentBoundArgs
+  >;
+  ToggleButton: WithBoundArgs<
+    typeof XDropdownListToggleButtonComponent,
+    XDropdownListToggleComponentBoundArgs | "color" | "text"
+  >;
+  ariaControls: string;
+  contentIsShown: boolean;
+  focusedItemIndex: number;
+  registerAnchor: (element: HTMLElement) => void;
+  onTriggerKeydown: (event: KeyboardEvent) => void;
+  resetFocusedItemIndex: () => void;
+  scheduleAssignMenuItemIDs: () => void;
+  toggleContent: () => void;
+  hideContent: () => void;
+  showContent: () => void;
+}
+
+interface XDropdownListComponentSignature {
+  Element: HTMLDivElement;
+  Args: XDropdownListSharedArgs & {
+    isSaving?: boolean;
+    placement?: Placement | null;
+    renderOut?: boolean;
+    color?: HdsButtonColor;
+    disabled?: boolean;
+    offset?: OffsetOptions;
+    label?: string;
+
+    /**
+     * Whether an asynchronous list is loading.
+     * Used to determine if a loading UI is shown.
+     */
+    isLoading?: boolean;
+
+    /**
+     * Whether the "hide dropdown" function is disabled.
+     * Used in cases where closing the dropdown would be destructive,
+     * such as when a user is awaiting an interior task to finish.
+     */
+    disableClose?: boolean;
+
+    /**
+     * Whether the list element should be rendered.
+     * Set `false` by parent components to hide the list without
+     * destroying the entire content element.
+     */
+    listIsShown?: boolean;
+
+    /**
+     * Whether the filter input should be shown.
+     * Set `false` by parent components to explicitly hide the input,
+     * even in cases where the list is long enough to show it.
+     */
+    inputIsShown?: boolean;
+
+    /**
+     * Whether the keyboard should be used to navigate the list,
+     * as determined by the parent component.
+     */
+    keyboardNavIsEnabled?: boolean;
+    onItemClick?: (value: any, attributes: any) => void;
+  };
+  Blocks: {
+    default: [];
+    anchor: [dd: XDropdownListAnchorAPI];
+    item: [dd: XDropdownListItemAPI];
+    header: [];
+    loading: [];
+    "no-matches": [];
+    footer: [];
   };
 }
 
@@ -23,9 +106,7 @@ export enum FocusDirection {
   Last = "last",
 }
 
-export default class XDropdownListComponent extends Component<
-  XDropdownListComponentSignature<any>
-> {
+export default class XDropdownListComponent extends Component<XDropdownListComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked private _scrollContainer: HTMLElement | null = null;
@@ -36,6 +117,8 @@ export default class XDropdownListComponent extends Component<
   @tracked protected query: string = "";
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected focusedItemIndex = -1;
+  @tracked protected keyboardNavIsEnabled =
+    this.args.keyboardNavIsEnabled ?? true;
 
   /**
    * An asserted-true reference to the scroll container.
@@ -59,6 +142,10 @@ export default class XDropdownListComponent extends Component<
    * aria-roles for various elements.
    */
   get inputIsShown() {
+    if (this.args.inputIsShown === false) {
+      return false;
+    }
+
     if (!this.args.items) {
       return false;
     } else {
@@ -79,8 +166,27 @@ export default class XDropdownListComponent extends Component<
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
-  @action protected registerScrollContainer(element: HTMLDivElement) {
+  @action protected registerScrollContainer(element: HTMLElement) {
     this._scrollContainer = element;
+  }
+
+  /**
+   * The action to enable keyboard navigation, if allowed by the parent component.
+   * Called when the filter input is focused.
+   */
+  @action protected maybeEnableKeyboardNav() {
+    if (this.args.keyboardNavIsEnabled === false) {
+      return;
+    }
+    this.keyboardNavIsEnabled = true;
+  }
+
+  /**
+   * The action to disable keyboard navigation.
+   * Called when the filter input loses focus.
+   */
+  @action protected disableKeyboardNav() {
+    this.keyboardNavIsEnabled = false;
   }
 
   /**
@@ -115,7 +221,7 @@ export default class XDropdownListComponent extends Component<
   @action onDestroy() {
     this.query = "";
     this._filteredItems = null;
-    this.focusedItemIndex = -1;
+    this.resetFocusedItemIndex();
   }
 
   /**
@@ -262,18 +368,27 @@ export default class XDropdownListComponent extends Component<
       this.scrollContainer.scrollTop = itemTop;
     }
   }
+
+  /**
+   * Sets the focusItemIndex to -1.
+   * Called onInput and when the popover is closed.
+   */
+  @action protected resetFocusedItemIndex() {
+    this.focusedItemIndex = -1;
+  }
+
   /**
    * The action run when the user types in the input.
    * Filters the facets shown in the dropdown and schedules
    * the menu items to be assigned their new IDs.
    */
-  protected onInput = restartableTask(async (inputEvent: InputEvent) => {
-    this.focusedItemIndex = -1;
+  @action onInput(event: Event) {
+    this.resetFocusedItemIndex();
 
     let shownItems: any = {};
     let { items } = this.args;
 
-    this.query = (inputEvent.target as HTMLInputElement).value;
+    this.query = (event.target as HTMLInputElement).value;
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
@@ -281,12 +396,51 @@ export default class XDropdownListComponent extends Component<
     }
 
     this._filteredItems = shownItems;
+    this.scheduleAssignMenuItemIDs.perform();
+  }
 
-    schedule("afterRender", () => {
-      assert("onInput expects a _scrollContainer", this._scrollContainer);
-      this.assignMenuItemIDs(
-        this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
-      );
-    });
+  /**
+   * The task that assigns menu item IDs.
+   * Scheduled after render to ensure that the menu items
+   * have been rendered and are available to query, including
+   * after being filtered.
+   *
+   * In cases where items are loaded asynchronously,
+   * e.g., when querying Algolia, the menu items are not
+   * available immediately after render. In these cases,
+   * the parent component should call `scheduleAssignMenuItemIDs`
+   * in the next runloop, but we also have a fallback that
+   * will try again up to three times.
+   */
+  protected scheduleAssignMenuItemIDs = restartableTask(async () => {
+    for (let i = 0; i <= 3; i++) {
+      if (this._scrollContainer) {
+        schedule("afterRender", () => {
+          assert(
+            "scheduleAssignMenuItemIDs expects a _scrollContainer",
+            this._scrollContainer
+          );
+          this.assignMenuItemIDs(
+            this._scrollContainer.querySelectorAll(
+              `[role=${this.listItemRole}]`
+            )
+          );
+        });
+      } else {
+        if (i === 3) {
+          throw new Error(
+            "scheduleAssignMenuItemIDs expects a _scrollContainer"
+          );
+        } else {
+          await timeout(1);
+        }
+      }
+    }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList": typeof XDropdownListComponent;
+  }
 }

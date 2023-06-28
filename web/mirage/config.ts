@@ -2,6 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import config from "../config/environment";
+import { SearchResponse } from "@algolia/client-search";
+import { getTestDocNumber } from "./factories/document";
+import { SearchForFacetValuesResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -63,18 +66,68 @@ export default function (mirageConfig) {
         return new Response(200, {});
       });
 
+      const getAlgoliaSearchResults = (schema, request) => {
+        const requestBody = JSON.parse(request.requestBody);
+        const { facetQuery, query } = requestBody;
+
+        console.log("requestBody", requestBody);
+
+        if (facetQuery) {
+          let facetMatch = schema.document.all().models.filter((doc) => {
+            return doc.attrs.product
+              .toLowerCase()
+              .includes(facetQuery.toLowerCase());
+          })[0];
+
+          if (!facetMatch) {
+            return new Response(200, {}, { facetHits: [] });
+          } else {
+            return new Response(
+              200,
+              {},
+              { facetHits: [{ value: facetMatch.attrs.product }] }
+            );
+          }
+        } else {
+          let docMatches = schema.document.all().models.filter((doc) => {
+            return (
+              doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+              doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+            );
+          });
+          return new Response(200, {}, { hits: docMatches });
+        }
+      };
+
       /**
        * Used by the AlgoliaSearchService to query Algolia.
        */
       this.post(
         `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-        () => {
-          return {
-            facets: [],
-            hits: [],
-          };
+        (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
         }
       );
+
+      /**
+       * Algolia has several search hosts, e.g., appID-1.algolianet.com,
+       * and Mirage doesn't support wildcards in routes.
+       * So, we create a route for each host.
+       */
+
+      let algoliaSearchHosts = [];
+
+      for (let i = 1; i <= 9; i++) {
+        algoliaSearchHosts.push(
+          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
+        );
+      }
+
+      algoliaSearchHosts.forEach((host) => {
+        this.post(host, (schema, request) => {
+          return getAlgoliaSearchResults(schema, request);
+        });
+      });
 
       /**
        * Called by the Document route to log a document view.
@@ -228,34 +281,43 @@ export default function (mirageConfig) {
        * Used by the sidebar to populate a draft's product/area dropdown.
        */
       this.get("/products", () => {
-        let objects = this.schema.products.all().models.map((product) => {
-          return {
-            [product.attrs.name]: {
-              abbreviation: product.attrs.abbreviation,
-            },
-          };
-        });
+        let currentProducts = this.schema.products.all().models;
+        if (currentProducts.length === 0) {
+          return new Response(
+            200,
+            {},
+            { "Default Fetched Product": { abbreviation: "NONE" } }
+          );
+        } else {
+          let objects = this.schema.products.all().models.map((product) => {
+            return {
+              [product.attrs.name]: {
+                abbreviation: product.attrs.abbreviation,
+              },
+            };
+          });
 
-        // The objects currently look like:
-        // [
-        //  0: { "Labs": { abbreviation: "LAB" } },
-        //  1: { "Vault": { abbreviation: "VLT"} }
-        // ]
+          // The objects currently look like:
+          // [
+          //  0: { "Labs": { abbreviation: "LAB" } },
+          //  1: { "Vault": { abbreviation: "VLT"} }
+          // ]
 
-        // We reformat them to match the API's response:
-        // {
-        //  "Labs": { abbreviation: "LAB" },
-        //  "Vault": { abbreviation: "VLT" }
-        // }
+          // We reformat them to match the API's response:
+          // {
+          //  "Labs": { abbreviation: "LAB" },
+          //  "Vault": { abbreviation: "VLT" }
+          // }
 
-        let formattedObjects = {};
+          let formattedObjects = {};
 
-        objects.forEach((object) => {
-          let key = Object.keys(object)[0];
-          formattedObjects[key] = object[key];
-        });
+          objects.forEach((object) => {
+            let key = Object.keys(object)[0];
+            formattedObjects[key] = object[key];
+          });
 
-        return new Response(200, {}, formattedObjects);
+          return new Response(200, {}, formattedObjects);
+        }
       });
 
       // RecentlyViewedDocsService / fetchIndexID
@@ -299,6 +361,25 @@ export default function (mirageConfig) {
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
         }
       );
+
+      /**
+       * Used by the sidebar to save document properties, e.g., productArea.
+       */
+      this.patch("/drafts/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+
+          if ("product" in attrs) {
+            attrs.docNumber = getTestDocNumber(attrs.product);
+          }
+
+          document.update(attrs);
+          return new Response(200, {}, document.attrs);
+        }
+      });
     },
   };
 

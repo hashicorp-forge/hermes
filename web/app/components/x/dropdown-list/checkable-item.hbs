@@ -1,7 +1,8 @@
 <FlightIcon
   data-test-x-dropdown-list-checkable-item-check
+  data-test-is-checked={{@isSelected}}
   @name="check"
-  class="check {{if @selected 'visible' 'invisible'}}"
+  class="check mr-2.5 {{if @isSelected 'visible' 'invisible'}}"
 />
 <div class="x-dropdown-list-item-value">
   {{@value}}
@@ -9,7 +10,7 @@
 {{#if @count}}
   <Hds::BadgeCount
     data-test-x-dropdown-list-checkable-item-count
-    @text={{@count}}
+    @text="{{@count}}"
     @size="small"
     class="x-dropdown-list-item-count"
   />

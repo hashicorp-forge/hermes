@@ -72,8 +72,7 @@ func DraftsHandler(
 				"path", r.URL.Path,
 				"error", err,
 			)
-			errJSON := fmt.Sprintf(`{"error": "%s"}`, userErrMsg)
-			http.Error(w, errJSON, httpCode)
+			http.Error(w, userErrMsg, httpCode)
 		}
 
 		// Authorize request.
@@ -515,7 +514,7 @@ func DraftsDocumentHandler(
 		}
 		if !isOwner && !isContributor {
 			http.Error(w,
-				`{"error": "Only owners or contributors can access a draft document"}`,
+				"Only owners or contributors can access a draft document",
 				http.StatusUnauthorized)
 			return
 		}
@@ -554,6 +553,26 @@ func DraftsDocumentHandler(
 			// Set custom editable fields.
 			docObj.SetCustomEditableFields()
 
+			// Get document from database.
+			doc := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := doc.Get(db); err != nil {
+				l.Error("error getting document draft from database",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				http.Error(w, "Error requesting document draft",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Set locked value for response to value from the database (this value
+			// isn't stored in Algolia).
+			docObj.SetLocked(doc.Locked)
+
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -567,20 +586,24 @@ func DraftsDocumentHandler(
 				return
 			}
 
-			// Update recently viewed docs for the user.
-			if err := updateRecentlyViewedDocs(userEmail, docId, db, now); err != nil {
-				// If we get an error, log it but don't return an error response because
-				// this would degrade UX.
-				// TODO: change this log back to an error when this handles incomplete
-				// data in the database.
-				l.Warn("error updating recently viewed docs",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docId,
-				)
-				return
-
+			// Update recently viewed documents if this is a document view event. The
+			// Add-To-Recently-Viewed header is set in the request from the frontend
+			// to differentiate between document views and requests to only retrieve
+			// document metadata.
+			if r.Header.Get("Add-To-Recently-Viewed") != "" {
+				if err := updateRecentlyViewedDocs(userEmail, docId, db, now); err != nil {
+					// If we get an error, log it but don't return an error response because
+					// this would degrade UX.
+					// TODO: change this log back to an error when this handles incomplete
+					// data in the database.
+					l.Warn("error updating recently viewed docs",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docId,
+					)
+					return
+				}
 			}
 
 			l.Info("retrieved document draft", "doc_id", docId)
@@ -589,7 +612,7 @@ func DraftsDocumentHandler(
 			// Authorize request.
 			if !isOwner {
 				http.Error(w,
-					`{"error": "Only owners can delete a draft document"}`,
+					"Only owners can delete a draft document",
 					http.StatusUnauthorized)
 				return
 			}
@@ -689,6 +712,24 @@ func DraftsDocumentHandler(
 				// Set product abbreviation because we use this later to update the
 				// doc number in the Algolia object.
 				productAbbreviation = p.Abbreviation
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docId, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
+				return
 			}
 
 			// Compare contributors in request and stored object in Algolia

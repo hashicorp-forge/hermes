@@ -46,6 +46,24 @@ func ReviewHandler(
 				return
 			}
 
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
+				return
+			}
+
 			// Get base document object from Algolia so we can determine the doc type.
 			baseDocObj := &hcd.BaseDoc{}
 			err = ar.Drafts.GetObject(docID, &baseDocObj)
@@ -170,8 +188,7 @@ func ReviewHandler(
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, `{"error": "Error creating review"}`,
-					http.StatusInternalServerError)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
 				return
 			}
 
@@ -184,8 +201,7 @@ func ReviewHandler(
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, `{"error": "Error creating review"}`,
-					http.StatusInternalServerError)
+				http.Error(w, "Error creating review", http.StatusInternalServerError)
 				return
 			}
 			docObj.SetModifiedTime(modifiedTime.Unix())
@@ -497,7 +513,7 @@ func ReviewHandler(
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					http.Error(w, `{"error": "Error sending subscriber email"}`,
+					http.Error(w, "Error sending subscriber email",
 						http.StatusInternalServerError)
 					return
 				}
@@ -512,6 +528,7 @@ func ReviewHandler(
 								DocumentOwner:     docObj.GetOwners()[0],
 								DocumentShortName: docObj.GetDocNumber(),
 								DocumentTitle:     docObj.GetTitle(),
+								DocumentType:      docObj.GetDocType(),
 								DocumentURL:       docURL,
 								Product:           docObj.GetProduct(),
 							},
@@ -526,7 +543,7 @@ func ReviewHandler(
 								"method", r.Method,
 								"path", r.URL.Path,
 							)
-							http.Error(w, `{"error": "Error sending subscriber email"}`,
+							http.Error(w, "Error sending subscriber email",
 								http.StatusInternalServerError)
 							return
 						}

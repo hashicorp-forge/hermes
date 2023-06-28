@@ -21,11 +21,8 @@
         <h1
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
         >Create your {{@docType}}</h1>
-        <p>Complete the following metadata to create your
-          {{@docType}}
-          and begin editing your draft.</p>
       </div>
-      <div class="pt-10 space-y-6">
+      <div class="pt-10 space-y-7">
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -36,8 +33,9 @@
           as |F|
         >
           <F.Label>Title</F.Label>
-          <F.HelperText>Your title should succinctly outline the idea you're
-            proposing.</F.HelperText>
+          <F.HelperText>
+            A succinct outline of the idea youʼre proposing.
+          </F.HelperText>
         </Hds::Form::TextInput::Field>
 
         <div class="relative">
@@ -62,52 +60,22 @@
           </Hds::Form::Textarea::Field>
         </div>
 
-        <Hds::Form::Select::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productArea}}
-          name="productArea"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Product/Area</F.Label>
-          <F.HelperText>Specify the full name of the product or area this
-            {{@docType}}
-            belongs to.</F.HelperText>
-          {{#if @productAbbrevMappings}}
-            <F.Options>
-              <option value=""></option>
-              {{#each-in @productAbbrevMappings as |name|}}
-                <option
-                  value="{{name}}"
-                  {{! This allows us to recover from errors: }}
-                  selected={{eq name this.productArea}}
-                >{{name}}</option>
-              {{/each-in}}
-            </F.Options>
-          {{/if}}
-        </Hds::Form::Select::Field>
-
-        <Hds::Form::TextInput::Field
-          @type="text"
-          @isRequired={{true}}
-          @value={{this.productAbbreviation}}
-          placeholder="Select product/area to populate abbreviation"
-          @isInvalid={{this.formErrors.productAbbreviation}}
-          name="productAbbreviation"
-          disabled
-          as |F|
-        >
-          <F.Label>Product/Area abbreviation</F.Label>
-          {{#if this.formErrors.productAbbreviation}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.productAbbreviation}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>Product/Area abbreviation is automatically populated on
-            selecting the "Product/Area" option.
-          </F.HelperText>
-        </Hds::Form::TextInput::Field>
+        <div>
+          <div class="mb-2">
+            <span class="hermes-form-label">
+              Product/Area &nbsp;
+              <Hds::Badge @size="small" @text="Required" />
+            </span>
+            <span class="hermes-form-helper-text hds-form-helper-text">
+              Where your doc should be categorized.
+            </span>
+          </div>
+          <Inputs::ProductSelect
+            @selected={{this.productArea}}
+            @onChange={{this.onProductSelect}}
+            class="w-[300px]"
+          />
+        </div>
 
         {{! Note: We are still refining the subscribe/follow feature set.
                 As part of that effort we will be looking into how the concept
@@ -163,8 +131,9 @@
               @onChange={{this.updateContributors}}
             />
           </F.Control>
-          <F.Label><FlightIcon @name="users" />
-            Add contributors
+          <F.Label>
+            <FlightIcon @name="users" />
+            Contributors
           </F.Label>
           {{#if this.formErrors.contributors}}
             <F.Error as |E|>
@@ -172,17 +141,18 @@
             </F.Error>
           {{/if}}
           <F.HelperText>
-            If you're collaborating with others on this
-            {{@docType}}, add them here. The document will automatically be
-            shared with the collaborators specified here. You can also add
-            contributors later.
+            People to share your doc with. You can always add more later.
           </F.HelperText>
         </Hds::Form::Field>
       </div>
+      <div class="h-24"></div>
     </div>
     <div>
       <div class="preview-card">
-        <h3><FlightIcon @name="eye" /> Preview</h3>
+        <h3>
+          <FlightIcon @name="eye" />
+          Preview
+        </h3>
         <Doc::Tile
           @productArea={{this.productArea}}
           @status="draft"
