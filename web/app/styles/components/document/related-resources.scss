@@ -1,7 +1,7 @@
 .related-resources {
   @apply w-full mt-0.5 space-y-0.5;
 
-  .related-resource-container {
+  .related-resource-inner {
     @apply w-full relative;
 
     &:hover,
@@ -45,7 +45,7 @@
   }
 }
 
-.related-resources-overflow-popover-menu-item-button {
+.related-resources-overflow-menu-item-button {
   @apply w-full flex space-x-2 py-2 px-4 leading-none;
 
   > .flight-icon {
@@ -99,11 +99,11 @@
     animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
   }
 
-  .hermes-doc + .external-doc {
+  .hermes-document + .external-resource {
     @apply mt-1.5;
   }
 
-  .external-doc {
+  .external-resource {
     .related-resource-link {
       @apply items-center;
     }

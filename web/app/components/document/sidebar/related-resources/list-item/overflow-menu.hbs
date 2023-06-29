@@ -3,6 +3,7 @@
   @renderOut={{true}}
   @placement="bottom-end"
   @offset={{hash mainAxis=-3 crossAxis=-3}}
+  data-test-related-resources-list-item-overflow-menu
 >
   <:anchor as |dd|>
     <div
@@ -22,7 +23,7 @@
   <:item as |dd|>
     <dd.Action
       {{on "click" dd.attrs.action}}
-      class="related-resources-overflow-popover-menu-item-button"
+      class="related-resources-overflow-menu-item-button"
     >
       <FlightIcon @name={{dd.attrs.icon}} />
       <span>{{dd.attrs.label}}</span>

@@ -1,10 +1,11 @@
 <li
   class="related-resource group
-    {{if this.documentObjectID 'hermes-doc' 'external-doc'}}"
+    {{if this.documentObjectID 'hermes-document' 'external-resource'}}"
 >
-  <div class="related-resource-container group">
+  <div class="related-resource-inner group">
     {{#if this.documentObjectID}}
       <LinkTo
+        data-test-item-type="hermes-document"
         @model={{this.documentObjectID}}
         @route="authenticated.document"
         class="related-resource-link peer"
@@ -16,6 +17,7 @@
       </LinkTo>
     {{else}}
       <ExternalLink
+        data-test-item-type="external-resource"
         href={{this.externalResourceURL}}
         class="related-resource-link peer"
       >
@@ -35,10 +37,9 @@
 
 {{#if this.modalIsShown}}
   <Document::Sidebar::RelatedResources::ListItem::Edit
-    @resource={{@resource}}
+    @resource={{this.externalLink}}
     @hideModal={{this.hideModal}}
     @onSave={{this.saveChanges}}
     @url={{this.externalResourceURL}}
-
   />
 {{/if}}

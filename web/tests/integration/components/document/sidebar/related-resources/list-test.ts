@@ -8,7 +8,7 @@ interface DocumentSidebarRelatedResourcesListTestContext extends TestContext {
 }
 
 module(
-  "Integration | Component | document/sidebar/related-resources",
+  "Integration | Component | document/sidebar/related-resources/list",
   function (hooks) {
     setupRenderingTest(hooks);
 

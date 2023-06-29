@@ -35,6 +35,11 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
     return (this.args.resource as RelatedExternalLink).url;
   }
 
+  protected get externalLink(): RelatedExternalLink {
+    assert("external resource expected", this._itemIsExternalResource);
+    return this.args.resource as RelatedExternalLink;
+  }
+
   @action protected showModal() {
     this.modalIsShown = true;
   }

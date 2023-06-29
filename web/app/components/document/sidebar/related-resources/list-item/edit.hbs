@@ -1,5 +1,9 @@
 {{#in-element (html-element ".ember-application") insertBefore=null}}
-  <Hds::Modal @onClose={{@hideModal}} as |M|>
+  <Hds::Modal
+    data-test-edit-related-resource-modal
+    @onClose={{@hideModal}}
+    as |M|
+  >
     <M.Header>Edit resource</M.Header>
     <M.Body>
       <form class="px-6 pb-6" {{on "submit" @onSave}}>
@@ -21,6 +25,7 @@
     <M.Footer>
       <Hds::ButtonSet>
         <Hds::Button
+          data-test-edit-related-resource-modal-save-button
           @text="Save changes"
           @color="primary"
           {{! TODO: this needs to save }}
