@@ -13,6 +13,9 @@ interface CopyURLButtonComponentSignature {
   Args: {
     url: string;
     tooltipPlacement?: Placement;
+    tooltipIsForcedOpen?: boolean;
+    tooltipText?: string;
+    tooltipIcon?: string;
   };
 }
 
@@ -26,11 +29,25 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
    */
   @tracked protected urlWasRecentlyCopied = false;
 
+  @tracked protected isForcedOpen = this.args.tooltipIsForcedOpen ?? false;
+
   /**
    * The button element.
    * Used to get the tooltip's ID by way of the `aria-describedby` attribute.
    */
   @tracked private button: HTMLElement | null = null;
+
+  get tooltipPlacement(): Placement {
+    return this.args.tooltipPlacement ?? "top";
+  }
+
+  get tooltipText(): string {
+    if (this.args.tooltipText) {
+      return this.args.tooltipText;
+    }
+
+    return this.urlWasRecentlyCopied ? "Copied!" : "Copy URL";
+  }
 
   /**
    * The action called when the button is clicked.
@@ -82,4 +99,10 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
       });
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    CopyURLButton: typeof CopyURLButtonComponent;
+  }
 }

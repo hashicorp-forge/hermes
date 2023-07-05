@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import { dropTask, restartableTask, task, timeout } from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
@@ -268,6 +268,29 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
+  get shareButtonTooltipText() {
+    if (this.setDraftVisibility.isRunning) {
+      return "Creating link...";
+    }
+    if (this.showCopyURLSuccessMessage) {
+      return "Link copied!";
+    }
+  }
+
+  get shareButtonTooltipIcon() {
+    if (this.setDraftVisibility.isRunning) {
+      return "loading";
+    }
+    if (this.showCopyURLSuccessMessage) {
+      return "check";
+    }
+  }
+
+  protected showCopyURLSuccessMessage = dropTask(async () => {
+    console.log("showCopyURLSuccessMessage");
+    await timeout(500);
+  });
+
   protected setDraftVisibility = restartableTask(async (visibility: string) => {
     if (this.draftVisibility === visibility) {
       return;
@@ -284,7 +307,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.draftVisibilityIcon = "lock";
       // allow time for the animation to conclude
-      await timeout(Ember.testing ? 0 : 300);
+      await timeout(Ember.testing ? 0 : 3000);
     } else {
       this.draftVisibilityIcon = "enterprise";
       schedule("afterRender", () => {
@@ -293,6 +316,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         );
         assert("shareButton is expected", shareButton);
         shareButton.classList.add("in");
+        void this.showCopyURLSuccessMessage.perform();
       });
     }
 

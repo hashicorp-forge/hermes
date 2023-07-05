@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div class="sidebar-header {{if @userHasScrolled 'scrolled'}}">
   <LinkTo
     data-test-sidebar-dashboard-link
@@ -21,8 +20,9 @@
         data-test-copy-url-value={{this.url}}
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
-        @isLoading={{@shareButtonIsLoading}}
-        @loadingText="Creating link..."
+        @tooltipIsForcedOpen={{this.tooltipIsForcedOpen}}
+        @tooltipIcon={{@shareButtonTooltipIcon}}
+        @tooltipText={{@shareButtonTooltipText}}
         class="sidebar-header-button"
         id="sidebar-header-copy-url-button"
       />

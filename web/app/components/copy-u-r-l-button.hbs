@@ -1,14 +1,20 @@
-{{! @glint-nocheck: not typesafe yet }}
 <Action
   data-test-copy-url-button
   {{tooltip
-    (if this.urlWasRecentlyCopied "Copied!" "Copy URL")
-    placement=(or @tooltipPlacement "top")
+    this.tooltipText
+    placement=this.tooltipPlacement
+    forceOpen=this.isForcedOpen
     stayOpenOnClick=true
   }}
   {{did-insert this.didInsertButton}}
   {{on "click" (perform this.copyURL)}}
   ...attributes
 >
-  <FlightIcon @name={{if this.urlWasRecentlyCopied "check" "link"}} />
+  <FlightIcon
+    @name={{if
+      @tooltipIcon
+      @tooltipIcon
+      (if this.urlWasRecentlyCopied "check" "link")
+    }}
+  />
 </Action>

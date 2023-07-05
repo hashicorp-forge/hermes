@@ -5,7 +5,8 @@
     @toggleCollapsed={{this.toggleCollapsed}}
     @userHasScrolled={{this.userHasScrolled}}
     @shareButtonIsShown={{eq this.draftVisibility "2"}}
-    @shareButtonIsLoading={{this.setDraftVisibility.isRunning}}
+    @shareButtonTooltipText={{this.shareButtonTooltipText}}
+    @shareButtonTooltipIcon={{this.shareButtonTooltipIcon}}
   />
 
   {{#unless this.isCollapsed}}

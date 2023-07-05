@@ -11,6 +11,8 @@ interface DocumentSidebarHeaderComponentSignature {
     userHasScrolled: boolean;
     shareButtonIsShown?: boolean;
     shareButtonIsLoading?: boolean;
+    shareButtonTooltipText?: string;
+    shareButtonTooltipIcon?: string;
   };
 }
 
@@ -25,6 +27,12 @@ export function isValidURL(input: string) {
 
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+
+  get tooltipIsForcedOpen() {
+    console.log("tooltipIsForcedOpen", this.args.shareButtonTooltipText);
+    // if there's custom text, we want to force the tooltip open
+    return !!this.args.shareButtonTooltipText;
+  }
 
   protected get shareButtonIsShown() {
     if (this.args.shareButtonIsShown) {

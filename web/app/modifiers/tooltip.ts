@@ -17,6 +17,7 @@ import {
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
+import { schedule } from "@ember/runloop";
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
@@ -40,6 +41,8 @@ interface TooltipModifierSignature {
     Positional: [string];
     Named: {
       placement?: Placement;
+      stayOpenOnClick?: boolean;
+      forceOpen?: boolean;
     };
   };
 }
@@ -113,6 +116,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
   @tracked stayOpenOnClick = false;
 
+  @tracked forceOpen?: boolean;
+
   /**
    * An asserted-to-exist reference to the reference element.
    */
@@ -146,6 +151,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * calculated by the `floating-ui` positioning library.
    */
   @action showContent() {
+    console.log("showContent");
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
@@ -320,7 +326,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * and the reference element is not focus-visible.
    */
   @action maybeHideContent() {
-    if (this.reference.matches(":focus-visible")) {
+    console.log("maybeHideContent");
+    console.log("isShown", this.forceOpen);
+    if (this.reference.matches(":focus-visible") || this.forceOpen) {
       return;
     }
     if (this.tooltip) {
@@ -344,6 +352,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     named: {
       placement?: Placement;
       stayOpenOnClick?: boolean;
+      forceOpen?: boolean;
     }
   ) {
     this._reference = element;
@@ -357,6 +366,14 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named.stayOpenOnClick) {
       this.stayOpenOnClick = named.stayOpenOnClick;
+    }
+
+    this.forceOpen = named.forceOpen;
+
+    if (named.forceOpen) {
+      if (this.forceOpen) {
+        schedule("afterRender", this, this.showContent);
+      }
     }
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);
