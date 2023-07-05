@@ -29,9 +29,11 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
   @service("config") declare configSvc: ConfigService;
 
   get tooltipIsForcedOpen() {
-    console.log("tooltipIsForcedOpen", this.args.shareButtonTooltipText);
-    // if there's custom text, we want to force the tooltip open
-    return !!this.args.shareButtonTooltipText;
+    if (this.args.shareButtonTooltipText) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   protected get shareButtonIsShown() {

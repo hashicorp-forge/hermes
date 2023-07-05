@@ -29,8 +29,9 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
    */
   @tracked protected urlWasRecentlyCopied = false;
 
-  @tracked protected isForcedOpen = this.args.tooltipIsForcedOpen ?? false;
-
+  protected get isForcedOpen() {
+    return this.args.tooltipIsForcedOpen ?? false;
+  }
   /**
    * The button element.
    * Used to get the tooltip's ID by way of the `aria-describedby` attribute.

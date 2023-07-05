@@ -3,7 +3,13 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import { dropTask, restartableTask, task, timeout } from "ember-concurrency";
+import {
+  dropTask,
+  keepLatestTask,
+  restartableTask,
+  task,
+  timeout,
+} from "ember-concurrency";
 import { dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
@@ -67,7 +73,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
 
-  @tracked protected draftVisibility = "1";
+  @tracked protected draftVisibility = "restricted";
 
   get body() {
     assert("_body must exist", this._body);
@@ -148,19 +154,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected draftVisibilityIcon = "lock";
 
   protected get statusIsShown(): boolean {
-    console.log(this.args.document.status);
     return this.args.document.status !== "WIP";
   }
 
   protected get draftVisibilityOptions() {
     return {
-      "1": {
+      restricted: {
         title: "Restricted",
         icon: "lock",
         description:
           "Only you and the people you add can view and edit this doc.",
       },
-      "2": {
+      shareable: {
         title: "Shareable",
         icon: "enterprise",
         description:
@@ -269,63 +274,93 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   get shareButtonTooltipText() {
-    if (this.setDraftVisibility.isRunning) {
+    if (
+      this.setDraftVisibility.isRunning &&
+      this._tempNewVisibility === "shareable"
+    ) {
       return "Creating link...";
     }
-    if (this.showCopyURLSuccessMessage) {
+    if (this.showCopyURLSuccessMessage.isRunning) {
       return "Link copied!";
     }
   }
 
   get shareButtonTooltipIcon() {
-    if (this.setDraftVisibility.isRunning) {
+    if (
+      this.setDraftVisibility.isRunning &&
+      this._tempNewVisibility === "shareable"
+    ) {
+      console.log("loading");
       return "loading";
     }
-    if (this.showCopyURLSuccessMessage) {
+    if (this.showCopyURLSuccessMessage.isRunning) {
       return "check";
     }
   }
 
-  protected showCopyURLSuccessMessage = dropTask(async () => {
-    console.log("showCopyURLSuccessMessage");
-    await timeout(500);
+  @tracked private _tempNewVisibility: string | null = null;
+
+  protected showCopyURLSuccessMessage = restartableTask(async () => {
+    // TODO: this actually has to copy the URL to the clipboard
+    await timeout(1000);
   });
 
-  protected setDraftVisibility = restartableTask(async (visibility: string) => {
-    if (this.draftVisibility === visibility) {
-      return;
-    }
+  protected setDraftVisibility = restartableTask(
+    async (newVisibility: string) => {
 
-    if (visibility === "1") {
-      // user is disabling the link button
-      const shareButton = document.getElementById(
-        "sidebar-header-copy-url-button"
-      );
-      assert("shareButton is expected", shareButton);
-      shareButton.classList.remove("in");
-      shareButton.classList.add("out");
+      if (this._tempNewVisibility === newVisibility) {
+        return;
+      }
 
-      this.draftVisibilityIcon = "lock";
-      // allow time for the animation to conclude
-      await timeout(Ember.testing ? 0 : 3000);
-    } else {
-      this.draftVisibilityIcon = "enterprise";
-      schedule("afterRender", () => {
-        const shareButton = document.getElementById(
-          "sidebar-header-copy-url-button"
+      this._tempNewVisibility = newVisibility;
+
+      try {
+        console.log("try");
+        if (newVisibility === "restricted") {
+          console.log("if");
+          // user is disabling the link button
+          const shareButton = document.getElementById(
+            "sidebar-header-copy-url-button"
+          );
+          assert("shareButton is expected", shareButton);
+          shareButton.classList.remove("in");
+          shareButton.classList.add("out");
+
+          this.draftVisibilityIcon = "lock";
+          // allow time for the animation to conclude
+          await timeout(Ember.testing ? 0 : 3000);
+          this.draftVisibility = newVisibility;
+        } else {
+          console.log("else");
+          this.draftVisibilityIcon = "enterprise";
+          schedule("afterRender", () => {
+            const shareButton = document.getElementById(
+              "sidebar-header-copy-url-button"
+            );
+            assert("shareButton is expected", shareButton);
+            shareButton.classList.add("in");
+          });
+          this.draftVisibility = newVisibility;
+          await timeout(Ember.testing ? 0 : 3000);
+
+          if (this.draftVisibility === "shareable") {
+            void this.showCopyURLSuccessMessage.perform();
+          }
+        }
+      } catch (error: unknown) {
+        this.maybeShowFlashError(
+          error as Error,
+          "Unable to update document visibility"
         );
-        assert("shareButton is expected", shareButton);
-        shareButton.classList.add("in");
-        void this.showCopyURLSuccessMessage.perform();
-      });
+      } finally {
+        // set the classes back to normal
+        // maybe don't bring CSS into this?
+        this._tempNewVisibility = null;
+      }
     }
+  );
 
-    this.draftVisibility = visibility;
-
-    await timeout(3000);
-  });
-
-  updateProduct = restartableTask(async (product: string) => {
+  updateProduct = keepLatestTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
     // productAbbreviation is computed by the back end
