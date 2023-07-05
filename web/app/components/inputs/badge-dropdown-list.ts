@@ -1,21 +1,21 @@
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
+import { XDropdownListItemAPI } from "../x/dropdown-list/item";
+import { XDropdownListSharedArgs } from "../x/dropdown-list/_shared";
 
 interface InputsBadgeDropdownListComponentSignature {
   Element: HTMLDivElement;
-  Args: {
-    items: any;
-    selected?: any;
-    listIsOrdered?: boolean;
+  Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
-    onItemClick: ((e: Event) => void) | ((e: string) => void);
     placement?: Placement;
-    icon: string;
     renderOut?: boolean;
+
+    onItemClick: ((e: Event) => void) | ((e: string) => void);
+    icon: string;
   };
   Blocks: {
     default: [];
-    item: [dd: any];
+    item: [dd: XDropdownListItemAPI];
   };
 }
 

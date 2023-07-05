@@ -1,9 +1,9 @@
-{{! @glint-ignore: not typesafe yet }}
 <X::DropdownList
   @items={{@facets}}
   @listIsOrdered={{true}}
+  @offset={{hash mainAxis=3 crossAxis=-5}}
+  @renderOut={{true}}
   class="facet-dropdown-popover"
-  {{! @glint-ignore: not typesafe yet }}
   ...attributes
 >
   <:anchor as |dd|>
@@ -12,12 +12,12 @@
   <:item as |dd|>
     <dd.LinkTo
       @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
+      @query={{get-facet-query-hash @label dd.value dd.attrs.isSelected}}
     >
       <X::DropdownList::CheckableItem
         @value={{dd.value}}
         @count={{dd.attrs.count}}
-        @selected={{dd.attrs.selected}}
+        @isSelected={{dd.attrs.isSelected}}
       />
     </dd.LinkTo>
   </:item>

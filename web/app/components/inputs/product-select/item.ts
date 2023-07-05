@@ -4,7 +4,7 @@ interface InputsProductSelectItemComponentSignature {
   Element: HTMLDivElement;
   Args: {
     product: string;
-    selected: boolean;
+    isSelected?: boolean;
     abbreviation?: boolean;
   };
 }

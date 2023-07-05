@@ -1,4 +1,3 @@
-{{! @glint-nocheck - not typesafe yet }}
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
 <div data-test-product-select>
   {{#if this.products}}
@@ -19,7 +18,7 @@
           <dd.Action data-test-product-select-badge-dropdown-item>
             <Inputs::ProductSelect::Item
               @product={{dd.value}}
-              @selected={{dd.selected}}
+              @isSelected={{dd.isSelected}}
             />
           </dd.Action>
         </:item>
@@ -62,7 +61,7 @@
           <dd.Action class="pr-5">
             <Inputs::ProductSelect::Item
               @product={{dd.value}}
-              @selected={{dd.selected}}
+              @isSelected={{dd.isSelected}}
               @abbreviation={{dd.attrs.abbreviation}}
             />
           </dd.Action>

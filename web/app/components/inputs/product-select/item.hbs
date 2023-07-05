@@ -1,4 +1,3 @@
-{{!  @glint-nocheck - not typesafe yet }}
 <div
   data-test-product-select-item
   class="relative flex w-full product-select-item"
@@ -23,7 +22,7 @@
     </span>
   {{/if}}
 
-  {{#if @selected}}
+  {{#if @isSelected}}
     <FlightIcon
       data-test-product-select-item-selected
       @name="check"

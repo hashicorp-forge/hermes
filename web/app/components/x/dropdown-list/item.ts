@@ -2,23 +2,58 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { FocusDirection } from ".";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
+import { WithBoundArgs } from "@glint/template";
+import XDropdownListActionComponent from "./action";
+import XDropdownListLinkToComponent from "./link-to";
+import { restartableTask, timeout } from "ember-concurrency";
+import { FocusDirection } from ".";
+
+type XDropdownListInteractiveComponentBoundArgs =
+  | "role"
+  | "isAriaSelected"
+  | "isAriaChecked"
+  | "registerElement"
+  | "focusMouseTarget"
+  | "onClick";
+
+export interface XDropdownListItemAPI {
+  Action: WithBoundArgs<
+    typeof XDropdownListActionComponent,
+    XDropdownListInteractiveComponentBoundArgs
+  >;
+  LinkTo: WithBoundArgs<
+    typeof XDropdownListLinkToComponent,
+    XDropdownListInteractiveComponentBoundArgs
+  >;
+  contentID: string;
+  value: any;
+  selected?: any;
+  isSelected?: boolean;
+  attrs?: any;
+}
+
+export interface XDropdownListItemComponentArgs {
+  contentID: string;
+  attributes?: any;
+  isSelected?: boolean;
+  focusedItemIndex: number;
+  listItemRole: string;
+  onItemClick?: (value: any, attributes: any) => void;
+  setFocusedItemIndex: (
+    focusDirection: FocusDirection | number,
+    maybeScrollIntoView?: boolean
+  ) => void;
+  hideContent: () => void;
+}
 
 interface XDropdownListItemComponentSignature {
-  Args: {
+  Args: XDropdownListItemComponentArgs & {
     value: string;
-    attributes?: unknown;
-    selected: boolean;
-    focusedItemIndex: number;
-    listItemRole: string;
-    hideDropdown: () => void;
-    onItemClick?: (value: any, attributes: any) => void;
-    setFocusedItemIndex: (
-      focusDirection: FocusDirection | number,
-      maybeScrollIntoView?: boolean
-    ) => void;
+  };
+  Blocks: {
+    default: [dd: XDropdownListItemAPI];
   };
 }
 
@@ -54,10 +89,13 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
    * Used to apply classes and aria-selected, and to direct the parent component's
    * focus action toward the correct element.
    */
-  private get itemIndexNumber(): number {
+  private get itemIndexNumber(): number | null {
     let idNumber = this.domElementID.split("-").pop();
-    assert("itemIndexNumber expects an ID number", idNumber);
-    return parseInt(idNumber, 10);
+    if (idNumber) {
+      return parseInt(idNumber, 10);
+    } else {
+      return null;
+    }
   }
 
   get isAriaSelected(): boolean {
@@ -96,25 +134,48 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      */
     if (Ember.testing) {
       schedule("afterRender", () => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     } else {
       next(() => {
-        this.args.hideDropdown();
+        this.args.hideContent();
       });
     }
   }
 
   /**
-   * Sets our local `element` reference to mouse target,
-   * to capture its ID, which may change when the list is filtered.
-   * Then, calls the parent component's `setFocusedItemIndex` action,
-   * directing focus to the current element.
+   * The task run when the mouse enters the element.
+   * If menuItemIDs have been assigned, sets our local `element`
+   * reference to the mouse target and aria-focuses it.
+   *
+   * Depending on the component, MenuItemIDs are sometimes assigned
+   * in the next run loop, which means they're not always available on mouseenter.
+   * For example, if a cursor hovers a menu item and the list is filtered,
+   * the mouseenter event will fire before the ID is assigned.
+   *
+   * In these cases, we wait a tick and try again (up to 3 times).
    */
-  @action focusMouseTarget(e: MouseEvent) {
-    let target = e.target;
-    assert("target must be an element", target instanceof HTMLElement);
-    this._domElement = target;
-    this.args.setFocusedItemIndex(this.itemIndexNumber, false);
+  protected maybeFocusMouseTarget = restartableTask(async (e: MouseEvent) => {
+    for (let i = 0; i <= 3; i++) {
+      if (this.itemIndexNumber !== null) {
+        let target = e.target;
+        assert("target must be an element", target instanceof HTMLElement);
+        this._domElement = target;
+        this.args.setFocusedItemIndex(this.itemIndexNumber, false);
+        return;
+      } else {
+        if (i === 3) {
+          throw new Error("itemIndexNumber can not be undefined");
+        } else {
+          await timeout(1);
+        }
+      }
+    }
+  });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "X::DropdownList::Item": typeof XDropdownListItemComponent;
   }
 }

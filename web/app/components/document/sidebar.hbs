@@ -183,14 +183,8 @@
           </div>
         </div>
 
-        <p>Created {{or @document.createdDate "Unknown"}}</p>
-
-        <hr class="w-full h-px bg-color-border-primary -mb-2" />
-
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Product/Area</small>
+          <Document::Sidebar::SectionHeader @title="Product/Area" />
           {{#if this.isDraft}}
             <div class="w-full relative">
               <Inputs::ProductSelect
@@ -210,9 +204,7 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Owner</small>
+          <Document::Sidebar::SectionHeader @title="Owner" />
           <Person
             @imgURL={{get @document.ownerPhotos 0}}
             @email={{get @document.owners 0}}
@@ -220,9 +212,7 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Contributors</small>
+          <Document::Sidebar::SectionHeader @title="Contributors" />
           {{#if this.isOwner}}
             <EditableField
               @value={{this.contributors}}
@@ -274,9 +264,7 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Approvers</small>
+          <Document::Sidebar::SectionHeader @title="Approvers" />
           {{#if this.isOwner}}
             <EditableField
               @value={{this.approvers}}
@@ -344,9 +332,9 @@
             )
           }}
             <div class="flex flex-col items-start space-y-2">
-              <small class="hds-typography-body-100 hds-foreground-faint">
-                {{attributes.displayName}}
-              </small>
+              <Document::Sidebar::SectionHeader
+                @title={{attributes.displayName}}
+              />
               <CustomEditableField
                 @document={{@document}}
                 @field={{field}}
@@ -616,7 +604,7 @@
                       <Hds::Link::Inline
                         @icon="external-link"
                         @iconPosition="trailing"
-                        @hrefIsExternal={{true}}
+                        @isHrefExternal={{true}}
                         @href={{link.url}}
                         class="no-underline text-body-100"
                       >

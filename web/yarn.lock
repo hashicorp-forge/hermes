@@ -1874,6 +1874,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@embroider/macros@npm:^1.5.0":
+  version: 1.11.1
+  resolution: "@embroider/macros@npm:1.11.1"
+  dependencies:
+    "@embroider/shared-internals": 2.1.0
+    assert-never: ^1.2.1
+    babel-import-util: ^1.1.0
+    ember-cli-babel: ^7.26.6
+    find-up: ^5.0.0
+    lodash: ^4.17.21
+    resolve: ^1.20.0
+    semver: ^7.3.2
+  peerDependencies:
+    "@glint/template": ^1.0.0
+  peerDependenciesMeta:
+    "@glint/template":
+      optional: true
+  checksum: e08f00bdb6e2749677937c3492ded4fd67850026d359b619a26ae8cbb336dc5cf2efd6c18e370e033ade7d69ed91003d10d0be7730a59de6d763a85acc2c190c
+  languageName: node
+  linkType: hard
+
 "@embroider/shared-internals@npm:0.41.0":
   version: 0.41.0
   resolution: "@embroider/shared-internals@npm:0.41.0"
@@ -1902,6 +1923,22 @@ __metadata:
     semver: ^7.3.5
     typescript-memoize: ^1.0.1
   checksum: 19d2754182b9e1373177843a354852c82b35d71af66edcdf0662597442062e5f5f51adbdf7a63a263ee0052064c222ff33ddb983ec3f17b68b7275de8de3680e
+  languageName: node
+  linkType: hard
+
+"@embroider/shared-internals@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@embroider/shared-internals@npm:2.1.0"
+  dependencies:
+    babel-import-util: ^1.1.0
+    ember-rfc176-data: ^0.3.17
+    fs-extra: ^9.1.0
+    js-string-escape: ^1.0.1
+    lodash: ^4.17.21
+    resolve-package-path: ^4.0.1
+    semver: ^7.3.5
+    typescript-memoize: ^1.0.1
+  checksum: db58b0cceb6bfa002fd8147012904be53b4efd5d27af9fca2fdf7384fc697795268b5f194c3c3f64ff01f4615bf5202e58a44adbe1a220076c46e67f4abb4503
   languageName: node
   linkType: hard
 
@@ -7535,6 +7572,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ember-animated-tools@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "ember-animated-tools@npm:1.0.0"
+  dependencies:
+    "@embroider/addon-shim": ^1.5.0
+    ember-animated: ^1.0.0
+  checksum: faa4f4eda84d51ec4fbd3a420f8cfd515f0301502793f5844a70fd3be801ede843d1ef51d44cd1a42e678e5137e4de3a79f8955f433f73717067a7570bbac77d
+  languageName: node
+  linkType: hard
+
+"ember-animated@npm:^1.0.0, ember-animated@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "ember-animated@npm:1.0.4"
+  dependencies:
+    "@embroider/addon-shim": ^1.5.0
+    "@embroider/macros": ^1.5.0
+    assert-never: ^1.2.1
+    ember-element-helper: ^0.5.0 || ^0.6.0
+  peerDependencies:
+    "@ember/test-helpers": ^2.6.0
+  peerDependenciesMeta:
+    "@ember/test-helpers":
+      optional: true
+  checksum: 93bebe1265b85dddb9590312a1a3756e01767dbb14e1e7019958c22f48df4c5bdd126b5477fb6ae3392670ed4d49c3baae430ccac3d9116dd230211a8bb3fd5e
+  languageName: node
+  linkType: hard
+
 "ember-app-scheduler@npm:^5.1.2 || ^6.0.0 || ^7.0.0":
   version: 7.0.1
   resolution: "ember-app-scheduler@npm:7.0.1"
@@ -8475,7 +8539,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-element-helper@npm:^0.6.0, ember-element-helper@npm:^0.6.1":
+"ember-element-helper@npm:^0.5.0 || ^0.6.0, ember-element-helper@npm:^0.6.0, ember-element-helper@npm:^0.6.1":
   version: 0.6.1
   resolution: "ember-element-helper@npm:0.6.1"
   dependencies:
@@ -11096,6 +11160,8 @@ __metadata:
     autoprefixer: ^10.4.4
     babel-eslint: ^10.1.0
     broccoli-asset-rev: ^3.0.0
+    ember-animated: ^1.0.4
+    ember-animated-tools: ^1.0.0
     ember-auto-import: ^2.4.0
     ember-basic-dropdown: ^4.0.5
     ember-cli: ~3.28.6

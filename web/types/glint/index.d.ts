@@ -29,18 +29,32 @@ import { HdsCardContainerComponent } from "hds/card/container";
 import { HdsTableTdComponent } from "hds/table/td";
 import { HdsTableTrComponent } from "hds/table/tr";
 import { HdsTableComponent } from "hds/table";
+import AnimatedContainer from "ember-animated/components/animated-container";
+import { AnimatedEachCurly } from "ember-animated/components/animated-each";
+import AnimatedValue from "ember-animated/components/animated-value";
+import AnimatedOrphans from "ember-animated/components/animated-orphans";
+import { AnimatedIfCurly } from "ember-animated/components/animated-if";
+import { FlashMessageComponent } from "ember-cli-flash/flash-message";
+import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
+    "click-outside": typeof OnClickOutsideModifier;
+    AnimatedContainer: typeof AnimatedContainer;
+    AnimatedValue: typeof AnimatedValue;
+    AnimatedOrphans: typeof AnimatedOrphans;
+    "animated-each": typeof AnimatedEachCurly;
+    "animated-if": typeof AnimatedIfCurly;
     perform: typeof PerformHelper;
     or: typeof OrHelper;
     eq: typeof EqHelper;
     and: typeof AndHelper;
     not: typeof NotHelper;
     "is-empty": IsEmptyHelper;
+    FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;
     "Hds::Button": HdsButtonComponent;
     "Hds::BadgeCount": HdsBadgeCountComponent;

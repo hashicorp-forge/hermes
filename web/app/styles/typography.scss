@@ -9,3 +9,11 @@
 .hermes-form-helper-text {
   @apply text-body-100;
 }
+
+.hermes-h4 {
+  @apply text-color-foreground-faint uppercase tracking-wide font-medium text-body-100;
+}
+
+.truncated-text-container {
+  @apply truncate block font-regular text-body-100 text-color-foreground-faint;
+}

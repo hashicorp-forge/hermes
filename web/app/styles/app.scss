@@ -1,5 +1,8 @@
+@use "@hashicorp/design-system-components";
+
 @use "./animations";
 @use "./typography";
+
 
 @use "components/action";
 @use "components/toolbar";
@@ -38,7 +41,6 @@
 
 @use "./ember-power-select-theme";
 
-@use "@hashicorp/design-system-components";
 @use "./error-404";
 @use "./hds-overrides";
 

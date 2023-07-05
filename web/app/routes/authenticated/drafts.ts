@@ -121,7 +121,7 @@ export default class DraftsRoute extends Route {
         Object.entries(facets).forEach(([name, facet]) => {
           /**
            * e.g., name === "product"
-           * e.g., facet === { "Vault": { count: 1, selected: false }}
+           * e.g., facet === { "Vault": { count: 1, isSelected: false }}
            */
           this.algolia.markSelected(facet, params[name]);
         });

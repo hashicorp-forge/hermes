@@ -7,14 +7,14 @@ import { SortByLabel } from "hermes/components/header/toolbar";
 
 const FACETS = {
   docType: {
-    RFC: { count: 1, selected: false },
+    RFC: { count: 1, isSelected: false },
   },
   owners: {
-    ["mishra@hashicorp.com"]: { count: 8, selected: false },
+    ["mishra@hashicorp.com"]: { count: 8, isSelected: false },
   },
-  product: { Labs: { count: 9, selected: false } },
+  product: { Labs: { count: 9, isSelected: false } },
   status: {
-    Approved: { count: 3, selected: false },
+    Approved: { count: 3, isSelected: false },
   },
 };
 
@@ -88,7 +88,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     let statusFacets: FacetDropdownObjects = {};
 
     STATUS_NAMES.forEach((status) => {
-      statusFacets[status] = { count: 1, selected: false };
+      statusFacets[status] = { count: 1, isSelected: false };
     });
 
     this.set("facets", { status: statusFacets });

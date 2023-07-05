@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{!
   Marked up with guidance from:
   https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
@@ -6,12 +5,12 @@
   https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
   https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-actions-active-descendant/
 }}
-
 <FloatingUI
   @renderOut={{@renderOut}}
   @placement={{@placement}}
   @offset={{@offset}}
-  class="hermes-popover x-dropdown-list"
+  @disableClose={{@disableClose}}
+  class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -60,7 +59,7 @@
           f.contentID
         )
         resetFocusedItemIndex=this.resetFocusedItemIndex
-        scheduleAssignMenuItemIDs=this.scheduleAssignMenuItemIDs
+        scheduleAssignMenuItemIDs=(perform this.scheduleAssignMenuItemIDs)
         registerAnchor=f.registerAnchor
         contentIsShown=f.contentIsShown
         selected=@selected
@@ -77,64 +76,93 @@
   </:anchor>
   <:content as |f|>
     <div
-      {{did-insert this.didInsertContent}}
       {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
       class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
       role={{if this.inputIsShown "combobox"}}
     >
-      {{#if this.inputIsShown}}
-        <div class="x-dropdown-list-input-container">
-          <Hds::Form::TextInput::Base
-            data-test-x-dropdown-list-input
-            {{did-insert this.registerAndFocusInput}}
-            {{on "input" (perform this.onInput)}}
-            @value={{this.query}}
-            @type="search"
-            placeholder="Filter..."
-            aria-controls="x-dropdown-list-{{f.contentID}}"
-            aria-activedescendant={{unless
-              (eq this.focusedItemIndex -1)
-              (concat "x-dropdown-list-item-" this.focusedItemIndex)
-            }}
-          />
+      {{#if @isLoading}}
+        {{#if (has-block "loading")}}
+          <div class="w-full" data-test-x-dropdown-list-loading-block>
+            {{yield to="loading"}}
+          </div>
+        {{else}}
+          <div class="x-dropdown-list-default-loading-container">
+            <FlightIcon @name="loading" />
+          </div>
+        {{/if}}
+      {{else}}
+        <div
+          data-test-x-dropdown-list-loaded-content
+          class="overflow-hidden flex flex-col"
+          {{did-insert this.didInsertContent}}
+        >
+          {{#if this.inputIsShown}}
+            <div class="x-dropdown-list-input-container">
+              <Hds::Form::TextInput::Base
+                data-test-x-dropdown-list-input
+                {{did-insert this.registerAndFocusInput}}
+                {{on "input" this.onInput}}
+                {{on "focusin" this.maybeEnableKeyboardNav}}
+                {{on "focusout" this.disableKeyboardNav}}
+                @value={{this.query}}
+                @type="search"
+                placeholder="Filter..."
+                aria-controls="x-dropdown-list-{{f.contentID}}"
+                aria-activedescendant={{unless
+                  (eq this.focusedItemIndex -1)
+                  (concat "x-dropdown-list-item-" this.focusedItemIndex)
+                }}
+              />
+            </div>
+          {{/if}}
+          <div
+            {{did-insert this.registerScrollContainer}}
+            class="x-dropdown-list-scroll-container"
+          >
+            {{#if (has-block "header")}}
+              {{yield to="header"}}
+            {{/if}}
+            <X::DropdownList::Items
+              @contentID={{f.contentID}}
+              @query={{this.query}}
+              @items={{@items}}
+              @shownItems={{this.shownItems}}
+              @selected={{@selected}}
+              @focusedItemIndex={{this.focusedItemIndex}}
+              @inputIsShown={{this.inputIsShown}}
+              @listIsOrdered={{@listIsOrdered}}
+              @listItemRole={{this.listItemRole}}
+              @onInput={{this.onInput}}
+              @onItemClick={{@onItemClick}}
+              @registerScrollContainer={{this.registerScrollContainer}}
+              @setFocusedItemIndex={{this.setFocusedItemIndex}}
+              @hideContent={{f.hideContent}}
+              @scrollContainer={{this.scrollContainer}}
+              @listIsShown={{@listIsShown}}
+              @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
+            >
+              <:no-matches>
+                {{#if (has-block "no-matches")}}
+                  {{yield to="no-matches"}}
+                {{else}}
+                  <div class="x-dropdown-list-default-empty-state">
+                    No matches
+                  </div>
+                {{/if}}
+              </:no-matches>
+              <:item as |i|>
+                {{yield i to="item"}}
+              </:item>
+            </X::DropdownList::Items>
+
+            {{#if (has-block "footer")}}
+              {{yield to="footer"}}
+            {{/if}}
+          </div>
         </div>
       {{/if}}
-      <div
-        {{did-insert this.registerScrollContainer}}
-        class="x-dropdown-list-scroll-container"
-      >
-        {{#if (has-block "header")}}
-          {{yield to="header"}}
-        {{/if}}
-
-        <X::DropdownList::Items
-          @contentID={{f.contentID}}
-          @query={{this.query}}
-          @items={{@items}}
-          @shownItems={{this.shownItems}}
-          @selected={{@selected}}
-          @focusedItemIndex={{this.focusedItemIndex}}
-          @inputIsShown={{this.inputIsShown}}
-          @listIsOrdered={{@listIsOrdered}}
-          @listItemRole={{this.listItemRole}}
-          @onInput={{perform this.onInput}}
-          @onItemClick={{@onItemClick}}
-          @registerScrollContainer={{this.registerScrollContainer}}
-          @setFocusedItemIndex={{this.setFocusedItemIndex}}
-          @hideContent={{f.hideContent}}
-          @scrollContainer={{this.scrollContainer}}
-        >
-          <:item as |i|>
-            {{yield i to="item"}}
-          </:item>
-        </X::DropdownList::Items>
-
-        {{#if (has-block "footer")}}
-          {{yield to="footer"}}
-        {{/if}}
-      </div>
     </div>
   </:content>
 </FloatingUI>
