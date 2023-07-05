@@ -16,18 +16,6 @@
   }
 }
 
-@keyframes slideUpScaleUp {
-  from {
-    transform: translateY(5px) scale(0.8);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-3px);
-  }
-}
-
 // For a custom scaleIn, define `--scaleInFrom` in the element's style attribute.
 // For example: .classToAnimate { --scaleInFrom: 0.5; animation: scaleIn 50ms; }
 @keyframes scaleIn {
@@ -39,33 +27,8 @@
   }
 }
 
-@keyframes scaleDownToNormal {
-  from {
-    transform: scale(1.1);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes scaleUpToNormalWithBounce {
-  0% {
-    transform: scale(5);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
 @keyframes slideDownAndRotateLeft {
   to {
-    transform: translateY(8px) rotate(-70deg);
-  }
-}
-
-@keyframes slideUpAndRotateRight {
-  from {
     transform: translateY(8px) rotate(-70deg);
   }
 }

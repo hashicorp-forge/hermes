@@ -14,6 +14,8 @@
       {{on "scroll" this.onScroll}}
       {{did-insert this.registerBody}}
     >
+
+      <!--
       {{#let (get-product-id this.product) as |productIcon|}}
         {{#if productIcon}}
           <div
@@ -25,10 +27,11 @@
           </div>
         {{/if}}
       {{/let}}
+      -->
 
       <div class="sidebar-body-container">
         <div>
-          <div class="flex items-center space-x-1.5 mt-2 mb-6">
+          <div class="flex items-center space-x-1.5 mb-6">
 
             <Hds::Badge
               @text={{if this.isDraft "Draft" @document.docNumber}}
@@ -51,7 +54,14 @@
                 <:anchor as |dd|>
                   <dd.ToggleAction
                     class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
-                    {{tooltip "Privacy settings"}}
+                    {{tooltip
+                      (if
+                        (eq this.draftVisibilityIcon "lock")
+                        "Restricted"
+                        "Shareable"
+                      )
+                      placement="bottom"
+                    }}
                   >
                     <FlightIcon @name={{this.draftVisibilityIcon}} />
                     <FlightIcon
@@ -169,7 +179,7 @@
           {{! pills }}
           <div class="flex space-x-0.5 -ml-0.5">
             <div
-              class="rounded-l-full rounded-r-full bg-color-surface-action border border-color-border-action px-3 py-0.5 text-color-foreground-action"
+              class="rounded-l-full rounded-r-full bg-color-surface-interactive border border-color-border-strong px-3 py-0.5"
             >
               {{@document.docType}}
             </div>
@@ -198,7 +208,7 @@
           {{else}}
             <Hds::Badge
               @text={{@document.product}}
-              @icon={{get-product-id @document.product}}
+              @icon={{or (get-product-id @document.product) "folder"}}
             />
           {{/if}}
         </div>
