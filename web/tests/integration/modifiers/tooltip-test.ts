@@ -123,32 +123,20 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
     let state = htmlElement(".tip").getAttribute("data-tooltip-state");
 
-    assert.equal(state, "closed", "tooltip is closed by default");
+    assert.equal(state, "closed");
 
     await triggerEvent(".tip", "mouseenter");
 
-    assert.equal(
-      htmlElement(".tip").getAttribute("data-tooltip-state"),
-      "opening",
-      "tooltip is in its opening state"
-    );
+    const tip = htmlElement(".tip");
+
+    assert.equal(tip.getAttribute("data-tooltip-state"), "opening");
 
     await waitUntil(() => {
-      return htmlElement(".tip").getAttribute("data-tooltip-state") === "open";
+      return tip.getAttribute("data-tooltip-state") === "open";
     });
-
-    assert.equal(
-      htmlElement(".tip").getAttribute("data-tooltip-state"),
-      "open",
-      "tooltip is open"
-    );
 
     await triggerEvent(".tip", "mouseleave");
 
-    assert.equal(
-      htmlElement(".tip").getAttribute("data-tooltip-state"),
-      "closed",
-      "tooltip is in its closing state"
-    );
+    assert.equal(tip.getAttribute("data-tooltip-state"), "closed");
   });
 });

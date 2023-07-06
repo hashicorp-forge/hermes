@@ -212,6 +212,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       await timeout(this.delay);
     }
 
+    // Used in tests to assert intermediary states
     if (this._useTestDelay) {
       await simpleTimeout(10);
     }
