@@ -17,11 +17,18 @@ import {
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
-import { schedule } from "@ember/runloop";
 import { restartableTask, timeout } from "ember-concurrency";
 import Ember from "ember";
+import simpleTimeout from "hermes/utils/simple-timeout";
+import { schedule } from "@ember/runloop";
 
-const DEFAULT_DELAY = Ember.testing ? 0 : 400;
+const DEFAULT_DELAY = Ember.testing ? 0 : 275;
+
+enum TooltipState {
+  Opening = "opening",
+  Open = "open",
+  Closed = "closed",
+}
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
@@ -31,8 +38,8 @@ const DEFAULT_DELAY = Ember.testing ? 0 : 400;
  *  <FlightIcon @name="arrow-left" />
  * </div>
  *
- * Takes text and an optional named `placement` argument:
- * {{tooltip "Go back" placement="left-end"}}
+ * Takes text and optional arguments:
+ * {{tooltip "Go back" placement="left-end" delay=0}}
  *
  * TODO:
  * - Add `renderInPlace` argument
@@ -49,6 +56,7 @@ interface TooltipModifierSignature {
       // TODO: investigate "trigger: manual" as an alternative
       isForcedOpen?: boolean;
       delay?: number;
+      _useTestDelay?: boolean;
     };
   };
 }
@@ -117,14 +125,36 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltip: HTMLElement | null = null;
 
   /**
+   * The state of the tooltip as it transitions to and from closed and open.
+   * Used in tests to assert that intermediary states are rendered.
+   */
+  @tracked state: TooltipState = TooltipState.Closed;
+
+  /**
    * The placement of the tooltip relative to the reference element.
    * Defaults to `top` but can be overridden by invoking the modifier
    * with a `placement` argument.
    */
   @tracked placement: Placement = "top";
 
-  @tracked delay = DEFAULT_DELAY;
+  /**
+   * The delay before the tooltip is shown.
+   * Can be overridden with a `delay` argument.
+   */
+  @tracked delay: number = DEFAULT_DELAY;
 
+  /**
+   * Whether to use a delay in the testing environment.
+   * Triggers a short `simpleTimeout` on open so we can test
+   * the content's intermediary states.
+   */
+  @tracked _useTestDelay: boolean = false;
+
+  /**
+   * Whether the content should stay open on click.
+   * Used in components like `CopyURLButton` where we want to show
+   * a "success" message without closing and reopening the tooltip.
+   */
   @tracked stayOpenOnClick = false;
 
   @tracked isForcedOpen?: boolean;
@@ -156,141 +186,155 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked floatingUICleanup: (() => void) | null = null;
 
   /**
+   * The action that runs when the content's [visibility] state changes.
+   * Updates the `data-tooltip-state` attribute on the reference
+   * so we can test intermediary states.
+   */
+  @action updateState(state: TooltipState) {
+    this.state = state;
+    if (this.reference) {
+      this.reference.setAttribute("data-tooltip-state", this.state);
+    }
+  }
+
+  /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
    * positioned relative to the reference element, as
    * calculated by the `floating-ui` positioning library.
    */
   showContent = restartableTask(async () => {
-    try {
-      /**
-       * Do nothing if the tooltip exists, e.g., if the user
-       * hovers a reference that's already focused.
-       */
-      if (this.tooltip) {
+    /**
+     * Do nothing if the tooltip exists, e.g., if the user
+     * hovers a reference that's already focused.
+     */
+    if (this.tooltip) {
+      return;
+    }
+
+    this.updateState(TooltipState.Opening);
+
+    if (this.delay > 0) {
+      await timeout(this.delay);
+    }
+
+    // Used in tests to assert intermediary states
+    if (this._useTestDelay) {
+      await simpleTimeout(10);
+    }
+
+    /**
+     * Create the tooltip and set its attributes
+     */
+    this.tooltip = document.createElement("div");
+    this.tooltip.classList.add("hermes-tooltip");
+    this.tooltip.setAttribute("id", `tooltip-${this.id}`);
+    this.tooltip.setAttribute("role", "tooltip");
+
+    /**
+     * Create the arrow and append it to the tooltip
+     */
+    this._arrow = document.createElement("div");
+    this._arrow.classList.add("arrow");
+    this.tooltip.appendChild(this._arrow);
+
+    /**
+     * Create the textElement and append it to the tooltip
+     */
+    const textElement = document.createElement("div");
+    textElement.textContent = this.tooltipText;
+    textElement.classList.add("text");
+    this.tooltip.appendChild(textElement);
+
+    /**
+     * Append the tooltip to the end of the document.
+     * We use the `ember-application` selector to ensure
+     * a consistent cross-environment parent;
+     *
+     * TODO: Add the ability to render the tooltip in place
+     */
+    htmlElement(".ember-application").appendChild(this.tooltip);
+
+    /**
+     * The function that calculates, and updates the tooltip's position.
+     * Called repeatedly by the `floating-ui` positioning library.
+     */
+    let updatePosition = async () => {
+      if (!this.tooltip) {
         return;
       }
 
-      if (this.delay > 0) {
-        await timeout(this.delay);
-      }
-
-      /**
-       * Create the tooltip and set its attributes
-       */
-      this.tooltip = document.createElement("div");
-      this.tooltip.classList.add("hermes-tooltip");
-      this.tooltip.setAttribute("id", `tooltip-${this.id}`);
-      this.tooltip.setAttribute("role", "tooltip");
-
-      /**
-       * Create the arrow and append it to the tooltip
-       */
-      this._arrow = document.createElement("div");
-      this._arrow.classList.add("arrow");
-      this.tooltip.appendChild(this._arrow);
-
-      /**
-       * Create the textElement and append it to the tooltip
-       */
-      const textElement = document.createElement("div");
-      textElement.textContent = this.tooltipText;
-      textElement.classList.add("text");
-      this.tooltip.appendChild(textElement);
-
-      /**
-       * Append the tooltip to the end of the document.
-       * We use the `ember-application` selector to ensure
-       * a consistent cross-environment parent;
-       *
-       * TODO: Add the ability to render the tooltip in place
-       */
-      htmlElement(".ember-application").appendChild(this.tooltip);
-
-      /**
-       * The function that calculates, and updates the tooltip's position.
-       * Called repeatedly by the `floating-ui` positioning library.
-       */
-      let updatePosition = async () => {
+      // https://floating-ui.com/docs/computePosition
+      computePosition(this.reference, this.tooltip, {
+        platform: platform,
+        placement: this.placement,
+        middleware: [
+          offset(8),
+          flip(),
+          shift(),
+          arrow({
+            element: this.arrow,
+            padding: 10,
+          }),
+        ],
+      }).then(({ x, y, placement, middlewareData }) => {
         if (!this.tooltip) {
           return;
         }
 
-        // https://floating-ui.com/docs/computePosition
-        computePosition(this.reference, this.tooltip, {
-          platform: platform,
-          placement: this.placement,
-          middleware: [
-            offset(8),
-            flip(),
-            shift(),
-            arrow({
-              element: this.arrow,
-              padding: 10,
-            }),
-          ],
-        }).then(({ x, y, placement, middlewareData }) => {
-          if (!this.tooltip) {
-            return;
-          }
+        /**
+         * Update and set the tooltip's placement attribute
+         * based on the calculated placement (which could differ from
+         * the named argument passed to the modifier)
+         */
+        this.placement = placement;
+        this.tooltip.setAttribute("data-tooltip-placement", this.placement);
 
-          /**
-           * Update and set the tooltip's placement attribute
-           * based on the calculated placement (which could differ from
-           * the named argument passed to the modifier)
-           */
-          this.placement = placement;
-          this.tooltip.setAttribute("data-tooltip-placement", this.placement);
-
-          /**
-           * Position the tooltip
-           */
-          Object.assign(this.tooltip.style, {
-            left: `${x}px`,
-            top: `${y}px`,
-          });
-
-          /**
-           * Position the arrow
-           * https://floating-ui.com/docs/arrow#usage
-           * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
-           */
-          const basicTooltipPlacement = this.placement.split("-")[0] as Side;
-          const arrowStaticSide = {
-            top: "bottom",
-            right: "left",
-            bottom: "top",
-            left: "right",
-          }[basicTooltipPlacement] as Side;
-
-          if (middlewareData.arrow) {
-            const { x, y } = middlewareData.arrow;
-            Object.assign(this.arrow.style, {
-              left: x != null ? `${x}px` : "",
-              top: y != null ? `${y}px` : "",
-              /**
-               * Ensure the static side gets unset when
-               * flipping to other placements' axes.
-               */
-              right: "",
-              bottom: "",
-              [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
-              transform: "rotate(45deg)",
-            });
-          }
+        /**
+         * Position the tooltip
+         */
+        Object.assign(this.tooltip.style, {
+          left: `${x}px`,
+          top: `${y}px`,
         });
-      };
 
-      this.floatingUICleanup = autoUpdate(
-        this.reference,
-        this.tooltip,
-        updatePosition
-      );
-    } catch (error) {
-      console.error(error);
-    } finally {
-      // do we need this?
-    }
+        /**
+         * Position the arrow
+         * https://floating-ui.com/docs/arrow#usage
+         * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
+         */
+        const basicTooltipPlacement = this.placement.split("-")[0] as Side;
+        const arrowStaticSide = {
+          top: "bottom",
+          right: "left",
+          bottom: "top",
+          left: "right",
+        }[basicTooltipPlacement] as Side;
+
+        if (middlewareData.arrow) {
+          const { x, y } = middlewareData.arrow;
+          Object.assign(this.arrow.style, {
+            left: x != null ? `${x}px` : "",
+            top: y != null ? `${y}px` : "",
+            /**
+             * Ensure the static side gets unset when
+             * flipping to other placements' axes.
+             */
+            right: "",
+            bottom: "",
+            [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
+            transform: "rotate(45deg)",
+          });
+        }
+      });
+    };
+
+    this.floatingUICleanup = autoUpdate(
+      this.reference,
+      this.tooltip,
+      updatePosition
+    );
+    this.updateState(TooltipState.Open);
   });
 
   /**
@@ -362,6 +406,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     if (this.tooltip) {
       this.tooltip.remove();
       this.tooltip = null;
+      this.updateState(TooltipState.Closed);
     }
   }
 
@@ -386,6 +431,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       stayOpenOnClick?: boolean;
       isForcedOpen?: boolean;
       delay?: number;
+      _useTestDelay?: boolean;
     }
   ) {
     this._reference = element;
@@ -399,6 +445,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named.stayOpenOnClick) {
       this.stayOpenOnClick = named.stayOpenOnClick;
+    }
+
+    if (named._useTestDelay) {
+      this._useTestDelay = named._useTestDelay;
     }
 
     if (named.delay !== undefined) {
@@ -418,6 +468,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     }
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);
+    this._reference.setAttribute("data-tooltip-state", this.state);
 
     /**
      * If the reference isn't inherently focusable, make it focusable.
