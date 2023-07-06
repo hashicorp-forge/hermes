@@ -22,7 +22,7 @@ import Ember from "ember";
 import { set } from "mockdate";
 import simpleTimeout from "hermes/utils/simple-timeout";
 
-const DEFAULT_DELAY = Ember.testing ? 0 : 400;
+const DEFAULT_DELAY = Ember.testing ? 0 : 275;
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
