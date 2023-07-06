@@ -71,6 +71,7 @@
                   </dd.ToggleAction>
                 </:anchor>
                 <:item as |dd|>
+                {{log dd}}
                   <dd.Action
                     class="flex items-start gap-3 py-2.5 pl-4 pr-6"
                     {{on "click" (perform this.setDraftVisibility dd.value)}}
@@ -90,7 +91,7 @@
                     <FlightIcon
                       @name="check"
                       class="check shrink-0 mt-0.5
-                        {{if dd.selected 'visible' 'invisible'}}"
+                        {{if dd.isSelected 'visible' 'invisible'}}"
                     />
                   </dd.Action>
 
