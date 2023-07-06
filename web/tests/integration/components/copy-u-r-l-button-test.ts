@@ -64,7 +64,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
         "The tooltip can be rendered custom placement"
       );
 
-    assert.dom(".hermes-tooltip .text").hasText("Copy URL");
+    assert.dom(".hermes-tooltip .text").hasText("Copy link");
 
     let clickPromise = click("[data-test-copy-url-button]");
 

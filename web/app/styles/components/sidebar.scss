@@ -58,8 +58,8 @@
     }
 
     &.out {
-      animation: fadeOut 90ms ease-out 50ms forwards,
-        slideDownAndRotateLeft 140ms ease-out forwards;
+      animation: fadeOut 200ms ease-out 50ms forwards,
+        slideDownAndRotateLeft 250ms ease-out forwards;
     }
 
     &.in:hover {

@@ -290,8 +290,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.setDraftVisibility.isRunning &&
       this._tempNewVisibility === "shareable"
     ) {
-      console.log("loading");
-      return "loading";
+      return "running";
     }
     if (this.showCopyURLSuccessMessage.isRunning) {
       return "check";
@@ -302,15 +301,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   protected showCopyURLSuccessMessage = restartableTask(async () => {
     // TODO: this actually has to copy the URL to the clipboard
-    await timeout(1000);
+    await timeout(1500);
   });
 
   protected setDraftVisibility = restartableTask(
     async (newVisibility: string) => {
 
-      if (this._tempNewVisibility === newVisibility) {
+      if (this.draftVisibility === newVisibility) {
         return;
       }
+
 
       this._tempNewVisibility = newVisibility;
 

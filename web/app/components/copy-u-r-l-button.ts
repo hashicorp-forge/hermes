@@ -24,7 +24,7 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
 
   /**
    * Whether the URL was recently copied to the clipboard.
-   * Used to determine if the tooltip should say "Copy URL" or "Copied."
+   * Used to determine if the tooltip should say "Copy link" or "Copied."
    * Temporarily set true when the URL is successfully copied.
    */
   @tracked protected urlWasRecentlyCopied = false;
@@ -47,7 +47,7 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
       return this.args.tooltipText;
     }
 
-    return this.urlWasRecentlyCopied ? "Copied!" : "Copy URL";
+    return this.urlWasRecentlyCopied ? "Copied!" : "Copy link";
   }
 
   /**
