@@ -116,7 +116,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
   test("it can open on a delay", async function (assert) {
     await render(hbs`
-      <div class="tip" {{tooltip "more information" _isTestingDelay=true}}>
+      <div class="tip" {{tooltip "more information" _useTestDelay=true}}>
         Hover or focus me
       </div>
     `);

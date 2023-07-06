@@ -19,10 +19,15 @@ import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
 import { restartableTask, timeout } from "ember-concurrency";
 import Ember from "ember";
-import { set } from "mockdate";
 import simpleTimeout from "hermes/utils/simple-timeout";
 
 const DEFAULT_DELAY = Ember.testing ? 0 : 275;
+
+enum TooltipState {
+  Opening = "opening",
+  Open = "open",
+  Closed = "closed",
+}
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
@@ -32,8 +37,8 @@ const DEFAULT_DELAY = Ember.testing ? 0 : 275;
  *  <FlightIcon @name="arrow-left" />
  * </div>
  *
- * Takes text and an optional named `placement` argument:
- * {{tooltip "Go back" placement="left-end"}}
+ * Takes text and optional arguments:
+ * {{tooltip "Go back" placement="left-end" delay=0}}
  *
  * TODO:
  * - Add `renderInPlace` argument
@@ -47,7 +52,7 @@ interface TooltipModifierSignature {
     Named: {
       placement?: Placement;
       delay?: number;
-      _isTestingDelay?: boolean;
+      _useTestDelay?: boolean;
     };
   };
 }
@@ -78,12 +83,6 @@ function cleanup(instance: TooltipModifier) {
   if (instance.tooltip) {
     instance.tooltip.remove();
   }
-}
-
-enum TooltipState {
-  Opening = "opening",
-  Open = "open",
-  Closed = "closed",
 }
 
 export default class TooltipModifier extends Modifier<TooltipModifierSignature> {
@@ -122,7 +121,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltip: HTMLElement | null = null;
 
   /**
-   * The state of the tooltip. TODO: Add more
+   * The state of the tooltip as it transitions to and from closed and open.
+   * Used in tests to assert that intermediary states are rendered.
    */
   @tracked state: TooltipState = TooltipState.Closed;
 
@@ -133,9 +133,24 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  /**
+   * The delay before the tooltip is shown.
+   * Can be overridden with a `delay` argument.
+   */
   @tracked delay: number = DEFAULT_DELAY;
-  @tracked _isTestingDelay: boolean = false;
 
+  /**
+   * Whether to use a delay in the testing environment.
+   * Triggers a short `simpleTimeout` on open so we can test
+   * the content's intermediary states.
+   */
+  @tracked _useTestDelay: boolean = false;
+
+  /**
+   * Whether the content should stay open on click.
+   * Used in components like `CopyURLButton` where we want to show
+   * a "success" message without closing and reopening the tooltip.
+   */
   @tracked stayOpenOnClick = false;
 
   /**
@@ -162,20 +177,13 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     return this._arrow;
   }
 
-  get isOpening() {
-    return this.state === TooltipState.Opening;
-  }
-
-  get isOpen() {
-    return this.state === TooltipState.Open;
-  }
-
-  get isClosed() {
-    return this.state === TooltipState.Closed;
-  }
-
   @tracked floatingUICleanup: (() => void) | null = null;
 
+  /**
+   * The action that runs when the content's [visibility] state changes.
+   * Updates the `data-tooltip-state` attribute on the reference
+   * so we can test intermediary states.
+   */
   @action updateState(state: TooltipState) {
     this.state = state;
     if (this.reference) {
@@ -204,7 +212,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       await timeout(this.delay);
     }
 
-    if (this._isTestingDelay) {
+    if (this._useTestDelay) {
       await simpleTimeout(10);
     }
 
@@ -404,7 +412,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       placement?: Placement;
       stayOpenOnClick?: boolean;
       delay?: number;
-      _isTestingDelay?: boolean;
+      _useTestDelay?: boolean;
     }
   ) {
     this._reference = element;
@@ -420,8 +428,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.stayOpenOnClick = named.stayOpenOnClick;
     }
 
-    if (named._isTestingDelay) {
-      this._isTestingDelay = named._isTestingDelay;
+    if (named._useTestDelay) {
+      this._useTestDelay = named._useTestDelay;
     }
 
     if (named.delay !== undefined) {
