@@ -71,7 +71,6 @@
                   </dd.ToggleAction>
                 </:anchor>
                 <:item as |dd|>
-                {{log dd}}
                   <dd.Action
                     class="flex items-start gap-3 py-2.5 pl-4 pr-6"
                     {{on "click" (perform this.setDraftVisibility dd.value)}}
@@ -178,7 +177,7 @@
             {{/if}}
           </div>
 
-          {{! pills }}
+          {{! Pills }}
           <div class="flex space-x-0.5 -ml-0.5">
             <div
               class="rounded-l-full rounded-r-full bg-color-surface-interactive border border-color-border-strong px-3 py-0.5"
@@ -187,7 +186,12 @@
             </div>
             {{#if this.statusIsShown}}
               <div
-                class="rounded-l-full rounded-r-full bg-color-surface-highlight border border-color-border-highlight px-3 py-0.5 text-color-foreground-highlight"
+                class="rounded-l-full rounded-r-full border px-3 py-0.5
+                  {{if
+                    (eq @document.status 'Approved')
+                    'bg-color-surface-success border-green-700/40 text-color-palette-green-200'
+                    'bg-color-surface-highlight border-purple-700/40 text-color-foreground-highlight'
+                  }}"
               >
                 {{@document.status}}
               </div>

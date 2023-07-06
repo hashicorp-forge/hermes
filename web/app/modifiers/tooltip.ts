@@ -18,6 +18,10 @@ import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
+import { restartableTask, timeout } from "ember-concurrency";
+import Ember from "ember";
+
+const DEFAULT_DELAY = Ember.testing ? 0 : 400;
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
@@ -44,6 +48,7 @@ interface TooltipModifierSignature {
       stayOpenOnClick?: boolean;
       // TODO: investigate "trigger: manual" as an alternative
       isForcedOpen?: boolean;
+      delay?: number;
     };
   };
 }
@@ -58,7 +63,10 @@ function cleanup(instance: TooltipModifier) {
   instance.reference.removeEventListener("click", instance.handleClick);
   instance.reference.removeEventListener("focusin", instance.onFocusIn);
   instance.reference.removeEventListener("focusout", instance.maybeHideContent);
-  instance.reference.removeEventListener("mouseenter", instance.showContent);
+  instance.reference.removeEventListener(
+    "mouseenter",
+    instance.showContent.perform
+  );
   instance.reference.removeEventListener(
     "mouseleave",
     instance.maybeHideContent
@@ -115,6 +123,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  @tracked delay = DEFAULT_DELAY;
+
   @tracked stayOpenOnClick = false;
 
   @tracked isForcedOpen?: boolean;
@@ -151,127 +161,137 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * positioned relative to the reference element, as
    * calculated by the `floating-ui` positioning library.
    */
-  @action showContent() {
-    /**
-     * Do nothing if the tooltip exists, e.g., if the user
-     * hovers a reference that's already focused.
-     */
-    if (this.tooltip) {
-      return;
-    }
-
-    /**
-     * Create the tooltip and set its attributes
-     */
-    this.tooltip = document.createElement("div");
-    this.tooltip.classList.add("hermes-tooltip");
-    this.tooltip.setAttribute("id", `tooltip-${this.id}`);
-    this.tooltip.setAttribute("role", "tooltip");
-
-    /**
-     * Create the arrow and append it to the tooltip
-     */
-    this._arrow = document.createElement("div");
-    this._arrow.classList.add("arrow");
-    this.tooltip.appendChild(this._arrow);
-
-    /**
-     * Create the textElement and append it to the tooltip
-     */
-    const textElement = document.createElement("div");
-    textElement.textContent = this.tooltipText;
-    textElement.classList.add("text");
-    this.tooltip.appendChild(textElement);
-
-    /**
-     * Append the tooltip to the end of the document.
-     * We use the `ember-application` selector to ensure
-     * a consistent cross-environment parent;
-     *
-     * TODO: Add the ability to render the tooltip in place
-     */
-    htmlElement(".ember-application").appendChild(this.tooltip);
-
-    /**
-     * The function that calculates, and updates the tooltip's position.
-     * Called repeatedly by the `floating-ui` positioning library.
-     */
-    let updatePosition = async () => {
-      if (!this.tooltip) {
+  showContent = restartableTask(async () => {
+    try {
+      /**
+       * Do nothing if the tooltip exists, e.g., if the user
+       * hovers a reference that's already focused.
+       */
+      if (this.tooltip) {
         return;
       }
 
-      // https://floating-ui.com/docs/computePosition
-      computePosition(this.reference, this.tooltip, {
-        platform: platform,
-        placement: this.placement,
-        middleware: [
-          offset(8),
-          flip(),
-          shift(),
-          arrow({
-            element: this.arrow,
-            padding: 10,
-          }),
-        ],
-      }).then(({ x, y, placement, middlewareData }) => {
+      if (this.delay > 0) {
+        await timeout(this.delay);
+      }
+
+      /**
+       * Create the tooltip and set its attributes
+       */
+      this.tooltip = document.createElement("div");
+      this.tooltip.classList.add("hermes-tooltip");
+      this.tooltip.setAttribute("id", `tooltip-${this.id}`);
+      this.tooltip.setAttribute("role", "tooltip");
+
+      /**
+       * Create the arrow and append it to the tooltip
+       */
+      this._arrow = document.createElement("div");
+      this._arrow.classList.add("arrow");
+      this.tooltip.appendChild(this._arrow);
+
+      /**
+       * Create the textElement and append it to the tooltip
+       */
+      const textElement = document.createElement("div");
+      textElement.textContent = this.tooltipText;
+      textElement.classList.add("text");
+      this.tooltip.appendChild(textElement);
+
+      /**
+       * Append the tooltip to the end of the document.
+       * We use the `ember-application` selector to ensure
+       * a consistent cross-environment parent;
+       *
+       * TODO: Add the ability to render the tooltip in place
+       */
+      htmlElement(".ember-application").appendChild(this.tooltip);
+
+      /**
+       * The function that calculates, and updates the tooltip's position.
+       * Called repeatedly by the `floating-ui` positioning library.
+       */
+      let updatePosition = async () => {
         if (!this.tooltip) {
           return;
         }
 
-        /**
-         * Update and set the tooltip's placement attribute
-         * based on the calculated placement (which could differ from
-         * the named argument passed to the modifier)
-         */
-        this.placement = placement;
-        this.tooltip.setAttribute("data-tooltip-placement", this.placement);
+        // https://floating-ui.com/docs/computePosition
+        computePosition(this.reference, this.tooltip, {
+          platform: platform,
+          placement: this.placement,
+          middleware: [
+            offset(8),
+            flip(),
+            shift(),
+            arrow({
+              element: this.arrow,
+              padding: 10,
+            }),
+          ],
+        }).then(({ x, y, placement, middlewareData }) => {
+          if (!this.tooltip) {
+            return;
+          }
 
-        /**
-         * Position the tooltip
-         */
-        Object.assign(this.tooltip.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
+          /**
+           * Update and set the tooltip's placement attribute
+           * based on the calculated placement (which could differ from
+           * the named argument passed to the modifier)
+           */
+          this.placement = placement;
+          this.tooltip.setAttribute("data-tooltip-placement", this.placement);
 
-        /**
-         * Position the arrow
-         * https://floating-ui.com/docs/arrow#usage
-         * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
-         */
-        const basicTooltipPlacement = this.placement.split("-")[0] as Side;
-        const arrowStaticSide = {
-          top: "bottom",
-          right: "left",
-          bottom: "top",
-          left: "right",
-        }[basicTooltipPlacement] as Side;
-
-        if (middlewareData.arrow) {
-          const { x, y } = middlewareData.arrow;
-          Object.assign(this.arrow.style, {
-            left: x != null ? `${x}px` : "",
-            top: y != null ? `${y}px` : "",
-            /**
-             * Ensure the static side gets unset when
-             * flipping to other placements' axes.
-             */
-            right: "",
-            bottom: "",
-            [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
-            transform: "rotate(45deg)",
+          /**
+           * Position the tooltip
+           */
+          Object.assign(this.tooltip.style, {
+            left: `${x}px`,
+            top: `${y}px`,
           });
-        }
-      });
-    };
 
-    this.floatingUICleanup = autoUpdate(
-      this.reference,
-      this.tooltip,
-      updatePosition
-    );
-  }
+          /**
+           * Position the arrow
+           * https://floating-ui.com/docs/arrow#usage
+           * https://codesandbox.io/s/mystifying-kare-ee3hmh?file=/src/index.js
+           */
+          const basicTooltipPlacement = this.placement.split("-")[0] as Side;
+          const arrowStaticSide = {
+            top: "bottom",
+            right: "left",
+            bottom: "top",
+            left: "right",
+          }[basicTooltipPlacement] as Side;
+
+          if (middlewareData.arrow) {
+            const { x, y } = middlewareData.arrow;
+            Object.assign(this.arrow.style, {
+              left: x != null ? `${x}px` : "",
+              top: y != null ? `${y}px` : "",
+              /**
+               * Ensure the static side gets unset when
+               * flipping to other placements' axes.
+               */
+              right: "",
+              bottom: "",
+              [arrowStaticSide]: `${-this.arrow.offsetWidth / 2}px`,
+              transform: "rotate(45deg)",
+            });
+          }
+        });
+      };
+
+      this.floatingUICleanup = autoUpdate(
+        this.reference,
+        this.tooltip,
+        updatePosition
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // do we need this?
+    }
+  });
 
   /**
    * A click listener added in the `modify` hook that hides the tooltip
@@ -316,7 +336,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @action onFocusIn() {
     if (this.reference.matches(":focus-visible")) {
-      this.showContent();
+      this.showContent.perform();
     }
   }
 
@@ -332,15 +352,17 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     if (this.isForcedOpen) {
       return;
     }
-    if (this.tooltip) {
+    if (this.tooltip || this.showContent.isRunning) {
+      this.showContent.cancelAll();
       this.hideContent();
     }
   }
 
   @action hideContent() {
-    assert("tooltip expected", this.tooltip);
-    this.tooltip.remove();
-    this.tooltip = null;
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
+    }
   }
 
   @action maybeForceHidden() {
@@ -363,6 +385,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       placement?: Placement;
       stayOpenOnClick?: boolean;
       isForcedOpen?: boolean;
+      delay?: number;
     }
   ) {
     this._reference = element;
@@ -378,10 +401,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.stayOpenOnClick = named.stayOpenOnClick;
     }
 
+    if (named.delay !== undefined) {
+      this.delay = named.delay;
+    } else {
+      this.delay = DEFAULT_DELAY;
+    }
+
     if (named.isForcedOpen) {
       this.isForcedOpen = named.isForcedOpen;
       schedule("afterRender", () => {
-        this.showContent();
+        this.showContent.perform();
       });
     } else {
       this.maybeForceHidden();
@@ -400,7 +429,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     document.addEventListener("keydown", this.handleKeydown);
     this._reference.addEventListener("click", this.handleClick);
     this._reference.addEventListener("focusin", this.onFocusIn);
-    this._reference.addEventListener("mouseenter", this.showContent);
+    this._reference.addEventListener("mouseenter", this.showContent.perform);
     this._reference.addEventListener("focusout", this.maybeHideContent);
     this._reference.addEventListener("mouseleave", this.maybeHideContent);
   }

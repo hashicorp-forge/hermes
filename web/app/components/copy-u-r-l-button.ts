@@ -47,7 +47,13 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
       return this.args.tooltipText;
     }
 
-    return this.urlWasRecentlyCopied ? "Copied!" : "Copy link";
+    return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
+  }
+
+  get delay(): number | undefined {
+    if (this.isForcedOpen) {
+      return 0;
+    }
   }
 
   /**

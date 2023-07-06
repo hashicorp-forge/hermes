@@ -306,18 +306,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   protected setDraftVisibility = restartableTask(
     async (newVisibility: string) => {
-
       if (this.draftVisibility === newVisibility) {
         return;
       }
 
-
       this._tempNewVisibility = newVisibility;
 
       try {
-        console.log("try");
         if (newVisibility === "restricted") {
-          console.log("if");
           // user is disabling the link button
           const shareButton = document.getElementById(
             "sidebar-header-copy-url-button"
@@ -331,7 +327,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           await timeout(Ember.testing ? 0 : 3000);
           this.draftVisibility = newVisibility;
         } else {
-          console.log("else");
           this.draftVisibilityIcon = "enterprise";
           schedule("afterRender", () => {
             const shareButton = document.getElementById(

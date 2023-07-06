@@ -70,7 +70,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
 
     await waitFor("[data-url-copied=true]");
 
-    assert.dom(".hermes-tooltip .text").hasText("Copied!");
+    assert.dom(".hermes-tooltip .text").hasText("Link copied!");
 
     await clickPromise;
   });
