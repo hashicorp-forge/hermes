@@ -58,7 +58,7 @@
     }
 
     &.out {
-      animation: fadeOut 200ms ease-out 50ms forwards,
+      animation: fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
 
