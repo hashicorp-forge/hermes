@@ -22,7 +22,8 @@ import Ember from "ember";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import { schedule } from "@ember/runloop";
 
-const DEFAULT_DELAY = Ember.testing ? 0 : 275;
+const DEFAULT_DELAY = Ember.testing ? 0 : 0;
+const DEFAULT_OPEN_DURATION = Ember.testing ? 0 : 200;
 
 enum TooltipState {
   Opening = "opening",
@@ -46,18 +47,21 @@ enum TooltipState {
  * - Add animation logic
  */
 
+interface TooltipModifierNamedArgs {
+  placement?: Placement;
+  stayOpenOnClick?: boolean;
+  // TODO: investigate "trigger: manual" as an alternative
+  isForcedOpen?: boolean;
+  delay?: number;
+  isDisabled?: boolean;
+  _useTestDelay?: boolean;
+}
+
 interface TooltipModifierSignature {
   Args: {
     Element: HTMLElement;
     Positional: [string];
-    Named: {
-      placement?: Placement;
-      stayOpenOnClick?: boolean;
-      // TODO: investigate "trigger: manual" as an alternative
-      isForcedOpen?: boolean;
-      delay?: number;
-      _useTestDelay?: boolean;
-    };
+    Named: TooltipModifierNamedArgs;
   };
 }
 
@@ -124,6 +128,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked tooltip: HTMLElement | null = null;
 
+  @tracked tooltipContent: HTMLElement | null = null;
+
   /**
    * The state of the tooltip as it transitions to and from closed and open.
    * Used in tests to assert that intermediary states are rendered.
@@ -136,6 +142,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * with a `placement` argument.
    */
   @tracked placement: Placement = "top";
+
+  @tracked openDuration: number = DEFAULT_OPEN_DURATION;
 
   /**
    * The delay before the tooltip is shown.
@@ -185,6 +193,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
   @tracked floatingUICleanup: (() => void) | null = null;
 
+  @tracked transform: string = "none";
+
   /**
    * The action that runs when the content's [visibility] state changes.
    * Updates the `data-tooltip-state` attribute on the reference
@@ -204,6 +214,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * calculated by the `floating-ui` positioning library.
    */
   showContent = restartableTask(async () => {
+    console.log("task started");
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
@@ -220,23 +231,30 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     // Used in tests to assert intermediary states
     if (this._useTestDelay) {
-      await simpleTimeout(10);
+      await simpleTimeout(Ember.testing ? 0 : 50);
     }
 
     /**
      * Create the tooltip and set its attributes
      */
     this.tooltip = document.createElement("div");
-    this.tooltip.classList.add("hermes-tooltip");
+    this.tooltip.classList.add(
+      "hermes-floating-ui-content",
+      "hermes-tooltip-positioner"
+    );
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
+
+    this.tooltipContent = document.createElement("div");
+    this.tooltipContent.classList.add("hermes-tooltip");
+    this.tooltip.appendChild(this.tooltipContent);
 
     /**
      * Create the arrow and append it to the tooltip
      */
     this._arrow = document.createElement("div");
     this._arrow.classList.add("arrow");
-    this.tooltip.appendChild(this._arrow);
+    this.tooltipContent.appendChild(this._arrow);
 
     /**
      * Create the textElement and append it to the tooltip
@@ -244,7 +262,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     const textElement = document.createElement("div");
     textElement.textContent = this.tooltipText;
     textElement.classList.add("text");
-    this.tooltip.appendChild(textElement);
+    this.tooltipContent.appendChild(textElement);
 
     /**
      * Append the tooltip to the end of the document.
@@ -327,6 +345,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           });
         }
       });
+
+      if (this.placement.startsWith("top")) {
+        this.transform = "scale(.97) translateY(1px)";
+      } else if (this.placement.startsWith("bottom")) {
+        this.transform = "scale(.97) translateY(-1px)";
+      } else if (this.placement.startsWith("left")) {
+        this.transform = "scale(.97) translateX(1px)";
+      } else if (this.placement.startsWith("right")) {
+        this.transform = "scale(.97) translateX(-1px)";
+      }
     };
 
     this.floatingUICleanup = autoUpdate(
@@ -334,6 +362,40 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.tooltip,
       updatePosition
     );
+
+    if (this.openDuration) {
+      const fadeAnimation = this.tooltip.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        {
+          duration: Ember.testing ? 0 : 50,
+        }
+      );
+      const transformAnimation = this.tooltipContent.animate(
+        [{ transform: this.transform }, { transform: "none" }],
+        {
+          duration: this.openDuration,
+          easing: "ease-in-out",
+        }
+      );
+      try {
+        console.log("trying...");
+        // this isn't being awaited for some reason
+        await Promise.all([
+          fadeAnimation.finished,
+          transformAnimation.finished,
+        ]);
+        console.log("done trying");
+      } catch (e: unknown) {
+        console.log("caught error");
+      } finally {
+        // for some reason this is being reached before the try block finishes
+        // when the tooltip is triggered force-open
+        // (and there is no error)
+        fadeAnimation.cancel();
+        transformAnimation.cancel();
+      }
+    }
+
     this.updateState(TooltipState.Open);
   });
 
@@ -426,13 +488,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   modify(
     element: Element,
     positional: [string],
-    named: {
-      placement?: Placement;
-      stayOpenOnClick?: boolean;
-      isForcedOpen?: boolean;
-      delay?: number;
-      _useTestDelay?: boolean;
-    }
+    named: TooltipModifierNamedArgs
   ) {
     this._reference = element;
     this._tooltipText = positional[0];
@@ -459,12 +515,15 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named.isForcedOpen) {
       this.isForcedOpen = named.isForcedOpen;
+
       schedule("afterRender", () => {
-        this.showContent.perform();
+        // make sure we're not cancelling an animation
+        if (!this.showContent.isRunning) {
+          this.showContent.perform();
+        }
       });
     } else {
       this.maybeForceHidden();
-      // needs close logic
     }
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);

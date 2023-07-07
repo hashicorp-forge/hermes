@@ -281,7 +281,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       return "Creating link...";
     }
     if (this.showCopyURLSuccessMessage.isRunning) {
-      return "Link copied!";
+      return "Link created!";
     }
   }
 
@@ -293,7 +293,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       return "running";
     }
     if (this.showCopyURLSuccessMessage.isRunning) {
-      return "check";
+      return "smile";
     }
   }
 
@@ -301,7 +301,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   protected showCopyURLSuccessMessage = restartableTask(async () => {
     // TODO: this actually has to copy the URL to the clipboard
-    await timeout(1500);
+    await timeout(1000);
   });
 
   protected setDraftVisibility = restartableTask(
