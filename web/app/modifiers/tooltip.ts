@@ -121,7 +121,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltip: HTMLElement | null = null;
 
   /**
-   * The state of the tooltip as it transitions to and from closed and open.
+   * The state of the tooltip as it transitions between closed and open.
    * Used in tests to assert that intermediary states are rendered.
    */
   @tracked state: TooltipState = TooltipState.Closed;
