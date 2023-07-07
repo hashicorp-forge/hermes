@@ -22,8 +22,8 @@ import Ember from "ember";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import { schedule } from "@ember/runloop";
 
-const DEFAULT_DELAY = Ember.testing ? 0 : 0;
-const DEFAULT_OPEN_DURATION = Ember.testing ? 0 : 200;
+const DEFAULT_DELAY = 0;
+const DEFAULT_OPEN_DURATION = 200;
 
 enum TooltipState {
   Opening = "opening",
@@ -53,6 +53,7 @@ interface TooltipModifierNamedArgs {
   // TODO: investigate "trigger: manual" as an alternative
   isForcedOpen?: boolean;
   delay?: number;
+  openDuration?: number;
   isDisabled?: boolean;
   _useTestDelay?: boolean;
 }
@@ -124,10 +125,17 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked _arrow: HTMLElement | null = null;
 
   /**
-   * The tooltip element that is rendered in the DOM.
+   * The tooltip element that is rendered in the DOM and positioned
+   * relative to the reference element.
    */
   @tracked tooltip: HTMLElement | null = null;
 
+  @tracked tooltipContent: HTMLElement | null = null;
+
+  /**
+   * The content within the positioned tooltip element.
+   * Used for animations that with `trans
+   */
   @tracked tooltipContent: HTMLElement | null = null;
 
   /**
@@ -225,7 +233,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this.updateState(TooltipState.Opening);
 
-    if (this.delay > 0) {
+    if (!Ember.testing && this.delay > 0) {
       await timeout(this.delay);
     }
 
@@ -240,7 +248,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this.tooltip = document.createElement("div");
     this.tooltip.classList.add(
       "hermes-floating-ui-content",
-      "hermes-tooltip-positioner"
+      "hermes-tooltip"
     );
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
@@ -363,14 +371,14 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       updatePosition
     );
 
-    if (this.openDuration) {
+    if (!Ember.testing && this.openDuration) {
       const fadeAnimation = this.tooltip.animate(
         [{ opacity: 0 }, { opacity: 1 }],
         {
           duration: Ember.testing ? 0 : 50,
         }
       );
-      const transformAnimation = this.tooltipContent.animate(
+      const transformAnimation = this.tooltip.animate(
         [{ transform: this.transform }, { transform: "none" }],
         {
           duration: this.openDuration,
@@ -384,13 +392,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           fadeAnimation.finished,
           transformAnimation.finished,
         ]);
-        console.log("done trying");
-      } catch (e: unknown) {
-        console.log("caught error");
       } finally {
-        // for some reason this is being reached before the try block finishes
-        // when the tooltip is triggered force-open
-        // (and there is no error)
         fadeAnimation.cancel();
         transformAnimation.cancel();
       }
@@ -505,6 +507,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named._useTestDelay) {
       this._useTestDelay = named._useTestDelay;
+    }
+
+    if (named.openDuration) {
+      this.openDuration = named.openDuration;
     }
 
     if (named.delay !== undefined) {

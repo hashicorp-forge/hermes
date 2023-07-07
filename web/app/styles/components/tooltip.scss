@@ -1,9 +1,5 @@
-.hermes-tooltip-positioner {
-  @apply z-50;
-}
-
 .hermes-tooltip {
-  @apply w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast z-50;
+  @apply z-50 w-max bg-color-foreground-strong rounded py-2 px-2.5 text-color-foreground-high-contrast;
 
   .arrow {
     @apply absolute bg-color-foreground-strong h-2 w-2 -z-10 pointer-events-none;
