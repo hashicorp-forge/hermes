@@ -9,7 +9,10 @@ import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import NativeArray from "@ember/array/-private/native-array";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+} from "hermes/components/document/sidebar/related-resources";
 import Ember from "ember";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
@@ -20,8 +23,8 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     addRelatedDocument: (documentID: string) => void;
     shownDocuments: Record<string, HermesDocument>;
     objectID?: string;
-    relatedDocuments: NativeArray<HermesDocument>;
-    relatedLinks: NativeArray<RelatedExternalLink>;
+    relatedDocuments: RelatedHermesDocument[];
+    relatedLinks: RelatedExternalLink[];
     search: (dd: any, query: string) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
@@ -123,6 +126,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     let externalLink = {
       url: this.query,
       title: this.externalLinkTitle,
+      order: 0,
     };
 
     const isDuplicate = this.args.relatedLinks.find((link) => {

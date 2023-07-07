@@ -8,12 +8,24 @@ import FetchService from "hermes/services/fetch";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { restartableTask } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import { next } from "@ember/runloop";
+import { FacetName } from "hermes/components/header/toolbar";
+
+type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
 export interface RelatedExternalLink {
-  url: string;
   title: string;
+  url: string;
+  order: number;
+}
+
+export interface RelatedHermesDocument {
+  googleFileID: string;
+  title: string;
+  type: string;
+  documentNumber: string;
+  order: number;
 }
 
 interface DocumentSidebarRelatedResourcesComponentSignature {
@@ -36,11 +48,42 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
 
-  @tracked relatedLinks: NativeArray<RelatedExternalLink> = A();
-  @tracked relatedDocuments: NativeArray<HermesDocument> = A();
+  @tracked relatedLinks: RelatedExternalLink[] = [];
+  @tracked relatedDocuments: RelatedHermesDocument[] = [];
   @tracked _shownDocuments: HermesDocument[] | null = null;
 
   @tracked addResourceModalIsShown = false;
+
+  // @tracked relatedResources: RelatedResource | null = null;
+
+  get relatedResources(): {
+    [key: string]: RelatedExternalLink | RelatedHermesDocument;
+  } {
+    let resourcesArray: NativeArray<
+      RelatedExternalLink | RelatedHermesDocument
+    > = A();
+    resourcesArray.pushObjects(this.relatedDocuments);
+    resourcesArray.pushObjects(this.relatedLinks);
+
+    let resourcesObject: {
+      [key: string]: RelatedExternalLink | RelatedHermesDocument;
+    } = {};
+
+    resourcesArray.forEach(
+      (resource: RelatedExternalLink | RelatedHermesDocument) => {
+        let key = "";
+
+        if ("url" in resource) {
+          key = resource.url;
+        } else if ("googleFileID" in resource) {
+          key = resource.googleFileID;
+        }
+        resourcesObject[key] = resource;
+      }
+    );
+
+    return resourcesObject;
+  }
 
   get relatedResourcesAreShown(): boolean {
     return Object.keys(this.relatedResources).length > 0;
@@ -62,7 +105,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     let filterString = `(NOT objectID:"${this.args.objectID}")`;
 
     if (this.relatedDocuments.length) {
-      let relatedDocIDs = this.relatedDocuments.map((doc) => doc.objectID);
+      let relatedDocIDs = this.relatedDocuments.map((doc) => doc.googleFileID);
 
       filterString = filterString.slice(0, -1) + " ";
 
@@ -114,31 +157,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     });
   }
 
-  get relatedResources(): {
-    [key: string]: RelatedExternalLink | HermesDocument;
-  } {
-    let resourcesArray: NativeArray<RelatedExternalLink | HermesDocument> = A();
-    resourcesArray.pushObjects(this.relatedDocuments);
-    resourcesArray.pushObjects(this.relatedLinks);
-
-    let resourcesObject: {
-      [key: string]: RelatedExternalLink | HermesDocument;
-    } = {};
-
-    resourcesArray.forEach((resource: RelatedExternalLink | HermesDocument) => {
-      let key = "";
-
-      if ("url" in resource) {
-        key = resource.url;
-      } else if ("objectID" in resource) {
-        key = resource.objectID;
-      }
-      resourcesObject[key] = resource;
-    });
-
-    return resourcesObject;
-  }
-
   get shownDocuments(): { [key: string]: HermesDocument } {
     /**
      * The array initially looks like this:
@@ -170,6 +188,43 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     alert("TODO");
   }
 
+  protected loadRelatedResources = task(async () => {
+    // make a fetch GET request to the back end
+    try {
+      // TODO: use when API is built
+      // const resources = await this.fetchSvc
+      //   .fetch(`/api/v1/documents/${this.args.objectID}/related-resources`)
+      //   .then((response) => response?.json());
+
+      const fakeResources: {
+        hermesDocuments: RelatedHermesDocument[];
+        externalLinks: RelatedExternalLink[];
+      } = {
+        hermesDocuments: [
+          {
+            googleFileID: "113_MX3wacdwXz2412EChoePvZ45CrjP5sL_nhN5cYNI",
+            title: "Older Hermes Feature",
+            type: "RFC",
+            documentNumber: "HRM-005",
+            order: 1,
+          },
+        ],
+        externalLinks: [
+          {
+            title: "Google",
+            url: "https://www.google.com",
+            order: 2,
+          },
+        ],
+      };
+
+      this.relatedDocuments = fakeResources.hermesDocuments;
+      this.relatedLinks = fakeResources.externalLinks;
+    } catch (e: unknown) {
+      // do an inline error with ability to retry
+    }
+  });
+
   @action addRelatedExternalLink(link: RelatedExternalLink) {
     // TODO: call `onChange` here
     this.relatedLinks.unshiftObject(link);
@@ -179,12 +234,13 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     // TODO: call `onChange` here
     let document = this.shownDocuments[documentObjectID];
     if (document) {
-      this.relatedDocuments.unshiftObject(document);
+      // TODO: fix me
+      // this.relatedDocuments.unshiftObject(document);
     }
     this.hideAddResourceModal();
   }
 
-  @action removeResource(resource: RelatedExternalLink | HermesDocument) {
+  @action removeResource(resource: RelatedExternalLink | RelatedHermesDocument) {
     // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);

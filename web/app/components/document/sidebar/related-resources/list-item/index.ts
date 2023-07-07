@@ -3,12 +3,12 @@ import { HermesDocument } from "hermes/types/document";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import { RelatedExternalLink, RelatedHermesDocument } from "hermes/components/document/sidebar/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
-    resource: HermesDocument | RelatedExternalLink;
+    resource: RelatedHermesDocument | RelatedExternalLink;
     removeResource: (resource: HermesDocument | RelatedExternalLink) => void;
     editResource: (resource: RelatedExternalLink) => void;
   };
@@ -23,8 +23,8 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
   private _itemIsExternalResource = "url" in this.args.resource;
 
   protected get documentObjectID(): string | null {
-    if ("objectID" in this.args.resource) {
-      return (this.args.resource as HermesDocument).objectID;
+    if ("googleFileID" in this.args.resource) {
+      return (this.args.resource as RelatedHermesDocument).googleFileID;
     } else {
       return null;
     }

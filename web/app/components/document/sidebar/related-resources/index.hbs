@@ -1,10 +1,13 @@
 <Document::Sidebar::SectionHeader
+  {{did-insert (perform this.loadRelatedResources)}}
   @title={{@headerTitle}}
   @buttonIsHidden={{this.sectionHeaderButtonIsHidden}}
   @buttonAction={{this.showAddResourceModal}}
 />
 
-<Document::Sidebar::RelatedResources::List @items={{this.relatedResourcesObjectEntries}}>
+<Document::Sidebar::RelatedResources::List
+  @items={{this.relatedResourcesObjectEntries}}
+>
   <:resource as |r|>
     <Document::Sidebar::RelatedResources::ListItem
       @resource={{r}}
