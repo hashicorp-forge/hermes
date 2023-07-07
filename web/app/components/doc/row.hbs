@@ -24,11 +24,9 @@
   </Hds::Table::Td>
   <Hds::Table::Td class="status">
     <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
-  <Hds::Table::Td class="product"><Hds::Badge
-      @text={{this.productAreaName}}
-      @icon={{or (get-product-id @productArea) "folder"}}
-      title={{this.productAreaName}}
-    /></Hds::Table::Td>
+  <Hds::Table::Td class="product">
+    {{this.productAreaName}}
+  </Hds::Table::Td>
   <Hds::Table::Td class="owner">
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
   </Hds::Table::Td>

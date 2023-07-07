@@ -15,32 +15,17 @@
       {{on "scroll" this.onScroll}}
       {{did-insert this.registerBody}}
     >
-
-      <!--
-      {{#let (get-product-id this.product) as |productIcon|}}
-        {{#if productIcon}}
-          <div
-            class="product-badge
-              {{productIcon}}
-              {{if this.save.isRunning 'opacity-50'}}"
-          >
-            <FlightIcon @name={{productIcon}} />
-          </div>
-        {{/if}}
-      {{/let}}
-      -->
-
       <div class="sidebar-body-container">
         <div>
           <div class="flex items-center space-x-1.5 mb-6">
 
             <Hds::Badge
               @text={{if this.isDraft "Draft" @document.docNumber}}
-              class="uppercase !text-white
+              class="uppercase !rounded-[3px]
                 {{if
                   @document.isDraft
-                  '!bg-color-palette-neutral-500'
-                  '!bg-color-palette-neutral-700'
+                  '!bg-color-palette-neutral-400 !text-white'
+                  '!bg-color-palette-neutral-2X00 !bg-transparent pl-0 !text-color-foreground-faint'
                 }}
                 "
             />
@@ -212,10 +197,20 @@
               />
             </div>
           {{else}}
-            <Hds::Badge
-              @text={{@document.product}}
-              @icon={{or (get-product-id @document.product) "folder"}}
-            />
+            <div class="flex items-center space-x-2">
+              <div
+                class="shrink-0 w-6 h-6 rounded-full grid place-items-center product-themed
+                  {{dasherize this.product}}"
+              >
+                <FlightIcon
+                  @name={{or (get-product-id this.product) "folder"}}
+                  class="scale-90"
+                />
+              </div>
+              <div class="text-body-200 text-medium">
+                {{or this.product "Unknown"}}
+              </div>
+            </div>
           {{/if}}
         </div>
 
