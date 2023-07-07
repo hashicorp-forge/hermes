@@ -133,7 +133,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltipContent: HTMLElement | null = null;
 
   /**
-   * The state of the tooltip as it transitions to and from closed and open.
+   * The state of the tooltip as it transitions between closed and open.
    * Used in tests to assert that intermediary states are rendered.
    */
   @tracked state: TooltipState = TooltipState.Closed;
@@ -145,7 +145,18 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  /**
+   * The duration of the tooltip's open animation.
+   * Ignored in the testing environment.
+   */
   @tracked openDuration: number = DEFAULT_OPEN_DURATION;
+
+  /**
+   * The transform applied to the tooltip content.
+   * Calculated based on the tooltip's placement and
+   * used to animate the tooltip in and out.
+   */
+  @tracked transform: string = "none";
 
   /**
    * The delay before the tooltip is shown.
@@ -193,8 +204,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
   @tracked floatingUICleanup: (() => void) | null = null;
 
-  @tracked transform: string = "none";
-
   /**
    * The action that runs when the content's [visibility] state changes.
    * Updates the `data-tooltip-state` attribute on the reference
@@ -237,10 +246,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      * Create the tooltip and set its attributes
      */
     this.tooltip = document.createElement("div");
-    this.tooltip.classList.add(
-      "hermes-floating-ui-content",
-      "hermes-tooltip"
-    );
+    this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
