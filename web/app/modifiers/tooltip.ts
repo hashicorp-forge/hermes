@@ -130,14 +130,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked tooltip: HTMLElement | null = null;
 
-  @tracked tooltipContent: HTMLElement | null = null;
-
-  /**
-   * The content within the positioned tooltip element.
-   * Used for animations that with `trans
-   */
-  @tracked tooltipContent: HTMLElement | null = null;
-
   /**
    * The state of the tooltip as it transitions to and from closed and open.
    * Used in tests to assert that intermediary states are rendered.
@@ -246,23 +238,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      * Create the tooltip and set its attributes
      */
     this.tooltip = document.createElement("div");
-    this.tooltip.classList.add(
-      "hermes-floating-ui-content",
-      "hermes-tooltip"
-    );
+    this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
-
-    this.tooltipContent = document.createElement("div");
-    this.tooltipContent.classList.add("hermes-tooltip");
-    this.tooltip.appendChild(this.tooltipContent);
 
     /**
      * Create the arrow and append it to the tooltip
      */
     this._arrow = document.createElement("div");
     this._arrow.classList.add("arrow");
-    this.tooltipContent.appendChild(this._arrow);
+    this.tooltip.appendChild(this._arrow);
 
     /**
      * Create the textElement and append it to the tooltip
@@ -270,7 +255,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     const textElement = document.createElement("div");
     textElement.textContent = this.tooltipText;
     textElement.classList.add("text");
-    this.tooltipContent.appendChild(textElement);
+    this.tooltip.appendChild(textElement);
 
     /**
      * Append the tooltip to the end of the document.
