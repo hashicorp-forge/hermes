@@ -10,9 +10,8 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask, task } from "ember-concurrency";
 import { next } from "@ember/runloop";
-import { FacetName } from "hermes/components/header/toolbar";
 
-type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
+export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
 export interface RelatedExternalLink {
   title: string;
@@ -211,8 +210,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         ],
         externalLinks: [
           {
-            title: "Google",
-            url: "https://www.google.com",
+            title: "Figma resource",
+            url: "https://www.testURL.com",
             order: 2,
           },
         ],
@@ -231,7 +230,28 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   @action addRelatedDocument(documentObjectID: string) {
+    // TODO: make a "PUT" request
+    //     {
+    //   "hermesDocuments": [
+    //     {
+    //       "googleFileID": "113_MX3wacdwXz2412EChoePvZ45CrjP5sL_nhN5cYNI",
+    //       "sortOrder": 1
+    //     }
+    //   ],
+    //   "externalLinks": [
+    //     {
+    //       "name": "Google",
+    //       "url": "https://www.google.com",
+    //       "sortOrder": 2
+    //     }
+    //   ]
+    // }
+
+    // TODO: use when API is built
+    // this.saveRelatedResources.perform();
+
     // TODO: call `onChange` here
+
     let document = this.shownDocuments[documentObjectID];
     if (document) {
       // TODO: fix me
@@ -240,7 +260,20 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     this.hideAddResourceModal();
   }
 
-  @action removeResource(resource: RelatedExternalLink | RelatedHermesDocument) {
+  protected saveRelatedResources = task(async () => {
+    // TODO: use when API is built
+    // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
+    //   method: "PUT",
+    //   body: JSON.stringify(this.relatedDocuments),
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // })
+  });
+
+  @action removeResource(
+    resource: RelatedExternalLink | RelatedHermesDocument
+  ) {
     // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);

@@ -1,16 +1,16 @@
-<div class="flex shrink-0 w-5">
-  {{#if @resource.objectID}}
-    <div class="flex p-px hds-surface-mid rounded-sm overflow-hidden bg-white">
-      <img src="/images/document.png" class="w-full h-auto" />
+<div class="flex shrink-0 w-[22px]">
+  {{#if this.resourceIsDocument}}
+    <div class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white">
+      <img src="/images/document.png" class="w-[18px] h-auto" />
     </div>
   {{else}}
-    <div class="flex self-center w-5">
-      <img
-        src="https://www.google.com/s2/favicons?domain={{@resource.url}}"
-        width="16"
-        height="16"
-      />
-    </div>
+    <FlightIcon
+      @name={{this.iconName}}
+      class={{if
+        (eq this.iconName "external-link")
+        "opacity-50"
+      }}
+    />
   {{/if}}
 </div>
 
@@ -21,11 +21,11 @@
   >
     {{@resource.title}}
   </TruncatedText>
-  {{#if @resource.docNumber}}
+  {{#if this.resourceIsDocument}}
     <div class="text-color-foreground-faint text-body-100 mt-px">
-      {{@resource.docType}}
+      {{this.docType}}
       ·
-      {{@resource.docNumber}}
+      {{this.docNumber}}
     </div>
   {{/if}}
 </div>
