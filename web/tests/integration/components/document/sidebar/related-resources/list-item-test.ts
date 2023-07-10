@@ -1,10 +1,12 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, render, triggerEvent } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { HermesDocument } from "hermes/types/document";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+} from "hermes/components/document/sidebar/related-resources";
 import htmlElement from "hermes/utils/html-element";
 
 const RELATED_RESOURCE_SELECTOR = ".related-resource";
@@ -18,7 +20,7 @@ const DROPDOWN_LIST_ITEM_SELECTOR = ".x-dropdown-list-item";
 
 interface DocumentSidebarRelatedResourcesListItemTestContext
   extends MirageTestContext {
-  document: HermesDocument;
+  document: RelatedHermesDocument;
   externalResource: RelatedExternalLink;
   removeResource: () => void;
   editResource: () => void;
@@ -34,10 +36,20 @@ module(
       this: DocumentSidebarRelatedResourcesListItemTestContext
     ) {
       this.server.create("document");
-      this.set("document", this.server.schema.document.first().attrs);
+
+      const documentAttrs = this.server.schema.document.first().attrs;
+      this.set("document", {
+        googleFileID: documentAttrs.objectID,
+        title: documentAttrs.title,
+        type: documentAttrs.docType,
+        documentNumber: documentAttrs.docNumber,
+        order: 1,
+      });
       this.set("externalResource", {
+        id: 1,
         url: "https://example.com",
         title: "Example",
+        order: 1,
       });
       this.set("removeResource", () => {});
       this.set("editResource", () => {});

@@ -25,7 +25,9 @@ module(
       </Document::Sidebar::RelatedResources::List>
     `);
 
-      assert.dom(".related-resources").exists("list is rendered");
+      await this.pauseTest();
+
+      assert.dom(".related-resources-list").exists("list is rendered");
 
       this.set("items", []);
 

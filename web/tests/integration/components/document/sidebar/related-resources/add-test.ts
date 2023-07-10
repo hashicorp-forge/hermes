@@ -1,6 +1,6 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, render, waitFor } from "@ember/test-helpers";
+import { fillIn, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
@@ -10,8 +10,6 @@ const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
 const LIST_HEADER_SELECTOR = "[data-test-related-resources-list-header]";
 const DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const NO_MATCHES_SELECTOR = ".related-resources-modal-body-header";
-const EXTERNAL_RESOURCE_FORM_BUTTON_SELECTOR =
-  "[data-test-add-external-resource-button]";
 
 interface DocumentSidebarRelatedResourcesAddTestContext
   extends MirageTestContext {
