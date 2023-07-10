@@ -25,6 +25,33 @@
       {{/let}}
 
       <div class="sidebar-body-container">
+        <div class="flex flex-col items-start">
+          <Document::Sidebar::RelatedResources
+            @productArea={{@document.product}}
+            @objectID={{@document.objectID}}
+            @onChange={{this.onRelatedResourcesChange}}
+            @allowAddingExternalLinks={{true}}
+            @headerTitle="Related resources"
+            @modalHeaderTitle="Add related resource"
+            @modalInputPlaceholder="Paste a URL or search documents..."
+            @optionalSearchFilters={{array
+              (concat "product:" @document.product)
+            }}
+          />
+        </div>
+
+        <div class="flex flex-col items-start">
+          <Document::Sidebar::RelatedResources
+            @productArea={{@document.product}}
+            @objectID={{@document.objectID}}
+            @onChange={{this.onRelatedResourcesChange}}
+            @headerTitle="PRD"
+            @modalHeaderTitle="Add PRD"
+            @modalInputPlaceholder="Search PRDs..."
+            @searchFilters="docType:PRD"
+            @itemLimit={{1}}
+          />
+        </div>
         <div class="flex flex-col items-start space-y-2">
           {{#if (is-empty @document.docNumber)}}
             <small
@@ -270,35 +297,6 @@
         <div class="flex flex-col items-start space-y-2">
           <Document::Sidebar::SectionHeader @title="Last modified" />
           <p>{{@document.lastModified}}</p>
-        </div>
-
-        <div class="flex flex-col items-start">
-
-          <Document::Sidebar::RelatedResources
-            @productArea={{@document.product}}
-            @objectID={{@document.objectID}}
-            @onChange={{this.onRelatedResourcesChange}}
-            @allowAddingExternalLinks={{true}}
-            @headerTitle="Related resources"
-            @modalHeaderTitle="Add related resource"
-            @modalInputPlaceholder="Paste a URL or search documents..."
-            @optionalSearchFilters={{array
-              (concat "product:" @document.product)
-            }}
-          />
-        </div>
-
-        <div class="flex flex-col items-start">
-          <Document::Sidebar::RelatedResources
-            @productArea={{@document.product}}
-            @objectID={{@document.objectID}}
-            @onChange={{this.onRelatedResourcesChange}}
-            @headerTitle="PRD"
-            @modalHeaderTitle="Add PRD"
-            @modalInputPlaceholder="Search PRDs..."
-            @searchFilters="docType:PRD"
-            @itemLimit={{1}}
-          />
         </div>
 
         {{#each-in this.customEditableFields as |field attributes|}}

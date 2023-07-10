@@ -4,20 +4,48 @@ import animateScale from "hermes/utils/ember-animated/animate-scale";
 import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import { action } from "@ember/object";
+import { Transition } from "ember-animated/-private/transition";
 
 interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
   Args: {
     items: any[];
+    itemLimit?: number;
   };
   Blocks: {
     resource: [resource: any];
   };
 }
 
+export function* emptyTransition(context: TransitionContext) {}
+
 export default class DocumentSidebarRelatedResourcesListComponent extends Component<DocumentSidebarRelatedResourcesListComponentSignature> {
+  shouldAnimate = false;
+
   get listIsEmpty() {
     return this.args.items.length === 0;
+  }
+
+  @action protected didInsert() {
+    this.shouldAnimate = true;
+  }
+
+  @action transitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }): Transition {
+    if (firstTime) {
+      if (this.shouldAnimate === false) {
+        return emptyTransition;
+      }
+    }
+    return this.transition;
   }
 
   *transition({
@@ -33,11 +61,11 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
       void fadeOut(sprite, { duration: 0 });
     }
 
+    yield wait(100);
     for (let sprite of insertedSprites) {
       sprite.applyStyles({
         opacity: "0",
       });
-      yield wait(100);
       void animateScale(sprite, {
         from: 0.95,
         to: 1,

@@ -1,11 +1,9 @@
 import Component from "@glimmer/component";
-import { A } from "@ember/array";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
-import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask, task, timeout } from "ember-concurrency";
@@ -53,6 +51,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @tracked _shownDocuments: HermesDocument[] | null = null;
 
   @tracked addResourceModalIsShown = false;
+
+  @tracked loadingHasFailed = false;
 
   get relatedResources(): {
     [key: string]: RelatedResource;
@@ -198,6 +198,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   protected loadRelatedResources = task(async () => {
+    await timeout(500);
     // make a fetch GET request to the back end
     try {
       // TODO: use when API is built
@@ -232,7 +233,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
       this.relatedDocuments = fakeResources.hermesDocuments;
       this.relatedLinks = fakeResources.externalLinks;
+      this.loadingHasFailed = false;
     } catch (e: unknown) {
+      this.loadingHasFailed = true;
       // do an inline error with ability to retry
     }
   });

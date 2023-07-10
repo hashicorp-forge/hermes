@@ -6,6 +6,7 @@ import WillDestroyModifier from "ember-render-modifiers/modifiers/will-destroy";
 import AndHelper from "ember-truth-helpers/helpers/and";
 import EqHelper from "ember-truth-helpers/helpers/eq";
 import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
+import LtHelper from "ember-truth-helpers/helpers/lt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
 import { FlightIconComponent } from "hds/flight-icon";
@@ -53,6 +54,7 @@ declare module "@glint/environment-ember-loose/registry" {
     eq: typeof EqHelper;
     and: typeof AndHelper;
     not: typeof NotHelper;
+    lt: typeof LtHelper;
     "is-empty": IsEmptyHelper;
     FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;

@@ -5,17 +5,39 @@
   @buttonAction={{this.showAddResourceModal}}
 />
 
-<Document::Sidebar::RelatedResources::List
-  @items={{this.relatedResourcesObjectEntries}}
->
-  <:resource as |r|>
-    <Document::Sidebar::RelatedResources::ListItem
-      @resource={{r}}
-      @removeResource={{this.removeResource}}
-      @editResource={{this.editResource}}
+{{#if this.loadRelatedResources.isRunning}}
+  <div class="h-[26px]">
+    <FlightIcon @name="loading" class="mt-1.5" />
+  </div>
+{{else if this.loadingHasFailed}}
+  <div class="h-16">
+    <div
+      class="text-display-300 text-color-foreground-faint opacity-50 font-semibold mb-2"
+    >
+      Failed to load
+    </div>
+    <Hds::Button
+      @color="secondary"
+      @size="small"
+      @text="Retry"
+      @icon="reload"
+      {{on "click" (perform this.loadRelatedResources)}}
     />
-  </:resource>
-</Document::Sidebar::RelatedResources::List>
+  </div>
+{{else}}
+  <Document::Sidebar::RelatedResources::List
+    @items={{this.relatedResourcesObjectEntries}}
+    @itemLimit={{@itemLimit}}
+  >
+    <:resource as |r|>
+      <Document::Sidebar::RelatedResources::ListItem
+        @resource={{r}}
+        @removeResource={{this.removeResource}}
+        @editResource={{this.editResource}}
+      />
+    </:resource>
+  </Document::Sidebar::RelatedResources::List>
+{{/if}}
 
 {{#if this.addResourceModalIsShown}}
   <Document::Sidebar::RelatedResources::Add
