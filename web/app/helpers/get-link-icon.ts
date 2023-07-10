@@ -42,7 +42,7 @@ const getLinkIconHelper = helper<GetLinkIconSignature>(([url]) => {
       }
     }
   }
-  return "external-link";
+  return "file";
 });
 
 export default getLinkIconHelper;

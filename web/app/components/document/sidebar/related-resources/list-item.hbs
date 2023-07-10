@@ -16,7 +16,6 @@
         />
       </LinkTo>
     {{else}}
-      {{log @resource}}
       <ExternalLink
         data-test-item-type="external-resource"
         href={{this.externalResourceURL}}
@@ -41,6 +40,5 @@
     @resource={{this.externalLink}}
     @hideModal={{this.hideModal}}
     @onSave={{this.saveChanges}}
-    @url={{this.externalResourceURL}}
   />
 {{/if}}

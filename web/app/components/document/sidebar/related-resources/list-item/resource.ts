@@ -1,6 +1,9 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { RelatedHermesDocument, RelatedResource } from "../../related-resources";
+import {
+  RelatedHermesDocument,
+  RelatedResource,
+} from "../../related-resources";
 import { assert } from "@ember/debug";
 
 interface DocumentSidebarRelatedResourcesListItemResourceComponentSignature {
@@ -23,6 +26,13 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   protected get docNumber() {
     this.assertResourceIsDocument(this.args.resource);
     return this.args.resource.documentNumber;
+  }
+
+  protected get title() {
+    if ("url" in this.args.resource) {
+      return this.args.resource.title || this.url;
+    }
+    return this.args.resource.title;
   }
 
   assertResourceIsDocument(

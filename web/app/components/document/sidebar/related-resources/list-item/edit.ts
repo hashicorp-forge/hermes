@@ -2,15 +2,15 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { restartableTask } from "ember-concurrency";
 import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
   Args: {
     resource: RelatedExternalLink;
     hideModal: () => void;
     onSave: (resource: RelatedExternalLink) => void;
-    // Temporary workaround until this is an attribute of the resource
-    url: string;
   };
   Blocks: {
     default: [];
@@ -20,10 +20,14 @@ interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
 export default class DocumentSidebarRelatedResourcesListItemEditComponent extends Component<DocumentSidebarRelatedResourcesListItemEditComponentSignature> {
   @tracked resource = this.args.resource;
 
-  @tracked url = this.args.url;
+  @tracked url = this.args.resource.url;
   @tracked title = this.args.resource.title;
 
+  @tracked errorMessageIsShown = false;
+
   @tracked _form: HTMLFormElement | null = null;
+
+  @tracked urlIsValid = false;
 
   @action protected registerForm(form: HTMLFormElement): void {
     this._form = form;
@@ -45,20 +49,34 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
 
     this.title = title;
     this.url = url;
+
+    void this.validateURL.perform();
   }
 
-  @action protected onSave(): void {
+  protected validateURL = restartableTask(async () => {
+    this.urlIsValid = await isValidURL(this.url);
+    this.errorMessageIsShown = !this.urlIsValid;
+  });
+
+  protected onSave = restartableTask(async (e: Event) => {
+    // prevent the form from submitting on enter
+    e.preventDefault();
+
     let newResource = this.args.resource;
     newResource.url = this.url;
     newResource.title = this.title;
 
-    // TODO: validate fields
-    // if the title is empty, use a fallback (url, domain)
-    // validate that the url is a valid url
-    // if the url is invalid, show an error message and start eager validation
+    await this.validateURL.perform();
 
-    this.args.onSave(newResource);
-  }
+    if (this.urlIsValid) {
+      if (!this.args.resource.title.length) {
+        newResource.title = this.url;
+      }
+      this.args.onSave(newResource);
+    } else {
+      this.errorMessageIsShown = true;
+    }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

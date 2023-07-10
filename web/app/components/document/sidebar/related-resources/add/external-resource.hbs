@@ -12,21 +12,22 @@
       </div>
     {{else}}
       <div class="w-full" data-test-add-external-resource-form>
-        <form {{on "submit" @onSubmit}} class="mb-2.5">
+        <form {{on "submit" @onSubmit}} class="mb-3">
           <Hds::Form::TextInput::Field
             {{on "input" @onInput}}
             @value={{@title}}
-            placeholder="Enter a title"
+            placeholder="Optional"
             required={{true}}
             class="external-resource-title-input"
             as |F|
-          />
+          >
+            <F.Label>Title</F.Label>
+          </Hds::Form::TextInput::Field>
         </form>
         <div class="external-resource-url">
-          <div
-            class="truncate"
-            data-test-add-external-resource-truncated-url
-          >{{@url}}</div>
+          <div class="truncate" data-test-add-external-resource-truncated-url>
+            {{@url}}
+          </div>
           <div class="external-resource-favicon">
             <FlightIcon @name={{get-link-icon @url}} />
           </div>

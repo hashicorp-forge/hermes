@@ -115,6 +115,10 @@
 
 .external-resource-title-input {
   @apply text-display-300 font-semibold h-11 px-2.5;
+
+  &::placeholder {
+    @apply opacity-50;
+  }
 }
 
 .external-resource-url {

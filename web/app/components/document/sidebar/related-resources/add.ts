@@ -13,6 +13,7 @@ import {
   RelatedHermesDocument,
 } from "hermes/components/document/sidebar/related-resources";
 import Ember from "ember";
+import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
@@ -47,7 +48,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @tracked keyboardNavIsEnabled = true;
 
   @tracked externalLinkTitle = "";
-
 
   get noMatchesFound(): boolean {
     const objectEntriesLengthIsZero =
@@ -126,6 +126,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const isDuplicate = this.args.relatedLinks.find((link) => {
       return link.url === externalLink.url;
     });
+
 
     if (isDuplicate) {
       this.showDuplicateMessage();
@@ -218,15 +219,9 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   });
 
   protected checkURL = restartableTask(async () => {
-    const url = this.query;
-    try {
-      this.queryIsURL = Boolean(new URL(url));
-    } catch (e) {
-      this.queryIsURL = false;
-    } finally {
-      if (this.queryIsURL) {
-        void this.fetchURLInfo.perform();
-      }
+    this.queryIsURL = await isValidURL(this.query);
+    if (this.queryIsURL) {
+      void this.fetchURLInfo.perform();
     }
   });
 }

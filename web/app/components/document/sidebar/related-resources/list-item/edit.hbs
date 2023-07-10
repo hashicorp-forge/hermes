@@ -6,10 +6,15 @@
   >
     <M.Header>Edit resource</M.Header>
     <M.Body>
-      <form {{did-insert this.registerForm}} class="px-6 pb-6" {{on "submit" this.onSave}}>
+      <form
+        {{did-insert this.registerForm}}
+        class="px-6 pb-6"
+        {{on "submit" (perform this.onSave)}}
+      >
         <Hds::Form::TextInput::Field
           {{on "input" this.updateFormValues}}
           @value={{this.title}}
+          placeholder="Optional"
           required={{true}}
           name="title"
           class="external-resource-title-input mb-4"
@@ -25,6 +30,11 @@
           as |F|
         >
           <F.Label>URL</F.Label>
+          {{#if this.errorMessageIsShown}}
+            <F.Error class="mt-3">
+              A valid URL is required.
+            </F.Error>
+          {{/if}}
         </Hds::Form::TextInput::Field>
         {{! This adds enter-to-submit functionality }}
         <input type="submit" class="hidden" />
@@ -37,12 +47,18 @@
           @text="Save changes"
           @color="primary"
           {{! Should it show a flashMessage? }}
-          {{on "click" this.onSave}}
+          {{on "click" (perform this.onSave)}}
         />
         <Hds::Button
           @text="Cancel"
           @color="secondary"
           {{on "click" @hideModal}}
+        />
+        <Hds::Button
+          @text="Delete"
+          @color="tertiary"
+          @icon="trash"
+          class="text-color-foreground-critical hover:text-color-foreground-critical-on-surface"
         />
       </Hds::ButtonSet>
     </M.Footer>
