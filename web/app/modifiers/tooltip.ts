@@ -127,12 +127,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltip: HTMLElement | null = null;
 
   /**
-   * The content within the positioned tooltip element.
-   * Used for animations that with `trans
-   */
-  @tracked tooltipContent: HTMLElement | null = null;
-
-  /**
    * The state of the tooltip as it transitions between closed and open.
    * Used in tests to assert that intermediary states are rendered.
    */
@@ -152,9 +146,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked openDuration: number = DEFAULT_OPEN_DURATION;
 
   /**
-   * The transform applied to the tooltip content.
-   * Calculated based on the tooltip's placement and
-   * used to animate the tooltip in and out.
+   * The transform applied to the tooltip.
+   * Calculated based on placement; used for animations.
    */
   @tracked transform: string = "none";
 
