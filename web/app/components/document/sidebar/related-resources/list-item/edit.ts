@@ -54,7 +54,7 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   }
 
   protected validateURL = restartableTask(async () => {
-    this.urlIsValid = await isValidURL(this.url);
+    this.urlIsValid = isValidURL(this.url);
     this.errorMessageIsShown = !this.urlIsValid;
   });
 

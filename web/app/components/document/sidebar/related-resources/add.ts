@@ -127,7 +127,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       return link.url === externalLink.url;
     });
 
-
     if (isDuplicate) {
       this.showDuplicateMessage();
     } else {
@@ -219,7 +218,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   });
 
   protected checkURL = restartableTask(async () => {
-    this.queryIsURL = await isValidURL(this.query);
+    this.queryIsURL = isValidURL(this.query);
     if (this.queryIsURL) {
       void this.fetchURLInfo.perform();
     }

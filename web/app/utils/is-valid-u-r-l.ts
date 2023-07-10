@@ -1,4 +1,4 @@
-export default async function isValidURL(string: string): Promise<boolean> {
+export default function isValidURL(string: string): boolean {
   try {
     new URL(string);
     return true;
