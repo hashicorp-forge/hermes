@@ -46,31 +46,30 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
 
     domain = domainParts[domainParts.length - 2];
 
-    assert("domain must exist", domain);
+    if (domain) {
+      if (domain.includes("figma")) {
+        return "figma-color";
+      }
+      if (domain.includes("google")) {
+        return "google-color";
+      }
+      if (domain.includes("datadog")) {
+        return "datadog-color";
+      }
+      if (domain.includes("github")) {
+        return "github-color";
+      }
+      if (domain.includes("codepen")) {
+        return "codepen-color";
+      }
+      if (domain.includes("slack")) {
+        return "slack-color";
+      }
+      if (domain.includes("loom")) {
+        return "loom-color";
+      }
+    }
 
-    // can this be done better?
-
-    if (domain.includes("figma")) {
-      return "figma-color";
-    }
-    if (domain.includes("google")) {
-      return "google-color";
-    }
-    if (domain.includes("datadog")) {
-      return "datadog-color";
-    }
-    if (domain.includes("github")) {
-      return "github-color";
-    }
-    if (domain.includes("codepen")) {
-      return "codepen-color";
-    }
-    if (domain.includes("slack")) {
-      return "slack-color";
-    }
-    if (domain.includes("loom")) {
-      return "loom-color";
-    }
     return "external-link";
   }
 

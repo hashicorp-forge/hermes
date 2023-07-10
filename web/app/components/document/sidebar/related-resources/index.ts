@@ -8,12 +8,13 @@ import FetchService from "hermes/services/fetch";
 import NativeArray from "@ember/array/-private/native-array";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { restartableTask, task } from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { next } from "@ember/runloop";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
 export interface RelatedExternalLink {
+  id: string;
   title: string;
   url: string;
   order: number;
@@ -183,8 +184,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   @action editResource(resource: RelatedExternalLink) {
-    // TODO: call `onChange` here
-    alert("TODO");
+    // need to find the resource by ID
+    // then replace it in the array with the new resource
+
+    let resourceIndex = this.relatedLinks.findIndex(
+      (link) => link.id === resource.id
+    );
   }
 
   protected loadRelatedResources = task(async () => {
@@ -225,38 +230,25 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   });
 
   @action addRelatedExternalLink(link: RelatedExternalLink) {
-    // TODO: call `onChange` here
     this.relatedLinks.unshiftObject(link);
+    this.saveRelatedResources.perform();
   }
 
   @action addRelatedDocument(documentObjectID: string) {
-    // TODO: make a "PUT" request
-    //     {
-    //   "hermesDocuments": [
-    //     {
-    //       "googleFileID": "113_MX3wacdwXz2412EChoePvZ45CrjP5sL_nhN5cYNI",
-    //       "sortOrder": 1
-    //     }
-    //   ],
-    //   "externalLinks": [
-    //     {
-    //       "name": "Google",
-    //       "url": "https://www.google.com",
-    //       "sortOrder": 2
-    //     }
-    //   ]
-    // }
-
-    // TODO: use when API is built
-    // this.saveRelatedResources.perform();
-
-    // TODO: call `onChange` here
-
     let document = this.shownDocuments[documentObjectID];
     if (document) {
-      // TODO: fix me
-      // this.relatedDocuments.unshiftObject(document);
+      const relatedHermesDocument = {
+        googleFileID: document.objectID,
+        title: document.title,
+        type: document.docType,
+        documentNumber: document.docNumber,
+        order: 1,
+      } as RelatedHermesDocument;
+
+      this.relatedDocuments.unshiftObject(relatedHermesDocument);
     }
+    // TODO: maybe await?
+    void this.saveRelatedResources.perform();
     this.hideAddResourceModal();
   }
 
@@ -269,11 +261,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     //     "Content-Type": "application/json"
     //   }
     // })
+    await timeout(500);
   });
 
-  @action removeResource(
-    resource: RelatedExternalLink | RelatedHermesDocument
-  ) {
+  @action removeResource(resource: RelatedResource) {
     // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
