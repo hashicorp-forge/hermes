@@ -55,8 +55,6 @@
           {{#if (and @allowAddingExternalLinks this.queryIsURL)}}
             <Document::Sidebar::RelatedResources::Add::ExternalResource
               @urlIsLoading={{not this.urlWasProcessed}}
-              @defaultFaviconIsShown={{this.defaultFaviconIsShown}}
-              @faviconURL={{this.faviconURL}}
               @onInput={{this.onExternalLinkTitleInput}}
               @onSubmit={{this.addRelatedExternalLink}}
               @title={{this.externalLinkTitle}}

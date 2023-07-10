@@ -7,7 +7,6 @@ import { assert } from "@ember/debug";
 import { dropTask, restartableTask, timeout } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
-import NativeArray from "@ember/array/-private/native-array";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import {
   RelatedExternalLink,
@@ -41,20 +40,14 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @tracked query = "";
   @tracked queryIsURL = false;
-  @tracked faviconURL: string | null = null;
-  @tracked defaultFaviconIsShown = false;
 
   @tracked searchInput: HTMLInputElement | null = null;
-  @tracked faviconHasLoaded = false;
   @tracked urlWasProcessed = false;
 
   @tracked keyboardNavIsEnabled = true;
 
-  @tracked externalLinkTitle = "Placeholder Title";
+  @tracked externalLinkTitle = "";
 
-  get faviconIsShown() {
-    return this.faviconHasLoaded && this.fetchURLInfo.isIdle;
-  }
 
   get noMatchesFound(): boolean {
     const objectEntriesLengthIsZero =
@@ -141,7 +134,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       void this.args.search(null, "");
     }
 
-    this.externalLinkTitle = "Placeholder Title";
+    this.externalLinkTitle = "";
 
     this.args.onClose();
   }
@@ -207,26 +200,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   }
 
   protected fetchURLInfo = restartableTask(async () => {
-    this.faviconHasLoaded = false;
-
     try {
-      this.faviconURL =
-        "https://www.google.com/s2/favicons?domain=" + this.query;
-
-      // Simulate a request
-      const favicon = new Image();
-
-      favicon.addEventListener("load", () => {
-        this.faviconHasLoaded = true;
-      });
-
-      favicon.addEventListener("error", () => {
-        this.faviconHasLoaded = true;
-        this.defaultFaviconIsShown = true;
-      });
-
-      favicon.src = this.faviconURL as string;
-      await timeout(Ember.testing ? 0 : 1250);
+      await timeout(Ember.testing ? 0 : 750);
       this.urlWasProcessed = true;
 
       // const response = await this.fetchSvc.fetch(urlToFetch, {

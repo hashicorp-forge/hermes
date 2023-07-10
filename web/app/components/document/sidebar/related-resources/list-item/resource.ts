@@ -1,6 +1,6 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { RelatedHermesDocument, RelatedResource } from "..";
+import { RelatedHermesDocument, RelatedResource } from "../../related-resources";
 import { assert } from "@ember/debug";
 
 interface DocumentSidebarRelatedResourcesListItemResourceComponentSignature {
@@ -31,6 +31,11 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
     if (!("googleFileID" in document)) {
       throw new Error("resource must be a document");
     }
+  }
+
+  protected get url() {
+    assert("url must exist in the resource", "url" in this.args.resource);
+    return this.args.resource.url;
   }
 
   protected get iconName() {

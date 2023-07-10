@@ -52,6 +52,11 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     newResource.url = this.url;
     newResource.title = this.title;
 
+    // TODO: validate fields
+    // if the title is empty, use a fallback (url, domain)
+    // validate that the url is a valid url
+    // if the url is invalid, show an error message and start eager validation
+
     this.args.onSave(newResource);
   }
 }

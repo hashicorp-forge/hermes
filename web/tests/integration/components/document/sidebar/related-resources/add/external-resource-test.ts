@@ -8,7 +8,6 @@ interface DocumentSidebarRelatedResourcesAddExternalResourceTestContext
   onSubmit: () => void;
   onInput: () => void;
   urlIsLoading: boolean;
-  defaultFaviconIsShown: boolean;
 }
 
 module(
@@ -20,15 +19,12 @@ module(
       this.set("onSubmit", () => {});
       this.set("onInput", () => {});
       this.set("urlIsLoading", true);
-      this.set("defaultFaviconIsShown", true);
 
       await render<DocumentSidebarRelatedResourcesAddExternalResourceTestContext>(hbs`
       <Document::Sidebar::RelatedResources::Add::ExternalResource
         @urlIsLoading={{this.urlIsLoading}}
         @title="Test"
         @url="https://example.com"
-        @defaultFaviconIsShown={{this.defaultFaviconIsShown}}
-        @faviconURL="https://example.com/favicon.ico"
         @onSubmit={{this.onSubmit}}
         @onInput={{this.onInput}}
       />
@@ -43,8 +39,6 @@ module(
 
       this.set("urlIsLoading", false);
 
-      assert.dom("[data-test-external-resource-default-favicon]").exists();
-
       assert
         .dom("[data-test-add-external-resource-form]")
         .exists("shows the form when the URL is not loading");
@@ -54,13 +48,6 @@ module(
       assert
         .dom("[data-test-add-external-resource-truncated-url]")
         .hasText("https://example.com");
-
-      this.set("defaultFaviconIsShown", false);
-
-      assert
-        .dom("[data-test-external-resource-custom-favicon]")
-        .exists()
-        .hasAttribute("src", "https://example.com/favicon.ico");
     });
   }
 );

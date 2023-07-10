@@ -184,25 +184,17 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     // need to find the resource by ID
     // then replace it in the array with the new resource
 
-    console.log("resource", resource);
-
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.id === resource.id
     );
 
-    console.log("resourceIndex", resourceIndex);
-
     if (resourceIndex !== -1) {
       this.relatedLinks[resourceIndex] = resource;
+      // PROBLEM: the getter isn't updating with the new resource
+      this.relatedLinks = this.relatedLinks;
+      // TODO: maybe await?
+      void this.saveRelatedResources.perform();
     }
-
-    console.log("this.relatedLinks", this.relatedLinks);
-
-    // PROBLEM: the getter isn't updating with the new resource
-    this.relatedLinks = this.relatedLinks;
-
-    // TODO: maybe await?
-    void this.saveRelatedResources.perform();
   }
 
   protected loadRelatedResources = task(async () => {

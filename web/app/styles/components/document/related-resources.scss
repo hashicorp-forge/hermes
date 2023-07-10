@@ -40,8 +40,8 @@
 
   &::after {
     @apply bg-color-surface-highlight border-color-border-highlight;
-    animation: fadeIn 600ms ease-out, scaleIn 800ms ease-out,
-      fadeOut 500ms ease-out 1200ms forwards;
+    animation: fadeIn 400ms ease-out, scaleIn 600ms ease-out,
+      fadeOut 500ms ease-out 700ms forwards;
   }
 }
 
@@ -90,13 +90,16 @@
 
   @apply outline-offset-[3px];
 
-  &::before {
-    @apply hds-elevation-mid;
-    @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
-    @apply bg-color-surface-highlight border border-color-border-highlight;
-    content: "";
+  &.highlighted {
+    &::before {
+      @apply hds-elevation-mid;
+      @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
+      @apply bg-color-surface-highlight border border-color-border-highlight;
+      content: "";
 
-    animation: fadeIn 0.15s ease-in-out, fadeOut 0.4s ease-in-out 2.5s forwards;
+      animation: fadeIn 0.15s ease-in-out,
+        fadeOut 0.4s ease-in-out 2.5s forwards;
+    }
   }
 
   .hermes-document + .external-resource {

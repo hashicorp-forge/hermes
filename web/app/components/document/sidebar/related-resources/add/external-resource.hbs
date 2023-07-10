@@ -16,29 +16,19 @@
           <Hds::Form::TextInput::Field
             {{on "input" @onInput}}
             @value={{@title}}
+            placeholder="Enter a title"
             required={{true}}
             class="external-resource-title-input"
             as |F|
-          >
-            <F.Label>Title</F.Label>
-          </Hds::Form::TextInput::Field>
+          />
         </form>
         <div class="external-resource-url">
-          <div class="truncate" data-test-add-external-resource-truncated-url>{{@url}}</div>
+          <div
+            class="truncate"
+            data-test-add-external-resource-truncated-url
+          >{{@url}}</div>
           <div class="external-resource-favicon">
-            {{#if @defaultFaviconIsShown}}
-              <FlightIcon
-                @name="globe"
-                data-test-external-resource-default-favicon
-              />
-            {{else}}
-              <img
-                data-test-external-resource-custom-favicon
-                src={{@faviconURL}}
-                width="16"
-                height="16"
-              />
-            {{/if}}
+            <FlightIcon @name={{get-link-icon @url}} />
           </div>
         </div>
         <Hds::Button

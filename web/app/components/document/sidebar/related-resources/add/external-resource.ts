@@ -6,8 +6,6 @@ interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
     urlIsLoading: boolean;
     title: string;
     url: string;
-    defaultFaviconIsShown: boolean;
-    faviconURL: string | null;
     onSubmit: () => void;
     onInput: (e: Event) => void;
   };

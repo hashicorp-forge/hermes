@@ -36,14 +36,12 @@
           data-test-edit-related-resource-modal-save-button
           @text="Save changes"
           @color="primary"
-          {{! TODO: this needs to save }}
           {{! Should it show a flashMessage? }}
           {{on "click" this.onSave}}
         />
         <Hds::Button
           @text="Cancel"
           @color="secondary"
-          {{! TODO: this may need some change-revert logic }}
           {{on "click" @hideModal}}
         />
       </Hds::ButtonSet>

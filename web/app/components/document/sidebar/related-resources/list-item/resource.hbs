@@ -1,15 +1,14 @@
 <div class="flex shrink-0 w-[22px]">
   {{#if this.resourceIsDocument}}
-    <div class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white">
+    <div
+      class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white"
+    >
       <img src="/images/document.png" class="w-[18px] h-auto" />
     </div>
   {{else}}
     <FlightIcon
-      @name={{this.iconName}}
-      class={{if
-        (eq this.iconName "external-link")
-        "opacity-50"
-      }}
+      @name={{get-link-icon this.url}}
+      class={{if (eq (get-link-icon this.url) "external-link") "opacity-50"}}
     />
   {{/if}}
 </div>

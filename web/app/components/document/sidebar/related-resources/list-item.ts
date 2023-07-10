@@ -1,18 +1,18 @@
 import Component from "@glimmer/component";
-import { HermesDocument } from "hermes/types/document";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
+  RelatedResource,
 } from "hermes/components/document/sidebar/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
     resource: RelatedHermesDocument | RelatedExternalLink;
-    removeResource: (resource: HermesDocument | RelatedExternalLink) => void;
+    removeResource: (resource: RelatedResource) => void;
     editResource: (resource: RelatedExternalLink) => void;
   };
   Blocks: {
