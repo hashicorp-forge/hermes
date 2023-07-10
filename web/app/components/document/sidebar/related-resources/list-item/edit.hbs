@@ -6,16 +6,24 @@
   >
     <M.Header>Edit resource</M.Header>
     <M.Body>
-      <form class="px-6 pb-6" {{on "submit" @onSave}}>
+      <form {{did-insert this.registerForm}} class="px-6 pb-6" {{on "submit" this.onSave}}>
         <Hds::Form::TextInput::Field
-          @value={{@resource.title}}
+          {{on "input" this.updateFormValues}}
+          @value={{this.title}}
           required={{true}}
+          name="title"
           class="external-resource-title-input mb-4"
           as |F|
         >
           <F.Label>Title</F.Label>
         </Hds::Form::TextInput::Field>
-        <Hds::Form::TextInput::Field @value={{@url}} required={{true}} as |F|>
+        <Hds::Form::TextInput::Field
+          {{on "input" this.updateFormValues}}
+          @value={{this.url}}
+          required={{true}}
+          name="url"
+          as |F|
+        >
           <F.Label>URL</F.Label>
         </Hds::Form::TextInput::Field>
         {{! This adds enter-to-submit functionality }}
@@ -30,7 +38,7 @@
           @color="primary"
           {{! TODO: this needs to save }}
           {{! Should it show a flashMessage? }}
-          {{on "click" @onSave}}
+          {{on "click" this.onSave}}
         />
         <Hds::Button
           @text="Cancel"

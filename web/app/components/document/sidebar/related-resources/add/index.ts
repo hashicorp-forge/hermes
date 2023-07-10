@@ -124,6 +124,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @action addRelatedExternalLink() {
     let externalLink = {
+      id: Math.floor(Math.random() * 1000000000),
       url: this.query,
       title: this.externalLinkTitle,
       order: 0,

@@ -3,7 +3,10 @@ import { HermesDocument } from "hermes/types/document";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
-import { RelatedExternalLink, RelatedHermesDocument } from "hermes/components/document/sidebar/related-resources";
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+} from "hermes/components/document/sidebar/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
@@ -48,12 +51,8 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
     this.modalIsShown = false;
   }
 
-  @action protected saveChanges() {
-    assert(
-      "only external resources can be saved",
-      this._itemIsExternalResource
-    );
-    this.args.editResource(this.args.resource as RelatedExternalLink);
+  @action protected saveChanges(resource: RelatedExternalLink) {
+    this.args.editResource(resource);
     this.hideModal();
   }
 }

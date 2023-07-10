@@ -14,7 +14,7 @@ import { next } from "@ember/runloop";
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
 export interface RelatedExternalLink {
-  id: string;
+  id: number;
   title: string;
   url: string;
   order: number;
@@ -54,14 +54,11 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @tracked addResourceModalIsShown = false;
 
-  // @tracked relatedResources: RelatedResource | null = null;
-
   get relatedResources(): {
-    [key: string]: RelatedExternalLink | RelatedHermesDocument;
+    [key: string]: RelatedResource;
   } {
-    let resourcesArray: NativeArray<
-      RelatedExternalLink | RelatedHermesDocument
-    > = A();
+    let resourcesArray: RelatedResource[] = [];
+
     resourcesArray.pushObjects(this.relatedDocuments);
     resourcesArray.pushObjects(this.relatedLinks);
 
@@ -187,9 +184,25 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     // need to find the resource by ID
     // then replace it in the array with the new resource
 
+    console.log("resource", resource);
+
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.id === resource.id
     );
+
+    console.log("resourceIndex", resourceIndex);
+
+    if (resourceIndex !== -1) {
+      this.relatedLinks[resourceIndex] = resource;
+    }
+
+    console.log("this.relatedLinks", this.relatedLinks);
+
+    // PROBLEM: the getter isn't updating with the new resource
+    this.relatedLinks = this.relatedLinks;
+
+    // TODO: maybe await?
+    void this.saveRelatedResources.perform();
   }
 
   protected loadRelatedResources = task(async () => {
@@ -199,6 +212,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // const resources = await this.fetchSvc
       //   .fetch(`/api/v1/documents/${this.args.objectID}/related-resources`)
       //   .then((response) => response?.json());
+
+      await timeout(500);
 
       const fakeResources: {
         hermesDocuments: RelatedHermesDocument[];
@@ -215,6 +230,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         ],
         externalLinks: [
           {
+            id: 42,
             title: "Figma resource",
             url: "https://www.testURL.com",
             order: 2,
@@ -253,7 +269,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   protected saveRelatedResources = task(async () => {
-    // TODO: use when API is built
     // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
     //   method: "PUT",
     //   body: JSON.stringify(this.relatedDocuments),
@@ -268,11 +283,11 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
-      return;
     } else {
       this.relatedDocuments.removeObject(resource);
-      return;
     }
+    // TODO: maybe await?
+    void this.saveRelatedResources.perform();
   }
 }
 
