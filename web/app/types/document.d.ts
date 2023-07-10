@@ -41,7 +41,7 @@ export interface CustomEditableFields {
 export interface CustomEditableField {
   displayName: string;
   type: "STRING" | "PEOPLE";
-  value?: string;
+  value?: string | string[];
 }
 
 export interface HermesUser {
