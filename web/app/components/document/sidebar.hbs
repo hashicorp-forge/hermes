@@ -40,6 +40,8 @@
           />
         </div>
 
+        {{!-- TODO: Remove but test this --}}
+        <!--
         <div class="flex flex-col items-start">
           <Document::Sidebar::RelatedResources
             @productArea={{@document.product}}
@@ -52,6 +54,8 @@
             @itemLimit={{1}}
           />
         </div>
+        -->
+
         <div class="flex flex-col items-start space-y-2">
           {{#if (is-empty @document.docNumber)}}
             <small

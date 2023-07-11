@@ -7,7 +7,8 @@ import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask, task, timeout } from "ember-concurrency";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
+import htmlElement from "hermes/utils/html-element";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -19,6 +20,7 @@ export interface RelatedExternalLink {
 }
 
 export interface RelatedHermesDocument {
+  id: number;
   googleFileID: string;
   title: string;
   type: string;
@@ -214,6 +216,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       } = {
         hermesDocuments: [
           {
+            id: 24,
             googleFileID: "113_MX3wacdwXz2412EChoePvZ45CrjP5sL_nhN5cYNI",
             title: "Older Hermes Feature",
             type: "RFC",
@@ -258,10 +261,60 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
       this.relatedDocuments.unshiftObject(relatedHermesDocument);
     }
+
     // TODO: maybe await?
     void this.saveRelatedResources.perform();
     this.hideAddResourceModal();
+
+    void this.handleAnimationClasses.perform();
   }
+
+  protected handleAnimationClasses = restartableTask(async () => {
+    schedule("afterRender", async () => {
+      // New docs will always be the first element found
+      const newResourceLink = htmlElement(
+        ".related-resource.hermes-document .related-resource-link"
+      );
+
+      const highlightAffordance = document.createElement("div");
+      highlightAffordance.classList.add("highlight-affordance");
+      newResourceLink.insertBefore(
+        highlightAffordance,
+        newResourceLink.firstChild
+      );
+
+
+      const fadeInAnimation = highlightAffordance.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        { duration: 50 }
+      );
+
+      await timeout(2000)
+
+      const fadeOutAnimation = highlightAffordance.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 400 }
+      );
+
+      try {
+        await fadeInAnimation.finished;
+        await fadeOutAnimation.finished;
+      } finally {
+        fadeInAnimation.cancel();
+        fadeOutAnimation.cancel();
+        highlightAffordance.remove();
+      }
+      // going to add a new div called ".highlight-affordance" that will animate in,
+      // then animate out after 2.5 seconds
+
+      // newResource.classList.add("in");
+      // await timeout(2500);
+      // newResource.classList.remove("in");
+      // newResource.classList.add("out");
+      // await timeout(500);
+      // newResource.classList.remove("out");
+    });
+  });
 
   protected saveRelatedResources = task(async () => {
     // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {

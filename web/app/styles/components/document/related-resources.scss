@@ -14,6 +14,12 @@
 
   .related-resource {
     @apply flex w-full relative;
+
+    .highlight-affordance {
+      @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
+      @apply bg-color-surface-highlight border border-color-border-highlight;
+      @apply hds-elevation-mid;
+    }
   }
 }
 
@@ -85,22 +91,12 @@
 }
 
 .related-resource-link {
-  @apply relative flex items-start rounded border border-transparent space-x-2 py-[5px];
+  @apply relative grid gap-2 items-start rounded border border-transparent py-[5px];
   @apply w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-3 -mr-[4px];
-
   @apply outline-offset-[3px];
+  grid-template-columns: 22px auto;
 
-  &.highlighted {
-    &::before {
-      @apply hds-elevation-mid;
-      @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
-      @apply bg-color-surface-highlight border border-color-border-highlight;
-      content: "";
 
-      animation: fadeIn 0.15s ease-in-out,
-        fadeOut 0.4s ease-in-out 2.5s forwards;
-    }
-  }
 
   .hermes-document + .external-resource {
     @apply mt-1.5;
