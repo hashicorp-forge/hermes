@@ -11,6 +11,7 @@ interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
     resource: RelatedExternalLink;
     hideModal: () => void;
     onSave: (resource: RelatedExternalLink) => void;
+    removeResource: (resource: RelatedExternalLink) => void;
   };
   Blocks: {
     default: [];

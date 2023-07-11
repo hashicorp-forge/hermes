@@ -59,6 +59,7 @@
           @color="tertiary"
           @icon="trash"
           class="text-color-foreground-critical hover:text-color-foreground-critical-on-surface"
+          {{on "click" (fn @removeResource @resource)}}
         />
       </Hds::ButtonSet>
     </M.Footer>

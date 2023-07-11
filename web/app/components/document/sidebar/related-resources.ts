@@ -12,6 +12,11 @@ import htmlElement from "hermes/utils/html-element";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
+enum RelatedResourceType {
+  ExternalLink = "external-resource",
+  HermesDocument = "hermes-document",
+}
+
 export interface RelatedExternalLink {
   id: number;
   title: string;
@@ -195,7 +200,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // PROBLEM: the getter isn't updating with the new resource
       this.relatedLinks = this.relatedLinks;
       // TODO: maybe await?
-      void this.saveRelatedResources.perform();
+      void this.saveRelatedResources.perform(RelatedResourceType.ExternalLink);
     }
   }
 
@@ -245,7 +250,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @action addRelatedExternalLink(link: RelatedExternalLink) {
     this.relatedLinks.unshiftObject(link);
-    this.saveRelatedResources.perform();
+    void this.saveRelatedResources.perform(RelatedResourceType.ExternalLink);
   }
 
   @action addRelatedDocument(documentObjectID: string) {
@@ -263,69 +268,78 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
 
     // TODO: maybe await?
-    void this.saveRelatedResources.perform();
+    void this.saveRelatedResources.perform(RelatedResourceType.HermesDocument);
     this.hideAddResourceModal();
-
-    void this.handleAnimationClasses.perform();
   }
 
-  protected handleAnimationClasses = restartableTask(async () => {
-    schedule("afterRender", async () => {
-      // New docs will always be the first element found
-      const newResourceLink = htmlElement(
-        ".related-resource.hermes-document .related-resource-link"
-      );
+  protected handleAnimationClasses = restartableTask(
+    async (resourceType: RelatedResourceType) => {
+      schedule("afterRender", async () => {
+        const resourceTypeSelector =
+          resourceType === RelatedResourceType.HermesDocument
+            ? "hermes-document"
+            : "external-resource";
 
-      const highlightAffordance = document.createElement("div");
-      highlightAffordance.classList.add("highlight-affordance");
-      newResourceLink.insertBefore(
-        highlightAffordance,
-        newResourceLink.firstChild
-      );
+        // New resources will always be the first element
+        const newResourceLink = htmlElement(
+          `.related-resource.${resourceTypeSelector} .related-resource-link`
+        );
 
+        const highlightAffordance = document.createElement("div");
+        highlightAffordance.classList.add("highlight-affordance");
+        newResourceLink.insertBefore(
+          highlightAffordance,
+          newResourceLink.firstChild
+        );
 
-      const fadeInAnimation = highlightAffordance.animate(
-        [{ opacity: 0 }, { opacity: 1 }],
-        { duration: 50 }
-      );
+        const fadeInAnimation = highlightAffordance.animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          { duration: 50 }
+        );
 
-      await timeout(2000)
+        await timeout(2000);
 
-      const fadeOutAnimation = highlightAffordance.animate(
-        [{ opacity: 1 }, { opacity: 0 }],
-        { duration: 400 }
-      );
+        const fadeOutAnimation = highlightAffordance.animate(
+          [{ opacity: 1 }, { opacity: 0 }],
+          { duration: 400 }
+        );
 
-      try {
-        await fadeInAnimation.finished;
-        await fadeOutAnimation.finished;
-      } finally {
-        fadeInAnimation.cancel();
-        fadeOutAnimation.cancel();
-        highlightAffordance.remove();
+        try {
+          await fadeInAnimation.finished;
+          await fadeOutAnimation.finished;
+        } finally {
+          fadeInAnimation.cancel();
+          fadeOutAnimation.cancel();
+          highlightAffordance.remove();
+        }
+        // going to add a new div called ".highlight-affordance" that will animate in,
+        // then animate out after 2.5 seconds
+
+        // newResource.classList.add("in");
+        // await timeout(2500);
+        // newResource.classList.remove("in");
+        // newResource.classList.add("out");
+        // await timeout(500);
+        // newResource.classList.remove("out");
+      });
+    }
+  );
+
+  protected saveRelatedResources = task(
+    async (resourceType?: RelatedResourceType) => {
+      if (resourceType) {
+        void this.handleAnimationClasses.perform(resourceType);
       }
-      // going to add a new div called ".highlight-affordance" that will animate in,
-      // then animate out after 2.5 seconds
-
-      // newResource.classList.add("in");
-      // await timeout(2500);
-      // newResource.classList.remove("in");
-      // newResource.classList.add("out");
-      // await timeout(500);
-      // newResource.classList.remove("out");
-    });
-  });
-
-  protected saveRelatedResources = task(async () => {
-    // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
-    //   method: "PUT",
-    //   body: JSON.stringify(this.relatedDocuments),
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   }
-    // })
-    await timeout(500);
-  });
+      // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
+      //   method: "PUT",
+      //   body: JSON.stringify(this.relatedDocuments),
+      //   headers: {
+      //     "Content-Type": "application/json"
+      //   }
+      // })
+      await timeout(500);
+    }
+  );
 
   @action removeResource(resource: RelatedResource) {
     // TODO: call `onChange` here
