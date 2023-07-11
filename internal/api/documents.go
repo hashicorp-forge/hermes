@@ -40,13 +40,6 @@ type DocumentPatchRequest struct {
 	TargetVersion  string   `json:"targetVersion,omitempty"`
 }
 
-var (
-	documentsResourceURLPathRE = regexp.MustCompile(
-		`^\/api\/v1\/documents\/([0-9A-Za-z_\-]+)$`)
-	documentsResourceRelatedResourcesURLPathRE = regexp.MustCompile(
-		`^\/api\/v1\/documents\/([0-9A-Za-z_\-]+)\/related-resources$`)
-)
-
 func DocumentHandler(
 	cfg *config.Config,
 	l hclog.Logger,
@@ -57,7 +50,8 @@ func DocumentHandler(
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse document ID from the URL path.
-		docID, isRelatedResourcesRequest, err := parseDocumentsURLPath(r.URL.Path)
+		docID, isRelatedResourcesRequest, err := parseDocumentsURLPath(
+			r.URL.Path, "documents")
 		if err != nil {
 			l.Error("error parsing documents URL path",
 				"error", err,
@@ -491,28 +485,38 @@ func updateRecentlyViewedDocs(
 
 // parseDocumentsURLPath parses the document ID from a documents API URL path
 // and determines if it is a related resources request.
-func parseDocumentsURLPath(path string) (
+// resourceType should be "documents" or "drafts", as appropriate.
+func parseDocumentsURLPath(path, resourceType string) (
 	docID string,
 	isRelatedResourcesRequest bool,
 	err error,
 ) {
+	resourceURLPathRE := regexp.MustCompile(
+		fmt.Sprintf(
+			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)$`,
+			resourceType))
+	resourceRelatedResourcesURLPathRE := regexp.MustCompile(
+		fmt.Sprintf(
+			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)\/related-resources$`,
+			resourceType))
+
 	switch {
-	case documentsResourceURLPathRE.MatchString(path):
-		matches := documentsResourceURLPathRE.FindStringSubmatch(path)
+	case resourceURLPathRE.MatchString(path):
+		matches := resourceURLPathRE.FindStringSubmatch(path)
 		if len(matches) != 2 {
 			return "", false, fmt.Errorf(
-				"wrong number of string submatches for documents resource URL path")
+				"wrong number of string submatches for resource URL path")
 		}
 		return matches[1], false, nil
 
-	case documentsResourceRelatedResourcesURLPathRE.MatchString(path):
-		matches := documentsResourceRelatedResourcesURLPathRE.
+	case resourceRelatedResourcesURLPathRE.MatchString(path):
+		matches := resourceRelatedResourcesURLPathRE.
 			FindStringSubmatch(path)
 		if len(matches) != 2 {
 			return "",
 				true,
 				fmt.Errorf(
-					"wrong number of string submatches for documents resource related resources URL path")
+					"wrong number of string submatches for resource related resources URL path")
 		}
 		return matches[1], true, nil
 

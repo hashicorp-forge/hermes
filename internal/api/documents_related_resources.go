@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -238,18 +237,15 @@ func documentsResourceRelatedResourcesHandler(
 	}
 }
 
-func getDocumentFromAlgolia(docID string, algo *algolia.Client) (hcd.Doc, error) {
+// getDocumentFromAlgolia gets a document object from Algolia.
+func getDocumentFromAlgolia(
+	docID string, algo *algolia.Client) (hcd.Doc, error) {
+
 	// Get base document object from Algolia so we can determine the doc type.
 	baseDocObj := &hcd.BaseDoc{}
-	err := algo.Docs.GetObject(docID, &baseDocObj)
-	if err != nil {
-		// Handle 404 from Algolia and only log a warning.
-		if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
-			return nil, fmt.Errorf("base document object not found")
-		} else {
-			return nil, fmt.Errorf(
-				"error requesting base document object from Algolia: %w", err)
-		}
+	if err := algo.Docs.GetObject(docID, &baseDocObj); err != nil {
+		return nil, fmt.Errorf(
+			"error retrieving base document object from Algolia: %w", err)
 	}
 
 	// Create new document object of the proper doc type.
@@ -259,8 +255,7 @@ func getDocumentFromAlgolia(docID string, algo *algolia.Client) (hcd.Doc, error)
 	}
 
 	// Get document object from Algolia.
-	err = algo.Docs.GetObject(docID, &docObj)
-	if err != nil {
+	if err := algo.Docs.GetObject(docID, &docObj); err != nil {
 		return nil, fmt.Errorf("error retrieving document object from Algolia")
 	}
 
