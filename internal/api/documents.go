@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
@@ -39,6 +40,13 @@ type DocumentPatchRequest struct {
 	TargetVersion  string   `json:"targetVersion,omitempty"`
 }
 
+var (
+	documentsResourceURLPathRE = regexp.MustCompile(
+		`^\/api\/v1\/documents\/([0-9A-Za-z_\-]+)$`)
+	documentsResourceRelatedResourcesURLPathRE = regexp.MustCompile(
+		`^\/api\/v1\/documents\/([0-9A-Za-z_\-]+)\/related-resources$`)
+)
+
 func DocumentHandler(
 	cfg *config.Config,
 	l hclog.Logger,
@@ -49,14 +57,14 @@ func DocumentHandler(
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse document ID from the URL path.
-		docID, err := parseURLPath(r.URL.Path, "/api/v1/documents")
+		docID, isRelatedResourcesRequest, err := parseDocumentsURLPath(r.URL.Path)
 		if err != nil {
-			l.Error("error parsing document ID from the URL path",
+			l.Error("error parsing documents URL path",
 				"error", err,
 				"path", r.URL.Path,
 				"method", r.Method,
 			)
-			http.Error(w, "Error accessing document", http.StatusInternalServerError)
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -111,6 +119,13 @@ func DocumentHandler(
 				"doc_id", docID,
 			)
 			http.Error(w, "Error accessing document", http.StatusInternalServerError)
+			return
+		}
+
+		// Pass request off to the documents related resources handler if
+		// appropriate.
+		if isRelatedResourcesRequest {
+			documentsResourceRelatedResourcesHandler(w, r, docID, docObj, l, ar, db)
 			return
 		}
 
@@ -472,4 +487,36 @@ func updateRecentlyViewedDocs(
 	}
 
 	return nil
+}
+
+// parseDocumentsURLPath parses the document ID from a documents API URL path
+// and determines if it is a related resources request.
+func parseDocumentsURLPath(path string) (
+	docID string,
+	isRelatedResourcesRequest bool,
+	err error,
+) {
+	switch {
+	case documentsResourceURLPathRE.MatchString(path):
+		matches := documentsResourceURLPathRE.FindStringSubmatch(path)
+		if len(matches) != 2 {
+			return "", false, fmt.Errorf(
+				"wrong number of string submatches for documents resource URL path")
+		}
+		return matches[1], false, nil
+
+	case documentsResourceRelatedResourcesURLPathRE.MatchString(path):
+		matches := documentsResourceRelatedResourcesURLPathRE.
+			FindStringSubmatch(path)
+		if len(matches) != 2 {
+			return "",
+				true,
+				fmt.Errorf(
+					"wrong number of string submatches for documents resource related resources URL path")
+		}
+		return matches[1], true, nil
+
+	default:
+		return "", false, fmt.Errorf("path did not match any URL strings")
+	}
 }
