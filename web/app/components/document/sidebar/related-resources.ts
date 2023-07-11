@@ -12,9 +12,9 @@ import htmlElement from "hermes/utils/html-element";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
-enum RelatedResourceType {
-  ExternalLink = "external-resource",
-  HermesDocument = "hermes-document",
+enum RelatedResourceSelector {
+  ExternalLink = ".external-resource",
+  HermesDocument = ".hermes-document",
 }
 
 export interface RelatedExternalLink {
@@ -197,7 +197,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // PROBLEM: the getter isn't updating with the new resource
       this.relatedLinks = this.relatedLinks;
       // TODO: maybe await?
-      void this.saveRelatedResources.perform(RelatedResourceType.ExternalLink);
+      void this.saveRelatedResources.perform(`#related-resource-${resource.id}`);
     }
   }
 
@@ -246,7 +246,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @action addRelatedExternalLink(link: RelatedExternalLink) {
     this.relatedLinks.unshiftObject(link);
-    void this.saveRelatedResources.perform(RelatedResourceType.ExternalLink);
+    void this.saveRelatedResources.perform(
+      RelatedResourceSelector.ExternalLink
+    );
   }
 
   @action addRelatedDocument(documentObjectID: string) {
@@ -264,38 +266,32 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
 
     // TODO: maybe await?
-    void this.saveRelatedResources.perform(RelatedResourceType.HermesDocument);
+    void this.saveRelatedResources.perform(
+      RelatedResourceSelector.HermesDocument
+    );
     this.hideAddResourceModal();
   }
 
   protected handleAnimationClasses = restartableTask(
-    async (resourceType: RelatedResourceType) => {
+    async (selector: string) => {
       schedule("afterRender", async () => {
-        const resourceTypeSelector =
-          resourceType === RelatedResourceType.HermesDocument
-            ? "hermes-document"
-            : "external-resource";
-
         // New resources will always be the first element
         const newResourceLink = htmlElement(
-          `.related-resource.${resourceTypeSelector} .related-resource-link`
+          `.related-resource${selector} .related-resource-link`
         );
 
-        const highlightAffordance = document.createElement("div");
-        highlightAffordance.classList.add("highlight-affordance");
-        newResourceLink.insertBefore(
-          highlightAffordance,
-          newResourceLink.firstChild
-        );
+        const highlight = document.createElement("div");
+        highlight.classList.add("highlight-affordance");
+        newResourceLink.insertBefore(highlight, newResourceLink.firstChild);
 
-        const fadeInAnimation = highlightAffordance.animate(
+        const fadeInAnimation = highlight.animate(
           [{ opacity: 0 }, { opacity: 1 }],
           { duration: 50 }
         );
 
         await timeout(2000);
 
-        const fadeOutAnimation = highlightAffordance.animate(
+        const fadeOutAnimation = highlight.animate(
           [{ opacity: 1 }, { opacity: 0 }],
           { duration: 400 }
         );
@@ -306,27 +302,25 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         } finally {
           fadeInAnimation.cancel();
           fadeOutAnimation.cancel();
-          highlightAffordance.remove();
+          highlight.remove();
         }
       });
     }
   );
 
-  protected saveRelatedResources = task(
-    async (resourceType?: RelatedResourceType) => {
-      if (resourceType) {
-        void this.handleAnimationClasses.perform(resourceType);
-      }
-      // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
-      //   method: "PUT",
-      //   body: JSON.stringify(this.relatedDocuments),
-      //   headers: {
-      //     "Content-Type": "application/json"
-      //   }
-      // })
-      await timeout(500);
+  protected saveRelatedResources = task(async (selector?: string) => {
+    if (selector) {
+      void this.handleAnimationClasses.perform(selector);
     }
-  );
+    // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
+    //   method: "PUT",
+    //   body: JSON.stringify(this.relatedDocuments),
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // })
+    await timeout(500);
+  });
 
   @action removeResource(resource: RelatedResource) {
     if ("url" in resource) {
