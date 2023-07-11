@@ -1,7 +1,17 @@
 <div class="sidebar-section-header-container" ...attributes>
-  <h5 class="sidebar-section-header">
-    {{@title}}
-  </h5>
+  <div class="flex relative">
+    <h5 class="sidebar-section-header">
+      {{@title}}
+    </h5>
+    {{#if @badgeText}}
+      <Hds::Badge
+        @text={{@badgeText}}
+        @color="highlight"
+        @size="small"
+        class="absolute -right-2 top-1/2 -translate-y-1/2 translate-x-full"
+      />
+    {{/if}}
+  </div>
   {{#if this.buttonIsShown}}
     <Action
       {{on "click" this.buttonAction}}
