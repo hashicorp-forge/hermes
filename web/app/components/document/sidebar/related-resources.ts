@@ -188,9 +188,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   @action editResource(resource: RelatedExternalLink) {
-    // need to find the resource by ID
-    // then replace it in the array with the new resource
-
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.id === resource.id
     );
@@ -244,7 +241,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       this.loadingHasFailed = false;
     } catch (e: unknown) {
       this.loadingHasFailed = true;
-      // do an inline error with ability to retry
     }
   });
 
@@ -312,15 +308,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           fadeOutAnimation.cancel();
           highlightAffordance.remove();
         }
-        // going to add a new div called ".highlight-affordance" that will animate in,
-        // then animate out after 2.5 seconds
-
-        // newResource.classList.add("in");
-        // await timeout(2500);
-        // newResource.classList.remove("in");
-        // newResource.classList.add("out");
-        // await timeout(500);
-        // newResource.classList.remove("out");
       });
     }
   );
@@ -342,7 +329,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   );
 
   @action removeResource(resource: RelatedResource) {
-    // TODO: call `onChange` here
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
     } else {
