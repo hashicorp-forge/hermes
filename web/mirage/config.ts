@@ -242,6 +242,27 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the RelatedResources component.
+       */
+      this.get(
+        "documents/:document_id/related-resources",
+        (schema, request) => {
+          let hermesDocuments = schema.relatedHermesDocument
+            .all()
+            .models.map((doc) => {
+              return doc.attrs;
+            });
+          let externalLinks = schema.relatedExternalLinks
+            .all()
+            .models.map((link) => {
+              return link.attrs;
+            });
+
+          return new Response(200, {}, { hermesDocuments, externalLinks });
+        }, { timing: 10 }
+      );
+
+      /**
        * Used by the /drafts route's getDraftResults method to fetch
        * a list of facets and draft results.
        */

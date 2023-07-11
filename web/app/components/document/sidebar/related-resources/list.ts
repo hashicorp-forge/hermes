@@ -6,6 +6,7 @@ import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { action } from "@ember/object";
 import { Transition } from "ember-animated/-private/transition";
+import Ember from "ember";
 
 interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
@@ -53,6 +54,10 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     keptSprites,
     removedSprites,
   }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
     for (let sprite of keptSprites) {
       void move(sprite, { duration: 250, easing: easeOutQuad });
     }

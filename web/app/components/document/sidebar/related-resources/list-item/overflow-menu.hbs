@@ -22,6 +22,11 @@
   </:anchor>
   <:item as |dd|>
     <dd.Action
+      data-test-overflow-menu-action={{if
+        (eq dd.attrs.label "Edit")
+        "edit"
+        "remove"
+      }}
       {{on "click" dd.attrs.action}}
       class="related-resources-overflow-menu-item-button"
     >

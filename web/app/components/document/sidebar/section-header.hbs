@@ -1,10 +1,11 @@
 <div class="sidebar-section-header-container" ...attributes>
-  <div class="flex relative">
+  <div class="inline-flex relative">
     <h5 class="sidebar-section-header">
       {{@title}}
     </h5>
     {{#if @badgeText}}
       <Hds::Badge
+        data-test-sidebar-section-header-badge
         @text={{@badgeText}}
         @color="highlight"
         @size="small"

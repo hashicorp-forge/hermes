@@ -6,9 +6,10 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import { dropTask, restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
+import Ember from "ember";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -33,19 +34,20 @@ export interface RelatedHermesDocument {
   order: number;
 }
 
+export interface DocumentSidebarRelatedResourcesComponentArgs {
+  productArea?: string;
+  objectID?: string;
+  allowAddingExternalLinks?: boolean;
+  headerTitle: string;
+  modalHeaderTitle: string;
+  searchFilters?: string;
+  optionalSearchFilters?: string[];
+  itemLimit?: number;
+  modalInputPlaceholder: string;
+}
+
 interface DocumentSidebarRelatedResourcesComponentSignature {
-  Args: {
-    productArea?: string;
-    objectID?: string;
-    allowAddingExternalLinks?: boolean;
-    headerTitle: string;
-    modalHeaderTitle: string;
-    searchFilters?: string;
-    optionalSearchFilters?: string[];
-    itemLimit?: number;
-    modalInputPlaceholder: string;
-    onChange: () => void;
-  };
+  Args: DocumentSidebarRelatedResourcesComponentArgs;
 }
 
 export default class DocumentSidebarRelatedResourcesComponent extends Component<DocumentSidebarRelatedResourcesComponentSignature> {
@@ -197,47 +199,21 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // PROBLEM: the getter isn't updating with the new resource
       this.relatedLinks = this.relatedLinks;
       // TODO: maybe await?
-      void this.saveRelatedResources.perform(`#related-resource-${resource.id}`);
+      void this.saveRelatedResources.perform(
+        `#related-resource-${resource.id}`
+      );
     }
   }
 
   protected loadRelatedResources = task(async () => {
-    await timeout(500);
     // make a fetch GET request to the back end
     try {
-      // TODO: use when API is built
-      // const resources = await this.fetchSvc
-      //   .fetch(`/api/v1/documents/${this.args.objectID}/related-resources`)
-      //   .then((response) => response?.json());
+      const resources = await this.fetchSvc
+        .fetch(`/api/v1/documents/${this.args.objectID}/related-resources`)
+        .then((response) => response?.json());
 
-      await timeout(500);
-
-      const fakeResources: {
-        hermesDocuments: RelatedHermesDocument[];
-        externalLinks: RelatedExternalLink[];
-      } = {
-        hermesDocuments: [
-          {
-            id: 24,
-            googleFileID: "113_MX3wacdwXz2412EChoePvZ45CrjP5sL_nhN5cYNI",
-            title: "Older Hermes Feature",
-            type: "RFC",
-            documentNumber: "HRM-005",
-            order: 1,
-          },
-        ],
-        externalLinks: [
-          {
-            id: 42,
-            title: "Figma resource",
-            url: "https://www.testURL.com",
-            order: 2,
-          },
-        ],
-      };
-
-      this.relatedDocuments = fakeResources.hermesDocuments;
-      this.relatedLinks = fakeResources.externalLinks;
+      this.relatedDocuments = resources.hermesDocuments;
+      this.relatedLinks = resources.externalLinks;
       this.loadingHasFailed = false;
     } catch (e: unknown) {
       this.loadingHasFailed = true;
@@ -289,7 +265,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           { duration: 50 }
         );
 
-        await timeout(2000);
+        await timeout(Ember.testing ? 0 : 2000);
 
         const fadeOutAnimation = highlight.animate(
           [{ opacity: 1 }, { opacity: 0 }],
@@ -319,18 +295,19 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     //     "Content-Type": "application/json"
     //   }
     // })
-    await timeout(500);
+    await timeout(Ember.testing ? 0 : 500);
   });
 
-  @action removeResource(resource: RelatedResource) {
+  protected removeResource = dropTask(async (resource: RelatedResource) => {
     if ("url" in resource) {
+      console.log("removing link");
       this.relatedLinks.removeObject(resource);
     } else {
+      console.log("removing document");
       this.relatedDocuments.removeObject(resource);
     }
-    // TODO: maybe await?
-    void this.saveRelatedResources.perform();
-  }
+    await this.saveRelatedResources.perform();
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

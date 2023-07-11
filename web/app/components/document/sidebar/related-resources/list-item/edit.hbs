@@ -4,7 +4,9 @@
     @onClose={{@hideModal}}
     as |M|
   >
-    <M.Header>Edit resource</M.Header>
+    <M.Header data-test-edit-related-resource-modal-header>
+      Edit resource
+    </M.Header>
     <M.Body>
       <form
         {{did-insert this.registerForm}}
@@ -23,6 +25,7 @@
           <F.Label>Title</F.Label>
         </Hds::Form::TextInput::Field>
         <Hds::Form::TextInput::Field
+          data-test-external-resource-url-input
           {{on "input" this.updateFormValues}}
           @value={{this.url}}
           required={{true}}

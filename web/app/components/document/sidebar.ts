@@ -220,10 +220,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
-  @action onRelatedResourcesChange() {
-    alert("TODO");
-  }
-
   showFlashError(error: Error, title: string) {
     this.flashMessages.add({
       title,
