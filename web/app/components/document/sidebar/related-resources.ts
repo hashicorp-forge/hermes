@@ -214,6 +214,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
       this.relatedDocuments = resources.hermesDocuments;
       this.relatedLinks = resources.externalLinks;
+
       this.loadingHasFailed = false;
     } catch (e: unknown) {
       this.loadingHasFailed = true;
@@ -300,10 +301,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   protected removeResource = dropTask(async (resource: RelatedResource) => {
     if ("url" in resource) {
-      console.log("removing link");
       this.relatedLinks.removeObject(resource);
     } else {
-      console.log("removing document");
       this.relatedDocuments.removeObject(resource);
     }
     await this.saveRelatedResources.perform();

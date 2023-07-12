@@ -32,9 +32,10 @@
             <FlightIcon @name={{get-link-icon @url}} />
           </div>
         </div>
+
         <Hds::Button
-          data-test-add-external-resource-button
-          {{on "click" @onSubmit}}
+          data-test-add-external-resource-submit-button
+          {{on "click" this.onSubmit}}
           @isFullWidth={{true}}
           @color="primary"
           @text="Add"
@@ -43,4 +44,9 @@
       </div>
     {{/if}}
   </div>
+  {{#if @linkIsDuplicate}}
+    <Hds::Form::Error class="mt-5" data-test-add-external-resource-error>
+      This resource has already been added.
+    </Hds::Form::Error>
+  {{/if}}
 </div>

@@ -18,7 +18,6 @@
     .highlight-affordance {
       @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
       @apply bg-color-surface-highlight border border-color-border-highlight;
-      @apply hds-elevation-mid;
     }
   }
 }
@@ -31,7 +30,7 @@
   @apply w-full relative flex items-center;
   @apply px-10 mt-6;
   @apply h-[228px];
-  @apply hds-elevation-low;
+  animation: fadeIn 400ms ease-out;
 
   &::before,
   &::after {
@@ -41,13 +40,14 @@
 
   &::before {
     @apply opacity-0 bg-color-page-faint border-color-border-primary;
-    animation: fadeIn 0ms ease-out 600ms forwards;
+    @apply hds-elevation-low;
+    animation: fadeIn 200ms ease-out 500ms forwards;
   }
 
   &::after {
     @apply bg-color-surface-highlight border-color-border-highlight;
-    animation: fadeIn 400ms ease-out, scaleIn 600ms ease-out,
-      fadeOut 500ms ease-out 700ms forwards;
+    animation: fadeIn 400ms ease-out, scaleIn 500ms ease-out,
+      fadeOut 500ms ease-out 600ms forwards;
   }
 }
 
@@ -95,8 +95,6 @@
   @apply w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-3 -mr-[4px];
   @apply outline-offset-[3px];
   grid-template-columns: 22px auto;
-
-
 
   .hermes-document + .external-resource {
     @apply mt-1.5;

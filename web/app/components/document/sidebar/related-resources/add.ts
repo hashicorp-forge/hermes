@@ -48,6 +48,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @tracked keyboardNavIsEnabled = true;
 
   @tracked externalLinkTitle = "";
+  @tracked linkIsDuplicate = false;
 
   get noMatchesFound(): boolean {
     const objectEntriesLengthIsZero =
@@ -92,16 +93,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
-  @action private showDuplicateMessage() {
-    this.flashMessages.add({
-      title: "Duplicate URL",
-      message: "This link is already a related doc.",
-      type: "critical",
-      timeout: 6000,
-      extendedTimeout: 1000,
-    });
-  }
-
   @action protected disableKeyboardNav() {
     this.keyboardNavIsEnabled = false;
   }
@@ -115,6 +106,18 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.externalLinkTitle = input.value;
   }
 
+  @action checkForDuplicate(url: string) {
+    const isDuplicate = this.args.relatedLinks.find((link) => {
+      return link.url === url;
+    });
+
+    if (isDuplicate) {
+      this.linkIsDuplicate = true;
+    } else {
+      this.linkIsDuplicate = false;
+    }
+  }
+
   @action addRelatedExternalLink() {
     let externalLink = {
       id: Math.floor(Math.random() * 1000000000),
@@ -123,20 +126,14 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       order: 0,
     };
 
-    const isDuplicate = this.args.relatedLinks.find((link) => {
-      return link.url === externalLink.url;
-    });
+    this.checkForDuplicate(externalLink.url);
 
-    if (isDuplicate) {
-      this.showDuplicateMessage();
-    } else {
+    if (!this.linkIsDuplicate) {
       this.args.addRelatedExternalLink(externalLink);
       void this.args.search(null, "");
+      this.externalLinkTitle = "";
+      this.args.onClose();
     }
-
-    this.externalLinkTitle = "";
-
-    this.args.onClose();
   }
 
   /**
@@ -212,6 +209,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       //   //   "Content-Type": "application/json",
       //   // },
       // });
+
+      // check if duplicate, if so, show error message
     } catch (e) {
       console.error(e);
     }
@@ -221,6 +220,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.queryIsURL = isValidURL(this.query);
     if (this.queryIsURL) {
       void this.fetchURLInfo.perform();
+      this.checkForDuplicate(this.query);
     }
   });
 }

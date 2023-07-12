@@ -22,7 +22,7 @@ const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";
 const EDIT_MODAL_SELECTOR = "[data-test-edit-related-resource-modal]";
 const EDIT_MODAL_HEADER_SELECTOR =
   "[data-test-edit-related-resource-modal-header]";
-const EDIT_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
+const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
 const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
 const EDIT_RESOURCE_SAVE_BUTTON_SELECTOR =
@@ -36,6 +36,17 @@ const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
   "[data-test-related-resources-search-input]";
 const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
+const ADD_EXTERNAL_RESOURCE_FORM_SELECTOR =
+  "[data-test-add-external-resource-form]";
+const EXTERNAL_RESOURCE_PREVIEW_URL_SELECTOR =
+  "[data-test-add-external-resource-truncated-url]";
+const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
+  "[data-test-add-external-resource-submit-button]";
+const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR =
+  "[data-test-edit-related-resource-modal-delete-button]";
+
+const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
+  "[data-test-add-external-resource-error]";
 
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
@@ -165,7 +176,7 @@ module(
       assert.dom(LIST_SELECTOR).exists("the list is shown again");
     });
 
-    test("resources can be deleted", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+    test("resources can be deleted (overflow menu)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedHermesDocument");
       this.server.create("relatedExternalLink");
 
@@ -193,6 +204,33 @@ module(
       assert.dom(LIST_ITEM_SELECTOR).doesNotExist();
     });
 
+    test("external resources can be deleted (modal)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.create("relatedExternalLink", {
+        title: "Example",
+        url: "https://example.com",
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
+
+      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click("[data-test-overflow-menu-action='edit']");
+
+      await click(ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR);
+
+      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("the item is removed");
+    });
+
     test("external resources can be edited", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedExternalLink", {
         title: "Example",
@@ -216,12 +254,12 @@ module(
       assert.dom(EDIT_MODAL_SELECTOR).exists("the edit modal is shown");
       assert.dom(EDIT_MODAL_HEADER_SELECTOR).hasText("Edit resource");
 
-      assert.dom(EDIT_RESOURCE_TITLE_INPUT_SELECTOR).hasValue("Example");
+      assert.dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR).hasValue("Example");
       assert
         .dom(EDIT_RESOURCE_URL_INPUT_SELECTOR)
         .hasValue("https://example.com");
 
-      await fillIn(EDIT_RESOURCE_TITLE_INPUT_SELECTOR, "New title");
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New title");
       await fillIn(EDIT_RESOURCE_URL_INPUT_SELECTOR, "https://new-url.com");
 
       await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
@@ -235,7 +273,6 @@ module(
     });
 
     test("you can add related hermes documents", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
-      // populate "Algolia"
       this.server.createList("document", 3);
 
       await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
@@ -302,7 +339,137 @@ module(
       assert.dom(NO_RESOURCES_FOUND_SELECTOR).exists();
     });
 
-    test("you can add related external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+    test("you can add related external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Test placeholder"
+        />
+      `);
+
+      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("no items yet");
+
+      // Add a resource without a title
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .exists({ count: 1 }, "documents are listed in a modal");
+
+      await fillIn(
+        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+        "https://example.com"
+      );
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .doesNotExist("documents are removed when a valid URL is entered");
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+        .exists('the "add resource" form is shown');
+      assert
+        .dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR)
+        .hasAttribute("placeholder", "Optional");
+
+      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+
+      assert
+        .dom(ADD_RESOURCE_MODAL_SELECTOR)
+        .doesNotExist("the modal is closed");
+
+      assert
+        .dom(LIST_ITEM_SELECTOR)
+        .exists({ count: 1 }, "there is 1 item")
+        .hasText(
+          "https://example.com",
+          "the external resource displays a URL when no title is provided"
+        );
+
+      // Add a resource with a title
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .exists("documents are shown again when the modal is reopened");
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR)
+        .hasValue("", "the form is reset")
+        .hasAttribute(
+          "placeholder",
+          "Test placeholder",
+          "the custom placeholder is shown"
+        );
+
+      await fillIn(
+        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+        "https://hashicorp.com"
+      );
+
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "HashiCorp");
+
+      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+
+      assert
+        .dom(ADD_RESOURCE_MODAL_SELECTOR)
+        .doesNotExist("the modal is closed");
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 2 }, "there are 2 items");
+
+      assert
+        .dom(LIST_ITEM_SELECTOR + ":nth-child(2)")
+        .hasText(
+          "HashiCorp",
+          "the external resource displays a title when provided"
+        );
+    });
+
+    test("it prevents duplicate external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      const url = "https://example.com";
+
+      this.server.create("relatedExternalLink", {
+        url,
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Test placeholder"
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, url);
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
+        .hasText("This resource has already been added.");
+
+      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+
+      assert
+        .dom(ADD_RESOURCE_MODAL_SELECTOR)
+        .exists("the button is disabled when the URL is a duplicate");
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "https://");
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
+        .doesNotExist("the error message is removed when the URL changes");
+    });
 
     test("you can set an item limit", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
 
