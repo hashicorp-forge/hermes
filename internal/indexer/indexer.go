@@ -212,7 +212,7 @@ func (idx *Indexer) Run() error {
 
 			// Get drafts folder data (headers) from the database.
 			// Note: we add a "refreshHeaders:" prefix for the Google Drive ID here
-			// to not conflict with with the actual last indexed time of the folder
+			// to not conflict with the actual last indexed time of the folder
 			// (if we're indexing it, that is).
 			fd := models.IndexerFolder{
 				GoogleDriveID: fmt.Sprintf("refreshHeaders:%s", idx.DraftsFolderID),
@@ -429,7 +429,9 @@ func (idx *Indexer) Run() error {
 				logError("error exporting document", err)
 				os.Exit(1)
 			}
+
 			content, err := io.ReadAll(exp.Body)
+
 			if err != nil {
 				logError("error reading exported document", err)
 				os.Exit(1)

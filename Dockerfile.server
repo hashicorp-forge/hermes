@@ -1,0 +1,43 @@
+# Stage 1: Fetching Frontend base utilities
+FROM node:16.3.0-alpine AS frontend
+
+# Set the work dir
+WORKDIR /app
+
+# Copy all project files
+COPY .. /app
+
+
+# Install corepack for Yarn~3.3.0
+RUN npm install -g -f yarn \
+    && npm install -g ember-cli \
+    && yarn set version "3.3.0" \
+    && cd /app/web \
+    && yarn install \
+    && rm -rf dist/ \
+    && yarn build 
+
+
+# Stage 2: Build the application for backend go
+FROM golang:1.18-alpine 
+
+# Copy the built frontend from the previous stage
+COPY --from=frontend /app /app
+
+# Set the work dir
+WORKDIR /app
+
+# Build the backend application
+# Change directory to 'web' and run commands sequentially
+RUN rm -f /app/hermes \
+    && CGO_ENABLED=0 go build -o /app/hermes ./cmd/hermes
+
+# # Expose the necessary port for the application
+# EXPOSE 8000 9999
+
+
+## Grant execute permissions to the script
+#RUN chmod +x /app/run.sh
+
+# Run the script to start both server and indexer
+CMD ["./hermes","server","-config=config.hcl"]

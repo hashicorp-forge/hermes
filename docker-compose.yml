@@ -1,6 +1,26 @@
 version: "3"
 
 services:
+  # server:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.server
+  #   ports:
+  #     - "8000:8000"
+  #     - "9999:9999"
+  #   depends_on:
+  #     - postgres
+  #   links:
+  #     - postgres
+
+  # indexer:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.indexer
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+
   postgres:
     image: postgres:14.5-alpine
     restart: always

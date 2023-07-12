@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/driver/postgres"
@@ -11,6 +10,7 @@ import (
 
 // NewDB returns a new migrated database.
 func NewDB(cfg config.Postgres) (*gorm.DB, error) {
+
 	// TODO: validate config.
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d",
 		cfg.Host,
