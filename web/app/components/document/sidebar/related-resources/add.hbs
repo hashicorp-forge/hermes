@@ -1,12 +1,18 @@
 {{on-document "keydown" this.onDocumentKeydown}}
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
-  <Hds::Modal @onClose={{@onClose}} class="h-[475px]" as |M|>
+  <Hds::Modal
+    data-test-add-related-resource-modal
+    @onClose={{@onClose}}
+    class="h-[475px]"
+    as |M|
+  >
     <M.Header data-test-add-related-resource-modal-title>
       {{@headerTitle}}
     </M.Header>
     <M.Body>
       <X::DropdownList
+        data-test-add-related-resources-list
         @items={{@shownDocuments}}
         @onItemClick={{@addRelatedDocument}}
         @offset={{hash mainAxis=1 crossAxis=0}}
@@ -71,7 +77,10 @@
         </:loading>
         <:no-matches>
           {{#unless this.noMatchesHeaderIsHidden}}
-            <div class="related-resources-modal-container mt-36">
+            <div
+              data-test-no-related-resources-found
+              class="related-resources-modal-container mt-36"
+            >
               <h3 class="related-resources-modal-body-header">
                 No results found
               </h3>

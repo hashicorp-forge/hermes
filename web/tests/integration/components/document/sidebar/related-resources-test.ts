@@ -6,6 +6,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
 import htmlElement from "hermes/utils/html-element";
+import { wait } from "ember-animated/.";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -26,6 +27,15 @@ const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
 const EDIT_RESOURCE_SAVE_BUTTON_SELECTOR =
   "[data-test-edit-related-resource-modal-save-button]";
+const ADD_RESOURCE_BUTTON_SELECTOR = ".sidebar-section-header-button";
+const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
+const ADD_RELATED_RESOURCES_LIST_SELECTOR =
+  "[data-test-add-related-resources-list]";
+const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
+  ".related-document-option";
+const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
+  "[data-test-related-resources-search-input]";
+const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
 
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
@@ -43,12 +53,6 @@ module(
       this.server.create("document", {
         product: "Labs",
         objectID: "1234",
-        onChange: () => {},
-        allowAddingExternalLinks: true,
-        headerTitle: "Related resources",
-        modalHeaderTitle: "Add related resource",
-        modalInputPlaceholder: "Paste a URL or search documents...",
-        optionalSearchFilters: ["product:Labs"],
       });
 
       this.set("document", this.server.schema.document.first().attrs);
@@ -230,10 +234,78 @@ module(
         .hasAttribute("href", "https://new-url.com");
     });
 
-    test("you can add related hermes documents", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+    test("you can add related hermes documents", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      // populate "Algolia"
+      this.server.createList("document", 3);
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("no items yet");
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists("the modal is shown");
+      assert
+        .dom(ADD_RELATED_RESOURCES_LIST_SELECTOR)
+        .exists("the list is shown");
+
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert.dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR).exists({
+        count: 4,
+      });
+
+      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RESOURCE_MODAL_SELECTOR)
+        .doesNotExist("the modal is closed");
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 }, "there is 1 item");
+
+      // TODO: test this with mirage and a real PUT request
+    });
+
+    test("it shows a 'no results' fallback message", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert.dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR).exists({
+        count: 1,
+      });
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "XYZ");
+
+      await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+
+      assert.dom(NO_RESOURCES_FOUND_SELECTOR).exists();
+    });
+
     test("you can add related external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
-    test("you can search for documents", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
     test("you can set an item limit", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
     test("you can turn off the external link fallback", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
   }
 );
