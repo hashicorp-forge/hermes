@@ -162,21 +162,36 @@ postgres {
 // products should be modified to reflect the products/areas in your
 // organization.
 products {
-  product "Engineering" {
-    abbreviation = "ENG"
+  product "Payments" {
+    abbreviation = "PAYMT"
   }
-  product "Labs" {
-    abbreviation = "LAB"
+  product "Platform" {
+    abbreviation = "PLF"
   }
-  product "MyProduct" {
-    abbreviation = "MY"
+  product "X" {
+    abbreviation = "X"
+  }
+  product "Capital" {
+  abbreviation = "CAP"
+  }
+  product "Curlec" {
+  abbreviation = "CUR"
+  }
+  product "Ezetap" {
+  abbreviation = "EZP"
+  }
+  product "Payroll" {
+  abbreviation = "PAYRL"
+  }
+  product "Issuing" {
+  abbreviation = "ISSU"
   }
 }
 
 // server contains the configuration for the server.
 server {
   // addr is the address to bind to for listening.
-  // addr = "127.0.0.1:8000"
+  addr = "127.0.0.1:8000"
   // uncomment this if usign docker compose or deploying
-  addr = "0.0.0.0:8000"
+  // addr = "0.0.0.0:8000"
 }

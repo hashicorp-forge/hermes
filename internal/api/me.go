@@ -144,6 +144,7 @@ func MeHandler(
 				GivenName:     p.Names[0].GivenName,
 				FamilyName:    p.Names[0].FamilyName,
 			}
+
 			if len(p.Photos) > 0 {
 				resp.Picture = p.Photos[0].Url
 			}

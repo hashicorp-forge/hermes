@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Contribution Invitation</title>
+    <style>
+        body {
+            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #333333;
+        }
+
+        .visible-container {
+            margin: 0 auto;
+            visibility: visible;
+            max-width: 670px;
+            background: #ffffff;
+            border-radius: 3px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        .document-details {
+            background-color: #f2f2f2;
+            padding: 15px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .document-details p {
+            margin-bottom: 5px;
+        }
+
+        .signature {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777777;
+        }
+
+        .web-app-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2e7cff;
+            text-decoration: none;
+        }
+
+        .container-line {
+            width: 100%;
+            height: 2px;
+            background-color: lightblue;
+        }
+
+        /* Button Styles */
+        button {
+            outline: none;
+            height: 40px;
+            text-align: center;
+            border-radius: 40px;
+            background: #fff;
+            border: 2px solid #1ecd97;
+            color: #1ecd97;
+            letter-spacing: 1px;
+            text-shadow: 0;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:hover {
+            color: white;
+            background: #1ecd97;
+        }
+
+        button:active {
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="visible-container">
+    <h1>Document Contribution Invitation</h1>
+    <div class="container-line"></div>
+    <p>Hey Razor,</p>
+    <p>You have been invited to contribute to a document in DocVault, the Document Management System at Razorpay.</p>
+    <div class="document-details">
+        <p><strong>Document Details:</strong></p>
+        <p><a href="{{.DocumentURL}}" id="button"><button>[{{.DocumentProdAbbrev}}-{{.DocumentType}}] {{.DocumentTitle}}</button></a>
+            <br> by {{.DocumentOwner}} [{{.DocumentOwnerEmail}}]</p>
+    </div>
+    <p>Please click on the link above to access the document and make your contribution. Your expertise and insights would be greatly appreciated.</p>
+    <p>Thank you for your time and willingness to contribute.</p>
+    <a href="{{.BaseURL}}" class="web-app-link">Access the DocVault Web Application</a>
+    <p class="signature">Best Regards,<br>DocVault Team</p>
+</div>
+</body>
+</html>

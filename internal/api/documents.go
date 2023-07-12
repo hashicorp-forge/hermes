@@ -315,24 +315,21 @@ func DocumentHandler(
 				return
 			}
 
+			// load template
+			// Load the email template
+			//var body bytes.Buffer
+			templateBytes, err := ioutil.ReadFile("templates/review_email_template.html")
+			if err != nil {
+				l.Error("error parsing template: ", "err", err)
+				return
+			}
+
 			// Send emails to new approvers.
 			if cfg.Email != nil && cfg.Email.Enabled {
 				if len(approversToEmail) > 0 {
 					// TODO: use a template for email content.
-					rawBody := `
-<html>
-<body>
-<p>Hi!</p>
-<p>
-Your review has been requested for a new document, <a href="%s">[%s] %s</a>.
-</p>
-<p>
-Cheers,<br>
-Hermes
-</p>
-</body>
-</html>`
-
+					rawBody := string(templateBytes)
+					// returns the "baseurl/documents/{docid}"
 					docURL, err := getDocumentURL(cfg.BaseURL, docID)
 					if err != nil {
 						l.Error("error getting document URL",
@@ -345,7 +342,8 @@ Hermes
 							http.StatusInternalServerError)
 						return
 					}
-					body := fmt.Sprintf(rawBody, docURL, docObj.GetDocNumber(), docObj.GetTitle())
+					//body := fmt.Sprintf(rawBody, docURL, docObj.GetDocNumber(), docObj.GetTitle())
+					body := fmt.Sprintf(rawBody, docURL, docObj.GetProduct(), docObj.GetTitle())
 
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully on a failure here.
@@ -353,7 +351,8 @@ Hermes
 						_, err = s.SendEmail(
 							[]string{approverEmail},
 							cfg.Email.FromAddress,
-							fmt.Sprintf("Document review requested for %s", docObj.GetDocNumber()),
+							fmt.Sprintf("[%s]%s | Doc Review Request from %s", docObj.GetDocType(), docObj.GetTitle(), docObj.GetOwners()[0]),
+							//fmt.Sprintf("Document review requested for %s", docObj.GetDocNumber()),
 							body,
 						)
 						if err != nil {
@@ -368,7 +367,7 @@ Hermes
 							return
 						}
 					}
-					l.Info("approver emails sent")
+					l.Info("Reviewers emails sent")
 				}
 			}
 
@@ -384,7 +383,7 @@ Hermes
 
 			// Rename file with new title.
 			s.RenameFile(docID,
-				fmt.Sprintf("[%s] %s", docObj.GetDocNumber(), docObj.GetTitle()))
+				fmt.Sprintf("[%s] %s", docObj.GetProduct(), req.Title))
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched document", "doc_id", docID)
