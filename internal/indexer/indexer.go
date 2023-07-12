@@ -3,7 +3,6 @@ package indexer
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 	"time"
@@ -423,26 +422,30 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
+			// Uncomment following lines if you wish to share all of your documents contents to algolia
+			// for indexing
+
 			// Get document content.
-			exp, err := gwSvc.Drive.Files.Export(file.Id, "text/plain").Download()
-			if err != nil {
-				logError("error exporting document", err)
-				os.Exit(1)
-			}
-
-			content, err := io.ReadAll(exp.Body)
-
-			if err != nil {
-				logError("error reading exported document", err)
-				os.Exit(1)
-			}
-			// Trim doc content if it is larger than the maximum size.
-			if len(content) > maxContentSize {
-				content = content[:maxContentSize]
-			}
+			//exp, err := gwSvc.Drive.Files.Export(file.Id, "text/plain").Download()
+			//if err != nil {
+			//	logError("error exporting document", err)
+			//	os.Exit(1)
+			//}
+			//
+			//content, err := io.ReadAll(exp.Body)
+			//
+			//if err != nil {
+			//	logError("error reading exported document", err)
+			//	os.Exit(1)
+			//}
+			//// Trim doc content if it is larger than the maximum size.
+			//if len(content) > maxContentSize {
+			//	content = content[:maxContentSize]
+			//}
 
 			// Update document object with content and latest modified time.
-			docObj.SetContent(string(content))
+			//docObj.SetContent(string(content))
+			docObj.SetContent("NA")
 			docObj.SetModifiedTime(modifiedTime.Unix())
 
 			// Save the document in Algolia.
