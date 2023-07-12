@@ -56,6 +56,9 @@ type Document struct {
 	Product   Product
 	ProductID uint `gorm:"index:latest_product_number"`
 
+	// RelatedResources are the related resources for the document.
+	RelatedResources []*DocumentRelatedResource
+
 	// Status is the status of the document.
 	Status DocumentStatus
 
@@ -175,6 +178,9 @@ func (d *Document) Get(db *gorm.DB) error {
 	if err := db.
 		Where(Document{GoogleFileID: d.GoogleFileID}).
 		Preload(clause.Associations).
+		Preload("RelatedResources", func(db *gorm.DB) *gorm.DB {
+			return db.Order("document_related_resources.sort_order ASC")
+		}).
 		First(&d).
 		Error; err != nil {
 		return err
@@ -232,6 +238,155 @@ func GetLatestProductNumber(db *gorm.DB,
 	}
 
 	return d.DocumentNumber, nil
+}
+
+// ReplaceRelatedResources replaces related resources for document d.
+func (d *Document) ReplaceRelatedResources(
+	db *gorm.DB,
+	elrrs []DocumentRelatedResourceExternalLink,
+	hdrrs []DocumentRelatedResourceHermesDocument,
+) error {
+	if err := validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return err
+	}
+
+	// Get document ID if not known.
+	if d.ID == 0 {
+		doc := &Document{
+			GoogleFileID: d.GoogleFileID,
+		}
+		if err := doc.Get(db); err != nil {
+			return fmt.Errorf("error getting document: %w", err)
+		}
+		d.ID = doc.ID
+	}
+
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		// Delete assocations of RelatedResources.
+		rrs := []DocumentRelatedResource{}
+		if err := tx.
+			Where("document_id = ?", d.ID).
+			Find(&rrs).Error; err != nil {
+			return fmt.Errorf("error finding existing related resources: %w", err)
+		}
+		for _, rr := range rrs {
+			if err := tx.
+				Exec(
+					fmt.Sprintf("DELETE FROM %q WHERE id = ?", rr.RelatedResourceType),
+					rr.RelatedResourceID,
+				).
+				Error; err != nil {
+				return fmt.Errorf(
+					"error deleting existing typed related resources: %w", err)
+			}
+		}
+
+		// Delete RelatedResources.
+		if err := tx.
+			Unscoped(). // Hard delete instead of soft delete.
+			Where("document_id = ?", d.ID).
+			Delete(&DocumentRelatedResource{}).Error; err != nil {
+			return fmt.Errorf("error deleting existing related resources: %w", err)
+		}
+
+		// Create all related resources.
+		for _, elrr := range elrrs {
+			if err := elrr.Create(tx); err != nil {
+				return fmt.Errorf(
+					"error creating external link related resource: %w", err)
+			}
+		}
+		for _, hdrr := range hdrrs {
+			if err := hdrr.Create(tx); err != nil {
+				return fmt.Errorf(
+					"error creating Hermes document related resource: %w", err)
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("error replacing related resources: %w", err)
+	}
+
+	return nil
+}
+
+// GetRelatedResources returns typed related resources for document d.
+func (d *Document) GetRelatedResources(db *gorm.DB) (
+	elrrs []DocumentRelatedResourceExternalLink,
+	hdrrs []DocumentRelatedResourceHermesDocument,
+	err error,
+) {
+	if err = validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return
+	}
+
+	// Get the document.
+	if err := d.Get(db); err != nil {
+		return nil, nil, fmt.Errorf("error getting document: %w", err)
+	}
+
+	// Get related resources.
+	for _, rr := range d.RelatedResources {
+		switch rr.RelatedResourceType {
+		case "document_related_resource_external_links":
+			elrr := DocumentRelatedResourceExternalLink{}
+			if err := db.
+				Where("id = ?", rr.RelatedResourceID).
+				Preload(clause.Associations).
+				First(&elrr).Error; err != nil {
+				return nil,
+					nil,
+					fmt.Errorf("error getting external link related resource: %w", err)
+			}
+			elrrs = append(elrrs, elrr)
+		case "document_related_resource_hermes_documents":
+			hdrr := DocumentRelatedResourceHermesDocument{}
+			if err := db.
+				Where("id = ?", rr.RelatedResourceID).
+				Preload(clause.Associations).
+				First(&hdrr).Error; err != nil {
+				return nil,
+					nil,
+					fmt.Errorf(
+						"error getting document for Hermes document related resource: %w",
+						err)
+			}
+			hdrrs = append(hdrrs, hdrr)
+		default:
+			return nil,
+				nil,
+				fmt.Errorf("unknown related resource type: %s", rr.RelatedResourceType)
+		}
+	}
+
+	return
 }
 
 // Upsert updates or inserts the receiver document into database db.
