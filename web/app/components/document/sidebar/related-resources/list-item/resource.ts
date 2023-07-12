@@ -29,8 +29,8 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   }
 
   protected get title() {
-    if ("url" in this.args.resource) {
-      return this.args.resource.title || this.url;
+    if ("name" in this.args.resource) {
+      return this.args.resource.name;
     }
     return this.args.resource.title;
   }

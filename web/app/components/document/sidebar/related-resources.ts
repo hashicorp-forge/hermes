@@ -19,10 +19,9 @@ enum RelatedResourceSelector {
 }
 
 export interface RelatedExternalLink {
-  id: number;
-  title: string;
+  name: string;
   url: string;
-  order: number;
+  sortOrder: number;
 }
 
 export interface RelatedHermesDocument {
@@ -31,7 +30,7 @@ export interface RelatedHermesDocument {
   title: string;
   type: string;
   documentNumber: string;
-  order: number;
+  sortOrder: number;
 }
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
@@ -44,6 +43,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   optionalSearchFilters?: string[];
   itemLimit?: number;
   modalInputPlaceholder: string;
+  documentIsDraft?: boolean;
 }
 
 interface DocumentSidebarRelatedResourcesComponentSignature {
@@ -63,9 +63,37 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @tracked loadingHasFailed = false;
 
+  get formattedRelatedResources(): {
+    hermesDocuments: Partial<RelatedHermesDocument>[];
+    externalLinks: Partial<RelatedExternalLink>[];
+  } {
+    const externalLinks = this.relatedLinks.map((link) => {
+      return {
+        name: link.name || link.url,
+        url: link.url,
+        sortOrder: this.relatedLinks.indexOf(link) + 1,
+      };
+    });
+
+    const hermesDocuments = this.relatedDocuments.map((doc) => {
+      return {
+        googleFileID: doc.googleFileID,
+        sortOrder:
+          this.relatedDocuments.indexOf(doc) + 1 + externalLinks.length,
+      };
+    });
+
+    return {
+      externalLinks,
+      hermesDocuments,
+    };
+  }
+
   get relatedResources(): {
     [key: string]: RelatedResource;
   } {
+    // we should format this to what the API expects
+
     let resourcesArray: RelatedResource[] = [];
 
     resourcesArray.pushObjects(this.relatedDocuments);
@@ -105,8 +133,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   protected search = restartableTask(async (dd: any, query: string) => {
     let index =
-      this.configSvc.config.algolia_docs_index_name +
-      "_createdTime_desc__productRanked";
+      this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
     let filterString = `(NOT objectID:"${this.args.objectID}")`;
 
@@ -191,7 +218,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @action editResource(resource: RelatedExternalLink) {
     let resourceIndex = this.relatedLinks.findIndex(
-      (link) => link.id === resource.id
+      (link) => link.sortOrder === resource.sortOrder
     );
 
     if (resourceIndex !== -1) {
@@ -200,20 +227,29 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       this.relatedLinks = this.relatedLinks;
       // TODO: maybe await?
       void this.saveRelatedResources.perform(
-        `#related-resource-${resource.id}`
+        `#related-resource-${resource.sortOrder}`
       );
     }
   }
 
   protected loadRelatedResources = task(async () => {
-    // make a fetch GET request to the back end
     try {
       const resources = await this.fetchSvc
-        .fetch(`/api/v1/documents/${this.args.objectID}/related-resources`)
+        .fetch(
+          `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+            this.args.objectID
+          }/related-resources`
+        )
         .then((response) => response?.json());
 
-      this.relatedDocuments = resources.hermesDocuments;
-      this.relatedLinks = resources.externalLinks;
+      if (resources.hermesDocuments) {
+        this.relatedDocuments = resources.hermesDocuments;
+      }
+
+      if (resources.externalLinks) {
+        this.relatedLinks = resources.externalLinks;
+        console.log(this.relatedLinks);
+      }
 
       this.loadingHasFailed = false;
     } catch (e: unknown) {
@@ -236,7 +272,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         title: document.title,
         type: document.docType,
         documentNumber: document.docNumber,
-        order: 1,
+        sortOrder: 1,
       } as RelatedHermesDocument;
 
       this.relatedDocuments.unshiftObject(relatedHermesDocument);
@@ -289,14 +325,19 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     if (selector) {
       void this.handleAnimationClasses.perform(selector);
     }
-    // await this.fetchSvc.fetch(`/api/v1/documents/${this.args.objectID}/related-resources`, {
-    //   method: "PUT",
-    //   body: JSON.stringify(this.relatedDocuments),
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   }
-    // })
-    await timeout(Ember.testing ? 0 : 500);
+
+    await this.fetchSvc.fetch(
+      `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+        this.args.objectID
+      }/related-resources`,
+      {
+        method: "PUT",
+        body: JSON.stringify(this.formattedRelatedResources),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   });
 
   protected removeResource = dropTask(async (resource: RelatedResource) => {

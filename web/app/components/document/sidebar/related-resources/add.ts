@@ -4,7 +4,7 @@ import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
-import { dropTask, restartableTask, timeout } from "ember-concurrency";
+import { dropTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
@@ -12,7 +12,6 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
 } from "hermes/components/document/sidebar/related-resources";
-import Ember from "ember";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
@@ -75,7 +74,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
 
     if (this.args.allowAddingExternalLinks) {
-      return !this.queryIsURL && !this.fetchURLInfo.isRunning;
+      return !this.queryIsURL;
     }
 
     return true;
@@ -120,10 +119,9 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   @action addRelatedExternalLink() {
     let externalLink = {
-      id: Math.floor(Math.random() * 1000000000),
       url: this.query,
-      title: this.externalLinkTitle,
-      order: 0,
+      name: this.externalLinkTitle,
+      sortOrder: 1,
     };
 
     this.checkForDuplicate(externalLink.url);
@@ -186,7 +184,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action protected onInput(dd: any, e: Event) {
     const input = e.target as HTMLInputElement;
     this.query = input.value;
-    void this.checkURL.perform();
+    this.checkURL();
     void this.args.search(dd, this.query);
   }
 
@@ -196,33 +194,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
-  protected fetchURLInfo = restartableTask(async () => {
-    try {
-      await timeout(Ember.testing ? 0 : 750);
-      this.urlWasProcessed = true;
-
-      // const response = await this.fetchSvc.fetch(urlToFetch, {
-      //   // For when we make a real request:
-      //   // headers: {
-      //   //   Authorization:
-      //   //     "Bearer " + this.session.data.authenticated.access_token,
-      //   //   "Content-Type": "application/json",
-      //   // },
-      // });
-
-      // check if duplicate, if so, show error message
-    } catch (e) {
-      console.error(e);
-    }
-  });
-
-  protected checkURL = restartableTask(async () => {
+  @action checkURL() {
     this.queryIsURL = isValidURL(this.query);
     if (this.queryIsURL) {
-      void this.fetchURLInfo.perform();
+      this.urlWasProcessed = true;
       this.checkForDuplicate(this.query);
     }
-  });
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

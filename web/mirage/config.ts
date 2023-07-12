@@ -242,7 +242,25 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used by the RelatedResources component.
+       * Used by the RelatedResources component when the doc is a draft.
+       */
+      this.get("drafts/:document_id/related-resources", (schema, request) => {
+        let hermesDocuments = schema.relatedHermesDocument
+          .all()
+          .models.map((doc) => {
+            return doc.attrs;
+          });
+        let externalLinks = schema.relatedExternalLinks
+          .all()
+          .models.map((link) => {
+            return link.attrs;
+          });
+
+        return new Response(200, {}, { hermesDocuments, externalLinks });
+      });
+
+      /**
+       * Used by the RelatedResources component when the doc is published.
        */
       this.get(
         "documents/:document_id/related-resources",
@@ -259,7 +277,7 @@ export default function (mirageConfig) {
             });
 
           return new Response(200, {}, { hermesDocuments, externalLinks });
-        }, { timing: 10 }
+        }
       );
 
       /**

@@ -27,6 +27,7 @@
       <div class="sidebar-body-container">
         <div class="flex flex-col items-start">
           <Document::Sidebar::RelatedResources
+            @documentIsDraft={{this.isDraft}}
             @productArea={{@document.product}}
             @objectID={{@document.objectID}}
             @allowAddingExternalLinks={{true}}
@@ -38,23 +39,6 @@
             }}
           />
         </div>
-
-        {{! TODO: Remove but test this }}
-        <!--
-        <div class="flex flex-col items-start">
-          <Document::Sidebar::RelatedResources
-            @productArea={{@document.product}}
-            @objectID={{@document.objectID}}
-            @onChange={{this.onRelatedResourcesChange}}
-            @headerTitle="PRD"
-            @modalHeaderTitle="Add PRD"
-            @modalInputPlaceholder="Search PRDs..."
-            @searchFilters="docType:PRD"
-            @itemLimit={{1}}
-          />
-        </div>
-        -->
-
         <div class="flex flex-col items-start space-y-2">
           {{#if (is-empty @document.docNumber)}}
             <small

@@ -22,7 +22,10 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   @tracked resource = this.args.resource;
 
   @tracked url = this.args.resource.url;
-  @tracked title = this.args.resource.title;
+  @tracked title =
+    this.args.resource.name === this.args.resource.url
+      ? ""
+      : this.args.resource.name;
 
   @tracked errorMessageIsShown = false;
 
@@ -65,13 +68,13 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
 
     let newResource = this.args.resource;
     newResource.url = this.url;
-    newResource.title = this.title;
+    newResource.name = this.title;
 
     await this.validateURL.perform();
 
     if (this.urlIsValid) {
-      if (!this.args.resource.title.length) {
-        newResource.title = this.url;
+      if (!this.args.resource.name.length) {
+        newResource.name = this.url;
       }
       this.args.onSave(newResource);
     } else {
