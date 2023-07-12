@@ -14,6 +14,7 @@ interface DocumentSidebarRelatedResourcesListItemComponentSignature {
     resource: RelatedHermesDocument | RelatedExternalLink;
     removeResource: (resource: RelatedResource) => void;
     editResource: (resource: RelatedExternalLink) => void;
+    editingIsDisabled?: boolean;
   };
   Blocks: {
     default: [];

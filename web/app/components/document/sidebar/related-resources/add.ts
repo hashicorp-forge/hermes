@@ -120,7 +120,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action addRelatedExternalLink() {
     let externalLink = {
       url: this.query,
-      name: this.externalLinkTitle,
+      name: this.externalLinkTitle || this.query,
       sortOrder: 1,
     };
 

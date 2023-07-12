@@ -44,6 +44,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   itemLimit?: number;
   modalInputPlaceholder: string;
   documentIsDraft?: boolean;
+  editingIsDisabled?: boolean;
 }
 
 interface DocumentSidebarRelatedResourcesComponentSignature {
@@ -127,6 +128,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   get sectionHeaderButtonIsHidden(): boolean {
+    if (this.args.editingIsDisabled) {
+      return true;
+    }
+
     if (this.args.itemLimit) {
       return Object.keys(this.relatedResources).length >= this.args.itemLimit;
     } else {
@@ -230,7 +235,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // PROBLEM: the getter isn't updating with the new resource
       this.relatedLinks = this.relatedLinks;
 
-      await this.saveRelatedResources.perform(
+      void this.saveRelatedResources.perform(
         `#related-resource-${resource.sortOrder}`
       );
     }
@@ -263,7 +268,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   protected addRelatedExternalLink = restartableTask(
     async (link: RelatedExternalLink) => {
       this.relatedLinks.unshiftObject(link);
-      await this.saveRelatedResources.perform(
+      void this.saveRelatedResources.perform(
         RelatedResourceSelector.ExternalLink
       );
     }
@@ -284,7 +289,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         this.relatedDocuments.unshiftObject(relatedHermesDocument);
       }
 
-      await this.saveRelatedResources.perform(
+      void this.saveRelatedResources.perform(
         RelatedResourceSelector.HermesDocument
       );
 
@@ -346,7 +351,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       }
     );
 
-    await this.loadRelatedResources.perform();
+    // await this.loadRelatedResources.perform();
   });
 
   protected removeResource = dropTask(async (resource: RelatedResource) => {
@@ -355,7 +360,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     } else {
       this.relatedDocuments.removeObject(resource);
     }
-    await this.saveRelatedResources.perform();
+    void this.saveRelatedResources.perform();
   });
 }
 

@@ -29,11 +29,14 @@
         />
       </ExternalLink>
     {{/if}}
-    <Document::Sidebar::RelatedResources::ListItem::OverflowMenu
-      @resource={{@resource}}
-      @onRemoveClick={{@removeResource}}
-      @onEditClick={{this.showModal}}
-    />
+    {{#unless @editingIsDisabled}}
+      <Document::Sidebar::RelatedResources::ListItem::OverflowMenu
+        @resource={{@resource}}
+        @onRemoveClick={{@removeResource}}
+        @onEditClick={{this.showModal}}
+      />
+    {{/unless}}
+
   </div>
 </li>
 
