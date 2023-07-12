@@ -965,3 +965,202 @@ func TestGetLatestProductNumber(t *testing.T) {
 		assert.Equal(2, num)
 	})
 }
+
+func TestDocumentReplaceRelatedResources(t *testing.T) {
+	dsn := os.Getenv("HERMES_TEST_POSTGRESQL_DSN")
+	if dsn == "" {
+		t.Skip("HERMES_TEST_POSTGRESQL_DSN environment variable isn't set")
+	}
+
+	t.Run("Get and Update", func(t *testing.T) {
+		db, tearDownTest := setupTest(t, dsn)
+		defer tearDownTest(t)
+
+		t.Run("Create a document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT1",
+				LongName: "DocumentType1",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a product", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Product{
+				Name:         "Product1",
+				Abbreviation: "P1",
+			}
+			err := p.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create documents", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID1",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err := d.Create(db)
+			require.NoError(err)
+
+			d = Document{
+				GoogleFileID: "GoogleFileID2",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err = d.Create(db)
+			require.NoError(err)
+
+			d = Document{
+				GoogleFileID: "GoogleFileID3",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err = d.Create(db)
+			require.NoError(err)
+		})
+
+		t.Run("Add external link related resources", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+
+			rr := DocumentRelatedResourceExternalLink{
+				RelatedResource: DocumentRelatedResource{
+					Document: Document{
+						GoogleFileID: "GoogleFileID2",
+					},
+					SortOrder: 1,
+				},
+				Name: "Name1",
+				URL:  "URL1",
+			}
+			err := rr.Create(db)
+			require.NoError(err)
+
+			rr = DocumentRelatedResourceExternalLink{
+				RelatedResource: DocumentRelatedResource{
+					Document: Document{
+						GoogleFileID: "GoogleFileID2",
+					},
+					SortOrder: 2,
+				},
+				Name: "Name2",
+				URL:  "URL2",
+			}
+			err = rr.Create(db)
+			require.NoError(err)
+
+			rr = DocumentRelatedResourceExternalLink{
+				RelatedResource: DocumentRelatedResource{
+					Document: Document{
+						GoogleFileID: "GoogleFileID2",
+					},
+					SortOrder: 3,
+				},
+				Name: "Name3",
+				URL:  "URL3",
+			}
+			err = rr.Create(db)
+			require.NoError(err)
+		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID2",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.Len(d.RelatedResources, 3)
+		})
+
+		t.Run("Replace related resources", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID2",
+			}
+			err := d.ReplaceRelatedResources(db,
+				[]DocumentRelatedResourceExternalLink{
+					{
+						RelatedResource: DocumentRelatedResource{
+							Document: Document{
+								GoogleFileID: "GoogleFileID2",
+							},
+							SortOrder: 1,
+						},
+						Name: "Name4",
+						URL:  "URL4",
+					},
+				},
+				[]DocumentRelatedResourceHermesDocument{
+					{
+						RelatedResource: DocumentRelatedResource{
+							Document: Document{
+								GoogleFileID: "GoogleFileID2",
+							},
+							SortOrder: 2,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID1",
+						},
+					},
+					{
+						RelatedResource: DocumentRelatedResource{
+							Document: Document{
+								GoogleFileID: "GoogleFileID2",
+							},
+							SortOrder: 3,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID3",
+						},
+					},
+				},
+			)
+			require.NoError(err)
+		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID2",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.Len(d.RelatedResources, 3)
+		})
+
+		t.Run("Get typed related resources", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID2",
+			}
+			elrrs, hdrrs, err := d.GetRelatedResources(db)
+			require.NoError(err)
+			assert.Len(elrrs, 1)
+			assert.Equal("Name4", elrrs[0].Name)
+			assert.Equal("URL4", elrrs[0].URL)
+			assert.Equal(1, elrrs[0].RelatedResource.SortOrder)
+			assert.Len(hdrrs, 2)
+			assert.Equal("GoogleFileID1", hdrrs[0].Document.GoogleFileID)
+			assert.Equal(2, hdrrs[0].RelatedResource.SortOrder)
+			assert.Equal("GoogleFileID3", hdrrs[1].Document.GoogleFileID)
+			assert.Equal(3, hdrrs[1].RelatedResource.SortOrder)
+		})
+	})
+
+}

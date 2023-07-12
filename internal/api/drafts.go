@@ -439,14 +439,16 @@ func DraftsDocumentHandler(
 	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Get document ID from URL path
-		docId, err := parseURLPath(r.URL.Path, "/api/v1/drafts")
+		// Parse document ID from the URL path.
+		docId, isRelatedResourcesRequest, err := parseDocumentsURLPath(
+			r.URL.Path, "drafts")
 		if err != nil {
-			l.Error("error requesting document draft from algolia",
+			l.Error("error parsing drafts URL path",
 				"error", err,
 				"path", r.URL.Path,
+				"method", r.Method,
 			)
-			http.Error(w, "Error requesting document draft", http.StatusInternalServerError)
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -516,6 +518,13 @@ func DraftsDocumentHandler(
 			http.Error(w,
 				"Only owners or contributors can access a draft document",
 				http.StatusUnauthorized)
+			return
+		}
+
+		// Pass request off to the documents related resources handler if
+		// appropriate.
+		if isRelatedResourcesRequest {
+			documentsResourceRelatedResourcesHandler(w, r, docId, docObj, l, ar, db)
 			return
 		}
 
