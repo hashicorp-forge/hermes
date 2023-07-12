@@ -68,7 +68,7 @@ func documentsResourceRelatedResourcesHandler(
 				"method", r.Method,
 				"doc_id", docID,
 			)
-			http.Error(w, "Error accessing document",
+			http.Error(w, "Error accessing document resources",
 				http.StatusInternalServerError)
 			return
 		}
