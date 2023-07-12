@@ -43,13 +43,12 @@ module(
         title: documentAttrs.title,
         type: documentAttrs.docType,
         documentNumber: documentAttrs.docNumber,
-        order: 1,
+        sortOrder: 1,
       });
       this.set("externalResource", {
-        id: 1,
         url: "https://example.com",
-        title: "Example",
-        order: 1,
+        name: "Example",
+        sortOrder: 1,
       });
       this.set("removeResource", () => {});
       this.set("editResource", () => {});

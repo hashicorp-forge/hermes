@@ -2,7 +2,7 @@ import { Factory } from "miragejs";
 
 export default Factory.extend({
   id: 0,
-  order: (i) => i,
+  sortOrder: (i) => i,
   googleFileID() {
     return `${this.id}`;
   },

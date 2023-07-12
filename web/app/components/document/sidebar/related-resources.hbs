@@ -40,7 +40,7 @@
       <Document::Sidebar::RelatedResources::ListItem
         @resource={{r}}
         @removeResource={{this.removeResource.perform}}
-        @editResource={{this.editResource}}
+        @editResource={{perform this.editResource}}
       />
     </:resource>
   </Document::Sidebar::RelatedResources::List>
@@ -51,8 +51,8 @@
     @headerTitle={{@modalHeaderTitle}}
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideAddResourceModal}}
-    @addRelatedExternalLink={{this.addRelatedExternalLink}}
-    @addRelatedDocument={{this.addRelatedDocument}}
+    @addRelatedExternalLink={{perform this.addRelatedExternalLink}}
+    @addRelatedDocument={{perform this.addRelatedDocument}}
     @shownDocuments={{this.shownDocuments}}
     @objectID={{@objectID}}
     @relatedDocuments={{this.relatedDocuments}}

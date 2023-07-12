@@ -5,8 +5,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
-import htmlElement from "hermes/utils/html-element";
-import { wait } from "ember-animated/.";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -206,7 +204,7 @@ module(
 
     test("external resources can be deleted (modal)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedExternalLink", {
-        title: "Example",
+        name: "Example",
         url: "https://example.com",
       });
 
@@ -233,7 +231,7 @@ module(
 
     test("external resources can be edited", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedExternalLink", {
-        title: "Example",
+        name: "Example",
         url: "https://example.com",
       });
 
@@ -308,8 +306,6 @@ module(
         .doesNotExist("the modal is closed");
 
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 }, "there is 1 item");
-
-      // TODO: test this with mirage and a real PUT request
     });
 
     test("it shows a 'no results' fallback message", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -425,7 +421,7 @@ module(
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 2 }, "there are 2 items");
 
       assert
-        .dom(LIST_ITEM_SELECTOR + ":nth-child(2)")
+        .dom(LIST_ITEM_SELECTOR + ":first-child")
         .hasText(
           "HashiCorp",
           "the external resource displays a title when provided"

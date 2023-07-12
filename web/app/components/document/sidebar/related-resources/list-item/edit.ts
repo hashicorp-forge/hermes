@@ -54,15 +54,15 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     this.title = title;
     this.url = url;
 
-    void this.validateURL.perform();
+    this.validateURL();
   }
 
-  protected validateURL = restartableTask(async () => {
+  @action validateURL() {
     this.urlIsValid = isValidURL(this.url);
     this.errorMessageIsShown = !this.urlIsValid;
-  });
+  }
 
-  protected onSave = restartableTask(async (e: Event) => {
+  @action onSave(e: Event) {
     // prevent the form from submitting on enter
     e.preventDefault();
 
@@ -70,7 +70,7 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     newResource.url = this.url;
     newResource.name = this.title;
 
-    await this.validateURL.perform();
+    this.validateURL();
 
     if (this.urlIsValid) {
       if (!this.args.resource.name.length) {
@@ -80,7 +80,7 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     } else {
       this.errorMessageIsShown = true;
     }
-  });
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

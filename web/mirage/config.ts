@@ -419,6 +419,74 @@ export default function (mirageConfig) {
           return new Response(200, {}, document.attrs);
         }
       });
+
+      /*************************************************************************
+       *
+       * PUT requests
+       *
+       *************************************************************************/
+
+      // Related resources (drafts)
+
+      this.put("/drafts/:document_id/related-resources", (schema, request) => {
+        let requestBody = JSON.parse(request.requestBody);
+        let { hermesDocuments, externalLinks } = requestBody;
+
+        let doc = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (doc) {
+          doc.update({
+            hermesDocuments,
+            externalLinks,
+          });
+          return new Response(200, {}, doc.attrs);
+        }
+      });
+
+      // Related resources (published docs)
+
+      this.put(
+        "documents/:document_id/related-resources",
+        (schema, request) => {
+          let requestBody = JSON.parse(request.requestBody);
+          let { hermesDocuments, externalLinks } = requestBody;
+
+          // we're not yet saving this to the document;
+          // currently we're just just overwriting the global mirage objects
+
+          this.schema.db.relatedHermesDocument.remove();
+          this.schema.db.relatedExternalLinks.remove();
+
+          hermesDocuments.forEach(
+            (doc: { googleFileID: string; sortOrder: number }) => {
+              const mirageDocument = this.schema.document.findBy({
+                objectID: doc.googleFileID,
+              }).attrs;
+
+              this.schema.relatedHermesDocument.create({
+                googleFileID: doc.googleFileID,
+                sortOrder: hermesDocuments.indexOf(doc) + 1,
+                title: mirageDocument.title,
+                type: mirageDocument.docType,
+                documentNumber: mirageDocument.docNumber,
+              });
+            }
+          );
+
+          externalLinks.forEach((link) => {
+            this.schema.relatedExternalLinks.create({
+              name: link.name,
+              url: link.url,
+              sortOrder:
+                externalLinks.indexOf(link) + 1 + hermesDocuments.length,
+            });
+          });
+
+          return new Response(200, {}, {});
+        }
+      );
     },
   };
 

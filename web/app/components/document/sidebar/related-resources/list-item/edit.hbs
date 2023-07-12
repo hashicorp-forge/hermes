@@ -11,7 +11,7 @@
       <form
         {{did-insert this.registerForm}}
         class="px-6 pb-6"
-        {{on "submit" (perform this.onSave)}}
+        {{on "submit" this.onSave}}
       >
         <Hds::Form::TextInput::Field
           {{on "input" this.updateFormValues}}
@@ -49,7 +49,7 @@
           data-test-edit-related-resource-modal-save-button
           @text="Save changes"
           @color="primary"
-          {{on "click" (perform this.onSave)}}
+          {{on "click" this.onSave}}
         />
         <Hds::Button
           @text="Cancel"

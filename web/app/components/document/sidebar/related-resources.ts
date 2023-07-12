@@ -112,7 +112,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         } else if ("googleFileID" in resource) {
           key = resource.googleFileID;
         }
+
         resourcesObject[key] = resource;
+        (resourcesObject[key] as RelatedResource).sortOrder =
+          resourcesArray.indexOf(resource) + 1;
       }
     );
 
@@ -216,21 +219,22 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     this.addResourceModalIsShown = false;
   }
 
-  @action editResource(resource: RelatedExternalLink) {
+  editResource = dropTask(async (resource: RelatedExternalLink) => {
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.sortOrder === resource.sortOrder
     );
 
     if (resourceIndex !== -1) {
       this.relatedLinks[resourceIndex] = resource;
+
       // PROBLEM: the getter isn't updating with the new resource
       this.relatedLinks = this.relatedLinks;
-      // TODO: maybe await?
-      void this.saveRelatedResources.perform(
+
+      await this.saveRelatedResources.perform(
         `#related-resource-${resource.sortOrder}`
       );
     }
-  }
+  });
 
   protected loadRelatedResources = task(async () => {
     try {
@@ -248,7 +252,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
       if (resources.externalLinks) {
         this.relatedLinks = resources.externalLinks;
-        console.log(this.relatedLinks);
       }
 
       this.loadingHasFailed = false;
@@ -257,33 +260,37 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
   });
 
-  @action addRelatedExternalLink(link: RelatedExternalLink) {
-    this.relatedLinks.unshiftObject(link);
-    void this.saveRelatedResources.perform(
-      RelatedResourceSelector.ExternalLink
-    );
-  }
-
-  @action addRelatedDocument(documentObjectID: string) {
-    let document = this.shownDocuments[documentObjectID];
-    if (document) {
-      const relatedHermesDocument = {
-        googleFileID: document.objectID,
-        title: document.title,
-        type: document.docType,
-        documentNumber: document.docNumber,
-        sortOrder: 1,
-      } as RelatedHermesDocument;
-
-      this.relatedDocuments.unshiftObject(relatedHermesDocument);
+  protected addRelatedExternalLink = restartableTask(
+    async (link: RelatedExternalLink) => {
+      this.relatedLinks.unshiftObject(link);
+      await this.saveRelatedResources.perform(
+        RelatedResourceSelector.ExternalLink
+      );
     }
+  );
 
-    // TODO: maybe await?
-    void this.saveRelatedResources.perform(
-      RelatedResourceSelector.HermesDocument
-    );
-    this.hideAddResourceModal();
-  }
+  protected addRelatedDocument = restartableTask(
+    async (documentObjectID: string) => {
+      let document = this.shownDocuments[documentObjectID];
+      if (document) {
+        const relatedHermesDocument = {
+          googleFileID: document.objectID,
+          title: document.title,
+          type: document.docType,
+          documentNumber: document.docNumber,
+          sortOrder: 1,
+        } as RelatedHermesDocument;
+
+        this.relatedDocuments.unshiftObject(relatedHermesDocument);
+      }
+
+      await this.saveRelatedResources.perform(
+        RelatedResourceSelector.HermesDocument
+      );
+
+      this.hideAddResourceModal();
+    }
+  );
 
   protected handleAnimationClasses = restartableTask(
     async (selector: string) => {
@@ -338,6 +345,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         },
       }
     );
+
+    await this.loadRelatedResources.perform();
   });
 
   protected removeResource = dropTask(async (resource: RelatedResource) => {
