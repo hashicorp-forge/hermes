@@ -471,8 +471,56 @@ module(
         .doesNotExist("the error message is removed when the URL changes");
     });
 
-    test("you can set an item limit", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+    test("you can set an item limit", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.createList("relatedHermesDocument", 3);
 
-    test("you can turn off the external link fallback", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @itemLimit={{1}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Test placeholder"
+        />
+      `);
+
+      assert
+        .dom(LIST_ITEM_SELECTOR)
+        .exists({ count: 1 }, "items are limited by the 'itemLimit' argument");
+
+      assert
+        .dom(ADD_RESOURCE_BUTTON_SELECTOR)
+        .doesNotExist("the add button is removed when the limit is reached");
+    });
+
+    test("you can turn off the external link fallback", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{false}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Test placeholder"
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await fillIn(
+        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+        "https://example.com"
+      );
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+        .doesNotExist("the external resource form is not shown");
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .exists("the fallback message is shown");
+    });
   }
 );

@@ -37,6 +37,7 @@ import AnimatedOrphans from "ember-animated/components/animated-orphans";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
+import { HdsFormErrorComponent } from "hds/form/error";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -66,6 +67,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "Hds::Link::Inline": HdsLinkInlineComponent;
     "Hds::Link::Standalone": HdsLinkStandaloneComponent;
     "Hds::Modal": HdsModalComponent;
+    "Hds::Form::Error": HdsFormErrorComponent;
     "Hds::Form::Checkbox::Field": HdsFormCheckboxFieldComponent;
     "Hds::Form::Textarea::Field": HdsFormTextareaFieldComponent;
     "Hds::Form::Toggle::Base": HdsFormToggleBaseComponent;
