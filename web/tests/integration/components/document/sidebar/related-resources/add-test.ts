@@ -1,6 +1,11 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { fillIn, render } from "@ember/test-helpers";
+import {
+  fillIn,
+  render,
+  triggerEvent,
+  triggerKeyEvent,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
@@ -8,6 +13,7 @@ import { HermesDocument } from "hermes/types/document";
 const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
 const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
 const LIST_HEADER_SELECTOR = "[data-test-related-resources-list-header]";
+const LIST_ITEM_SELECTOR = ".x-dropdown-list-item";
 const DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const NO_MATCHES_SELECTOR = ".related-resources-modal-body-header";
 
@@ -198,16 +204,6 @@ module(
         );
     });
 
-    todo(
-      "it conditionally enables keyboard navigation",
-      async function (
-        this: DocumentSidebarRelatedResourcesAddTestContext,
-        assert
-      ) {
-        assert.true(false);
-      }
-    );
-
     test("it returns query results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
       await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
           <Document::Sidebar::RelatedResources::Add
@@ -231,13 +227,8 @@ module(
       assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 1 });
     });
 
-    todo(
-      "it can add external links",
-      async function (
-        this: DocumentSidebarRelatedResourcesAddTestContext,
-        assert
-      ) {
-        await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+    test("it conditionally enables keyboard navigation", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
           <Document::Sidebar::RelatedResources::Add
             @headerTitle="Test title"
             @inputPlaceholder="Test placeholder"
@@ -245,7 +236,6 @@ module(
             @addRelatedExternalLink={{this.noop}}
             @addRelatedDocument={{this.noop}}
             @shownDocuments={{this.shownDocuments}}
-            @allowAddingExternalLinks={{true}}
             @objectID="test"
             @relatedDocuments={{array}}
             @relatedLinks={{array}}
@@ -253,13 +243,37 @@ module(
           />
         `);
 
-        await fillIn(SEARCH_INPUT_SELECTOR, "https://www.hashicorp.com");
+      // assert that no item is aria-selected
+      // keydown and assert that an item is selected
+      // unfocus the search input and assert that keyboard navigation is disabled
 
-        assert.true(false);
+      assert
+        .dom(DOCUMENT_OPTION_SELECTOR)
+        .doesNotHaveAttribute("aria-selected");
 
-        // TODO: Test that it saves on submit
-        // await click(EXTERNAL_RESOURCE_FORM_BUTTON_SELECTOR);
-      }
-    );
+      await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+
+      // Assert that the first item is selected
+      assert.dom(DOCUMENT_OPTION_SELECTOR).hasAttribute("aria-selected");
+
+      // Disable keyboard navigation
+      await triggerEvent(SEARCH_INPUT_SELECTOR, "focusout");
+
+      // Try keydown again. Normally this would select the second item.
+      await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+
+      // Assert that the first item is still selected
+      assert.dom(DOCUMENT_OPTION_SELECTOR).hasAttribute("aria-selected");
+
+      // Enable keyboard navigation
+      await triggerEvent(SEARCH_INPUT_SELECTOR, "focusin");
+
+      // Try keydown again. This should select the second item.
+      await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+
+      assert
+        .dom(`${LIST_ITEM_SELECTOR}:nth-child(2) ${DOCUMENT_OPTION_SELECTOR}`)
+        .hasAttribute("aria-selected");
+    });
   }
 );

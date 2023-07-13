@@ -117,7 +117,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @tracked protected query: string = "";
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected focusedItemIndex = -1;
-  @tracked protected keyboardNavIsEnabled =
+  @tracked private _keyboardNavIsEnabled =
     this.args.keyboardNavIsEnabled ?? true;
 
   /**
@@ -163,6 +163,21 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   }
 
   /**
+   * Whether keyboard navigation is enabled.
+   * If the parent component has passed in a value,
+   * use that. Otherwise, use the local value,
+   * which depends on filterInput focus.
+   */
+  get keyboardNavIsEnabled() {
+    if (this.args.keyboardNavIsEnabled !== undefined) {
+      // Defer to the parent argument if it exists.
+      return this.args.keyboardNavIsEnabled;
+    } else {
+      return this._keyboardNavIsEnabled;
+    }
+  }
+
+  /**
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
@@ -175,10 +190,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Called when the filter input is focused.
    */
   @action protected maybeEnableKeyboardNav() {
-    if (this.args.keyboardNavIsEnabled === false) {
-      return;
-    }
-    this.keyboardNavIsEnabled = true;
+    this._keyboardNavIsEnabled = true;
   }
 
   /**
@@ -186,7 +198,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Called when the filter input loses focus.
    */
   @action protected disableKeyboardNav() {
-    this.keyboardNavIsEnabled = false;
+    this._keyboardNavIsEnabled = false;
   }
 
   /**
