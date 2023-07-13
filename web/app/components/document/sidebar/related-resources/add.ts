@@ -28,6 +28,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
+    searchErrorIsShown?: boolean;
   };
   Blocks: {
     default: [];
@@ -125,10 +126,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
   /**
    * Whether the "no results" message is hidden.
-   * False unless, when allowing external links,
-   * the query is a URL or empty.
+   * False when a search error is shown, or when,
+   * if allowing external links, the query is a URL or empty.
    */
   protected get noResultsMessageIsHidden(): boolean {
+    if (this.args.searchErrorIsShown) {
+      return false;
+    }
     if (this.args.allowAddingExternalLinks) {
       return this.queryIsURL || this.queryIsEmpty;
     } else {

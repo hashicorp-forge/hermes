@@ -243,7 +243,6 @@ module(
           />
         `);
 
-
       assert
         .dom(DOCUMENT_OPTION_SELECTOR)
         .doesNotHaveAttribute("aria-selected");

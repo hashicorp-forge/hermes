@@ -65,6 +65,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @tracked loadingHasFailed = false;
 
   /**
+   * Whether to show an error message in the search modal.
+   * Set true when an Algolia search fails.
+   */
+  @tracked searchErrorIsShown = false;
+
+  /**
    * The related resources object, formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
@@ -199,9 +205,13 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           dd.scheduleAssignMenuItemIDs();
         });
       }
-    } catch (e) {
-      // TODO: Handle this in the UI.
-      console.error(e);
+      this.searchErrorIsShown = false;
+    } catch {
+      this.searchErrorIsShown = true;
+
+      // This will trigger the "no matches" block,
+      // which is where we're displaying the error.
+      this._algoliaResults = null;
     }
   });
 
