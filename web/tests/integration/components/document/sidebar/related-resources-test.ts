@@ -1,6 +1,13 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, render, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  find,
+  render,
+  waitFor,
+  waitUntil,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
@@ -17,6 +24,7 @@ const HEADER_SELECTOR = ".sidebar-section-header";
 const ERROR_MESSAGE_SELECTOR = ".related-resources-failed-to-load";
 const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
 const OVERFLOW_BUTTON_SELECTOR = ".related-resource-overflow-button";
+const EDIT_BUTTON_SELECTOR = "[data-test-overflow-menu-action='edit']";
 const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";
 const EDIT_MODAL_SELECTOR = "[data-test-edit-related-resource-modal]";
 const EDIT_MODAL_HEADER_SELECTOR =
@@ -220,7 +228,7 @@ module(
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
 
       await click(OVERFLOW_BUTTON_SELECTOR);
-      await click("[data-test-overflow-menu-action='edit']");
+      await click(EDIT_BUTTON_SELECTOR);
 
       await click(ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR);
 
@@ -245,7 +253,7 @@ module(
       `);
 
       await click(OVERFLOW_BUTTON_SELECTOR);
-      await click("[data-test-overflow-menu-action='edit']");
+      await click(EDIT_BUTTON_SELECTOR);
 
       assert.dom(EDIT_MODAL_SELECTOR).exists("the edit modal is shown");
       assert.dom(EDIT_MODAL_HEADER_SELECTOR).hasText("Edit resource");
@@ -466,7 +474,13 @@ module(
     });
 
     test("you can set an item limit", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
-      this.server.createList("relatedHermesDocument", 3);
+      this.server.create("relatedHermesDocument", {
+        id: 1,
+      });
+
+      this.server.create("relatedHermesDocument", {
+        id: 2,
+      });
 
       await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
         <Document::Sidebar::RelatedResources
@@ -588,11 +602,87 @@ module(
 
       await click(OVERFLOW_BUTTON_SELECTOR);
 
-      await click("[data-test-overflow-menu-action='remove']");
+      await click(REMOVE_BUTTON_SELECTOR);
 
       assert
         .dom(LIST_ITEM_SELECTOR)
         .doesNotExist("the PUT call went to the drafts endpoint");
+    });
+
+    test("it temporarily adds a highlight affordance to new and recently edited docs", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.create("relatedHermesDocument", {
+        id: 1,
+      });
+
+      this.server.create("relatedHermesDocument", {
+        id: 2,
+      });
+
+      this.server.create("relatedExternalLink", {
+        id: 3,
+      });
+
+      this.server.createList("document", 2);
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 3 });
+
+      // Add a new document
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
+
+      // A new document will be the first item
+      assert.dom(LIST_ITEM_SELECTOR + " .highlight-affordance").exists();
+
+      // Confirm that the highlight-affordance div is removed
+      await waitUntil(() => {
+        return !find(".highlight-affordance");
+      });
+
+      // Add a new external resource
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+      await fillIn(
+        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+        "https://new-resource-example.com"
+      );
+      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
+      assert
+        // A new external resource will render after the 3 documents.
+        .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+        .exists();
+
+      // Confirm that the highlight-affordance div is removed
+      // Because we target it in the next step
+      await waitUntil(() => {
+        return !find(".highlight-affordance");
+      });
+
+      // Edit a document
+      await click(
+        LIST_ITEM_SELECTOR + ":nth-child(4) " + OVERFLOW_BUTTON_SELECTOR
+      );
+      await click(EDIT_BUTTON_SELECTOR);
+      await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+
+      assert
+        .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+        .exists();
     });
   }
 );

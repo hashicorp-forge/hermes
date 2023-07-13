@@ -140,6 +140,33 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
   }
 
+  /**
+   * The Algolia results for a query. Updated by the `search` task
+   * and displayed in the "add resources" modal.
+   */
+  protected get algoliaResults(): { [key: string]: HermesDocument } {
+    /**
+     * The array initially looks like this:
+     * [{title: "foo", objectID: "bar"...}, ...]
+     *
+     * We transform it to look like:
+     * { "bar": {title: "foo", objectID: "bar"...}, ...}
+     */
+    let documents: any = {};
+
+    if (this._algoliaResults) {
+      this._algoliaResults.forEach((doc) => {
+        documents[doc.objectID] = doc;
+      });
+    }
+    return documents;
+  }
+
+  /**
+   * The action to update the `sortOrder` attribute of
+   * the resources, based on their position in the array.
+   * Called when the resource list is saved.
+   */
   @action private updateSortOrder() {
     this.relatedDocuments.forEach((doc, index) => {
       doc.sortOrder = index + 1;
@@ -213,28 +240,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       console.error(e);
     }
   });
-
-  /**
-   * The Algolia results for a query. Updated by the `search` task
-   * and displayed in the "add resources" modal.
-   */
-  protected get algoliaResults(): { [key: string]: HermesDocument } {
-    /**
-     * The array initially looks like this:
-     * [{title: "foo", objectID: "bar"...}, ...]
-     *
-     * We transform it to look like:
-     * { "bar": {title: "foo", objectID: "bar"...}, ...}
-     */
-    let documents: any = {};
-
-    if (this._algoliaResults) {
-      this._algoliaResults.forEach((doc) => {
-        documents[doc.objectID] = doc;
-      });
-    }
-    return documents;
-  }
 
   /**
    * The action run when the "add resource" plus button is clicked.
