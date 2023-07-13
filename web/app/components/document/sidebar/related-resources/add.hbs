@@ -79,7 +79,11 @@
               class="related-resources-modal-container mt-36"
             >
               <h3 class="related-resources-modal-body-header">
-                {{if @searchErrorIsShown "Search error. Type to retry." "No results found"}}
+                {{if
+                  @searchErrorIsShown
+                  "Search error. Type to retry."
+                  "No results found"
+                }}
               </h3>
             </div>
           {{/unless}}

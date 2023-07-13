@@ -10,6 +10,7 @@ import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
+import FlashMessageService from "ember-cli-flash/services/flash-messages";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -55,6 +56,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
+  @service declare flashMessages: FlashMessageService;
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
   @tracked relatedDocuments: RelatedHermesDocument[] = [];
@@ -206,12 +208,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         });
       }
       this.searchErrorIsShown = false;
-    } catch {
-      this.searchErrorIsShown = true;
-
+    } catch (e: unknown) {
       // This will trigger the "no matches" block,
       // which is where we're displaying the error.
       this._algoliaResults = null;
+      this.searchErrorIsShown = true;
+      console.error(e);
     }
   });
 
@@ -426,18 +428,28 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       void this.animateHighlight.perform(selector);
     }
 
-    await this.fetchSvc.fetch(
-      `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
-        this.args.objectID
-      }/related-resources`,
-      {
-        method: "PUT",
-        body: JSON.stringify(this.formattedRelatedResources),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    try {
+      await this.fetchSvc.fetch(
+        `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+          this.args.objectID
+        }/related-resources`,
+        {
+          method: "PUT",
+          body: JSON.stringify(this.formattedRelatedResources),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (e: unknown) {
+      this.flashMessages.add({
+        title: "Save error",
+        message: e as string,
+        type: "critical",
+        sticky: true,
+        extendedTimeout: 1000,
+      });
+    }
   });
 }
 
