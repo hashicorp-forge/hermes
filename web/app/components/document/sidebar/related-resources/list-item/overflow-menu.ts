@@ -5,7 +5,6 @@ import { RelatedResource } from "hermes/components/document/sidebar/related-reso
 interface DocumentSidebarRelatedResourcesListItemOverflowMenuComponentSignature {
   Args: {
     resource: RelatedResource;
-    showEditAction?: boolean;
     onRemoveClick: (resource: RelatedResource) => void;
     onEditClick?: () => void;
   };
