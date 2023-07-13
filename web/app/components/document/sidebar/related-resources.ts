@@ -258,6 +258,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * updates it locally, then saves it to the DB.
    */
   @action protected editResource(resource: RelatedExternalLink) {
+    const cachedLinks = this.relatedLinks.slice();
+
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.sortOrder === resource.sortOrder
     );
@@ -270,6 +272,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       this.relatedLinks = this.relatedLinks;
 
       void this.saveRelatedResources.perform(
+        this.relatedDocuments,
+        cachedLinks,
         `#related-resource-${resource.sortOrder}`
       );
     }
@@ -280,7 +284,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Adds a resource to the correct array, then saves it to the DB,
    * triggering a resource-highlight animation.
    */
-  protected addResource = keepLatestTask(async (resource: RelatedResource) => {
+  @action protected addResource(resource: RelatedResource) {
     let resourceSelector = RelatedResourceSelector.ExternalLink;
 
     let cachedLinks = this.relatedLinks.slice();
@@ -293,24 +297,22 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       this.relatedDocuments.unshiftObject(resource);
     }
 
-    try {
-      await this.saveRelatedResources.perform(resourceSelector);
-    } catch {
-      console.log(cachedDocuments);
-      this.relatedLinks = cachedLinks;
-      this.relatedDocuments = cachedDocuments;
-    }
+    void this.saveRelatedResources.perform(
+      cachedDocuments,
+      cachedLinks,
+      resourceSelector
+    );
 
     this.hideAddResourceModal();
-  });
+  }
 
   /**
    * The task called to remove a resource from a document.
    * Triggered via the overflow menu or the "Edit resource" modal.
    */
-  protected removeResource = dropTask(async (resource: RelatedResource) => {
-    const cachedLinks = this.relatedLinks;
+  @action protected removeResource(resource: RelatedResource) {
     const cachedDocuments = this.relatedDocuments;
+    const cachedLinks = this.relatedLinks;
 
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
@@ -318,13 +320,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       this.relatedDocuments.removeObject(resource);
     }
 
-    try {
-      await this.saveRelatedResources.perform();
-    } catch (e: unknown) {
-      this.relatedLinks = cachedLinks;
-      this.relatedDocuments = cachedDocuments;
-    }
-  });
+    void this.saveRelatedResources.perform(cachedDocuments, cachedLinks);
+  }
 
   /**
    * The action run when the component is rendered.
@@ -399,35 +396,43 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Creates a PUT request to the DB and conditionally triggers
    * the resource-highlight animation.
    */
-  protected saveRelatedResources = task(async (selector?: string) => {
-    if (selector) {
-      void this.animateHighlight.perform(selector);
-    }
+  protected saveRelatedResources = task(
+    async (
+      cachedDocuments: RelatedHermesDocument[],
+      cachedLinks: RelatedExternalLink[],
+      elementSelectorToHighlight?: string
+    ) => {
+      if (elementSelectorToHighlight) {
+        void this.animateHighlight.perform(elementSelectorToHighlight);
+      }
 
-    try {
-      await this.fetchSvc.fetch(
-        `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
-          this.args.objectID
-        }/related-resources`,
-        {
-          method: "PUT",
-          body: JSON.stringify(this.formattedRelatedResources),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (e: unknown) {
-      this.flashMessages.add({
-        title: "Unable to save",
-        message: (e as any).message,
-        type: "critical",
-        sticky: true,
-        extendedTimeout: 1000,
-      });
-      throw e;
+      try {
+        await this.fetchSvc.fetch(
+          `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+            this.args.objectID
+          }/related-resources`,
+          {
+            method: "PUT",
+            body: JSON.stringify(this.formattedRelatedResources),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } catch (e: unknown) {
+        this.relatedLinks = cachedLinks;
+        this.relatedDocuments = cachedDocuments;
+
+        this.flashMessages.add({
+          title: "Unable to save",
+          message: (e as any).message,
+          type: "critical",
+          sticky: true,
+          extendedTimeout: 1000,
+        });
+      }
     }
-  });
+  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {

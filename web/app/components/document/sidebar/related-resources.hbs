@@ -32,7 +32,7 @@
     <:resource as |r|>
       <Document::Sidebar::RelatedResources::ListItem
         @resource={{r}}
-        @removeResource={{perform this.removeResource}}
+        @removeResource={{this.removeResource}}
         @editResource={{this.editResource}}
         @editingIsDisabled={{@editingIsDisabled}}
       />
@@ -45,7 +45,7 @@
     @headerTitle={{@modalHeaderTitle}}
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideAddResourceModal}}
-    @addResource={{perform this.addResource}}
+    @addResource={{this.addResource}}
     @shownDocuments={{this.algoliaResults}}
     @objectID={{@objectID}}
     @relatedDocuments={{this.relatedDocuments}}

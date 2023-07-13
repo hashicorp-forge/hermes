@@ -119,6 +119,8 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("a flash message displays when a related resource fails to save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.put("/documents/:document_id/related-resources", {}, 500);
+
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
@@ -129,8 +131,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    this.server.put("/documents/:document_id/related-resources", {}, 500);
-
     await click(ADD_RELATED_RESOURCE_BUTTON_SELECTOR);
 
     await waitFor(ADD_RELATED_DOCUMENT_OPTION_SELECTOR);
@@ -139,8 +139,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await waitFor(FLASH_MESSAGE_SELECTOR);
 
-    assert
-      .dom(FLASH_MESSAGE_SELECTOR)
-      .containsText("Unable to save");
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Unable to save");
   });
 });
