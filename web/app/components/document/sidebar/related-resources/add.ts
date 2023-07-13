@@ -4,7 +4,7 @@ import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
-import { dropTask } from "ember-concurrency";
+import { restartableTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
@@ -262,7 +262,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Sends an empty-string query to Algolia, effectively populating its
    * "suggestions." Called when the search input is inserted.
    */
-  protected loadInitialData = dropTask(async (dd: any) => {
+  protected loadInitialData = restartableTask(async (dd: any) => {
     await this.args.search(dd, "");
   });
 

@@ -6,7 +6,7 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { dropTask, restartableTask, task, timeout } from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";

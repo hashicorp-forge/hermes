@@ -2,7 +2,6 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
 import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 
@@ -19,29 +18,59 @@ interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
 }
 
 export default class DocumentSidebarRelatedResourcesListItemEditComponent extends Component<DocumentSidebarRelatedResourcesListItemEditComponentSignature> {
-  @tracked resource = this.args.resource;
+  /**
+   * A locally tracked URL property. Starts as the passed-in value;
+   * updated when the URL input-value changes.
+   */
+  @tracked protected url = this.args.resource.url;
 
-  @tracked url = this.args.resource.url;
-  @tracked title =
+  /**
+   * The title of the resource. If the name is the same as the URL,
+   * we treat it like it's an empty value so the placeholder text shows.
+   */
+  @tracked protected title =
     this.args.resource.name === this.args.resource.url
       ? ""
       : this.args.resource.name;
 
-  @tracked errorMessageIsShown = false;
+  /**
+   * Whether the error warning is shown.
+   * True when the URL is invalid.
+   */
+  @tracked protected errorMessageIsShown = false;
 
-  @tracked _form: HTMLFormElement | null = null;
+  /**
+   * A local reference to the form element.
+   * Registered when inserted.
+   */
+  @tracked private _form: HTMLFormElement | null = null;
 
-  @tracked urlIsValid = false;
+  /**
+   * Whether the URL is valid, as determined by the `isValidURL` utility.
+   * Used to dictate whether an error message is shown.
+   */
+  @tracked protected urlIsValid = true;
 
+  /**
+   * The action to register the form element locally.
+   * Called when the form is rendered.
+   */
   @action protected registerForm(form: HTMLFormElement): void {
     this._form = form;
   }
 
+  /**
+   * An asserted-true reference to the form element.
+   */
   protected get form(): HTMLFormElement {
     assert("this._form must exist", this._form);
     return this._form;
   }
 
+  /**
+   * The action that updates the local form properties and eagerly validates the URL.
+   * Runs on the "input" events of the URL and title inputs.
+   */
   @action protected updateFormValues(): void {
     const formObject = Object.fromEntries(new FormData(this.form).entries());
 
@@ -57,12 +86,19 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     this.validateURL();
   }
 
-  @action validateURL() {
+  /**
+   * The action that validates the locally tracked URL.
+   * Updates the `urlIsValid` property, which is used to show
+   * an error message for invalid URLs.
+   */
+  @action private validateURL() {
     this.urlIsValid = isValidURL(this.url);
-    this.errorMessageIsShown = !this.urlIsValid;
   }
-
-  @action onSave(e: Event) {
+  /**
+   * The action called to save the resource if its URL is valid.
+   * Formats the resource and calls the passed-in `onSave` action.
+   */
+  @action protected maybeSaveResource(e: Event) {
     // prevent the form from submitting on enter
     e.preventDefault();
 
@@ -77,8 +113,6 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
         newResource.name = this.url;
       }
       this.args.onSave(newResource);
-    } else {
-      this.errorMessageIsShown = true;
     }
   }
 }

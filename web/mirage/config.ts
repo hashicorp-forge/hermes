@@ -245,6 +245,7 @@ export default function (mirageConfig) {
        * Used by the RelatedResources component when the doc is a draft.
        */
       this.get("drafts/:document_id/related-resources", (schema, request) => {
+        console.log('drafts related resources');
         let hermesDocuments = schema.relatedHermesDocument
           .all()
           .models.map((doc) => {

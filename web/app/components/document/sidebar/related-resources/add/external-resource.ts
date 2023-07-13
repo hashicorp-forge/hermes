@@ -13,6 +13,10 @@ interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
 }
 
 export default class DocumentSidebarRelatedResourcesAddExternalResource extends Component<DocumentSidebarRelatedResourcesAddExternalResourceSignature> {
+  /**
+   * The action run when the "add" button is clicked.
+   * Calls the parent method unless the link is a duplicate.
+   */
   @action onSubmit() {
     if (!this.args.linkIsDuplicate) {
       this.args.onSubmit();

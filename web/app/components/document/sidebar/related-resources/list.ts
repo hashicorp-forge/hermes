@@ -7,6 +7,7 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { action } from "@ember/object";
 import { Transition } from "ember-animated/-private/transition";
 import Ember from "ember";
+import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 
 interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
@@ -19,28 +20,36 @@ interface DocumentSidebarRelatedResourcesListComponentSignature {
   };
 }
 
-export function* emptyTransition(context: TransitionContext) {}
-
 export default class DocumentSidebarRelatedResourcesListComponent extends Component<DocumentSidebarRelatedResourcesListComponentSignature> {
-  shouldAnimate = false;
+  /**
+   * Whether the list should animate.
+   * Used to disable the animation on first render.
+   */
+  private shouldAnimate = false;
 
+  /**
+   * Whether the list is empty.
+   * Determines if we show an empty state.
+   */
   get listIsEmpty() {
     return this.args.items.length === 0;
   }
 
-  @action protected didInsert() {
+  /**
+   * The action to enable animations.
+   * Called when the list is rendered, just
+   * after the transitionRules have been set
+   */
+  @action protected enableAnimation() {
     this.shouldAnimate = true;
   }
 
-  @action transitionRules({
-    firstTime,
-    oldItems,
-    newItems,
-  }: {
-    firstTime: boolean;
-    oldItems: unknown[];
-    newItems: unknown[];
-  }): Transition {
+  /**
+   * The transition rules for the list.
+   * Returns an empty transition on first render, and
+   * on subsequent checks, returns the default transition.
+   */
+  @action transitionRules({ firstTime }: { firstTime: boolean }): Transition {
     if (firstTime) {
       if (this.shouldAnimate === false) {
         return emptyTransition;
@@ -49,6 +58,10 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     return this.transition;
   }
 
+  /**
+   * The transition for the list items.
+   * Called when the list changes.
+   */
   *transition({
     insertedSprites,
     keptSprites,
@@ -67,6 +80,7 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     }
 
     yield wait(100);
+
     for (let sprite of insertedSprites) {
       sprite.applyStyles({
         opacity: "0",
