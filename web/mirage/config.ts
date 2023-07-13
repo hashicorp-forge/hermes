@@ -111,6 +111,8 @@ export default function (mirageConfig) {
        * Algolia has several search hosts, e.g., appID-1.algolianet.com,
        * and Mirage doesn't support wildcards in routes.
        * So, we create a route for each host.
+       *
+       * TODO: Export this into a function that can be used in tests also.
        */
 
       let algoliaSearchHosts = [];

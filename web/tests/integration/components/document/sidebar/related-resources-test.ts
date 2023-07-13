@@ -5,6 +5,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
+import config from "hermes/config/environment";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -36,13 +37,10 @@ const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
 const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
 const ADD_EXTERNAL_RESOURCE_FORM_SELECTOR =
   "[data-test-add-external-resource-form]";
-const EXTERNAL_RESOURCE_PREVIEW_URL_SELECTOR =
-  "[data-test-add-external-resource-truncated-url]";
 const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
   "[data-test-add-external-resource-submit-button]";
 const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR =
   "[data-test-edit-related-resource-modal-delete-button]";
-
 const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-add-external-resource-error]";
 
@@ -517,6 +515,53 @@ module(
       assert
         .dom(NO_RESOURCES_FOUND_SELECTOR)
         .exists("the fallback message is shown");
+    });
+
+    test("it shows an error when searching fails", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.createList("document", 3);
+
+      this.server.post(
+        `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
+        () => {
+          return new Response(500, {}, {});
+        }
+      );
+
+      let algoliaSearchHosts = [];
+
+      for (let i = 1; i <= 9; i++) {
+        algoliaSearchHosts.push(
+          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
+        );
+      }
+
+      algoliaSearchHosts.forEach((host) => {
+        this.server.post(host, () => {
+          return new Response(500, {}, {});
+        });
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+          <Document::Sidebar::RelatedResources
+            @productArea={{this.document.product}}
+            @objectID={{this.document.objectID}}
+            @allowAddingExternalLinks={{true}}
+            @headerTitle="Test title"
+            @modalHeaderTitle="Add related resource"
+            @modalInputPlaceholder="Test placeholder"
+          />
+        `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .containsText(
+          "Search error. Type to retry.",
+          "the error message is shown in the modal"
+        );
     });
   }
 );

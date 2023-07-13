@@ -441,10 +441,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           },
         }
       );
+      throw new Error("should show error");
     } catch (e: unknown) {
+      console.log("should show error");
       this.flashMessages.add({
         title: "Save error",
-        message: e as string,
+        message: (e as any).message,
         type: "critical",
         sticky: true,
         extendedTimeout: 1000,
