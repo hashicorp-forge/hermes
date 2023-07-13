@@ -26,13 +26,13 @@
   </div>
 {{else}}
   <Document::Sidebar::RelatedResources::List
-    @items={{this.relatedResourcesObjectEntries}}
+    @items={{this.relatedResources}}
     @itemLimit={{@itemLimit}}
   >
     <:resource as |r|>
       <Document::Sidebar::RelatedResources::ListItem
         @resource={{r}}
-        @removeResource={{this.removeResource}}
+        @removeResource={{perform this.removeResource}}
         @editResource={{this.editResource}}
         @editingIsDisabled={{@editingIsDisabled}}
       />
@@ -45,8 +45,7 @@
     @headerTitle={{@modalHeaderTitle}}
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideAddResourceModal}}
-    @addRelatedExternalLink={{this.addRelatedExternalLink}}
-    @addRelatedDocument={{this.addRelatedDocument}}
+    @addResource={{perform this.addResource}}
     @shownDocuments={{this.algoliaResults}}
     @objectID={{@objectID}}
     @relatedDocuments={{this.relatedDocuments}}

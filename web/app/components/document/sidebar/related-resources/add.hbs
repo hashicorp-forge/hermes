@@ -12,7 +12,7 @@
       <X::DropdownList
         data-test-add-related-resources-list
         @items={{@shownDocuments}}
-        @onItemClick={{@addRelatedDocument}}
+        @onItemClick={{this.onItemClick}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
         @listIsShown={{this.listIsShown}}

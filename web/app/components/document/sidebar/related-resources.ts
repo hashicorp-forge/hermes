@@ -6,7 +6,13 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import {
+  dropTask,
+  keepLatestTask,
+  restartableTask,
+  task,
+  timeout,
+} from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
@@ -73,25 +79,26 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @tracked searchErrorIsShown = false;
 
   /**
-   * The related resources object, formatted for a PUT request to the API.
+   * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
     hermesDocuments: Partial<RelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
-    const externalLinks = this.relatedLinks.map((link) => {
-      return {
-        name: link.name || link.url,
-        url: link.url,
-        sortOrder: this.relatedLinks.indexOf(link) + 1,
-      };
-    });
+    this.updateSortOrder();
 
     const hermesDocuments = this.relatedDocuments.map((doc) => {
       return {
         googleFileID: doc.googleFileID,
-        sortOrder:
-          this.relatedDocuments.indexOf(doc) + 1 + externalLinks.length,
+        sortOrder: doc.sortOrder,
+      };
+    });
+
+    const externalLinks = this.relatedLinks.map((link) => {
+      return {
+        name: link.name || link.url,
+        url: link.url,
+        sortOrder: link.sortOrder,
       };
     });
 
@@ -102,37 +109,17 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   * The related resources object, formatted for the RelatedResourcesList.
+   * The combined resources array, formatted for the RelatedResourcesList.
    */
-  protected get relatedResources(): {
-    [key: string]: RelatedResource;
-  } {
+  protected get relatedResources(): RelatedResource[] {
     let resourcesArray: RelatedResource[] = [];
+
+    this.updateSortOrder();
 
     resourcesArray.pushObjects(this.relatedDocuments);
     resourcesArray.pushObjects(this.relatedLinks);
 
-    let resourcesObject: {
-      [key: string]: RelatedExternalLink | RelatedHermesDocument;
-    } = {};
-
-    resourcesArray.forEach(
-      (resource: RelatedExternalLink | RelatedHermesDocument) => {
-        let key = "";
-
-        if ("url" in resource) {
-          key = resource.url;
-        } else if ("googleFileID" in resource) {
-          key = resource.googleFileID;
-        }
-
-        resourcesObject[key] = resource;
-        (resourcesObject[key] as RelatedResource).sortOrder =
-          resourcesArray.indexOf(resource) + 1;
-      }
-    );
-
-    return resourcesObject;
+    return resourcesArray;
   }
 
   /**
@@ -147,10 +134,20 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
 
     if (this.args.itemLimit) {
-      return Object.keys(this.relatedResources).length >= this.args.itemLimit;
+      return this.relatedResources.length >= this.args.itemLimit;
     } else {
       return false;
     }
+  }
+
+  @action private updateSortOrder() {
+    this.relatedDocuments.forEach((doc, index) => {
+      doc.sortOrder = index + 1;
+    });
+
+    this.relatedLinks.forEach((link, index) => {
+      link.sortOrder = index + 1 + this.relatedDocuments.length;
+    });
   }
 
   /**
@@ -218,16 +215,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   });
 
   /**
-   * TODO: Investigate if this can be combined with relatedResources/formattedResources
-   */
-  protected get relatedResourcesObjectEntries(): RelatedResource[] {
-    const objectEntries = Object.entries(this.relatedResources);
-    return objectEntries.map((entry) => {
-      return entry[1];
-    });
-  }
-
-  /**
    * The Algolia results for a query. Updated by the `search` task
    * and displayed in the "add resources" modal.
    */
@@ -278,7 +265,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     if (resourceIndex !== -1) {
       this.relatedLinks[resourceIndex] = resource;
 
-      // PROBLEM: the getter isn't updating with the new resource
+      // The getter doesn't update when a new resource is added, so we manually save it.
+      // TODO: Improve this
       this.relatedLinks = this.relatedLinks;
 
       void this.saveRelatedResources.perform(
@@ -288,67 +276,55 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   *
-   *
-   *
-   *
-   * TODO:
-   * Combine these "add" functions into a single method?
-   *
-   *
-   *
-   *
-   *
+   * The action to add a resource to a document.
+   * Adds a resource to the correct array, then saves it to the DB,
+   * triggering a resource-highlight animation.
    */
+  protected addResource = keepLatestTask(async (resource: RelatedResource) => {
+    let resourceSelector = RelatedResourceSelector.ExternalLink;
 
-  /**
-   * The action to add an external link to a document.
-   * Adds the link into the local array, then saves to the DB.
-   */
-  @action protected addRelatedExternalLink(link: RelatedExternalLink) {
-    this.relatedLinks.unshiftObject(link);
-    void this.saveRelatedResources.perform(
-      RelatedResourceSelector.ExternalLink
-    );
-  }
+    let cachedLinks = this.relatedLinks.slice();
+    let cachedDocuments = this.relatedDocuments.slice();
 
-  /**
-   * The action to add a Hermes document as a related resource.
-   * Adds the link to the local array, then saves it to the DB.
-   */
-  @action protected addRelatedDocument(documentObjectID: string) {
-    let document = this.algoliaResults[documentObjectID];
-    if (document) {
-      const relatedHermesDocument = {
-        googleFileID: document.objectID,
-        title: document.title,
-        type: document.docType,
-        documentNumber: document.docNumber,
-        sortOrder: 1,
-      } as RelatedHermesDocument;
-
-      this.relatedDocuments.unshiftObject(relatedHermesDocument);
+    if ("url" in resource) {
+      this.relatedLinks.unshiftObject(resource);
+    } else {
+      resourceSelector = RelatedResourceSelector.HermesDocument;
+      this.relatedDocuments.unshiftObject(resource);
     }
 
-    void this.saveRelatedResources.perform(
-      RelatedResourceSelector.HermesDocument
-    );
+    try {
+      await this.saveRelatedResources.perform(resourceSelector);
+    } catch {
+      console.log(cachedDocuments);
+      this.relatedLinks = cachedLinks;
+      this.relatedDocuments = cachedDocuments;
+    }
 
     this.hideAddResourceModal();
-  }
+  });
 
   /**
    * The task called to remove a resource from a document.
    * Triggered via the overflow menu or the "Edit resource" modal.
    */
-  @action protected removeResource(resource: RelatedResource) {
+  protected removeResource = dropTask(async (resource: RelatedResource) => {
+    const cachedLinks = this.relatedLinks;
+    const cachedDocuments = this.relatedDocuments;
+
     if ("url" in resource) {
       this.relatedLinks.removeObject(resource);
     } else {
       this.relatedDocuments.removeObject(resource);
     }
-    void this.saveRelatedResources.perform();
-  }
+
+    try {
+      await this.saveRelatedResources.perform();
+    } catch (e: unknown) {
+      this.relatedLinks = cachedLinks;
+      this.relatedDocuments = cachedDocuments;
+    }
+  });
 
   /**
    * The action run when the component is rendered.
@@ -441,16 +417,15 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           },
         }
       );
-      throw new Error("should show error");
     } catch (e: unknown) {
-      console.log("should show error");
       this.flashMessages.add({
-        title: "Save error",
+        title: "Unable to save",
         message: (e as any).message,
         type: "critical",
         sticky: true,
         extendedTimeout: 1000,
       });
+      throw e;
     }
   });
 }

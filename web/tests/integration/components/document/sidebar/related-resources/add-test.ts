@@ -83,8 +83,6 @@ module(
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
-          @addRelatedExternalLink={{this.noop}}
-          @addRelatedDocument={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @objectID="test"
           @relatedDocuments={{array}}
@@ -107,8 +105,7 @@ module(
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
-          @addRelatedExternalLink={{this.noop}}
-          @addRelatedDocument={{this.noop}}
+          @addResource={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @allowAddingExternalLinks={{true}}
           @objectID="test"
@@ -150,8 +147,7 @@ module(
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
-          @addRelatedExternalLink={{this.noop}}
-          @addRelatedDocument={{this.noop}}
+          @addResource={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @objectID="test"
           @relatedDocuments={{array}}
@@ -170,8 +166,7 @@ module(
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
-          @addRelatedExternalLink={{this.noop}}
-          @addRelatedDocument={{this.noop}}
+          @addResource={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @allowAddingExternalLinks={{this.allowAddingExternalLinks}}
           @objectID="test"
@@ -210,8 +205,7 @@ module(
             @headerTitle="Test title"
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
-            @addRelatedExternalLink={{this.noop}}
-            @addRelatedDocument={{this.noop}}
+            @addResource={{this.noop}}
             @shownDocuments={{this.shownDocuments}}
             @objectID="test"
             @relatedDocuments={{array}}
@@ -233,8 +227,7 @@ module(
             @headerTitle="Test title"
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
-            @addRelatedExternalLink={{this.noop}}
-            @addRelatedDocument={{this.noop}}
+            @addResource={{this.noop}}
             @shownDocuments={{this.shownDocuments}}
             @objectID="test"
             @relatedDocuments={{array}}

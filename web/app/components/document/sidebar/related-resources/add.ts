@@ -11,6 +11,7 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
+  RelatedResource,
 } from "hermes/components/document/sidebar/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 
@@ -18,8 +19,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
-    addRelatedExternalLink: (link: RelatedExternalLink) => void;
-    addRelatedDocument: (documentID: string) => void;
+    addResource: (resource: RelatedResource) => void;
     shownDocuments: Record<string, HermesDocument>;
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
@@ -156,6 +156,18 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.keyboardNavIsEnabled = true;
   }
 
+  @action protected onItemClick(_item: any, attrs: any) {
+    const relatedHermesDocument = {
+      googleFileID: attrs.objectID,
+      title: attrs.title,
+      type: attrs.docType,
+      documentNumber: attrs.docNumber,
+      sortOrder: 1,
+    } as RelatedHermesDocument;
+
+    this.args.addResource(relatedHermesDocument);
+  }
+
   /**
    * The action that updates the locally tracked externalLinkTitle property.
    * Called when the Title input changes.
@@ -194,7 +206,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.checkForDuplicate(externalLink.url);
 
     if (!this.linkIsDuplicate) {
-      this.args.addRelatedExternalLink(externalLink);
+      this.args.addResource(externalLink);
       void this.args.search(null, "");
       this.externalLinkTitle = "";
       this.args.onClose();

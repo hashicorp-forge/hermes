@@ -563,5 +563,36 @@ module(
           "the error message is shown in the modal"
         );
     });
+
+    test("it calls the correct endpoint when editing a draft", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.create("relatedExternalLink", {
+        name: "Example",
+        url: "https://example.com",
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      assert
+        .dom(LIST_ITEM_SELECTOR)
+        .exists({ count: 1 }, "it loaded resources from the drafts endpoint");
+
+      await click(OVERFLOW_BUTTON_SELECTOR);
+
+      await click("[data-test-overflow-menu-action='remove']");
+
+      assert
+        .dom(LIST_ITEM_SELECTOR)
+        .doesNotExist("the PUT call went to the drafts endpoint");
+    });
   }
 );
