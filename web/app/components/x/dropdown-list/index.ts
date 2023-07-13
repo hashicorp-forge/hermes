@@ -13,6 +13,7 @@ import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
+import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -366,19 +367,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   private maybeScrollIntoView() {
     const focusedItem = this._menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
-
-    const containerHeight = this.scrollContainer.offsetHeight;
-    const itemHeight = focusedItem.offsetHeight;
-    const itemTop = focusedItem.offsetTop;
-    const itemBottom = focusedItem.offsetTop + itemHeight;
-    const scrollviewTop = this.scrollContainer.scrollTop;
-    const scrollviewBottom = scrollviewTop + containerHeight;
-
-    if (itemBottom > scrollviewBottom) {
-      this.scrollContainer.scrollTop = itemTop + itemHeight - containerHeight;
-    } else if (itemTop < scrollviewTop) {
-      this.scrollContainer.scrollTop = itemTop;
-    }
+    maybeScrollIntoView(focusedItem, this.scrollContainer);
   }
 
   /**

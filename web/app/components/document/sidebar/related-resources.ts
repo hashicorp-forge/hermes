@@ -6,17 +6,12 @@ import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import {
-  dropTask,
-  keepLatestTask,
-  restartableTask,
-  task,
-  timeout,
-} from "ember-concurrency";
+import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -52,6 +47,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   modalInputPlaceholder: string;
   documentIsDraft?: boolean;
   editingIsDisabled?: boolean;
+  scrollContainer: HTMLElement;
 }
 
 interface DocumentSidebarRelatedResourcesComponentSignature {
@@ -364,25 +360,33 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    */
   protected animateHighlight = restartableTask(async (selector: string) => {
     schedule("afterRender", async () => {
-      // New resources will always be the first element
-      const newResourceLink = htmlElement(
+      const target = htmlElement(
         `.related-resource${selector} .related-resource-link`
       );
 
+      next(() => {
+        maybeScrollIntoView(
+          target,
+          this.args.scrollContainer,
+          "getBoundingClientRect",
+          10
+        );
+      });
+
       const highlight = document.createElement("div");
       highlight.classList.add("highlight-affordance");
-      newResourceLink.insertBefore(highlight, newResourceLink.firstChild);
+      target.insertBefore(highlight, target.firstChild);
 
       const fadeInAnimation = highlight.animate(
         [{ opacity: 0 }, { opacity: 1 }],
-        { duration: 50 }
+        { duration: Ember.testing ? 0 : 50 }
       );
 
       await timeout(Ember.testing ? 0 : 2000);
 
       const fadeOutAnimation = highlight.animate(
         [{ opacity: 1 }, { opacity: 0 }],
-        { duration: 400 }
+        { duration: Ember.testing ? 0 : 400 }
       );
 
       try {
