@@ -4,12 +4,16 @@
  */
 export default function maybeScrollIntoView(
   target: HTMLElement,
-  container: HTMLElement,
+  container?: HTMLElement,
   measuringPreference:
     | "offsetHeight"
     | "getBoundingClientRect" = "offsetHeight",
   bottomPadding: number = 0
 ): void {
+  if (!container) {
+    return;
+  }
+
   const useBoundingClientRect = measuringPreference === "getBoundingClientRect";
 
   const containerHeight = container.offsetHeight;

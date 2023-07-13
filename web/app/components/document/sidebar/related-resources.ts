@@ -12,6 +12,7 @@ import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
+import { assert } from "@ember/debug";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -271,11 +272,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // The getter doesn't update when a new resource is added, so we manually save it.
       // TODO: Improve this
       this.relatedLinks = this.relatedLinks;
-
       void this.saveRelatedResources.perform(
         this.relatedDocuments,
         cachedLinks,
-        `#related-resource-${resource.sortOrder}`
+        resource.sortOrder
       );
     }
   }
@@ -358,47 +358,55 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Called when a resource is added or edited.
    * Temporarily adds a visual indicator of the changed element.
    */
-  protected animateHighlight = restartableTask(async (selector: string) => {
-    schedule("afterRender", async () => {
-      const target = htmlElement(
-        `.related-resource${selector} .related-resource-link`
-      );
+  protected animateHighlight = restartableTask(
+    async (selector: string | number) => {
+      schedule("afterRender", async () => {
+        let target: HTMLElement | null = null;
 
-      next(() => {
-        maybeScrollIntoView(
-          target,
-          this.args.scrollContainer,
-          "getBoundingClientRect",
-          10
+        if (typeof selector === "number") {
+          target = htmlElement(`#related-resource-${selector}`);
+        } else {
+          target = htmlElement(
+            `.related-resource${selector} .related-resource-link`
+          );
+        }
+
+        next(() => {
+          maybeScrollIntoView(
+            target as HTMLElement,
+            this.args.scrollContainer,
+            "getBoundingClientRect",
+            10
+          );
+        });
+
+        const highlight = document.createElement("div");
+        highlight.classList.add("highlight-affordance");
+        target.insertBefore(highlight, target.firstChild);
+
+        const fadeInAnimation = highlight.animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          { duration: 50 }
         );
+
+        await timeout(Ember.testing ? 0 : 2000);
+
+        const fadeOutAnimation = highlight.animate(
+          [{ opacity: 1 }, { opacity: 0 }],
+          { duration: Ember.testing ? 50 : 400 }
+        );
+
+        try {
+          await fadeInAnimation.finished;
+          await fadeOutAnimation.finished;
+        } finally {
+          fadeInAnimation.cancel();
+          fadeOutAnimation.cancel();
+          highlight.remove();
+        }
       });
-
-      const highlight = document.createElement("div");
-      highlight.classList.add("highlight-affordance");
-      target.insertBefore(highlight, target.firstChild);
-
-      const fadeInAnimation = highlight.animate(
-        [{ opacity: 0 }, { opacity: 1 }],
-        { duration: Ember.testing ? 0 : 50 }
-      );
-
-      await timeout(Ember.testing ? 0 : 2000);
-
-      const fadeOutAnimation = highlight.animate(
-        [{ opacity: 1 }, { opacity: 0 }],
-        { duration: Ember.testing ? 0 : 400 }
-      );
-
-      try {
-        await fadeInAnimation.finished;
-        await fadeOutAnimation.finished;
-      } finally {
-        fadeInAnimation.cancel();
-        fadeOutAnimation.cancel();
-        highlight.remove();
-      }
-    });
-  });
+    }
+  );
 
   /**
    * The task to save the document's related resources.
@@ -407,9 +415,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    */
   protected saveRelatedResources = task(
     async (
-      cachedDocuments: RelatedHermesDocument[],
-      cachedLinks: RelatedExternalLink[],
-      elementSelectorToHighlight?: string
+      cachedDocuments,
+      cachedLinks,
+      elementSelectorToHighlight?: string | number
     ) => {
       if (elementSelectorToHighlight) {
         void this.animateHighlight.perform(elementSelectorToHighlight);

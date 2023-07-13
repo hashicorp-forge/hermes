@@ -645,6 +645,8 @@ module(
 
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
 
+      await waitFor(".highlight-affordance");
+
       // A new document will be the first item
       assert.dom(LIST_ITEM_SELECTOR + " .highlight-affordance").exists();
 
@@ -662,6 +664,9 @@ module(
       await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
+
+      await waitFor(".highlight-affordance");
+
       assert
         // A new external resource will render after the 3 documents.
         .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
@@ -679,6 +684,8 @@ module(
       );
       await click(EDIT_BUTTON_SELECTOR);
       await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+
+      await waitFor(".highlight-affordance");
 
       assert
         .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
