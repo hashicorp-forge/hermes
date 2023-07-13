@@ -1,4 +1,4 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import {
   fillIn,
@@ -243,9 +243,6 @@ module(
           />
         `);
 
-      // assert that no item is aria-selected
-      // keydown and assert that an item is selected
-      // unfocus the search input and assert that keyboard navigation is disabled
 
       assert
         .dom(DOCUMENT_OPTION_SELECTOR)
