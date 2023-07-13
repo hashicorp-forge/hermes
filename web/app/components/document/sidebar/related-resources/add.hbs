@@ -1,5 +1,3 @@
-{{on-document "keydown" this.onDocumentKeydown}}
-
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   <Hds::Modal
     data-test-add-related-resource-modal
@@ -31,7 +29,6 @@
             {{did-insert (fn this.didInsertInput dd)}}
             {{on "input" (fn this.onInput dd)}}
             {{on "keydown" (fn this.onInputKeydown dd)}}
-            {{on "focusin" (fn this.maybeOpenDropdown dd)}}
             {{on "focusin" this.enableKeyboardNav}}
             {{on "focusout" this.disableKeyboardNav}}
             @type="search"

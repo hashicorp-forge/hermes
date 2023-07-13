@@ -70,8 +70,6 @@ export default function (mirageConfig) {
         const requestBody = JSON.parse(request.requestBody);
         const { facetQuery, query } = requestBody;
 
-        console.log("requestBody", requestBody);
-
         if (facetQuery) {
           let facetMatch = schema.document.all().models.filter((doc) => {
             return doc.attrs.product

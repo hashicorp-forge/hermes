@@ -62,13 +62,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @tracked keyboardNavIsEnabled = true;
 
   /**
-   *
-   *
-   *
-   * TODO: investigate if we need this
-   *
-   *
-   *
+   * The title of the external link, as set by the optional input.
+   * Used to set the name of the external resource.
    */
   @tracked externalLinkTitle = "";
 
@@ -203,21 +198,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   }
 
   /**
-   * TODO: Explain this
-   * TODO: Rename this
-   * TODO: see if this is still a factor when disableKeyboardNav is a thing
-   */
-  @action protected onDocumentKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      const activeElement = document.activeElement;
-      if (activeElement !== this.searchInput) {
-        e.stopImmediatePropagation();
-        return;
-      }
-    }
-  }
-
-  /**
    * Keyboard listener for the search input.
    * Allows "enter" to add external links.
    * Prevents the default ArrowUp/ArrowDown actions
@@ -275,15 +255,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.query = input.value;
     this.checkURL();
     void this.args.search(dd, this.query);
-  }
-
-  /**
-   * TODO: investigate if this ever happens
-   */
-  @action protected maybeOpenDropdown(dd: any) {
-    if (!dd.contentIsShown) {
-      dd.showContent();
-    }
   }
 
   /**
