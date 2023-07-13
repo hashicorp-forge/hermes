@@ -60,7 +60,6 @@
 
           {{#if (and @allowAddingExternalLinks this.queryIsURL)}}
             <Document::Sidebar::RelatedResources::Add::ExternalResource
-              @urlIsLoading={{not this.urlWasProcessed}}
               @onInput={{this.onExternalLinkTitleInput}}
               @onSubmit={{this.addRelatedExternalLink}}
               @linkIsDuplicate={{this.linkIsDuplicate}}
@@ -77,7 +76,7 @@
           />
         </:loading>
         <:no-matches>
-          {{#unless this.noMatchesHeaderIsHidden}}
+          {{#unless this.noResultsMessageIsHidden}}
             <div
               data-test-no-related-resources-found
               class="related-resources-modal-container mt-36"

@@ -13,7 +13,7 @@ const HERMES_DOCUMENT_SELECTOR = ".hermes-document";
 const EXTERNAL_RESOURCE_SELECTOR = ".external-resource";
 const BADGE_SELECTOR = "[data-test-sidebar-section-header-badge]";
 const HEADER_SELECTOR = ".sidebar-section-header";
-const ERROR_MESSAGE_SELECTOR = "[data-test-related-resources-error-message]";
+const ERROR_MESSAGE_SELECTOR = ".related-resources-failed-to-load";
 const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
 const OVERFLOW_BUTTON_SELECTOR = ".related-resource-overflow-button";
 const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";

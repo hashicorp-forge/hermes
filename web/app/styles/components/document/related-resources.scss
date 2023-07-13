@@ -22,6 +22,10 @@
   }
 }
 
+.related-resources-failed-to-load {
+  @apply text-display-300 text-color-foreground-faint opacity-50 font-semibold mb-2;
+}
+
 .related-resources-modal-container {
   @apply relative px-3 w-full;
 }

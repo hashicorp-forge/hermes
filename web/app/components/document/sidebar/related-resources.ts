@@ -58,13 +58,16 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
   @tracked relatedDocuments: RelatedHermesDocument[] = [];
-  @tracked _shownDocuments: HermesDocument[] | null = null;
+
+  @tracked _algoliaResults: HermesDocument[] | null = null;
 
   @tracked addResourceModalIsShown = false;
-
   @tracked loadingHasFailed = false;
 
-  get formattedRelatedResources(): {
+  /**
+   * The related resources object, formatted for a PUT request to the API.
+   */
+  private get formattedRelatedResources(): {
     hermesDocuments: Partial<RelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
@@ -90,11 +93,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     };
   }
 
-  get relatedResources(): {
+  /**
+   * The related resources object, formatted for the RelatedResourcesList.
+   */
+  protected get relatedResources(): {
     [key: string]: RelatedResource;
   } {
-    // we should format this to what the API expects
-
     let resourcesArray: RelatedResource[] = [];
 
     resourcesArray.pushObjects(this.relatedDocuments);
@@ -123,11 +127,13 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     return resourcesObject;
   }
 
-  get relatedResourcesAreShown(): boolean {
-    return Object.keys(this.relatedResources).length > 0;
-  }
-
-  get sectionHeaderButtonIsHidden(): boolean {
+  /**
+   * Whether the "Add Resource" button should be hidden.
+   * True when editing is explicitly disabled (e.g., when the viewer doesn't have edit
+   * permissions), and when the item limit is reached (to be used for single-doc
+   * attributes like "RFC" or "PRD")
+   */
+  protected get sectionHeaderButtonIsHidden(): boolean {
     if (this.args.editingIsDisabled) {
       return true;
     }
@@ -139,6 +145,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
   }
 
+  /**
+   * The search task passed to the "Add..." modal.
+   * Returns Algolia document matches for a query and updates
+   * the dropdown with the correct menu item IDs.
+   * Runs whenever the input value changes.
+   */
   protected search = restartableTask(async (dd: any, query: string) => {
     let index =
       this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
@@ -172,11 +184,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             "status",
             "owners",
           ],
+          // TODO: Confirm this with a fresh index
           optionalFilters: this.args.optionalSearchFilters,
         })
         .then((response) => response);
       if (algoliaResponse) {
-        this._shownDocuments = algoliaResponse.hits as HermesDocument[];
+        this._algoliaResults = algoliaResponse.hits as HermesDocument[];
         if (dd) {
           dd.resetFocusedItemIndex();
         }
@@ -187,18 +200,26 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         });
       }
     } catch (e) {
+      // TODO: Handle this in the UI.
       console.error(e);
     }
   });
 
-  get relatedResourcesObjectEntries() {
+  /**
+   * TODO: Investigate if this can be combined with relatedResources/formattedResources
+   */
+  protected get relatedResourcesObjectEntries(): RelatedResource[] {
     const objectEntries = Object.entries(this.relatedResources);
     return objectEntries.map((entry) => {
       return entry[1];
     });
   }
 
-  get shownDocuments(): { [key: string]: HermesDocument } {
+  /**
+   * The Algolia results for a query. Updated by the `search` task
+   * and displayed in the "add resources" modal.
+   */
+  protected get algoliaResults(): { [key: string]: HermesDocument } {
     /**
      * The array initially looks like this:
      * [{title: "foo", objectID: "bar"...}, ...]
@@ -208,23 +229,36 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
      */
     let documents: any = {};
 
-    if (this._shownDocuments) {
-      this._shownDocuments.forEach((doc) => {
+    if (this._algoliaResults) {
+      this._algoliaResults.forEach((doc) => {
         documents[doc.objectID] = doc;
       });
     }
     return documents;
   }
 
-  @action showAddResourceModal() {
+  /**
+   * The action run when the "add resource" plus button is clicked.
+   * Shows the modal.
+   */
+  @action protected showAddResourceModal() {
     this.addResourceModalIsShown = true;
   }
 
-  @action hideAddResourceModal() {
+  /**
+   * The action run to close the "add resources" modal.
+   * Called on `esc` and by clicking the X button.
+   */
+  @action protected hideAddResourceModal() {
     this.addResourceModalIsShown = false;
   }
 
-  editResource = dropTask(async (resource: RelatedExternalLink) => {
+  /**
+   * The action run when the user saves changes on a
+   * RelatedExternalLink. Confirms that the resource exists,
+   * updates it locally, then saves it to the DB.
+   */
+  @action protected editResource(resource: RelatedExternalLink) {
     let resourceIndex = this.relatedLinks.findIndex(
       (link) => link.sortOrder === resource.sortOrder
     );
@@ -239,8 +273,76 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         `#related-resource-${resource.sortOrder}`
       );
     }
-  });
+  }
 
+  /**
+   *
+   *
+   *
+   *
+   * TODO:
+   * Combine these "add" functions into a single method?
+   *
+   *
+   *
+   *
+   *
+   */
+
+  /**
+   * The action to add an external link to a document.
+   * Adds the link into the local array, then saves to the DB.
+   */
+  @action protected addRelatedExternalLink(link: RelatedExternalLink) {
+    this.relatedLinks.unshiftObject(link);
+    void this.saveRelatedResources.perform(
+      RelatedResourceSelector.ExternalLink
+    );
+  }
+
+  /**
+   * The action to add a Hermes document as a related resource.
+   * Adds the link to the local array, then saves it to the DB.
+   */
+  @action protected addRelatedDocument(documentObjectID: string) {
+    let document = this.algoliaResults[documentObjectID];
+    if (document) {
+      const relatedHermesDocument = {
+        googleFileID: document.objectID,
+        title: document.title,
+        type: document.docType,
+        documentNumber: document.docNumber,
+        sortOrder: 1,
+      } as RelatedHermesDocument;
+
+      this.relatedDocuments.unshiftObject(relatedHermesDocument);
+    }
+
+    void this.saveRelatedResources.perform(
+      RelatedResourceSelector.HermesDocument
+    );
+
+    this.hideAddResourceModal();
+  }
+
+  /**
+   * The task called to remove a resource from a document.
+   * Triggered via the overflow menu or the "Edit resource" modal.
+   */
+  @action protected removeResource(resource: RelatedResource) {
+    if ("url" in resource) {
+      this.relatedLinks.removeObject(resource);
+    } else {
+      this.relatedDocuments.removeObject(resource);
+    }
+    void this.saveRelatedResources.perform();
+  }
+
+  /**
+   * The action run when the component is rendered.
+   * Loads the document's related resources, if they exist.
+   * On error, triggers the "retry" design.
+   */
   protected loadRelatedResources = task(async () => {
     try {
       const resources = await this.fetchSvc
@@ -265,77 +367,53 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
   });
 
-  protected addRelatedExternalLink = restartableTask(
-    async (link: RelatedExternalLink) => {
-      this.relatedLinks.unshiftObject(link);
-      void this.saveRelatedResources.perform(
-        RelatedResourceSelector.ExternalLink
+  /**
+   * The task to animate a resource with a highlight.
+   * Called when a resource is added or edited.
+   * Temporarily adds a visual indicator of the changed element.
+   */
+  protected animateHighlight = restartableTask(async (selector: string) => {
+    schedule("afterRender", async () => {
+      // New resources will always be the first element
+      const newResourceLink = htmlElement(
+        `.related-resource${selector} .related-resource-link`
       );
-    }
-  );
 
-  protected addRelatedDocument = restartableTask(
-    async (documentObjectID: string) => {
-      let document = this.shownDocuments[documentObjectID];
-      if (document) {
-        const relatedHermesDocument = {
-          googleFileID: document.objectID,
-          title: document.title,
-          type: document.docType,
-          documentNumber: document.docNumber,
-          sortOrder: 1,
-        } as RelatedHermesDocument;
+      const highlight = document.createElement("div");
+      highlight.classList.add("highlight-affordance");
+      newResourceLink.insertBefore(highlight, newResourceLink.firstChild);
 
-        this.relatedDocuments.unshiftObject(relatedHermesDocument);
+      const fadeInAnimation = highlight.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        { duration: 50 }
+      );
+
+      await timeout(Ember.testing ? 0 : 2000);
+
+      const fadeOutAnimation = highlight.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 400 }
+      );
+
+      try {
+        await fadeInAnimation.finished;
+        await fadeOutAnimation.finished;
+      } finally {
+        fadeInAnimation.cancel();
+        fadeOutAnimation.cancel();
+        highlight.remove();
       }
+    });
+  });
 
-      void this.saveRelatedResources.perform(
-        RelatedResourceSelector.HermesDocument
-      );
-
-      this.hideAddResourceModal();
-    }
-  );
-
-  protected handleAnimationClasses = restartableTask(
-    async (selector: string) => {
-      schedule("afterRender", async () => {
-        // New resources will always be the first element
-        const newResourceLink = htmlElement(
-          `.related-resource${selector} .related-resource-link`
-        );
-
-        const highlight = document.createElement("div");
-        highlight.classList.add("highlight-affordance");
-        newResourceLink.insertBefore(highlight, newResourceLink.firstChild);
-
-        const fadeInAnimation = highlight.animate(
-          [{ opacity: 0 }, { opacity: 1 }],
-          { duration: 50 }
-        );
-
-        await timeout(Ember.testing ? 0 : 2000);
-
-        const fadeOutAnimation = highlight.animate(
-          [{ opacity: 1 }, { opacity: 0 }],
-          { duration: 400 }
-        );
-
-        try {
-          await fadeInAnimation.finished;
-          await fadeOutAnimation.finished;
-        } finally {
-          fadeInAnimation.cancel();
-          fadeOutAnimation.cancel();
-          highlight.remove();
-        }
-      });
-    }
-  );
-
+  /**
+   * The task to save the document's related resources.
+   * Creates a PUT request to the DB and conditionally triggers
+   * the resource-highlight animation.
+   */
   protected saveRelatedResources = task(async (selector?: string) => {
     if (selector) {
-      void this.handleAnimationClasses.perform(selector);
+      void this.animateHighlight.perform(selector);
     }
 
     await this.fetchSvc.fetch(
@@ -350,17 +428,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         },
       }
     );
-
-    // await this.loadRelatedResources.perform();
-  });
-
-  protected removeResource = dropTask(async (resource: RelatedResource) => {
-    if ("url" in resource) {
-      this.relatedLinks.removeObject(resource);
-    } else {
-      this.relatedDocuments.removeObject(resource);
-    }
-    void this.saveRelatedResources.perform();
   });
 }
 

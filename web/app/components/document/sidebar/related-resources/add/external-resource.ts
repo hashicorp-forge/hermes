@@ -4,7 +4,6 @@ import Component from "@glimmer/component";
 interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
   Element: null;
   Args: {
-    urlIsLoading: boolean;
     title: string;
     url: string;
     onSubmit: () => void;

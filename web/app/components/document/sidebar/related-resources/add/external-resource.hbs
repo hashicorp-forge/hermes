@@ -1,48 +1,36 @@
 <div class="related-resources-modal-container">
   <div class="add-external-resource-container">
-    {{#if @urlIsLoading}}
-      <div
-        class="block w-full text-center"
-        data-test-external-resource-url-is-loading
-      >
-        <FlightIcon @name="loading" @size="24" class="mb-2" />
-        <h3 class="related-resources-modal-body-header">
-          Reading URL...
-        </h3>
-      </div>
-    {{else}}
-      <div class="w-full" data-test-add-external-resource-form>
-        <form {{on "submit" @onSubmit}} class="mb-3">
-          <Hds::Form::TextInput::Field
-            {{on "input" @onInput}}
-            @value={{@title}}
-            placeholder="Optional"
-            required={{true}}
-            class="external-resource-title-input"
-            as |F|
-          >
-            <F.Label>Title</F.Label>
-          </Hds::Form::TextInput::Field>
-        </form>
-        <div class="external-resource-url">
-          <div class="truncate" data-test-add-external-resource-truncated-url>
-            {{@url}}
-          </div>
-          <div class="external-resource-favicon">
-            <FlightIcon @name={{get-link-icon @url}} />
-          </div>
+    <div class="w-full" data-test-add-external-resource-form>
+      <form {{on "submit" @onSubmit}} class="mb-3">
+        <Hds::Form::TextInput::Field
+          {{on "input" @onInput}}
+          @value={{@title}}
+          placeholder="Optional"
+          required={{true}}
+          class="external-resource-title-input"
+          as |F|
+        >
+          <F.Label>Title</F.Label>
+        </Hds::Form::TextInput::Field>
+      </form>
+      <div class="external-resource-url">
+        <div class="truncate" data-test-add-external-resource-truncated-url>
+          {{@url}}
         </div>
-
-        <Hds::Button
-          data-test-add-external-resource-submit-button
-          {{on "click" this.onSubmit}}
-          @isFullWidth={{true}}
-          @color="primary"
-          @text="Add"
-          class="mb-2.5"
-        />
+        <div class="external-resource-favicon">
+          <FlightIcon @name={{get-link-icon @url}} />
+        </div>
       </div>
-    {{/if}}
+
+      <Hds::Button
+        data-test-add-external-resource-submit-button
+        {{on "click" this.onSubmit}}
+        @isFullWidth={{true}}
+        @color="primary"
+        @text="Add"
+        class="mb-2.5"
+      />
+    </div>
   </div>
   {{#if @linkIsDuplicate}}
     <Hds::Form::Error class="mt-5" data-test-add-external-resource-error>

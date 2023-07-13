@@ -7,19 +7,12 @@
 />
 
 {{#if this.loadRelatedResources.isRunning}}
-  <div class="h-[26px]">
-    <FlightIcon
-      data-test-related-resources-list-loading-icon
-      @name="loading"
-      class="mt-1.5"
-    />
+  <div class="h-[26px] pt-1.5">
+    <FlightIcon data-test-related-resources-list-loading-icon @name="loading" />
   </div>
 {{else if this.loadingHasFailed}}
   <div class="h-16">
-    <div
-      data-test-related-resources-error-message
-      class="text-display-300 text-color-foreground-faint opacity-50 font-semibold mb-2"
-    >
+    <div class="related-resources-failed-to-load">
       Failed to load
     </div>
     <Hds::Button
@@ -39,9 +32,9 @@
     <:resource as |r|>
       <Document::Sidebar::RelatedResources::ListItem
         @resource={{r}}
-        @removeResource={{this.removeResource.perform}}
-        @editResource={{perform this.editResource}}
-        @editingIsDisabled={{this.editingIsDisabled}}
+        @removeResource={{this.removeResource}}
+        @editResource={{this.editResource}}
+        @editingIsDisabled={{@editingIsDisabled}}
       />
     </:resource>
   </Document::Sidebar::RelatedResources::List>
@@ -52,9 +45,9 @@
     @headerTitle={{@modalHeaderTitle}}
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideAddResourceModal}}
-    @addRelatedExternalLink={{perform this.addRelatedExternalLink}}
-    @addRelatedDocument={{perform this.addRelatedDocument}}
-    @shownDocuments={{this.shownDocuments}}
+    @addRelatedExternalLink={{this.addRelatedExternalLink}}
+    @addRelatedDocument={{this.addRelatedDocument}}
+    @shownDocuments={{this.algoliaResults}}
     @objectID={{@objectID}}
     @relatedDocuments={{this.relatedDocuments}}
     @relatedLinks={{this.relatedLinks}}
