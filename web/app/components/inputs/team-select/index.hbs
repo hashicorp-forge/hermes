@@ -1,15 +1,15 @@
 {{! @glint-nocheck - not typesafe yet }}
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+
 <div data-test-product-select>
-  {{#if this.products}}
+  {{#if this.teams}}
     {{#if @formatIsBadge}}
       <Inputs::BadgeDropdownList
-        @items={{this.products}}
+        @items={{this.teams}}
         @listIsOrdered={{true}}
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
         @placement={{@placement}}
-        @selectedBU={{@selectedBU}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
         @icon={{this.icon}}
@@ -18,7 +18,7 @@
       >
         <:item as |dd|>
           <dd.Action data-test-product-select-badge-dropdown-item>
-            <Inputs::ProductSelect::Item
+            <Inputs::TeamSelect::Item
               @product={{dd.value}}
               @selected={{dd.selected}}
             />
@@ -27,14 +27,13 @@
       </Inputs::BadgeDropdownList>
     {{else}}
       <X::DropdownList
-        @items={{this.products}}
+        @items={{this.teams}}
         @listIsOrdered={{true}}
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
         @placement={{@placement}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
-        @selectedBU={{@selectedBU}}
         class="w-[300px] product-select-dropdown-list"
         ...attributes
       >
@@ -48,7 +47,7 @@
               class="product-select-selected-value
                 {{unless @selected 'text-color-foreground-faint'}}"
             >
-              {{or @selected "Select a product/area"}}
+              {{or @selected "Select your team/pod"}}
             </span>
 
             {{#if this.selectedProductAbbreviation}}
@@ -62,22 +61,21 @@
         </:anchor>
         <:item as |dd|>
           <dd.Action class="pr-5">
-            <Inputs::ProductSelect::Item
+            <Inputs::TeamSelect::Item
               @product={{dd.value}}
               @selected={{dd.selected}}
               @abbreviation={{dd.attrs.abbreviation}}
-              @selectedBU={{@selectedBU}}
             />
           </dd.Action>
         </:item>
       </X::DropdownList>
     {{/if}}
-  {{else if this.fetchProducts.isRunning}}
+  {{else if this.fetchteams.isRunning}}
     <FlightIcon data-test-product-select-spinner @name="loading" />
   {{else}}
     <div
       class="absolute top-0 left-0"
-      {{did-insert (perform this.fetchProducts)}}
+      {{did-insert (perform this.fetchteams)}}
     ></div>
   {{/if}}
 </div>

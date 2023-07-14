@@ -9,6 +9,7 @@
 # macOS & local
 .DS_Store
 .env
+.idea
 
 # Web application
 node_modules

@@ -1726,7 +1726,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ember-decorators/utils@npm:^6.1.0":
+"@ember-decorators/component@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "@ember-decorators/component@npm:6.1.1"
+  dependencies:
+    "@ember-decorators/utils": ^6.1.1
+    ember-cli-babel: ^7.1.3
+  checksum: 0b731884ff2d84db32eae9c006179153ad1d7f93eee040260d0622101017f363caf38db98e536ffd4008312af91cc57a8dda0d0f2c71f80d3643d5456658bee6
+  languageName: node
+  linkType: hard
+
+"@ember-decorators/object@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "@ember-decorators/object@npm:6.1.1"
+  dependencies:
+    "@ember-decorators/utils": ^6.1.1
+    ember-cli-babel: ^7.1.3
+  checksum: 806f753a58ecca5924da110efa614e9a33b4ed7734aa5e67ea41a8a5f555734852e50e78dadcd269407efe1cc08756e8dbc55c077183892f9dc38a0701b8641d
+  languageName: node
+  linkType: hard
+
+"@ember-decorators/utils@npm:^6.1.0, @ember-decorators/utils@npm:^6.1.1":
   version: 6.1.1
   resolution: "@ember-decorators/utils@npm:6.1.1"
   dependencies:
@@ -8518,6 +8538,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ember-decorators@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "ember-decorators@npm:6.1.1"
+  dependencies:
+    "@ember-decorators/component": ^6.1.1
+    "@ember-decorators/object": ^6.1.1
+    ember-cli-babel: ^7.7.3
+  checksum: ffe95d41dae393586190340c0e65d772c2132ff50269ef21a408d999e10fff79214ac9e14a49e1a94bf3fdd18c660759bc23c79de9ca41375f0e9ba8204b5168
+  languageName: node
+  linkType: hard
+
 "ember-destroyable-polyfill@npm:^2.0.2, ember-destroyable-polyfill@npm:^2.0.3":
   version: 2.0.3
   resolution: "ember-destroyable-polyfill@npm:2.0.3"
@@ -11171,6 +11202,7 @@ __metadata:
     ember-composable-helpers: ^5.0.0
     ember-concurrency: ^2.2.1
     ember-data: ~3.28.6
+    ember-decorators: ^6.1.1
     ember-element-helper: ^0.6.1
     ember-export-application-global: ^2.0.1
     ember-fetch: ^8.1.1

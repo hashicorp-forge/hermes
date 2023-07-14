@@ -73,7 +73,28 @@
           <Inputs::ProductSelect
             @selected={{this.productArea}}
             @onChange={{this.onProductSelect}}
+            @onSelectBU={{this.updateSelectedBU}}
             class="w-[300px]"
+          />
+        </div>
+
+{{! Testing new functionality }}
+        {{!-- Render the team dropdown only when BU is selected --}}
+        <div>
+          <div class="mb-2">
+            <span class="hermes-form-label">
+              Teams/Pod
+              <Hds::Badge @size="small" @text="Required" />
+            </span>
+            <span class="hermes-form-helper-text hds-form-helper-text">
+              Select your Team/Pod
+            </span>
+          </div>
+          <Inputs::TeamSelect
+                  @selectedBU={{this.selectedBU}}
+                  @selected={{this.teamArea}}
+                  @onChange={{this.onTeamSelect}}
+                  class="w-[300px]"
           />
         </div>
 
