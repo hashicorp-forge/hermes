@@ -45,9 +45,15 @@ export default class AuthenticatedDashboardController extends Controller {
     this.toggleProperty('showModal2');
   }
 
+  @action
+  updateSelectedBU(selectedBU) {
+    // Trigger the necessary actions, such as fetching filtered teams
+    // ...
+  }
 
-  @action protected onProductSelect(
-    productName: string
+
+  @action onProductSelect(
+    productName,
   ) {
     this.TeamBU = productName;
   }

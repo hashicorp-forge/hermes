@@ -89,11 +89,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
-  @computed('productArea')
-  get shouldRenderTeamDropdown() {
-    return !!this.productArea;
-  }
-
   /**
    * The form element. Used to bind FormData to our tracked elements.
    */
