@@ -1,10 +1,18 @@
 <div class="flex flex-1 space-x-px max-h-screen">
-  <Document::Sidebar
-    @profile={{this.authenticatedUser.info}}
-    @document={{@document}}
-    @deleteDraft={{perform this.deleteDraft}}
-    @docType={{@docType}}
-  />
+  <div
+    class="sidebar shrink-0 {{if this.sidebarIsCollapsed 'collapsed' 'w-72'}}"
+  >
+    {{#unless @modelIsChanging}}
+      <Document::Sidebar
+        @profile={{this.authenticatedUser.info}}
+        @document={{@document}}
+        @deleteDraft={{perform this.deleteDraft}}
+        @docType={{@docType}}
+        @isCollapsed={{this.sidebarIsCollapsed}}
+        @toggleCollapsed={{this.toggleSidebarCollapsedState}}
+      />
+    {{/unless}}
+  </div>
 
   <div class="pt-4 pb-4 pr-4 w-full">
     <Hds::Card::Container

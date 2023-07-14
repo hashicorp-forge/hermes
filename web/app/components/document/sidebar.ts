@@ -22,6 +22,8 @@ interface DocumentSidebarComponentSignature {
     document: HermesDocument;
     docType: string;
     deleteDraft: (docId: string) => void;
+    isCollapsed: boolean;
+    toggleCollapsed: () => void;
   };
 }
 
@@ -31,7 +33,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
 
-  @tracked isCollapsed = false;
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
   @tracked requestReviewModalIsActive = false;
@@ -82,10 +83,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       customEditableFields[field]["value"] = this.args.document[field];
     }
     return customEditableFields;
-  }
-
-  @action toggleCollapsed() {
-    this.isCollapsed = !this.isCollapsed;
   }
 
   get approveButtonText() {
