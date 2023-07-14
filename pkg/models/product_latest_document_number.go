@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ type ProductLatestDocumentNumber struct {
 	DocumentType   DocumentType
 	DocumentTypeID uint `gorm:"primaryKey"`
 	Product        Product
-	ProductID      uint `gorm:"primaryKey"`
+	ProductID      uuid.UUID `gorm:"primaryKey"`
 
 	// LatestDocumentNumber is a the latest document number per product and
 	// document type.

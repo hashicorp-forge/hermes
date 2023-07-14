@@ -24,6 +24,7 @@ type ReviewRequestedEmailData struct {
 	DocumentTitle      string
 	DocumentURL        string
 	DocumentProdAbbrev string
+	DocumentTeamAbbrev string
 }
 
 type SubscriberDocumentPublishedEmailData struct {
@@ -35,6 +36,7 @@ type SubscriberDocumentPublishedEmailData struct {
 	DocumentType      string
 	DocumentURL       string
 	Product           string
+	Team              string
 }
 
 type ContributorRequestedEmailData struct {
@@ -47,6 +49,7 @@ type ContributorRequestedEmailData struct {
 	DocumentTitle      string
 	DocumentURL        string
 	DocumentProdAbbrev string
+	DocumentTeamAbbrev string
 }
 
 func SendReviewRequestedEmail(
@@ -81,7 +84,7 @@ func SendReviewRequestedEmail(
 	_, err = s.SendEmail(
 		to,
 		from,
-		fmt.Sprintf("[%s]%s | Document Review Request from %s [%s]", d.DocumentType, d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
+		fmt.Sprintf("%s | [%s/%s - %s] | Document Review Request from %s [%s]", d.DocumentType, d.DocumentProdAbbrev, d.DocumentTeamAbbrev, d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
 		body.String(),
 	)
 	return err
@@ -119,7 +122,7 @@ func SendContributorRequestedEmail(
 	_, err = s.SendEmail(
 		to,
 		from,
-		fmt.Sprintf("[%s]%s | Document Contribution Request from %s [%s]", d.DocumentType, d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
+		fmt.Sprintf("%s | [%s/%s - %s] | Document Contribution Request from %s [%s]", d.DocumentType, d.DocumentProdAbbrev, d.DocumentTeamAbbrev, d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
 		body.String(),
 	)
 	return err

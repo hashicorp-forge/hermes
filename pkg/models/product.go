@@ -2,13 +2,18 @@ package models
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"time"
 )
 
 // Product is a model for product data.
 type Product struct {
-	gorm.Model
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// Name is the name of the product.
 	Name string `gorm:"default:null;index;not null;type:citext;unique"`
@@ -35,7 +40,7 @@ func (p *Product) FirstOrCreate(db *gorm.DB) error {
 		),
 		validation.Field(
 			&p.Name,
-			validation.When(p.ID == 0,
+			validation.When(p.ID == uuid.Nil,
 				validation.Required.Error("either ID or Name is required"))),
 	); err != nil {
 		return err
@@ -58,7 +63,7 @@ func (p *Product) Get(db *gorm.DB) error {
 		),
 		validation.Field(
 			&p.Name,
-			validation.When(p.ID == 0,
+			validation.When(p.ID == uuid.Nil,
 				validation.Required.Error("either ID or Name is required"))),
 	); err != nil {
 		return err

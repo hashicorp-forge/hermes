@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -54,7 +55,11 @@ type Document struct {
 
 	// Product is the product or area that the document relates to.
 	Product   Product
-	ProductID uint `gorm:"index:latest_product_number"`
+	ProductID uuid.UUID `gorm:"index:latest_product_number"`
+
+	// Team is the team/pod inside the Product
+	Team   Team
+	TeamID uuid.UUID `gorm:"index"` // Foreign key column referencing the teams table
 
 	// Status is the status of the document.
 	Status DocumentStatus
@@ -313,11 +318,19 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 	}
 
 	// Get product if ProductID is not set.
-	if d.ProductID == 0 && d.Product.Name != "" {
+	if d.ProductID == uuid.Nil && d.Product.Name != "" {
 		if err := d.Product.Get(db); err != nil {
 			return fmt.Errorf("error getting product: %w", err)
 		}
 		d.ProductID = d.Product.ID
+	}
+
+	// Get team if TeamID is not set.
+	if d.TeamID == uuid.Nil && d.Team.Name != "" {
+		if err := d.Team.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.TeamID = d.Team.ID
 	}
 
 	return nil
@@ -395,6 +408,13 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 			return fmt.Errorf("error getting product: %w", err)
 		}
 		d.ProductID = d.Product.ID
+	}
+
+	if d.Team.Name != "" {
+		if err := d.Team.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.TeamID = d.Team.ID
 	}
 
 	return nil

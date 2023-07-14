@@ -9,6 +9,7 @@ export interface HermesDocument {
 
   status: string;
   product?: string;
+  team?: string;
   modifiedAgo: string;
   modifiedTime: number;
   docNumber: string;

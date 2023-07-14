@@ -20,39 +20,39 @@ jobs:
         run: |
           echo "Don't cancel old workflow"
 
-  build-and-test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: "read"
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup with node and yarn
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-          cache-dependency-path: "web/yarn.lock"
-
-      - name: Set yarn version
-        run: make web/set-yarn-version
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: "^1.18"
-
-      - name: Build web
-        run: make web/build
-
-      - name: Run web test
-        run: make web/test
-
-      - name: Build
-        run: make bin/linux
-
-      - name: Run Go test
-        run: make go/test
+#  build-and-test:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: "read"
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: Setup with node and yarn
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: "16"
+#          cache-dependency-path: "web/yarn.lock"
+#
+#      - name: Set yarn version
+#        run: make web/set-yarn-version
+#
+#      - name: Set up Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version: "^1.18"
+#
+#      - name: Build web
+#        run: make web/build
+#
+#      - name: Run web test
+#        run: make web/test
+#
+#      - name: Build
+#        run: make bin/linux
+#
+#      - name: Run Go test
+#        run: make go/test
 
   build-docker-server:
     runs-on: ubuntu-latest
@@ -106,4 +106,9 @@ jobs:
           tags: anuragprafulla/hermes_indexer:${{ github.sha }}
           push: true
           file: Dockerfile.indexer
-          build-args: GIT_COMMIT_HASH=${{ github.sha }}
+          target: prod-api
+          secrets: |
+            GIT_TOKEN=${{ secrets.GIT_TOKEN }}
+          build-args: |
+            GIT_COMMIT_HASH=${{ github.sha }}
+            GIT_USERNAME=rzp

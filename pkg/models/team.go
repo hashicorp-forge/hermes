@@ -3,13 +3,19 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type Team struct {
-	gorm.Model
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// Name is the name of the team
 	Name string `gorm:"default:null;index;not null;type:citext;unique"`
@@ -18,7 +24,7 @@ type Team struct {
 	Abbreviation string `gorm:"default:null;not null;type:citext;unique"`
 
 	// BUName is the business unit that this team belongs to
-	BUID uint `gorm:"default:null;not null;type:citext;"`
+	BUID uuid.UUID `gorm:"default:null;not null;type:citext;"`
 
 	// UserSubscribers are the users that subscribed to this product.
 	BU Product
@@ -87,7 +93,7 @@ func (t *Team) Get(db *gorm.DB) error {
 		),
 		validation.Field(
 			&t.Name,
-			validation.When(t.ID == 0,
+			validation.When(t.ID == uuid.Nil,
 				validation.Required.Error("either ID or Name is required"))),
 	); err != nil {
 		return err

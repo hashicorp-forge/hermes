@@ -7,8 +7,18 @@ import { getTestDocNumber } from "./factories/document";
 import { SearchForFacetValuesResponse } from "@algolia/client-search";
 
 export default function (mirageConfig) {
+  // Add this function to enable the UUID extension
+  function enableUUIDExtension() {
+    this.db.connection.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+  }
   let finalConfig = {
     ...mirageConfig,
+
+    // Call the enableUUIDExtension function during server setup
+    initialize(server) {
+      mirageConfig.initialize?.(server);
+      enableUUIDExtension.call(server);
+    },
 
     routes() {
       this.namespace = "api/v1";
@@ -335,6 +345,53 @@ export default function (mirageConfig) {
           return new Response(200, {}, formattedObjects);
         }
       });
+
+      // /**
+      //  * Used by the NewDoc route to map the teams to their abbreviations.
+      //  * Used by the sidebar to populate a draft's teams dropdown.
+      //  * Used for fetching the teams for the dropdown while new draft form is filled
+      //  */
+      // this.get("/teams", () => {
+      //   let currentTeams = this.schema.teams.all().models;
+      //   if (currentTeams.length === 0) {
+      //     return new Response(
+      //         200,
+      //         {},
+      //         { "Default Fetched Product": { abbreviation: "NONE" } }
+      //     );
+      //   } else {
+      //     let objects = this.schema.teams.all().models.map((product) => {
+      //       return {
+      //         [product.attrs.name]: {
+      //           abbreviation: product.attrs.abbreviation,
+      //           BU: product.attrs.BU,
+      //         },
+      //       };
+      //     });
+      //
+      //     // The objects currently look like:
+      //     // [
+      //     //  0: { "Labs": { abbreviation: "LAB" } },
+      //     //  1: { "Vault": { abbreviation: "VLT"} }
+      //     // ]
+      //
+      //     // We reformat them to match the API's response:
+      //     // {
+      //     //  "Labs": { abbreviation: "LAB" },
+      //     //  "Vault": { abbreviation: "VLT" }
+      //     // }
+      //
+      //     let formattedObjects = {};
+      //
+      //     objects.forEach((object) => {
+      //       let key = Object.keys(object)[0];
+      //       formattedObjects[key] = object[key];
+      //     });
+      //
+      //     return new Response(200, {}, formattedObjects);
+      //   }
+      // });
+
 
       // RecentlyViewedDocsService / fetchIndexID
       this.get("https://www.googleapis.com/drive/v3/files", (schema) => {

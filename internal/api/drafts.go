@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp-forge/hermes/internal/email"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp-forge/hermes/internal/email"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
@@ -29,6 +30,8 @@ type DraftsRequest struct {
 	DocType             string   `json:"docType,omitempty"`
 	Product             string   `json:"product,omitempty"`
 	ProductAbbreviation string   `json:"productAbbreviation,omitempty"`
+	Team                string   `json:"team,omitempty"`
+	TeamAbbreviation    string   `json:"teamAbbreviation,omitempty"`
 	Summary             string   `json:"summary,omitempty"`
 	Tags                []string `json:"tags,omitempty"`
 	Title               string   `json:"title"`
@@ -40,6 +43,7 @@ type DraftsPatchRequest struct {
 	Approvers    []string `json:"approvers,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	Product      string   `json:"product,omitempty"`
+	Team         string   `json:"team,omitempty"`
 	Summary      string   `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
 	Title string `json:"title,omitempty"`
@@ -118,6 +122,8 @@ func DraftsHandler(
 				return
 			}
 
+			// TODO check if the team selected belongs to the selected business team
+
 			// Get doc type template.
 			template := getDocTypeTemplate(cfg.DocumentTypes.DocumentType, req.DocType)
 			if template == "" {
@@ -133,7 +139,7 @@ func DraftsHandler(
 				req.ProductAbbreviation = "TODO"
 			}
 			//title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
-			title := fmt.Sprintf("[%s] %s", req.ProductAbbreviation, req.Title)
+			title := fmt.Sprintf("[%s-%s(%s)] %s", req.ProductAbbreviation, req.TeamAbbreviation, req.DocType, req.Title)
 
 			// Copy template to new draft file.
 			f, err := s.CopyFile(template, title, cfg.GoogleWorkspace.DraftsFolder)
@@ -195,6 +201,7 @@ func DraftsHandler(
 				Owners:       []string{userEmail},
 				OwnerPhotos:  op,
 				Product:      req.Product,
+				Team:         req.Team,
 				Status:       "WIP",
 				Summary:      req.Summary,
 				Tags:         req.Tags,
@@ -286,6 +293,9 @@ func DraftsHandler(
 				},
 				Product: models.Product{
 					Name: req.Product,
+				},
+				Team: models.Team{
+					Name: req.Team,
 				},
 				Status:  models.WIPDocumentStatus,
 				Summary: req.Summary,
@@ -407,6 +417,7 @@ func DraftsHandler(
 								DocumentTitle:      docObj.GetTitle(),
 								DocumentURL:        docURL,
 								DocumentProdAbbrev: docObj.GetProduct(),
+								DocumentTeamAbbrev: docObj.GetTeam(),
 							},
 							[]string{c},
 							cfg.Email.FromAddress,
@@ -824,6 +835,24 @@ func DraftsDocumentHandler(
 				productAbbreviation = p.Abbreviation
 			}
 
+			var teamAbbreviation string
+			// Validate product if it is in the patch request.
+			if req.Team != "" {
+				p := models.Team{Name: req.Team}
+				if err := p.Get(db); err != nil {
+					l.Error("error getting team",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"team", req.Team,
+						"doc_id", docId)
+					http.Error(w, "Bad request: invalid product",
+						http.StatusBadRequest)
+					return
+				}
+				teamAbbreviation = p.Abbreviation
+			}
+
 			// Check if document is locked.
 			locked, err := hcd.IsLocked(docId, db, s, l)
 			if err != nil {
@@ -946,6 +975,29 @@ func DraftsDocumentHandler(
 				}
 
 				// Update doc number in Algolia object.
+				docObj.SetDocNumber(fmt.Sprintf("[%s-%s]-???", productAbbreviation, teamAbbreviation))
+			}
+
+			// Update team (if it is in the patch request).
+			if req.Team != "" {
+				// Update in database.
+				d := models.Document{
+					GoogleFileID: docId,
+					Team:         models.Team{Name: req.Team},
+				}
+				if err := d.Upsert(db); err != nil {
+					l.Error("error upserting document to update team",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"team", req.Team,
+						"doc_id", docId)
+					http.Error(w, "Error patching document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Update doc number in Algolia object.
 				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 			}
 
@@ -980,7 +1032,7 @@ func DraftsDocumentHandler(
 
 			// Rename file with new title.
 			s.RenameFile(docId,
-				fmt.Sprintf("[%s] %s", docObj.GetProduct(), req.Title))
+				fmt.Sprintf("[%s-%s] %s", docObj.GetProduct(), docObj.GetTeam(), req.Title))
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched draft document", "doc_id", docId)

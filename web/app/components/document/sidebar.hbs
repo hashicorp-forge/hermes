@@ -17,12 +17,12 @@
                     <div
                             class="product-badge
               {{productIcon}}
-                                {{if this.save.isRunning 'opacity-50'}}"
-                    >
-                        <FlightIcon @name={{productIcon}} />
-                    </div>
-                {{/if}}
-            {{/let}}
+              {{if this.save.isRunning 'opacity-50'}}"
+          >
+            <FlightIcon @name={{productIcon}} />
+          </div>
+        {{/if}}
+      {{/let}}
 
             <div class="sidebar-body-container">
                 <div class="flex flex-col items-start space-y-2">
@@ -135,7 +135,7 @@
                 <div class="flex flex-col items-start space-y-2">
                     <small
                             class="hds-typography-body-100 hds-foreground-faint"
-                    >Product/Area</small>
+                    >Business Unit (BU)</small>
                     {{#if this.isDraft}}
                         <div class="w-full relative">
                             <Inputs::ProductSelect
@@ -146,6 +146,22 @@
                                     @renderOut={{true}}
                             />
                         </div>
+
+                    {{#if this.product}}
+                <small
+                        class="hds-typography-body-100 hds-foreground-faint"
+                >Team/Pod</small>
+                        <div class="w-full relative">
+                            <Inputs::TeamSelect
+                                    @onChange={{this.updateTeam.perform}}
+                                    @isSaving={{this.save.isRunning}}
+                                    @formatIsBadge={{true}}
+                                    @renderOut={{true}}
+                                    @selectedBU={{this.product}}
+                                    @selected={{this.team}}
+                            />
+                    </div>
+                    {{/if}}
                     {{else}}
                         <Hds::Badge
                                 @text={{@document.product}}

@@ -62,6 +62,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
+  @tracked team = this.args.document.team || "";
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -244,6 +245,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   updateProduct = restartableTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
+    // productAbbreviation is computed by the back end
+  });
+
+  updateTeam = restartableTask(async (team: string) => {
+    this.team = team;
+    await this.save.perform("team", this.team);
     // productAbbreviation is computed by the back end
   });
 

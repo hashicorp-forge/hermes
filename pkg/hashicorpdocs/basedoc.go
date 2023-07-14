@@ -78,6 +78,9 @@ type BaseDoc struct {
 	// Product is the product or area that the document relates to.
 	Product string `json:"product,omitempty"`
 
+	// Team is the team/pods that the document relates to.
+	Team string `json:"team,omitempty"`
+
 	// Summary is a summary of the document.
 	Summary string `json:"summary,omitempty"`
 
@@ -143,6 +146,10 @@ func (d BaseDoc) GetModifiedTime() int64 {
 
 func (d BaseDoc) GetProduct() string {
 	return d.Product
+}
+
+func (d BaseDoc) GetTeam() string {
+	return d.Team
 }
 
 func (d BaseDoc) GetStatus() string {
