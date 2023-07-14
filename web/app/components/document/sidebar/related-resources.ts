@@ -93,7 +93,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
     const externalLinks = this.relatedLinks.map((link) => {
       return {
-        name: link.name || link.url,
+        name: link.name,
         url: link.url,
         sortOrder: link.sortOrder,
       };

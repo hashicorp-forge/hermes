@@ -51,6 +51,8 @@ const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR =
   "[data-test-edit-related-resource-modal-delete-button]";
 const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-add-external-resource-error]";
+const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
+  "[data-test-external-resource-title-error]";
 
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
@@ -355,8 +357,6 @@ module(
 
       assert.dom(LIST_ITEM_SELECTOR).doesNotExist("no items yet");
 
-      // Add a resource without a title
-
       await click(ADD_RESOURCE_BUTTON_SELECTOR);
 
       await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
@@ -378,8 +378,21 @@ module(
         .exists('the "add resource" form is shown');
       assert
         .dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR)
-        .hasAttribute("placeholder", "Optional");
+        .hasAttribute("placeholder", "Enter a title");
 
+      // Try to add a resource without a title
+
+      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+
+      // Confirm that it fails
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
+        .hasText("A title is required.");
+
+      // Now add a a title
+
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "Example");
       await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
       assert
@@ -389,49 +402,7 @@ module(
       assert
         .dom(LIST_ITEM_SELECTOR)
         .exists({ count: 1 }, "there is 1 item")
-        .hasText(
-          "https://example.com",
-          "the external resource displays a URL when no title is provided"
-        );
-
-      // Add a resource with a title
-
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-
-      assert
-        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
-        .exists("documents are shown again when the modal is reopened");
-
-      assert
-        .dom(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR)
-        .hasValue("", "the form is reset")
-        .hasAttribute(
-          "placeholder",
-          "Test placeholder",
-          "the custom placeholder is shown"
-        );
-
-      await fillIn(
-        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-        "https://hashicorp.com"
-      );
-
-      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "HashiCorp");
-
-      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
-
-      assert
-        .dom(ADD_RESOURCE_MODAL_SELECTOR)
-        .doesNotExist("the modal is closed");
-
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 2 }, "there are 2 items");
-
-      assert
-        .dom(LIST_ITEM_SELECTOR + ":first-child")
-        .hasText(
-          "HashiCorp",
-          "the external resource displays a title when provided"
-        );
+        .hasText("Example");
     });
 
     test("it prevents duplicate external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -661,6 +632,7 @@ module(
         ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
         "https://new-resource-example.com"
       );
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New resource");
       await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
       assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
@@ -690,6 +662,35 @@ module(
       assert
         .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
         .exists();
+    });
+
+    test("a title is required when editing a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.create("relatedExternalLink", {
+        name: "Example",
+        url: "https://example.com",
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+        />
+      `);
+
+      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click(EDIT_BUTTON_SELECTOR);
+
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "");
+      await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+
+      assert
+        .dom(EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR)
+        .hasText("A title is required.");
     });
   }
 );

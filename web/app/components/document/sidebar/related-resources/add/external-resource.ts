@@ -1,5 +1,6 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
 
 interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
   Element: null;
@@ -13,11 +14,22 @@ interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
 }
 
 export default class DocumentSidebarRelatedResourcesAddExternalResource extends Component<DocumentSidebarRelatedResourcesAddExternalResourceSignature> {
+  @tracked titleErrorIsShown = false;
+
+  get errorIsShown() {
+    return this.titleErrorIsShown || this.args.linkIsDuplicate;
+  }
   /**
    * The action run when the "add" button is clicked.
    * Calls the parent method unless the link is a duplicate.
    */
   @action onSubmit() {
+    // if the link doesn't have a title, don't submit
+    if (!this.args.title) {
+      this.titleErrorIsShown = true;
+      return;
+    }
+
     if (!this.args.linkIsDuplicate) {
       this.args.onSubmit();
     }

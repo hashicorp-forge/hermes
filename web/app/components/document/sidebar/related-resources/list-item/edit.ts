@@ -37,7 +37,13 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
    * Whether the error warning is shown.
    * True when the URL is invalid.
    */
-  @tracked protected errorMessageIsShown = false;
+  @tracked protected urlErrorMessageIsShown = false;
+
+  /**
+   * Whether the error warning is shown.
+   * True if the title is empty on submit.
+   */
+  @tracked protected titleErrorMessageIsShown = false;
 
   /**
    * A local reference to the form element.
@@ -108,10 +114,12 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
 
     this.validateURL();
 
+    if (!this.title) {
+      this.titleErrorMessageIsShown = true;
+      return;
+    }
+
     if (this.urlIsValid) {
-      if (!this.args.resource.name.length) {
-        newResource.name = this.url;
-      }
       this.args.onSave(newResource);
     }
   }
