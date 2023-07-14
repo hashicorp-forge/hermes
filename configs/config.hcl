@@ -7,6 +7,7 @@ algolia {
   application_id            = ""
   docs_index_name           = "docs"
   drafts_index_name         = "drafts"
+  template_index_name       ="template"
   internal_index_name       = "internal"
   links_index_name          = "links"
   missing_fields_index_name = "missing_fields"

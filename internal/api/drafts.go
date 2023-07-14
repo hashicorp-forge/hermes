@@ -24,6 +24,7 @@ import (
 	"gorm.io/gorm"
 )
 
+
 type DraftsRequest struct {
 	Approvers           []string `json:"approvers,omitempty"`
 	Contributors        []string `json:"contributors,omitempty"`
@@ -61,6 +62,8 @@ type DraftsPatchRequest struct {
 type DraftsResponse struct {
 	ID string `json:"id"`
 }
+
+
 
 func DraftsHandler(
 	cfg *config.Config,
@@ -102,16 +105,17 @@ func DraftsHandler(
 					http.StatusBadRequest)
 				return
 			}
-
-			switch req.DocType {
-			case "FRD":
-			case "RFC":
-			case "PRD":
-			case "":
-				l.Error("Bad request: docType is required")
-				http.Error(w, "Bad request: docType is required", http.StatusBadRequest)
-				return
-			default:
+			// Define a variable to hold the retrieved document type array
+			var doctypeArray []template=GetDocTypeArray(*cfg)
+			// replace switch case with loop
+			check:=true
+			for i := 0; i < len(doctypeArray); i++ {
+				if(doctypeArray[i].TemplateName==req.DocType){					
+					check=false
+					break;
+				}
+			}
+			if(check){
 				l.Error("Bad request: docType is required", "doc_type", req.DocType)
 				http.Error(w, "Bad request: invalid docType", http.StatusBadRequest)
 				return
@@ -122,34 +126,36 @@ func DraftsHandler(
 				return
 			}
 
-			// TODO check if the team selected belongs to the selected business team
 
-			// Get doc type template.
-			template := getDocTypeTemplate(cfg.DocumentTypes.DocumentType, req.DocType)
-			if template == "" {
-				l.Error("Bad request: no template configured for doc type", "doc_type", req.DocType)
+			// Get doc type template new.
+			templateName := getDocTypeTemplate(doctypeArray, req.DocType)
+			if templateName == "" {
+				l.Error("Bad request: no templateName configured for doc type", "doc_type", req.DocType)
 				http.Error(w,
-					"Bad request: no template configured for doc type",
+					"Bad request: no templateName configured for doc type",
 					http.StatusBadRequest)
 				return
 			}
+
 
 			// Build title.
 			if req.ProductAbbreviation == "" {
 				req.ProductAbbreviation = "TODO"
 			}
+
 			//title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
 			title := fmt.Sprintf("[%s-%s(%s)] %s", req.ProductAbbreviation, req.TeamAbbreviation, req.DocType, req.Title)
 
 			// Copy template to new draft file.
-			f, err := s.CopyFile(template, title, cfg.GoogleWorkspace.DraftsFolder)
+			f, err := s.CopyFile(templateName, title, cfg.GoogleWorkspace.DraftsFolder)
 			if err != nil {
-				l.Error("error creating draft", "error", err, "template", template,
+				l.Error("error creating draft", "error", err, "template id ", templateName,
 					"drafts_folder", cfg.GoogleWorkspace.DraftsFolder)
 				http.Error(w, "Error creating document draft",
 					http.StatusInternalServerError)
 				return
 			}
+
 
 			// Build created date.
 			ct, err := time.Parse(time.RFC3339Nano, f.CreatedTime)
@@ -188,6 +194,7 @@ func DraftsHandler(
 				"o_id:" + id,
 			}
 
+			// a object of base doc
 			baseDocObj := &hcd.BaseDoc{
 				ObjectID:     f.Id,
 				Title:        req.Title,
@@ -246,16 +253,17 @@ func DraftsHandler(
 				return
 			}
 
+			// archieved
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				f.Id, cfg.BaseURL, true, s)
-			if err != nil {
-				l.Error("error replacing draft doc header",
-					"error", err, "doc_id", f.Id)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
-			}
+			// err = docObj.ReplaceHeader(
+			// 	f.Id, cfg.BaseURL, true, s)
+			// if err != nil {
+			// 	l.Error("error replacing draft doc header",
+			// 		"error", err, "doc_id", f.Id)
+			// 	http.Error(w, "Error creating document draft",
+			// 		http.StatusInternalServerError)
+			// 	return
+			// }
 
 			// Create document in the database.
 			var approvers []*models.User
@@ -1106,22 +1114,38 @@ func parseURLPath(path, prefix string) (string, error) {
 }
 
 // getDocTypeTemplate returns the file ID of the template for a specified
-// document type or an empty string if not found.
+// document type or an empty string if not found. new
 func getDocTypeTemplate(
-	docTypes []*config.DocumentType,
+	docTypes []template,
 	docType string,
 ) string {
-	template := ""
+	docId := ""
 
 	for _, t := range docTypes {
-		if strings.ToUpper(t.Name) == docType {
-			template = t.Template
+		if strings.ToUpper(t.TemplateName) == strings.ToUpper(docType) {
+			docId = t.DocId
 			break
 		}
 	}
 
-	return template
+	return docId
 }
+
+// // document type or an empty string if not found. old
+// func getDocTypeTemplateOld(
+// 	docTypes []*config.DocumentType,
+// 	docType string,
+// ) string {
+// 	template := ""
+// 	for _, t := range docTypes {
+// 		if strings.ToUpper(t.Name) == docType {
+// 			template = t.Template
+// 			break
+// 		}
+// 	}
+// 	return template
+// }
+
 
 // removeSharing lists permissions for a document and then
 // deletes the permission for the supplied user email

@@ -2,8 +2,6 @@ package hashicorpdocs
 
 import (
 	"fmt"
-	"strings"
-
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"google.golang.org/api/drive/v3"
 )
@@ -74,17 +72,9 @@ type MissingFields struct {
 }
 
 // NewEmptyDoc returns an empty doc struct for the provided doc type.
+// new version of new empty doc for custom template
 func NewEmptyDoc(docType string) (Doc, error) {
-	switch docType {
-	case "FRD":
-		return &FRD{}, nil
-	case "RFC":
-		return &RFC{}, nil
-	case "PRD":
-		return &PRD{}, nil
-	default:
-		return nil, fmt.Errorf("invalid doc type")
-	}
+	return &COMMONTEMPLATE{}, nil
 }
 
 // ParseDoc parses and returns a known document type, associated product name,
@@ -94,32 +84,12 @@ func ParseDoc(
 	f *drive.File,
 	s *gw.Service,
 	allFolders []string) (Doc, error) {
+	p, err := NewCOMMONTEMPLATE(f, s, allFolders)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing doc Type: %w", err)
+	}
+	return p, nil
 
 	// TODO: Add a Parse() function to the Doc interface to make this more
 	// extensible and not have to address all doc types here.
-	switch strings.ToLower(docType) {
-	case "frd":
-		r, err := NewFRD(f, s, allFolders)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing FRD: %w", err)
-		}
-		return r, nil
-
-	case "rfc":
-		r, err := NewRFC(f, s, allFolders)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing RFC: %w", err)
-		}
-		return r, nil
-
-	case "prd":
-		p, err := NewPRD(f, s, allFolders)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing PRD: %w", err)
-		}
-		return p, nil
-
-	default:
-		return nil, fmt.Errorf("unknown doc type: %s", docType)
-	}
 }

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/api"
 	"github.com/hashicorp-forge/hermes/internal/auth"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
@@ -375,11 +376,17 @@ func (c *Command) Run(args []string) int {
 
 	// Register document types.
 	// TODO: remove this and use the database for all document type lookups.
+	// array of object object to store doctype objects fetched from algolia
+	var objectArray []template = GetDocTypeArray(*cfg)
 	docTypes := map[string]hcd.Doc{
-		"frd": &hcd.FRD{},
-		"prd": &hcd.PRD{},
-		"rfc": &hcd.RFC{},
+		// "prd": &hcd.PRD{},
 	}
+	for i := 0; i < len(objectArray); i++ {
+		doctype := objectArray[i].TemplateName
+		doctype = strings.ToLower(doctype)
+		docTypes[doctype] = &hcd.COMMONTEMPLATE{}
+	}
+
 	for name, dt := range docTypes {
 		if err = doctypes.Register(name, dt); err != nil {
 			c.UI.Error(fmt.Sprintf("error registering %q doc type: %v", name, err))
@@ -402,6 +409,8 @@ func (c *Command) Run(args []string) int {
 			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts",
 			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+		{"/api/v1/custom-template",
+			api.TemplateHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts/",
 			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/me", api.MeHandler(c.Log, goog, db)},
@@ -489,62 +498,74 @@ func (c *Command) ShutdownServer(s *http.Server) func() {
 
 // registerDocumentTypes registers all products configured in the application
 // config in the database.
-func registerDocumentTypes(cfg config.Config, db *gorm.DB) error {
-	for _, d := range cfg.DocumentTypes.DocumentType {
-		// Marshal Checks to JSON.
-		checksJSON, err := json.Marshal(d.Checks)
+// Define a variable to hold the retrieved object
+type template struct {
+	ObjectId     string `json:"objectId"`
+	Description  string `json:"description,omitempty"`
+	TemplateName string `json:"templateName"`
+	DocId        string `json:"docId"`
+	LongName     string `json:"longName"`
+}
+
+func GetDocTypeArray(cfg config.Config) []template {
+	// Initialize the Algolia client
+	appID := cfg.Algolia.ApplicationID
+	apiKey := cfg.Algolia.WriteAPIKey
+	// Initialize the search client
+	client := search.NewClient(appID, apiKey)
+
+	// Specify the index name
+	indexName := "template"
+	// Create a search index instance
+	index := client.InitIndex(indexName)
+	// fetch all objectIds and append in
+	var record template
+	// use BrowseObjects to Get all records as an iterator
+	it, err := index.BrowseObjects()
+	if err != nil {
+		fmt.Println("error browsing document types")
+	}
+	//objectArray contains array of template objects
+	var objectArray []template
+	// loop to traverse through all the template objects
+	for {
+		rec, err := it.Next(&record)
 		if err != nil {
-			return fmt.Errorf("error marshaling checks to JSON: %w", err)
+			break
 		}
-
-		// Convert custom fields to model's version.
-		var cfs []models.DocumentTypeCustomField
-		for _, c := range d.CustomFields {
-			cf := models.DocumentTypeCustomField{
-				Name:     c.Name,
-				ReadOnly: c.ReadOnly,
-			}
-
-			// Convert custom field type.
-			t := strings.ToLower(c.Type)
-			switch t {
-			case "string":
-				cf.Type = models.DocumentTypeCustomFieldType(
-					models.StringDocumentTypeCustomFieldType)
-			case "person":
-				cf.Type = models.DocumentTypeCustomFieldType(
-					models.PersonDocumentTypeCustomFieldType)
-			case "people":
-				cf.Type = models.DocumentTypeCustomFieldType(
-					models.PeopleDocumentTypeCustomFieldType)
-			case "":
-				return fmt.Errorf("missing document type custom field")
-			default:
-				return fmt.Errorf("invalid document type custom field: %s", t)
-			}
-
-			cfs = append(cfs, cf)
+		jsonData, err := json.Marshal(rec)
+		if err != nil {
+			fmt.Println("Error converting to JSON:", err)
+			break
 		}
+		// temporary object variable to store and append to object Array
+		var object template
+		error := json.Unmarshal([]byte(jsonData), &object)
+		if error != nil {
+			fmt.Println("Error converting JSON to object:", err)
+			break
+		}
+		objectArray = append(objectArray, object)
+	}
+	// fmt.Printf("objectArray: %v\n", objectArray)
+	return objectArray
+}
 
+func registerDocumentTypes(cfg config.Config, db *gorm.DB) error {
+	var objectArray []template = GetDocTypeArray(cfg)
+	for _, d := range objectArray {
 		dt := models.DocumentType{
-			Name:         d.Name,
+			Name:         d.TemplateName,
 			LongName:     d.LongName,
 			Description:  d.Description,
-			Checks:       checksJSON,
-			CustomFields: cfs,
+			Checks:       nil,
+			CustomFields: nil,
 		}
-
-		if d.MoreInfoLink != nil {
-			dt.MoreInfoLinkText = d.MoreInfoLink.Text
-			dt.MoreInfoLinkURL = d.MoreInfoLink.URL
-		}
-
 		// Upsert document type.
 		if err := dt.Upsert(db); err != nil {
 			return fmt.Errorf("error upserting document type: %w", err)
 		}
 	}
-
 	return nil
 }
 
