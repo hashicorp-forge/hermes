@@ -1,0 +1,104 @@
+{{! @glint-nocheck: not typesafe yet }}
+{{!-- custom-template-add --}}
+{{#if this.docIsBeingCreated}}
+  <div class="text-center hds-typography-display-400 mt-3">
+    <FlightIcon @name="loading" @size="24" />
+    <div class="mt-8 text-display-200 font-semibold">
+      Creating New Template
+    </div>
+    <div class="text-body-200 text-color-foreground-faint">This usually takes
+      10-20 seconds.</div>
+  </div>
+{{else}}
+  <form
+    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    {{on "submit" this.submit}}
+    {{did-insert this.registerForm}}
+  >
+    <div>
+      <div class="space-y-4">
+        <h1
+          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
+        >Create New Template</h1>
+      </div>
+      {{!-- template id  --}}
+      <div class="pt-10 space-y-7">
+        <Hds::Form::TextInput::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.templateName}}
+          name="templateName"
+          placeholder="Enter new Template Id"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Template ID</F.Label>
+        </Hds::Form::TextInput::Field>
+      </div>
+
+      {{!-- template longName --}}
+      <div class="pt-10 space-y-7">
+        <Hds::Form::TextInput::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.longName}}
+          name="longName"
+          placeholder="Enter Template long name"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Template long name</F.Label>
+        </Hds::Form::TextInput::Field>
+      </div>
+        <div class="h-12"></div>
+      {{!-- description --}}
+      <div class="relative">
+          <Hds::Form::Textarea::Field
+            @value={{this.description}}
+            rows="3"
+            name="description"
+            {{on "input" this.updateForm}}
+            as |F|
+          >
+            <F.Label>Description</F.Label>
+            <F.HelperText>
+              <span
+                class={{if
+                  this.descriptionIsLong
+                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                }}
+              >One or two sentences</span> outlining your Template.
+              {{if this.descriptionIsLong "(Just a recommendation)"}}
+            </F.HelperText>
+          </Hds::Form::Textarea::Field>
+      </div>
+
+      {{!-- doc id  --}}
+      <div class="pt-10 space-y-7">
+        <Hds::Form::TextInput::Field
+          @type="text"
+          @isRequired={{true}}
+          @value={{this.docId}}
+          name="docId"
+          placeholder="Enter existing google doc template link"
+          {{on "input" this.updateForm}}
+          as |F|
+        >
+          <F.Label>Document link</F.Label>
+        </Hds::Form::TextInput::Field>
+      </div>
+
+      <div class="h-24"></div>
+    </div>
+    <div>
+      <div class="preview-card">
+        <Hds::Button
+          @text="Create new template"
+          type="submit"
+          disabled={{not this.formRequirementsMet}}
+          class="w-full"
+        />
+      </div>
+    </div>
+  </form>
+{{/if}}

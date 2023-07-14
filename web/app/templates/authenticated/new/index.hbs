@@ -8,18 +8,17 @@
       <LinkTo
         class="w-full h-full no-underline"
         @route="authenticated.new.doc"
-        @query={{hash docType=docType.name}}
+        @query={{hash docType=docType.templateName}}
       >
         <Hds::Card::Container
           @level="mid"
           @levelHover="high"
           @hasBorder="true"
-          class="template-card
-            {{if docType.moreInfoLink 'template-card--with-link'}}"
+          class="template-card template-card--with-link"
         >
           <div>
             <p class="text-display-200 text-color-foreground-primary mb-1">
-              {{docType.name}}
+              {{docType.templateName}}
             </p>
             <h2
               class="text-display-400 font-semibold text-color-foreground-strong"
@@ -32,18 +31,37 @@
           </div>
         </Hds::Card::Container>
       </LinkTo>
-      {{#if docType.moreInfoLink}}
-        <Hds::Link::Standalone
-          @isHrefExternal={{true}}
-          @href={{docType.moreInfoLink.url}}
-          @icon="external-link"
-          @iconPosition="trailing"
-          class="small-external-link absolute bottom-6 left-5 whitespace-nowrap z-10"
-          @text={{docType.moreInfoLink.text}}
-        />
-      {{/if}}
     </li>
 
   {{/each}}
+
+  {{!-- custom-template-add --}}
+  <li class="relative">
+      <LinkTo
+        class="w-full h-full no-underline"
+        @route="authenticated.new.custom-template"
+      >
+        <Hds::Card::Container
+          @level="mid"
+          @levelHover="high"
+          @hasBorder="true"
+          class="template-card template-card--with-link"
+        >
+          <div>
+            <p class="text-display-200 text-color-foreground-primary mb-1">
+              Add template
+            </p>
+            <h2
+              class="text-display-400 font-semibold text-color-foreground-strong"
+            >
+              +
+            </h2>
+            <p class="my-2 text-body-200 text-color-foreground-primary">
+              add new custom template
+            </p>
+          </div>
+        </Hds::Card::Container>
+      </LinkTo>
+  </li>
 
 </ol>
