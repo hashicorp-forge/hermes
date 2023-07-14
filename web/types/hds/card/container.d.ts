@@ -13,6 +13,9 @@ interface HdsCardContainerComponentSignature {
     hasBorder?: boolean;
     overflow?: HdsComponentOverflow;
   };
+  Blocks: {
+    default: [];
+  }
 }
 
 export type HdsCardContainerComponent =

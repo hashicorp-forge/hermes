@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div class="flex flex-1 space-x-px max-h-screen">
   <Document::Sidebar
     @profile={{this.authenticatedUser.info}}
@@ -10,7 +9,7 @@
   <div class="pt-4 pb-4 pr-4 w-full">
     <Hds::Card::Container
       @level="high"
-      @hasBorder="true"
+      @hasBorder={{true}}
       @overflow="hidden"
       class="flex items-center justify-center h-full"
     >

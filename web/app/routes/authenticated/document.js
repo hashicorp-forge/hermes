@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 import timeAgo from "hermes/utils/time-ago";
 import RSVP from "rsvp";
 import parseDate from "hermes/utils/parse-date";
+import htmlElement from "hermes/utils/html-element";
 
 const serializePeople = (people) =>
   people.map((p) => ({
@@ -39,6 +40,8 @@ export default class DocumentRoute extends Route {
   }
 
   async model(params, transition) {
+    console.log("model");
+
     let doc = {};
     let draftFetched = false;
 
@@ -151,5 +154,20 @@ export default class DocumentRoute extends Route {
       doc,
       docType,
     });
+  }
+
+  afterModel(model, transition) {
+    if (transition.from) {
+      if (transition.from.name === transition.to.name) {
+        if (
+          transition.from.params.document_id !==
+          transition.to.params.document_id
+        ) {
+          // a new doc is loading from another doc
+          htmlElement(".sidebar-body").scrollTop = 0;
+          // also need to make sure the sidebar is updated with the correct meta
+        }
+      }
+    }
   }
 }
