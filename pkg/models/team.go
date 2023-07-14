@@ -30,15 +30,6 @@ type Team struct {
 	BU Product
 }
 
-//this function prints pretty json
-//func PrettyStruct(data interface{}) (string, error) {
-//	val, err := json.MarshalIndent(data, "", "    ")
-//	if err != nil {
-//		return "", err
-//	}
-//	return string(val), nil
-//}
-
 // Upsert upserts a team along with its associated BU into the database.
 // If a BU with the given name already exists, it is used; otherwise, an error is returned.
 func (t *Team) Upsert(db *gorm.DB, prdName string) error {
@@ -55,12 +46,6 @@ func (t *Team) Upsert(db *gorm.DB, prdName string) error {
 		// Set the BUID of the team to the ID of the BU.
 		t.BUID = existingPrd.ID
 		t.BU = existingPrd
-
-		//res, err := PrettyStruct(t)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//fmt.Println(res)
 
 		// Upsert the team.
 		if err := tx.Where(Team{Name: t.Name}).

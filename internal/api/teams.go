@@ -3,13 +3,14 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"net/http"
 )
 
 type TeamRequest struct {
@@ -98,16 +99,6 @@ func getTeamsData(db *gorm.DB) (map[string]struct {
 		return nil, fmt.Errorf("failed to fetch teams: %w", err)
 	}
 
-	// Just for printing
-	//for _, team := range teams {
-	//	fmt.Printf("Team ID: %d\n", team.ID)
-	//	fmt.Printf("Team Name: %s\n", team.Name)
-	//	fmt.Printf("Team Abbreviation: %s\n", team.Abbreviation)
-	//	fmt.Printf("BU: %s\n", team.BU)
-	//	// Print other columns as needed
-	//	fmt.Println("-------------") // Separate each team
-	//}
-
 	teamsData := make(map[string]struct {
 		Abbreviation   string      `json:"abbreviation"`
 		BU             string      `json:"BU"`
@@ -129,67 +120,10 @@ func getTeamsData(db *gorm.DB) (map[string]struct {
 	return teamsData, nil
 }
 
-// AddNewTeams This helper function add the newly added product in both algolia and upserts it
+// AddNewTeams This helper function adds the newly added product and upserts it
 // in the postgres Database
 func AddNewTeams(ar *algolia.Client,
 	aw *algolia.Client, db *gorm.DB, req TeamRequest) error {
-
-	//// Step 1: Update the algolia object
-	//var teamsObj = structs.Teams{
-	//	ObjectID: "teams",
-	//	Data:     make(map[string]structs.TeamData, 0),
-	//}
-	//// Retrieve the existing teamsObj from Algolia
-	//err := ar.Internal.GetObject("teams", &teamsObj)
-	//if err != nil {
-	//	if algoliaErr, ok := err.(*search.); ok && algoliaErr.StatusCode == 404 {
-	//		// Object does not exist, create it
-	//		_, err := index.SaveObject(objectID, data)
-	//		if err != nil {
-	//			return fmt.Errorf("error creating object: %w", err)
-	//		}
-	//	} else {
-	//		return fmt.Errorf("error fetching object: %w", err)
-	//	}
-	//} else {
-	//	// Object exists, update it
-	//	_, err := index.SaveObject(objectID, data)
-	//	if err != nil {
-	//		return fmt.Errorf("error updating object: %w", err)
-	//	}
-	//}
-	//
-	//	if err == algoli search {
-	//		// Object not found, it's the first run, handle accordingly
-	//		// For example, initialize the teamsObj with default values
-	//		teamsObj = &structs.Teams{
-	//			ObjectID: "teams",
-	//			Data:     make(map[string]structs.Team, 0),
-	//		}
-	//	} else {
-	//		// Other error occurred while retrieving the object
-	//		return fmt.Errorf("error retrieving existing teams object from Algolia: %w", err)
-	//	}
-	//}
-	//
-	//// Add the new value to the productsObj
-	//productsObj.Data[req.ProductName] = structs.ProductData{
-	//	Abbreviation: req.ProductAbbreviation,
-	//}
-	//
-	//// Save the updated productsObj back to Algolia
-	//// this replaces the old object completely
-	//// Save Algolia products object.
-	//res, err := aw.Internal.SaveObject(&productsObj)
-	//if err != nil {
-	//	return fmt.Errorf("error saving Algolia products object: %w", err)
-	//}
-	//err = res.Wait()
-	//if err != nil {
-	//	return fmt.Errorf("error saving Algolia products object: %w", err)
-	//}
-
-	// Step 2: upsert in the db
 	pm := models.Team{
 		Name:         req.TeamName,
 		Abbreviation: req.TeamAbbreviation,

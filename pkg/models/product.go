@@ -76,15 +76,6 @@ func (p *Product) Get(db *gorm.DB) error {
 		Error
 }
 
-//// Upsert updates or inserts a product into database db.
-//func (p *Product) Upsert(db *gorm.DB) error {
-//	return db.
-//		Where(Product{Name: p.Name}).
-//		Assign(*p).
-//		FirstOrCreate(&p).
-//		Error
-//}
-
 // Upsert updates or inserts a BU into the database, including associated teams.
 func (p *Product) Upsert(db *gorm.DB) error {
 	return db.Transaction(func(tx *gorm.DB) error {
