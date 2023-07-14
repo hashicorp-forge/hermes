@@ -3,6 +3,10 @@
     class="sidebar shrink-0 {{if this.sidebarIsCollapsed 'collapsed' 'w-72'}}"
   >
     {{#unless @modelIsChanging}}
+      {{!
+        We teardown and rebuild the sidebar when the model is changing
+        so that its state is reset and it inherits the new model's data.
+      }}
       <Document::Sidebar
         @profile={{this.authenticatedUser.info}}
         @document={{@document}}
@@ -21,14 +25,21 @@
       @overflow="hidden"
       class="flex items-center justify-center h-full"
     >
-      <iframe
-        title="Google Doc"
-        height="100%"
-        width="100%"
-        class="border-0"
-        src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
-      >
-      </iframe>
+      {{#unless @modelIsChanging}}
+        {{!
+          We teardown and rebuild the iframe when the model is changing
+          so that any SRC changes don't add history entries,
+          which would cause the back button to break.
+        }}
+        <iframe
+          title="Google Doc"
+          height="100%"
+          width="100%"
+          class="border-0"
+          src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
+        >
+        </iframe>
+      {{/unless}}
     </Hds::Card::Container>
   </div>
 
