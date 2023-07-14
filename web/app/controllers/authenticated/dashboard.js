@@ -32,7 +32,8 @@ export default class AuthenticatedDashboardController extends Controller {
   @tracked TeamName: string = "";
   @tracked TeamAbbreviation: string = "";
   @tracked TeamIsBeingCreated = false;
-  @tracked TeamBU: string = "";
+  @tracked TeamBU: string | null = null;
+
 
   @action
   toggleModal1() {
@@ -42,6 +43,13 @@ export default class AuthenticatedDashboardController extends Controller {
   @action
   toggleModal2() {
     this.toggleProperty('showModal2');
+  }
+
+
+  @action protected onProductSelect(
+    productName: string
+  ) {
+    this.TeamBU = productName;
   }
 
   /**
@@ -105,7 +113,7 @@ export default class AuthenticatedDashboardController extends Controller {
     // Do something with the form values
     this.TeamName = formObject['team-name'];
     this.TeamAbbreviation = formObject['team-abbr'];
-    this.TeamBU = formObject['bu-name'];
+    // this.TeamBU = formObject['bu-name'];
 
     // now post this info
     this.createTeam.perform();

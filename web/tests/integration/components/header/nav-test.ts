@@ -22,6 +22,11 @@ module("Integration | Component | header/nav", function (hooks) {
       given_name: "Foo",
       name: "Foo Bar",
       picture: "",
+      employee_id: "",
+      department : "",
+      organization: "",
+      profile     : "",
+      role : "",
       subscriptions: [],
     };
   });

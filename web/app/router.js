@@ -19,6 +19,7 @@ Router.map(function () {
       this.route("custom-template")
       this.route("doc");
     });
+    this.route('myprofile');
   });
   this.route("authenticate");
   this.route('404', { path: '/*path' })

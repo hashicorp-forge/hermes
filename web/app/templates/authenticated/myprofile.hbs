@@ -1,0 +1,30 @@
+{{page-title "Your Profile"}}
+
+<Header/>
+
+
+<div class="user-card">
+    <img
+        src="{{this.profile.picture}}"
+        class="user-avatar"
+        role="presentation"
+        referrerpolicy="no-referrer"
+        alt="User Photo"
+        class="profile-image"
+    />
+    <br>
+    <h2>{{this.profile.name}}</h2>
+    <p><strong>Email:</strong> <Hds::Badge @text="{{this.profile.email}}" @color="critical" /></p>
+    <p><strong>User Role:</strong>
+        {{#if (eq this.authenticatedUser.info.role "Basic")}}
+            <Hds::Badge @text="Basic" @color="silver" />
+        {{else}}
+            <Hds::Badge @text="Admin" @color="critical" />
+        {{/if}}
+    </p>
+    <p><strong>Employee ID:</strong> <Hds::Badge @text="{{this.profile.employee_id}}" @color="neutral-dark-mode" /></p>
+    <p><strong>Department:</strong> <Hds::Badge @text="{{this.profile.department}}" @color="neutral-dark-mode" /></p>
+    <p><strong>Profile:</strong> <Hds::Badge @text="{{this.profile.profile}}" @color="neutral-dark-mode" /></p>
+    <p><strong>Organization:</strong> <Hds::Badge @text="{{this.profile.organization}}" @color="neutral-dark-mode" /></p>
+</div>
+

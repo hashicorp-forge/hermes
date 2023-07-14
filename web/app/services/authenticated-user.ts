@@ -12,6 +12,11 @@ export interface AuthenticatedUser {
   email: string;
   given_name: string;
   picture: string;
+  employee_id :   string ;
+  department :   string ;
+  organization:  string ;
+  profile      : string ;
+  role : string;
   subscriptions: Subscription[];
 }
 

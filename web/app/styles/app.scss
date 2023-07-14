@@ -46,9 +46,83 @@
 @import "ember-modal-dialog/ember-modal-structure";
 @import "ember-modal-dialog/ember-modal-appearance";
 
+// for the dashboard modal dialogue  
+
 .ember-modal-dialog{
   width: 400px;
 }
+
+// for the my profile page
+$color_1: #ff6f00;
+$background-color_1: #f5f5f5;
+$background-color_2: #fff;
+
+.profile-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 20px;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  &:hover {
+    img {
+      transform: scale(1.1);
+    }
+  }
+}
+
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: $background-color_1;
+  border-radius: 10px;
+  padding: 40px;
+  width: 650px;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 20px -5px rgba(0, 0, 0, 0.5);
+
+  &:before {
+    content: '';
+    position: absolute;
+    height: 200%;
+    width: 250px;
+    background: #262626;
+    top: -50px;
+    left: -175px;
+    z-index: -1;
+    transform: rotate(17deg);
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  p {
+    margin-bottom: 10px;
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  .badge {
+    margin-left: 10px;
+  }
+}
+
+// end of myprofile page scss
 
 
 *,
