@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/email"
+	slackbot "github.com/hashicorp-forge/hermes/internal/slack-bot"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
@@ -447,6 +448,31 @@ func DraftsHandler(
 							"method", r.Method,
 							"path", r.URL.Path,
 						)
+					}
+
+					// Also send the slack message tagginhg all the contributors in the
+					// dedicated channel
+					// extracting all contributors emails
+					emails := make([]string, len(req.Contributors))
+					for i, c := range req.Contributors {
+						emails[i] = c
+					}
+					err = slackbot.SendSlackMessage_Contributor(slackbot.ContributorInvitationSlackData{
+						BaseURL:            cfg.BaseURL,
+						DocumentOwner:      p.Names[0].DisplayName,
+						DocumentOwnerEmail: docObj.GetOwners()[0],
+						DocumentType:       docObj.GetDocType(),
+						DocumentTitle:      docObj.GetTitle(),
+						DocumentURL:        docURL,
+						DocumentProdAbbrev: docObj.GetProduct(),
+						DocumentTeamAbbrev: docObj.GetTeam(),
+					}, emails,
+					)
+					//handle error gracefully
+					if err != nil {
+						fmt.Printf("Some error occured while sendind the message: %s", err)
+					} else {
+						fmt.Println("Succesfully! Delivered the message to all contributors")
 					}
 				}
 			}

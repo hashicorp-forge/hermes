@@ -11,6 +11,8 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
+	slackbot "github.com/hashicorp-forge/hermes/internal/slack-bot"
+
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -553,6 +555,32 @@ func ReviewHandler(
 							"method", r.Method,
 							"path", r.URL.Path,
 						)
+					}
+
+					// Also send the slack message tagginhg all the reviewers in the
+					// dedicated channel
+					// tagging all reviewers emails
+					emails := make([]string, len(docObj.GetApprovers()))
+					for i, c := range docObj.GetApprovers() {
+						emails[i] = c
+					}
+					err = slackbot.SendSlackMessage_Reviewer(slackbot.ReviewerRequestedSlackData{
+						BaseURL:            cfg.BaseURL,
+						DocumentOwner:      ppl.Names[0].DisplayName,
+						DocumentType:       docObj.GetDocType(),
+						DocumentShortName:  docObj.GetDocNumber(),
+						DocumentTitle:      docObj.GetTitle(),
+						DocumentURL:        docURL,
+						DocumentProdAbbrev: docObj.GetProduct(),
+						DocumentTeamAbbrev: docObj.GetTeam(),
+						DocumentOwnerEmail: docObj.GetOwners()[0],
+					}, emails,
+					)
+					//handle error gracefully
+					if err != nil {
+						fmt.Printf("Some error occured while sendind the message: %s", err)
+					} else {
+						fmt.Println("Succesfully! Delivered the message to all reviewers")
 					}
 				}
 
