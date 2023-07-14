@@ -71,11 +71,6 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
         .fetch("/api/v1/products")
         .then((resp) => resp?.json());
       this.products = products;
-<<<<<<< HEAD
-      // console.log(this.products);
-=======
-      console.log(this.products);
->>>>>>> 90f5f26732ee9d8d725bb92594bb6e8f9b251aa9
     } catch (err) {
       console.error(err);
       throw err;

@@ -214,8 +214,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       this.createDoc.perform();
     }
   }
-
-  @tracked selectedBU: string | null = null;
+  
   @action
   updateSelectedBU(selectedBU: string) {
     this.selectedBU = selectedBU;

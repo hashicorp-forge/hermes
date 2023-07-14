@@ -106,9 +106,4 @@ jobs:
           tags: anuragprafulla/hermes_indexer:${{ github.sha }}
           push: true
           file: Dockerfile.indexer
-          target: prod-api
-          secrets: |
-            GIT_TOKEN=${{ secrets.GIT_TOKEN }}
-          build-args: |
-            GIT_COMMIT_HASH=${{ github.sha }}
-            GIT_USERNAME=rzp
+          build-args: GIT_COMMIT_HASH=${{ github.sha }}
