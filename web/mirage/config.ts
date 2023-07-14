@@ -136,6 +136,22 @@ export default function (mirageConfig) {
         return new Response(200, {});
       });
 
+      // /**
+      //  * Called by the Dashboard/ create new team modal to create new team in database.
+      //  */
+      // this.post('/teams', (schema, request) => {
+      //   let attrs = JSON.parse(request.requestBody);
+      //   return schema.teams.create(attrs);
+      // });
+      //
+      // /**
+      //  * Called by the dashboard/ create new product modal to create new product in the database
+      //  */
+      // this.post('/products', (schema, request) => {
+      //   let attrs = JSON.parse(request.requestBody);
+      //   return schema.products.create(attrs);
+      // });
+
       /*************************************************************************
        *
        * GET requests
@@ -344,6 +360,11 @@ export default function (mirageConfig) {
         });
         return new Response(200, {}, index);
       });
+
+      // // used by new, to display all available teams
+      // this.get('/teams', (schema) => {
+      //   return schema.teams.all();
+      // });
 
       /*************************************************************************
        *

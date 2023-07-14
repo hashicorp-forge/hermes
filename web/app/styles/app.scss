@@ -1,5 +1,4 @@
 @use "./typography";
-
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -44,6 +43,13 @@
 @use "tailwindcss/base";
 @use "tailwindcss/components";
 @use "tailwindcss/utilities";
+@import "ember-modal-dialog/ember-modal-structure";
+@import "ember-modal-dialog/ember-modal-appearance";
+
+.ember-modal-dialog{
+  width: 400px;
+}
+
 
 *,
 *::before,

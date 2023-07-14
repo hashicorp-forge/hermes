@@ -18,6 +18,8 @@ type User struct {
 
 	// ProductSubscriptions are the products that have been subscribed to by the
 	// user.
+	//By default, GORM will create a join table named user_product_subscriptions to represent this association.
+	//	The join table will have foreign keys that reference the primary keys of the User and Product tables.
 	ProductSubscriptions []Product `gorm:"many2many:user_product_subscriptions;"`
 
 	// RecentlyViewedDocs are the documents recently viewed by the user.

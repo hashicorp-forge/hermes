@@ -1,11 +1,10 @@
 {{! @glint-nocheck - not typesafe yet }}
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
-
 <div data-test-product-select>
   {{#if this.teams}}
     {{#if @formatIsBadge}}
       <Inputs::BadgeDropdownList
-        @items={{this.teams}}
+        @items={{this.filteredOptions}}
         @listIsOrdered={{true}}
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
@@ -27,7 +26,7 @@
       </Inputs::BadgeDropdownList>
     {{else}}
       <X::DropdownList
-        @items={{this.teams}}
+        @items={{this.filteredOptions}}
         @listIsOrdered={{true}}
         @onItemClick={{this.onChange}}
         @selected={{@selected}}

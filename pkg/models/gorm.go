@@ -12,5 +12,6 @@ func ModelsToAutoMigrate() []interface{} {
 		&Product{},
 		&ProductLatestDocumentNumber{},
 		&User{},
+		&Team{},
 	}
 }

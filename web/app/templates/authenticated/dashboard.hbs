@@ -1,13 +1,183 @@
 {{page-title "Dashboard"}}
 
-<Header />
+<Header @toggleModal1 = {{this.toggleModal1}}/>
+
 
 <section class="x-container">
+  <Hds::ButtonSet>
+  <Hds::Button
+          @text="Add BU"
+          @icon="org"
+          @color="secondary"
+          {{on "click"  (fn this.toggleModal1)}}
+  />
+
+  <Hds::Button
+          @text="Team/Pod"
+          @icon="user-plus"
+          @color="secondary"
+          {{on "click"  (fn this.toggleModal2)}}
+  />
+  </Hds::ButtonSet>
+  <br>
+  <br>
 
   <div class="hds-border-primary border-0 border-b pb-9">
     <h1>Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
     <p>Here’s all the latest updates across the organization.</p>
   </div>
+
+  {{#if  this.showModal1}}
+  {{#modal-dialog
+  onClose=(action (action (mut  this.showModal2) false))
+  targetAttachment="center"
+  translucentOverlay=true
+  }}
+  <div class="modal-body">
+    <div class="space-y-4" style="text-align: center;">
+      <h4 class="modal-title">Create New Business Unit</h4>
+    </div>
+    <form {{on "submit" this.submitFormBU}}>
+      <div class="mb-4" >
+        <label class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label" for="bu-name">Business Unit Name:
+          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
+            <!---->    <div class="hds-badge__text">
+              Required
+            </div>
+          </div>
+        </label>
+        <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-person-fill fs-5"></i>
+        </span>
+          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-name" required placeholder="Enter Business Unit Name" value={{this.businessUnitName}}>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="bu-abbr" class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label">Abbreviation:
+          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
+            <!---->    <div class="hds-badge__text">
+              Required
+            </div>
+          </div>
+        </label>
+        <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-info-circle-fill fs-5"></i>
+        </span>
+          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-abbr" required placeholder="Enter Abbreviation" value={{this.abbreviation}}>
+        </div>
+      </div>
+      <div class="modal-footer" class="space-y-4">
+        <Hds::ButtonSet>
+          {{#if this.BUIsBeingCreated }}
+          <Hds::Button
+                  @isIconOnly={{true}}
+                  @text="Submit"
+                  @icon="loading"
+          />
+          {{else}}
+          <Hds::Button
+                  @text="Submit"
+                  type="submit"
+          />
+          {{/if}}
+          <Hds::Button
+                  @text="Cancel"
+                  @color="critical"
+                  {{on "click" (fn  this.toggleModal1 false)}}
+          />
+        </Hds::ButtonSet>
+      </div>
+    </form>
+  </div>
+
+  {{/modal-dialog}}
+  {{/if}}
+
+
+  {{#if this.showModal2}}
+    {{#modal-dialog
+  onClose=(action (action (mut this.showModal2) false))
+  targetAttachment="center"
+  translucentOverlay=true
+  }}
+  <div class="modal-body">
+    <div class="space-y-4" style="text-align: center;">
+      <h4 class="modal-title">Create New Team/Pod</h4>
+    </div>
+    <form {{on "submit" this.submitFormteam}}>
+      <div class="mb-4" >
+        <label class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label" for="team-name">Team Name:
+          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
+            <!---->    <div class="hds-badge__text">
+              Required
+            </div>
+          </div>
+        </label>
+        <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-person-fill fs-5"></i>
+        </span>
+          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="team-name" required placeholder="Enter Team/Pod Name" >
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="team-abbr" class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label">Abbreviation:
+          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
+            <!---->    <div class="hds-badge__text">
+              Required
+            </div>
+          </div>
+        </label>
+        <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-info-circle-fill fs-5"></i>
+        </span>
+          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="team-abbr" required placeholder="Enter Abbreviation" >
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="bu-name" class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label">Business Unit:
+          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
+            <!---->    <div class="hds-badge__text">
+              Required
+            </div>
+          </div>
+        </label>
+        <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-info-circle-fill fs-5"></i>
+        </span>
+          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-name" required placeholder="Enter Business Unit Name">
+        </div>
+      </div>
+      <div class="modal-footer" class="space-y-4">
+        <Hds::ButtonSet>
+          {{#if this.TeamIsBeingCreated }}
+          <Hds::Button
+                  @isIconOnly={{true}}
+                  @text="Submit"
+                  @icon="loading"
+          />
+          {{else}}
+          <Hds::Button
+                  @text="Submit"
+                  type="submit"
+          />
+          {{/if}}
+          <Hds::Button
+                  @text="Cancel"
+                  @color="critical"
+                  {{on "click" (fn this.toggleModal2 false)}}
+          />
+        </Hds::ButtonSet>
+      </div>
+    </form>
+  </div>
+
+  {{/modal-dialog}}
+  {{/if}}
 
   {{#if this.docsWaitingForReview}}
     <div

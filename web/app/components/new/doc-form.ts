@@ -55,6 +55,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected teamAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
+  @tracked selectedBU: string | null = null;
+
   @tracked protected _form: HTMLFormElement | null = null;
 
   /**
@@ -186,6 +188,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     attributes: ProductArea
   ) {
     this.productArea = productName;
+    this.selectedBU = productName;
     this.productAbbreviation = attributes.abbreviation;
     this.maybeValidate();
   }

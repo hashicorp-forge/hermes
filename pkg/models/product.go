@@ -19,6 +19,9 @@ type Product struct {
 
 	// UserSubscribers are the users that subscribed to this product.
 	UserSubscribers []User `gorm:"many2many:user_product_subscriptions;"`
+
+	// Teams is the list of teams associated with the BU.
+	Teams []Team `gorm:"foreignKey:BUID;constraint:Teams_BU_mapping"`
 }
 
 // FirstOrCreate finds the first product by name or creates a record if it does
@@ -68,11 +71,45 @@ func (p *Product) Get(db *gorm.DB) error {
 		Error
 }
 
-// Upsert updates or inserts a product into database db.
+//// Upsert updates or inserts a product into database db.
+//func (p *Product) Upsert(db *gorm.DB) error {
+//	return db.
+//		Where(Product{Name: p.Name}).
+//		Assign(*p).
+//		FirstOrCreate(&p).
+//		Error
+//}
+
+// Upsert updates or inserts a BU into the database, including associated teams.
 func (p *Product) Upsert(db *gorm.DB) error {
-	return db.
-		Where(Product{Name: p.Name}).
-		Assign(*p).
-		FirstOrCreate(&p).
-		Error
+	return db.Transaction(func(tx *gorm.DB) error {
+		// Upsert the BU.
+		if err := tx.
+			Where(Product{Name: p.Name}).
+			Omit(clause.Associations).
+			Assign(*p).
+			Clauses(clause.OnConflict{DoNothing: true}).
+			FirstOrCreate(&p).
+			Error; err != nil {
+			return err
+		}
+
+		// Save the associated teams.
+		for _, team := range p.Teams {
+			// Assign the BU ID to the team.
+			team.BUID = p.ID
+
+			// Upsert the team.
+			if err := tx.
+				Where(Team{Name: team.Name}).
+				Omit(clause.Associations).
+				Clauses(clause.OnConflict{DoNothing: true}).
+				Create(&team).
+				Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
