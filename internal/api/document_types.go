@@ -34,7 +34,7 @@ func GetDocTypeArray(cfg config.Config) []template {
 	// Initialize the search client
 	client := search.NewClient(appID, apiKey)
 	// Specify the index name
-	indexName := "template"
+	indexName := cfg.Algolia.TemplateIndexName
 	// Create a search index instance
 	index := client.InitIndex(indexName)
 	// fetch all objectIds and append in

@@ -21,18 +21,18 @@
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
         >Create New Template</h1>
       </div>
-      {{!-- template id  --}}
+      {{!-- template name  --}}
       <div class="pt-10 space-y-7">
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
           @value={{this.templateName}}
           name="templateName"
-          placeholder="Enter new Template Id"
+          placeholder="Enter new Template Name"
           {{on "input" this.updateForm}}
           as |F|
         >
-          <F.Label>Template ID</F.Label>
+          <F.Label>Template Name</F.Label>
         </Hds::Form::TextInput::Field>
       </div>
 

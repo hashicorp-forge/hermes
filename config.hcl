@@ -8,6 +8,7 @@ algolia {
   docs_index_name           = "docs"
   drafts_index_name         = "drafts"
   internal_index_name       = "internal"
+  template_index_name       = "template"
   links_index_name          = "links"
   missing_fields_index_name = "missing_fields"
   search_api_key            = "dummy"

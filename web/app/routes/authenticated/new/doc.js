@@ -34,7 +34,7 @@ export default class AuthenticatedNewDocRoute extends Route {
     // }
 
     //custom-template-add-task-1
-    // fetch all the template id and match with current doctype.
+    // fetch all the template names and match with current doctype.
     // if doctype does not present throw error and move to /new
 
     this.fetchSvc.fetch("/api/v1/document-types")

@@ -150,7 +150,7 @@ func DraftsHandler(
 			// Copy template to new draft file.
 			f, err := s.CopyFile(templateName, title, cfg.GoogleWorkspace.DraftsFolder)
 			if err != nil {
-				l.Error("error creating draft", "error", err, "template id ", templateName,
+				l.Error("error creating draft", "error", err, "template name ", templateName,
 					"drafts_folder", cfg.GoogleWorkspace.DraftsFolder)
 				http.Error(w, "Error creating document draft",
 					http.StatusInternalServerError)
