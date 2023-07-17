@@ -365,17 +365,23 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Temporarily adds a visual indicator of the changed element.
    */
   protected animateHighlight = restartableTask(
-    async (selector: string | number) => {
+    async (classNameOrID: string | number) => {
       schedule("afterRender", async () => {
         let target: HTMLElement | null = null;
 
-        if (typeof selector === "number") {
-          target = htmlElement(`#related-resource-${selector}`);
-        } else {
-          target = htmlElement(
-            `.related-resource${selector} .related-resource-link`
-          );
-        }
+        // When editing, we select by ID. Otherwise, we select by class.
+        let targetSelector =
+          typeof classNameOrID === "number"
+            ? "#related-resource-"
+            : ".related-resource";
+
+        // Add the class or ID to the selector
+        targetSelector += `${classNameOrID}`;
+
+        // Specify the target's anchor element
+        targetSelector += " .related-resource-link";
+
+        target = htmlElement(targetSelector);
 
         next(() => {
           maybeScrollIntoView(
