@@ -21,7 +21,8 @@ import { restartableTask, timeout } from "ember-concurrency";
 import Ember from "ember";
 import simpleTimeout from "hermes/utils/simple-timeout";
 
-const DEFAULT_DELAY = Ember.testing ? 0 : 275;
+const DEFAULT_DELAY = 0;
+const DEFAULT_OPEN_DURATION = 200;
 
 enum TooltipState {
   Opening = "opening",
@@ -45,15 +46,19 @@ enum TooltipState {
  * - Add animation logic
  */
 
+interface TooltipModifierNamedArgs {
+  placement?: Placement;
+  stayOpenOnClick?: boolean;
+  delay?: number;
+  openDuration?: number;
+  _useTestDelay?: boolean;
+}
+
 interface TooltipModifierSignature {
   Args: {
     Element: HTMLElement;
     Positional: [string];
-    Named: {
-      placement?: Placement;
-      delay?: number;
-      _useTestDelay?: boolean;
-    };
+    Named: TooltipModifierNamedArgs;
   };
 }
 
@@ -116,7 +121,8 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked _arrow: HTMLElement | null = null;
 
   /**
-   * The tooltip element that is rendered in the DOM.
+   * The tooltip element that is rendered in the DOM and positioned
+   * relative to the reference element.
    */
   @tracked tooltip: HTMLElement | null = null;
 
@@ -132,6 +138,18 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * with a `placement` argument.
    */
   @tracked placement: Placement = "top";
+
+  /**
+   * The duration of the tooltip's open animation.
+   * Ignored in the testing environment.
+   */
+  @tracked openDuration: number = DEFAULT_OPEN_DURATION;
+
+  /**
+   * The transform applied to the tooltip.
+   * Calculated based on placement; used for animations.
+   */
+  @tracked transform: string = "none";
 
   /**
    * The delay before the tooltip is shown.
@@ -208,7 +226,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this.updateState(TooltipState.Opening);
 
-    if (this.delay > 0) {
+    if (!Ember.testing && this.delay > 0) {
       await timeout(this.delay);
     }
 
@@ -221,7 +239,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      * Create the tooltip and set its attributes
      */
     this.tooltip = document.createElement("div");
-    this.tooltip.classList.add("hermes-tooltip");
+    this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
@@ -321,6 +339,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           });
         }
       });
+
+      if (this.placement.startsWith("top")) {
+        this.transform = "scale(.97) translateY(1px)";
+      } else if (this.placement.startsWith("bottom")) {
+        this.transform = "scale(.97) translateY(-1px)";
+      } else if (this.placement.startsWith("left")) {
+        this.transform = "scale(.97) translateX(1px)";
+      } else if (this.placement.startsWith("right")) {
+        this.transform = "scale(.97) translateX(-1px)";
+      }
     };
 
     this.floatingUICleanup = autoUpdate(
@@ -328,6 +356,31 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.tooltip,
       updatePosition
     );
+
+    if (!Ember.testing && this.openDuration) {
+      const fadeAnimation = this.tooltip.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        {
+          duration: Ember.testing ? 0 : 50,
+        }
+      );
+      const transformAnimation = this.tooltip.animate(
+        [{ transform: this.transform }, { transform: "none" }],
+        {
+          duration: this.openDuration,
+          easing: "ease-in-out",
+        }
+      );
+      try {
+        await Promise.all([
+          fadeAnimation.finished,
+          transformAnimation.finished,
+        ]);
+      } finally {
+        fadeAnimation.cancel();
+        transformAnimation.cancel();
+      }
+    }
 
     this.updateState(TooltipState.Open);
   });
@@ -409,12 +462,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   modify(
     element: Element,
     positional: [string],
-    named: {
-      placement?: Placement;
-      stayOpenOnClick?: boolean;
-      delay?: number;
-      _useTestDelay?: boolean;
-    }
+    named: TooltipModifierNamedArgs
   ) {
     this._reference = element;
     this._tooltipText = positional[0];
@@ -431,6 +479,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named._useTestDelay) {
       this._useTestDelay = named._useTestDelay;
+    }
+
+    if (named.openDuration) {
+      this.openDuration = named.openDuration;
     }
 
     if (named.delay !== undefined) {
