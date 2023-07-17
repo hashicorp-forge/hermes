@@ -1,10 +1,22 @@
 <div class="sidebar-section-header-container" ...attributes>
-  <h5 class="sidebar-section-header">
-    {{@title}}
-  </h5>
-  {{#if @buttonAction}}
+  <div class="inline-flex relative">
+    <h5 class="sidebar-section-header">
+      {{@title}}
+    </h5>
+    {{#if @badgeText}}
+      <Hds::Badge
+        data-test-sidebar-section-header-badge
+        @text={{@badgeText}}
+        @color="highlight"
+        @size="small"
+        class="absolute -right-2 top-1/2 -translate-y-1/2 translate-x-full"
+      />
+    {{/if}}
+  </div>
+  {{#if this.buttonIsShown}}
     <Action
-      {{on "click" @buttonAction}}
+      {{on "click" this.buttonAction}}
+      data-test-section-header-button-for={{@title}}
       class="sidebar-section-header-button"
       aria-label={{or @buttonLabel "Add"}}
     >

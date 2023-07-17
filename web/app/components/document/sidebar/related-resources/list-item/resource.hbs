@@ -1,0 +1,30 @@
+<div class="flex shrink-0 w-[22px]">
+  {{#if this.resourceIsDocument}}
+    <div
+      class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white"
+    >
+      <img src="/images/document.png" class="w-[18px] h-auto" />
+    </div>
+  {{else}}
+    <FlightIcon
+      @name={{get-link-icon this.url}}
+      class={{if (eq (get-link-icon this.url) "file") "opacity-40"}}
+    />
+  {{/if}}
+</div>
+
+<div class="w-full overflow-hidden">
+  <TruncatedText
+    @tagName="h4"
+    class="text-body-200 text-color-foreground-strong font-medium"
+  >
+    {{this.title}}
+  </TruncatedText>
+  {{#if this.resourceIsDocument}}
+    <div class="text-color-foreground-faint text-body-100 mt-px">
+      {{this.docType}}
+      ·
+      {{this.docNumber}}
+    </div>
+  {{/if}}
+</div>

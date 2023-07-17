@@ -1,0 +1,27 @@
+<AnimatedContainer data-test-related-resources-list class="w-full">
+  <div {{did-insert this.enableAnimation}}>
+    {{#if this.listIsEmpty}}
+      <div class="mt-1.5" data-test-related-resources-list-empty-state>
+        <CustomEditableFields::EmptyState />
+      </div>
+    {{else}}
+      <ul class="related-resources-list" ...attributes>
+        {{#animated-each
+          @items
+          rules=this.transitionRules
+          initialInsertion=true
+          finalRemoval=true
+          as |resource i|
+        }}
+          {{#if @itemLimit}}
+            {{#if (lt i @itemLimit)}}
+              {{yield resource to="resource"}}
+            {{/if}}
+          {{else}}
+            {{yield resource to="resource"}}
+          {{/if}}
+        {{/animated-each}}
+      </ul>
+    {{/if}}
+  </div>
+</AnimatedContainer>

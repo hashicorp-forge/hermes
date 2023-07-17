@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import { HermesDocument } from "hermes/types/document";
+import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarHeaderComponentSignature {
   Args: {
@@ -10,15 +11,6 @@ interface DocumentSidebarHeaderComponentSignature {
     toggleCollapsed: () => void;
     userHasScrolled: boolean;
   };
-}
-
-export function isValidURL(input: string) {
-  try {
-    new URL(input);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {

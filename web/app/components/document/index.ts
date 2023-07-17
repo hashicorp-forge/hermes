@@ -7,10 +7,13 @@ import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import { tracked } from "@glimmer/tracking";
+import { action } from "@ember/object";
 
 interface DocumentIndexComponentSignature {
   document: HermesDocument;
   docType: string;
+  modelIsChanging: boolean;
 }
 
 export default class DocumentIndexComponent extends Component<DocumentIndexComponentSignature> {
@@ -20,6 +23,12 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
   @service declare flashMessages: FlashMessageService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
+
+  @tracked sidebarIsCollapsed = false;
+
+  @action protected toggleSidebarCollapsedState() {
+    this.sidebarIsCollapsed = !this.sidebarIsCollapsed;
+  }
 
   protected deleteDraft = dropTask(async (docID: string) => {
     try {
@@ -57,5 +66,11 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
       timeout: 6000,
       extendedTimeout: 1000,
     });
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    Document: typeof DocumentIndexComponent;
   }
 }
