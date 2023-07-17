@@ -215,6 +215,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
      * Instead, we use FloatingUI to place the input in view.
      */
     this.input.focus({ preventScroll: true });
+
+    /**
+     * We might expect this to run on the input's `focusin` event,
+     * but our programmatic focus call occurs at the beginning of the runloop,
+     * before the template can capture it. So we call it manually the first time.
+     */
+    this.maybeEnableKeyboardNav();
   }
 
   /**
