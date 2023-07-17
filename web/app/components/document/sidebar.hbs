@@ -3,6 +3,9 @@
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
   @userHasScrolled={{this.userHasScrolled}}
+  @shareButtonIsShown={{eq this.draftVisibility "shareable"}}
+  @shareButtonTooltipText={{this.shareButtonTooltipText}}
+  @shareButtonTooltipIcon={{this.shareButtonTooltipIcon}}
 />
 
 {{#unless @isCollapsed}}
@@ -11,22 +14,9 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.registerBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <div
-          class="product-badge
-            {{productIcon}}
-            {{if this.save.isRunning 'opacity-50'}}"
-        >
-          <FlightIcon @name={{productIcon}} />
-        </div>
-      {{/if}}
-    {{/let}}
-
     <div class="sidebar-body-container">
       <div>
         <div class="flex items-center space-x-1.5 mb-6">
-
           <Hds::Badge
             @text={{if this.isDraft "Draft" @document.docNumber}}
             class="uppercase !rounded-[3px]
@@ -187,24 +177,6 @@
             </div>
           {{/if}}
         </div>
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        {{#if (is-empty @document.docNumber)}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-          </small>
-        {{else}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-            &bullet;
-            <span data-test-sidebar-doc-number>
-              {{@document.docNumber}}
-            </span>
-          </small>
-        {{/if}}
       </div>
 
       <div class="flex flex-col items-start space-y-2">
