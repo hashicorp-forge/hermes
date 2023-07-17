@@ -184,8 +184,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     let index =
       this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
+    // Make sure the current document is omitted from the results
     let filterString = `(NOT objectID:"${this.args.objectID}")`;
 
+    // And if there are any related documents, omit those too
     if (this.relatedDocuments.length) {
       let relatedDocIDs = this.relatedDocuments.map((doc) => doc.googleFileID);
 
@@ -196,6 +198,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       )}")`;
     }
 
+    // If there are search filters, e.g., "doctype:RFC" add them to the query
     if (this.args.searchFilters) {
       filterString += ` AND (${this.args.searchFilters})`;
     }
@@ -213,6 +216,11 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             "status",
             "owners",
           ],
+
+          // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
+          // Include any optional search filters, e.g., "product:Terraform"
+          // to give a higher ranking to results that match the filter.
+
           // TODO: Confirm this with a fresh index
           optionalFilters: this.args.optionalSearchFilters,
         })
@@ -441,7 +449,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         this.relatedDocuments = cachedDocuments;
 
         this.flashMessages.add({
-          title: "Unable to save",
+          title: "Unable to save resource",
           message: (e as any).message,
           type: "critical",
           sticky: true,

@@ -139,6 +139,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await waitFor(FLASH_MESSAGE_SELECTOR);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Unable to save");
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Unable to save resource");
   });
 });

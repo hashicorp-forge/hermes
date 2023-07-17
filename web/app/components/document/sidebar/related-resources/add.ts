@@ -156,6 +156,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.keyboardNavIsEnabled = true;
   }
 
+  /**
+   * The action passed to the XDropdownList component, to be run when an item is clicked.
+   * Adds the clicked document to the related-documents array in the correct format.
+   */
   @action protected onItemClick(_item: any, attrs: any) {
     const relatedHermesDocument = {
       googleFileID: attrs.objectID,
@@ -254,15 +258,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   }
 
   /**
-   * The task that loads the initial `algoliaResults`.
-   * Sends an empty-string query to Algolia, effectively populating its
-   * "suggestions." Called when the search input is inserted.
-   */
-  protected loadInitialData = restartableTask(async (dd: any) => {
-    await this.args.search(dd, "");
-  });
-
-  /**
    * The action that runs when the search-input value changes.
    * Updates the local query property, checks if it's a URL, and searches Algolia.
    */
@@ -283,6 +278,15 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       this.checkForDuplicate(this.query);
     }
   }
+
+  /**
+   * The task that loads the initial `algoliaResults`.
+   * Sends an empty-string query to Algolia, effectively populating its
+   * "suggestions." Called when the search input is inserted.
+   */
+  protected loadInitialData = restartableTask(async (dd: any) => {
+    await this.args.search(dd, "");
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {
