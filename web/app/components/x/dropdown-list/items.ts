@@ -64,15 +64,7 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    */
   @action protected maybeKeyboardNavigate(event: KeyboardEvent) {
     if (this.args.keyboardNavIsEnabled === false) {
-      switch (event.key) {
-        case "ArrowDown":
-        case "ArrowUp":
-        case "Enter":
-          event.preventDefault();
-          return;
-        default:
-          return;
-      }
+      return;
     }
 
     if (event.key === "ArrowDown") {

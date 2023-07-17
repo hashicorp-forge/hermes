@@ -24,11 +24,12 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
-    search: (dd: any, query: string) => Promise<void>;
+    search: (dd: any, query: string, shouldIgnoreDelay?: boolean) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
+    searchIsRunning?: boolean;
   };
   Blocks: {
     default: [];
@@ -73,6 +74,12 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Used to prevent duplicates in the array.
    */
   @tracked linkIsDuplicate = false;
+
+  /**
+   * Whether an error is shown below a the external link title input.
+   * True if the input is empty on submit.
+   */
+  @tracked externalLinkTitleErrorIsShown = false;
 
   /**
    * Whether a query has no results.
@@ -156,6 +163,21 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.keyboardNavIsEnabled = true;
   }
 
+  @action onExternalLinkSubmit(e: Event) {
+    // Prevent the form from blindly submitting
+    e.preventDefault();
+
+    if (this.externalLinkTitle.length === 0) {
+      this.externalLinkTitleErrorIsShown = true;
+      return;
+    }
+
+    if (!this.linkIsDuplicate) {
+      this.addRelatedExternalLink();
+      this.args.onClose();
+    }
+  }
+
   /**
    * The action passed to the XDropdownList component, to be run when an item is clicked.
    * Adds the clicked document to the related-documents array in the correct format.
@@ -226,8 +248,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action protected onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
-        this.addRelatedExternalLink();
-        this.args.onClose();
+        this.onExternalLinkSubmit(e);
         return;
       }
     }
@@ -285,7 +306,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * "suggestions." Called when the search input is inserted.
    */
   protected loadInitialData = restartableTask(async (dd: any) => {
-    await this.args.search(dd, "");
+    await this.args.search(dd, "", true);
   });
 }
 

@@ -143,7 +143,17 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  /**
+   * The duration of the tooltip's open animation.
+   * Ignored in the testing environment.
+   */
   @tracked openDuration: number = DEFAULT_OPEN_DURATION;
+
+  /**
+   * The transform applied to the tooltip.
+   * Calculated based on placement; used for animations.
+   */
+  @tracked transform: string = "none";
 
   /**
    * The delay before the tooltip is shown.
@@ -193,8 +203,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
   @tracked floatingUICleanup: (() => void) | null = null;
 
-  @tracked transform: string = "none";
-
   /**
    * The action that runs when the content's [visibility] state changes.
    * Updates the `data-tooltip-state` attribute on the reference
@@ -223,7 +231,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this.updateState(TooltipState.Opening);
 
-    if (this.delay > 0) {
+    if (!Ember.testing && this.delay > 0) {
       await timeout(this.delay);
     }
 

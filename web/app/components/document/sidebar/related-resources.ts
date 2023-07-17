@@ -180,69 +180,80 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * the dropdown with the correct menu item IDs.
    * Runs whenever the input value changes.
    */
-  protected search = restartableTask(async (dd: any, query: string) => {
-    let index =
-      this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+  protected search = restartableTask(
+    async (dd: any, query: string, shouldIgnoreDelay?: boolean) => {
+      let index =
+        this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    // Make sure the current document is omitted from the results
-    let filterString = `(NOT objectID:"${this.args.objectID}")`;
+      // Make sure the current document is omitted from the results
+      let filterString = `(NOT objectID:"${this.args.objectID}")`;
 
-    // And if there are any related documents, omit those too
-    if (this.relatedDocuments.length) {
-      let relatedDocIDs = this.relatedDocuments.map((doc) => doc.googleFileID);
+      // And if there are any related documents, omit those too
+      if (this.relatedDocuments.length) {
+        let relatedDocIDs = this.relatedDocuments.map(
+          (doc) => doc.googleFileID
+        );
 
-      filterString = filterString.slice(0, -1) + " ";
+        filterString = filterString.slice(0, -1) + " ";
 
-      filterString += `AND NOT objectID:"${relatedDocIDs.join(
-        '" AND NOT objectID:"'
-      )}")`;
-    }
+        filterString += `AND NOT objectID:"${relatedDocIDs.join(
+          '" AND NOT objectID:"'
+        )}")`;
+      }
 
-    // If there are search filters, e.g., "doctype:RFC" add them to the query
-    if (this.args.searchFilters) {
-      filterString += ` AND (${this.args.searchFilters})`;
-    }
+      // If there are search filters, e.g., "doctype:RFC" add them to the query
+      if (this.args.searchFilters) {
+        filterString += ` AND (${this.args.searchFilters})`;
+      }
 
-    try {
-      let algoliaResponse = await this.algolia.searchIndex
-        .perform(index, query, {
-          hitsPerPage: 4,
-          filters: filterString,
-          attributesToRetrieve: [
-            "title",
-            "product",
-            "docNumber",
-            "docType",
-            "status",
-            "owners",
-          ],
+      try {
+        let algoliaResponse = await this.algolia.searchIndex
+          .perform(index, query, {
+            hitsPerPage: 4,
+            filters: filterString,
+            attributesToRetrieve: [
+              "title",
+              "product",
+              "docNumber",
+              "docType",
+              "status",
+              "owners",
+            ],
 
-          // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
-          // Include any optional search filters, e.g., "product:Terraform"
-          // to give a higher ranking to results that match the filter.
-          optionalFilters: this.args.optionalSearchFilters,
-        })
-        .then((response) => response);
-      if (algoliaResponse) {
-        this._algoliaResults = algoliaResponse.hits as HermesDocument[];
-        if (dd) {
-          dd.resetFocusedItemIndex();
+            // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
+            // Include any optional search filters, e.g., "product:Terraform"
+            // to give a higher ranking to results that match the filter.
+            optionalFilters: this.args.optionalSearchFilters,
+          })
+          .then((response) => response);
+        if (algoliaResponse) {
+          this._algoliaResults = algoliaResponse.hits as HermesDocument[];
+          if (dd) {
+            dd.resetFocusedItemIndex();
+          }
         }
+        if (dd) {
+          next(() => {
+            dd.scheduleAssignMenuItemIDs();
+          });
+        }
+        this.searchErrorIsShown = false;
+
+        if (!shouldIgnoreDelay) {
+          // This will show the "loading" spinner for some additional time
+          // unless the task is restarted. This is to prevent the spinner
+          // from flashing when the user types and results return quickly.
+          await timeout(Ember.testing ? 0 : 200);
+        }
+      } catch (e: unknown) {
+        // This will trigger the "no matches" block,
+        // which is where we're displaying the error.
+        this._algoliaResults = null;
+        this.searchErrorIsShown = true;
+        console.error(e);
       }
-      if (dd) {
-        next(() => {
-          dd.scheduleAssignMenuItemIDs();
-        });
-      }
-      this.searchErrorIsShown = false;
-    } catch (e: unknown) {
-      // This will trigger the "no matches" block,
-      // which is where we're displaying the error.
-      this._algoliaResults = null;
-      this.searchErrorIsShown = true;
-      console.error(e);
     }
-  });
+  );
 
   /**
    * The action run when the "add resource" plus button is clicked.
@@ -365,17 +376,23 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Temporarily adds a visual indicator of the changed element.
    */
   protected animateHighlight = restartableTask(
-    async (selector: string | number) => {
+    async (classNameOrID: string | number) => {
       schedule("afterRender", async () => {
         let target: HTMLElement | null = null;
 
-        if (typeof selector === "number") {
-          target = htmlElement(`#related-resource-${selector}`);
-        } else {
-          target = htmlElement(
-            `.related-resource${selector} .related-resource-link`
-          );
-        }
+        // When editing, we select by ID. Otherwise, we select by class.
+        let targetSelector =
+          typeof classNameOrID === "number"
+            ? "#related-resource-"
+            : ".related-resource";
+
+        // Add the class or ID to the selector
+        targetSelector += `${classNameOrID}`;
+
+        // Specify the target's anchor element
+        targetSelector += " .related-resource-link";
+
+        target = htmlElement(targetSelector);
 
         next(() => {
           maybeScrollIntoView(

@@ -1,10 +1,13 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import {
+  click,
   fillIn,
   render,
   triggerEvent,
   triggerKeyEvent,
+  waitFor,
+  waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
@@ -23,6 +26,7 @@ interface DocumentSidebarRelatedResourcesAddTestContext
   search: (dd: any, query: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
   allowAddingExternalLinks: boolean;
+  searchIsRunning: boolean;
 }
 
 module(
@@ -82,6 +86,7 @@ module(
         <Document::Sidebar::RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
+          @addResource={{this.noop}}
           @onClose={{this.noop}}
           @shownDocuments={{this.shownDocuments}}
           @objectID="test"
@@ -263,6 +268,34 @@ module(
       assert
         .dom(`${LIST_ITEM_SELECTOR}:nth-child(2) ${DOCUMENT_OPTION_SELECTOR}`)
         .hasAttribute("aria-selected");
+    });
+
+    test("it shows a loading icon while search is running", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+      this.set("searchIsRunning", false);
+
+      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
+        <Document::Sidebar::RelatedResources::Add
+          @headerTitle="Test title"
+          @inputPlaceholder="Test placeholder"
+          @onClose={{this.noop}}
+          @addResource={{this.noop}}
+          @shownDocuments={{this.shownDocuments}}
+          @objectID="test"
+          @relatedDocuments={{array}}
+          @relatedLinks={{array}}
+          @search={{this.search}}
+          @searchIsRunning={{this.searchIsRunning}}
+        />
+      `);
+      const iconSelector = "[data-test-related-resources-search-loading-icon]";
+
+      assert.dom(iconSelector).doesNotExist();
+
+      this.set("searchIsRunning", true);
+
+      assert
+        .dom("[data-test-related-resources-search-loading-icon]")
+        .exists("a loading icon is shown when `searchIsRunning` is true");
     });
   }
 );
