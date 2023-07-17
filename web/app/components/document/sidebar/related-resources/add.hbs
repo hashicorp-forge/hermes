@@ -45,7 +45,8 @@
             />
             {{#if @searchIsRunning}}
               <div
-                class="absolute top-1/2 -translate-y-1/2 right-3 bg-white flex"
+                data-test-related-resources-search-loading-icon
+                class="absolute top-1/2 -translate-y-1/2 right-3 flex bg-white"
               >
                 <FlightIcon @name="loading" />
               </div>
