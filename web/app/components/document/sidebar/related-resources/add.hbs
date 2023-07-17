@@ -58,8 +58,9 @@
           {{#if (and @allowAddingExternalLinks this.queryIsURL)}}
             <Document::Sidebar::RelatedResources::Add::ExternalResource
               @onInput={{this.onExternalLinkTitleInput}}
-              @onSubmit={{this.addRelatedExternalLink}}
+              @onSubmit={{this.onExternalLinkSubmit}}
               @linkIsDuplicate={{this.linkIsDuplicate}}
+              @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
               @title={{this.externalLinkTitle}}
               @url={{this.query}}
             />

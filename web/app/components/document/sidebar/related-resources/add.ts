@@ -75,6 +75,12 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @tracked linkIsDuplicate = false;
 
   /**
+   * Whether an error is shown below a the external link title input.
+   * True if the input is empty on submit.
+   */
+  @tracked externalLinkTitleErrorIsShown = false;
+
+  /**
    * Whether a query has no results.
    * May determine whether the list header (e.g., "suggestions," "results") is shown.
    */
@@ -156,6 +162,21 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.keyboardNavIsEnabled = true;
   }
 
+  @action onExternalLinkSubmit(e: Event) {
+    // Prevent the form from blindly submitting
+    e.preventDefault();
+
+    if (this.externalLinkTitle.length === 0) {
+      this.externalLinkTitleErrorIsShown = true;
+      return;
+    }
+
+    if (!this.linkIsDuplicate) {
+      this.addRelatedExternalLink();
+      this.args.onClose();
+    }
+  }
+
   /**
    * The action passed to the XDropdownList component, to be run when an item is clicked.
    * Adds the clicked document to the related-documents array in the correct format.
@@ -226,8 +247,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action protected onInputKeydown(dd: any, e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
-        this.addRelatedExternalLink();
-        this.args.onClose();
+        this.onExternalLinkSubmit(e);
         return;
       }
     }
