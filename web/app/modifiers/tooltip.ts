@@ -131,7 +131,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked tooltip: HTMLElement | null = null;
 
   /**
-   * The state of the tooltip as it transitions to and from closed and open.
+   * The state of the tooltip as it transitions between closed and open.
    * Used in tests to assert that intermediary states are rendered.
    */
   @tracked state: TooltipState = TooltipState.Closed;
@@ -206,7 +206,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.reference.setAttribute("data-tooltip-state", this.state);
     }
   }
-
   /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
@@ -214,7 +213,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * calculated by the `floating-ui` positioning library.
    */
   showContent = restartableTask(async () => {
-    console.log("task started");
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
@@ -225,13 +223,13 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this.updateState(TooltipState.Opening);
 
-    if (!Ember.testing && this.delay > 0) {
+    if (this.delay > 0) {
       await timeout(this.delay);
     }
 
     // Used in tests to assert intermediary states
     if (this._useTestDelay) {
-      await simpleTimeout(Ember.testing ? 0 : 50);
+      await simpleTimeout(10);
     }
 
     /**

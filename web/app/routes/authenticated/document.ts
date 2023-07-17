@@ -1,8 +1,11 @@
+// @ts-nocheck - Not yet typed
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import timeAgo from "hermes/utils/time-ago";
 import RSVP from "rsvp";
 import parseDate from "hermes/utils/parse-date";
+import htmlElement from "hermes/utils/html-element";
+import { scheduleOnce } from "@ember/runloop";
 
 const serializePeople = (people) =>
   people.map((p) => ({
@@ -151,5 +154,31 @@ export default class DocumentRoute extends Route {
       doc,
       docType,
     });
+  }
+
+  /**
+   * Once the model has resolved, check if the document is loading from
+   * another document, as is the case in related Hermes documents.
+   * In those cases, we scroll the sidebar to the top and toggle the
+   * `modelIsChanging` property to remove and rerender the sidebar,
+   * resetting its local state to reflect the new model data.
+   */
+  afterModel(model, transition) {
+    if (transition.from) {
+      if (transition.from.name === transition.to.name) {
+        if (
+          transition.from.params.document_id !==
+          transition.to.params.document_id
+        ) {
+          this.controller.set("modelIsChanging", true);
+
+          htmlElement(".sidebar-body").scrollTop = 0;
+
+          scheduleOnce("afterRender", () => {
+            this.controller.set("modelIsChanging", false);
+          });
+        }
+      }
+    }
   }
 }

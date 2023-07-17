@@ -1,0 +1,50 @@
+<li
+  id="related-resource-{{@resource.sortOrder}}"
+  class="related-resource group
+    {{if this.documentObjectID 'hermes-document' 'external-resource'}}
+    "
+>
+  <div class="related-resource-inner group">
+    {{#if this.documentObjectID}}
+      <LinkTo
+        data-test-item-type="hermes-document"
+        @model={{this.documentObjectID}}
+        @route="authenticated.document"
+        class="related-resource-link peer"
+      >
+        <Document::Sidebar::RelatedResources::ListItem::Resource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </LinkTo>
+    {{else}}
+      <ExternalLink
+        data-test-item-type="external-resource"
+        href={{this.externalResourceURL}}
+        class="related-resource-link peer items-center"
+      >
+        <Document::Sidebar::RelatedResources::ListItem::Resource
+          @resource={{@resource}}
+          @removeResource={{@removeResource}}
+        />
+      </ExternalLink>
+    {{/if}}
+    {{#unless @editingIsDisabled}}
+      <Document::Sidebar::RelatedResources::ListItem::OverflowMenu
+        @resource={{@resource}}
+        @onRemoveClick={{@removeResource}}
+        @onEditClick={{this.showModal}}
+      />
+    {{/unless}}
+
+  </div>
+</li>
+
+{{#if this.modalIsShown}}
+  <Document::Sidebar::RelatedResources::ListItem::Edit
+    @resource={{this.externalLink}}
+    @hideModal={{this.hideModal}}
+    @removeResource={{@removeResource}}
+    @onSave={{this.saveChanges}}
+  />
+{{/if}}

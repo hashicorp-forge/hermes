@@ -28,6 +28,7 @@ export default Factory.extend({
   docType: "RFC",
   modifiedAgo: 1000000000,
   modifiedTime: 1,
+  appCreated: true,
   docNumber() {
     // @ts-ignore - Mirage types are wrong
     // See discussion at https://github.com/miragejs/miragejs/pull/525
@@ -38,5 +39,5 @@ export default Factory.extend({
       value: "This is a test document",
     },
   },
-  owners: ["Test user"],
+  owners: ["testuser@example.com"],
 });

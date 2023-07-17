@@ -6,6 +6,7 @@ import WillDestroyModifier from "ember-render-modifiers/modifiers/will-destroy";
 import AndHelper from "ember-truth-helpers/helpers/and";
 import EqHelper from "ember-truth-helpers/helpers/eq";
 import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
+import LtHelper from "ember-truth-helpers/helpers/lt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
 import { FlightIconComponent } from "hds/flight-icon";
@@ -36,6 +37,7 @@ import AnimatedOrphans from "ember-animated/components/animated-orphans";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
+import { HdsFormErrorComponent } from "hds/form/error";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -53,6 +55,7 @@ declare module "@glint/environment-ember-loose/registry" {
     eq: typeof EqHelper;
     and: typeof AndHelper;
     not: typeof NotHelper;
+    lt: typeof LtHelper;
     "is-empty": IsEmptyHelper;
     FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;
@@ -64,6 +67,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "Hds::Link::Inline": HdsLinkInlineComponent;
     "Hds::Link::Standalone": HdsLinkStandaloneComponent;
     "Hds::Modal": HdsModalComponent;
+    "Hds::Form::Error": HdsFormErrorComponent;
     "Hds::Form::Checkbox::Field": HdsFormCheckboxFieldComponent;
     "Hds::Form::Textarea::Field": HdsFormTextareaFieldComponent;
     "Hds::Form::Toggle::Base": HdsFormToggleBaseComponent;

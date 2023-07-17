@@ -12,18 +12,19 @@ export interface GoogleUser {
   photos: { url: string }[];
 }
 
-interface PeopleSelectComponentSignature {
+interface InputsPeopleSelectComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     selected: HermesUser[];
     onBlur?: () => void;
-    onChange: (people: GoogleUser[]) => void;
+    onChange: (people: HermesUser[]) => void;
   };
 }
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 
-export default class PeopleSelectComponent extends Component<PeopleSelectComponentSignature> {
+export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
   /**
@@ -76,17 +77,19 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
         const peopleJson = await response?.json();
 
         if (peopleJson) {
-          this.people = peopleJson.map((p: GoogleUser) => {
-            return {
-              email: p.emailAddresses[0]?.value,
-              imgURL: p.photos?.[0]?.url,
-            };
-          }).filter((person: HermesUser) => {
-            // filter out any people already selected
-            return !this.args.selected.find(
-              (selectedPerson) => selectedPerson.email === person.email
-            );
-          });
+          this.people = peopleJson
+            .map((p: GoogleUser) => {
+              return {
+                email: p.emailAddresses[0]?.value,
+                imgURL: p.photos?.[0]?.url,
+              };
+            })
+            .filter((person: HermesUser) => {
+              // filter out any people already selected
+              return !this.args.selected.find(
+                (selectedPerson) => selectedPerson.email === person.email
+              );
+            });
         } else {
           this.people = [];
         }
@@ -107,4 +110,10 @@ export default class PeopleSelectComponent extends Component<PeopleSelectCompone
       }
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Inputs::PeopleSelect": typeof InputsPeopleSelectComponent;
+  }
 }

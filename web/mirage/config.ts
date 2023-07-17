@@ -70,8 +70,6 @@ export default function (mirageConfig) {
         const requestBody = JSON.parse(request.requestBody);
         const { facetQuery, query } = requestBody;
 
-        console.log("requestBody", requestBody);
-
         if (facetQuery) {
           let facetMatch = schema.document.all().models.filter((doc) => {
             return doc.attrs.product
@@ -113,6 +111,8 @@ export default function (mirageConfig) {
        * Algolia has several search hosts, e.g., appID-1.algolianet.com,
        * and Mirage doesn't support wildcards in routes.
        * So, we create a route for each host.
+       *
+       * TODO: Export this into a function that can be used in tests also.
        */
 
       let algoliaSearchHosts = [];
@@ -240,6 +240,46 @@ export default function (mirageConfig) {
           schema.document.findBy({ objectID: request.params.document_id }).attrs
         );
       });
+
+      /**
+       * Used by the RelatedResources component when the doc is a draft.
+       */
+      this.get("drafts/:document_id/related-resources", (schema, request) => {
+        console.log('drafts related resources');
+        let hermesDocuments = schema.relatedHermesDocument
+          .all()
+          .models.map((doc) => {
+            return doc.attrs;
+          });
+        let externalLinks = schema.relatedExternalLinks
+          .all()
+          .models.map((link) => {
+            return link.attrs;
+          });
+
+        return new Response(200, {}, { hermesDocuments, externalLinks });
+      });
+
+      /**
+       * Used by the RelatedResources component when the doc is published.
+       */
+      this.get(
+        "documents/:document_id/related-resources",
+        (schema, request) => {
+          let hermesDocuments = schema.relatedHermesDocument
+            .all()
+            .models.map((doc) => {
+              return doc.attrs;
+            });
+          let externalLinks = schema.relatedExternalLinks
+            .all()
+            .models.map((link) => {
+              return link.attrs;
+            });
+
+          return new Response(200, {}, { hermesDocuments, externalLinks });
+        }
+      );
 
       /**
        * Used by the /drafts route's getDraftResults method to fetch
@@ -380,6 +420,74 @@ export default function (mirageConfig) {
           return new Response(200, {}, document.attrs);
         }
       });
+
+      /*************************************************************************
+       *
+       * PUT requests
+       *
+       *************************************************************************/
+
+      // Related resources (drafts)
+
+      this.put("/drafts/:document_id/related-resources", (schema, request) => {
+        let requestBody = JSON.parse(request.requestBody);
+        let { hermesDocuments, externalLinks } = requestBody;
+
+        let doc = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (doc) {
+          doc.update({
+            hermesDocuments,
+            externalLinks,
+          });
+          return new Response(200, {}, doc.attrs);
+        }
+      });
+
+      // Related resources (published docs)
+
+      this.put(
+        "documents/:document_id/related-resources",
+        (schema, request) => {
+          let requestBody = JSON.parse(request.requestBody);
+          let { hermesDocuments, externalLinks } = requestBody;
+
+          // we're not yet saving this to the document;
+          // currently we're just just overwriting the global mirage objects
+
+          this.schema.db.relatedHermesDocument.remove();
+          this.schema.db.relatedExternalLinks.remove();
+
+          hermesDocuments.forEach(
+            (doc: { googleFileID: string; sortOrder: number }) => {
+              const mirageDocument = this.schema.document.findBy({
+                objectID: doc.googleFileID,
+              }).attrs;
+
+              this.schema.relatedHermesDocument.create({
+                googleFileID: doc.googleFileID,
+                sortOrder: hermesDocuments.indexOf(doc) + 1,
+                title: mirageDocument.title,
+                type: mirageDocument.docType,
+                documentNumber: mirageDocument.docNumber,
+              });
+            }
+          );
+
+          externalLinks.forEach((link) => {
+            this.schema.relatedExternalLinks.create({
+              name: link.name,
+              url: link.url,
+              sortOrder:
+                externalLinks.indexOf(link) + 1 + hermesDocuments.length,
+            });
+          });
+
+          return new Response(200, {}, {});
+        }
+      );
     },
   };
 
