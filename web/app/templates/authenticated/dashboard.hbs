@@ -26,8 +26,10 @@
     <h1>Welcome back, {{this.authenticatedUser.info.given_name}} 
       {{#if (eq this.authenticatedUser.info.role "Basic")}}
         <Hds::Badge @text="Basic" @size="large" @type="inverted" icon="user"/>
-      {{else}}
+      {{else if (eq this.authenticatedUser.info.role "Admin")}}
         <Hds::Badge @text="Admin" @size="large" @type="inverted" icon="user" @color="success"/>
+          {{else}}
+        <<Hds::Badge @icon="loading" />
       {{/if}}
     </h1>
     <p>Here’s all the latest updates across the organization.</p>

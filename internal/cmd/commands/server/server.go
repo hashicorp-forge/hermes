@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/hashicorp/go-hclog"
 	"log"
 	"net/http"
 	"os"
@@ -426,6 +427,13 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
 	}
 
+	// Define a slice of patterns that require admin access.
+	adminRequiredPatterns := []string{
+		"/api/v1/products",
+		"/api/v1/teams",
+		// Add more patterns here if needed.
+	}
+
 	// Define handlers for unauthenticated endpoints.
 	unauthenticatedEndpoints := []endpoint{
 		{"/health", healthHandler()},
@@ -451,11 +459,22 @@ func (c *Command) Run(args []string) int {
 
 	// Register handlers.
 	for _, e := range authenticatedEndpoints {
-		mux.Handle(
-			e.pattern,
-			auth.AuthenticateRequest(*cfg, goog, c.Log, e.handler),
-		)
+		// Check if the current pattern requires admin access.
+		if containsPattern(adminRequiredPatterns, e.pattern) {
+			// If it does, apply the isAdminForProduct middleware after AuthenticateRequest.
+			mux.Handle(
+				e.pattern,
+				auth.AuthenticateRequest(*cfg, goog, c.Log, isAdminForProduct(e.handler, db, c.Log)),
+			)
+		} else {
+			// For other endpoints, use the existing authentication middleware.
+			mux.Handle(
+				e.pattern,
+				auth.AuthenticateRequest(*cfg, goog, c.Log, e.handler),
+			)
+		}
 	}
+
 	for _, e := range unauthenticatedEndpoints {
 		mux.Handle(e.pattern, e.handler)
 	}
@@ -608,4 +627,46 @@ func registerProducts(
 	}
 
 	return nil
+}
+
+// isAdminForProduct is a middleware function that checks if the user is an admin
+// for POST requests within the only admin access endpoint.
+func isAdminForProduct(next http.Handler, db *gorm.DB, log hclog.Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if the request method is POST.
+		if r.Method != http.MethodGet {
+			if r.Context().Value("userEmail") == nil {
+				log.Error("userEmail is not set in the request context",
+					"method", r.Method,
+					"path", r.URL.Path)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			userEmail := r.Context().Value("userEmail").(string)
+			var user models.User = models.User{EmailAddress: userEmail}
+			// Check if the user is an admin (you need to implement this logic).
+			isAdmin, err := user.IsUserAdmin(db)
+			if err != nil {
+				http.Error(w, "Error Fetching User details from Database!", http.StatusInternalServerError)
+			}
+			if !isAdmin {
+				http.Error(w, "Access denied: You must be an admin to perform this action.", http.StatusForbidden)
+				return
+			}
+		}
+
+		// If the request is not a Get request or the user is an admin for a POST request or any other crud,
+		// call the next handler in the chain.
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Helper function to check if a pattern is present in the slice.
+func containsPattern(patterns []string, target string) bool {
+	for _, p := range patterns {
+		if p == target {
+			return true
+		}
+	}
+	return false
 }

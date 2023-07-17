@@ -183,3 +183,19 @@ func (u *User) FetchRole(db *gorm.DB) (string, error) {
 
 	return user.Role.String(), nil
 }
+
+// IsUserAdmin checks if the user with the given email address is an admin.
+func (u *User) IsUserAdmin(db *gorm.DB) (bool, error) {
+	// Fetch the user by email address.
+	var user User
+	if err := db.Where("email_address = ?", u.EmailAddress).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// If the user is not found, they cannot be an admin.
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to fetch user's role: %w", err)
+	}
+
+	// Check if the role is "Admin".
+	return user.Role == Admin, nil
+}

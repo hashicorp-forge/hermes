@@ -90,7 +90,8 @@ export default class AuthenticatedDashboardController extends Controller {
         extendedTimeout: 1000,
       });
     } catch (err) {
-      this.docIsBeingCreated = false;
+      this.toggleModal1();
+      this.TeamIsBeingCreated = false;
       this.flashMessages.add({
         title: "Error creating new Team",
         message: `${err}`,
@@ -161,6 +162,8 @@ export default class AuthenticatedDashboardController extends Controller {
         extendedTimeout: 1000,
       });
     } catch (err) {
+      this.BUIsBeingCreated = false;
+      this.toggleModal1();
       this.flashMessages.add({
         title: "Error creating new Business Unit",
         message: `${err}`,
@@ -183,8 +186,6 @@ export default class AuthenticatedDashboardController extends Controller {
     const formData = new FormData(formElement);
     const formObject = Object.fromEntries(formData.entries());
 
-    // Do something with the formObject
-    console.log(formObject);
 
     // Do something with the form values
     this.businessUnitName = formObject['bu-name'];
