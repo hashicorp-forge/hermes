@@ -4,6 +4,20 @@
   &.hds-dropdown__content {
     @apply min-w-[175px];
   }
+
+  &.non-floating-list {
+    @apply w-full relative max-w-none;
+
+    .x-dropdown-list-item-link {
+      &.is-aria-selected {
+        @apply bg-color-surface-interactive-hover;
+
+        .flight-icon {
+          @apply text-inherit;
+        }
+      }
+    }
+  }
 }
 
 .x-dropdown-list-container {

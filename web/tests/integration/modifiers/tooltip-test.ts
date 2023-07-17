@@ -1,15 +1,15 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { render, triggerEvent } from "@ember/test-helpers";
+import { render, triggerEvent, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
+import { wait } from "ember-animated/.";
 
 module("Integration | Modifier | tooltip", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders", async function (assert) {
     await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
       <div data-test-div {{tooltip "more information"}}>
         Hover or focus me
       </div>
@@ -76,7 +76,6 @@ module("Integration | Modifier | tooltip", function (hooks) {
 
   test("it takes a placement argument", async function (assert) {
     await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
       <div class="w-full h-full grid place-items-center">
         <div>
           <div data-test-one {{tooltip "more information"}}>
@@ -113,5 +112,31 @@ module("Integration | Modifier | tooltip", function (hooks) {
         "left-end",
         "tooltip can be custom placed"
       );
+  });
+
+  test("it can open on a delay", async function (assert) {
+    await render(hbs`
+      <div class="tip" {{tooltip "more information" _useTestDelay=true}}>
+        Hover or focus me
+      </div>
+    `);
+
+    let state = htmlElement(".tip").getAttribute("data-tooltip-state");
+
+    assert.equal(state, "closed");
+
+    await triggerEvent(".tip", "mouseenter");
+
+    const tip = htmlElement(".tip");
+
+    assert.equal(tip.getAttribute("data-tooltip-state"), "opening");
+
+    await waitUntil(() => {
+      return tip.getAttribute("data-tooltip-state") === "open";
+    });
+
+    await triggerEvent(".tip", "mouseleave");
+
+    assert.equal(tip.getAttribute("data-tooltip-state"), "closed");
   });
 });

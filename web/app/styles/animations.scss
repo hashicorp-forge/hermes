@@ -1,0 +1,28 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// For a custom scaleIn, define `--scaleInFrom` in the element's style attribute.
+// For example: .classToAnimate { --scaleInFrom: 0.5; animation: scaleIn 50ms; }
+@keyframes scaleIn {
+  from {
+    transform: scale(var(--scaleInFrom, 0.95));
+  }
+  to {
+    transform: scale(1);
+  }
+}

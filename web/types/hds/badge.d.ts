@@ -10,10 +10,10 @@ import {
 interface HdsBadgeComponentSignature {
   Element: HTMLDivElement;
   Args: {
+    text: string;
     color?: HdsBadgeColor;
     type?: HdsBadgeType;
     size?: HdsComponentSize;
-    text?: string;
     icon?: string;
     isIconOnly?: boolean;
   };

@@ -1,9 +1,14 @@
-import { click, findAll, visit } from "@ember/test-helpers";
+import { click, findAll, visit, waitFor } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+
+const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
+  "[data-test-section-header-button-for='Related resources']";
+const ADD_RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
+const FLASH_MESSAGE_SELECTOR = "[data-test-flash-notification]";
 
 interface AuthenticatedDocumentRouteTestContext extends MirageTestContext {}
 
@@ -111,5 +116,29 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom("[data-test-product-select]")
       .doesNotExist("published docs don't show a product select element");
+  });
+
+  test("a flash message displays when a related resource fails to save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.put("/documents/:document_id/related-resources", {}, 500);
+
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      product: "Test Product 0",
+      appCreated: true,
+      status: "In review",
+    });
+
+    await visit("/document/1");
+
+    await click(ADD_RELATED_RESOURCE_BUTTON_SELECTOR);
+
+    await waitFor(ADD_RELATED_DOCUMENT_OPTION_SELECTOR);
+
+    await click(ADD_RELATED_DOCUMENT_OPTION_SELECTOR);
+
+    await waitFor(FLASH_MESSAGE_SELECTOR);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Unable to save resource");
   });
 });

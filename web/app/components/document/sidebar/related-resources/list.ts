@@ -1,0 +1,103 @@
+import Component from "@glimmer/component";
+import move from "ember-animated/motions/move";
+import animateScale from "hermes/utils/ember-animated/animate-scale";
+import { easeOutQuad } from "hermes/utils/ember-animated/easings";
+import { TransitionContext, wait } from "ember-animated/.";
+import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import { action } from "@ember/object";
+import { Transition } from "ember-animated/-private/transition";
+import Ember from "ember";
+import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
+
+interface DocumentSidebarRelatedResourcesListComponentSignature {
+  Element: HTMLUListElement;
+  Args: {
+    items: any[];
+    itemLimit?: number;
+  };
+  Blocks: {
+    resource: [resource: any];
+  };
+}
+
+export default class DocumentSidebarRelatedResourcesListComponent extends Component<DocumentSidebarRelatedResourcesListComponentSignature> {
+  /**
+   * Whether the list should animate.
+   * Used to disable the animation on first render.
+   */
+  private shouldAnimate = false;
+
+  /**
+   * Whether the list is empty.
+   * Determines if we show an empty state.
+   */
+  get listIsEmpty() {
+    return this.args.items.length === 0;
+  }
+
+  /**
+   * The action to enable animations.
+   * Called when the list is rendered, just
+   * after the transitionRules have been set
+   */
+  @action protected enableAnimation() {
+    this.shouldAnimate = true;
+  }
+
+  /**
+   * The transition rules for the list.
+   * Returns an empty transition on first render, and
+   * on subsequent checks, returns the default transition.
+   */
+  @action transitionRules({ firstTime }: { firstTime: boolean }): Transition {
+    if (firstTime) {
+      if (this.shouldAnimate === false) {
+        return emptyTransition;
+      }
+    }
+    return this.transition;
+  }
+
+  /**
+   * The transition for the list items.
+   * Called when the list changes.
+   */
+  *transition({
+    insertedSprites,
+    keptSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
+    for (let sprite of keptSprites) {
+      void move(sprite, { duration: 250, easing: easeOutQuad });
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 0 });
+    }
+
+    yield wait(100);
+
+    for (let sprite of insertedSprites) {
+      sprite.applyStyles({
+        opacity: "0",
+      });
+      void animateScale(sprite, {
+        from: 0.95,
+        to: 1,
+        duration: 200,
+        easing: easeOutQuad,
+      });
+      void fadeIn(sprite, { duration: 50 });
+    }
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Document::Sidebar::RelatedResources::List": typeof DocumentSidebarRelatedResourcesListComponent;
+  }
+}

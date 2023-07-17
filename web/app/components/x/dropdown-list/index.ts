@@ -13,6 +13,7 @@ import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
+import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -117,7 +118,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @tracked protected query: string = "";
   @tracked protected listItemRole = this.inputIsShown ? "option" : "menuitem";
   @tracked protected focusedItemIndex = -1;
-  @tracked protected keyboardNavIsEnabled =
+  @tracked private _keyboardNavIsEnabled =
     this.args.keyboardNavIsEnabled ?? true;
 
   /**
@@ -163,6 +164,21 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   }
 
   /**
+   * Whether keyboard navigation is enabled.
+   * If the parent component has passed in a value,
+   * use that. Otherwise, use the local value,
+   * which depends on filterInput focus.
+   */
+  get keyboardNavIsEnabled() {
+    if (this.args.keyboardNavIsEnabled !== undefined) {
+      // Defer to the parent argument if it exists.
+      return this.args.keyboardNavIsEnabled;
+    } else {
+      return this._keyboardNavIsEnabled;
+    }
+  }
+
+  /**
    * The action run when the scrollContainer is inserted.
    * Registers the div for reference locally.
    */
@@ -175,10 +191,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Called when the filter input is focused.
    */
   @action protected maybeEnableKeyboardNav() {
-    if (this.args.keyboardNavIsEnabled === false) {
-      return;
-    }
-    this.keyboardNavIsEnabled = true;
+    this._keyboardNavIsEnabled = true;
   }
 
   /**
@@ -186,7 +199,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * Called when the filter input loses focus.
    */
   @action protected disableKeyboardNav() {
-    this.keyboardNavIsEnabled = false;
+    this._keyboardNavIsEnabled = false;
   }
 
   /**
@@ -202,6 +215,13 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
      * Instead, we use FloatingUI to place the input in view.
      */
     this.input.focus({ preventScroll: true });
+
+    /**
+     * We might expect this to run on the input's `focusin` event,
+     * but our programmatic focus call occurs at the beginning of the runloop,
+     * before the template can capture it. So we call it manually the first time.
+     */
+    this.maybeEnableKeyboardNav();
   }
 
   /**
@@ -354,19 +374,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   private maybeScrollIntoView() {
     const focusedItem = this._menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
-
-    const containerHeight = this.scrollContainer.offsetHeight;
-    const itemHeight = focusedItem.offsetHeight;
-    const itemTop = focusedItem.offsetTop;
-    const itemBottom = focusedItem.offsetTop + itemHeight;
-    const scrollviewTop = this.scrollContainer.scrollTop;
-    const scrollviewBottom = scrollviewTop + containerHeight;
-
-    if (itemBottom > scrollviewBottom) {
-      this.scrollContainer.scrollTop = itemTop + itemHeight - containerHeight;
-    } else if (itemTop < scrollviewTop) {
-      this.scrollContainer.scrollTop = itemTop;
-    }
+    maybeScrollIntoView(focusedItem, this.scrollContainer);
   }
 
   /**

@@ -17,6 +17,18 @@ import {
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
+import { restartableTask, timeout } from "ember-concurrency";
+import Ember from "ember";
+import simpleTimeout from "hermes/utils/simple-timeout";
+
+const DEFAULT_DELAY = 0;
+const DEFAULT_OPEN_DURATION = 200;
+
+enum TooltipState {
+  Opening = "opening",
+  Open = "open",
+  Closed = "closed",
+}
 
 /**
  * A modifier that attaches a tooltip to a reference element on hover or focus.
@@ -26,21 +38,27 @@ import htmlElement from "hermes/utils/html-element";
  *  <FlightIcon @name="arrow-left" />
  * </div>
  *
- * Takes text and an optional named `placement` argument:
- * {{tooltip "Go back" placement="left-end"}}
+ * Takes text and optional arguments:
+ * {{tooltip "Go back" placement="left-end" delay=0}}
  *
  * TODO:
  * - Add `renderInPlace` argument
  * - Add animation logic
  */
 
+interface TooltipModifierNamedArgs {
+  placement?: Placement;
+  stayOpenOnClick?: boolean;
+  delay?: number;
+  openDuration?: number;
+  _useTestDelay?: boolean;
+}
+
 interface TooltipModifierSignature {
   Args: {
     Element: HTMLElement;
     Positional: [string];
-    Named: {
-      placement?: Placement;
-    };
+    Named: TooltipModifierNamedArgs;
   };
 }
 
@@ -54,7 +72,10 @@ function cleanup(instance: TooltipModifier) {
   instance.reference.removeEventListener("click", instance.handleClick);
   instance.reference.removeEventListener("focusin", instance.onFocusIn);
   instance.reference.removeEventListener("focusout", instance.maybeHideContent);
-  instance.reference.removeEventListener("mouseenter", instance.showContent);
+  instance.reference.removeEventListener(
+    "mouseenter",
+    instance.showContent.perform
+  );
   instance.reference.removeEventListener(
     "mouseleave",
     instance.maybeHideContent
@@ -100,9 +121,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked _arrow: HTMLElement | null = null;
 
   /**
-   * The tooltip element that is rendered in the DOM.
+   * The tooltip element that is rendered in the DOM and positioned
+   * relative to the reference element.
    */
   @tracked tooltip: HTMLElement | null = null;
+
+  /**
+   * The state of the tooltip as it transitions between closed and open.
+   * Used in tests to assert that intermediary states are rendered.
+   */
+  @tracked state: TooltipState = TooltipState.Closed;
 
   /**
    * The placement of the tooltip relative to the reference element.
@@ -111,6 +139,36 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked placement: Placement = "top";
 
+  /**
+   * The duration of the tooltip's open animation.
+   * Ignored in the testing environment.
+   */
+  @tracked openDuration: number = DEFAULT_OPEN_DURATION;
+
+  /**
+   * The transform applied to the tooltip.
+   * Calculated based on placement; used for animations.
+   */
+  @tracked transform: string = "none";
+
+  /**
+   * The delay before the tooltip is shown.
+   * Can be overridden with a `delay` argument.
+   */
+  @tracked delay: number = DEFAULT_DELAY;
+
+  /**
+   * Whether to use a delay in the testing environment.
+   * Triggers a short `simpleTimeout` on open so we can test
+   * the content's intermediary states.
+   */
+  @tracked _useTestDelay: boolean = false;
+
+  /**
+   * Whether the content should stay open on click.
+   * Used in components like `CopyURLButton` where we want to show
+   * a "success" message without closing and reopening the tooltip.
+   */
   @tracked stayOpenOnClick = false;
 
   /**
@@ -140,12 +198,24 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked floatingUICleanup: (() => void) | null = null;
 
   /**
+   * The action that runs when the content's [visibility] state changes.
+   * Updates the `data-tooltip-state` attribute on the reference
+   * so we can test intermediary states.
+   */
+  @action updateState(state: TooltipState) {
+    this.state = state;
+    if (this.reference) {
+      this.reference.setAttribute("data-tooltip-state", this.state);
+    }
+  }
+
+  /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
    * positioned relative to the reference element, as
    * calculated by the `floating-ui` positioning library.
    */
-  @action showContent() {
+  showContent = restartableTask(async () => {
     /**
      * Do nothing if the tooltip exists, e.g., if the user
      * hovers a reference that's already focused.
@@ -154,11 +224,22 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       return;
     }
 
+    this.updateState(TooltipState.Opening);
+
+    if (!Ember.testing && this.delay > 0) {
+      await timeout(this.delay);
+    }
+
+    // Used in tests to assert intermediary states
+    if (this._useTestDelay) {
+      await simpleTimeout(10);
+    }
+
     /**
      * Create the tooltip and set its attributes
      */
     this.tooltip = document.createElement("div");
-    this.tooltip.classList.add("hermes-tooltip");
+    this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
@@ -258,6 +339,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
           });
         }
       });
+
+      if (this.placement.startsWith("top")) {
+        this.transform = "scale(.97) translateY(1px)";
+      } else if (this.placement.startsWith("bottom")) {
+        this.transform = "scale(.97) translateY(-1px)";
+      } else if (this.placement.startsWith("left")) {
+        this.transform = "scale(.97) translateX(1px)";
+      } else if (this.placement.startsWith("right")) {
+        this.transform = "scale(.97) translateX(-1px)";
+      }
     };
 
     this.floatingUICleanup = autoUpdate(
@@ -265,7 +356,34 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.tooltip,
       updatePosition
     );
-  }
+
+    if (!Ember.testing && this.openDuration) {
+      const fadeAnimation = this.tooltip.animate(
+        [{ opacity: 0 }, { opacity: 1 }],
+        {
+          duration: Ember.testing ? 0 : 50,
+        }
+      );
+      const transformAnimation = this.tooltip.animate(
+        [{ transform: this.transform }, { transform: "none" }],
+        {
+          duration: this.openDuration,
+          easing: "ease-in-out",
+        }
+      );
+      try {
+        await Promise.all([
+          fadeAnimation.finished,
+          transformAnimation.finished,
+        ]);
+      } finally {
+        fadeAnimation.cancel();
+        transformAnimation.cancel();
+      }
+    }
+
+    this.updateState(TooltipState.Open);
+  });
 
   /**
    * A click listener added in the `modify` hook that hides the tooltip
@@ -310,7 +428,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @action onFocusIn() {
     if (this.reference.matches(":focus-visible")) {
-      this.showContent();
+      this.showContent.perform();
     }
   }
 
@@ -323,15 +441,18 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     if (this.reference.matches(":focus-visible")) {
       return;
     }
-    if (this.tooltip) {
+    if (this.tooltip || this.showContent.isRunning) {
+      this.showContent.cancelAll();
       this.hideContent();
     }
   }
 
   @action hideContent() {
-    assert("tooltip expected", this.tooltip);
-    this.tooltip.remove();
-    this.tooltip = null;
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
+      this.updateState(TooltipState.Closed);
+    }
   }
 
   /**
@@ -341,10 +462,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   modify(
     element: Element,
     positional: [string],
-    named: {
-      placement?: Placement;
-      stayOpenOnClick?: boolean;
-    }
+    named: TooltipModifierNamedArgs
   ) {
     this._reference = element;
     this._tooltipText = positional[0];
@@ -359,7 +477,22 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.stayOpenOnClick = named.stayOpenOnClick;
     }
 
+    if (named._useTestDelay) {
+      this._useTestDelay = named._useTestDelay;
+    }
+
+    if (named.openDuration) {
+      this.openDuration = named.openDuration;
+    }
+
+    if (named.delay !== undefined) {
+      this.delay = named.delay;
+    } else {
+      this.delay = DEFAULT_DELAY;
+    }
+
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);
+    this._reference.setAttribute("data-tooltip-state", this.state);
 
     /**
      * If the reference isn't inherently focusable, make it focusable.
@@ -371,7 +504,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     document.addEventListener("keydown", this.handleKeydown);
     this._reference.addEventListener("click", this.handleClick);
     this._reference.addEventListener("focusin", this.onFocusIn);
-    this._reference.addEventListener("mouseenter", this.showContent);
+    this._reference.addEventListener("mouseenter", this.showContent.perform);
     this._reference.addEventListener("focusout", this.maybeHideContent);
     this._reference.addEventListener("mouseleave", this.maybeHideContent);
   }
