@@ -8,6 +8,7 @@ interface DocThumbnailComponentSignature {
     isLarge?: boolean;
     status?: string;
     product?: string;
+    docID?: string;
   };
 }
 

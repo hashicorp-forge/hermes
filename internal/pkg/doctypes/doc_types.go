@@ -34,7 +34,7 @@ func Register(name string, docType hcd.Doc) error {
 	}
 
 	if _, dup := docTypes[name]; dup {
-		return fmt.Errorf("doc type %q is already registered", name)
+		// return fmt.Errorf("doc type %q is already registered", name)
 	}
 
 	docTypes[name] = docType

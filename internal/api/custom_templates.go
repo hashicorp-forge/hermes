@@ -63,6 +63,7 @@ func TemplateHandler(
 				return
 			}
 
+			// template name cannot be empty
 			if req.TemplateName == "" {
 				http.Error(w, "Bad request: template is required", http.StatusBadRequest)
 				return

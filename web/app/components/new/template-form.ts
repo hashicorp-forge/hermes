@@ -95,12 +95,29 @@ export default class NewDocFormComponent extends Component<NewTemplateFormCompon
     return Object.values(this.formErrors).filter(defined).length > 0;
   }
 
+  private extractDocId(link: string): string {
+    // Check if the input is already a valid document ID
+    if (/^[a-zA-Z0-9-_]+$/.test(link)) {
+      return link;
+    }
+
+    try {
+      const url = new URL(link);
+      const pathname = url.pathname;
+      const parts = pathname.split("/");
+      const docId = parts[3];
+      return docId || link;
+    } catch {
+      return link; // Invalid or unsupported link format
+    }
+  }
+
   /**
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
-    
-    if (this.templateName && this.docId && this.longName) {
+    this.docId=this.extractDocId(this.docId)
+    if (this.templateName && this.longName && this.docId.length==44) {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;
@@ -173,7 +190,7 @@ export default class NewDocFormComponent extends Component<NewTemplateFormCompon
    */
   private createDoc = task(async () => {
     this.docIsBeingCreated = true;
-
+    this.docId=this.extractDocId(this.docId)
     try {
       const doc = await this.fetchSvc
         .fetch("/api/v1/custom-template", {

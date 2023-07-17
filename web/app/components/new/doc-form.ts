@@ -109,7 +109,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
+    if (this.title && this.productArea && this.teamArea) {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;

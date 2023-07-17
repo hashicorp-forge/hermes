@@ -19,6 +19,8 @@ interface DocTileComponentSignature {
 
 export default class DocTileComponent extends Component<DocTileComponentSignature> {
   protected get productAreaName(): string | undefined {
+    // console.log(this.args.docID);
+
     switch (this.args.productArea) {
       case "Cloud Platform":
         return "HCP";

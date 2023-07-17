@@ -6,7 +6,11 @@
       @query={{hash draft=@isDraft}}
       class="flex space-x-4 items-start"
     >
-      <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
+      <Doc::Thumbnail 
+        @status={{@status}} 
+        @product={{@productArea}} 
+        @docID={{@docID}}
+      />
       <div>
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"

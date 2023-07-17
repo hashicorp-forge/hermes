@@ -1,4 +1,7 @@
 .preview-card {
-  @apply p-4 sticky top-4 space-y-4;
+  @apply p-4 sticky top-4 space-y-1;
   background: var(--token-color-surface-faint);
 }
+.right-align { margin-left: auto;}
+
+.div-template { height: 426px;}

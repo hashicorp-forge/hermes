@@ -11,7 +11,7 @@
   </div>
 {{else}}
   <form
-    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    class="grid gap-10 grid-cols-[1fr_350px] grid-rows-1"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
@@ -92,12 +92,38 @@
     </div>
     <div>
       <div class="preview-card">
-        <Hds::Button
-          @text="Create new template"
-          type="submit"
-          disabled={{not this.formRequirementsMet}}
-          class="w-full"
-        />
+        <div class="flex w-full">
+          <h3>
+            <FlightIcon @name="eye" />
+            Preview Template
+          </h3>
+        </div>
+        <div class="div-template">
+          <img 
+            src="https://lh3.google.com/u/0/d/{{this.docId}}=w416-iv1" 
+            alt="Enter Correct Doc Id"
+            onerror="this.src='https://lh3.google.com/u/0/d/1I79UV01KW2nbtl2e7Qh3Q2NscvLxI0E_6Q3AzETi44A=w416-iv1'"
+            class="w-full"
+          >
+        </div>
+        <div class="flex items-start px-3 gap-2 w-full">
+          <Hds::Button
+            @text="Create"
+            type="submit"
+            disabled={{not this.formRequirementsMet}}
+            class="right-align"
+          />
+          <a href="/new">
+            <Hds::Button
+              @text="Cancel"
+              @size="medium"
+              @color="critical"
+              @icon="x-circle"
+              @isIconOnly={{false}}
+            />
+          </a>
+          
+        </div>
       </div>
     </div>
   </form>

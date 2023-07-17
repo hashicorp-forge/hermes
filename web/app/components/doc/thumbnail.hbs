@@ -6,7 +6,13 @@
     bg-color-palette-neutral-100 rounded"
   ...attributes
 >
-  <img src="/images/document.png" class="w-full h-auto" />
+  {{!-- <img src="/images/document.png" class="w-full h-auto" /> --}}
+  <img 
+    src="https://lh3.google.com/u/0/d/{{@docID}}=w416-iv1" 
+    alt="Enter Correct Doc Id"
+    onerror="this.src='https://lh3.google.com/u/0/d/1I79UV01KW2nbtl2e7Qh3Q2NscvLxI0E_6Q3AzETi44A=w416-iv1'"
+    class="w-full h-auto"
+  >
 
   <div class="w-full h-full absolute">
     {{#if this.isObsolete}}
