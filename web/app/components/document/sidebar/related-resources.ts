@@ -220,8 +220,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
           // Include any optional search filters, e.g., "product:Terraform"
           // to give a higher ranking to results that match the filter.
-
-          // TODO: Confirm this with a fresh index
           optionalFilters: this.args.optionalSearchFilters,
         })
         .then((response) => response);
