@@ -24,11 +24,12 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
-    search: (dd: any, query: string) => Promise<void>;
+    search: (dd: any, query: string, shouldIgnoreDelay?: boolean) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
+    searchIsRunning?: boolean;
   };
   Blocks: {
     default: [];
@@ -285,7 +286,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * "suggestions." Called when the search input is inserted.
    */
   protected loadInitialData = restartableTask(async (dd: any) => {
-    await this.args.search(dd, "");
+    await this.args.search(dd, "", true);
   });
 }
 

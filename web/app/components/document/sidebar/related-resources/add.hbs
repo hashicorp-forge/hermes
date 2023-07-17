@@ -23,24 +23,34 @@
         class="non-floating-list"
       >
         <:anchor as |dd|>
-          <Hds::Form::TextInput::Base
-            data-test-related-resources-search-input
-            {{did-insert dd.registerAnchor}}
-            {{did-insert (fn this.didInsertInput dd)}}
-            {{on "input" (fn this.onInput dd)}}
-            {{on "keydown" (fn this.onInputKeydown dd)}}
-            {{on "focusin" this.enableKeyboardNav}}
-            {{on "focusout" this.disableKeyboardNav}}
-            @type="search"
-            @value={{this.query}}
-            name="related-resources-search"
-            size="25"
-            placeholder={{@inputPlaceholder}}
-            aria-label={{@inputPlaceholder}}
-            aria-controls={{dd.ariaControls}}
-            aria-expanded={{dd.contentIsShown}}
-            aria-haspopup="listbox"
-          />
+          <div class="relative">
+
+            <Hds::Form::TextInput::Base
+              data-test-related-resources-search-input
+              {{did-insert dd.registerAnchor}}
+              {{did-insert (fn this.didInsertInput dd)}}
+              {{on "input" (fn this.onInput dd)}}
+              {{on "keydown" (fn this.onInputKeydown dd)}}
+              {{on "focusin" this.enableKeyboardNav}}
+              {{on "focusout" this.disableKeyboardNav}}
+              @type="search"
+              @value={{this.query}}
+              name="related-resources-search"
+              size="25"
+              placeholder={{@inputPlaceholder}}
+              aria-label={{@inputPlaceholder}}
+              aria-controls={{dd.ariaControls}}
+              aria-expanded={{dd.contentIsShown}}
+              aria-haspopup="listbox"
+            />
+            {{#if @searchIsRunning}}
+              <div
+                class="absolute top-1/2 -translate-y-1/2 right-3 bg-white flex"
+              >
+                <FlightIcon @name="loading" />
+              </div>
+            {{/if}}
+          </div>
         </:anchor>
         <:header>
           {{#if this.listHeaderIsShown}}
