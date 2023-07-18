@@ -182,8 +182,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    */
   protected search = restartableTask(
     async (dd: any, query: string, shouldIgnoreDelay?: boolean) => {
-      let index =
-        this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+      let index = this.configSvc.config.algolia_docs_index_name;
 
       // Make sure the current document is omitted from the results
       let filterString = `(NOT objectID:"${this.args.objectID}")`;
