@@ -177,6 +177,9 @@ type GoogleWorkspace struct {
 	// DocsFolder is the folder that contains all published documents.
 	DocsFolder string `hcl:"docs_folder"`
 
+	// Domain is the Google Workspace domain (e.g., "hashicorp.com").
+	Domain string `hcl:"domain"`
+
 	// DraftsFolder is the folder that contains all document drafts.
 	DraftsFolder string `hcl:"drafts_folder"`
 

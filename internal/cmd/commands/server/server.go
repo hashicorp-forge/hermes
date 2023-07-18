@@ -157,6 +157,14 @@ func (c *Command) Run(args []string) int {
 			return 1
 		}
 	}
+	if cfg.GoogleWorkspace == nil {
+		c.UI.Error("error validating config: google_workspace block is required")
+		return 1
+	}
+	if cfg.GoogleWorkspace.Domain == "" {
+		c.UI.Error("error validating config: google_workspace domain is required")
+		return 1
+	}
 
 	// Build configuration for Okta authentication.
 	if !cfg.Okta.Disabled {
