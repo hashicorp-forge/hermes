@@ -1,15 +1,18 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type TemplateRequest struct {
@@ -20,6 +23,15 @@ type TemplateRequest struct {
 }
 type TemplateResponse struct {
 	ID string `json:"id"`
+}
+
+// TemplatePatchRequest contains a subset of Template fields that are allowed to
+// be updated with a PATCH request.
+type TemplatePatchRequest struct {
+	TemplateName string `json:"templateName,omitempty"`
+	LongName     string `json:"longName,omitempty"`
+	Description  string `json:"description,omitempty"`
+	DocId        string `json:"docId,omitempty"`
 }
 
 func TemplateHandler(
@@ -118,4 +130,135 @@ func TemplateHandler(
 		}
 	})
 
+}
+
+func TemplateUpdateDeleteHandler(
+	cfg *config.Config,
+	l hclog.Logger,
+	ar *algolia.Client,
+	aw *algolia.Client,
+	s *gw.Service,
+	db *gorm.DB) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get document ID from URL path
+		ObjectID, err := parseURLPath(r.URL.Path, "/api/v1/custom-template")
+		if err != nil {
+			l.Error("error requesting template from algolia",
+				"error", err,
+				"path", r.URL.Path,
+			)
+			http.Error(w, "Error requesting template", http.StatusInternalServerError)
+			return
+		}
+
+		switch r.Method {
+		case "DELETE":
+
+			// Delete object in Algolia
+			res, err := aw.Template.DeleteObject(ObjectID)
+			if err != nil {
+				l.Error("error deleting document draft from algolia",
+					"error", err,
+					"doc_id", ObjectID,
+				)
+				http.Error(w, "Error deleting document draft",
+					http.StatusInternalServerError)
+				return
+			}
+			err = res.Wait()
+			if err != nil {
+				l.Error("error deleting template from algolia",
+					"error", err,
+					"doc_id", ObjectID,
+				)
+				http.Error(w, "Error deleting template",
+					http.StatusInternalServerError)
+				return
+			}
+
+			resp := &DraftsResponse{
+				ID: ObjectID,
+			}
+
+			// Write response.
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+
+			enc := json.NewEncoder(w)
+			err = enc.Encode(resp)
+			if err != nil {
+				l.Error("error encoding document id", "error", err, "templateObjectId", ObjectID)
+				http.Error(w, "Error deleting document draft",
+					http.StatusInternalServerError)
+				return
+			}
+		case "PATCH":
+			// Copy request body so we can use both for validation using the request
+			// struct, and then afterwards for patching the document JSON.
+			buf, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				l.Error("error reading request body",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"object_id", ObjectID)
+				http.Error(w, "Error patching template",
+					http.StatusInternalServerError)
+				return
+			}
+			// body := ioutil.NopCloser(bytes.NewBuffer(buf))
+			newBody := ioutil.NopCloser(bytes.NewBuffer(buf))
+			r.Body = newBody
+
+			// Decode request. The request struct validates that the request only
+			// contains fields that are allowed to be patched.
+			var req TemplatePatchRequest
+			if err := decodeRequest(r, &req); err != nil {
+				l.Error("error decoding draft patch request", "error", err)
+				http.Error(w, fmt.Sprintf("Bad request: %q", err),
+					http.StatusBadRequest)
+				return
+			}
+
+			// fmt.Printf("body: %v\n", body)
+			// fmt.Printf("req: %v\n", req)
+
+			type template struct {
+				ObjectID string `json:"objectID"`
+				TemplateName string `json:"templateName"`
+				LongName string `json:"longName"`
+				Description string `json:"description"`
+				DocId string `json:"docId"`
+			}
+			
+			updateObj := template{
+				ObjectID: ObjectID,
+				TemplateName: req.TemplateName,
+				LongName: req.LongName,
+				Description: req.Description,
+				DocId: req.DocId,
+			}
+			
+			res, err := aw.Template.PartialUpdateObject(updateObj)
+
+			err = res.Wait()
+			if err != nil {
+				l.Error("error updating template in algolia",
+					"error", err,
+					"object_id", ObjectID,
+				)
+				http.Error(w, "Error deleting template",
+					http.StatusInternalServerError)
+				return
+			}
+
+
+			w.WriteHeader(http.StatusOK)
+			l.Info("patched draft document", "object_id", ObjectID)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
 }

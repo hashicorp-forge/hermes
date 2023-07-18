@@ -1,0 +1,23 @@
+{{! @glint-nocheck - not typesafe yet }}
+<Hds::Button 
+    @text="Delete" 
+    @size="medium" 
+    @color="critical" 
+    @icon="trash" 
+    @isIconOnly={{true}} 
+    class="basis-0"
+    {{on "click" (fn (set this "deleteModalIsActive" true))}} 
+/>
+
+{{#if this.deleteModalIsActive}}
+<Document::Modal 
+    @color="critical" 
+    @headerText="Delete Template?"
+    @bodyText="Are you sure you want to delete this Template?" 
+    @errorTitle="Error deleteing template"
+    @close={{this.closeDeleteModal}} 
+    @task={{perform this.deleteTemplate}} 
+    @taskButtonText="Yes, delete"
+    @taskButtonLoadingText="Deleting..." 
+    @taskButtonIcon="trash" />
+{{/if}}

@@ -34,6 +34,14 @@ export interface HermesDocument {
   };
 }
 
+export interface HermesTemplate {
+  readonly objectId: string;
+  templateName: string;
+  description?: string;
+  longName: string;
+  docId: string;
+}
+
 export interface CustomEditableFields {
   [key: string]: CustomEditableField;
 }
