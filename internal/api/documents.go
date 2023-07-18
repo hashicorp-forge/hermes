@@ -40,6 +40,15 @@ type DocumentPatchRequest struct {
 	TargetVersion  string   `json:"targetVersion,omitempty"`
 }
 
+type documentSubcollectionRequestType int
+
+const (
+	unspecifiedDocumentSubcollectionRequestType documentSubcollectionRequestType = iota
+	noSubcollectionRequestType
+	relatedResourcesDocumentSubcollectionRequestType
+	shareableDocumentSubcollectionRequestType
+)
+
 func DocumentHandler(
 	cfg *config.Config,
 	l hclog.Logger,
@@ -49,8 +58,8 @@ func DocumentHandler(
 	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Parse document ID from the URL path.
-		docID, isRelatedResourcesRequest, err := parseDocumentsURLPath(
+		// Parse document ID and request type from the URL path.
+		docID, reqType, err := parseDocumentsURLPath(
 			r.URL.Path, "documents")
 		if err != nil {
 			l.Error("error parsing documents URL path",
@@ -116,10 +125,19 @@ func DocumentHandler(
 			return
 		}
 
-		// Pass request off to the documents related resources handler if
-		// appropriate.
-		if isRelatedResourcesRequest {
+		// Pass request off to associated subcollection (part of the URL after the
+		// document ID) handler, if appropriate.
+		switch reqType {
+		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(w, r, docID, docObj, l, ar, db)
+			return
+		case shareableDocumentSubcollectionRequestType:
+			l.Warn("invalid shareable request for documents collection",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+			)
+			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -483,44 +501,61 @@ func updateRecentlyViewedDocs(
 	return nil
 }
 
-// parseDocumentsURLPath parses the document ID from a documents API URL path
-// and determines if it is a related resources request.
-// resourceType should be "documents" or "drafts", as appropriate.
-func parseDocumentsURLPath(path, resourceType string) (
+// parseDocumentsURLPath parses the document ID and subcollection request type
+// from a documents/drafts API URL path.
+func parseDocumentsURLPath(path, collection string) (
 	docID string,
-	isRelatedResourcesRequest bool,
+	reqType documentSubcollectionRequestType,
 	err error,
 ) {
-	resourceURLPathRE := regexp.MustCompile(
+	noSubcollectionRE := regexp.MustCompile(
 		fmt.Sprintf(
 			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)$`,
-			resourceType))
-	resourceRelatedResourcesURLPathRE := regexp.MustCompile(
+			collection))
+	relatedResourcesSubcollectionRE := regexp.MustCompile(
 		fmt.Sprintf(
 			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)\/related-resources$`,
-			resourceType))
+			collection))
+	// shareable isn't really a subcollection, but we'll go with it.
+	shareableRE := regexp.MustCompile(
+		fmt.Sprintf(
+			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)\/shareable$`,
+			collection))
 
 	switch {
-	case resourceURLPathRE.MatchString(path):
-		matches := resourceURLPathRE.FindStringSubmatch(path)
+	case noSubcollectionRE.MatchString(path):
+		matches := noSubcollectionRE.FindStringSubmatch(path)
 		if len(matches) != 2 {
-			return "", false, fmt.Errorf(
+			return "", unspecifiedDocumentSubcollectionRequestType, fmt.Errorf(
 				"wrong number of string submatches for resource URL path")
 		}
-		return matches[1], false, nil
+		return matches[1], noSubcollectionRequestType, nil
 
-	case resourceRelatedResourcesURLPathRE.MatchString(path):
-		matches := resourceRelatedResourcesURLPathRE.
+	case relatedResourcesSubcollectionRE.MatchString(path):
+		matches := relatedResourcesSubcollectionRE.
 			FindStringSubmatch(path)
 		if len(matches) != 2 {
 			return "",
-				true,
+				relatedResourcesDocumentSubcollectionRequestType,
 				fmt.Errorf(
-					"wrong number of string submatches for resource related resources URL path")
+					"wrong number of string submatches for related resources subcollection URL path")
 		}
-		return matches[1], true, nil
+		return matches[1], relatedResourcesDocumentSubcollectionRequestType, nil
+
+	case shareableRE.MatchString(path):
+		matches := shareableRE.
+			FindStringSubmatch(path)
+		if len(matches) != 2 {
+			return "",
+				shareableDocumentSubcollectionRequestType,
+				fmt.Errorf(
+					"wrong number of string submatches for shareable subcollection URL path")
+		}
+		return matches[1], shareableDocumentSubcollectionRequestType, nil
 
 	default:
-		return "", false, fmt.Errorf("path did not match any URL strings")
+		return "",
+			unspecifiedDocumentSubcollectionRequestType,
+			fmt.Errorf("path did not match any URL strings")
 	}
 }

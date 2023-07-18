@@ -237,6 +237,20 @@ export default class AlgoliaService extends Service {
   }
 
   /**
+   * Returns an object for a given ID and an optional indexName.
+   * If no match is found, an error is returned.
+   * Used by the `RelatedResources` component to find docs from first-party URLs.
+   *
+   * https://www.algolia.com/doc/api-reference/api-methods/get-objects/
+   */
+  getObject = restartableTask(
+    async (objectID: string, indexName?: string): Promise<unknown> => {
+      const index = indexName ? this.client.initIndex(indexName) : this.index;
+      return await index.getObject(objectID);
+    }
+  );
+
+  /**
    * Returns a search response for a given query and params.
    * Restarts with every search input keystroke.
    */
