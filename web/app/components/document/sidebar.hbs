@@ -3,7 +3,7 @@
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
   @userHasScrolled={{this.userHasScrolled}}
-  @shareButtonIsShown={{eq this.draftVisibility "shareable"}}
+  @shareButtonIsShown={{or (not this.isDraft) this.draftIsShareable}}
   @shareButtonTooltipText={{this.shareButtonTooltipText}}
   @shareButtonTooltipIcon={{this.shareButtonTooltipIcon}}
 />

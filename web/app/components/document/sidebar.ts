@@ -71,10 +71,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
 
+  @tracked _draftIsShareable = false;
+
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
 
-  @tracked protected draftVisibility = "restricted";
+  protected get draftVisibility() {
+    return this.draftIsShareable ? "shareable" : "restricted";
+  }
+
+  protected get draftVisibilityIcon() {
+    return this.draftIsShareable ? "enterprise" : "lock";
+  }
+
+  get draftIsShareable() {
+    return this.isDraft && this._draftIsShareable;
+  }
 
   get body() {
     assert("_body must exist", this._body);
@@ -147,8 +159,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return "In-Review";
     }
   }
-
-  @tracked protected draftVisibilityIcon = "lock";
 
   protected get statusIsShown(): boolean {
     return this.args.document.status !== "WIP";
@@ -319,12 +329,30 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           shareButton.classList.remove("in");
           shareButton.classList.add("out");
 
-          this.draftVisibilityIcon = "lock";
+          void this.fetchSvc.fetch(`/api/v1/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: false,
+            }),
+          });
           // allow time for the animation to conclude
           await timeout(Ember.testing ? 0 : 3000);
-          this.draftVisibility = newVisibility;
+
+          // update the UI
+          this._draftIsShareable = false;
         } else {
-          this.draftVisibilityIcon = "enterprise";
+          this._draftIsShareable = true;
+
+          // make a PUT request to save shareability
+          await this.fetchSvc.fetch(`/api/v1/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: true,
+            }),
+          });
+
           schedule("afterRender", () => {
             const shareButton = document.getElementById(
               "sidebar-header-copy-url-button"
@@ -332,12 +360,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             assert("shareButton is expected", shareButton);
             shareButton.classList.add("in");
           });
-          this.draftVisibility = newVisibility;
-          await timeout(Ember.testing ? 0 : 3000);
 
-          if (this.draftVisibility === "shareable") {
-            void this.showCopyURLSuccessMessage.perform();
-          }
+          void this.showCopyURLSuccessMessage.perform();
         }
       } catch (error: unknown) {
         this.maybeShowFlashError(
@@ -463,7 +487,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action registerBody(element: HTMLElement) {
     this._body = element;
+    // kick off whether the draft is shareable.
+    if (this.isDraft) {
+      void this.getDraftPermissions.perform();
+    }
   }
+
+  private getDraftPermissions = task(async () => {
+    try {
+      const response = await this.fetchSvc
+        .fetch(`/api/v1/drafts/${this.docID}/shareable`)
+        .then((response) => response?.json());
+      if (response?.isShareable) {
+        this._draftIsShareable = true;
+      }
+    } catch {}
+  });
 
   approve = task(async () => {
     try {
