@@ -13,6 +13,7 @@ import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import { assert } from "@ember/debug";
+import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -181,7 +182,11 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Runs whenever the input value changes.
    */
   protected search = restartableTask(
-    async (dd: any, query: string, shouldIgnoreDelay?: boolean) => {
+    async (
+      dd: XDropdownListAnchorAPI | null,
+      query: string,
+      shouldIgnoreDelay?: boolean
+    ) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
       // Make sure the current document is omitted from the results

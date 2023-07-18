@@ -12,6 +12,7 @@ import {
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
+import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 
 const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
 const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
@@ -23,7 +24,7 @@ const NO_MATCHES_SELECTOR = ".related-resources-modal-body-header";
 interface DocumentSidebarRelatedResourcesAddTestContext
   extends MirageTestContext {
   noop: () => void;
-  search: (dd: any, query: string) => Promise<void>;
+  search: (dd: XDropdownListAnchorAPI | null, query: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
   allowAddingExternalLinks: boolean;
   searchIsRunning: boolean;
@@ -66,19 +67,28 @@ module(
 
       this.set("shownDocuments", suggestions);
 
-      this.set("search", (dd: any, query: string) => {
-        if (query === "") {
-          this.set("shownDocuments", suggestions);
-        } else {
-          let matches = this.server.schema.document
-            .where((document: HermesDocument) => {
-              return document.title.toLowerCase().includes(query.toLowerCase());
-            })
-            .models.reduce(reducerFunction, {});
-          this.set("shownDocuments", getFirstFourRecords(matches));
+      this.set(
+        "search",
+        (
+          dd: XDropdownListAnchorAPI | null,
+          query: string,
+          shouldIgnoreDelay?: boolean
+        ) => {
+          if (query === "") {
+            this.set("shownDocuments", suggestions);
+          } else {
+            let matches = this.server.schema.document
+              .where((document: HermesDocument) => {
+                return document.title
+                  .toLowerCase()
+                  .includes(query.toLowerCase());
+              })
+              .models.reduce(reducerFunction, {});
+            this.set("shownDocuments", getFirstFourRecords(matches));
+          }
+          return Promise.resolve();
         }
-        return Promise.resolve();
-      });
+      );
     });
 
     test("it renders correctly (initial load)", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {

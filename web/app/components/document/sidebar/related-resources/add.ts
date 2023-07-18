@@ -14,6 +14,7 @@ import {
   RelatedResource,
 } from "hermes/components/document/sidebar/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
@@ -24,7 +25,11 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
-    search: (dd: any, query: string, shouldIgnoreDelay?: boolean) => Promise<void>;
+    search: (
+      dd: XDropdownListAnchorAPI | null,
+      query: string,
+      shouldIgnoreDelay?: boolean
+    ) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
@@ -245,7 +250,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Prevents the default ArrowUp/ArrowDown actions
    * so they can be handled by the XDropdownList component.
    */
-  @action protected onInputKeydown(dd: any, e: KeyboardEvent) {
+  @action protected onInputKeydown(
+    dd: XDropdownListAnchorAPI,
+    e: KeyboardEvent
+  ) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
         this.onExternalLinkSubmit(e);
@@ -268,7 +276,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Saves the input locally, loads initial data, then
    * focuses the search input.
    */
-  @action protected didInsertInput(dd: any, e: HTMLInputElement) {
+  @action protected didInsertInput(
+    dd: XDropdownListAnchorAPI,
+    e: HTMLInputElement
+  ) {
     this.searchInput = e;
     void this.loadInitialData.perform(dd);
 
@@ -282,7 +293,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action that runs when the search-input value changes.
    * Updates the local query property, checks if it's a URL, and searches Algolia.
    */
-  @action protected onInput(dd: any, e: Event) {
+  @action protected onInput(dd: XDropdownListAnchorAPI, e: Event) {
     const input = e.target as HTMLInputElement;
     this.query = input.value;
     this.checkURL();
@@ -305,9 +316,11 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Sends an empty-string query to Algolia, effectively populating its
    * "suggestions." Called when the search input is inserted.
    */
-  protected loadInitialData = restartableTask(async (dd: any) => {
-    await this.args.search(dd, "", true);
-  });
+  protected loadInitialData = restartableTask(
+    async (dd: XDropdownListAnchorAPI) => {
+      await this.args.search(dd, "", true);
+    }
+  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {
