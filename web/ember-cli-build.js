@@ -30,7 +30,6 @@ module.exports = function (defaults) {
       },
     },
   });
-
   // Use `app.import` to add additional libraries to the generated
   // output files.
   //

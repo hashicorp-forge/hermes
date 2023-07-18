@@ -44,6 +44,13 @@
         class="create-draft-button"
       />
 
+      <Hds::Button
+      @icon ="folder-users"
+      @isIconOnly={{true}}
+      @color="secondary"
+      {{on "click"  (fn this.toggleModal)}}
+    />
+
       <div class="relative">
         {{#if this.userMenuHighlightIsShown}}
           <Header::UserMenuHighlight />
@@ -91,15 +98,6 @@
             @route="authenticated.myprofile"
             @text="Your Profile"
           />
-          {{#if (eq this.profile.role "Admin")}}
-          <dd.Interactive
-            data-test-user-menu-item="Admin Console"
-            @icon="settings"
-            @route="authenticated.myprofile"
-            @text="Admin Console"
-          />
-        {{/if}}
-
           {{#if this.showSignOut}}
             <dd.Interactive
               data-test-user-menu-item="sign-out"
@@ -112,3 +110,33 @@
     </div>
   </nav>
 </div>
+
+
+
+ {{#if this.showModal}}
+      <Hds::Modal id="basic-modal" @onClose={{fn this.toggleModal}} as |M|>
+        <M.Header @icon="folder-users">
+          <h2>Directory List</h2> 
+        </M.Header>
+        <M.Body>
+          <p class="hds-typography-body-300 hds-foreground-primary">
+            <ul class="directory-list">
+              {{#each-in this.products as |buKey buValue|}}
+                {{!-- Use the 'collapsible-folder' component --}}
+                <CollapsibleFolder
+                 @folderName={{buKey}} 
+                 @teams={{buValue.teams}} 
+                 />
+              {{/each-in}}
+            </ul>
+           </p>
+        </M.Body>
+        <M.Footer as |F|>
+      <Hds::ButtonSet>
+        <Hds::Button type="button" @text="Cancel" @color="critical"
+          {{on "click" F.close}}
+        />
+      </Hds::ButtonSet>
+    </M.Footer>
+      </Hds::Modal>
+  {{/if}}

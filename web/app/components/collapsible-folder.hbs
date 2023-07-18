@@ -1,0 +1,17 @@
+{{!-- app/templates/components/collapsible-folder.hbs --}}
+<li>
+  <a href="#" {{on "click" this.toggleFolder}}>
+    {{@folderName}}
+  </a>
+  {{#unless this.isCollapsed}}
+    {{#if @teams}}
+      <ul class="folder">
+        {{#each-in @teams as |teamKey teamValue|}}
+          <li>{{teamKey}}</li>
+        {{/each-in}}
+      </ul>
+    {{else}}
+      <p>No teams found for {{@folderName}}.</p>
+    {{/if}}
+  {{/unless}}
+</li>

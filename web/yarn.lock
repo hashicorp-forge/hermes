@@ -1774,6 +1774,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ember/jquery@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@ember/jquery@npm:2.0.0"
+  dependencies:
+    broccoli-funnel: ^3.0.6
+    broccoli-merge-trees: ^4.2.0
+    ember-cli-babel: ^7.26.6
+    jquery: ^3.5.0
+    resolve: ^1.15.1
+  checksum: 533d9acf83c340fe0d22f4a5c60ced7933336581c409635300c17de13b7a41a3c21f3392f0efa947ea5a1c707ae35b471ed4fe683325fdf525dabd55c6e78e6d
+  languageName: node
+  linkType: hard
+
 "@ember/optional-features@npm:^2.0.0":
   version: 2.0.0
   resolution: "@ember/optional-features@npm:2.0.0"
@@ -5682,7 +5695,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.2, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.8":
+"broccoli-funnel@npm:^3.0.0, broccoli-funnel@npm:^3.0.2, broccoli-funnel@npm:^3.0.3, broccoli-funnel@npm:^3.0.5, broccoli-funnel@npm:^3.0.6, broccoli-funnel@npm:^3.0.8":
   version: 3.0.8
   resolution: "broccoli-funnel@npm:3.0.8"
   dependencies:
@@ -11166,6 +11179,7 @@ __metadata:
   resolution: "hermes@workspace:."
   dependencies:
     "@csstools/postcss-sass": ^5.0.1
+    "@ember/jquery": ^2.0.0
     "@ember/optional-features": ^2.0.0
     "@ember/test-helpers": ^2.6.0
     "@floating-ui/dom": ^1.2.4
@@ -11795,6 +11809,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-core-module@npm:^2.12.0":
+  version: 2.12.1
+  resolution: "is-core-module@npm:2.12.1"
+  dependencies:
+    has: ^1.0.3
+  checksum: f04ea30533b5e62764e7b2e049d3157dc0abd95ef44275b32489ea2081176ac9746ffb1cdb107445cf1ff0e0dfcad522726ca27c27ece64dadf3795428b8e468
+  languageName: node
+  linkType: hard
+
 "is-core-module@npm:^2.9.0":
   version: 2.11.0
   resolution: "is-core-module@npm:2.11.0"
@@ -12196,6 +12219,13 @@ __metadata:
     merge-stream: ^2.0.0
     supports-color: ^8.0.0
   checksum: 98cd68b696781caed61c983a3ee30bf880b5bd021c01d98f47b143d4362b85d0737f8523761e2713d45e18b4f9a2b98af1eaee77afade4111bb65c77d6f7c980
+  languageName: node
+  linkType: hard
+
+"jquery@npm:^3.5.0":
+  version: 3.7.0
+  resolution: "jquery@npm:3.7.0"
+  checksum: 907785e133afc427650a131af5fccef66a404885037513b3d4d7d63aee6409bcc32a39836868c60e59b05aa0fb8ace8961c18b2ee3ffdf6ffdb571d6d7cd88ff
   languageName: node
   linkType: hard
 
@@ -15629,6 +15659,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resolve@npm:^1.15.1":
+  version: 1.22.3
+  resolution: "resolve@npm:1.22.3"
+  dependencies:
+    is-core-module: ^2.12.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: fb834b81348428cb545ff1b828a72ea28feb5a97c026a1cf40aa1008352c72811ff4d4e71f2035273dc536dcfcae20c13604ba6283c612d70fa0b6e44519c374
+  languageName: node
+  linkType: hard
+
 "resolve@patch:resolve@^1.1.7#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.11.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.12.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.13.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.17.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.3#~builtin<compat/resolve>, resolve@patch:resolve@^1.4.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.5.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.8.1#~builtin<compat/resolve>":
   version: 1.22.1
   resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=c3c19d"
@@ -15639,6 +15682,19 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: 5656f4d0bedcf8eb52685c1abdf8fbe73a1603bb1160a24d716e27a57f6cecbe2432ff9c89c2bd57542c3a7b9d14b1882b73bfe2e9d7849c9a4c0b8b39f02b8b
+  languageName: node
+  linkType: hard
+
+"resolve@patch:resolve@^1.15.1#~builtin<compat/resolve>":
+  version: 1.22.3
+  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=c3c19d"
+  dependencies:
+    is-core-module: ^2.12.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: ad59734723b596d0891321c951592ed9015a77ce84907f89c9d9307dd0c06e11a67906a3e628c4cae143d3e44898603478af0ddeb2bba3f229a9373efe342665
   languageName: node
   linkType: hard
 

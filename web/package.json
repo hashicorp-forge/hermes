@@ -24,6 +24,7 @@
     "test:ember": "ember test"
   },
   "devDependencies": {
+    "@ember/jquery": "^2.0.0",
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.6.0",
     "@gavant/glint-template-types": "^0.3.3",
