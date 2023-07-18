@@ -157,14 +157,6 @@ func (c *Command) Run(args []string) int {
 			return 1
 		}
 	}
-	if cfg.GoogleWorkspace == nil {
-		c.UI.Error("error validating config: google_workspace block is required")
-		return 1
-	}
-	if cfg.GoogleWorkspace.Domain == "" {
-		c.UI.Error("error validating config: google_workspace domain is required")
-		return 1
-	}
 
 	// Build configuration for Okta authentication.
 	if !cfg.Okta.Disabled {
@@ -198,6 +190,7 @@ func (c *Command) Run(args []string) int {
 		cfg.Algolia.SearchAPIKey:            "Algolia Search API Key is required",
 		cfg.BaseURL:                         "Base URL is required",
 		cfg.GoogleWorkspace.DocsFolder:      "Google Workspace Docs Folder is required",
+		cfg.GoogleWorkspace.Domain:          "Google Workspace Domain is required",
 		cfg.GoogleWorkspace.DraftsFolder:    "Google Workspace Drafts Folder is required",
 		cfg.GoogleWorkspace.ShortcutsFolder: "Google Workspace Shortcuts Folder is required",
 	}
