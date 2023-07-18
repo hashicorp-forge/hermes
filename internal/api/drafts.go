@@ -537,7 +537,8 @@ func DraftsDocumentHandler(
 			return
 		}
 
-		// Pass request off to associated subcollection handler, if appropriate.
+		// Pass request off to associated subcollection (part of the URL after the
+		// draft document ID) handler, if appropriate.
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(w, r, docId, docObj, l, ar, db)

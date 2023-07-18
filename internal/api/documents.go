@@ -125,7 +125,8 @@ func DocumentHandler(
 			return
 		}
 
-		// Pass request off to associated subcollection handler, if appropriate.
+		// Pass request off to associated subcollection (part of the URL after the
+		// document ID) handler, if appropriate.
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(w, r, docID, docObj, l, ar, db)
