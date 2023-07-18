@@ -7,7 +7,10 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import FetchService from "hermes/services/fetch";
 import { HdsButtonColor } from "hds/_shared";
-import { XDropdownListSharedArgs } from "./_shared";
+import {
+  XDropdownListSharedArgs,
+  XDropdownListToggleComponentArgs,
+} from "./_shared";
 import { WithBoundArgs } from "@glint/template";
 import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
@@ -23,7 +26,8 @@ export type XDropdownListToggleComponentBoundArgs =
   | "disabled"
   | "ariaControls";
 
-export interface XDropdownListAnchorAPI {
+export interface XDropdownListAnchorAPI
+  extends XDropdownListToggleComponentArgs {
   ToggleAction: WithBoundArgs<
     typeof XDropdownListToggleActionComponent,
     XDropdownListToggleComponentBoundArgs
@@ -32,14 +36,9 @@ export interface XDropdownListAnchorAPI {
     typeof XDropdownListToggleButtonComponent,
     XDropdownListToggleComponentBoundArgs | "color" | "text"
   >;
-  ariaControls: string;
-  contentIsShown: boolean;
   focusedItemIndex: number;
-  registerAnchor: (element: HTMLElement) => void;
-  onTriggerKeydown: (event: KeyboardEvent) => void;
   resetFocusedItemIndex: () => void;
   scheduleAssignMenuItemIDs: () => void;
-  toggleContent: () => void;
   hideContent: () => void;
   showContent: () => void;
 }

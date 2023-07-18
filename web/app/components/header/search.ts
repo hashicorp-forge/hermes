@@ -10,6 +10,7 @@ import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects;
@@ -74,7 +75,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * If the user presses enter and there's no focused item,
    * then the "View All Results" link is clicked and the dropdown is closed.
    */
-  @action maybeSubmitForm(dd: any, e: KeyboardEvent): void {
+  @action maybeSubmitForm(dd: XDropdownListAnchorAPI, e: KeyboardEvent): void {
     if (e.key === "Enter") {
       // Prevent the form from submitting
       e.preventDefault();
@@ -120,7 +121,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * Uses mousedown instead of click to get ahead of the focusin event.
    * This allows users to click the search input to dismiss the popover.
    */
-  @action protected maybeCloseDropdown(dd: any): void {
+  @action protected maybeCloseDropdown(dd: XDropdownListAnchorAPI): void {
     if (dd.contentIsShown) {
       dd.hideContent();
     }
@@ -132,7 +133,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * we open the popover.
    * @param dd
    */
-  @action protected maybeOpenDropdown(dd: any): void {
+  @action protected maybeOpenDropdown(dd: XDropdownListAnchorAPI): void {
     if (!dd.contentIsShown && this.query.length) {
       dd.showContent();
     }
