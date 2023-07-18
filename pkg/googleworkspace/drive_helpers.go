@@ -349,6 +349,24 @@ func (s *Service) ShareFile(
 	return nil
 }
 
+// ShareFileWithDomain shares a Google Drive file with a domain.
+func (s *Service) ShareFileWithDomain(
+	fileID, domain, role string) error {
+
+	_, err := s.Drive.Permissions.Create(fileID,
+		&drive.Permission{
+			Domain: domain,
+			Role:   role,
+			Type:   "domain",
+		}).
+		SupportsAllDrives(true).
+		Do()
+	if err != nil {
+		return fmt.Errorf("error updating file permissions: %w", err)
+	}
+	return nil
+}
+
 // ListPermissions lists permissions for a Google Drive file.
 func (s *Service) ListPermissions(fileID string) ([]*drive.Permission, error) {
 	var permissions []*drive.Permission

@@ -32,7 +32,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
       shouldIgnoreDelay?: boolean
     ) => Promise<void>;
     findObject: (
-      dd: XDropdownListAnchorAPI,
+      dd: XDropdownListAnchorAPI | null,
       id: string
     ) => Promise<HermesDocument | undefined>;
     allowAddingExternalLinks?: boolean;
@@ -391,7 +391,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
           let document = await this.args.findObject(this.dd, idOrAttributes);
           if (document) {
             this.queryIsFirstPartyLink = true;
-            console.log('uh');
+            console.log("uh");
             const relatedHermesDocument = {
               googleFileID: document.objectID,
               title: document.title,
