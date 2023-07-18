@@ -36,7 +36,11 @@ export interface XDropdownListAnchorAPI {
   contentIsShown: boolean;
   focusedItemIndex: number;
   registerAnchor: (element: HTMLElement) => void;
-  onTriggerKeydown: (event: KeyboardEvent) => void;
+  onTriggerKeydown: (
+    contentIsShown: boolean,
+    hideContent: () => void,
+    event: KeyboardEvent
+  ) => void;
   resetFocusedItemIndex: () => void;
   scheduleAssignMenuItemIDs: () => void;
   toggleContent: () => void;

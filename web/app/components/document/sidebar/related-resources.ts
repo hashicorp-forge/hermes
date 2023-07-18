@@ -12,7 +12,7 @@ import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
-import { assert } from "@ember/debug";
+import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -174,6 +174,34 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     });
   }
 
+  protected findObject = restartableTask(
+    async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
+      let index = this.configSvc.config.algolia_docs_index_name;
+
+      console.log("yuh");
+      console.log(objectID);
+
+      try {
+        let algoliaResponse = await this.algolia.findObject.perform(
+          index,
+          objectID
+        );
+        if (algoliaResponse) {
+          console.log(algoliaResponse);
+
+          this._algoliaResults = [
+            algoliaResponse,
+          ] as unknown as HermesDocument[];
+          if (dd) {
+            dd.resetFocusedItemIndex();
+          }
+        }
+      } catch (e: unknown) {
+        console.error(e);
+      }
+    }
+  );
+
   /**
    * The search task passed to the "Add..." modal.
    * Returns Algolia document matches for a query and updates
@@ -181,9 +209,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Runs whenever the input value changes.
    */
   protected search = restartableTask(
-    async (dd: any, query: string, shouldIgnoreDelay?: boolean) => {
-      let index =
-        this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+    async (
+      dd: XDropdownListAnchorAPI | null,
+      query: string,
+      shouldIgnoreDelay?: boolean
+    ) => {
+      let index = this.configSvc.config.algolia_docs_index_name;
 
       // Make sure the current document is omitted from the results
       let filterString = `(NOT objectID:"${this.args.objectID}")`;

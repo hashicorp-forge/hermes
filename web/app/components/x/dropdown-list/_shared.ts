@@ -25,7 +25,11 @@ export interface XDropdownListSharedArgs {
  */
 export interface XDropdownListToggleComponentArgs {
   registerAnchor: (e: HTMLElement) => void;
-  onTriggerKeydown: (e: KeyboardEvent) => void;
+  onTriggerKeydown: (
+    contentIsShown: boolean,
+    showContent: () => void,
+    e: KeyboardEvent
+  ) => void;
   toggleContent: () => void;
   contentIsShown: boolean;
   ariaControls: string;

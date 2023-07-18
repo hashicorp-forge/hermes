@@ -27,10 +27,9 @@
 
             <Hds::Form::TextInput::Base
               data-test-related-resources-search-input
-              {{did-insert dd.registerAnchor}}
               {{did-insert (fn this.didInsertInput dd)}}
-              {{on "input" (fn this.onInput dd)}}
-              {{on "keydown" (fn this.onInputKeydown dd)}}
+              {{on "input" this.onInput}}
+              {{on "keydown" this.onInputKeydown}}
               {{on "focusin" this.enableKeyboardNav}}
               {{on "focusout" this.disableKeyboardNav}}
               @type="search"
@@ -66,7 +65,7 @@
             </div>
           {{/if}}
 
-          {{#if (and @allowAddingExternalLinks this.queryIsURL)}}
+          {{#if (and @allowAddingExternalLinks this.queryIsExternalURL)}}
             <Document::Sidebar::RelatedResources::Add::ExternalResource
               @onInput={{this.onExternalLinkTitleInput}}
               @onSubmit={{this.onExternalLinkSubmit}}
@@ -75,6 +74,10 @@
               @title={{this.externalLinkTitle}}
               @url={{this.query}}
             />
+          {{/if}}
+
+          {{#if this.queryIsFirstPartyLink}}
+            its a link all right
           {{/if}}
         </:header>
         <:loading>

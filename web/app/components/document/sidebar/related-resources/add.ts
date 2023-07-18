@@ -14,6 +14,8 @@ import {
   RelatedResource,
 } from "hermes/components/document/sidebar/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import FetchService from "hermes/services/fetch";
+import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
@@ -24,7 +26,15 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
-    search: (dd: any, query: string, shouldIgnoreDelay?: boolean) => Promise<void>;
+    search: (
+      dd: XDropdownListAnchorAPI | null,
+      query: string,
+      shouldIgnoreDelay?: boolean
+    ) => Promise<void>;
+    findObject: (
+      dd: XDropdownListAnchorAPI,
+      id: string
+    ) => Promise<HermesDocument | undefined>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
@@ -38,7 +48,10 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
 
 export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
+
+  @tracked private _dd: XDropdownListAnchorAPI | null = null;
 
   /**
    * The value of the search input. Used to query Algolia for documents,
@@ -51,6 +64,16 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True if the text entered is deemed valid by the isValidURL utility.
    */
   @tracked protected queryIsURL = false;
+
+  /**
+   * TODO
+   */
+  @tracked protected queryIsExternalURL = false;
+
+  /**
+   * TODO
+   */
+  @tracked protected queryIsFirstPartyLink = false;
 
   /**
    * The DOM element of the search input. Receives focus when inserted.
@@ -96,13 +119,18 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
+  private get dd(): XDropdownListAnchorAPI {
+    assert("dd expected", this._dd);
+    return this._dd;
+  }
+
   /**
    * Whether the list element is displayed.
    * True unless the query is a URL and adding external links is allowed.
    */
   protected get listIsShown(): boolean {
     if (this.args.allowAddingExternalLinks) {
-      return !this.queryIsURL;
+      return !this.queryIsExternalURL;
     } else {
       return true;
     }
@@ -141,7 +169,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       return false;
     }
     if (this.args.allowAddingExternalLinks) {
-      return this.queryIsURL || this.queryIsEmpty;
+      return this.queryIsExternalURL || this.queryIsEmpty;
     } else {
       return false;
     }
@@ -245,7 +273,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Prevents the default ArrowUp/ArrowDown actions
    * so they can be handled by the XDropdownList component.
    */
-  @action protected onInputKeydown(dd: any, e: KeyboardEvent) {
+  @action protected onInputKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
         this.onExternalLinkSubmit(e);
@@ -260,7 +288,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       }
     }
 
-    dd.onTriggerKeydown(dd.contentIsShown, dd.showContent, e);
+    this.dd.onTriggerKeydown(this.dd.contentIsShown, this.dd.showContent, e);
   }
 
   /**
@@ -268,9 +296,14 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Saves the input locally, loads initial data, then
    * focuses the search input.
    */
-  @action protected didInsertInput(dd: any, e: HTMLInputElement) {
+  @action protected didInsertInput(
+    dd: XDropdownListAnchorAPI,
+    e: HTMLInputElement
+  ) {
     this.searchInput = e;
-    void this.loadInitialData.perform(dd);
+    this._dd = dd;
+    this.dd.registerAnchor(this.searchInput);
+    void this.loadInitialData.perform();
 
     next(() => {
       assert("searchInput expected", this.searchInput);
@@ -282,11 +315,58 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action that runs when the search-input value changes.
    * Updates the local query property, checks if it's a URL, and searches Algolia.
    */
-  @action protected onInput(dd: any, e: Event) {
+  @action protected onInput(e: Event) {
     const input = e.target as HTMLInputElement;
     this.query = input.value;
+    this.queryIsFirstPartyLink = false;
+
     this.checkURL();
-    void this.args.search(dd, this.query);
+    void this.args.search(this.dd, this.query);
+  }
+
+  @action checkIfFirstPartyLink(url: string) {
+    // need to check the URL to see if it's a first party link
+    // if it is, we'll query the database to see if it exists.
+    // if it does, we'll add it to the related resources
+    // in the correct format.
+
+    // need to check if it starts with a the config's shortlink...
+    // if so, need to reverse-engineer its ID
+
+    // need to check if the domain matches the current domain
+    // and ends with /documents/...
+
+    const isShortLink = url.startsWith(
+      this.configSvc.config.short_link_base_url
+    );
+
+    const hermesDomain = window.location.hostname.split(".").pop();
+
+    if (hermesDomain) {
+      const urlIsFromCurrentDomain = url.includes(hermesDomain);
+
+      if (isShortLink) {
+        // Short links are formatted like [shortLinkBaseURL]/[docType]/[docNumber]
+        const urlParts = url.split("/");
+        const docType = urlParts[urlParts.length - 2];
+        const docNumber = urlParts[urlParts.length - 1];
+        void this.args.search(
+          this.dd,
+          `docType:${docType} AND docNumber:${docNumber}`
+        );
+        // need to set the docType and the docNumber
+        return;
+      }
+
+      if (urlIsFromCurrentDomain) {
+        const docID = url.split("/document/").pop();
+        if (docID) {
+          void this.args.findObject(this.dd, docID);
+          return;
+        }
+      }
+    }
+    this.queryIsExternalURL = true;
   }
 
   /**
@@ -297,16 +377,53 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.queryIsURL = isValidURL(this.query);
     if (this.queryIsURL) {
       this.checkForDuplicate(this.query);
+      this.checkIfFirstPartyLink(this.query);
     }
   }
+
+  private fetchFirstPartyDocument = restartableTask(
+    async (idOrAttributes: string | Record<string, any>) => {
+      this.queryIsExternalURL = false;
+
+      if (typeof idOrAttributes === "string") {
+        // fetch the document by id
+        try {
+          let document = await this.args.findObject(this.dd, idOrAttributes);
+          if (document) {
+            this.queryIsFirstPartyLink = true;
+            console.log('uh');
+            const relatedHermesDocument = {
+              googleFileID: document.objectID,
+              title: document.title,
+              type: document.docType,
+              documentNumber: document.docNumber,
+              sortOrder: 1,
+            } as RelatedHermesDocument;
+
+            this.dd.hideContent();
+            return;
+          }
+        } catch {
+          console.log("aughts");
+          this.queryIsFirstPartyLink = false;
+          this.queryIsExternalURL = true;
+          return;
+        }
+      } else {
+        // search for the document by attributes (docType, docNumber)
+      }
+
+      this.queryIsFirstPartyLink = false;
+    }
+  );
 
   /**
    * The task that loads the initial `algoliaResults`.
    * Sends an empty-string query to Algolia, effectively populating its
    * "suggestions." Called when the search input is inserted.
    */
-  protected loadInitialData = restartableTask(async (dd: any) => {
-    await this.args.search(dd, "", true);
+  protected loadInitialData = restartableTask(async () => {
+    await this.args.search(this.dd, "", true);
   });
 }
 
