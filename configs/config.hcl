@@ -85,6 +85,9 @@ google_workspace {
   // docs_folder contains all published documents in a flat structure.
   docs_folder = "my-docs-folder-id"
 
+  // domain is the Google Workspace domain (e.g., "hashicorp.com").
+  domain = "your-domain-dot-com"
+
   // drafts_folder contains all draft documents.
   drafts_folder = "my-drafts-folder-id"
 

@@ -6,59 +6,56 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseDocumentsURLPath(t *testing.T) {
+func TestParseDocumentIDFromURLPath(t *testing.T) {
 	cases := map[string]struct {
-		url                        string
-		resourceType               string
-		wantDocID                  string
-		wantRelatedResourceRequest bool
-		shouldErr                  bool
+		path        string
+		collection  string
+		wantReqType documentSubcollectionRequestType
+		wantDocID   string
+		shouldErr   bool
 	}{
-		"good document resource URL": {
-			url:          "/api/v1/documents/doc123",
-			resourceType: "documents",
-			wantDocID:    "doc123",
+		"good documents collection URL with related resources": {
+			path:        "/api/v1/documents/doc123/related-resources",
+			collection:  "documents",
+			wantReqType: relatedResourcesDocumentSubcollectionRequestType,
+			wantDocID:   "doc123",
 		},
-		"good document resource URL with related resources": {
-			url:                        "/api/v1/documents/doc123/related-resources",
-			resourceType:               "documents",
-			wantDocID:                  "doc123",
-			wantRelatedResourceRequest: true,
+		"good drafts collection URL with related resources": {
+			path:        "/api/v1/drafts/doc123/related-resources",
+			collection:  "drafts",
+			wantReqType: relatedResourcesDocumentSubcollectionRequestType,
+			wantDocID:   "doc123",
 		},
-		"good draft resource URL": {
-			url:          "/api/v1/drafts/doc123",
-			resourceType: "drafts",
-			wantDocID:    "doc123",
-		},
-		"good draft resource URL with related resources": {
-			url:                        "/api/v1/drafts/doc123/related-resources",
-			resourceType:               "drafts",
-			wantDocID:                  "doc123",
-			wantRelatedResourceRequest: true,
+		"good drafts collection URL with shareable": {
+			path:        "/api/v1/drafts/doc123/shareable",
+			collection:  "drafts",
+			wantReqType: shareableDocumentSubcollectionRequestType,
+			wantDocID:   "doc123",
 		},
 		"extra frontslash after related-resources": {
-			url:          "/api/v1/documents/doc123/related-resources/",
-			resourceType: "documents",
-			shouldErr:    true,
+			path:        "/api/v1/documents/doc123/related-resources/",
+			collection:  "documents",
+			wantReqType: relatedResourcesDocumentSubcollectionRequestType,
+			shouldErr:   true,
 		},
 		"no document resource ID": {
-			url:          "/api/v1/documents/",
-			resourceType: "documents",
-			shouldErr:    true,
+			path:       "/api/v1/documents/",
+			collection: "documents",
+			shouldErr:  true,
 		},
 	}
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			docID, rrReq, err := parseDocumentsURLPath(c.url, c.resourceType)
+			docID, reqType, err := parseDocumentsURLPath(c.path, c.collection)
 
 			if c.shouldErr {
 				assert.Error(err)
 			} else {
 				assert.NoError(err)
 				assert.Equal(c.wantDocID, docID)
-				assert.Equal(c.wantRelatedResourceRequest, rrReq)
+				assert.Equal(c.wantReqType, reqType)
 			}
 		})
 	}

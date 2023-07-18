@@ -439,8 +439,8 @@ func DraftsDocumentHandler(
 	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Parse document ID from the URL path.
-		docId, isRelatedResourcesRequest, err := parseDocumentsURLPath(
+		// Parse document ID and request type from the URL path.
+		docId, reqType, err := parseDocumentsURLPath(
 			r.URL.Path, "drafts")
 		if err != nil {
 			l.Error("error parsing drafts URL path",
@@ -503,6 +503,22 @@ func DraftsDocumentHandler(
 			return
 		}
 
+		// Get document from database.
+		doc := models.Document{
+			GoogleFileID: docId,
+		}
+		if err := doc.Get(db); err != nil {
+			l.Error("error getting document draft from database",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docId,
+			)
+			http.Error(w, "Error requesting document draft",
+				http.StatusInternalServerError)
+			return
+		}
+
 		// Authorize request (only allow owners or contributors to get past this
 		// point in the handler). We further authorize some methods later that
 		// require owner access only.
@@ -514,17 +530,21 @@ func DraftsDocumentHandler(
 		if contains(docObj.GetContributors(), userEmail) {
 			isContributor = true
 		}
-		if !isOwner && !isContributor {
+		if !isOwner && !isContributor && !doc.ShareableAsDraft {
 			http.Error(w,
-				"Only owners or contributors can access a draft document",
+				"Only owners or contributors can access a non-shared draft document",
 				http.StatusUnauthorized)
 			return
 		}
 
-		// Pass request off to the documents related resources handler if
-		// appropriate.
-		if isRelatedResourcesRequest {
+		// Pass request off to associated subcollection (part of the URL after the
+		// draft document ID) handler, if appropriate.
+		switch reqType {
+		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(w, r, docId, docObj, l, ar, db)
+			return
+		case shareableDocumentSubcollectionRequestType:
+			draftsShareableHandler(w, r, docId, docObj, *cfg, l, ar, s, db)
 			return
 		}
 
@@ -561,22 +581,6 @@ func DraftsDocumentHandler(
 
 			// Set custom editable fields.
 			docObj.SetCustomEditableFields()
-
-			// Get document from database.
-			doc := models.Document{
-				GoogleFileID: docId,
-			}
-			if err := doc.Get(db); err != nil {
-				l.Error("error getting document draft from database",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docId,
-				)
-				http.Error(w, "Error requesting document draft",
-					http.StatusInternalServerError)
-				return
-			}
 
 			// Set locked value for response to value from the database (this value
 			// isn't stored in Algolia).
