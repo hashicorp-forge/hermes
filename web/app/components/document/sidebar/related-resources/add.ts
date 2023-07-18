@@ -33,7 +33,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
       shouldIgnoreDelay?: boolean,
       options?: SearchOptions
     ) => Promise<void>;
-    findObject: (
+    getObject: (
       dd: XDropdownListAnchorAPI | null,
       id: string
     ) => Promise<HermesDocument | undefined>;
@@ -366,7 +366,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       if (urlIsFromCurrentDomain) {
         const docID = url.split("/document/").pop();
         if (docID) {
-          void this.args.findObject(this.dd, docID);
+          void this.args.getObject(this.dd, docID);
           return;
         }
       }
@@ -393,7 +393,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       if (typeof idOrAttributes === "string") {
         // fetch the document by id
         try {
-          let document = await this.args.findObject(this.dd, idOrAttributes);
+          let document = await this.args.getObject(this.dd, idOrAttributes);
           if (document) {
             this.queryIsFirstPartyLink = true;
             console.log("uh");

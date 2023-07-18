@@ -187,16 +187,6 @@ export default class AlgoliaService extends Service {
     }
   };
 
-  findObject = task(
-    async (
-      indexName: string,
-      objectID: string
-    ): Promise<SearchResponse<unknown>> => {
-      let index: SearchIndex = this.client.initIndex(indexName);
-      return await index.getObject(objectID);
-    }
-  );
-
   /**
    * Searches an index by query and search params.
    * Returns an Algolia SearchResponse.

@@ -175,7 +175,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     });
   }
 
-  protected findObject = restartableTask(
+  protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
@@ -183,7 +183,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       console.log(objectID);
 
       try {
-        let algoliaResponse = await this.algolia.findObject.perform(
+        let algoliaResponse = await this.algolia.getObject.perform(
           index,
           objectID
         );
