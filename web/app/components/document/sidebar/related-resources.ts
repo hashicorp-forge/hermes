@@ -13,6 +13,7 @@ import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
+import { SearchOptions } from "instantsearch.js";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -212,7 +213,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     async (
       dd: XDropdownListAnchorAPI | null,
       query: string,
-      shouldIgnoreDelay?: boolean
+      shouldIgnoreDelay?: boolean,
+      options?: SearchOptions
     ) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
@@ -237,10 +239,14 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         filterString += ` AND (${this.args.searchFilters})`;
       }
 
+      if (options?.filters) {
+        filterString += ` AND (${options.filters})`;
+      }
+
       try {
         let algoliaResponse = await this.algolia.searchIndex
           .perform(index, query, {
-            hitsPerPage: 4,
+            hitsPerPage: options?.hitsPerPage || 4,
             filters: filterString,
             attributesToRetrieve: [
               "title",

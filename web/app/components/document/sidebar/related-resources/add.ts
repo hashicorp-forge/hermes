@@ -16,6 +16,7 @@ import {
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
+import { SearchOptions } from "instantsearch.js";
 
 interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Element: null;
@@ -29,7 +30,8 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     search: (
       dd: XDropdownListAnchorAPI | null,
       query: string,
-      shouldIgnoreDelay?: boolean
+      shouldIgnoreDelay?: boolean,
+      options?: SearchOptions
     ) => Promise<void>;
     findObject: (
       dd: XDropdownListAnchorAPI | null,
@@ -340,23 +342,26 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       this.configSvc.config.short_link_base_url
     );
 
+    if (isShortLink) {
+      // Short links are formatted like [shortLinkBaseURL]/[docType]/[docNumber]
+      const urlParts = url.split("/");
+      const docType = urlParts[urlParts.length - 2];
+      const docNumber = urlParts[urlParts.length - 1];
+      const filterString = `docType:${docType} AND docNumber:${docNumber}`;
+
+      // TODO: Confirm that this returns accurate results.
+      void this.args.search(this.dd, "", true, {
+        hitsPerPage: 1,
+        filters: filterString,
+      });
+      // need to set the docType and the docNumber
+      return;
+    }
+
     const hermesDomain = window.location.hostname.split(".").pop();
 
     if (hermesDomain) {
       const urlIsFromCurrentDomain = url.includes(hermesDomain);
-
-      if (isShortLink) {
-        // Short links are formatted like [shortLinkBaseURL]/[docType]/[docNumber]
-        const urlParts = url.split("/");
-        const docType = urlParts[urlParts.length - 2];
-        const docNumber = urlParts[urlParts.length - 1];
-        void this.args.search(
-          this.dd,
-          `docType:${docType} AND docNumber:${docNumber}`
-        );
-        // need to set the docType and the docNumber
-        return;
-      }
 
       if (urlIsFromCurrentDomain) {
         const docID = url.split("/document/").pop();
