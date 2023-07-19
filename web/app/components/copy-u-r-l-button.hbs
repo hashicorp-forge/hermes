@@ -3,7 +3,7 @@
   {{tooltip
     this.tooltipText
     placement=this.tooltipPlacement
-    isForcedOpen=this.isForcedOpen
+    isForcedOpen=this.tooltipIsForcedOpen
     stayOpenOnClick=true
     delay=this.delay
   }}
@@ -11,11 +11,5 @@
   {{on "click" (perform this.copyURL)}}
   ...attributes
 >
-  <FlightIcon
-    @name={{if
-      @tooltipIcon
-      @tooltipIcon
-      (if this.urlWasRecentlyCopied "check" "link")
-    }}
-  />
+  <FlightIcon @name={{this.icon}} />
 </Action>

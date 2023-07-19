@@ -15,7 +15,7 @@ interface CopyURLButtonComponentSignature {
     tooltipPlacement?: Placement;
     tooltipIsForcedOpen?: boolean;
     tooltipText?: string;
-    tooltipIcon?: string;
+    icon?: string;
   };
 }
 
@@ -29,36 +29,69 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
    */
   @tracked protected urlWasRecentlyCopied = false;
 
-  protected get isForcedOpen() {
-    return this.args.tooltipIsForcedOpen ?? false;
-  }
   /**
-   * The button element.
+   * The button element, captured on render.
    * Used to get the tooltip's ID by way of the `aria-describedby` attribute.
    */
   @tracked private button: HTMLElement | null = null;
 
+  /**
+   * Whether the tooltip is forced open regardless of hover state.
+   * True when the parent has provided text for the tooltip,
+   * such as "Creating link..." and "Link created"
+   */
+  protected get tooltipIsForcedOpen() {
+    return this.args.tooltipIsForcedOpen ?? false;
+  }
+
+  /**
+   * The placement of the tooltip.
+   * Uses the passed-in value, or defaults to "top."
+   */
   get tooltipPlacement(): Placement {
     return this.args.tooltipPlacement ?? "top";
   }
 
+  /**
+   * The icon to show in the button.
+   * If the parent has provided an icon, e.g., "loading," use that.
+   * Otherwise use use "link" or, if a URL was recently copied, "check."
+   */
+  protected get icon() {
+    if (this.args.icon) {
+      return this.args.icon;
+    } else {
+      return this.urlWasRecentlyCopied ? "check" : "link";
+    }
+  }
+
+  /**
+   * The text to show in the tooltip.
+   * If the parent has provided text, e.g., "Loading," use that.
+   * Otherwise use "Copy link" or, if a URL was recently copied, "Link copied!"
+   */
   get tooltipText(): string {
     if (this.args.tooltipText) {
       return this.args.tooltipText;
+    } else {
+      return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
     }
-
-    return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
   }
 
+  /**
+   * The delay before the tooltip appears.
+   * If the tooltip is forced open, use 0.
+   * TODO: confirm if this is still needed after the tooltip refactor
+   */
   get delay(): number | undefined {
-    if (this.isForcedOpen) {
+    if (this.tooltipIsForcedOpen) {
       return 0;
     }
   }
 
   /**
    * The action called when the button is clicked.
-   * Registers the button element locally.
+   * Registers the button locally for its `aria-describedby` attribute.
    */
   @action protected didInsertButton(e: HTMLElement) {
     this.button = e;
