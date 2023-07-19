@@ -183,7 +183,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   get userHasEditPrivileges() {
-    return this.isOwner || this.isContributor || this.isApprover;
+    return this.isOwner || this.isContributor;
   }
 
   get editingIsDisabled() {
