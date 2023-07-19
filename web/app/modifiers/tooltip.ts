@@ -50,11 +50,9 @@ enum TooltipState {
 interface TooltipModifierNamedArgs {
   placement?: Placement;
   stayOpenOnClick?: boolean;
-  // TODO: investigate "trigger: manual" as an alternative
   isForcedOpen?: boolean;
   delay?: number;
   openDuration?: number;
-  isDisabled?: boolean;
   _useTestDelay?: boolean;
 }
 
@@ -175,6 +173,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    */
   @tracked stayOpenOnClick = false;
 
+  /**
+   * Whether the tooltip should be forced open, regardless of hover state.
+   * Used in components like `CopyURLButton` to programmatically open the tooltip
+   * to show states that aren't triggered by hover, e.g., "Creating link..."
+   */
   @tracked isForcedOpen?: boolean;
 
   /**
@@ -377,8 +380,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         }
       );
       try {
-        console.log("trying...");
-        // this isn't being awaited for some reason
         await Promise.all([
           fadeAnimation.finished,
           transformAnimation.finished,
@@ -465,6 +466,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     }
   }
 
+  /**
+   * The function that runs when the modifier is updated.
+   * Used to catch when `named.isForcedOpen` changes from true to false.
+   */
   @action maybeForceHidden() {
     if (this.isForcedOpen) {
       schedule("afterRender", () => {

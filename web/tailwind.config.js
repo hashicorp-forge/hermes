@@ -66,19 +66,15 @@ module.exports = {
         "color-surface-primary": "var(--token-color-surface-primary)",
         "color-surface-strong": "var(--token-color-surface-strong)",
         "color-surface-warning": "var(--token-color-surface-warning)",
-        "color-surface-success": "var(--token-color-surface-success)",
 
         // Border
         "color-border-faint": "var(--token-color-border-faint)",
-        "color-border-action": "var(--token-color-border-action)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
-        "color-border-highlight": "var(--token-color-border-highlight)",
-        "color-border-success": "var(--token-color-border-success)",
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",
