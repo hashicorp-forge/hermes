@@ -1,9 +1,5 @@
 .product-badge {
-  @apply grid place-items-center absolute;
-}
-
-.product-themed {
-  @apply bg-gradient-to-br from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+  @apply grid place-items-center absolute bg-gradient-to-br from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
   // `.hcp` uses the default styles
 

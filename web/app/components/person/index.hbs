@@ -14,8 +14,7 @@
         </div>
       {{/if}}
       <div
-        class="{{if (eq @avatarSize 'small') 'w-5 h-5' 'w-6 h-6'}}
-          overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
+        class="w-5 h-5 overflow-hidden rounded-full flex justify-center items-center bg-[color:var(--token-color-palette-alpha-300)]"
       >
         {{#if @imgURL}}
           <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
@@ -35,7 +34,7 @@
       </div>
     </div>
     <div
-      class="person-email text-body-200 truncate relative"
+      class="person-email hds-typography-body-200 truncate hds-foreground-primary relative"
       title={{@email}}
     >
       {{or @email "Unknown"}}

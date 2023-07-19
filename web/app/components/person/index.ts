@@ -3,11 +3,10 @@ import Component from "@glimmer/component";
 interface PersonComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    email?: string;
+    email: string;
     imgURL?: string | null;
     ignoreUnknown?: boolean;
     badge?: string;
-    onlyShowAvatar?: boolean;
   };
 }
 

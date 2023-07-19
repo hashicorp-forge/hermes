@@ -26,9 +26,3 @@
     transform: scale(1);
   }
 }
-
-@keyframes slideDownAndRotateLeft {
-  to {
-    transform: translateY(18px) rotate(-360deg);
-  }
-}

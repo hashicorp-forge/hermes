@@ -9,17 +9,6 @@
   <img src="/images/document.png" class="w-full h-auto" />
 
   <div class="w-full h-full absolute">
-    {{#if (eq @status "wip")}}
-
-      <small
-        class="absolute top-[5px] left-[5px] font-medium text-body-100 px-1.5 py-1 uppercase mb-1.5 leading-none text-white"
-      >
-        <div
-          class="absolute top-0 left-0 w-full h-full rounded-[3px] bg-color-palette-neutral-500 opacity-95"
-        ></div>
-        <div class="relative">Draft</div>
-      </small>
-    {{/if}}
     {{#if this.isObsolete}}
       <Doc::FolderAffordance @isLarge={{@isLarge}} />
     {{/if}}
@@ -38,7 +27,7 @@
     {{#if this.productShortName}}
       <div
         data-test-doc-thumbnail-product-badge
-        class="product-themed product-badge {{this.productShortName}}"
+        class="product-badge {{this.productShortName}}"
       >
         <FlightIcon @size="16" @name={{this.productShortName}} />
       </div>

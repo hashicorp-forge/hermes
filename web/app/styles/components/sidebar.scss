@@ -40,21 +40,12 @@
         content: "";
         @apply opacity-0 absolute top-0 left-0 w-full h-full rounded border bg-color-surface-highlight z-[-1];
       }
+    }
 
-      // &::before {
-      //   --scaleInFrom: 0.3;
-      //   animation: fadeIn 150ms ease-in forwards 50ms,
-      //     scaleIn 250ms cubic-bezier(0, 1, 0.5, 1) forwards,
-      //     fadeOut 500ms ease-out 2000ms forwards;
-      // }
-
-      // &::after {
-      //   --scaleInFrom: 0.3;
-      //   animation: fadeIn 300ms ease-in forwards 50ms,
-      //     scaleIn 250ms cubic-bezier(0, 1, 0.5, 1) forwards,
-      //     fadeOut 1500ms ease-out 1000ms forwards;
-      //   border-color: #cf9cf8b4;
-      // }
+    @keyframes slideDownAndRotateLeft {
+      to {
+        transform: translateY(18px) rotate(-360deg);
+      }
     }
 
     &.out {
