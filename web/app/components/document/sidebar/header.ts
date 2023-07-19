@@ -13,7 +13,7 @@ interface DocumentSidebarHeaderComponentSignature {
     shareButtonIsShown?: boolean;
     shareButtonIsLoading?: boolean;
     shareButtonTooltipText?: string;
-    shareButtonTooltipIcon?: string;
+    shareButtonIcon?: string;
   };
 }
 

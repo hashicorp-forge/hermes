@@ -292,7 +292,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
-  get shareButtonTooltipIcon() {
+  get shareButtonIcon() {
     if (
       this.setDraftVisibility.isRunning &&
       this._tempNewVisibility === "shareable"
