@@ -12,7 +12,7 @@
   <div
     class="sidebar-body"
     {{on "scroll" this.onScroll}}
-    {{did-insert this.registerBody}}
+    {{did-insert this.didInsertBody}}
   >
     {{#let (get-product-id this.product) as |productIcon|}}
       {{#if productIcon}}

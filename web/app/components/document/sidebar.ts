@@ -11,7 +11,7 @@ import {
 } from "ember-concurrency";
 import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce, schedule } from "@ember/runloop";
+import { debounce } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -564,7 +564,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     debounce(this, onScrollFunction, 50);
   }
 
-  @action registerBody(element: HTMLElement) {
+  /**
+   * Registers the body element locally and, if the document is a draft,
+   * kicks off the task to fetch the draft's `isShareable` attribute.
+   */
+  @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
     // kick off whether the draft is shareable.
     if (this.isDraft) {
@@ -574,6 +578,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
+   * Called when a document draft is rendered.
    */
   private getDraftPermissions = task(async () => {
     try {
