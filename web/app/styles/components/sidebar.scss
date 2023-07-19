@@ -42,10 +42,6 @@
       animation: fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
-
-    &.in:hover {
-      @apply bg-transparent;
-    }
   }
 
   .draft-visibility-button {
