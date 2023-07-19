@@ -79,17 +79,6 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
   }
 
   /**
-   * The delay before the tooltip appears.
-   * If the tooltip is forced open, use 0.
-   * TODO: confirm if this is still needed after the tooltip refactor
-   */
-  get delay(): number | undefined {
-    if (this.tooltipIsForcedOpen) {
-      return 0;
-    }
-  }
-
-  /**
    * The action called when the button is clicked.
    * Registers the button locally for its `aria-describedby` attribute.
    */
