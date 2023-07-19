@@ -18,14 +18,12 @@ interface CopyURLButtonComponentTextContext extends TestContext {
 module("Integration | Component | copy-u-r-l-button", function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(function () {
+  test("it renders as expected", async function (assert) {
     sinon.stub(navigator.clipboard, "writeText").resolves();
     sinon
       .stub(navigator.clipboard, "readText")
       .resolves("https://hashicorp.com");
-  });
 
-  test("it renders as expected", async function (assert) {
     this.set("tooltipPlacement", undefined);
 
     // Render with padding so the tooltip has room on all sides:
@@ -117,6 +115,6 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
       </div>
     `);
 
-    assert.dom(".hermes-icon").hasClass("loading");
+    assert.dom(".flight-icon").hasAttribute("data-test-icon", "loading");
   });
 });
