@@ -135,9 +135,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * True if the document is published or the draft is shareable.
    * False otherwise.
    */
-  protected get shareButtonIsShown() {
+  protected get shareButtonIsShown(): boolean | undefined {
     if (!this.isDraft) {
-      return true;
+      // Let the child component decide.
+      return;
     }
     if (this._docIsShareable) {
       return true;

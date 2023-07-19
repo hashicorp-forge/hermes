@@ -20,6 +20,11 @@ interface DocumentSidebarHeaderComponentSignature {
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
   @service("config") declare configSvc: ConfigService;
 
+  /**
+   * Whether the tooltip is forced open, regardless of hover state.
+   * True if the parent component has passed a tooltip text prop,
+   * e.g., "Creating link..." or "Link created."
+   */
   get tooltipIsForcedOpen() {
     if (this.args.shareButtonTooltipText) {
       return true;
@@ -28,6 +33,11 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
     }
   }
 
+  /**
+   * If the share button is shown. If the parent component sets this true,
+   * it will override the default behavior, which is to show the share button
+   * if the document is published and has a docType and docNumber.
+   */
   protected get shareButtonIsShown() {
     if (this.args.shareButtonIsShown) {
       return this.args.shareButtonIsShown;
@@ -37,6 +47,12 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
     return !document.isDraft && document.docNumber && document.docType;
   }
 
+  /**
+   * The URL that the copyURLButton should copy to the clipboard.
+   * If the document is a draft, this is the current window location.
+   * If the doc is published, use the short link if it's available,
+   * otherwise use the current window location.s
+   */
   protected get url() {
     // We only assign shortLinks to published documents
     if (this.args.document.isDraft) {
