@@ -4,7 +4,6 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
-  dropTask,
   keepLatestTask,
   restartableTask,
   task,
