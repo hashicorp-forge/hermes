@@ -38,7 +38,7 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
   /**
    * Whether the tooltip is forced open regardless of hover state.
    * True when the parent has provided text for the tooltip,
-   * such as "Creating link..." and "Link created"
+   * such as "Creating link..." and "Link created!"
    */
   protected get tooltipIsForcedOpen() {
     return this.args.tooltipIsForcedOpen ?? false;

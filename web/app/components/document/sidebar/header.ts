@@ -23,7 +23,7 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
   /**
    * Whether the tooltip is forced open, regardless of hover state.
    * True if the parent component has passed a tooltip text prop,
-   * e.g., "Creating link..." or "Link created."
+   * e.g., "Creating link..." or "Link created!"
    */
   get tooltipIsForcedOpen() {
     if (this.args.shareButtonTooltipText) {

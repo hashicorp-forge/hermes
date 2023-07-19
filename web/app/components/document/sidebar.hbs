@@ -34,6 +34,7 @@
             {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
         >
           <Hds::Badge
+            data-test-sidebar-title-badge
             @text={{if this.isDraft "Draft" @document.docNumber}}
             class="uppercase !rounded-[3px]
               {{if
@@ -45,6 +46,7 @@
           />
           {{#if this.isDraft}}
             <X::DropdownList
+              data-test-draft-visibility-dropdown
               @items={{this.draftVisibilityOptions}}
               @selected={{this.draftVisibility}}
               @renderOut={{true}}
@@ -53,13 +55,16 @@
             >
               <:anchor as |dd|>
                 <dd.ToggleAction
+                  data-test-draft-visibility-toggle
+                  data-test-icon={{this.draftVisibilityIcon}}
+                  data-test-chevron-direction={{if
+                    dd.contentIsShown
+                    "up"
+                    "down"
+                  }}
                   class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
                   {{tooltip
-                    (if
-                      (eq this.draftVisibilityIcon "lock")
-                      "Restricted"
-                      "Shareable"
-                    )
+                    this.toggleDraftVisibilityTooltipText
                     placement="bottom"
                   }}
                 >
@@ -71,17 +76,16 @@
               </:anchor>
               <:item as |dd|>
                 <dd.Action
+                  data-test-draft-visibility-option
+                  data-test-is-checked={{dd.isSelected}}
+                  data-test-value={{dd.value}}
                   class="flex items-start gap-3 py-2.5 pl-4 pr-6"
                   {{on "click" (perform this.setDraftVisibility dd.value)}}
                 >
                   <FlightIcon @name={{dd.attrs.icon}} class="shrink-0 mt-0.5" />
                   <div class="w-full">
-                    <h4>
-                      {{dd.attrs.title}}
-                    </h4>
-                    <p>
-                      {{dd.attrs.description}}
-                    </p>
+                    <h4>{{dd.attrs.title}}</h4>
+                    <p>{{dd.attrs.description}}</p>
                   </div>
                   <FlightIcon
                     @name="check"

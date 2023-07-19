@@ -45,6 +45,11 @@ export enum DraftVisibilityIcon {
   Loading = "loading",
 }
 
+export enum DraftVisibilityDescription {
+  Restricted = "Only you and the people you add can view and edit this doc.",
+  Shareable = "Editing is restricted, but anyone in the organization with the link can view.",
+}
+
 const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
@@ -110,6 +115,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.draftIsShareable
       ? DraftVisibility.Shareable
       : DraftVisibility.Restricted;
+  }
+
+  protected get toggleDraftVisibilityTooltipText() {
+    if (this.draftVisibilityIcon === DraftVisibilityIcon.Restricted) {
+      return capitalize(DraftVisibility.Restricted);
+    } else {
+      return capitalize(DraftVisibility.Shareable);
+    }
   }
 
   /**
@@ -236,14 +249,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         // need to uppercase the first letter of the title
         title: capitalize(DraftVisibility.Restricted),
         icon: DraftVisibilityIcon.Restricted,
-        description:
-          "Only you and the people you add can view and edit this doc.",
+        description: DraftVisibilityDescription.Restricted,
       },
       [DraftVisibility.Shareable]: {
         title: capitalize(DraftVisibility.Shareable),
         icon: DraftVisibilityIcon.Shareable,
-        description:
-          "Editing is restricted, but anyone in the organization with the link can view.  ",
+        description: DraftVisibilityDescription.Shareable,
       },
     };
   }
