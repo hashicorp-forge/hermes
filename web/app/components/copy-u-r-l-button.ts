@@ -45,14 +45,6 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
   }
 
   /**
-   * The placement of the tooltip.
-   * Uses the passed-in value, or defaults to "top."
-   */
-  get tooltipPlacement(): Placement {
-    return this.args.tooltipPlacement ?? "top";
-  }
-
-  /**
    * The icon to show in the button.
    * If the parent has provided an icon, e.g., "loading," use that.
    * Otherwise use use "link" or, if a URL was recently copied, "check."
