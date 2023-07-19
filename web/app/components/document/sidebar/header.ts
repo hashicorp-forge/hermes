@@ -38,6 +38,11 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
   }
 
   protected get url() {
+    // We only assign shortLinks to published documents
+    if (this.args.document.isDraft) {
+      return window.location.href;
+    }
+
     let shortLinkBaseURL: string | undefined =
       this.configSvc.config.short_link_base_url;
 
