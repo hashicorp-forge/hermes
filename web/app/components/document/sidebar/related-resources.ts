@@ -160,6 +160,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     return documents;
   }
 
+  protected get titleTooltipText(): string {
+    return `Documents and links that are relevant to this work.`;
+  }
+
   /**
    * The action to update the `sortOrder` attribute of
    * the resources, based on their position in the array.

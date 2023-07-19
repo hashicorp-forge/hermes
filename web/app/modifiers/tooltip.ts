@@ -51,6 +51,7 @@ interface TooltipModifierNamedArgs {
   stayOpenOnClick?: boolean;
   delay?: number;
   openDuration?: number;
+  class?: string;
   _useTestDelay?: boolean;
 }
 
@@ -172,6 +173,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked stayOpenOnClick = false;
 
   /**
+   * Optional classnames to append to the tooltip.
+   */
+  @tracked class: string | null = null;
+
+  /**
    * An asserted-to-exist reference to the reference element.
    */
   get reference(): Element {
@@ -240,6 +246,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      */
     this.tooltip = document.createElement("div");
     this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
+
+    if (this.class) {
+      this.tooltip.classList.add(this.class);
+    }
+
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
@@ -283,7 +294,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         middleware: [
           offset(8),
           flip(),
-          shift(),
+          shift({ padding: 20 }),
           arrow({
             element: this.arrow,
             padding: 10,
@@ -471,6 +482,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named.placement) {
       this.placement = named.placement;
+    }
+
+    if (named.class) {
+      this.class = named.class;
     }
 
     if (named.stayOpenOnClick) {
