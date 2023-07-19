@@ -190,9 +190,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     if (!this.args.document.appCreated || this.docIsLocked) {
       // true is the doc wasn't appCreated or is in a locked state
       return true;
-    } else if (this.isDraft || this.docIsInReview || this.docIsApproved) {
+    } else if (this.isDraft) {
       // true is the doc is a draft/in review/approved and the user is not an owner, contributor, or approver
       return !this.userHasEditPrivileges;
+    } else if (this.docIsInReview || this.docIsApproved) {
+      return !this.isOwner;
     } else {
       // doc is obsolete or some unknown status..
       return true;

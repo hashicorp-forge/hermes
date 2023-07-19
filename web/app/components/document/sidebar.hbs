@@ -125,7 +125,7 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
-        {{#if this.isDraft}}
+        {{#if (and this.isDraft this.userHasEditPrivileges)}}
           <div class="w-full relative">
             <Inputs::ProductSelect
               @selected={{this.product}}
