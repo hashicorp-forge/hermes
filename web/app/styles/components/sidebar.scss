@@ -32,16 +32,6 @@
       @apply border-color-border-strong bg-color-foreground-high-contrast;
     }
 
-    &.in {
-      animation: fadeIn 0ms forwards;
-
-      &::before,
-      &::after {
-        content: "";
-        @apply opacity-0 absolute top-0 left-0 w-full h-full rounded border bg-color-surface-highlight z-[-1];
-      }
-    }
-
     @keyframes slideDownAndRotateLeft {
       to {
         transform: translateY(18px) rotate(-360deg);

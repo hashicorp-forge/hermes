@@ -3,9 +3,9 @@
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
   @userHasScrolled={{this.userHasScrolled}}
-  @shareButtonIsShown={{or (not this.isDraft) this.draftIsShareable}}
-  @shareButtonTooltipText={{this.shareButtonTooltipText}}
-  @shareButtonIcon={{this.shareButtonIcon}}
+  @shareButtonIsShown={{this.shareButtonIsShown}}
+  @shareButtonTooltipText={{this.temporaryShareButtonTooltipText}}
+  @shareButtonIcon={{this.temporaryShareButtonIcon}}
 />
 
 {{#unless @isCollapsed}}
