@@ -247,6 +247,13 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the document sidebar to determine if a draft `isShareable`.
+       */
+      this.get("/documents/:document_id/shareable", () => {
+        return new Response(200, {}, { isShareable: false });
+      });
+
+      /**
        * Used by the RelatedResources component when the doc is a draft.
        */
       this.get("drafts/:document_id/related-resources", (schema, request) => {
@@ -492,6 +499,20 @@ export default function (mirageConfig) {
           return new Response(200, {}, {});
         }
       );
+
+      // Update whether a draft is shareable.
+      this.put("/drafts/:document_id/shareable", (schema, request) => {
+        const isShareable = JSON.parse(request.requestBody).isShareable;
+
+        let doc = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (doc) {
+          doc.update({ isShareable });
+          return new Response(200, {}, doc.attrs);
+        }
+      });
     },
   };
 

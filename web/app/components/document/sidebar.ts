@@ -3,8 +3,13 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
-import { restartableTask, task } from "ember-concurrency";
-import { dasherize } from "@ember/string";
+import {
+  keepLatestTask,
+  restartableTask,
+  task,
+  timeout,
+} from "ember-concurrency";
+import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
@@ -15,6 +20,8 @@ import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
+import Ember from "ember";
+import htmlElement from "hermes/utils/html-element";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -26,6 +33,24 @@ interface DocumentSidebarComponentSignature {
     toggleCollapsed: () => void;
   };
 }
+
+export enum DraftVisibility {
+  Restricted = "restricted",
+  Shareable = "shareable",
+}
+
+export enum DraftVisibilityIcon {
+  Restricted = "lock",
+  Shareable = "enterprise",
+  Loading = "loading",
+}
+
+export enum DraftVisibilityDescription {
+  Restricted = "Only you and the people you add can view and edit this doc.",
+  Shareable = "Editing is restricted, but anyone in the organization with the link can view.",
+}
+
+const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
@@ -64,8 +89,83 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
 
+  /**
+   * Whether the draft's `isShareable` property is true.
+   * Checked on render and changed when the user toggles permissions.
+   * Used to
+   */
+  @tracked _docIsShareable = false;
+
+  /**
+   * The icon of a new draft visibility. Set immediately when
+   * a draft-visibility option is selected and removed when the
+   * request finally completes. Used to reactively update the UI.
+   */
+  @tracked private newDraftVisibilityIcon: DraftVisibilityIcon | null = null;
+
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  /**
+   * Whether the draft is shareable.
+   * Used to identify the draft-visibility options
+   * and determine which to show as checked.
+   */
+  protected get draftVisibility(): DraftVisibility {
+    return this.draftIsShareable
+      ? DraftVisibility.Shareable
+      : DraftVisibility.Restricted;
+  }
+
+  protected get toggleDraftVisibilityTooltipText() {
+    if (this.draftVisibilityIcon === DraftVisibilityIcon.Restricted) {
+      return capitalize(DraftVisibility.Restricted);
+    } else {
+      return capitalize(DraftVisibility.Shareable);
+    }
+  }
+
+  /**
+   * The icon shown in the draft-visibility toggle.
+   * If the initial draft permissions are loading, show a loading icon.
+   * If the user has selected a new draft visibility, show that icon.
+   * Otherwise, show the saved draft visibility icon.
+   */
+  protected get draftVisibilityIcon(): DraftVisibilityIcon {
+    if (this.getDraftPermissions.isRunning) {
+      return DraftVisibilityIcon.Loading;
+    }
+    if (this.newDraftVisibilityIcon) {
+      return this.newDraftVisibilityIcon;
+    }
+    return this.draftIsShareable
+      ? DraftVisibilityIcon.Shareable
+      : DraftVisibilityIcon.Restricted;
+  }
+
+  /**
+   * Whether the share button should be shown.
+   * True if the document is published or the draft is shareable.
+   * False otherwise.
+   */
+  protected get shareButtonIsShown(): boolean | undefined {
+    if (!this.isDraft) {
+      // Let the child component decide.
+      return;
+    }
+    if (this._docIsShareable) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Whether the draft is shareable.
+   * True if the document is a draft and `isShareable`.
+   */
+  private get draftIsShareable() {
+    return this.isDraft && this._docIsShareable;
+  }
 
   get body() {
     assert("_body must exist", this._body);
@@ -136,6 +236,64 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return "Approved";
       default:
         return "In-Review";
+    }
+  }
+
+  /**
+   * The items passed to the draft-visibility dropdown.
+   * Used to render the dropdown items and react to item selection.
+   */
+  protected get draftVisibilityOptions() {
+    return {
+      [DraftVisibility.Restricted]: {
+        // need to uppercase the first letter of the title
+        title: capitalize(DraftVisibility.Restricted),
+        icon: DraftVisibilityIcon.Restricted,
+        description: DraftVisibilityDescription.Restricted,
+      },
+      [DraftVisibility.Shareable]: {
+        title: capitalize(DraftVisibility.Shareable),
+        icon: DraftVisibilityIcon.Shareable,
+        description: DraftVisibilityDescription.Shareable,
+      },
+    };
+  }
+
+  /**
+   * Whether the share button is in the process of creating a shareable link.
+   * Used to determine the icon and tooltip text of the share button.
+   */
+  private get isCreatingShareLink() {
+    return (
+      this.setDraftVisibility.isRunning &&
+      this.newDraftVisibilityIcon === DraftVisibilityIcon.Shareable
+    );
+  }
+
+  /**
+   * The tooltip text to show in the share button
+   * while the user is creating or has recently created a shareable link.
+   */
+  protected get temporaryShareButtonTooltipText() {
+    if (this.isCreatingShareLink) {
+      return "Creating link...";
+    }
+    if (this.showCreateLinkSuccessMessage.isRunning) {
+      return "Link created!";
+    }
+  }
+
+  /**
+   * The icon to show in the share button while the user is
+   * creating a shareable link. Shows the "running" animation while
+   * the request works; switches to a "smile" when the request completes.
+   */
+  protected get temporaryShareButtonIcon() {
+    if (this.isCreatingShareLink) {
+      return "running";
+    }
+    if (this.showCreateLinkSuccessMessage.isRunning) {
+      return "smile";
     }
   }
 
@@ -270,7 +428,78 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  updateProduct = restartableTask(async (product: string) => {
+  /**
+   * A task that waits for a short time and then resolves.
+   * Used to trigger the "link created" state of the share button.
+   */
+  protected showCreateLinkSuccessMessage = restartableTask(async () => {
+    await timeout(Ember.testing ? 0 : 1000);
+  });
+
+  /**
+   * Sets the draft's `isShareable` property based on a selection
+   * in the draft-visibility dropdown. Immediately updates the UI
+   * to reflect the intended change while a request is made to the
+   * back end. Once the request completes, the UI is updated again
+   * to reflect the actual state of the document.
+   */
+  protected setDraftVisibility = restartableTask(
+    async (newVisibility: DraftVisibility) => {
+      if (this.draftVisibility === newVisibility) {
+        return;
+      }
+
+      try {
+        if (newVisibility === DraftVisibility.Restricted) {
+          this.newDraftVisibilityIcon = DraftVisibilityIcon.Restricted;
+
+          const shareButton = htmlElement(SHARE_BUTTON_SELECTOR);
+
+          shareButton.classList.add("out");
+
+          void this.fetchSvc.fetch(`/api/v1/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: false,
+            }),
+          });
+
+          // Give time for the link icon to animate out
+          await timeout(Ember.testing ? 0 : 300);
+
+          // With the animation done, we can now remove the button.
+          this._docIsShareable = false;
+        } else {
+          // Immediately update the UI to show the share button
+          // in its "creating link" state.
+          this.newDraftVisibilityIcon = DraftVisibilityIcon.Shareable;
+          this._docIsShareable = true;
+
+          await this.fetchSvc.fetch(`/api/v1/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: true,
+            }),
+          });
+
+          // Kick off the timer for the "link created" state.
+          void this.showCreateLinkSuccessMessage.perform();
+        }
+      } catch (error: unknown) {
+        this.showFlashError(
+          error as Error,
+          "Unable to update draft visibility"
+        );
+      } finally {
+        // reset the new-visibility-intent icon
+        this.newDraftVisibilityIcon = null;
+      }
+    }
+  );
+
+  updateProduct = keepLatestTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
     // productAbbreviation is computed by the back end
@@ -379,9 +608,32 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     debounce(this, onScrollFunction, 50);
   }
 
-  @action registerBody(element: HTMLElement) {
+  /**
+   * Registers the body element locally and, if the document is a draft,
+   * kicks off the task to fetch the draft's `isShareable` attribute.
+   */
+  @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
+    // kick off whether the draft is shareable.
+    if (this.isDraft) {
+      void this.getDraftPermissions.perform();
+    }
   }
+
+  /**
+   * Fetches the draft's `isShareable` attribute and updates the local property.
+   * Called when a document draft is rendered.
+   */
+  private getDraftPermissions = task(async () => {
+    try {
+      const response = await this.fetchSvc
+        .fetch(`/api/v1/drafts/${this.docID}/shareable`)
+        .then((response) => response?.json());
+      if (response?.isShareable) {
+        this._docIsShareable = true;
+      }
+    } catch {}
+  });
 
   approve = task(async () => {
     try {
