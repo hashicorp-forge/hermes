@@ -26,10 +26,33 @@
   }
 
   .sidebar-header-button {
-    @apply rounded-button-md py-2 px-3 space-x-2 flex items-center border border-transparent text-color-foreground-primary;
+    @apply relative rounded-button-md py-2 px-3 flex items-center border border-transparent text-color-foreground-primary;
 
     &:hover {
       @apply border-color-border-strong bg-color-foreground-high-contrast;
+    }
+
+    @keyframes slideDownAndRotateLeft {
+      to {
+        transform: translateY(18px) rotate(-360deg);
+      }
+    }
+
+    &.out {
+      animation: fadeOut 50ms ease-out 200ms forwards,
+        slideDownAndRotateLeft 250ms ease-out forwards;
+    }
+  }
+
+  .draft-visibility-button {
+    @apply px-2.5;
+    // match the height of the header buttons
+    @apply h-[38px];
+    // offset the extra height relative to the badge
+    @apply my-[-7px];
+
+    [class*=" flight-icon-chevron"] {
+      @apply ml-px -mr-px;
     }
   }
 
@@ -51,7 +74,7 @@
     }
 
     .sidebar-body-container {
-      @apply pt-11 pb-10 pl-7 pr-3 space-y-8;
+      @apply pt-14 pb-10 pl-7 pr-3 space-y-8;
     }
 
     /* Style the scrollbar for Chrome, Safari, and Opera. */

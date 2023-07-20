@@ -3,13 +3,16 @@
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
   @userHasScrolled={{this.userHasScrolled}}
+  @shareButtonIsShown={{this.shareButtonIsShown}}
+  @shareButtonTooltipText={{this.temporaryShareButtonTooltipText}}
+  @shareButtonIcon={{this.temporaryShareButtonIcon}}
 />
 
 {{#unless @isCollapsed}}
   <div
     class="sidebar-body"
     {{on "scroll" this.onScroll}}
-    {{did-insert this.registerBody}}
+    {{did-insert this.didInsertBody}}
   >
     {{#let (get-product-id this.product) as |productIcon|}}
       {{#if productIcon}}
@@ -24,62 +27,119 @@
     {{/let}}
 
     <div class="sidebar-body-container">
-      <div class="flex flex-col items-start space-y-2">
-        {{#if (is-empty @document.docNumber)}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-          </small>
-        {{else}}
-          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
-              (is-empty @document.docType)
-            }}{{@document.docType}}{{/unless}}
-            &bullet;
-            <span data-test-sidebar-doc-number>
-              {{@document.docNumber}}
-            </span>
-          </small>
-        {{/if}}
+      <div>
+        {{! div to break the parent's space-y styles }}
+        <div
+          class="flex items-center space-x-1.5
+            {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
+        >
+          <Hds::Badge
+            data-test-sidebar-title-badge
+            @text={{if this.isDraft "Draft" @document.docNumber}}
+            class="uppercase !rounded-[3px]
+              {{if
+                @document.isDraft
+                '!bg-color-palette-neutral-500 !text-white'
+                '!bg-transparent pl-0 !text-color-foreground-faint'
+              }}
+              "
+          />
+          {{#if this.isDraft}}
+            <X::DropdownList
+              data-test-draft-visibility-dropdown
+              @items={{this.draftVisibilityOptions}}
+              @selected={{this.draftVisibility}}
+              @renderOut={{true}}
+              @offset={{hash mainAxis=0 crossAxis=-7}}
+              class="w-[350px]"
+            >
+              <:anchor as |dd|>
+                <dd.ToggleAction
+                  data-test-draft-visibility-toggle
+                  data-test-icon={{this.draftVisibilityIcon}}
+                  data-test-chevron-direction={{if
+                    dd.contentIsShown
+                    "up"
+                    "down"
+                  }}
+                  class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
+                  {{tooltip
+                    this.toggleDraftVisibilityTooltipText
+                    placement="bottom"
+                  }}
+                >
+                  <FlightIcon @name={{this.draftVisibilityIcon}} />
+                  <FlightIcon
+                    @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+                  />
+                </dd.ToggleAction>
+              </:anchor>
+              <:item as |dd|>
+                <dd.Action
+                  data-test-draft-visibility-option
+                  data-test-is-checked={{dd.isSelected}}
+                  data-test-value={{dd.value}}
+                  class="flex items-start gap-3 py-2.5 pl-4 pr-6"
+                  {{on "click" (perform this.setDraftVisibility dd.value)}}
+                >
+                  <FlightIcon @name={{dd.attrs.icon}} class="shrink-0 mt-0.5" />
+                  <div class="w-full">
+                    <h4>{{dd.attrs.title}}</h4>
+                    <p>{{dd.attrs.description}}</p>
+                  </div>
+                  <FlightIcon
+                    @name="check"
+                    class="check shrink-0 mt-0.5
+                      {{if dd.isSelected 'visible' 'invisible'}}"
+                  />
+                </dd.Action>
+              </:item>
+            </X::DropdownList>
+          {{/if}}
+        </div>
         {{#if this.editingIsDisabled}}
           <h1
             class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
           >{{this.title}}</h1>
         {{else}}
-          <EditableField
-            @value={{this.title}}
-            @onChange={{perform this.save "title"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#unless (is-empty this.title)}}
-                <h1
-                  class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-                >{{this.title}}</h1>
-              {{else}}
-                <h1
-                  class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
-                >Enter a title here.</h1>
-              {{/unless}}
-            </:default>
-            <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                class="primary-textarea"
-                name="title"
-                {{on "blur" F.update}}
-                as |F|
-              />
-            </:editing>
-          </EditableField>
+          <div class="mb-8">
+            <EditableField
+              @value={{this.title}}
+              @onChange={{perform this.save "title"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#unless (is-empty this.title)}}
+                  <h1
+                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+                  >{{this.title}}</h1>
+                {{else}}
+                  <h1
+                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
+                  >Enter a title here.</h1>
+                {{/unless}}
+              </:default>
+              <:editing as |F|>
+                <Hds::Form::Textarea::Field
+                  {{auto-height-textarea}}
+                  @value={{F.value}}
+                  class="primary-textarea"
+                  name="title"
+                  {{on "blur" F.update}}
+                  as |F|
+                />
+              </:editing>
+            </EditableField>
+          </div>
         {{/if}}
       </div>
 
       <hr class="border-0 border-b hds-border-faint" />
 
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Summary" />
+      {{! Summary }}
+      <div class="mb-5">
+        <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
         {{#if this.editingIsDisabled}}
           <p
             class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
@@ -120,7 +180,10 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
-        <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+        <div class="flex space-x-1">
+          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+          <Hds::Badge @text={{@document.docType}} />
+        </div>
       </div>
 
       <div class="flex flex-col items-start space-y-2">
