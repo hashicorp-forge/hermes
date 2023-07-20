@@ -327,34 +327,66 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  get docIsApproved() {
+  /**
+   * Whether the doc status is approved. Used to determine editing privileges.
+   * If the doc is approved, editing is exclusive to the doc owner.
+   */
+  private get docIsApproved() {
     return this.args.document.status.toLowerCase() === "approved";
   }
 
-  get docIsInReview() {
+  /**
+   * Whether the doc status is in review. Used to determine editing privileges.
+   * If the doc is in review, editing is exclusive to the doc owner.
+   */
+  private get docIsInReview() {
     return dasherize(this.args.document.status) === "in-review";
   }
 
-  // isOwner returns true if the logged in user is the document owner.
-  get isOwner() {
+  /**
+   * Whether the document viewer is its owner.
+   * True if the logged in user's email matches the documents owner.
+   */
+  protected get isOwner() {
     return this.args.document.owners?.[0] === this.args.profile.email;
   }
 
-  get userHasEditPrivileges() {
-    return this.isOwner || this.isContributor || this.isApprover;
-  }
-
-  get editingIsDisabled() {
-    if (!this.args.document.appCreated || this.docIsLocked) {
-      // true is the doc wasn't appCreated or is in a locked state
-      return true;
-    } else if (this.isDraft || this.docIsInReview || this.docIsApproved) {
-      // true is the doc is a draft/in review/approved and the user is not an owner, contributor, or approver
-      return !this.userHasEditPrivileges;
-    } else {
-      // doc is obsolete or some unknown status..
+  /**
+   * Whether the editing of document metadata allowed, excluding the
+   * product/area field, which is disallowed for published docs.
+   * If the doc is locked, editing is disabled and a message is shown
+   * explaining that suggestions must be removed from the header.
+   *
+   * If the doc was created off-app, editing is disabled and a message
+   * is shown explaining that only app-created docs can be edited.
+   *
+   * If the doc is in a known state, e.g., draft, in review, or approved,
+   * editing is disabled for non-doc-owners.
+   *
+   * If the doc is in an unknown state, editing is disabled.
+   */
+  protected get editingIsDisabled() {
+    if (this.docIsLocked) {
       return true;
     }
+
+    if (!this.args.document.appCreated) {
+      return true;
+    }
+
+    if (this.isDraft || this.docIsInReview || this.docIsApproved) {
+      return !this.isOwner;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Whether editing is enabled for basic metadata fields.
+   * Used in the template to make some logic more readable.
+   */
+  protected get editingIsEnabled() {
+    return !this.editingIsDisabled;
   }
 
   @action refreshRoute() {

@@ -30,6 +30,38 @@ const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
 const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
+const EDITABLE_TITLE_SELECTOR = "[data-test-document-title-editable]";
+const EDITABLE_SUMMARY_SELECTOR = "[data-test-document-summary-editable]";
+const EDITABLE_PRODUCT_AREA_SELECTOR =
+  "[data-test-document-product-area-editable]";
+const EDITABLE_CONTRIBUTORS_SELECTOR =
+  "[data-test-document-contributors-editable]";
+const EDITABLE_APPROVERS_SELECTOR = "[data-test-document-approvers-editable]";
+
+const READ_ONLY_TITLE_SELECTOR = "[data-test-document-title-read-only]";
+const READ_ONLY_SUMMARY_SELECTOR = "[data-test-document-summary-read-only]";
+const READ_ONLY_PRODUCT_AREA_SELECTOR =
+  "[data-test-document-product-area-read-only]";
+const READ_ONLY_CONTRIBUTORS_SELECTOR =
+  "[data-test-document-contributors-read-only]";
+const READ_ONLY_APPROVERS_SELECTOR = "[data-test-document-approvers-read-only]";
+
+const assertEditingIsDisabled = (assert: Assert) => {
+  assert.dom(EDITABLE_TITLE_SELECTOR).doesNotExist();
+  assert.dom(EDITABLE_SUMMARY_SELECTOR).doesNotExist();
+  assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
+  assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).doesNotExist();
+  assert.dom(EDITABLE_APPROVERS_SELECTOR).doesNotExist();
+
+  assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+  assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).doesNotExist();
+
+  assert.dom(READ_ONLY_TITLE_SELECTOR).exists();
+  assert.dom(READ_ONLY_SUMMARY_SELECTOR).exists();
+  assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).exists();
+  assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).exists();
+  assert.dom(READ_ONLY_APPROVERS_SELECTOR).exists();
+};
 
 interface AuthenticatedDocumentRouteTestContext extends MirageTestContext {}
 
@@ -286,5 +318,108 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(COPY_URL_BUTTON_SELECTOR)
       .doesNotExist("copyURLButton is removed");
+  });
+
+  test("owners can edit a draft's document metadata", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    assert.dom(EDITABLE_TITLE_SELECTOR).exists();
+    assert.dom(EDITABLE_SUMMARY_SELECTOR).exists();
+    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).exists();
+    assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
+    assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
+
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
+    assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
+
+    assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_SUMMARY_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_APPROVERS_SELECTOR).doesNotExist();
+  });
+
+  test("owners can edit everything but the product area of a published doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+    });
+
+    await visit("/document/1");
+
+    assert.dom(EDITABLE_TITLE_SELECTOR).exists();
+    assert.dom(EDITABLE_SUMMARY_SELECTOR).exists();
+    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
+    assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
+    assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
+
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+    assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
+
+    assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_SUMMARY_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).exists();
+    assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).doesNotExist();
+    assert.dom(READ_ONLY_APPROVERS_SELECTOR).doesNotExist();
+  });
+
+  test("collaborators cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: true,
+      owners: ["foo@example.com"],
+      collaborators: ["testuser@example.com"],
+    });
+
+    await visit("/document/1?draft=true");
+
+    assertEditingIsDisabled(assert);
+  });
+
+  test("collaborators cannot edit the metadata of published docs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      owners: ["foo@example.com"],
+      collaborators: ["testuser@example.com"],
+    });
+
+    await visit("/document/1");
+
+    assertEditingIsDisabled(assert);
+  });
+
+  test("approvers cannot edit the metadata of a published doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      owners: ["foo@example.com"],
+      approvers: ["testuser@example.com"],
+    });
+
+    await visit("/document/1");
+
+    assertEditingIsDisabled(assert);
+  });
+
+  test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: true,
+      owners: ["foo@example.com"],
+      isShareable: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    assertEditingIsDisabled(assert);
   });
 });

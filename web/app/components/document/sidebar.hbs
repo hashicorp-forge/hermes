@@ -44,7 +44,7 @@
               }}
               "
           />
-          {{#if this.isDraft}}
+          {{#if (and this.isDraft this.isOwner)}}
             <X::DropdownList
               data-test-draft-visibility-dropdown
               @items={{this.draftVisibilityOptions}}
@@ -97,13 +97,10 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        {{#if this.editingIsDisabled}}
-          <h1
-            class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-          >{{this.title}}</h1>
-        {{else}}
+        {{#if this.isOwner}}
           <div class="mb-8">
             <EditableField
+              data-test-document-title-editable
               @value={{this.title}}
               @onChange={{perform this.save "title"}}
               @loading={{this.save.isRunning}}
@@ -116,8 +113,11 @@
                   >{{this.title}}</h1>
                 {{else}}
                   <h1
+                    data-test-document-title-read-only
                     class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
-                  >Enter a title here.</h1>
+                  >
+                    Enter a title here.
+                  </h1>
                 {{/unless}}
               </:default>
               <:editing as |F|>
@@ -132,6 +132,11 @@
               </:editing>
             </EditableField>
           </div>
+        {{else}}
+          <h1
+            data-test-document-title-read-only
+            class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+          >{{this.title}}</h1>
         {{/if}}
       </div>
 
@@ -140,12 +145,9 @@
       {{! Summary }}
       <div class="mb-5">
         <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
-        {{#if this.editingIsDisabled}}
-          <p
-            class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-          >{{this.summary}}</p>
-        {{else}}
+        {{#if this.isOwner}}
           <EditableField
+            data-test-document-summary-editable
             @value={{this.summary}}
             @onChange={{perform this.save "summary"}}
             @loading={{this.save.isRunning}}
@@ -175,6 +177,13 @@
               />
             </:editing>
           </EditableField>
+        {{else}}
+          <p
+            data-test-document-summary-read-only
+            class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+          >
+            {{this.summary}}
+          </p>
         {{/if}}
       </div>
 
@@ -188,9 +197,10 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
-        {{#if this.isDraft}}
+        {{#if (and this.isDraft this.isOwner)}}
           <div class="w-full relative">
             <Inputs::ProductSelect
+              data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.updateProduct.perform}}
               @isSaving={{this.save.isRunning}}
@@ -200,6 +210,7 @@
           </div>
         {{else}}
           <Hds::Badge
+            data-test-document-product-area-read-only
             @text={{@document.product}}
             @icon={{get-product-id @document.product}}
           />
@@ -218,6 +229,7 @@
         <Document::Sidebar::SectionHeader @title="Contributors" />
         {{#if this.isOwner}}
           <EditableField
+            data-test-document-contributors-editable
             @value={{this.contributors}}
             @onChange={{perform this.save "contributors"}}
             @loading={{this.save.isRunning}}
@@ -249,20 +261,22 @@
             </:editing>
           </EditableField>
         {{else}}
-          {{#if this.contributors.length}}
-            <ol class="person-list">
-              {{#each this.contributors as |contributor|}}
-                <li>
-                  <Person
-                    @imgURL={{contributor.imgURL}}
-                    @email={{contributor.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <em>No contributors</em>
-          {{/if}}
+          <div data-test-document-contributors-read-only>
+            {{#if this.contributors.length}}
+              <ol class="person-list">
+                {{#each this.contributors as |contributor|}}
+                  <li>
+                    <Person
+                      @imgURL={{contributor.imgURL}}
+                      @email={{contributor.email}}
+                    />
+                  </li>
+                {{/each}}
+              </ol>
+            {{else}}
+              <em>No contributors</em>
+            {{/if}}
+          </div>
         {{/if}}
       </div>
 
@@ -270,6 +284,7 @@
         <Document::Sidebar::SectionHeader @title="Approvers" />
         {{#if this.isOwner}}
           <EditableField
+            data-test-document-approvers-editable
             @value={{this.approvers}}
             @onChange={{perform this.save "approvers"}}
             @loading={{this.save.isRunning}}
@@ -302,21 +317,23 @@
             </:editing>
           </EditableField>
         {{else}}
-          {{#if this.approvers.length}}
-            <ol class="person-list">
-              {{#each this.approvers as |approver|}}
-                <li>
-                  <Person::Approver
-                    @document={{@document}}
-                    @imgURL={{approver.imgURL}}
-                    @email={{approver.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <em>No approvers</em>
-          {{/if}}
+          <div data-test-document-approvers-read-only>
+            {{#if this.approvers.length}}
+              <ol class="person-list">
+                {{#each this.approvers as |approver|}}
+                  <li>
+                    <Person::Approver
+                      @document={{@document}}
+                      @imgURL={{approver.imgURL}}
+                      @email={{approver.email}}
+                    />
+                  </li>
+                {{/each}}
+              </ol>
+            {{else}}
+              <em>No approvers</em>
+            {{/if}}
+          </div>
         {{/if}}
       </div>
 
@@ -346,12 +363,7 @@
       </div>
 
       {{#each-in this.customEditableFields as |field attributes|}}
-        {{#if
-          (or
-            (and (not this.editingIsDisabled) (not this.docIsApproved))
-            attributes.value
-          )
-        }}
+        {{#if (or attributes.value this.isOwner)}}
           <div class="flex flex-col items-start space-y-2">
             <Document::Sidebar::SectionHeader
               @title={{attributes.displayName}}
@@ -362,7 +374,7 @@
               @attributes={{attributes}}
               @onChange={{perform this.save field}}
               @loading={{this.save.isRunning}}
-              @disabled={{or this.editingIsDisabled (not this.isOwner)}}
+              @disabled={{this.editingIsDisabled}}
             />
           </div>
         {{/if}}
@@ -370,7 +382,7 @@
     </div>
   </div>
 
-  {{#if this.userHasEditPrivileges}}
+  {{#if this.isOwner}}
     <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
       {{#if this.editingIsDisabled}}
         <div class="px-3 -mb-1">
