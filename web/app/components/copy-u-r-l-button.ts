@@ -13,6 +13,9 @@ interface CopyURLButtonComponentSignature {
   Args: {
     url: string;
     tooltipPlacement?: Placement;
+    tooltipIsForcedOpen?: boolean;
+    tooltipText?: string;
+    icon?: string;
   };
 }
 
@@ -21,20 +24,55 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
 
   /**
    * Whether the URL was recently copied to the clipboard.
-   * Used to determine if the tooltip should say "Copy URL" or "Copied."
+   * Used to determine if the tooltip should say "Copy link" or "Copied."
    * Temporarily set true when the URL is successfully copied.
    */
   @tracked protected urlWasRecentlyCopied = false;
 
   /**
-   * The button element.
+   * The button element, captured on render.
    * Used to get the tooltip's ID by way of the `aria-describedby` attribute.
    */
   @tracked private button: HTMLElement | null = null;
 
   /**
+   * Whether the tooltip is forced open regardless of hover state.
+   * True when the parent has provided text for the tooltip,
+   * such as "Creating link..." and "Link created!"
+   */
+  protected get tooltipIsForcedOpen() {
+    return this.args.tooltipIsForcedOpen ?? false;
+  }
+
+  /**
+   * The icon to show in the button.
+   * If the parent has provided an icon, e.g., "loading," use that.
+   * Otherwise use use "link" or, if a URL was recently copied, "check."
+   */
+  protected get icon() {
+    if (this.args.icon) {
+      return this.args.icon;
+    } else {
+      return this.urlWasRecentlyCopied ? "check" : "link";
+    }
+  }
+
+  /**
+   * The text to show in the tooltip.
+   * If the parent has provided text, e.g., "Loading," use that.
+   * Otherwise use "Copy link" or, if a URL was recently copied, "Link copied!"
+   */
+  get tooltipText(): string {
+    if (this.args.tooltipText) {
+      return this.args.tooltipText;
+    } else {
+      return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
+    }
+  }
+
+  /**
    * The action called when the button is clicked.
-   * Registers the button element locally.
+   * Registers the button locally for its `aria-describedby` attribute.
    */
   @action protected didInsertButton(e: HTMLElement) {
     this.button = e;
@@ -82,4 +120,10 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
       });
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    CopyURLButton: typeof CopyURLButtonComponent;
+  }
 }
