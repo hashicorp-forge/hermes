@@ -4,12 +4,7 @@
       {{@title}}
     </h5>
     {{#if @titleTooltipText}}
-      <span
-        {{tooltip @titleTooltipText class="max-w-[200px]"}}
-        class="ml-1.5 flex text-color-foreground-faint hover:text-color-foreground-primary"
-      >
-        <FlightIcon @name="help" />
-      </span>
+      <TooltipIcon @text={{@titleTooltipText}} class="ml-1.5" />
     {{/if}}
     {{#if @badgeText}}
       <Hds::Badge

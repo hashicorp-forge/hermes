@@ -159,7 +159,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
     return documents;
   }
-
+  /**
+   * The text passed to the TooltipIcon beside the title.
+   */
   protected get titleTooltipText(): string {
     return `Documents and links that are relevant to this work.`;
   }
