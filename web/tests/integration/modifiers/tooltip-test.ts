@@ -3,7 +3,6 @@ import { setupRenderingTest } from "ember-qunit";
 import { render, triggerEvent, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
-import { wait } from "ember-animated/.";
 
 module("Integration | Modifier | tooltip", function (hooks) {
   setupRenderingTest(hooks);
@@ -138,5 +137,17 @@ module("Integration | Modifier | tooltip", function (hooks) {
     await triggerEvent(".tip", "mouseleave");
 
     assert.equal(tip.getAttribute("data-tooltip-state"), "closed");
+  });
+
+  test("you can pass a class to the tooltip", async function (assert) {
+    await render(hbs`
+      <div class="tip" {{tooltip "more information" class="foo"}}>
+        Hover or focus me
+      </div>
+    `);
+
+    await triggerEvent(".tip", "mouseenter");
+
+    assert.dom(".hermes-tooltip").hasClass("foo");
   });
 });

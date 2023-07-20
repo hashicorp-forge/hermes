@@ -20,6 +20,7 @@ import htmlElement from "hermes/utils/html-element";
 import { restartableTask, timeout } from "ember-concurrency";
 import Ember from "ember";
 import simpleTimeout from "hermes/utils/simple-timeout";
+import { schedule } from "@ember/runloop";
 
 const DEFAULT_DELAY = 0;
 const DEFAULT_OPEN_DURATION = 200;
@@ -49,8 +50,10 @@ enum TooltipState {
 interface TooltipModifierNamedArgs {
   placement?: Placement;
   stayOpenOnClick?: boolean;
+  isForcedOpen?: boolean;
   delay?: number;
   openDuration?: number;
+  class?: string;
   _useTestDelay?: boolean;
 }
 
@@ -172,6 +175,18 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @tracked stayOpenOnClick = false;
 
   /**
+   * Optional classnames to append to the tooltip.
+   */
+  @tracked class: string | null = null;
+
+  /**
+   * Whether the tooltip should be forced open, regardless of hover state.
+   * Used in components like `CopyURLButton` to programmatically open the tooltip
+   * to show states that aren't triggered by hover, e.g., "Creating link..."
+   */
+  @tracked isForcedOpen?: boolean;
+
+  /**
    * An asserted-to-exist reference to the reference element.
    */
   get reference(): Element {
@@ -208,7 +223,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.reference.setAttribute("data-tooltip-state", this.state);
     }
   }
-
   /**
    * The action that runs on mouseenter and focusin.
    * Creates the tooltip element and adds it to the DOM,
@@ -240,6 +254,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      */
     this.tooltip = document.createElement("div");
     this.tooltip.classList.add("hermes-floating-ui-content", "hermes-tooltip");
+
+    if (this.class) {
+      this.tooltip.classList.add(this.class);
+    }
+
     this.tooltip.setAttribute("id", `tooltip-${this.id}`);
     this.tooltip.setAttribute("role", "tooltip");
 
@@ -283,7 +302,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         middleware: [
           offset(8),
           flip(),
-          shift(),
+          shift({ padding: 20 }),
           arrow({
             element: this.arrow,
             padding: 10,
@@ -441,6 +460,9 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     if (this.reference.matches(":focus-visible")) {
       return;
     }
+    if (this.isForcedOpen) {
+      return;
+    }
     if (this.tooltip || this.showContent.isRunning) {
       this.showContent.cancelAll();
       this.hideContent();
@@ -452,6 +474,19 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.tooltip.remove();
       this.tooltip = null;
       this.updateState(TooltipState.Closed);
+    }
+  }
+
+  /**
+   * The function that runs when the modifier is updated.
+   * Used to catch when `named.isForcedOpen` changes from true to false.
+   */
+  @action maybeForceHidden() {
+    if (this.isForcedOpen) {
+      schedule("afterRender", () => {
+        this.isForcedOpen = false;
+        this.maybeHideContent();
+      });
     }
   }
 
@@ -473,6 +508,10 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.placement = named.placement;
     }
 
+    if (named.class) {
+      this.class = named.class;
+    }
+
     if (named.stayOpenOnClick) {
       this.stayOpenOnClick = named.stayOpenOnClick;
     }
@@ -489,6 +528,19 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       this.delay = named.delay;
     } else {
       this.delay = DEFAULT_DELAY;
+    }
+
+    if (named.isForcedOpen) {
+      this.isForcedOpen = named.isForcedOpen;
+
+      schedule("afterRender", () => {
+        // make sure we're not cancelling an animation
+        if (!this.showContent.isRunning) {
+          this.showContent.perform();
+        }
+      });
+    } else {
+      this.maybeForceHidden();
     }
 
     this._reference.setAttribute("aria-describedby", `tooltip-${this.id}`);

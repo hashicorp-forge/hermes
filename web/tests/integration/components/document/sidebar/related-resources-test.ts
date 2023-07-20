@@ -5,6 +5,7 @@ import {
   fillIn,
   find,
   render,
+  triggerEvent,
   waitFor,
   waitUntil,
 } from "@ember/test-helpers";
@@ -53,9 +54,12 @@ const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-add-external-resource-error]";
 const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-external-resource-title-error]";
+const TOOLTIP_TRIGGER_SELECTOR = "[data-test-tooltip-icon-trigger]";
+const TOOLTIP_SELECTOR = ".hermes-tooltip";
 
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
+  body: HTMLElement;
 }
 
 module(
@@ -73,6 +77,8 @@ module(
       });
 
       this.set("document", this.server.schema.document.first().attrs);
+      const bodyDiv = document.createElement("div");
+      this.set("body", bodyDiv);
     });
 
     test("it renders the related resources list", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -98,6 +104,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -112,6 +119,13 @@ module(
       assert
         .dom(HEADER_SELECTOR)
         .hasText("Test title", "the header title is correct");
+
+      assert.dom(TOOLTIP_SELECTOR).doesNotExist();
+      assert.dom(TOOLTIP_TRIGGER_SELECTOR).exists();
+      await triggerEvent(TOOLTIP_TRIGGER_SELECTOR, "mouseenter");
+      assert
+        .dom(".hermes-tooltip")
+        .hasText("Documents and links that are relevant to this work.");
 
       assert.dom(BADGE_SELECTOR).hasText("New", "the 'new' badge is rendered'");
 
@@ -163,6 +177,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -194,6 +209,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -224,6 +240,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -251,6 +268,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -289,6 +307,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -325,6 +344,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -352,6 +372,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -420,6 +441,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -462,6 +484,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -483,6 +506,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -534,6 +558,7 @@ module(
             @headerTitle="Test title"
             @modalHeaderTitle="Add related resource"
             @modalInputPlaceholder="Test placeholder"
+            @scrollContainer={{this.body}}
           />
         `);
 
@@ -564,6 +589,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -604,6 +630,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 
@@ -679,6 +706,7 @@ module(
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
         />
       `);
 

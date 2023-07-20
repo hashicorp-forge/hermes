@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div class="sidebar-header {{if @userHasScrolled 'scrolled'}}">
   <LinkTo
     data-test-sidebar-dashboard-link
@@ -11,7 +10,7 @@
       @size={{if @isCollapsed "24"}}
     />
     {{#unless @isCollapsed}}
-      <span>Dashboard</span>
+      <span class="ml-2">Dashboard</span>
     {{/unless}}
   </LinkTo>
   <div class="sidebar-header-icon-controls">
@@ -21,7 +20,11 @@
         data-test-copy-url-value={{this.url}}
         @url={{this.url}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
+        @tooltipIsForcedOpen={{this.tooltipIsForcedOpen}}
+        @icon={{@shareButtonIcon}}
+        @tooltipText={{@shareButtonTooltipText}}
         class="sidebar-header-button"
+        id="sidebar-header-copy-url-button"
       />
     {{/if}}
     <ExternalLink
