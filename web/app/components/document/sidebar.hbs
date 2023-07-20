@@ -134,6 +134,7 @@
           </div>
         {{else}}
           <h1
+            data-test-document-title-read-only
             class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
           >{{this.title}}</h1>
         {{/if}}
@@ -290,23 +291,21 @@
             @disabled={{this.editingIsDisabled}}
           >
             <:default>
-              <div data-test-document-approvers-read-only>
-                {{#if this.approvers.length}}
-                  <ol class="person-list">
-                    {{#each this.approvers as |approver|}}
-                      <li>
-                        <Person::Approver
-                          @document={{@document}}
-                          @imgURL={{approver.imgURL}}
-                          @email={{approver.email}}
-                        />
-                      </li>
-                    {{/each}}
-                  </ol>
-                {{else}}
-                  <em>No approvers</em>
-                {{/if}}
-              </div>
+              {{#if this.approvers.length}}
+                <ol class="person-list">
+                  {{#each this.approvers as |approver|}}
+                    <li>
+                      <Person::Approver
+                        @document={{@document}}
+                        @imgURL={{approver.imgURL}}
+                        @email={{approver.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No approvers</em>
+              {{/if}}
             </:default>
             <:editing as |F|>
               <Inputs::PeopleSelect
@@ -318,21 +317,23 @@
             </:editing>
           </EditableField>
         {{else}}
-          {{#if this.approvers.length}}
-            <ol class="person-list">
-              {{#each this.approvers as |approver|}}
-                <li>
-                  <Person::Approver
-                    @document={{@document}}
-                    @imgURL={{approver.imgURL}}
-                    @email={{approver.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <em>No approvers</em>
-          {{/if}}
+          <div data-test-document-approvers-read-only>
+            {{#if this.approvers.length}}
+              <ol class="person-list">
+                {{#each this.approvers as |approver|}}
+                  <li>
+                    <Person::Approver
+                      @document={{@document}}
+                      @imgURL={{approver.imgURL}}
+                      @email={{approver.email}}
+                    />
+                  </li>
+                {{/each}}
+              </ol>
+            {{else}}
+              <em>No approvers</em>
+            {{/if}}
+          </div>
         {{/if}}
       </div>
 
