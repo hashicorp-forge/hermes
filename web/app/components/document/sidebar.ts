@@ -223,6 +223,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
+  /**
+   * Whether editing is enabled for basic metadata fields.
+   * Used in the template to make some logic more readable.
+   */
+  protected get editingIsEnabled() {
+    return !this.editingIsDisabled;
+  }
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260

@@ -298,12 +298,7 @@
       </div>
 
       {{#each-in this.customEditableFields as |field attributes|}}
-        {{#if
-          (or
-            (and (not this.editingIsDisabled) (not this.docIsApproved))
-            attributes.value
-          )
-        }}
+        {{#if (or attributes.value this.isOwner)}}
           <div class="flex flex-col items-start space-y-2">
             <Document::Sidebar::SectionHeader
               @title={{attributes.displayName}}
@@ -314,7 +309,7 @@
               @attributes={{attributes}}
               @onChange={{perform this.save field}}
               @loading={{this.save.isRunning}}
-              @disabled={{or this.editingIsDisabled (not this.isOwner)}}
+              @disabled={{this.editingIsDisabled}}
             />
           </div>
         {{/if}}
@@ -385,7 +380,6 @@
         {{else}}
           {{#if this.isOwner}}
             <div class="flex items-start px-3 gap-2">
-
               <Hds::Button
                 @text={{this.moveToStatusButtonText}}
                 @size="medium"
@@ -412,7 +406,6 @@
                 {{on "click" (fn (set this "archiveModalIsActive" true))}}
               />
             </div>
-
           {{else}}
             {{#if this.isApprover}}
               <div class="flex flex-col items-start px-3 gap-2">
@@ -449,7 +442,6 @@
           {{/if}}
         {{/if}}
       {{/if}}
-
     </div>
   {{/if}}
 {{/unless}}
