@@ -53,6 +53,7 @@ const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).doesNotExist();
   assert.dom(EDITABLE_APPROVERS_SELECTOR).doesNotExist();
 
+  assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
   assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).doesNotExist();
 
   assert.dom(READ_ONLY_TITLE_SELECTOR).exists();
@@ -333,6 +334,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
     assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
 
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
     assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
@@ -357,6 +359,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
     assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
 
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
     assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
