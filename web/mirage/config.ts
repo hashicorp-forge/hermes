@@ -214,8 +214,13 @@ export default function (mirageConfig) {
 
       /**
        * Used by the PeopleSelect component to get a list of people.
+       * Used to confirm that an approver has access to a document.
        */
-      this.get("/people", (schema) => {
+      this.get("/people", (schema, request) => {
+        // This allows the test user to view docs they're an approver on.
+        if (request.queryParams.emails === "testuser@example.com") {
+          return new Response(200, {}, []);
+        }
         return schema.people.all();
       });
 
@@ -245,7 +250,6 @@ export default function (mirageConfig) {
        * Used by the RelatedResources component when the doc is a draft.
        */
       this.get("drafts/:document_id/related-resources", (schema, request) => {
-        console.log('drafts related resources');
         let hermesDocuments = schema.relatedHermesDocument
           .all()
           .models.map((doc) => {
