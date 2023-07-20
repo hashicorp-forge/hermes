@@ -175,30 +175,17 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     });
   }
 
+  /**
+   * Note: Errors handled in the child component.
+   */
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
-      let index = this.configSvc.config.algolia_docs_index_name;
-
-      console.log("yuh");
-      console.log(objectID);
-
-      try {
-        let algoliaResponse = await this.algolia.getObject.perform(
-          index,
-          objectID
-        );
-        if (algoliaResponse) {
-          console.log(algoliaResponse);
-
-          this._algoliaResults = [
-            algoliaResponse,
-          ] as unknown as HermesDocument[];
-          if (dd) {
-            dd.resetFocusedItemIndex();
-          }
+      let algoliaResponse = await this.algolia.getObject.perform(objectID);
+      if (algoliaResponse) {
+        this._algoliaResults = [algoliaResponse] as unknown as HermesDocument[];
+        if (dd) {
+          dd.resetFocusedItemIndex();
         }
-      } catch (e: unknown) {
-        console.error(e);
       }
     }
   );

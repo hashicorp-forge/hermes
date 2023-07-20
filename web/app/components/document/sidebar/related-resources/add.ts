@@ -148,7 +148,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
 
     if (this.args.allowAddingExternalLinks) {
-      return !this.queryIsURL;
+      return !this.queryIsExternalURL;
     }
 
     return true;
@@ -326,7 +326,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     void this.args.search(this.dd, this.query);
   }
 
-  @action checkIfFirstPartyLink(url: string) {
+  private checkIfFirstPartyLink = restartableTask(async (url: string) => {
     // need to check the URL to see if it's a first party link
     // if it is, we'll query the database to see if it exists.
     // if it does, we'll add it to the related resources
@@ -354,7 +354,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
         hitsPerPage: 1,
         filters: filterString,
       });
-      // need to set the docType and the docNumber
       return;
     }
 
@@ -366,13 +365,21 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       if (urlIsFromCurrentDomain) {
         const docID = url.split("/document/").pop();
         if (docID) {
-          void this.args.getObject(this.dd, docID);
-          return;
+          try {
+            await this.args.getObject(this.dd, docID);
+            console.log("uh");
+            // this.dd.resetFocusedItemIndex();
+            return;
+          } catch {
+            // TODO: maybe show that we recognize the URL but it's not a valid document
+            this.queryIsExternalURL = true;
+          }
         }
       }
     }
+
     this.queryIsExternalURL = true;
-  }
+  });
 
   /**
    * The action to check if a URL is valid, and, if so,
@@ -382,7 +389,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.queryIsURL = isValidURL(this.query);
     if (this.queryIsURL) {
       this.checkForDuplicate(this.query);
-      this.checkIfFirstPartyLink(this.query);
+      void this.checkIfFirstPartyLink.perform(this.query);
     }
   }
 

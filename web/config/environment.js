@@ -55,6 +55,8 @@ module.exports = function (environment) {
 
     skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
 
+    shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
+
     torii: {
       sessionServiceName: "session",
       providers: {
