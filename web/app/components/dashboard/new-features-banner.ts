@@ -3,7 +3,8 @@ import { tracked } from "@glimmer/tracking";
 import window from "ember-window-mock";
 import { action } from "@ember/object";
 
-let LOCAL_STORAGE_ITEM_NAME = "july-20-2023-newFeatureBannerIsShown";
+export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM =
+  "july-20-2023-newFeatureBannerIsShown";
 
 interface DashboardNewFeaturesBannerSignature {
   Args: {};
@@ -18,22 +19,39 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
    * until the user dismisses the banner.
    */
   protected get isShown(): boolean {
-    const storageItem = window.localStorage.getItem(LOCAL_STORAGE_ITEM_NAME);
+    /**
+     * If the banner has been dismissed, don't show it.
+     * This check causes the property to recompute when dismissed.
+     */
+    if (this.isDismissed) {
+      return false;
+    }
+
+    const storageItem = window.localStorage.getItem(
+      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM
+    );
 
     if (storageItem === null) {
-      window.localStorage.setItem(LOCAL_STORAGE_ITEM_NAME, "true");
+      window.localStorage.setItem(
+        NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
+        "true"
+      );
       return true;
-    } else if (storageItem === "true" && !this.isDismissed) {
+    } else if (storageItem === "true") {
       return true;
     } else return false;
   }
+
   /**
    * The action called when the user clicks the dismiss button.
    * Sets the local storage item to false and sets the isDismissed
    * property to true so the banner is immediately hidden.
    */
   @action protected dismiss() {
-    window.localStorage.setItem(LOCAL_STORAGE_ITEM_NAME, "false");
+    window.localStorage.setItem(
+      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
+      "false"
+    );
     this.isDismissed = true;
   }
 }
