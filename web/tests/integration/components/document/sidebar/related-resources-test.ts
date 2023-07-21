@@ -720,5 +720,17 @@ module(
         .dom(EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR)
         .hasText("A title is required.");
     });
+
+    test("first class links are recognized (full URL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
+    test("first-class links are recognized (shortURL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
+    test("a failed algoliaObject lookup is handled", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
+    test("a failed searchWithFilters call is handled", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
+    test("a duplicate first-class link is handled (full URL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
+
+    test("a duplicate first-class link is handled (shortURL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {});
   }
 );

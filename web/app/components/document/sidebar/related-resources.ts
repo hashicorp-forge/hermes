@@ -44,7 +44,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   headerTitle: string;
   modalHeaderTitle: string;
   searchFilters?: string;
-  optionalSearchFilters?: string[];
+  optionalSearchFilters?: string;
   itemLimit?: number;
   modalInputPlaceholder: string;
   documentIsDraft?: boolean;
@@ -237,6 +237,16 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         filterString += ` AND (${this.args.searchFilters})`;
       }
 
+      let maybeOptionalFilters = "";
+
+      if (this.args.optionalSearchFilters) {
+        maybeOptionalFilters = this.args.optionalSearchFilters;
+      }
+
+      if (options?.optionalFilters) {
+        maybeOptionalFilters += ` ${options.optionalFilters}`;
+      }
+
       try {
         let algoliaResponse = await this.algolia.searchIndex
           .perform(index, query, {
@@ -254,8 +264,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
             // Include any optional search filters, e.g., "product:Terraform"
             // to give a higher ranking to results that match the filter.
-            optionalFilters:
-              options?.optionalFilters || this.args.optionalSearchFilters,
+            optionalFilters: maybeOptionalFilters,
           })
           .then((response) => response);
         if (algoliaResponse) {

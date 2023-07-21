@@ -472,6 +472,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       return;
     }
 
+    // TODO: duplicate resources are being treated like external links
+
     const filterString = docNumber;
     // TODO: Confirm that this returns accurate results.
     try {
