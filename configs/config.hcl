@@ -20,7 +20,6 @@ algolia {
 // *** DO NOT MODIFY document_types ***
 document_types {
   document_type "RFC" {
-    long_name   = "Request for Comments"
     description = "Create a Request for Comments document to present a proposal to colleagues for their review and feedback."
     template    = "1Oz_7FhaWxdFUDEzKCC5Cy58t57C4znmC_Qr80BORy1U"
 
@@ -48,7 +47,6 @@ document_types {
   }
 
   document_type "PRD" {
-    long_name   = "Product Requirements"
     description = "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem."
     template    = "1oS4q6IPDr3aMSTTk9UDdOnEcFwVWW9kT8ePCNqcg1P4"
 

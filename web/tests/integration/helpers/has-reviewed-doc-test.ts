@@ -3,12 +3,12 @@ import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
-module("Integration | Helper | has-approved-doc", function (hooks) {
+module("Integration | Helper | has-reviewed-doc", function (hooks) {
   setupRenderingTest(hooks);
 
   test("", async function (assert) {
     this.set("document", {
-      approvedBy: [],
+      reviewedBy: [],
     });
 
     const email = "person@example.com";
@@ -17,20 +17,20 @@ module("Integration | Helper | has-approved-doc", function (hooks) {
     await render(hbs`
       {{! @glint-nocheck: not typesafe yet }}
       <div>
-        {{#if (has-approved-doc this.document this.email)}}
-          Has approved
+        {{#if (has-reviewed-doc this.document this.email)}}
+          Has reviewed
         {{else}}
-          Has not approved
+          Has not reviewed
         {{/if}}
       </div>
     `);
 
-    assert.dom("div").hasText("Has not approved");
+    assert.dom("div").hasText("Has not reviewed");
 
     this.set("document", {
-      approvedBy: [email],
+      reviewedBy: [email],
     });
 
-    assert.dom("div").hasText("Has approved");
+    assert.dom("div").hasText("Has reviewed");
   });
 });

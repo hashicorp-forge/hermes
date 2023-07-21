@@ -25,7 +25,7 @@ type DocumentReviewStatus int
 
 const (
 	UnspecifiedDocumentReviewStatus DocumentReviewStatus = iota
-	ApprovedDocumentReviewStatus
+	ReviewedDocumentReviewStatus
 	ChangesRequestedDocumentReviewStatus
 )
 

@@ -21,13 +21,13 @@ type BaseDoc struct {
 	// afterwards.
 	AppCreated bool `json:"appCreated,omitempty"`
 
-	// ApprovedBy is a slice of email address strings for users that have approved
+	// ReviewedBy is a slice of email address strings for users that have reviewed
 	// the document.
-	ApprovedBy []string `json:"approvedBy,omitempty"`
+	ReviewedBy []string `json:"reviewedBy,omitempty"`
 
-	// Approvers is a slice of email address strings for users whose approvals
+	// Reviewers is a slice of email address strings for users whose approvals
 	// are requested for the document.
-	Approvers []string `json:"approvers,omitempty"`
+	Reviewers []string `json:"reviewers,omitempty"`
 
 	// ChangesRequestedBy is a slice of email address strings for users that have
 	// requested changes for the document.
@@ -84,7 +84,7 @@ type BaseDoc struct {
 	// Summary is a summary of the document.
 	Summary string `json:"summary,omitempty"`
 
-	// Status is the status of the document (e.g., "WIP", "In-Review", "Approved",
+	// Status is the status of the document (e.g., "Draft", "In-Review", "Reviewed",
 	// "Obsolete").
 	Status string `json:"status,omitempty"`
 
@@ -100,12 +100,12 @@ func (d *BaseDoc) DeleteFileRevision(revisionID string) {
 	delete(d.FileRevisions, revisionID)
 }
 
-func (d BaseDoc) GetApprovedBy() []string {
-	return d.ApprovedBy
+func (d BaseDoc) GetReviewedBy() []string {
+	return d.ReviewedBy
 }
 
-func (d BaseDoc) GetApprovers() []string {
-	return d.Approvers
+func (d BaseDoc) GetReviewers() []string {
+	return d.Reviewers
 }
 
 func (d BaseDoc) GetChangesRequestedBy() []string {
@@ -164,8 +164,8 @@ func (d BaseDoc) GetTitle() string {
 	return d.Title
 }
 
-func (d *BaseDoc) SetApprovedBy(s []string) {
-	d.ApprovedBy = s
+func (d *BaseDoc) SetReviewedBy(s []string) {
+	d.ReviewedBy = s
 }
 
 func (d *BaseDoc) SetChangesRequestedBy(s []string) {

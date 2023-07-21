@@ -177,9 +177,9 @@ func (r *RFC) parseRFCHeader(d *docs.Document) {
 					label := p.Elements[0].TextRun.Content
 
 					switch {
-					case strings.HasPrefix(label, "Approver:") ||
-						strings.HasPrefix(label, "Approvers:"):
-						r.parseRFCApprovers(p)
+					case strings.HasPrefix(label, "Reviewer:") ||
+						strings.HasPrefix(label, "Reviewers:"):
+						r.parseRFCReviewers(p)
 
 					case strings.HasPrefix(label, "Contributor:") ||
 						strings.HasPrefix(label, "Contributors:"):
@@ -211,9 +211,9 @@ func (r *RFC) parseRFCHeader(d *docs.Document) {
 	}
 }
 
-// parseRFCApprovers parses RFC Approvers from a Google Doc paragraph.
-func (r *RFC) parseRFCApprovers(p *docs.Paragraph) {
-	r.Approvers = parseParagraphWithEmails("Approver", p)
+// parseRFCReviewers parses RFC Reviewers from a Google Doc paragraph.
+func (r *RFC) parseRFCReviewers(p *docs.Paragraph) {
+	r.Reviewers = parseParagraphWithEmails("Reviewer", p)
 }
 
 // parseRFCContributors parses the RFC Contributors from a Google Docs paragraph.
@@ -282,9 +282,9 @@ func (r *RFC) parseRFCStatus(p *docs.Paragraph) {
 	label := p.Elements[0].TextRun.Content
 	var status string
 
-	// Sometimes "Status: WIP" is collected together as one text element.
-	if label == "Status: WIP" && p.Elements[0].TextRun.TextStyle.Bold {
-		status = "WIP"
+	// Sometimes "Status: Draft" is collected together as one text element.
+	if label == "Status: Draft" && p.Elements[0].TextRun.TextStyle.Bold {
+		status = "Draft"
 	} else {
 		for i, e := range p.Elements {
 			if i > 0 && e.TextRun != nil && e.TextRun.TextStyle != nil && e.TextRun.TextStyle.Bold {

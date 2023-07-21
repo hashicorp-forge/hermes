@@ -19,9 +19,9 @@ export interface HermesDocument {
   owners?: string[];
   appCreated?: boolean;
   contributors?: HermesUser[];
-  approvers?: HermesUser[];
+  reviewers: HermesUser[];
   changesRequestedBy?: string[];
-  approvedBy?: string[];
+  reviewedBy: string[];
   summary?: string;
   isDraft?: boolean;
   customEditableFields?: CustomEditableFields;
@@ -38,7 +38,6 @@ export interface HermesTemplate {
   readonly objectId: string;
   templateName: string;
   description?: string;
-  longName: string;
   docId: string;
 }
 

@@ -9,6 +9,7 @@ import (
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"google.golang.org/api/docs/v1"
 )
+
 // template-add-wholefile
 // ReplaceHeader replaces the COMMONTEMPLATE document header, which is the first table
 // in the document.
@@ -30,7 +31,7 @@ import (
 //   |-----------------------------------------------------------------------------------|
 //   | Contributors: {{contributors}}       | Other stakeholders: {{stakeholders}}       |
 //   |-----------------------------------------------------------------------------------|
-//   | RFC: {{rfc}}                         | Approvers: {{approvers}}                   |
+//   | RFC: {{rfc}}                         | Reviewers: {{reviewers}}                   |
 //   |-----------------------------------------------------------------------------------|
 //   | Tags: {{tags}}                                                                    |
 //   |-----------------------------------------------------------------------------------|
@@ -521,7 +522,7 @@ func (doc *COMMONTEMPLATE) oldReplaceHeader(fileID, baseURL string, isDraft bool
 
 	// Status cell.
 	cellReqs, cellLength = createTextCellRequests(
-		"Status", "WIP | In-Review | Approved | Obsolete", int64(pos))
+		"Status", "Draft | In-Review | Reviewed | Obsolete", int64(pos))
 	reqs = append(reqs, cellReqs...)
 	var statusStartIndex, statusEndIndex int
 	switch strings.ToLower(doc.Status) {
@@ -530,16 +531,16 @@ func (doc *COMMONTEMPLATE) oldReplaceHeader(fileID, baseURL string, isDraft bool
 	case "in-review":
 		statusStartIndex = 14
 		statusEndIndex = 23
-	case "approved":
+	case "reviewed":
 		statusStartIndex = 26
 		statusEndIndex = 34
 	case "obsolete":
 		statusStartIndex = 37
 		statusEndIndex = 45
-	case "wip":
+	case "draft":
 		fallthrough
 	default:
-		// Default to "WIP" for all unknown statuses.
+		// Default to "Draft" for all unknown statuses.
 		statusStartIndex = 8
 		statusEndIndex = 11
 	}
@@ -593,12 +594,12 @@ func (doc *COMMONTEMPLATE) oldReplaceHeader(fileID, baseURL string, isDraft bool
 	// pos += cellLength + 3
 
 	// Contributors cell.
-	if len(doc.Contributors)==0 || doc.Contributors[0]!=doc.Owners[0]{
+	if len(doc.Contributors) == 0 || doc.Contributors[0] != doc.Owners[0] {
 		doc.Contributors = append([]string{doc.Owners[0]}, doc.Contributors...)
 	}
 	// pos+=2
 	cellReqs, cellLength = createTextCellRequests(
-		"Author/s",strings.Join(doc.Contributors[:], ", "), int64(pos))
+		"Author/s", strings.Join(doc.Contributors[:], ", "), int64(pos))
 	reqs = append(reqs, cellReqs...)
 	pos += cellLength + 3
 
@@ -623,28 +624,25 @@ func (doc *COMMONTEMPLATE) oldReplaceHeader(fileID, baseURL string, isDraft bool
 		}...)
 	pos += 5
 
-
 	cellReqs, cellLength = createTextCellRequests(
 		"Team/Pod", "", int64(pos))
 	reqs = append(reqs, cellReqs...)
 	pos += cellLength + 2
 
-	
-
-	// Approvers cell.
-	// Build approvers slice with a check next to reviewers who have approved.
-	var approvers []string
-	for _, approver := range doc.Approvers {
-		if contains(doc.ApprovedBy, approver) {
-			approvers = append(approvers, "✅ "+approver)
-		} else if contains(doc.ChangesRequestedBy, approver) {
-			approvers = append(approvers, "❌ "+approver)
+	// Reviewers cell.
+	// Build reviewers slice with a check next to reviewers who have reviewed.
+	var reviewers []string
+	for _, reviewer := range doc.Reviewers {
+		if contains(doc.ReviewedBy, reviewer) {
+			reviewers = append(reviewers, "✅ "+reviewer)
+		} else if contains(doc.ChangesRequestedBy, reviewer) {
+			reviewers = append(reviewers, "❌ "+reviewer)
 		} else {
-			approvers = append(approvers, approver)
+			reviewers = append(reviewers, reviewer)
 		}
 	}
 	cellReqs, cellLength = createTextCellRequests(
-		"Reviewers", strings.Join(approvers[:], ", "), int64(pos))
+		"Reviewers", strings.Join(reviewers[:], ", "), int64(pos))
 	reqs = append(reqs, cellReqs...)
 	pos += cellLength + 3
 
@@ -689,4 +687,3 @@ func (doc *COMMONTEMPLATE) oldReplaceHeader(fileID, baseURL string, isDraft bool
 func (doc *COMMONTEMPLATE) ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Service) error {
 	return nil
 }
-

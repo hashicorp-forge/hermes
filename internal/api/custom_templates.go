@@ -19,7 +19,6 @@ type TemplateRequest struct {
 	Description  string `json:"description,omitempty"`
 	TemplateName string `json:"templateName"`
 	DocId        string `json:"docId"`
-	LongName     string `json:"longName"`
 }
 type TemplateResponse struct {
 	ID string `json:"id"`
@@ -29,7 +28,6 @@ type TemplateResponse struct {
 // be updated with a PATCH request.
 type TemplatePatchRequest struct {
 	TemplateName string `json:"templateName,omitempty"`
-	LongName     string `json:"longName,omitempty"`
 	Description  string `json:"description,omitempty"`
 	DocId        string `json:"docId,omitempty"`
 }
@@ -86,7 +84,6 @@ func TemplateHandler(
 				TemplateName: req.TemplateName,
 				Description:  req.Description,
 				DocId:        req.DocId,
-				LongName:     req.LongName,
 			}
 
 			res, err := aw.Template.SaveObject(baseTemplateObj)
@@ -227,7 +224,6 @@ func TemplateUpdateDeleteHandler(
 			type template struct {
 				ObjectID string `json:"objectID"`
 				TemplateName string `json:"templateName"`
-				LongName string `json:"longName"`
 				Description string `json:"description"`
 				DocId string `json:"docId"`
 			}
@@ -235,7 +231,6 @@ func TemplateUpdateDeleteHandler(
 			updateObj := template{
 				ObjectID: ObjectID,
 				TemplateName: req.TemplateName,
-				LongName: req.LongName,
 				Description: req.Description,
 				DocId: req.DocId,
 			}

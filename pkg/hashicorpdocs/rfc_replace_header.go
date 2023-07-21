@@ -33,7 +33,7 @@ import (
 //   |-----------------------------------------------------------------------------------|
 //   | Target Version: {{target-version}}   |  Other stakeholders: {{stakeholders}}      |
 //   |-----------------------------------------------------------------------------------|
-//   | PRD: {{prd}}                         | Approvers: {{approvers}}                   |
+//   | PRD: {{prd}}                         | Reviewers: {{reviewers}}                   |
 //   |-----------------------------------------------------------------------------------|
 //   | Tags: {{tags}}                                                                    |
 //   |-----------------------------------------------------------------------------------|
@@ -501,7 +501,7 @@ func (doc *RFC) ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Servic
 
 	// Status cell.
 	cellReqs, cellLength = createTextCellRequests(
-		"Status", "WIP | In-Review | Approved | Obsolete", int64(pos))
+		"Status", "Draft | In-Review | Reviewed | Obsolete", int64(pos))
 	reqs = append(reqs, cellReqs...)
 	var statusStartIndex, statusEndIndex int
 	switch strings.ToLower(doc.Status) {
@@ -510,16 +510,16 @@ func (doc *RFC) ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Servic
 	case "in-review":
 		statusStartIndex = 14
 		statusEndIndex = 23
-	case "approved":
+	case "reviewed":
 		statusStartIndex = 26
 		statusEndIndex = 34
 	case "obsolete":
 		statusStartIndex = 37
 		statusEndIndex = 45
-	case "wip":
+	case "draft":
 		fallthrough
 	default:
-		// Default to "WIP" for all unknown statuses.
+		// Default to "Draft" for all unknown statuses.
 		statusStartIndex = 8
 		statusEndIndex = 11
 	}
@@ -628,20 +628,20 @@ func (doc *RFC) ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Servic
 	}
 	pos += cellLength + 2
 
-	// Approvers cell.
-	// Build approvers slice with a check next to reviewers who have approved.
-	var approvers []string
-	for _, approver := range doc.Approvers {
-		if contains(doc.ApprovedBy, approver) {
-			approvers = append(approvers, "✅ "+approver)
-		} else if contains(doc.ChangesRequestedBy, approver) {
-			approvers = append(approvers, "❌ "+approver)
+	// Reviewers cell.
+	// Build reviewers slice with a check next to reviewers who have reviewed.
+	var reviewers []string
+	for _, reviewer := range doc.Reviewers {
+		if contains(doc.ReviewedBy, reviewer) {
+			reviewers = append(reviewers, "✅ "+reviewer)
+		} else if contains(doc.ChangesRequestedBy, reviewer) {
+			reviewers = append(reviewers, "❌ "+reviewer)
 		} else {
-			approvers = append(approvers, approver)
+			reviewers = append(reviewers, reviewer)
 		}
 	}
 	cellReqs, cellLength = createTextCellRequests(
-		"Approvers", strings.Join(approvers[:], ", "), int64(pos))
+		"Reviewers", strings.Join(reviewers[:], ", "), int64(pos))
 	reqs = append(reqs, cellReqs...)
 	pos += cellLength + 3
 

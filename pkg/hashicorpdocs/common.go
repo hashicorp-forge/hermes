@@ -2,6 +2,7 @@ package hashicorpdocs
 
 import (
 	"fmt"
+
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"google.golang.org/api/drive/v3"
 )
@@ -17,8 +18,8 @@ type Doc interface {
 	DeleteFileRevision(string)
 
 	// Getters for fields common to all document types.
-	GetApprovedBy() []string
-	GetApprovers() []string
+	GetReviewedBy() []string
+	GetReviewers() []string
 	GetChangesRequestedBy() []string
 	GetContributors() []string
 	GetCreatedTime() int64
@@ -38,7 +39,7 @@ type Doc interface {
 	ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Service) error
 
 	// Setters for fields common to all document types.
-	SetApprovedBy([]string)
+	SetReviewedBy([]string)
 	SetChangesRequestedBy([]string)
 	SetContent(s string)
 	SetDocNumber(string)

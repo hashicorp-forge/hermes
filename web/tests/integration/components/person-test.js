@@ -57,16 +57,16 @@ module("Integration | Component | person", function (hooks) {
       />
     `);
 
-    assert.dom("[data-test-person-approved-badge]").doesNotExist();
+    assert.dom("[data-test-person-reviewed-badge]").doesNotExist();
 
-    this.set("badge", "approved");
+    this.set("badge", "reviewed");
 
-    assert.dom("[data-test-person-approved-badge]").exists();
+    assert.dom("[data-test-person-reviewed-badge]").exists();
 
     this.set("badge", "pending");
 
     assert
-      .dom("[data-test-person-approved-badge]")
+      .dom("[data-test-person-reviewed-badge]")
       .doesNotExist("only shows a badge if the correct value is passed in");
   });
 });

@@ -19,11 +19,11 @@
       <Doc::FolderAffordance @isLarge={{@isLarge}} />
     {{/if}}
 
-    {{#if (or this.isApproved this.isObsolete)}}
+    {{#if (or this.isReviewed this.isObsolete)}}
       <div class="absolute w-full">
         <FlightIcon
           data-test-doc-status-icon
-          @name={{if this.isApproved "check-circle" "archive"}}
+          @name={{if this.isReviewed "check-circle" "archive"}}
           @size="24"
           class="status-icon {{this.status}}"
         />

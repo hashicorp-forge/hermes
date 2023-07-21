@@ -104,11 +104,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     let statuses: FacetDropdownObjects = {};
     for (let status in this.args.facets.status) {
       if (
-        status === "Approved" ||
+        status === "Reviewed" ||
         status === "In-Review" ||
         status === "In Review" ||
         status === "Obsolete" ||
-        status === "WIP"
+        status === "Draft"
       ) {
         statuses[status] = this.args.facets.status[
           status

@@ -22,7 +22,7 @@ import (
 // DocumentPatchRequest contains a subset of documents fields that are allowed
 // to be updated with a PATCH request.
 type DocumentPatchRequest struct {
-	Approvers    []string `json:"approvers,omitempty"`
+	Reviewers    []string `json:"reviewers,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	Status       string   `json:"status,omitempty"`
 	Summary      string   `json:"summary,omitempty"`
@@ -264,17 +264,17 @@ func DocumentHandler(
 				return
 			}
 
-			// Compare approvers in req and stored object in Algolia
+			// Compare reviewers in req and stored object in Algolia
 			// before we save the patched objected
-			var approversToEmail []string
-			if len(docObj.GetApprovers()) == 0 && len(req.Approvers) != 0 {
-				// If there are no approvers of the document
-				// email the approvers in the request
-				approversToEmail = req.Approvers
-			} else if len(req.Approvers) != 0 {
-				// Only compare when there are stored approvers
-				// and approvers in the request
-				approversToEmail = compareSlices(docObj.GetApprovers(), req.Approvers)
+			var reviewersToEmail []string
+			if len(docObj.GetReviewers()) == 0 && len(req.Reviewers) != 0 {
+				// If there are no reviewers of the document
+				// email the reviewers in the request
+				reviewersToEmail = req.Reviewers
+			} else if len(req.Reviewers) != 0 {
+				// Only compare when there are stored reviewers
+				// and reviewers in the request
+				reviewersToEmail = compareSlices(docObj.GetReviewers(), req.Reviewers)
 			}
 
 			// Patch document by decoding the (now validated) request body JSON to the
@@ -324,9 +324,9 @@ func DocumentHandler(
 				return
 			}
 
-			// Send emails to new approvers.
+			// Send emails to new reviewers.
 			if cfg.Email != nil && cfg.Email.Enabled {
-				if len(approversToEmail) > 0 {
+				if len(reviewersToEmail) > 0 {
 					// TODO: use a template for email content.
 					rawBody := string(templateBytes)
 					// returns the "baseurl/documents/{docid}"
@@ -347,9 +347,9 @@ func DocumentHandler(
 
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully on a failure here.
-					for _, approverEmail := range approversToEmail {
+					for _, reviewerEmail := range reviewersToEmail {
 						_, err = s.SendEmail(
-							[]string{approverEmail},
+							[]string{reviewerEmail},
 							cfg.Email.FromAddress,
 							fmt.Sprintf("[%s]%s | Doc Review Request from %s", docObj.GetDocType(), docObj.GetTitle(), docObj.GetOwners()[0]),
 							//fmt.Sprintf("Document review requested for %s", docObj.GetDocNumber()),

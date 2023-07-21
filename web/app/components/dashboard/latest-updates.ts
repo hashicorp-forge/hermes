@@ -32,8 +32,8 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
         return "No documents have been created yet.";
       case "in-review":
         return "No docs are in review.";
-      case "approved":
-        return "No docs have been approved.";
+      case "reviewed":
+        return "No docs have been reviewed.";
     }
   }
   /**
@@ -69,8 +69,8 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
       case "in-review":
         facetFilters = "status:In-Review";
         break;
-      case "approved":
-        facetFilters = "status:approved";
+      case "reviewed":
+        facetFilters = "status:reviewed";
         break;
     }
 

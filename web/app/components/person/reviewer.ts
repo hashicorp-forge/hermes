@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 
-interface PersonApproverComponentSignature {
+interface PersonReviewerComponentSignature {
   Element: HTMLDivElement;
   Args: {
     document: HermesDocument;
@@ -13,10 +13,10 @@ interface PersonApproverComponentSignature {
   };
 }
 
-export default class PersonApproverComponent extends Component<PersonApproverComponentSignature> {}
+export default class PersonReviewerComponent extends Component<PersonReviewerComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Person::Approver": typeof PersonApproverComponent;
+    "Person::Reviewer": typeof PersonReviewerComponent;
   }
 }

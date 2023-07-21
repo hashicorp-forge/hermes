@@ -117,7 +117,7 @@ export default class DocumentRoute extends Route {
 
     // Load the document as well as the logged in user info
 
-    // Preload avatars for all approvers in the Algolia index.
+    // Preload avatars for all reviewers in the Algolia index.
     if (doc.contributors?.length) {
       const contributors = await this.fetchSvc
         .fetch(`/api/v1/people?emails=${doc.contributors.join(",")}`)
@@ -129,15 +129,15 @@ export default class DocumentRoute extends Route {
         doc.contributors = [];
       }
     }
-    if (doc.approvers?.length) {
-      const approvers = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${doc.approvers.join(",")}`)
+    if (doc.reviewers?.length) {
+      const reviewers = await this.fetchSvc
+        .fetch(`/api/v1/people?emails=${doc.reviewers.join(",")}`)
         .then((r) => r.json());
 
-      if (approvers) {
-        doc.approvers = serializePeople(approvers);
+      if (reviewers) {
+        doc.reviewers = serializePeople(reviewers);
       } else {
-        doc.approvers = [];
+        doc.reviewers = [];
       }
     }
 

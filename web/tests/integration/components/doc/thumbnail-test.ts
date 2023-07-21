@@ -36,11 +36,11 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
       .dom("[data-test-doc-thumbnail]")
       .hasClass("large", "large class is added");
 
-    this.set("status", "Approved");
+    this.set("status", "Reviewed");
 
     assert
-      .dom("[data-test-doc-status-icon].approved")
-      .exists("approved icon is shown");
+      .dom("[data-test-doc-status-icon].reviewed")
+      .exists("reviewed icon is shown");
 
     this.set("status", "Obsolete");
 

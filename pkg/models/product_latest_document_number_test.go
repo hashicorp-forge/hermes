@@ -70,13 +70,11 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			docType = DocumentType{
 				Name:     "RFC",
-				LongName: "Request For Comments",
 			}
 			err := docType.FirstOrCreate(db)
 			require.NoError(err)
 			assert.NotEmpty(docType.ID)
 			assert.Equal("RFC", docType.Name)
-			assert.Equal("Request For Comments", docType.LongName)
 		})
 
 		t.Run("Try to upsert a new latest product document number without a latest"+
@@ -107,7 +105,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				require.NoError(err)
 				assert.NotEmpty(p.DocumentTypeID)
 				assert.Equal("RFC", p.DocumentType.Name)
-				assert.Equal("Request For Comments", p.DocumentType.LongName)
 				assert.EqualValues(1, p.ProductID)
 				assert.Equal("product1", p.Product.Name)
 				assert.Equal(5, p.LatestDocumentNumber)
@@ -127,7 +124,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			require.NoError(err)
 			assert.NotEmpty(p.DocumentTypeID)
 			assert.Equal("RFC", p.DocumentType.Name)
-			assert.Equal("Request For Comments", p.DocumentType.LongName)
 			assert.EqualValues(1, p.ProductID)
 			assert.Equal("product1", p.Product.Name)
 			assert.Equal(5, p.LatestDocumentNumber)
@@ -149,7 +145,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				require.NoError(err)
 				assert.NotEmpty(p.DocumentTypeID)
 				assert.Equal("RFC", p.DocumentType.Name)
-				assert.Equal("Request For Comments", p.DocumentType.LongName)
 				assert.EqualValues(1, p.ProductID)
 				assert.Equal("product1", p.Product.Name)
 				assert.Equal(10, p.LatestDocumentNumber)
@@ -169,7 +164,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			require.NoError(err)
 			assert.NotEmpty(p.DocumentTypeID)
 			assert.Equal("RFC", p.DocumentType.Name)
-			assert.Equal("Request For Comments", p.DocumentType.LongName)
 			assert.EqualValues(1, p.ProductID)
 			assert.Equal("product1", p.Product.Name)
 			assert.Equal(10, p.LatestDocumentNumber)
@@ -183,7 +177,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				p := ProductLatestDocumentNumber{
 					DocumentType: DocumentType{
 						Name:     "NEW",
-						LongName: "New Document Type",
 					},
 					LatestDocumentNumber: 1,
 					Product: Product{

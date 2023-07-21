@@ -15,7 +15,7 @@
     @apply absolute opacity-75 mix-blend-multiply;
     @apply w-9 h-9;
 
-    &.approved {
+    &.reviewed {
       @apply fill-color-palette-green-200 -rotate-6;
       @apply -right-[7px] top-[5px];
     }
@@ -60,7 +60,7 @@
     .status-icon {
       @apply w-[84px] h-[84px] top-[8px];
 
-      &.approved {
+      &.reviewed {
         @apply -right-3.5;
       }
 

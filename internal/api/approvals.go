@@ -104,8 +104,8 @@ func ApprovalHandler(
 					http.StatusBadRequest)
 				return
 			}
-			if !contains(docObj.GetApprovers(), userEmail) {
-				http.Error(w, "Not authorized as a document approver",
+			if !contains(docObj.GetReviewers(), userEmail) {
+				http.Error(w, "Not authorized as a document reviewer",
 					http.StatusUnauthorized)
 				return
 			}
@@ -119,15 +119,15 @@ func ApprovalHandler(
 			docObj.SetChangesRequestedBy(
 				append(docObj.GetChangesRequestedBy(), userEmail))
 
-			// If user had previously approved, delete email from slice of users who
-			// have approved the document.
-			var newApprovedBy []string
-			for _, a := range docObj.GetApprovedBy() {
+			// If user had previously reviewed, delete email from slice of users who
+			// have reviewed the document.
+			var newReviewedBy []string
+			for _, a := range docObj.GetReviewedBy() {
 				if a != userEmail {
-					newApprovedBy = append(newApprovedBy, a)
+					newReviewedBy = append(newReviewedBy, a)
 				}
 			}
-			docObj.SetApprovedBy(newApprovedBy)
+			docObj.SetReviewedBy(newReviewedBy)
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
@@ -289,25 +289,25 @@ func ApprovalHandler(
 			userEmail := r.Context().Value("userEmail").(string)
 			if docObj.GetStatus() != "In-Review" && docObj.GetStatus() != "In Review" {
 				http.Error(w,
-					"Only documents in the \"In-Review\" status can be approved",
+					"Only documents in the \"In-Review\" status can be reviewed",
 					http.StatusBadRequest)
 				return
 			}
-			if !contains(docObj.GetApprovers(), userEmail) {
+			if !contains(docObj.GetReviewers(), userEmail) {
 				http.Error(w,
-					"Not authorized as a document approver",
+					"Not authorized as a document reviewer",
 					http.StatusUnauthorized)
 				return
 			}
-			if contains(docObj.GetApprovedBy(), userEmail) {
+			if contains(docObj.GetReviewedBy(), userEmail) {
 				http.Error(w,
-					"Document already approved by user",
+					"Document already reviewed by user",
 					http.StatusBadRequest)
 				return
 			}
 
-			// Add email to slice of users who have approved the document.
-			docObj.SetApprovedBy(append(docObj.GetApprovedBy(), userEmail))
+			// Add email to slice of users who have reviewed the document.
+			docObj.SetReviewedBy(append(docObj.GetReviewedBy(), userEmail))
 
 			// If the user had previously requested changes, delete email from slice
 			// of users who have requested changes of the document.
@@ -347,31 +347,31 @@ func ApprovalHandler(
 			}
 
 			// Record file revision in the Algolia document object.
-			revisionName := fmt.Sprintf("Approved by %s", userEmail)
+			revisionName := fmt.Sprintf("Reviewed by %s", userEmail)
 			docObj.SetFileRevision(latestRev.Id, revisionName)
 
 			// Save modified doc object in Algolia.
 			res, err := aw.Docs.SaveObject(docObj)
 			if err != nil {
-				l.Error("error saving approved doc object in Algolia",
+				l.Error("error saving reviewed doc object in Algolia",
 					"error", err,
 					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
 				)
-				http.Error(w, "Error approving document",
+				http.Error(w, "Error reviewing document",
 					http.StatusInternalServerError)
 				return
 			}
 			err = res.Wait()
 			if err != nil {
-				l.Error("error saving approved doc object in Algolia",
+				l.Error("error saving reviewed doc object in Algolia",
 					"error", err,
 					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
 				)
-				http.Error(w, "Error approving document",
+				http.Error(w, "Error reviewing document",
 					http.StatusInternalServerError)
 				return
 			}
@@ -386,7 +386,7 @@ func ApprovalHandler(
 					"method", r.Method,
 					"path", r.URL.Path,
 				)
-				http.Error(w, "Error approving document",
+				http.Error(w, "Error reviewing document",
 					http.StatusInternalServerError)
 				return
 			}

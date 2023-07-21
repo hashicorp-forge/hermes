@@ -13,14 +13,12 @@ import Ember from "ember";
 
 interface DocFormErrors {
   templateName: string | null;
-  longName: string | null;
   docId: string | null;
   description: string | null;
 }
 
 const FORM_ERRORS: DocFormErrors = {
   templateName: null,
-  longName: null,
   docId: null,
   description: null,
 };
@@ -41,7 +39,6 @@ export default class DeleteTemplateComponent extends Component<DeleteTemplateCom
 
   @tracked objectID = this.args.template.objectId
   @tracked templateName = this.args.template.templateName;
-  @tracked longName = this.args.template.longName;
   @tracked description = this.args.template.description;
   @tracked docId = this.args.template.docId;
 
@@ -50,7 +47,7 @@ export default class DeleteTemplateComponent extends Component<DeleteTemplateCom
 
   /**
    * Whether the form has all required fields filled out.
-   * True if the templateName ,longName and docId are filled out.
+   * True if the templateName and docId are filled out.
    */
   @tracked protected formRequirementsMet = false;
 
@@ -116,9 +113,10 @@ export default class DeleteTemplateComponent extends Component<DeleteTemplateCom
   /**
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
+
   private maybeValidate() {
     this.docId = this.extractDocId(this.docId)
-    if (this.templateName && this.longName && this.docId.length == 44) {
+    if (this.templateName  && this.docId.length == 44) {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;
@@ -152,7 +150,6 @@ export default class DeleteTemplateComponent extends Component<DeleteTemplateCom
     assert("templateName is missing from formObject", "templateName" in formObject);
     assert("docId is missing from formObject", "docId" in formObject);
     this.templateName = formObject["templateName"] as string;
-    this.longName = formObject["longName"] as string;
     this.docId = formObject["docId"] as string;
     this.description = formObject["description"] as string;
 
@@ -198,7 +195,6 @@ export default class DeleteTemplateComponent extends Component<DeleteTemplateCom
     // Handle the button click logic here
     let patchObj = {
       templateName: this.templateName,
-      longName: this.longName,
       description: this.description,
       docId: this.docId
     }

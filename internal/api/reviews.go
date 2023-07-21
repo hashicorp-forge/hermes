@@ -114,20 +114,7 @@ func ReviewHandler(
 				"path", r.URL.Path,
 			)
 
-			// Get latest product number.
-			latestNum, err := models.GetLatestProductNumber(
-				db, docObj.GetDocType(), docObj.GetProduct())
-			if err != nil {
-				l.Error("error getting product document number",
-					"error", err,
-					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
+
 
 			// Get product from database so we can get the product abbreviation.
 			product := models.Product{
@@ -145,11 +132,6 @@ func ReviewHandler(
 				return
 			}
 
-			// Set the document number.
-			nextDocNum := latestNum + 1
-			docObj.SetDocNumber(fmt.Sprintf("%s-%03d",
-
-				nextDocNum))
 
 			// Change document status to "In-Review".
 			docObj.SetStatus("In-Review")
@@ -431,7 +413,6 @@ func ReviewHandler(
 				return
 			}
 			d.Status = models.InReviewDocumentStatus
-			d.DocumentNumber = nextDocNum
 			if err := d.Upsert(db); err != nil {
 				l.Error("error upserting document in database",
 					"error", err,
@@ -519,10 +500,10 @@ func ReviewHandler(
 				}
 
 				// Send emails to reviewers.
-				if len(docObj.GetApprovers()) > 0 {
+				if len(docObj.GetReviewers()) > 0 {
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully from a failure here.
-					for _, approverEmail := range docObj.GetApprovers() {
+					for _, reviewerEmail := range docObj.GetReviewers() {
 						err := email.SendReviewRequestedEmail(
 							email.ReviewRequestedEmailData{
 								BaseURL:            cfg.BaseURL,
@@ -535,12 +516,12 @@ func ReviewHandler(
 								DocumentTeam:       docObj.GetTeam(),
 								DocumentOwnerEmail: docObj.GetOwners()[0],
 							},
-							[]string{approverEmail},
+							[]string{reviewerEmail},
 							cfg.Email.FromAddress,
 							s,
 						)
 						if err != nil {
-							l.Error("error sending approver email",
+							l.Error("error sending reviewer email",
 								"error", err,
 								"doc_id", docID,
 								"method", r.Method,
@@ -550,7 +531,7 @@ func ReviewHandler(
 								http.StatusInternalServerError)
 							return
 						}
-						l.Info("doc approver email sent",
+						l.Info("doc reviewer email sent",
 							"doc_id", docID,
 							"method", r.Method,
 							"path", r.URL.Path,
@@ -560,8 +541,8 @@ func ReviewHandler(
 					// Also send the slack message tagginhg all the reviewers in the
 					// dedicated channel
 					// tagging all reviewers emails
-					emails := make([]string, len(docObj.GetApprovers()))
-					for i, c := range docObj.GetApprovers() {
+					emails := make([]string, len(docObj.GetReviewers()))
+					for i, c := range docObj.GetReviewers() {
 						emails[i] = c
 					}
 					err = slackbot.SendSlackMessage_Reviewer(slackbot.ReviewerRequestedSlackData{
@@ -774,8 +755,9 @@ func revertReviewCreation(
 			result, fmt.Errorf("error moving doc back to drafts folder: %w", err))
 	}
 
-	// Change back document number to "ABC-???" and status to "WIP".
-	docObj.SetStatus("WIP")
+
+	docObj.SetStatus("Draft")
+
 
 	// Replace the doc header.
 	if err := docObj.ReplaceHeader(

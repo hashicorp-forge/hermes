@@ -29,8 +29,8 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get isApproved(): boolean {
-    return this.status === "approved";
+  protected get isReviewed(): boolean {
+    return this.status === "reviewed";
   }
 
   protected get isObsolete(): boolean {

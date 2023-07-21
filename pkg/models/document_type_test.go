@@ -31,13 +31,11 @@ func TestDocumentType(t *testing.T) {
 		// Create a document type.
 		d = DocumentType{
 			Name:     "DT1",
-			LongName: "DocumentType1",
 		}
 		err = d.FirstOrCreate(db)
 		require.NoError(err)
 		assert.EqualValues(1, d.ID)
 		assert.Equal("DT1", d.Name)
-		assert.Equal("DocumentType1", d.LongName)
 
 		// Get the document type.
 		d = DocumentType{
@@ -47,18 +45,15 @@ func TestDocumentType(t *testing.T) {
 		require.NoError(err)
 		assert.EqualValues(1, d.ID)
 		assert.Equal("DT1", d.Name)
-		assert.Equal("DocumentType1", d.LongName)
 
 		// Create another document type.
 		d = DocumentType{
 			Name:     "DT2",
-			LongName: "DocumentType2",
 		}
 		err = d.FirstOrCreate(db)
 		require.NoError(err)
 		assert.EqualValues(2, d.ID)
 		assert.Equal("DT2", d.Name)
-		assert.Equal("DocumentType2", d.LongName)
 
 		// Get the document type.
 		d = DocumentType{
@@ -68,7 +63,6 @@ func TestDocumentType(t *testing.T) {
 		require.NoError(err)
 		assert.EqualValues(2, d.ID)
 		assert.Equal("DT2", d.Name)
-		assert.Equal("DocumentType2", d.LongName)
 
 		// Get all document types.
 		ds := DocumentTypes{}
@@ -77,10 +71,8 @@ func TestDocumentType(t *testing.T) {
 		require.Len(ds, 2)
 		assert.EqualValues(1, ds[0].ID)
 		assert.Equal("DT1", ds[0].Name)
-		assert.Equal("DocumentType1", ds[0].LongName)
 		assert.EqualValues(2, ds[1].ID)
 		assert.Equal("DT2", ds[1].Name)
-		assert.Equal("DocumentType2", ds[1].LongName)
 	})
 
 	t.Run("FirstOrCreate with custom fields", func(t *testing.T) {
@@ -91,7 +83,6 @@ func TestDocumentType(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d := DocumentType{
 				Name:     "DT1",
-				LongName: "DocumentType1",
 				CustomFields: []DocumentTypeCustomField{
 					{
 						Name: "CustomStringField",
@@ -111,7 +102,6 @@ func TestDocumentType(t *testing.T) {
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("DT1", d.Name)
-			assert.Equal("DocumentType1", d.LongName)
 			require.Len(d.CustomFields, 3)
 			assert.Equal("CustomStringField", d.CustomFields[0].Name)
 			assert.Equal(StringDocumentTypeCustomFieldType, d.CustomFields[0].Type)
@@ -130,7 +120,6 @@ func TestDocumentType(t *testing.T) {
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("DT1", d.Name)
-			assert.Equal("DocumentType1", d.LongName)
 			require.Len(d.CustomFields, 3)
 			assert.Equal("CustomStringField", d.CustomFields[0].Name)
 			assert.Equal(StringDocumentTypeCustomFieldType, d.CustomFields[0].Type)

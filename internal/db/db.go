@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/driver/postgres"
@@ -45,7 +46,7 @@ func NewDB(cfg config.Postgres) (*gorm.DB, error) {
 
 	if err := db.SetupJoinTable(
 		models.Document{},
-		"Approvers",
+		"Reviewers",
 		&models.DocumentReview{},
 	); err != nil {
 		return nil, fmt.Errorf(

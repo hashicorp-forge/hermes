@@ -26,7 +26,7 @@ import (
 )
 
 type DraftsRequest struct {
-	Approvers    []string `json:"approvers,omitempty"`
+	Reviewers    []string `json:"approvers,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	DocType      string   `json:"docType,omitempty"`
 	Product      string   `json:"product,omitempty"`
@@ -39,7 +39,7 @@ type DraftsRequest struct {
 // DraftsPatchRequest contains a subset of drafts fields that are allowed to
 // be updated with a PATCH request.
 type DraftsPatchRequest struct {
-	Approvers    []string `json:"approvers,omitempty"`
+	Reviewers    []string `json:"reviewers,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	Product      string   `json:"product,omitempty"`
 	Team         string   `json:"team,omitempty"`
@@ -197,7 +197,7 @@ func DraftsHandler(
 				OwnerPhotos:  op,
 				Product:      req.Product,
 				Team:         req.Team,
-				Status:       "WIP",
+				Status:       "Draft",
 				Summary:      req.Summary,
 				Tags:         req.Tags,
 			}
@@ -254,9 +254,9 @@ func DraftsHandler(
 			// }
 
 			// Create document in the database.
-			var approvers []*models.User
-			for _, c := range req.Approvers {
-				approvers = append(approvers, &models.User{
+			var reviewers []*models.User
+			for _, c := range req.Reviewers {
+				reviewers = append(reviewers, &models.User{
 					EmailAddress: c,
 				})
 			}
@@ -277,7 +277,7 @@ func DraftsHandler(
 			// TODO: add custom fields.
 			d := models.Document{
 				GoogleFileID:       f.Id,
-				Approvers:          approvers,
+				Reviewers:          reviewers,
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
 				DocumentModifiedAt: createdTime,
@@ -293,7 +293,7 @@ func DraftsHandler(
 				Team: models.Team{
 					Name: req.Team,
 				},
-				Status:  models.WIPDocumentStatus,
+				Status:  models.DraftDocumentStatus,
 				Summary: req.Summary,
 				Title:   req.Title,
 			}

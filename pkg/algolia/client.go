@@ -121,8 +121,8 @@ func New(cfg *Config) (*Client, error) {
 		// Attributes
 		AttributesForFaceting: opt.AttributesForFaceting(
 			"appCreated",
-			"approvers",
-			"approvedBy",
+			"reviewers",
+			"reviewedBy",
 			"docType",
 			"owners",
 			"searchable(product)",
