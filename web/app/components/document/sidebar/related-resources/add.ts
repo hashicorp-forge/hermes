@@ -131,7 +131,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       Object.entries(this.args.shownDocuments).length === 0;
 
     if (this.args.allowAddingExternalLinks) {
-      return objectEntriesLengthIsZero && !this.queryIsURL;
+      return objectEntriesLengthIsZero && this.queryIsFirstPartyURL(this.query);
     } else {
       return objectEntriesLengthIsZero;
     }
@@ -425,15 +425,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
         }
 
       case RelatedResourceQueryType.AlgoliaSearchWithFilters:
-        const urlParts = this.query.split("/");
-        const docType = urlParts[urlParts.length - 2];
-        const docNumber = urlParts[urlParts.length - 1];
-        const filterString = `docType:${docType} AND docNumber:${docNumber}`;
-        // TODO: Confirm that this returns accurate results.
-        void this.args.search(this.dd, "", true, {
-          hitsPerPage: 1,
-          filters: filterString,
-        });
+        void this.searchWithFilters.perform();
         break;
       case RelatedResourceQueryType.ExternalLink:
         this.checkForDuplicate(this.query);
@@ -462,6 +454,48 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.firstPartyURLFormat = null;
     return false;
   }
+
+  private searchWithFilters = restartableTask(async () => {
+    const handleAsExternalLink = () => {
+      this.queryType = RelatedResourceQueryType.ExternalLink;
+      this.handleQuery();
+    };
+
+    // Short links are formatted like [shortLinkBaseURL]/[docType]/[docNumber]
+
+    const urlParts = this.query.split("/");
+    const docType = urlParts[urlParts.length - 2];
+    const docNumber = urlParts[urlParts.length - 1];
+
+    if (!docType || !docNumber) {
+      handleAsExternalLink();
+      return;
+    }
+
+    const filterString = docNumber;
+    // TODO: Confirm that this returns accurate results.
+    try {
+      await this.args.search(this.dd, filterString, true, {
+        hitsPerPage: 1,
+        optionalFilters: [`docType:"${docType}" AND docNumber:"${docNumber}"`],
+      });
+
+      if (this.noMatchesFound) {
+        handleAsExternalLink();
+      }
+    } catch (e: unknown) {
+      const typedError = e as { status?: number };
+
+      if (typedError.status) {
+        if (typedError.status === 404) {
+          handleAsExternalLink();
+          return;
+        }
+      }
+      // TODO: confirm that this triggers a `@searchErrorIsShown` update
+      throw e;
+    }
+  });
 
   private getAlgoliaObject = restartableTask(async (id: string) => {
     assert(
