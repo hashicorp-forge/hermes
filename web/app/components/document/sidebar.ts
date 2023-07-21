@@ -164,7 +164,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   // hasReviewed returns true if the logged in user has reviewed the document.
   get hasReviewed() {
-    return this.args.document.reviewedBy.includes(this.args.profile.email);
+    let reviewedReviewers: string[] = this.args.document.reviewedBy ?? [];
+    let res= reviewedReviewers.includes(this.args.profile.email);
+    return res;
   }
 
   // hasRequestedChanges returns true if the logged in user has requested
