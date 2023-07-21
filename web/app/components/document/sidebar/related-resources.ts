@@ -192,6 +192,11 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         if (dd) {
           dd.resetFocusedItemIndex();
         }
+        if (dd) {
+          next(() => {
+            dd.scheduleAssignMenuItemIDs();
+          });
+        }
       }
     }
   );

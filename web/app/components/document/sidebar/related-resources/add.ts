@@ -48,10 +48,25 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
   };
 }
 
+enum RelatedResourceQueryType {
+  AlgoliaSearch = "algoliaSearch",
+  AlgoliaSearchWithFilters = "algoliaSearchWithFilters",
+  AlgoliaGetObject = "algoliaGetObject",
+  ExternalLink = "externalLink",
+}
+
+enum FirstPartyURLFormat {
+  ShortLink = "shortLink",
+  FullURL = "fullURL",
+}
+
 export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
+
+  @tracked queryType = RelatedResourceQueryType.AlgoliaSearch;
+  @tracked firstPartyURLFormat: FirstPartyURLFormat | null = null;
 
   @tracked private _dd: XDropdownListAnchorAPI | null = null;
 
@@ -66,16 +81,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True if the text entered is deemed valid by the isValidURL utility.
    */
   @tracked protected queryIsURL = false;
-
-  /**
-   * TODO
-   */
-  @tracked protected queryIsExternalURL = false;
-
-  /**
-   * TODO
-   */
-  @tracked protected queryIsFirstPartyLink = false;
 
   /**
    * The DOM element of the search input. Receives focus when inserted.
@@ -106,6 +111,17 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    */
   @tracked externalLinkTitleErrorIsShown = false;
 
+  protected get shownDocuments() {
+    if (this.linkIsDuplicate) {
+      return {};
+    }
+    return this.args.shownDocuments;
+  }
+
+  protected get queryIsExternalURL() {
+    return this.queryType === RelatedResourceQueryType.ExternalLink;
+  }
+
   /**
    * Whether a query has no results.
    * May determine whether the list header (e.g., "suggestions," "results") is shown.
@@ -121,6 +137,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
+  private get shortLinkBaseURL() {
+    return this.configSvc.config.short_link_base_url;
+  }
+
   private get dd(): XDropdownListAnchorAPI {
     assert("dd expected", this._dd);
     return this._dd;
@@ -131,6 +151,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True unless the query is a URL and adding external links is allowed.
    */
   protected get listIsShown(): boolean {
+    // we don't want to necessarily gate this behind `allowAddingExternalLinks`
+    // since we now have the concept of first-party URLs that we can search for.
+    // TODO: Handle this logic.
+
     if (this.args.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     } else {
@@ -138,6 +162,15 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
+  protected get noMatchesMessage() {
+    if (this.args.searchErrorIsShown) {
+      return "Search error. Type to retry.";
+    }
+    if (this.linkIsDuplicate) {
+      return "This doc has already been added.";
+    }
+    return "No results found";
+  }
   /**
    * Whether to show a header above the search results (e.g., "suggestions", "results")
    * True when there's results to show.
@@ -145,6 +178,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   protected get listHeaderIsShown(): boolean {
     if (this.noMatchesFound) {
       return false;
+    }
+
+    if (this.queryIsFirstPartyURL(this.query)) {
+      if (this.queryType === RelatedResourceQueryType.ExternalLink) {
+        return false;
+      }
+      return !this.linkIsDuplicate;
     }
 
     if (this.args.allowAddingExternalLinks) {
@@ -237,10 +277,20 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action to check for duplicate ExternalResources.
    * Used to dictate whether a warning message is displayed.
    */
-  @action private checkForDuplicate(url: string) {
-    const isDuplicate = this.args.relatedLinks.find((link) => {
-      return link.url === url;
-    });
+  @action private checkForDuplicate(
+    urlOrID: string,
+    resourceIsHermesDocument = false
+  ) {
+    let isDuplicate = false;
+    if (resourceIsHermesDocument) {
+      isDuplicate = !!this.args.relatedDocuments.find((document) => {
+        return document.googleFileID === urlOrID;
+      });
+    } else {
+      isDuplicate = !!this.args.relatedLinks.find((link) => {
+        return link.url === urlOrID;
+      });
+    }
     if (isDuplicate) {
       this.linkIsDuplicate = true;
     } else {
@@ -252,13 +302,14 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action to add an external link to a document.
    * Correctly formats the link data and saves it, unless it already exists.
    */
-  @action addRelatedExternalLink() {
+  @action private addRelatedExternalLink() {
     let externalLink = {
       url: this.query,
       name: this.externalLinkTitle || this.query,
       sortOrder: 1,
     };
 
+    // see if this is already covered
     this.checkForDuplicate(externalLink.url);
 
     if (!this.linkIsDuplicate) {
@@ -267,30 +318,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       this.externalLinkTitle = "";
       this.args.onClose();
     }
-  }
-
-  /**
-   * Keyboard listener for the search input.
-   * Allows "enter" to add external links.
-   * Prevents the default ArrowUp/ArrowDown actions
-   * so they can be handled by the XDropdownList component.
-   */
-  @action protected onInputKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      if (this.queryIsURL) {
-        this.onExternalLinkSubmit(e);
-        return;
-      }
-    }
-
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      if (!this.query.length) {
-        e.preventDefault();
-        return;
-      }
-    }
-
-    this.dd.onTriggerKeydown(this.dd.contentIsShown, this.dd.showContent, e);
   }
 
   /**
@@ -314,120 +341,156 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   }
 
   /**
+   * Keyboard listener for the search input.
+   * Allows "enter" to add external links.
+   * Prevents the default ArrowUp/ArrowDown actions
+   * so they can be handled by the XDropdownList component.
+   */
+  @action protected onInputKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      if (this.queryIsURL) {
+        this.onExternalLinkSubmit(e);
+        return;
+      }
+    }
+
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      if (!this.query.length) {
+        e.preventDefault();
+        return;
+      }
+    }
+    this.dd.onTriggerKeydown(e);
+  }
+
+  /**
    * The action that runs when the search-input value changes.
    * Updates the local query property, checks if it's a URL, and searches Algolia.
    */
   @action protected onInput(e: Event) {
     const input = e.target as HTMLInputElement;
     this.query = input.value;
-    this.queryIsFirstPartyLink = false;
 
-    this.checkURL();
-    void this.args.search(this.dd, this.query);
+    this.processQueryType();
+    this.handleQuery();
   }
 
-  private checkIfFirstPartyLink = restartableTask(async (url: string) => {
-    // need to check the URL to see if it's a first party link
-    // if it is, we'll query the database to see if it exists.
-    // if it does, we'll add it to the related resources
-    // in the correct format.
+  /**
+   * Processes the query to determine if it's a document search or a URL.
+   * If it's a URL, checks if it's a first- or third-party link.
+   */
+  @action private processQueryType() {
+    this.queryIsURL = isValidURL(this.query);
 
-    // need to check if it starts with a the config's shortlink...
-    // if so, need to reverse-engineer its ID
+    if (this.queryIsURL) {
+      if (this.queryIsFirstPartyURL(this.query)) {
+        switch (this.firstPartyURLFormat) {
+          case FirstPartyURLFormat.ShortLink:
+            this.queryType = RelatedResourceQueryType.AlgoliaSearchWithFilters;
+            return;
+          case FirstPartyURLFormat.FullURL:
+            this.queryType = RelatedResourceQueryType.AlgoliaGetObject;
+            return;
+        }
+      }
+      this.queryType = RelatedResourceQueryType.ExternalLink;
+      return;
+    }
+    this.queryType = RelatedResourceQueryType.AlgoliaSearch;
+  }
 
-    // need to check if the domain matches the current domain
-    // and ends with /documents/...
+  @action private handleQuery() {
+    switch (this.queryType) {
+      case RelatedResourceQueryType.AlgoliaSearch:
+        void this.args.search(this.dd, this.query);
+        break;
+      case RelatedResourceQueryType.AlgoliaGetObject:
+        let docID = this.query.split("/document/").pop();
+        if (docID === this.query) {
+          // URL splitting didn't work. Treat the query as an external link.
+          this.queryType = RelatedResourceQueryType.ExternalLink;
+          this.handleQuery();
+          break;
+        }
 
-    const isShortLink = url.startsWith(
-      this.configSvc.config.short_link_base_url
+        if (docID) {
+          if (docID.includes("?draft=false")) {
+            docID = docID.replace("?draft=false", "");
+          }
+          void this.getAlgoliaObject.perform(docID);
+          break;
+        } else {
+          this.queryType = RelatedResourceQueryType.ExternalLink;
+          this.handleQuery();
+        }
+
+      case RelatedResourceQueryType.AlgoliaSearchWithFilters:
+        const urlParts = this.query.split("/");
+        const docType = urlParts[urlParts.length - 2];
+        const docNumber = urlParts[urlParts.length - 1];
+        const filterString = `docType:${docType} AND docNumber:${docNumber}`;
+        // TODO: Confirm that this returns accurate results.
+        void this.args.search(this.dd, "", true, {
+          hitsPerPage: 1,
+          filters: filterString,
+        });
+        break;
+      case RelatedResourceQueryType.ExternalLink:
+        this.checkForDuplicate(this.query);
+
+        break;
+    }
+  }
+
+  @action private queryIsFirstPartyURL(url: string) {
+    if (this.shortLinkBaseURL) {
+      if (url.startsWith(this.shortLinkBaseURL)) {
+        this.firstPartyURLFormat = FirstPartyURLFormat.ShortLink;
+        return true;
+      }
+    }
+
+    const currentDomain = window.location.hostname.split(".").pop();
+
+    if (currentDomain) {
+      if (url.includes(currentDomain)) {
+        this.firstPartyURLFormat = FirstPartyURLFormat.FullURL;
+        return true;
+      }
+    }
+
+    this.firstPartyURLFormat = null;
+    return false;
+  }
+
+  private getAlgoliaObject = restartableTask(async (id: string) => {
+    assert(
+      "full url format expected",
+      this.firstPartyURLFormat === FirstPartyURLFormat.FullURL
     );
 
-    if (isShortLink) {
-      // Short links are formatted like [shortLinkBaseURL]/[docType]/[docNumber]
-      const urlParts = url.split("/");
-      const docType = urlParts[urlParts.length - 2];
-      const docNumber = urlParts[urlParts.length - 1];
-      const filterString = `docType:${docType} AND docNumber:${docNumber}`;
+    this.checkForDuplicate(id, true);
 
-      // TODO: Confirm that this returns accurate results.
-      void this.args.search(this.dd, "", true, {
-        hitsPerPage: 1,
-        filters: filterString,
-      });
+    if (this.linkIsDuplicate) {
       return;
     }
 
-    const hermesDomain = window.location.hostname.split(".").pop();
+    try {
+      await this.args.getObject(this.dd, id);
+    } catch (e: unknown) {
+      const typedError = e as { status?: number };
 
-    if (hermesDomain) {
-      const urlIsFromCurrentDomain = url.includes(hermesDomain);
-
-      if (urlIsFromCurrentDomain) {
-        const docID = url.split("/document/").pop();
-        if (docID) {
-          try {
-            await this.args.getObject(this.dd, docID);
-            console.log("uh");
-            // this.dd.resetFocusedItemIndex();
-            return;
-          } catch {
-            // TODO: maybe show that we recognize the URL but it's not a valid document
-            this.queryIsExternalURL = true;
-          }
-        }
-      }
-    }
-
-    this.queryIsExternalURL = true;
-  });
-
-  /**
-   * The action to check if a URL is valid, and, if so,
-   * whether it's a duplicate.
-   */
-  @action private checkURL() {
-    this.queryIsURL = isValidURL(this.query);
-    if (this.queryIsURL) {
-      this.checkForDuplicate(this.query);
-      void this.checkIfFirstPartyLink.perform(this.query);
-    }
-  }
-
-  private fetchFirstPartyDocument = restartableTask(
-    async (idOrAttributes: string | Record<string, any>) => {
-      this.queryIsExternalURL = false;
-
-      if (typeof idOrAttributes === "string") {
-        // fetch the document by id
-        try {
-          let document = await this.args.getObject(this.dd, idOrAttributes);
-          if (document) {
-            this.queryIsFirstPartyLink = true;
-            console.log("uh");
-            const relatedHermesDocument = {
-              googleFileID: document.objectID,
-              title: document.title,
-              type: document.docType,
-              documentNumber: document.docNumber,
-              sortOrder: 1,
-            } as RelatedHermesDocument;
-
-            this.dd.hideContent();
-            return;
-          }
-        } catch {
-          console.log("aughts");
-          this.queryIsFirstPartyLink = false;
-          this.queryIsExternalURL = true;
+      if (typedError.status) {
+        if (typedError.status === 404) {
+          this.queryType = RelatedResourceQueryType.ExternalLink;
+          this.handleQuery();
           return;
         }
-      } else {
-        // search for the document by attributes (docType, docNumber)
       }
-
-      this.queryIsFirstPartyLink = false;
+      // TODO: confirm that this triggers a `@searchErrorIsShown` update
+      throw e;
     }
-  );
+  });
 
   /**
    * The task that loads the initial `algoliaResults`.

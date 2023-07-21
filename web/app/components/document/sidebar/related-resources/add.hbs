@@ -11,7 +11,7 @@
     <M.Body>
       <X::DropdownList
         data-test-add-related-resources-list
-        @items={{@shownDocuments}}
+        @items={{this.shownDocuments}}
         @onItemClick={{this.onItemClick}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
@@ -75,10 +75,6 @@
               @url={{this.query}}
             />
           {{/if}}
-
-          {{#if this.queryIsFirstPartyLink}}
-            its a link all right
-          {{/if}}
         </:header>
         <:loading>
           <FlightIcon
@@ -94,11 +90,7 @@
               class="related-resources-modal-container mt-36"
             >
               <h3 class="related-resources-modal-body-header">
-                {{if
-                  @searchErrorIsShown
-                  "Search error. Type to retry."
-                  "No results found"
-                }}
+                {{this.noMatchesMessage}}
               </h3>
             </div>
           {{/unless}}
