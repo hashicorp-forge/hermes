@@ -1,11 +1,12 @@
 package models
 
 import (
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 )
 
 // Product is a model for product data.
@@ -17,10 +18,6 @@ type Product struct {
 
 	// Name is the name of the product.
 	Name string `gorm:"default:null;index;not null;type:citext;unique"`
-
-	// Abbreviation is a short group of capitalized letters to represent the
-	// product.
-	Abbreviation string `gorm:"default:null;not null;type:citext;unique"`
 
 	// UserSubscribers are the users that subscribed to this product.
 	UserSubscribers []User `gorm:"many2many:user_product_subscriptions;"`

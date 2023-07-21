@@ -20,9 +20,6 @@ type Team struct {
 	// Name is the name of the team
 	Name string `gorm:"default:null;index;not null;type:citext;unique"`
 
-	// Abbreviation is a short group of capitalized letters to represent the team.
-	Abbreviation string `gorm:"default:null;not null;type:citext;unique"`
-
 	// BUName is the business unit that this team belongs to
 	BUID uuid.UUID `gorm:"default:null;not null;type:citext;"`
 

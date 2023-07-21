@@ -25,18 +25,15 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type DraftsRequest struct {
-	Approvers           []string `json:"approvers,omitempty"`
-	Contributors        []string `json:"contributors,omitempty"`
-	DocType             string   `json:"docType,omitempty"`
-	Product             string   `json:"product,omitempty"`
-	ProductAbbreviation string   `json:"productAbbreviation,omitempty"`
-	Team                string   `json:"team,omitempty"`
-	TeamAbbreviation    string   `json:"teamAbbreviation,omitempty"`
-	Summary             string   `json:"summary,omitempty"`
-	Tags                []string `json:"tags,omitempty"`
-	Title               string   `json:"title"`
+	Approvers    []string `json:"approvers,omitempty"`
+	Contributors []string `json:"contributors,omitempty"`
+	DocType      string   `json:"docType,omitempty"`
+	Product      string   `json:"product,omitempty"`
+	Team         string   `json:"team,omitempty"`
+	Summary      string   `json:"summary,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	Title        string   `json:"title"`
 }
 
 // DraftsPatchRequest contains a subset of drafts fields that are allowed to
@@ -63,8 +60,6 @@ type DraftsPatchRequest struct {
 type DraftsResponse struct {
 	ID string `json:"id"`
 }
-
-
 
 func DraftsHandler(
 	cfg *config.Config,
@@ -107,16 +102,16 @@ func DraftsHandler(
 				return
 			}
 			// Define a variable to hold the retrieved document type array
-			var doctypeArray []template=GetDocTypeArray(*cfg)
+			var doctypeArray []template = GetDocTypeArray(*cfg)
 			// replace switch case with loop
-			check:=true
+			check := true
 			for i := 0; i < len(doctypeArray); i++ {
-				if(doctypeArray[i].TemplateName==req.DocType){					
-					check=false
-					break;
+				if doctypeArray[i].TemplateName == req.DocType {
+					check = false
+					break
 				}
 			}
-			if(check){
+			if check {
 				l.Error("Bad request: docType is required", "doc_type", req.DocType)
 				http.Error(w, "Bad request: invalid docType", http.StatusBadRequest)
 				return
@@ -126,7 +121,6 @@ func DraftsHandler(
 				http.Error(w, "Bad request: title is required", http.StatusBadRequest)
 				return
 			}
-
 
 			// Get doc type template new.
 			templateName := getDocTypeTemplate(doctypeArray, req.DocType)
@@ -138,14 +132,9 @@ func DraftsHandler(
 				return
 			}
 
-
 			// Build title.
-			if req.ProductAbbreviation == "" {
-				req.ProductAbbreviation = "TODO"
-			}
 
-			//title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
-			title := fmt.Sprintf("[%s-%s(%s)] %s", req.ProductAbbreviation, req.TeamAbbreviation, req.DocType, req.Title)
+			title := fmt.Sprintf("%s", req.Title)
 
 			// Copy template to new draft file.
 			f, err := s.CopyFile(templateName, title, cfg.GoogleWorkspace.DraftsFolder)
@@ -156,7 +145,6 @@ func DraftsHandler(
 					http.StatusInternalServerError)
 				return
 			}
-
 
 			// Build created date.
 			ct, err := time.Parse(time.RFC3339Nano, f.CreatedTime)
@@ -203,7 +191,6 @@ func DraftsHandler(
 				Contributors: req.Contributors,
 				Created:      cd,
 				CreatedTime:  ct.Unix(),
-				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
 				Owners:       []string{userEmail},
@@ -424,9 +411,9 @@ func DraftsHandler(
 								DocumentOwnerEmail: docObj.GetOwners()[0],
 								DocumentType:       docObj.GetDocType(),
 								DocumentTitle:      docObj.GetTitle(),
-								DocumentURL:        docURL,
-								DocumentProdAbbrev: docObj.GetProduct(),
-								DocumentTeamAbbrev: docObj.GetTeam(),
+								DocumentURL:        fmt.Sprintf("%s?draft=true", docURL),
+								DocumentProd:       docObj.GetProduct(),
+								DocumentTeam:       docObj.GetTeam(),
 							},
 							[]string{c},
 							cfg.Email.FromAddress,
@@ -463,16 +450,16 @@ func DraftsHandler(
 						DocumentOwnerEmail: docObj.GetOwners()[0],
 						DocumentType:       docObj.GetDocType(),
 						DocumentTitle:      docObj.GetTitle(),
-						DocumentURL:        docURL,
-						DocumentProdAbbrev: docObj.GetProduct(),
-						DocumentTeamAbbrev: docObj.GetTeam(),
+						DocumentURL:        fmt.Sprintf("%s?draft=true", docURL),
+						DocumentProd:       docObj.GetProduct(),
+						DocumentTeam:       docObj.GetTeam(),
 					}, emails,
 					)
 					//handle error gracefully
 					if err != nil {
 						fmt.Printf("Some error occured while sendind the message: %s", err)
 					} else {
-						fmt.Println("Succesfully! Delivered the message to all contributors")
+						fmt.Println("Succesfully! Delivered the EMAIL AND SLACK messageS to all contributors")
 					}
 				}
 			}
@@ -849,7 +836,6 @@ func DraftsDocumentHandler(
 			}
 
 			// Validate product if it is in the patch request.
-			var productAbbreviation string
 			if req.Product != "" {
 				p := models.Product{Name: req.Product}
 				if err := p.Get(db); err != nil {
@@ -864,12 +850,8 @@ func DraftsDocumentHandler(
 					return
 				}
 
-				// Set product abbreviation because we use this later to update the
-				// doc number in the Algolia object.
-				productAbbreviation = p.Abbreviation
 			}
 
-			var teamAbbreviation string
 			// Validate product if it is in the patch request.
 			if req.Team != "" {
 				p := models.Team{Name: req.Team}
@@ -884,7 +866,6 @@ func DraftsDocumentHandler(
 						http.StatusBadRequest)
 					return
 				}
-				teamAbbreviation = p.Abbreviation
 			}
 
 			// Check if document is locked.
@@ -1007,9 +988,6 @@ func DraftsDocumentHandler(
 						http.StatusInternalServerError)
 					return
 				}
-
-				// Update doc number in Algolia object.
-				docObj.SetDocNumber(fmt.Sprintf("[%s-%s]-???", productAbbreviation, teamAbbreviation))
 			}
 
 			// Update team (if it is in the patch request).
@@ -1031,8 +1009,6 @@ func DraftsDocumentHandler(
 					return
 				}
 
-				// Update doc number in Algolia object.
-				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 			}
 
 			// Save new modified draft doc object in Algolia.
@@ -1066,7 +1042,7 @@ func DraftsDocumentHandler(
 
 			// Rename file with new title.
 			s.RenameFile(docId,
-				fmt.Sprintf("[%s-%s] %s", docObj.GetProduct(), docObj.GetTeam(), req.Title))
+				fmt.Sprintf(req.Title))
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched draft document", "doc_id", docId)
@@ -1171,7 +1147,6 @@ func getDocTypeTemplate(
 // 	}
 // 	return template
 // }
-
 
 // removeSharing lists permissions for a document and then
 // deletes the permission for the supplied user email

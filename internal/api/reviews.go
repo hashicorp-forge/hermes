@@ -148,7 +148,7 @@ func ReviewHandler(
 			// Set the document number.
 			nextDocNum := latestNum + 1
 			docObj.SetDocNumber(fmt.Sprintf("%s-%03d",
-				product.Abbreviation,
+
 				nextDocNum))
 
 			// Change document status to "In-Review".
@@ -164,7 +164,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -220,7 +220,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -244,7 +244,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -293,7 +293,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -311,7 +311,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -334,7 +334,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -362,7 +362,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -390,7 +390,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -420,7 +420,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -442,7 +442,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -531,8 +531,8 @@ func ReviewHandler(
 								DocumentShortName:  docObj.GetDocNumber(),
 								DocumentTitle:      docObj.GetTitle(),
 								DocumentURL:        docURL,
-								DocumentProdAbbrev: docObj.GetProduct(),
-								DocumentTeamAbbrev: docObj.GetTeam(),
+								DocumentProd:       docObj.GetProduct(),
+								DocumentTeam:       docObj.GetTeam(),
 								DocumentOwnerEmail: docObj.GetOwners()[0],
 							},
 							[]string{approverEmail},
@@ -571,8 +571,8 @@ func ReviewHandler(
 						DocumentShortName:  docObj.GetDocNumber(),
 						DocumentTitle:      docObj.GetTitle(),
 						DocumentURL:        docURL,
-						DocumentProdAbbrev: docObj.GetProduct(),
-						DocumentTeamAbbrev: docObj.GetTeam(),
+						DocumentProd:       docObj.GetProduct(),
+						DocumentTeam:       docObj.GetTeam(),
 						DocumentOwnerEmail: docObj.GetOwners()[0],
 					}, emails,
 					)
@@ -741,7 +741,6 @@ func getDocumentURL(baseURL, docID string) (string, error) {
 // arguments for this function are set.
 func revertReviewCreation(
 	docObj hcd.Doc,
-	productAbbreviation string,
 	fileRevision string,
 	shortcut *drive.File,
 	cfg *config.Config,
@@ -776,7 +775,6 @@ func revertReviewCreation(
 	}
 
 	// Change back document number to "ABC-???" and status to "WIP".
-	docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 	docObj.SetStatus("WIP")
 
 	// Replace the doc header.

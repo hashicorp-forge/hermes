@@ -17,11 +17,9 @@
     <p><strong>Email:</strong> <Hds::Badge @text="{{this.profile.email}}" @color="critical" /></p>
     <p><strong>User Role:</strong>
         {{#if (eq this.authenticatedUser.info.role "Basic")}}
-            <Hds::Badge @text="Basic" @color="silver" />
+            <Hds::Badge @text="User" @color="silver" />
         {{else if (eq this.authenticatedUser.info.role "Admin")}}
             <Hds::Badge @text="Admin" @color="critical" />
-              {{else}}
-              <<Hds::Badge @icon="loading" />
         {{/if}}
     </p>
     <p><strong>Employee ID:</strong> <Hds::Badge @text="{{this.profile.employee_id}}" @color="neutral-dark-mode" /></p>

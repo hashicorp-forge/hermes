@@ -14,8 +14,7 @@ import (
 )
 
 type ProductRequest struct {
-	ProductName         string `json:"productName,omitempty"`
-	ProductAbbreviation string `json:"productAbbreviation,omitempty"`
+	ProductName string `json:"productName,omitempty"`
 }
 
 // ProductsHandler returns the product mappings to the Hermes frontend.
@@ -88,26 +87,22 @@ func ProductsHandler(cfg *config.Config, ar *algolia.Client,
 // getProducts gets the product or area name and their associated
 // data from Database
 func getProductsData(db *gorm.DB) (map[string]struct {
-	Abbreviation   string      `json:"abbreviation"`
 	PerDocTypeData interface{} `json:"perDocTypeData"`
 }, error) {
 	var products []models.Product
 
-	if err := db.Select("name, abbreviation").Find(&products).Error; err != nil {
+	if err := db.Select("name").Find(&products).Error; err != nil {
 		return nil, err
 	}
 
 	productData := make(map[string]struct {
-		Abbreviation   string      `json:"abbreviation"`
 		PerDocTypeData interface{} `json:"perDocTypeData"`
 	})
 
 	for _, product := range products {
 		productData[product.Name] = struct {
-			Abbreviation   string      `json:"abbreviation"`
 			PerDocTypeData interface{} `json:"perDocTypeData"`
 		}{
-			Abbreviation:   product.Abbreviation,
 			PerDocTypeData: nil, // You can populate this field as needed
 		}
 	}
@@ -119,10 +114,9 @@ func getProductsData(db *gorm.DB) (map[string]struct {
 func AddNewProducts(ar *algolia.Client,
 	aw *algolia.Client, db *gorm.DB, req ProductRequest) error {
 
-	// Step 2: upsert in the db
+	// Step 1: upsert in the db
 	pm := models.Product{
-		Name:         req.ProductName,
-		Abbreviation: req.ProductAbbreviation,
+		Name: req.ProductName,
 	}
 	if err := pm.Upsert(db); err != nil {
 		return fmt.Errorf("error upserting product: %w", err)

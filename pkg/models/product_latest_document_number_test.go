@@ -31,14 +31,12 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			product = Product{
-				Name:         "product1",
-				Abbreviation: "TEST",
+				Name: "product1",
 			}
 			err := product.FirstOrCreate(db)
 			require.NoError(err)
 			assert.EqualValues(1, product.ID)
 			assert.Equal("product1", product.Name)
-			assert.Equal("TEST", product.Abbreviation)
 		})
 
 		t.Run(
@@ -189,8 +187,7 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 					},
 					LatestDocumentNumber: 1,
 					Product: Product{
-						Name:         "New Product",
-						Abbreviation: "NP",
+						Name: "New Product",
 					},
 				}
 				err := p.Upsert(db)
@@ -199,7 +196,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				assert.Equal("NEW", p.DocumentType.Name)
 				assert.EqualValues(2, p.ProductID)
 				assert.Equal("New Product", p.Product.Name)
-				assert.Equal("NP", p.Product.Abbreviation)
 				assert.Equal(1, p.LatestDocumentNumber)
 			})
 	})

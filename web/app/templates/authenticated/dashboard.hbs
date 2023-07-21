@@ -6,12 +6,12 @@
     <h1>Welcome back, {{this.authenticatedUser.info.given_name}} 
       {{#if (eq this.authenticatedUser.info.role "Admin")}}
         <Hds::Badge @text="Admin" @size="large" @type="inverted" @size="small" icon="user" @color="highlight"/>
-      {{else}}
-        <Hds::Badge @icon="loading" />
       {{/if}}
     </h1>
-     <br>
-  <Hds::ButtonSet>
+     
+       {{#if (eq this.authenticatedUser.info.role "Admin")}}
+       <br>
+         <Hds::ButtonSet>
   <Hds::Button
           @text="Add BU"
           @icon="org"
@@ -35,8 +35,8 @@
 
   </Hds::ButtonSet>
   <br>
-
-
+      {{/if}}
+  
     <p>Here’s all the latest updates across the organization.</p>
   </div>
 
@@ -64,21 +64,6 @@
           <i class="bi bi-person-fill fs-5"></i>
         </span>
           <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-name" required placeholder="Enter Business Unit Name" value={{this.businessUnitName}}>
-        </div>
-      </div>
-      <div class="mb-4">
-        <label for="bu-abbr" class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label">Abbreviation:
-          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
-            <!---->    <div class="hds-badge__text">
-              Required
-            </div>
-          </div>
-        </label>
-        <div class="input-group">
-        <span class="input-group-text">
-          <i class="bi bi-info-circle-fill fs-5"></i>
-        </span>
-          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-abbr" required placeholder="Enter Abbreviation" value={{this.abbreviation}}>
         </div>
       </div>
       <div class="modal-footer" class="space-y-4">
@@ -133,21 +118,6 @@
           <i class="bi bi-person-fill fs-5"></i>
         </span>
           <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="team-name" required placeholder="Enter Team/Pod Name" >
-        </div>
-      </div>
-      <div class="mb-4">
-        <label for="team-abbr" class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label">Abbreviation:
-          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
-            <!---->    <div class="hds-badge__text">
-              Required
-            </div>
-          </div>
-        </label>
-        <div class="input-group">
-        <span class="input-group-text">
-          <i class="bi bi-info-circle-fill fs-5"></i>
-        </span>
-          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="team-abbr" required placeholder="Enter Abbreviation" >
         </div>
       </div>
          <div class="mb-4">
@@ -280,7 +250,6 @@
             <Doc::Tile
               @avatar="{{get doc.ownerPhotos 0}}"
               @docID="{{doc.objectID}}"
-              @docNumber="{{doc.docNumber}}"
               @modifiedAgo="{{doc.modifiedAgo}}"
               @owner="{{get doc.owners 0}}"
               @productArea="{{doc.product}}"

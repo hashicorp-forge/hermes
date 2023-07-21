@@ -26,25 +26,12 @@
 
             <div class="sidebar-body-container">
                 <div class="flex flex-col items-start space-y-2">
-                    {{#if (is-empty @document.docNumber)}}
                         <small
                                 class="hds-typography-body-100 hds-foreground-faint"
                         >{{#unless
                                 (is-empty @document.docType)
                         }}{{@document.docType}}{{/unless}}
                         </small>
-                    {{else}}
-                        <small
-                                class="hds-typography-body-100 hds-foreground-faint"
-                        >{{#unless
-                                (is-empty @document.docType)
-                        }}{{@document.docType}}{{/unless}}
-                            &bullet;
-                            <span data-test-sidebar-doc-number>
-                                {{@document.docNumber}}
-                            </span>
-                        </small>
-                    {{/if}}
                     {{#if this.editingIsDisabled}}
                         <h1
                                 class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
@@ -146,11 +133,16 @@
                                     @renderOut={{true}}
                             />
                         </div>
-
-                    {{#if this.product}}
+                        {{else}}
+                        <Hds::Badge
+                                @text={{@document.product}}
+                                @icon={{get-product-id @document.product}}
+                        />
+                    {{/if}}
                 <small
                         class="hds-typography-body-100 hds-foreground-faint"
                 >Team/Pod</small>
+                    {{#if this.isDraft}}
                         <div class="w-full relative">
                             <Inputs::TeamSelect
                                     @onChange={{this.updateTeam.perform}}
@@ -161,13 +153,13 @@
                                     @selected={{this.team}}
                             />
                     </div>
-                    {{/if}}
-                    {{else}}
+                      {{else}}
                         <Hds::Badge
-                                @text={{@document.product}}
+                                @text={{@document.team}}
                                 @icon={{get-product-id @document.product}}
                         />
                     {{/if}}
+                    
                 </div>
 
                 <div class="flex flex-col items-start space-y-2">

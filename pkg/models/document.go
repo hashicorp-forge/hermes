@@ -3,8 +3,9 @@ package models
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gorm.io/gorm"

@@ -30,11 +30,9 @@ export default class AuthenticatedDashboardController extends Controller {
   @tracked showModal3 = false;
 
   @tracked businessUnitName: string = '';
-  @tracked bu_abbreviation: string = '';
   @tracked BUIsBeingCreated = false;
 
   @tracked TeamName: string = "";
-  @tracked TeamAbbreviation: string = "";
   @tracked TeamIsBeingCreated = false;
   @tracked TeamBU: string | null = null;
 
@@ -99,7 +97,6 @@ export default class AuthenticatedDashboardController extends Controller {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
               teamName: this.TeamName,
-              teamAbbreviation: this.TeamAbbreviation,
               teamBU: this.TeamBU,
             }),
           })
@@ -118,7 +115,7 @@ export default class AuthenticatedDashboardController extends Controller {
         extendedTimeout: 1000,
       });
     } catch (err) {
-      this.toggleModal1();
+      this.toggleModal2();
       this.TeamIsBeingCreated = false;
       this.flashMessages.add({
         title: "Error creating new Team",
@@ -142,20 +139,14 @@ export default class AuthenticatedDashboardController extends Controller {
     const formData = new FormData(formElement);
     const formObject = Object.fromEntries(formData.entries());
 
-    // Do something with the formObject
-    console.log(formObject);
-
     // Do something with the form values
     this.TeamName = formObject['team-name'];
-    this.TeamAbbreviation = formObject['team-abbr'];
-    // this.TeamBU = formObject['bu-name'];
 
     // now post this info
     this.createTeam.perform();
 
     // Clear the form fields
     this.TeamName = "";
-    this.TeamAbbreviation = "";
     this.TeamBU = "";
   }
 
@@ -172,7 +163,6 @@ export default class AuthenticatedDashboardController extends Controller {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               productName: this.businessUnitName,
-              productAbbreviation: this.bu_abbreviation,
             }),
           })
           .then((response) => response?.json());
@@ -217,14 +207,12 @@ export default class AuthenticatedDashboardController extends Controller {
 
     // Do something with the form values
     this.businessUnitName = formObject['bu-name'];
-    this.bu_abbreviation = formObject['bu-abbr'];
 
     // now post this info
     this.createBU.perform();
 
     // Clear the form fields
     this.businessUnitName = "";
-    this.bu_abbreviation = "";
   }
 
     /**
@@ -234,7 +222,6 @@ export default class AuthenticatedDashboardController extends Controller {
   private makeAdmin:  TaskForAsyncTaskFunction<unknown, () => Promise<void>> = task(async () => {
     this.AdminisBeingCreated = true;
     try {
-      console.log(this.emails);
       const admin = await this.fetchSvc
           .fetch("/api/v1/make-admin", {
             method: "POST",
@@ -259,7 +246,7 @@ export default class AuthenticatedDashboardController extends Controller {
       });
     } catch (err) {
       this.AdminisBeingCreated = false;
-      this.toggleModal1();
+      this.toggleModal3();
       this.flashMessages.add({
         title: "Error creating New Admin",
         message: `${err}`,

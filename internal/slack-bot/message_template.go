@@ -2,22 +2,13 @@ package slackbot
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/slack-go/slack"
 )
 
-func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData, userIDs []string) (*slack.Message, error) {
+func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData) (*slack.Message, error) {
 	// header
-	// Here we need to tag all the users atonce to avoid the redundancy
-	// Get the user tags
-	userTags := make([]string, len(userIDs))
-	for i, userID := range userIDs {
-		userTags[i] = fmt.Sprintf("<@%s>", userID)
-	}
-	usersTagString := strings.Join(userTags, " ")
-
-	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]%s* *|* *Document Review Request* from *%s[%s]*\n*%s*", data.DocumentType, data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail, usersTagString), false, false)
+	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]* *|* *Document Review Request* from *%s[%s]*", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
 
 	headerSection := slack.NewSectionBlock(headerText, nil, nil)
 
@@ -38,7 +29,7 @@ func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData, userIDs []st
 
 	// Document Details Link Button
 	documentDetailsButton := slack.NewButtonBlockElement("", "", nil)
-	documentDetailsLinkText := slack.NewTextBlockObject("plain_text", fmt.Sprintf("[%s-%s] %s", data.DocumentProdAbbrev, data.DocumentType, data.DocumentTitle), false, false)
+	documentDetailsLinkText := slack.NewTextBlockObject("plain_text", fmt.Sprintf("[%s] %s", data.DocumentType, data.DocumentTitle), false, false)
 	documentDetailsButton.Text = documentDetailsLinkText
 	documentDetailsButton.URL = data.DocumentURL
 	documentDetailsButton.Style = slack.StylePrimary
@@ -86,17 +77,9 @@ func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData, userIDs []st
 	return &msg, nil
 }
 
-func GenerateUIRichBlocks_Contributor(data ContributorInvitationSlackData, userIDs []string) (*slack.Message, error) {
+func GenerateUIRichBlocks_Contributor(data ContributorInvitationSlackData) (*slack.Message, error) {
 	// header
-	// Here we need to tag all the users atonce to avoid the redundancy
-	// Get the user tags
-	userTags := make([]string, len(userIDs))
-	for i, userID := range userIDs {
-		userTags[i] = fmt.Sprintf("<@%s>", userID)
-	}
-	usersTagString := strings.Join(userTags, " ")
-
-	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]%s* *|* *Document Contribution Invitation* from *%s[%s]*\n*%s*", data.DocumentType, data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail, usersTagString), false, false)
+	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]* *|* *Document Contribution Invitation* from *%s[%s]*", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
 
 	headerSection := slack.NewSectionBlock(headerText, nil, nil)
 
@@ -117,7 +100,7 @@ func GenerateUIRichBlocks_Contributor(data ContributorInvitationSlackData, userI
 
 	// Document Details Link Button
 	documentDetailsButton := slack.NewButtonBlockElement("", "", nil)
-	documentDetailsLinkText := slack.NewTextBlockObject("plain_text", fmt.Sprintf("[%s-%s] %s", data.DocumentProdAbbrev, data.DocumentType, data.DocumentTitle), false, false)
+	documentDetailsLinkText := slack.NewTextBlockObject("plain_text", fmt.Sprintf("[%s] %s", data.DocumentType, data.DocumentTitle), false, false)
 	documentDetailsButton.Text = documentDetailsLinkText
 	documentDetailsButton.URL = data.DocumentURL
 	documentDetailsButton.Style = slack.StylePrimary

@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/hashicorp/go-hclog"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-hclog"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/api"
@@ -609,17 +610,14 @@ func registerProducts(
 	for _, p := range cfg.Products.Product {
 		// Upsert product in database.
 		pm := models.Product{
-			Name:         p.Name,
-			Abbreviation: p.Abbreviation,
+			Name: p.Name,
 		}
 		if err := pm.Upsert(db); err != nil {
 			return fmt.Errorf("error upserting product: %w", err)
 		}
 
 		// Add product to Algolia products object.
-		productsObj.Data[p.Name] = structs.ProductData{
-			Abbreviation: p.Abbreviation,
-		}
+		productsObj.Data[p.Name] = structs.ProductData{}
 	}
 
 	// Save Algolia products object.

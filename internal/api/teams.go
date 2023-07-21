@@ -14,9 +14,8 @@ import (
 )
 
 type TeamRequest struct {
-	TeamName         string `json:"teamName,omitempty"`
-	TeamAbbreviation string `json:"teamAbbreviation,omitempty"`
-	TeamBU           string `json:"teamBU,omitempty"`
+	TeamName string `json:"teamName,omitempty"`
+	TeamBU   string `json:"teamBU,omitempty"`
 }
 
 // TeamsHandler returns the product mappings to the Hermes frontend.
@@ -89,7 +88,6 @@ func TeamsHandler(cfg *config.Config, ar *algolia.Client,
 // getProducts gets the product or area name and their associated
 // data from Database
 func getTeamsData(db *gorm.DB) (map[string]struct {
-	Abbreviation   string      `json:"abbreviation"`
 	BU             string      `json:"BU"`
 	PerDocTypeData interface{} `json:"perDocDataType"`
 }, error) {
@@ -100,18 +98,15 @@ func getTeamsData(db *gorm.DB) (map[string]struct {
 	}
 
 	teamsData := make(map[string]struct {
-		Abbreviation   string      `json:"abbreviation"`
 		BU             string      `json:"BU"`
 		PerDocTypeData interface{} `json:"perDocDataType"`
 	})
 
 	for _, team := range teams {
 		teamsData[team.Name] = struct {
-			Abbreviation   string      `json:"abbreviation"`
 			BU             string      `json:"BU"`
 			PerDocTypeData interface{} `json:"perDocDataType"`
 		}{
-			Abbreviation:   team.Abbreviation,
 			BU:             team.BU.Name,
 			PerDocTypeData: nil,
 		}
@@ -125,8 +120,7 @@ func getTeamsData(db *gorm.DB) (map[string]struct {
 func AddNewTeams(ar *algolia.Client,
 	aw *algolia.Client, db *gorm.DB, req TeamRequest) error {
 	pm := models.Team{
-		Name:         req.TeamName,
-		Abbreviation: req.TeamAbbreviation,
+		Name: req.TeamName,
 	}
 	if err := pm.Upsert(db, req.TeamBU); err != nil {
 		return fmt.Errorf("error upserting product: %w", err)
