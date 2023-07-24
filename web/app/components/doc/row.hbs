@@ -6,9 +6,9 @@
       @query={{hash draft=@isDraft}}
       class="flex space-x-4 items-start"
     >
-      <Doc::Thumbnail 
-        @status={{@status}} 
-        @product={{@productArea}} 
+      <Doc::Thumbnail
+        @status={{@status}}
+        @product={{@productArea}}
         @docID={{@docID}}
       />
       <div>
@@ -37,11 +37,4 @@
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
   </Hds::Table::Td>
   <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
-  <Hds::Table::Td class="created">
-    {{#if (not (is-empty @dueDate))}}
-    {{dateformat @dueDate}}
-    {{else}}
-    No Due Date
-    {{/if}}
-    </Hds::Table::Td>
 </Hds::Table::Tr>

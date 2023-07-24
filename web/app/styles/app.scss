@@ -254,6 +254,9 @@ ol {
 .x-container {
   @apply w-full max-w-screen-lg mx-auto px-8;
 }
+.x-container-navbar {
+  @apply w-full mx-auto px-20;
+}
 
 h1 {
   @apply text-display-500 font-bold text-color-foreground-strong mb-1.5;

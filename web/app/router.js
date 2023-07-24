@@ -13,6 +13,7 @@ Router.map(function () {
     this.route("document", { path: "/document/:document_id" });
     this.route("drafts");
     this.route("my");
+    this.route("waiting-for-me");
     this.route("results");
     this.route("settings");
     this.route("new", function () {

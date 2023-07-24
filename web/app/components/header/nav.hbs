@@ -1,5 +1,5 @@
 {{! @glint-nocheck: not typesafe yet }}
-<div class="x-container">
+<div class="x-container-navbar">
 
   <nav class="header-nav">
     <LinkTo @route="authenticated.dashboard" class="header-nav-logo">
@@ -31,6 +31,14 @@
       >
         My Drafts
       </LinkTo>
+
+      <LinkTo
+        data-test-nav-link="waiting-for-me"
+        @route="authenticated.waiting-for-me"
+        @current-when="authenticated.waiting-for-me"
+      >
+        Docs For Me
+      </LinkTo>
     </div>
 
     <Header::Search class="global-search" />
@@ -40,19 +48,19 @@
         @route="authenticated.new"
         {{!-- @isIconOnly={{true}} --}}
         @text="New Doc"
-        {{!-- @icon="file-plus" --}}
-        {{!-- class="create-draft-button" --}}
+        @icon="file-plus"
+        {{! class="create-draft-button" }}
         class="navbar-button"
       />
 
       <Hds::Button
-      {{!-- @icon ="folder-users" --}}
-      {{!-- @isIconOnly={{true}} --}}
-      @text="Directory"
-      @color="secondary"
-      class="navbar-button"
-      {{on "click"  (fn this.toggleModal)}}
-    />
+        @icon ="folder-users"
+        {{!-- @isIconOnly={{true}} --}}
+        @text="Directory"
+        @color="secondary"
+        class="navbar-button"
+        {{on "click" (fn this.toggleModal)}}
+      />
 
       <div class="relative">
         {{#if this.userMenuHighlightIsShown}}
@@ -97,7 +105,7 @@
           />
           <dd.Interactive
             data-test-user-menu-item="Your Profile"
-            @icon = "user"
+            @icon="user"
             @route="authenticated.myprofile"
             @text="Your Profile"
           />
@@ -114,32 +122,30 @@
   </nav>
 </div>
 
-
-
- {{#if this.showModal}}
-      <Hds::Modal id="basic-modal" @onClose={{fn this.toggleModal}} as |M|>
-        <M.Header @icon="folder-users">
-          <h2>Directory List</h2> 
-        </M.Header>
-        <M.Body>
-          <p class="hds-typography-body-300 hds-foreground-primary">
-            <ul class="directory-list">
-              {{#each-in this.products as |buKey buValue|}}
-                {{!-- Use the 'collapsible-folder' component --}}
-                <CollapsibleFolder
-                 @folderName={{buKey}} 
-                 @teams={{buValue.teams}} 
-                 />
-              {{/each-in}}
-            </ul>
-           </p>
-        </M.Body>
-        <M.Footer as |F|>
+{{#if this.showModal}}
+  <Hds::Modal id="basic-modal" @onClose={{fn this.toggleModal}} as |M|>
+    <M.Header @icon="folder-users">
+      <h2>Directory List</h2>
+    </M.Header>
+    <M.Body>
+      <p class="hds-typography-body-300 hds-foreground-primary">
+        <ul class="directory-list">
+          {{#each-in this.products as |buKey buValue|}}
+            {{! Use the 'collapsible-folder' component }}
+            <CollapsibleFolder @folderName={{buKey}} @teams={{buValue.teams}} />
+          {{/each-in}}
+        </ul>
+      </p>
+    </M.Body>
+    <M.Footer as |F|>
       <Hds::ButtonSet>
-        <Hds::Button type="button" @text="Cancel" @color="critical"
+        <Hds::Button
+          type="button"
+          @text="Cancel"
+          @color="critical"
           {{on "click" F.close}}
         />
       </Hds::ButtonSet>
     </M.Footer>
-      </Hds::Modal>
-  {{/if}}
+  </Hds::Modal>
+{{/if}}
