@@ -382,6 +382,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * Whether the footer is shown.
+   * True for editors who may need to see the "doc is locked" message,
+   * as well as approvers and owners who need doc-management controls.
+   */
+  protected get footerIsShown() {
+    return this.isApprover || this.isOwner || this.isContributor;
+  }
+
+  /**
    * Whether editing is enabled for basic metadata fields.
    * Used in the template to make some logic more readable.
    */
