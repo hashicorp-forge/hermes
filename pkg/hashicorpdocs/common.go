@@ -31,6 +31,7 @@ type Doc interface {
 	GetOwners() []string
 	GetProduct() string
 	GetTeam() string
+	GetProject() string
 	GetStatus() string
 	GetSummary() string
 	GetTitle() string

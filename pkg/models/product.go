@@ -23,7 +23,7 @@ type Product struct {
 	UserSubscribers []User `gorm:"many2many:user_product_subscriptions;"`
 
 	// Teams is the list of teams associated with the BU.
-	Teams []Team `gorm:"foreignKey:BUID;constraint:Teams_BU_mapping"`
+	Teams []Team `gorm:"foreignKey:BUID;"`
 }
 
 // FirstOrCreate finds the first product by name or creates a record if it does

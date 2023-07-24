@@ -64,6 +64,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked dueDate = this.args.document.dueDate || "";
   @tracked product = this.args.document.product || "";
   @tracked team = this.args.document.team || "";
+  @tracked project = this.args.document.project || "";
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -259,6 +260,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // productAbbreviation is computed by the back end
   });
 
+  updateProject = restartableTask(async (project: string) => {
+    this.project = project;
+    await this.save.perform("project", this.project);
+  });
+  
   updateDueDate = restartableTask(async (date: string) => {
     this.dueDate = date;
     await this.save.perform("dueDate", this.dueDate);

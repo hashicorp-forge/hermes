@@ -426,6 +426,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},
 		{"/api/v1/products", api.ProductsHandler(cfg, algoSearch, algoWrite, db, c.Log)},
 		{"/api/v1/teams", api.TeamsHandler(cfg, algoSearch, algoWrite, db, c.Log)},
+		{"/api/v1/projects", api.ProjectsHandler(cfg, algoSearch, algoWrite, db, c.Log)},
 		{"/api/v1/reviews/",
 			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},

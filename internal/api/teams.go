@@ -18,6 +18,12 @@ type TeamRequest struct {
 	TeamBU   string `json:"teamBU,omitempty"`
 }
 
+type TeamData struct {
+	BU             string                 `json:"BU"`
+	PerDocTypeData interface{}            `json:"perDocDataType"`
+	Projects       map[string]interface{} `json:"projects"`
+}
+
 // TeamsHandler returns the product mappings to the Hermes frontend.
 func TeamsHandler(cfg *config.Config, ar *algolia.Client,
 	aw *algolia.Client, db *gorm.DB, log hclog.Logger) http.Handler {
@@ -54,12 +60,18 @@ func TeamsHandler(cfg *config.Config, ar *algolia.Client,
 			w.WriteHeader(http.StatusOK)
 			enc := json.NewEncoder(w)
 			err = enc.Encode(response)
+			if err != nil {
+				log.Error("error encoding teams response", "error", err)
+				http.Error(w, "Error creating new teams",
+					http.StatusInternalServerError)
+				return
+			}
 
 		case "GET":
-			// Get products and associated data from Algolia
+			// Get teams and associated data from Algolia
 			products, err := getTeamsData(db)
 			if err != nil {
-				log.Error("error getting products from database", "error", err)
+				log.Error("error getting teams from database", "error", err)
 				http.Error(w, "Error getting product mappings",
 					http.StatusInternalServerError)
 				return
@@ -71,7 +83,7 @@ func TeamsHandler(cfg *config.Config, ar *algolia.Client,
 			enc := json.NewEncoder(w)
 			err = enc.Encode(products)
 			if err != nil {
-				log.Error("error encoding products response", "error", err)
+				log.Error("error encoding teams response", "error", err)
 				http.Error(w, "Error getting products",
 					http.StatusInternalServerError)
 				return
@@ -85,30 +97,31 @@ func TeamsHandler(cfg *config.Config, ar *algolia.Client,
 	})
 }
 
-// getProducts gets the product or area name and their associated
+// getTeamsData gets the teams and their associated
 // data from Database
-func getTeamsData(db *gorm.DB) (map[string]struct {
-	BU             string      `json:"BU"`
-	PerDocTypeData interface{} `json:"perDocDataType"`
-}, error) {
+func getTeamsData(db *gorm.DB) (map[string]TeamData, error) {
 	var teams []models.Team
 
 	if err := db.Preload(clause.Associations).Find(&teams).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch teams: %w", err)
 	}
 
-	teamsData := make(map[string]struct {
-		BU             string      `json:"BU"`
-		PerDocTypeData interface{} `json:"perDocDataType"`
-	})
+	teamsData := make(map[string]TeamData)
 
 	for _, team := range teams {
-		teamsData[team.Name] = struct {
-			BU             string      `json:"BU"`
-			PerDocTypeData interface{} `json:"perDocDataType"`
-		}{
+		projectDataList := make(map[string]interface{})
+		for _, project := range team.Projects {
+			projectData := map[string]interface{}{
+				"teamid": project.TeamID,
+				// Add any other project-related data you want to include here
+			}
+			projectDataList[project.Name] = projectData
+		}
+
+		teamsData[team.Name] = TeamData{
 			BU:             team.BU.Name,
 			PerDocTypeData: nil,
+			Projects:       projectDataList,
 		}
 	}
 

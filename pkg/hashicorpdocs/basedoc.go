@@ -84,6 +84,9 @@ type BaseDoc struct {
 	// Team is the team/pods that the document relates to.
 	Team string `json:"team,omitempty"`
 
+	// Project is the project that the document relates to
+	Project string `json:"project,omitempty"`
+
 	// Summary is a summary of the document.
 	Summary string `json:"summary,omitempty"`
 
@@ -157,6 +160,10 @@ func (d BaseDoc) GetProduct() string {
 
 func (d BaseDoc) GetTeam() string {
 	return d.Team
+}
+
+func (d BaseDoc) GetProject() string {
+	return d.Project
 }
 
 func (d BaseDoc) GetStatus() string {

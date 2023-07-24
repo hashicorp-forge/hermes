@@ -25,6 +25,14 @@ type Team struct {
 
 	// UserSubscribers are the users that subscribed to this product.
 	BU Product
+
+	// Projects are the projects associated with this team
+	Projects []Project `gorm:"many2many:team_projects;foreignKey:ID;joinForeignKey:TeamID;References:ID;joinReferences:ProjectID"`
+}
+
+type TeamProject struct {
+	TeamID    uuid.UUID `gorm:"type:uuid"`
+	ProjectID uuid.UUID `gorm:"type:uuid"`
 }
 
 // Upsert upserts a team along with its associated BU into the database.
@@ -86,4 +94,48 @@ func (t *Team) Get(db *gorm.DB) error {
 		Preload(clause.Associations).
 		First(&t).
 		Error
+}
+
+/* All Below methods are for manupulating with the projects*/
+
+// AddProject adds a new project to the team's array of projects.
+func (t *Team) AddProject(db *gorm.DB, projectName string) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+
+		project := &Project{
+			Name:   projectName,
+			TeamID: t.ID,
+			Team:   *t,
+		}
+
+		// Upsert the team.
+		if err := tx.Where(Project{Name: project.Name}).
+			Preload("Team").
+			Omit(clause.Associations).
+			Assign(*project).
+			Clauses(clause.OnConflict{DoNothing: true}).
+			FirstOrCreate(&project).Error; err != nil {
+			return fmt.Errorf("error upserting project: %w", err)
+		}
+
+		// Append the new project to the team's projects slice.
+		t.Projects = append(t.Projects, *project)
+
+		// // Save the updated team with the new project. this gave infinite loop
+		// if err := db.Save(&t).Error; err != nil {
+		// 	return fmt.Errorf("error saving team: %w", err)
+		// }
+
+		return nil
+	})
+}
+
+// GetTeamWithProjects gets a team from the database along with its associated projects.
+func GetTeamWithProjects(db *gorm.DB, teamID uuid.UUID) (*Team, error) {
+	team := &Team{}
+	if err := db.Preload("Projects").First(team, teamID).Error; err != nil {
+		return nil, fmt.Errorf("error finding team: %w", err)
+	}
+
+	return team, nil
 }

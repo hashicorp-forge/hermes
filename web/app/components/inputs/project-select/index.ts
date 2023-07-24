@@ -8,10 +8,10 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import getProductId from "hermes/utils/get-product-id";
 
-interface InputsTeamSelectSignature {
+interface InputsProjectSelectSignature {
   Element: HTMLDivElement;
   Args: {
-    selectedBU: string | null;
+    selectedteam: string | null;
     selected?: string;
     onChange: (value: string, attributes?: TeamArea) => void;
     formatIsBadge?: boolean;
@@ -28,10 +28,20 @@ type TeamAreas = {
 export type TeamArea = {
   abbreviation: string;
   perDocDataType: unknown;
-  BU: string
+  BU: string;
+  projects: ProjectAreas;
 };
 
-export default class InputsTeamSelectComponent extends Component<InputsTeamSelectSignature> {
+type ProjectAreas = {
+  [key: string]: ProjectAreas;
+ };
+
+ export type ProjectArea = {
+  teamid: string;
+};
+
+
+export default class InputsProjectSelectComponent extends Component<InputsProjectSelectSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked selected = this.args.selected;
@@ -45,42 +55,25 @@ export default class InputsTeamSelectComponent extends Component<InputsTeamSelec
     return icon;
   }
 
-  get selectedProductAbbreviation(): string | null {
-    if (!this.selected) {
-      return null;
-    }
-    const selectedProduct = this.teams?.[this.selected];
-    assert("selected Team must exist", selectedProduct);
-    return selectedProduct.abbreviation;
-  }
-
   @action onChange(newValue: any, attributes?: TeamArea) {
     this.selected = newValue;
     this.args.onChange(newValue, attributes);
   }
 
-  @computed('args.selectedBU', 'teams')
+  @computed('args.selectedteam', 'teams')
   get filteredOptions() {
-    if (!this.args.selectedBU) {
+    if (!this.args.selectedteam) {
       return {};
     }
-
-    // Filter the teams based on the selected business unit
-    const filteredTeams: TeamAreas = {};
-    let teams: TeamAreas | undefined= this.teams;
-
-    for (const team in teams) {
-      if (Object.prototype.hasOwnProperty.call(teams, team)) {
-        const teamData: TeamArea | undefined = teams[team];
-        if (teamData && teamData.BU  === this.args.selectedBU) {
-          filteredTeams[team] = teamData;
-        }
-      }
+    // else return the correstponding projects present in the 
+    // team selected
+    const teams: TeamAreas | undefined = this.teams;
+    if (teams){
+      return teams[this.args.selectedteam]?.projects;
     }
-    return filteredTeams;
   }
 
-    protected fetchteams = task(async () => {
+    protected fetchprojects = task(async () => {
       try {
         // Filter the teams based on the selected business unit
         this.teams = await this.fetchSvc
@@ -95,6 +88,6 @@ export default class InputsTeamSelectComponent extends Component<InputsTeamSelec
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Inputs::TeamSelect": typeof InputsTeamSelectComponent;
+    "Inputs::ProjectSelect": typeof InputsProjectSelectComponent;
   }
 }

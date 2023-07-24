@@ -1,0 +1,80 @@
+{{! @glint-nocheck - not typesafe yet }}
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div data-test-product-select>
+  {{#if this.teams}}
+    {{#if @formatIsBadge}}
+      <Inputs::BadgeDropdownList
+        @items={{this.filteredOptions}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        @renderOut={{@renderOut}}
+        @icon={{this.icon}}
+        class="w-80 product-select-dropdown-list"
+        ...attributes
+      >
+        <:item as |dd|>
+          <dd.Action data-test-product-select-badge-dropdown-item>
+            <Inputs::ProductSelect::Item
+              @product={{dd.value}}
+              @selected={{dd.selected}}
+            />
+          </dd.Action>
+        </:item>
+      </Inputs::BadgeDropdownList>
+    {{else}}
+      <X::DropdownList
+        @items={{this.filteredOptions}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        @renderOut={{@renderOut}}
+        class="w-[300px] product-select-dropdown-list"
+        ...attributes
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
+          >
+            <FlightIcon @name="collections" />
+
+            <span
+              class="product-select-selected-value
+                {{unless @selected 'text-color-foreground-faint'}}"
+            >
+              {{or @selected "Select your Project"}}
+            </span>
+
+            {{#if this.selectedProductAbbreviation}}
+              <span class="product-select-toggle-abbreviation">
+                {{this.selectedProductAbbreviation}}
+              </span>
+            {{/if}}
+
+            <FlightIcon @name="caret" class="product-select-toggle-caret" />
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action class="pr-5">
+            <Inputs::ProjectSelect::Item
+              @product={{dd.value}}
+              @selected={{dd.selected}}
+              @abbreviation={{dd.attrs.abbreviation}}
+            />
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    {{/if}}
+  {{else if this.fetchprojects.isRunning}}
+    <FlightIcon data-test-product-select-spinner @name="loading" />
+  {{else}}
+    <div
+      class="absolute top-0 left-0"
+      {{did-insert (perform this.fetchprojects)}}
+    ></div>
+  {{/if}}
+</div>

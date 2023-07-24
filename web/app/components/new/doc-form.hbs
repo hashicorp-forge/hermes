@@ -96,6 +96,25 @@
           />
         </div>
 
+        <div>
+          <div class="mb-2">
+            <span class="hermes-form-label">
+             Project
+              <Hds::Badge @size="small" @text="Required" />
+            </span>
+            <span class="hermes-form-helper-text hds-form-helper-text">
+              Select your Project or Create a new one from dashboard
+            </span>
+          </div>
+          <Inputs::ProjectSelect
+                  @selectedteam={{this.teamArea}}
+                  @selected={{this.projectArea}}
+                  @onChange={{this.onProjectSelect}}
+                  class="w-[300px]"
+          />
+        </div>
+
+
         {{! Note: We are still refining the subscribe/follow feature set.
                 As part of that effort we will be looking into how the concept
                 of "tags" would be useful. For now, we are choosing to

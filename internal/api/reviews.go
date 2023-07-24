@@ -114,8 +114,6 @@ func ReviewHandler(
 				"path", r.URL.Path,
 			)
 
-
-
 			// Get product from database so we can get the product abbreviation.
 			product := models.Product{
 				Name: docObj.GetProduct(),
@@ -131,7 +129,6 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 				return
 			}
-
 
 			// Change document status to "In-Review".
 			docObj.SetStatus("In-Review")
@@ -638,30 +635,14 @@ func ReviewHandler(
 }
 
 // createShortcut creates a shortcut in the hierarchical folder structure
-// ("Shortcuts Folder/RFC/MyProduct/") under docsFolder.
+// ("Shortcuts Folder/BU/Team/Project/Template-type/docx") under docsFolder.
 func createShortcut(
 	cfg *config.Config,
 	docObj hcd.Doc,
 	s *gw.Service) (shortcut *drive.File, retErr error) {
 
-	// Get folder for doc type.
-	docTypeFolder, err := s.GetSubfolder(
-		cfg.GoogleWorkspace.ShortcutsFolder, docObj.GetDocType())
-	if err != nil {
-		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
-	}
-
-	// Doc type folder wasn't found, so create it.
-	if docTypeFolder == nil {
-		docTypeFolder, err = s.CreateFolder(
-			docObj.GetDocType(), cfg.GoogleWorkspace.ShortcutsFolder)
-		if err != nil {
-			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
-		}
-	}
-
-	// Get folder for doc type + product.
-	productFolder, err := s.GetSubfolder(docTypeFolder.Id, docObj.GetProduct())
+	// Get folder for  the product/BU
+	productFolder, err := s.GetSubfolder(cfg.GoogleWorkspace.ShortcutsFolder, docObj.GetProduct())
 	if err != nil {
 		return nil, fmt.Errorf("error getting product subfolder: %w", err)
 	}
@@ -669,19 +650,19 @@ func createShortcut(
 	// Product folder wasn't found, so create it.
 	if productFolder == nil {
 		productFolder, err = s.CreateFolder(
-			docObj.GetProduct(), docTypeFolder.Id)
+			docObj.GetProduct(), cfg.GoogleWorkspace.ShortcutsFolder)
 		if err != nil {
 			return nil, fmt.Errorf("error creating product subfolder: %w", err)
 		}
 	}
 
-	// Get folder for doc type + product + Team/Pod.
+	// Get folder for Team/Pod inside the products
 	teamFolder, err := s.GetSubfolder(productFolder.Id, docObj.GetTeam())
 	if err != nil {
-		return nil, fmt.Errorf("error getting product subfolder: %w", err)
+		return nil, fmt.Errorf("error getting teams subfolder: %w", err)
 	}
 
-	// Product folder wasn't found, so create it.
+	// if teams folder wasn't found, so create it.
 	if teamFolder == nil {
 		teamFolder, err = s.CreateFolder(
 			docObj.GetTeam(), productFolder.Id)
@@ -690,10 +671,41 @@ func createShortcut(
 		}
 	}
 
+	// Get folder for project inside the teams
+	projectFolder, err := s.GetSubfolder(teamFolder.Id, docObj.GetProject())
+	if err != nil {
+		return nil, fmt.Errorf("error getting projects subfolder: %w", err)
+	}
+
+	// if teams folder wasn't found, so create it.
+	if projectFolder == nil {
+		projectFolder, err = s.CreateFolder(
+			docObj.GetProject(), teamFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating project subfolder: %w", err)
+		}
+	}
+
+	// Get folder for doc type.
+	docTypeFolder, err := s.GetSubfolder(
+		projectFolder.Id, docObj.GetDocType())
+	if err != nil {
+		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
+	}
+
+	// Doc type folder wasn't found, so create it.
+	if docTypeFolder == nil {
+		docTypeFolder, err = s.CreateFolder(
+			docObj.GetDocType(), projectFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
+		}
+	}
+
 	// Create shortcut.
 	if shortcut, err = s.CreateShortcut(
 		docObj.GetObjectID(),
-		teamFolder.Id); err != nil {
+		docTypeFolder.Id); err != nil {
 
 		return nil, fmt.Errorf("error creating shortcut: %w", err)
 	}
@@ -755,9 +767,7 @@ func revertReviewCreation(
 			result, fmt.Errorf("error moving doc back to drafts folder: %w", err))
 	}
 
-
 	docObj.SetStatus("Draft")
-
 
 	// Replace the doc header.
 	if err := docObj.ReplaceHeader(

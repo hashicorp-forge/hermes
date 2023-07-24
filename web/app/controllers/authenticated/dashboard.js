@@ -28,6 +28,7 @@ export default class AuthenticatedDashboardController extends Controller {
   @tracked showModal1 = false;
   @tracked showModal2 = false;
   @tracked showModal3 = false;
+  @tracked showModal4 = false;
 
   @tracked businessUnitName: string = '';
   @tracked BUIsBeingCreated = false;
@@ -38,6 +39,13 @@ export default class AuthenticatedDashboardController extends Controller {
 
   @tracked emails: HermesUser[] = [];
   @tracked AdminisBeingCreated = false;
+
+  @tracked ProjectBU: string = '';
+  @tracked ProjectTeamName: string = "";
+  @tracked ProjectIsBeingCreated = false;
+  @tracked ProjectName: string | null = null;
+
+  @tracked selectedBU: string | null = null;
 
 
   @action
@@ -53,6 +61,11 @@ export default class AuthenticatedDashboardController extends Controller {
   @action
   toggleModal3() {
     this.toggleProperty('showModal3');
+  }
+
+  @action
+  toggleModal4() {
+    this.toggleProperty('showModal4');
   }
 
    /**
@@ -72,7 +85,8 @@ export default class AuthenticatedDashboardController extends Controller {
 
 
   @action
-  updateSelectedBU(selectedBU) {
+  updateSelectedBU(selectedBU: string) {
+    this.selectedBU = selectedBU;
     // Trigger the necessary actions, such as fetching filtered teams
     // ...
   }
@@ -82,6 +96,15 @@ export default class AuthenticatedDashboardController extends Controller {
     productName,
   ) {
     this.TeamBU = productName;
+    this.ProjectBU = productName;
+    // This is for filtering the teams based on BU
+    this.selectedBU = productName;
+  }
+
+  @action protected onTeamSelect(
+    teamName: string,
+  ) {
+    this.ProjectTeamName = teamName;
   }
 
   /**
@@ -272,6 +295,75 @@ export default class AuthenticatedDashboardController extends Controller {
 
     // Clear the form fields
     this.emails = "";
+  }
+
+
+   /**
+   * Creates a Project, then redirects to the dashboard.
+   * On error, show a flashMessage and allow users to try again.
+   */
+   private createProject: TaskForAsyncTaskFunction<unknown, () => Promise<void>> = task(async () => {
+    this.ProjectIsBeingCreated= true;
+    try {
+      const prj = await this.fetchSvc
+          .fetch("/api/v1/projects", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              name: this.ProjectName,
+              team: this.ProjectTeamName,
+            }),
+          })
+          .then((response) => response?.json());
+
+      // Wait for document to be available.
+      await timeout(AWAIT_DOC_DELAY);
+
+      this.router.transitionTo("authenticated.dashboard");
+      this.toggleModal4();
+      this.flashMessages.add({
+        title: "Success",
+        message: `New Project has been created Succesfully`,
+        type: "success",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+    } catch (err) {
+      this.toggleModal4();
+      this.ProjectIsBeingCreated = false;
+      this.flashMessages.add({
+        title: "Error creating new Project",
+        message: `${err}`,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+    } finally {
+      // Hide spinning wheel or loading state
+      this.set('ProjectIsBeingCreated', false);
+    }
+  });
+
+  /* method to subbit the create a new Project form*/
+  @action  submitFormProject(event: SubmitEvent) {
+    // Show spinning wheel or loading state
+    this.set('ProjectIsBeingCreated', true);
+    event.preventDefault();
+
+    const formElement = event.target;
+    const formData = new FormData(formElement);
+    const formObject = Object.fromEntries(formData.entries());
+
+    // Do something with the form values
+    this.ProjectName = formObject['project-name'];
+
+    // now post this info
+    this.createProject.perform();
+
+    // Clear the form fields
+    this.ProjectName  = "";
+    this.ProjectBU = "";
+    this.ProjectTeamName = "";
   }
 
 }
