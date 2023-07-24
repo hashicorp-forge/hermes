@@ -38,16 +38,19 @@
     <div class="user-buttons">
       <Hds::Button
         @route="authenticated.new"
-        @isIconOnly={{true}}
-        @text="Create draft"
-        @icon="file-plus"
-        class="create-draft-button"
+        {{!-- @isIconOnly={{true}} --}}
+        @text="New Doc"
+        {{!-- @icon="file-plus" --}}
+        {{!-- class="create-draft-button" --}}
+        class="navbar-button"
       />
 
       <Hds::Button
-      @icon ="folder-users"
-      @isIconOnly={{true}}
+      {{!-- @icon ="folder-users" --}}
+      {{!-- @isIconOnly={{true}} --}}
+      @text="Directory"
       @color="secondary"
+      class="navbar-button"
       {{on "click"  (fn this.toggleModal)}}
     />
 
