@@ -22,13 +22,15 @@
               <H.Th class="product">Product/Area</H.Th>
               <H.Th class="owner">Owner</H.Th>
               <H.Th class="created">Created</H.Th>
+              <H.Th class="created">Due Date</H.Th>
             </H.Tr>
           </:head>
           <:body>
             {{#each @docs as |doc index|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
-                @createdDate="{{parse-date doc.created}}"
+                {{!-- @createdDate="{{parse-date doc.created}}" --}}
+                @createdDate="{{doc.created}}"
                 @docID="{{doc.objectID}}"
                 @docNumber="{{doc.docNumber}}"
                 @docType="{{doc.docType}}"
@@ -37,6 +39,7 @@
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
                 @isDraft={{@isDraft}}
+                @dueDate="{{doc.dueDate}}"
               />
             {{/each}}
           </:body>

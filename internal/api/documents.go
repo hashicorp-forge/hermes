@@ -23,6 +23,7 @@ import (
 // to be updated with a PATCH request.
 type DocumentPatchRequest struct {
 	Reviewers    []string `json:"reviewers,omitempty"`
+	DueDate      string   `json:"dueDate,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	Status       string   `json:"status,omitempty"`
 	Summary      string   `json:"summary,omitempty"`
@@ -212,17 +213,17 @@ func DocumentHandler(
 			)
 
 		case "PATCH":
-			canPatchDocument:=true
+			canPatchDocument := true
 			// Authorize request (only the owner can PATCH the doc).
 			userEmail := r.Context().Value("userEmail").(string)
 			for _, reviewer := range docObj.GetReviewers() {
-				if reviewer==userEmail {
-					canPatchDocument=false
+				if reviewer == userEmail {
+					canPatchDocument = false
 					break
 				}
 			}
-			if userEmail==docObj.GetOwners()[0] {
-				canPatchDocument=false
+			if userEmail == docObj.GetOwners()[0] {
+				canPatchDocument = false
 			}
 
 			if canPatchDocument {

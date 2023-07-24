@@ -26,7 +26,8 @@ import (
 )
 
 type DraftsRequest struct {
-	Reviewers    []string `json:"approvers,omitempty"`
+	Reviewers    []string `json:"reviewers,omitempty"`
+	DueDate      string   `json:"dueDate,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	DocType      string   `json:"docType,omitempty"`
 	Product      string   `json:"product,omitempty"`
@@ -40,6 +41,7 @@ type DraftsRequest struct {
 // be updated with a PATCH request.
 type DraftsPatchRequest struct {
 	Reviewers    []string `json:"reviewers,omitempty"`
+	DueDate      string   `json:"dueDate,omitempty"`
 	Contributors []string `json:"contributors,omitempty"`
 	Product      string   `json:"product,omitempty"`
 	Team         string   `json:"team,omitempty"`
@@ -278,6 +280,7 @@ func DraftsHandler(
 			d := models.Document{
 				GoogleFileID:       f.Id,
 				Reviewers:          reviewers,
+				DueDate:            req.DueDate,
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
 				DocumentModifiedAt: createdTime,

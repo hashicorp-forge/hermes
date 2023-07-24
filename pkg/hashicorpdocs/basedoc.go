@@ -29,6 +29,9 @@ type BaseDoc struct {
 	// are requested for the document.
 	Reviewers []string `json:"reviewers,omitempty"`
 
+	// last date to review a doc for a reviewer
+	DueDate string `json:"dueDate,omitempty"`
+
 	// ChangesRequestedBy is a slice of email address strings for users that have
 	// requested changes for the document.
 	ChangesRequestedBy []string `json:"changesRequestedBy,omitempty"`
@@ -106,6 +109,10 @@ func (d BaseDoc) GetReviewedBy() []string {
 
 func (d BaseDoc) GetReviewers() []string {
 	return d.Reviewers
+}
+
+func (d BaseDoc) GetDueDate() string {
+	return d.DueDate
 }
 
 func (d BaseDoc) GetChangesRequestedBy() []string {

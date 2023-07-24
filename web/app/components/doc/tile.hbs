@@ -33,6 +33,30 @@
     @text={{this.productAreaName}}
     @icon={{or (get-product-id this.this.args.productArea) "folder"}}
   />
+  {{#if (not (is-empty @dueDate))}}
+    {{#if @showColorBadge}}
+      {{#if this.isDueDateOverdue}}
+        <Hds::Badge
+          @color="critical"
+          @text="Due Date : {{dateformat @dueDate}}"
+        />
+      {{else if this.isDueDateToday}}
+        <Hds::Badge
+          @color="warning"
+          @text="Due Date : {{dateformat @dueDate}}"
+        />
+      {{else}}
+        <Hds::Badge
+          @color="success"
+          @text="Due Date : {{dateformat @dueDate}}"
+        />
+      {{/if}}
+    {{else}}
+      <Hds::Badge @text="Due Date : {{dateformat @dueDate}}" />
+    {{/if}}
+  {{else}}
+    <Hds::Badge @text="No Due Date" />
+  {{/if}}
 
   {{#if (and @isResult @snippet)}}
     <Doc::Snippet @snippet={{@snippet}} class="pt-2" />

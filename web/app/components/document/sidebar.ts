@@ -61,6 +61,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked summary = this.args.document.summary || "";
   @tracked contributors = this.args.document.contributors || [];
   @tracked reviewers = this.args.document.reviewers || [];
+  @tracked dueDate = this.args.document.dueDate || "";
   @tracked product = this.args.document.product || "";
   @tracked team = this.args.document.team || "";
 
@@ -165,7 +166,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // hasReviewed returns true if the logged in user has reviewed the document.
   get hasReviewed() {
     let reviewedReviewers: string[] = this.args.document.reviewedBy ?? [];
-    let res= reviewedReviewers.includes(this.args.profile.email);
+    let res = reviewedReviewers.includes(this.args.profile.email);
     return res;
   }
 
@@ -255,6 +256,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   updateTeam = restartableTask(async (team: string) => {
     this.team = team;
     await this.save.perform("team", this.team);
+    // productAbbreviation is computed by the back end
+  });
+
+  updateDueDate = restartableTask(async (date: string) => {
+    this.dueDate = date;
+    await this.save.perform("dueDate", this.dueDate);
     // productAbbreviation is computed by the back end
   });
 

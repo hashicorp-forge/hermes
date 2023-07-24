@@ -37,4 +37,11 @@
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
   </Hds::Table::Td>
   <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
+  <Hds::Table::Td class="created">
+    {{#if (not (is-empty @dueDate))}}
+    {{dateformat @dueDate}}
+    {{else}}
+    No Due Date
+    {{/if}}
+    </Hds::Table::Td>
 </Hds::Table::Tr>

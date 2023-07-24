@@ -95,7 +95,8 @@ export default class DocumentRoute extends Route {
     }
 
     if (!!doc.createdTime) {
-      doc.createdDate = parseDate(doc.createdTime * 1000, "long");
+      // doc.createdDate = parseDate(doc.createdTime * 1000, "long");
+      doc.createdDate=doc.created;
     }
 
     // Build strings for created and last-modified.

@@ -23,6 +23,8 @@ type Document struct {
 	// document.
 	Reviewers []*User `gorm:"many2many:document_reviews;"`
 
+	// last date to review a doc for a reviewer
+	DueDate string 
 	// Contributors are users who have contributed to the document.
 	Contributors []*User `gorm:"many2many:document_contributors;"`
 

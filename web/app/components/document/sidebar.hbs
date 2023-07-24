@@ -280,6 +280,47 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Due Date</small>
+          {{#if this.editingIsDisabled}}
+            <p
+              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+            >{{dateformat @document.dueDate}}</p>
+          {{else}}
+            <EditableField
+              @value={{@document.dueDate}}
+              @onChange={{perform this.save "dueDate"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#unless (is-empty @document.dueDate)}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+                  >
+                    {{dateformat @document.dueDate}}</p>
+                {{else}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
+                  >
+                    Enter due date here</p>
+                {{/unless}}
+              </:default>
+              <:editing as |F|>
+              <Hds::Form::TextInput::Field
+                  id="user-question"
+                  @type="date"
+                  @value={{F.value}}
+                  {{on "blur" F.update}}
+                  as |F|
+                />
+              </:editing>
+            </EditableField>
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
           <small class="hds-typography-body-100 hds-foreground-faint">
             Created
           </small>

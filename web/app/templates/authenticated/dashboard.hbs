@@ -1,236 +1,258 @@
 {{page-title "Dashboard"}}
 
-<Header/>
- <section class="x-container">
+<Header />
+<section class="x-container">
   <div class="hds-border-primary border-0 border-b pb-9">
-    <h1>Welcome back, {{this.authenticatedUser.info.given_name}} 
+    <h1>Welcome back,
+      {{this.authenticatedUser.info.given_name}}
       {{#if (eq this.authenticatedUser.info.role "Admin")}}
-        <Hds::Badge @text="Admin" @size="large" @type="inverted" @size="small" icon="user" @color="highlight"/>
+        <Hds::Badge
+          @text="Admin"
+          @size="large"
+          @type="inverted"
+          @size="small"
+          icon="user"
+          @color="highlight"
+        />
       {{/if}}
     </h1>
-     
-       {{#if (eq this.authenticatedUser.info.role "Admin")}}
-       <br>
-         <Hds::ButtonSet>
-  <Hds::Button
+
+    {{#if (eq this.authenticatedUser.info.role "Admin")}}
+      <br />
+      <Hds::ButtonSet>
+        <Hds::Button
           @text="Add BU"
           @icon="org"
           @color="secondary"
-          {{on "click"  (fn this.toggleModal1)}}
-  />
+          {{on "click" (fn this.toggleModal1)}}
+        />
 
-  <Hds::Button
+        <Hds::Button
           @text="Team/Pod"
           @icon="user-plus"
           @color="secondary"
-          {{on "click"  (fn this.toggleModal2)}}
-  />
+          {{on "click" (fn this.toggleModal2)}}
+        />
 
-   <Hds::Button
+        <Hds::Button
           @text="Admin"
           @icon="identity-user"
           @color="critical"
-          {{on "click"  (fn this.toggleModal3)}}
-  />
+          {{on "click" (fn this.toggleModal3)}}
+        />
 
-  </Hds::ButtonSet>
-  <br>
-      {{/if}}
-  
+      </Hds::ButtonSet>
+      <br />
+    {{/if}}
+
     <p>Here’s all the latest updates across the organization.</p>
   </div>
 
-  {{#if  this.showModal1}}
-  {{#modal-dialog
-  onClose=(action (action (mut  this.showModal1) false))
-  targetAttachment="center"
-  translucentOverlay=true
-  }}
-  <div class="modal-body">
-    <div class="space-y-4" style="text-align: center;">
-      <h4 class="modal-title">Create New Business Unit</h4>
-    </div>
-    <form {{on "submit" this.submitFormBU}}>
-      <div class="mb-4" >
-        <label class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label" for="bu-name">Business Unit Name:
-          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
-            <!---->    <div class="hds-badge__text">
-              Required
+  {{#if this.showModal1}}
+    {{#modal-dialog
+      onClose=(action (action (mut this.showModal1) false))
+      targetAttachment="center"
+      translucentOverlay=true
+    }}
+      <div class="modal-body">
+        <div class="space-y-4" style="text-align: center;">
+          <h4 class="modal-title">Create New Business Unit</h4>
+        </div>
+        <form {{on "submit" this.submitFormBU}}>
+          <div class="mb-4">
+            <label
+              class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label"
+              for="bu-name"
+            >Business Unit Name:
+              <div
+                class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator"
+                aria-hidden="true"
+              >
+                <!---->
+                <div class="hds-badge__text">
+                  Required
+                </div>
+              </div>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-person-fill fs-5"></i>
+              </span>
+              <input
+                type="text"
+                class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"
+                name="bu-name"
+                required
+                placeholder="Enter Business Unit Name"
+                value={{this.businessUnitName}}
+              />
             </div>
           </div>
-        </label>
-        <div class="input-group">
-        <span class="input-group-text">
-          <i class="bi bi-person-fill fs-5"></i>
-        </span>
-          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="bu-name" required placeholder="Enter Business Unit Name" value={{this.businessUnitName}}>
-        </div>
-      </div>
-      <div class="modal-footer" class="space-y-4">
-        <Hds::ButtonSet>
-          {{#if this.BUIsBeingCreated }}
-          <Hds::Button
+          <div class="modal-footer" class="space-y-4">
+            <Hds::ButtonSet>
+              {{#if this.BUIsBeingCreated}}
+                <Hds::Button
                   @isIconOnly={{true}}
                   @text="Submit"
                   @icon="loading"
-          />
-          {{else}}
-          <Hds::Button
-                  @text="Submit"
-                  type="submit"
-          />
-          {{/if}}
-          <Hds::Button
-                  @text="Cancel"
-                  @color="critical"
-                  {{on "click" (fn  this.toggleModal1 false)}}
-          />
-        </Hds::ButtonSet>
+                />
+              {{else}}
+                <Hds::Button @text="Submit" type="submit" />
+              {{/if}}
+              <Hds::Button
+                @text="Cancel"
+                @color="critical"
+                {{on "click" (fn this.toggleModal1 false)}}
+              />
+            </Hds::ButtonSet>
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
 
-  {{/modal-dialog}}
+    {{/modal-dialog}}
   {{/if}}
-
 
   {{#if this.showModal2}}
     {{#modal-dialog
-  onClose=(action (action (mut this.showModal2) false))
-  targetAttachment="center"
-  translucentOverlay=true
-  }}
-  <div class="modal-body">
-    <div class="space-y-4" style="text-align: center;">
-      <h4 class="modal-title">Create New Team/Pod</h4>
-    </div>
-    <form {{on "submit" this.submitFormteam}}>
-      <div class="mb-4" >
-        <label class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label" for="team-name">Team Name:
-          <div class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator" aria-hidden="true">
-            <!---->    <div class="hds-badge__text">
-              Required
+      onClose=(action (action (mut this.showModal2) false))
+      targetAttachment="center"
+      translucentOverlay=true
+    }}
+      <div class="modal-body">
+        <div class="space-y-4" style="text-align: center;">
+          <h4 class="modal-title">Create New Team/Pod</h4>
+        </div>
+        <form {{on "submit" this.submitFormteam}}>
+          <div class="mb-4">
+            <label
+              class="hds-form-label hds-typography-body-200 hds-font-weight-semibold hds-form-field__label"
+              for="team-name"
+            >Team Name:
+              <div
+                class="hds-badge hds-badge--size-small hds-badge--type-filled hds-badge--color-neutral hds-form-indicator"
+                aria-hidden="true"
+              >
+                <!---->
+                <div class="hds-badge__text">
+                  Required
+                </div>
+              </div>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-person-fill fs-5"></i>
+              </span>
+              <input
+                type="text"
+                class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"
+                name="team-name"
+                required
+                placeholder="Enter Team/Pod Name"
+              />
             </div>
           </div>
-        </label>
-        <div class="input-group">
-        <span class="input-group-text">
-          <i class="bi bi-person-fill fs-5"></i>
-        </span>
-          <input type="text" class="hds-form-text-input hds-typography-body-200 hds-font-weight-regular hds-form-field__control"  name="team-name" required placeholder="Enter Team/Pod Name" >
-        </div>
-      </div>
-         <div class="mb-4">
-          <div class="mb-2">
-            <span class="hermes-form-label">
-              Business Unit/BU &nbsp;
-              <Hds::Badge @size="small" @text="Required" />
-            </span>
-            <span class="hermes-form-helper-text hds-form-helper-text">
-              Where your Team shall be made
-            </span>
+          <div class="mb-4">
+            <div class="mb-2">
+              <span class="hermes-form-label">
+                Business Unit/BU &nbsp;
+                <Hds::Badge @size="small" @text="Required" />
+              </span>
+              <span class="hermes-form-helper-text hds-form-helper-text">
+                Where your Team shall be made
+              </span>
+            </div>
+            <Inputs::ProductSelect
+              @selected={{this.TeamBU}}
+              @onChange={{this.onProductSelect}}
+              @onSelectBU={{this.updateSelectedBU}}
+              class="w-[300px]"
+            />
           </div>
-          <Inputs::ProductSelect
-            @selected={{this.TeamBU}}
-            @onChange={{this.onProductSelect}}
-            @onSelectBU={{this.updateSelectedBU}}
-            class="w-[300px]"
-          />
-        </div>
 
-
-
-      <div class="modal-footer" class="space-y-4">
-        <Hds::ButtonSet>
-          {{#if this.TeamIsBeingCreated }}
-          <Hds::Button
+          <div class="modal-footer" class="space-y-4">
+            <Hds::ButtonSet>
+              {{#if this.TeamIsBeingCreated}}
+                <Hds::Button
                   @isIconOnly={{true}}
                   @text="Submit"
                   @icon="loading"
-          />
-          {{else}}
-          <Hds::Button
-                  @text="Submit"
-                  type="submit"
-          />
-          {{/if}}
-          <Hds::Button
-                  @text="Cancel"
-                  @color="critical"
-                  {{on "click" (fn this.toggleModal2 false)}}
-          />
-        </Hds::ButtonSet>
+                />
+              {{else}}
+                <Hds::Button @text="Submit" type="submit" />
+              {{/if}}
+              <Hds::Button
+                @text="Cancel"
+                @color="critical"
+                {{on "click" (fn this.toggleModal2 false)}}
+              />
+            </Hds::ButtonSet>
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
 
-  {{/modal-dialog}}
+    {{/modal-dialog}}
   {{/if}}
 
-
-  {{#if  this.showModal3}}
-  {{#modal-dialog
-  onClose=(action (action (mut  this.showModal3) false))
-  targetAttachment="center"
-  translucentOverlay=true
-  }}
-  <div class="modal-body">
-    <div class="space-y-4" style="text-align: center;">
-      <h4 class="modal-title">Make Someone Admin</h4>
-    </div>
-    <form {{on "submit" this.submitFormMakemeAdmin}}>
-      <div class="mb-4" >
-        <Hds::Form::Field @layout="vertical" as |F|>
-          {{yield
-            (hash
-              Error=F.Error
-              HelperText=F.HelperText
-              Label=F.Label
-              isRequired=F.isRequired
-              isOptional=F.isOptional
-            )
-          }}
-          <F.Control>
-            <Inputs::PeopleSelect
-              class="multiselect mt-2 w-auto"
-              @selected={{this.emails}}
-              @onChange={{this.updateemails}}
-            />
-          </F.Control>
-          <F.Label>
-            <FlightIcon @name="users" />
-            Select Admin/Admins
-          </F.Label>
-          <F.HelperText>
-            Doing this will give them all Admin Priveleges.
-          </F.HelperText>
-        </Hds::Form::Field>
-      </div>
-      <div class="modal-footer" class="space-y-4">
-        <Hds::ButtonSet>
-          {{#if this.AdminisBeingCreated }}
-          <Hds::Button
+  {{#if this.showModal3}}
+    {{#modal-dialog
+      onClose=(action (action (mut this.showModal3) false))
+      targetAttachment="center"
+      translucentOverlay=true
+    }}
+      <div class="modal-body">
+        <div class="space-y-4" style="text-align: center;">
+          <h4 class="modal-title">Make Someone Admin</h4>
+        </div>
+        <form {{on "submit" this.submitFormMakemeAdmin}}>
+          <div class="mb-4">
+            <Hds::Form::Field @layout="vertical" as |F|>
+              {{yield
+                (hash
+                  Error=F.Error
+                  HelperText=F.HelperText
+                  Label=F.Label
+                  isRequired=F.isRequired
+                  isOptional=F.isOptional
+                )
+              }}
+              <F.Control>
+                <Inputs::PeopleSelect
+                  class="multiselect mt-2 w-auto"
+                  @selected={{this.emails}}
+                  @onChange={{this.updateemails}}
+                />
+              </F.Control>
+              <F.Label>
+                <FlightIcon @name="users" />
+                Select Admin/Admins
+              </F.Label>
+              <F.HelperText>
+                Doing this will give them all Admin Priveleges.
+              </F.HelperText>
+            </Hds::Form::Field>
+          </div>
+          <div class="modal-footer" class="space-y-4">
+            <Hds::ButtonSet>
+              {{#if this.AdminisBeingCreated}}
+                <Hds::Button
                   @isIconOnly={{true}}
                   @text="Submit"
                   @icon="loading"
-          />
-          {{else}}
-          <Hds::Button
-                  @text="Submit"
-                  type="submit"
-          />
-          {{/if}}
-          <Hds::Button
-                  @text="Cancel"
-                  @color="critical"
-                  {{on "click" (fn  this.toggleModal3 false)}}
-          />
-        </Hds::ButtonSet>
+                />
+              {{else}}
+                <Hds::Button @text="Submit" type="submit" />
+              {{/if}}
+              <Hds::Button
+                @text="Cancel"
+                @color="critical"
+                {{on "click" (fn this.toggleModal3 false)}}
+              />
+            </Hds::ButtonSet>
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
 
-  {{/modal-dialog}}
+    {{/modal-dialog}}
   {{/if}}
 
   {{#if this.docsWaitingForReview}}
@@ -255,6 +277,8 @@
               @productArea="{{doc.product}}"
               @status="{{lowercase doc.status}}"
               @title="{{doc.title}}"
+              @dueDate="{{doc.dueDate}}"
+              @showColorBadge={{true}}
             />
           {{/if}}
         {{/each}}
@@ -284,6 +308,8 @@
             @productArea={{r.doc.product}}
             @status={{lowercase r.doc.status}}
             @title={{r.doc.title}}
+            @dueDate={{r.doc.dueDate}}
+            @showColorBadge={{false}}
           />
         {{/each}}
       </div>
