@@ -382,6 +382,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * Whether the footer controls are disabled.
+   * True if the doc is locked or was created off-app.
+   * Determines if we show controls like "approve" and "request changes"
+   * or a message explaining their absence.
+   */
+  protected get footerControlsAreDisabled() {
+    if (this.docIsLocked || !this.args.document.appCreated) {
+      return true;
+    }
+  }
+
+  /**
    * Whether the footer is shown.
    * True for editors who may need to see the "doc is locked" message,
    * as well as approvers and owners who need doc-management controls.
