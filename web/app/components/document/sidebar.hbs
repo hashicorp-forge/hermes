@@ -209,10 +209,9 @@
             />
           </div>
         {{else}}
-          <Hds::Badge
+          <ProductBadgeLink
             data-test-document-product-area-read-only
-            @text={{@document.product}}
-            @icon={{get-product-id @document.product}}
+            @productArea={{@document.product}}
           />
         {{/if}}
       </div>

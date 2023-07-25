@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 interface DocSnippetComponentSignature {
   Element: HTMLParagraphElement;
   Args: {
-    snippet: string;
+    snippet?: string;
   };
 }
 
