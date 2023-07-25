@@ -113,13 +113,18 @@ export default class WaitingForMeRoute extends Route {
     }
 
     docsWaitingForReview._result = docsWaitingForReview._result.sort((a, b) => {
+
+      // Use optional chaining to access the 'dueDate' property safely
+      const dueDateA = a.dueDate?.toString()||"";
+      const dueDateB = b.dueDate?.toString()||"";
+
       // Check if 'dueDate' property exists in both 'a' and 'b'
-      if (a.dueDate && b.dueDate) {
-        return a.dueDate.localeCompare(b.dueDate);
-      } else if (a.dueDate) {
+      if (dueDateA && dueDateB) {
+        return dueDateA.localeCompare(dueDateB);
+      } else if (dueDateA) {
         // If 'dueDate' exists in 'a' but not in 'b', consider 'a' to come before 'b'
         return -1;
-      } else if (b.dueDate) {
+      } else if (dueDateB) {
         // If 'dueDate' exists in 'b' but not in 'a', consider 'b' to come before 'a'
         return 1;
       } else {
@@ -127,7 +132,7 @@ export default class WaitingForMeRoute extends Route {
         return 0;
       }
     });
-    
+
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,
       docsReviewed: docsReviewed,
