@@ -79,9 +79,21 @@ export default class DashboardRoute extends Route {
         this.recentDocs.all = null;
       }
     }
-    docsWaitingForReview._result = docsWaitingForReview._result.sort((a, b) =>
-      a.dueDate.localeCompare(b.dueDate)
-    );
+    docsWaitingForReview._result = docsWaitingForReview._result.sort((a, b) => {
+      // Check if 'dueDate' property exists in both 'a' and 'b'
+      if (a.dueDate && b.dueDate) {
+        return a.dueDate.localeCompare(b.dueDate);
+      } else if (a.dueDate) {
+        // If 'dueDate' exists in 'a' but not in 'b', consider 'a' to come before 'b'
+        return -1;
+      } else if (b.dueDate) {
+        // If 'dueDate' exists in 'b' but not in 'a', consider 'b' to come before 'a'
+        return 1;
+      } else {
+        // If 'dueDate' doesn't exist in both 'a' and 'b', maintain their original order
+        return 0;
+      }
+    });
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,
     });
