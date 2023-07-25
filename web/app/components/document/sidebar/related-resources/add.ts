@@ -23,7 +23,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
   Args: {
     onClose: () => void;
     addResource: (resource: RelatedResource) => void;
-    shownDocuments: Record<string, HermesDocument>;
+    algoliaResults: Record<string, HermesDocument>;
     objectID?: string;
     relatedDocuments: RelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
@@ -33,15 +33,13 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
       shouldIgnoreDelay?: boolean,
       options?: SearchOptions
     ) => Promise<void>;
-    getObject: (
-      dd: XDropdownListAnchorAPI | null,
-      id: string
-    ) => Promise<HermesDocument | undefined>;
+    getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
     allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
     searchIsRunning?: boolean;
+    resetAlgoliaResults: () => void;
   };
   Blocks: {
     default: [];
@@ -115,7 +113,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     if (this.linkIsDuplicate) {
       return {};
     }
-    return this.args.shownDocuments;
+    return this.args.algoliaResults;
   }
 
   protected get queryIsExternalURL() {
@@ -127,14 +125,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * May determine whether the list header (e.g., "suggestions," "results") is shown.
    */
   private get noMatchesFound(): boolean {
-    const objectEntriesLengthIsZero =
-      Object.entries(this.args.shownDocuments).length === 0;
-
-    if (this.args.allowAddingExternalLinks) {
-      return objectEntriesLengthIsZero && this.queryIsFirstPartyURL(this.query);
-    } else {
-      return objectEntriesLengthIsZero;
-    }
+    return Object.entries(this.args.algoliaResults).length === 0;
   }
 
   private get shortLinkBaseURL() {
@@ -393,9 +384,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
             return;
         }
       }
-      this.queryType = RelatedResourceQueryType.ExternalLink;
-      return;
+
+      if (this.args.allowAddingExternalLinks) {
+        this.queryType = RelatedResourceQueryType.ExternalLink;
+        return;
+      }
     }
+
     this.queryType = RelatedResourceQueryType.AlgoliaSearch;
   }
 
@@ -428,8 +423,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
         void this.searchWithFilters.perform();
         break;
       case RelatedResourceQueryType.ExternalLink:
+        this.args.resetAlgoliaResults();
         this.checkForDuplicate(this.query);
-
         break;
     }
   }
@@ -467,34 +462,46 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const docType = urlParts[urlParts.length - 2];
     const docNumber = urlParts[urlParts.length - 1];
 
-    if (!docType || !docNumber) {
-      handleAsExternalLink();
-      return;
+    const hasTypeAndNumber = docType && docNumber;
+
+    if (this.args.allowAddingExternalLinks) {
+      if (!hasTypeAndNumber) {
+        handleAsExternalLink();
+        return;
+      }
     }
 
-    // TODO: duplicate resources are being treated like external links
+    const filterString = docNumber || this.query;
+    const optionalFilters = docNumber
+      ? [`docType:"${docType}" AND docNumber:"${docNumber}"`]
+      : [];
 
-    const filterString = docNumber;
-    // TODO: Confirm that this returns accurate results.
     try {
       await this.args.search(this.dd, filterString, true, {
         hitsPerPage: 1,
-        optionalFilters: [`docType:"${docType}" AND docNumber:"${docNumber}"`],
+        optionalFilters,
       });
 
-      if (this.noMatchesFound) {
-        handleAsExternalLink();
-      }
-    } catch (e: unknown) {
-      const typedError = e as { status?: number };
+      // This will update the `shownDocuments` object
+      // need to check the value of the first key
+      const firstResult = Object.values(
+        this.shownDocuments
+      )[0] as HermesDocument;
 
-      if (typedError.status) {
-        if (typedError.status === 404) {
+      if (this.noMatchesFound) {
+        if (this.args.allowAddingExternalLinks) {
           handleAsExternalLink();
           return;
         }
       }
-      // TODO: confirm that this triggers a `@searchErrorIsShown` update
+
+      this.checkForDuplicate(firstResult?.objectID, true);
+
+      if (this.linkIsDuplicate) {
+        return;
+      }
+    } catch (e: unknown) {
+      // TODO: Confirm what happens in this case
       throw e;
     }
   });
@@ -514,17 +521,9 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     try {
       await this.args.getObject(this.dd, id);
     } catch (e: unknown) {
-      const typedError = e as { status?: number };
-
-      if (typedError.status) {
-        if (typedError.status === 404) {
-          this.queryType = RelatedResourceQueryType.ExternalLink;
-          this.handleQuery();
-          return;
-        }
-      }
-      // TODO: confirm that this triggers a `@searchErrorIsShown` update
-      throw e;
+      this.queryType = RelatedResourceQueryType.ExternalLink;
+      this.handleQuery();
+      return;
     }
   });
 

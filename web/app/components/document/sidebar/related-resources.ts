@@ -186,16 +186,29 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    */
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
-      let algoliaResponse = await this.algolia.getObject.perform(objectID);
-      if (algoliaResponse) {
-        this._algoliaResults = [algoliaResponse] as unknown as HermesDocument[];
-        if (dd) {
-          dd.resetFocusedItemIndex();
+      try {
+        let algoliaResponse = await this.algolia.getObject.perform(objectID);
+        if (algoliaResponse) {
+          this._algoliaResults = [
+            algoliaResponse,
+          ] as unknown as HermesDocument[];
+          if (dd) {
+            dd.resetFocusedItemIndex();
+          }
+          if (dd) {
+            next(() => {
+              dd.scheduleAssignMenuItemIDs();
+            });
+          }
         }
-        if (dd) {
-          next(() => {
-            dd.scheduleAssignMenuItemIDs();
-          });
+      } catch (e: unknown) {
+        const typedError = e as { status?: number };
+        if (typedError.status === 404) {
+          // This means the document wasn't found.
+          // Throw the error and let the child component handle it.
+          throw e;
+        } else {
+          this.handleSearchError(e);
         }
       }
     }
@@ -287,14 +300,18 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           await timeout(Ember.testing ? 0 : 200);
         }
       } catch (e: unknown) {
-        // This will trigger the "no matches" block,
-        // which is where we're displaying the error.
-        this._algoliaResults = null;
-        this.searchErrorIsShown = true;
-        console.error(e);
+        this.handleSearchError(e);
       }
     }
   );
+
+  @action private handleSearchError(e: unknown) {
+    // This will trigger the "no matches" block,
+    // which is where we're displaying the error.
+    this.resetAlgoliaResults();
+    this.searchErrorIsShown = true;
+    console.error("Algolia search failed", e);
+  }
 
   /**
    * The action run when the "add resource" plus button is clicked.
@@ -363,6 +380,15 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     );
 
     this.hideAddResourceModal();
+  }
+
+  /**
+   * The action to set the locally tracked Algolia results to null.
+   * Used in template computations when a search fails, or when a link is
+   * recognized as an external resource by a child component.
+   */
+  @action protected resetAlgoliaResults() {
+    this._algoliaResults = null;
   }
 
   /**

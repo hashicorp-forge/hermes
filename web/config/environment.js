@@ -74,6 +74,8 @@ module.exports = function (environment) {
   };
 
   if (environment === "development") {
+    ENV.shortLinkBaseURL = "https://go.hashi.co";
+
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
@@ -82,6 +84,8 @@ module.exports = function (environment) {
   }
 
   if (environment === "test") {
+    ENV.shortLinkBaseURL = "https://go.hashi.co";
+
     // Testem prefers this...
     ENV.locationType = "none";
 

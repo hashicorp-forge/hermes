@@ -47,13 +47,14 @@
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideAddResourceModal}}
     @addResource={{this.addResource}}
-    @shownDocuments={{this.algoliaResults}}
+    @algoliaResults={{this.algoliaResults}}
     @objectID={{@objectID}}
     @relatedDocuments={{this.relatedDocuments}}
     @relatedLinks={{this.relatedLinks}}
     @allowAddingExternalLinks={{@allowAddingExternalLinks}}
     @search={{perform this.search}}
     @getObject={{perform this.getObject}}
+    @resetAlgoliaResults={{this.resetAlgoliaResults}}
     @searchErrorIsShown={{this.searchErrorIsShown}}
     @searchIsRunning={{this.search.isRunning}}
   />
