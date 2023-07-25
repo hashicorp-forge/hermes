@@ -47,9 +47,25 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
 }
 
 enum RelatedResourceQueryType {
+  /**
+   * The default query type. Used for document searches.
+   */
   AlgoliaSearch = "algoliaSearch",
+
+  /**
+   * Used for shortLink URLs. Searches Algolia with filters
+   * as parsed by its docType and docNumber.
+   */
   AlgoliaSearchWithFilters = "algoliaSearchWithFilters",
+
+  /**
+   * Used for full Hermes URLs. Used to query Algolia by :document_id.
+   */
   AlgoliaGetObject = "algoliaGetObject",
+
+  /**
+   * Used for external, URLs and Hermes searches that return no results.
+   */
   ExternalLink = "externalLink",
 }
 
@@ -63,9 +79,23 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
 
+  /**
+   * The query type, determined onInput. Dictates how the query is handled.
+   */
   @tracked queryType = RelatedResourceQueryType.AlgoliaSearch;
+
+  /**
+   * The format of the first-party URL, if the query is one.
+   * Used to determine how to handle the query: Short links are treated
+   * as a search with filters, while full URLs are handled as getObject requests.
+   */
   @tracked firstPartyURLFormat: FirstPartyURLFormat | null = null;
 
+  /**
+   * A local duplicate of the XDropdownListAnchorAPI.
+   * Registered when the search input is inserted.
+   * Asserted true by its sibling getter.
+   */
   @tracked private _dd: XDropdownListAnchorAPI | null = null;
 
   /**
@@ -109,13 +139,20 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    */
   @tracked externalLinkTitleErrorIsShown = false;
 
-  protected get shownDocuments() {
+  /**
+   * The documents shown in the Algolia results list.
+   */
+  protected get algoliaResults(): Record<string, HermesDocument> {
     if (this.linkIsDuplicate) {
       return {};
     }
     return this.args.algoliaResults;
   }
 
+  /**
+   * Whether the query is an external URL.
+   * Used as a shorthand check when determining layout and behavior.
+   */
   protected get queryIsExternalURL() {
     return this.queryType === RelatedResourceQueryType.ExternalLink;
   }
@@ -128,10 +165,17 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     return Object.entries(this.args.algoliaResults).length === 0;
   }
 
-  private get shortLinkBaseURL() {
+  /**
+   * The app's configured shortLinkBaseURL if it exists.
+   * Used to determine whether a URL is a first-party shortLink.
+   */
+  private get shortLinkBaseURL(): string | undefined {
     return this.configSvc.config.short_link_base_url;
   }
 
+  /**
+   * An asserted-true reference to the XDropdownListAnchorAPI.
+   */
   private get dd(): XDropdownListAnchorAPI {
     assert("dd expected", this._dd);
     return this._dd;
@@ -142,10 +186,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True unless the query is a URL and adding external links is allowed.
    */
   protected get listIsShown(): boolean {
-    // we don't want to necessarily gate this behind `allowAddingExternalLinks`
-    // since we now have the concept of first-party URLs that we can search for.
-    // TODO: Handle this logic.
-
     if (this.args.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     } else {
@@ -153,6 +193,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
+  /**
+   * The message to show in the "<:no-matches>" block
+   * when the query errors, detects a duplicate, or returns no results.
+   */
   protected get noMatchesMessage() {
     if (this.args.searchErrorIsShown) {
       return "Search error. Type to retry.";
@@ -162,6 +206,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
     return "No results found";
   }
+
   /**
    * Whether to show a header above the search results (e.g., "suggestions", "results")
    * True when there's results to show.
@@ -184,6 +229,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
     return true;
   }
+
   /**
    * Whether the query is empty.
    * Helps determine whether the "no results" message.
@@ -224,6 +270,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.keyboardNavIsEnabled = true;
   }
 
+  /**
+   * The action to run when the external link form is submitted.
+   * Validates the title input, then adds the link, if it's not a duplicate.
+   */
   @action onExternalLinkSubmit(e: Event) {
     // Prevent the form from blindly submitting
     e.preventDefault();
@@ -394,6 +444,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.queryType = RelatedResourceQueryType.AlgoliaSearch;
   }
 
+  /**
+   * The action run once the query type is determined.
+   * Calls the appropriate method for the query.
+   */
   @action private handleQuery() {
     switch (this.queryType) {
       case RelatedResourceQueryType.AlgoliaSearch:
@@ -402,23 +456,24 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       case RelatedResourceQueryType.AlgoliaGetObject:
         let docID = this.query.split("/document/").pop();
         if (docID === this.query) {
-          // URL splitting didn't work. Treat the query as an external link.
+          // URL splitting didn't work.
+          // Re-handle the query as an external link.
           this.queryType = RelatedResourceQueryType.ExternalLink;
           this.handleQuery();
           break;
         }
-
         if (docID) {
+          // Trim any trailing query params
           if (docID.includes("?draft=false")) {
             docID = docID.replace("?draft=false", "");
           }
           void this.getAlgoliaObject.perform(docID);
           break;
         } else {
+          // The query looked like a full URL, but
           this.queryType = RelatedResourceQueryType.ExternalLink;
           this.handleQuery();
         }
-
       case RelatedResourceQueryType.AlgoliaSearchWithFilters:
         void this.searchWithFilters.perform();
         break;
@@ -429,6 +484,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     }
   }
 
+  /**
+   * An action to check if is a query is a first-party URL.
+   * Sets the `firstPartyURLFormat` property depending on its assessment.
+   */
   @action private queryIsFirstPartyURL(url: string) {
     if (this.shortLinkBaseURL) {
       if (url.startsWith(this.shortLinkBaseURL)) {
@@ -450,6 +509,11 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     return false;
   }
 
+  /**
+   * An Algolia search for queries identified as first-party shortLinks.
+   * Checks the query for a docType and docNumber, and if they exist,
+   * uses them as filters in the Algolia search.
+   */
   private searchWithFilters = restartableTask(async () => {
     const handleAsExternalLink = () => {
       this.queryType = RelatedResourceQueryType.ExternalLink;
@@ -461,7 +525,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const urlParts = this.query.split("/");
     const docType = urlParts[urlParts.length - 2];
     const docNumber = urlParts[urlParts.length - 1];
-
     const hasTypeAndNumber = docType && docNumber;
 
     if (this.args.allowAddingExternalLinks) {
@@ -476,36 +539,35 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       ? [`docType:"${docType}" AND docNumber:"${docNumber}"`]
       : [];
 
-    try {
-      await this.args.search(this.dd, filterString, true, {
-        hitsPerPage: 1,
-        optionalFilters,
-      });
+    // Errors are handled in the parent method
+    await this.args.search(this.dd, filterString, true, {
+      hitsPerPage: 1,
+      optionalFilters,
+    });
 
-      // This will update the `shownDocuments` object
-      // need to check the value of the first key
-      const firstResult = Object.values(
-        this.shownDocuments
-      )[0] as HermesDocument;
+    // This will update the `shownDocuments` object
+    // need to check the value of the first key
+    const firstResult = Object.values(this.algoliaResults)[0] as HermesDocument;
 
-      if (this.noMatchesFound) {
-        if (this.args.allowAddingExternalLinks) {
-          handleAsExternalLink();
-          return;
-        }
-      }
-
-      this.checkForDuplicate(firstResult?.objectID, true);
-
-      if (this.linkIsDuplicate) {
+    if (this.noMatchesFound) {
+      if (this.args.allowAddingExternalLinks) {
+        handleAsExternalLink();
         return;
       }
-    } catch (e: unknown) {
-      // TODO: Confirm what happens in this case
-      throw e;
+    }
+
+    this.checkForDuplicate(firstResult?.objectID, true);
+
+    if (this.linkIsDuplicate) {
+      return;
     }
   });
 
+  /**
+   * An Algolia getObject request for queries identified as first-party full URLs.
+   * Fetches non-duplicate docs by ID. If the request fails, the query is handled
+   * as an external link.
+   */
   private getAlgoliaObject = restartableTask(async (id: string) => {
     assert(
       "full url format expected",
@@ -521,6 +583,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     try {
       await this.args.getObject(this.dd, id);
     } catch (e: unknown) {
+      // The parent method throws when a 404 is returned.
+      // We catch it here and reprocess the query as an external link.
       this.queryType = RelatedResourceQueryType.ExternalLink;
       this.handleQuery();
       return;

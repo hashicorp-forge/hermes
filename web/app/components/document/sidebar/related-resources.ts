@@ -159,6 +159,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
     return documents;
   }
+
   /**
    * The text passed to the TooltipIcon beside the title.
    */
@@ -305,8 +306,12 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
   );
 
+  /**
+   * The action run when a search errors. Resets the Algolia results
+   * and causes a search error to appear.
+   */
   @action private handleSearchError(e: unknown) {
-    // This will trigger the "no matches" block,
+    // This triggers the "no matches" block,
     // which is where we're displaying the error.
     this.resetAlgoliaResults();
     this.searchErrorIsShown = true;
@@ -347,6 +352,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // The getter doesn't update when a new resource is added, so we manually save it.
       // TODO: Improve this
       this.relatedLinks = this.relatedLinks;
+
       void this.saveRelatedResources.perform(
         this.relatedDocuments,
         cachedLinks,

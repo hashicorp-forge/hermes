@@ -11,7 +11,7 @@
     <M.Body>
       <X::DropdownList
         data-test-add-related-resources-list
-        @items={{this.shownDocuments}}
+        @items={{this.algoliaResults}}
         @onItemClick={{this.onItemClick}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
