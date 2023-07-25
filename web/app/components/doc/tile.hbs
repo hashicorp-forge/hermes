@@ -5,6 +5,11 @@
     @query={{hash draft=@isDraft}}
     class="pb-2 block"
   >
+    {{!
+      We create a click area that extends beyond the edges of its relative container.
+      This makes the parent div clickable without having to wrap itself in a link,
+      and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
+    }}
     <div
       aria-hidden="true"
       class="absolute rounded-md group-hover:bg-color-surface-faint -top-4 -left-4 -right-4 -bottom-6"
@@ -47,7 +52,5 @@
     </div>
   </LinkTo>
 
-  <div class="relative">
-    <ProductBadgeLink @productArea={{@productArea}} />
-  </div>
+  <ProductBadgeLink @productArea={{@productArea}} class="relative" />
 </div>
