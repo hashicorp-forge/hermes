@@ -79,10 +79,12 @@
             data-test-user-menu-item="email-notifications"
             @route="authenticated.settings"
             @text="Email notifications"
-            class={{if
-              this.emailNotificationsHighlightIsShown
-              "highlighted-new"
-            }}
+          />
+          <dd.Interactive
+            data-test-user-menu-item="email-notifications"
+            @route="support"
+            @text="Support"
+            class={{if this.userMenuHighlightIsShown "highlighted-new"}}
           />
           {{#if this.showSignOut}}
             <dd.Interactive

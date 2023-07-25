@@ -14,6 +14,8 @@ interface HeaderNavComponentSignature {
   Args: {};
 }
 
+const LOCAL_STORAGE_KEY = "july-26-2023-supportHighlightIsShown";
+
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
@@ -49,9 +51,8 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * Whether to the "new" badge should appear on the email notifications menuitem.
    * Will be false if the user has previously closed the dropdown.
    */
-  @tracked protected emailNotificationsHighlightIsShown =
-    window.localStorage.getItem("emailNotificationsHighlightIsShown") !==
-    "false";
+  @tracked protected localStorageItemIsFalse =
+    window.localStorage.getItem(LOCAL_STORAGE_KEY) === "false";
 
   /**
    * Whether a highlight icon should appear over the user avatar.
@@ -59,8 +60,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * (i.e., when we've just announced a feature), as determined by localStorage.
    * Set false when the user menu is opened.
    */
-  @tracked protected userMenuHighlightIsShown =
-    this.emailNotificationsHighlightIsShown;
+  @tracked protected userMenuHighlightIsShown = !this.localStorageItemIsFalse;
 
   /**
    * The actions to take when the dropdown menu is opened.
@@ -68,8 +68,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * (We assume the user to have seen the highlight when they open the menu.)
    */
   @action protected onDropdownOpen(): void {
-    this.userMenuHighlightIsShown = false;
-    window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
+    // window.localStorage.setItem(LOCAL_STORAGE_KEY, "false");
   }
 
   /**
@@ -77,7 +76,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * Force-hides the emailNotificationsHighlight if it's visible.
    */
   @action protected onDropdownClose(): void {
-    this.emailNotificationsHighlightIsShown = false;
+    this.userMenuHighlightIsShown = false;
   }
 
   @action protected invalidateSession(): void {
@@ -87,7 +86,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    'Header::Nav': typeof HeaderNavComponent;
+    "Header::Nav": typeof HeaderNavComponent;
   }
 }
-

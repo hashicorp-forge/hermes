@@ -17,3 +17,12 @@
 .truncated-text-container {
   @apply truncate block font-regular text-body-100 text-color-foreground-faint;
 }
+
+.static-text-screen {
+  h2 {
+    @apply text-body-200 flex items-center space-x-2;
+  }
+  p, h4 {
+    @apply text-body-300
+  }
+}

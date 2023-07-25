@@ -1,0 +1,171 @@
+<div class="w-full max-w-2xl mx-auto">
+  <div class="relative flex items-center justify-between w-full h-16">
+    {{! TODO: replace with component }}
+    <LinkTo @route="authenticated.dashboard" class="flex items-center">
+      <FlightIcon class="mr-2" @name="arrow-left" />
+      Dashboard
+    </LinkTo>
+    <LinkTo
+      @route="authenticated.dashboard"
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+    >
+      <HermesLogo />
+    </LinkTo>
+  </div>
+  <Hds::Card::Container
+    @level="high"
+    @hasBorder={{true}}
+    @overflow="visible"
+    class="relative w-full px-16 pt-12 pb-14"
+  >
+    <div class="mb-6 flex w-full justify-between">
+      <h1>Support</h1>
+      {{#if true}}
+        <Hds::Button
+          @text="Chat us on Slack"
+          @icon="slack"
+          {{!-- @color="secondary" --}}
+          {{! @size="small" }}
+          {{!-- @href={{this.slackURL}} --}}
+        />
+      {{/if}}
+    </div>
+    <div class="mb-12">
+      <h2 class="mb-4 hermes-h4">
+        <FlightIcon @name="alert-diamond" />
+        <span>
+          Known limitations
+        </span>
+      </h2>
+      <ul class="space-y-6">
+        <li>
+          {{! <h4>How do I accept document suggestions?</h4> }}
+          <h4>Suggestions must be accepted off-site.</h4>
+          <p>
+            Unfortunately this can't be done yet in Hermes, but you can open
+            your document in Google Docs and accept suggestions there. Look for
+            the
+            <FlightIcon
+              @name="external-link"
+              class="inline-flex mx-2 leading-none"
+            />
+            icon in your document sidebar.
+          </p>
+        </li>
+        <li>
+          <h4>Suggestions in the header will lock your doc.</h4>
+          <p>
+            Remove all comments and suggestions from the header of your doc,
+            then wait 5 minutes and refresh. Get in touch if this fails to
+            resolve the issue.
+          </p>
+        </li>
+        <li>
+          {{! <h4>Why aren't I receiving comment notifications?</h4> }}
+          <h4>Receiving "all notifications" isn't the default.</h4>
+          <p>
+            By default, you should receive notifications for mentions and
+            threads involving you. To subscribe to all comments, open your
+            document in Google Docs and click the bell icon in the top right.
+            From there, look for the "Subscribe to new comments" option. TODO:
+            Make this more precise.
+          </p>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mb-12">
+      <h2 class="mb-4 hermes-h4">
+        <FlightIcon @name="discussion-square" />
+        <span>
+          Frequently asked questions
+        </span>
+      </h2>
+      <ul class="space-y-6">
+
+        <li>
+          <h4>How do I unlock a document?</h4>
+          <p>
+            Remove all comments and suggestions from the header of your doc,
+            then wait 5 minutes and refresh. Get in touch if this fails to
+            resolve the issue.
+          </p>
+        </li>
+        <li>
+          <h4>Why did Hermes assign the wrong document number?</h4>
+          <p>
+            Generally this is traced to a document that was created outside of
+            Hermes being moved into the Hermes folder. TODO: Add more info and
+            instructions on how to fix.
+          </p>
+        </li>
+        <li>
+          <h4>Can I re-publish a document?</h4>
+          <p>
+            Once a document is published it cannot be re-published. If a
+            document has undergone significant changes, it's best to create a
+            new document and archive the old one or manually socialize the
+            existing document with your team.
+          </p>
+        </li>
+        <li>
+          <h4>How do I add teams as contributors/approvers?</h4>
+          <p>
+            We don't yet support team and group email addresses, so you'll need
+            to invite them off-site. If you're looking to share a draft, be sure
+            to switch it shareable via the document sidebar.
+          </p>
+        </li>
+        <li>
+          <h4>How do I stop getting 400 errors from Google?</h4>
+          <p>
+            This is most often caused by content blockers or browser security
+            settings. Safe-listing the Hermes domain will typically resolve the
+            issue.
+          </p>
+        </li>
+        <li>
+          <h4>Can I transfer or share document ownership?</h4>
+          <p>
+            Our current implementation doesn't yet support this.
+          </p>
+        </li>
+        <li>
+          <h4>Why don't drafts appearing in the shared Drive folder?</h4>
+          <p>
+            Drafts are kept out of the shared drive until they're published. If
+            you need to find the file on Drive, you can generally find it by
+            name.
+          </p>
+        </li>
+        <li>
+          <h4>How do I delete a published document?</h4>
+          <p>
+            Published documents cannot be fully deleted, but they can be
+            archived. Drafts, on the other hand, can be deleted by clicking the
+            trash icon in the document sidebar.
+          </p>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="hermes-h4 mb-4">
+        <FlightIcon @name="support" />
+        <span>
+          Additional support
+        </span>
+      </h2>
+      <ul>
+        <li>
+          <h4>How do I submit a bug or feature request?</h4>
+          <p>
+            HashiCorp employees are encouraged to contact us on Slack.
+            Open-source users can submit an issue on GitHub and we'll reply as
+            soon as we can.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </Hds::Card::Container>
+  <Footer />
+</div>

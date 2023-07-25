@@ -6,3 +6,9 @@ interface HermesLogoComponentSignature {
 }
 
 export default class HermesLogoComponent extends Component<HermesLogoComponentSignature> {}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    HermesLogo: typeof HermesLogoComponent;
+  }
+}
