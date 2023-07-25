@@ -38,13 +38,13 @@ export default class DashboardRoute extends Route {
     const userInfo = this.authenticatedUser.info;
 
     const docsWaitingForReview = this.algolia.searchIndex
-      .perform(this.configSvc.config.algolia_docs_index_name, "", {
+      .perform(this.configSvc.config.algolia_docs_index_name+"_dueDate_asc","", {
         filters:
           `reviewers:'${userInfo.email}'` +
           ` AND NOT reviewedBy:'${userInfo.email}'` +
           " AND appCreated:true" +
           " AND status:In-Review",
-        hitsPerPage: 1000,
+        hitsPerPage: 4,
       })
       .then((result) => {
         // Add modifiedAgo for each doc.
@@ -79,29 +79,6 @@ export default class DashboardRoute extends Route {
         this.recentDocs.all = null;
       }
     }
-
-
-
-    docsWaitingForReview._result = docsWaitingForReview._result.sort((a, b) => {
-      // Use optional chaining to access the 'dueDate' property safely
-      const dueDateA = a.dueDate?.toString()||"";
-      const dueDateB = b.dueDate?.toString()||"";
-
-      // Check if 'dueDate' property exists in both 'a' and 'b'
-      if (dueDateA && dueDateB) {
-        return dueDateA.localeCompare(dueDateB);
-      } else if (dueDateA) {
-        // If 'dueDate' exists in 'a' but not in 'b', consider 'a' to come before 'b'
-        return -1;
-      } else if (dueDateB) {
-
-        // If 'dueDate' exists in 'b' but not in 'a', consider 'b' to come before 'a'
-        return 1;
-      } else {
-        // If 'dueDate' doesn't exist in both 'a' and 'b', maintain their original order
-        return 0;
-      }
-    });
 
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,

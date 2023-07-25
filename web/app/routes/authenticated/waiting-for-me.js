@@ -8,7 +8,6 @@ export default class WaitingForMeRoute extends Route {
   @service algolia;
   @service("config") configSvc;
   @service("fetch") fetchSvc;
-  @service("recently-viewed-docs") recentDocs;
   @service session;
   @service authenticatedUser;
 
@@ -36,9 +35,9 @@ export default class WaitingForMeRoute extends Route {
     }
 
     const userInfo = this.authenticatedUser.info;
-
+    const searchIndex=this.configSvc.config.algolia_docs_index_name + "_dueDate_asc";
     const docsWaitingForReview = this.algolia.searchIndex
-      .perform(this.configSvc.config.algolia_docs_index_name, "", {
+      .perform(searchIndex, "", {
         filters:
           `reviewers:'${userInfo.email}'` +
           ` AND NOT reviewedBy:'${userInfo.email}'` +
@@ -69,13 +68,11 @@ export default class WaitingForMeRoute extends Route {
       });
 
     const docsReviewed = this.algolia.searchIndex
-      .perform(this.configSvc.config.algolia_docs_index_name, "", {
+      .perform(searchIndex, "", {
         filters:
           `reviewers:'${userInfo.email}'` +
           ` AND reviewedBy:'${userInfo.email}'` +
           " AND appCreated:true",
-        // +
-        // " AND status:In-Review",
         hitsPerPage: 1000,
       })
       .then((result) => {
@@ -100,38 +97,6 @@ export default class WaitingForMeRoute extends Route {
         return result.hits;
       });
 
-    await this.recentDocs.fetchAll.perform();
-    if (this.recentDocs.all === null) {
-      try {
-        await this.recentDocs.fetchAll.perform();
-      } catch {
-        /**
-         * This tells our template to show the error state.
-         */
-        this.recentDocs.all = null;
-      }
-    }
-
-    docsWaitingForReview._result = docsWaitingForReview._result.sort((a, b) => {
-
-      // Use optional chaining to access the 'dueDate' property safely
-      const dueDateA = a.dueDate?.toString()||"";
-      const dueDateB = b.dueDate?.toString()||"";
-
-      // Check if 'dueDate' property exists in both 'a' and 'b'
-      if (dueDateA && dueDateB) {
-        return dueDateA.localeCompare(dueDateB);
-      } else if (dueDateA) {
-        // If 'dueDate' exists in 'a' but not in 'b', consider 'a' to come before 'b'
-        return -1;
-      } else if (dueDateB) {
-        // If 'dueDate' exists in 'b' but not in 'a', consider 'b' to come before 'a'
-        return 1;
-      } else {
-        // If 'dueDate' doesn't exist in both 'a' and 'b', maintain their original order
-        return 0;
-      }
-    });
 
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,

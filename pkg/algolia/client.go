@@ -28,6 +28,8 @@ type Client struct {
 	// by descending modified time.
 	DocsModifiedTimeDesc *search.Index
 
+	DocsDueDateAsc *search.Index
+
 	// Drafts is an Algolia index for storing metadata for draft documents.
 	Drafts *search.Index
 
@@ -143,6 +145,7 @@ func New(cfg *Config) (*Client, error) {
 			cfg.DocsIndexName+"_createdTime_asc",
 			cfg.DocsIndexName+"_createdTime_desc",
 			cfg.DocsIndexName+"_modifiedTime_desc",
+			cfg.DocsIndexName+"_dueDate_asc",
 		),
 	})
 	if err != nil {
@@ -153,11 +156,14 @@ func New(cfg *Config) (*Client, error) {
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
-	err = configureReplicaIndexes(
+	c.DocsDueDateAsc = a.InitIndex(cfg.DocsIndexName + "_dueDate_asc")
+
+	err = configureDocsReplicaIndexes(
 		cfg.DocsIndexName,
 		c.DocsCreatedTimeAsc,
 		c.DocsCreatedTimeDesc,
 		c.DocsModifiedTimeDesc,
+		c.DocsDueDateAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -224,6 +230,7 @@ func configureReplicaIndexes(
 	createdTimeAscIndex *search.Index,
 	createdTimeDescIndex *search.Index,
 	modifiedTimeDescIndex *search.Index,
+
 ) error {
 	// Configure the createdTime_asc replica for index.
 	_, err := createdTimeAscIndex.SetSettings(search.Settings{
@@ -284,6 +291,90 @@ func configureReplicaIndexes(
 	return nil
 }
 
+func configureDocsReplicaIndexes(
+	indexName string,
+	createdTimeAscIndex *search.Index,
+	createdTimeDescIndex *search.Index,
+	modifiedTimeDescIndex *search.Index,
+	dueDateAscIndex *search.Index,
+) error {
+	// Configure the createdTime_asc replica for index.
+	_, err := createdTimeAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
+			"docType",
+			"owners",
+			"product",
+			"status",
+		),
+
+		Ranking: opt.Ranking(
+			"asc(createdTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s createdTime_asc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the createdTime_desc replica for index.
+	_, err = createdTimeDescIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
+			"docType",
+			"owners",
+			"product",
+			"status",
+		),
+
+		Ranking: opt.Ranking(
+			"desc(createdTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s createdTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the modifiedTime_desc replica for index.
+	_, err = modifiedTimeDescIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"status",
+		),
+
+		Ranking: opt.Ranking(
+			"desc(modifiedTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the dueDate_asc replica for index.
+	_, err = dueDateAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"reviewers",
+			"reviewedBy",
+			"appCreated",
+			"status",
+		),
+		Ranking: opt.Ranking(
+			"asc(dueDate)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	return nil
+}
+
 // NewSearchClient returns a new Algolia client for searching indices.
 func NewSearchClient(cfg *Config) (*Client, error) {
 	if err := validate(cfg); err != nil {
@@ -299,6 +390,7 @@ func NewSearchClient(cfg *Config) (*Client, error) {
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
+	c.DocsDueDateAsc = a.InitIndex(cfg.DocsIndexName + "_dueDate_asc")
 	c.Drafts = a.InitIndex(cfg.DraftsIndexName)
 	c.DraftsCreatedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_asc")
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
