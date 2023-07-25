@@ -183,7 +183,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   * Note: Errors handled in the child component.
+   * Requests an Algolia document by ID.
+   * If found, sets the local Algolia results to an array
+   * with that document. If not, throws a 404 to the child component.
    */
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
@@ -206,7 +208,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         const typedError = e as { status?: number };
         if (typedError.status === 404) {
           // This means the document wasn't found.
-          // Throw the error and let the child component handle it.
+          // Let the child component handle the error.
           throw e;
         } else {
           this.handleSearchError(e);

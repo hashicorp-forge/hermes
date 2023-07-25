@@ -1,7 +1,13 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render, triggerKeyEvent, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  render,
+  triggerKeyEvent,
+  waitFor,
+} from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 
@@ -88,8 +94,6 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(BEST_MATCHES_HEADER_SELECTOR).doesNotExist();
 
     await fillIn(SEARCH_INPUT_SELECTOR, "vault");
-
-    await waitFor(BEST_MATCHES_HEADER_SELECTOR);
 
     assert
       .dom(BEST_MATCHES_HEADER_SELECTOR)
