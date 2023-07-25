@@ -1,6 +1,6 @@
 import { visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
@@ -19,4 +19,23 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     await visit("/drafts");
     assert.equal(getPageTitle(), "My Drafts | Hermes");
   });
+
+  test("product badges have the correct hrefs", async function (this: AuthenticatedDraftRouteTestContext, assert) {
+    this.server.create("document", {
+      product: "Security",
+    });
+
+    await visit("/drafts");
+
+    assert
+      .dom(".product-badge-link")
+      .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
+  });
+
+  todo(
+    "product badges are clickable",
+    async function (this: AuthenticatedDraftRouteTestContext, assert) {
+      assert.true(false);
+    }
+  );
 });

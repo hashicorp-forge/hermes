@@ -1,6 +1,6 @@
-import { click, visit } from "@ember/test-helpers";
+import { visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
@@ -22,18 +22,24 @@ module("Acceptance | authenticated/all", function (hooks) {
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
-  test("product area badges are clickable filters", async function (this: AuthenticatedAllRouteTestContext, assert) {
+  test("product badges have the correct hrefs", async function (this: AuthenticatedAllRouteTestContext, assert) {
     // Note: "Vault" is the default product area in the Mirage factory.
 
-    this.server.createList("document", 5);
-    this.server.create("document", { product: "Labs" });
+    this.server.create("document", {
+      product: "Labs",
+    });
 
     await visit("/all");
 
     assert
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/all?product=%5B%22Vault%22%5D");
-
-    // TODO: Set up a handler in Mirage to return filtered results.
+      .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
   });
+
+  todo(
+    "product badges are clickable",
+    async function (this: AuthenticatedAllRouteTestContext, assert) {
+      assert.true(false);
+    }
+  );
 });

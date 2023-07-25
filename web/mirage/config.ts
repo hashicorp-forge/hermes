@@ -297,12 +297,17 @@ export default function (mirageConfig) {
        * a list of facets and draft results.
        */
       this.get("/drafts", () => {
+        const allDocs = this.schema.document.all().models;
+        const drafts = allDocs.filter((doc) => {
+          return doc.attrs.isDraft;
+        });
+
         return new Response(
           200,
           {},
           {
             facets: [],
-            Hits: [],
+            Hits: drafts,
             params: "",
             page: 0,
           }
