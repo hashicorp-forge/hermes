@@ -96,14 +96,14 @@ export default class SupportRoute extends Route {
                 "HashiCorp employees are encouraged to contact us on Slack. Open-source users should reach out on GitHub Issues.",
               links: [
                 {
-                  title: "proj-hermes-feedback",
+                  title: "TODO:slackName",
                   icon: "slack",
-                  url: "https://hashicorp.slack.com/archives/C03F4PTHZ1U",
+                  url: "TODO:slackURL",
                 },
                 {
-                  title: "labs@hashicorp.com",
+                  title: "TODO:emailName",
                   icon: "mail",
-                  url: "mailto:labs@hashicorp.com",
+                  url: "mailto:TODO:EMAIL",
                 },
                 {
                   title: "GitHub Issues",
