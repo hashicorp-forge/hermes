@@ -1,5 +1,23 @@
 import Route from "@ember/routing/route";
 
+const insertIcon = (icon: string, optionalClassName?: string) => {
+  return `
+    <span class="inline-icon ${optionalClassName}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="flight-icon icon-${icon}"
+        aria-label="${icon}"
+        fill="currentColor"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <use href="#flight-${icon}-16"></use>
+      </svg>
+    </span>
+  `;
+};
+
 export default class SupportRoute extends Route {
   model() {
     return {
@@ -10,8 +28,9 @@ export default class SupportRoute extends Route {
           items: [
             {
               title: "Doc suggestions must be accepted off-site",
-              content:
-                "Unfortunately, Google disables this function for embedded documents like you see in Hermes. To accept suggestions, you'll need to open your document directly in Google. Look for the {{icon='external-link'}} button in the Hermes document sidebar.",
+              content: `Unfortunately, Google disables this function for embedded documents like you see in Hermes. To accept suggestions, you'll need to open your document directly in Google. Look for the ${insertIcon(
+                "external-link"
+              )} button in the Hermes document sidebar.\nnd ain't that the truth pal.`,
             },
             {
               title: "Suggestions in the header will lock your document.",
@@ -20,8 +39,10 @@ export default class SupportRoute extends Route {
             },
             {
               title: 'You must manually enable "all notifications."',
-              content:
-                "By default, you'll get emailed about @-mentions and threads involving you. To receive all comments, you'll need to open your doc outside of Hermes ({{icon='external-link'}}), then [follow these instructions](https://support.google.com/docs/answer/91588).",
+              content: `By default, you'll get emailed about @-mentions and threads involving you. To receive all comments, you'll need to open your doc in Google (${insertIcon(
+                "external-link",
+                "with-parentheses"
+              )}), then [follow these instructions](https://support.google.com/docs/answer/91588).`,
             },
           ],
         },
@@ -30,7 +51,7 @@ export default class SupportRoute extends Route {
           titleIcon: "discussion-square",
           items: [
             {
-              title: "How do I stop getting 400 errors from Google?",
+              title: "Why am I getting 400 errors from Google?",
               content:
                 "This is usually caused by content blockers or browser security settings. Safe-listing the Hermes domain will typically resolve the issue.",
             },
@@ -46,8 +67,13 @@ export default class SupportRoute extends Route {
             },
             {
               title: "How do I delete a document?",
-              content:
-                "Published docs can't be deleted, only archived. Drafts, on the other hand, can be deleted using the {{icon='trash'}} button the document sidebar.",
+              content: `Published docs can't be deleted, only archived (${insertIcon(
+                "archive",
+                "with-parentheses"
+              )}). Drafts, on the other hand, can be deleted using the ${insertIcon(
+                "trash",
+                "critical"
+              )} button the document sidebar.`,
             },
             {
               title: "Can I transfer or share document ownership?",
@@ -72,7 +98,7 @@ export default class SupportRoute extends Route {
                 {
                   title: "proj-hermes-feedback",
                   icon: "slack",
-                  url: "",
+                  url: "https://hashicorp.slack.com/archives/C03F4PTHZ1U",
                 },
                 {
                   title: "labs@hashicorp.com",
@@ -82,7 +108,7 @@ export default class SupportRoute extends Route {
                 {
                   title: "GitHub Issues",
                   icon: "github",
-                  url: "",
+                  url: "https://github.com/hashicorp-forge/hermes/issues",
                 },
               ],
             },

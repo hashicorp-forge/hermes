@@ -17,29 +17,3 @@
 .truncated-text-container {
   @apply truncate block font-regular text-body-100 text-color-foreground-faint;
 }
-
-.static-text-screen {
-  .card {
-    @apply text-body-300;
-  }
-
-  h2 {
-    @apply text-body-200 flex items-center space-x-2.5;
-
-    svg {
-      @apply text-color-foreground-action;
-    }
-  }
-
-  p a {
-    @apply underline text-color-foreground-faint;
-  }
-
-  .support-links {
-    @apply mt-5 space-y-1.5;
-
-    svg {
-      @apply text-color-foreground-primary;
-    }
-  }
-}

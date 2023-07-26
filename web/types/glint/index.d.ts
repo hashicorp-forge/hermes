@@ -38,6 +38,7 @@ import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
 import { HdsFormErrorComponent } from "hds/form/error";
+import { MarkdownToHtmlCurly } from "ember-cli-showdown/components/markdown-to-html";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -45,6 +46,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
     "click-outside": typeof OnClickOutsideModifier;
+    "markdown-to-html": typeof MarkdownToHtmlCurly
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;
     AnimatedOrphans: typeof AnimatedOrphans;

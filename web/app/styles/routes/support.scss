@@ -1,0 +1,70 @@
+.hermes-support {
+  .header-link {
+    @apply flex items-center space-x-2 text-color-foreground-faint;
+
+    &:hover {
+      @apply text-color-foreground-primary;
+    }
+  }
+
+  .page-card {
+    @apply w-full px-24 pt-14 pb-20 text-body-300;
+  }
+
+  .hermes-support-header {
+    @apply flex items-center space-x-3 mb-12;
+  }
+
+  .content-sections {
+    @apply space-y-14;
+
+    a {
+      @apply underline text-color-foreground-faint;
+
+      &:hover {
+        @apply text-color-foreground-primary;
+      }
+    }
+  }
+
+  .content-section > h2 {
+    @apply flex items-center space-x-2.5 mb-4;
+
+    svg {
+      @apply text-color-foreground-action;
+    }
+  }
+
+  .content-section-items {
+    @apply space-y-6;
+
+    .links {
+      @apply mt-5 space-y-1.5;
+
+      svg {
+        @apply text-color-foreground-primary;
+      }
+
+      a {
+        @apply flex space-x-2 items-center;
+      }
+    }
+  }
+
+  .inline-icon {
+    @apply border border-color-border-primary bg-color-palette-neutral-100 rounded;
+    @apply inline-flex py-1 px-[7px];
+
+    // Some tweaks to make the icon align with the text
+    @apply relative translate-y-0.5 mx-px -my-1;
+
+    &.with-parentheses {
+      // Bring the icon closer to the parentheses
+      @apply -mx-0.5;
+    }
+
+    &.critical {
+      @apply bg-color-surface-critical border-color-border-critical text-color-foreground-critical-on-surface;
+    }
+  }
+}

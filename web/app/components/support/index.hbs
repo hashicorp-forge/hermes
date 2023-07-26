@@ -1,10 +1,6 @@
 <div class="w-full max-w-3xl mx-auto">
-  <div class="relative flex items-center justify-center w-full h-16">
-    {{! TODO: replace with component }}
-    <LinkTo
-      @route="authenticated.dashboard"
-      class="flex text-color-foreground-faint hover:text-color-foreground-strong items-center space-x-2"
-    >
+  <div class="grid place-items-center h-16">
+    <LinkTo @route="authenticated.dashboard" class="header-link">
       <FlightIcon @name="arrow-left" />
       <span>Back to the Dashboard</span>
     </LinkTo>
@@ -14,19 +10,19 @@
     @level="high"
     @hasBorder={{true}}
     @overflow="visible"
-    class="relative w-full card px-24 pt-14 pb-20"
+    class="page-card"
   >
-    <div class="flex space-x-3 items-center">
+    <div class="hermes-support-header">
       <LinkTo @route="authenticated.dashboard">
         <HermesLogo />
       </LinkTo>
       <Hds::Badge @text="Support" @color="success" @type="inverted" />
     </div>
 
-    <ul class="space-y-12 mt-12">
+    <ul class="content-sections">
       {{#each @docs.sections as |section|}}
-        <li>
-          <h2 class="mb-4 hermes-h4">
+        <li class="content-section">
+          <h2 class="hermes-h4">
             {{#if section.titleIcon}}
               <FlightIcon @name={{section.titleIcon}} />
             {{/if}}
@@ -34,20 +30,18 @@
               {{section.title}}
             </span>
           </h2>
-          <ul class="space-y-6">
+          <ul class="content-section-items">
             {{#each section.items as |item|}}
               <li>
                 <h4>{{item.title}}</h4>
-                <p>{{item.content}}</p>
+                <div>
+                  {{markdown-to-html item.content}}
+                </div>
                 {{#if item.links}}
-                  <ul class="support-links">
-
+                  <ul class="links">
                     {{#each item.links as |link|}}
                       <li>
-                        <ExternalLink
-                          href={{link.href}}
-                          class="flex space-x-2 text-color-foreground-faint items-center"
-                        >
+                        <ExternalLink href={{link.url}}>
                           {{#if link.icon}}
                             <FlightIcon @name={{link.icon}} />
                           {{/if}}
