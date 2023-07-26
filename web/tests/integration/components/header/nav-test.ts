@@ -6,6 +6,10 @@ import { setupWindowMock } from "ember-window-mock/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import window from "ember-window-mock";
+import { NEW_NAV_ITEM_LOCAL_STORAGE_KEY } from "hermes/components/header/nav";
+
+const HIGHLIGHTED_NEW_TEXT_SELECTOR =
+  ".highlighted-new .hds-dropdown-list-item__interactive-text";
 
 module("Integration | Component | header/nav", function (hooks) {
   setupRenderingTest(hooks);
@@ -27,10 +31,7 @@ module("Integration | Component | header/nav", function (hooks) {
   });
 
   test("it renders correctly", async function (assert) {
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
-      <Header::Nav />
-    `);
+    await render(hbs`<Header::Nav />`);
 
     assert.dom(".header-nav").exists();
     assert.dom('[data-test-nav-link="all"]').hasAttribute("href", "/all");
@@ -44,25 +45,21 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom("[data-test-user-menu-title]").hasText("Foo Bar");
     assert.dom("[data-test-user-menu-email]").hasText("foo@example.com");
 
+    assert.dom('[data-test-user-menu-item="support"]').hasText("Support");
     assert
       .dom('[data-test-user-menu-item="email-notifications"]')
       .hasText("Email notifications");
-
     assert.dom('[data-test-user-menu-item="sign-out"]').hasText("Sign out");
   });
 
   test("it shows an icon when the user menu has something to highlight", async function (assert) {
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
-      <Header::Nav />
-    `);
+    window.localStorage.removeItem(NEW_NAV_ITEM_LOCAL_STORAGE_KEY);
 
-    assert.equal(
-      window.localStorage.getItem("emailNotificationsHighlightIsShown"),
-      null
-    );
+    await render(hbs`<Header::Nav />`);
 
-    assert.dom("[data-test-user-menu-highlight]").exists("highlight is shown");
+    assert
+      .dom("[data-test-user-menu-highlight]")
+      .exists("the highlight dot is shown");
 
     await click("[data-test-user-menu-toggle]");
 
@@ -71,7 +68,7 @@ module("Integration | Component | header/nav", function (hooks) {
       .doesNotExist("highlight is hidden when the menu is open");
 
     assert
-      .dom(".highlighted-new .hds-dropdown-list-item__interactive-text")
+      .dom(HIGHLIGHTED_NEW_TEXT_SELECTOR)
       .hasPseudoElementStyle(
         "after",
         { content: '"New"' },
@@ -83,7 +80,7 @@ module("Integration | Component | header/nav", function (hooks) {
     await click("[data-test-user-menu-toggle]");
 
     assert
-      .dom(".highlighted-new")
-      .doesNotExist("highlight is hidden after the menu is closed");
+      .dom(HIGHLIGHTED_NEW_TEXT_SELECTOR)
+      .doesNotExist('the "highlighted-new" class is removed');
   });
 });

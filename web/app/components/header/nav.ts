@@ -9,12 +9,15 @@ import AuthenticatedUserService, {
 } from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
+import Ember from "ember";
 
 interface HeaderNavComponentSignature {
   Args: {};
 }
 
-const LOCAL_STORAGE_KEY = "july-26-2023-supportHighlightIsShown";
+export const NEW_NAV_ITEM_LOCAL_STORAGE_KEY = Ember.testing
+  ? "test-supportHighlightIsShown"
+  : "july-26-2023-supportHighlightIsShown";
 
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
@@ -52,7 +55,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * Will be false if the user has previously closed the dropdown.
    */
   @tracked protected localStorageItemIsFalse =
-    window.localStorage.getItem(LOCAL_STORAGE_KEY) === "false";
+    window.localStorage.getItem(NEW_NAV_ITEM_LOCAL_STORAGE_KEY) === "false";
 
   /**
    * Whether a highlight icon should appear over the user avatar.
@@ -68,7 +71,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
    * (We assume the user to have seen the highlight when they open the menu.)
    */
   @action protected onDropdownOpen(): void {
-    // window.localStorage.setItem(LOCAL_STORAGE_KEY, "false");
+    window.localStorage.setItem(NEW_NAV_ITEM_LOCAL_STORAGE_KEY, "false");
   }
 
   /**

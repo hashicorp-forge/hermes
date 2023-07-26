@@ -76,15 +76,15 @@
           />
           <dd.Separator class="mt-2" />
           <dd.Interactive
-            data-test-user-menu-item="email-notifications"
-            @route="authenticated.settings"
-            @text="Email notifications"
-          />
-          <dd.Interactive
-            data-test-user-menu-item="email-notifications"
+            data-test-user-menu-item="support"
             @route="support"
             @text="Support"
             class={{if this.userMenuHighlightIsShown "highlighted-new"}}
+          />
+          <dd.Interactive
+            data-test-user-menu-item="email-notifications"
+            @route="authenticated.settings"
+            @text="Email notifications"
           />
           {{#if this.showSignOut}}
             <dd.Interactive

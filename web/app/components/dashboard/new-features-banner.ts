@@ -2,9 +2,11 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import window from "ember-window-mock";
 import { action } from "@ember/object";
+import Ember from "ember";
 
-export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM =
-  "july-20-2023-newFeatureBannerIsShown";
+export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM = Ember.testing
+  ? "test-newFeatureBannerIsShown"
+  : "july-20-2023-newFeatureBannerIsShown";
 
 interface DashboardNewFeaturesBannerSignature {
   Args: {};

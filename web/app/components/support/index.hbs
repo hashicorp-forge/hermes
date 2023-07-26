@@ -58,7 +58,7 @@
             like you see in Hermes. To accept suggestions, you'll need to open
             your document directly in Google. Look for the
             <div
-              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-0.5 px-1 rounded-sm relative translate-y-0.5 mx-0.5 -my-1"
+              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-1 px-2 rounded-sm relative translate-y-0.5 mx-0.5 -my-1"
             >
               <FlightIcon @name="external-link" />
             </div>
@@ -68,19 +68,27 @@
         <li>
           <h4>Suggestions in the header will lock your document.</h4>
           <p>
-            If this happens, remove all suggestions from the header of your doc,
-            and refresh Hermes. Please be patient, as it may take a few minutes
-            for your changes to be noticed by Hermes. If your document remains
-            locked after 10 minutes, please get in touch.
+            If this happens, remove the suggestions from your document header,
+            wait a few minutes (for Hermes to notice the change), then refresh.
+            If your document is still locked after 10 minutes, please get in
+            touch.
           </p>
         </li>
         <li>
           {{! <h4>Why aren't I receiving comment notifications?</h4> }}
-          <h4>Subscribing to all notifications must be done manually.</h4>
+          <h4>You must manually enable "all notifications."</h4>
           <p>
-            By default, you will receive email notifications for @-mentions and
-            threads involving you. To get to all comments, you'll need use the
-            Google Docs interface. Open your doc in Google, then click the
+            By default, you'll get emailed about @-mentions and threads
+            involving you. To receive to all comments, you'll need use the
+            Google Docs interface. Open your doc in Google (
+            <div
+              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-1 px-2 rounded-sm relative translate-y-0.5 -mx-0.5 -my-1"
+            >
+              <FlightIcon @name="external-link" />
+            </div>
+            ), then
+            <a href="https://support.google.com/docs/answer/91588">follow these
+              instructions</a>.
           </p>
         </li>
       </ul>
@@ -94,13 +102,12 @@
         </span>
       </h2>
       <ul class="space-y-6">
-
         <li>
-          <h4>How do I unlock a document?</h4>
+          <h4>How do I stop getting 400 errors from Google?</h4>
           <p>
-            Remove all comments and suggestions from the header of your doc,
-            then wait 5 minutes and refresh. Get in touch if this fails to
-            resolve the issue.
+            This is most often caused by content blockers or browser security
+            settings. Safe-listing the Hermes domain will typically resolve the
+            issue.
           </p>
         </li>
         <li>
@@ -112,15 +119,6 @@
           </p>
         </li>
         <li>
-          <h4>Can I re-publish a document?</h4>
-          <p>
-            Once a document is published it cannot be re-published. If a
-            document has undergone significant changes, it's best to create a
-            new document and archive the old one or manually socialize the
-            existing document with your team.
-          </p>
-        </li>
-        <li>
           <h4>How do I add teams as contributors/approvers?</h4>
           <p>
             We don't yet support team and group email addresses, so you'll need
@@ -129,13 +127,23 @@
           </p>
         </li>
         <li>
-          <h4>How do I stop getting 400 errors from Google?</h4>
+          <h4>How do I delete a document?</h4>
           <p>
-            This is most often caused by content blockers or browser security
-            settings. Safe-listing the Hermes domain will typically resolve the
-            issue.
+            Published documents cannot be fully deleted, but they can be
+            archived. Drafts, on the other hand, can be deleted by clicking the
+            trash icon in the document sidebar.
           </p>
         </li>
+        <li>
+          <h4>Can I re-publish a document?</h4>
+          <p>
+            Once a document is published it cannot be re-published. If a
+            document has undergone significant changes, it's best to create a
+            new document and archive the old one or manually socialize the
+            existing document with your team.
+          </p>
+        </li>
+
         <li>
           <h4>Can I transfer or share document ownership?</h4>
           <p>
@@ -143,28 +151,21 @@
           </p>
         </li>
         <li>
-          <h4>Why don't drafts appearing in the shared Drive folder?</h4>
+          <h4>Why aren't my drafts in the shared Drive folder?</h4>
           <p>
             Drafts are kept out of the shared drive until they're published. If
             you need to find the file on Drive, you can generally find it by
             name.
           </p>
         </li>
-        <li>
-          <h4>How do I delete a published document?</h4>
-          <p>
-            Published documents cannot be fully deleted, but they can be
-            archived. Drafts, on the other hand, can be deleted by clicking the
-            trash icon in the document sidebar.
-          </p>
-        </li>
+
       </ul>
     </div>
     <div>
       <h2 class="hermes-h4 mb-4">
         <FlightIcon @name="support" />
         <span>
-          Additional support
+          Additional help
         </span>
       </h2>
       <ul class="space-y-6">
