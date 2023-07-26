@@ -1,7 +1,9 @@
 import Component from "@glimmer/component";
 
 interface SupportComponentSignature {
-  Args: {};
+  Args: {
+    docs: any;
+  };
 }
 
 export default class SupportComponent extends Component<SupportComponentSignature> {}

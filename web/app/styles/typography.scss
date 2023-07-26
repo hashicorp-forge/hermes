@@ -19,6 +19,10 @@
 }
 
 .static-text-screen {
+  .card {
+    @apply text-body-300;
+  }
+
   h2 {
     @apply text-body-200 flex items-center space-x-2.5;
 
@@ -31,12 +35,9 @@
     @apply underline text-color-foreground-faint;
   }
 
-  p,
-  h4 {
-    @apply text-body-300;
-  }
-
   .support-links {
+    @apply mt-5 space-y-1.5;
+
     svg {
       @apply text-color-foreground-primary;
     }

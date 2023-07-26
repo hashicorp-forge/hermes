@@ -3,207 +3,66 @@
     {{! TODO: replace with component }}
     <LinkTo
       @route="authenticated.dashboard"
-      class="flex text-color-foreground-faint items-center space-x-2"
+      class="flex text-color-foreground-faint hover:text-color-foreground-strong items-center space-x-2"
     >
       <FlightIcon @name="arrow-left" />
       <span>Back to the Dashboard</span>
     </LinkTo>
-
-    {{! <LinkTo
-      @route="authenticated.dashboard"
-      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-    >
-      <HermesLogo />
-    </LinkTo> }}
-
   </div>
+
   <Hds::Card::Container
     @level="high"
     @hasBorder={{true}}
     @overflow="visible"
-    class="relative w-full px-24 pt-14 pb-16"
+    class="relative w-full card px-24 pt-14 pb-20"
   >
     <div class="flex space-x-3 items-center">
       <LinkTo @route="authenticated.dashboard">
         <HermesLogo />
       </LinkTo>
-
       <Hds::Badge @text="Support" @color="success" @type="inverted" />
     </div>
-    {{!-- <div class="mt-0 mb-10 flex w-full text-cenXter justify-ceXnter">
-      {{! <HermesLogo /> }}
-      <div>
-        <h1 class="mb-1.5 text-[2.8rem] leading-none">
-          We can explain.
-        </h1>
 
-        <p class="text-color-foreground-faint">
-          (Our temporary support docs)
-        </p>
-      </div>
-    </div> --}}
-    <div class="mt-12 mb-14">
-      <h2 class="mb-4 hermes-h4">
-        <FlightIcon @name="alert-diamond" />
-        <span>
-          Known limitations
-        </span>
-      </h2>
-      <ul class="space-y-6">
+    <ul class="space-y-12 mt-12">
+      {{#each @docs.sections as |section|}}
         <li>
-          {{! <h4>How do I accept document suggestions?</h4> }}
-          <h4>Doc suggestions must be accepted off-site.</h4>
-          <p>
-            Unfortunately, Google disables this function for embedded documents
-            like you see in Hermes. To accept suggestions, you'll need to open
-            your document directly in Google. Look for the
-            <div
-              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-1 px-2 rounded-sm relative translate-y-0.5 mx-0.5 -my-1"
-            >
-              <FlightIcon @name="external-link" />
-            </div>
-            button in the Hermes document sidebar.
-          </p>
-        </li>
-        <li>
-          <h4>Suggestions in the header will lock your document.</h4>
-          <p>
-            If this happens, remove the suggestions from your document header,
-            wait a few minutes (for Hermes to notice the change), then refresh.
-            If your document is still locked after 10 minutes, please get in
-            touch.
-          </p>
-        </li>
-        <li>
-          {{! <h4>Why aren't I receiving comment notifications?</h4> }}
-          <h4>You must manually enable "all notifications."</h4>
-          <p>
-            By default, you'll get emailed about @-mentions and threads
-            involving you. To receive to all comments, you'll need use the
-            Google Docs interface. Open your doc in Google (
-            <div
-              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-1 px-2 rounded-sm relative translate-y-0.5 -mx-0.5 -my-1"
-            >
-              <FlightIcon @name="external-link" />
-            </div>
-            ), then
-            <a href="https://support.google.com/docs/answer/91588">follow these
-              instructions</a>.
-          </p>
-        </li>
-      </ul>
-    </div>
+          <h2 class="mb-4 hermes-h4">
+            {{#if section.titleIcon}}
+              <FlightIcon @name={{section.titleIcon}} />
+            {{/if}}
+            <span>
+              {{section.title}}
+            </span>
+          </h2>
+          <ul class="space-y-6">
+            {{#each section.items as |item|}}
+              <li>
+                <h4>{{item.title}}</h4>
+                <p>{{item.content}}</p>
+                {{#if item.links}}
+                  <ul class="support-links">
 
-    <div class="mb-14">
-      <h2 class="mb-4 hermes-h4">
-        <FlightIcon @name="discussion-square" />
-        <span>
-          Frequently asked questions
-        </span>
-      </h2>
-      <ul class="space-y-6">
-        <li>
-          <h4>How do I stop getting 400 errors from Google?</h4>
-          <p>
-            This is most often caused by content blockers or browser security
-            settings. Safe-listing the Hermes domain will typically resolve the
-            issue.
-          </p>
-        </li>
-        <li>
-          <h4>Why did Hermes assign the wrong document number?</h4>
-          <p>
-            Generally this is traced to a document that was created outside of
-            Hermes being moved into the Hermes folder. TODO: Add more info and
-            instructions on how to fix.
-          </p>
-        </li>
-        <li>
-          <h4>How do I add teams as contributors/approvers?</h4>
-          <p>
-            We don't yet support team and group email addresses, so you'll need
-            to invite them off-site. If you're looking to share a draft, be sure
-            to switch it shareable via the document sidebar.
-          </p>
-        </li>
-        <li>
-          <h4>How do I delete a document?</h4>
-          <p>
-            Published documents cannot be fully deleted, but they can be
-            archived. Drafts, on the other hand, can be deleted by clicking the
-            trash icon in the document sidebar.
-          </p>
-        </li>
-        <li>
-          <h4>Can I re-publish a document?</h4>
-          <p>
-            Once a document is published it cannot be re-published. If a
-            document has undergone significant changes, it's best to create a
-            new document and archive the old one or manually socialize the
-            existing document with your team.
-          </p>
-        </li>
-
-        <li>
-          <h4>Can I transfer or share document ownership?</h4>
-          <p>
-            Our current implementation doesn't yet support this.
-          </p>
-        </li>
-        <li>
-          <h4>Why aren't my drafts in the shared Drive folder?</h4>
-          <p>
-            Drafts are kept out of the shared drive until they're published. If
-            you need to find the file on Drive, you can generally find it by
-            name.
-          </p>
-        </li>
-
-      </ul>
-    </div>
-    <div>
-      <h2 class="hermes-h4 mb-4">
-        <FlightIcon @name="support" />
-        <span>
-          Additional help
-        </span>
-      </h2>
-      <ul class="space-y-6">
-        <li>
-          <h4>Still have a question, bug, or feature request?</h4>
-          <p>
-            HashiCorp employees are encouraged to contact us on Slack.
-            Open-source users can submit an issue on GitHub and we'll reply as
-            soon as we can.
-          </p>
-          <ul class="text-body-300 mt-5 space-y-1.5 support-links">
-            <li>
-              <LinkTo
-                @route="authenticated.dashboard"
-                class="flex text-color-foreground-faint items-center"
-              >
-                <FlightIcon class="mr-2" @name="slack" />
-                proj-hermes-feedback
-              </LinkTo>
-            </li>
-            <li>
-
-              <a class="flex text-color-foreground-faint items-center">
-                <FlightIcon class="mr-2" @name="mail" />
-                labs@hashicorp.com
-              </a>
-            </li>
-            <li>
-
-              <a class="flex text-color-foreground-faint items-center">
-                <FlightIcon class="mr-2" @name="github" />
-                Github Issues
-              </a>
-            </li>
+                    {{#each item.links as |link|}}
+                      <li>
+                        <ExternalLink
+                          href={{link.href}}
+                          class="flex space-x-2 text-color-foreground-faint items-center"
+                        >
+                          {{#if link.icon}}
+                            <FlightIcon @name={{link.icon}} />
+                          {{/if}}
+                          <span>{{link.title}}</span>
+                        </ExternalLink>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+              </li>
+            {{/each}}
           </ul>
         </li>
-      </ul>
-    </div>
+      {{/each}}
+    </ul>
   </Hds::Card::Container>
   <Footer />
 </div>
