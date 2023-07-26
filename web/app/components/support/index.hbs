@@ -1,36 +1,48 @@
-<div class="w-full max-w-2xl mx-auto">
-  <div class="relative flex items-center justify-between w-full h-16">
+<div class="w-full max-w-3xl mx-auto">
+  <div class="relative flex items-center justify-center w-full h-16">
     {{! TODO: replace with component }}
-    <LinkTo @route="authenticated.dashboard" class="flex items-center">
-      <FlightIcon class="mr-2" @name="arrow-left" />
-      Dashboard
-    </LinkTo>
     <LinkTo
+      @route="authenticated.dashboard"
+      class="flex text-color-foreground-faint items-center space-x-2"
+    >
+      <FlightIcon @name="arrow-left" />
+      <span>Back to the Dashboard</span>
+    </LinkTo>
+
+    {{! <LinkTo
       @route="authenticated.dashboard"
       class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
     >
       <HermesLogo />
-    </LinkTo>
+    </LinkTo> }}
+
   </div>
   <Hds::Card::Container
     @level="high"
     @hasBorder={{true}}
     @overflow="visible"
-    class="relative w-full px-16 pt-12 pb-14"
+    class="relative w-full px-24 pt-14 pb-16"
   >
-    <div class="mb-6 flex w-full justify-between">
-      <h1>Support</h1>
-      {{#if true}}
-        <Hds::Button
-          @text="Chat us on Slack"
-          @icon="slack"
-          {{!-- @color="secondary" --}}
-          {{! @size="small" }}
-          {{!-- @href={{this.slackURL}} --}}
-        />
-      {{/if}}
+    <div class="flex space-x-3 items-center">
+      <LinkTo @route="authenticated.dashboard">
+        <HermesLogo />
+      </LinkTo>
+
+      <Hds::Badge @text="Support" @color="success" @type="inverted" />
     </div>
-    <div class="mb-12">
+    {{!-- <div class="mt-0 mb-10 flex w-full text-cenXter justify-ceXnter">
+      {{! <HermesLogo /> }}
+      <div>
+        <h1 class="mb-1.5 text-[2.8rem] leading-none">
+          We can explain.
+        </h1>
+
+        <p class="text-color-foreground-faint">
+          (Our temporary support docs)
+        </p>
+      </div>
+    </div> --}}
+    <div class="mt-12 mb-14">
       <h2 class="mb-4 hermes-h4">
         <FlightIcon @name="alert-diamond" />
         <span>
@@ -40,41 +52,41 @@
       <ul class="space-y-6">
         <li>
           {{! <h4>How do I accept document suggestions?</h4> }}
-          <h4>Suggestions must be accepted off-site.</h4>
+          <h4>Doc suggestions must be accepted off-site.</h4>
           <p>
-            Unfortunately this can't be done yet in Hermes, but you can open
-            your document in Google Docs and accept suggestions there. Look for
-            the
-            <FlightIcon
-              @name="external-link"
-              class="inline-flex mx-2 leading-none"
-            />
-            icon in your document sidebar.
+            Unfortunately, Google disables this function for embedded documents
+            like you see in Hermes. To accept suggestions, you'll need to open
+            your document directly in Google. Look for the
+            <div
+              class="bg-color-palette-neutral-100 border border-color-border-primary inline-flex py-0.5 px-1 rounded-sm relative translate-y-0.5 mx-0.5 -my-1"
+            >
+              <FlightIcon @name="external-link" />
+            </div>
+            button in the Hermes document sidebar.
           </p>
         </li>
         <li>
-          <h4>Suggestions in the header will lock your doc.</h4>
+          <h4>Suggestions in the header will lock your document.</h4>
           <p>
-            Remove all comments and suggestions from the header of your doc,
-            then wait 5 minutes and refresh. Get in touch if this fails to
-            resolve the issue.
+            If this happens, remove all suggestions from the header of your doc,
+            and refresh Hermes. Please be patient, as it may take a few minutes
+            for your changes to be noticed by Hermes. If your document remains
+            locked after 10 minutes, please get in touch.
           </p>
         </li>
         <li>
           {{! <h4>Why aren't I receiving comment notifications?</h4> }}
-          <h4>Receiving "all notifications" isn't the default.</h4>
+          <h4>Subscribing to all notifications must be done manually.</h4>
           <p>
-            By default, you should receive notifications for mentions and
-            threads involving you. To subscribe to all comments, open your
-            document in Google Docs and click the bell icon in the top right.
-            From there, look for the "Subscribe to new comments" option. TODO:
-            Make this more precise.
+            By default, you will receive email notifications for @-mentions and
+            threads involving you. To get to all comments, you'll need use the
+            Google Docs interface. Open your doc in Google, then click the
           </p>
         </li>
       </ul>
     </div>
 
-    <div class="mb-12">
+    <div class="mb-14">
       <h2 class="mb-4 hermes-h4">
         <FlightIcon @name="discussion-square" />
         <span>
@@ -155,14 +167,39 @@
           Additional support
         </span>
       </h2>
-      <ul>
+      <ul class="space-y-6">
         <li>
-          <h4>How do I submit a bug or feature request?</h4>
+          <h4>Still have a question, bug, or feature request?</h4>
           <p>
             HashiCorp employees are encouraged to contact us on Slack.
             Open-source users can submit an issue on GitHub and we'll reply as
             soon as we can.
           </p>
+          <ul class="text-body-300 mt-5 space-y-1.5 support-links">
+            <li>
+              <LinkTo
+                @route="authenticated.dashboard"
+                class="flex text-color-foreground-faint items-center"
+              >
+                <FlightIcon class="mr-2" @name="slack" />
+                proj-hermes-feedback
+              </LinkTo>
+            </li>
+            <li>
+
+              <a class="flex text-color-foreground-faint items-center">
+                <FlightIcon class="mr-2" @name="mail" />
+                labs@hashicorp.com
+              </a>
+            </li>
+            <li>
+
+              <a class="flex text-color-foreground-faint items-center">
+                <FlightIcon class="mr-2" @name="github" />
+                Github Issues
+              </a>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>

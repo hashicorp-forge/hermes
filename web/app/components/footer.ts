@@ -13,3 +13,9 @@ export default class FooterComponent extends Component {
     return new Date().getFullYear();
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    Footer: typeof FooterComponent;
+  }
+}

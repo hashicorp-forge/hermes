@@ -20,9 +20,25 @@
 
 .static-text-screen {
   h2 {
-    @apply text-body-200 flex items-center space-x-2;
+    @apply text-body-200 flex items-center space-x-2.5;
+
+    svg {
+      @apply text-color-foreground-action;
+    }
   }
-  p, h4 {
-    @apply text-body-300
+
+  p a {
+    @apply text-color-foreground-action underline;
+  }
+
+  p,
+  h4 {
+    @apply text-body-300;
+  }
+
+  .support-links {
+    svg {
+      @apply text-color-foreground-primary;
+    }
   }
 }
