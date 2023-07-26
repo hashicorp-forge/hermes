@@ -3,25 +3,25 @@ import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
 import timeAgo from "hermes/utils/time-ago";
 
-export default class WaitingForMeRoute extends Route {
+export default class DocsOfMeRoute extends Route {
   @service algolia;
   @service("config") configSvc;
   @service("fetch") fetchSvc;
   @service session;
   @service authenticatedUser;
 
-
   async model(params) {
-
     const userInfo = this.authenticatedUser.info;
-    const searchIndex=this.configSvc.config.algolia_docs_index_name + "_dueDate_asc";
-    const docsWaitingForReview = this.algolia.searchIndex
+
+    const searchIndex =
+      this.configSvc.config.algolia_docs_index_name + "_dueDate_asc";
+
+    const docsOfMeWaitingForReview = this.algolia.searchIndex
       .perform(searchIndex, "", {
         filters:
-          `reviewers:'${userInfo.email}'` +
-          ` AND NOT reviewedBy:'${userInfo.email}'` +
-          " AND appCreated:true" +
-          " AND status:In-Review",
+          `owners:${userInfo.email}` +
+          " AND status:In-Review" +
+          " AND appCreated:true",
         hitsPerPage: 1000,
       })
       .then((result) => {
@@ -49,8 +49,8 @@ export default class WaitingForMeRoute extends Route {
     const docsReviewed = this.algolia.searchIndex
       .perform(searchIndex, "", {
         filters:
-          `reviewers:'${userInfo.email}'` +
-          ` AND reviewedBy:'${userInfo.email}'` +
+          `owners:${userInfo.email}` +
+          " AND status:Reviewed" +
           " AND appCreated:true",
         hitsPerPage: 1000,
       })
@@ -76,9 +76,8 @@ export default class WaitingForMeRoute extends Route {
         return result.hits;
       });
 
-
     return RSVP.hash({
-      docsWaitingForReview: docsWaitingForReview,
+      docsOfMeWaitingForReview: docsOfMeWaitingForReview,
       docsReviewed: docsReviewed,
     });
   }

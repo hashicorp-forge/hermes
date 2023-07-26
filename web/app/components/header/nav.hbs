@@ -39,6 +39,13 @@
       >
         Docs For Me
       </LinkTo>
+      <LinkTo
+        data-test-nav-link="docs-of-me"
+        @route="authenticated.docs-of-me"
+        @current-when="authenticated.docs-of-me"
+      >
+        Docs Of Me
+      </LinkTo>
     </div>
 
     <Header::Search class="global-search" />
@@ -54,7 +61,7 @@
       />
 
       <Hds::Button
-        @icon ="folder-users"
+        @icon="folder-users"
         {{!-- @isIconOnly={{true}} --}}
         @text="Directory"
         @color="secondary"

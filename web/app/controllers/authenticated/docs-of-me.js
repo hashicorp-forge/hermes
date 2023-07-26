@@ -4,8 +4,8 @@ import { inject as service } from "@ember/service";
 import FetchService from "../../services/fetch";
 
 
-export default class AuthenticatedWaitingForMeController extends Controller {
-  @alias("model.docsWaitingForReview") docsWaitingForReview;
+export default class AuthenticatedDocsOfMeController extends Controller {
+  @alias("model.docsOfMeWaitingForReview") docsOfMeWaitingForReview;
   @alias("model.docsReviewed") docsReviewed;
 
   @service router;

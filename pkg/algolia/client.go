@@ -361,6 +361,7 @@ func configureDocsReplicaIndexes(
 			"reviewedBy",
 			"appCreated",
 			"status",
+			"owners",
 		),
 		Ranking: opt.Ranking(
 			"asc(dueDate)",

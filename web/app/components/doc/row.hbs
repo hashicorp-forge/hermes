@@ -33,9 +33,11 @@
       @icon={{or (get-product-id @productArea) "folder"}}
       title={{this.productAreaName}}
     /></Hds::Table::Td>
-  <Hds::Table::Td class="owner">
-    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
-  </Hds::Table::Td>
+  {{#if (not @hideOwner)}}
+    <Hds::Table::Td class="owner">
+      <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
+    </Hds::Table::Td>
+  {{/if}}
   <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
   <Hds::Table::Td class="created">
     {{#if (not (is-empty @dueDate))}}
