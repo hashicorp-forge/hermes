@@ -24,9 +24,12 @@ type Document struct {
 	Reviewers []*User `gorm:"many2many:document_reviews;"`
 
 	// last date to review a doc for a reviewer
-	DueDate string 
+	DueDate string
 	// Contributors are users who have contributed to the document.
 	Contributors []*User `gorm:"many2many:document_contributors;"`
+
+	// Contributors are users who have contributed to the document.
+	ReviewedBy []*User `gorm:"many2many:document_reviewedBy;"`
 
 	// CustomFields contains custom fields.
 	CustomFields []*DocumentCustomField

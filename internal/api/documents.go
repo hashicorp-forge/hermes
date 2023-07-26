@@ -11,6 +11,8 @@ import (
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/email"
+	slackbot "github.com/hashicorp-forge/hermes/internal/slack-bot"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -327,59 +329,189 @@ func DocumentHandler(
 				return
 			}
 
-			// load template
-			// Load the email template
-			//var body bytes.Buffer
-			templateBytes, err := ioutil.ReadFile("templates/review_email_template.html")
-			if err != nil {
-				l.Error("error parsing template: ", "err", err)
+			// Save modified object in the database also
+			var reviewers []*models.User
+			for _, c := range docObj.GetReviewers() {
+				reviewers = append(reviewers, &models.User{
+					EmailAddress: c,
+				})
+			}
+			var contributors []*models.User
+			for _, c := range docObj.GetContributors() {
+				contributors = append(contributors, &models.User{
+					EmailAddress: c,
+				})
+			}
+
+			var reviewedBy []*models.User
+			for _, c := range docObj.GetReviewedBy() {
+				reviewedBy = append(reviewedBy, &models.User{
+					EmailAddress: c,
+				})
+			}
+
+			statusMap := map[string]models.DocumentStatus{
+				"Draft":     models.DraftDocumentStatus,
+				"In-Review": models.InReviewDocumentStatus,
+				"Reviewed":  models.ReviewedDocumentStatus,
+				"Obsolete":  models.ObsoleteDocumentStatus,
+			}
+
+			d := models.Document{
+				GoogleFileID: docObj.GetObjectID(),
+				Reviewers:    reviewers,
+				DueDate:      docObj.GetDueDate(),
+				Contributors: contributors,
+				ReviewedBy:   reviewedBy,
+				DocumentType: models.DocumentType{
+					Name: docObj.GetDocType(),
+				},
+				Owner: &models.User{
+					EmailAddress: userEmail,
+				},
+				Product: models.Product{
+					Name: docObj.GetProduct(),
+				},
+				Team: models.Team{
+					Name: docObj.GetTeam(),
+				},
+				Project: models.Project{
+					Name: docObj.GetProject(),
+				},
+				Status:  statusMap[docObj.GetStatus()],
+				Summary: docObj.GetSummary(),
+				Title:   docObj.GetTitle(),
+			}
+
+			if err := d.Upsert(db); err != nil {
+				l.Error("error upserting document in database",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path)
+				http.Error(w, "Error patching doc in the database",
+					http.StatusInternalServerError)
 				return
 			}
 
-			// Send emails to new reviewers.
-			if cfg.Email != nil && cfg.Email.Enabled {
-				if len(reviewersToEmail) > 0 {
-					// TODO: use a template for email content.
-					rawBody := string(templateBytes)
-					// returns the "baseurl/documents/{docid}"
-					docURL, err := getDocumentURL(cfg.BaseURL, docID)
+			// Get owner name
+			// Fetch owner name by searching Google Workspace directory.
+			// The api has a bug please kindly see this before proceeding forward
+			ppls, err := s.SearchPeople(docObj.GetOwners()[0], "emailAddresses,names")
+			if err != nil {
+				l.Error(
+					"Error getting user information",
+					"error searching people directory",
+					err,
+				)
+				return
+			}
+
+			// Verify that the result only contains one person.
+			if len(ppls) != 1 {
+				l.Error(
+					"Error getting user information",
+					fmt.Sprintf(
+						"wrong number of people in search result: %d", len(ppls)),
+					err,
+				)
+				return
+			}
+			ppl := ppls[0]
+
+			// Replace the names in the People API result with data from the Admin
+			// Directory API.
+			// TODO: remove this when the bug in the People API is fixed:
+			// https://issuetracker.google.com/issues/196235775
+			if err := replaceNamesWithAdminAPIResponse(
+				ppl, s,
+			); err != nil {
+				l.Error(
+					"Error getting user information",
+					"error replacing names with Admin API response",
+					err,
+				)
+				return
+			}
+
+			// Verify other required values are set.
+			if len(ppl.Names) == 0 {
+				l.Error(
+					"Error getting user information",
+					"no names in result",
+					err,
+				)
+				return
+			}
+
+			// Send emails to reviewers.
+			if cfg.Email != nil && cfg.Email.Enabled && len(reviewersToEmail) > 0 {
+				// TODO: use an asynchronous method for sending emails because we
+				// can't currently recover gracefully from a failure here.
+				// returns the "baseurl/documents/{docid}"
+				docURL, err := getDocumentURL(cfg.BaseURL, docID)
+				if err != nil {
+					l.Error("error getting the base doc url!", "error", err)
+				}
+				for _, reviewerEmail := range reviewersToEmail {
+					err := email.SendReviewRequestedEmail(
+						email.ReviewRequestedEmailData{
+							BaseURL:            cfg.BaseURL,
+							DocumentOwner:      ppl.Names[0].DisplayName,
+							DocumentType:       docObj.GetDocType(),
+							DocumentShortName:  docObj.GetDocNumber(),
+							DocumentTitle:      docObj.GetTitle(),
+							DocumentURL:        docURL,
+							DocumentProd:       docObj.GetProduct(),
+							DocumentTeam:       docObj.GetTeam(),
+							DocumentOwnerEmail: docObj.GetOwners()[0],
+						},
+						[]string{reviewerEmail},
+						cfg.Email.FromAddress,
+						s,
+					)
 					if err != nil {
-						l.Error("error getting document URL",
+						l.Error("error sending reviewer email",
 							"error", err,
 							"doc_id", docID,
 							"method", r.Method,
 							"path", r.URL.Path,
 						)
-						http.Error(w, "Error patching review",
+						http.Error(w, "Error creating review",
 							http.StatusInternalServerError)
 						return
 					}
-					//body := fmt.Sprintf(rawBody, docURL, docObj.GetDocNumber(), docObj.GetTitle())
-					body := fmt.Sprintf(rawBody, docURL, docObj.GetProduct(), docObj.GetTitle())
+					l.Info("doc reviewer email sent",
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+				}
 
-					// TODO: use an asynchronous method for sending emails because we
-					// can't currently recover gracefully on a failure here.
-					for _, reviewerEmail := range reviewersToEmail {
-						_, err = s.SendEmail(
-							[]string{reviewerEmail},
-							cfg.Email.FromAddress,
-							fmt.Sprintf("[%s]%s | Doc Review Request from %s", docObj.GetDocType(), docObj.GetTitle(), docObj.GetOwners()[0]),
-							//fmt.Sprintf("Document review requested for %s", docObj.GetDocNumber()),
-							body,
-						)
-						if err != nil {
-							l.Error("error sending email",
-								"error", err,
-								"doc_id", docID,
-								"method", r.Method,
-								"path", r.URL.Path,
-							)
-							http.Error(w, "Error patching review",
-								http.StatusInternalServerError)
-							return
-						}
-					}
-					l.Info("Reviewers emails sent")
+				// Also send the slack message tagginhg all the reviewers in the
+				// dedicated channel
+				// tagging all reviewers emails
+				emails := make([]string, len(reviewersToEmail))
+				for i, c := range reviewersToEmail {
+					emails[i] = c
+				}
+				err = slackbot.SendSlackMessage_Reviewer(slackbot.ReviewerRequestedSlackData{
+					BaseURL:            cfg.BaseURL,
+					DocumentOwner:      ppl.Names[0].DisplayName,
+					DocumentType:       docObj.GetDocType(),
+					DocumentShortName:  docObj.GetDocNumber(),
+					DocumentTitle:      docObj.GetTitle(),
+					DocumentURL:        docURL,
+					DocumentProd:       docObj.GetProduct(),
+					DocumentTeam:       docObj.GetTeam(),
+					DocumentOwnerEmail: docObj.GetOwners()[0],
+				}, emails,
+				)
+				//handle error gracefully
+				if err != nil {
+					fmt.Printf("Some error occured while sendind the message: %s", err)
+				} else {
+					fmt.Println("Succesfully! Delivered the message to all new reviewers")
 				}
 			}
 
@@ -395,7 +527,7 @@ func DocumentHandler(
 
 			// Rename file with new title.
 			s.RenameFile(docID,
-				fmt.Sprintf("[%s] %s", docObj.GetProduct(), req.Title))
+				fmt.Sprintf(req.Title))
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched document", "doc_id", docID)

@@ -27,6 +27,7 @@ type Doc interface {
 	GetDocType() string
 	GetMetaTags() []string
 	GetModifiedTime() int64
+	GetDueDate() string
 	GetObjectID() string
 	GetOwners() []string
 	GetProduct() string
