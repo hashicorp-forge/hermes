@@ -49,18 +49,20 @@ func SendSlackMessage_Reviewer(d ReviewerRequestedSlackData, Reviewers []string)
 	// Create a Slack API client
 	api := slack.New(os.Getenv("SLACK_BOT_ACCESS_TOKEN"))
 
-	// Generate the block message
-	msg, err := GenerateUIRichBlocks_Reviewer(d)
-	if err != nil {
-		return fmt.Errorf("failed to create the message block using slack-go-blockkit: %w", err)
-	}
-
 	// Iterate over the list of user emails and get user IDs
 	for _, email := range Reviewers {
-		userID, err := GetUserIDByEmail(email, api)
+		userID, username, err := GetUserIDByEmail(email, api)
+
 		if err != nil {
 			return fmt.Errorf("failed to retrieve Slack user ID: %w", err)
 		}
+
+		// Generate the block message
+		msg, err := GenerateUIRichBlocks_Reviewer(d, username)
+		if err != nil {
+			return fmt.Errorf("failed to create the message block using slack-go-blockkit: %w", err)
+		}
+
 		// Send the direct message to the user
 		_, _, err = api.PostMessage(
 			userID,
@@ -92,17 +94,18 @@ func SendSlackMessage_Contributor(d ContributorInvitationSlackData, Contributors
 	// Create a Slack API client
 	api := slack.New(os.Getenv("SLACK_BOT_ACCESS_TOKEN"))
 
-	// Generate the block message
-	msg, err := GenerateUIRichBlocks_Contributor(d)
-	if err != nil {
-		return fmt.Errorf("failed to create the message block using slack-go-blockkit: %w", err)
-	}
-
 	// Iterate over the list of user emails and get user IDs
 	for _, email := range Contributors {
-		userID, err := GetUserIDByEmail(email, api)
+		userID, username, err := GetUserIDByEmail(email, api)
+
 		if err != nil {
 			return fmt.Errorf("failed to retrieve Slack user ID: %w", err)
+		}
+
+		// Generate the block message
+		msg, err := GenerateUIRichBlocks_Contributor(d, username)
+		if err != nil {
+			return fmt.Errorf("failed to create the message block using slack-go-blockkit: %w", err)
 		}
 		// Send the direct message to the user
 		_, _, err = api.PostMessage(

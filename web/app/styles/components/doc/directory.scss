@@ -1,0 +1,27 @@
+.folder-list {
+    @apply grid gap-x-8 gap-y-12 grid-cols-6;
+  }
+
+
+  .wrapper {
+  box-shadow: inset 2px 1px 8px #ccc;
+  padding: 18px;
+  max-width: 80%; /* Adjust this value to your desired maximum width */
+  margin: 2rem auto;
+  border-radius: 20px;
+  max-height: 500px; /* Set a max height to enable scrolling when necessary */
+}
+
+/* Optional: Add some styling for the scrollbar */
+.wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+
+.centered-container {
+	width: 70%;
+  margin: 0 auto;
+}
+
+  
+  

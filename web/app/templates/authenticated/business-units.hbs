@@ -1,0 +1,34 @@
+{{page-title "BusinessUnits"}}
+<Header />
+
+<section class="x-container">
+  <div class="flex items-center space-x-2 mb-8">
+      <FlightIcon @name="git-branch" @size="24" />
+      <p
+      >Business Units</p>
+    </div>
+  <div class="wrapper">
+    <div class="folder-list">
+      {{#each-in this.model as |buKey buValue|}}
+          <LinkTo
+            @route="authenticated.teams"
+            @models={{array buKey}}
+            class="flex flex-col items-start space-y-2 p-4 -m-4 rounded-md hover:bg-color-palette-neutral-50 active:bg-color-palette-neutral-100 overflow-hidden"
+          >
+            <div class="centered-container">
+              <div class="space-y-2">
+                <Hds::IconTile @icon="folder" @color="vault" />
+              </div>
+
+              <div class="flex flex-col items-start space-y-1">
+                <p>
+                  {{buKey}}
+                </p>
+              </div>
+            </div>
+          </LinkTo>
+      {{/each-in}}
+    </div>
+  </div>
+</section>
+{{outlet}}

@@ -6,14 +6,14 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData) (*slack.Message, error) {
+func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData, username string) (*slack.Message, error) {
 	// header
-	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]* *|* *Document Review Request* from *%s[%s]*", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
+	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*%s* *|* *Document Review Request* from *%s [%s] *", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
 
 	headerSection := slack.NewSectionBlock(headerText, nil, nil)
 
 	// Invitation Text Section
-	invitationText := slack.NewTextBlockObject("mrkdwn", "*Hi Razor,* \nYou have been invited to review a new document in DocVault.", false, false)
+	invitationText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Hi %s,* \nYou have been invited to review a new document in DocVault.", username), false, false)
 	invitationSection := slack.NewSectionBlock(invitationText, nil, nil)
 
 	// // Document Owner Section
@@ -77,14 +77,14 @@ func GenerateUIRichBlocks_Reviewer(data ReviewerRequestedSlackData) (*slack.Mess
 	return &msg, nil
 }
 
-func GenerateUIRichBlocks_Contributor(data ContributorInvitationSlackData) (*slack.Message, error) {
+func GenerateUIRichBlocks_Contributor(data ContributorInvitationSlackData, username string) (*slack.Message, error) {
 	// header
-	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*[%s]* *|* *Document Contribution Invitation* from *%s[%s]*", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
+	headerText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*%s* *|* *Document Contribution Invitation* from *%s [%s]*", data.DocumentTitle, data.DocumentOwner, data.DocumentOwnerEmail), false, false)
 
 	headerSection := slack.NewSectionBlock(headerText, nil, nil)
 
 	// Invitation Text Section
-	invitationText := slack.NewTextBlockObject("mrkdwn", "*Hi Razor,* \nYou have been invited to contribute to a document in DocVault, the Document Management System at Razorpay.\n", false, false)
+	invitationText := slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*Hi %s,* \nYou have been invited to contribute to a document in DocVault, the Document Management System at Razorpay.\n", username), false, false)
 	invitationSection := slack.NewSectionBlock(invitationText, nil, nil)
 
 	// // Document Owner Section
