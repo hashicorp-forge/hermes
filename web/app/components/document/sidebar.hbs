@@ -588,7 +588,7 @@
                 <FlightIcon @size="16" @name="at-sign" />
               </div>
               Approvers and people subscribed to
-              {{@document.product}}
+              “{{@document.product}}”
               will be notified.
             </li>
             <li class="flex items-center">
@@ -596,10 +596,8 @@
                 class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
               >
                 <FlightIcon @size="16" @name="radio" />
-
-                {{! <FlightIcon @size="16" @name="globe" /> }}
               </div>
-              Your doc will appear on Hermes and Google Group emails.
+              Your document will appear in Hermes and Google Workspace search.
             </li>
             <li class="flex items-center">
               <div
@@ -608,15 +606,9 @@
 
                 <FlightIcon @size="16" @name="globe-private" />
               </div>
-              Published docs cannot be deleted.
+              Published documents cannot be deleted but can be archived.
             </li>
           </ul>
-          {{!-- <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
-            This will publish your document company-wide.
-            <br />Anyone subscribed to
-            {{@document.product}}
-            will be notified, along with the approvers below.
-          </p> --}}
 
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
