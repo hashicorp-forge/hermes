@@ -223,7 +223,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
       // Set modal on a delay so it appears after transition.
       this.modalAlerts.setActive.perform(
-        "docCreated",
+        "draftCreated",
         AWAIT_DOC_CREATED_MODAL_DELAY
       );
 

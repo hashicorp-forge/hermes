@@ -6,6 +6,7 @@
   @shareButtonIsShown={{this.shareButtonIsShown}}
   @shareButtonTooltipText={{this.temporaryShareButtonTooltipText}}
   @shareButtonIcon={{this.temporaryShareButtonIcon}}
+  @shareURL={{this.shareURL}}
 />
 
 {{#unless @isCollapsed}}
@@ -429,7 +430,7 @@
                 @size="medium"
                 @color="primary"
                 class="w-full"
-                {{on "click" (fn (set this "requestReviewModalIsActive" true))}}
+                {{on "click" (fn (set this "requestReviewModalIsShown" true))}}
               />
               <Hds::Button
                 @text="Delete"
@@ -438,7 +439,7 @@
                 @icon="trash"
                 @isIconOnly={{true}}
                 class="basis-0"
-                {{on "click" (fn (set this "deleteModalIsActive" true))}}
+                {{on "click" (fn (set this "deleteModalIsShown" true))}}
               />
             </div>
           {{/if}}
@@ -469,7 +470,7 @@
                 @isIconOnly={{true}}
                 class="basis-0"
                 disabled={{(eq @document.status "Obsolete")}}
-                {{on "click" (fn (set this "archiveModalIsActive" true))}}
+                {{on "click" (fn (set this "archiveModalIsShown" true))}}
               />
             </div>
 
@@ -517,7 +518,7 @@
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
-  {{#if this.archiveModalIsActive}}
+  {{#if this.archiveModalIsShown}}
     <Document::Modal
       @color="critical"
       @headerText="Archive document?"
@@ -531,7 +532,7 @@
     />
   {{/if}}
 
-  {{#if this.deleteModalIsActive}}
+  {{#if this.deleteModalIsShown}}
     <Document::Modal
       @color="critical"
       @headerText="Delete draft?"
@@ -545,7 +546,7 @@
     />
   {{/if}}
 
-  {{#if this.requestReviewModalIsActive}}
+  {{#if this.requestReviewModalIsShown}}
     <Document::Modal
       @headerText="Request review"
       @errorTitle="Error requesting review"
@@ -640,5 +641,55 @@
         {{/if}}
       </:default>
     </Document::Modal>
+  {{/if}}
+
+  {{#if this.docPublishedModalIsShown}}
+    <Hds::Modal as |M|>
+      <M.Header>
+        <div class="flex items-center">
+          <FlightIcon
+            @name="check-circle-fill"
+            class="text-color-palette-green-200 mr-2"
+          />
+          Document published!
+        </div>
+      </M.Header>
+      <M.Body>
+        <p class="text-body-300 mb-5">
+          Your doc is now available to everyone in your workspace.
+          <br />
+          Weʼve notified your approvers and subscribers to this product/area.
+        </p>
+        <label
+          class="hermes-form-label mb-1"
+          for="recently-published-share-url"
+        >
+          Share it with others
+        </label>
+        <Hds::Form::TextInput::Base
+          id="recently-published-share-url"
+          class="text-body-300 pl-2.5 mb-1.5"
+          @value={{this.shareURL}}
+          {{select-on-focus}}
+          readonly
+        />
+      </M.Body>
+      <M.Footer>
+        <Hds::ButtonSet>
+
+          <CopyURLButton
+            @url={{this.shareURL}}
+            class="hds-button hds-button--size-medium hds-button--color-primary"
+          />
+          <Hds::Button
+            {{on "click" (set this "docPublishedModalIsShown" false)}}
+            @text="Continue to document"
+            @icon="arrow-right"
+            @iconPosition="trailing"
+            @color="tertiary"
+          />
+        </Hds::ButtonSet>
+      </M.Footer>
+    </Hds::Modal>
   {{/if}}
 {{/in-element}}
