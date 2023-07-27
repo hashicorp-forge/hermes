@@ -2,6 +2,10 @@ import Component from "@glimmer/component";
 
 interface ExternalLinkComponentSignature {
   Element: HTMLAnchorElement;
+  Args: {
+    iconIsShown?: boolean;
+    iconIsSmall?: boolean;
+  };
   Blocks: {
     default: [];
   };

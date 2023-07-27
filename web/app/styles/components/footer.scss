@@ -1,7 +1,19 @@
 .footer {
-  @apply text-center mt-12 mb-16;
+  @apply mt-12 mb-16 w-full text-body-200 text-color-foreground-faint;
 
-  a {
-    @apply text-inherit no-underline border-b border-b-color-border-primary hover:border-b-color-foreground-action hover:text-color-foreground-action;
+  .footer-inner {
+    @apply border-t border-t-color-border-primary pt-6 flex w-full items-center justify-between;
+  }
+
+  &.compact {
+    @apply mt-6;
+
+    .x-container {
+      @apply px-0;
+    }
+
+    .footer-inner {
+      @apply border-t-0;
+    }
   }
 }

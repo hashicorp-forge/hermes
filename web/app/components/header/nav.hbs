@@ -76,6 +76,22 @@
           />
           <dd.Separator class="mt-2" />
           <dd.Interactive
+            @href={{this.gitHubRepoURL}}
+            @isHrefExternal={{true}}
+            @text="GitHub repo"
+            @icon="external-link"
+            class="user-menu-external-link"
+          />
+          {{#if this.supportDocsLinkIsShown}}
+            <dd.Interactive
+              @href={{this.supportDocsURL}}
+              @isHrefExternal={{true}}
+              @text="Support docs"
+              @icon="external-link"
+              class="user-menu-external-link"
+            />
+          {{/if}}
+          <dd.Interactive
             data-test-user-menu-item="email-notifications"
             @route="authenticated.settings"
             @text="Email notifications"
