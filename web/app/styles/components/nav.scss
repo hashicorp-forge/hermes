@@ -42,8 +42,14 @@
   .user-menu-external-link {
     @apply flex-row-reverse justify-end;
 
+    &:not(:hover) {
+      .hds-dropdown-list-item__interactive-icon {
+        @apply text-color-foreground-faint opacity-75;
+      }
+    }
+
     .hds-dropdown-list-item__interactive-icon {
-      @apply mr-0 ml-1.5 opacity-50;
+      @apply mr-0 ml-1.5;
     }
 
     .hds-dropdown-list-item__interactive-text {

@@ -21,11 +21,8 @@
           <ExternalLink @iconIsShown={{true}} href={{this.gitHubRepoURL}}>
             GitHub repo
           </ExternalLink>
-          {{#if this.supportLinkIsShown}}
-            <ExternalLink
-              @iconIsShown={{true}}
-              href="https://github.com/hashicorp-forge/hermes"
-            >
+          {{#if this.supportDocsURL}}
+            <ExternalLink @iconIsShown={{true}} href={{this.supportDocsURL}}>
               Support docs
             </ExternalLink>
           {{/if}}

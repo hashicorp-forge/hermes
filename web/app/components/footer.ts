@@ -18,18 +18,18 @@ export default class FooterComponent extends Component<FooterComponentSignature>
     return new Date().getFullYear();
   }
 
-  protected get supportLinkIsShown() {
-    // TODO: Get this from the config
-    return true;
-  }
-
   protected get hermesVersion() {
-    // return "0.3.0";
-    return null;
+    // TODO: Get this from the config
+    return "0.3.0";
   }
 
   protected get gitHubRepoURL() {
     return HERMES_GITHUB_REPO_URL;
+  }
+
+  protected get supportDocsURL() {
+    // TODO: Get this from the config
+    return "";
   }
 }
 
