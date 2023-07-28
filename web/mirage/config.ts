@@ -302,7 +302,7 @@ export default function (mirageConfig) {
       /**
        * Used by /subscriptions to get all possible subscriptions.
        * Used by the NewDoc route to map the products to their abbreviations.
-       * Used by the sidebar to populate a draft's product/area dropdown.
+       * Used by the sidebar to populate a draft's bu dropdown.
        */
       this.get("/products", () => {
         let currentProducts = this.schema.products.all().models;

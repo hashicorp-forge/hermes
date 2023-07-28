@@ -1,6 +1,6 @@
 {{page-title "waiting for me"}}
 <Header />
-<section class="x-container">
+<section class="x-container-navbar">
   {{#if this.docsWaitingForReview}}
     <div
       class="flex flex-col w-full py-10 border-0 border-b hds-border-primary"
@@ -11,31 +11,19 @@
           class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
         >Documents waiting for your review</h2>
       </div>
-      <div class="y-2 gap-2"></div>
-      {{!-- <div class="tile-list">
-        {{#each this.docsWaitingForReview as |doc index|}}
-          {{#if (lt index 1000)}}
-            <Doc::Tile
-              @avatar="{{get doc.ownerPhotos 0}}"
-              @docID="{{doc.objectID}}"
-              @modifiedAgo="{{doc.modifiedAgo}}"
-              @owner="{{get doc.owners 0}}"
-              @productArea="{{doc.product}}"
-              @status="{{lowercase doc.status}}"
-              @title="{{doc.title}}"
-              @dueDate="{{doc.dueDate}}"
-              @showColorBadge={{true}}
-            />
-          {{/if}}
-        {{/each}}
+      {{!-- <div>
+        <h2><Hds::Badge @color="highlight" @text="In review" @size="large" @type="inverted"/></h2>
       </div> --}}
+      <div class="y-2 gap-2"></div>
       <Hds::Table @isStriped={{false}} class="row-results__table">
         <:head as |H|>
           <H.Tr>
             <H.Th class="name">Name</H.Th>
             <H.Th class="type">Type</H.Th>
             <H.Th class="status">Status</H.Th>
-            <H.Th class="product">Product/Area</H.Th>
+            <H.Th class="product">BU</H.Th>
+            <H.Th class="product">Team</H.Th>
+            <H.Th class="product">Project</H.Th>
             <H.Th class="owner">Owner</H.Th>
             <H.Th class="created">Created</H.Th>
             <H.Th class="created">Due Date</H.Th>
@@ -52,11 +40,15 @@
               @docType="{{doc.docType}}"
               @owner="{{get doc.owners 0}}"
               @productArea="{{doc.product}}"
+              @team="{{doc.team}}"
+              @project="{{doc.project}}"
               @status="{{lowercase doc.status}}"
               @title="{{doc.title}}"
               @isDraft={{@isDraft}}
               @dueDate="{{doc.dueDate}}"
               @showColorBadge={{true}}
+              {{!-- @hideStatus={{true}} --}}
+              @hideThumbnail={{true}}
             />
           {{/each}}
         </:body>
@@ -71,30 +63,15 @@
       >Documents you have reviewed</h2>
     </div>
     <div class="y-2 gap-2"></div>
-    {{!-- <div class="tile-list">
-        {{#each this.docsWaitingForReview as |doc index|}}
-          {{#if (lt index 1000)}}
-            <Doc::Tile
-              @avatar="{{get doc.ownerPhotos 0}}"
-              @docID="{{doc.objectID}}"
-              @modifiedAgo="{{doc.modifiedAgo}}"
-              @owner="{{get doc.owners 0}}"
-              @productArea="{{doc.product}}"
-              @status="{{lowercase doc.status}}"
-              @title="{{doc.title}}"
-              @dueDate="{{doc.dueDate}}"
-              @showColorBadge={{true}}
-            />
-          {{/if}}
-        {{/each}}
-      </div> --}}
     <Hds::Table @isStriped={{false}} class="row-results__table">
       <:head as |H|>
         <H.Tr>
           <H.Th class="name">Name</H.Th>
           <H.Th class="type">Type</H.Th>
-          <H.Th class="status">Status</H.Th>
-          <H.Th class="product">Product/Area</H.Th>
+          {{! <H.Th class="status">Status</H.Th> }}
+          <H.Th class="product">BU</H.Th>
+          <H.Th class="product">Team</H.Th>
+          <H.Th class="product">Project</H.Th>
           <H.Th class="owner">Owner</H.Th>
           <H.Th class="created">Created</H.Th>
           <H.Th class="created">Due Date</H.Th>
@@ -111,12 +88,16 @@
             @docType="{{doc.docType}}"
             @owner="{{get doc.owners 0}}"
             @productArea="{{doc.product}}"
+            @team="{{doc.team}}"
+            @project="{{doc.project}}"
             @status="{{lowercase doc.status}}"
             @title="{{doc.title}}"
             @isDraft={{@isDraft}}
             @dueDate="{{doc.dueDate}}"
             @showColorBadge={{true}}
             @isReviewed={{true}}
+            @hideStatus={{true}}
+            @hideThumbnail={{true}}
           />
         {{/each}}
       </:body>

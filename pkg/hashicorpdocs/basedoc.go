@@ -12,7 +12,7 @@ type BaseDoc struct {
 	// DocType is the type of document (e.g., "RFC", "PRD").
 	DocType string `json:"docType,omitempty"`
 
-	// DocNumber is a unique document identifier containing a product/area
+	// DocNumber is a unique document identifier containing a bu
 	// abbreviation and a unique number (e.g., "TF-123").
 	DocNumber string `json:"docNumber,omitempty"`
 

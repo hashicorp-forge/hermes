@@ -23,6 +23,12 @@ export default class AllRoute extends Route {
     product: {
       refreshModel: true,
     },
+    team: {
+      refreshModel: true,
+    },
+    project: {
+      refreshModel: true,
+    },
     sortBy: {
       refreshModel: true,
     },

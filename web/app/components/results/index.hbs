@@ -1,28 +1,31 @@
 {{! @glint-nocheck: not typesafe yet }}
 <section class="flex flex-col items-center flex-1 min-h-full">
   <div class="x-container">
-      {{#if (and this.firstPageIsShown this.queryIsProductName)}}
-        <div class="flex flex-col items-start w-full pb-10" data-test-results-product-link>
-          <Hds::Card::Container
-            @level="mid"
-            @hasBorder="true"
-            @overflow="hidden"
-            class="flex flex-col items-start space-y-3 pt-4 px-4 pb-3"
-          >
-            <Hds::Badge
-              @text={{this.capitalizedQuery}}
-              @icon={{or (get-product-id @query) "folder"}}
-            />
-            <Hds::Link::Standalone
-              @text="View all {{this.capitalizedQuery}} documents"
-              @icon="arrow-right-circle"
-              @iconPosition="trailing"
-              @route="authenticated.all"
-              @query={{hash product=(array this.capitalizedQuery)}}
-            />
-          </Hds::Card::Container>
-        </div>
-      {{/if}}
+    {{#if (and this.firstPageIsShown this.queryIsProductName)}}
+      <div
+        class="flex flex-col items-start w-full pb-10"
+        data-test-results-product-link
+      >
+        <Hds::Card::Container
+          @level="mid"
+          @hasBorder="true"
+          @overflow="hidden"
+          class="flex flex-col items-start space-y-3 pt-4 px-4 pb-3"
+        >
+          <Hds::Badge
+            @text={{this.capitalizedQuery}}
+            @icon={{or (get-product-id @query) "folder"}}
+          />
+          <Hds::Link::Standalone
+            @text="View all {{this.capitalizedQuery}} documents"
+            @icon="arrow-right-circle"
+            @iconPosition="trailing"
+            @route="authenticated.all"
+            @query={{hash product=(array this.capitalizedQuery)}}
+          />
+        </Hds::Card::Container>
+      </div>
+    {{/if}}
 
     <h1
       class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
@@ -36,6 +39,8 @@
             @isResult="{true}"
             @owner="{{get doc.owners 0}}"
             @productArea="{{doc.product}}"
+            @team="{{doc.team}}"
+            @project="{{doc.project}}"
             @snippet="{{doc._snippetResult.content.value}}"
             @status="{{lowercase doc.status}}"
             @title="{{doc.title}}"

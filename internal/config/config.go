@@ -224,7 +224,7 @@ type Products struct {
 	Product []*Product `hcl:"product,block"`
 }
 
-// Product is a product/area.
+// Product is a bu.
 type Product struct {
 	// Name is the name of the product.
 	Name string `hcl:"name,label" json:"name"`

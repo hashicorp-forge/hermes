@@ -16,6 +16,8 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       docType: ["bar"],
       owners: [],
       product: [],
+      team: [],
+      project: [],
       status: [],
     };
 
@@ -38,7 +40,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
 
       <LinkTo
         @route="authenticated.all"
-        @query={{get-facet-query-hash "Product/Area" "foo" false}}
+        @query={{get-facet-query-hash "BU" "foo" false}}
       />
 
       <LinkTo
@@ -76,7 +78,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .hasAttribute(
         "href",
         "/all?docType=%5B%22bar%22%5D&product=%5B%22foo%22%5D",
-        "Product/Area facetName is properly translated"
+        "BU facetName is properly translated"
       );
 
     assert

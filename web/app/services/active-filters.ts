@@ -8,10 +8,12 @@ export default class ActiveFiltersService extends Service {
   @service declare router: RouterService;
 
   @tracked index: ActiveFilters = {
-    docType: [],
-    status: [],
     product: [],
+    team: [],
+    project: [],
+    docType: [],
     owners: [],
+    status: [],
   };
 
   update(params: DocumentsRouteParams) {
@@ -19,6 +21,8 @@ export default class ActiveFiltersService extends Service {
       docType: params.docType || [],
       status: params.status || [],
       product: params.product || [],
+      team: params.team || [],
+      project: params.project || [],
       owners: params.owners || [],
     };
   }

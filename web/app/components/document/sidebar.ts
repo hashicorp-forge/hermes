@@ -264,8 +264,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.project = project;
     await this.save.perform("project", this.project);
   });
-  
-  updateDueDate = restartableTask(async (date: string) => {
+
+  updateDueDate = task(async (date: string) => {
     this.dueDate = date;
     await this.save.perform("dueDate", this.dueDate);
     // productAbbreviation is computed by the back end
@@ -513,28 +513,44 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 
-  requestReview = task(async () => {
-    try {
-      // Update reviewers.
-      await this.patchDocument.perform({
-        reviewers: this.reviewers.compact().mapBy("email"),
-      });
-
-      await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
-        method: "POST",
-      });
-
-      this.showFlashSuccess("Done!", "Document review requested");
-
-      this.router.transitionTo({
-        queryParams: { draft: false },
-      });
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to request review");
-      throw error;
+  get IsAllowedToMoveToInReview() {
+    if (this.reviewers.length && this.dueDate) {
+      return true;
+    } else {
+      return false;
     }
-    this.requestReviewModalIsActive = false;
-    this.refreshRoute();
+  }
+
+  requestReview = task(async () => {
+    if (this.IsAllowedToMoveToInReview) {
+      try {
+        // Update reviewers.
+        await this.patchDocument.perform({
+          reviewers: this.reviewers.compact().mapBy("email"),
+        });
+        await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
+          method: "POST",
+        });
+        this.showFlashSuccess("Done!", "Document review requested");
+        this.router.transitionTo({
+          queryParams: { draft: false },
+        });
+      } catch (error: unknown) {
+        this.maybeShowFlashError(error as Error, "Unable to request review");
+        throw error;
+      }
+      this.requestReviewModalIsActive = false;
+      this.refreshRoute();
+    } else {
+      this.flashMessages.add({
+        title: "Unable To move to In-Review",
+        message: "You must have to fill Reviewers and Due Date to proceed",
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+        preventDuplicates: true,
+      });
+    }
   });
 
   deleteDraft = task(async () => {

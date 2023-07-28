@@ -23,6 +23,12 @@ export default class ResultsRoute extends Route {
     product: {
       refreshModel: true,
     },
+    team: {
+      refreshModel: true,
+    },
+    project: {
+      refreshModel: true,
+    },
     status: {
       refreshModel: true,
     },

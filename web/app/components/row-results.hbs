@@ -10,7 +10,7 @@
 }}
 
 <section>
-  <div class="x-container">
+  <div class="x-container-navbar">
     <div class="row-results">
       {{#if @docs}}
         <Hds::Table @isStriped={{false}} class="row-results__table">
@@ -19,7 +19,9 @@
               <H.Th class="name">Name</H.Th>
               <H.Th class="type">Type</H.Th>
               <H.Th class="status">Status</H.Th>
-              <H.Th class="product">Product/Area</H.Th>
+              <H.Th class="product">BU</H.Th>
+              <H.Th class="product">Team</H.Th>
+              <H.Th class="product">Project</H.Th>
               <H.Th class="owner">Owner</H.Th>
               <H.Th class="created">Created</H.Th>
               <H.Th class="created">Due Date</H.Th>
@@ -36,6 +38,8 @@
                 @docType="{{doc.docType}}"
                 @owner="{{get doc.owners 0}}"
                 @productArea="{{doc.product}}"
+                @team="{{doc.team}}"
+                @project="{{doc.project}}"
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
                 @isDraft={{@isDraft}}

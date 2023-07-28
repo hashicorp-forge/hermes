@@ -25,6 +25,8 @@ export enum FacetName {
   Owners = "owners",
   Status = "status",
   Product = "product",
+  Team = "team",
+  Project = "project",
 }
 
 export interface SortByFacets {

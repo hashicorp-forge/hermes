@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 
 export default class AuthenticatedNewIndexRoute extends Route {
   @service("fetch") fetchSvc;
+  @service authenticatedUser;
 
   async model() {
     return await this.fetchSvc

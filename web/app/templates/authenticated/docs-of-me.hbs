@@ -1,6 +1,6 @@
 {{page-title "docs of me"}}
 <Header />
-<section class="x-container">
+<section class="x-container-navbar">
   {{#if this.docsOfMeWaitingForReview}}
     <div
       class="flex flex-col w-full py-10 border-0 border-b hds-border-primary"
@@ -20,7 +20,9 @@
               <H.Th class="type">Type</H.Th>
               <H.Th class="status">Overall Doc Status</H.Th>
               <H.Th class="product">BU</H.Th>
-              {{!-- <H.Th class="owner">Owner</H.Th> --}}
+              <H.Th class="product">Team</H.Th>
+              <H.Th class="product">Project</H.Th>
+              {{! <H.Th class="owner">Owner</H.Th> }}
               <H.Th class="created">Created</H.Th>
               <H.Th class="created">Due Date</H.Th>
             </H.Tr>
@@ -35,12 +37,16 @@
               @docType="{{doc.docType}}"
               @owner="{{get doc.owners 0}}"
               @productArea="{{doc.product}}"
+              @team="{{doc.team}}"
+              @project="{{doc.project}}"
               @status="{{lowercase doc.status}}"
               @title="{{doc.title}}"
               @isDraft={{@isDraft}}
               @dueDate="{{doc.dueDate}}"
               @showColorBadge={{true}}
               @hideOwner={{true}}
+              {{!-- @hideStatus={{true}} --}}
+              @hideThumbnail={{true}}
             />
           </:body>
         </Hds::Table>
@@ -48,7 +54,7 @@
           @reviewers={{doc.reviewers}}
           @reviewedBy={{doc.reviewedBy}}
         />
-        <div class="mb-16"></div>
+        <div class="mb-8"></div>
       {{/each}}
 
     </div>
@@ -69,9 +75,11 @@
           <H.Tr>
             <H.Th class="name">Name</H.Th>
             <H.Th class="type">Type</H.Th>
-            <H.Th class="status">Status</H.Th>
-            <H.Th class="product">Product/Area</H.Th>
-            <H.Th class="owner">Owner</H.Th>
+            {{!-- <H.Th class="status">Status</H.Th> --}}
+            <H.Th class="product">BU</H.Th>
+            <H.Th class="product">Team</H.Th>
+            <H.Th class="product">Project</H.Th>
+            {{!-- <H.Th class="owner">Owner</H.Th> --}}
             <H.Th class="created">Created</H.Th>
             <H.Th class="created">Due Date</H.Th>
           </H.Tr>
@@ -87,12 +95,17 @@
               @docType="{{doc.docType}}"
               @owner="{{get doc.owners 0}}"
               @productArea="{{doc.product}}"
+              @team="{{doc.team}}"
+              @project="{{doc.project}}"
               @status="{{lowercase doc.status}}"
               @title="{{doc.title}}"
               @isDraft={{@isDraft}}
               @dueDate="{{doc.dueDate}}"
               @showColorBadge={{true}}
               @isReviewed={{true}}
+              @hideStatus={{true}}
+              @hideOwner={{true}}
+              @hideThumbnail={{true}}
             />
           {{/each}}
         </:body>

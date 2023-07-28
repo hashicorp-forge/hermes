@@ -16,84 +16,83 @@
         />
       {{/if}}
     </h1>
-     
+
     {{#if (eq this.authenticatedUser.info.role "Admin")}}
-    <br>
+      <br />
       <Hds::ButtonSet>
-            <Hds::Button
-                    @text="Admin"
-                    @icon="identity-user"
-                    @color="critical"
-                    {{on "click"  (fn this.toggleModal3)}}
-            />
+        <Hds::Button
+          @text="Admin"
+          @icon="identity-user"
+          @color="critical"
+          {{on "click" (fn this.toggleModal3)}}
+        />
 
       </Hds::ButtonSet>
-    <br>
-  {{/if}}
+      <br />
+    {{/if}}
 
     {{#if this.showModal3}}
-    {{#modal-dialog
-      onClose=(action (action (mut this.showModal3) false))
-      targetAttachment="center"
-      translucentOverlay=true
-    }}
-      <div class="modal-body">
-        <div class="space-y-4" style="text-align: center;">
-          <h4 class="modal-title">Make Someone Admin</h4>
-        </div>
-        <form {{on "submit" this.submitFormMakemeAdmin}}>
-          <div class="mb-4">
-            <Hds::Form::Field @layout="vertical" as |F|>
-              {{yield
-                (hash
-                  Error=F.Error
-                  HelperText=F.HelperText
-                  Label=F.Label
-                  isRequired=F.isRequired
-                  isOptional=F.isOptional
-                )
-              }}
-              <F.Control>
-                <Inputs::PeopleSelect
-                  class="multiselect mt-2 w-auto"
-                  @selected={{this.emails}}
-                  @onChange={{this.updateemails}}
-                />
-              </F.Control>
-              <F.Label>
-                <FlightIcon @name="users" />
-                Select Admin/Admins
-              </F.Label>
-              <F.HelperText>
-                Doing this will give them all Admin Priveleges.
-              </F.HelperText>
-            </Hds::Form::Field>
+      {{#modal-dialog
+        onClose=(action (action (mut this.showModal3) false))
+        targetAttachment="center"
+        translucentOverlay=true
+      }}
+        <div class="modal-body">
+          <div class="space-y-4" style="text-align: center;">
+            <h4 class="modal-title">Make Someone Admin</h4>
           </div>
-          <div class="modal-footer" class="space-y-4">
-            <Hds::ButtonSet>
-              {{#if this.AdminisBeingCreated}}
+          <form {{on "submit" this.submitFormMakemeAdmin}}>
+            <div class="mb-4">
+              <Hds::Form::Field @layout="vertical" as |F|>
+                {{yield
+                  (hash
+                    Error=F.Error
+                    HelperText=F.HelperText
+                    Label=F.Label
+                    isRequired=F.isRequired
+                    isOptional=F.isOptional
+                  )
+                }}
+                <F.Control>
+                  <Inputs::PeopleSelect
+                    class="multiselect mt-2 w-auto"
+                    @selected={{this.emails}}
+                    @onChange={{this.updateemails}}
+                  />
+                </F.Control>
+                <F.Label>
+                  <FlightIcon @name="users" />
+                  Select Admin/Admins
+                </F.Label>
+                <F.HelperText>
+                  Doing this will give them all Admin Priveleges.
+                </F.HelperText>
+              </Hds::Form::Field>
+            </div>
+            <div class="modal-footer" class="space-y-4">
+              <Hds::ButtonSet>
+                {{#if this.AdminisBeingCreated}}
+                  <Hds::Button
+                    @isIconOnly={{true}}
+                    @text="Submit"
+                    @icon="loading"
+                  />
+                {{else}}
+                  <Hds::Button @text="Submit" type="submit" />
+                {{/if}}
                 <Hds::Button
-                  @isIconOnly={{true}}
-                  @text="Submit"
-                  @icon="loading"
+                  @text="Cancel"
+                  @color="critical"
+                  {{on "click" (fn this.toggleModal3 false)}}
                 />
-              {{else}}
-                <Hds::Button @text="Submit" type="submit" />
-              {{/if}}
-              <Hds::Button
-                @text="Cancel"
-                @color="critical"
-                {{on "click" (fn this.toggleModal3 false)}}
-              />
-            </Hds::ButtonSet>
-          </div>
-        </form>
-      </div>
+              </Hds::ButtonSet>
+            </div>
+          </form>
+        </div>
 
-    {{/modal-dialog}}
-  {{/if}}
+      {{/modal-dialog}}
+    {{/if}}
 
-  
     <p>Here’s all the latest updates across the organization.</p>
   </div>
 
@@ -117,6 +116,8 @@
               @modifiedAgo="{{doc.modifiedAgo}}"
               @owner="{{get doc.owners 0}}"
               @productArea="{{doc.product}}"
+              @team="{{doc.team}}"
+              @project="{{doc.project}}"
               @status="{{lowercase doc.status}}"
               @title="{{doc.title}}"
               @dueDate="{{doc.dueDate}}"

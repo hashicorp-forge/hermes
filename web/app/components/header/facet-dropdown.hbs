@@ -1,26 +1,37 @@
 {{! @glint-ignore: not typesafe yet }}
-<X::DropdownList
-  @items={{@facets}}
-  @listIsOrdered={{true}}
-  @offset={{hash mainAxis=3 crossAxis=-5}}
-  @renderOut={{true}}
-  class="facet-dropdown-popover"
-  {{! @glint-ignore: not typesafe yet }}
-  ...attributes
->
-  <:anchor as |dd|>
-    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
-  </:anchor>
-  <:item as |dd|>
-    <dd.LinkTo
-      @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
-    >
-      <X::DropdownList::CheckableItem
-        @value={{dd.value}}
-        @count={{dd.attrs.count}}
-        @selected={{dd.attrs.selected}}
-      />
-    </dd.LinkTo>
-  </:item>
-</X::DropdownList>
+{{#if this.teams}}
+  <X::DropdownList
+    @items={{@facets}}
+    @label={{@label}}
+    @teams={{this.teams}}
+    @listIsOrdered={{true}}
+    @offset={{hash mainAxis=3 crossAxis=-5}}
+    @renderOut={{true}}
+    class="facet-dropdown-popover"
+    {{! @glint-ignore: not typesafe yet }}
+    ...attributes
+  >
+    <:anchor as |dd|>
+      <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
+    </:anchor>
+    <:item as |dd|>
+      <dd.LinkTo
+        @route={{this.currentRouteName}}
+        @query={{get-facet-query-hash @label dd.value dd.attrs.selected}}
+      >
+        <X::DropdownList::CheckableItem
+          @value={{dd.value}}
+          @count={{dd.attrs.count}}
+          @selected={{dd.attrs.selected}}
+        />
+      </dd.LinkTo>
+    </:item>
+  </X::DropdownList>
+{{else if this.fetchteams.isRunning}}
+  <FlightIcon data-test-product-select-spinner @name="loading" />
+{{else}}
+  <div
+    class="absolute top-0 left-0"
+    {{did-insert (perform this.fetchteams)}}
+  ></div>
+{{/if}}

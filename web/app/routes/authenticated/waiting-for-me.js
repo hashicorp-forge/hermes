@@ -10,12 +10,12 @@ export default class WaitingForMeRoute extends Route {
   @service session;
   @service authenticatedUser;
 
-
   async model(params) {
-
     const userInfo = this.authenticatedUser.info;
-    const searchIndex=this.configSvc.config.algolia_docs_index_name + "_dueDate_asc";
+    const searchIndex =
+      this.configSvc.config.algolia_docs_index_name + "_dueDate_asc";
     const docsWaitingForReview = this.algolia.searchIndex
+
       .perform(searchIndex, "", {
         filters:
           `reviewers:'${userInfo.email}'` +
@@ -75,7 +75,6 @@ export default class WaitingForMeRoute extends Route {
         }
         return result.hits;
       });
-
 
     return RSVP.hash({
       docsWaitingForReview: docsWaitingForReview,

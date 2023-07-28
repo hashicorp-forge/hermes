@@ -3,6 +3,8 @@ export interface DocumentsRouteParams {
   owners: string[];
   page: number;
   product: string[];
+  team: string[];
+  project: string[];
   sortBy: string;
   status: string[];
 }

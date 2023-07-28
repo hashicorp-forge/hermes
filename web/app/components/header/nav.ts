@@ -69,6 +69,8 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     owners: [],
     page: 1,
     product: [],
+    team: [],
+    project: [],
     status: [],
     sortBy: "dateDesc",
   };

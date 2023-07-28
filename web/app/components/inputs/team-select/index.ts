@@ -1,5 +1,5 @@
 import { assert } from "@ember/debug";
-import {action, computed} from "@ember/object";
+import { action, computed } from "@ember/object";
 import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
@@ -28,7 +28,7 @@ type TeamAreas = {
 export type TeamArea = {
   abbreviation: string;
   perDocDataType: unknown;
-  BU: string
+  BU: string;
 };
 
 export default class InputsTeamSelectComponent extends Component<InputsTeamSelectSignature> {
@@ -59,7 +59,7 @@ export default class InputsTeamSelectComponent extends Component<InputsTeamSelec
     this.args.onChange(newValue, attributes);
   }
 
-  @computed('args.selectedBU', 'teams')
+  @computed("args.selectedBU", "teams")
   get filteredOptions() {
     if (!this.args.selectedBU) {
       return {};
@@ -67,12 +67,12 @@ export default class InputsTeamSelectComponent extends Component<InputsTeamSelec
 
     // Filter the teams based on the selected business unit
     const filteredTeams: TeamAreas = {};
-    let teams: TeamAreas | undefined= this.teams;
+    let teams: TeamAreas | undefined = this.teams;
 
     for (const team in teams) {
       if (Object.prototype.hasOwnProperty.call(teams, team)) {
         const teamData: TeamArea | undefined = teams[team];
-        if (teamData && teamData.BU  === this.args.selectedBU) {
+        if (teamData && teamData.BU === this.args.selectedBU) {
           filteredTeams[team] = teamData;
         }
       }
@@ -80,17 +80,16 @@ export default class InputsTeamSelectComponent extends Component<InputsTeamSelec
     return filteredTeams;
   }
 
-    protected fetchteams = task(async () => {
-      try {
-        // Filter the teams based on the selected business unit
-        this.teams = await this.fetchSvc
-            .fetch("/api/v1/teams")
-            .then((resp) => resp?.json());
-        } catch (err) {
-          throw err;
-        }
-      });
-
+  protected fetchteams = task(async () => {
+    try {
+      // Filter the teams based on the selected business unit
+      this.teams = await this.fetchSvc
+        .fetch("/api/v1/teams")
+        .then((resp) => resp?.json());
+    } catch (err) {
+      throw err;
+    }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

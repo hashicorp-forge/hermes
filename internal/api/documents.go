@@ -215,20 +215,26 @@ func DocumentHandler(
 			)
 
 		case "PATCH":
-			canPatchDocument := true
+			canNotPatchDocument := true
 			// Authorize request (only the owner can PATCH the doc).
 			userEmail := r.Context().Value("userEmail").(string)
 			for _, reviewer := range docObj.GetReviewers() {
 				if reviewer == userEmail {
-					canPatchDocument = false
+					canNotPatchDocument = false
+					break
+				}
+			}
+			for _, contributor := range docObj.GetContributors() {
+				if contributor == userEmail {
+					canNotPatchDocument = false
 					break
 				}
 			}
 			if userEmail == docObj.GetOwners()[0] {
-				canPatchDocument = false
+				canNotPatchDocument = false
 			}
 
-			if canPatchDocument {
+			if canNotPatchDocument {
 				http.Error(w, "Not a document owner", http.StatusUnauthorized)
 				return
 			}

@@ -12,6 +12,8 @@ interface DocRowComponentSignature {
     title: string;
     isDraft?: boolean;
     productArea: string;
+    team:string;
+    project:string;
     status: string;
     isResult?: boolean;
     isOwner?: boolean;

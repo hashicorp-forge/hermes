@@ -16,42 +16,43 @@
           @route="authenticated.new.doc"
           @query={{hash docType=docType.templateName}}
         >
-            <div>
-              <h2
-                class="text-display-400 font-semibold text-color-foreground-strong"
-              >
-                {{docType.templateName}}
-              </h2>
-              <p class="my-2 text-body-200 text-color-foreground-primary">
-                {{docType.description}}
-              </p>
-              <img 
-                src="https://lh3.google.com/u/0/d/{{docType.docId}}=w416-iv1" 
-                alt="Enter Correct Doc Id"
-                onerror="this.src='/images/document.png'"
-                class="w-full"
-              >
-            </div>
-        </LinkTo >
-        
-        <div class="flex items-start px-3 gap-2">
-          <EditTemplate @template={{docType}}/>
-          <DeleteTemplate @template={{docType}}/>
-        </div>
+          <div>
+            <h2
+              class="text-display-400 font-semibold text-color-foreground-strong"
+            >
+              {{docType.templateName}}
+            </h2>
+            <p class="my-2 text-body-200 text-color-foreground-primary">
+              {{docType.description}}
+            </p>
+            <img
+              src="https://lh3.google.com/u/0/d/{{docType.docId}}=w416-iv1"
+              alt="Enter Correct Doc Id"
+              onerror="this.src='/images/document.png'"
+              class="w-full"
+            />
+          </div>
+        </LinkTo>
+        {{#if (eq this.authenticatedUser.info.role "Admin")}}
+          <div class="flex items-start px-3 gap-2">
+            <EditTemplate @template={{docType}} />
+            <DeleteTemplate @template={{docType}} />
+          </div>
+        {{/if}}
       </Hds::Card::Container>
     </li>
 
   {{/each}}
 </ol>
-  {{!-- fixed button - click to add new template  --}}
+{{! fixed button - click to add new template  }}
+{{#if (eq this.authenticatedUser.info.role "Admin")}}
   <a class="fixedButton" href="/new/custom-template">
     <div class="roundedFixedBtn" data-tooltip="Create new template">
-      <img 
-        src="/images/create.png" 
+      <img
+        src="/images/create.png"
         alt="create template"
         class="w-full create-template-card-image"
-      >
+      />
     </div>
   </a>
-
-
+{{/if}}

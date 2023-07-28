@@ -87,7 +87,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     `);
     assert
       .dom(".product-select-selected-value")
-      .hasText("Select a product/area");
+      .hasText("Select a bu");
   });
 
   test("it displays the products in a dropdown list with abbreviations", async function (this: InputsProductSelectContext, assert) {

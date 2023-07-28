@@ -6,11 +6,13 @@
       @query={{hash draft=@isDraft}}
       class="flex space-x-4 items-start"
     >
-      <Doc::Thumbnail
-        @status={{@status}}
-        @product={{@productArea}}
-        @docID={{@docID}}
-      />
+      {{#if (not @hideThumbnail)}}
+        <Doc::Thumbnail
+          @status={{@status}}
+          @product={{@productArea}}
+          @docID={{@docID}}
+        />
+      {{/if}}
       <div>
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
@@ -26,13 +28,24 @@
   <Hds::Table::Td class="type">
     {{@docType}}
   </Hds::Table::Td>
-  <Hds::Table::Td class="status">
-    <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
-  <Hds::Table::Td class="product"><Hds::Badge
+  {{#if (not @hideStatus)}}
+    <Hds::Table::Td class="status">
+      <Doc::State @state={{@status}} @hideProgress={{true}} />
+    </Hds::Table::Td>
+  {{/if}}
+  <Hds::Table::Td class="product">
+    <Hds::Badge
       @text={{this.productAreaName}}
       @icon={{or (get-product-id @productArea) "folder"}}
       title={{this.productAreaName}}
-    /></Hds::Table::Td>
+    />
+  </Hds::Table::Td>
+  <Hds::Table::Td class="product">
+    <Hds::Badge @text={{@team}} title={{@team}} />
+  </Hds::Table::Td>
+  <Hds::Table::Td class="product">
+    <Hds::Badge @text={{@project}} title={{@project}} />
+  </Hds::Table::Td>
   {{#if (not @hideOwner)}}
     <Hds::Table::Td class="owner">
       <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
