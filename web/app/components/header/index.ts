@@ -3,7 +3,7 @@ import { FacetDropdownGroups } from "hermes/types/facets";
 
 interface HeaderComponentSignature {
   Args: {
-    facets: FacetDropdownGroups;
+    facets?: FacetDropdownGroups;
     sortControlIsHidden?: boolean;
   };
 }

@@ -12,6 +12,8 @@
   class="mt-5 w-full divide-y divide-color-border-primary"
 >
   {{#each this.shownItems as |listItem|}}
-    <Settings::SubscriptionListItem @productArea={{listItem}} />
+    <li class="subscription-list-item">
+      <Settings::SubscriptionListItem @productArea={{listItem}} />
+    </li>
   {{/each}}
 </ol>

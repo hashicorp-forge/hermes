@@ -25,6 +25,7 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
    * Determines whether the user is subscribed to the product area.
    */
   protected get isChecked(): boolean {
+    console.log(this.authenticatedUser);
     assert(
       "isChecked expects a subscriptions list",
       this.authenticatedUser.subscriptions
@@ -66,4 +67,10 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
     this.confirmationIsShown = false;
     this.confirmationIsClosing = false;
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Settings::SubscriptionListItem": typeof SettingsSubscriptionListItemComponent;
+  }
 }

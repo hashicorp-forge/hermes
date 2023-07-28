@@ -11,7 +11,7 @@
 }
 
 .hermes-h4 {
-  @apply text-color-foreground-faint uppercase tracking-wide font-medium text-body-100;
+  @apply text-color-foreground-faint uppercase tracking-wide font-medium text-body-100 whitespace-nowrap;
 }
 
 .truncated-text-container {

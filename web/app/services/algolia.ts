@@ -233,6 +233,7 @@ export default class AlgoliaService extends Service {
     if (userIsOwner) {
       facetFilters.push(`owners:${this.userEmail}`);
     }
+
     return facetFilters;
   }
 
@@ -328,6 +329,8 @@ export default class AlgoliaService extends Service {
     ): Promise<SearchResponse | unknown> => {
       let query = params["q"] || "";
 
+      console.log(params);
+
       try {
         return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
@@ -335,6 +338,7 @@ export default class AlgoliaService extends Service {
           hitsPerPage: HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,
+          // attributesToSnippet: ["content:100"],
         });
       } catch (e: unknown) {
         console.error(e);

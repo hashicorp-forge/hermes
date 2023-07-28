@@ -9,6 +9,7 @@ export default class Router extends EmberRouter {
 Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
     this.route("all");
+    this.route("product-area", { path: "/product-area/:product_area_id" });
     this.route("dashboard");
     this.route("document", { path: "/document/:document_id" });
     this.route("drafts");
@@ -20,5 +21,5 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
-  this.route('404', { path: '/*path' })
+  this.route("404", { path: "/*path" });
 });

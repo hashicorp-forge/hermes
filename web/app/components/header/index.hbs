@@ -2,7 +2,9 @@
   <Header::Nav />
 </header>
 
-<Header::Toolbar
-  @facets={{@facets}}
-  @sortControlIsHidden={{@sortControlIsHidden}}
-/>
+{{#if @facets}}
+  <Header::Toolbar
+    @facets={{@facets}}
+    @sortControlIsHidden={{@sortControlIsHidden}}
+  />
+{{/if}}
