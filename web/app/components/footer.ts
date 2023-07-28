@@ -29,7 +29,7 @@ export default class FooterComponent extends Component<FooterComponentSignature>
 
   protected get supportDocsURL() {
     // TODO: Get this from the config
-    return "";
+    return "#";
   }
 }
 
