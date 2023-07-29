@@ -33,19 +33,21 @@
       </LinkTo>
 
       <LinkTo
-        data-test-nav-link="waiting-for-me"
-        @route="authenticated.waiting-for-me"
-        @current-when="authenticated.waiting-for-me"
+        data-test-nav-link="doc-owner-dashboard"
+        @route="authenticated.doc-owner-dashboard"
+        @current-when="authenticated.doc-owner-dashboard"
       >
-        Docs For Me
+        Doc Owner View
       </LinkTo>
+
       <LinkTo
-        data-test-nav-link="docs-of-me"
-        @route="authenticated.docs-of-me"
-        @current-when="authenticated.docs-of-me"
+        data-test-nav-link="doc-reviewer-dashboard"
+        @route="authenticated.doc-reviewer-dashboard"
+        @current-when="authenticated.doc-reviewer-dashboard"
       >
-        Docs Of Me
+        Doc Review View
       </LinkTo>
+
     </div>
 
     <Header::Search class="global-search" />
@@ -66,7 +68,7 @@
         @text="Directory"
         @color="secondary"
         class="navbar-button"
-         @route="authenticated.business-units"
+        @route="authenticated.business-units"
       />
 
       <div class="relative">

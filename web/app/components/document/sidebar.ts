@@ -95,7 +95,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   get reviewButtonText() {
     if (!this.hasReviewed) {
-      return "Review";
+      return "Review Completed";
     } else {
       return "Already reviewed";
     }
