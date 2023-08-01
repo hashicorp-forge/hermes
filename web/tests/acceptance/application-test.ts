@@ -7,6 +7,7 @@ import {
 } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
+import { TEST_SUPPORT_URL } from "hermes/utils/hermes-urls";
 
 module("Acceptance | application", function (hooks) {
   setupApplicationTest(hooks);
@@ -108,7 +109,6 @@ module("Acceptance | application", function (hooks) {
     await click("[data-test-flash-notification-button]");
     await waitFor(successSelector);
 
-
     assert
       .dom(warningSelector)
       .doesNotExist("flash notification is dismissed on reauth buttonClick");
@@ -174,5 +174,21 @@ module("Acceptance | application", function (hooks) {
      *
      */
     teardownContext(this);
+  });
+
+  test("the config is grabbed from the backend when the app loads", async function (this: ApplicationTestContext, assert) {
+    await authenticateSession({});
+
+    await visit("/");
+
+    assert
+      .dom(".footer [data-test-footer-support-link]")
+      .hasAttribute("href", TEST_SUPPORT_URL);
+
+    await click("[data-test-user-menu-toggle]");
+
+    assert
+      .dom("[data-test-user-menu-support")
+      .hasAttribute("href", TEST_SUPPORT_URL);
   });
 });

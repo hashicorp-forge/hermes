@@ -6,9 +6,8 @@ import { module, test } from "qunit";
 import MockDate from "mockdate";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
-import RouterService from "@ember/routing/router-service";
 
-const SUPPORT_URL = "https://example.com/support";
+const SUPPORT_URL = "https://footer-component-support.com";
 
 module("Integration | Component | footer", function (hooks) {
   setupRenderingTest(hooks);
@@ -31,6 +30,9 @@ module("Integration | Component | footer", function (hooks) {
   });
 
   test("it renders as expected (with optional links)", async function (assert) {
+    // In assertion tests, Mirage automatically loads our mock config.
+    // Rendering tests skip this step, so we need to do it manually.
+
     let mockConfigSvc = this.owner.lookup("service:config") as ConfigService;
     mockConfigSvc.config.support_link_url = SUPPORT_URL;
 
