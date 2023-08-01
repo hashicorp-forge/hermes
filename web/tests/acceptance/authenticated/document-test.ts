@@ -1,5 +1,6 @@
 import {
   click,
+  find,
   findAll,
   triggerEvent,
   visit,
@@ -17,6 +18,8 @@ import {
 } from "hermes/components/document/sidebar";
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
+import sinon from "sinon";
+import { TEST_SHORT_LINK_URL } from "hermes/utils/hermes-urls";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -162,6 +165,17 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom("[data-test-product-select]")
       .doesNotExist("published docs don't show a product select element");
+  });
+
+  test("the shortLinkURL is loaded by the config service", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", { objectID: 500, title: "Test Document" });
+
+    await visit("/document/500");
+    const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
+      "data-test-url"
+    );
+
+    assert.true(shortLinkURL?.startsWith(TEST_SHORT_LINK_URL));
   });
 
   test("a flash message displays when a related resource fails to save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
