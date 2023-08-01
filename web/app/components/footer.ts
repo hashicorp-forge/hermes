@@ -24,7 +24,7 @@ export default class FooterComponent extends Component<FooterComponentSignature>
     return HERMES_GITHUB_REPO_URL;
   }
 
-  protected get supportDocsURL() {
+  protected get supportURL() {
     return this.config.config.support_link_url;
   }
 }

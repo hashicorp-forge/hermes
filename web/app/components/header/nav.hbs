@@ -76,6 +76,7 @@
           />
           <dd.Separator class="mt-2" />
           <dd.Interactive
+            data-test-user-menu-github
             @href={{this.gitHubRepoURL}}
             @isHrefExternal={{true}}
             @text="GitHub"
@@ -84,6 +85,7 @@
           />
           {{#if this.supportDocsURL}}
             <dd.Interactive
+              data-test-user-menu-support
               @href={{this.supportDocsURL}}
               @isHrefExternal={{true}}
               @text="Support"

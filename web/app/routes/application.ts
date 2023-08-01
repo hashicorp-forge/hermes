@@ -70,18 +70,17 @@ export default class ApplicationRoute extends Route {
 
     this.flags.initialize();
 
-    // Set config from the backend in production
-    if (config.environment === "production") {
-      await this.fetchSvc
-        .fetch("/api/v1/web/config")
-        .then((response) => response?.json())
-        .then((json) => {
-          this.config.setConfig(json);
-        })
-        .catch((err) => {
-          console.log("Error fetching and setting web config: " + err);
-        });
-    }
+    console.log('did it work');
+
+    await this.fetchSvc
+      .fetch("/api/v1/web/config")
+      .then((response) => response?.json())
+      .then((json) => {
+        this.config.setConfig(json);
+      })
+      .catch((err) => {
+        console.log("Error fetching and setting web config: " + err);
+      });
 
     // Initialize the metrics service
     this.metrics;

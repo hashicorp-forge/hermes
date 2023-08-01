@@ -3,7 +3,7 @@
     <div class="x-container">
       <div class="footer-inner">
         <div class="flex items-center">
-          <div>
+          <div data-test-footer-copyright>
             ©
             {{this.currentYear}}
             HashiCorp
@@ -11,11 +11,19 @@
         </div>
 
         <div class="flex items-center space-x-4">
-          <ExternalLink @iconIsShown={{true}} href={{this.gitHubRepoURL}}>
+          <ExternalLink
+            data-test-footer-github-link
+            @iconIsShown={{true}}
+            href={{this.gitHubRepoURL}}
+          >
             GitHub
           </ExternalLink>
-          {{#if this.supportDocsURL}}
-            <ExternalLink @iconIsShown={{true}} href={{this.supportDocsURL}}>
+          {{#if this.supportURL}}
+            <ExternalLink
+              data-test-footer-support-link
+              @iconIsShown={{true}}
+              href={{this.supportURL}}
+            >
               Support
             </ExternalLink>
           {{/if}}
