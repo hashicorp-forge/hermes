@@ -79,6 +79,12 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.equal(getPageTitle(), "Test Document | Hermes");
   });
 
+  test("the footer is not shown", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", { objectID: 1, title: "Test Document" });
+    await visit("/document/1");
+    assert.dom(".footer").doesNotExist();
+  });
+
   test("the page title is correct (draft)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,

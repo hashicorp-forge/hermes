@@ -1,7 +1,6 @@
 import Route from "@ember/routing/route";
 import { UnauthorizedError } from "@ember-data/adapter/error";
 import { action } from "@ember/object";
-import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
@@ -12,7 +11,6 @@ import window from "ember-window-mock";
 import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
 import MetricsService from "hermes/services/metrics";
-import GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/google-analytics-four";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -69,8 +67,6 @@ export default class ApplicationRoute extends Route {
     await this.session.setup();
 
     this.flags.initialize();
-
-    console.log('did it work');
 
     await this.fetchSvc
       .fetch("/api/v1/web/config")
