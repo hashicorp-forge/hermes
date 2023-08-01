@@ -19,7 +19,7 @@ import {
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
 import sinon from "sinon";
-import { TEST_SHORT_LINK_URL } from "hermes/utils/hermes-urls";
+import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -175,7 +175,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       "data-test-url"
     );
 
-    assert.true(shortLinkURL?.startsWith(TEST_SHORT_LINK_URL));
+    assert.true(shortLinkURL?.startsWith(TEST_SHORT_LINK_BASE_URL));
   });
 
   test("a flash message displays when a related resource fails to save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

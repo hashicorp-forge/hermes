@@ -8,8 +8,7 @@ import config from "../config/environment";
 
 import {
   TEST_SUPPORT_URL,
-  TEST_SHORT_LINK_URL,
-  // @ts-ignore - Mirage not detecting file
+  TEST_SHORT_LINK_BASE_URL,
 } from "hermes/utils/hermes-urls";
 
 export default function (mirageConfig) {
@@ -161,7 +160,7 @@ export default function (mirageConfig) {
             algolia_internal_index_name: config.algolia.internalIndexName,
             feature_flags: null,
             google_doc_folders: "",
-            short_link_base_url: TEST_SHORT_LINK_URL,
+            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
             skip_google_auth: false,
             google_analytics_tag_id: undefined,
             support_link_url: TEST_SUPPORT_URL,
