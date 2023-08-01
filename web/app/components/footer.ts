@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
+import ConfigService from "hermes/services/config";
 
 interface FooterComponentSignature {
   Element: HTMLDivElement;
@@ -9,6 +10,7 @@ interface FooterComponentSignature {
 
 export default class FooterComponent extends Component<FooterComponentSignature> {
   @service declare router: RouterService;
+  @service declare config: ConfigService;
 
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
@@ -18,18 +20,12 @@ export default class FooterComponent extends Component<FooterComponentSignature>
     return new Date().getFullYear();
   }
 
-  protected get hermesVersion() {
-    // TODO: Get this from the config
-    return "0.3.0";
-  }
-
   protected get gitHubRepoURL() {
     return HERMES_GITHUB_REPO_URL;
   }
 
   protected get supportDocsURL() {
-    // TODO: Get this from the config
-    return "#";
+    return this.config.config.support_link_url;
   }
 }
 

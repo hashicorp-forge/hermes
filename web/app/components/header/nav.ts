@@ -33,17 +33,12 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     return !this.configSvc.config.skip_google_auth;
   }
 
-  protected get supportDocsLinkIsShown() {
-    // this should depend on the config
-    return true;
-  }
-
   protected get gitHubRepoURL() {
     return HERMES_GITHUB_REPO_URL;
   }
 
   protected get supportDocsURL() {
-    return "";
+    return this.configSvc.config.support_link_url;
   }
 
   /**
