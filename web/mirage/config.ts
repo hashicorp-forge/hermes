@@ -1,10 +1,15 @@
 // https://www.ember-cli-mirage.com/docs/advanced/server-configuration
 
 import { Collection, Response, createServer } from "miragejs";
-import config from "../config/environment";
-import { SearchResponse } from "@algolia/client-search";
 import { getTestDocNumber } from "./factories/document";
-import { SearchForFacetValuesResponse } from "@algolia/client-search";
+
+// @ts-ignore - Mirage not detecting file
+import config from "../config/environment";
+
+import {
+  TEST_SUPPORT_URL,
+  TEST_SHORT_LINK_BASE_URL,
+} from "hermes/utils/hermes-urls";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -141,6 +146,27 @@ export default function (mirageConfig) {
        * GET requests
        *
        *************************************************************************/
+
+      /**
+       * Used by the config service for environment variables.
+       */
+      this.get("/web/config", () => {
+        return new Response(
+          200,
+          {},
+          {
+            algolia_docs_index_name: config.algolia.docsIndexName,
+            algolia_drafts_index_name: config.algolia.draftsIndexName,
+            algolia_internal_index_name: config.algolia.internalIndexName,
+            feature_flags: null,
+            google_doc_folders: "",
+            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
+            skip_google_auth: false,
+            google_analytics_tag_id: undefined,
+            support_link_url: TEST_SUPPORT_URL,
+          }
+        );
+      });
 
       /**
        * Used in the /new routes when creating a document.
