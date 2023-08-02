@@ -94,6 +94,10 @@ module.exports = {
         "color-foreground-high-contrast":
           "var(--token-color-foreground-high-contrast)",
         "color-foreground-highlight": "var(--token-color-foreground-highlight)",
+        "color-foreground-highlight-on-surface":
+          "var(--token-color-foreground-highlight-on-surface)",
+        "color-foreground-highlight-high-contrast":
+          "var(--token-color-foreground-highlight-high-contrast)",
         "color-foreground-primary": "var(--token-color-foreground-primary)",
         "color-foreground-strong": "var(--token-color-foreground-strong)",
         "color-foreground-warning": "var(--token-color-foreground-warning)",
@@ -179,6 +183,8 @@ module.exports = {
         "color-palette-purple-200": "var(--token-color-palette-purple-200)",
 
         // Alpha
+        "color-palette-alpha-100": "var(--token-color-palette-alpha-100)",
+        "color-palette-alpha-200": "var(--token-color-palette-alpha-200)",
         "color-palette-alpha-300": "var(--token-color-palette-alpha-300)",
       },
     },

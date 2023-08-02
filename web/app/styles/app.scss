@@ -3,7 +3,6 @@
 @use "./animations";
 @use "./typography";
 
-
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -143,4 +142,20 @@ h1 {
   width: 0;
   height: 0;
   visibility: hidden;
+}
+
+// TODO: move to avatar.scss or something
+.letter-avatar {
+  @apply tracking-tighter;
+
+  &.letter-count-1 {
+  }
+
+  &.letter-count-2 {
+    @apply text-[11px];
+  }
+
+  &.letter-count-3 {
+    @apply text-[9px];
+  }
 }
