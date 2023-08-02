@@ -426,7 +426,7 @@
           {{#if this.isOwner}}
             <div class="flex items-start px-3 gap-2">
               <Hds::Button
-                @text="Request Review"
+                @text="Publish for review..."
                 @size="medium"
                 @color="primary"
                 class="w-full"
@@ -548,13 +548,12 @@
 
   {{#if this.requestReviewModalIsShown}}
     <Document::Modal
-      @headerText="Request review"
+      @headerText="Publish for review"
       @errorTitle="Error requesting review"
       @close={{this.closeRequestReviewModal}}
       @task={{perform this.requestReview}}
-      @taskButtonText="Request review"
-      @taskButtonLoadingText="Requesting review..."
-      @taskButtonIcon="test"
+      @taskButtonText="Publish doc"
+      @taskButtonLoadingText="Publishing..."
       @hideFooterWhileSaving={{true}}
       @taskButtonIsDisabled={{and
         (not this.docTypeCheckboxValue)
@@ -565,7 +564,7 @@
         {{#if M.taskIsRunning}}
           <div class="grid place-items-center pt-1 pb-12">
             <div class="text-center">
-              <FlightIcon @name="loading" @size={{24}} class="mb-5" />
+              <FlightIcon @name="loading" @size="24" class="mb-5" />
               <h2>Submitting for review...</h2>
               <p class="text-body-300 mb-2">This usually takes about a minute.</p>
               <span
@@ -582,10 +581,36 @@
             </div>
           </div>
         {{else}}
-          <p class="mb-4 pr-16 text-body-300 text-color-foreground-primary">
-            This will publish your document company-wide, and anyone you request
-            below will receive a notification to review.
-          </p>
+          <ul class="mb-6 space-y-1 text-body-300">
+            <li class="flex items-center">
+              <div
+                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
+              >
+                <FlightIcon @size="16" @name="at-sign" />
+              </div>
+              Approvers and people subscribed to
+              “{{@document.product}}”
+              will be notified.
+            </li>
+            <li class="flex items-center">
+              <div
+                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
+              >
+                <FlightIcon @size="16" @name="radio" />
+              </div>
+              Your document will appear in Hermes and Google Workspace search.
+            </li>
+            <li class="flex items-center">
+              <div
+                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
+              >
+
+                <FlightIcon @size="16" @name="globe-private" />
+              </div>
+              Published documents cannot be deleted but can be archived.
+            </li>
+          </ul>
+
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
               <Inputs::PeopleSelect
@@ -596,8 +621,9 @@
                 class="mb-0"
               />
             </F.Control>
-            <F.Label>Add approvers</F.Label>
+            <F.Label>Approvers</F.Label>
           </Hds::Form::Field>
+
           {{#if @docType.checks.length}}
             {{! For now, we only support one check }}
             {{#each (take 1 @docType.checks) as |check|}}
