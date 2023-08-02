@@ -177,6 +177,9 @@ module.exports = {
         "color-palette-green-200": "var(--token-color-palette-green-200)",
         "color-palette-purple-100": "var(--token-color-palette-purple-100)",
         "color-palette-purple-200": "var(--token-color-palette-purple-200)",
+
+        // Alpha
+        "color-palette-alpha-300": "var(--token-color-palette-alpha-300)",
       },
     },
   },

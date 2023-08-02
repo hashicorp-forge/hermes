@@ -6,9 +6,104 @@
 
   <Dashboard::NewFeaturesBanner />
 
-  <div class="hds-border-primary border-0 border-b pb-9">
-    <h1>Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
-    <p>Here’s all the latest updates across the organization.</p>
+  <h1 class="mb-4">Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
+
+  {{! Fake review }}
+  <div class="hds-alert hds-alert--type-inline hds-alert--color-highlight">
+    <div class="w-full">
+      <h3 class="hds-alert__title text-body-200">
+        Documents awaiting your review:
+      </h3>
+      <div class="grid gap-0.5">
+        {{#each (take 2 this.recentDocs.all) as |r|}}
+          <LinkTo
+            @route="authenticated.document"
+            @model={{r.doc.objectID}}
+            class="w-full bg-white pl-3 py-3 pr-3 rounded border border-color-border-primary overflow-hidden"
+          >
+            <div class="w-full">
+              <div class="w-full flex items-center gap-2.5">
+                <!--
+                <div class="shrink-0">
+                  <Person
+                    @email={{get r.doc.owners 0}}
+                    @imgURL={{get r.doc.ownerPhotos 0}}
+                    @isImageOnly={{true}}
+                  />
+                </div>
+                -->
+                <div class="shrink-0 flex space-x-0.5 outline outline-teal-300">
+                  <div
+                    class="product-badge w-7 h-7 relative rounded-full
+                      {{get-product-id r.doc.product}}"
+                  >
+                    <FlightIcon
+                      @size="16"
+                      @name={{get-product-id r.doc.product}}
+                    />
+                  </div>
+                  <div>
+                    <Person::Avatar
+                      @email={{get r.doc.owners 0}}
+                      @imgURL={{get r.doc.ownerPhotos 0}}
+                      class="w-7 h-7"
+                    />
+                  </div>
+                </div>
+
+                <div class="w-full block overflow-hidden">
+
+                  {{! Title }}
+                  <div class="w-full flex outline outline-orange-300">
+                    <TruncatedText
+                      @tagName="h4"
+                      class="text-display-200 outline outline-purple-400 font-semibold text-color-foreground-strong"
+                    >
+                      {{r.doc.title}}
+                      and the ramifications of ding that
+                    </TruncatedText>
+
+                    {{! Email }}
+                    <div
+                      class="max-w-[200px] outline outline-blue-500 self-center ml-2 flex space-x-2"
+                    >
+                      <TruncatedText class="text-body-200 w-full">
+                        {{get r.doc.owners 0}}
+                      </TruncatedText>
+                    </div>
+                  </div>
+                </div>
+
+                {{! Badges }}
+                <div
+                  class="flex shrink-0 items-center outline outline-green-300 space-x-1"
+                >
+                  {{! Product }}
+                  <Hds::Badge
+                    @icon={{or (get-product-id r.doc.product) "folder"}}
+                    @text={{r.doc.product}}
+                  />
+
+                  {{! Number }}
+                  <Hds::Badge @text={{r.doc.docNumber}} />
+
+                  {{! Type }}
+                  <Hds::Badge @text={{r.doc.docType}} />
+                </div>
+              </div>
+              <!--
+              <div>
+                <Hds::Badge
+                  @text={{r.doc.product}}
+                  @icon={{or (get-product-id r.doc.product) "folder"}}
+                />
+              </div>
+              -->
+            </div>
+          </LinkTo>
+        {{/each}}
+      </div>
+    </div>
   </div>
 
   {{#if this.docsWaitingForReview}}
