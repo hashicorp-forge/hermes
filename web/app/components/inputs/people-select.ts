@@ -18,6 +18,7 @@ interface InputsPeopleSelectComponentSignature {
     selected: HermesUser[];
     onBlur?: () => void;
     onChange: (people: HermesUser[]) => void;
+    renderInPlace?: boolean;
   };
 }
 

@@ -10,7 +10,7 @@
 
 {{#unless @isCollapsed}}
   <div
-    class="sidebar-body"
+    class="sidebar-body hidden md:block"
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
@@ -383,7 +383,10 @@
   </div>
 
   {{#if this.footerIsShown}}
-    <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
+    <div
+      class="sidebar-footer hidden md:block
+        {{if this.editingIsDisabled 'locked'}}"
+    >
       {{#if this.footerControlsAreDisabled}}
         <div class="px-3 -mb-1">
           <div class="w-full pt-3.5 border-t border-color-border-primary">
@@ -588,7 +591,7 @@
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
               <Inputs::PeopleSelect
-                @renderInPlace={{true}}
+                @renderInPlace={{false}}
                 @selected={{this.approvers}}
                 @onChange={{this.updateApprovers}}
                 @disabled={{M.taskIsRunning}}

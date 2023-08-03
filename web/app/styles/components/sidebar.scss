@@ -1,5 +1,5 @@
 .sidebar {
-  @apply flex flex-col max-h-full relative z-10 pb-4;
+  @apply flex flex-col max-h-full relative z-10 md:pb-4;
 
   &.collapsed {
     @apply w-16;
@@ -18,7 +18,7 @@
   }
 
   .sidebar-header {
-    @apply sticky top-0 bg-color-page-faint flex justify-between px-3.5 py-4 z-10;
+    @apply sticky top-0 bg-color-page-faint h-12 md:h-auto flex justify-between px-3.5 py-4 z-10;
 
     &.scrolled {
       box-shadow: 0 1px 0 0 rgba(0, 0, 0, 15%);
@@ -41,6 +41,10 @@
     &.out {
       animation: fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
+    }
+
+    &.toggle-collapsed-button {
+      @apply hidden md:flex;
     }
   }
 

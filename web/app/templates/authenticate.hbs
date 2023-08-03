@@ -1,10 +1,8 @@
 {{! @glint-nocheck: not typesafe yet }}
 {{page-title "Authenticate"}}
-{{set-body-class "bg-color-page-faint"}}
+{{set-body-class "screen--authenticate"}}
 
-<div
-  class="flex flex-col items-center justify-center flex-1 min-h-full py-12 relative"
->
+<div class="min-h-screen flex items-center">
   <div class="w-full max-w-xl mx-auto">
     <Hds::Card::Container
       @level="high"
@@ -25,10 +23,7 @@
         @icon="google"
         {{on "click" (perform this.authenticate)}}
       />
-
     </Hds::Card::Container>
     <Footer class="compact" />
   </div>
 </div>
-
-{{outlet}}

@@ -38,7 +38,7 @@
     <Action
       data-test-sidebar-toggle-button
       data-test-is-collapsed={{@isCollapsed}}
-      class="sidebar-header-button"
+      class="sidebar-header-button toggle-collapsed-button"
       {{on "click" @toggleCollapsed}}
       {{tooltip
         (concat (if @isCollapsed "Expand" "Collapse") " sidebar")
