@@ -91,10 +91,12 @@ ol {
 }
 
 h1 {
-  @apply text-display-500 font-bold text-color-foreground-strong mb-1.5;
+  @apply text-display-400 font-bold text-color-foreground-strong mb-1.5;
+  @apply md:text-display-500;
 
   + p {
     @apply text-body-300;
+    @apply md:text-display-300;
   }
 }
 

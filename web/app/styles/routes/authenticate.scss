@@ -1,3 +1,11 @@
 .screen--authenticate {
   @apply bg-color-page-faint;
+
+  .card-container {
+    @apply w-full text-center;
+    @apply px-8 pt-10 pb-12;
+    @apply sm:px-12 sm:pt-14 sm:pb-20;
+
+    @apply md:px-20 pt-24 pb-32;
+  }
 }

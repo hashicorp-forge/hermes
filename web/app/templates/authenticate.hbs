@@ -2,25 +2,24 @@
 {{page-title "Authenticate"}}
 {{set-body-class "screen--authenticate"}}
 
-<div class="min-h-screen flex items-center">
+<div class="min-h-screen flex items-center px-4">
   <div class="w-full max-w-xl mx-auto">
     <Hds::Card::Container
       @level="high"
       @hasBorder="true"
       @overflow="visible"
-      class="w-full flex flex-col items-center px-20 pt-24 pb-32 text-center relative"
+      class="card-container"
     >
-      <HermesLogo class="mb-8" />
-      <h1 class="">
-        Welcome to Hermes.
-      </h1>
-      <p class="mb-8 text-display-300">
+      <HermesLogo class="mb-8 mx-auto inline-flex" />
+      <h1>Welcome to Hermes.</h1>
+      <p class="mb-8">
         Log in to browse, search, and manage documents
       </p>
       <Hds::Button
         @text="Authenticate with Google"
         @size="large"
         @icon="google"
+        class="mx-auto inline-flex"
         {{on "click" (perform this.authenticate)}}
       />
     </Hds::Card::Container>
