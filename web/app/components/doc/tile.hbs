@@ -2,18 +2,22 @@
   @route="authenticated.document"
   @model={{@docID}}
   @query={{hash draft=@isDraft}}
-  class="flex flex-col items-start space-y-2 p-4 -m-4 rounded-md hover:bg-color-palette-neutral-50 active:bg-color-palette-neutral-100 overflow-hidden"
+  class="doc-tile"
 >
-  <div class="space-y-2">
-    <Doc::Thumbnail
-      @status={{@status}}
-      @product={{@productArea}}
-      @isLarge={{true}}
-    />
-    <Doc::State @state={{@status}} />
+  <div class="inline-block">
+    <div class="space-y-2">
+      <Doc::Thumbnail
+        @status={{@status}}
+        @product={{@productArea}}
+        {{! TODO: this should be dynamic }}
+        @isLarge={{true}}
+      />
+      {{! TODO: dynamically show/hide progress? }}
+      <Doc::State @state={{@status}} />
+    </div>
   </div>
 
-  <div class="flex flex-col items-start space-y-1">
+  <div class="block space-y-1">
     <h4 class="doc-tile-title">
       {{@title}}
     </h4>
@@ -41,4 +45,5 @@
   {{#if (and @isResult @snippet)}}
     <Doc::Snippet @snippet={{@snippet}} class="pt-2" />
   {{/if}}
+
 </LinkTo>

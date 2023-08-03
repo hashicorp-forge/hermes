@@ -1,3 +1,19 @@
+.doc-tile {
+  @apply rounded-md overflow-hidden;
+
+  @apply p-4 -m-4;
+
+  @apply space-y-2;
+
+  &:hover {
+    @apply bg-color-palette-neutral-50;
+  }
+
+  &:active {
+    @apply bg-color-palette-neutral-100;
+  }
+}
+
 .doc-tile-title {
   @apply font-semibold text-color-foreground-strong overflow-hidden;
 
