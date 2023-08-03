@@ -3,6 +3,10 @@
 @use "./animations";
 @use "./typography";
 
+@use "routes/authenticate";
+@use "routes/dashboard";
+@use "routes/document";
+
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -38,9 +42,6 @@
 @use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
-
-@use "routes/authenticate";
-@use "routes/dashboard";
 
 @use "./ember-power-select-theme";
 

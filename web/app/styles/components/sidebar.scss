@@ -1,5 +1,12 @@
+@use "../routes/document.scss" as d;
+
 .sidebar {
-  @apply flex flex-col max-h-full relative z-10 md:pb-4;
+  @apply flex flex-col max-h-full relative z-10 shrink-0;
+
+  @apply w-full;
+  @apply md:w-72;
+
+  @apply md:pb-4;
 
   &.collapsed {
     @apply w-16;
@@ -18,7 +25,16 @@
   }
 
   .sidebar-header {
-    @apply sticky top-0 bg-color-page-faint h-12 md:h-auto flex justify-between px-3.5 py-4 z-10;
+    @apply sticky top-0 bg-color-page-faint flex justify-between z-10;
+
+    @apply px-1;
+    @apply md:px-3.5;
+
+    @apply pt-1 pb-0.5;
+    @apply md:py-4;
+
+    @apply h-[#{d.$sidebar-header-height}];
+    @apply md:h-auto;
 
     &.scrolled {
       box-shadow: 0 1px 0 0 rgba(0, 0, 0, 15%);

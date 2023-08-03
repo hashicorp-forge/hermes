@@ -1,0 +1,24 @@
+$sidebar-header-height: 48px;
+
+.screen--document {
+  @apply bg-color-page-faint;
+
+  .document-wrapper {
+    @apply w-full flex space-x-px h-screen;
+
+    @apply flex-wrap;
+    @apply md:flex-nowrap;
+
+    @apply md:flex-row;
+  }
+
+  .card-wrapper {
+    @apply w-full pb-4 mt-0.5;
+
+    @apply px-4;
+    @apply md:pt-4 md:pl-0;
+
+    @apply h-[calc(100%-#{$sidebar-header-height})];
+    @apply md:h-full;
+  }
+}

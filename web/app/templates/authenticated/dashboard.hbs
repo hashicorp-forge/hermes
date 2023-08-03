@@ -38,13 +38,14 @@
     </div>
   {{/if}}
 
+  {{! TODO: Component-ize these: }}
+
   <div class="dashboard-section">
     <div class="dashboard-section-header">
       {{! TODO: This should react to small screens }}
       <FlightIcon @name="eye" @size="24" />
       <h2>Recently viewed</h2>
     </div>
-
     {{#if this.recentDocs.all}}
       <div class="tile-list">
         {{#each this.recentDocs.all as |r|}}
@@ -83,7 +84,6 @@
         You havenʼt viewed any documents yet.
       </div>
     {{/if}}
-
   </div>
 
   <Dashboard::LatestUpdates />
