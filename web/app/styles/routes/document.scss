@@ -1,5 +1,3 @@
-$sidebar-header-height: 48px;
-
 .route--document {
   @apply bg-color-page-faint;
 
@@ -18,7 +16,7 @@ $sidebar-header-height: 48px;
     @apply px-4;
     @apply md:pt-4 md:pl-0;
 
-    @apply h-[calc(100%-#{$sidebar-header-height})];
+    @apply h-[calc(100%-var(--documentSidebarHeaderHeight))];
     @apply md:h-full;
   }
 }

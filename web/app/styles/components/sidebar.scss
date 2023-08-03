@@ -1,12 +1,17 @@
-@use "../routes/document.scss" as d;
+:root {
+  --bodyAndFooterHeight: calc(
+    100% - var(--documentSidebarHeaderHeight) -
+      var(--documentSidebarPaddingBottom)
+  );
+}
 
 .sidebar {
-  @apply flex flex-col max-h-full relative z-10 shrink-0;
+  @apply flex flex-col outline outline-blue-400 relative z-10 shrink-0;
+
+  // add pb-4 back
 
   @apply w-full;
   @apply md:w-72;
-
-  @apply md:pb-4;
 
   &.collapsed {
     @apply w-16;
@@ -27,13 +32,15 @@
   .sidebar-header {
     @apply sticky top-0 bg-color-page-faint flex justify-between z-10;
 
+    @apply overflow-visible;
+
     @apply px-1;
     @apply md:px-3.5;
 
     @apply pt-1 pb-0.5;
     @apply md:py-4;
 
-    @apply h-[#{d.$sidebar-header-height}];
+    @apply h-[var(--documentSidebarHeaderHeight)];
     @apply md:h-auto;
 
     &.scrolled {
@@ -64,30 +71,18 @@
     }
   }
 
-  .draft-visibility-button {
-    @apply px-2.5;
-    // match the height of the header buttons
-    @apply h-[38px];
-    // offset the extra height relative to the badge
-    @apply my-[-7px];
+  .sidebar-body-and-footer {
+    @apply flex flex-col outline outline-red-400 bg-yellow-50;
 
-    [class*=" flight-icon-chevron"] {
-      @apply ml-px -mr-px;
-    }
-  }
+    @apply absolute;
+    @apply md:relative;
 
-  .sidebar-header-icon-controls {
-    @apply flex;
-
-    .sidebar-header-button {
-      &::hover {
-        @apply border-transparent  bg-color-surface-interactive-hover;
-      }
-    }
+    @apply h-auto max-h-screen z-10;
+    @apply md:h-[var(--bodyAndFooterHeight)];
   }
 
   .sidebar-body {
-    @apply relative overflow-y-scroll h-full;
+    @apply block relative overflow-y-scroll h-full;
 
     .product-badge {
       @apply rounded-r w-9 h-7 top-0;
@@ -112,6 +107,28 @@
 
     /* Style the scrollbar Firefox */
     scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+  }
+
+  .draft-visibility-button {
+    @apply px-2.5;
+    // match the height of the header buttons
+    @apply h-[38px];
+    // offset the extra height relative to the badge
+    @apply my-[-7px];
+
+    [class*=" flight-icon-chevron"] {
+      @apply ml-px -mr-px;
+    }
+  }
+
+  .sidebar-header-icon-controls {
+    @apply flex;
+
+    .sidebar-header-button {
+      &::hover {
+        @apply border-transparent  bg-color-surface-interactive-hover;
+      }
+    }
   }
 
   .sidebar-section-header-container {
@@ -141,7 +158,7 @@
   }
 
   .sidebar-footer {
-    @apply w-full bg-color-page-faint shrink-0 py-4 px-3.5;
+    @apply w-full h-[var(--documentSidebarHeaderHeight)] bg-color-page-faint shrink-0 py-4 px-3.5;
 
     &.locked {
       @apply pt-0;

@@ -9,115 +9,166 @@
 />
 
 {{#unless @isCollapsed}}
-  <div
-    class="sidebar-body hidden md:block"
-    {{on "scroll" this.onScroll}}
-    {{did-insert this.didInsertBody}}
-  >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <div
-          class="product-badge
-            {{productIcon}}
-            {{if this.save.isRunning 'opacity-50'}}"
-        >
-          <FlightIcon @name={{productIcon}} />
-        </div>
-      {{/if}}
-    {{/let}}
+  {{! TODO: maybe-in-element this to a scroll container }}
+  <div class="sidebar-body-and-footer">
+    <div
+      class="sidebar-body"
+      {{on "scroll" this.onScroll}}
+      {{did-insert this.didInsertBody}}
+    >
+      {{#let (get-product-id this.product) as |productIcon|}}
+        {{#if productIcon}}
+          <div
+            class="product-badge
+              {{productIcon}}
+              {{if this.save.isRunning 'opacity-50'}}"
+          >
+            <FlightIcon @name={{productIcon}} />
+          </div>
+        {{/if}}
+      {{/let}}
 
-    <div class="sidebar-body-container">
-      <div>
-        {{! div to break the parent's space-y styles }}
-        <div
-          class="flex items-center space-x-1.5
-            {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
-        >
-          <Hds::Badge
-            data-test-sidebar-title-badge
-            @text={{if this.isDraft "Draft" @document.docNumber}}
-            class="uppercase !rounded-[3px]
-              {{if
-                @document.isDraft
-                '!bg-color-palette-neutral-500 !text-white'
-                '!bg-transparent pl-0 !text-color-foreground-faint'
-              }}
-              "
-          />
-          {{#if (and this.isDraft this.isOwner)}}
-            <X::DropdownList
-              data-test-draft-visibility-dropdown
-              @items={{this.draftVisibilityOptions}}
-              @selected={{this.draftVisibility}}
-              @renderOut={{true}}
-              @offset={{hash mainAxis=0 crossAxis=-7}}
-              class="w-[350px]"
-            >
-              <:anchor as |dd|>
-                <dd.ToggleAction
-                  data-test-draft-visibility-toggle
-                  data-test-icon={{this.draftVisibilityIcon}}
-                  data-test-chevron-direction={{if
-                    dd.contentIsShown
-                    "up"
-                    "down"
-                  }}
-                  class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
-                  {{tooltip
-                    this.toggleDraftVisibilityTooltipText
-                    placement="bottom"
-                  }}
-                >
-                  <FlightIcon @name={{this.draftVisibilityIcon}} />
-                  <FlightIcon
-                    @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+      <div class="sidebar-body-container">
+        <div>
+          {{! div to break the parent's space-y styles }}
+          <div
+            class="flex items-center space-x-1.5
+              {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
+          >
+            <Hds::Badge
+              data-test-sidebar-title-badge
+              @text={{if this.isDraft "Draft" @document.docNumber}}
+              class="uppercase !rounded-[3px]
+                {{if
+                  @document.isDraft
+                  '!bg-color-palette-neutral-500 !text-white'
+                  '!bg-transparent pl-0 !text-color-foreground-faint'
+                }}
+                "
+            />
+            {{#if (and this.isDraft this.isOwner)}}
+              <X::DropdownList
+                data-test-draft-visibility-dropdown
+                @items={{this.draftVisibilityOptions}}
+                @selected={{this.draftVisibility}}
+                @renderOut={{true}}
+                @offset={{hash mainAxis=0 crossAxis=-7}}
+                class="w-[350px]"
+              >
+                <:anchor as |dd|>
+                  <dd.ToggleAction
+                    data-test-draft-visibility-toggle
+                    data-test-icon={{this.draftVisibilityIcon}}
+                    data-test-chevron-direction={{if
+                      dd.contentIsShown
+                      "up"
+                      "down"
+                    }}
+                    class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
+                    {{tooltip
+                      this.toggleDraftVisibilityTooltipText
+                      placement="bottom"
+                    }}
+                  >
+                    <FlightIcon @name={{this.draftVisibilityIcon}} />
+                    <FlightIcon
+                      @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+                    />
+                  </dd.ToggleAction>
+                </:anchor>
+                <:item as |dd|>
+                  <dd.Action
+                    data-test-draft-visibility-option
+                    data-test-is-checked={{dd.isSelected}}
+                    data-test-value={{dd.value}}
+                    class="flex items-start gap-3 py-2.5 pl-4 pr-6"
+                    {{on "click" (perform this.setDraftVisibility dd.value)}}
+                  >
+                    <FlightIcon
+                      @name={{dd.attrs.icon}}
+                      class="shrink-0 mt-0.5"
+                    />
+                    <div class="w-full">
+                      <h4>{{dd.attrs.title}}</h4>
+                      <p>{{dd.attrs.description}}</p>
+                    </div>
+                    <FlightIcon
+                      @name="check"
+                      class="check shrink-0 mt-0.5
+                        {{if dd.isSelected 'visible' 'invisible'}}"
+                    />
+                  </dd.Action>
+                </:item>
+              </X::DropdownList>
+            {{/if}}
+          </div>
+          {{#if this.isOwner}}
+            <div class="mb-8">
+              <EditableField
+                data-test-document-title-editable
+                @value={{this.title}}
+                @onChange={{perform this.save "title"}}
+                @loading={{this.save.isRunning}}
+                @disabled={{this.editingIsDisabled}}
+              >
+                <:default>
+                  {{#unless (is-empty this.title)}}
+                    <h1
+                      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+                    >{{this.title}}</h1>
+                  {{else}}
+                    <h1
+                      data-test-document-title-read-only
+                      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
+                    >
+                      Enter a title here.
+                    </h1>
+                  {{/unless}}
+                </:default>
+                <:editing as |F|>
+                  <Hds::Form::Textarea::Field
+                    {{auto-height-textarea}}
+                    @value={{F.value}}
+                    class="primary-textarea"
+                    name="title"
+                    {{on "blur" F.update}}
+                    as |F|
                   />
-                </dd.ToggleAction>
-              </:anchor>
-              <:item as |dd|>
-                <dd.Action
-                  data-test-draft-visibility-option
-                  data-test-is-checked={{dd.isSelected}}
-                  data-test-value={{dd.value}}
-                  class="flex items-start gap-3 py-2.5 pl-4 pr-6"
-                  {{on "click" (perform this.setDraftVisibility dd.value)}}
-                >
-                  <FlightIcon @name={{dd.attrs.icon}} class="shrink-0 mt-0.5" />
-                  <div class="w-full">
-                    <h4>{{dd.attrs.title}}</h4>
-                    <p>{{dd.attrs.description}}</p>
-                  </div>
-                  <FlightIcon
-                    @name="check"
-                    class="check shrink-0 mt-0.5
-                      {{if dd.isSelected 'visible' 'invisible'}}"
-                  />
-                </dd.Action>
-              </:item>
-            </X::DropdownList>
+                </:editing>
+              </EditableField>
+            </div>
+          {{else}}
+            <h1
+              data-test-document-title-read-only
+              class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+            >{{this.title}}</h1>
           {{/if}}
         </div>
-        {{#if this.isOwner}}
-          <div class="mb-8">
+
+        <hr class="border-0 border-b hds-border-faint" />
+
+        {{! Summary }}
+        <div class="mb-5">
+          <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
+          {{#if this.isOwner}}
             <EditableField
-              data-test-document-title-editable
-              @value={{this.title}}
-              @onChange={{perform this.save "title"}}
+              data-test-document-summary-editable
+              @value={{this.summary}}
+              @onChange={{perform this.save "summary"}}
               @loading={{this.save.isRunning}}
               @disabled={{this.editingIsDisabled}}
             >
               <:default>
-                {{#unless (is-empty this.title)}}
-                  <h1
-                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-                  >{{this.title}}</h1>
-                {{else}}
-                  <h1
-                    data-test-document-title-read-only
-                    class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-faint"
+                {{#unless (is-empty this.summary)}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
                   >
-                    Enter a title here.
-                  </h1>
+                    {{this.summary}}</p>
+                {{else}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
+                  >
+                    Enter a summary here.</p>
                 {{/unless}}
               </:default>
               <:editing as |F|>
@@ -125,117 +176,97 @@
                   {{auto-height-textarea}}
                   @value={{F.value}}
                   class="primary-textarea"
-                  name="title"
+                  name="summary"
                   {{on "blur" F.update}}
                   as |F|
                 />
               </:editing>
             </EditableField>
-          </div>
-        {{else}}
-          <h1
-            data-test-document-title-read-only
-            class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-          >{{this.title}}</h1>
-        {{/if}}
-      </div>
-
-      <hr class="border-0 border-b hds-border-faint" />
-
-      {{! Summary }}
-      <div class="mb-5">
-        <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
-        {{#if this.isOwner}}
-          <EditableField
-            data-test-document-summary-editable
-            @value={{this.summary}}
-            @onChange={{perform this.save "summary"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#unless (is-empty this.summary)}}
-                <p
-                  class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-                >
-                  {{this.summary}}</p>
-              {{else}}
-                <p
-                  class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
-                >
-                  Enter a summary here.</p>
-              {{/unless}}
-            </:default>
-            <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                class="primary-textarea"
-                name="summary"
-                {{on "blur" F.update}}
-                as |F|
-              />
-            </:editing>
-          </EditableField>
-        {{else}}
-          <p
-            data-test-document-summary-read-only
-            class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-          >
-            {{this.summary}}
-          </p>
-        {{/if}}
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Status" />
-        <div class="flex space-x-1">
-          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
-          <Hds::Badge @text={{@document.docType}} />
+          {{else}}
+            <p
+              data-test-document-summary-read-only
+              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+            >
+              {{this.summary}}
+            </p>
+          {{/if}}
         </div>
-      </div>
 
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Product/Area" />
-        {{#if (and this.isDraft this.isOwner)}}
-          <div class="w-full relative">
-            <Inputs::ProductSelect
-              data-test-document-product-area-editable
-              @selected={{this.product}}
-              @onChange={{this.updateProduct.perform}}
-              @isSaving={{this.save.isRunning}}
-              @formatIsBadge={{true}}
-              @renderOut={{true}}
-            />
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Status" />
+          <div class="flex space-x-1">
+            <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+            <Hds::Badge @text={{@document.docType}} />
           </div>
-        {{else}}
-          <Hds::Badge
-            data-test-document-product-area-read-only
-            @text={{@document.product}}
-            @icon={{get-product-id @document.product}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Product/Area" />
+          {{#if (and this.isDraft this.isOwner)}}
+            <div class="w-full relative">
+              <Inputs::ProductSelect
+                data-test-document-product-area-editable
+                @selected={{this.product}}
+                @onChange={{this.updateProduct.perform}}
+                @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
+                @renderOut={{true}}
+              />
+            </div>
+          {{else}}
+            <Hds::Badge
+              data-test-document-product-area-read-only
+              @text={{@document.product}}
+              @icon={{get-product-id @document.product}}
+            />
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Owner" />
+          <Person
+            @imgURL={{get @document.ownerPhotos 0}}
+            @email={{get @document.owners 0}}
           />
-        {{/if}}
-      </div>
+        </div>
 
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person
-          @imgURL={{get @document.ownerPhotos 0}}
-          @email={{get @document.owners 0}}
-        />
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Contributors" />
-        {{#if this.isOwner}}
-          <EditableField
-            data-test-document-contributors-editable
-            @value={{this.contributors}}
-            @onChange={{perform this.save "contributors"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Contributors" />
+          {{#if this.isOwner}}
+            <EditableField
+              data-test-document-contributors-editable
+              @value={{this.contributors}}
+              @onChange={{perform this.save "contributors"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#if this.contributors.length}}
+                  <ol class="person-list">
+                    {{#each this.contributors as |contributor|}}
+                      <li>
+                        <Person
+                          @imgURL={{contributor.imgURL}}
+                          @email={{contributor.email}}
+                        />
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <em>No contributors</em>
+                {{/if}}
+              </:default>
+              <:editing as |F|>
+                <Inputs::PeopleSelect
+                  class="multiselect--narrow"
+                  @selected={{this.contributors}}
+                  @onChange={{this.updateContributors}}
+                  {{click-outside (fn F.update this.contributors)}}
+                />
+              </:editing>
+            </EditableField>
+          {{else}}
+            <div data-test-document-contributors-read-only>
               {{#if this.contributors.length}}
                 <ol class="person-list">
                   {{#each this.contributors as |contributor|}}
@@ -250,47 +281,48 @@
               {{else}}
                 <em>No contributors</em>
               {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                class="multiselect--narrow"
-                @selected={{this.contributors}}
-                @onChange={{this.updateContributors}}
-                {{click-outside (fn F.update this.contributors)}}
-              />
-            </:editing>
-          </EditableField>
-        {{else}}
-          <div data-test-document-contributors-read-only>
-            {{#if this.contributors.length}}
-              <ol class="person-list">
-                {{#each this.contributors as |contributor|}}
-                  <li>
-                    <Person
-                      @imgURL={{contributor.imgURL}}
-                      @email={{contributor.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No contributors</em>
-            {{/if}}
-          </div>
-        {{/if}}
-      </div>
+            </div>
+          {{/if}}
+        </div>
 
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Approvers" />
-        {{#if this.isOwner}}
-          <EditableField
-            data-test-document-approvers-editable
-            @value={{this.approvers}}
-            @onChange={{perform this.save "approvers"}}
-            @loading={{this.save.isRunning}}
-            @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Approvers" />
+          {{#if this.isOwner}}
+            <EditableField
+              data-test-document-approvers-editable
+              @value={{this.approvers}}
+              @onChange={{perform this.save "approvers"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#if this.approvers.length}}
+                  <ol class="person-list">
+                    {{#each this.approvers as |approver|}}
+                      <li>
+                        <Person::Approver
+                          @document={{@document}}
+                          @imgURL={{approver.imgURL}}
+                          @email={{approver.email}}
+                        />
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <em>No approvers</em>
+                {{/if}}
+              </:default>
+              <:editing as |F|>
+                <Inputs::PeopleSelect
+                  class="multiselect--narrow"
+                  @selected={{this.approvers}}
+                  @onChange={{this.updateApprovers}}
+                  {{click-outside (fn F.update this.approvers)}}
+                />
+              </:editing>
+            </EditableField>
+          {{else}}
+            <div data-test-document-approvers-read-only>
               {{#if this.approvers.length}}
                 <ol class="person-list">
                   {{#each this.approvers as |approver|}}
@@ -306,215 +338,200 @@
               {{else}}
                 <em>No approvers</em>
               {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                class="multiselect--narrow"
-                @selected={{this.approvers}}
-                @onChange={{this.updateApprovers}}
-                {{click-outside (fn F.update this.approvers)}}
-              />
-            </:editing>
-          </EditableField>
-        {{else}}
-          <div data-test-document-approvers-read-only>
-            {{#if this.approvers.length}}
-              <ol class="person-list">
-                {{#each this.approvers as |approver|}}
-                  <li>
-                    <Person::Approver
-                      @document={{@document}}
-                      @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No approvers</em>
-            {{/if}}
-          </div>
-        {{/if}}
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.createdDate "Unknown"}}</p>
-      </div>
-
-      <div class="flex flex-col items-start space-y-2">
-        <Document::Sidebar::SectionHeader @title="Last modified" />
-        <p>{{@document.lastModified}}</p>
-      </div>
-
-      <div class="flex flex-col items-start">
-        <Document::Sidebar::RelatedResources
-          @editingIsDisabled={{this.editingIsDisabled}}
-          @documentIsDraft={{this.isDraft}}
-          @productArea={{@document.product}}
-          @objectID={{@document.objectID}}
-          @allowAddingExternalLinks={{true}}
-          @headerTitle="Related resources"
-          @modalHeaderTitle="Add related resource"
-          @modalInputPlaceholder="Search docs or paste a URL..."
-          @scrollContainer={{this.body}}
-          @optionalSearchFilters={{array (concat "product:" @document.product)}}
-        />
-      </div>
-
-      {{#each-in this.customEditableFields as |field attributes|}}
-        {{#if (or attributes.value this.isOwner)}}
-          <div class="flex flex-col items-start space-y-2">
-            <Document::Sidebar::SectionHeader
-              @title={{attributes.displayName}}
-            />
-            <CustomEditableField
-              @document={{@document}}
-              @field={{field}}
-              @attributes={{attributes}}
-              @onChange={{perform this.save field}}
-              @loading={{this.save.isRunning}}
-              @disabled={{this.editingIsDisabled}}
-            />
-          </div>
-        {{/if}}
-      {{/each-in}}
-    </div>
-  </div>
-
-  {{#if this.footerIsShown}}
-    <div
-      class="sidebar-footer hidden md:block
-        {{if this.editingIsDisabled 'locked'}}"
-    >
-      {{#if this.footerControlsAreDisabled}}
-        <div class="px-3 -mb-1">
-          <div class="w-full pt-3.5 border-t border-color-border-primary">
-            <div class="text-body-200 text-color-foreground-faint">
-              <h5
-                class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
-              >
-                {{if this.docIsLocked "Document is locked" "Read-only headers"}}
-                <FlightIcon
-                  @name="lock"
-                  class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
-                />
-              </h5>
-              <p class="mb-1.5">
-                {{if
-                  this.docIsLocked
-                  "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
-                  "Weʼre unable to edit the metadata of files created offsite."
-                }}
-              </p>
             </div>
-            {{#if this.docIsLocked}}
-              <Hds::Link::Standalone
-                @icon="arrow-right"
-                @iconPosition="trailing"
-                @text="See the issue on GitHub"
-                @size="small"
-                @href="https://github.com/hashicorp-forge/hermes/issues/181"
-              />
-            {{else}}
-              <div class="text-body-100 text-color-foreground-faint">
-                Create docs in-app for best results.
-              </div>
-            {{/if}}
-          </div>
+          {{/if}}
         </div>
-      {{else}}
-        {{#if this.isDraft}}
-          {{#if this.isOwner}}
-            <div class="flex items-start px-3 gap-2">
-              <Hds::Button
-                @text="Request Review"
-                @size="medium"
-                @color="primary"
-                class="w-full"
-                {{on "click" (fn (set this "requestReviewModalIsActive" true))}}
+
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Created" />
+          <p>{{or @document.createdDate "Unknown"}}</p>
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <Document::Sidebar::SectionHeader @title="Last modified" />
+          <p>{{@document.lastModified}}</p>
+        </div>
+
+        <div class="flex flex-col items-start">
+          <Document::Sidebar::RelatedResources
+            @editingIsDisabled={{this.editingIsDisabled}}
+            @documentIsDraft={{this.isDraft}}
+            @productArea={{@document.product}}
+            @objectID={{@document.objectID}}
+            @allowAddingExternalLinks={{true}}
+            @headerTitle="Related resources"
+            @modalHeaderTitle="Add related resource"
+            @modalInputPlaceholder="Search docs or paste a URL..."
+            @scrollContainer={{this.body}}
+            @optionalSearchFilters={{array
+              (concat "product:" @document.product)
+            }}
+          />
+        </div>
+
+        {{#each-in this.customEditableFields as |field attributes|}}
+          {{#if (or attributes.value this.isOwner)}}
+            <div class="flex flex-col items-start space-y-2">
+              <Document::Sidebar::SectionHeader
+                @title={{attributes.displayName}}
               />
-              <Hds::Button
-                @text="Delete"
-                @size="medium"
-                @color="critical"
-                @icon="trash"
-                @isIconOnly={{true}}
-                class="basis-0"
-                {{on "click" (fn (set this "deleteModalIsActive" true))}}
+              <CustomEditableField
+                @document={{@document}}
+                @field={{field}}
+                @attributes={{attributes}}
+                @onChange={{perform this.save field}}
+                @loading={{this.save.isRunning}}
+                @disabled={{this.editingIsDisabled}}
               />
             </div>
           {{/if}}
-        {{else}}
-          {{#if this.isOwner}}
-            <div class="flex items-start px-3 gap-2">
+        {{/each-in}}
+      </div>
+    </div>
 
-              <Hds::Button
-                @text={{this.moveToStatusButtonText}}
-                @size="medium"
-                @color={{this.moveToStatusButtonColor}}
-                class="w-full"
-                @icon={{if this.changeDocumentStatus.isRunning "loading"}}
-                disabled={{this.changeDocumentStatus.isRunning}}
-                {{on
-                  "click"
-                  (perform
-                    this.changeDocumentStatus
-                    this.moveToStatusButtonTargetStatus
-                  )
-                }}
-              />
-              <Hds::Button
-                @text="Archive"
-                @size="medium"
-                @color="critical"
-                @icon="archive"
-                @isIconOnly={{true}}
-                class="basis-0"
-                disabled={{(eq @document.status "Obsolete")}}
-                {{on "click" (fn (set this "archiveModalIsActive" true))}}
-              />
+    {{#if this.footerIsShown}}
+      <div
+        {{! TODO: calculate if the sidebar body height exceeds its parent. if it does, add a border to the top of the footer }}
+        class="sidebar-footer {{if this.editingIsDisabled 'locked'}}"
+      >
+        {{#if this.footerControlsAreDisabled}}
+          <div class="px-3 -mb-1">
+            <div class="w-full pt-3.5 border-t border-color-border-primary">
+              <div class="text-body-200 text-color-foreground-faint">
+                <h5
+                  class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
+                >
+                  {{if
+                    this.docIsLocked
+                    "Document is locked"
+                    "Read-only headers"
+                  }}
+                  <FlightIcon
+                    @name="lock"
+                    class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
+                  />
+                </h5>
+                <p class="mb-1.5">
+                  {{if
+                    this.docIsLocked
+                    "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
+                    "Weʼre unable to edit the metadata of files created offsite."
+                  }}
+                </p>
+              </div>
+              {{#if this.docIsLocked}}
+                <Hds::Link::Standalone
+                  @icon="arrow-right"
+                  @iconPosition="trailing"
+                  @text="See the issue on GitHub"
+                  @size="small"
+                  @href="https://github.com/hashicorp-forge/hermes/issues/181"
+                />
+              {{else}}
+                <div class="text-body-100 text-color-foreground-faint">
+                  Create docs in-app for best results.
+                </div>
+              {{/if}}
             </div>
-
-          {{else}}
-            {{#if this.isApprover}}
-              <div class="flex flex-col items-start px-3 gap-2">
+          </div>
+        {{else}}
+          {{#if this.isDraft}}
+            {{#if this.isOwner}}
+              <div class="flex items-start px-3 gap-2">
                 <Hds::Button
-                  @text={{this.approveButtonText}}
+                  @text="Request Review"
                   @size="medium"
                   @color="primary"
                   class="w-full"
-                  @icon={{if this.approve.isRunning "loading"}}
-                  disabled={{(or
-                    this.approve.isRunning
-                    this.requestChanges.isRunning
-                    this.hasApproved
-                  )}}
-                  {{on "click" (perform this.approve @profile.email)}}
+                  {{on
+                    "click"
+                    (fn (set this "requestReviewModalIsActive" true))
+                  }}
                 />
-                {{#if (eq @document.docType "FRD")}}
+                <Hds::Button
+                  @text="Delete"
+                  @size="medium"
+                  @color="critical"
+                  @icon="trash"
+                  @isIconOnly={{true}}
+                  class="basis-0"
+                  {{on "click" (fn (set this "deleteModalIsActive" true))}}
+                />
+              </div>
+            {{/if}}
+          {{else}}
+            {{#if this.isOwner}}
+              <div class="flex items-start px-3 gap-2">
+
+                <Hds::Button
+                  @text={{this.moveToStatusButtonText}}
+                  @size="medium"
+                  @color={{this.moveToStatusButtonColor}}
+                  class="w-full"
+                  @icon={{if this.changeDocumentStatus.isRunning "loading"}}
+                  disabled={{this.changeDocumentStatus.isRunning}}
+                  {{on
+                    "click"
+                    (perform
+                      this.changeDocumentStatus
+                      this.moveToStatusButtonTargetStatus
+                    )
+                  }}
+                />
+                <Hds::Button
+                  @text="Archive"
+                  @size="medium"
+                  @color="critical"
+                  @icon="archive"
+                  @isIconOnly={{true}}
+                  class="basis-0"
+                  disabled={{(eq @document.status "Obsolete")}}
+                  {{on "click" (fn (set this "archiveModalIsActive" true))}}
+                />
+              </div>
+
+            {{else}}
+              {{#if this.isApprover}}
+                <div class="flex flex-col items-start px-3 gap-2">
                   <Hds::Button
-                    @text={{this.requestChangesButtonText}}
+                    @text={{this.approveButtonText}}
                     @size="medium"
-                    @color="secondary"
+                    @color="primary"
                     class="w-full"
-                    @icon={{if this.requestChanges.isRunning "loading"}}
+                    @icon={{if this.approve.isRunning "loading"}}
                     disabled={{(or
                       this.approve.isRunning
                       this.requestChanges.isRunning
-                      this.hasRequestedChanges
+                      this.hasApproved
                     )}}
-                    {{on "click" (perform this.requestChanges @profile.email)}}
+                    {{on "click" (perform this.approve @profile.email)}}
                   />
-                {{/if}}
-              </div>
+                  {{#if (eq @document.docType "FRD")}}
+                    <Hds::Button
+                      @text={{this.requestChangesButtonText}}
+                      @size="medium"
+                      @color="secondary"
+                      class="w-full"
+                      @icon={{if this.requestChanges.isRunning "loading"}}
+                      disabled={{(or
+                        this.approve.isRunning
+                        this.requestChanges.isRunning
+                        this.hasRequestedChanges
+                      )}}
+                      {{on
+                        "click"
+                        (perform this.requestChanges @profile.email)
+                      }}
+                    />
+                  {{/if}}
+                </div>
+              {{/if}}
             {{/if}}
           {{/if}}
         {{/if}}
-      {{/if}}
-
-    </div>
-  {{/if}}
+      </div>
+    {{/if}}
+  </div>
 {{/unless}}
 
 {{! Place modals at the end of the DOM so they don't inherit styles }}
