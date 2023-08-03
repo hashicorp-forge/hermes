@@ -35,7 +35,7 @@
 
   <Hds::Badge
     @text={{this.productAreaName}}
-    @icon={{or (get-product-id this.this.args.productArea) "folder"}}
+    @icon={{or (get-product-id @productArea) "folder"}}
   />
 
   {{#if (and @isResult @snippet)}}
