@@ -1,0 +1,24 @@
+.screen--dashboard {
+  .dashboard-section {
+    @apply pb-7;
+    @apply md:pb-10;
+
+    + .dashboard-section {
+      @apply border-t border-t-color-border-primary;
+
+      @apply pt-7;
+      @apply md:pt-10;
+    }
+  }
+
+  .dashboard-section-header {
+    @apply flex items-center space-x-2 mb-7;
+
+    h2 {
+      @apply font-semibold text-color-foreground-strong;
+
+      @apply text-body-300;
+      @apply sm:text-display-300
+    }
+  }
+}

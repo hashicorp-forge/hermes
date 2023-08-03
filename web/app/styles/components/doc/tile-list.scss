@@ -1,4 +1,6 @@
 .tile-list {
-  @apply grid gap-x-8 gap-y-12;
-  @apply grid-cols-2 md:grid-cols-4;
+  @apply grid;
+
+  @apply grid-cols-2 gap-6;
+  @apply md:grid-cols-4 md:gap-x-8 md:gap-y-12;
 }

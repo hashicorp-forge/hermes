@@ -1,5 +1,7 @@
 .doc-thumbnail {
-  @apply relative w-12 shrink-0 flex overflow-hidden;
+  @apply relative shrink-0 flex overflow-hidden;
+
+  @apply w-12;
 
   // Outer border / shadow
   &::after {
@@ -42,8 +44,9 @@
   }
 
   &.large {
-    // Match the width of the progress bars
-    @apply w-28;
+    @apply w-20;
+    @apply md:w-24;
+    @apply lg:w-28;
 
     &::after {
       @apply shadow-surface-mid rounded;
@@ -53,8 +56,8 @@
       @apply w-[36px] h-[32px] rounded-bl rounded-tr;
 
       .flight-icon {
-      @apply scale-100;
-    }
+        @apply scale-100;
+      }
     }
 
     .status-icon {

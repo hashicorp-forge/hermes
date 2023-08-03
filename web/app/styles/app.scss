@@ -3,7 +3,6 @@
 @use "./animations";
 @use "./typography";
 
-
 @use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
@@ -39,7 +38,9 @@
 @use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
+
 @use "routes/authenticate";
+@use "routes/dashboard";
 
 @use "./ember-power-select-theme";
 
@@ -87,17 +88,10 @@ ol {
 }
 
 .x-container {
-  @apply w-full max-w-screen-lg mx-auto px-8;
-}
+  @apply w-full max-w-screen-lg mx-auto;
 
-h1 {
-  @apply text-display-400 font-bold text-color-foreground-strong mb-1.5;
-  @apply md:text-display-500;
-
-  + p {
-    @apply text-body-300;
-    @apply md:text-display-300;
-  }
+  @apply px-4;
+  @apply sm:px-8;
 }
 
 // Prevent the Flight Icons shim from taking up space

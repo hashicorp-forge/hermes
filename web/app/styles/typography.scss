@@ -1,3 +1,18 @@
+h1 {
+  @apply font-bold text-color-foreground-strong;
+
+  @apply text-display-400;
+  @apply md:text-display-500;
+
+  @apply mb-0.5;
+  @apply md:mb-1.5;
+
+  + p {
+    @apply text-body-300;
+    @apply md:text-display-300;
+  }
+}
+
 .hermes-form-label {
   @apply text-body-200 font-semibold flex text-color-foreground-strong;
 
