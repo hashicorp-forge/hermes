@@ -30,6 +30,10 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
     this.sidebarIsCollapsed = !this.sidebarIsCollapsed;
   }
 
+  @action protected unCollapseSidebar() {
+    this.sidebarIsCollapsed = false;
+  }
+
   protected deleteDraft = dropTask(async (docID: string) => {
     try {
       let fetchResponse = await this.fetchSvc.fetch("/api/v1/drafts/" + docID, {

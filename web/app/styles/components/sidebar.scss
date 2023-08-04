@@ -60,6 +60,11 @@
       animation: fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
+
+    &.sidebar-toggle-button {
+      @apply hidden;
+      @apply md:flex;
+    }
   }
 
   .sidebar-body-and-footer {

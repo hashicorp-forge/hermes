@@ -1,22 +1,33 @@
 <div class="sidebar-header sidebar-toolbar {{if @userHasScrolled 'scrolled'}}">
   <div class="self-stretch flex">
+    {{! Collapsed view needs work now }}
     <LinkTo
       data-test-sidebar-dashboard-link
       class="sidebar-header-button sidebar-dashboard-link h-full"
       @route="authenticated.dashboard"
       {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
     >
-      <FlightIcon
-        @name={{if @isCollapsed "hashicorp" "arrow-left"}}
-        @size={{if @isCollapsed "24"}}
-      />
+      <FlightIcon @name={{this.dashboardIcon}} @size={{if @isCollapsed "24"}} />
       {{#unless @isCollapsed}}
-        <span class="ml-2">Dashboard</span>
+        {{#if this.dashboardLabel}}
+          <span class="ml-2">Dashboard</span>
+        {{else}}
+          <FlightIcon @name="hashicorp" class="ml-2" />
+        {{/if}}
       {{/unless}}
+
     </LinkTo>
     <div class="md:hidden">
-      <Action class="sidebar-header-button" {{on "click" @toggleSidebarMenu}}>
-        Info
+      <Action
+        class="sidebar-header-button h-full"
+        {{on "click" @toggleSidebarMenu}}
+      >
+        <FlightIcon
+          @name={{if @isCollapsed "hashicorp" "info-fill"}}
+          @size={{if @isCollapsed "24"}}
+        />
+        {{! TODO: clean up this ml-2 stuff }}
+        <span class="ml-2">Info</span>
       </Action>
     </div>
   </div>
@@ -40,24 +51,21 @@
       href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
     >
+      {{! At small sizes the tooltip isn't needed }}
       <FlightIcon @name="external-link" />
     </ExternalLink>
+
     <Action
       data-test-sidebar-toggle-button
       data-test-is-collapsed={{@isCollapsed}}
-      class="sidebar-header-button !hidden !md:block"
-      {{! TODO: This should do different things depending on the screen size }}
-      {{! On small screens it should open and reveal the menu }}
-      {{! Menu status needs to reset when the breakpoint changes }}
-      {{! At small sizes the tooltip isn't needed }}
-      {{!  }}
+      {{! TODO: move styles to css }}
+      class="sidebar-header-button sidebar-toggle-button"
       {{on "click" @toggleCollapsed}}
       {{tooltip
         (concat (if @isCollapsed "Expand" "Collapse") " sidebar")
         placement=(if @isCollapsed "right" "bottom")
       }}
     >
-      {{! TODO: this should change icons at certain breakpoints }}
       <FlightIcon @name={{if @isCollapsed "sidebar-show" "sidebar-hide"}} />
     </Action>
   </div>

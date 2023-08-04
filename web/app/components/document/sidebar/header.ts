@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import { HermesDocument } from "hermes/types/document";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { action } from "@ember/object";
+import ViewportService, { VIEWPORT_WIDTHS } from "hermes/services/viewport";
 
 interface DocumentSidebarHeaderComponentSignature {
   Args: {
@@ -21,6 +22,7 @@ interface DocumentSidebarHeaderComponentSignature {
 
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+  @service declare viewport: ViewportService;
 
   /**
    * Whether the tooltip is forced open, regardless of hover state.
@@ -33,6 +35,21 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
     } else {
       return false;
     }
+  }
+
+  get dashboardIcon() {
+    if (this.viewport.width < VIEWPORT_WIDTHS.md) {
+      return "arrow-left";
+    }
+
+    return this.args.isCollapsed ? "hashicorp" : "arrow-left";
+  }
+
+  get dashboardLabel() {
+    if (this.viewport.width < VIEWPORT_WIDTHS.md) {
+      return null;
+    }
+    return this.args.isCollapsed ? null : "Dashboard";
   }
 
   /**

@@ -11,7 +11,7 @@ import {
 } from "ember-concurrency";
 import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce } from "@ember/runloop";
+import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -32,6 +32,7 @@ interface DocumentSidebarComponentSignature {
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
+    unCollapseSidebar: () => void;
   };
 }
 
@@ -74,6 +75,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  get isCollapsed() {
+    if (this.viewport.width < VIEWPORT_WIDTHS.md) {
+      schedule("afterRender", this, function () {
+        this.args.unCollapseSidebar();
+      });
+      return false;
+    }
+
+    return this.args.isCollapsed;
+  }
+
   get isDraft() {
     return this.args.document?.isDraft;
   }
@@ -93,7 +105,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked _sidebarMenuIsShown = false;
 
   get sidebarMenuIsShown() {
-    return this._sidebarMenuIsShown && this.viewport.width < VIEWPORT_WIDTHS.md;
+    if (this.viewport.width < VIEWPORT_WIDTHS.md) {
+      return this._sidebarMenuIsShown;
+    } else {
+      this._sidebarMenuIsShown = false;
+      return false;
+    }
   }
 
   /**
