@@ -3,6 +3,7 @@ import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import { HermesDocument } from "hermes/types/document";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { action } from "@ember/object";
 
 interface DocumentSidebarHeaderComponentSignature {
   Args: {
@@ -14,6 +15,7 @@ interface DocumentSidebarHeaderComponentSignature {
     shareButtonIsLoading?: boolean;
     shareButtonTooltipText?: string;
     shareButtonIcon?: string;
+    toggleSidebarMenu: () => void;
   };
 }
 

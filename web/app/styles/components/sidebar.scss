@@ -1,12 +1,5 @@
-:root {
-  --bodyAndFooterHeight: calc(
-    100% - var(--documentSidebarHeaderHeight) -
-      var(--documentSidebarPaddingBottom)
-  );
-}
-
 .sidebar {
-  @apply flex flex-col outline outline-blue-400 relative z-10 shrink-0;
+  @apply flex flex-col relative z-10 shrink-0;
 
   // add pb-4 back
 
@@ -32,6 +25,9 @@
   .sidebar-header {
     @apply sticky top-0 bg-color-page-faint flex justify-between z-10;
 
+    @apply h-[50px];
+    @apply md:h-[70px];
+
     @apply overflow-visible;
 
     @apply px-1;
@@ -40,7 +36,6 @@
     @apply pt-1 pb-0.5;
     @apply md:py-4;
 
-    @apply h-[var(--documentSidebarHeaderHeight)];
     @apply md:h-auto;
 
     &.scrolled {
@@ -65,20 +60,24 @@
       animation: fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
-
-    &.toggle-collapsed-button {
-      @apply hidden md:flex;
-    }
   }
 
   .sidebar-body-and-footer {
-    @apply flex flex-col outline outline-red-400 bg-yellow-50;
+    @apply flex flex-col bg-color-page-faint transition-transform;
 
-    @apply absolute;
-    @apply md:relative;
+    @apply max-w-[90%] w-full justify-self-end;
+    @apply md:max-w-none;
+
+    @apply absolute left-0 -translate-x-full;
+    @apply md:relative md:translate-x-0;
 
     @apply h-auto max-h-screen z-10;
-    @apply md:h-[var(--bodyAndFooterHeight)];
+    // Subtract the footer height along with some padding
+    @apply md:h-[calc(100%-70px-16px)];
+
+    &.menu-open {
+      @apply translate-x-0;
+    }
   }
 
   .sidebar-body {
@@ -158,7 +157,14 @@
   }
 
   .sidebar-footer {
-    @apply w-full h-[var(--documentSidebarHeaderHeight)] bg-color-page-faint shrink-0 py-4 px-3.5;
+    @apply w-full bg-color-page-faint shrink-0;
+
+    @apply h-[70px];
+    @apply py-4;
+
+    @apply py-2;
+
+    @apply md:px-3.5;
 
     &.locked {
       @apply pt-0;

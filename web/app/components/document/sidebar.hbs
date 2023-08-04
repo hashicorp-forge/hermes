@@ -6,11 +6,31 @@
   @shareButtonIsShown={{this.shareButtonIsShown}}
   @shareButtonTooltipText={{this.temporaryShareButtonTooltipText}}
   @shareButtonIcon={{this.temporaryShareButtonIcon}}
+  @toggleSidebarMenu={{this.toggleSidebarMenu}}
 />
+
+{{#if this.sidebarMenuIsShown}}
+  <Action
+    aria-label="Close"
+    class="fixed top-0 left-0 w-full h-full bg-black opacity-30 z-10"
+    {{on "click" this.hideSidebarMenu}}
+  />
+{{/if}}
+
 
 {{#unless @isCollapsed}}
   {{! TODO: maybe-in-element this to a scroll container }}
-  <div class="sidebar-body-and-footer">
+  <div
+    class="sidebar-body-and-footer {{if this.sidebarMenuIsShown 'menu-open'}}"
+  >
+    {{! TODO: at certain sizes this needs a close button }}
+    <div
+      class="absolute z-20 top-0 right-8 h-[50px] pt-1 pb-0.5 flex items-stretch md:hidden"
+    >
+      <Action class="sidebar-header-button" {{on "click" this.hideSidebarMenu}}>
+        Close
+      </Action>
+    </div>
     <div
       class="sidebar-body"
       {{on "scroll" this.onScroll}}

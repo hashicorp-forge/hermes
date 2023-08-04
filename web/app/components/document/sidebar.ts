@@ -88,6 +88,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
+  @tracked sidebarMenuIsShown = false;
 
   /**
    * Whether the draft's `isShareable` property is true.
@@ -447,6 +448,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       timeout: 6000,
       extendedTimeout: 1000,
     });
+  }
+
+  @action hideSidebarMenu() {
+    this.sidebarMenuIsShown = false;
+  }
+
+  @action showSidebarMenu() {
+    this.sidebarMenuIsShown = true;
+  }
+
+  @action toggleSidebarMenu() {
+    this.sidebarMenuIsShown = !this.sidebarMenuIsShown;
   }
 
   /**
