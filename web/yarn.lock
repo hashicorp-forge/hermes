@@ -10296,6 +10296,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"font-color-contrast@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "font-color-contrast@npm:11.1.0"
+  checksum: 7c8af0690adc8ddfd8f3030bbce6d3345851fe78c0076fb5b3ab23568b241559fd2925f8923dc5e907faa4d49d79a03e5c04321b1551d04dbdd662a29857a968
+  languageName: node
+  linkType: hard
+
 "for-in@npm:^1.0.2":
   version: 1.0.2
   resolution: "for-in@npm:1.0.2"
@@ -11211,6 +11218,7 @@ __metadata:
     eslint-plugin-node: ^11.1.0
     eslint-plugin-prettier: ^3.4.1
     eslint-plugin-qunit: ^6.2.0
+    font-color-contrast: ^11.1.0
     instantsearch.js: ^4.40.2
     loader.js: ^4.7.0
     miragejs: ^0.1.47
