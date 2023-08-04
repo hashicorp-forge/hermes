@@ -1,6 +1,15 @@
+import { VIEWPORT_SIZES as VIEWPORT_WIDTHS } from "./app/services/viewport";
+
 module.exports = {
   content: ["./app/**/*.{html,js,hbs}"],
   theme: {
+    screens: {
+      sm: VIEWPORT_WIDTHS.sm + "px",
+      md: VIEWPORT_WIDTHS.md + "px",
+      lg: VIEWPORT_WIDTHS.lg + "px",
+      xl: VIEWPORT_WIDTHS.xl + "px",
+      "2xl": VIEWPORT_WIDTHS["2xl"] + "px",
+    },
     fontSize: {
       "display-500": [
         "var(--token-typography-display-500-font-size)",
