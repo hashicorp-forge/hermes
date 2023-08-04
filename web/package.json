@@ -142,7 +142,7 @@
     "postcss-scss": "^4.0.3",
     "replace-special-characters": "^1.2.7",
     "sinon": "^15.0.1",
-    "tailwindcss": "^3.0.23",
+    "tailwindcss": "^3.3.3",
     "torii": "^0.10.1",
     "webpack": "^5.70.0"
   },

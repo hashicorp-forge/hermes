@@ -1,15 +1,8 @@
-import { VIEWPORT_SIZES as VIEWPORT_WIDTHS } from "./app/services/viewport";
+import type { Config } from "tailwindcss";
 
-module.exports = {
+export default {
   content: ["./app/**/*.{html,js,hbs}"],
   theme: {
-    screens: {
-      sm: VIEWPORT_WIDTHS.sm + "px",
-      md: VIEWPORT_WIDTHS.md + "px",
-      lg: VIEWPORT_WIDTHS.lg + "px",
-      xl: VIEWPORT_WIDTHS.xl + "px",
-      "2xl": VIEWPORT_WIDTHS["2xl"] + "px",
-    },
     fontSize: {
       "display-500": [
         "var(--token-typography-display-500-font-size)",
@@ -80,7 +73,6 @@ module.exports = {
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",
-        "color-border-faint": "var(--token-color-border-faint)",
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
@@ -195,4 +187,4 @@ module.exports = {
     // with @hashicorp/design-system-components
     preflight: false,
   },
-};
+} satisfies Config;

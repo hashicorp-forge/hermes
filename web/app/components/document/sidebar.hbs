@@ -9,6 +9,7 @@
   @toggleSidebarMenu={{this.toggleSidebarMenu}}
 />
 
+{{! Sidebar overlay affordance }}
 {{#if this.sidebarMenuIsShown}}
   <Action
     aria-label="Close"
@@ -16,7 +17,6 @@
     {{on "click" this.hideSidebarMenu}}
   />
 {{/if}}
-
 
 {{#unless @isCollapsed}}
   {{! TODO: maybe-in-element this to a scroll container }}

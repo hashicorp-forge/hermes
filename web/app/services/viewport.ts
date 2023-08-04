@@ -3,6 +3,8 @@ import { debounce } from "@ember/runloop";
 import Service from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 
+// Currently based on default Tailwind breakpoints
+// TODO: Figure out how to share this with Tailwind and Sass
 export const VIEWPORT_WIDTHS = {
   sm: 640,
   md: 768,
@@ -17,32 +19,10 @@ export default class ViewportService extends Service {
     window.addEventListener("resize", this.debouncedUpdate);
   }
 
-  get widthIsSm() {
-    return this.width >= VIEWPORT_WIDTHS.sm && this.width < VIEWPORT_WIDTHS.md;
-  }
-
-  get widthIsMd() {
-    return this.width >= VIEWPORT_WIDTHS.md && this.width < VIEWPORT_WIDTHS.lg;
-  }
-
-  get widthIsLg() {
-    return this.width >= VIEWPORT_WIDTHS.lg && this.width < VIEWPORT_WIDTHS.xl;
-  }
-
-  get widthIsXL() {
-    return (
-      this.width >= VIEWPORT_WIDTHS.xl && this.width < VIEWPORT_WIDTHS["2xl"]
-    );
-  }
-
-  get widthIs2XL() {
-    return this.width >= VIEWPORT_WIDTHS["2xl"];
-  }
-
   @tracked width: number = window.innerWidth;
 
   @action private debouncedUpdate() {
-    debounce(this, this.updateVariables, 100);
+    debounce(this, this.updateVariables, 50);
   }
 
   @action private updateVariables() {

@@ -22,6 +22,7 @@ import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
+import ViewportService, { VIEWPORT_WIDTHS } from "hermes/services/viewport";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -57,6 +58,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
+  @service declare viewport: ViewportService;
 
   @tracked archiveModalIsActive = false;
   @tracked deleteModalIsActive = false;
@@ -88,7 +90,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
-  @tracked sidebarMenuIsShown = false;
+  @tracked _sidebarMenuIsShown = false;
+
+  get sidebarMenuIsShown() {
+    return this._sidebarMenuIsShown && this.viewport.width < VIEWPORT_WIDTHS.md;
+  }
 
   /**
    * Whether the draft's `isShareable` property is true.
@@ -451,15 +457,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   @action hideSidebarMenu() {
-    this.sidebarMenuIsShown = false;
+    this._sidebarMenuIsShown = false;
   }
 
   @action showSidebarMenu() {
-    this.sidebarMenuIsShown = true;
+    this._sidebarMenuIsShown = true;
   }
 
   @action toggleSidebarMenu() {
-    this.sidebarMenuIsShown = !this.sidebarMenuIsShown;
+    this._sidebarMenuIsShown = !this._sidebarMenuIsShown;
   }
 
   /**
