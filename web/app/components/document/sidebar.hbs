@@ -318,7 +318,7 @@
                   <p
                     class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
                   >
-                    {{dateformat @document.dueDate}}</p>
+                    {{dateformat this.dueDate}}</p>
                 {{else}}
                   <p
                     class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
@@ -330,7 +330,9 @@
                 <Hds::Form::TextInput::Field
                   id="user-question"
                   @type="date"
-                  @value={{F.value}}
+                  @renderInPlace={{true}}
+                  @value={{this.dueDate}}
+                  {{on "change" this.updateDueDate}}
                   {{on "blur" F.update}}
                   as |F|
                 />
@@ -597,41 +599,14 @@
           </Hds::Form::Field>
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
-              {{#if this.editingIsDisabled}}
-                <p
-                  class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-                >{{dateformat @document.dueDate}}</p>
-              {{else}}
-                <EditableField
-                  @value={{@document.dueDate}}
-                  @onChange={{perform this.updateDueDate}}
-                  @loading={{this.save.isRunning}}
-                  @disabled={{this.editingIsDisabled}}
-                >
-                  <:default>
-                    {{#unless (is-empty @document.dueDate)}}
-                      <p
-                        class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-                      >
-                        {{dateformat @document.dueDate}}</p>
-                    {{else}}
-                      <p
-                        class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
-                      >
-                        Enter due date here</p>
-                    {{/unless}}
-                  </:default>
-                  <:editing as |F|>
-                    <Hds::Form::TextInput::Field
-                      id="user-question"
-                      @type="date"
-                      @value={{F.value}}
-                      {{on "blur" F.update}}
-                      as |F|
-                    />
-                  </:editing>
-                </EditableField>
-              {{/if}}
+              <Hds::Form::TextInput::Field
+                id="user-question"
+                @type="date"
+                @renderInPlace={{true}}
+                @value={{this.dueDate}}
+                {{on "change" this.updateDueDate}}
+                @disabled={{M.taskIsRunning}}
+              />
             </F.Control>
             <F.Label>Add Due Date <Hds::Badge @text="Required" /></F.Label>
           </Hds::Form::Field>

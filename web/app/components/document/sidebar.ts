@@ -265,11 +265,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     await this.save.perform("project", this.project);
   });
 
-  updateDueDate = task(async (date: string) => {
-    this.dueDate = date;
-    await this.save.perform("dueDate", this.dueDate);
-    // productAbbreviation is computed by the back end
-  });
+  // updateDueDate = task(async (date: string) => {
+  //   this.dueDate = date;
+  //   await this.save.perform("dueDate", this.dueDate);
+  //   // productAbbreviation is computed by the back end
+  // });
 
   isAllReviewersReviewed(
     reviewedReviewers: string[],
@@ -527,6 +527,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         // Update reviewers.
         await this.patchDocument.perform({
           reviewers: this.reviewers.compact().mapBy("email"),
+          dueDate: this.dueDate,
         });
         await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
           method: "POST",
@@ -565,6 +566,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @action
   updateReviewers(reviewers: HermesUser[]) {
     this.reviewers = reviewers;
+  }
+  @action
+  updateDueDate(event:Event) {
+    const target = event.target as HTMLInputElement;
+    // Get the selected date value from the input field
+    const dueDate = target.value;
+    // Update the dueDate property in the component
+    this.dueDate = dueDate;
   }
 
   @action
