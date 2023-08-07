@@ -4,7 +4,7 @@ export interface GetDocAbbreviationHelperSignature {
   Args: {
     Positional: [docNumber: string];
   };
-  Return: string | null;
+  Return: string;
 }
 const getDocAbbreviation = helper<GetDocAbbreviationHelperSignature>(
   ([docNumber]: [string]) => {
@@ -15,7 +15,7 @@ const getDocAbbreviation = helper<GetDocAbbreviationHelperSignature>(
       return abbreviation.slice(0, 3).toUpperCase();
     }
 
-    return null;
+    return "";
   }
 );
 

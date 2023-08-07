@@ -3,9 +3,6 @@
 <Header />
 
 <section class="x-container">
-
-  <Dashboard::NewFeaturesBanner />
-
   <h1 class="mb-7">Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
 
   {{! Fake review }}
@@ -15,45 +12,29 @@
         class="font-regular text-color-foreground-primary self-center text-body-200"
       >
         You have
-        <span class="badge-count-highlight">1</span>
+        <span class="badge-count-highlight">4</span>
         document awaiting your review:
       </h3>
     </div>
+
     <div class="grid mt-4 gap-1 mb-4">
-      {{#each (take 1 this.recentDocs.all) as |r|}}
+      {{#each (take 4 this.recentDocs.all) as |r|}}
         <LinkTo
           @route="authenticated.document"
           @model={{r.doc.objectID}}
-          class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint"
+          class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint group"
         >
           <div class="w-full">
             <div class="w-full flex items-center gap-3">
-              <div class="shrink-0 flex space-x-0.5 Xoutline Xoutline-teal-300">
-                <div
-                  class="product-badge w-7 h-7 relative rounded-full
-                    {{get-product-id r.doc.product}}"
-                >
-                  {{#if (get-product-id r.doc.product)}}
-                    <FlightIcon
-                      @size="16"
-                      @name={{get-product-id r.doc.product}}
-                    />
-                  {{else}}
-                    <span
-                      class="font-medium letter-avatar letter-count-{{get-letter-count
-                          (get-doc-abbreviation r.doc.docNumber)
-                        }}
-                        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                    >
-                      {{get-doc-abbreviation r.doc.docNumber}}
-                    </span>
-                  {{/if}}
-                </div>
+              <div class="shrink-0 flex gap-0.5">
+
+                <ProductAvatar @doc={{r.doc}} />
+
                 <div class="flex w-auto self-center">
                   <Person::Avatar
                     @email={{get r.doc.owners 0}}
                     @imgURL={{get r.doc.ownerPhotos 0}}
-                    class="w-7 h-7"
+                    class="!w-7 !h-7 rounded-full border border-white group-hover:border-color-surface-faint"
                   />
                 </div>
               </div>

@@ -10,7 +10,10 @@
   @placement={{@placement}}
   @offset={{@offset}}
   @disableClose={{@disableClose}}
-  class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
+  class="{{unless (eq @placement null) 'hermes-popover'}}
+    x-dropdown-list
+    {{@theme}}
+    "
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes

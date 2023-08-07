@@ -1,0 +1,37 @@
+<X::DropdownList
+  @items={{this.bgColors}}
+  @inputIsShown={{false}}
+  @theme="secondary"
+    class="max-h-[300px]"
+>
+  <:anchor as |dd|>
+    <dd.ToggleAction>
+      <ProductAvatar @doc={{@doc}} />
+    </dd.ToggleAction>
+  </:anchor>
+  <:header>
+    <div class="px-[18px] pt-2.5">
+      <h4 class="hermes-h4">Select a color</h4>
+    </div>
+  </:header>
+  <:item as |dd|>
+    {{#let
+      (or (eq dd.attrs.name "Cool 500") (eq dd.attrs.name "Warm 500"))
+      as |isNewSection|
+    }}
+      <div class="relative w-full">
+
+        {{#if isNewSection}}
+          <div class="mt-2 w-full h-px bg-color-border-faint absolute left-0 -top-1"></div>
+        {{/if}}
+        <dd.Action
+          {{on "click" (fn this.setColor dd.attrs.hex)}}
+          class="py-1 space-x-1.5 px-4 {{if isNewSection 'mt-2'}}"
+        >
+          <ProductAvatar @bgColor={{dd.attrs.hex}} class="w-5 h-5" />
+          <span class="text-color-foreground-faint">{{dd.attrs.name}}</span>
+        </dd.Action>
+      </div>
+    {{/let}}
+  </:item>
+</X::DropdownList>

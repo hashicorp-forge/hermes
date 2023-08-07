@@ -1,6 +1,6 @@
 .hermes-floating-ui-content {
   &:not(.non-floating-content) {
-    @apply absolute;
+    @apply absolute z-50;
 
     /* These positioning styles are overwritten by FloatingUI,
    * but they ensure that the tooltip isn't added to the bottom of the page,

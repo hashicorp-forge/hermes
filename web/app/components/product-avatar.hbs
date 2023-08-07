@@ -1,0 +1,24 @@
+<div
+  style={{unless (get-product-id @doc.product) this.style}}
+  class="product-badge w-7 h-7 relative border rounded-full border-white group-hover:border-color-surface-faint
+    {{get-product-id @doc.product}}"
+  ...attributes
+>
+  {{#let (get-product-id @doc.product) as |product|}}
+
+    {{#if product}}
+      <FlightIcon @size="16" @name={{product}} />
+    {{else}}
+      {{#if @doc}}
+        <span
+          class="font-medium letter-avatar letter-count-{{get-letter-count
+              (get-doc-abbreviation @doc.docNumber)
+            }}
+            absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+          {{get-doc-abbreviation @doc.docNumber}}
+        </span>
+      {{/if}}
+    {{/if}}
+  {{/let}}
+</div>
