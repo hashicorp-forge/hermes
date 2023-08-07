@@ -1,28 +1,23 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{#if this.isShown}}
   <Hds::Alert
+    data-test-new-features-banner
     @type="inline"
     @color="highlight"
     @icon="gift"
     @onDismiss={{this.dismiss}}
-    class="mt-6"
+    class="mt-6 mb-10"
     as |A|
   >
-    <A.Title>New features available</A.Title>
+    <A.Title>New editor features.</A.Title>
     <A.Description>
       <ul>
-        <li>You can now create RFC, PRD, and FRD drafts!</li>
-        <li>Send a RFC, PRD, and FRD document for review. Hermes will
-          automatically email the approvers!</li>
-        <li>Approvers can now approve documents through Hermes.</li>
-        <li>Archive documents by marking them "obsolete". </li>
+        <li><strong>Related resources:</strong>
+          Attach content to your document such as other Hermes documents or
+          external links.</li>
+        <li><strong>Shareable drafts:</strong>
+          You can now toggle your document draft visibility to “shareable” and
+          generate a sharable link.</li>
       </ul>
     </A.Description>
-    <A.Link::Standalone
-      @icon="arrow-right"
-      @iconPosition="leading"
-      @text="Create a document draft"
-      @route="authenticated.new"
-    />
   </Hds::Alert>
 {{/if}}

@@ -39,6 +39,24 @@
     @apply w-[30px] h-[30px] rounded-[3px] absolute z-10 top-1/2 -translate-y-1/2 left-[3px] pointer-events-none;
   }
 
+  .user-menu-external-link {
+    @apply flex-row-reverse justify-end;
+
+    &:not(:hover) {
+      .hds-dropdown-list-item__interactive-icon {
+        @apply text-color-foreground-faint opacity-75;
+      }
+    }
+
+    .hds-dropdown-list-item__interactive-icon {
+      @apply mr-0 ml-1.5;
+    }
+
+    .hds-dropdown-list-item__interactive-text {
+      @apply flex-initial;
+    }
+  }
+
   .search-dropdown {
     @apply w-full max-w-none min-w-[320px];
   }

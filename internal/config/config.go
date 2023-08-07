@@ -49,6 +49,9 @@ type Config struct {
 
 	// ShortenerBaseURL is the base URL for building short links.
 	ShortenerBaseURL string `hcl:"shortener_base_url,optional"`
+
+	// SupportLinkURL is the URL for the support documentation.
+	SupportLinkURL string `hcl:"support_link_url,optional"`
 }
 
 // DocumentTypes contain available document types.

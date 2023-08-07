@@ -4,6 +4,14 @@ import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 
+// @ts-ignore - Mirage not detecting file
+import config from "../config/environment";
+
+import {
+  TEST_SUPPORT_URL,
+  TEST_SHORT_LINK_BASE_URL,
+} from "hermes/utils/hermes-urls";
+
 export default function (mirageConfig) {
   let finalConfig = {
     ...mirageConfig,
@@ -214,6 +222,27 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       /**
+       * Used by the config service for environment variables.
+       */
+      this.get("/web/config", () => {
+        return new Response(
+          200,
+          {},
+          {
+            algolia_docs_index_name: config.algolia.docsIndexName,
+            algolia_drafts_index_name: config.algolia.draftsIndexName,
+            algolia_internal_index_name: config.algolia.internalIndexName,
+            feature_flags: null,
+            google_doc_folders: "",
+            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
+            skip_google_auth: false,
+            google_analytics_tag_id: undefined,
+            support_link_url: TEST_SUPPORT_URL,
+          }
+        );
+      });
+
+      /**
        * Used in the /new routes when creating a document.
        */
       this.get("/document-types", () => {
@@ -285,8 +314,13 @@ export default function (mirageConfig) {
 
       /**
        * Used by the PeopleSelect component to get a list of people.
+       * Used to confirm that an approver has access to a document.
        */
-      this.get("/people", (schema) => {
+      this.get("/people", (schema, request) => {
+        // This allows the test user to view docs they're an approver on.
+        if (request.queryParams.emails === "testuser@example.com") {
+          return new Response(200, {}, []);
+        }
         return schema.people.all();
       });
 

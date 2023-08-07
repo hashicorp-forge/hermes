@@ -3,7 +3,13 @@
   href="#"
   target="_blank"
   rel="noopener noreferrer"
+  class={{if @iconIsShown "flex items-center space-x-1.5"}}
   ...attributes
 >
-  {{yield}}
+  <span>
+    {{yield}}
+  </span>
+  {{#if @iconIsShown}}
+    <FlightIcon @name="external-link" class="opacity-75" />
+  {{/if}}
 </a>
