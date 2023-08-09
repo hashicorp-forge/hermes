@@ -74,7 +74,7 @@ module.exports = function (environment) {
   };
 
   if (environment === "development") {
-    ENV.shortLinkBaseURL = "https://go.hashi.co";
+    ENV.shortLinkBaseURL = "https://fake.short.link";
 
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
@@ -84,7 +84,7 @@ module.exports = function (environment) {
   }
 
   if (environment === "test") {
-    ENV.shortLinkBaseURL = "https://go.hashi.co";
+    ENV.shortLinkBaseURL = "https://fake.short.link";
 
     // Testem prefers this...
     ENV.locationType = "none";
