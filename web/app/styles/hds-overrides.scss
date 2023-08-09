@@ -40,7 +40,10 @@
 }
 
 .badge-count-highlight {
-  @apply border-transparent bg-red-500 rounded-l-full rounded-r-full bg-color-surface-highlight relative text-color-foreground-highlight text-body-200 mx-1.5 px-3 py-[2px] min-h-0;
+  @apply border-transparent rounded-l-full rounded-r-full bg-color-surface-highlight relative text-color-foreground-highlight text-body-200 inline-flex;
+
+  @apply px-2 mx-0.5;
+  @apply md:px-3 md:py-[2px] md:mx-1.5;
 
   &::before {
     content: "";

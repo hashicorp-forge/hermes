@@ -1,0 +1,70 @@
+<li class="w-full flex">
+  <LinkTo
+    data-test-doc-awaiting-review-link
+    @route="authenticated.document"
+    @model={{@doc.objectID}}
+    class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint group"
+  >
+    <div class="w-full">
+      <div
+        class="relative w-full flex flex-wrap md:flex-nowrap items-center gap-2.5"
+      >
+
+        {{! Avatar }}
+        {{! TODO: Apply this to other avatar spots }}
+        <Person::Avatar
+          data-test-doc-awaiting-review-owner-avatar
+          @email={{or (get @doc.owners 0) "Unknown"}}
+          @imgURL={{get @doc.ownerPhotos 0}}
+          class="!w-7 !h-7 rounded-full border border-white group-hover:border-color-surface-faint shrink-0"
+        />
+
+        <div class="w-full block overflow-hidden">
+
+          {{! Title }}
+          <div class="w-full md:flex">
+            <TruncatedText
+              @tagName="h4"
+              @startingBreakpoint="md"
+              class="text-display-200 max-w-[60%] font-semibold text-color-foreground-strong"
+              data-test-doc-awaiting-review-number-and-title
+            >
+              <span class="mr-0.5">
+                {{@doc.docNumber}}
+              </span>
+              {{@doc.title}}
+            </TruncatedText>
+
+            {{! Email }}
+            <div
+              class="self-center my-1 md:my-0 md:ml-2 flex space-x-2 w-full md:w-auto md:max-w-[40%]"
+            >
+              <TruncatedText
+                @startingBreakpoint="md"
+                class="text-body-200 w-full"
+                data-test-doc-awaiting-review-owner
+              >
+                {{get @doc.owners 0}}
+              </TruncatedText>
+            </div>
+          </div>
+        </div>
+
+        {{! Badges}}
+        <div
+          class="absolute top-[3px] left-9 md:relative md:top-0 md:left-0 flex shrink-0 items-center space-x-1"
+        >
+          <Hds::Badge
+            data-test-doc-awaiting-review-product-badge
+            @icon={{or (get-product-id @doc.product) "folder"}}
+            @text={{or @doc.product "Unknown"}}
+          />
+          <Hds::Badge
+            data-test-doc-awaiting-review-doctype-badge
+            @text={{@doc.docType}}
+          />
+        </div>
+      </div>
+    </div>
+  </LinkTo>
+</li>

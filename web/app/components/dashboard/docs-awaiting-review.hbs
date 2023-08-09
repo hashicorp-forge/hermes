@@ -1,0 +1,19 @@
+<div class="w-full">
+  <div class="flex">
+    <h2 class="font-regular self-center text-body-200 md:flex items-center">
+      You have
+      <span data-test-docs-awaiting-review-count class="badge-count-highlight">
+        {{@docs.length}}
+      </span>
+      document{{if (gt @docs.length 1) "s"}}
+      awaiting your review:
+    </h2>
+  </div>
+
+  <ul class="mt-4 gap-1 mb-12 space-y-0.5">
+    {{#each @docs as |doc|}}
+      <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
+    {{/each}}
+
+  </ul>
+</div>

@@ -54,4 +54,16 @@ module("Integration | Component | truncated-text", function (hooks) {
 
     assert.dom(`h1${CONTAINER_SELECTOR}`).exists("renders a custom tag");
   });
+
+  test("it truncates text with a custom breakpoint", async function (assert) {
+    await render(hbs`
+      <div style="width:275px">
+        <TruncatedText @startingBreakpoint="md" style="font-size:28px;">
+          This is a very long text that should be truncated
+        </TruncatedText>
+      </div>
+    `);
+
+    // TODO: use ember-window-mock to set the breakpoint to md
+  });
 });
