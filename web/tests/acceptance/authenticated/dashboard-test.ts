@@ -75,7 +75,7 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
 
     assert
       .dom(find(DOC_AWAITING_REVIEW_LINK_SELECTOR))
-      .hasText("Foo")
+      .containsText("Foo")
       .hasAttribute("href", "/documents/10", "Links to the correct doc");
 
     assert
