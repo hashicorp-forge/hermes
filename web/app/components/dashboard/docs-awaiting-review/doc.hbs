@@ -11,7 +11,6 @@
       >
 
         {{! Avatar }}
-        {{! TODO: Apply this to other avatar spots }}
         <Person::Avatar
           data-test-doc-awaiting-review-owner-avatar
           @email={{or (get @doc.owners 0) "Unknown"}}
@@ -22,7 +21,7 @@
 
         <div class="w-full block overflow-hidden">
 
-          {{! Title }}
+          {{! DocNumber & Title }}
           <div class="w-full md:flex">
             <TruncatedText
               @tagName="h4"
@@ -51,7 +50,7 @@
           </div>
         </div>
 
-        {{! Badges}}
+        {{! Product & DocType }}
         <div
           class="absolute top-[3px] left-9 md:relative md:top-0 md:left-0 flex shrink-0 items-center space-x-1"
         >
