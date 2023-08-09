@@ -76,14 +76,12 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
 
     await this.algolia.clearCache.perform();
 
-    // this search fails for some reason
-
     let newDocsToShow = await this.algolia.searchIndex
       .perform(
         this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc",
         "",
         {
-          facetFilters,
+          facetFilters: [facetFilters],
           hitsPerPage: 4,
         }
       )
