@@ -1,5 +1,8 @@
 <div
-  class="w-5 h-5 overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200"
+  class="overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200 border border-transparent
+    {{if this.sizeIsSmall 'w-5 h-5'}}
+    {{if this.sizeIsMedium 'w-7 h-7'}}
+    "
   ...attributes
 >
   {{#if @imgURL}}
