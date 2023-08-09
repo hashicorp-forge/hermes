@@ -14,4 +14,9 @@ module("Acceptance | authenticate", function (hooks) {
     await visit("/authenticate");
     assert.equal(getPageTitle(), "Authenticate | Hermes");
   });
+
+  test('the footer has the compact class', async function (this: AuthenticateRouteTestContext, assert) {
+    await visit("/authenticate");
+    assert.dom(".footer").hasClass("compact");
+  });
 });

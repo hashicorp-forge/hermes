@@ -9,6 +9,7 @@ import AuthenticatedUserService, {
 } from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
+import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 
 interface HeaderNavComponentSignature {
   Args: {};
@@ -30,6 +31,14 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
   protected get showSignOut(): boolean {
     return !this.configSvc.config.skip_google_auth;
+  }
+
+  protected get gitHubRepoURL() {
+    return HERMES_GITHUB_REPO_URL;
+  }
+
+  protected get supportDocsURL() {
+    return this.configSvc.config.support_link_url;
   }
 
   /**
@@ -87,7 +96,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    'Header::Nav': typeof HeaderNavComponent;
+    "Header::Nav": typeof HeaderNavComponent;
   }
 }
-

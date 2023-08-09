@@ -1,10 +1,16 @@
 // https://www.ember-cli-mirage.com/docs/advanced/server-configuration
 
 import { Collection, Response, createServer } from "miragejs";
-import config from "../config/environment";
-import { SearchResponse } from "@algolia/client-search";
 import { getTestDocNumber } from "./factories/document";
-import { SearchForFacetValuesResponse } from "@algolia/client-search";
+import algoliaHosts from "./algolia/hosts";
+
+// @ts-ignore - Mirage not detecting file
+import config from "../config/environment";
+
+import {
+  TEST_SUPPORT_URL,
+  TEST_SHORT_LINK_BASE_URL,
+} from "hermes/utils/hermes-urls";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -12,6 +18,142 @@ export default function (mirageConfig) {
 
     routes() {
       this.namespace = "api/v1";
+
+      /*************************************************************************
+       *
+       * Algolia requests
+       *
+       *************************************************************************/
+
+      /**
+       * A triage function for all Algolia requests.
+       * Reviews the request and determines how to respond.
+       */
+      const handleAlgoliaRequest = (schema, request) => {
+        const requestBody = JSON.parse(request.requestBody);
+
+        if (requestBody) {
+          const { facetQuery, query } = requestBody;
+          if (facetQuery) {
+            let facetMatch = schema.document.all().models.filter((doc) => {
+              return doc.attrs.product
+                .toLowerCase()
+                .includes(facetQuery.toLowerCase());
+            })[0];
+            if (facetMatch) {
+              return new Response(
+                200,
+                {},
+                { facetHits: [{ value: facetMatch.attrs.product }] }
+              );
+            } else {
+              return new Response(200, {}, { facetHits: [] });
+            }
+          } else if (query !== undefined) {
+            /**
+             * A query exists, but may be empty.
+             * Typically, this is a query for a document title or product,
+             * but sometimes it's a query by some optionalFilters.
+             */
+
+            let docMatches = [];
+            let idsToExclude: string[] = [];
+
+            const filters = requestBody.filters;
+
+            if (filters?.includes("NOT objectID")) {
+              // there can be a number of objectIDs in the format of
+              // NOT objectID:"1234" AND NOT objectID:"5678"
+              // we need to parse these and use them to filter the results below.
+              filters.split("NOT objectID:").forEach((filter: string) => {
+                if (filter) {
+                  const id = filter.split('"')[1];
+                  if (id) {
+                    idsToExclude.push(id);
+                  }
+                }
+              });
+            }
+
+            const optionalFilters = requestBody.optionalFilters;
+
+            if (optionalFilters?.includes("docNumber")) {
+              const docNumber = optionalFilters
+                .split('docNumber:"')[1]
+                .split('"')[0];
+
+              docMatches = schema.document.all().models.filter((doc) => {
+                return doc.attrs.docNumber === docNumber;
+              });
+
+              // Duplicates are detected in the front end
+              return new Response(200, {}, { hits: docMatches });
+            } else {
+              docMatches = schema.document.all().models.filter((doc) => {
+                return (
+                  doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+                  doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+                );
+              });
+            }
+
+            if (idsToExclude) {
+              docMatches = docMatches.filter((doc) => {
+                return !idsToExclude.includes(doc.attrs.objectID);
+              });
+            }
+
+            return new Response(200, {}, { hits: docMatches });
+          } else {
+            /**
+             * A request we're not currently handling with any specificity.
+             * Returns the entire document index.
+             */
+            return new Response(
+              200,
+              {},
+              { hits: schema.document.all().models }
+            );
+          }
+        } else {
+          /**
+           * This is a `getObject` request, (a search by a :document_id),
+           * which arrives like this: { *: "index-name/id" }.
+           * We use the ID to search Mirage.
+           * If an object is found, we return it.
+           * If not, we return a 404.
+           */
+          const docID = request.params["*"].split("/")[1];
+          const doc = schema.document.findBy({ id: docID });
+
+          if (doc) {
+            return new Response(200, {}, doc.attrs);
+          } else {
+            // Mimic Algolia's response when its getObject method fails.
+            return new Response(404, {}, {});
+          }
+        }
+      };
+
+      /**
+       * Algolia has several search hosts, e.g.,
+       * - appID-1.algolianet.com
+       * - appID-2.algolianet.com
+       *
+       * And Mirage lacks wildcards, so we create a route for each.
+       *
+       * Additionally, we support the remaining Algolia routes.
+       */
+
+      algoliaHosts.forEach((host) => {
+        this.post(host, (schema, request) => {
+          return handleAlgoliaRequest(schema, request);
+        });
+
+        this.get(host, (schema, request) => {
+          return handleAlgoliaRequest(schema, request);
+        });
+      });
 
       /*************************************************************************
        *
@@ -66,69 +208,6 @@ export default function (mirageConfig) {
         return new Response(200, {});
       });
 
-      const getAlgoliaSearchResults = (schema, request) => {
-        const requestBody = JSON.parse(request.requestBody);
-        const { facetQuery, query } = requestBody;
-
-        if (facetQuery) {
-          let facetMatch = schema.document.all().models.filter((doc) => {
-            return doc.attrs.product
-              .toLowerCase()
-              .includes(facetQuery.toLowerCase());
-          })[0];
-
-          if (!facetMatch) {
-            return new Response(200, {}, { facetHits: [] });
-          } else {
-            return new Response(
-              200,
-              {},
-              { facetHits: [{ value: facetMatch.attrs.product }] }
-            );
-          }
-        } else {
-          let docMatches = schema.document.all().models.filter((doc) => {
-            return (
-              doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
-              doc.attrs.product.toLowerCase().includes(query.toLowerCase())
-            );
-          });
-          return new Response(200, {}, { hits: docMatches });
-        }
-      };
-
-      /**
-       * Used by the AlgoliaSearchService to query Algolia.
-       */
-      this.post(
-        `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-        (schema, request) => {
-          return getAlgoliaSearchResults(schema, request);
-        }
-      );
-
-      /**
-       * Algolia has several search hosts, e.g., appID-1.algolianet.com,
-       * and Mirage doesn't support wildcards in routes.
-       * So, we create a route for each host.
-       *
-       * TODO: Export this into a function that can be used in tests also.
-       */
-
-      let algoliaSearchHosts = [];
-
-      for (let i = 1; i <= 9; i++) {
-        algoliaSearchHosts.push(
-          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
-        );
-      }
-
-      algoliaSearchHosts.forEach((host) => {
-        this.post(host, (schema, request) => {
-          return getAlgoliaSearchResults(schema, request);
-        });
-      });
-
       /**
        * Called by the Document route to log a document view.
        */
@@ -141,6 +220,27 @@ export default function (mirageConfig) {
        * GET requests
        *
        *************************************************************************/
+
+      /**
+       * Used by the config service for environment variables.
+       */
+      this.get("/web/config", () => {
+        return new Response(
+          200,
+          {},
+          {
+            algolia_docs_index_name: config.algolia.docsIndexName,
+            algolia_drafts_index_name: config.algolia.draftsIndexName,
+            algolia_internal_index_name: config.algolia.internalIndexName,
+            feature_flags: null,
+            google_doc_folders: "",
+            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
+            skip_google_auth: false,
+            google_analytics_tag_id: undefined,
+            support_link_url: TEST_SUPPORT_URL,
+          }
+        );
+      });
 
       /**
        * Used in the /new routes when creating a document.
