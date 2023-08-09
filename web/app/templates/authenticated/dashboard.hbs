@@ -11,10 +11,14 @@
     {{this.authenticatedUser.info.given_name}}!
   </h1>
 
+  {{#if @model}}
+    <Dashboard::DocsAwaitingReview @docs={{@model}} />
+  {{/if}}
+
   <div
-    class="flex flex-col w-full mt-10 pb-10 border-0 border-b hds-border-primary"
+    class="hds-border-primary mt-10 flex w-full flex-col border-0 border-b pb-10"
   >
-    <div class="flex items-center space-x-2 mb-8">
+    <div class="mb-8 flex items-center space-x-2">
       <FlightIcon @name="eye" @size="24" />
       <h2
         class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
@@ -43,7 +47,7 @@
       </div>
     {{else if (eq this.recentDocs.all null)}}
       <div class="h-[100px]">
-        <p class="mb-7 text-color-foreground-faint text-body-300">
+        <p class="mb-7 text-body-300 text-color-foreground-faint">
           Error fetching documents.
         </p>
         <Hds::Button
@@ -62,7 +66,7 @@
 
   </div>
 
-  <div class="flex flex-col w-full py-10">
+  <div class="flex w-full flex-col py-10">
     <Dashboard::LatestUpdates />
   </div>
 

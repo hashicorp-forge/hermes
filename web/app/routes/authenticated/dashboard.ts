@@ -9,6 +9,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 // @ts-ignore - Not yet typed
 import timeAgo from "hermes/utils/time-ago";
+import { HermesDocument } from "hermes/types/document";
 
 export default class DashboardRoute extends Route {
   @service declare algolia: AlgoliaService;
@@ -19,7 +20,7 @@ export default class DashboardRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  async model() {
+  async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
 
     const docsAwaitingReview = await this.algolia.searchIndex
@@ -34,12 +35,10 @@ export default class DashboardRoute extends Route {
       .then((result) => {
         // Add modifiedAgo for each doc.
         for (const hit of result.hits) {
-          console.log("shit", hit);
           this.fetchSvc
             .fetch("/api/v1/documents/" + hit.objectID)
             .then((resp) => resp?.json())
             .then((doc) => {
-              console.log("doc");
               if (doc.modifiedTime) {
                 const modifiedDate = new Date(doc.modifiedTime * 1000);
                 // @ts-ignore
@@ -53,7 +52,7 @@ export default class DashboardRoute extends Route {
               );
             });
         }
-        return result.hits;
+        return result.hits as HermesDocument[];
       });
 
     try {
