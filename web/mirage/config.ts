@@ -92,13 +92,31 @@ export default function (mirageConfig) {
             );
           }
         } else {
-          let docMatches = schema.document.all().models.filter((doc) => {
-            return (
-              doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
-              doc.attrs.product.toLowerCase().includes(query.toLowerCase())
-            );
-          });
-          return new Response(200, {}, { hits: docMatches });
+          let isDocsAwaitingReviewRequest =
+            requestBody.filters.includes("approvers:'testuser@example.com'") &&
+            requestBody.filters.includes("AND status:In-Review");
+
+          if (isDocsAwaitingReviewRequest) {
+            let docsAwaitingReview = schema.document
+              .all()
+              .models.filter((doc) => {
+                return (
+                  doc.attrs.approvers.includes("testuser@example.com") &&
+                  doc.attrs.status.toLowerCase().includes("review")
+                );
+              });
+            return new Response(200, {}, { hits: docsAwaitingReview });
+          } else {
+            // This is a regular search request.
+            // TODO: Handle these requests with more precision.
+            let docMatches = schema.document.all().models.filter((doc) => {
+              return (
+                doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+                doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+              );
+            });
+            return new Response(200, {}, { hits: docMatches });
+          }
         }
       };
 

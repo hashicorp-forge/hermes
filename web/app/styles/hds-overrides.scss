@@ -38,3 +38,12 @@
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }
 }
+
+.badge-count-highlight {
+  @apply border-transparent bg-red-500 rounded-l-full rounded-r-full bg-color-surface-highlight relative text-color-foreground-highlight text-body-200 mx-1.5 px-3 py-[2px] min-h-0;
+
+  &::before {
+    content: "";
+    @apply absolute -left-px -top-px -right-px -bottom-px rounded-l-full rounded-r-full border border-color-foreground-highlight opacity-60;
+  }
+}

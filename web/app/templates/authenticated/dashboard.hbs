@@ -2,47 +2,91 @@
 
 <Header />
 
+{{! TODO: Move this into an index component }}
+
 <section class="x-container">
 
   <Dashboard::NewFeaturesBanner />
 
-  <div class="hds-border-primary border-0 border-b pb-9">
-    <h1>Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
-    <p>Here’s all the latest updates across the organization.</p>
-  </div>
+  <h1 class="mb-7">
+    Welcome back,
+    {{this.authenticatedUser.info.given_name}}!
+  </h1>
 
   {{#if this.docsWaitingForReview}}
-    <div
-      class="flex flex-col w-full py-10 border-0 border-b hds-border-primary"
-    >
-      <div class="flex items-center space-x-2 mb-8">
-        <FlightIcon @name="user-check" @size="24" />
-        <h2
-          class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-        >Documents waiting for your review</h2>
+    {{! TODO: Move this into a component }}
+    <div class="w-full">
+      <div class="flex">
+        <h2 class="font-regular self-center text-body-200 flex items-center">
+          You have
+          <span class="badge-count-highlight">
+            {{this.docsWaitingForReview.length}}
+          </span>
+          document{{if (gt 1 this.docsWaitingForReview.length) "s"}}
+          awaiting your review:
+        </h2>
       </div>
 
-      <div class="tile-list">
-        {{#each this.docsWaitingForReview as |doc index|}}
-          {{#if (lt index 4)}}
-            <Doc::Tile
-              @avatar="{{get doc.ownerPhotos 0}}"
-              @docID="{{doc.objectID}}"
-              @docNumber="{{doc.docNumber}}"
-              @modifiedAgo="{{doc.modifiedAgo}}"
-              @owner="{{get doc.owners 0}}"
-              @productArea="{{doc.product}}"
-              @status="{{lowercase doc.status}}"
-              @title="{{doc.title}}"
-            />
-          {{/if}}
+      <div class="grid mt-4 gap-1 mb-12">
+        {{#each this.docsWaitingForReview as |doc|}}
+          <LinkTo
+            @route="authenticated.document"
+            @model={{doc.objectID}}
+            class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint group"
+          >
+            <div class="w-full">
+              <div class="w-full flex items-center gap-2.5">
+
+                {{! Avatar }}
+                <Person::Avatar
+                  @email={{get doc.owners 0}}
+                  @imgURL={{get doc.ownerPhotos 0}}
+                  class="!w-7 !h-7 rounded-full border border-white group-hover:border-color-surface-faint shrink-0"
+                />
+
+                <div class="w-full block overflow-hidden">
+
+                  {{! Title }}
+                  <div class="w-full flex">
+                    <TruncatedText
+                      @tagName="h4"
+                      class="text-display-200 max-w-[50%] font-semibold text-color-foreground-strong"
+                    >
+                      <span class="mr-0.5">
+                        {{doc.docNumber}}
+                      </span>
+                      {{doc.title}}
+                    </TruncatedText>
+
+                    {{! Email }}
+                    <div class="self-center ml-2 flex space-x-2">
+                      <TruncatedText class="text-body-200 w-full">
+                        {{get doc.owners 0}}
+                      </TruncatedText>
+                    </div>
+                  </div>
+                </div>
+
+                {{! Badges}}
+                <div class="flex shrink-0 items-center space-x-1">
+                  <Hds::Badge
+                    @icon={{or (get-product-id doc.product) "folder"}}
+                    @text={{doc.product}}
+                  />
+                  <Hds::Badge @text={{doc.docType}} />
+                </div>
+              </div>
+            </div>
+          </LinkTo>
         {{/each}}
 
       </div>
     </div>
   {{/if}}
 
-  <div class="flex flex-col w-full py-10 border-0 border-b hds-border-primary">
+  <div
+    class="flex flex-col w-full mt-10 pb-10 border-0 border-b hds-border-primary"
+  >
     <div class="flex items-center space-x-2 mb-8">
       <FlightIcon @name="eye" @size="24" />
       <h2
@@ -54,7 +98,7 @@
       <div class="tile-list">
         {{#each this.recentDocs.all as |r|}}
           <Doc::Tile
-            @isDraft={{r.isDraft}}
+            @isDraft={{r.doc.isDraft}}
             @avatar={{get r.doc.ownerPhotos 0}}
             @docID={{r.doc.objectID}}
             @docNumber={{r.doc.docNumber}}
