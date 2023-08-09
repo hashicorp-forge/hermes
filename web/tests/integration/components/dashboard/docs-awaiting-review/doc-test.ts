@@ -52,7 +52,7 @@ module(
       assert
         .dom(DOC_AWAITING_REVIEW_LINK_SELECTOR)
         .containsText("Foo")
-        .hasAttribute("href", "/documents/10");
+        .hasAttribute("href", "/document/10");
 
       assert
         .dom(
@@ -60,7 +60,7 @@ module(
             `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`
           )
         )
-        .hasText("TP0-001: Bar", "Shows the doc number and title");
+        .hasText("HCP-001 Foo", "Shows the doc number and title");
 
       assert
         .dom(

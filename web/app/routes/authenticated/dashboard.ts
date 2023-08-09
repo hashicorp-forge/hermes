@@ -1,42 +1,28 @@
 import Route from "@ember/routing/route";
-import RSVP from "rsvp";
 import { inject as service } from "@ember/service";
+import AlgoliaService from "hermes/services/algolia";
+import ConfigService from "hermes/services/config";
+import FetchService from "hermes/services/fetch";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import SessionService from "hermes/services/session";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
+
+// @ts-ignore - Not yet typed
 import timeAgo from "hermes/utils/time-ago";
 
 export default class DashboardRoute extends Route {
-  @service algolia;
-  @service("config") configSvc;
-  @service("fetch") fetchSvc;
-  @service("recently-viewed-docs") recentDocs;
-  @service session;
-  @service authenticatedUser;
+  @service declare algolia: AlgoliaService;
+  @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
+  @service("recently-viewed-docs")
+  declare recentDocs: RecentlyViewedDocsService;
+  @service declare session: SessionService;
+  @service declare authenticatedUser: AuthenticatedUserService;
 
-  queryParams = {
-    latestUpdates: {
-      refreshModel: true,
-      replace: true,
-    },
-  };
-
-  resetController(controller, isExiting, transition) {
-    if (isExiting) {
-      controller.set("latestUpdates", "newDocs");
-    }
-  }
-
-  async model(params) {
-    // Create facet filter for recently updated docs depending on the selected
-    // "Latest updates" tab.
-    let facetFilter = "";
-    if (params.latestUpdates == "approved") {
-      facetFilter = "status:approved";
-    } else if (params.latestUpdates == "inReview") {
-      facetFilter = "status:In-Review";
-    }
-
+  async model() {
     const userInfo = this.authenticatedUser.info;
 
-    const docsWaitingForReview = this.algolia.searchIndex
+    const docsAwaitingReview = await this.algolia.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {
         filters:
           `approvers:'${userInfo.email}'` +
@@ -48,12 +34,15 @@ export default class DashboardRoute extends Route {
       .then((result) => {
         // Add modifiedAgo for each doc.
         for (const hit of result.hits) {
+          console.log("shit", hit);
           this.fetchSvc
             .fetch("/api/v1/documents/" + hit.objectID)
-            .then((resp) => resp.json())
+            .then((resp) => resp?.json())
             .then((doc) => {
+              console.log("doc");
               if (doc.modifiedTime) {
                 const modifiedDate = new Date(doc.modifiedTime * 1000);
+                // @ts-ignore
                 hit.modifiedAgo = `Modified ${timeAgo(modifiedDate)}`;
               }
             })
@@ -67,31 +56,28 @@ export default class DashboardRoute extends Route {
         return result.hits;
       });
 
-    await this.recentDocs.fetchAll.perform();
-    if (this.recentDocs.all === null) {
-      try {
-        await this.recentDocs.fetchAll.perform();
-      } catch {
-        /**
-         * This tells our template to show the error state.
-         */
-        this.recentDocs.all = null;
-      }
+    try {
+      await this.recentDocs.fetchAll.perform();
+    } catch {
+      /**
+       * This tells our template to show the error state.
+       */
+      this.recentDocs.all = null;
     }
 
-    return RSVP.hash({
-      docsWaitingForReview: docsWaitingForReview,
-    });
+    return docsAwaitingReview;
   }
 
   /**
    * Builds a parent query string for searching for Google files. The folders
    * parameter is an array of all folder ID strings to search.
    */
+  // @ts-ignore - Not yet typed
   buildParentsQuery(folders) {
     let parentsQuery = "";
     if (folders.length > 0) {
       parentsQuery += " and (";
+      // @ts-ignore - Not yet typed
       folders.forEach((folder, index) => {
         if (index == 0) {
           parentsQuery += `'${folder}' in parents`;

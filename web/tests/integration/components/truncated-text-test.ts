@@ -64,6 +64,8 @@ module("Integration | Component | truncated-text", function (hooks) {
       </div>
     `);
 
+    assert.true(true, "TODO: implement this test");
+
     // TODO: use ember-window-mock to set the breakpoint to md
   });
 });

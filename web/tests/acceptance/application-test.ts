@@ -190,5 +190,15 @@ module("Acceptance | application", function (hooks) {
     assert
       .dom("[data-test-user-menu-support")
       .hasAttribute("href", TEST_SUPPORT_URL);
+
+    /**
+     * FIXME: Investigate unresolved promises
+     *
+     * For reasons not yet clear, this test has unresolved promises
+     * that prevent it from completing naturally. Because of this,
+     * we handle teardown manually.
+     *
+     */
+    teardownContext(this);
   });
 });

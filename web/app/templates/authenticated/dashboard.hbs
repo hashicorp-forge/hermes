@@ -11,10 +11,6 @@
     {{this.authenticatedUser.info.given_name}}!
   </h1>
 
-  {{#if this.docsWaitingForReview}}
-    <Dashboard::DocsAwaitingReview @docs={{this.docsWaitingForReview}} />
-  {{/if}}
-
   <div
     class="flex flex-col w-full mt-10 pb-10 border-0 border-b hds-border-primary"
   >
