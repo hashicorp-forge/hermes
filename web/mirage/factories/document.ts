@@ -39,5 +39,6 @@ export default Factory.extend({
       value: "This is a test document",
     },
   },
+  approvers: [],
   owners: ["testuser@example.com"],
 });

@@ -1,11 +1,11 @@
 <div
-  class="w-5 h-5 overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300"
+  class="w-5 h-5 overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200"
   ...attributes
 >
   {{#if @imgURL}}
     <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
   {{else}}
-    <div class="bg-color-foreground-high-contrast text-body-100 flex">
+    <div class="text-body-100 flex">
       {{#if @email}}
         <span class="capitalize">
           {{get-first-letter @email}}

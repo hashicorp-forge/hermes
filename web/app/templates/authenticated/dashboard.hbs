@@ -19,7 +19,10 @@
       <div class="flex">
         <h2 class="font-regular self-center text-body-200 flex items-center">
           You have
-          <span class="badge-count-highlight">
+          <span
+            data-test-docs-awaiting-review-count
+            class="badge-count-highlight"
+          >
             {{this.docsWaitingForReview.length}}
           </span>
           document{{if (gt 1 this.docsWaitingForReview.length) "s"}}
@@ -27,60 +30,74 @@
         </h2>
       </div>
 
-      <div class="grid mt-4 gap-1 mb-12">
+      <ul class="grid mt-4 gap-1 mb-12">
         {{#each this.docsWaitingForReview as |doc|}}
-          <LinkTo
-            @route="authenticated.document"
-            @model={{doc.objectID}}
-            class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint group"
-          >
-            <div class="w-full">
-              <div class="w-full flex items-center gap-2.5">
+          <li class="w-full flex">
+            <LinkTo
+              data-test-doc-awaiting-review-link
+              @route="authenticated.document"
+              @model={{doc.objectID}}
+              class="w-full bg-white px-3.5 py-3 rounded border border-color-border-primary overflow-hidden hover:bg-color-surface-faint group"
+            >
+              <div class="w-full">
+                <div class="w-full flex items-center gap-2.5">
 
-                {{! Avatar }}
-                <Person::Avatar
-                  @email={{get doc.owners 0}}
-                  @imgURL={{get doc.ownerPhotos 0}}
-                  class="!w-7 !h-7 rounded-full border border-white group-hover:border-color-surface-faint shrink-0"
-                />
+                  {{! Avatar }}
+                  {{! TODO: Apply this to other avatar spots }}
+                  <Person::Avatar
+                    data-test-doc-awaiting-review-owner-avatar
+                    @email={{get doc.owners 0}}
+                    @imgURL={{get doc.ownerPhotos 0}}
+                    class="!w-7 !h-7 rounded-full border border-white group-hover:border-color-surface-faint shrink-0"
+                  />
 
-                <div class="w-full block overflow-hidden">
+                  <div class="w-full block overflow-hidden">
 
-                  {{! Title }}
-                  <div class="w-full flex">
-                    <TruncatedText
-                      @tagName="h4"
-                      class="text-display-200 max-w-[50%] font-semibold text-color-foreground-strong"
-                    >
-                      <span class="mr-0.5">
-                        {{doc.docNumber}}
-                      </span>
-                      {{doc.title}}
-                    </TruncatedText>
-
-                    {{! Email }}
-                    <div class="self-center ml-2 flex space-x-2">
-                      <TruncatedText class="text-body-200 w-full">
-                        {{get doc.owners 0}}
+                    {{! Title }}
+                    <div class="w-full flex">
+                      <TruncatedText
+                        @tagName="h4"
+                        class="text-display-200 max-w-[50%] font-semibold text-color-foreground-strong"
+                        data-test-doc-awaiting-review-number-and-title
+                      >
+                        <span class="mr-0.5">
+                          {{doc.docNumber}}
+                        </span>
+                        {{doc.title}}
                       </TruncatedText>
+
+                      {{! Email }}
+                      <div class="self-center ml-2 flex space-x-2">
+                        <TruncatedText
+                          class="text-body-200 w-full"
+                          data-test-doc-awaiting-review-owner
+                        >
+                          {{get doc.owners 0}}
+                        </TruncatedText>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {{! Badges}}
-                <div class="flex shrink-0 items-center space-x-1">
-                  <Hds::Badge
-                    @icon={{or (get-product-id doc.product) "folder"}}
-                    @text={{doc.product}}
-                  />
-                  <Hds::Badge @text={{doc.docType}} />
+                  {{! Badges}}
+                  <div class="flex shrink-0 items-center space-x-1">
+                    <Hds::Badge
+                      data-test-doc-awaiting-review-product-badge
+                      @icon={{or (get-product-id doc.product) "folder"}}
+                      @text={{doc.product}}
+                    />
+                    <Hds::Badge
+                      data-test-doc-awaiting-review-doctype-badge
+                      @text={{doc.docType}}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </LinkTo>
+            </LinkTo>
+          </li>
+
         {{/each}}
 
-      </div>
+      </ul>
     </div>
   {{/if}}
 
