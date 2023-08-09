@@ -55,6 +55,8 @@ module.exports = function (environment) {
 
     skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
 
+    shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
+
     torii: {
       sessionServiceName: "session",
       providers: {
@@ -72,6 +74,8 @@ module.exports = function (environment) {
   };
 
   if (environment === "development") {
+    ENV.shortLinkBaseURL = "https://fake.short.link";
+
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
@@ -80,6 +84,8 @@ module.exports = function (environment) {
   }
 
   if (environment === "test") {
+    ENV.shortLinkBaseURL = "https://fake.short.link";
+
     // Testem prefers this...
     ENV.locationType = "none";
 

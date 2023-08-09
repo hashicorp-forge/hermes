@@ -358,7 +358,7 @@
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Search docs or paste a URL..."
           @scrollContainer={{this.body}}
-          @optionalSearchFilters={{array (concat "product:" @document.product)}}
+          @optionalSearchFilters={{concat "product:" @document.product}}
         />
       </div>
 
