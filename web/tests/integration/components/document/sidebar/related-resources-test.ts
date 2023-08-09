@@ -14,6 +14,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
 import config from "hermes/config/environment";
+import algoliaHosts from "hermes/mirage/algolia/hosts";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -57,6 +58,14 @@ const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
 const TOOLTIP_TRIGGER_SELECTOR = "[data-test-tooltip-icon-trigger]";
 const TOOLTIP_SELECTOR = ".hermes-tooltip";
 
+const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
+const CURRENT_DOMAIN = window.location.hostname;
+const CURRENT_PORT = window.location.port;
+
+const SHORT_LINK_BASE_URL = config.shortLinkBaseURL;
+
+const SEARCH_ERROR_MESSAGE = "Search error. Type to retry.";
+
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
   body: HTMLElement;
@@ -74,6 +83,13 @@ module(
       this.server.create("document", {
         product: "Labs",
         objectID: "1234",
+      });
+
+      // Populate the database with at least one more doc.
+      this.server.create("document", {
+        title: "Foobar",
+        product: "Labs",
+        objectID: "4321",
       });
 
       this.set("document", this.server.schema.document.first().attrs);
@@ -514,7 +530,7 @@ module(
 
       await fillIn(
         ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-        "https://example.com"
+        "http://test.com"
       );
 
       assert
@@ -524,54 +540,6 @@ module(
       assert
         .dom(NO_RESOURCES_FOUND_SELECTOR)
         .exists("the fallback message is shown");
-    });
-
-    test("it shows an error when searching fails", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
-      this.server.createList("document", 3);
-
-      this.server.post(
-        `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-        () => {
-          return new Response(500, {}, {});
-        }
-      );
-
-      let algoliaSearchHosts = [];
-
-      for (let i = 1; i <= 9; i++) {
-        algoliaSearchHosts.push(
-          `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`
-        );
-      }
-
-      algoliaSearchHosts.forEach((host) => {
-        this.server.post(host, () => {
-          return new Response(500, {}, {});
-        });
-      });
-
-      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
-          <Document::Sidebar::RelatedResources
-            @productArea={{this.document.product}}
-            @objectID={{this.document.objectID}}
-            @allowAddingExternalLinks={{true}}
-            @headerTitle="Test title"
-            @modalHeaderTitle="Add related resource"
-            @modalInputPlaceholder="Test placeholder"
-            @scrollContainer={{this.body}}
-          />
-        `);
-
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-
-      await waitFor(NO_RESOURCES_FOUND_SELECTOR);
-
-      assert
-        .dom(NO_RESOURCES_FOUND_SELECTOR)
-        .containsText(
-          "Search error. Type to retry.",
-          "the error message is shown in the modal"
-        );
     });
 
     test("it calls the correct endpoint when editing a draft", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -719,6 +687,302 @@ module(
       assert
         .dom(EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR)
         .hasText("A title is required.");
+    });
+
+    test("first class links are recognized (full URL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      const docID = "777";
+      const docTitle = "Jackpot!";
+
+      this.server.create("document", {
+        id: docID,
+        title: docTitle,
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      // Construct a "valid" first-class Hermes URL
+      const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/${docID}`;
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .containsText(docTitle, "the document URL is correctly parsed");
+
+      // Reset the input
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "");
+
+      // Confirm the reset
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .doesNotContainText(docTitle);
+
+      // Construct a first-class Google URL
+      const googleURL = `https://docs.google.com/document/d/${docID}/edit`;
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, googleURL);
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .containsText(docTitle, "the Google URL is correctly parsed");
+    });
+
+    test("first-class links are recognized (shortURL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      const docID = "777";
+      const docTitle = "Jackpot!";
+      const docType = "PRD";
+      const docNumber = "VLT-777";
+
+      this.server.create("document", {
+        id: docID,
+        objectID: docID,
+        title: docTitle,
+        docType,
+        docNumber,
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      const shortLink = `${SHORT_LINK_BASE_URL}/${docType}/${docNumber}`;
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .containsText(docTitle, "the shortLink is correctly parsed");
+    });
+
+    test("an invalid hermes URL is handled like an external link", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      // We build a URL with the correct format, but an invalid ID.
+
+      const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/999`;
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+        .exists('the "add resource" form is shown');
+    });
+
+    test("an invalid shortLink URL is handled like an external link", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      const shortLink = `${SHORT_LINK_BASE_URL}/RFC/VLT-999`;
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+
+      assert
+        .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+        .exists('the "add resource" form is shown');
+    });
+
+    test("a duplicate first-class link is handled (full URL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      const docID = "777";
+      const docTitle = "Foo";
+
+      this.server.create("document", {
+        id: docID,
+        title: docTitle,
+        objectID: docID,
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/${docID}`;
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
+
+      // Enter the same URL
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .hasText("This doc has already been added.");
+    });
+
+    test("a duplicate first-class link is handled (shortURL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      const docID = "777";
+      const docTitle = "Foo";
+      const docNumber = "VLT-777";
+
+      this.server.create("document", {
+        id: docID,
+        title: docTitle,
+        objectID: docID,
+        docNumber,
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      const shortLink = `${SHORT_LINK_BASE_URL}/RFC/${docNumber}`;
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      // Enter the same URL
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .hasText("This doc has already been added.");
+    });
+
+    test("a non-404 getAlgoliaObject call is handled", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      algoliaHosts.forEach((host) => {
+        this.server.get(host, () => {
+          return new Response(500, {}, {});
+        });
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @documentIsDraft={{true}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Test header"
+          @modalInputPlaceholder="Test placeholder"
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      // Enter what looks like a valid URL to trigger an object lookup
+      await fillIn(
+        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+        `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/xyz`
+      );
+
+      await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .containsText(SEARCH_ERROR_MESSAGE);
+    });
+
+    test("it shows an error when searching fails", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.server.createList("document", 3);
+
+      algoliaHosts.forEach((host) => {
+        this.server.post(host, () => {
+          return new Response(500, {}, {});
+        });
+      });
+
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+          <Document::Sidebar::RelatedResources
+            @productArea={{this.document.product}}
+            @objectID={{this.document.objectID}}
+            @allowAddingExternalLinks={{true}}
+            @headerTitle="Test title"
+            @modalHeaderTitle="Add related resource"
+            @modalInputPlaceholder="Test placeholder"
+            @scrollContainer={{this.body}}
+          />
+        `);
+
+      await click(ADD_RESOURCE_BUTTON_SELECTOR);
+
+      await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+
+      assert
+        .dom(NO_RESOURCES_FOUND_SELECTOR)
+        .containsText(
+          SEARCH_ERROR_MESSAGE,
+          "the error message is shown in the modal"
+        );
     });
   }
 );
