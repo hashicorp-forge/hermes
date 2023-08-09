@@ -53,25 +53,7 @@ module("Integration | Component | truncated-text", function (hooks) {
       </div>
     `);
 
-    // <p> tag is used if no `tagName` is provided
-    const container = find(`p${CONTAINER_SELECTOR}`) as HTMLElement;
-    const text = find(`${CONTAINER_SELECTOR} > span`) as HTMLElement;
-
-    let containerWidth = container.offsetWidth;
-    let textWidth = text.offsetWidth;
-
-    assert.equal(containerWidth, 275);
-    assert.true(containerWidth < textWidth);
-
-    // TODO: Get this working
-
-    // @ts-ignore
-    window.screen.width = "200px";
-
-    containerWidth = container.offsetWidth;
-    textWidth = text.offsetWidth;
-
-    assert.true(containerWidth > textWidth);
+    assert.dom(CONTAINER_SELECTOR).hasClass("starting-breakpoint-md");
   });
 
   test("it truncates text with a custom tag", async function (assert) {

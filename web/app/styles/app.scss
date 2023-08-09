@@ -1,8 +1,9 @@
 @use "@hashicorp/design-system-components";
 
+@use "./variables";
+
 @use "./animations";
 @use "./typography";
-
 
 @use "components/action";
 @use "components/toolbar";
@@ -86,11 +87,11 @@ ol {
 }
 
 .x-container {
-  @apply w-full max-w-screen-lg mx-auto px-8;
+  @apply mx-auto w-full max-w-screen-lg px-8;
 }
 
 h1 {
-  @apply text-display-500 font-bold text-color-foreground-strong mb-1.5;
+  @apply mb-1.5 text-display-500 font-bold text-color-foreground-strong;
 
   + p {
     @apply text-body-300;

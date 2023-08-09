@@ -1,5 +1,7 @@
+@use "variables" as v;
+
 .hermes-form-label {
-  @apply text-body-200 font-semibold flex text-color-foreground-strong;
+  @apply flex text-body-200 font-semibold text-color-foreground-strong;
 
   + .hermes-form-helper-text {
     @apply mt-1;
@@ -11,11 +13,11 @@
 }
 
 .hermes-h4 {
-  @apply text-color-foreground-faint uppercase tracking-wide font-medium text-body-100;
+  @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
 }
 
 .truncated-text-container {
-  @apply block font-regular text-body-100 text-color-foreground-faint;
+  @apply block text-body-100 font-regular text-color-foreground-faint;
 
   // These classes are applied by the TruncatedText component
   // based on its optional `startingBreakpoint` argument:
@@ -24,7 +26,9 @@
     @apply truncate;
   }
 
-  &.starting-md {
-    @apply md:truncate;
+  &.starting-breakpoint-md {
+    @media (min-width: v.$screen-md) {
+      @apply truncate;
+    }
   }
 }

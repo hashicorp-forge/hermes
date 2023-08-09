@@ -14,7 +14,7 @@ interface TruncatedTextComponentSignature {
 export default class TruncatedTextComponent extends Component<TruncatedTextComponentSignature> {
   protected get class(): string {
     if (this.args.startingBreakpoint === "md") {
-      return "starting-md";
+      return "starting-breakpoint-md";
     }
     return "default";
   }
