@@ -31,11 +31,4 @@ module("Acceptance | authenticated/drafts", function (hooks) {
       .dom(".product-badge-link")
       .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
   });
-
-  todo(
-    "product badges are clickable",
-    async function (this: AuthenticatedDraftRouteTestContext, assert) {
-      assert.true(false);
-    }
-  );
 });

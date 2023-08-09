@@ -35,11 +35,4 @@ module("Acceptance | authenticated/all", function (hooks) {
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
       .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
   });
-
-  todo(
-    "product badges are clickable",
-    async function (this: AuthenticatedAllRouteTestContext, assert) {
-      assert.true(false);
-    }
-  );
 });
