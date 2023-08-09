@@ -1,13 +1,10 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import {
-  click,
   fillIn,
   render,
   triggerEvent,
   triggerKeyEvent,
-  waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
@@ -25,6 +22,7 @@ interface DocumentSidebarRelatedResourcesAddTestContext
   extends MirageTestContext {
   noop: () => void;
   search: (dd: XDropdownListAnchorAPI | null, query: string) => Promise<void>;
+  getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
   allowAddingExternalLinks: boolean;
   searchIsRunning: boolean;
@@ -89,6 +87,10 @@ module(
           return Promise.resolve();
         }
       );
+
+      this.set("getObject", (dd: XDropdownListAnchorAPI | null, id: string) => {
+        return Promise.resolve();
+      });
     });
 
     test("it renders correctly (initial load)", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
@@ -98,11 +100,13 @@ module(
           @inputPlaceholder="Test placeholder"
           @addResource={{this.noop}}
           @onClose={{this.noop}}
-          @shownDocuments={{this.shownDocuments}}
+          @algoliaResults={{this.shownDocuments}}
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
           @search={{this.search}}
+          @resetAlgoliaResults={{this.noop}}
+          @getObject={{this.getObject}}
         />
       `);
 
@@ -121,12 +125,14 @@ module(
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
-          @shownDocuments={{this.shownDocuments}}
+          @algoliaResults={{this.shownDocuments}}
           @allowAddingExternalLinks={{true}}
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
           @search={{this.search}}
+          @resetAlgoliaResults={{this.noop}}
+          @getObject={{this.getObject}}
         />
       `);
 
@@ -163,11 +169,13 @@ module(
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
-          @shownDocuments={{this.shownDocuments}}
+          @algoliaResults={{this.shownDocuments}}
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
           @search={{this.search}}
+          @resetAlgoliaResults={{this.noop}}
+          @getObject={{this.getObject}}
         />
       `);
       assert.dom("[data-test-add-related-resource-spinner]").exists();
@@ -182,12 +190,14 @@ module(
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
-          @shownDocuments={{this.shownDocuments}}
+          @algoliaResults={{this.shownDocuments}}
           @allowAddingExternalLinks={{this.allowAddingExternalLinks}}
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
           @search={{this.search}}
+          @resetAlgoliaResults={{this.noop}}
+          @getObject={{this.getObject}}
         />
       `);
 
@@ -221,11 +231,13 @@ module(
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
             @addResource={{this.noop}}
-            @shownDocuments={{this.shownDocuments}}
+            @algoliaResults={{this.shownDocuments}}
             @objectID="test"
             @relatedDocuments={{array}}
             @relatedLinks={{array}}
             @search={{this.search}}
+            @resetAlgoliaResults={{this.noop}}
+            @getObject={{this.getObject}}
           />
         `);
 
@@ -243,11 +255,13 @@ module(
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
             @addResource={{this.noop}}
-            @shownDocuments={{this.shownDocuments}}
+            @algoliaResults={{this.shownDocuments}}
             @objectID="test"
             @relatedDocuments={{array}}
             @relatedLinks={{array}}
             @search={{this.search}}
+            @resetAlgoliaResults={{this.noop}}
+            @getObject={{this.getObject}}
           />
         `);
 
@@ -289,12 +303,14 @@ module(
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
-          @shownDocuments={{this.shownDocuments}}
+          @algoliaResults={{this.shownDocuments}}
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
           @search={{this.search}}
           @searchIsRunning={{this.searchIsRunning}}
+          @resetAlgoliaResults={{this.noop}}
+          @getObject={{this.getObject}}
         />
       `);
       const iconSelector = "[data-test-related-resources-search-loading-icon]";

@@ -11,7 +11,7 @@
     <M.Body>
       <X::DropdownList
         data-test-add-related-resources-list
-        @items={{@shownDocuments}}
+        @items={{this.algoliaResults}}
         @onItemClick={{this.onItemClick}}
         @offset={{hash mainAxis=1 crossAxis=0}}
         @isLoading={{this.loadInitialData.isRunning}}
@@ -27,10 +27,9 @@
 
             <Hds::Form::TextInput::Base
               data-test-related-resources-search-input
-              {{did-insert dd.registerAnchor}}
               {{did-insert (fn this.didInsertInput dd)}}
-              {{on "input" (fn this.onInput dd)}}
-              {{on "keydown" (fn this.onInputKeydown dd)}}
+              {{on "input" this.onInput}}
+              {{on "keydown" this.onInputKeydown}}
               {{on "focusin" this.enableKeyboardNav}}
               {{on "focusout" this.disableKeyboardNav}}
               @type="search"
@@ -66,7 +65,7 @@
             </div>
           {{/if}}
 
-          {{#if (and @allowAddingExternalLinks this.queryIsURL)}}
+          {{#if (and @allowAddingExternalLinks this.queryIsExternalURL)}}
             <Document::Sidebar::RelatedResources::Add::ExternalResource
               @onInput={{this.onExternalLinkTitleInput}}
               @onSubmit={{this.onExternalLinkSubmit}}
@@ -91,11 +90,7 @@
               class="related-resources-modal-container mt-36"
             >
               <h3 class="related-resources-modal-body-header">
-                {{if
-                  @searchErrorIsShown
-                  "Search error. Type to retry."
-                  "No results found"
-                }}
+                {{this.noMatchesMessage}}
               </h3>
             </div>
           {{/unless}}

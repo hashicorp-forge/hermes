@@ -12,8 +12,8 @@ import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
-import { assert } from "@ember/debug";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
+import { SearchOptions } from "instantsearch.js";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -44,7 +44,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   headerTitle: string;
   modalHeaderTitle: string;
   searchFilters?: string;
-  optionalSearchFilters?: string[];
+  optionalSearchFilters?: string;
   itemLimit?: number;
   modalInputPlaceholder: string;
   documentIsDraft?: boolean;
@@ -159,6 +159,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     }
     return documents;
   }
+
   /**
    * The text passed to the TooltipIcon beside the title.
    */
@@ -182,6 +183,41 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
+   * Requests an Algolia document by ID.
+   * If found, sets the local Algolia results to an array
+   * with that document. If not, throws a 404 to the child component.
+   */
+  protected getObject = restartableTask(
+    async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
+      try {
+        let algoliaResponse = await this.algolia.getObject.perform(objectID);
+        if (algoliaResponse) {
+          this._algoliaResults = [
+            algoliaResponse,
+          ] as unknown as HermesDocument[];
+          if (dd) {
+            dd.resetFocusedItemIndex();
+          }
+          if (dd) {
+            next(() => {
+              dd.scheduleAssignMenuItemIDs();
+            });
+          }
+        }
+      } catch (e: unknown) {
+        const typedError = e as { status?: number };
+        if (typedError.status === 404) {
+          // This means the document wasn't found.
+          // Let the child component handle the error.
+          throw e;
+        } else {
+          this.handleSearchError(e);
+        }
+      }
+    }
+  );
+
+  /**
    * The search task passed to the "Add..." modal.
    * Returns Algolia document matches for a query and updates
    * the dropdown with the correct menu item IDs.
@@ -191,7 +227,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     async (
       dd: XDropdownListAnchorAPI | null,
       query: string,
-      shouldIgnoreDelay?: boolean
+      shouldIgnoreDelay?: boolean,
+      options?: SearchOptions
     ) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
@@ -216,10 +253,20 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         filterString += ` AND (${this.args.searchFilters})`;
       }
 
+      let maybeOptionalFilters = "";
+
+      if (this.args.optionalSearchFilters) {
+        maybeOptionalFilters = this.args.optionalSearchFilters;
+      }
+
+      if (options?.optionalFilters) {
+        maybeOptionalFilters += ` ${options.optionalFilters}`;
+      }
+
       try {
         let algoliaResponse = await this.algolia.searchIndex
           .perform(index, query, {
-            hitsPerPage: 4,
+            hitsPerPage: options?.hitsPerPage || 4,
             filters: filterString,
             attributesToRetrieve: [
               "title",
@@ -233,7 +280,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
             // Include any optional search filters, e.g., "product:Terraform"
             // to give a higher ranking to results that match the filter.
-            optionalFilters: this.args.optionalSearchFilters,
+            optionalFilters: maybeOptionalFilters,
           })
           .then((response) => response);
         if (algoliaResponse) {
@@ -256,14 +303,22 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           await timeout(Ember.testing ? 0 : 200);
         }
       } catch (e: unknown) {
-        // This will trigger the "no matches" block,
-        // which is where we're displaying the error.
-        this._algoliaResults = null;
-        this.searchErrorIsShown = true;
-        console.error(e);
+        this.handleSearchError(e);
       }
     }
   );
+
+  /**
+   * The action run when a search errors. Resets the Algolia results
+   * and causes a search error to appear.
+   */
+  @action private handleSearchError(e: unknown) {
+    // This triggers the "no matches" block,
+    // which is where we're displaying the error.
+    this.resetAlgoliaResults();
+    this.searchErrorIsShown = true;
+    console.error("Algolia search failed", e);
+  }
 
   /**
    * The action run when the "add resource" plus button is clicked.
@@ -299,6 +354,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       // The getter doesn't update when a new resource is added, so we manually save it.
       // TODO: Improve this
       this.relatedLinks = this.relatedLinks;
+
       void this.saveRelatedResources.perform(
         this.relatedDocuments,
         cachedLinks,
@@ -332,6 +388,15 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     );
 
     this.hideAddResourceModal();
+  }
+
+  /**
+   * The action to set the locally tracked Algolia results to null.
+   * Used in template computations when a search fails, or when a link is
+   * recognized as an external resource by a child component.
+   */
+  @action protected resetAlgoliaResults() {
+    this._algoliaResults = null;
   }
 
   /**
