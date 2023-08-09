@@ -454,7 +454,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
         void this.args.search(this.dd, this.query);
         break;
       case RelatedResourceQueryType.AlgoliaGetObject:
+        /**
+         * First-class queries are either:
+         * - Hermes URLs (e.g., /document/:document_id?queryParams)
+         * - Google Docs URLs (e.g., /document/d/:document_id/viewMode)
+         */
         let docID = this.query.split("/document/").pop();
+
         if (docID === this.query) {
           // URL splitting didn't work.
           // Re-handle the query as an external link.
@@ -462,11 +468,23 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
           this.handleQuery();
           break;
         }
+
         if (docID) {
-          // Trim any trailing query params
-          if (docID.includes("?draft=false")) {
-            docID = docID.replace("?draft=false", "");
+          // Trim any leading "d/"
+          if (docID.includes("d/")) {
+            docID = docID.replace("d/", "");
           }
+
+          // Trim anything after a slash
+          if (docID.includes("/")) {
+            docID = docID.split("/")[0] as string;
+          }
+
+          // Trim any trailing query params
+          if (docID.includes("?")) {
+            docID = docID.split("?")[0] as string;
+          }
+
           void this.getAlgoliaObject.perform(docID);
           break;
         } else {
@@ -503,6 +521,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
         this.firstPartyURLFormat = FirstPartyURLFormat.FullURL;
         return true;
       }
+    }
+
+    const googleDocsURL = "https://docs.google.com/document/d/";
+
+    if (url.includes(googleDocsURL)) {
+      this.firstPartyURLFormat = FirstPartyURLFormat.FullURL;
+      return true;
     }
 
     this.firstPartyURLFormat = null;

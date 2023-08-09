@@ -713,16 +713,33 @@ module(
 
       await click(ADD_RESOURCE_BUTTON_SELECTOR);
 
-      // Construct a "valid" first-class URL
+      // Construct a "valid" first-class Hermes URL
       const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/${docID}`;
 
       await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
-
       await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
 
       assert
         .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
         .containsText(docTitle, "the document URL is correctly parsed");
+
+      // Reset the input
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "");
+
+      // Confirm the reset
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .doesNotContainText(docTitle);
+
+      // Construct a first-class Google URL
+      const googleURL = `https://docs.google.com/document/d/${docID}/edit`;
+
+      await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, googleURL);
+      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+
+      assert
+        .dom(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR)
+        .containsText(docTitle, "the Google URL is correctly parsed");
     });
 
     test("first-class links are recognized (shortURL)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
