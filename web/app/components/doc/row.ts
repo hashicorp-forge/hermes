@@ -17,15 +17,7 @@ interface DocRowComponentSignature {
   };
 }
 
-export default class DocRowComponent extends Component<DocRowComponentSignature> {
-  get productAreaName() {
-    if (this.args.productArea === "Cloud Platform") {
-      return "HCP";
-    } else {
-      return this.args.productArea;
-    }
-  }
-}
+export default class DocRowComponent extends Component<DocRowComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
