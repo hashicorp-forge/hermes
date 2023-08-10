@@ -34,22 +34,21 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
     }
   }
 
+  /**
+   * The route the badge should link to.
+   * If on the /drafts or /my screen, keep the filters scoped there.
+   * In all other cases, link to the /all screen.
+   */
   protected get route() {
     const { currentRouteName } = this.router;
 
-    if (!currentRouteName) {
-      return "authenticated.all";
+    switch (currentRouteName) {
+      case "authenticated.drafts":
+      case "authenticated.my":
+        return currentRouteName;
+      default:
+        return "authenticated.all";
     }
-
-    if (currentRouteName.includes("drafts")) {
-      return "authenticated.drafts";
-    }
-
-    if (currentRouteName.includes("my")) {
-      return "authenticated.my";
-    }
-
-    return "authenticated.all";
   }
 }
 
