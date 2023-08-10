@@ -1,9 +1,9 @@
-<div class="relative group">
+<div class="group relative">
   <LinkTo
     @route="authenticated.document"
     @model={{@docID}}
     @query={{hash draft=@isDraft}}
-    class="pb-2 block"
+    class="block pb-2"
   >
     {{!
       We create a click area that extends beyond the edges of its relative container.
@@ -12,11 +12,11 @@
     }}
     <div
       aria-hidden="true"
-      class="absolute rounded-md group-hover:bg-color-surface-faint -top-4 -left-4 -right-4 -bottom-6"
+      class="absolute -top-4 -left-4 -right-4 -bottom-6 rounded-md group-hover:bg-color-surface-faint"
     ></div>
 
     <div class="relative">
-      <div class="space-y-2.5 inline-block">
+      <div class="inline-block space-y-2.5">
         <Doc::Thumbnail
           @status={{@status}}
           @product={{@productArea}}
@@ -34,7 +34,7 @@
           </small>
         {{/if}}
       </div>
-      <div class="space-y-1 mt-2 max-w-full">
+      <div class="mt-2 max-w-full space-y-1">
         <Person
           @ignoreUnknown={{true}}
           @imgURL={{@avatar}}
