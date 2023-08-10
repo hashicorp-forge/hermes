@@ -32,6 +32,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
       objectID: "400",
       status: "in-review",
       docNumber: "001",
+      isDraft: false,
     });
     this.set("document", this.server.schema.document.first().attrs);
 
@@ -131,7 +132,11 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
   });
 
   test("it populates the correct share link (with ShortLinkBaseURL)", async function (this: DocumentSidebarHeaderTestContext, assert) {
-    this.server.create("document", { docType: "PRD", docNumber: "TST-001" });
+    this.server.create("document", {
+      docType: "PRD",
+      docNumber: "TST-001",
+      isDraft: false,
+    });
     this.set("document", this.server.schema.document.first().attrs);
 
     let configService = this.owner.lookup("service:config") as ConfigService;
