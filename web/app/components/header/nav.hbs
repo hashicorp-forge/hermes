@@ -76,6 +76,15 @@
           />
           <dd.Separator class="mt-2" />
           <dd.Interactive
+            data-test-user-menu-item="email-notifications"
+            @route="authenticated.settings"
+            @text="Email notifications"
+            class={{if
+              this.emailNotificationsHighlightIsShown
+              "highlighted-new"
+            }}
+          />
+          <dd.Interactive
             data-test-user-menu-github
             @href={{this.gitHubRepoURL}}
             @isHrefExternal={{true}}
@@ -93,15 +102,6 @@
               class="user-menu-external-link"
             />
           {{/if}}
-          <dd.Interactive
-            data-test-user-menu-item="email-notifications"
-            @route="authenticated.settings"
-            @text="Email notifications"
-            class={{if
-              this.emailNotificationsHighlightIsShown
-              "highlighted-new"
-            }}
-          />
           {{#if this.showSignOut}}
             <dd.Interactive
               data-test-user-menu-item="sign-out"
