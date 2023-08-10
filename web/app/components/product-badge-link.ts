@@ -36,7 +36,7 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
 
   /**
    * The route the badge should link to.
-   * If on the /drafts or /my screen, keep the filters scoped there.
+   * If on the /drafts or /my screen, stay there.
    * In all other cases, link to the /all screen.
    */
   protected get route() {
