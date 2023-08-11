@@ -66,8 +66,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_PERSONAL_USERNAME }}
-          password: ${{ secrets.DOCKER_PERSONAL_PASSWORD }}
+          username: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
+          password: ${{ secrets.PUBLIC_DOCKER_PASSWORD }}
 
       - name: Set up Docker Buildx
         id: buildx
@@ -76,7 +76,7 @@ jobs:
       - name: Build and push to Dockerhub
         uses: docker/build-push-action@v2
         with:
-          tags: anuragprafulla/hermes_server:${{ github.sha }}
+          tags: razorpay/hermes_server:${{ github.sha }}
           push: true
           file: Dockerfile.server
           build-args: GIT_COMMIT_HASH=${{ github.sha }}
@@ -97,13 +97,13 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_PERSONAL_USERNAME }}
-          password: ${{ secrets.DOCKER_PERSONAL_PASSWORD }}
+          username: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
+          password: ${{ secrets.PUBLIC_DOCKER_PASSWORD }}
 
       - name: Build and push to Dockerhub
         uses: docker/build-push-action@v2
         with:
-          tags: anuragprafulla/hermes_indexer:${{ github.sha }}
+          tags: razorpay/hermes_indexer:${{ github.sha }}
           push: true
           file: Dockerfile.indexer
           build-args: GIT_COMMIT_HASH=${{ github.sha }}
