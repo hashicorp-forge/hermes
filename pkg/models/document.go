@@ -1,9 +1,11 @@
 package models
 
 import (
-	"errors"
+	// "errors"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gorm.io/gorm"
@@ -17,12 +19,17 @@ type Document struct {
 	// GoogleFileID is the Google Drive file ID of the document.
 	GoogleFileID string `gorm:"index;not null;unique"`
 
-	// Approvers is the list of users whose approval is requested for the
+	// Reviewers is the list of users whose approval is requested for the
 	// document.
-	Approvers []*User `gorm:"many2many:document_reviews;"`
+	Reviewers []*User `gorm:"many2many:document_reviews;"`
 
+	// last date to review a doc for a reviewer
+	DueDate string
 	// Contributors are users who have contributed to the document.
 	Contributors []*User `gorm:"many2many:document_contributors;"`
+
+	// Contributors are users who have contributed to the document.
+	ReviewedBy []*User `gorm:"many2many:document_reviewedBy;"`
 
 	// CustomFields contains custom fields.
 	CustomFields []*DocumentCustomField
@@ -33,10 +40,10 @@ type Document struct {
 	// DocumentModifiedAt is the time the document was last modified.
 	DocumentModifiedAt time.Time
 
-	// DocumentNumber is a document number unique to each product/area. It
+	// DocumentNumber is a document number unique to each bu. It
 	// pairs with the product abbreviation to form a document identifier
 	// (e.g., "TF-123").
-	DocumentNumber int `gorm:"index:latest_product_number"`
+	// DocumentNumber int `gorm:"index:latest_product_number"`
 
 	// DocumentType is the document type.
 	DocumentType   DocumentType
@@ -54,7 +61,15 @@ type Document struct {
 
 	// Product is the product or area that the document relates to.
 	Product   Product
-	ProductID uint `gorm:"index:latest_product_number"`
+	ProductID uuid.UUID `gorm:"index:latest_product_number"`
+
+	// Team is the team/pod inside the Product
+	Team   Team
+	TeamID uuid.UUID `gorm:"index"` // Foreign key column referencing the teams table
+
+	// Project is the project inside specific team
+	Project   Project
+	ProjectID uuid.UUID `gorm:"index"` // Foreign key column referencing the projects table
 
 	// Status is the status of the document.
 	Status DocumentStatus
@@ -70,15 +85,15 @@ type Document struct {
 // Documents is a slice of documents.
 type Documents []Document
 
-// DocumentStatus is the status of the document (e.g., "WIP", "In-Review",
-// "Approved", "Obsolete").
+// DocumentStatus is the status of the document (e.g., "Draft", "In-Review",
+// "Reviewed", "Obsolete").
 type DocumentStatus int
 
 const (
 	UnspecifiedDocumentStatus DocumentStatus = iota
-	WIPDocumentStatus
+	DraftDocumentStatus
 	InReviewDocumentStatus
-	ApprovedDocumentStatus
+	ReviewedDocumentStatus
 	ObsoleteDocumentStatus
 )
 
@@ -188,51 +203,51 @@ func (d *Document) Get(db *gorm.DB) error {
 }
 
 // GetLatestProductNumber gets the latest document number for a product.
-func GetLatestProductNumber(db *gorm.DB,
-	documentTypeName, productName string) (int, error) {
-	// Validate required fields.
-	if err := validation.Validate(db, validation.Required); err != nil {
-		return 0, err
-	}
-	if err := validation.Validate(productName, validation.Required); err != nil {
-		return 0, err
-	}
+// func GetLatestProductNumber(db *gorm.DB,
+// 	documentTypeName, productName string) (int, error) {
+// 	// Validate required fields.
+// 	if err := validation.Validate(db, validation.Required); err != nil {
+// 		return 0, err
+// 	}
+// 	if err := validation.Validate(productName, validation.Required); err != nil {
+// 		return 0, err
+// 	}
 
-	// Get document type.
-	dt := DocumentType{
-		Name: documentTypeName,
-	}
-	if err := dt.Get(db); err != nil {
-		return 0, fmt.Errorf("error getting document type: %w", err)
-	}
+// 	// Get document type.
+// 	dt := DocumentType{
+// 		Name: documentTypeName,
+// 	}
+// 	if err := dt.Get(db); err != nil {
+// 		return 0, fmt.Errorf("error getting document type: %w", err)
+// 	}
 
-	// Get product.
-	p := Product{
-		Name: productName,
-	}
-	if err := p.Get(db); err != nil {
-		return 0, fmt.Errorf("error getting product: %w", err)
-	}
+// 	// Get product.
+// 	p := Product{
+// 		Name: productName,
+// 	}
+// 	if err := p.Get(db); err != nil {
+// 		return 0, fmt.Errorf("error getting product: %w", err)
+// 	}
 
-	// Get document with largest document number.
-	var d Document
-	if err := db.
-		Where(Document{
-			DocumentTypeID: dt.ID,
-			ProductID:      p.ID,
-		}).
-		Order("document_number desc").
-		First(&d).
-		Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, nil
-		} else {
-			return 0, err
-		}
-	}
+// 	// Get document with largest document number.
+// 	var d Document
+// 	if err := db.
+// 		Where(Document{
+// 			DocumentTypeID: dt.ID,
+// 			ProductID:      p.ID,
+// 		}).
+// 		Order("document_number desc").
+// 		First(&d).
+// 		Error; err != nil {
+// 		if errors.Is(err, gorm.ErrRecordNotFound) {
+// 			return 0, nil
+// 		} else {
+// 			return 0, err
+// 		}
+// 	}
 
-	return d.DocumentNumber, nil
-}
+// 	return d.DocumentNumber, nil
+// }
 
 // Upsert updates or inserts the receiver document into database db.
 func (d *Document) Upsert(db *gorm.DB) error {
@@ -284,15 +299,15 @@ func (d *Document) Upsert(db *gorm.DB) error {
 
 // createAssocations creates required assocations for a document.
 func (d *Document) createAssocations(db *gorm.DB) error {
-	// Find or create approvers.
-	var approvers []*User
-	for _, a := range d.Approvers {
+	// Find or create reviewers.
+	var reviewers []*User
+	for _, a := range d.Reviewers {
 		if err := a.FirstOrCreate(db); err != nil {
-			return fmt.Errorf("error finding or creating approver: %w", err)
+			return fmt.Errorf("error finding or creating reviewer: %w", err)
 		}
-		approvers = append(approvers, a)
+		reviewers = append(reviewers, a)
 	}
-	d.Approvers = approvers
+	d.Reviewers = reviewers
 
 	// Find or create contributors.
 	var contributors []*User
@@ -313,11 +328,36 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 	}
 
 	// Get product if ProductID is not set.
-	if d.ProductID == 0 && d.Product.Name != "" {
+	if d.ProductID == uuid.Nil && d.Product.Name != "" {
 		if err := d.Product.Get(db); err != nil {
 			return fmt.Errorf("error getting product: %w", err)
 		}
 		d.ProductID = d.Product.ID
+	}
+
+	// Get team if TeamID is not set.
+	if d.TeamID == uuid.Nil && d.Team.Name != "" {
+		if err := d.Team.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.TeamID = d.Team.ID
+	}
+
+	// Get project if project id is not set.
+	if d.ProjectID == uuid.Nil && d.Project.Name != "" {
+		// Search for the project by its ID in the project table.
+		project := d.Project
+		if err := db.
+			Where(project).
+			Preload(clause.Associations).
+			First(&project).
+			Error; err != nil {
+			return fmt.Errorf("error getting project: %w", err)
+		}
+
+		// Assign the found project to the document's Project field.
+		d.Project = project
+		d.ProjectID = project.ID
 	}
 
 	return nil
@@ -325,15 +365,15 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 
 // getAssociations gets associations.
 func (d *Document) getAssociations(db *gorm.DB) error {
-	// Get approvers.
-	var approvers []*User
-	for _, a := range d.Approvers {
+	// Get reviewers.
+	var reviewers []*User
+	for _, a := range d.Reviewers {
 		if err := a.Get(db); err != nil {
-			return fmt.Errorf("error getting approver: %w", err)
+			return fmt.Errorf("error getting reviewer: %w", err)
 		}
-		approvers = append(approvers, a)
+		reviewers = append(reviewers, a)
 	}
-	d.Approvers = approvers
+	d.Reviewers = reviewers
 
 	// Get contributors.
 	var contributors []*User
@@ -397,17 +437,42 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 		d.ProductID = d.Product.ID
 	}
 
+	// get team
+	if d.Team.Name != "" {
+		if err := d.Team.Get(db); err != nil {
+			return fmt.Errorf("error getting product: %w", err)
+		}
+		d.TeamID = d.Team.ID
+	}
+
+	// Get project if project id is not set.
+	if d.Project.Name != "" {
+		// Search for the project by its ID in the project table.
+		project := d.Project
+		if err := db.
+			Where(project).
+			Preload(clause.Associations).
+			First(&project).
+			Error; err != nil {
+			return fmt.Errorf("error getting project: %w", err)
+		}
+
+		// Assign the found project to the document's Project field.
+		d.Project = project
+		d.ProjectID = project.ID
+	}
+
 	return nil
 }
 
 // replaceAssocations replaces assocations for a document.
 func (d *Document) replaceAssocations(db *gorm.DB) error {
-	// Replace approvers.
+	// Replace reviewers.
 	if err := db.
 		Session(&gorm.Session{SkipHooks: true}).
 		Model(&d).
-		Association("Approvers").
-		Replace(d.Approvers); err != nil {
+		Association("Reviewers").
+		Replace(d.Reviewers); err != nil {
 		return err
 	}
 

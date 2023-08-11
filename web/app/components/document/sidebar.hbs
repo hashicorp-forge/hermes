@@ -26,25 +26,10 @@
 
       <div class="sidebar-body-container">
         <div class="flex flex-col items-start space-y-2">
-          {{#if (is-empty @document.docNumber)}}
-            <small
-              class="hds-typography-body-100 hds-foreground-faint"
-            >{{#unless
-                (is-empty @document.docType)
-              }}{{@document.docType}}{{/unless}}
-            </small>
-          {{else}}
-            <small
-              class="hds-typography-body-100 hds-foreground-faint"
-            >{{#unless
-                (is-empty @document.docType)
-              }}{{@document.docType}}{{/unless}}
-              &bullet;
-              <span data-test-sidebar-doc-number>
-                {{@document.docNumber}}
-              </span>
-            </small>
-          {{/if}}
+          <small class="hds-typography-body-100 hds-foreground-faint">{{#unless
+              (is-empty @document.docType)
+            }}{{@document.docType}}{{/unless}}
+          </small>
           {{#if this.editingIsDisabled}}
             <h1
               class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
@@ -133,9 +118,8 @@
         </div>
 
         <div class="flex flex-col items-start space-y-2">
-          <small
-            class="hds-typography-body-100 hds-foreground-faint"
-          >Product/Area</small>
+          <small class="hds-typography-body-100 hds-foreground-faint">Business
+            Unit (BU)</small>
           {{#if this.isDraft}}
             <div class="w-full relative">
               <Inputs::ProductSelect
@@ -152,6 +136,48 @@
               @icon={{get-product-id @document.product}}
             />
           {{/if}}
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Team/Pod</small>
+          {{#if this.isDraft}}
+            <div class="w-full relative">
+              <Inputs::TeamSelect
+                @onChange={{this.updateTeam.perform}}
+                @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
+                @renderOut={{true}}
+                @selectedBU={{this.product}}
+                @selected={{this.team}}
+              />
+            </div>
+          {{else}}
+            <Hds::Badge
+              @text={{@document.team}}
+              @icon={{get-product-id @document.product}}
+            />
+          {{/if}}
+
+          <small
+            class="hds-typography-body-100 hds-foreground-faint"
+          >Project</small>
+          {{#if this.isDraft}}
+            <div class="w-full relative">
+              <Inputs::ProjectSelect
+                @onChange={{this.updateProject.perform}}
+                @isSaving={{this.save.isRunning}}
+                @formatIsBadge={{true}}
+                @renderOut={{true}}
+                @selectedteam={{this.team}}
+                @selected={{this.project}}
+              />
+            </div>
+          {{else}}
+            <Hds::Badge
+              @text={{@document.project}}
+              @icon={{get-product-id @document.product}}
+            />
+          {{/if}}
+
         </div>
 
         <div class="flex flex-col items-start space-y-2">
@@ -221,56 +247,97 @@
         <div class="flex flex-col items-start space-y-2">
           <small
             class="hds-typography-body-100 hds-foreground-faint"
-          >Approvers</small>
+          >Reviewers</small>
           {{#if this.isOwner}}
             <EditableField
-              @value={{this.approvers}}
-              @onChange={{perform this.save "approvers"}}
+              @value={{this.reviewers}}
+              @onChange={{perform this.save "reviewers"}}
               @loading={{this.save.isRunning}}
               @disabled={{this.editingIsDisabled}}
             >
               <:default>
-                {{#if this.approvers.length}}
+                {{#if this.reviewers.length}}
                   <ol class="person-list">
-                    {{#each this.approvers as |approver|}}
+                    {{#each this.reviewers as |reviewer|}}
                       <li>
-                        <Person::Approver
+                        <Person::Reviewer
                           @document={{@document}}
-                          @imgURL={{approver.imgURL}}
-                          @email={{approver.email}}
+                          @imgURL={{reviewer.imgURL}}
+                          @email={{reviewer.email}}
                         />
                       </li>
                     {{/each}}
                   </ol>
                 {{else}}
-                  <em>No approvers</em>
+                  <em>No reviewers</em>
                 {{/if}}
               </:default>
               <:editing as |F|>
                 <Inputs::PeopleSelect
                   class="multiselect--narrow"
-                  @selected={{this.approvers}}
-                  @onChange={{this.updateApprovers}}
-                  {{click-outside (fn F.update this.approvers)}}
+                  @selected={{this.reviewers}}
+                  @onChange={{this.updateReviewers}}
+                  {{click-outside (fn F.update this.reviewers)}}
                 />
               </:editing>
             </EditableField>
           {{else}}
-            {{#if this.approvers.length}}
+            {{#if this.reviewers.length}}
               <ol class="person-list">
-                {{#each this.approvers as |approver|}}
+                {{#each this.reviewers as |reviewer|}}
                   <li>
-                    <Person::Approver
+                    <Person::Reviewer
                       @document={{@document}}
-                      @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
+                      @imgURL={{reviewer.imgURL}}
+                      @email={{reviewer.email}}
                     />
                   </li>
                 {{/each}}
               </ol>
             {{else}}
-              <em>No approvers</em>
+              <em>No reviewers</em>
             {{/if}}
+          {{/if}}
+        </div>
+
+        <div class="flex flex-col items-start space-y-2">
+          <small class="hds-typography-body-100 hds-foreground-faint">Due Date</small>
+          {{#if (or this.editingIsDisabled (not this.isOwner))}}
+            <p
+              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+            >{{dateformat @document.dueDate}}</p>
+          {{else}}
+            <EditableField
+              @value={{@document.dueDate}}
+              @onChange={{perform this.save "dueDate"}}
+              @loading={{this.save.isRunning}}
+              @disabled={{this.editingIsDisabled}}
+            >
+              <:default>
+                {{#unless (is-empty @document.dueDate)}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
+                  >
+                    {{dateformat this.dueDate}}</p>
+                {{else}}
+                  <p
+                    class="hds-typography-body-200 hds-font-weight-medium hds-foreground-faint"
+                  >
+                    Enter due date here</p>
+                {{/unless}}
+              </:default>
+              <:editing as |F|>
+                <Hds::Form::TextInput::Field
+                  id="user-question"
+                  @type="date"
+                  @renderInPlace={{true}}
+                  @value={{this.dueDate}}
+                  {{on "change" this.updateDueDate}}
+                  {{on "blur" F.update}}
+                  as |F|
+                />
+              </:editing>
+            </EditableField>
           {{/if}}
         </div>
 
@@ -288,29 +355,6 @@
           <p>{{@document.lastModified}}</p>
         </div>
 
-        {{#each-in this.customEditableFields as |field attributes|}}
-          {{#if
-            (or
-              (and (not this.editingIsDisabled) (not this.docIsApproved))
-              attributes.value
-            )
-          }}
-            <div class="flex flex-col items-start space-y-2">
-              <small class="hds-typography-body-100 hds-foreground-faint">
-                {{attributes.displayName}}
-              </small>
-              <CustomEditableField
-                @document={{@document}}
-                @field={{field}}
-                @attributes={{attributes}}
-                @onChange={{perform this.save field}}
-                @updateFieldValue={{this.updateCustomFieldValue}}
-                @loading={{this.save.isRunning}}
-                @disabled={{or this.editingIsDisabled (not this.isOwner)}}
-              />
-            </div>
-          {{/if}}
-        {{/each-in}}
       </div>
     </div>
 
@@ -385,21 +429,34 @@
             {{#if this.isOwner}}
               <div class="flex items-start px-3 gap-2">
 
-                <Hds::Button
-                  @text={{this.moveToStatusButtonText}}
-                  @size="medium"
-                  @color={{this.moveToStatusButtonColor}}
-                  class="w-full"
-                  @icon={{if this.changeDocumentStatus.isRunning "loading"}}
-                  disabled={{this.changeDocumentStatus.isRunning}}
-                  {{on
-                    "click"
-                    (perform
-                      this.changeDocumentStatus
-                      this.moveToStatusButtonTargetStatus
-                    )
-                  }}
-                />
+                {{#if (eq this.moveToStatusButtonText "Move to Reviewed")}}
+                  <Hds::Button
+                    @text={{this.moveToStatusButtonText}}
+                    @size="medium"
+                    @color={{this.moveToStatusButtonColor}}
+                    class="w-full"
+                    @icon={{if this.changeDocumentStatus.isRunning "loading"}}
+                    disabled={{this.notReviewedYet}}
+                    {{on "click" (perform this.moveToReviewed)}}
+                  />
+                {{else}}
+                  <Hds::Button
+                    @text={{this.moveToStatusButtonText}}
+                    @size="medium"
+                    @color={{this.moveToStatusButtonColor}}
+                    class="w-full"
+                    @icon={{if this.changeDocumentStatus.isRunning "loading"}}
+                    disabled={{this.changeDocumentStatus.isRunning}}
+                    {{on
+                      "click"
+                      (perform
+                        this.changeDocumentStatus
+                        this.moveToStatusButtonTargetStatus
+                      )
+                    }}
+                  />
+                {{/if}}
+
                 <Hds::Button
                   @text="Archive"
                   @size="medium"
@@ -413,20 +470,20 @@
               </div>
 
             {{else}}
-              {{#if this.isApprover}}
+              {{#if this.isReviewer}}
                 <div class="flex flex-col items-start px-3 gap-2">
                   <Hds::Button
-                    @text={{this.approveButtonText}}
+                    @text={{this.reviewButtonText}}
                     @size="medium"
                     @color="primary"
                     class="w-full"
-                    @icon={{if this.approve.isRunning "loading"}}
+                    @icon={{if this.review.isRunning "loading"}}
                     disabled={{(or
-                      this.approve.isRunning
+                      this.review.isRunning
                       this.requestChanges.isRunning
-                      this.hasApproved
+                      this.hasReviewed
                     )}}
-                    {{on "click" (perform this.approve @profile.email)}}
+                    {{on "click" (perform this.review @profile.email)}}
                   />
                   {{#if (eq @document.docType "FRD")}}
                     <Hds::Button
@@ -436,7 +493,7 @@
                       class="w-full"
                       @icon={{if this.requestChanges.isRunning "loading"}}
                       disabled={{(or
-                        this.approve.isRunning
+                        this.review.isRunning
                         this.requestChanges.isRunning
                         this.hasRequestedChanges
                       )}}
@@ -532,13 +589,26 @@
             <F.Control>
               <Inputs::PeopleSelect
                 @renderInPlace={{true}}
-                @selected={{this.approvers}}
-                @onChange={{this.updateApprovers}}
+                @selected={{this.reviewers}}
+                @onChange={{this.updateReviewers}}
                 @disabled={{M.taskIsRunning}}
                 class="mb-0"
               />
             </F.Control>
-            <F.Label>Add approvers</F.Label>
+            <F.Label>Add reviewers <Hds::Badge @text="Required" /></F.Label>
+          </Hds::Form::Field>
+          <Hds::Form::Field @layout="vertical" as |F|>
+            <F.Control>
+              <Hds::Form::TextInput::Field
+                id="user-question"
+                @type="date"
+                @renderInPlace={{true}}
+                @value={{this.dueDate}}
+                {{on "change" this.updateDueDate}}
+                @disabled={{M.taskIsRunning}}
+              />
+            </F.Control>
+            <F.Label>Add Due Date <Hds::Badge @text="Required" /></F.Label>
           </Hds::Form::Field>
           {{#if @docType.checks.length}}
             {{! For now, we only support one check }}

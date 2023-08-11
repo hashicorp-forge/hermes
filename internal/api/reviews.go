@@ -11,6 +11,8 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
+	slackbot "github.com/hashicorp-forge/hermes/internal/slack-bot"
+
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -112,21 +114,6 @@ func ReviewHandler(
 				"path", r.URL.Path,
 			)
 
-			// Get latest product number.
-			latestNum, err := models.GetLatestProductNumber(
-				db, docObj.GetDocType(), docObj.GetProduct())
-			if err != nil {
-				l.Error("error getting product document number",
-					"error", err,
-					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Get product from database so we can get the product abbreviation.
 			product := models.Product{
 				Name: docObj.GetProduct(),
@@ -143,12 +130,6 @@ func ReviewHandler(
 				return
 			}
 
-			// Set the document number.
-			nextDocNum := latestNum + 1
-			docObj.SetDocNumber(fmt.Sprintf("%s-%03d",
-				product.Abbreviation,
-				nextDocNum))
-
 			// Change document status to "In-Review".
 			docObj.SetStatus("In-Review")
 
@@ -162,7 +143,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -218,7 +199,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -242,7 +223,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					docObj, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -291,7 +272,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -309,7 +290,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -332,7 +313,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					docObj, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -360,7 +341,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -388,7 +369,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -418,7 +399,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -429,7 +410,6 @@ func ReviewHandler(
 				return
 			}
 			d.Status = models.InReviewDocumentStatus
-			d.DocumentNumber = nextDocNum
 			if err := d.Upsert(db); err != nil {
 				l.Error("error upserting document in database",
 					"error", err,
@@ -440,7 +420,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					docObj, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -466,25 +446,79 @@ func ReviewHandler(
 					return
 				}
 
-				// Send emails to approvers.
-				if len(docObj.GetApprovers()) > 0 {
+				// Get owner name
+				// Fetch owner name by searching Google Workspace directory.
+				// The api has a bug please kindly see this before proceeding forward
+				ppls, err := s.SearchPeople(docObj.GetOwners()[0], "emailAddresses,names")
+				if err != nil {
+					l.Error(
+						"Error getting user information",
+						"error searching people directory",
+						err,
+					)
+					return
+				}
+
+				// Verify that the result only contains one person.
+				if len(ppls) != 1 {
+					l.Error(
+						"Error getting user information",
+						fmt.Sprintf(
+							"wrong number of people in search result: %d", len(ppls)),
+						err,
+					)
+					return
+				}
+				ppl := ppls[0]
+
+				// Replace the names in the People API result with data from the Admin
+				// Directory API.
+				// TODO: remove this when the bug in the People API is fixed:
+				// https://issuetracker.google.com/issues/196235775
+				if err := replaceNamesWithAdminAPIResponse(
+					ppl, s,
+				); err != nil {
+					l.Error(
+						"Error getting user information",
+						"error replacing names with Admin API response",
+						err,
+					)
+					return
+				}
+
+				// Verify other required values are set.
+				if len(ppl.Names) == 0 {
+					l.Error(
+						"Error getting user information",
+						"no names in result",
+						err,
+					)
+					return
+				}
+
+				// Send emails to reviewers.
+				if len(docObj.GetReviewers()) > 0 {
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully from a failure here.
-					for _, approverEmail := range docObj.GetApprovers() {
+					for _, reviewerEmail := range docObj.GetReviewers() {
 						err := email.SendReviewRequestedEmail(
 							email.ReviewRequestedEmailData{
-								BaseURL:           cfg.BaseURL,
-								DocumentOwner:     docObj.GetOwners()[0],
-								DocumentShortName: docObj.GetDocNumber(),
-								DocumentTitle:     docObj.GetTitle(),
-								DocumentURL:       docURL,
+								BaseURL:            cfg.BaseURL,
+								DocumentOwner:      ppl.Names[0].DisplayName,
+								DocumentType:       docObj.GetDocType(),
+								DocumentShortName:  docObj.GetDocNumber(),
+								DocumentTitle:      docObj.GetTitle(),
+								DocumentURL:        docURL,
+								DocumentProd:       docObj.GetProduct(),
+								DocumentTeam:       docObj.GetTeam(),
+								DocumentOwnerEmail: docObj.GetOwners()[0],
 							},
-							[]string{approverEmail},
+							[]string{reviewerEmail},
 							cfg.Email.FromAddress,
 							s,
 						)
 						if err != nil {
-							l.Error("error sending approver email",
+							l.Error("error sending reviewer email",
 								"error", err,
 								"doc_id", docID,
 								"method", r.Method,
@@ -494,11 +528,37 @@ func ReviewHandler(
 								http.StatusInternalServerError)
 							return
 						}
-						l.Info("doc approver email sent",
+						l.Info("doc reviewer email sent",
 							"doc_id", docID,
 							"method", r.Method,
 							"path", r.URL.Path,
 						)
+					}
+
+					// Also send the slack message tagginhg all the reviewers in the
+					// dedicated channel
+					// tagging all reviewers emails
+					emails := make([]string, len(docObj.GetReviewers()))
+					for i, c := range docObj.GetReviewers() {
+						emails[i] = c
+					}
+					err = slackbot.SendSlackMessage_Reviewer(slackbot.ReviewerRequestedSlackData{
+						BaseURL:            cfg.BaseURL,
+						DocumentOwner:      ppl.Names[0].DisplayName,
+						DocumentType:       docObj.GetDocType(),
+						DocumentShortName:  docObj.GetDocNumber(),
+						DocumentTitle:      docObj.GetTitle(),
+						DocumentURL:        docURL,
+						DocumentProd:       docObj.GetProduct(),
+						DocumentTeam:       docObj.GetTeam(),
+						DocumentOwnerEmail: docObj.GetOwners()[0],
+					}, emails,
+					)
+					//handle error gracefully
+					if err != nil {
+						fmt.Printf("Some error occured while sendind the message: %s", err)
+					} else {
+						fmt.Println("Succesfully! Delivered the message to all reviewers")
 					}
 				}
 
@@ -531,6 +591,7 @@ func ReviewHandler(
 								DocumentType:      docObj.GetDocType(),
 								DocumentURL:       docURL,
 								Product:           docObj.GetProduct(),
+								Team:              docObj.GetTeam(),
 							},
 							[]string{subscriber.EmailAddress},
 							cfg.Email.FromAddress,
@@ -574,30 +635,14 @@ func ReviewHandler(
 }
 
 // createShortcut creates a shortcut in the hierarchical folder structure
-// ("Shortcuts Folder/RFC/MyProduct/") under docsFolder.
+// ("Shortcuts Folder/BU/Team/Project/Template-type/docx") under docsFolder.
 func createShortcut(
 	cfg *config.Config,
 	docObj hcd.Doc,
 	s *gw.Service) (shortcut *drive.File, retErr error) {
 
-	// Get folder for doc type.
-	docTypeFolder, err := s.GetSubfolder(
-		cfg.GoogleWorkspace.ShortcutsFolder, docObj.GetDocType())
-	if err != nil {
-		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
-	}
-
-	// Doc type folder wasn't found, so create it.
-	if docTypeFolder == nil {
-		docTypeFolder, err = s.CreateFolder(
-			docObj.GetDocType(), cfg.GoogleWorkspace.ShortcutsFolder)
-		if err != nil {
-			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
-		}
-	}
-
-	// Get folder for doc type + product.
-	productFolder, err := s.GetSubfolder(docTypeFolder.Id, docObj.GetProduct())
+	// Get folder for  the product/BU
+	productFolder, err := s.GetSubfolder(cfg.GoogleWorkspace.ShortcutsFolder, docObj.GetProduct())
 	if err != nil {
 		return nil, fmt.Errorf("error getting product subfolder: %w", err)
 	}
@@ -605,16 +650,62 @@ func createShortcut(
 	// Product folder wasn't found, so create it.
 	if productFolder == nil {
 		productFolder, err = s.CreateFolder(
-			docObj.GetProduct(), docTypeFolder.Id)
+			docObj.GetProduct(), cfg.GoogleWorkspace.ShortcutsFolder)
 		if err != nil {
 			return nil, fmt.Errorf("error creating product subfolder: %w", err)
+		}
+	}
+
+	// Get folder for Team/Pod inside the products
+	teamFolder, err := s.GetSubfolder(productFolder.Id, docObj.GetTeam())
+	if err != nil {
+		return nil, fmt.Errorf("error getting teams subfolder: %w", err)
+	}
+
+	// if teams folder wasn't found, so create it.
+	if teamFolder == nil {
+		teamFolder, err = s.CreateFolder(
+			docObj.GetTeam(), productFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating team subfolder: %w", err)
+		}
+	}
+
+	// Get folder for project inside the teams
+	projectFolder, err := s.GetSubfolder(teamFolder.Id, docObj.GetProject())
+	if err != nil {
+		return nil, fmt.Errorf("error getting projects subfolder: %w", err)
+	}
+
+	// if teams folder wasn't found, so create it.
+	if projectFolder == nil {
+		projectFolder, err = s.CreateFolder(
+			docObj.GetProject(), teamFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating project subfolder: %w", err)
+		}
+	}
+
+	// Get folder for doc type.
+	docTypeFolder, err := s.GetSubfolder(
+		projectFolder.Id, docObj.GetDocType())
+	if err != nil {
+		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
+	}
+
+	// Doc type folder wasn't found, so create it.
+	if docTypeFolder == nil {
+		docTypeFolder, err = s.CreateFolder(
+			docObj.GetDocType(), projectFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
 		}
 	}
 
 	// Create shortcut.
 	if shortcut, err = s.CreateShortcut(
 		docObj.GetObjectID(),
-		productFolder.Id); err != nil {
+		docTypeFolder.Id); err != nil {
 
 		return nil, fmt.Errorf("error creating shortcut: %w", err)
 	}
@@ -643,7 +734,6 @@ func getDocumentURL(baseURL, docID string) (string, error) {
 // arguments for this function are set.
 func revertReviewCreation(
 	docObj hcd.Doc,
-	productAbbreviation string,
 	fileRevision string,
 	shortcut *drive.File,
 	cfg *config.Config,
@@ -677,9 +767,7 @@ func revertReviewCreation(
 			result, fmt.Errorf("error moving doc back to drafts folder: %w", err))
 	}
 
-	// Change back document number to "ABC-???" and status to "WIP".
-	docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
-	docObj.SetStatus("WIP")
+	docObj.SetStatus("Draft")
 
 	// Replace the doc header.
 	if err := docObj.ReplaceHeader(

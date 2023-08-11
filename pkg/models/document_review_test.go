@@ -22,7 +22,6 @@ func TestDocumentReviewModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			dt := DocumentType{
 				Name:     "DT1",
-				LongName: "DocumentType1",
 			}
 			err := dt.FirstOrCreate(db)
 			require.NoError(err)
@@ -31,8 +30,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
-				Name:         "Product1",
-				Abbreviation: "P1",
+				Name: "Product1",
 			}
 			err := p.FirstOrCreate(db)
 			require.NoError(err)
@@ -45,7 +43,7 @@ func TestDocumentReviewModel(t *testing.T) {
 					GoogleFileID: "fileID1",
 				},
 				User: User{
-					EmailAddress: "a@approver.com",
+					EmailAddress: "a@reviewer.com",
 				},
 			}
 			err := dr.Get(db)
@@ -57,12 +55,12 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d = Document{
 				GoogleFileID: "fileID1",
-				Approvers: []*User{
+				Reviewers: []*User{
 					{
-						EmailAddress: "a@approver.com",
+						EmailAddress: "a@reviewer.com",
 					},
 					{
-						EmailAddress: "b@approver.com",
+						EmailAddress: "b@reviewer.com",
 					},
 				},
 				DocumentType: DocumentType{
@@ -84,7 +82,7 @@ func TestDocumentReviewModel(t *testing.T) {
 					GoogleFileID: "fileID1",
 				},
 				User: User{
-					EmailAddress: "b@approver.com",
+					EmailAddress: "b@reviewer.com",
 				},
 			}
 			err := dr.Get(db)
@@ -92,7 +90,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert.EqualValues(1, dr.DocumentID)
 			assert.Equal("fileID1", dr.Document.GoogleFileID)
 			assert.EqualValues(2, dr.UserID)
-			assert.Equal("b@approver.com", dr.User.EmailAddress)
+			assert.Equal("b@reviewer.com", dr.User.EmailAddress)
 			assert.Equal(UnspecifiedDocumentReviewStatus, dr.Status)
 		})
 
@@ -103,15 +101,15 @@ func TestDocumentReviewModel(t *testing.T) {
 					GoogleFileID: "fileID1",
 				},
 				User: User{
-					EmailAddress: "b@approver.com",
+					EmailAddress: "b@reviewer.com",
 				},
-				Status: ApprovedDocumentReviewStatus,
+				Status: ReviewedDocumentReviewStatus,
 			}
 			err := dr.Update(db)
 			require.NoError(err)
 			assert.EqualValues(1, dr.DocumentID)
 			assert.EqualValues(2, dr.UserID)
-			assert.Equal(ApprovedDocumentReviewStatus, dr.Status)
+			assert.Equal(ReviewedDocumentReviewStatus, dr.Status)
 		})
 
 		t.Run("Get the review to verify", func(t *testing.T) {
@@ -121,14 +119,14 @@ func TestDocumentReviewModel(t *testing.T) {
 					GoogleFileID: "fileID1",
 				},
 				User: User{
-					EmailAddress: "b@approver.com",
+					EmailAddress: "b@reviewer.com",
 				},
 			}
 			err := dr.Get(db)
 			require.NoError(err)
 			assert.EqualValues(1, dr.DocumentID)
 			assert.EqualValues(2, dr.UserID)
-			assert.Equal(ApprovedDocumentReviewStatus, dr.Status)
+			assert.Equal(ReviewedDocumentReviewStatus, dr.Status)
 		})
 	})
 
@@ -140,7 +138,6 @@ func TestDocumentReviewModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			dt := DocumentType{
 				Name:     "DT1",
-				LongName: "DocumentType1",
 			}
 			err := dt.FirstOrCreate(db)
 			require.NoError(err)
@@ -149,8 +146,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
-				Name:         "Product1",
-				Abbreviation: "P1",
+				Name: "Product1",
 			}
 			err := p.FirstOrCreate(db)
 			require.NoError(err)
@@ -161,12 +157,12 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d1 = Document{
 				GoogleFileID: "fileID1",
-				Approvers: []*User{
+				Reviewers: []*User{
 					{
-						EmailAddress: "a@approver.com",
+						EmailAddress: "a@reviewer.com",
 					},
 					{
-						EmailAddress: "b@approver.com",
+						EmailAddress: "b@reviewer.com",
 					},
 				},
 				DocumentType: DocumentType{
@@ -185,9 +181,9 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d2 = Document{
 				GoogleFileID: "fileID2",
-				Approvers: []*User{
+				Reviewers: []*User{
 					{
-						EmailAddress: "a@approver.com",
+						EmailAddress: "a@reviewer.com",
 					},
 				},
 				DocumentType: DocumentType{
@@ -206,9 +202,9 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d3 = Document{
 				GoogleFileID: "fileID3",
-				Approvers: []*User{
+				Reviewers: []*User{
 					{
-						EmailAddress: "b@approver.com",
+						EmailAddress: "b@reviewer.com",
 					},
 				},
 				DocumentType: DocumentType{
@@ -240,8 +236,8 @@ func TestDocumentReviewModel(t *testing.T) {
 			})
 			require.NoError(err)
 			require.Len(revs, 2)
-			assert.Equal("a@approver.com", revs[0].User.EmailAddress)
-			assert.Equal("b@approver.com", revs[1].User.EmailAddress)
+			assert.Equal("a@reviewer.com", revs[0].User.EmailAddress)
+			assert.Equal("b@reviewer.com", revs[1].User.EmailAddress)
 		})
 
 		t.Run("Find all reviews for a user", func(t *testing.T) {
@@ -249,15 +245,15 @@ func TestDocumentReviewModel(t *testing.T) {
 			var revs DocumentReviews
 			err := revs.Find(db, DocumentReview{
 				User: User{
-					EmailAddress: "b@approver.com",
+					EmailAddress: "b@reviewer.com",
 				},
 			})
 			require.NoError(err)
 			require.Len(revs, 2)
 			assert.Equal("fileID1", revs[0].Document.GoogleFileID)
 			assert.Equal("fileID3", revs[1].Document.GoogleFileID)
-			assert.Equal("b@approver.com", revs[0].User.EmailAddress)
-			assert.Equal("b@approver.com", revs[1].User.EmailAddress)
+			assert.Equal("b@reviewer.com", revs[0].User.EmailAddress)
+			assert.Equal("b@reviewer.com", revs[1].User.EmailAddress)
 		})
 	})
 
@@ -270,7 +266,6 @@ func TestDocumentReviewModel(t *testing.T) {
 				_, require := assert.New(t), require.New(t)
 				dt := DocumentType{
 					Name:     "DT1",
-					LongName: "DocumentType1",
 				}
 				err := dt.FirstOrCreate(db)
 				require.NoError(err)
@@ -294,8 +289,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			t.Run("Create a product", func(t *testing.T) {
 				_, require := assert.New(t), require.New(t)
 				p := Product{
-					Name:         "Product1",
-					Abbreviation: "P1",
+					Name: "Product1",
 				}
 				err := p.FirstOrCreate(db)
 				require.NoError(err)
@@ -305,12 +299,12 @@ func TestDocumentReviewModel(t *testing.T) {
 				assert, require := assert.New(t), require.New(t)
 				d := Document{
 					GoogleFileID: "fileID1",
-					Approvers: []*User{
+					Reviewers: []*User{
 						{
-							EmailAddress: "a@approver.com",
+							EmailAddress: "a@reviewer.com",
 						},
 						{
-							EmailAddress: "b@approver.com",
+							EmailAddress: "b@reviewer.com",
 						},
 					},
 					CustomFields: []*DocumentCustomField{
@@ -336,22 +330,22 @@ func TestDocumentReviewModel(t *testing.T) {
 				assert.EqualValues(1, d.ID)
 			})
 
-			t.Run("Update review status to approved", func(t *testing.T) {
+			t.Run("Update review status to reviewed", func(t *testing.T) {
 				assert, require := assert.New(t), require.New(t)
 				dr := DocumentReview{
 					Document: Document{
 						GoogleFileID: "fileID1",
 					},
 					User: User{
-						EmailAddress: "b@approver.com",
+						EmailAddress: "b@reviewer.com",
 					},
-					Status: ApprovedDocumentReviewStatus,
+					Status: ReviewedDocumentReviewStatus,
 				}
 				err := dr.Update(db)
 				require.NoError(err)
 				assert.EqualValues(1, dr.DocumentID)
 				assert.EqualValues(2, dr.UserID)
-				assert.Equal(ApprovedDocumentReviewStatus, dr.Status)
+				assert.Equal(ReviewedDocumentReviewStatus, dr.Status)
 			})
 		})
 }

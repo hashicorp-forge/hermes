@@ -5,45 +5,54 @@
 <ol class="mt-9 grid grid-cols-3 gap-4">
   {{#each @model as |docType|}}
     <li class="relative">
-      <LinkTo
-        class="w-full h-full no-underline"
-        @route="authenticated.new.doc"
-        @query={{hash docType=docType.name}}
+      <Hds::Card::Container
+        @level="mid"
+        @levelHover="high"
+        @hasBorder="true"
+        class="template-card template-card--with-link"
       >
-        <Hds::Card::Container
-          @level="mid"
-          @levelHover="high"
-          @hasBorder="true"
-          class="template-card
-            {{if docType.moreInfoLink 'template-card--with-link'}}"
+        <LinkTo
+          class="w-full h-full no-underline"
+          @route="authenticated.new.doc"
+          @query={{hash docType=docType.templateName}}
         >
           <div>
-            <p class="text-display-200 text-color-foreground-primary mb-1">
-              {{docType.name}}
-            </p>
             <h2
               class="text-display-400 font-semibold text-color-foreground-strong"
             >
-              {{docType.longName}}
+              {{docType.templateName}}
             </h2>
             <p class="my-2 text-body-200 text-color-foreground-primary">
               {{docType.description}}
             </p>
+            <img
+              src="https://lh3.google.com/u/0/d/{{docType.docId}}=w416-iv1"
+              alt="Enter Correct Doc Id"
+              onerror="this.src='/images/document.png'"
+              class="w-full"
+            />
           </div>
-        </Hds::Card::Container>
-      </LinkTo>
-      {{#if docType.moreInfoLink}}
-        <Hds::Link::Standalone
-          @isHrefExternal={{true}}
-          @href={{docType.moreInfoLink.url}}
-          @icon="external-link"
-          @iconPosition="trailing"
-          class="small-external-link absolute bottom-6 left-5 whitespace-nowrap z-10"
-          @text={{docType.moreInfoLink.text}}
-        />
-      {{/if}}
+        </LinkTo>
+        {{#if (eq this.authenticatedUser.info.role "Admin")}}
+          <div class="flex items-start px-3 gap-2">
+            <EditTemplate @template={{docType}} />
+            <DeleteTemplate @template={{docType}} />
+          </div>
+        {{/if}}
+      </Hds::Card::Container>
     </li>
 
   {{/each}}
-
 </ol>
+{{! fixed button - click to add new template  }}
+{{#if (eq this.authenticatedUser.info.role "Admin")}}
+  <a class="fixedButton" href="/new/custom-template">
+    <div class="roundedFixedBtn" data-tooltip="Create new template">
+      <img
+        src="/images/create.png"
+        alt="create template"
+        class="w-full create-template-card-image"
+      />
+    </div>
+  </a>
+{{/if}}

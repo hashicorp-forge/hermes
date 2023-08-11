@@ -1,4 +1,5 @@
-/config.hcl
+# /config.hcl
+# /config_indexer.hcl
 /hermes
 
 # Google OAuth 2.0
@@ -8,6 +9,7 @@
 # macOS & local
 .DS_Store
 .env
+.idea
 
 # Web application
 node_modules

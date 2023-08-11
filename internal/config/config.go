@@ -63,10 +63,6 @@ type DocumentType struct {
 	// Example: "RFC"
 	Name string `hcl:"name,label" json:"name"`
 
-	// LongName is the longer name for the document type.
-	// Example: "Request for Comments"
-	LongName string `hcl:"long_name,optional" json:"longName"`
-
 	// Description is the description of the document type.
 	// Example: "Create a Request for Comments document to present a proposal to
 	//   colleagues for their review and feedback."
@@ -228,7 +224,7 @@ type Products struct {
 	Product []*Product `hcl:"product,block"`
 }
 
-// Product is a product/area.
+// Product is a bu.
 type Product struct {
 	// Name is the name of the product.
 	Name string `hcl:"name,label" json:"name"`

@@ -15,12 +15,16 @@ import (
 var tmplFS embed.FS
 
 type ReviewRequestedEmailData struct {
-	BaseURL           string
-	CurrentYear       int
-	DocumentOwner     string
-	DocumentShortName string
-	DocumentTitle     string
-	DocumentURL       string
+	BaseURL            string
+	CurrentYear        int
+	DocumentOwner      string
+	DocumentOwnerEmail string
+	DocumentType       string
+	DocumentShortName  string
+	DocumentTitle      string
+	DocumentURL        string
+	DocumentProd       string
+	DocumentTeam       string
 }
 
 type SubscriberDocumentPublishedEmailData struct {
@@ -32,6 +36,20 @@ type SubscriberDocumentPublishedEmailData struct {
 	DocumentType      string
 	DocumentURL       string
 	Product           string
+	Team              string
+}
+
+type ContributorRequestedEmailData struct {
+	BaseURL            string
+	CurrentYear        int
+	DocumentOwner      string
+	DocumentOwnerEmail string
+	DocumentType       string
+	DocumentShortName  string
+	DocumentTitle      string
+	DocumentURL        string
+	DocumentProd       string
+	DocumentTeam       string
 }
 
 func SendReviewRequestedEmail(
@@ -66,7 +84,45 @@ func SendReviewRequestedEmail(
 	_, err = s.SendEmail(
 		to,
 		from,
-		fmt.Sprintf("Document review requested for %s", d.DocumentShortName),
+		fmt.Sprintf("%s | Document Review Request from %s [%s]", d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
+		body.String(),
+	)
+	return err
+}
+
+func SendContributorRequestedEmail(
+	d ContributorRequestedEmailData,
+	to []string,
+	from string,
+	s *gw.Service,
+) error {
+	// Validate data.
+	if err := validation.ValidateStruct(&d,
+		validation.Field(&d.BaseURL, validation.Required),
+		validation.Field(&d.DocumentOwner, validation.Required),
+		validation.Field(&d.DocumentTitle, validation.Required),
+		validation.Field(&d.DocumentURL, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data: %w", err)
+	}
+
+	var body bytes.Buffer
+	tmpl, err := template.ParseFS(tmplFS, "templates/contributor.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	// Set current year.
+	d.CurrentYear = time.Now().Year()
+
+	if err := tmpl.Execute(&body, d); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	_, err = s.SendEmail(
+		to,
+		from,
+		fmt.Sprintf("%s | Document Contribution Request from %s [%s]", d.DocumentTitle, d.DocumentOwner, d.DocumentOwnerEmail),
 		body.String(),
 	)
 	return err

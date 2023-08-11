@@ -76,7 +76,6 @@ func TestUserModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			dt := DocumentType{
 				Name:     "DT1",
-				LongName: "DocumentType1",
 			}
 			err := dt.FirstOrCreate(db)
 			require.NoError(err)
@@ -85,8 +84,7 @@ func TestUserModel(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
-				Name:         "Product1",
-				Abbreviation: "P1",
+				Name: "Product1",
 			}
 			err := p.FirstOrCreate(db)
 			require.NoError(err)
@@ -241,8 +239,7 @@ func TestUserModel(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
-				Name:         "Product1",
-				Abbreviation: "P1",
+				Name: "Product1",
 			}
 			err := p.FirstOrCreate(db)
 			require.NoError(err)
@@ -252,8 +249,7 @@ func TestUserModel(t *testing.T) {
 		t.Run("Create a second product", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			p := Product{
-				Name:         "Product2",
-				Abbreviation: "P2",
+				Name: "Product2",
 			}
 			err := p.FirstOrCreate(db)
 			require.NoError(err)

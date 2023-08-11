@@ -14,6 +14,7 @@ declare const config: {
     apiKey: string;
     docsIndexName: string;
     draftsIndexName: string;
+    templateIndexName: string,
     internalIndexName: string;
   };
   featureFlags: Record<string, boolean>;

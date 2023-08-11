@@ -2,9 +2,9 @@
 {{#unless this.isHidden}}
   <div class="flex space-x-2 w-full" ...attributes>
     <div class="relative shrink-0">
-      {{#if (eq @badge "approved")}}
+      {{#if (eq @badge "reviewed")}}
         <div
-          data-test-person-approved-badge
+          data-test-person-reviewed-badge
           class="bg-color-page-faint flex rounded-full absolute -bottom-1.5 -right-1.5 p-0.5 scale-[70%] origin-bottom-right"
         >
           <FlightIcon

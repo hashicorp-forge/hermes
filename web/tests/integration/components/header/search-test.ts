@@ -128,7 +128,7 @@ module("Integration | Component | header/search", function (hooks) {
       .hasAttribute("href", `/results?q=${query}`);
   });
 
-  test("a product/area link is conditionally shown", async function (this: HeaderSearchTestContext, assert) {
+  test("a bu link is conditionally shown", async function (this: HeaderSearchTestContext, assert) {
     await render<HeaderSearchTestContext>(hbs`
       <Header::Search />
     `);

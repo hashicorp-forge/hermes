@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  # server:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.server
+  #   ports:
+  #     - "8000:8000"
+  #     - "9999:9999"
+  #   depends_on:
+  #     - postgres
+  #   links:
+  #     - postgres
+
+  # indexer:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.indexer
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+
+  postgres:
+    image: postgres:14.5-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:

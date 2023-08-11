@@ -25,7 +25,7 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     assert.equal(getPageTitle(), "Create Your PRD | Hermes");
   });
 
-  test("the product/area can be set", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
+  test("the bu can be set", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
     this.server.createList("product", 4);
 
     // add a product with an icon
@@ -40,7 +40,7 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     const thumbnailBadgeSelector = "[data-test-doc-thumbnail-product-badge]";
 
     assert.dom(toggleSelector).exists();
-    assert.dom(`${toggleSelector} span`).hasText("Select a product/area");
+    assert.dom(`${toggleSelector} span`).hasText("Select a bu");
     assert
       .dom(`${toggleSelector} .flight-icon`)
       .hasAttribute("data-test-icon", "folder");

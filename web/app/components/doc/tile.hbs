@@ -9,6 +9,7 @@
       @status={{@status}}
       @product={{@productArea}}
       @isLarge={{true}}
+      @docID={{@docID}}
     />
     <Doc::State @state={{@status}} />
   </div>
@@ -17,11 +18,6 @@
     <h4 class="doc-tile-title">
       {{@title}}
     </h4>
-    {{#if (not (is-empty @docNumber))}}
-      <small class="text-body-100 text-color-foreground-faint">
-        {{@docNumber}}
-      </small>
-    {{/if}}
   </div>
 
   <div class="flex flex-col items-start space-y-1 pb-1 max-w-full">
@@ -37,6 +33,27 @@
     @text={{this.productAreaName}}
     @icon={{or (get-product-id this.this.args.productArea) "folder"}}
   />
+  {{#if (not @hideDueDate)}}
+    {{#if (not (is-empty @dueDate))}}
+      {{#if @showColorBadge}}
+        {{#if this.isDueDateOverdue}}
+          <Hds::Badge
+            @color="critical"
+            @text="Due Date : {{dateformat @dueDate}}"
+          />
+        {{else}}
+          <Hds::Badge
+            @color="warning"
+            @text="Due Date : {{dateformat @dueDate}}"
+          />
+        {{/if}}
+      {{else}}
+        <Hds::Badge @text="Due Date : {{dateformat @dueDate}}" />
+      {{/if}}
+    {{else}}
+      <Hds::Badge @text="No Due Date" />
+    {{/if}}
+  {{/if}}
 
   {{#if (and @isResult @snippet)}}
     <Doc::Snippet @snippet={{@snippet}} class="pt-2" />

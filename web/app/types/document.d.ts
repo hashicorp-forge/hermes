@@ -9,6 +9,8 @@ export interface HermesDocument {
 
   status: string;
   product?: string;
+  team?: string;
+  project?: string;
   modifiedAgo: string;
   modifiedTime: number;
   docNumber: string;
@@ -18,9 +20,10 @@ export interface HermesDocument {
   owners?: string[];
   appCreated?: boolean;
   contributors?: HermesUser[];
-  approvers?: HermesUser[];
+  reviewers: HermesUser[];
+  dueDate: string;
   changesRequestedBy?: string[];
-  approvedBy?: string[];
+  reviewedBy: string[];
   summary?: string;
   isDraft?: boolean;
   customEditableFields?: CustomEditableFields;
@@ -31,6 +34,13 @@ export interface HermesDocument {
       value: string;
     };
   };
+}
+
+export interface HermesTemplate {
+  readonly objectId: string;
+  templateName: string;
+  description?: string;
+  docId: string;
 }
 
 export interface CustomEditableFields {

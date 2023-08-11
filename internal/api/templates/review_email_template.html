@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Review Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            color: #333333;
+        }
+
+        .invisible-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+        }
+
+        .visible-container {
+            visibility: visible;
+            max-width: 670px;
+            background: #f2f2f2;
+            border-radius: 3px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        .document-details {
+            background-color: #ffffff;
+            padding: 15px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .document-details p {
+            margin-bottom: 5px;
+        }
+
+        .document-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2e7cff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .document-link:hover {
+            background-color: #266ce0;
+        }
+
+        .signature {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777777;
+        }
+    </style>
+</head>
+<body>
+<div class="invisible-container">
+    <div class="visible-container">
+        <h1>Document Review Request</h1>
+        <p>Hi Razor,</p>
+
+        <p>You have been invited to review a new document in DocVault, the Document Management System at Razorpay.</p>
+
+        <div class="document-details">
+            <p><strong>Document Details:</strong></p>
+            <p>
+                <a href="%s" class="document-link">[%s] %s</a>
+            </p>
+        </div>
+
+        <p>Please click on the link above to access the document and provide your valuable feedback. Your insights and suggestions are highly appreciated.</p>
+
+        <p>Thank you for your time and contribution.</p>
+
+        <p class="signature">Best Regards,<br>
+            DocVault Team</p>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+

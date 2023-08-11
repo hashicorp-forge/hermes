@@ -95,8 +95,8 @@ func MeRecentlyViewedDocsHandler(
 				}
 
 				isDraft := false
-				// The document is a draft if it's in WIP status and wasn't imported.
-				if doc.Status == models.WIPDocumentStatus && !doc.Imported {
+				// The document is a draft if it's in Draft status and wasn't imported.
+				if doc.Status == models.DraftDocumentStatus && !doc.Imported {
 					isDraft = true
 				}
 

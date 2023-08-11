@@ -8,12 +8,16 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/forPelevin/gomoji v1.1.3
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-hclog v1.2.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/joho/godotenv v1.5.1
 	github.com/mitchellh/cli v1.1.2
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
+	github.com/slack-go/slack v0.12.2
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/oauth2 v0.3.0
 	google.golang.org/api v0.103.0
@@ -38,9 +42,9 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect

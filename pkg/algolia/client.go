@@ -28,6 +28,8 @@ type Client struct {
 	// by descending modified time.
 	DocsModifiedTimeDesc *search.Index
 
+	DocsDueDateAsc *search.Index
+
 	// Drafts is an Algolia index for storing metadata for draft documents.
 	Drafts *search.Index
 
@@ -42,6 +44,9 @@ type Client struct {
 	// DraftsModifiedTimeDesc is an Algolia replica of the drafts index that is sorted
 	// by descending modified time.
 	DraftsModifiedTimeDesc *search.Index
+
+	// Template is an Algolia index for storing metadata for templates
+	Template *search.Index
 
 	// Internal is an Algolia index for storing internal Hermes metadata.
 	Internal *search.Index
@@ -66,6 +71,10 @@ type Config struct {
 	// DraftsIndexName is the name of the Algolia index for storing draft
 	// documents' metadata.
 	DraftsIndexName string `hcl:"drafts_index_name,optional"`
+
+	// TemplateIndexName is the name of the Algolia index for storing
+	// templates' metadata.
+	TemplateIndexName string `hcl:"template_index_name,optional"`
 
 	// InternalIndexName is the name of the Algolia index for storing internal
 	// Hermes metadata.
@@ -105,6 +114,7 @@ func New(cfg *Config) (*Client, error) {
 	c.Docs = a.InitIndex(cfg.DocsIndexName)
 	c.Drafts = a.InitIndex(cfg.DraftsIndexName)
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
+	c.Template = a.InitIndex(cfg.TemplateIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 	c.MissingFields = a.InitIndex(cfg.MissingFieldsIndexName)
 
@@ -113,11 +123,13 @@ func New(cfg *Config) (*Client, error) {
 		// Attributes
 		AttributesForFaceting: opt.AttributesForFaceting(
 			"appCreated",
-			"approvers",
-			"approvedBy",
+			"reviewers",
+			"reviewedBy",
 			"docType",
 			"owners",
 			"searchable(product)",
+			"searchable(team)",
+			"searchable(project)",
 			"status",
 			"searchable(tags)",
 		),
@@ -135,6 +147,7 @@ func New(cfg *Config) (*Client, error) {
 			cfg.DocsIndexName+"_createdTime_asc",
 			cfg.DocsIndexName+"_createdTime_desc",
 			cfg.DocsIndexName+"_modifiedTime_desc",
+			cfg.DocsIndexName+"_dueDate_asc",
 		),
 	})
 	if err != nil {
@@ -145,11 +158,14 @@ func New(cfg *Config) (*Client, error) {
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
-	err = configureReplicaIndexes(
+	c.DocsDueDateAsc = a.InitIndex(cfg.DocsIndexName + "_dueDate_asc")
+
+	err = configureDocsReplicaIndexes(
 		cfg.DocsIndexName,
 		c.DocsCreatedTimeAsc,
 		c.DocsCreatedTimeDesc,
 		c.DocsModifiedTimeDesc,
+		c.DocsDueDateAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -165,6 +181,8 @@ func New(cfg *Config) (*Client, error) {
 			"product",
 			"status",
 			"tags",
+			"team",
+			"project",
 		),
 
 		// Ranking
@@ -216,6 +234,7 @@ func configureReplicaIndexes(
 	createdTimeAscIndex *search.Index,
 	createdTimeDescIndex *search.Index,
 	modifiedTimeDescIndex *search.Index,
+
 ) error {
 	// Configure the createdTime_asc replica for index.
 	_, err := createdTimeAscIndex.SetSettings(search.Settings{
@@ -225,6 +244,8 @@ func configureReplicaIndexes(
 			"owners",
 			"product",
 			"status",
+			"team",
+			"project",
 		),
 
 		Ranking: opt.Ranking(
@@ -245,6 +266,8 @@ func configureReplicaIndexes(
 			"owners",
 			"product",
 			"status",
+			"team",
+			"project",
 		),
 
 		Ranking: opt.Ranking(
@@ -276,6 +299,99 @@ func configureReplicaIndexes(
 	return nil
 }
 
+func configureDocsReplicaIndexes(
+	indexName string,
+	createdTimeAscIndex *search.Index,
+	createdTimeDescIndex *search.Index,
+	modifiedTimeDescIndex *search.Index,
+	dueDateAscIndex *search.Index,
+) error {
+	// Configure the createdTime_asc replica for index.
+	_, err := createdTimeAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
+			"docType",
+			"owners",
+			"product",
+			"status",
+			"searchable(team)",
+			"searchable(project)",
+		),
+
+		Ranking: opt.Ranking(
+			"asc(createdTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s createdTime_asc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the createdTime_desc replica for index.
+	_, err = createdTimeDescIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"contributors",
+			"docType",
+			"owners",
+			"product",
+			"status",
+			"searchable(team)",
+			"searchable(project)",
+		),
+
+		Ranking: opt.Ranking(
+			"desc(createdTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s createdTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the modifiedTime_desc replica for index.
+	_, err = modifiedTimeDescIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"status",
+		),
+
+		Ranking: opt.Ranking(
+			"desc(modifiedTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the dueDate_asc replica for index.
+	_, err = dueDateAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"reviewers",
+			"reviewedBy",
+			"appCreated",
+			"status",
+			"owners",
+			"product",
+			"searchable(team)",
+			"searchable(project)",
+		),
+
+		Ranking: opt.Ranking(
+			"asc(dueDate)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	return nil
+}
+
 // NewSearchClient returns a new Algolia client for searching indices.
 func NewSearchClient(cfg *Config) (*Client, error) {
 	if err := validate(cfg); err != nil {
@@ -291,10 +407,12 @@ func NewSearchClient(cfg *Config) (*Client, error) {
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
+	c.DocsDueDateAsc = a.InitIndex(cfg.DocsIndexName + "_dueDate_asc")
 	c.Drafts = a.InitIndex(cfg.DraftsIndexName)
 	c.DraftsCreatedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_asc")
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
 	c.DraftsModifiedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_desc")
+	c.Template = a.InitIndex(cfg.TemplateIndexName)
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 
@@ -307,6 +425,7 @@ func validate(c *Config) error {
 		validation.Field(&c.ApplicationID, validation.Required),
 		validation.Field(&c.DocsIndexName, validation.Required),
 		validation.Field(&c.DraftsIndexName, validation.Required),
+		validation.Field(&c.TemplateIndexName, validation.Required),
 		validation.Field(&c.InternalIndexName, validation.Required),
 		validation.Field(&c.LinksIndexName, validation.Required),
 		validation.Field(&c.MissingFieldsIndexName, validation.Required),

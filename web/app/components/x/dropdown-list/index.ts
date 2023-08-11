@@ -5,13 +5,16 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
+import ActiveFiltersService from "hermes/services/active-filters";
 import FetchService from "hermes/services/fetch";
 
 interface XDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items?: any;
+    label?: string;
+    teams?: any;
     listIsOrdered?: boolean;
     selected?: any;
     placement?: Placement;
@@ -38,6 +41,7 @@ export enum FocusDirection {
 
 export default class XDropdownListComponent extends Component<XDropdownListComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare activeFilters: ActiveFiltersService;
 
   @tracked private _scrollContainer: HTMLElement | null = null;
   @tracked private _input: HTMLInputElement | null = null;
@@ -77,13 +81,169 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     }
   }
 
+  findCommonStrings(arr1: string[], arr2: string[]): string[] {
+    const commonStrings: string[] = [];
+
+    for (const str of arr1) {
+      if (arr2.includes(str)) {
+        commonStrings.push(str);
+      }
+    }
+
+    return commonStrings;
+  }
+
+  // Function to retrieve all teams under specific BUs
+  getTeamsByBUs(jsonData: { [key: string]: any }, bus: string[]): string[] {
+    const teams: string[] = [];
+
+    for (const key in jsonData) {
+      if (jsonData.hasOwnProperty(key)) {
+        const team = jsonData[key];
+        if (bus.includes(team.BU) && team.projects) {
+          teams.push(key);
+        }
+      }
+    }
+
+    return teams;
+  }
+  // Function to retrieve projects under specific BUs
+  // Function to retrieve project keys under specific BUs
+  getProjectsByBUs(
+    jsonData: { [key: string]: any },
+    targetBUs: string[]
+  ): string[] {
+    const projectKeys: string[] = [];
+
+    for (const key in jsonData) {
+      if (jsonData.hasOwnProperty(key)) {
+        const team = jsonData[key];
+        if (targetBUs.includes(team.BU) && team.projects) {
+          projectKeys.push(...Object.keys(team.projects));
+        }
+      }
+    }
+
+    return projectKeys;
+  }
+  // Function to retrieve projects under specific team names
+  getProjectsByTeams(
+    jsonData: { [key: string]: any },
+    targetTeams: string[]
+  ): string[] {
+    const projectKeys: string[] = [];
+
+    for (const key in jsonData) {
+      if (jsonData.hasOwnProperty(key) && targetTeams.includes(key)) {
+        const team = jsonData[key];
+        if (team.projects) {
+          projectKeys.push(...Object.keys(team.projects));
+        }
+      }
+    }
+
+    return projectKeys;
+  }
+
+  getValidBUs() {
+    // Extract distinct BU values as an array of strings
+    let distinctBUs: string[] = Object.values(this.args.teams)
+      .map((item: any) => item.BU)
+      .filter((value, index, self) => self.indexOf(value) === index);
+    let filteredBUs = this.findCommonStrings(distinctBUs, this.shownFilters);
+    return filteredBUs;
+  }
+  getValidTeams() {
+    let distinctTeams: string[] = Object.keys(this.args.teams);
+    let filteredTeams = this.findCommonStrings(
+      distinctTeams,
+      this.shownFilters
+    );
+    return filteredTeams;
+  }
+
+  // Function to filter and keep specific keys from the JSON object
+  filterKeysFromJSON(
+    jsonData: { [key: string]: any },
+    keysToKeep: string[]
+  ): { [key: string]: any } {
+    const filteredData: { [key: string]: any } = {};
+
+    for (const key of keysToKeep) {
+      if (jsonData.hasOwnProperty(key)) {
+        filteredData[key] = jsonData[key];
+      }
+    }
+
+    return filteredData;
+  }
+
+  allowedTeams(resultShownItems: any) {
+    let filteredBUs = this.getValidBUs();
+    const teamsUnderBUs: string[] = this.getTeamsByBUs(
+      this.args.teams,
+      filteredBUs
+    );
+    const filteredData: { [key: string]: any } = this.filterKeysFromJSON(
+      resultShownItems,
+      teamsUnderBUs
+    );
+    // Check if filteredData is empty
+    const isEmpty: boolean = Object.keys(filteredData).length === 0;
+    if (!isEmpty) {
+      resultShownItems = filteredData;
+    }
+    return resultShownItems;
+  }
+
+  allowedProjects(resultShownItems: any) {
+    let filteredTeams = this.getValidTeams();
+    let filteredBUs = this.getValidBUs();
+
+    let projectsUnderBUs = this.getProjectsByBUs(this.args.teams, filteredBUs);
+    let projectsUnderTeams: string[] = this.getProjectsByTeams(
+      this.args.teams,
+      filteredTeams
+    );
+    const filteredDataForProjectUnderTeams: { [key: string]: any } =
+      this.filterKeysFromJSON(resultShownItems, projectsUnderTeams);
+    const filteredDataForProjectUnderBUs: { [key: string]: any } =
+      this.filterKeysFromJSON(resultShownItems, projectsUnderBUs);
+
+    // Check if filteredDataForProjectUnderTeams is empty
+    const isEmptyForProjectUnderTeams: boolean =
+      Object.keys(filteredDataForProjectUnderTeams).length === 0;
+    // Check if filteredDataForProjectUnderBUs is empty
+    const isEmptyForProjectUnderBUs: boolean =
+      Object.keys(filteredDataForProjectUnderBUs).length === 0;
+    if (!isEmptyForProjectUnderTeams) {
+      resultShownItems = filteredDataForProjectUnderTeams;
+    } else if (!isEmptyForProjectUnderBUs) {
+      resultShownItems = filteredDataForProjectUnderBUs;
+    }
+    return resultShownItems;
+  }
+
   /**
    * The items that should be shown in the dropdown.
    * Initially the same as the items passed in and
    * updated when the user types in the filter input.
    */
   get shownItems() {
-    return this._filteredItems || this.args.items;
+    let resultShownItems = this._filteredItems || this.args.items;
+    let label = this.args.label;
+    if (label == "Team") {
+      resultShownItems = this.allowedTeams(resultShownItems);
+    }
+    if (label == "Project") {
+      resultShownItems = this.allowedProjects(resultShownItems);
+    }
+    return resultShownItems;
+  }
+
+  get shownFilters() {
+    return Object.values(this.activeFilters.index).flat();
   }
 
   /**

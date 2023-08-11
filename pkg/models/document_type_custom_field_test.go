@@ -45,13 +45,11 @@ func TestDocumentTypeCustomFieldModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d := DocumentType{
 				Name:     "DT1",
-				LongName: "DocumentType1",
 			}
 			err := d.FirstOrCreate(db)
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("DT1", d.Name)
-			assert.Equal("DocumentType1", d.LongName)
 		})
 
 		t.Run("Create a first document type custom field using Upsert",
@@ -128,13 +126,11 @@ func TestDocumentTypeCustomFieldModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d := DocumentType{
 				Name:     "DT2",
-				LongName: "DocumentType2",
 			}
 			err := d.FirstOrCreate(db)
 			require.NoError(err)
 			assert.EqualValues(2, d.ID)
 			assert.Equal("DT2", d.Name)
-			assert.Equal("DocumentType2", d.LongName)
 		})
 
 		t.Run("Create a third document type custom field (same name) "+

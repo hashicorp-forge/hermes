@@ -1,0 +1,55 @@
+{{page-title "Files"}}
+<Header />
+<section class="x-container">
+  <div class="flex items-center space-x-2 mb-8">
+      <FlightIcon @name="git-branch" @size="24" />
+    <p
+      ><LinkTo
+          @route="authenticated.business-units"
+           >
+           {{this.model.businessUnitId}}
+          </LinkTo> 
+        - 
+        <LinkTo
+          @route="authenticated.teams"
+          @models={{array this.model.businessUnitId}}
+           >
+          {{this.model.teamId}}
+          </LinkTo> 
+         - 
+        <LinkTo
+          @route="authenticated.projects"
+          @models={{array this.model.businessUnitId this.model.teamId}}
+           >
+          {{this.model.projectId}}
+          </LinkTo>         
+          - templates
+      </p>
+    </div>
+  <div class="wrapper">
+    <div class="folder-list">
+      {{#each this.model.templates as |temp index|}}
+          <LinkTo
+            @route="authenticated.files"
+            @models={{array this.model.businessUnitId this.model.teamId this.model.projectId temp.templateName}}
+            class="flex flex-col items-start space-y-2 p-4 -m-4 rounded-md hover:bg-color-palette-neutral-50 active:bg-color-palette-neutral-100 overflow-hidden"
+          >
+            <div class="centered-container">
+              <div class="space-y-2">
+                <Hds::IconTile @icon="folder" @color="vault" />
+              </div>
+
+              <div class="flex flex-col items-start space-y-1">
+                <p>
+                  {{temp.templateName}}
+                </p>
+              </div>
+            </div>
+          </LinkTo>
+      {{/each}}
+    </div>
+  </div>
+</section>
+{{outlet}}
+
+

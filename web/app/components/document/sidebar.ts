@@ -36,7 +36,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked deleteModalIsActive = false;
   @tracked requestReviewModalIsActive = false;
   @tracked docTypeCheckboxValue = false;
-  @tracked emailFields = ["approvers", "contributors"];
+  @tracked emailFields = ["reviewers", "contributors"];
 
   get modalIsActive() {
     return (
@@ -60,11 +60,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
   @tracked contributors = this.args.document.contributors || [];
-  @tracked approvers = this.args.document.approvers || [];
+  @tracked reviewers = this.args.document.reviewers || [];
+  @tracked dueDate = this.args.document.dueDate || "";
   @tracked product = this.args.document.product || "";
+  @tracked team = this.args.document.team || "";
+  @tracked project = this.args.document.project || "";
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  @tracked notReviewedYet = false;
 
   get body() {
     assert("_body must exist", this._body);
@@ -88,21 +93,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.isCollapsed = !this.isCollapsed;
   }
 
-  get approveButtonText() {
-    if (!this.hasApproved) {
-      return "Approve";
+  get reviewButtonText() {
+    if (!this.hasReviewed) {
+      return "Review Completed";
     } else {
-      return "Already approved";
+      return "Already reviewed";
     }
   }
 
   get requestChangesButtonText() {
-    // FRDs are a special case that can be approved or not approved.
+    // FRDs are a special case that can be reviewed or not reviewed.
     if (this.args.document.docType === "FRD") {
       if (!this.hasRequestedChanges) {
-        return "Not approved";
+        return "Not reviewed";
       } else {
-        return "Already not approved";
+        return "Already not reviewed";
       }
     }
 
@@ -136,7 +141,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   get moveToStatusButtonTargetStatus() {
     switch (this.args.document.status) {
       case "In-Review":
-        return "Approved";
+        return "Reviewed";
       default:
         return "In-Review";
     }
@@ -146,9 +151,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
-  // isApprover returns true if the logged in user is a document approver.
-  get isApprover() {
-    return this.args.document.approvers?.some(
+  // isReviewer returns true if the logged in user is a document reviewer.
+  get isReviewer() {
+    return this.args.document.reviewers?.some(
       (e) => e.email === this.args.profile.email
     );
   }
@@ -159,9 +164,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  // hasApproved returns true if the logged in user has approved the document.
-  get hasApproved() {
-    return this.args.document.approvedBy?.includes(this.args.profile.email);
+  // hasReviewed returns true if the logged in user has reviewed the document.
+  get hasReviewed() {
+    let reviewedReviewers: string[] = this.args.document.reviewedBy ?? [];
+    let res = reviewedReviewers.includes(this.args.profile.email);
+    return res;
   }
 
   // hasRequestedChanges returns true if the logged in user has requested
@@ -172,8 +179,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  get docIsApproved() {
-    return this.args.document.status.toLowerCase() === "approved";
+  get docIsReviewed() {
+    return this.args.document.status.toLowerCase() === "reviewed";
   }
 
   get docIsInReview() {
@@ -186,15 +193,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   get userHasEditPrivileges() {
-    return this.isOwner || this.isContributor || this.isApprover;
+    return this.isOwner || this.isContributor || this.isReviewer;
   }
 
   get editingIsDisabled() {
     if (!this.args.document.appCreated || this.docIsLocked) {
       // true is the doc wasn't appCreated or is in a locked state
       return true;
-    } else if (this.isDraft || this.docIsInReview || this.docIsApproved) {
-      // true is the doc is a draft/in review/approved and the user is not an owner, contributor, or approver
+    } else if (this.isDraft || this.docIsInReview || this.docIsReviewed) {
+      // true is the doc is a draft/in review/reviewed and the user is not an owner, contributor, or reviewer
       return !this.userHasEditPrivileges;
     } else {
       // doc is obsolete or some unknown status..
@@ -247,6 +254,55 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // productAbbreviation is computed by the back end
   });
 
+  updateTeam = restartableTask(async (team: string) => {
+    this.team = team;
+    await this.save.perform("team", this.team);
+    // productAbbreviation is computed by the back end
+  });
+
+  updateProject = restartableTask(async (project: string) => {
+    this.project = project;
+    await this.save.perform("project", this.project);
+  });
+
+  // updateDueDate = task(async (date: string) => {
+  //   this.dueDate = date;
+  //   await this.save.perform("dueDate", this.dueDate);
+  //   // productAbbreviation is computed by the back end
+  // });
+
+  isAllReviewersReviewed(
+    reviewedReviewers: string[],
+    allReviewers: string[]
+  ): boolean {
+    //variable to count how many matches are there
+    // in betwwen reviewedReviewers and allReviewers array
+    let matchCount = 0;
+
+    // loop through all reviewers
+    for (let i = 0; i < allReviewers.length; i++) {
+      let check = false;
+
+      // check if a reviewer has reviewed by traversing reviewedReviewers array
+      for (let j = 0; j < reviewedReviewers.length; j++) {
+        if (allReviewers[i] == reviewedReviewers[j]) {
+          matchCount++;
+          check = true;
+          break;
+        }
+      }
+      if (check == false) {
+        return false;
+      }
+    }
+
+    // if no reviewers are there we cann't move it to reviewed
+    if (matchCount == 0) {
+      return false;
+    }
+    return true;
+  }
+
   save = task(async (field: string, val: string | HermesUser[]) => {
     if (field && val) {
       let serializedValue;
@@ -268,6 +324,177 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         this.showFlashError(err as Error, "Unable to save document");
       }
     }
+
+    this.refreshRoute();
+
+    if (this.args.document.status != "Draft") {
+      // if all elements of allReviewers presents in reviewedReviewers
+      // and if document
+      // not in reviewed
+      // move it to reviewed
+      if (this.isReadyToGoToReviewed()) {
+        if (this.args.document.status != "Reviewed") {
+          console.log("moving to reviewed");
+          try {
+            await this.patchDocument.perform({
+              status: "Reviewed",
+            });
+            this.showFlashSuccess(
+              "Done!",
+              `Document status changed to Reviewed`
+            );
+          } catch (error: unknown) {
+            this.maybeShowFlashError(
+              error as Error,
+              "Unable to change document status"
+            );
+            throw error;
+          }
+          this.refreshRoute();
+        }
+      }
+
+      // if all elements of allReviewers not presents in reviewedReviewers
+      // and if document
+      // not in in review
+      // move it to in review
+      else {
+        if (this.args.document.status != "In-Review") {
+          console.log("moving to in review");
+          try {
+            await this.patchDocument.perform({
+              status: "In-Review",
+            });
+            this.showFlashSuccess(
+              "Done!",
+              `Document status changed to In-Review`
+            );
+          } catch (error: unknown) {
+            this.maybeShowFlashError(
+              error as Error,
+              "Unable to change document status"
+            );
+            throw error;
+          }
+          this.refreshRoute();
+        }
+      }
+    }
+  });
+
+  addUserToReviewedArray(array: string[], newString: string): string[] {
+    return array.includes(newString) ? array : [...array, newString];
+  }
+
+  review = task(async () => {
+    try {
+      await this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      this.showFlashSuccess("Done!", "Document reviewed");
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to review");
+      throw error;
+    }
+    this.refreshRoute();
+
+    let reviewedReviewers: string[] = this.args.document.reviewedBy ?? [];
+    var allReviewers: string[] = this.reviewers.map((obj) => obj.email);
+
+    reviewedReviewers = this.addUserToReviewedArray(
+      reviewedReviewers,
+      this.args.profile.email
+    );
+
+    // console.log("reviewedReviewers review(): ", reviewedReviewers);
+    // console.log("allReviewers review(): ", allReviewers);
+
+    // if all elements of allReviewers presents in reviewedReviewers
+    // and if document
+    // not in reviewed
+    // move it to reviewed
+    if (this.isAllReviewersReviewed(reviewedReviewers, allReviewers)) {
+      if (this.args.document.status != "Reviewed") {
+        console.log("moving to reviewed");
+        try {
+          await this.patchDocument.perform({
+            status: "Reviewed",
+          });
+          this.showFlashSuccess("Done!", `Document status changed to Reviewed`);
+        } catch (error: unknown) {
+          this.maybeShowFlashError(
+            error as Error,
+            "Unable to change document status"
+          );
+          throw error;
+        }
+        this.refreshRoute();
+      }
+    }
+
+    // if all elements of allReviewers not presents in reviewedReviewers
+    // and if document
+    // not in in review
+    // move it to in review
+    else {
+      if (this.args.document.status != "In-Review") {
+        console.log("moving to in review");
+        try {
+          await this.patchDocument.perform({
+            status: "In-Review",
+          });
+          this.showFlashSuccess(
+            "Done!",
+            `Document status changed to In-Review`
+          );
+        } catch (error: unknown) {
+          this.maybeShowFlashError(
+            error as Error,
+            "Unable to change document status"
+          );
+          throw error;
+        }
+        this.refreshRoute();
+      }
+    }
+
+    this.refreshRoute();
+  });
+
+  isReadyToGoToReviewed(): boolean {
+    let reviewedReviewers: string[] = this.args.document.reviewedBy ?? [];
+    var allReviewers: string[] = this.reviewers.map((obj) => obj.email);
+
+    return this.isAllReviewersReviewed(reviewedReviewers, allReviewers);
+  }
+
+  moveToReviewed = task(async () => {
+    if (this.isReadyToGoToReviewed()) {
+      try {
+        await this.patchDocument.perform({
+          status: "Reviewed",
+        });
+        this.showFlashSuccess("Done!", `Document status changed to Reviewed`);
+      } catch (error: unknown) {
+        this.maybeShowFlashError(
+          error as Error,
+          "Unable to change document status"
+        );
+        throw error;
+      }
+    } else {
+      this.flashMessages.add({
+        title: "Unable To Change Status",
+        message:
+          "There must be atleast one reviewer and all of them must be reviewed to move the doc to Reviewed",
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+        preventDuplicates: true,
+      });
+    }
+    this.refreshRoute();
   });
 
   patchDocument = task(async (fields) => {
@@ -286,28 +513,45 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 
-  requestReview = task(async () => {
-    try {
-      // Update approvers.
-      await this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
-      });
-
-      await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
-        method: "POST",
-      });
-
-      this.showFlashSuccess("Done!", "Document review requested");
-
-      this.router.transitionTo({
-        queryParams: { draft: false },
-      });
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to request review");
-      throw error;
+  get IsAllowedToMoveToInReview() {
+    if (this.reviewers.length && this.dueDate) {
+      return true;
+    } else {
+      return false;
     }
-    this.requestReviewModalIsActive = false;
-    this.refreshRoute();
+  }
+
+  requestReview = task(async () => {
+    if (this.IsAllowedToMoveToInReview) {
+      try {
+        // Update reviewers.
+        await this.patchDocument.perform({
+          reviewers: this.reviewers.compact().mapBy("email"),
+          dueDate: this.dueDate,
+        });
+        await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
+          method: "POST",
+        });
+        this.showFlashSuccess("Done!", "Document review requested");
+        this.router.transitionTo({
+          queryParams: { draft: false },
+        });
+      } catch (error: unknown) {
+        this.maybeShowFlashError(error as Error, "Unable to request review");
+        throw error;
+      }
+      this.requestReviewModalIsActive = false;
+      this.refreshRoute();
+    } else {
+      this.flashMessages.add({
+        title: "Unable To move to In-Review",
+        message: "You must have to fill Reviewers and Due Date to proceed",
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+        preventDuplicates: true,
+      });
+    }
   });
 
   deleteDraft = task(async () => {
@@ -320,8 +564,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   @action
-  updateApprovers(approvers: HermesUser[]) {
-    this.approvers = approvers;
+  updateReviewers(reviewers: HermesUser[]) {
+    this.reviewers = reviewers;
+  }
+  @action
+  updateDueDate(event:Event) {
+    const target = event.target as HTMLInputElement;
+    // Get the selected date value from the input field
+    const dueDate = target.value;
+    // Update the dueDate property in the component
+    this.dueDate = dueDate;
   }
 
   @action
@@ -366,21 +618,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this._body = element;
   }
 
-  approve = task(async () => {
-    try {
-      await this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      this.showFlashSuccess("Done!", "Document approved");
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to approve");
-      throw error;
-    }
-
-    this.refreshRoute();
-  });
-
   requestChanges = task(async () => {
     try {
       await this.fetchSvc.fetch(`/api/v1/approvals/${this.docID}`, {
@@ -389,9 +626,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       });
       // Add a notification for the user
       let msg = "Requested changes for document";
-      // FRDs are a special case that can be approved or not approved.
+      // FRDs are a special case that can be reviewed or not reviewed.
       if (this.args.document.docType === "FRD") {
-        msg = "Document marked as not approved";
+        msg = "Document marked as not reviewed";
       }
       this.showFlashSuccess("Done!", msg);
     } catch (error: unknown) {

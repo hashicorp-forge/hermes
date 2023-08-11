@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp-forge/hermes/pkg/models"
+	"gorm.io/gorm"
+
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/people/v1"
@@ -23,11 +26,17 @@ type MeGetResponse struct {
 	Picture       string `json:"picture"`
 	Locale        string `json:"locale,omitempty"`
 	HD            string `json:"hd,omitempty"`
+	EmployeeID    string `json:"employee_id,omitempty"`
+	Department    string `json:"department,omitempty"`
+	Organization  string `json:"organization,omitempty"`
+	Profile       string `json:"profile,omitempty"`
+	Role          string `json:"role,omitempty"`
 }
 
 func MeHandler(
 	l hclog.Logger,
 	s *gw.Service,
+	db *gorm.DB,
 ) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -144,6 +153,32 @@ func MeHandler(
 				GivenName:     p.Names[0].GivenName,
 				FamilyName:    p.Names[0].FamilyName,
 			}
+
+			// fetch whether user is admin or not
+			user := models.User{EmailAddress: p.EmailAddresses[0].Value}
+			if resp.Role, err = user.FetchRole(db); err != nil {
+				errResp(
+					http.StatusInternalServerError,
+					"Error getting user information",
+					"error getting user role details",
+					err,
+				)
+				return
+			}
+
+			// Get additional information from user admin api
+			if err := getOtherUserInfo(
+				&resp, p, s,
+			); err != nil {
+				errResp(
+					http.StatusInternalServerError,
+					"Error getting user information",
+					"error getting additional info with Admin API response",
+					err,
+				)
+				return
+			}
+
 			if len(p.Photos) > 0 {
 				resp.Picture = p.Photos[0].Url
 			}
@@ -190,6 +225,34 @@ func replaceNamesWithAdminAPIResponse(
 			GivenName:   u.Name.GivenName,
 		},
 	}
+
+	return nil
+}
+
+func getOtherUserInfo(
+	r *MeGetResponse, p *people.Person, s *gw.Service) error {
+	if len(p.EmailAddresses) == 0 {
+		return errors.New("email address not found")
+	}
+	u, err := s.GetUser(p.EmailAddresses[0].Value)
+	if err != nil {
+		return fmt.Errorf("error getting user: %w", err)
+	}
+
+	for _, adminExtID := range u.ExternalIds.([]interface{}) {
+		r.EmployeeID = adminExtID.(map[string]interface{})["value"].(string)
+		break
+	}
+
+	for _, adminOrg := range u.Organizations.([]interface{}) {
+		r.Organization = adminOrg.(map[string]interface{})["name"].(string)
+		r.Department = adminOrg.(map[string]interface{})["department"].(string)
+		r.Profile = adminOrg.(map[string]interface{})["title"].(string)
+		break
+	}
+
+	// fetch image
+	r.Picture = u.ThumbnailPhotoUrl
 
 	return nil
 }

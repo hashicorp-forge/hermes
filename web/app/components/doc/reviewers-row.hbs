@@ -1,0 +1,12 @@
+<Hds::Table::Tr class="row-results__table__row">
+  <Hds::Table::Td class="type">
+    {{@reviewerMailId}}
+  </Hds::Table::Td>
+  <Hds::Table::Td class="status">
+    {{#if this.isReviewed}}
+      <Hds::Badge @color="success" @text="Reviewed" />
+    {{else}}
+      <Hds::Badge @color="warning" @text="In review" />
+    {{/if}}
+  </Hds::Table::Td>
+</Hds::Table::Tr>

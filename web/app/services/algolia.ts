@@ -18,7 +18,7 @@ import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
-export const FACET_NAMES = ["docType", "owners", "product", "status"];
+export const FACET_NAMES = ["docType", "owners", "product", "status","team","project"];
 
 export type AlgoliaSearchParams = RequestOptions & SearchOptions;
 export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
@@ -116,7 +116,7 @@ export default class AlgoliaService extends Service {
      *  },
      *  status: {
      *    Obsolete: 4,
-     *    Approved: 6,
+     *    Reviewed: 6,
      *  }, and so on ...
      * }
      */
@@ -157,7 +157,7 @@ export default class AlgoliaService extends Service {
      *  },
      *  status: {
      *    Obsolete: { count: 4, selected: false },
-     *    Approved: { count: 6, selected: false },
+     *    Reviewed: { count: 6, selected: false },
      *  }, and so on ...
      * }
      */
@@ -171,18 +171,18 @@ export default class AlgoliaService extends Service {
     /**
      * e.g., facet === {
      *  Obsolete: { count: 4, selected: false },
-     *  Approved: { count: 6, selected: false },
+     *  Reviewed: { count: 6, selected: false },
      * }
      */
     if (selection) {
       /**
-       * e.g., selection === ["Approved"]
+       * e.g., selection === ["Reviewed"]
        */
       for (let param of selection) {
         (facet[param] as FacetDropdownObjectDetails).selected = true;
       }
       /**
-       * e.g., facet["Approved"] === { count: 6, selected: true }
+       * e.g., facet["Reviewed"] === { count: 6, selected: true }
        */
     }
   };

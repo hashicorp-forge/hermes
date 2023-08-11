@@ -24,6 +24,7 @@
     "test:ember": "ember test"
   },
   "devDependencies": {
+    "@ember/jquery": "^2.0.0",
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.6.0",
     "@gavant/glint-template-types": "^0.3.3",
@@ -82,6 +83,7 @@
     "ember-click-outside-modifier": "^4.0.0",
     "ember-composable-helpers": "^5.0.0",
     "ember-data": "~3.28.6",
+    "ember-decorators": "^6.1.1",
     "ember-element-helper": "^0.6.1",
     "ember-export-application-global": "^2.0.1",
     "ember-fetch": "^8.1.1",
@@ -90,6 +92,7 @@
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-maybe-in-element": "^2.1.0",
     "ember-metrics": "^2.0.0-beta.2",
+    "ember-modal-dialog": "^4.1.2",
     "ember-modifier": "^4.1.0",
     "ember-on-helper": "^0.1.0",
     "ember-page-title": "^6.2.2",

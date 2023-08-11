@@ -62,11 +62,11 @@ func refreshDocumentHeaders(
 	switch ft {
 	case draftsFolderType:
 		lockedDocs.Find(idx.Database,
-			"locked = ? AND status = ?", true, models.WIPDocumentStatus)
+			"locked = ? AND status = ?", true, models.DraftDocumentStatus)
 	case documentsFolderType:
 		lockedDocs.Find(idx.Database,
-			// All document statuses > WIPDocumentStatus are for published documents.
-			"locked = ? AND status > ?", true, models.WIPDocumentStatus)
+			// All document statuses > DraftDocumentStatus are for published documents.
+			"locked = ? AND status > ?", true, models.DraftDocumentStatus)
 	}
 	var lockedDocIDs []string
 	for _, d := range lockedDocs {

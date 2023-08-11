@@ -22,9 +22,11 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
    * The route's default query parameters. Used to reset the filters.
    */
   defaultQuery = {
+    product: [],
+    team: [],
+    project: [],
     docType: [],
     owners: [],
-    product: [],
     status: [],
     page: 1,
   };

@@ -234,9 +234,9 @@ func (r *PRD) parsePRDStatus(p *docs.Paragraph) {
 	label := p.Elements[0].TextRun.Content
 	var status string
 
-	// Sometimes "Status: WIP" is collected together as one text element.
-	if label == "Status: WIP" && p.Elements[0].TextRun.TextStyle.Bold {
-		status = "WIP"
+	// Sometimes "Status: Draft" is collected together as one text element.
+	if label == "Status: Draft" && p.Elements[0].TextRun.TextStyle.Bold {
+		status = "Draft"
 	} else {
 		for i, e := range p.Elements {
 			if i > 0 && e.TextRun.TextStyle.Bold {

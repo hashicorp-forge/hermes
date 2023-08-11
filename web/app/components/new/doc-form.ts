@@ -2,10 +2,9 @@ import Component from "@glimmer/component";
 import { task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import { action } from "@ember/object";
+import {action, computed} from "@ember/object";
 import Ember from "ember";
 import FetchService from "hermes/services/fetch";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
 import { HermesUser } from "hermes/types/document";
@@ -13,11 +12,13 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "../inputs/product-select";
+import AuthenticatedUserService, {
+  AuthenticatedUser,
+} from "hermes/services/authenticated-user";
 
 interface DocFormErrors {
   title: string | null;
   summary: string | null;
-  productAbbreviation: string | null;
   tags: string | null;
   contributors: string | null;
 }
@@ -25,7 +26,6 @@ interface DocFormErrors {
 const FORM_ERRORS: DocFormErrors = {
   title: null,
   summary: null,
-  productAbbreviation: null,
   tags: null,
   contributors: null,
 };
@@ -49,8 +49,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
   @tracked protected productArea: string | null = null;
-  @tracked protected productAbbreviation: string | null = null;
+  @tracked protected teamArea: string | null = null;
+  @tracked protected projectArea: string| null = null;
   @tracked protected contributors: HermesUser[] = [];
+
+  @tracked selectedBU: string | null = null;
 
   @tracked protected _form: HTMLFormElement | null = null;
 
@@ -84,6 +87,47 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
+  /** For fetching the authenticated user details */
+  protected get profile(): AuthenticatedUser {
+    return this.authenticatedUser.info;
+  }
+
+  /** These are all fields realted to modal dialogues */
+  // for all model dialogues on the daashboard
+  @tracked showModal1 = false;
+  @tracked showModal2 = false;
+  @tracked showModal4 = false;
+
+  @tracked businessUnitName: string = '';
+  @tracked BUIsBeingCreated = false;
+
+  @tracked TeamName: string = "";
+  @tracked TeamIsBeingCreated = false;
+  @tracked TeamBU: string | null = null;
+
+  @tracked ProjectBU: string = '';
+  @tracked ProjectTeamName: string = "";
+  @tracked ProjectIsBeingCreated = false;
+  @tracked ProjectName: string | null = null;
+
+  @tracked selectedBU_modal: string | null = null;
+
+
+  @action
+  toggleModal1() {
+    this.showModal1 = !this.showModal1;
+  }
+
+  @action
+  toggleModal2() {
+    this.showModal2 = !this.showModal2;
+  }
+
+  @action
+  toggleModal4() {
+    this.showModal4 = !this.showModal4;
+  }
+
   /**
    * The form element. Used to bind FormData to our tracked elements.
    */
@@ -104,7 +148,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
+    if (this.title && this.productArea && this.teamArea && this.projectArea)  {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;
@@ -119,12 +163,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   private validate() {
     const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
     this.formErrors = errors;
   }
 
@@ -178,7 +216,21 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     attributes: ProductArea
   ) {
     this.productArea = productName;
-    this.productAbbreviation = attributes.abbreviation;
+    this.selectedBU = productName;
+    this.maybeValidate();
+  }
+
+  @action protected onTeamSelect(
+      teamName: string,
+  ) {
+    this.teamArea = teamName;
+    this.maybeValidate();
+  }
+
+  @action protected onProjectSelect(
+    projectName: string,
+  ) {
+    this.projectArea = projectName;
     this.maybeValidate();
   }
 
@@ -193,6 +245,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     if (this.formRequirementsMet && !this.hasErrors) {
       this.createDoc.perform();
     }
+  }
+  
+  @action
+  updateSelectedBU(selectedBU: string) {
+    this.selectedBU = selectedBU;
+    // Trigger the necessary actions, such as fetching filtered teams
+    // ...
   }
 
   /**
@@ -211,7 +270,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             contributors: this.getEmails(this.contributors),
             docType: this.args.docType,
             product: this.productArea,
-            productAbbreviation: this.productAbbreviation,
+            team: this.teamArea,
+            project: this.projectArea,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
           }),
@@ -241,6 +301,231 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       });
     }
   });
+
+  /** Modal dialogue methods */
+
+
+    @action
+    updateSelectedBU_modal(selectedBU: string) {
+      this.selectedBU_modal = selectedBU;
+      // Trigger the necessary actions, such as fetching filtered teams
+      // ...
+    }
+
+
+    @action onProductSelect_modal(
+      productName: string,
+    ) {
+      this.TeamBU = productName;
+      this.ProjectBU = productName;
+      // This is for filtering the teams based on BU
+      this.selectedBU_modal = productName;
+    }
+
+    @action protected onTeamSelect_modal(
+      teamName: string,
+    ) {
+      this.ProjectTeamName = teamName;
+    }
+
+    /**
+     * Creates a Team, then redirects to the dashboard.
+     * On error, show a flashMessage and allow users to try again.
+     */
+    private createTeam = task(async () => {
+      this.TeamIsBeingCreated = true;
+      try {
+        const bu = await this.fetchSvc
+            .fetch("/api/v1/teams", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({
+                teamName: this.TeamName,
+                teamBU: this.TeamBU,
+              }),
+            })
+            .then((response) => response?.json());
+
+        // Wait for document to be available.
+        await timeout(AWAIT_DOC_DELAY);
+
+        this.router.transitionTo("authenticated.dashboard");
+        this.toggleModal2();
+        this.flashMessages.add({
+          title: "Success",
+          message: `New Team has been created Succesfully`,
+          type: "success",
+          timeout: 6000,
+          extendedTimeout: 1000,
+        });
+      } catch (err) {
+        this.toggleModal2();
+        this.TeamIsBeingCreated = false;
+        this.flashMessages.add({
+          title: "Error creating new Team",
+          message: `${err}`,
+          type: "critical",
+          timeout: 6000,
+          extendedTimeout: 1000,
+        });
+      } finally {
+        // Hide spinning wheel or loading state
+        this.TeamIsBeingCreated=false;
+      }
+    });
+
+    @action submitFormteam(event: SubmitEvent) {
+      // Show spinning wheel or loading state
+      this.TeamIsBeingCreated=true;
+      event.preventDefault();
+
+      const formElement = event.target as HTMLFormElement; // Explicit typecasting
+      const formData = new FormData(formElement);
+      const formObject = Object.fromEntries(formData.entries());
+
+      // Do something with the form values
+      this.TeamName = formObject['team-name'] as string;
+
+      // now post this info
+      this.createTeam.perform();
+
+      // Clear the form fields
+      this.TeamName = "";
+      this.TeamBU = "";
+    }
+
+    /**
+     * Creates a BU, then redirects to the dashboard.
+     * On error, show a flashMessage and allow users to try again.
+     */
+    private createBU= task(async () => {
+      this.BUIsBeingCreated = true;
+      try {
+        const bu = await this.fetchSvc
+            .fetch("/api/v1/products", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                productName: this.businessUnitName,
+              }),
+            })
+            .then((response) => response?.json());
+
+        // Wait for document to be available.
+        await timeout(AWAIT_DOC_DELAY);
+
+        this.router.transitionTo("authenticated.dashboard");
+        this.toggleModal1();
+        this.flashMessages.add({
+          title: "Success",
+          message: `New Business Unit (BU) created succesfully`,
+          type: "success",
+          timeout: 6000,
+          extendedTimeout: 1000,
+        });
+      } catch (err) {
+        this.BUIsBeingCreated = false;
+        this.toggleModal1();
+        this.flashMessages.add({
+          title: "Error creating new Business Unit",
+          message: `${err}`,
+          type: "critical",
+          timeout: 6000,
+          extendedTimeout: 1000,
+        }); }
+      finally {
+        // Hide spinning wheel or loading state
+        this.BUIsBeingCreated=false;
+      }
+    });
+
+    @action submitFormBU(event: SubmitEvent) {
+      // Show spinning wheel or loading state
+      this.BUIsBeingCreated = true;
+      event.preventDefault();
+    
+      const formElement = event.target as HTMLFormElement; // Explicit typecasting
+      const formData = new FormData(formElement);
+      const formObject = Object.fromEntries(formData.entries());
+    
+      // Do something with the form values
+      this.businessUnitName = formObject['bu-name'] as string;
+    
+      // now post this info
+      this.createBU.perform();
+    
+      // Clear the form fields
+      this.businessUnitName = "";
+    }
+
+     /**
+   * Creates a Project, then redirects to the dashboard.
+   * On error, show a flashMessage and allow users to try again.
+   */
+   private createProject= task(async () => {
+    this.ProjectIsBeingCreated= true;
+    try {
+      const prj = await this.fetchSvc
+          .fetch("/api/v1/projects", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              name: this.ProjectName,
+              team: this.ProjectTeamName,
+            }),
+          })
+          .then((response) => response?.json());
+
+      // Wait for document to be available.
+      await timeout(AWAIT_DOC_DELAY);
+
+      this.router.transitionTo("authenticated.dashboard");
+      this.toggleModal4();
+      this.flashMessages.add({
+        title: "Success",
+        message: `New Project has been created Succesfully`,
+        type: "success",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+    } catch (err) {
+      this.toggleModal4();
+      this.ProjectIsBeingCreated = false;
+      this.flashMessages.add({
+        title: "Error creating new Project",
+        message: `${err}`,
+        type: "critical",
+        timeout: 6000,
+        extendedTimeout: 1000,
+      });
+      } finally {
+        // Hide spinning wheel or loading state
+        this.ProjectIsBeingCreated = false;
+      }
+    });
+
+    /* method to subbit the create a new Project form*/
+    @action  submitFormProject(event: SubmitEvent) {
+      // Show spinning wheel or loading state
+      this.ProjectIsBeingCreated = true;
+      event.preventDefault();
+
+      const formElement = event.target as HTMLFormElement; // Explicit typecasting;
+      const formData = new FormData(formElement);
+      const formObject = Object.fromEntries(formData.entries());
+
+      // Do something with the form values
+      this.ProjectName = formObject['project-name'] as string;
+
+      // now post this info
+      this.createProject.perform();
+
+      // Clear the form fields
+      this.ProjectName  = "";
+      this.ProjectBU = "";
+      this.ProjectTeamName = "";
+    }
+    
 }
 
 declare module "@glint/environment-ember-loose/registry" {

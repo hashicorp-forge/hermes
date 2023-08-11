@@ -8,6 +8,7 @@ export default class ConfigService extends Service {
   config = {
     algolia_docs_index_name: config.algolia.docsIndexName,
     algolia_drafts_index_name: config.algolia.draftsIndexName,
+    algolia_template_index_name: config.algolia.templateIndexName,
     algolia_internal_index_name: config.algolia.internalIndexName,
     feature_flags: config.featureFlags,
     google_doc_folders: config.google.docFolders ?? "",

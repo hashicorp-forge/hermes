@@ -97,8 +97,8 @@ Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and 
 Copy the example configuration file to the root of this repo and edit the file (it contains sensible defaults and comments to hopefully provide enough information to update necessary values).
 
 ```sh
-cp configs/config_indexer.hcl ./
-# Edit config_indexer.hcl...
+cp configs/config.hcl ./
+# Edit config.hcl...
 ```
 
 ### Build the Project
@@ -119,13 +119,13 @@ make docker/postgres/start
 ### Run the Server
 
 ```sh
-./hermes server -config=config_indexer.hcl
+./hermes server -config=config.hcl
 ```
 
 ### Run the Indexer
 
 ```sh
-./hermes indexer -config=config_indexer.hcl
+./hermes indexer -config=config.hcl
 ```
 
 NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send emails, etc.

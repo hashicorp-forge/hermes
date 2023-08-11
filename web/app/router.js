@@ -13,10 +13,31 @@ Router.map(function () {
     this.route("document", { path: "/document/:document_id" });
     this.route("drafts");
     this.route("my");
+    this.route("doc-reviewer-dashboard");
+    this.route("doc-owner-dashboard");
     this.route("results");
     this.route("settings");
     this.route("new", function () {
+      this.route("custom-template")
       this.route("doc");
+    });
+    this.route('myprofile');
+    this.route('business-units');
+
+    this.route('teams', {
+      path: '/business-units/:business_unit_id'
+    });
+
+    this.route('projects', {
+      path: '/:business_unit_id/teams/:team_id'
+    });
+
+    this.route('project', {
+      path: '/business-units/:business_unit_id/teams/:team_id/projects/:project_id/project'
+    });
+
+    this.route('files', {
+      path: '/business-units/:business_unit_id/teams/:team_id/projects/:project_id/files/:doctype'
     });
   });
   this.route("authenticate");

@@ -1,6 +1,6 @@
 {{#if @facets}}
   <div class="toolbar mb-7">
-    <div class="x-container">
+    <div class="x-container-navbar">
       <div class="flex justify-between w-full">
         <div class="flex items-center">
           <div
@@ -10,25 +10,36 @@
           </div>
           <div class="facets flex items-center space-x-1.5">
             <Header::FacetDropdown
+              @label="BU"
+              @facets={{@facets.product}}
+              @disabled={{not @facets.product}}
+            />
+            <Header::FacetDropdown
+              @label="Team"
+              @facets={{@facets.team}}
+              @disabled={{not @facets.team}}
+            />
+            <Header::FacetDropdown
+              @label="Project"
+              @facets={{@facets.project}}
+              @disabled={{not @facets.project}}
+            />
+            <Header::FacetDropdown
               @label="Type"
               @facets={{@facets.docType}}
               @disabled={{not @facets.docType}}
+            />
+
+            <Header::FacetDropdown
+              @label="Owner"
+              @facets={{@facets.owners}}
+              @disabled={{this.ownerFacetIsDisabled}}
             />
             <Header::FacetDropdown
               @label="Status"
               @facets={{this.statuses}}
               @disabled={{not this.statuses}}
               class="medium"
-            />
-            <Header::FacetDropdown
-              @label="Product/Area"
-              @facets={{@facets.product}}
-              @disabled={{not @facets.product}}
-            />
-            <Header::FacetDropdown
-              @label="Owner"
-              @facets={{@facets.owners}}
-              @disabled={{this.ownerFacetIsDisabled}}
             />
           </div>
         </div>

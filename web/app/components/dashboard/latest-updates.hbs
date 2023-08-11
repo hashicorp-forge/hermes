@@ -20,10 +20,10 @@
     @action={{fn this.setCurrentTab "in-review"}}
   />
   <X::HdsTab
-    @label="Approved"
+    @label="Reviewed"
     @icon="check-circle"
-    @isSelected={{eq this.currentTab "approved"}}
-    @action={{fn this.setCurrentTab "approved"}}
+    @isSelected={{eq this.currentTab "reviewed"}}
+    @action={{fn this.setCurrentTab "reviewed"}}
   />
 </div>
 {{#if this.didInsert.isRunning}}
@@ -45,6 +45,8 @@
           @status={{lowercase doc.status}}
           @thumbnail={{doc.googleMetadata.thumbnailLink}}
           @title={{doc.title}}
+          @dueDate={{doc.dueDate}}
+          @showColorBadge={{false}}
         />
       {{/each}}
     </div>

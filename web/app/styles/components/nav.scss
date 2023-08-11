@@ -33,6 +33,9 @@
 
   .user-buttons {
     @apply flex items-center justify-end space-x-1.5 sm:ml-6 md:ml-8 order-4;
+    .navbar-button{
+      white-space: nowrap;
+    }
   }
 
   .user-avatar {

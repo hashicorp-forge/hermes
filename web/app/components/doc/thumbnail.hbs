@@ -6,18 +6,24 @@
     bg-color-palette-neutral-100 rounded"
   ...attributes
 >
-  <img src="/images/document.png" class="w-full h-auto" />
+  {{!-- <img src="/images/document.png" class="w-full h-auto" /> --}}
+  <img 
+    src="https://lh3.google.com/u/0/d/{{@docID}}=w416-iv1" 
+    alt="Enter Correct Doc Id"
+    onerror="this.src='/images/document.png'"
+    class="w-full h-auto"
+  >
 
   <div class="w-full h-full absolute">
     {{#if this.isObsolete}}
       <Doc::FolderAffordance @isLarge={{@isLarge}} />
     {{/if}}
 
-    {{#if (or this.isApproved this.isObsolete)}}
+    {{#if (or this.isReviewed this.isObsolete)}}
       <div class="absolute w-full">
         <FlightIcon
           data-test-doc-status-icon
-          @name={{if this.isApproved "check-circle" "archive"}}
+          @name={{if this.isReviewed "check-circle" "archive"}}
           @size="24"
           class="status-icon {{this.status}}"
         />

@@ -1,12 +1,15 @@
-import Component from "@glimmer/component";
+import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
+import { task } from "ember-concurrency";
+import { computed } from '@ember/object';
 import AuthenticatedUserService, {
   AuthenticatedUser,
 } from "hermes/services/authenticated-user";
+import FetchService from "hermes/services/fetch";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 
@@ -14,11 +17,36 @@ interface HeaderNavComponentSignature {
   Args: {};
 }
 
+type TeamAreas = {
+  [key: string]: TeamArea;
+};
+
+export type TeamArea = {
+  abbreviation: string;
+  perDocDataType: unknown;
+  BU: string
+};
+
+type ProductAreas = {
+  [key: string]: ProductArea;
+};
+
+export type ProductArea = {
+  abbreviation: string;
+  perDocDataType: unknown;
+  teams: unknown;
+};
+
+
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @tracked showModal: boolean=false;
+  @service("fetch") declare fetchSvc: FetchService;
+  @tracked teams: TeamAreas| undefined = undefined;
+  @tracked products: ProductAreas| undefined = undefined;
 
   protected get profile(): AuthenticatedUser {
     return this.authenticatedUser.info;
@@ -41,6 +69,8 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     owners: [],
     page: 1,
     product: [],
+    team: [],
+    project: [],
     status: [],
     sortBy: "dateDesc",
   };

@@ -9,6 +9,7 @@
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
         @placement={{@placement}}
+        @selectedBU={{@selectedBU}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
         @icon={{this.icon}}
@@ -33,6 +34,7 @@
         @placement={{@placement}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
+        @selectedBU={{@selectedBU}}
         class="w-[300px] product-select-dropdown-list"
         ...attributes
       >
@@ -40,13 +42,13 @@
           <dd.ToggleAction
             class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
           >
-            <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
+            <FlightIcon @name={{or (get-product-id @selected) "org"}} />
 
             <span
               class="product-select-selected-value
                 {{unless @selected 'text-color-foreground-faint'}}"
             >
-              {{or @selected "Select a product/area"}}
+              {{or @selected "Select from an existing BU"}}
             </span>
 
             {{#if this.selectedProductAbbreviation}}
@@ -64,6 +66,7 @@
               @product={{dd.value}}
               @selected={{dd.selected}}
               @abbreviation={{dd.attrs.abbreviation}}
+              @selectedBU={{@selectedBU}}
             />
           </dd.Action>
         </:item>

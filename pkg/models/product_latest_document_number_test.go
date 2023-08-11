@@ -31,14 +31,12 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 		t.Run("Create a product", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			product = Product{
-				Name:         "product1",
-				Abbreviation: "TEST",
+				Name: "product1",
 			}
 			err := product.FirstOrCreate(db)
 			require.NoError(err)
 			assert.EqualValues(1, product.ID)
 			assert.Equal("product1", product.Name)
-			assert.Equal("TEST", product.Abbreviation)
 		})
 
 		t.Run(
@@ -72,13 +70,11 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			docType = DocumentType{
 				Name:     "RFC",
-				LongName: "Request For Comments",
 			}
 			err := docType.FirstOrCreate(db)
 			require.NoError(err)
 			assert.NotEmpty(docType.ID)
 			assert.Equal("RFC", docType.Name)
-			assert.Equal("Request For Comments", docType.LongName)
 		})
 
 		t.Run("Try to upsert a new latest product document number without a latest"+
@@ -109,7 +105,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				require.NoError(err)
 				assert.NotEmpty(p.DocumentTypeID)
 				assert.Equal("RFC", p.DocumentType.Name)
-				assert.Equal("Request For Comments", p.DocumentType.LongName)
 				assert.EqualValues(1, p.ProductID)
 				assert.Equal("product1", p.Product.Name)
 				assert.Equal(5, p.LatestDocumentNumber)
@@ -129,7 +124,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			require.NoError(err)
 			assert.NotEmpty(p.DocumentTypeID)
 			assert.Equal("RFC", p.DocumentType.Name)
-			assert.Equal("Request For Comments", p.DocumentType.LongName)
 			assert.EqualValues(1, p.ProductID)
 			assert.Equal("product1", p.Product.Name)
 			assert.Equal(5, p.LatestDocumentNumber)
@@ -151,7 +145,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				require.NoError(err)
 				assert.NotEmpty(p.DocumentTypeID)
 				assert.Equal("RFC", p.DocumentType.Name)
-				assert.Equal("Request For Comments", p.DocumentType.LongName)
 				assert.EqualValues(1, p.ProductID)
 				assert.Equal("product1", p.Product.Name)
 				assert.Equal(10, p.LatestDocumentNumber)
@@ -171,7 +164,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 			require.NoError(err)
 			assert.NotEmpty(p.DocumentTypeID)
 			assert.Equal("RFC", p.DocumentType.Name)
-			assert.Equal("Request For Comments", p.DocumentType.LongName)
 			assert.EqualValues(1, p.ProductID)
 			assert.Equal("product1", p.Product.Name)
 			assert.Equal(10, p.LatestDocumentNumber)
@@ -185,12 +177,10 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				p := ProductLatestDocumentNumber{
 					DocumentType: DocumentType{
 						Name:     "NEW",
-						LongName: "New Document Type",
 					},
 					LatestDocumentNumber: 1,
 					Product: Product{
-						Name:         "New Product",
-						Abbreviation: "NP",
+						Name: "New Product",
 					},
 				}
 				err := p.Upsert(db)
@@ -199,7 +189,6 @@ func TestProductLatestDocumentNumber(t *testing.T) {
 				assert.Equal("NEW", p.DocumentType.Name)
 				assert.EqualValues(2, p.ProductID)
 				assert.Equal("New Product", p.Product.Name)
-				assert.Equal("NP", p.Product.Abbreviation)
 				assert.Equal(1, p.LatestDocumentNumber)
 			})
 	})

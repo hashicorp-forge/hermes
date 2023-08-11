@@ -41,6 +41,12 @@ export default class DraftsRoute extends Route {
     product: {
       refreshModel: true,
     },
+    team: {
+      refreshModel: true,
+    },
+    project: {
+      refreshModel: true,
+    },
     sortBy: {
       refreshModel: true,
     },

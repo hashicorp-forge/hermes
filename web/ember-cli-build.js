@@ -21,6 +21,7 @@ module.exports = function (defaults) {
                 // And the styles from @hashicorp/design-system-tokens
                 // - Required for @hashicorp/design-system-components to work
                 "./node_modules/@hashicorp/design-system-tokens/dist/products/css",
+                "./node_modules/ember-modal-dialog/app/styles",
               ],
             },
           },
@@ -29,7 +30,6 @@ module.exports = function (defaults) {
       },
     },
   });
-
   // Use `app.import` to add additional libraries to the generated
   // output files.
   //

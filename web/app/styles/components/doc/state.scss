@@ -3,7 +3,7 @@
     @apply h-0.5 rounded-full bg-color-palette-neutral-200;
   }
 
-  &--wip {
+  &--draft {
     li:nth-child(1) {
       @apply bg-color-palette-blue-200;
     }
@@ -18,7 +18,7 @@
     }
   }
 
-  &--approved {
+  &--reviewed {
     .progress-bar {
       @apply bg-color-palette-green-200 opacity-75;
     }

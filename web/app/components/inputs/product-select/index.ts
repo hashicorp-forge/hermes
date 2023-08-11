@@ -17,6 +17,7 @@ interface InputsProductSelectSignature {
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
+    onSelectBU: (selectedBU: string) => void;
   };
 }
 
@@ -35,6 +36,11 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   @tracked selected = this.args.selected;
 
   @tracked products: ProductAreas | undefined = undefined;
+
+  @action
+  selectBU(selectedBU: string) {
+    this.args.onSelectBU(selectedBU) // Pass the selected BU to the parent component
+  }
 
   get icon(): string {
     let icon = "folder";
@@ -55,6 +61,7 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
 
   @action onChange(newValue: any, attributes?: ProductArea) {
     this.selected = newValue;
+    this.selectBU(newValue);
     this.args.onChange(newValue, attributes);
   }
 
