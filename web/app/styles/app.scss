@@ -1,10 +1,11 @@
+@use "components/action";
+
 @use "@hashicorp/design-system-components";
 
 @use "./animations";
 @use "./typography";
 
 
-@use "components/action";
 @use "components/toolbar";
 @use "components/tooltip";
 @use "components/popover";
