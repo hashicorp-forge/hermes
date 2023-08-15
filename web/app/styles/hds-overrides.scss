@@ -38,15 +38,3 @@
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }
 }
-
-.badge-count-highlight {
-  @apply relative inline-flex rounded-l-full rounded-r-full border-transparent bg-color-foreground-faint text-body-200 text-color-page-primary;
-
-  @apply mx-0.5 px-2;
-  @apply md:mx-1.5 md:px-2.5 md:py-[1px];
-
-  // &::before {
-  //   content: "";
-  //   @apply absolute -left-px -top-px -right-px -bottom-px rounded-l-full rounded-r-full border border-color-foreground-highlight opacity-60;
-  // }
-}
