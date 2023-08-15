@@ -32,6 +32,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
       objectID: "400",
       status: "in-review",
       docNumber: "001",
+      isDraft: false,
     });
     this.set("document", this.server.schema.document.first().attrs);
 
