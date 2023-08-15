@@ -19,10 +19,12 @@ Router.map(function () {
       this.route("doc");
     });
     this.route("admin", function () {
-      this.route("documents");
-      this.route("doc-types");
-      this.route("projects");
-      this.route("users");
+      this.route("product-areas", function () {
+        this.route("add");
+      });
+      this.route("doc-types", function () {
+        this.route("add");
+      });
     });
   });
   this.route("authenticate");

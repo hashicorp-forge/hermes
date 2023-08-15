@@ -3,33 +3,20 @@
 <div class="x-container">
 
   <nav class="admin-nav">
+    <h2 class="text-display-500 font-bold opacity-40">Add new...</h2>
     <LinkTo
       class="text-display-500 font-bold"
-      @route="authenticated.admin.documents"
-      @current-when="authenticated.admin.documents"
+      @route="authenticated.admin.product-areas"
+      @current-when="authenticated.admin.product-areas"
     >
-      Documents
-    </LinkTo>
-    <LinkTo
-      class="text-display-500 font-bold"
-      @route="authenticated.admin.projects"
-      @current-when="authenticated.admin.projects"
-    >
-      Projects
-    </LinkTo>
-    <LinkTo
-      class="text-display-500 font-bold"
-      @route="authenticated.admin.users"
-      @current-when="authenticated.admin.users"
-    >
-      Users
+      Product/Area
     </LinkTo>
     <LinkTo
       class="text-display-500 font-bold"
       @route="authenticated.admin.doc-types"
       @current-when="authenticated.admin.doc-types"
     >
-      DocTypes
+      DocType
     </LinkTo>
   </nav>
 

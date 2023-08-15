@@ -1,0 +1,137 @@
+<form class="mx-auto max-w-xl">
+  <div class="mb-5 grid gap-5">
+
+    {{! TODO: try this as a tile? }}
+
+    <Hds::Form::TextInput::Field
+      @value=""
+      placeholder="E.g., Request for Comments"
+      as |F|
+    >
+      <F.Label>Full name</F.Label>
+    </Hds::Form::TextInput::Field>
+    <Hds::Form::TextInput::Field
+      @value=""
+      placeholder="E.g., RFC, PRFAQ"
+      as |F|
+    >
+      <F.Label>Abbreviation</F.Label>
+    </Hds::Form::TextInput::Field>
+    <Hds::Form::Textarea::Field @value="" as |F|>
+      <F.Label>Description</F.Label>
+    </Hds::Form::Textarea::Field>
+
+    <Hds::Form::TextInput::Field @value="" placeholder="" as |F|>
+      <F.Label>Template ID</F.Label>
+    </Hds::Form::TextInput::Field>
+
+    {{! Create a rearrangeable list that functions }}
+  </div>
+  <div>
+
+    <h5 class="hermes-form-label mb-2">Fields</h5>
+    <ul class="mb-5 space-y-1">
+      {{#each this.suggestedFields as |field|}}
+        <li>
+          <Hds::Form::Checkbox::Field
+            disabled={{field.isRequired}}
+            checked={{field.isRequired}}
+            as |F|
+          >
+            <F.Label class="flex items-center font-regular">
+              <FlightIcon
+                @name={{if
+                  (eq field.type "string")
+                  "type"
+                  (if
+                    (eq field.type "long-string")
+                    "type"
+                    (if (eq field.type "product-area") "hashicorp" "users")
+                  )
+                }}
+                class="mr-1.5 text-color-foreground-primary"
+              />
+              {{field.name}}
+            </F.Label>
+
+          </Hds::Form::Checkbox::Field>
+        </li>
+      {{/each}}
+    </ul>
+
+    <Action {{on "click" this.showModal}}>
+      + Add custom field...
+    </Action>
+  </div>
+
+  <Hds::Button @text="Create doctype" />
+</form>
+
+{{#if this.modalIsShown}}
+  <Hds::Modal @onClose={{this.hideModal}} as |M|>
+    <M.Header>Add custom field</M.Header>
+    <M.Body>
+      <X::DropdownList
+        @items={{this.customFieldTypes}}
+        @selected={{this.selectedCustomFieldType}}
+      >
+        <:anchor as |dd|>
+          <div class="hermes-form-label">
+            Field type
+          </div>
+          <dd.ToggleButton @text="--" />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action>
+            {{dd.attrs.name}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+
+      <div>
+        <div class="hermes-form-label">
+          Name
+        </div>
+        <Hds::Form::TextInput::Base @value="" />
+      </div>
+      <div class="hermes-form-label">
+        Attributes
+      </div>
+      <div>
+        <Hds::Form::Checkbox::Field as |F|>
+          <F.Label class="font-regular">
+            Required
+          </F.Label>
+        </Hds::Form::Checkbox::Field>
+      </div>
+      <div>
+        <Hds::Form::Checkbox::Field as |F|>
+          <F.Label class="font-regular">
+            Has "new" label
+          </F.Label>
+        </Hds::Form::Checkbox::Field>
+      </div>
+      <div>
+        <Hds::Form::Checkbox::Field as |F|>
+          <F.Label class="font-regular">
+            Has tooltip
+          </F.Label>
+        </Hds::Form::Checkbox::Field>
+      </div>
+    </M.Body>
+    <M.Footer>
+      <Hds::ButtonSet>
+        <Hds::Button @text="Add field" {{on "click" this.addField}} />
+      </Hds::ButtonSet>
+    </M.Footer>
+  </Hds::Modal>
+{{/if}}
+
+<!--
+{{#each @docTypes as |d|}}
+  <div>
+    {{log "d" d}}
+    {{d.name}}
+  </div>
+{{/each}}
+-->
