@@ -9,6 +9,7 @@ import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
 import LtHelper from "ember-truth-helpers/helpers/lt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
+import EmberSetBodyClassHelper from "ember-set-body-class";
 import { FlightIconComponent } from "hds/flight-icon";
 import { HdsButtonComponent } from "hds/button";
 import { HdsBadgeCountComponent } from "hds/badge-count";
@@ -45,6 +46,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
     "click-outside": typeof OnClickOutsideModifier;
+    "set-body-class": typeof EmberSetBodyClassHelper;
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;
     AnimatedOrphans: typeof AnimatedOrphans;
