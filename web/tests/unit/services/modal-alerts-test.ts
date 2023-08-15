@@ -12,8 +12,8 @@ module("Unit | Service | modal-alerts", function (hooks) {
 
     assert.equal(modalAlerts.activeModal, null);
 
-    await modalAlerts.setActive.perform("docCreated");
-    assert.equal(modalAlerts.activeModal, "docCreated");
+    await modalAlerts.setActive.perform("draftCreated");
+    assert.equal(modalAlerts.activeModal, "draftCreated");
 
     modalAlerts.close();
 

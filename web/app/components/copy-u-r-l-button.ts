@@ -16,6 +16,7 @@ interface CopyURLButtonComponentSignature {
     tooltipIsForcedOpen?: boolean;
     tooltipText?: string;
     icon?: string;
+    isIconOnly?: boolean;
   };
 }
 
@@ -66,8 +67,12 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
     if (this.args.tooltipText) {
       return this.args.tooltipText;
     } else {
-      return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
+      return this.defaultText;
     }
+  }
+
+  protected get defaultText(): string {
+    return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
   }
 
   /**
@@ -91,23 +96,26 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
         const result = await navigator.clipboard.readText();
         if (result === this.args.url) {
           this.urlWasRecentlyCopied = true;
+
           assert("button must exist", this.button);
 
           let tooltipId = this.button.getAttribute("aria-describedby");
 
-          assert("tooltipId must exist", tooltipId);
-
-          document
-            .getElementById(tooltipId)
-            ?.setAttribute("data-url-copied", "true");
+          if (this.args.isIconOnly && tooltipId) {
+            document
+              .getElementById(tooltipId)
+              ?.setAttribute("data-url-copied", "true");
+          }
 
           await timeout(Ember.testing ? 0 : 2000);
 
           this.urlWasRecentlyCopied = false;
 
-          document
-            .getElementById(tooltipId)
-            ?.setAttribute("data-url-copied", "false");
+          if (this.args.isIconOnly && tooltipId) {
+            document
+              .getElementById(tooltipId)
+              ?.setAttribute("data-url-copied", "false");
+          }
         }
       }
     } catch (e) {

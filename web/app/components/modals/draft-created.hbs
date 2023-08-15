@@ -1,13 +1,7 @@
 {{#if this.modalIsShown}}
-  <Hds::Modal data-test-doc-created-modal as |M|>
+  <Hds::Modal data-test-draft-created-modal as |M|>
     <M.Header>
-      <div class="flex items-center">
-        <FlightIcon
-          @name="check-circle-fill"
-          class="text-color-palette-green-200 mr-2"
-        />
-        Doc Created!
-      </div>
+      Draft created!
     </M.Header>
     <M.Body>
       <p class="text-body-300">
@@ -27,12 +21,12 @@
     <M.Footer as |F|>
       <div class="flex space-x-6 items-center">
         <Hds::Button
-          data-test-doc-created-modal-button
-          @text="Continue to doc"
+          data-test-draft-created-modal-button
+          @text="Continue to draft"
           {{on "click" this.close}}
         />
         <Hds::Form::Checkbox::Field
-          data-test-doc-created-modal-checkbox
+          data-test-draft-created-modal-checkbox
           {{on "click" this.toggleChecked}}
           as |F|
         >

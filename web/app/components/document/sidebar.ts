@@ -22,6 +22,8 @@ import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
+import ConfigService from "hermes/services/config";
+import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -53,22 +55,24 @@ export enum DraftVisibilityDescription {
 const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
 
-  @tracked archiveModalIsActive = false;
-  @tracked deleteModalIsActive = false;
-  @tracked requestReviewModalIsActive = false;
+  @tracked archiveModalIsShown = false;
+  @tracked deleteModalIsShown = false;
+  @tracked requestReviewModalIsShown = false;
+  @tracked docPublishedModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  get modalIsActive() {
+  get modalIsShown() {
     return (
-      this.archiveModalIsActive ||
-      this.deleteModalIsActive ||
-      this.requestReviewModalIsActive
+      this.archiveModalIsShown ||
+      this.deleteModalIsShown ||
+      this.requestReviewModalIsShown
     );
   }
 
@@ -141,6 +145,39 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.draftIsShareable
       ? DraftVisibilityIcon.Shareable
       : DraftVisibilityIcon.Restricted;
+  }
+
+  /**
+   * The URL that the copyURLButton should copy to the clipboard.
+   * If the document is a draft, this is the current window location.
+   * If the doc is published, use the short link if it's available,
+   * otherwise use the current window location.s
+   */
+  protected get shareURL() {
+    // We only assign shortLinks to published documents
+    if (this.args.document.isDraft) {
+      return window.location.href;
+    }
+
+    let shortLinkBaseURL: string | undefined =
+      this.configSvc.config.short_link_base_url;
+
+    if (shortLinkBaseURL) {
+      // Add a trailing slash if the URL needs one
+      if (!shortLinkBaseURL.endsWith("/")) {
+        shortLinkBaseURL += "/";
+      }
+      // Reject invalid URLs
+      if (!isValidURL(shortLinkBaseURL)) {
+        shortLinkBaseURL = undefined;
+      }
+    }
+
+    return shortLinkBaseURL
+      ? `${
+          shortLinkBaseURL + this.args.document.docType.toLowerCase()
+        }/${this.args.document.docNumber.toLowerCase()}`
+      : window.location.href;
   }
 
   /**
@@ -423,7 +460,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   @action maybeShowFlashError(error: Error, title: string) {
-    if (!this.modalIsActive) {
+    if (!this.modalIsShown) {
       this.showFlashError(error, title);
     }
   }
@@ -577,17 +614,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         method: "POST",
       });
 
-      this.showFlashSuccess("Done!", "Document review requested");
-
       this.router.transitionTo({
         queryParams: { draft: false },
       });
+
+      this.refreshRoute();
+
+      this.requestReviewModalIsShown = false;
+      this.docPublishedModalIsShown = true;
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to request review");
       throw error;
     }
-    this.requestReviewModalIsActive = false;
-    this.refreshRoute();
   });
 
   deleteDraft = task(async () => {
@@ -610,15 +648,19 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   @action closeDeleteModal() {
-    this.deleteModalIsActive = false;
+    this.deleteModalIsShown = false;
   }
 
   @action closeRequestReviewModal() {
-    this.requestReviewModalIsActive = false;
+    this.requestReviewModalIsShown = false;
   }
 
   @action closeArchiveModal() {
-    this.archiveModalIsActive = false;
+    this.archiveModalIsShown = false;
+  }
+
+  @action protected closeRequestReviewSuccessModal() {
+    this.requestReviewModalIsShown = false;
   }
 
   @action onScroll() {

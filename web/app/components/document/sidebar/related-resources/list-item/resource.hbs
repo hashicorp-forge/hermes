@@ -1,9 +1,9 @@
-<div class="flex shrink-0 w-[22px]">
+<div class="flex w-[22px] shrink-0">
   {{#if this.resourceIsDocument}}
     <div
-      class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white"
+      class="hds-surface-mid mt-[3px] flex overflow-hidden rounded-sm bg-white p-px"
     >
-      <img src="/images/document.png" class="w-[18px] h-auto" />
+      <img src="/images/document.png" class="h-auto w-[18px]" />
     </div>
   {{else}}
     <FlightIcon
@@ -16,12 +16,13 @@
 <div class="w-full overflow-hidden">
   <TruncatedText
     @tagName="h4"
-    class="text-body-200 text-color-foreground-strong font-medium"
+    class="text-body-200 font-medium text-color-foreground-strong"
+    title={{this.title}}
   >
     {{this.title}}
   </TruncatedText>
   {{#if this.resourceIsDocument}}
-    <div class="text-color-foreground-faint text-body-100 mt-px">
+    <div class="mt-px text-body-100 text-color-foreground-faint">
       {{this.docType}}
       ·
       {{this.docNumber}}

@@ -17,12 +17,13 @@
     {{#if this.shareButtonIsShown}}
       <CopyURLButton
         data-test-sidebar-copy-url-button
-        data-test-copy-url-value={{this.url}}
-        @url={{this.url}}
+        data-test-copy-url-value={{@shareURL}}
+        @url={{@shareURL}}
         @tooltipPlacement={{if @isCollapsed "right" "bottom"}}
         @tooltipIsForcedOpen={{this.tooltipIsForcedOpen}}
         @icon={{@shareButtonIcon}}
         @tooltipText={{@shareButtonTooltipText}}
+        @isIconOnly={{true}}
         class="sidebar-header-button"
         id="sidebar-header-copy-url-button"
       />

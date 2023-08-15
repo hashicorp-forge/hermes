@@ -4,7 +4,7 @@ import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { task, timeout } from "ember-concurrency";
 
-export type ModalType = "docCreated";
+export type ModalType = "draftCreated";
 
 export default class ModalAlertsService extends Service {
   @service declare router: RouterService;
