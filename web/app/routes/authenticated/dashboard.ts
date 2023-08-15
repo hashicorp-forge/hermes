@@ -30,7 +30,6 @@ export default class DashboardRoute extends Route {
           ` AND NOT approvedBy:'${userInfo.email}'` +
           " AND appCreated:true" +
           " AND status:In-Review",
-        hitsPerPage: 4,
       })
       .then((result) => {
         // Add modifiedAgo for each doc.

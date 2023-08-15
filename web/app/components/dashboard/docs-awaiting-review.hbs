@@ -1,12 +1,12 @@
 <div class="mb-12 w-full">
   <div class="relative flex justify-between">
-    <h2 class="items-center self-center text-body-200 font-regular md:flex">
+    <h2 class="items-center self-center text-body-300 font-regular md:flex">
       You have
       <Hds::BadgeCount
         data-test-docs-awaiting-review-count
         @text="{{@docs.length}}"
         @type="inverted"
-        class="mx-0.5 md:mx-1.5"
+        class="mx-0.5 !bg-color-foreground-critical md:mx-1.5"
       />
       document{{if (gt @docs.length 1) "s"}}
       awaiting your review:
