@@ -1,0 +1,11 @@
+.admin-nav {
+  @apply mt-6 flex justify-center space-x-6;
+
+  > a {
+    @apply border-b-4 border-b-transparent py-3 text-display-500 font-bold;
+  }
+
+  .active {
+    @apply border-b-color-foreground-critical;
+  }
+}

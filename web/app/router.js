@@ -20,6 +20,7 @@ Router.map(function () {
     });
     this.route("admin", function () {
       this.route("documents");
+      this.route("doc-types");
       this.route("projects");
       this.route("users");
     });

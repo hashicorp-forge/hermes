@@ -1,0 +1,23 @@
+{{page-title "DocTypes"}}
+
+<Hds::Button @text="New DocType" @icon="plus" />
+
+{{! Model for this route will call the back end for the docTypes }}
+
+{{@model}}
+
+{{#each @model as |docType|}}
+  {{log @model}}
+  <div class="docType">
+    <div class="docType__name">{{docType.name}}</div>
+    <div class="docType__description">{{docType.description}}</div>
+    <div class="docType__fields">
+      {{#each docType.fields as |field|}}
+        <div class="docType__field">
+          <div class="docType__field__name">{{field.name}}</div>
+          <div class="docType__field__type">{{field.type}}</div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+{{/each}}

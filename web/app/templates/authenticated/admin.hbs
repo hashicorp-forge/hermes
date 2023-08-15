@@ -1,21 +1,38 @@
 {{page-title "Admin"}}
 
-You have reached the ad_min.
+<div class="x-container">
 
-<LinkTo @route="authenticated.admin.users">
-  Users
-</LinkTo>
+  <nav class="admin-nav">
+    <LinkTo
+      class="text-display-500 font-bold"
+      @route="authenticated.admin.documents"
+      @current-when="authenticated.admin.documents"
+    >
+      Documents
+    </LinkTo>
+    <LinkTo
+      class="text-display-500 font-bold"
+      @route="authenticated.admin.projects"
+      @current-when="authenticated.admin.projects"
+    >
+      Projects
+    </LinkTo>
+    <LinkTo
+      class="text-display-500 font-bold"
+      @route="authenticated.admin.users"
+      @current-when="authenticated.admin.users"
+    >
+      Users
+    </LinkTo>
+    <LinkTo
+      class="text-display-500 font-bold"
+      @route="authenticated.admin.doc-types"
+      @current-when="authenticated.admin.doc-types"
+    >
+      DocTypes
+    </LinkTo>
+  </nav>
 
-<LinkTo @route="authenticated.admin.documents">
-  Documents
-</LinkTo>
+  {{outlet}}
 
-<LinkTo @route="authenticated.admin.projects">
-  Projects
-</LinkTo>
-
-{{outlet}}
-
-{{! admin nav }}
-
-{{! admin main body }}
+</div>
