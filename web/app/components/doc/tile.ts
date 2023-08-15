@@ -7,7 +7,8 @@ interface DocTileComponentSignature {
     docNumber?: string;
     isOwner?: boolean;
     isResult?: boolean;
-    modifiedAge?: string;
+    isDraft?: boolean;
+    modifiedAgo?: string;
     owner?: string;
     productArea?: string;
     snippet?: string;
@@ -17,16 +18,7 @@ interface DocTileComponentSignature {
   };
 }
 
-export default class DocTileComponent extends Component<DocTileComponentSignature> {
-  protected get productAreaName(): string | undefined {
-    switch (this.args.productArea) {
-      case "Cloud Platform":
-        return "HCP";
-      default:
-        return this.args.productArea;
-    }
-  }
-}
+export default class DocTileComponent extends Component<DocTileComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
