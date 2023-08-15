@@ -18,7 +18,12 @@ Router.map(function () {
     this.route("new", function () {
       this.route("doc");
     });
+    this.route("admin", function () {
+      this.route("documents");
+      this.route("projects");
+      this.route("users");
+    });
   });
   this.route("authenticate");
-  this.route('404', { path: '/*path' })
+  this.route("404", { path: "/*path" });
 });
