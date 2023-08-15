@@ -40,13 +40,13 @@
 }
 
 .badge-count-highlight {
-  @apply border-transparent rounded-l-full rounded-r-full bg-color-surface-highlight relative text-color-foreground-highlight text-body-200 inline-flex;
+  @apply relative inline-flex rounded-l-full rounded-r-full border-transparent bg-color-foreground-faint text-body-200 text-color-page-primary;
 
-  @apply px-2 mx-0.5;
-  @apply md:px-3 md:py-[2px] md:mx-1.5;
+  @apply mx-0.5 px-2;
+  @apply md:mx-1.5 md:px-2.5 md:py-[1px];
 
-  &::before {
-    content: "";
-    @apply absolute -left-px -top-px -right-px -bottom-px rounded-l-full rounded-r-full border border-color-foreground-highlight opacity-60;
-  }
+  // &::before {
+  //   content: "";
+  //   @apply absolute -left-px -top-px -right-px -bottom-px rounded-l-full rounded-r-full border border-color-foreground-highlight opacity-60;
+  // }
 }
