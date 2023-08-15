@@ -1,4 +1,5 @@
 import "@glint/environment-ember-loose";
+import EmberPageTitleHelper from "ember-page-title";
 import PerformHelper from "ember-concurrency/helpers/perform";
 import OnDocumentHelper from "ember-on-helper/helpers/on-document";
 import DidInsertModifier from "ember-render-modifiers/modifiers/did-insert";
@@ -42,6 +43,7 @@ import { HdsFormErrorComponent } from "hds/form/error";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
+    "page-title": typeof EmberPageTitleHelper;
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
