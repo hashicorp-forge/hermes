@@ -59,6 +59,15 @@ export default function (mirageConfig) {
             let docMatches = [];
             let idsToExclude: string[] = [];
 
+            const setDefaultDocMatches = () => {
+              docMatches = schema.document.all().models.filter((doc) => {
+                return (
+                  doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
+                  doc.attrs.product.toLowerCase().includes(query.toLowerCase())
+                );
+              });
+            };
+
             const filters = requestBody.filters;
 
             if (filters?.includes("NOT objectID")) {
@@ -88,13 +97,23 @@ export default function (mirageConfig) {
 
               // Duplicates are detected in the front end
               return new Response(200, {}, { hits: docMatches });
+            } else if (filters) {
+              const requestIsForDocsAwaitingReview =
+                filters.includes("approvers:'testuser@example.com'") &&
+                requestBody.filters.includes("AND status:In-Review");
+              if (requestIsForDocsAwaitingReview) {
+                docMatches = schema.document.all().models.filter((doc) => {
+                  return (
+                    doc.attrs.approvers.includes("testuser@example.com") &&
+                    doc.attrs.status.toLowerCase().includes("review")
+                  );
+                });
+              } else {
+                // This
+                setDefaultDocMatches();
+              }
             } else {
-              docMatches = schema.document.all().models.filter((doc) => {
-                return (
-                  doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
-                  doc.attrs.product.toLowerCase().includes(query.toLowerCase())
-                );
-              });
+              setDefaultDocMatches();
             }
 
             if (idsToExclude) {

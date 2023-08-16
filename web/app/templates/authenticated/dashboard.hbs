@@ -6,40 +6,18 @@
 
   <Dashboard::NewFeaturesBanner />
 
-  <div class="hds-border-primary border-0 border-b pb-9">
-    <h1>Welcome back, {{this.authenticatedUser.info.given_name}}</h1>
-    <p>Here’s all the latest updates across the organization.</p>
-  </div>
+  <h1 class="mb-7">
+    Welcome back,
+    {{this.authenticatedUser.info.given_name}}!
+  </h1>
 
-  {{#if this.docsWaitingForReview}}
-    <div
-      class="hds-border-primary flex w-full flex-col border-0 border-b py-10"
-    >
-      <div class="mb-8 flex items-center space-x-2">
-        <FlightIcon @name="user-check" @size="24" />
-        <h2
-          class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-        >Documents waiting for your review</h2>
-      </div>
-
-      <div class="tile-list">
-        {{#each this.docsWaitingForReview as |doc|}}
-          <Doc::Tile
-            @avatar="{{get doc.ownerPhotos 0}}"
-            @docID="{{doc.objectID}}"
-            @docNumber="{{doc.docNumber}}"
-            @modifiedAgo="{{doc.modifiedAgo}}"
-            @owner="{{get doc.owners 0}}"
-            @productArea="{{doc.product}}"
-            @status="{{lowercase doc.status}}"
-            @title="{{doc.title}}"
-          />
-        {{/each}}
-      </div>
-    </div>
+  {{#if @model}}
+    <Dashboard::DocsAwaitingReview @docs={{@model}} />
   {{/if}}
 
-  <div class="hds-border-primary flex w-full flex-col border-0 border-b py-10">
+  <div
+    class="hds-border-primary mt-10 flex w-full flex-col border-0 border-b pb-10"
+  >
     <div class="mb-8 flex items-center space-x-2">
       <FlightIcon @name="eye" @size="24" />
       <h2
@@ -51,7 +29,7 @@
       <div class="tile-list">
         {{#each this.recentDocs.all as |r|}}
           <Doc::Tile
-            @isDraft={{r.isDraft}}
+            @isDraft={{r.doc.isDraft}}
             @avatar={{get r.doc.ownerPhotos 0}}
             @docID={{r.doc.objectID}}
             @docNumber={{r.doc.docNumber}}

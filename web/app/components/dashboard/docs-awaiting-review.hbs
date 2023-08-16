@@ -1,0 +1,36 @@
+<div class="mb-12 w-full">
+  <div class="relative flex justify-between">
+    <h2 class="items-center self-center text-body-300 font-regular md:flex">
+      You have
+      <Hds::BadgeCount
+        data-test-docs-awaiting-review-count
+        @text="{{@docs.length}}"
+        @type="inverted"
+        class="mx-0.5 !bg-color-foreground-critical md:mx-1.5"
+      />
+      document{{if (gt @docs.length 1) "s"}}
+      awaiting your review:
+    </h2>
+
+  </div>
+
+  <ul class="mt-4 gap-1 space-y-0.5">
+    {{#each this.docsToShow as |doc|}}
+      <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
+    {{/each}}
+  </ul>
+  {{#if this.toggleButtonIsShown}}
+    <Action
+      data-test-docs-awaiting-review-toggle
+      {{on "click" this.toggleCollapsed}}
+      class="mt-4 flex items-center text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
+    >
+      <FlightIcon
+        data-test-docs-awaiting-review-toggle-icon
+        @name={{if this.isCollapsed "plus" "minus"}}
+        class="mr-1.5"
+      />
+      {{if this.isCollapsed "Show all" "Show fewer"}}
+    </Action>
+  {{/if}}
+</div>

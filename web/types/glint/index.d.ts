@@ -8,6 +8,7 @@ import AndHelper from "ember-truth-helpers/helpers/and";
 import EqHelper from "ember-truth-helpers/helpers/eq";
 import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
 import LtHelper from "ember-truth-helpers/helpers/lt";
+import GtHelper from "ember-truth-helpers/helpers/gt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
 import EmberSetBodyClassHelper from "ember-set-body-class";
@@ -60,6 +61,7 @@ declare module "@glint/environment-ember-loose/registry" {
     and: typeof AndHelper;
     not: typeof NotHelper;
     lt: typeof LtHelper;
+    gt: typeof GtHelper;
     "is-empty": IsEmptyHelper;
     FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;
