@@ -425,6 +425,7 @@
           {{#if this.isOwner}}
             <div class="flex items-start gap-2 px-3">
               <Hds::Button
+                data-test-sidebar-publish-for-review-button
                 @text="Publish for review..."
                 @size="medium"
                 @color="primary"
@@ -547,6 +548,7 @@
 
   {{#if this.requestReviewModalIsShown}}
     <Document::Modal
+      data-test-publish-for-review-modal
       @headerText="Publish for review"
       @errorTitle="Error requesting review"
       @close={{this.closeRequestReviewModal}}
@@ -561,7 +563,10 @@
     >
       <:default as |M|>
         {{#if M.taskIsRunning}}
-          <div class="grid place-items-center pt-1 pb-12">
+          <div
+            data-test-publishing-for-review-message
+            class="grid place-items-center pt-1 pb-12"
+          >
             <div class="text-center">
               <FlightIcon @name="loading" @size="24" class="mb-5" />
               <h2>Submitting for review...</h2>
@@ -668,49 +673,60 @@
   {{/if}}
 
   {{#if this.docPublishedModalIsShown}}
-    <Hds::Modal as |M|>
+    <Hds::Modal data-test-doc-published-modal as |M|>
       <M.Header>
         <div class="flex items-center">
           <FlightIcon
             @name="check-circle-fill"
-            class="text-color-palette-green-200 mr-2"
+            class="mr-2 text-color-palette-green-200"
           />
           Document published!
         </div>
       </M.Header>
       <M.Body>
-        <p class="text-body-300 mb-5">
+        <p class="text-body-300">
           Your doc is now available to everyone in your workspace.
           <br />
           Weʼve notified your approvers and subscribers to this product/area.
         </p>
-        <label
-          class="hermes-form-label mb-1"
-          for="recently-published-share-url"
-        >
-          Share it with others
-        </label>
-        <Hds::Form::TextInput::Base
-          id="recently-published-share-url"
-          class="text-body-300 pl-2.5 mb-1.5"
-          @value={{this.shareURL}}
-          {{select-on-focus}}
-          readonly
-        />
+        {{#unless this.docNumberLookupHasFailed}}
+          <label
+            class="hermes-form-label mb-1 mt-5"
+            for="recently-published-share-url"
+          >
+            Share it with others
+          </label>
+          <Hds::Form::TextInput::Base
+            data-test-share-document-url-input
+            id="recently-published-share-url"
+            class="mb-1.5 pl-2.5 text-body-300"
+            @value={{this.shareURL}}
+            {{select-on-focus}}
+            readonly
+          />
+        {{/unless}}
       </M.Body>
       <M.Footer>
         <Hds::ButtonSet>
-
-          <CopyURLButton
-            @url={{this.shareURL}}
-            class="hds-button hds-button--size-medium hds-button--color-primary"
-          />
+          {{#unless this.docNumberLookupHasFailed}}
+            <CopyURLButton
+              data-test-doc-published-copy-url-button
+              @url={{this.shareURL}}
+              class="hds-button hds-button--size-medium hds-button--color-primary"
+            />
+          {{/unless}}
           <Hds::Button
+            data-test-continue-to-document-button
             {{on "click" (set this "docPublishedModalIsShown" false)}}
             @text="Continue to document"
-            @icon="arrow-right"
-            @iconPosition="trailing"
-            @color="tertiary"
+            @icon={{unless this.docNumberLookupHasFailed "arrow-right"}}
+            @iconPosition={{unless this.docNumberLookupHasFailed "trailing"}}
+            @color={{if this.docNumberLookupHasFailed "primary" "tertiary"}}
+            data-test-color={{if
+              this.docNumberLookupHasFailed
+              "primary"
+              "tertiary"
+            }}
           />
         </Hds::ButtonSet>
       </M.Footer>
