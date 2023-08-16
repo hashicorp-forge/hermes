@@ -79,9 +79,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   /**
    * Whether the doc is a draft.
-   * If the draft was recently published, use that value
-   * to avoid a flicker of the "draft" state.
-   * Otherwise use the passed-in property.
+   * If the draft was recently published, return false.
+   * Otherwise use the passed-in isDraft property.
    */
   get isDraft() {
     return this.draftWasPublished ? false : this.args.document?.isDraft;
@@ -103,7 +102,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    * Whether a draft was published during the session.
    * Set true when the user successfully requests a review.
-   * Used to immediately update the UI to reflect the doc's new state.
+   * Used in the `isDraft` getter to immediately update the UI
+   * to reflect the new state of the document.
    */
   @tracked private draftWasPublished: boolean | null = null;
 
