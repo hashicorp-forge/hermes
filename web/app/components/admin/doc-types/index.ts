@@ -16,6 +16,8 @@ interface AdminDocTypesSignature {
 export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
   @tracked modalIsShown = false;
 
+  @tracked customFieldHasTooltip = false;
+
   get suggestedFields() {
     return [
       {
@@ -94,6 +96,34 @@ export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
     };
   }
 
+  @tracked selectedCustomFieldType = "string";
+
+  get selectedCustomFieldIcon() {
+    switch (this.selectedCustomFieldType) {
+      case "long-string":
+        return "align-left";
+      case "string":
+        return "type";
+      case "people":
+        return "users";
+      case "document":
+        return "file-text";
+    }
+  }
+
+  get selectedCustomFieldLabel() {
+    switch (this.selectedCustomFieldType) {
+      case "long-string":
+        return "Long text";
+      case "string":
+        return "Short text";
+      case "people":
+        return "People";
+      case "document":
+        return "Hermes Doc";
+    }
+  }
+
   @action showModal() {
     this.modalIsShown = true;
   }
@@ -104,6 +134,14 @@ export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
 
   @action addField() {
     return;
+  }
+
+  @action toggleHasTooltip() {
+    this.customFieldHasTooltip = !this.customFieldHasTooltip;
+  }
+
+  @action setCustomFieldType(type: string) {
+    this.selectedCustomFieldType = type;
   }
 }
 
