@@ -516,8 +516,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR).doesNotExist();
     assert.dom(DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR).doesNotExist();
 
-    await this.pauseTest();
-
     assert
       .dom(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR)
       .hasAttribute(
