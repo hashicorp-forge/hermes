@@ -1,0 +1,21 @@
+<div
+  class="overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200 border border-transparent
+    {{if this.sizeIsSmall 'w-5 h-5'}}
+    {{if this.sizeIsMedium 'w-7 h-7'}}
+    "
+  ...attributes
+>
+  {{#if @imgURL}}
+    <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
+  {{else}}
+    <div class="text-body-100 flex">
+      {{#if @email}}
+        <span class="capitalize">
+          {{get-first-letter @email}}
+        </span>
+      {{else}}
+        <FlightIcon @name="user" class="scale-90" />
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

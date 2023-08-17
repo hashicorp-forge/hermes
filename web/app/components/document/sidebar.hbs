@@ -6,6 +6,7 @@
   @shareButtonIsShown={{this.shareButtonIsShown}}
   @shareButtonTooltipText={{this.temporaryShareButtonTooltipText}}
   @shareButtonIcon={{this.temporaryShareButtonIcon}}
+  @shareURL={{this.shareURL}}
 />
 
 {{#unless @isCollapsed}}
@@ -36,7 +37,7 @@
           <Hds::Badge
             data-test-sidebar-title-badge
             @text={{if this.isDraft "Draft" @document.docNumber}}
-            class="uppercase !rounded-[3px]
+            class="!rounded-[3px] uppercase
               {{if
                 @document.isDraft
                 '!bg-color-palette-neutral-500 !text-white'
@@ -62,7 +63,7 @@
                     "up"
                     "down"
                   }}
-                  class="flex items-center text-color-foreground-faint sidebar-header-button draft-visibility-button"
+                  class="sidebar-header-button draft-visibility-button flex items-center text-color-foreground-faint"
                   {{tooltip
                     this.toggleDraftVisibilityTooltipText
                     placement="bottom"
@@ -82,14 +83,14 @@
                   class="flex items-start gap-3 py-2.5 pl-4 pr-6"
                   {{on "click" (perform this.setDraftVisibility dd.value)}}
                 >
-                  <FlightIcon @name={{dd.attrs.icon}} class="shrink-0 mt-0.5" />
+                  <FlightIcon @name={{dd.attrs.icon}} class="mt-0.5 shrink-0" />
                   <div class="w-full">
                     <h4>{{dd.attrs.title}}</h4>
                     <p>{{dd.attrs.description}}</p>
                   </div>
                   <FlightIcon
                     @name="check"
-                    class="check shrink-0 mt-0.5
+                    class="check mt-0.5 shrink-0
                       {{if dd.isSelected 'visible' 'invisible'}}"
                   />
                 </dd.Action>
@@ -140,7 +141,7 @@
         {{/if}}
       </div>
 
-      <hr class="border-0 border-b hds-border-faint" />
+      <hr class="hds-border-faint border-0 border-b" />
 
       {{! Summary }}
       <div class="mb-5">
@@ -198,7 +199,7 @@
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
-          <div class="w-full relative">
+          <div class="relative w-full">
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
@@ -384,16 +385,16 @@
   {{#if this.footerIsShown}}
     <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
       {{#if this.footerControlsAreDisabled}}
-        <div class="px-3 -mb-1">
-          <div class="w-full pt-3.5 border-t border-color-border-primary">
+        <div class="-mb-1 px-3">
+          <div class="w-full border-t border-color-border-primary pt-3.5">
             <div class="text-body-200 text-color-foreground-faint">
               <h5
-                class="text-body-200 font-semibold text-color-foreground-primary flex items-center mb-1"
+                class="mb-1 flex items-center text-body-200 font-semibold text-color-foreground-primary"
               >
                 {{if this.docIsLocked "Document is locked" "Read-only headers"}}
                 <FlightIcon
                   @name="lock"
-                  class="shrink-0 text-color-foreground-faint -mt-px ml-1.5"
+                  class="-mt-px ml-1.5 shrink-0 text-color-foreground-faint"
                 />
               </h5>
               <p class="mb-1.5">
@@ -422,13 +423,14 @@
       {{else}}
         {{#if this.isDraft}}
           {{#if this.isOwner}}
-            <div class="flex items-start px-3 gap-2">
+            <div class="flex items-start gap-2 px-3">
               <Hds::Button
+                data-test-sidebar-publish-for-review-button
                 @text="Publish for review..."
                 @size="medium"
                 @color="primary"
                 class="w-full"
-                {{on "click" (fn (set this "requestReviewModalIsActive" true))}}
+                {{on "click" (fn (set this "requestReviewModalIsShown" true))}}
               />
               <Hds::Button
                 @text="Delete"
@@ -437,13 +439,13 @@
                 @icon="trash"
                 @isIconOnly={{true}}
                 class="basis-0"
-                {{on "click" (fn (set this "deleteModalIsActive" true))}}
+                {{on "click" (fn (set this "deleteModalIsShown" true))}}
               />
             </div>
           {{/if}}
         {{else}}
           {{#if this.isOwner}}
-            <div class="flex items-start px-3 gap-2">
+            <div class="flex items-start gap-2 px-3">
 
               <Hds::Button
                 @text={{this.moveToStatusButtonText}}
@@ -468,13 +470,13 @@
                 @isIconOnly={{true}}
                 class="basis-0"
                 disabled={{(eq @document.status "Obsolete")}}
-                {{on "click" (fn (set this "archiveModalIsActive" true))}}
+                {{on "click" (fn (set this "archiveModalIsShown" true))}}
               />
             </div>
 
           {{else}}
             {{#if this.isApprover}}
-              <div class="flex flex-col items-start px-3 gap-2">
+              <div class="flex flex-col items-start gap-2 px-3">
                 <Hds::Button
                   @text={{this.approveButtonText}}
                   @size="medium"
@@ -516,7 +518,7 @@
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
-  {{#if this.archiveModalIsActive}}
+  {{#if this.archiveModalIsShown}}
     <Document::Modal
       @color="critical"
       @headerText="Archive document?"
@@ -530,12 +532,12 @@
     />
   {{/if}}
 
-  {{#if this.deleteModalIsActive}}
+  {{#if this.deleteModalIsShown}}
     <Document::Modal
       @color="critical"
       @headerText="Delete draft?"
-      @bodyText="Are you sure you want to archive this document?"
-      @errorTitle="Error archiving document"
+      @bodyText="Are you sure you want to delete this draft?"
+      @errorTitle="Error deleting draft"
       @close={{this.closeDeleteModal}}
       @task={{perform this.deleteDraft}}
       @taskButtonText="Yes, delete"
@@ -544,8 +546,9 @@
     />
   {{/if}}
 
-  {{#if this.requestReviewModalIsActive}}
+  {{#if this.requestReviewModalIsShown}}
     <Document::Modal
+      data-test-publish-for-review-modal
       @headerText="Publish for review"
       @errorTitle="Error requesting review"
       @close={{this.closeRequestReviewModal}}
@@ -560,15 +563,18 @@
     >
       <:default as |M|>
         {{#if M.taskIsRunning}}
-          <div class="grid place-items-center pt-1 pb-12">
+          <div
+            data-test-publishing-for-review-message
+            class="grid place-items-center pt-1 pb-12"
+          >
             <div class="text-center">
               <FlightIcon @name="loading" @size="24" class="mb-5" />
               <h2>Submitting for review...</h2>
-              <p class="text-body-300 mb-2">This usually takes about a minute.</p>
+              <p class="mb-2 text-body-300">This usually takes about a minute.</p>
               <span
-                class="block text-[12px] text-color-foreground-faint mb-8"
+                class="mb-8 block text-[12px] text-color-foreground-faint"
               >We appreciate your patience.</span>
-              <div class="flex justify-center space-x-2 items-center">
+              <div class="flex items-center justify-center space-x-2">
                 <div class="h-px w-4 bg-color-border-primary"></div>
                 <FlightIcon
                   @name="hashicorp"
@@ -586,9 +592,8 @@
               >
                 <FlightIcon @size="16" @name="at-sign" />
               </div>
-              Approvers and people subscribed to
-              “{{@document.product}}”
-              will be notified.
+              Approvers and people subscribed to “{{@document.product}}” will be
+              notified.
             </li>
             <li class="flex items-center">
               <div
@@ -644,7 +649,7 @@
                 </Hds::Form::Checkbox::Field>
               </div>
               {{#if check.links.length}}
-                <ul class="list-none pl-6 mt-1.5">
+                <ul class="mt-1.5 list-none pl-6">
                   {{#each check.links as |link|}}
                     <li>
                       <Hds::Link::Inline
@@ -652,7 +657,7 @@
                         @iconPosition="trailing"
                         @isHrefExternal={{true}}
                         @href={{link.url}}
-                        class="no-underline text-body-100"
+                        class="text-body-100 no-underline"
                       >
                         {{link.text}}
                       </Hds::Link::Inline>
@@ -665,5 +670,66 @@
         {{/if}}
       </:default>
     </Document::Modal>
+  {{/if}}
+
+  {{#if this.docPublishedModalIsShown}}
+    <Hds::Modal data-test-doc-published-modal as |M|>
+      <M.Header>
+        <div class="flex items-center">
+          <FlightIcon
+            @name="check-circle-fill"
+            class="mr-2 text-color-palette-green-200"
+          />
+          Document published!
+        </div>
+      </M.Header>
+      <M.Body>
+        <p class="text-body-300">
+          Your doc is now available to everyone in your workspace.
+          <br />
+          Weʼve notified your approvers and subscribers to this product/area.
+        </p>
+        {{#unless this.docNumberLookupHasFailed}}
+          <label
+            class="hermes-form-label mb-1 mt-5"
+            for="recently-published-share-url"
+          >
+            Share it with others
+          </label>
+          <Hds::Form::TextInput::Base
+            data-test-share-document-url-input
+            id="recently-published-share-url"
+            class="mb-1.5 pl-2.5 text-body-300"
+            @value={{this.shareURL}}
+            {{select-on-focus}}
+            readonly
+          />
+        {{/unless}}
+      </M.Body>
+      <M.Footer>
+        <Hds::ButtonSet>
+          {{#unless this.docNumberLookupHasFailed}}
+            <CopyURLButton
+              data-test-doc-published-copy-url-button
+              @url={{this.shareURL}}
+              class="hds-button hds-button--size-medium hds-button--color-primary"
+            />
+          {{/unless}}
+          <Hds::Button
+            data-test-continue-to-document-button
+            {{on "click" (set this "docPublishedModalIsShown" false)}}
+            @text="Continue to document"
+            @icon={{unless this.docNumberLookupHasFailed "arrow-right"}}
+            @iconPosition={{unless this.docNumberLookupHasFailed "trailing"}}
+            @color={{if this.docNumberLookupHasFailed "primary" "tertiary"}}
+            data-test-color={{if
+              this.docNumberLookupHasFailed
+              "primary"
+              "tertiary"
+            }}
+          />
+        </Hds::ButtonSet>
+      </M.Footer>
+    </Hds::Modal>
   {{/if}}
 {{/in-element}}
