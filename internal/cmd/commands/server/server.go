@@ -216,7 +216,7 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Initialize database.
-	if val, ok := os.LookupEnv("HERMES_SERVER_DB_PASSWORD"); ok {
+	if val, ok := os.LookupEnv("HERMES_SERVER_POSTGRES_PASSWORD"); ok {
 		cfg.Postgres.Password = val
 	}
 	db, err := db.NewDB(*cfg.Postgres)
