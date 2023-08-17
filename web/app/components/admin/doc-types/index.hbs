@@ -2,14 +2,14 @@
   <div class="mb-5 grid gap-5">
 
     {{! TODO: try this as a tile? }}
-
     <Hds::Form::TextInput::Field
       @value=""
       placeholder="E.g., Request for Comments"
       as |F|
     >
-      <F.Label>Full name</F.Label>
+      <F.Label>Name</F.Label>
     </Hds::Form::TextInput::Field>
+
     <Hds::Form::TextInput::Field
       @value=""
       placeholder="E.g., RFC, PRFAQ"
@@ -25,14 +25,17 @@
       <F.Label>Template ID</F.Label>
     </Hds::Form::TextInput::Field>
 
-    {{! Create a rearrangeable list that functions }}
   </div>
   <div>
 
     <h5 class="hermes-form-label mb-2">Fields</h5>
-    <ul class="mb-5 space-y-1">
+    <ul class="mb-5">
       {{#each this.suggestedFields as |field|}}
-        <li>
+        <li
+          class="border border-color-palette-neutral-200 py-1.5 px-2
+            {{if field.isRequired 'bg-color-page-faint'}}
+            -mt-px flex items-center justify-between rounded"
+        >
           <Hds::Form::Checkbox::Field
             disabled={{field.isRequired}}
             checked={{field.isRequired}}
@@ -40,21 +43,21 @@
           >
             <F.Label class="flex items-center font-regular">
               <FlightIcon
-                @name={{if
-                  (eq field.type "string")
-                  "type"
-                  (if
-                    (eq field.type "long-string")
-                    "type"
-                    (if (eq field.type "product-area") "hashicorp" "users")
-                  )
-                }}
+                @name={{field.icon}}
                 class="mr-1.5 text-color-foreground-primary"
               />
               {{field.name}}
             </F.Label>
 
           </Hds::Form::Checkbox::Field>
+          {{#unless field.isRequired}}
+            <Action class="cursor-move">
+              <FlightIcon
+                @name="menu"
+                class="text-color-foreground-faint opacity-75"
+              />
+            </Action>
+          {{/unless}}
         </li>
       {{/each}}
     </ul>
@@ -64,59 +67,84 @@
     </Action>
   </div>
 
-  <Hds::Button @text="Create doctype" />
+  <Hds::Button @text="Create doctype" class="mt-8 mb-10" />
 </form>
 
 {{#if this.modalIsShown}}
   <Hds::Modal @onClose={{this.hideModal}} as |M|>
     <M.Header>Add custom field</M.Header>
     <M.Body>
-      <X::DropdownList
-        @items={{this.customFieldTypes}}
-        @selected={{this.selectedCustomFieldType}}
-      >
-        <:anchor as |dd|>
-          <div class="hermes-form-label">
-            Field type
+      {{! TODO: wrap in a form }}
+      <div class="grid gap-4">
+        <div>
+          <div class="hermes-form-label mb-1.5">
+            Name
           </div>
-          <dd.ToggleButton @text="--" />
-        </:anchor>
-        <:item as |dd|>
-          <dd.Action>
-            {{dd.attrs.name}}
-          </dd.Action>
-        </:item>
-      </X::DropdownList>
-
-      <div>
-        <div class="hermes-form-label">
-          Name
+          <Hds::Form::TextInput::Base @value="" />
         </div>
-        <Hds::Form::TextInput::Base @value="" />
-      </div>
-      <div class="hermes-form-label">
-        Attributes
-      </div>
-      <div>
-        <Hds::Form::Checkbox::Field as |F|>
-          <F.Label class="font-regular">
-            Required
-          </F.Label>
-        </Hds::Form::Checkbox::Field>
-      </div>
-      <div>
-        <Hds::Form::Checkbox::Field as |F|>
-          <F.Label class="font-regular">
-            Has "new" label
-          </F.Label>
-        </Hds::Form::Checkbox::Field>
-      </div>
-      <div>
-        <Hds::Form::Checkbox::Field as |F|>
-          <F.Label class="font-regular">
-            Has tooltip
-          </F.Label>
-        </Hds::Form::Checkbox::Field>
+        <div>
+          <X::DropdownList
+            @items={{this.customFieldTypes}}
+            @selected={{this.selectedCustomFieldType}}
+            class="w-56"
+          >
+            <:anchor as |dd|>
+              <div class="hermes-form-label mb-1.5">
+                Field type
+              </div>
+              <dd.ToggleButton @text="--" class="w-56 text-left" />
+            </:anchor>
+            <:item as |dd|>
+              <dd.Action>
+                <FlightIcon @name={{dd.attrs.icon}} class="mr-2" />
+                {{dd.attrs.name}}
+              </dd.Action>
+            </:item>
+          </X::DropdownList>
+        </div>
+        <div>
+          <div class="hermes-form-label mb-1.5">
+            Attributes
+          </div>
+          <div class="flex gap-6">
+            <div>
+              <Hds::Form::Checkbox::Field as |F|>
+                <F.Label class="font-regular">
+                  <Hds::Badge
+                    @size="small"
+                    @text="New"
+                    class="uppercase"
+                    @color="highlight"
+                    @type="inverted"
+                  />
+                </F.Label>
+              </Hds::Form::Checkbox::Field>
+            </div>
+            <div>
+              <Hds::Form::Checkbox::Field as |F|>
+                <F.Label class="font-regular">
+                  Required
+                </F.Label>
+              </Hds::Form::Checkbox::Field>
+            </div>
+            <div>
+              <Hds::Form::Checkbox::Field as |F|>
+                <F.Label class="font-regular">
+                  Has tooltip
+                </F.Label>
+              </Hds::Form::Checkbox::Field>
+            </div>
+          </div>
+
+        </div>
+        {{#unless this.hasTooltip}}
+          <div>
+            <div class="hermes-form-label mb-1.5">
+              Tooltip text
+            </div>
+            <Hds::Form::TextInput::Base @value="" />
+          </div>
+        {{/unless}}
       </div>
     </M.Body>
     <M.Footer>

@@ -19,41 +19,56 @@ export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
   get suggestedFields() {
     return [
       {
-        name: "Product/Area",
-        type: "product-area",
-        isRequired: true,
-      },
-      {
         name: "Title",
         type: "string",
+        icon: "align-left",
         isRequired: true,
       },
       {
         name: "Summary",
         type: "long-string",
+        icon: "align-left",
+        isRequired: true,
+      },
+      {
+        name: "Product/Area",
+        type: "product-area",
+        icon: "folder",
         isRequired: true,
       },
       {
         name: "Approvers",
         type: "people",
+        icon: "users",
+        // TODO
         specialPermissions: "approve",
       },
       {
         name: "Contributors",
         type: "people",
+        icon: "users",
+
         specialPermissions: "contribute",
       },
       {
         name: "Stakeholders",
         type: "people",
+        icon: "users",
+      },
+      {
+        name: "Related resources",
+        type: "related-resources",
+        icon: "paperclip",
       },
       {
         name: "Current version",
         type: "string",
+        icon: "type",
       },
       {
         name: "Target version",
         type: "string",
+        icon: "type",
       },
     ];
   }
@@ -61,13 +76,20 @@ export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
   get customFieldTypes() {
     return {
       string: {
-        name: "Text",
+        name: "Short text",
+        icon: "type",
       },
       "long-string": {
         name: "Long text",
+        icon: "align-left",
       },
       people: {
         name: "People",
+        icon: "users",
+      },
+      document: {
+        name: "Hermes Doc",
+        icon: "file-text",
       },
     };
   }

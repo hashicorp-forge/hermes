@@ -19,6 +19,7 @@ Router.map(function () {
       this.route("doc");
     });
     this.route("admin", function () {
+      this.route("index", { path: "/" });
       this.route("product-areas", function () {
         this.route("add");
       });
