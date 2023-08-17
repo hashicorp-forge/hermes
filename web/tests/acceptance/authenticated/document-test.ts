@@ -5,6 +5,7 @@ import {
   triggerEvent,
   visit,
   waitFor,
+  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -18,7 +19,6 @@ import {
 } from "hermes/components/document/sidebar";
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
-import sinon from "sinon";
 import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
@@ -48,6 +48,21 @@ const READ_ONLY_PRODUCT_AREA_SELECTOR =
 const READ_ONLY_CONTRIBUTORS_SELECTOR =
   "[data-test-document-contributors-read-only]";
 const READ_ONLY_APPROVERS_SELECTOR = "[data-test-document-approvers-read-only]";
+const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
+  "[data-test-sidebar-publish-for-review-button";
+const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
+  "[data-test-publish-for-review-modal]";
+const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
+  "[data-test-document-modal-primary-button]";
+const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
+  "[data-test-publishing-for-review-message]";
+const DOC_PUBLISHED_MODAL_SELECTOR = "[data-test-doc-published-modal]";
+const SHARE_DOCUMENT_URL_INPUT_SELECTOR =
+  "[data-test-share-document-url-input]";
+const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
+  "[data-test-continue-to-document-button]";
+const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
+  "[data-test-doc-published-copy-url-button]";
 
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(EDITABLE_TITLE_SELECTOR).doesNotExist();
@@ -441,5 +456,72 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1?draft=true");
 
     assertEditingIsDisabled(assert);
+  });
+
+  test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: true,
+      docType: "PRD",
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+
+    assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
+
+    let clickPromise = click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    await waitFor(PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR);
+    assert.dom(PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR).exists();
+
+    await clickPromise;
+
+    await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
+    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+
+    assert
+      .dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR)
+      .exists()
+      .hasValue(`${TEST_SHORT_LINK_BASE_URL}/prd/hcp-001`);
+
+    assert.dom(DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR).hasText("Copy link");
+    assert
+      .dom(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR)
+      .hasText("Continue to document")
+      .hasAttribute("data-test-color", "tertiary");
+
+    // TODO: Assert that clicking the modal dismisses it.
+    // Requires @hashicorp/design-system-components 2.9.0+
+    // https://github.com/hashicorp/design-system/commit/a6553ea032f70f0167f149589801b72154c3cf75
+  });
+
+  test('the "document published" modal hides the share elements if the docNumber fails to load', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: true,
+      docType: "PRD",
+      docNumber: "LAB-???",
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
+    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+
+    assert.dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR).doesNotExist();
+    assert.dom(DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR).doesNotExist();
+
+    assert
+      .dom(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR)
+      .hasAttribute(
+        "data-test-color",
+        "primary",
+        "the Continue button becomes the primary button when the copy link is hidden"
+      );
   });
 });

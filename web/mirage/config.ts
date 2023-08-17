@@ -214,6 +214,29 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used when publishing a draft for review.
+       * Updates the document's status and isDraft properties.
+       *
+       * TODO: Add docNumber assignment.
+       */
+      this.post("/reviews/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.update({
+            status: "In Review",
+            isDraft: false,
+          });
+
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
       this.post("/me/subscriptions", () => {

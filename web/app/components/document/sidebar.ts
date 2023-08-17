@@ -24,12 +24,13 @@ import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { HermesDocumentType } from "hermes/types/document-type";
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
-    docType: string;
+    docType: HermesDocumentType;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -76,8 +77,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  /**
+   * Whether the doc is a draft.
+   * If the draft was recently published, return false.
+   * Otherwise use the passed-in isDraft property.
+   */
   get isDraft() {
-    return this.args.document?.isDraft;
+    return this.draftWasPublished ? false : this.args.document?.isDraft;
   }
 
   get docID() {
@@ -92,6 +98,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
+
+  /**
+   * Whether a draft was published during the session.
+   * Set true when the user successfully requests a review.
+   * Used in the `isDraft` getter to immediately update the UI
+   * to reflect the new state of the document.
+   */
+  @tracked private draftWasPublished: boolean | null = null;
+
+  /**
+   * Whether the `waitForDocNumber` task has has failed to find a docNumber.
+   * When true, the "doc published" modal will not show a URL or share button.
+   */
+  @tracked protected docNumberLookupHasFailed = false;
 
   /**
    * Whether the draft's `isShareable` property is true.
@@ -155,7 +175,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   protected get shareURL() {
     // We only assign shortLinks to published documents
-    if (this.args.document.isDraft) {
+    if (this.isDraft) {
       return window.location.href;
     }
 
@@ -620,12 +640,34 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.refreshRoute();
 
+      await this.waitForDocNumber.perform();
+      this.draftWasPublished = true;
       this.requestReviewModalIsShown = false;
       this.docPublishedModalIsShown = true;
     } catch (error: unknown) {
+      this.draftWasPublished = null;
       this.maybeShowFlashError(error as Error, "Unable to request review");
       throw error;
     }
+  });
+
+  /**
+   * A task that awaits a newly published doc's docNumber assignment.
+   * In the unlikely case where the docNumber doesn't appear after 10 seconds,
+   * we remove the URL and share button from the "doc published" modal.
+   */
+  private waitForDocNumber = task(async () => {
+    const numberOfTries = 10;
+
+    for (let i = 0; i < numberOfTries; i++) {
+      if (!this.args.document.docNumber.endsWith("?")) {
+        return;
+      } else {
+        await timeout(Ember.testing ? 0 : 1000);
+      }
+    }
+
+    this.docNumberLookupHasFailed = true;
   });
 
   deleteDraft = task(async () => {

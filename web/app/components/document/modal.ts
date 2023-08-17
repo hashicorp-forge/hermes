@@ -6,6 +6,7 @@ import { task } from "ember-concurrency";
 import { HdsModalColor } from "hds/_shared";
 
 interface DocumentModalComponentSignature {
+  Element: HTMLDialogElement;
   Args: {
     headerText: string;
     bodyText?: string;
