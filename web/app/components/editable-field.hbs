@@ -5,10 +5,8 @@
       (hash
         value=this.value
         update=this.maybeUpdateValue
-        onChange=@onChange
         input=this.inputModifier
-        errorIsShown=this.emptyValueErrorIsShown
-        disableEditing=this.disableEditing
+        emptyValueErrorIsShown=this.emptyValueErrorIsShown
       )
       to="editing"
     }}
@@ -16,12 +14,12 @@
     {{#if @loading}}
       <FlightIcon @name="loading" class="loading-indicator" />
     {{/if}}
-    <button
+    <Action
       class="field-toggle {{if @loading 'loading'}}"
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}
     >
       {{yield (hash value=this.value)}}
-    </button>
+    </Action>
   {{/if}}
 </div>

@@ -28,10 +28,8 @@ interface EditableFieldComponentSignature {
           Element: HTMLInputElement | HTMLTextAreaElement;
           Return: void;
         }>;
-        errorIsShown: boolean;
-        onChange: (value: any) => void;
-        disableEditing: () => void;
-      },
+        emptyValueErrorIsShown: boolean;
+      }
     ];
   };
 }
@@ -68,10 +66,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.editingIsEnabled = true;
   }
 
-  @action protected disableEditing() {
-    this.editingIsEnabled = false;
-  }
-
   @action protected handleKeydown(ev: KeyboardEvent) {
     if (ev.key === "Enter") {
       ev.preventDefault();
@@ -93,20 +87,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
     let newValue: string | string[] | undefined;
 
-    console.log("eventOrValue", eventOrValue);
     if (eventOrValue instanceof Event) {
       const target = eventOrValue.target;
       assert("target must exist", target);
       assert("value must exist in the target", "value" in target);
       const value = target.value;
       newValue = value as string | string[];
-    }
-
-    if (eventOrValue instanceof Array) {
+    } else {
       newValue = eventOrValue;
     }
 
-    console.log("this.args.value", this.args.value);
     if (newValue !== this.args.value) {
       if (newValue === "") {
         if (this.args.isRequired) {
@@ -118,11 +108,9 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           return;
         }
       }
-      console.log("newValue", newValue);
 
+      this.value = newValue;
       this.args.onChange?.(newValue);
-      // we're not awaiting this... should we be ?
-      console.log("this.args.value post-onChange", this.args.value);
     }
 
     scheduleOnce("actions", this, () => {
