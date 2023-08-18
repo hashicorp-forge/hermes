@@ -584,7 +584,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   save = task(async (field: string, val: string | HermesUser[]) => {
-    if (field && val) {
+    if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
@@ -594,13 +594,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
 
       try {
+        console.log('field', field);
+        console.log('serializedValue', serializedValue);
         await this.patchDocument.perform({
           [field]: serializedValue,
         });
+        console.log('patchDocument performed');
       } catch (err) {
-        // revert field value on failure
-        (this as any)[field] = val;
-
         this.showFlashError(err as Error, "Unable to save document");
       }
     }
@@ -688,6 +688,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
+
+  @action updateTitle(title: string) {
+    this.title = title;
+    void this.save.perform("title", this.title);
+  }
+
+  protected updateSummary = task(async(summary: string) => {
+    const cachedValue = this.summary;
+    this.summary = summary;
+    try {
+      this.save.perform("summary", this.summary);
+    } catch {
+      this.summary = cachedValue;
+    }
+  })
+
 
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;
