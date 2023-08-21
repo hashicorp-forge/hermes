@@ -19,6 +19,7 @@ interface EditableFieldComponentTestContext extends MirageTestContext {
   onChange: (value: any) => void;
   isLoading: boolean;
   value: string;
+  newArray: string[];
 }
 
 module("Integration | Component | editable-field", function (hooks) {
@@ -201,9 +202,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
     // Keying "Enter" tests both `onBlur` and `handleKeydown`
     // since `handleKeydown` ultimately calls `onBlur`.
-    await triggerKeyEvent(EDITABLE_FIELD_SELECTOR, "keydown", "Enter");
-
-    await waitUntil(() => this.value === "bar");
+    await triggerKeyEvent("input", "keydown", "Enter");
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
   });
@@ -268,7 +267,7 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
   });
 
-  test("it only runs the onChange action if the value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+  test("onChange only runs if the textInput value has changed", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
     this.set("onChange", () => count++);
 
@@ -286,8 +285,6 @@ module("Integration | Component | editable-field", function (hooks) {
       </EditableField>
     `);
 
-    assert.equal(count, 0, "onChange has not been called");
-
     await click(FIELD_TOGGLE_SELECTOR);
 
     await fillIn("input", "foo");
@@ -299,6 +296,40 @@ module("Integration | Component | editable-field", function (hooks) {
 
     await fillIn("input", "bar");
     await triggerKeyEvent("input", "keydown", "Enter");
+
+    assert.equal(count, 1, "onChange has been called");
+  });
+
+  test("onChange only runs if the array value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+    let count = 0;
+
+    this.set("onChange", () => count++);
+    this.set("newArray", ["foo"]);
+
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value={{array "foo"}}
+        @onChange={{this.onChange}}
+      >
+        <:default as |F|>
+          {{F.value}}
+        </:default>
+        <:editing as |F|>
+         <div {{click-outside (fn F.update this.newArray)}} />
+        </:editing>
+      </EditableField>
+      <div class="click-away"/>
+    `);
+
+    await click(FIELD_TOGGLE_SELECTOR);
+    await click(".click-away");
+
+    assert.equal(count, 0, "onChange has not been called");
+
+    this.set("newArray", ["bar"]);
+
+    await click(FIELD_TOGGLE_SELECTOR);
+    await click(".click-away");
 
     assert.equal(count, 1, "onChange has been called");
   });

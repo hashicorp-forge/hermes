@@ -594,12 +594,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
 
       try {
-        console.log('field', field);
-        console.log('serializedValue', serializedValue);
         await this.patchDocument.perform({
           [field]: serializedValue,
         });
-        console.log('patchDocument performed');
       } catch (err) {
         this.showFlashError(err as Error, "Unable to save document");
       }
@@ -694,7 +691,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     void this.save.perform("title", this.title);
   }
 
-  protected updateSummary = task(async(summary: string) => {
+  protected updateSummary = task(async (summary: string) => {
     const cachedValue = this.summary;
     this.summary = summary;
     try {
@@ -702,8 +699,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {
       this.summary = cachedValue;
     }
-  })
-
+  });
 
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;
