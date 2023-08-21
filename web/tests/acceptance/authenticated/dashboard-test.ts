@@ -34,12 +34,12 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
     assert.dom(RECENTLY_VIEWED_DOC_SELECTOR).exists({ count: 2 });
 
     assert
-      .dom(RECENTLY_VIEWED_DOC_SELECTOR)
+      .dom(`${RECENTLY_VIEWED_DOC_SELECTOR} a`)
       .containsText("Foo")
       .hasAttribute("href", "/document/1");
 
     assert
-      .dom(`${RECENTLY_VIEWED_DOC_SELECTOR}:nth-child(2)`)
+      .dom(`${RECENTLY_VIEWED_DOC_SELECTOR}:nth-child(2) a`)
       .containsText("Bar")
       .hasAttribute("href", "/document/2?draft=true");
   });
