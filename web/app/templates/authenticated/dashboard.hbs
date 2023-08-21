@@ -29,6 +29,7 @@
       <div class="tile-list">
         {{#each this.recentDocs.all as |r|}}
           <Doc::Tile
+            data-test-recently-viewed-doc
             @isDraft={{r.doc.isDraft}}
             @avatar={{get r.doc.ownerPhotos 0}}
             @docID={{r.doc.objectID}}
