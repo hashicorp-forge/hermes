@@ -67,13 +67,13 @@ export default class RecentlyViewedDocsService extends Service {
       let docResponses = await Promise.allSettled(
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
-          let fetchResponse = await this.fetchSvc.fetch(
-            `/api/v1/${endpoint}/${id}`
-          );
-          return {
-            doc: await fetchResponse?.json(),
-            isDraft,
-          };
+          let doc = await this.fetchSvc
+            .fetch(`/api/v1/${endpoint}/${id}`)
+            .then((resp) => resp?.json());
+
+          doc.isDraft = isDraft;
+
+          return { doc, isDraft };
         })
       );
       /**
