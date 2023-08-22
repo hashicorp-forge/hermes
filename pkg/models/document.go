@@ -530,6 +530,14 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 	}
 	d.Contributors = contributors
 
+	// Get document type.
+	dt := d.DocumentType
+	if err := dt.Get(db); err != nil {
+		return fmt.Errorf("error getting document type: %w", err)
+	}
+	d.DocumentType = dt
+	d.DocumentTypeID = dt.ID
+
 	// Get custom fields.
 	var customFields []*DocumentCustomField
 	for _, c := range d.CustomFields {
@@ -557,14 +565,6 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 		customFields = append(customFields, c)
 	}
 	d.CustomFields = customFields
-
-	// Get document type.
-	dt := d.DocumentType
-	if err := dt.Get(db); err != nil {
-		return fmt.Errorf("error getting document type: %w", err)
-	}
-	d.DocumentType = dt
-	d.DocumentTypeID = dt.ID
 
 	// Get owner.
 	if d.Owner != nil && d.Owner.EmailAddress != "" {
