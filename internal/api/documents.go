@@ -32,12 +32,12 @@ type DocumentPatchRequest struct {
 
 	// TODO: These are all current custom editable fields for all supported doc
 	// types. We should instead make this dynamic.
-	CurrentVersion string   `json:"currentVersion,omitempty"`
-	PRD            string   `json:"prd,omitempty"`
-	PRFAQ          string   `json:"prfaq,omitempty"`
-	RFC            string   `json:"rfc,omitempty"`
-	Stakeholders   []string `json:"stakeholders,omitempty"`
-	TargetVersion  string   `json:"targetVersion,omitempty"`
+	CurrentVersion *string   `json:"currentVersion,omitempty"`
+	PRD            *string   `json:"prd,omitempty"`
+	PRFAQ          *string   `json:"prfaq,omitempty"`
+	RFC            *string   `json:"rfc,omitempty"`
+	Stakeholders   *[]string `json:"stakeholders,omitempty"`
+	TargetVersion  *string   `json:"targetVersion,omitempty"`
 }
 
 type documentSubcollectionRequestType int
@@ -412,6 +412,171 @@ Hermes
 			// Rename file with new title.
 			s.RenameFile(docID,
 				fmt.Sprintf("[%s] %s", docObj.GetDocNumber(), docObj.GetTitle()))
+
+			// Get document record from database so we can modify it for updating.
+			d := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := d.Get(db); err != nil {
+				l.Error("error getting document from database",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			} else {
+				// Approvers.
+				if len(req.Approvers) > 0 {
+					var approvers []*models.User
+					for _, a := range docObj.GetApprovers() {
+						u := models.User{
+							EmailAddress: a,
+						}
+						approvers = append(approvers, &u)
+					}
+					d.Approvers = approvers
+				}
+
+				// Contributors.
+				if len(req.Contributors) > 0 {
+					var contributors []*models.User
+					for _, a := range docObj.GetContributors() {
+						u := &models.User{
+							EmailAddress: a,
+						}
+						contributors = append(contributors, u)
+					}
+					d.Contributors = contributors
+				}
+
+				// Custom fields.
+				switch docObj.GetDocType() {
+				case "FRD":
+					if req.PRD != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"FRD",
+							"PRD",
+							*req.PRD,
+						)
+					}
+					if req.PRFAQ != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"FRD",
+							"PRFAQ",
+							*req.PRFAQ,
+						)
+					}
+				case "PRD":
+					if req.RFC != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"PRD",
+							"RFC",
+							*req.RFC,
+						)
+					}
+					if req.Stakeholders != nil {
+						d.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
+							d.CustomFields,
+							"PRD",
+							"Stakeholders",
+							*req.Stakeholders,
+						)
+						if err != nil {
+							l.Error(
+								"error getting upserting stakeholders into document custom fields",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docID,
+							)
+							// Don't return an HTTP error because the database isn't the
+							// source of truth yet.
+						}
+					}
+				case "RFC":
+					if req.CurrentVersion != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Current Version",
+							*req.CurrentVersion,
+						)
+					}
+					if req.PRD != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"PRD",
+							*req.PRD,
+						)
+					}
+					if req.Stakeholders != nil {
+						d.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Stakeholders",
+							*req.Stakeholders,
+						)
+						if err != nil {
+							l.Error(
+								"error getting upserting stakeholders into document custom fields",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docID,
+							)
+							// Don't return an HTTP error because the database isn't the
+							// source of truth yet.
+						}
+					}
+					if req.TargetVersion != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Target Version",
+							*req.TargetVersion,
+						)
+					}
+				default:
+					l.Error("Document contains invalid docType",
+						"doc_type", docObj.GetDocType(),
+					)
+				}
+				// Make sure all custom fields have the document ID.
+				for _, cf := range d.CustomFields {
+					cf.DocumentID = d.ID
+				}
+
+				// Document modified time.
+				d.DocumentModifiedAt = time.Unix(docObj.GetModifiedTime(), 0)
+
+				// Summary.
+				if req.Summary != "" {
+					d.Summary = req.Summary
+				}
+
+				// Title.
+				if req.Title != "" {
+					d.Title = req.Title
+				}
+
+				// Update document in the database.
+				if err := d.Upsert(db); err != nil {
+					l.Error("error updating document",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					// Don't return an HTTP error because the database isn't the source of
+					// truth yet.
+				}
+			}
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched document", "doc_id", docID)
