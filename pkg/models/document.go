@@ -139,6 +139,32 @@ func (d *Document) Create(db *gorm.DB) error {
 	})
 }
 
+// Delete deletes a document in database db.
+func (d *Document) Delete(db *gorm.DB) error {
+	if err := validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return err
+	}
+
+	return db.
+		Model(&d).
+		Where(Document{GoogleFileID: d.GoogleFileID}).
+		Delete(&d).
+		Error
+}
+
 // Find finds all documents from database db with the provided query, and
 // assigns them to the receiver.
 func (d *Documents) Find(
