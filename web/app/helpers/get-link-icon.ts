@@ -42,7 +42,7 @@ const getLinkIconHelper = helper<GetLinkIconSignature>(([url]) => {
       }
     }
   }
-  return "file";
+  return "globe";
 });
 
 export default getLinkIconHelper;

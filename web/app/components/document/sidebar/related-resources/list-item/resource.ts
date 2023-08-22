@@ -51,9 +51,17 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   /**
    * The URL of a definitely ExternalResource
    */
-  protected get url() {
+  private get url() {
     assert("url must exist in the resource", "url" in this.args.resource);
     return this.args.resource.url;
+  }
+
+  protected get displayURL() {
+    // we remove the protocol and the www. from the url
+    return this.url
+      .replace(/(^\w+:|^)\/\//, "")
+      .replace("www.", "")
+      .split("/")[0];
   }
 
   /**
