@@ -541,27 +541,27 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 	// Get custom fields.
 	var customFields []*DocumentCustomField
 	for _, c := range d.CustomFields {
-		// If we already know the document type custom field ID, get the rest of its
-		// data.
-		if c.DocumentTypeCustomFieldID != 0 {
+		c.DocumentTypeCustomField.DocumentType = d.DocumentType
+		c.DocumentTypeCustomField.DocumentTypeID = d.DocumentTypeID
+
+		// Get document type custom field.
+		if c.DocumentTypeCustomFieldID == 0 {
+			c.DocumentTypeCustomField.DocumentType = d.DocumentType
+			c.DocumentTypeCustomField.DocumentTypeID = d.DocumentTypeID
+
+			if err := c.DocumentTypeCustomField.Get(db); err != nil {
+				return fmt.Errorf("error getting document type custom field: %w", err)
+			}
+			c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.ID
+		} else {
 			if err := db.
-				Model(&c.DocumentTypeCustomField).
-				Where(DocumentTypeCustomField{
-					Model: gorm.Model{
-						ID: c.DocumentTypeCustomFieldID,
-					},
-				}).
-				First(&c.DocumentTypeCustomField).
+				First(&c.DocumentTypeCustomField, c.DocumentTypeCustomFieldID).
 				Error; err != nil {
 				return fmt.Errorf(
-					"error getting document type custom field with known ID: %w", err)
+					"error getting document type custom field by ID: %w", err)
 			}
 		}
-		c.DocumentTypeCustomField.DocumentType.Name = d.DocumentType.Name
-		if err := c.DocumentTypeCustomField.Get(db); err != nil {
-			return fmt.Errorf("error getting document type custom field: %w", err)
-		}
-		c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.DocumentType.ID
+
 		customFields = append(customFields, c)
 	}
 	d.CustomFields = customFields
@@ -606,12 +606,56 @@ func (d *Document) replaceAssocations(db *gorm.DB) error {
 	}
 
 	// Replace custom fields.
-	if err := db.
-		Session(&gorm.Session{SkipHooks: true}).
-		Model(&d).
-		Association("CustomFields").
-		Replace(d.CustomFields); err != nil {
-		return err
+	if err := db.Transaction(func(db *gorm.DB) error {
+		if err := validation.ValidateStruct(d,
+			validation.Field(
+				&d.ID,
+				validation.When(d.GoogleFileID == "",
+					validation.Required.Error("either ID or GoogleFileID is required"),
+				),
+			),
+			validation.Field(
+				&d.GoogleFileID,
+				validation.When(d.ID == 0,
+					validation.Required.Error("either ID or GoogleFileID is required"),
+				),
+			),
+		); err != nil {
+			return err
+		}
+
+		// Get document ID if not known.
+		if d.ID == 0 {
+			doc := &Document{
+				GoogleFileID: d.GoogleFileID,
+			}
+			if err := doc.Get(db); err != nil {
+				return fmt.Errorf("error getting document: %w", err)
+			}
+			d.ID = doc.ID
+		}
+
+		// Delete existing DocumentCustomFields.
+		if err := db.
+			Unscoped(). // Hard delete instead of soft delete.
+			Where("document_id = ?", d.ID).
+			Delete(&DocumentCustomField{}).Error; err != nil {
+			return fmt.Errorf(
+				"error deleting existing document custom fields: %w", err)
+		}
+
+		// Create all DocumentCustomFields.
+		for _, cf := range d.CustomFields {
+			cf.DocumentID = d.ID
+			if err := cf.Create(db); err != nil {
+				return fmt.Errorf(
+					"error creating document custom field: %w", err)
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("error replacing document custom fields: %w", err)
 	}
 
 	return nil
