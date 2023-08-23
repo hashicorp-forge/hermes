@@ -55,6 +55,8 @@ const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-add-external-resource-error]";
 const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-external-resource-title-error]";
+const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";
+const RESOURCE_SECONDARY_TEXT_SELECTOR = "[data-test-resource-secondary-text]";
 const TOOLTIP_TRIGGER_SELECTOR = "[data-test-tooltip-icon-trigger]";
 const TOOLTIP_SELECTOR = ".hermes-tooltip";
 
@@ -306,7 +308,8 @@ module(
 
       assert.dom(EDIT_MODAL_SELECTOR).doesNotExist("the modal is closed");
 
-      assert.dom(EXTERNAL_RESOURCE_SELECTOR).hasText("New title");
+      assert.dom(RESOURCE_TITLE_SELECTOR).hasText("New title");
+      assert.dom(RESOURCE_SECONDARY_TEXT_SELECTOR).hasText("new-url.com");
       assert
         .dom(EXTERNAL_RESOURCE_SELECTOR + " a")
         .hasAttribute("href", "https://new-url.com");
@@ -436,10 +439,8 @@ module(
         .dom(ADD_RESOURCE_MODAL_SELECTOR)
         .doesNotExist("the modal is closed");
 
-      assert
-        .dom(LIST_ITEM_SELECTOR)
-        .exists({ count: 1 }, "there is 1 item")
-        .hasText("Example");
+      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 }, "there is 1 item");
+      assert.dom(RESOURCE_TITLE_SELECTOR).hasText("Example");
     });
 
     test("it prevents duplicate external resources", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
