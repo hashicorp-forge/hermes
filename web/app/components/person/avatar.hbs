@@ -1,14 +1,15 @@
 <div
-  class="overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200 border border-transparent
-    {{if this.sizeIsSmall 'w-5 h-5'}}
-    {{if this.sizeIsMedium 'w-7 h-7'}}
+  class="bg-color-palette-alpha-300 flex items-center justify-center overflow-hidden rounded-full bg-color-palette-neutral-200
+    {{if this.sizeIsSmall 'h-5 w-5'}}
+    {{if this.sizeIsMedium 'h-7 w-7'}}
+    {{if this.sizeIsLarge 'h-12 w-12'}}
     "
   ...attributes
 >
   {{#if @imgURL}}
     <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
   {{else}}
-    <div class="text-body-100 flex">
+    <div class="flex text-body-100">
       {{#if @email}}
         <span class="capitalize">
           {{get-first-letter @email}}

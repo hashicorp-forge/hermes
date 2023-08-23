@@ -1,5 +1,5 @@
 .active-filter-list-item {
-  @apply flex items-center border-color-border-strong rounded-full border py-0.5 pl-2 pr-3.5 no-underline text-color-foreground-primary bg-color-surface-interactive mr-1  my-0.5;
+  @apply my-0.5 mr-1 flex items-center rounded-full border border-color-border-strong bg-color-surface-interactive py-0.5 pl-2 pr-3.5 text-color-foreground-primary  no-underline;
 
   &:hover {
     @apply bg-color-surface-interactive-hover;

@@ -1,26 +1,29 @@
 <Header />
 
-<div class="x-container">
+<div class="x-container !max-w-[724px]">
+  <div class="relative mb-4">
+    <Person::Avatar
+      @imgURL={{this.authenticatedUser.info.picture}}
+      @email={{this.authenticatedUser.info.name}}
+      @size="large"
+      class="absolute -left-5 -translate-x-full"
+    />
+    <h1 class="mb-0 text-display-300">{{this.authenticatedUser.info.name}}</h1>
+    <p class="text-body-200">{{this.authenticatedUser.info.email}}</p>
+  </div>
   {{! make this more like the product overview screen }}
 
-  <div class="secondary-nav flex space-x-4 text-display-500 font-bold">
-
-    <LinkTo
-      class="pb-3"
-      @route="authenticated.my"
-      @current-when="authenticated.my.index"
-    >
+  <div class="secondary-nav">
+    <LinkTo @route="authenticated.my" @current-when="authenticated.my.index">
       Active
     </LinkTo>
     <LinkTo
-      class="pb-3"
       @route="authenticated.my.published"
       @current-when="authenticated.my.published"
     >
       Published
     </LinkTo>
     <LinkTo
-      class="pb-3"
       @route="authenticated.my.drafts"
       @current-when="authenticated.my.drafts"
     >

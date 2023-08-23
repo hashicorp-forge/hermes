@@ -1,6 +1,7 @@
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 
 interface MyDocsIndexComponentSignature {
@@ -17,6 +18,7 @@ interface MyDocsIndexComponentSignature {
 
 export default class MyDocsIndexComponent extends Component<MyDocsIndexComponentSignature> {
   @service declare router: RouterService;
+  @service declare authenticatedUser: AuthenticatedUserService;
 
   get currentRoute() {
     return this.router.currentRouteName;

@@ -12,6 +12,7 @@
 @use "components/popover";
 @use "components/footer";
 @use "components/nav";
+@use "components/secondary-nav";
 @use "components/x-hds-tab";
 @use "components/x/dropdown/list";
 @use "components/x/dropdown/list-item";
@@ -146,10 +147,4 @@ h1 {
   width: 0;
   height: 0;
   visibility: hidden;
-}
-
-.secondary-nav {
-  .active {
-    border-bottom: 4px solid red;
-  }
 }

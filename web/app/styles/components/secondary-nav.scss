@@ -1,0 +1,16 @@
+.secondary-nav {
+  @apply mb-4 flex border-b border-b-color-border-primary;
+
+  > a {
+    @apply relative px-3 pt-3 pb-5 text-body-200;
+  }
+
+  .active {
+    @apply text-color-foreground-action;
+
+    &::before {
+      content: "";
+      @apply absolute -bottom-px left-0 h-1 w-full bg-color-foreground-action;
+    }
+  }
+}
