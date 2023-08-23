@@ -1,7 +1,7 @@
 <Header />
 
 <div class="x-container">
-  <div class="mb-8 flex w-full items-center justify-between">
+  <div class="mb-4 flex w-full items-center justify-between">
 
     <div class="relative flex items-center">
       <LinkTo @route="authenticated.my">
@@ -9,7 +9,7 @@
           @imgURL={{this.authenticatedUser.info.picture}}
           @email={{this.authenticatedUser.info.name}}
           @size="large"
-          class="mr-4"
+          class="mr-5 -ml-1"
         />
       </LinkTo>
       <div>
@@ -62,7 +62,6 @@
     @sortAttribute={{this.sortAttribute}}
     @sortDirection={{this.sortDirection}}
     @docs={{this.sortedDocs}}
-    @isColumnSortable={{true}}
     @isCollapsed={{this.isCollapsed}}
     @toggleCollapsed={{this.toggleCollapsed}}
   />

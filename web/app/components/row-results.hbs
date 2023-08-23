@@ -6,71 +6,70 @@
           <:head as |H|>
             <H.Tr>
               <H.Th class="name">
-                <SortableTableHeaderButton
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
                   @attribute="title"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Name
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
               <H.Th class="type">
-                <SortableTableHeaderButton
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
                   @attribute="docType"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Type
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
               <H.Th class="status">
-                <SortableTableHeaderButton
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
                   @attribute="status"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Status
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
               <H.Th class="product">
-                <SortableTableHeaderButton
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
                   @attribute="product"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Product/Area
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
               <H.Th class="owner">
-                <SortableTableHeaderButton
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
                   @attribute="owners"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Owner
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
               <H.Th class="created">
-                <SortableTableHeaderButton
+                {{log "sortDirection" @sortDirection}}
+                <MaybeSortableTableHeader
                   @changeSort={{@changeSort}}
                   @sortAttribute={{@sortAttribute}}
                   @sortDirection={{@sortDirection}}
+                  @queryParam={{hash
+                    sortBy=(if (eq @sortDirection "desc") "dateAsc" "dateDesc")
+                    page=1
+                  }}
                   @attribute="createdTime"
                   @defaultSortDirection="desc"
-                  @disabled={{not @isColumnSortable}}
                 >
                   Created
-                </SortableTableHeaderButton>
+                </MaybeSortableTableHeader>
               </H.Th>
             </H.Tr>
           </:head>
@@ -86,7 +85,7 @@
                 @productArea="{{doc.product}}"
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
-                @isDraft={{@isDraft}}
+                @isDraft={{doc.isDraft}}
               />
             {{/each}}
           </:body>
@@ -109,17 +108,9 @@
           <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
         {{/if}}
       {{else}}
-        {{#if @isDraft}}
-          <Hds::Alert @type="inline" as |A|>
-            <A.Title>No drafts found</A.Title>
-            <A.Button
-              @text="Create a document draft"
-              @color="primary"
-              @icon="file-plus"
-              @route="authenticated.new"
-            />
-          </Hds::Alert>
-        {{/if}}
+        <Hds::Alert @type="inline" as |A|>
+          <A.Title>No docs found</A.Title>
+        </Hds::Alert>
       {{/if}}
     </div>
   </div>

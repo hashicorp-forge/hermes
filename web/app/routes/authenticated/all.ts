@@ -4,6 +4,8 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { tracked } from "@glimmer/tracking";
+import { SortByValue } from "hermes/components/header/toolbar";
 
 export default class AllRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -32,8 +34,10 @@ export default class AllRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
+    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
+
     const searchIndex =
-      params.sortBy === "dateAsc"
+      params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
@@ -44,6 +48,6 @@ export default class AllRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { facets, results, sortedBy };
   }
 }

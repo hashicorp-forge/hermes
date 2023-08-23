@@ -7,13 +7,11 @@ import { action } from "@ember/object";
 interface RowResultsComponentSignature {
   Args: {
     docs: HermesDocument[];
-    isDraft?: boolean;
     nbPages?: number;
     currentPage?: number;
-    isColumnSortable?: boolean;
     changeSort?: (attribute: SortAttribute) => void;
     toggleCollapsed?: () => void;
-    sortAttribute: SortAttribute;
+    sortAttribute: `${SortAttribute}`;
     sortDirection: SortDirection;
     isCollapsed?: boolean;
   };

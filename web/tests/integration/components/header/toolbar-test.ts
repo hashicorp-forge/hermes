@@ -35,41 +35,19 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
   test("it renders facets when provided", async function (assert) {
     this.set("facets", FACETS);
-    this.set("sortControlIsHidden", false);
 
     await render(hbs`
       {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar
         @facets={{this.facets}}
-        @sortControlIsHidden={{this.sortControlIsHidden}}
       />
     `);
 
     assert.dom(".facets").exists();
-    assert
-      .dom("[data-test-header-sort-dropdown-trigger]")
-      .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
     assert
       .dom(".facets [data-test-facet-dropdown-trigger]")
       .exists({ count: 4 });
-    assert
-      .dom("[data-test-header-sort-dropdown-trigger]")
-      .exists({ count: 1 })
-      .hasText(`Sort: ${SortByLabel.Newest}`);
-
-    await click(`[data-test-header-sort-dropdown-trigger]`);
-
-    assert
-      .dom(
-        "[data-test-header-sort-by-dropdown] .x-dropdown-list-item:nth-child(2)"
-      )
-      .hasText("Oldest");
-
-    this.set("sortControlIsHidden", true);
-    assert
-      .dom("[data-test-header-sort-by-dropdown]")
-      .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
   });
 
   test("it handles status values correctly", async function (assert) {
@@ -117,23 +95,6 @@ module("Integration | Component | header/toolbar", function (hooks) {
     `);
     assert
       .dom("[data-test-facet-dropdown-trigger='Status']")
-      .hasAttribute("disabled");
-  });
-
-  test("it conditionally disables the sort control", async function (assert) {
-    this.set("facets", FACETS);
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
-      <Header::Toolbar @facets={{this.facets}} />
-    `);
-
-    assert
-      .dom(`[data-test-header-sort-dropdown-trigger]`)
-      .doesNotHaveAttribute("disabled");
-
-    this.set("facets", {});
-    assert
-      .dom(`[data-test-header-sort-dropdown-trigger]`)
       .hasAttribute("disabled");
   });
 

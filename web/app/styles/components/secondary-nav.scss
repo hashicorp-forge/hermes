@@ -10,11 +10,11 @@
   }
 
   .active {
-    @apply z-10 bg-color-foreground-action text-color-page-primary;
+    @apply z-10 bg-color-foreground-action text-color-foreground-action;
 
     &::before {
       content: "";
-      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-foreground-action;
+      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-surface-action;
     }
   }
 }

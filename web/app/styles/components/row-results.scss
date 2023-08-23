@@ -50,6 +50,35 @@
   }
 
   .sort-icon {
-    @apply absolute -left-2 top-1/2 flex -translate-y-1/2 -translate-x-full;
+    @apply absolute -left-1.5 top-1/2 flex -translate-y-1/2 -translate-x-full;
+  }
+}
+
+@keyframes sortIconIn {
+  from {
+    transform: translateX(2px);
+  }
+}
+
+.sortable-table-header {
+  @apply relative;
+
+  .sort-icon {
+    @apply text-color-foreground-faint;
+  }
+
+  &:not(.active) {
+    &:hover,
+    &:focus-within {
+      .sort-icon {
+        @apply visible;
+        > .flight-icon {
+          animation: sortIconIn 85ms ease-in;
+        }
+      }
+    }
+    .sort-icon {
+      @apply invisible text-color-foreground-disabled;
+    }
   }
 }
