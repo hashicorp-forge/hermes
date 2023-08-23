@@ -1,14 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{!
-  Displays the results of an Algolia search in a rows format.
-
-  <RowResults /> properties:
-    @docs: Algolia result's "hits" element from a docs search response.
-    @isDraft: Document is a draft.
-    @nbPages: Algolia result's "nbPages" element from a docs search response.
-    @page: Algolia result's "page" element from a docs search response.
-}}
-
 <section>
   <div class="x-container">
     <div class="row-results">
@@ -20,12 +9,14 @@
               <H.Th class="type">Type</H.Th>
               <H.Th class="status">Status</H.Th>
               <H.Th class="product">Product/Area</H.Th>
-              <H.Th class="owner">Owner</H.Th>
+              {{#if this.ownerColumnIsShown}}
+                <H.Th class="owner">Owner</H.Th>
+              {{/if}}
               <H.Th class="created">Created</H.Th>
             </H.Tr>
           </:head>
           <:body>
-            {{#each @docs as |doc index|}}
+            {{#each @docs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"
@@ -37,11 +28,14 @@
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
                 @isDraft={{@isDraft}}
+                @ownerColumnIsShown={{this.ownerColumnIsShown}}
               />
             {{/each}}
           </:body>
         </Hds::Table>
-        <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+        {{#if this.paginationIsShown}}
+          <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+        {{/if}}
       {{else}}
         {{#if @isDraft}}
           <Hds::Alert @type="inline" as |A|>

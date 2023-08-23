@@ -147,3 +147,9 @@ h1 {
   height: 0;
   visibility: hidden;
 }
+
+.secondary-nav {
+  .active {
+    border-bottom: 4px solid red;
+  }
+}

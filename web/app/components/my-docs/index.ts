@@ -1,11 +1,12 @@
+import RouterService from "@ember/routing/router-service";
+import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 
 interface MyDocsIndexComponentSignature {
   Element: null;
   Args: {
-    draftsAndDocs: HermesDocument[];
+    activeDocs: HermesDocument[];
     documents: HermesDocument[];
     drafts: HermesDocument[];
   };
@@ -15,18 +16,22 @@ interface MyDocsIndexComponentSignature {
 }
 
 export default class MyDocsIndexComponent extends Component<MyDocsIndexComponentSignature> {
-  @tracked selectedTab = "all";
+  @service declare router: RouterService;
+
+  get currentRoute() {
+    return this.router.currentRouteName;
+  }
 
   get docsToShow() {
-    switch (this.selectedTab) {
-      case "all":
-        return this.args.draftsAndDocs;
-      case "drafts":
+    console.log(this.currentRoute);
+    switch (this.currentRoute) {
+      case "authenticated.my.drafts":
+        console.log(this.args.drafts);
         return this.args.drafts;
-      case "documents":
+      case "authenticated.my.index":
+        return this.args.activeDocs;
+      case "authenticated.my.published":
         return this.args.documents;
-      default:
-        return [];
     }
   }
 }

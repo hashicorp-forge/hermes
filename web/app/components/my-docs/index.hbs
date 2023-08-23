@@ -1,11 +1,50 @@
 <Header />
 
 <div class="x-container">
-  Active Published Drafts
+  {{! make this more like the product overview screen }}
 
+  <div class="secondary-nav flex space-x-4 text-display-500 font-bold">
+
+    <LinkTo
+      class="pb-3"
+      @route="authenticated.my"
+      @current-when="authenticated.my.index"
+    >
+      Active
+    </LinkTo>
+    <LinkTo
+      class="pb-3"
+      @route="authenticated.my.published"
+      @current-when="authenticated.my.published"
+    >
+      Published
+    </LinkTo>
+    <LinkTo
+      class="pb-3"
+      @route="authenticated.my.drafts"
+      @current-when="authenticated.my.drafts"
+    >
+      Drafts
+    </LinkTo>
+  </div>
+
+  {{#if this.docsToShow}}
+    <ol class="tile-list">
+      {{#each this.docsToShow as |doc|}}
+        <Doc::Tile
+          @isDraft={{doc.isDraft}}
+          @avatar={{get doc.ownerPhotos 0}}
+          @docID={{doc.objectID}}
+          @docNumber={{doc.docNumber}}
+          @modifiedAgo={{doc.modifiedAgo}}
+          @owner={{get doc.owners 0}}
+          @productArea={{doc.product}}
+          @status={{lowercase doc.status}}
+          @title={{doc.title}}
+        />
+      {{/each}}
+    </ol>
+
+    {{!-- <RowResults @docs={{this.docsToShow}} /> --}}
+  {{/if}}
 </div>
-{{! model changes on click }}
-{{! docsAndDrafts pagination could be HdsPagination? }}
-{{! Design will be based on the product landing page }}
-{{log this.docsToShow}}
-<RowResults @docs={{this.docsToShow}} />

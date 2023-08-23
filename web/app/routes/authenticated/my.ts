@@ -33,50 +33,15 @@ export default class AuthenticatedMyRoute extends Route {
   @service declare activeFilters: ActiveFiltersService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  queryParams = {
-    docType: {
-      refreshModel: true,
-    },
-    owners: {
-      refreshModel: true,
-    },
-    page: {
-      refreshModel: true,
-    },
-    product: {
-      refreshModel: true,
-    },
-    sortBy: {
-      refreshModel: true,
-    },
-    status: {
-      refreshModel: true,
-    },
-  };
-
   /**
    * Generates a URLSearchParams object for the drafts endpoint.
    */
-  private createDraftURLSearchParams(
-    params: AlgoliaSearchParams,
-    ownerFacetOnly: boolean
-  ): URLSearchParams {
-    /**
-     * In the case of facets, we want to filter by just the owner facet.
-     * In the case of documents, we want to filter by all facets.
-     */
-    let facetFilters = ownerFacetOnly
-      ? [`owners:${this.authenticatedUser.info.email}`]
-      : this.algolia.buildFacetFilters(params);
-
+  private createDraftURLSearchParams(): URLSearchParams {
     return new URLSearchParams(
       Object.entries({
-        facets: FACET_NAMES,
-        hitsPerPage: HITS_PER_PAGE,
-        maxValuesPerFacet: MAX_VALUES_PER_FACET,
-        facetFilters: facetFilters,
-        page: params.page ? params.page - 1 : 0,
-        sortBy: params["sortBy"],
+        hitsPerPage: 1000,
+        maxValuesPerFacet: 1,
+        page: 0,
         ownerEmail: this.authenticatedUser.info.email,
       })
         .map(([key, val]) => `${key}=${val}`)
@@ -89,15 +54,11 @@ export default class AuthenticatedMyRoute extends Route {
    */
   private getDraftResults = task(
     async (
-      params: AlgoliaSearchParams,
-      ownerFacetOnly = false
+      params: AlgoliaSearchParams
     ): Promise<DraftResponseJSON | undefined> => {
       try {
         let response = await this.fetchSvc
-          .fetch(
-            "/api/v1/drafts?" +
-              this.createDraftURLSearchParams(params, ownerFacetOnly)
-          )
+          .fetch("/api/v1/drafts?" + this.createDraftURLSearchParams({}))
           .then((response) => response?.json());
         return response;
       } catch (e: unknown) {
@@ -107,7 +68,7 @@ export default class AuthenticatedMyRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams): Promise<{
-    draftsAndDocs: HermesDocument[];
+    activeDocs: HermesDocument[];
     drafts: HermesDocument[];
     docs: HermesDocument[];
   }> {
@@ -133,14 +94,21 @@ export default class AuthenticatedMyRoute extends Route {
     const docs = docResults?.hits ?? [];
     const drafts = draftResults?.Hits ?? [];
 
-    let draftsAndDocs = [
+    let activeDocs = [
       ...(draftResults?.Hits ?? []),
       ...((docResults as SearchResponse<HermesDocument>).hits ?? []),
-    ].sort((a, b) => {
-      assert("createdTime must be defined", a.createdTime && b.createdTime);
-      return b.createdTime - a.createdTime;
-    });
+    ]
+      .sort((a, b) => {
+        assert("createdTime must be defined", a.createdTime && b.createdTime);
+        return b.createdTime - a.createdTime;
+      })
+      .filter((doc) => {
+        return (
+          doc.status.toLowerCase() !== "approved" &&
+          doc.status.toLowerCase() !== "obsolete"
+        );
+      });
 
-    return { draftsAndDocs, drafts, docs };
+    return { activeDocs, drafts, docs };
   }
 }

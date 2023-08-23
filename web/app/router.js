@@ -12,7 +12,10 @@ Router.map(function () {
     this.route("dashboard");
     this.route("document", { path: "/document/:document_id" });
     this.route("drafts");
-    this.route("my");
+    this.route("my", function () {
+      this.route("drafts");
+      this.route("published");
+    });
     this.route("results");
     this.route("settings");
     this.route("new", function () {
@@ -20,5 +23,5 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
-  this.route('404', { path: '/*path' })
+  this.route("404", { path: "/*path" });
 });
