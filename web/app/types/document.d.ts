@@ -25,7 +25,7 @@ export interface HermesDocument {
   summary?: string;
   isDraft?: boolean;
   customEditableFields?: CustomEditableFields;
-
+  createdTime: number;
   thumbnail?: string;
   _snippetResult?: {
     content: {

@@ -13,7 +13,7 @@
         @current-when="authenticated.all"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
-        All Docs
+        Explore
       </LinkTo>
       <LinkTo
         data-test-nav-link="my"
@@ -22,14 +22,6 @@
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         My Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="drafts"
-        @route="authenticated.drafts"
-        @current-when="authenticated.drafts"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Drafts
       </LinkTo>
     </div>
 
