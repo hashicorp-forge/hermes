@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -201,6 +203,18 @@ func ApprovalHandler(
 				return
 			}
 
+			// Update document reviews in the database.
+			if err := updateDocumentReviewsInDatabase(docObj, db); err != nil {
+				l.Error("error updating document reviews in the database",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+
 			// Write response.
 			w.WriteHeader(http.StatusOK)
 
@@ -391,6 +405,18 @@ func ApprovalHandler(
 				return
 			}
 
+			// Update document reviews in the database.
+			if err := updateDocumentReviewsInDatabase(docObj, db); err != nil {
+				l.Error("error updating document reviews in the database",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+
 			// Write response.
 			w.WriteHeader(http.StatusOK)
 
@@ -406,4 +432,41 @@ func ApprovalHandler(
 			return
 		}
 	})
+}
+
+// updateDocumentReviewsInDatabase takes a Doc (Algolia) object and updates the
+// associated document reviews in the database.
+func updateDocumentReviewsInDatabase(doc hcd.Doc, db *gorm.DB) error {
+	var docReviews []models.DocumentReview
+	for _, a := range doc.GetApprovers() {
+		u := models.User{
+			EmailAddress: a,
+		}
+		if helpers.StringSliceContains(doc.GetApprovedBy(), a) {
+			docReviews = append(docReviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: doc.GetObjectID(),
+				},
+				User:   u,
+				Status: models.ApprovedDocumentReviewStatus,
+			})
+		} else if helpers.StringSliceContains(doc.GetChangesRequestedBy(), a) {
+			docReviews = append(docReviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: doc.GetObjectID(),
+				},
+				User:   u,
+				Status: models.ChangesRequestedDocumentReviewStatus,
+			})
+		}
+	}
+
+	// Upsert document reviews in database.
+	for _, dr := range docReviews {
+		if err := dr.Update(db); err != nil {
+			return fmt.Errorf("error upserting document review: %w", err)
+		}
+	}
+
+	return nil
 }

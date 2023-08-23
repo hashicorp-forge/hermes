@@ -45,12 +45,12 @@ type DraftsPatchRequest struct {
 
 	// TODO: These are all current custom editable fields for all supported doc
 	// types. We should instead make this dynamic.
-	CurrentVersion string   `json:"currentVersion,omitempty"`
-	PRD            string   `json:"prd,omitempty"`
-	PRFAQ          string   `json:"prfaq,omitempty"`
-	RFC            string   `json:"rfc,omitempty"`
-	Stakeholders   []string `json:"stakeholders,omitempty"`
-	TargetVersion  string   `json:"targetVersion,omitempty"`
+	CurrentVersion *string   `json:"currentVersion,omitempty"`
+	PRD            *string   `json:"prd,omitempty"`
+	PRFAQ          *string   `json:"prfaq,omitempty"`
+	RFC            *string   `json:"rfc,omitempty"`
+	Stakeholders   *[]string `json:"stakeholders,omitempty"`
+	TargetVersion  *string   `json:"targetVersion,omitempty"`
 }
 
 type DraftsResponse struct {
@@ -98,6 +98,7 @@ func DraftsHandler(
 				return
 			}
 
+			// Validate document type.
 			switch req.DocType {
 			case "FRD":
 			case "RFC":
@@ -107,7 +108,7 @@ func DraftsHandler(
 				http.Error(w, "Bad request: docType is required", http.StatusBadRequest)
 				return
 			default:
-				l.Error("Bad request: docType is required", "doc_type", req.DocType)
+				l.Error("Bad request: invalid docType", "doc_type", req.DocType)
 				http.Error(w, "Bad request: invalid docType", http.StatusBadRequest)
 				return
 			}
@@ -630,7 +631,7 @@ func DraftsDocumentHandler(
 				return
 			}
 
-			// Delete document
+			// Delete document in Google Drive.
 			err = s.DeleteFile(docId)
 			if err != nil {
 				l.Error("error deleting document", "error", err, "doc_id", docId)
@@ -659,6 +660,19 @@ func DraftsDocumentHandler(
 				http.Error(w, "Error deleting document draft",
 					http.StatusInternalServerError)
 				return
+			}
+
+			// Delete document in the database.
+			d := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := d.Delete(db); err != nil {
+				l.Error("error deleting document in database",
+					"error", err,
+					"doc_id", docId,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
 			}
 
 			resp := &DraftsResponse{
@@ -829,27 +843,177 @@ func DraftsDocumentHandler(
 					"contributors_count", len(contributorsToRemoveSharing))
 			}
 
-			// Update product (if it is in the patch request).
-			if req.Product != "" {
-				// Update in database.
-				d := models.Document{
-					GoogleFileID: docId,
-					Product:      models.Product{Name: req.Product},
+			// Get document record from database so we can modify it for updating.
+			d := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := d.Get(db); err != nil {
+				l.Error("error getting document from database",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			} else {
+				// Approvers.
+				if len(req.Approvers) > 0 {
+					var approvers []*models.User
+					for _, a := range docObj.GetApprovers() {
+						u := models.User{
+							EmailAddress: a,
+						}
+						approvers = append(approvers, &u)
+					}
+					d.Approvers = approvers
 				}
+
+				// Contributors.
+				if len(req.Contributors) > 0 {
+					var contributors []*models.User
+					for _, a := range docObj.GetContributors() {
+						u := &models.User{
+							EmailAddress: a,
+						}
+						contributors = append(contributors, u)
+					}
+					d.Contributors = contributors
+				}
+
+				// Custom fields.
+				switch docObj.GetDocType() {
+				case "FRD":
+					if req.PRD != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"FRD",
+							"PRD",
+							*req.PRD,
+						)
+					}
+					if req.PRFAQ != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"FRD",
+							"PRFAQ",
+							*req.PRFAQ,
+						)
+					}
+				case "PRD":
+					if req.RFC != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"PRD",
+							"RFC",
+							*req.RFC,
+						)
+					}
+					if req.Stakeholders != nil {
+						d.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
+							d.CustomFields,
+							"PRD",
+							"Stakeholders",
+							*req.Stakeholders,
+						)
+						if err != nil {
+							l.Error(
+								"error getting upserting stakeholders into document custom fields",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docId,
+							)
+							// Don't return an HTTP error because the database isn't the
+							// source of truth yet.
+						}
+					}
+				case "RFC":
+					if req.CurrentVersion != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Current Version",
+							*req.CurrentVersion,
+						)
+					}
+					if req.PRD != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"PRD",
+							*req.PRD,
+						)
+					}
+					if req.Stakeholders != nil {
+						d.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Stakeholders",
+							*req.Stakeholders,
+						)
+						if err != nil {
+							l.Error(
+								"error getting upserting stakeholders into document custom fields",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docId,
+							)
+							// Don't return an HTTP error because the database isn't the
+							// source of truth yet.
+						}
+					}
+					if req.TargetVersion != nil {
+						d.CustomFields = models.UpsertStringDocumentCustomField(
+							d.CustomFields,
+							"RFC",
+							"Target Version",
+							*req.TargetVersion,
+						)
+					}
+				default:
+					l.Error("Document contains invalid docType",
+						"doc_type", docObj.GetDocType(),
+					)
+				}
+				// Make sure all custom fields have the document ID.
+				for _, cf := range d.CustomFields {
+					cf.DocumentID = d.ID
+				}
+
+				// Document modified time.
+				d.DocumentModifiedAt = time.Unix(docObj.GetModifiedTime(), 0)
+
+				// Product.
+				if req.Product != "" {
+					d.Product = models.Product{Name: req.Product}
+
+					// Update doc number in Algolia object.
+					docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
+				}
+
+				// Summary.
+				if req.Summary != "" {
+					d.Summary = req.Summary
+				}
+
+				// Title.
+				if req.Title != "" {
+					d.Title = req.Title
+				}
+
+				// Update document in the database.
 				if err := d.Upsert(db); err != nil {
-					l.Error("error upserting document to update product",
+					l.Error("error updating document",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"product", req.Product,
-						"doc_id", docId)
-					http.Error(w, "Error patching document draft",
-						http.StatusInternalServerError)
-					return
+						"doc_id", docId,
+					)
+					// Don't return an HTTP error because the database isn't the source of
+					// truth yet.
 				}
-
-				// Update doc number in Algolia object.
-				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
 			}
 
 			// Save new modified draft doc object in Algolia.
