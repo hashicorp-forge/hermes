@@ -1,18 +1,25 @@
-<div class="editable-field" ...attributes {{did-insert this.captureElement}}>
-  {{#if (and this.editing (not @loading))}}
-    <div {{on "keydown" this.preventNewlines}} {{on "keyup" this.cancel}}>
-      {{yield (hash value=@value update=this.update) to="editing"}}
-    </div>
+<div class="editable-field" ...attributes>
+  {{#if (and this.editingIsEnabled (not @loading))}}
+    {{on-document "keydown" this.handleKeydown}}
+    {{yield
+      (hash
+        value=this.value
+        update=this.maybeUpdateValue
+        input=this.inputModifier
+        emptyValueErrorIsShown=this.emptyValueErrorIsShown
+      )
+      to="editing"
+    }}
   {{else}}
     {{#if @loading}}
       <FlightIcon @name="loading" class="loading-indicator" />
     {{/if}}
-    <button
+    <Action
       class="field-toggle {{if @loading 'loading'}}"
       disabled={{or @disabled @loading}}
-      {{on "click" this.edit}}
+      {{on "click" this.enableEditing}}
     >
-      {{yield}}
-    </button>
+      {{yield (hash value=this.value)}}
+    </Action>
   {{/if}}
 </div>
