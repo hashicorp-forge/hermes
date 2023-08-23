@@ -93,17 +93,28 @@ func MeSubscriptionsHandler(
 				return
 			}
 
+			// Find or create user.
+			u := models.User{
+				EmailAddress: userEmail,
+			}
+			if err := u.FirstOrCreate(db); err != nil {
+				errResp(
+					http.StatusInternalServerError,
+					"Error authorizing the request",
+					"error finding or creating user",
+					err,
+				)
+				return
+			}
+
 			// Build user product subscriptions.
 			var subs []models.Product
 			for _, p := range req.Subscriptions {
 				subs = append(subs, models.Product{Name: p})
 			}
+			u.ProductSubscriptions = subs
 
 			// Upsert user.
-			u := models.User{
-				EmailAddress:         userEmail,
-				ProductSubscriptions: subs,
-			}
 			if err := u.Upsert(db); err != nil {
 				errResp(
 					http.StatusInternalServerError,
