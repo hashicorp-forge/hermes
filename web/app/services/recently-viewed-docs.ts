@@ -87,9 +87,11 @@ export default class RecentlyViewedDocsService extends Service {
       docResponses.forEach((response) => {
         if (response.status == "fulfilled") {
           let recentlyViewed = response.value as RecentlyViewedDoc;
-          recentlyViewed.doc.modifiedAgo = `Modified ${timeAgo(
-            new Date(recentlyViewed.doc.modifiedTime * 1000)
-          )}`;
+          if (recentlyViewed.doc.modifiedTime) {
+            recentlyViewed.doc.modifiedAgo = `Modified ${timeAgo(
+              new Date(recentlyViewed.doc.modifiedTime * 1000)
+            )}`;
+          }
           newAll.push(response.value);
         }
       });

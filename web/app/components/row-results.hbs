@@ -5,18 +5,77 @@
         <Hds::Table @isStriped={{false}} class="row-results__table">
           <:head as |H|>
             <H.Tr>
-              <H.Th class="name">Name</H.Th>
-              <H.Th class="type">Type</H.Th>
-              <H.Th class="status">Status</H.Th>
-              <H.Th class="product">Product/Area</H.Th>
-              {{#if this.ownerColumnIsShown}}
-                <H.Th class="owner">Owner</H.Th>
-              {{/if}}
-              <H.Th class="created">Created</H.Th>
+              <H.Th class="name">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="title"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Name
+                </SortableTableHeaderButton>
+              </H.Th>
+              <H.Th class="type">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="docType"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Type
+                </SortableTableHeaderButton>
+              </H.Th>
+              <H.Th class="status">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="status"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Status
+                </SortableTableHeaderButton>
+              </H.Th>
+              <H.Th class="product">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="product"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Product/Area
+                </SortableTableHeaderButton>
+              </H.Th>
+              <H.Th class="owner">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="owners"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Owner
+                </SortableTableHeaderButton>
+              </H.Th>
+              <H.Th class="created">
+                <SortableTableHeaderButton
+                  @changeSort={{@changeSort}}
+                  @sortAttribute={{@sortAttribute}}
+                  @sortDirection={{@sortDirection}}
+                  @attribute="createdTime"
+                  @defaultSortDirection="desc"
+                  @disabled={{not @isColumnSortable}}
+                >
+                  Created
+                </SortableTableHeaderButton>
+              </H.Th>
             </H.Tr>
           </:head>
           <:body>
-            {{#each @docs as |doc|}}
+            {{#each this.shownDocs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"
@@ -28,11 +87,24 @@
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
                 @isDraft={{@isDraft}}
-                @ownerColumnIsShown={{this.ownerColumnIsShown}}
               />
             {{/each}}
           </:body>
         </Hds::Table>
+        {{#if this.toggleCollapsedButtonIsShown}}
+          {{! TODO: component-ize this }}
+          <Action
+            {{on "click" this.toggleCollapsed}}
+            class="mt-4 flex items-center text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
+          >
+            <FlightIcon
+              data-test-docs-awaiting-review-toggle-icon
+              @name={{if @isCollapsed "plus" "minus"}}
+              class="mr-1.5"
+            />
+            {{if @isCollapsed "Show all" "Show fewer"}}
+          </Action>
+        {{/if}}
         {{#if this.paginationIsShown}}
           <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
         {{/if}}

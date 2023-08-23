@@ -2,7 +2,7 @@
   @apply w-full;
 
   .hds-table {
-    @apply table-auto lg:table-fixed mb-8;
+    @apply mb-8 table-auto lg:table-fixed;
     @apply border-0;
 
     &__th,
@@ -47,5 +47,9 @@
         @apply pr-0;
       }
     }
+  }
+
+  .sort-icon {
+    @apply absolute -left-2 top-1/2 flex -translate-y-1/2 -translate-x-full;
   }
 }

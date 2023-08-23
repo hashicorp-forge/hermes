@@ -7,17 +7,14 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import AlgoliaService, {
   AlgoliaFacetsObject,
   AlgoliaSearchParams,
-  FACET_NAMES,
-  HITS_PER_PAGE,
-  MAX_VALUES_PER_FACET,
 } from "hermes/services/algolia";
-import { FacetRecords } from "hermes/types/facets";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
+import { dasherize } from "@ember/string";
 
 interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -58,7 +55,7 @@ export default class AuthenticatedMyRoute extends Route {
     ): Promise<DraftResponseJSON | undefined> => {
       try {
         let response = await this.fetchSvc
-          .fetch("/api/v1/drafts?" + this.createDraftURLSearchParams({}))
+          .fetch("/api/v1/drafts?" + this.createDraftURLSearchParams())
           .then((response) => response?.json());
         return response;
       } catch (e: unknown) {
@@ -68,9 +65,10 @@ export default class AuthenticatedMyRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams): Promise<{
-    activeDocs: HermesDocument[];
+    allDocs: HermesDocument[];
     drafts: HermesDocument[];
-    docs: HermesDocument[];
+    inReviewDocs: HermesDocument[];
+    approvedDocs: HermesDocument[];
   }> {
     const searchIndex =
       params.sortBy === "dateAsc"
@@ -94,21 +92,22 @@ export default class AuthenticatedMyRoute extends Route {
     const docs = docResults?.hits ?? [];
     const drafts = draftResults?.Hits ?? [];
 
-    let activeDocs = [
+    const allDocs = [
       ...(draftResults?.Hits ?? []),
       ...((docResults as SearchResponse<HermesDocument>).hits ?? []),
-    ]
-      .sort((a, b) => {
-        assert("createdTime must be defined", a.createdTime && b.createdTime);
-        return b.createdTime - a.createdTime;
-      })
-      .filter((doc) => {
-        return (
-          doc.status.toLowerCase() !== "approved" &&
-          doc.status.toLowerCase() !== "obsolete"
-        );
-      });
+    ].sort((a, b) => {
+      assert("createdTime must be defined", a.createdTime && b.createdTime);
+      return b.createdTime - a.createdTime;
+    });
 
-    return { activeDocs, drafts, docs };
+    const inReviewDocs = docs.filter(
+      (doc: HermesDocument) => dasherize(doc.status) === "in-review"
+    );
+
+    const approvedDocs = docs.filter(
+      (doc: HermesDocument) => dasherize(doc.status) === "approved"
+    );
+
+    return { allDocs, drafts, inReviewDocs, approvedDocs };
   }
 }

@@ -12,7 +12,7 @@ module("Integration | Helper | dasherize", function (hooks) {
 
   test("it dasherizes strings", async function (this: DasherizeHelperTestContext, assert) {
     await render(hbs`
-      <div class="one">{{dasherize "foo Bar"}}</div>
+      <div class="one">{{dasherize "Foo Bar"}}</div>
       <div class="two">{{dasherize "fooBar"}}</div>
       <div class="three">{{dasherize "foo_bar"}}</div>
       <div class="four">{{dasherize undefined}}</div>

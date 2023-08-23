@@ -1,16 +1,20 @@
 .secondary-nav {
-  @apply mb-4 flex border-b border-b-color-border-primary;
+  @apply flex;
 
   > a {
-    @apply relative px-3 pt-3 pb-5 text-body-200;
+    @apply relative flex h-8 items-center justify-center rounded-l-full rounded-r-full px-3.5 text-body-200 text-color-foreground-faint;
+
+    &:not(.active):hover {
+      @apply text-color-foreground-strong;
+    }
   }
 
   .active {
-    @apply text-color-foreground-action;
+    @apply z-10 bg-color-foreground-action text-color-page-primary;
 
     &::before {
       content: "";
-      @apply absolute -bottom-px left-0 h-1 w-full bg-color-foreground-action;
+      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-foreground-action;
     }
   }
 }

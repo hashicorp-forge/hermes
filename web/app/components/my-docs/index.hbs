@@ -1,53 +1,69 @@
 <Header />
 
-<div class="x-container !max-w-[724px]">
-  <div class="relative mb-4">
-    <Person::Avatar
-      @imgURL={{this.authenticatedUser.info.picture}}
-      @email={{this.authenticatedUser.info.name}}
-      @size="large"
-      class="absolute -left-5 -translate-x-full"
-    />
-    <h1 class="mb-0 text-display-300">{{this.authenticatedUser.info.name}}</h1>
-    <p class="text-body-200">{{this.authenticatedUser.info.email}}</p>
-  </div>
-  {{! make this more like the product overview screen }}
+<div class="x-container">
+  <div class="mb-8 flex w-full items-center justify-between">
 
-  <div class="secondary-nav">
-    <LinkTo @route="authenticated.my" @current-when="authenticated.my.index">
-      Active
-    </LinkTo>
-    <LinkTo
-      @route="authenticated.my.published"
-      @current-when="authenticated.my.published"
-    >
-      Published
-    </LinkTo>
-    <LinkTo
-      @route="authenticated.my.drafts"
-      @current-when="authenticated.my.drafts"
-    >
-      Drafts
-    </LinkTo>
-  </div>
-
-  {{#if this.docsToShow}}
-    <ol class="tile-list">
-      {{#each this.docsToShow as |doc|}}
-        <Doc::Tile
-          @isDraft={{doc.isDraft}}
-          @avatar={{get doc.ownerPhotos 0}}
-          @docID={{doc.objectID}}
-          @docNumber={{doc.docNumber}}
-          @modifiedAgo={{doc.modifiedAgo}}
-          @owner={{get doc.owners 0}}
-          @productArea={{doc.product}}
-          @status={{lowercase doc.status}}
-          @title={{doc.title}}
+    <div class="relative flex items-center">
+      <LinkTo @route="authenticated.my">
+        <Person::Avatar
+          @imgURL={{this.authenticatedUser.info.picture}}
+          @email={{this.authenticatedUser.info.name}}
+          @size="large"
+          class="mr-4"
         />
-      {{/each}}
-    </ol>
+      </LinkTo>
+      <div>
+        <h1 class="mb-0 text-display-300">
+          {{this.authenticatedUser.info.name}}
+        </h1>
+        <p class="text-body-200 text-color-foreground-faint">
+          {{this.authenticatedUser.info.email}}
+        </p>
+      </div>
+    </div>
+    {{! make this more like the product overview screen }}
 
-    {{!-- <RowResults @docs={{this.docsToShow}} /> --}}
-  {{/if}}
+    <div class="secondary-nav">
+      <LinkTo
+        {{on "click" this.resetLocalProperties}}
+        @route="authenticated.my"
+        @current-when="authenticated.my.index"
+      >
+        All Docs
+      </LinkTo>
+      <LinkTo
+        {{on "click" this.resetLocalProperties}}
+        @route="authenticated.my.in-review"
+        @current-when="authenticated.my.in-review"
+      >
+        In Review
+      </LinkTo>
+      <LinkTo
+        {{on "click" this.resetLocalProperties}}
+        @route="authenticated.my.approved"
+        @current-when="authenticated.my.approved"
+      >
+        Approved
+      </LinkTo>
+      <LinkTo
+        {{on "click" this.resetLocalProperties}}
+        @route="authenticated.my.drafts"
+        @current-when="authenticated.my.drafts"
+      >
+        Drafts
+      </LinkTo>
+    </div>
+  </div>
 </div>
+
+{{#if this.docsToShow}}
+  <RowResults
+    @changeSort={{this.changeSort}}
+    @sortAttribute={{this.sortAttribute}}
+    @sortDirection={{this.sortDirection}}
+    @docs={{this.sortedDocs}}
+    @isColumnSortable={{true}}
+    @isCollapsed={{this.isCollapsed}}
+    @toggleCollapsed={{this.toggleCollapsed}}
+  />
+{{/if}}

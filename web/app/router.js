@@ -14,7 +14,8 @@ Router.map(function () {
     this.route("drafts");
     this.route("my", function () {
       this.route("drafts");
-      this.route("published");
+      this.route("approved");
+      this.route("in-review");
     });
     this.route("results");
     this.route("settings");
