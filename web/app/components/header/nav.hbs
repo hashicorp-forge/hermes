@@ -7,12 +7,12 @@
 
     <div class="primary-links">
       <LinkTo
-        data-test-nav-link="explore"
+        data-test-nav-link="all"
         @route="authenticated.all.documents"
         @current-when="authenticated.all"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
-        Explore
+        All Docs
       </LinkTo>
       <LinkTo
         data-test-nav-link="my"

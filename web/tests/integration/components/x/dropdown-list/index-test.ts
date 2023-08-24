@@ -575,7 +575,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       firstLink.getAttribute("href"),
-      "/all?products=Labs",
+      "/all/documents?products=Labs",
       "route and query are set"
     );
   });

@@ -1,13 +1,7 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import {
-  click,
-  fillIn,
-  render,
-  triggerKeyEvent,
-  waitFor,
-} from "@ember/test-helpers";
+import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 
@@ -145,7 +139,7 @@ module("Integration | Component | header/search", function (hooks) {
       .dom(PRODUCT_MATCH_LINK_SELECTOR)
       .exists()
       .hasText("View all Vault documents")
-      .hasAttribute("href", "/all?product=%5B%22Vault%22%5D");
+      .hasAttribute("href", "/all/documents?product=%5B%22Vault%22%5D");
   });
 
   test("the input can be focused with a keyboard shortcut", async function (this: HeaderSearchTestContext, assert) {

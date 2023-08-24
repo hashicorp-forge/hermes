@@ -17,14 +17,20 @@ module("Integration | Component | product-badge-link", function (hooks) {
 
     assert
       .dom(".foo")
-      .hasAttribute("href", "/all?product=%5B%22Cloud%20Platform%22%5D")
+      .hasAttribute(
+        "href",
+        "/all/documents?product=%5B%22Cloud%20Platform%22%5D"
+      )
       .hasText("HCP");
 
     assert
       .dom(".bar")
-      .hasAttribute("href", "/all?product=%5B%22Terraform%22%5D")
+      .hasAttribute("href", "/all/documents?product=%5B%22Terraform%22%5D")
       .hasText("Terraform");
 
-    assert.dom(".baz").hasAttribute("href", "/all").hasText("Unknown");
+    assert
+      .dom(".baz")
+      .hasAttribute("href", "/all/documents")
+      .hasText("Unknown");
   });
 });

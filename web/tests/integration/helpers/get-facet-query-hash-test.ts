@@ -51,7 +51,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(1)")
       .hasAttribute(
         "href",
-        "/all?docType=%5B%22bar%22%2C%22foo%22%5D",
+        "/all/documents?docType=%5B%22bar%22%2C%22foo%22%5D",
         "Link would add a filter to the query hash; Type facetName is properly translated"
       );
 
@@ -59,7 +59,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(2)")
       .hasAttribute(
         "href",
-        "/all",
+        "/all/documents",
         "Link would remove a filter from the query hash"
       );
 
@@ -67,7 +67,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(3)")
       .hasAttribute(
         "href",
-        "/all?docType=%5B%22bar%22%5D&status=%5B%22foo%22%5D",
+        "/all/documents?docType=%5B%22bar%22%5D&status=%5B%22foo%22%5D",
         "Status facetName is properly translated"
       );
 
@@ -75,7 +75,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(4)")
       .hasAttribute(
         "href",
-        "/all?docType=%5B%22bar%22%5D&product=%5B%22foo%22%5D",
+        "/all/documents?docType=%5B%22bar%22%5D&product=%5B%22foo%22%5D",
         "Product/Area facetName is properly translated"
       );
 
@@ -83,7 +83,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(5)")
       .hasAttribute(
         "href",
-        "/all?docType=%5B%22bar%22%5D&owners=%5B%22foo%22%5D",
+        "/all/documents?docType=%5B%22bar%22%5D&owners=%5B%22foo%22%5D",
         "Owner facetName is properly translated"
       );
   });

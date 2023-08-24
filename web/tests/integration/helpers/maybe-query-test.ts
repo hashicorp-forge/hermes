@@ -24,7 +24,7 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     assert.equal(
       find("a")?.getAttribute("href"),
-      "/all?product=%5B%22waypoint%22%5D",
+      "/all/documents?product=%5B%22waypoint%22%5D",
       "the passed-in query is used"
     );
   });
@@ -41,6 +41,6 @@ module("Integration | Helper | maybe-query", function (hooks) {
       </LinkTo>
     `);
 
-    assert.equal(find("a")?.getAttribute("href"), "/all");
+    assert.equal(find("a")?.getAttribute("href"), "/all/documents");
   });
 });
