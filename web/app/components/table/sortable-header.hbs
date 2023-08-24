@@ -1,5 +1,8 @@
 {{#if @changeSort}}
   <Action
+    data-test-sortable-table-header
+    data-test-attribute={{@attribute}}
+    data-test-element="button"
     class="sortable-table-header {{if this.isActive 'active'}}"
     {{on "click" this.changeSort}}
     ...attributes
@@ -11,6 +14,9 @@
   </Action>
 {{else}}
   <LinkTo
+    data-test-sortable-table-header
+    data-test-attribute={{@attribute}}
+    data-test-element="anchor"
     ...attributes
     @route={{this.currentRoute}}
     @query={{@queryParam}}

@@ -28,6 +28,7 @@ export default Factory.extend({
   docType: "RFC",
   modifiedAgo: 1000000000,
   modifiedTime: 1,
+  createdTime: 1,
   appCreated: true,
   isDraft: true,
   docNumber() {
