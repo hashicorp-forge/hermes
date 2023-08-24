@@ -32,7 +32,6 @@ export default class AuthenticatedAllDocumentsRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
-    console.log("params", params);
     const searchIndex =
       params.sortBy === "dateAsc"
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
