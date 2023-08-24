@@ -281,6 +281,7 @@ export default function (mirageConfig) {
             google_analytics_tag_id: undefined,
             support_link_url: TEST_SUPPORT_URL,
             version: "1.2.3",
+            short_revision: "abc123",
           }
         );
       });

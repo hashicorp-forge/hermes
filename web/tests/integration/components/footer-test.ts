@@ -2,7 +2,7 @@ import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { config, module, test } from "qunit";
 import MockDate from "mockdate";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
@@ -19,6 +19,7 @@ module("Integration | Component | footer", function (hooks) {
     const configService = this.owner.lookup("service:config") as ConfigService;
 
     configService.config.version = "1.2.3";
+    configService.config.short_revision = "abc123";
 
     await render(hbs`<Footer />`);
 
@@ -28,7 +29,10 @@ module("Integration | Component | footer", function (hooks) {
 
     assert
       .dom("[data-test-footer-version]")
-      .containsText("Version 1.2.3", "The version is shown");
+      .containsText(
+        "Hermes v1.2.3 (abc123)",
+        "The version and revision are shown"
+      );
 
     assert
       .dom("[data-test-footer-github-link]")

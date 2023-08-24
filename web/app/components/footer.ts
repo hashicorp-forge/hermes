@@ -16,6 +16,10 @@ export default class FooterComponent extends Component<FooterComponentSignature>
     return this.config.config.version;
   }
 
+  protected get revision() {
+    return this.config.config.short_revision;
+  }
+
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
   }
