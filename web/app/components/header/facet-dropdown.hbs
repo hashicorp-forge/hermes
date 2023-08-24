@@ -3,11 +3,20 @@
   @listIsOrdered={{true}}
   @offset={{hash mainAxis=3 crossAxis=-5}}
   @renderOut={{true}}
+  @placement={{@placement}}
   class="facet-dropdown-popover"
   ...attributes
 >
   <:anchor as |dd|>
-    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
+    {{! TODO: increase z-index on click }}
+    <dd.ToggleButton
+      class="-ml-px
+        {{if (eq @position 'center') 'rounded-none'}}
+        {{if (eq @position 'right') 'rounded-l-none'}}
+        {{if (eq @position 'left') 'rounded-r-none'}}"
+      @text={{@label}}
+      disabled={{@disabled}}
+    />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo

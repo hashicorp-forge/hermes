@@ -41,7 +41,6 @@ export type ActiveFilters = {
 interface ToolbarComponentSignature {
   Args: {
     facets: FacetDropdownGroups;
-    sortControlIsHidden?: boolean;
   };
 }
 

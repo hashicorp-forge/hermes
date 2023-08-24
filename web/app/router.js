@@ -10,6 +10,7 @@ Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
     this.route("all", function () {
       this.route("documents");
+      this.route("projects");
     });
     this.route("dashboard");
     this.route("document", { path: "/document/:document_id" });

@@ -5,6 +5,9 @@ import { inject as service } from "@ember/service";
 export default class AuthenticatedAllRoute extends Route {
   @service declare router: RouterService;
 
+  // TODO: this should handle the both the projects and documents routes
+  // based on the params or transition intent... maybe?
+
   beforeModel(transition: any) {
     const intent = transition.intent;
 
