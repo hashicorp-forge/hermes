@@ -1,10 +1,5 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{page-title "All Docs"}}
+<header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
+  <Header::Nav />
+</header>
 
-<Header @facets={{@model.facets}} />
-
-<RowResults
-  @docs={{@model.results.hits}}
-  @nbPages={{@model.results.nbPages}}
-  @currentPage={{(add @model.results.page 1)}}
-/>
+{{outlet}}

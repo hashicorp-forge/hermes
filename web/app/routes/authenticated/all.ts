@@ -1,49 +1,32 @@
 import Route from "@ember/routing/route";
+import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
-import { DocumentsRouteParams } from "hermes/types/document-routes";
-import ActiveFiltersService from "hermes/services/active-filters";
 
-export default class AllRoute extends Route {
-  @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
-  @service declare activeFilters: ActiveFiltersService;
+export default class AuthenticatedAllRoute extends Route {
+  @service declare router: RouterService;
 
-  queryParams = {
-    docType: {
-      refreshModel: true,
-    },
-    owners: {
-      refreshModel: true,
-    },
-    page: {
-      refreshModel: true,
-    },
-    product: {
-      refreshModel: true,
-    },
-    sortBy: {
-      refreshModel: true,
-    },
-    status: {
-      refreshModel: true,
-    },
-  };
+  beforeModel(transition: any) {
+    const intent = transition.intent;
 
-  async model(params: DocumentsRouteParams) {
-    const searchIndex =
-      params.sortBy === "dateAsc"
-        ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
-        : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+    let shouldTransition = false;
 
-    let [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
-    ]);
+    if (intent.name) {
+      if (intent.name === "authenticated.all") {
+        shouldTransition = true;
+      }
+    }
 
-    this.activeFilters.update(params);
+    console.log("intent", intent);
 
-    return { facets, results };
+    if (intent.url) {
+      if (intent.url === "/all" || intent.url === "/all/") {
+        shouldTransition = true;
+      }
+    }
+    console.log("shouldTransition", shouldTransition);
+
+    if (shouldTransition) {
+      this.router.transitionTo("authenticated.all.documents");
+    }
   }
 }

@@ -1,6 +1,6 @@
 import Controller from "@ember/controller";
 
-export default class AuthenticatedAllController extends Controller {
+export default class AuthenticatedAllDocumentsController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
   docType = [];
   owners = [];

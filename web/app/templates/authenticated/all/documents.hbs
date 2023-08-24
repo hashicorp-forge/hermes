@@ -1,0 +1,11 @@
+{{page-title "Explore Documents"}}
+
+<Header::Toolbar @facets={{@model.facets}} />
+
+{{log "model" @model}}
+
+<RowResults
+  @docs={{@model.results.hits}}
+  @nbPages={{@model.results.nbPages}}
+  @currentPage={{(add @model.results.page 1)}}
+/>
