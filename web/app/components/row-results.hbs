@@ -1,14 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{!
-  Displays the results of an Algolia search in a rows format.
-
-  <RowResults /> properties:
-    @docs: Algolia result's "hits" element from a docs search response.
-    @isDraft: Document is a draft.
-    @nbPages: Algolia result's "nbPages" element from a docs search response.
-    @page: Algolia result's "page" element from a docs search response.
-}}
-
 <section>
   <div class="x-container">
     <div class="row-results">
@@ -21,7 +10,21 @@
               <H.Th class="status">Status</H.Th>
               <H.Th class="product">Product/Area</H.Th>
               <H.Th class="owner">Owner</H.Th>
-              <H.Th class="created">Created</H.Th>
+              <H.Th class="created">
+                <Table::SortableHeader
+                  @changeSort={{@changeSort}}
+                  @currentSort={{@currentSort}}
+                  @sortDirection={{@sortDirection}}
+                  @queryParam={{hash
+                    sortBy=(if (eq @sortDirection "desc") "dateAsc" "dateDesc")
+                    page=1
+                  }}
+                  @attribute="createdTime"
+                  @defaultSortDirection="desc"
+                >
+                  Created
+                </Table::SortableHeader>
+              </H.Th>
             </H.Tr>
           </:head>
           <:body>
@@ -41,7 +44,9 @@
             {{/each}}
           </:body>
         </Hds::Table>
-        <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+        {{#if this.paginationIsShown}}
+          <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+        {{/if}}
       {{else}}
         {{#if @isDraft}}
           <Hds::Alert @type="inline" as |A|>

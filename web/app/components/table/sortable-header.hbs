@@ -1,0 +1,24 @@
+{{#if @changeSort}}
+  <Action
+    class="sortable-table-header {{if this.isActive 'active'}}"
+    {{on "click" this.changeSort}}
+    ...attributes
+  >
+    <div class="sort-icon">
+      <FlightIcon @name={{this.iconName}} />
+    </div>
+    {{yield}}
+  </Action>
+{{else}}
+  <LinkTo
+    ...attributes
+    @route={{this.currentRoute}}
+    @query={{@queryParam}}
+    class="sortable-table-header {{if this.isActive 'active'}}"
+  >
+    <div class="sort-icon">
+      <FlightIcon @name={{this.iconName}} />
+    </div>
+    {{yield}}
+  </LinkTo>
+{{/if}}
