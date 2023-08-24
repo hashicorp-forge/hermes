@@ -16,11 +16,19 @@ module("Integration | Component | footer", function (hooks) {
   test("it renders as expected (default setup)", async function (assert) {
     MockDate.set("2000-01-01T06:00:00.000-07:00");
 
+    const configService = this.owner.lookup("service:config") as ConfigService;
+
+    configService.config.version = "1.2.3";
+
     await render(hbs`<Footer />`);
 
     assert
       .dom("[data-test-footer-copyright]")
       .containsText("2000", "The current year is shown");
+
+    assert
+      .dom("[data-test-footer-version]")
+      .containsText("Version 1.2.3", "The version is shown");
 
     assert
       .dom("[data-test-footer-github-link]")

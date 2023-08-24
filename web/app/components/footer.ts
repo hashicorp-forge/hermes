@@ -12,6 +12,10 @@ export default class FooterComponent extends Component<FooterComponentSignature>
   @service declare router: RouterService;
   @service declare config: ConfigService;
 
+  protected get version() {
+    return this.config.config.version;
+  }
+
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
   }

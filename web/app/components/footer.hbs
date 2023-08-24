@@ -2,11 +2,15 @@
   <div class="footer" ...attributes>
     <div class="x-container">
       <div class="footer-inner">
-        <div class="flex items-center">
+        <div class="flex items-center space-x-4">
           <div data-test-footer-copyright>
             ©
             {{this.currentYear}}
             HashiCorp
+          </div>
+          <div data-test-footer-version>
+            Version
+            {{this.version}}
           </div>
         </div>
 
