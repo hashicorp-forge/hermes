@@ -16,14 +16,11 @@ export default class AuthenticatedAllRoute extends Route {
       }
     }
 
-    console.log("intent", intent);
-
     if (intent.url) {
       if (intent.url === "/all" || intent.url === "/all/") {
         shouldTransition = true;
       }
     }
-    console.log("shouldTransition", shouldTransition);
 
     if (shouldTransition) {
       this.router.transitionTo("authenticated.all.documents");
