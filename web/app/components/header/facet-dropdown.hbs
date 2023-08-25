@@ -7,7 +7,15 @@
   ...attributes
 >
   <:anchor as |dd|>
-    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
+    <dd.ToggleButton
+      class="focus:z-10 focus-visible:z-10 active:z-10
+        {{if this.positionIsLeft 'rounded-r-none'}}
+        {{if this.positionIsCenter 'rounded-none border-l-0'}}
+        {{if this.positionIsRight 'rounded-l-none border-l-0'}}
+        "
+      @text={{@label}}
+      disabled={{@disabled}}
+    />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
