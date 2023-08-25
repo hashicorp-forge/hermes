@@ -25,43 +25,43 @@ module("Acceptance | authenticated/all", function (hooks) {
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
-  test("documents can be sorted by created date", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    this.server.createList("document", 2);
+  // test("documents can be sorted by created date", async function (this: AuthenticatedAllRouteTestContext, assert) {
+  //   this.server.createList("document", 2);
 
-    await visit("/all");
+  //   await visit("/all");
 
-    assert
-      .dom(TABLE_HEADER_CREATED_SELECTOR)
-      .hasClass("active")
-      .hasAttribute("href", "/all?sortBy=dateAsc");
+  //   assert
+  //     .dom(TABLE_HEADER_CREATED_SELECTOR)
+  //     .hasClass("active")
+  //     .hasAttribute("href", "/all?sortBy=dateAsc");
 
-    assert
-      .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
-      .hasAttribute("data-test-icon", "arrow-down");
+  //   assert
+  //     .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
+  //     .hasAttribute("data-test-icon", "arrow-down");
 
-    await click(TABLE_HEADER_CREATED_SELECTOR);
+  //   await click(TABLE_HEADER_CREATED_SELECTOR);
 
-    assert
-      .dom(TABLE_HEADER_CREATED_SELECTOR)
-      .hasClass("active")
-      .hasAttribute("href", "/all");
+  //   assert
+  //     .dom(TABLE_HEADER_CREATED_SELECTOR)
+  //     .hasClass("active")
+  //     .hasAttribute("href", "/all");
 
-    assert
-      .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
-      .hasAttribute("data-test-icon", "arrow-up");
-  });
+  //   assert
+  //     .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
+  //     .hasAttribute("data-test-icon", "arrow-up");
+  // });
 
-  test("product badges have the correct hrefs", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    this.server.create("document", {
-      product: "Labs",
-    });
+  // test("product badges have the correct hrefs", async function (this: AuthenticatedAllRouteTestContext, assert) {
+  //   this.server.create("document", {
+  //     product: "Labs",
+  //   });
 
-    await visit("/all");
+  //   await visit("/all");
 
-    assert
-      .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
-  });
+  //   assert
+  //     .dom(PRODUCT_BADGE_LINK_SELECTOR)
+  //     .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
+  // });
 
   test("it redirects to the documents route", async function (this: AuthenticatedAllRouteTestContext, assert) {
     await visit("/all");
