@@ -26,6 +26,7 @@ module("Acceptance | authenticated/all/projects", function (hooks) {
     const firstDoc = this.server.schema.document.first().attrs;
     const secondDoc = this.server.schema.document.all().models[1].attrs;
     this.server.create("project", {
+      description: "This is a test project",
       documents: [firstDoc],
     });
     this.server.create("project", {

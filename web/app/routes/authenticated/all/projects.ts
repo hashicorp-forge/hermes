@@ -8,6 +8,7 @@ export type HermesProject = {
   id: string; // at least in mirage...
   name: string;
   documents?: HermesDocument[];
+  description?: string;
   jiraObject?: {
     key: string;
     url: string;

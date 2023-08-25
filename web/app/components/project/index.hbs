@@ -1,5 +1,53 @@
 <header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
   <Header::Nav />
 </header>
+<div class="x-container">
+  <div class="flex justify-between">
 
-{{@project.name}}
+    <LinkTo
+      @route="authenticated.all.projects"
+      class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
+    >
+      <FlightIcon @name="arrow-left" class="mr-2" />
+      All projects
+    </LinkTo>
+    <div class="flex">
+      <CopyURLButton @url="TODO" />
+      {{! TODO: add settings dropdown }}
+    </div>
+  </div>
+
+  <div class="text-center">
+    <h1 class="text-display-400">
+      {{@project.name}}
+    </h1>
+    <p>
+      {{@project.description}}
+    </p>
+  </div>
+  <div class="flex justify-center">
+    {{#if @project.jiraObject}}
+      Jira connected
+    {{else}}
+      <Hds::Button @color="secondary" @icon="zap" @text="Connect to Jira" />
+    {{/if}}
+  </div>
+
+  <div>
+    {{#if @project.documents}}
+      <ul>
+        {{#each @project.documents as |document|}}
+          <li>
+            {{document.title}}
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+  </div>
+</div>
+<!--
+.sidebar-header-button { @apply relative rounded-button-md py-2 px-3 flex
+items-center border border-transparent text-color-foreground-primary; &:hover {
+@apply border-color-border-strong bg-color-foreground-high-contrast; }
+
+-->
