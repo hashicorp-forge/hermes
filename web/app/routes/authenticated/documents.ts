@@ -5,7 +5,7 @@ import AlgoliaService from "hermes/services/algolia";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 
-export default class AuthenticatedAllDocumentsRoute extends Route {
+export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;

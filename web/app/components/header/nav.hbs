@@ -8,8 +8,8 @@
     <div class="primary-links">
       <LinkTo
         data-test-nav-link="all"
-        @route="authenticated.all.documents"
-        @current-when="authenticated.all"
+        @route="authenticated.documents"
+        @current-when={{or "authenticated.documents"}}
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         All Docs
