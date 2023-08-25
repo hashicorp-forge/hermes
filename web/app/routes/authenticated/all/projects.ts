@@ -5,6 +5,7 @@ import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
 
 export type HermesProject = {
+  id: string; // at least in mirage...
   name: string;
   documents?: HermesDocument[];
   jiraObject?: {
@@ -28,7 +29,8 @@ export default class AuthenticatedAllProjectsRoute extends Route {
       .fetch("/api/v1/projects")
       .then((response) => response?.json())
       .catch((e) => {
-        console.log("error", e);
+        console.error(e);
+        return null;
       });
   }
 }

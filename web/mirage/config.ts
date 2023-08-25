@@ -465,6 +465,18 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the /projects/:project_id route to fetch a project.
+       */
+
+      this.get("/projects/:project_id", (schema, request) => {
+        const project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        return new Response(200, {}, project.attrs);
+      });
+
+      /**
        * Used by the Dashboard route to get a user's recently viewed documents.
        */
       this.get("/me/recently-viewed-docs", (schema) => {
