@@ -11,7 +11,6 @@ import window from "ember-window-mock";
 import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
 import MetricsService from "hermes/services/metrics";
-import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
