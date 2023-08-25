@@ -33,8 +33,6 @@ export default class AuthenticatedAllDocumentsRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
-    this.activeFilters.update(params);
-
     const searchIndex =
       params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
@@ -44,6 +42,8 @@ export default class AuthenticatedAllDocumentsRoute extends Route {
       this.algolia.getFacets.perform(searchIndex, params),
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
+
+    this.activeFilters.update(params);
 
     const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
 

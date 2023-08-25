@@ -3,9 +3,9 @@ import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import {
-  FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetDropdownObjects,
+  FacetRecords,
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
@@ -40,7 +40,7 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    facets?: FacetDropdownGroups;
+    facets?: FacetRecords;
   };
 }
 
@@ -57,7 +57,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get statuses(): FacetDropdownObjects | null {
     let statuses: FacetDropdownObjects = {};
-    for (let status in this.args.facets?.status) {
+    for (let status in this.args.facets?.["status"]) {
       if (
         status === "Approved" ||
         status === "In-Review" ||
@@ -65,7 +65,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        statuses[status] = this.args.facets?.status[
+        statuses[status] = this.args.facets?.["status"][
           status
         ] as FacetDropdownObjectDetails;
       }

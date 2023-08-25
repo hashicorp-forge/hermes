@@ -1,5 +1,9 @@
 {{page-title "Documents"}}
 
+{{#in-element (html-element ".header-nav-and-filters") insertBefore=null}}
+  <Header::Toolbar @facets={{@model.facets}} />
+{{/in-element}}
+
 <RowResults
   @docs={{@model.results.hits}}
   @nbPages={{@model.results.nbPages}}

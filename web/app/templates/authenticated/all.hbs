@@ -3,8 +3,11 @@
   <Header::Nav />
 </header>
 <div class="x-container">
-  <div class="mb-8 flex w-full items-center justify-between">
+  <div
+    class="header-nav-and-filters mb-8 flex w-full items-center justify-between"
+  >
     <nav class="big-tabs">
+      {{! TODO: these need default queryParams }}
       <LinkTo
         @route="authenticated.all.documents"
         @current-when="authenticated.all.documents"
@@ -18,11 +21,9 @@
         Projects
       </LinkTo>
     </nav>
-
-    {{#unless this.filterBarIsShown}}
-      <Header::Toolbar @facets={{@model.facets}} />
-    {{/unless}}
   </div>
+  <Header::ActiveFilterList />
+
 </div>
 
 {{outlet}}

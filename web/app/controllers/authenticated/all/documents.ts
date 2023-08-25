@@ -1,7 +1,7 @@
 import Controller from "@ember/controller";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
-import AuthenticatedAllRoute from "hermes/routes/authenticated/all";
+import AuthenticatedAllDocumentsRoute from "hermes/routes/authenticated/all/documents";
 import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedAllDocumentsController extends Controller {
@@ -13,7 +13,7 @@ export default class AuthenticatedAllDocumentsController extends Controller {
   sortBy = "dateDesc";
   status = [];
 
-  declare model: ModelFrom<AuthenticatedAllRoute>;
+  declare model: ModelFrom<AuthenticatedAllDocumentsRoute>;
 
   get sortDirection() {
     switch (this.model.sortedBy) {
