@@ -1,12 +1,26 @@
 import Component from "@glimmer/component";
+import { HermesDocument } from "hermes/types/document";
+import { SortAttribute, SortDirection } from "./table/sortable-header";
 
 interface RowResultsComponentSignature {
   Args: {
-    // TODO: Add HermesDocument[] when we have a type for it.
-    docs: unknown[];
+    docs: HermesDocument[];
     isDraft?: boolean;
     nbPages: number;
     currentPage: number;
+    changeSort?: (attribute: SortAttribute) => void;
+    currentSort: `${SortAttribute}`;
+    sortDirection: SortDirection;
   };
 }
-export default class RowResultsComponent extends Component<RowResultsComponentSignature> {}
+export default class RowResultsComponent extends Component<RowResultsComponentSignature> {
+  protected get paginationIsShown() {
+    return this.args.nbPages && this.args.currentPage !== undefined;
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    RowResults: typeof RowResultsComponent;
+  }
+}
