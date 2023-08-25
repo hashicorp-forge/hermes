@@ -1,7 +1,6 @@
 import Controller from "@ember/controller";
-import AuthenticatedDocumentsRoute from "hermes/routes/authenticated/documents";
+import AuthenticatedDocumentsRoute from "hermes/routes/authenticated/all";
 import { ModelFrom } from "hermes/types/route-models";
-
 export default class AuthenticatedDocumentsController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
   docType = [];

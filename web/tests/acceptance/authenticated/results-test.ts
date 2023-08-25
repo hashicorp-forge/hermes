@@ -27,6 +27,6 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert
       .dom(".product-badge-link")
-      .hasAttribute("href", "/all/documents?product=%5B%22Vault%22%5D");
+      .hasAttribute("href", "/documents?product=%5B%22Vault%22%5D");
   });
 });

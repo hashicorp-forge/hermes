@@ -36,7 +36,7 @@ module("Integration | Component | results", function (hooks) {
     assert
       .dom("[data-test-results-product-link] a")
       .hasText("View all Terraform documents")
-      .hasAttribute("href", "/all/documents?product=%5B%22Terraform%22%5D");
+      .hasAttribute("href", "/documents?product=%5B%22Terraform%22%5D");
 
     this.set("query", "engineering");
     assert

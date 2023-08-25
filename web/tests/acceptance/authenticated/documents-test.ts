@@ -7,8 +7,8 @@ import { setupApplicationTest } from "ember-qunit";
 
 const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
 
-interface AuthenticatedAllDocumentsRouteTestContext extends MirageTestContext {}
-module("Acceptance | authenticated/all/documents", function (hooks) {
+interface AuthenticatedDocumentsRouteTestContext extends MirageTestContext {}
+module("Acceptance | authenticated/documents", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -16,20 +16,20 @@ module("Acceptance | authenticated/all/documents", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AuthenticatedAllDocumentsRouteTestContext, assert) {
-    await visit("/all/documents");
+  test("the page title is correct", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+    await visit("/documents");
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
-  test("product badges have the correct hrefs", async function (this: AuthenticatedAllDocumentsRouteTestContext, assert) {
+  test("product badges have the correct hrefs", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.create("document", {
       product: "Labs",
     });
 
-    await visit("/all/documents");
+    await visit("/documents");
 
     assert
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/all/documents?product=%5B%22Labs%22%5D");
+      .hasAttribute("href", "/documents?product=%5B%22Labs%22%5D");
   });
 });

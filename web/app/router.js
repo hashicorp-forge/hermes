@@ -8,9 +8,10 @@ export default class Router extends EmberRouter {
 
 Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
+    this.route("dashboard");
+    this.route("all"); // legacy route; redirects to /documents
     this.route("documents");
     this.route("projects");
-    this.route("dashboard");
     this.route("document", { path: "/document/:document_id" });
     this.route("project", { path: "/project/:project_id" });
     this.route("drafts");
