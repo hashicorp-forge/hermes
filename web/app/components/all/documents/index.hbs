@@ -1,0 +1,11 @@
+{{#in-element (html-element ".header-nav-and-filters") insertBefore=null}}
+  <Header::Toolbar @facets={{@facets}} />
+{{/in-element}}
+
+<RowResults
+  @docs={{@results.hits}}
+  @nbPages={{@results.nbPages}}
+  @currentPage={{(add @results.page 1)}}
+  @currentSort="createdTime"
+  @sortDirection={{this.sortDirection}}
+/>

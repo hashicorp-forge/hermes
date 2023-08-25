@@ -1,13 +1,7 @@
 {{page-title "Documents"}}
 
-{{#in-element (html-element ".header-nav-and-filters") insertBefore=null}}
-  <Header::Toolbar @facets={{@model.facets}} />
-{{/in-element}}
-
-<RowResults
-  @docs={{@model.results.hits}}
-  @nbPages={{@model.results.nbPages}}
-  @currentPage={{(add @model.results.page 1)}}
-  @currentSort="createdTime"
-  @sortDirection={{this.sortDirection}}
+<All::Documents
+  @facets={{@model.facets}}
+  @results={{@model.results}}
+  @sortedBy={{@model.sortedBy}}
 />
