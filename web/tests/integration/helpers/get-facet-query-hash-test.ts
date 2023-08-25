@@ -22,27 +22,27 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
     await render(hbs`
       {{! @glint-nocheck: not typesafe yet }}
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{get-facet-query-hash "Type" "foo" false}}
       />
 
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{get-facet-query-hash "Type" "bar" true}}
       />
 
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{get-facet-query-hash "Status" "foo" false}}
       />
 
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{get-facet-query-hash "Product/Area" "foo" false}}
       />
 
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{get-facet-query-hash "Owner" "foo" false}}
       />
     `);

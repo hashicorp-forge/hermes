@@ -22,7 +22,7 @@ export type HermesProject = {
   dateModified: number;
 };
 
-export default class AuthenticatedAllProjectsRoute extends Route {
+export default class AuthenticatedProjectsRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
 
   async model(_params: any) {

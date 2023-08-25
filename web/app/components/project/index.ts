@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { HermesProject } from "hermes/routes/authenticated/all/projects";
+import { HermesProject } from "hermes/routes/authenticated/projects";
 
 interface ProjectIndexComponentSignature {
   Args: {

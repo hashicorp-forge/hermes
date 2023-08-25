@@ -63,11 +63,11 @@ module("Acceptance | authenticated/all", function (hooks) {
       .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
   });
 
-  test("it redirects to the all.documents route", async function (this: AuthenticatedAllRouteTestContext, assert) {
+  test("it redirects to the documents route", async function (this: AuthenticatedAllRouteTestContext, assert) {
     await visit("/all");
 
     const routerService = this.owner.lookup("service:router") as RouterService;
 
-    assert.equal(routerService.currentRouteName, "authenticated.all.documents");
+    assert.equal(routerService.currentRouteName, "authenticated.documents");
   });
 });

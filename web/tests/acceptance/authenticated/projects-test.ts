@@ -5,7 +5,7 @@ import { visit } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 
-interface AuthenticatedAllProjectsRouteTestContext extends MirageTestContext {}
+interface AuthenticatedProjectsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/all/projects", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
@@ -14,12 +14,12 @@ module("Acceptance | authenticated/all/projects", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AuthenticatedAllProjectsRouteTestContext, assert) {
+  test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/all/projects");
     assert.equal(getPageTitle(), "All Projects | Hermes");
   });
 
-  test("it renders a list of projects", async function (this: AuthenticatedAllProjectsRouteTestContext, assert) {
+  test("it renders a list of projects", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     this.server.create("document", { product: "Terraform" });
     this.server.create("document");
 

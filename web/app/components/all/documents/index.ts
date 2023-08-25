@@ -5,7 +5,7 @@ import { HermesDocument } from "hermes/types/document";
 import { FacetRecords } from "hermes/types/facets";
 import { SearchResponse } from "instantsearch.js";
 
-interface AllDocumentsComponentSignature {
+interface DocumentsComponentSignature {
   Args: {
     facets?: FacetRecords;
     results: SearchResponse<HermesDocument>;
@@ -13,7 +13,7 @@ interface AllDocumentsComponentSignature {
   };
 }
 
-export default class AllDocumentsComponent extends Component<AllDocumentsComponentSignature> {
+export default class DocumentsComponent extends Component<DocumentsComponentSignature> {
   protected get sortDirection() {
     switch (this.args.sortedBy) {
       case SortByValue.DateAsc:
@@ -26,6 +26,6 @@ export default class AllDocumentsComponent extends Component<AllDocumentsCompone
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "All::Documents": typeof AllDocumentsComponent;
+    Documents: typeof DocumentsComponent;
   }
 }

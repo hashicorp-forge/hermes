@@ -15,7 +15,7 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     await render<MaybeQueryTestContext>(hbs`
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{maybe-query this.query}}
       >
        Link
@@ -34,7 +34,7 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     await render<MaybeQueryTestContext>(hbs`
       <LinkTo
-        @route="authenticated.all.documents"
+        @route="authenticated.documents"
         @query={{maybe-query this.query}}
       >
         Link

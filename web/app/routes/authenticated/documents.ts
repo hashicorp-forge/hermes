@@ -8,7 +8,7 @@ import { SortByValue } from "hermes/components/header/toolbar";
 import { SearchResponse } from "instantsearch.js";
 import { HermesDocument } from "hermes/types/document";
 
-export default class AuthenticatedAllDocumentsRoute extends Route {
+export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
