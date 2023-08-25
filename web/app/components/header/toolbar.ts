@@ -65,18 +65,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        console.log("1", status);
-        console.log("2", statuses[status]);
-        console.log("3", this.args.facets);
-        console.log("4", this.args.facets?.["status"]);
-        console.log("5", this.args.facets?.["status"][status]);
         statuses[status] = this.args.facets?.["status"][
           status
         ] as FacetDropdownObjectDetails;
       }
     }
-
-    console.log("statuses", statuses);
 
     if (Object.keys(statuses).length === 0) {
       // This will disable the status dropdown
