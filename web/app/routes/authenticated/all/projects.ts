@@ -7,8 +7,7 @@ import { HermesDocument } from "hermes/types/document";
 export type HermesProject = {
   name: string;
   documents?: HermesDocument[];
-  jira?: {
-    // not sure if these are accurate
+  jiraObject?: {
     key: string;
     url: string;
     priority: string;
@@ -24,8 +23,7 @@ export type HermesProject = {
 export default class AuthenticatedAllProjectsRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
 
-  async model(params: any) {
-    console.log("params", params);
+  async model(_params: any) {
     return await this.fetchSvc
       .fetch("/api/v1/projects")
       .then((response) => response?.json())

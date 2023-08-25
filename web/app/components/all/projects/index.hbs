@@ -1,12 +1,7 @@
-<div class="x-container">
+<div class="x-container mt-2">
   <ol class="grid grid-cols-3 gap-2">
     {{#each @projects as |project|}}
-      <li>
-        <Hds::Card::Container @hasBorder={{true}} class="p-4">
-
-          {{project.name}}
-        </Hds::Card::Container>
-      </li>
+      <All::Projects::Project @project={{project}} />
     {{/each}}
   </ol>
 </div>
