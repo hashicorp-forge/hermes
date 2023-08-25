@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { FacetDropdownObjects } from "hermes/types/facets";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 
 enum FacetDropdownPosition {
   Left = "left",
@@ -18,6 +18,7 @@ interface HeaderFacetDropdownComponentSignature {
     disabled?: boolean;
     placement?: Placement;
     position: `${FacetDropdownPosition}`;
+    offset?: OffsetOptions;
   };
 }
 

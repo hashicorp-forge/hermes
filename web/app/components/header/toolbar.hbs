@@ -1,57 +1,42 @@
 {{#if @facets}}
-  <div class="x-container">
-    <div class="mb-8 flex w-full items-center justify-between">
-      <nav class="big-tabs">
-        <LinkTo
-          @route="authenticated.all.documents"
-          @current-when="authenticated.all.documents"
-        >
-          Documents
-        </LinkTo>
-        <LinkTo
-          @route="authenticated.all.projects"
-          @current-when="authenticated.all.projects"
-        >
-          Projects
-        </LinkTo>
-      </nav>
-      <div class="toolbar">
-        <div class="flex w-full justify-between">
-          <div class="flex items-center">
-            <h4 class="hermes-h4 mr-4">
-              Filter by:
-            </h4>
-            <div class="facets flex items-center">
-              <Header::FacetDropdown
-                @label="Type"
-                @facets={{@facets.docType}}
-                @disabled={{not @facets.docType}}
-                @position="left"
-              />
-              <Header::FacetDropdown
-                @label="Status"
-                @facets={{this.statuses}}
-                @disabled={{not this.statuses}}
-                @position="center"
-                class="medium"
-              />
-              <Header::FacetDropdown
-                @label="Product/Area"
-                @facets={{@facets.product}}
-                @disabled={{not @facets.product}}
-                @position="center"
-              />
-              <Header::FacetDropdown
-                @label="Owner"
-                @facets={{@facets.owners}}
-                @disabled={{this.ownerFacetIsDisabled}}
-                @position="right"
-              />
-            </div>
-          </div>
+  <div class="toolbar">
+    <div class="flex w-full justify-between">
+      <div class="flex items-center">
+        <h4 class="hermes-h4 mr-4">
+          Filter by:
+        </h4>
+        <div class="facets flex items-center">
+          <Header::FacetDropdown
+            @label="Type"
+            @facets={{@facets.docType}}
+            @disabled={{not @facets.docType}}
+            @position="left"
+          />
+          <Header::FacetDropdown
+            @label="Status"
+            @facets={{this.statuses}}
+            @disabled={{not this.statuses}}
+            @position="center"
+            class="medium"
+          />
+          <Header::FacetDropdown
+            @label="Product/Area"
+            @facets={{@facets.product}}
+            @disabled={{not @facets.product}}
+            @position="center"
+            @placement="bottom"
+            @offset={{hash mainAxis=3 crossAxis=0}}
+          />
+          <Header::FacetDropdown
+            @label="Owner"
+            @facets={{@facets.owners}}
+            @position="right"
+            @placement="bottom-end"
+            @offset={{hash mainAxis=3 crossAxis=5}}
+          />
         </div>
-        <Header::ActiveFilterList />
       </div>
     </div>
+    <Header::ActiveFilterList />
   </div>
 {{/if}}

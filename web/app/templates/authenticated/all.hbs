@@ -2,5 +2,27 @@
 <header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
   <Header::Nav />
 </header>
+<div class="x-container">
+  <div class="mb-8 flex w-full items-center justify-between">
+    <nav class="big-tabs">
+      <LinkTo
+        @route="authenticated.all.documents"
+        @current-when="authenticated.all.documents"
+      >
+        Documents
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.all.projects"
+        @current-when="authenticated.all.projects"
+      >
+        Projects
+      </LinkTo>
+    </nav>
+
+    {{#unless this.filterBarIsShown}}
+      <Header::Toolbar @facets={{@model.facets}} />
+    {{/unless}}
+  </div>
+</div>
 
 {{outlet}}

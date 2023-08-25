@@ -1,7 +1,7 @@
 <X::DropdownList
   @items={{@facets}}
   @listIsOrdered={{true}}
-  @offset={{hash mainAxis=3 crossAxis=-5}}
+  @offset={{or @offset (hash mainAxis=3 crossAxis=-5)}}
   @renderOut={{true}}
   @placement={{@placement}}
   class="facet-dropdown-popover"
