@@ -36,19 +36,22 @@ export default class AuthenticatedAllRoute extends Route {
       this.router.transitionTo("authenticated.all.documents");
     }
   }
+
   async model(params: DocumentsRouteParams) {
-    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
+    this.activeFilters.update(params);
+
     const searchIndex =
       params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    let [facets, results] = await Promise.all([
+    const [facets, results] = await Promise.all([
       this.algolia.getFacets.perform(searchIndex, params),
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
 
-    this.activeFilters.update(params);
+    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
+
     return { facets, results, sortedBy };
   }
 }

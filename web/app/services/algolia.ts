@@ -221,6 +221,10 @@ export default class AlgoliaService extends Service {
     for (let facet of facets) {
       let facetValues = [];
 
+      if (params[facet] === undefined) {
+        continue;
+      }
+
       for (let val of params[facet]) {
         facetValues.push(`${facet}:${val}`);
       }
