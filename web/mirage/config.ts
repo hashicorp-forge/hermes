@@ -457,6 +457,14 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used by the /all/projects route to fetch a list of projects.
+       */
+      this.get("/projects", () => {
+        const projects = this.schema.projects.all().models;
+        return new Response(200, {}, projects);
+      });
+
+      /**
        * Used by the Dashboard route to get a user's recently viewed documents.
        */
       this.get("/me/recently-viewed-docs", (schema) => {
