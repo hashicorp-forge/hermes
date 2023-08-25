@@ -14,6 +14,7 @@ Router.map(function () {
     });
     this.route("dashboard");
     this.route("document", { path: "/document/:document_id" });
+    this.route("project", { path: "/project/:project_id" });
     this.route("drafts");
     this.route("my");
     this.route("results");

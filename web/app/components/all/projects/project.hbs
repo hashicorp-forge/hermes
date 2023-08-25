@@ -1,33 +1,34 @@
 <li>
-  {{! TODO: wrap in a linkTo }}
-  <Hds::Card::Container @hasBorder={{true}} class="h-48 p-4">
-    <div class="relative h-full">
-      <h3 class="font-medium">
-        {{@project.name}}
-      </h3>
-      {{#if this.documents}}
-        <span class="absolute top-0 right-0 flex items-center">
-          <FlightIcon
-            @name="files"
-            class="mr-2 text-color-foreground-disabled"
-          />
-          {{this.documents.length}}
-        </span>
-        <ul class="absolute left-0 bottom-0">
-          {{#each this.productAreas as |productArea|}}
-            <span>
-              {{productArea}}
-            </span>
-          {{/each}}
-        </ul>
-      {{/if}}
-      {{#if this.jiraObject}}
-        <span
-          class="absolute bottom-0 right-0 text-body-100 text-color-foreground-faint"
-        >
-          {{this.jiraObject.key}}
-        </span>
-      {{/if}}
-    </div>
-  </Hds::Card::Container>
+  <LinkTo @route="authenticated.project" @model="0">
+    <Hds::Card::Container @hasBorder={{true}} class="h-48 p-4">
+      <div class="relative h-full">
+        <h3 class="font-medium">
+          {{@project.name}}
+        </h3>
+        {{#if this.documents}}
+          <span class="absolute top-0 right-0 flex items-center">
+            <FlightIcon
+              @name="files"
+              class="mr-2 text-color-foreground-disabled"
+            />
+            {{this.documents.length}}
+          </span>
+          <ul class="absolute left-0 bottom-0">
+            {{#each this.productAreas as |productArea|}}
+              <span>
+                {{productArea}}
+              </span>
+            {{/each}}
+          </ul>
+        {{/if}}
+        {{#if this.jiraObject}}
+          <span
+            class="absolute bottom-0 right-0 text-body-100 text-color-foreground-faint"
+          >
+            {{this.jiraObject.key}}
+          </span>
+        {{/if}}
+      </div>
+    </Hds::Card::Container>
+  </LinkTo>
 </li>
