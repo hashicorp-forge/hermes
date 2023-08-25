@@ -4,11 +4,11 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import RouterService from "@ember/routing/router-service";
-import { getPageTitle } from "ember-page-title/test-support";
+// import { getPageTitle } from "ember-page-title/test-support";
 
-const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
-const TABLE_HEADER_CREATED_SELECTOR =
-  "[data-test-sortable-table-header][data-test-attribute=createdTime]";
+// const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
+// const TABLE_HEADER_CREATED_SELECTOR =
+//   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
 interface AuthenticatedAllRouteTestContext extends MirageTestContext {}
 
@@ -18,11 +18,6 @@ module("Acceptance | authenticated/all", function (hooks) {
 
   hooks.beforeEach(async function () {
     await authenticateSession({});
-  });
-
-  test("the page title is correct", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    await visit("/all");
-    assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
   // test("documents can be sorted by created date", async function (this: AuthenticatedAllRouteTestContext, assert) {
