@@ -1,21 +1,21 @@
 {{#if @facets}}
-  <div class="x-container">
-    <div class="mb-8 flex w-full items-center justify-between">
-      <nav class="big-tabs">
-        <LinkTo
-          @route="authenticated.all.documents"
-          @current-when="authenticated.all.documents"
-        >
-          Documents
-        </LinkTo>
-        <LinkTo
-          @route="authenticated.all.projects"
-          @current-when="authenticated.all.projects"
-        >
-          Projects
-        </LinkTo>
-      </nav>
-      <div class="toolbar">
+  <div class="mb-8 flex w-full items-center justify-between">
+    <nav class="big-tabs">
+      <LinkTo
+        @route="authenticated.all.documents"
+        @current-when="authenticated.all.documents"
+      >
+        Documents
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.all.projects"
+        @current-when="authenticated.all.projects"
+      >
+        Projects
+      </LinkTo>
+    </nav>
+    <div class="toolbar mb-7">
+      <div class="x-container">
         <div class="flex w-full justify-between">
           <div class="flex items-center">
             <h4 class="hermes-h4 mr-4">
@@ -23,36 +23,35 @@
             </h4>
             <div class="facets flex items-center">
               <Header::FacetDropdown
-                @position="left"
                 @label="Type"
                 @facets={{@facets.docType}}
                 @disabled={{not @facets.docType}}
+                @position="left"
               />
               <Header::FacetDropdown
-                @position="center"
                 @label="Status"
                 @facets={{this.statuses}}
                 @disabled={{not this.statuses}}
+                @position="center"
                 class="medium"
               />
               <Header::FacetDropdown
-                @position="center"
                 @label="Product/Area"
                 @facets={{@facets.product}}
                 @disabled={{not @facets.product}}
-                @placement="bottom"
+                @position="center"
               />
               <Header::FacetDropdown
-                @position="right"
                 @label="Owner"
                 @facets={{@facets.owners}}
                 @disabled={{this.ownerFacetIsDisabled}}
+                @position="right"
               />
             </div>
           </div>
         </div>
       </div>
+      <Header::ActiveFilterList />
     </div>
-    <Header::ActiveFilterList />
   </div>
 {{/if}}

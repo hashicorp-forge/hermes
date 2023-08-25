@@ -8,12 +8,12 @@
   ...attributes
 >
   <:anchor as |dd|>
-    {{! TODO: increase z-index on click }}
     <dd.ToggleButton
-      class="-ml-px
-        {{if (eq @position 'center') 'rounded-none'}}
-        {{if (eq @position 'right') 'rounded-l-none'}}
-        {{if (eq @position 'left') 'rounded-r-none'}}"
+      class="focus:z-10 focus-visible:z-10 active:z-10
+        {{if this.positionIsLeft 'rounded-r-none'}}
+        {{if this.positionIsCenter 'rounded-none border-l-0'}}
+        {{if this.positionIsRight 'rounded-l-none border-l-0'}}
+        "
       @text={{@label}}
       disabled={{@disabled}}
     />
