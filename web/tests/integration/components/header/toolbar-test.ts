@@ -2,7 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
+import { FacetDropdownGroups, FacetRecord } from "hermes/types/facets";
 
 const FACETS = {
   docType: {
@@ -61,7 +61,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       "Submitted",
     ];
 
-    let statusFacets: FacetDropdownObjects = {};
+    let statusFacets: FacetRecord = {};
 
     STATUS_NAMES.forEach((status) => {
       statusFacets[status] = { count: 1, isSelected: false };

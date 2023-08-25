@@ -1,11 +1,11 @@
 import { TestContext, find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
-import { FacetDropdownObjects } from "hermes/types/facets";
+import { FacetRecords } from "hermes/types/facets";
 import { module, test } from "qunit";
 
 interface HeaderFacetDropdownTestContext extends TestContext {
-  facets: FacetDropdownObjects | null;
+  facets: FacetRecords | null;
   label: string;
 }
 

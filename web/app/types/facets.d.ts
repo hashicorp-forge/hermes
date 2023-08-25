@@ -4,15 +4,8 @@ import { FacetName } from "hermes/components/header/toolbar";
  * E.g., { docType: { "API": { count: 1, isSelected: false }}}
  */
 export type FacetDropdownGroups = {
-  [name in FacetName]: FacetDropdownObjects;
+  [name in FacetName]: FacetRecord;
 };
-
-/**
- * E.g., { "API": { count: 1, isSelected: false }}
- */
-export interface FacetDropdownObjects {
-  [key: string]: FacetDropdownObjectDetails;
-}
 
 /**
  * E.g., {count: 1, isSelected: false}

@@ -8,8 +8,8 @@
         <div class="facets flex items-center">
           <Header::FacetDropdown
             @label="Type"
-            @facets={{@facets.docType}}
-            @disabled={{not @facets.docType}}
+            @facets={{get @facets "docType"}}
+            @disabled={{not (get @facets "docType")}}
             @position="left"
           />
           <Header::FacetDropdown
@@ -21,7 +21,7 @@
           />
           <Header::FacetDropdown
             @label="Product/Area"
-            @facets={{@facets.product}}
+            @facets={{get @facets "product"}}
             @disabled={{not @facets.product}}
             @position="center"
             @placement="bottom"
@@ -29,7 +29,7 @@
           />
           <Header::FacetDropdown
             @label="Owner"
-            @facets={{@facets.owners}}
+            @facets={{get @facets "owners"}}
             @position="right"
             @placement="bottom-end"
             @offset={{hash mainAxis=3 crossAxis=5}}

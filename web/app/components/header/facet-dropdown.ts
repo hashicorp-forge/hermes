@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { FacetDropdownObjects } from "hermes/types/facets";
+import { FacetRecord } from "hermes/types/facets";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
@@ -14,7 +14,7 @@ interface HeaderFacetDropdownComponentSignature {
   Element: HTMLDivElement;
   Args: {
     label: string;
-    facets: FacetDropdownObjects | null;
+    facets: FacetRecord | null;
     disabled?: boolean;
     placement?: Placement;
     position: `${FacetDropdownPosition}`;
