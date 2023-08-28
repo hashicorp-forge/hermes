@@ -1,3 +1,11 @@
 .ember-application {
-  background-color: var(--token-color-surface-primary);
+  @apply bg-color-page-primary;
+}
+
+.secondary-screen {
+  @apply bg-color-page-faint;
+
+  .ember-application {
+    @apply bg-color-page-faint;
+  }
 }

@@ -48,6 +48,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert
       .dom(`.ember-application ${CONTENT_SELECTOR}`)
       .exists("content is rendered in the root element");
+    await this.pauseTest();
   });
 
   test("it is positioned by floating-ui", async function (this: FloatingUIComponentTestContext, assert) {
