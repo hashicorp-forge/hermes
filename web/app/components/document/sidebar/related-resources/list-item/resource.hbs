@@ -6,10 +6,7 @@
       <img src="/images/document.png" class="h-auto w-[18px]" />
     </div>
   {{else}}
-    <FlightIcon
-      @name={{get-link-icon this.url}}
-      class={{if (eq (get-link-icon this.url) "globe") "opacity-40"}}
-    />
+    <Favicon @url={{this.url}} />
   {{/if}}
 </div>
 
