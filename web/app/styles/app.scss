@@ -4,6 +4,7 @@
 
 @use "./variables";
 
+@use "./body";
 @use "./animations";
 @use "./typography";
 
@@ -76,9 +77,6 @@ button {
 body {
   line-height: var(--token-typography-body-200-line-height);
   color: var(--token-color-foreground-primary);
-}
-.ember-application {
-  background-color: var(--token-color-surface-primary);
 }
 
 a {
