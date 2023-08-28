@@ -2,17 +2,17 @@
   <Header::Nav />
 </header>
 <div class="x-container">
-  <div class="flex justify-between">
+  <div class="flex items-center justify-between outline">
 
     <LinkTo
       @route="authenticated.projects"
-      class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
+      class="flex items-center rounded-button-md border border-transparent py-2 px-3 outline hover:border-color-border-strong"
     >
       <FlightIcon @name="arrow-left" class="mr-2" />
       All projects
     </LinkTo>
     <div class="flex">
-      <CopyURLButton @url="TODO" />
+      <CopyURLButton @url="TODO" class="outline" />
       {{! TODO: add settings dropdown }}
     </div>
   </div>
@@ -38,7 +38,12 @@
       <ul>
         {{#each @project.documents as |document|}}
           <li>
-            {{document.title}}
+            <LinkTo
+              @route="authenticated.document"
+              @model={{document.objectID}}
+            >
+              {{document.title}}
+            </LinkTo>
           </li>
         {{/each}}
       </ul>

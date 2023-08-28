@@ -6,7 +6,7 @@ import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 
 interface AuthenticatedProjectsRouteTestContext extends MirageTestContext {}
-module("Acceptance | authenticated/all/projects", function (hooks) {
+module("Acceptance | authenticated/projects", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -42,7 +42,7 @@ module("Acceptance | authenticated/all/projects", function (hooks) {
       },
     });
 
-    await visit("/all/projects");
+    await visit("/projects");
 
     await this.pauseTest();
   });
