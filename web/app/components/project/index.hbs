@@ -23,22 +23,17 @@
       </h1>
       {{! TODO: also take into accent if its the owner, etc }}
       {{#if @project.description}}
-        <p class="mb-4">
+        <p>
           {{@project.description}}
         </p>
       {{/if}}
     </div>
     {{! TODO: this should have some showJira logic }}
-    <div class="flex justify-center">
+    <div class="mt-4 flex justify-center">
       {{#if @project.jiraObject}}
         Jira connected
       {{else}}
-        <Hds::Button
-          @color="secondary"
-          @size="small"
-          @icon="zap"
-          @text="Add Jira link"
-        />
+        <Hds::Button @color="secondary" @size="small" @text="Add Jira link" />
       {{/if}}
     </div>
   </div>
@@ -59,6 +54,7 @@
             @size="small"
             @color="secondary"
             @icon="plus"
+            {{on "click" this.showModal}}
             @isIconOnly={{true}}
           />
         </div>
@@ -74,7 +70,6 @@
               class="flex h-12 items-center"
             >
               <div class="px-4">
-
                 {{document.title}}
               </div>
             </LinkTo>
@@ -103,6 +98,7 @@
             Related links
           </h3>
           <Hds::Button
+            {{on "click" this.showModal}}
             @text="Add a related link"
             @size="small"
             @color="secondary"
@@ -133,16 +129,17 @@
     {{/if}}
   </div>
 
-  <div class="text-center text-color-foreground-faint">
+  <div class="mb-4 text-center text-color-foreground-faint">
     Created
     {{@project.dateCreated}}
     by
     {{@project.creator}}
   </div>
 </div>
-<!--
-.sidebar-header-button { @apply relative rounded-button-md py-2 px-3 flex
-items-center border border-transparent text-color-foreground-primary; &:hover {
-@apply border-color-border-strong bg-color-foreground-high-contrast; }
 
--->
+{{#if this.modalIsShown}}
+  <Hds::Modal @onClose={{this.hideModal}} as |M|>
+    <M.Header>Add</M.Header>
+    <M.Body />
+  </Hds::Modal>
+{{/if}}

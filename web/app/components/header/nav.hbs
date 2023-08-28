@@ -9,7 +9,7 @@
       <LinkTo
         data-test-nav-link="explore"
         @route="authenticated.documents"
-        @current-when={{or "authenticated.documents" "authenticated.projects"}}
+        @current-when="authenticated.documents authenticated.projects"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         Explore
