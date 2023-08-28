@@ -18,11 +18,13 @@
         </div>
 
         {{#if this.productAreas}}
-          <ul class="absolute left-0 bottom-0">
+          {{! TODO: truncation }}
+          <ul class="absolute left-0 bottom-0 flex space-x-1">
             {{#each this.productAreas as |productArea|}}
-              <span>
-                {{productArea}}
-              </span>
+              <Hds::Badge
+                @text="{{productArea}}"
+                @icon={{or (get-product-id productArea) undefined}}
+              />
             {{/each}}
           </ul>
         {{/if}}

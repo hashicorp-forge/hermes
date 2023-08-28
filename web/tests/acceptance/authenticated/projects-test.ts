@@ -20,7 +20,11 @@ module("Acceptance | authenticated/projects", function (hooks) {
   });
 
   test("it renders a list of projects", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
-    this.server.create("document", { product: "Terraform" });
+    this.server.create("document", {
+      product: "Terraform",
+      status: "In review",
+      docType: "PRFAQ",
+    });
     this.server.create("document");
 
     const firstDoc = this.server.schema.document.first().attrs;
@@ -28,6 +32,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
     this.server.create("project", {
       description: "This is a test project",
       documents: [firstDoc],
+
       relatedLinks: [
         {
           name: "Hashicorp",

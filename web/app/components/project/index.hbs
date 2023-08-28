@@ -12,6 +12,16 @@
     </LinkTo>
     <div class="flex">
       <CopyURLButton @url="TODO" />
+      <X::DropdownList @items={{hash}} @placement="bottom-end">
+        <:anchor as |dd|>
+          <dd.ToggleAction>
+            <FlightIcon @name="settings" />
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          Butt
+        </:item>
+      </X::DropdownList>
       {{! TODO: add settings dropdown }}
     </div>
   </div>
@@ -42,7 +52,7 @@
     class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
   >
     <div
-      class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-page-faint"
+      class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-strong"
     >
       <div class="w-full px-4">
         <div class="flex items-center justify-between">
@@ -63,14 +73,34 @@
     {{#if @project.documents}}
       <ul class="divide-y divide-color-border-primary">
         {{#each @project.documents as |document|}}
-          <li>
+          <li class="group">
             <LinkTo
               @route="authenticated.document"
               @model={{document.objectID}}
-              class="flex h-12 items-center"
+              class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
             >
-              <div class="px-4">
-                {{document.title}}
+              <div class="flex w-full items-center justify-between px-4">
+                <div class="flex items-center">
+                  <Person::Avatar
+                    @email="{{get document.owners 0}}"
+                    @size="small"
+                    class="mr-2"
+                  />
+                  <h4 class="text-display-200 font-semibold">
+                    {{document.title}}
+                  </h4>
+                </div>
+                <div class="flex space-x-1">
+                  <Doc::State
+                    @hideProgress={{true}}
+                    @state={{document.status}}
+                  />
+                  <Hds::Badge
+                    @text="{{document.product}}"
+                    @icon={{or (get-product-id document.product) undefined}}
+                  />
+                  <Hds::Badge @text={{document.docType}} />
+                </div>
               </div>
             </LinkTo>
           </li>
@@ -90,7 +120,7 @@
     class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
   >
     <div
-      class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-page-faint"
+      class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-strong"
     >
       <div class="w-full px-4">
         <div class="flex items-center justify-between">
