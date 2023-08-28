@@ -28,6 +28,12 @@ module("Acceptance | authenticated/projects", function (hooks) {
     this.server.create("project", {
       description: "This is a test project",
       documents: [firstDoc],
+      relatedLinks: [
+        {
+          name: "Hashicorp",
+          url: "https://hashicorp.com",
+        },
+      ],
     });
     this.server.create("project", {
       documents: [firstDoc, secondDoc],
