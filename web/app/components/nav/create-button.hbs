@@ -15,19 +15,20 @@
     </dd.ToggleAction>
   </:anchor>
   <:header>
-    <div class="mt-3 px-4">
-      <h4 class="hermes-h4">
-        Select a template
+    <div class="mt-3 flex justify-between px-4">
+      <h4 class="font-semibold">
+        Choose a template
       </h4>
+      {{! <div
+        class="text-color-foreground-faint hover:text-color-foreground-primary"
+      >
+        Help...
+      </div> }}
     </div>
   </:header>
   <:footer>
-    <div class="qwe-123 mt-1 border-t border-t-color-border-primary">
-      <div class="px-4">
-        <h4 class="hermes-h4 mt-2">
-          Project
-        </h4>
-      </div>
+    <div class="qwe-123 border-t border-t-color-border-primary py-1.5">
+      {{! content placed here by in-element }}
     </div>
   </:footer>
   <:item as |dd|>
@@ -37,32 +38,36 @@
       {{#in-element (html-element ".qwe-123") insertBefore=null}}
         <dd.LinkTo
           @route="authenticated.new"
-          class="flex items-center justify-between px-4"
+          class="text-color-foreground-actXion flex h-9 items-center justify-between px-4"
         >
-          <div>
-            <FlightIcon
-              @name="grid"
-              class="mr-1.5 text-color-foreground-disabled"
-            />
-            {{dd.attrs.label}}
+          <div class="flex items-center">
+            <FlightIcon @name="grid" class="mr-3" />
+            {{! <div
+              class="mr-2 grid h-4 w-4 place-items-center rounded-sm bg-color-foreground-primary"
+            >
+              <span
+                class="text-[9px] font-medium uppercase leading-none tracking-tight text-white"
+              >
+                or
+              </span>
+            </div> }}
+            Create a project
           </div>
         </dd.LinkTo>
       {{/in-element}}
     {{else}}
       <dd.LinkTo
         @route="authenticated.new"
-        class="flex items-center justify-between px-4"
+        class="flex h-9 items-center justify-between rounded-none px-4"
       >
-        <div>
-          <FlightIcon
-            @name="file-text"
-            class="mr-1.5 text-color-foreground-disabled"
-          />
-          <span>
-            {{dd.attrs.label}}
-          </span>
+        <div class="flex items-center">
+          <FlightIcon @name={{or dd.attrs.icon "file-text"}} class="mr-3" />
+          {{dd.attrs.label}}
+          {{!-- <div class="ml-2 text-body-100 opacity-60">
+            {{dd.attrs.shortName}}
+          </div> --}}
         </div>
-        <Hds::Badge @text={{dd.attrs.shortName}} />
+        {{!-- <Hds::Badge @text={{dd.attrs.shortName}} /> --}}
       </dd.LinkTo>
     {{/if}}
   </:item>
