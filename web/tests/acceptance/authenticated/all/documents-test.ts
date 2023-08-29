@@ -43,7 +43,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/all?sortBy=dateAsc");
+      .hasAttribute("href", "/documents?sortBy=dateAsc");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
@@ -54,7 +54,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/all");
+      .hasAttribute("href", "/documents");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
