@@ -52,7 +52,7 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
       case "authenticated.my":
         return currentRouteName;
       default:
-        return "authenticated.all";
+        return "authenticated.documents";
     }
   }
 }

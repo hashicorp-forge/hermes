@@ -560,7 +560,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
         <:item as |dd|>
-          <dd.LinkTo @route="authenticated.all" @query={{hash products="Labs"}}>
+          <dd.LinkTo @route="authenticated.documents" @query={{hash products="Labs"}}>
             {{dd.value}}
           </dd.LinkTo>
         </:item>
@@ -575,7 +575,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       firstLink.getAttribute("href"),
-      "/all?products=Labs",
+      "/documents?products=Labs",
       "route and query are set"
     );
   });

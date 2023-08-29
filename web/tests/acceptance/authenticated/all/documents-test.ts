@@ -1,17 +1,16 @@
 import { click, visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
-import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import { module, test, todo } from "qunit";
 import { getPageTitle } from "ember-page-title/test-support";
 
 const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
-interface AuthenticatedAllRouteTestContext extends MirageTestContext {}
-
-module("Acceptance | authenticated/all", function (hooks) {
+interface AuthenticatedDocumentsRouteTestContext extends MirageTestContext {}
+module("Acceptance | authenticated/documents", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -19,12 +18,24 @@ module("Acceptance | authenticated/all", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    await visit("/all");
+  test("the page title is correct", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+    await visit("/documents");
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
-  test("documents can be sorted by created date", async function (this: AuthenticatedAllRouteTestContext, assert) {
+  test("product badges have the correct hrefs", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+    this.server.create("document", {
+      product: "Labs",
+    });
+
+    await visit("/documents");
+
+    assert
+      .dom(PRODUCT_BADGE_LINK_SELECTOR)
+      .hasAttribute("href", "/documents?product=%5B%22Labs%22%5D");
+  });
+
+  test("documents can be sorted by created date", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.createList("document", 2);
 
     await visit("/all");
@@ -32,7 +43,7 @@ module("Acceptance | authenticated/all", function (hooks) {
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/all?sortBy=dateAsc");
+      .hasAttribute("href", "/documents?sortBy=dateAsc");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
@@ -43,25 +54,11 @@ module("Acceptance | authenticated/all", function (hooks) {
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/all");
+      .hasAttribute("href", "/documents");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
       .hasAttribute("data-test-icon", "arrow-up");
-  });
-
-  test("product badges have the correct hrefs", async function (this: AuthenticatedAllRouteTestContext, assert) {
-    // Note: "Vault" is the default product area in the Mirage factory.
-
-    this.server.create("document", {
-      product: "Labs",
-    });
-
-    await visit("/all");
-
-    assert
-      .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
   });
 
   /**
@@ -71,7 +68,7 @@ module("Acceptance | authenticated/all", function (hooks) {
    */
   todo(
     "product badges have the correct hrefs when other filters are active",
-    async function (this: AuthenticatedAllRouteTestContext, assert) {
+    async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
       assert.true(false);
     }
   );
