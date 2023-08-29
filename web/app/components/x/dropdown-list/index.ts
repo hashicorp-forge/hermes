@@ -37,6 +37,7 @@ export interface XDropdownListAnchorAPI
     XDropdownListToggleComponentBoundArgs | "color" | "text"
   >;
   focusedItemIndex: number;
+  selected: any;
   resetFocusedItemIndex: () => void;
   scheduleAssignMenuItemIDs: () => void;
   hideContent: () => void;

@@ -84,6 +84,47 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
+  docTypes = [
+    {
+      label: "Request for comments",
+      icon: "discussion-circle",
+      shortName: "RFC",
+      description: "Ask colleagues for feedback on a proposal.",
+    },
+    {
+      label: "Product requirements",
+      icon: "target",
+      shortName: "PRD",
+      description: "Plan a new product or feature.",
+    },
+    {
+      label: "Funding request",
+      icon: "dollar-sign",
+      shortName: "FRD",
+      description: "Get buy-in for your project's budget.",
+    },
+    {
+      label: "Plan of record",
+      icon: "map",
+      shortName: "POR",
+      description: "Set goals and milestones for an initiative.",
+    },
+    {
+      label: "Press release / FAQ",
+      icon: "newspaper",
+      shortName: "PRFAQ",
+      description: "Write a press release for your project.",
+    },
+    {
+      label: "Memo",
+      icon: "radio",
+      shortName: "MEMO",
+      description: "Share freeform info with your team.",
+    },
+  ];
+
+  @tracked docType = this.docTypes[0];
+
   /**
    * The form element. Used to bind FormData to our tracked elements.
    */
@@ -137,6 +178,14 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected registerForm(form: HTMLFormElement) {
     this._form = form;
+  }
+
+  @action protected changeDocType(docTypeShortName: string) {
+    const docType = this.docTypes.find(
+      (docType) => docType.shortName === docTypeShortName
+    );
+    assert("docType must exist", docType);
+    this.docType = docType;
   }
 
   /**

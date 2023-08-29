@@ -1,6 +1,5 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{#if this.docIsBeingCreated}}
-  <div class="text-center hds-typography-display-400 mt-3">
+  <div class="hds-typography-display-400 mt-3 text-center">
     <FlightIcon @name="loading" @size="24" />
     <div class="mt-8 text-display-200 font-semibold">
       Creating
@@ -12,7 +11,7 @@
   </div>
 {{else}}
   <form
-    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    class="grid grid-cols-[1fr_250px] grid-rows-1 gap-10"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
@@ -20,9 +19,58 @@
       <div class="space-y-4">
         <h1
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
-        >Create your {{@docType}}</h1>
+        >
+          New document
+        </h1>
       </div>
-      <div class="pt-10 space-y-7">
+      <div class="space-y-7 pt-10">
+        <div>
+
+          <X::DropdownList
+            class="product-select-dropdown-list w-[300px]"
+            @items={{this.docTypes}}
+            @selected={{this.docType}}
+            {{!-- @onItemClick={{this.onChange}} --}}
+            {{!-- @placement={{@placement}} --}}
+            {{!-- @isSaving={{@isSaving}} --}}
+            {{!-- @renderOut={{@renderOut}} --}}
+            {{! ...attributes }}
+          >
+            <:anchor as |dd|>
+              <label class="hermes-form-label">
+                Choose a template
+              </label>
+              <dd.ToggleAction
+                class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
+              >
+                <FlightIcon
+                  @name={{or dd.selected.icon "file-text"}}
+                  class="mr-3"
+                />
+                {{dd.selected.label}}
+                <FlightIcon @name="caret" class="product-select-toggle-caret" />
+              </dd.ToggleAction>
+            </:anchor>
+            <:item as |dd|>
+              <dd.Action
+                class="pr-5"
+                {{on "click" (fn this.changeDocType dd.attrs.shortName)}}
+              >
+                <div class="flex items-center">
+                  <FlightIcon
+                    @name={{or dd.attrs.icon "file-text"}}
+                    class="mr-3"
+                  />
+                  {{dd.attrs.label}}
+                  {{!-- <div class="ml-2 text-body-100 opacity-60">
+            {{dd.attrs.shortName}}
+          </div> --}}
+                </div>
+              </dd.Action>
+            </:item>
+          </X::DropdownList>
+        </div>
+
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -51,7 +99,7 @@
               <span
                 class={{if
                   this.summaryIsLong
-                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                  "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
                 }}
               >One or two sentences</span>
               outlining your doc.
