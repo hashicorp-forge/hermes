@@ -10,23 +10,18 @@
   </:anchor>
   <:header>
     <h4 class="hermes-h4">
-
       Choose a template
     </h4>
   </:header>
   <:footer>
-    {{log "ho"}}
     <div class="qwe-123">
-
       <h4 class="hermes-h4">
         or
       </h4>
-
     </div>
   </:footer>
-  {{! Need to figure out how to loop through groups... }}
   <:item as |dd|>
-    {{log "oh"}}
+    {{! Move projects to the footer }}
     {{#if (eq dd.attrs.shortName "PROJECT")}}
       {{#in-element (html-element ".qwe-123") insertBefore=null}}
         <dd.LinkTo @route="authenticated.new" class="flex justify-between">

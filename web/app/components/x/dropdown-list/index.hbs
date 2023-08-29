@@ -95,7 +95,7 @@
       {{else}}
         <div
           data-test-x-dropdown-list-loaded-content
-          class="overflow-hidden flex flex-col"
+          class="flex flex-col overflow-hidden"
           {{did-insert this.didInsertContent}}
         >
           {{#if this.inputIsShown}}
@@ -124,42 +124,52 @@
             {{#if (has-block "header")}}
               {{yield to="header"}}
             {{/if}}
-            <X::DropdownList::Items
-              @contentID={{f.contentID}}
-              @query={{this.query}}
-              @items={{@items}}
-              @shownItems={{this.shownItems}}
-              @selected={{@selected}}
-              @focusedItemIndex={{this.focusedItemIndex}}
-              @inputIsShown={{this.inputIsShown}}
-              @listIsOrdered={{@listIsOrdered}}
-              @listItemRole={{this.listItemRole}}
-              @onInput={{this.onInput}}
-              @onItemClick={{@onItemClick}}
-              @registerScrollContainer={{this.registerScrollContainer}}
-              @setFocusedItemIndex={{this.setFocusedItemIndex}}
-              @hideContent={{f.hideContent}}
-              @scrollContainer={{this.scrollContainer}}
-              @listIsShown={{@listIsShown}}
-              @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
-            >
-              <:no-matches>
-                {{#if (has-block "no-matches")}}
-                  {{yield to="no-matches"}}
-                {{else}}
-                  <div class="x-dropdown-list-default-empty-state">
-                    No matches
-                  </div>
-                {{/if}}
-              </:no-matches>
-              <:item as |i|>
-                {{yield i to="item"}}
-              </:item>
-            </X::DropdownList::Items>
+
+            <div id="x-dropdown-list-items-{{f.contentID}}">
+              {{! Items placed here via in-element }}
+            </div>
 
             {{#if (has-block "footer")}}
               {{yield to="footer"}}
             {{/if}}
+
+            {{#in-element
+              (html-element (concat "#x-dropdown-list-items-" f.contentID))
+              insertBefore=null
+            }}
+              <X::DropdownList::Items
+                @contentID={{f.contentID}}
+                @query={{this.query}}
+                @items={{@items}}
+                @shownItems={{this.shownItems}}
+                @selected={{@selected}}
+                @focusedItemIndex={{this.focusedItemIndex}}
+                @inputIsShown={{this.inputIsShown}}
+                @listIsOrdered={{@listIsOrdered}}
+                @listItemRole={{this.listItemRole}}
+                @onInput={{this.onInput}}
+                @onItemClick={{@onItemClick}}
+                @registerScrollContainer={{this.registerScrollContainer}}
+                @setFocusedItemIndex={{this.setFocusedItemIndex}}
+                @hideContent={{f.hideContent}}
+                @scrollContainer={{this.scrollContainer}}
+                @listIsShown={{@listIsShown}}
+                @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
+              >
+                <:no-matches>
+                  {{#if (has-block "no-matches")}}
+                    {{yield to="no-matches"}}
+                  {{else}}
+                    <div class="x-dropdown-list-default-empty-state">
+                      No matches
+                    </div>
+                  {{/if}}
+                </:no-matches>
+                <:item as |i|>
+                  {{yield i to="item"}}
+                </:item>
+              </X::DropdownList::Items>
+            {{/in-element}}
           </div>
         </div>
       {{/if}}
