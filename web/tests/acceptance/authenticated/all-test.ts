@@ -65,4 +65,16 @@ module("Acceptance | authenticated/all", function (hooks) {
 
     assert.equal(routerService.currentRouteName, "authenticated.documents");
   });
+
+  /**
+   * We want to test that clicking the product badge replaces filters
+   * rather than compound them, but we don't yet have the Mirage
+   * factories to support this.
+   */
+  todo(
+    "product badges have the correct hrefs when other filters are active",
+    async function (this: AuthenticatedAllRouteTestContext, assert) {
+      assert.true(false);
+    }
+  );
 });
