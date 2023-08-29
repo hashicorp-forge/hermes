@@ -63,4 +63,16 @@ module("Acceptance | authenticated/all", function (hooks) {
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
       .hasAttribute("href", "/all?product=%5B%22Labs%22%5D");
   });
+
+  /**
+   * We want to test that clicking the product badge replaces filters
+   * rather than compound them, but we don't yet have the Mirage
+   * factories to support this.
+   */
+  todo(
+    "product badges have the correct hrefs when other filters are active",
+    async function (this: AuthenticatedAllRouteTestContext, assert) {
+      assert.true(false);
+    }
+  );
 });
