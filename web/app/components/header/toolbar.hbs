@@ -29,20 +29,11 @@
             <Header::FacetDropdown
               @label="Owner"
               @facets={{@facets.owners}}
-              @disabled={{this.ownerFacetIsDisabled}}
+              @disabled={{not @facets.owners}}
               @position="right"
             />
           </div>
         </div>
-        {{#if (and @facets (not @sortControlIsHidden))}}
-          <Header::SortDropdown
-            @label={{this.getSortByLabel}}
-            @facets={{this.sortByFacets}}
-            @disabled={{this.sortControlIsDisabled}}
-            @currentSortByValue={{this.currentSortByValue}}
-            @dropdownPlacement="bottom-end"
-          />
-        {{/if}}
       </div>
       <Header::ActiveFilterList />
     </div>

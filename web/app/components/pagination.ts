@@ -44,3 +44,9 @@ export default class PaginationComponent extends Component<PaginationComponentSi
     return pages;
   }
 }
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    Pagination: typeof PaginationComponent;
+  }
+}

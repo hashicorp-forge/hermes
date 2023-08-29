@@ -1,11 +1,13 @@
-import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { authenticateSession } from "ember-simple-auth/test-support";
-import { module, test } from "qunit";
-import { visit } from "@ember/test-helpers";
-import { getPageTitle } from "ember-page-title/test-support";
+import { click, visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
+import { authenticateSession } from "ember-simple-auth/test-support";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import { module, test, todo } from "qunit";
+import { getPageTitle } from "ember-page-title/test-support";
 
 const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
+const TABLE_HEADER_CREATED_SELECTOR =
+  "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
 interface AuthenticatedDocumentsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/documents", function (hooks) {
@@ -32,4 +34,42 @@ module("Acceptance | authenticated/documents", function (hooks) {
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
       .hasAttribute("href", "/documents?product=%5B%22Labs%22%5D");
   });
+
+  test("documents can be sorted by created date", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+    this.server.createList("document", 2);
+
+    await visit("/all");
+
+    assert
+      .dom(TABLE_HEADER_CREATED_SELECTOR)
+      .hasClass("active")
+      .hasAttribute("href", "/all?sortBy=dateAsc");
+
+    assert
+      .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
+      .hasAttribute("data-test-icon", "arrow-down");
+
+    await click(TABLE_HEADER_CREATED_SELECTOR);
+
+    assert
+      .dom(TABLE_HEADER_CREATED_SELECTOR)
+      .hasClass("active")
+      .hasAttribute("href", "/all");
+
+    assert
+      .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
+      .hasAttribute("data-test-icon", "arrow-up");
+  });
+
+  /**
+   * We want to test that clicking the product badge replaces filters
+   * rather than compound them, but we don't yet have the Mirage
+   * factories to support this.
+   */
+  todo(
+    "product badges have the correct hrefs when other filters are active",
+    async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+      assert.true(false);
+    }
+  );
 });
