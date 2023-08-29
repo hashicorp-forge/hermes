@@ -1,38 +1,67 @@
 <X::DropdownList
   @items={{this.menuItems}}
-  @placement="bottom-end"
-  class="w-[320px]"
+  @placement="bottom"
+  class="w-[300px]"
 >
   <:anchor as |dd|>
-    <dd.ToggleAction>
-      Toggle
+    <dd.ToggleAction
+      class="hds-button hds-button--color-primary hds-button--size-medium flex"
+    >
+      New
+      <FlightIcon
+        @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+        class="ml-1.5 -mr-0.5"
+      />
     </dd.ToggleAction>
   </:anchor>
   <:header>
-    <h4 class="hermes-h4">
-      Choose a template
-    </h4>
+    <div class="mt-3 px-4">
+      <h4 class="hermes-h4">
+        Select a template
+      </h4>
+    </div>
   </:header>
   <:footer>
-    <div class="qwe-123">
-      <h4 class="hermes-h4">
-        or
-      </h4>
+    <div class="qwe-123 mt-1 border-t border-t-color-border-primary">
+      <div class="px-4">
+        <h4 class="hermes-h4 mt-2">
+          Project
+        </h4>
+      </div>
     </div>
   </:footer>
   <:item as |dd|>
     {{! Move projects to the footer }}
     {{#if (eq dd.attrs.shortName "PROJECT")}}
+      {{! convert this to maybe in element }}
       {{#in-element (html-element ".qwe-123") insertBefore=null}}
-        <dd.LinkTo @route="authenticated.new" class="flex justify-between">
-          why
+        <dd.LinkTo
+          @route="authenticated.new"
+          class="flex items-center justify-between px-4"
+        >
+          <div>
+            <FlightIcon
+              @name="grid"
+              class="mr-1.5 text-color-foreground-disabled"
+            />
+            {{dd.attrs.label}}
+          </div>
         </dd.LinkTo>
       {{/in-element}}
     {{else}}
-      <dd.LinkTo @route="authenticated.new" class="flex justify-between">
-        <span>
-          {{dd.attrs.label}}
-        </span>
+      <dd.LinkTo
+        @route="authenticated.new"
+        class="flex items-center justify-between px-4"
+      >
+        <div>
+          <FlightIcon
+            @name="file-text"
+            class="mr-1.5 text-color-foreground-disabled"
+          />
+          <span>
+            {{dd.attrs.label}}
+          </span>
+        </div>
         <Hds::Badge @text={{dd.attrs.shortName}} />
       </dd.LinkTo>
     {{/if}}

@@ -5,13 +5,16 @@ import {
   Placement,
   autoUpdate,
   computePosition,
+  detectOverflow,
   flip,
   offset,
   platform,
   shift,
+  MiddlewareState,
 } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import htmlElement from "hermes/utils/html-element";
 
 interface FloatingUIContentSignature {
   Element: HTMLDivElement;
@@ -49,18 +52,52 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
       return;
     }
 
+    const detectOverflowMiddleware = {
+      name: "detectOverflow",
+      async fn(state: MiddlewareState) {
+        const containerWidth = htmlElement(".header-nav").offsetWidth;
+
+        console.log("containerWidth", containerWidth);
+        const overflow = await detectOverflow(state, {
+          boundary: htmlElement(".header-nav"),
+        });
+        return {
+          data: overflow,
+        };
+      },
+    };
+
     let updatePosition = async () => {
       let placement = this.args.placement || "bottom-start";
 
       computePosition(this.args.anchor, this.content, {
         platform,
         placement: placement as Placement,
-        middleware: [offset(this.offset), flip(), shift()],
-      }).then(({ x, y, placement }) => {
+        middleware: [
+          offset(this.offset),
+          flip(),
+          shift(),
+          detectOverflowMiddleware,
+        ],
+      }).then(({ x, y, placement, middlewareData }) => {
         this.content.setAttribute("data-floating-ui-placement", placement);
+        console.log("x", x);
+        console.log("y", y);
+        console.log("middlewareData", middlewareData["detectOverflow"]);
+
+        const availableSpaceRight = middlewareData["detectOverflow"].right;
+        const availableSpaceLeft = middlewareData["detectOverflow"].left;
+
+        let left = x;
+
+        if (availableSpaceRight > 0) {
+          left = x - availableSpaceRight;
+        } else if (availableSpaceLeft > 0) {
+          left = x + availableSpaceLeft;
+        }
 
         Object.assign(this.content.style, {
-          left: `${x}px`,
+          left: `${left}px`,
           top: `${y}px`,
         });
       });

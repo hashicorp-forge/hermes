@@ -43,7 +43,7 @@ export default class NavNewCreateButton extends Component<NavNewCreateButtonSign
 
   protected get menuItems() {
     const projectItem = {
-      label: "Project",
+      label: "Create a project",
       shortName: "PROJECT",
       description: "Create a new project.",
     };
