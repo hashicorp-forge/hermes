@@ -10,6 +10,7 @@ interface HtmlElementHelperSignature {
 
 const htmlElementHelper = helper<HtmlElementHelperSignature>(
   ([selector]: [string]) => {
+    console.log("selector", selector);
     return htmlElement(selector);
   }
 );

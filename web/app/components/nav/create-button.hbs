@@ -1,0 +1,45 @@
+<X::DropdownList
+  @items={{this.menuItems}}
+  @placement="bottom-end"
+  class="w-[320px]"
+>
+  <:anchor as |dd|>
+    <dd.ToggleAction>
+      Toggle
+    </dd.ToggleAction>
+  </:anchor>
+  <:header>
+    <h4 class="hermes-h4">
+
+      Choose a template
+    </h4>
+  </:header>
+  <:footer>
+    {{log "ho"}}
+    <div class="qwe-123">
+
+      <h4 class="hermes-h4">
+        or
+      </h4>
+
+    </div>
+  </:footer>
+  {{! Need to figure out how to loop through groups... }}
+  <:item as |dd|>
+    {{log "oh"}}
+    {{#if (eq dd.attrs.shortName "PROJECT")}}
+      {{#in-element (html-element ".qwe-123") insertBefore=null}}
+        <dd.LinkTo @route="authenticated.new" class="flex justify-between">
+          why
+        </dd.LinkTo>
+      {{/in-element}}
+    {{else}}
+      <dd.LinkTo @route="authenticated.new" class="flex justify-between">
+        <span>
+          {{dd.attrs.label}}
+        </span>
+        <Hds::Badge @text={{dd.attrs.shortName}} />
+      </dd.LinkTo>
+    {{/if}}
+  </:item>
+</X::DropdownList>

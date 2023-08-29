@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div class="x-container">
 
   <nav class="header-nav">
@@ -36,13 +35,7 @@
     <Header::Search class="global-search" />
 
     <div class="user-buttons">
-      <Hds::Button
-        @route="authenticated.new"
-        @isIconOnly={{true}}
-        @text="Create draft"
-        @icon="file-plus"
-        class="create-draft-button"
-      />
+      <Nav::CreateButton />
       <div class="relative">
         {{#if this.userMenuHighlightIsShown}}
           <Header::UserMenuHighlight />
