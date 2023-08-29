@@ -1,8 +1,8 @@
 import { click, visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
+import { module, test, todo } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { module, test, todo } from "qunit";
 import { getPageTitle } from "ember-page-title/test-support";
 
 const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
