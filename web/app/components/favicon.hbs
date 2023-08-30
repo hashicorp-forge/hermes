@@ -1,0 +1,17 @@
+{{#if this.fallbackIconIsShown}}
+  <FlightIcon
+    ...attributes
+    data-test-fallback-favicon
+    @name="globe"
+    class="opacity-60"
+  />
+{{else}}
+  <img
+    ...attributes
+    data-test-favicon
+    {{on "error" this.showFallbackIcon}}
+    src={{this.faviconURL}}
+    height="16"
+    width="16"
+  />
+{{/if}}
