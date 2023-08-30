@@ -48,7 +48,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | null = null;
+  @tracked protected productArea: string | undefined = undefined;
   @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
@@ -84,46 +84,61 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
+  @tracked docTypeModalIsShown = false;
+
   docTypes = [
     {
-      label: "Request for comments",
+      longName: "Request for comments",
       icon: "discussion-circle",
       shortName: "RFC",
-      description: "Ask colleagues for feedback on a proposal.",
+      description:
+        "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
+      moreInfoLink: {
+        text: "When should I create an RFC?",
+        url: "https://works.hashicorp.com/articles/rfc-template",
+      },
     },
     {
-      label: "Product requirements",
+      longName: "Product requirements",
       icon: "target",
       shortName: "PRD",
-      description: "Plan a new product or feature.",
+      description:
+        "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
+      moreInfoLink: {
+        text: "When should I create a PRD?",
+        url: "https://works.hashicorp.com/articles/prd-template",
+      },
     },
     {
-      label: "Funding request",
+      longName: "Funding request",
       icon: "dollar-sign",
       shortName: "FRD",
-      description: "Get buy-in for your project's budget.",
+      description:
+        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
     },
     {
-      label: "Plan of record",
+      longName: "Plan of record",
       icon: "map",
       shortName: "POR",
-      description: "Set goals and milestones for an initiative.",
+      description:
+        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
     },
     {
-      label: "Press release / FAQ",
+      longName: "Press release / FAQ",
       icon: "newspaper",
       shortName: "PRFAQ",
       description: "Write a press release for your project.",
     },
     {
-      label: "Memo",
+      longName: "Memo",
       icon: "radio",
       shortName: "MEMO",
       description: "Share freeform info with your team.",
     },
   ];
 
-  @tracked docType = this.docTypes[0];
+  // TODO: give docType a type
+  @tracked docType: Object | null = null;
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -188,6 +203,14 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.docType = docType;
   }
 
+  @action showDocTypeModal() {
+    this.docTypeModalIsShown = true;
+  }
+
+  @action hideDocTypeModal() {
+    this.docTypeModalIsShown = false;
+  }
+
   /**
    * Binds the FormData to our locally tracked properties.
    * If the summary is long, shows a gentle warning.
@@ -224,8 +247,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    attributes: ProductArea
+    attributes?: ProductArea
   ) {
+    assert("attributes must exist", attributes);
+
     this.productArea = productName;
     this.productAbbreviation = attributes.abbreviation;
     this.maybeValidate();

@@ -11,7 +11,7 @@
   </div>
 {{else}}
   <form
-    class="grid grid-cols-[1fr_250px] grid-rows-1 gap-10"
+    class="mx-auto max-w-xl"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
@@ -23,69 +23,26 @@
           New document
         </h1>
       </div>
-      <div class="space-y-7 pt-10">
-        <div>
+      <div class="space-y-7 pt-8">
 
-          <X::DropdownList
-            class="product-select-dropdown-list w-[300px]"
-            @items={{this.docTypes}}
-            @selected={{this.docType}}
-            {{!-- @onItemClick={{this.onChange}} --}}
-            {{!-- @placement={{@placement}} --}}
-            {{!-- @isSaving={{@isSaving}} --}}
-            {{!-- @renderOut={{@renderOut}} --}}
-            {{! ...attributes }}
-          >
-            <:anchor as |dd|>
-              <label class="hermes-form-label">
-                Choose a template
-              </label>
-              <dd.ToggleAction
-                class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
-              >
-                <FlightIcon
-                  @name={{or dd.selected.icon "file-text"}}
-                  class="mr-3"
-                />
-                {{dd.selected.label}}
-                <FlightIcon @name="caret" class="product-select-toggle-caret" />
-              </dd.ToggleAction>
-            </:anchor>
-            <:item as |dd|>
-              <dd.Action
-                class="pr-5"
-                {{on "click" (fn this.changeDocType dd.attrs.shortName)}}
-              >
-                <div class="flex items-center">
-                  <FlightIcon
-                    @name={{or dd.attrs.icon "file-text"}}
-                    class="mr-3"
-                  />
-                  {{dd.attrs.label}}
-                  {{!-- <div class="ml-2 text-body-100 opacity-60">
-            {{dd.attrs.shortName}}
-          </div> --}}
-                </div>
-              </dd.Action>
-            </:item>
-          </X::DropdownList>
-        </div>
-
+        {{! Title }}
         <Hds::Form::TextInput::Field
-          @type="text"
           @isRequired={{true}}
           @value={{this.title}}
+          @type="text"
           name="title"
-          placeholder="Enter a document title"
           {{on "input" this.updateForm}}
           as |F|
         >
-          <F.Label>Title</F.Label>
-          <F.HelperText>
+          <F.Label class="relative">
+            Title
+          </F.Label>
+          {{! <F.HelperText>
             A succinct outline of the idea youʼre proposing.
-          </F.HelperText>
+          </F.HelperText> }}
         </Hds::Form::TextInput::Field>
 
+        {{! Summary }}
         <div class="relative">
           <Hds::Form::Textarea::Field
             @value={{this.summary}}
@@ -108,79 +65,105 @@
           </Hds::Form::Textarea::Field>
         </div>
 
-        <div>
-          <div class="mb-2">
-            <span class="hermes-form-label">
-              Product/Area &nbsp;
-              <Hds::Badge @size="small" @text="Required" />
-            </span>
-            <span class="hermes-form-helper-text hds-form-helper-text">
-              Where your doc should be categorized.
-            </span>
+        {{! Type/Area }}
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <X::DropdownList
+              class="product-select-dropdown-list"
+              @items={{this.docTypes}}
+              @selected={{this.docType}}
+              @matchAnchorWidth={{true}}
+              {{!-- @onItemClick={{this.onChange}} --}}
+              {{!-- @placement={{@placement}} --}}
+              {{!-- @isSaving={{@isSaving}} --}}
+              {{!-- @renderOut={{@renderOut}} --}}
+              {{! ...attributes }}
+            >
+              <:anchor as |dd|>
+                <div class="mb-2 flex items-center justify-between">
+                  <div class="flex items-center">
+                    <label class="hermes-form-label relative">
+                      Document type
+                    </label>
+                    <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
+                    <Action
+                      {{on "click" this.showDocTypeModal}}
+                      class="ml-1.5 flex text-color-foreground-faint opacity-75 hover:opacity-100"
+                    >
+                      <FlightIcon @name="info-fill" class="" />
+                    </Action>
+                  </div>
+                </div>
+                <dd.ToggleAction
+                  class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium w-full"
+                >
+                  <FlightIcon
+                    @name={{or dd.selected.icon "file-text"}}
+                    class="mr-3"
+                  />
+                  <div
+                    class={{unless
+                      dd.selected.longName
+                      "text-color-foreground-faint"
+                    }}
+                  >
+                    {{or dd.selected.longName "---"}}
+                  </div>
+                  {{#if dd.selected.shortName}}
+                    <div class="ml-2 text-body-100 leading-none opacity-50">
+                      {{dd.selected.shortName}}
+                    </div>
+                  {{/if}}
+                  <FlightIcon
+                    @name="caret"
+                    class="product-select-toggle-caret"
+                  />
+                </dd.ToggleAction>
+              </:anchor>
+              <:item as |dd|>
+                <dd.Action
+                  class="pr-5"
+                  {{on "click" (fn this.changeDocType dd.attrs.shortName)}}
+                >
+                  <div class="flex items-center">
+                    <FlightIcon
+                      @name={{or dd.attrs.icon "file-text"}}
+                      class="mr-3"
+                    />
+                    {{dd.attrs.longName}}
+                    <div class="ml-2 text-body-100 opacity-50">
+                      {{dd.attrs.shortName}}
+                    </div>
+                  </div>
+                </dd.Action>
+              </:item>
+            </X::DropdownList>
           </div>
-          <Inputs::ProductSelect
-            @selected={{this.productArea}}
-            @onChange={{this.onProductSelect}}
-            class="w-[300px]"
-          />
+          <div>
+            <div class="mb-2">
+              <span class="hermes-form-label relative">
+                Product/Area
+                <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
+              </span>
+            </div>
+            <Inputs::ProductSelect
+              @selected={{this.productArea}}
+              @onChange={{this.onProductSelect}}
+              @isFullWidth={{true}}
+            />
+          </div>
         </div>
 
-        {{! Note: We are still refining the subscribe/follow feature set.
-                As part of that effort we will be looking into how the concept
-                of "tags" would be useful. For now, we are choosing to
-                comment out defining tags as part of the document draft
-                creation workflow.
-          }}
-        {{!-- <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
-          {{yield
-            (hash
-              Error=F.Error
-              HelperText=F.HelperText
-              Label=F.Label
-              isRequired=F.isRequired
-              isOptional=F.isOptional
-            )
-          }}
-          <F.Control>
-            <Inputs::TagSelect
-              @selected={{this.tags}}
-              @onChange={{this.updateTags}}
-            />
-          </F.Control>
-          <F.Label><FlightIcon @name="tag" />
-            Add tags
-          </F.Label>
-          {{#if this.formErrors.tags}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.tags}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>
-            Use tags to help people discover this document based on their
-            cross-functional interests. For instance, "raft", "design" or
-            "a11y". There is a maximum of 5 tags.
-          </F.HelperText>
-        </Hds::Form::Field> --}}
-
+        {{! Contributors }}
         <Hds::Form::Field @layout="vertical" as |F|>
-          {{yield
-            (hash
-              Error=F.Error
-              HelperText=F.HelperText
-              Label=F.Label
-              isRequired=F.isRequired
-              isOptional=F.isOptional
-            )
-          }}
           <F.Control>
             <Inputs::PeopleSelect
-              class="multiselect mt-2 w-auto"
+              class="multiselect mt-2 w-full"
               @selected={{this.contributors}}
               @onChange={{this.updateContributors}}
             />
           </F.Control>
           <F.Label>
-            <FlightIcon @name="users" />
             Contributors
           </F.Label>
           {{#if this.formErrors.contributors}}
@@ -193,9 +176,15 @@
           </F.HelperText>
         </Hds::Form::Field>
       </div>
-      <div class="h-24"></div>
+
+      <Hds::Button
+        @text="Create in Google Drive"
+        type="submit"
+        @icon="google"
+        class="mt-10 mb-10"
+      />
     </div>
-    <div>
+    {{!-- <div>
       <div class="preview-card">
         <h3>
           <FlightIcon @name="eye" />
@@ -214,6 +203,49 @@
           class="w-full"
         />
       </div>
-    </div>
+    </div> --}}
   </form>
+{{/if}}
+
+{{#if this.docTypeModalIsShown}}
+  <Hds::Modal @onClose={{this.hideDocTypeModal}} class="scrollable" as |M|>
+    <M.Header>Document types</M.Header>
+    <M.Body>
+      <div class="scrollable-container max-h-[380px]">
+
+        <ul class="mt-5 space-y-5">
+          {{#each this.docTypes as |docType|}}
+            <li>
+              <div class="flex items-center">
+                <h5 class="mb-0.5 flex text-display-200 font-semibold">
+                  {{docType.longName}}
+                  <span
+                    class="ml-1.5 flex font-regular text-color-foreground-primary"
+                  >
+                    ({{docType.shortName}})
+                  </span>
+                </h5>
+              </div>
+              <p class="text-body-200">
+                {{or docType.description "No description provided."}}
+              </p>
+              {{#if docType.moreInfoLink}}
+                <ExternalLink
+                  href={{docType.moreInfoLink.url}}
+                  @iconIsShown={{true}}
+                  class="mt-1 text-body-200 text-color-foreground-action"
+                >
+                  {{docType.moreInfoLink.text}}
+                </ExternalLink>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+        <div
+          class="sticky bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-white/0"
+        ></div>
+      </div>
+    </M.Body>
+
+  </Hds::Modal>
 {{/if}}

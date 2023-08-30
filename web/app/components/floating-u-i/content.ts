@@ -25,6 +25,7 @@ interface FloatingUIContentSignature {
     placement?: Placement | null;
     renderOut?: boolean;
     offset?: OffsetOptions;
+    matchAnchorWidth?: boolean;
   };
   Blocks: {
     default: [];
@@ -44,6 +45,9 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
 
   @action didInsert(e: HTMLElement) {
     this._content = e;
+    if (this.args.matchAnchorWidth) {
+      this.content.style.width = `${this.args.anchor.offsetWidth}px`;
+    }
 
     if (this.args.placement === null) {
       this.content.removeAttribute("data-floating-ui-placement");

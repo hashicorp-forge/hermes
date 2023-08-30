@@ -17,6 +17,7 @@ interface InputsProductSelectSignature {
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
+    isFullWidth?: boolean;
   };
 }
 
