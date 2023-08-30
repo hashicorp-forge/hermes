@@ -11,16 +11,53 @@
   </div>
 {{else}}
   <form
-    class="mx-auto max-w-xl"
+    class="mx-auto max-w-lg"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
     <div>
       <div class="space-y-4">
         <h1
-          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
+          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong flex"
         >
-          New document
+          New
+          <X::DropdownList
+            @items={{this.objectTypes}}
+            @selected={{this.selectedObjectType}}
+            {{!-- @offset={{hash crossAxis=-1 mainAxis=5}} --}}
+          >
+            <:anchor as |dd|>
+              <dd.ToggleAction
+                class="hover:hds-elevation-low group relative ml-[1px] -mt-0.5 -mb-[3px] flex items-center rounded-button-md border border-transparent px-2 pt-0.5 pb-[3px] hover:border-color-border-strong
+                  {{if dd.contentIsShown 'has-focus-ring'}}"
+              >
+                {{dd.selected}}
+                <FlightIcon
+                  @name="caret"
+                  class="ml-1
+                    {{unless dd.contentIsShown 'text-color-foreground-faint'}}
+                    group-hover:text-color-foreground-strong"
+                />
+              </dd.ToggleAction>
+
+            </:anchor>
+            <:item as |dd|>
+              <dd.Action
+                class="flex items-center justify-between pl-3.5 pr-5 text-display-300 font-regular text-color-foreground-primary"
+                {{on "click" (fn this.changeObjectType dd.value)}}
+              >
+
+                <span>
+                  {{dd.value}}
+                </span>
+                <FlightIcon
+                  @name="check"
+                  class="ml-8 text-color-foreground-action
+                    {{unless dd.isSelected 'invisible'}}"
+                />
+              </dd.Action>
+            </:item>
+          </X::DropdownList>
         </h1>
       </div>
       <div class="space-y-7 pt-8">
@@ -59,25 +96,21 @@
                   "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
                 }}
               >One or two sentences</span>
-              outlining your doc.
+              outlining your
+              {{if this.objectTypeIsProject "project" "doc"}}.
               {{if this.summaryIsLong "(Just a recommendation)"}}
             </F.HelperText>
           </Hds::Form::Textarea::Field>
         </div>
 
-        {{! Type/Area }}
-        <div class="grid grid-cols-2 gap-6">
+        {{#unless this.objectTypeIsProject}}
+          {{! Document type }}
           <div>
             <X::DropdownList
               class="product-select-dropdown-list"
               @items={{this.docTypes}}
-              @selected={{this.docType}}
+              @selected={{this.selectedDocType}}
               @matchAnchorWidth={{true}}
-              {{!-- @onItemClick={{this.onChange}} --}}
-              {{!-- @placement={{@placement}} --}}
-              {{!-- @isSaving={{@isSaving}} --}}
-              {{!-- @renderOut={{@renderOut}} --}}
-              {{! ...attributes }}
             >
               <:anchor as |dd|>
                 <div class="mb-2 flex items-center justify-between">
@@ -97,10 +130,12 @@
                 <dd.ToggleAction
                   class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium w-full"
                 >
-                  <FlightIcon
-                    @name={{or dd.selected.icon "file-text"}}
-                    class="mr-3"
-                  />
+                  {{#if dd.selected}}
+                    <FlightIcon
+                      @name={{or dd.selected.icon "file-text"}}
+                      class="mr-2.5"
+                    />
+                  {{/if}}
                   <div
                     class={{unless
                       dd.selected.longName
@@ -128,7 +163,7 @@
                   <div class="flex items-center">
                     <FlightIcon
                       @name={{or dd.attrs.icon "file-text"}}
-                      class="mr-3"
+                      class="mr-2.5"
                     />
                     {{dd.attrs.longName}}
                     <div class="ml-2 text-body-100 opacity-50">
@@ -139,6 +174,8 @@
               </:item>
             </X::DropdownList>
           </div>
+
+          {{! Product/Area }}
           <div>
             <div class="mb-2">
               <span class="hermes-form-label relative">
@@ -152,36 +189,35 @@
               @isFullWidth={{true}}
             />
           </div>
-        </div>
 
-        {{! Contributors }}
-        <Hds::Form::Field @layout="vertical" as |F|>
-          <F.Control>
-            <Inputs::PeopleSelect
-              class="multiselect mt-2 w-full"
-              @selected={{this.contributors}}
-              @onChange={{this.updateContributors}}
-            />
-          </F.Control>
-          <F.Label>
-            Contributors
-          </F.Label>
-          {{#if this.formErrors.contributors}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.contributors}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>
-            People to share your doc with. You can always add more later.
-          </F.HelperText>
-        </Hds::Form::Field>
+          {{! Contributors }}
+          <Hds::Form::Field @layout="vertical" as |F|>
+            <F.Control>
+              <Inputs::PeopleSelect
+                class="multiselect mt-2 w-full"
+                @selected={{this.contributors}}
+                @onChange={{this.updateContributors}}
+              />
+            </F.Control>
+            <F.Label>
+              Contributors
+            </F.Label>
+            {{#if this.formErrors.contributors}}
+              <F.Error as |E|>
+                <E.Message>{{this.formErrors.contributors}}</E.Message>
+              </F.Error>
+            {{/if}}
+            <F.HelperText>
+              People to share your doc with. You can always add more later.
+            </F.HelperText>
+          </Hds::Form::Field>
+        {{/unless}}
       </div>
 
       <Hds::Button
-        @text="Create in Google Drive"
+        @text="Create new {{if this.objectTypeIsProject 'project' 'document'}}"
         type="submit"
-        @icon="google"
-        class="mt-10 mb-10"
+        class="mt-8 mb-10"
       />
     </div>
     {{!-- <div>

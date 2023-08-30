@@ -41,7 +41,12 @@
             class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium
               {{if @isFullWidth 'w-full'}}"
           >
-            <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
+            {{#if dd.selected}}
+              <FlightIcon
+                @name={{or (get-product-id @selected) "folder"}}
+                class="mr-2.5"
+              />
+            {{/if}}
 
             <span
               class="product-select-selected-value

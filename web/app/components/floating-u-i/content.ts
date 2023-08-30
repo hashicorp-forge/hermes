@@ -45,8 +45,10 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
 
   @action didInsert(e: HTMLElement) {
     this._content = e;
+
     if (this.args.matchAnchorWidth) {
       this.content.style.width = `${this.args.anchor.offsetWidth}px`;
+      this.content.style.maxWidth = "none";
     }
 
     if (this.args.placement === null) {
@@ -61,7 +63,6 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
       async fn(state: MiddlewareState) {
         const containerWidth = htmlElement(".header-nav").offsetWidth;
 
-        console.log("containerWidth", containerWidth);
         const overflow = await detectOverflow(state, {
           boundary: htmlElement(".header-nav"),
         });
@@ -85,9 +86,9 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
         ],
       }).then(({ x, y, placement, middlewareData }) => {
         this.content.setAttribute("data-floating-ui-placement", placement);
-        console.log("x", x);
-        console.log("y", y);
-        console.log("middlewareData", middlewareData["detectOverflow"]);
+        // console.log("x", x);
+        // console.log("y", y);
+        // console.log("middlewareData", middlewareData["detectOverflow"]);
 
         const availableSpaceRight = middlewareData["detectOverflow"].right;
         const availableSpaceLeft = middlewareData["detectOverflow"].left;

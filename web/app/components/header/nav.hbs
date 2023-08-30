@@ -35,7 +35,13 @@
     <Header::Search class="global-search" />
 
     <div class="user-buttons">
-      <Nav::CreateButtonTwo />
+      <Hds::Button
+        @text="New"
+        @icon="plus"
+        @route="authenticated.new.doc"
+        class="pl-2.5 pr-4"
+      />
+      {{! <Nav::CreateButtonTwo /> }}
       <div class="relative">
         {{#if this.userMenuHighlightIsShown}}
           <Header::UserMenuHighlight />

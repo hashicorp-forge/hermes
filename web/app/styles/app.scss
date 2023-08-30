@@ -151,3 +151,10 @@ h1 {
   height: 0;
   visibility: hidden;
 }
+
+.has-focus-ring {
+  &:focus,
+  &:focus-visible {
+    box-shadow: var(--token-focus-ring-action-box-shadow);
+  }
+}

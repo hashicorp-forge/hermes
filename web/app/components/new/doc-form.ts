@@ -137,8 +137,17 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
   ];
 
+  objectTypes = { Document: {}, Project: {} };
+
+  @tracked selectedObjectType = "Document";
+
+  get objectTypeIsProject() {
+    return this.selectedObjectType === "Project";
+  }
+
   // TODO: give docType a type
-  @tracked docType: Object | null = null;
+  // @tracked docType: any = this.docTypes[0];
+  @tracked selectedDocType: any = null;
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -200,7 +209,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       (docType) => docType.shortName === docTypeShortName
     );
     assert("docType must exist", docType);
-    this.docType = docType;
+    this.selectedDocType = docType;
+  }
+
+  @action protected changeObjectType(value: string) {
+    const object = Object.keys(this.objectTypes).find((key) => key === value);
+    assert("object must exist", object);
+    this.selectedObjectType = object;
   }
 
   @action showDocTypeModal() {
