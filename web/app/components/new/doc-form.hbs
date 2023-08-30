@@ -17,14 +17,14 @@
   >
     <div>
       <div class="space-y-4">
-        <h1
-          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong flex"
-        >
+        <h1 class="flex text-display-500 text-color-foreground-strong">
           New
           <X::DropdownList
             @items={{this.objectTypes}}
             @selected={{this.selectedObjectType}}
-            {{!-- @offset={{hash crossAxis=-1 mainAxis=5}} --}}
+            @renderOut={{true}}
+            @offset={{hash crossAxis=-3 mainAxis=4}}
+            class="w-[220px]"
           >
             <:anchor as |dd|>
               <dd.ToggleAction
@@ -43,13 +43,16 @@
             </:anchor>
             <:item as |dd|>
               <dd.Action
-                class="flex items-center justify-between pl-3.5 pr-5 text-display-300 font-regular text-color-foreground-primary"
+                class="flex h-9 items-center justify-between rounded-none px-4"
                 {{on "click" (fn this.changeObjectType dd.value)}}
               >
-
-                <span>
+                <div class="flex items-center">
+                  <FlightIcon
+                    @name={{or dd.attrs.icon "file-text"}}
+                    class="mr-3"
+                  />
                   {{dd.value}}
-                </span>
+                </div>
                 <FlightIcon
                   @name="check"
                   class="ml-8 text-color-foreground-action
@@ -103,7 +106,21 @@
           </Hds::Form::Textarea::Field>
         </div>
 
-        {{#unless this.objectTypeIsProject}}
+        {{#if this.objectTypeIsProject}}
+          {{! TODO: Jira input }}
+          <div>
+
+            <label class="hermes-form-label mb-1">
+              Jira
+            </label>
+            <Hds::Button
+              @icon="plus"
+              @text="Add a Jira issue"
+              @color="secondary"
+              @size="small"
+            />
+          </div>
+        {{else}}
           {{! Document type }}
           <div>
             <X::DropdownList
@@ -211,7 +228,7 @@
               People to share your doc with. You can always add more later.
             </F.HelperText>
           </Hds::Form::Field>
-        {{/unless}}
+        {{/if}}
       </div>
 
       <Hds::Button

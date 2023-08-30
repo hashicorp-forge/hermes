@@ -4,15 +4,17 @@
   {{! class="w-[200px]" }}
 >
   <:anchor as |dd|>
+    <Hds::Button
+      @text="New"
+      @icon="plus"
+      @route="authenticated.new.doc"
+      @query={{hash docType="RFC"}}
+      class="rounded-r-none pl-2.5 pr-3.5"
+    />
     <dd.ToggleAction
-      class="hds-button hds-button--color-primary hds-button--size-medium flex"
+      class="hds-button hds-button--color-primary hds-button--size-medium flex rounded-l-none px-1.5"
     >
-      {{! <FlightIcon @name="plus" class="mr-1.5" /> }}
-      New
-      <FlightIcon
-        @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-        class="ml-1.5 -mr-0.5"
-      />
+      <FlightIcon @name={{if dd.contentIsShown "chevron-up" "chevron-down"}} />
     </dd.ToggleAction>
   </:anchor>
   <:item as |dd|>
