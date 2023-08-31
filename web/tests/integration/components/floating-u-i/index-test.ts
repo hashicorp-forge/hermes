@@ -96,7 +96,7 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
       <FloatingUI @matchAnchorWidth={{true}}>
         <:anchor as |f|>
           <Action
-            class="open-button"
+            id="open-button-1"
             style="width:500px;"
             {{on "click" f.showContent}}
             {{did-insert f.registerAnchor}}
@@ -104,22 +104,78 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
             Open
           </Action>
         </:anchor>
-        <:content as |f|>
-          <div class="content" id={{f.contentID}}>
+        <:content>
+          <div id="content-1">
+            Content
+          </div>
+        </:content>
+      </FloatingUI>
+
+      <FloatingUI @matchAnchorWidth={{hash enabled=true additionalWidth=100}}>
+        <:anchor as |f|>
+          <Action
+            id="open-button-2"
+            style="width:500px;"
+            {{on "click" f.showContent}}
+            {{did-insert f.registerAnchor}}
+          >
+            Open
+          </Action>
+        </:anchor>
+        <:content>
+          <div id="content-2">
+            Content
+          </div>
+        </:content>
+      </FloatingUI>
+
+      <FloatingUI @matchAnchorWidth={{hash enabled=true additionalWidth=-100}}>
+        <:anchor as |f|>
+          <Action
+            id="open-button-3"
+            style="width:500px;"
+            {{on "click" f.showContent}}
+            {{did-insert f.registerAnchor}}
+          >
+            Open
+          </Action>
+        </:anchor>
+        <:content>
+          <div id="content-3">
             Content
           </div>
         </:content>
       </FloatingUI>
     `);
 
-    await click(".open-button");
+    await click("#open-button-1");
 
-    const contentWidth = htmlElement(".content").offsetWidth;
+    let contentWidth = htmlElement("#content-1").offsetWidth;
 
     assert.equal(
       contentWidth,
       500,
       "the content width matches the anchor width"
+    );
+
+    await click("#open-button-2");
+
+    contentWidth = htmlElement("#content-2").offsetWidth;
+
+    assert.equal(
+      contentWidth,
+      600,
+      "the content width matches the anchor width plus the additional width"
+    );
+
+    await click("#open-button-3");
+
+    contentWidth = htmlElement("#content-3").offsetWidth;
+
+    assert.equal(
+      contentWidth,
+      400,
+      "the content width matches the anchor width minus the additional width"
     );
   });
 });

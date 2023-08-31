@@ -13,6 +13,11 @@ import {
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
+export interface MatchAnchorWidthOptions {
+  enabled: boolean;
+  additionalWidth: number;
+}
+
 interface FloatingUIContentSignature {
   Element: HTMLDivElement;
   Args: {
@@ -22,7 +27,7 @@ interface FloatingUIContentSignature {
     placement?: Placement | null;
     renderOut?: boolean;
     offset?: OffsetOptions;
-    matchAnchorWidth?: boolean;
+    matchAnchorWidth?: boolean | MatchAnchorWidthOptions;
   };
   Blocks: {
     default: [];
@@ -43,36 +48,56 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
-    if (this.args.matchAnchorWidth) {
-      this.content.style.width = `${this.args.anchor.offsetWidth}px`;
-      this.content.style.maxWidth = "none";
-    }
+    const { matchAnchorWidth, anchor, placement } = this.args;
+    const { content } = this;
 
-    if (this.args.placement === null) {
-      this.content.removeAttribute("data-floating-ui-placement");
-      this.content.classList.add("non-floating-content");
+    this.maybeMatchAnchorWidth();
+
+    if (placement === null) {
+      content.removeAttribute("data-floating-ui-placement");
+      content.classList.add("non-floating-content");
       this.cleanup = () => {};
       return;
     }
 
     let updatePosition = async () => {
-      let placement = this.args.placement || "bottom-start";
+      let _placement = placement || "bottom-start";
 
-      computePosition(this.args.anchor, this.content, {
+      computePosition(anchor, content, {
         platform,
-        placement: placement as Placement,
+        placement: _placement as Placement,
         middleware: [offset(this.offset), flip(), shift()],
       }).then(({ x, y, placement }) => {
-        this.content.setAttribute("data-floating-ui-placement", placement);
+        this.maybeMatchAnchorWidth();
+        content.setAttribute("data-floating-ui-placement", placement);
 
-        Object.assign(this.content.style, {
+        Object.assign(content.style, {
           left: `${x}px`,
           top: `${y}px`,
         });
       });
     };
 
-    this.cleanup = autoUpdate(this.args.anchor, this.content, updatePosition);
+    this.cleanup = autoUpdate(anchor, content, updatePosition);
+  }
+
+  private maybeMatchAnchorWidth() {
+    const { matchAnchorWidth, anchor } = this.args;
+    const { content } = this;
+
+    if (!matchAnchorWidth) {
+      return;
+    }
+
+    if (typeof matchAnchorWidth === "boolean") {
+      content.style.width = `${anchor.offsetWidth}px`;
+    } else {
+      content.style.width = `${
+        anchor.offsetWidth + matchAnchorWidth.additionalWidth
+      }px`;
+    }
+
+    content.style.maxWidth = "none";
   }
 }
 
