@@ -51,10 +51,11 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   /**
    * The full URL of an ExternalResource
    */
-  private get url() {
+  protected get url() {
     assert("url must exist in the resource", "url" in this.args.resource);
     return this.args.resource.url;
   }
+
   /**
    * The url to display in the ResourceList.
    * Strips the protocol, "www" and path.
