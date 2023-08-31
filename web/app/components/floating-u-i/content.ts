@@ -13,10 +13,12 @@ import {
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 
-export interface MatchAnchorWidthOptions {
-  enabled: boolean;
-  additionalWidth: number;
-}
+export type MatchAnchorWidthOptions =
+  | boolean
+  | {
+      enabled: boolean;
+      additionalWidth: number;
+    };
 
 interface FloatingUIContentSignature {
   Element: HTMLDivElement;
@@ -27,7 +29,7 @@ interface FloatingUIContentSignature {
     placement?: Placement | null;
     renderOut?: boolean;
     offset?: OffsetOptions;
-    matchAnchorWidth?: boolean | MatchAnchorWidthOptions;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
   Blocks: {
     default: [];

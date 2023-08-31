@@ -54,7 +54,7 @@ interface XDropdownListComponentSignature {
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
-    matchAnchorWidth?: boolean | MatchAnchorWidthOptions;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
 
     /**
      * Whether an asynchronous list is loading.
