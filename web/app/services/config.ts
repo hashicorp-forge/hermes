@@ -15,6 +15,8 @@ export default class ConfigService extends Service {
     skip_google_auth: config.skipGoogleAuth,
     google_analytics_tag_id: undefined,
     support_link_url: config.supportLinkURL,
+    version: config.version,
+    short_revision: config.shortRevision,
   };
 
   setConfig(param) {

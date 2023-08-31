@@ -1,9 +1,8 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, findAll, render } from "@ember/test-helpers";
+import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { FacetDropdownObjects } from "hermes/types/facets";
-import { SortByLabel } from "hermes/components/header/toolbar";
+import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
 
 const FACETS = {
   docType: {
@@ -18,26 +17,25 @@ const FACETS = {
   },
 };
 
+interface ToolbarTestContext extends TestContext {
+  facets: FacetDropdownGroups;
+}
+
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders a search input by default", async function (assert) {
     await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar />
     `);
 
     assert.dom(".facets").doesNotExist("Facets are hidden unless provided");
-    assert
-      .dom(".sort-by-dropdown")
-      .doesNotExist("Sort-by dropdown is hidden unless facets are provided");
   });
 
-  test("it renders facets when provided", async function (assert) {
+  test("it renders facets when provided", async function (this: ToolbarTestContext, assert) {
     this.set("facets", FACETS);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar
         @facets={{this.facets}}
       />
@@ -71,8 +69,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     this.set("facets", { status: statusFacets });
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
@@ -89,8 +86,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
   test("it conditionally renders the status facet disabled", async function (assert) {
     this.set("facets", { status: {} });
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
     assert

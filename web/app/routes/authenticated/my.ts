@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { SortByValue } from "hermes/components/header/toolbar";
 
 import AlgoliaService, {
   AlgoliaFacetsObject,
@@ -70,8 +71,9 @@ export default class AuthenticatedMyRoute extends Route {
     inReviewDocs: HermesDocument[];
     approvedDocs: HermesDocument[];
   }> {
+    // const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
     const searchIndex =
-      params.sortBy === "dateAsc"
+      params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 

@@ -5,61 +5,15 @@
         <Hds::Table @isStriped={{false}} class="row-results__table">
           <:head as |H|>
             <H.Tr>
-              <H.Th class="name">
-                <MaybeSortableTableHeader
-                  @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
-                  @sortDirection={{@sortDirection}}
-                  @attribute="title"
-                >
-                  Name
-                </MaybeSortableTableHeader>
-              </H.Th>
-              <H.Th class="type">
-                <MaybeSortableTableHeader
-                  @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
-                  @sortDirection={{@sortDirection}}
-                  @attribute="docType"
-                >
-                  Type
-                </MaybeSortableTableHeader>
-              </H.Th>
-              <H.Th class="status">
-                <MaybeSortableTableHeader
-                  @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
-                  @sortDirection={{@sortDirection}}
-                  @attribute="status"
-                >
-                  Status
-                </MaybeSortableTableHeader>
-              </H.Th>
-              <H.Th class="product">
-                <MaybeSortableTableHeader
-                  @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
-                  @sortDirection={{@sortDirection}}
-                  @attribute="product"
-                >
-                  Product/Area
-                </MaybeSortableTableHeader>
-              </H.Th>
-              <H.Th class="owner">
-                <MaybeSortableTableHeader
-                  @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
-                  @sortDirection={{@sortDirection}}
-                  @attribute="owners"
-                >
-                  Owner
-                </MaybeSortableTableHeader>
-              </H.Th>
+              <H.Th class="name">Name</H.Th>
+              <H.Th class="type">Type</H.Th>
+              <H.Th class="status">Status</H.Th>
+              <H.Th class="product">Product/Area</H.Th>
+              <H.Th class="owner">Owner</H.Th>
               <H.Th class="created">
-                {{log "sortDirection" @sortDirection}}
-                <MaybeSortableTableHeader
+                <Table::SortableHeader
                   @changeSort={{@changeSort}}
-                  @sortAttribute={{@sortAttribute}}
+                  @currentSort={{@currentSort}}
                   @sortDirection={{@sortDirection}}
                   @queryParam={{hash
                     sortBy=(if (eq @sortDirection "desc") "dateAsc" "dateDesc")
@@ -69,7 +23,7 @@
                   @defaultSortDirection="desc"
                 >
                   Created
-                </MaybeSortableTableHeader>
+                </Table::SortableHeader>
               </H.Th>
             </H.Tr>
           </:head>

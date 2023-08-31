@@ -282,6 +282,8 @@ export default function (mirageConfig) {
             skip_google_auth: false,
             google_analytics_tag_id: undefined,
             support_link_url: TEST_SUPPORT_URL,
+            version: "1.2.3",
+            short_revision: "abc123",
           }
         );
       });

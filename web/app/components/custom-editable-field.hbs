@@ -6,27 +6,21 @@
     @loading={{@loading}}
     @disabled={{@disabled}}
   >
-    <:default>
-      {{#let (get @document @field) as |documentField|}}
-        <p
-          class="hds-typography-body-200 hds-foreground-primary truncate
-            {{unless documentField 'italic'}}"
-          title="{{or documentField 'None'}}"
-        >
-          {{#if documentField}}
-            {{documentField}}
-          {{else}}
-            <CustomEditableFields::EmptyState />
-          {{/if}}
+    <:default as |F|>
+      {{#if F.value}}
+        <p class="truncate text-body-200" title={{F.value}}>
+          {{F.value}}
         </p>
-      {{/let}}
+      {{else}}
+        <CustomEditableFields::EmptyState />
+      {{/if}}
     </:default>
     <:editing as |F|>
       <Hds::Form::Textarea::Field
+        {{F.input}}
+        {{auto-height-textarea}}
         @value={{F.value}}
         name={{@field}}
-        {{auto-height-textarea}}
-        {{on "blur" F.update}}
         data-test-custom-string-field-input
       />
     </:editing>
@@ -48,7 +42,7 @@
               {{#if person.imgURL}}
                 <img
                   src="{{person.imgURL}}"
-                  class="align-middle h-4 w-4 rounded-full"
+                  class="h-4 w-4 rounded-full align-middle"
                 />
               {{/if}}
               {{person.email}}

@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { SortAttribute, SortDirection } from "./my-docs";
+import { SortAttribute, SortDirection } from "./table/sortable-header";
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 
@@ -8,10 +8,11 @@ interface RowResultsComponentSignature {
   Args: {
     docs: HermesDocument[];
     nbPages?: number;
+    isDraft?: boolean;
     currentPage?: number;
     changeSort?: (attribute: SortAttribute) => void;
     toggleCollapsed?: () => void;
-    sortAttribute: `${SortAttribute}`;
+    currentSort: `${SortAttribute}`;
     sortDirection: SortDirection;
     isCollapsed?: boolean;
   };
