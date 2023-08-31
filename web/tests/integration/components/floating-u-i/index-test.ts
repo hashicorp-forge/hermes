@@ -1,4 +1,4 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
@@ -89,5 +89,37 @@ module("Integration | Component | floating-u-i/index", function (hooks) {
     await click(".close-button");
 
     assert.dom(".close-button").exists('the "close" action was disabled');
+  });
+
+  test("the popover can match the anchor width", async function (assert) {
+    await render(hbs`
+      <FloatingUI @matchAnchorWidth={{true}}>
+        <:anchor as |f|>
+          <Action
+            class="open-button"
+            style="width:500px;"
+            {{on "click" f.showContent}}
+            {{did-insert f.registerAnchor}}
+          >
+            Open
+          </Action>
+        </:anchor>
+        <:content as |f|>
+          <div class="content" id={{f.contentID}}>
+            Content
+          </div>
+        </:content>
+      </FloatingUI>
+    `);
+
+    await click(".open-button");
+
+    const contentWidth = htmlElement(".content").offsetWidth;
+
+    assert.equal(
+      contentWidth,
+      500,
+      "the content width matches the anchor width"
+    );
   });
 });

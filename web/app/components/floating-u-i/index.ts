@@ -28,6 +28,7 @@ interface FloatingUIComponentSignature {
     placement?: Placement | null;
     disableClose?: boolean;
     offset?: OffsetOptions;
+    matchAnchorWidth?: boolean;
   };
   Blocks: {
     anchor: [dd: FloatingUIAnchorAPI];
