@@ -34,9 +34,7 @@ const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
 const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
-  Args: {
-    docType: string;
-  };
+  Args: {};
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
@@ -137,12 +135,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
   ];
 
-  objectTypes = { Document: {}, Project: {} };
-
-  @tracked selectedObjectType = "Document";
-
   get objectTypeIsProject() {
-    return this.selectedObjectType === "Project";
+    return false;
+    // return this.selectedObjectType === "Project";
   }
 
   // TODO: give docType a type
@@ -210,12 +205,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     );
     assert("docType must exist", docType);
     this.selectedDocType = docType;
-  }
-
-  @action protected changeObjectType(value: string) {
-    const object = Object.keys(this.objectTypes).find((key) => key === value);
-    assert("object must exist", object);
-    this.selectedObjectType = object;
   }
 
   @action showDocTypeModal() {
@@ -298,7 +287,17 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contributors: this.getEmails(this.contributors),
-            docType: this.args.docType,
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            docType: "rfc",
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),

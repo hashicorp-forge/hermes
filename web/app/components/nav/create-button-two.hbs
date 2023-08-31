@@ -8,7 +8,6 @@
       @text="New"
       @icon="plus"
       @route="authenticated.new.doc"
-      @query={{hash docType="RFC"}}
       class="rounded-r-none pl-2.5 pr-3.5"
     />
     <dd.ToggleAction
@@ -19,8 +18,7 @@
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
-      @route="authenticated.new.doc"
-      @query={{hash docType="RFC"}}
+      @route={{dd.attrs.route}}
       class="flex h-9 items-center justify-between rounded-none px-4"
     >
       <div class="flex items-center">

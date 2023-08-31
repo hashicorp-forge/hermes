@@ -1,6 +1,110 @@
 <Header />
+
 <section>
   <div class="x-container">
-    {{outlet}}
+    <div class="mx-auto max-w-lg">
+      <h1 class="mb-8 flex text-display-500 text-color-foreground-strong">
+        New
+        <X::DropdownList
+          @items={{this.objectTypes}}
+          @selected={{this.selectedObjectType}}
+          @renderOut={{true}}
+          @offset={{hash crossAxis=-3 mainAxis=4}}
+          class="w-[220px]"
+        >
+          <:anchor as |dd|>
+            <dd.ToggleAction
+              class="hover:hds-elevation-low group relative ml-[1px] -mt-0.5 -mb-[3px] flex items-center rounded-button-md border border-transparent px-2 pt-0.5 pb-[3px] hover:border-color-border-strong
+                {{if dd.contentIsShown 'has-focus-ring'}}"
+            >
+              {{dd.selected}}
+              <FlightIcon
+                @name="caret"
+                class="ml-1
+                  {{unless dd.contentIsShown 'text-color-foreground-faint'}}
+                  group-hover:text-color-foreground-strong"
+              />
+            </dd.ToggleAction>
+
+          </:anchor>
+          <:item as |dd|>
+            <dd.LinkTo
+              @route={{dd.attrs.route}}
+              class="flex h-9 items-center justify-between rounded-none px-4"
+              {{!-- {{on "click" (fn this.changeObjectType dd.value)}} --}}
+            >
+              <div class="flex items-center">
+                <FlightIcon
+                  @name={{or dd.attrs.icon "file-text"}}
+                  class="mr-3"
+                />
+                {{dd.value}}
+              </div>
+              <FlightIcon
+                @name="check"
+                class="ml-8 text-color-foreground-action
+                  {{unless dd.isSelected 'invisible'}}"
+              />
+            </dd.LinkTo>
+          </:item>
+        </X::DropdownList>
+      </h1>
+      {{! TODO: move logic up a level }}
+      <form {{on "submit" this.submitForm}} {{did-insert this.registerForm}}>
+        <div class="space-y-7">
+
+          {{! Title }}
+          <Hds::Form::TextInput::Field
+            @isRequired={{true}}
+            @value={{this.title}}
+            @type="text"
+            name="title"
+            {{!-- {{on "input" this.updateForm}} --}}
+            as |F|
+          >
+            <F.Label class="relative">
+              Title
+            </F.Label>
+          </Hds::Form::TextInput::Field>
+
+          {{! Summary }}
+          <div class="relative">
+            <Hds::Form::Textarea::Field
+              @value={{this.summary}}
+              rows="3"
+              name="summary"
+              {{!-- {{on "input" this.updateForm}} --}}
+              as |F|
+            >
+              <F.Label>Summary</F.Label>
+              <F.HelperText>
+                <span
+                  class={{if
+                    this.summaryIsLong
+                    "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
+                  }}
+                >One or two sentences</span>
+                outlining your
+                {{if this.objectTypeIsProject "project" "doc"}}.
+                {{if this.summaryIsLong "(Just a recommendation)"}}
+              </F.HelperText>
+            </Hds::Form::Textarea::Field>
+          </div>
+
+          {{outlet}}
+
+        </div>
+
+        <Hds::Button
+          @text="Create new {{if
+            this.objectTypeIsProject
+            'project'
+            'document'
+          }}"
+          type="submit"
+          class="mt-8 mb-10"
+        />
+      </form>
+    </div>
   </div>
 </section>

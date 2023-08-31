@@ -14,11 +14,6 @@
       >
         {{#if @shownItems}}
           {{#each-in @shownItems as |item attrs|}}
-            {{log "item" item}}
-            {{log "selected" @selected}}
-            {{log "attrs" attrs}}
-            {{log "isSelected" (eq @selected item)}}
-
             <X::DropdownList::Item
               @value={{item}}
               @contentID={{@contentID}}
