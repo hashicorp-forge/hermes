@@ -82,8 +82,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
-  @tracked docTypeModalIsShown = false;
-
   docTypes = [
     {
       longName: "Request for comments",
@@ -205,14 +203,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     );
     assert("docType must exist", docType);
     this.selectedDocType = docType;
-  }
-
-  @action showDocTypeModal() {
-    this.docTypeModalIsShown = true;
-  }
-
-  @action hideDocTypeModal() {
-    this.docTypeModalIsShown = false;
   }
 
   /**

@@ -20,19 +20,25 @@
       >
         <:anchor as |dd|>
           <div class="mb-2 flex items-center justify-between">
-            <div class="flex items-center">
-              <label class="hermes-form-label relative">
-                Document type
-              </label>
-              <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
-              <Action
-                {{on "click" this.showDocTypeModal}}
-                class="ml-1.5 flex text-color-foreground-faint opacity-75 hover:opacity-100"
-              >
-                <FlightIcon @name="info-fill" class="" />
-              </Action>
+            <div class="flex w-full items-center justify-between">
+              <div class="flex items-center">
+
+                <label class="hermes-form-label relative">
+                  Document type
+                </label>
+                <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
+              </div>
             </div>
+            <ExternalLink
+              @iconIsShown={{true}}
+              href="/support/document-types"
+              target="_blank"
+              class="flex whitespace-nowrap text-body-100 text-color-foreground-faint opacity-75 hover:opacity-100"
+            >
+              About document types
+            </ExternalLink>
           </div>
+
           <dd.ToggleAction
             class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium w-full"
           >
@@ -76,6 +82,7 @@
           </dd.Action>
         </:item>
       </X::DropdownList>
+
     </div>
 
     {{! Product/Area }}
@@ -115,49 +122,4 @@
       </F.HelperText>
     </Hds::Form::Field>
   {{/if}}
-{{/if}}
-
-{{#if this.docTypeModalIsShown}}
-  {{#in-element (html-element ".ember-application") insertBefore=null}}
-    <Hds::Modal @onClose={{this.hideDocTypeModal}} class="scrollable" as |M|>
-      <M.Header>Document types</M.Header>
-      <M.Body>
-        <div class="scrollable-container max-h-[380px]">
-
-          <ul class="mt-5 space-y-5">
-            {{#each this.docTypes as |docType|}}
-              <li>
-                <div class="flex items-center">
-                  <h5 class="mb-0.5 flex text-display-200 font-semibold">
-                    {{docType.longName}}
-                    <span
-                      class="ml-1.5 flex font-regular text-color-foreground-primary"
-                    >
-                      ({{docType.shortName}})
-                    </span>
-                  </h5>
-                </div>
-                <p class="text-body-200">
-                  {{or docType.description "No description provided."}}
-                </p>
-                {{#if docType.moreInfoLink}}
-                  <ExternalLink
-                    href={{docType.moreInfoLink.url}}
-                    @iconIsShown={{true}}
-                    class="mt-1 text-body-200 text-color-foreground-action"
-                  >
-                    {{docType.moreInfoLink.text}}
-                  </ExternalLink>
-                {{/if}}
-              </li>
-            {{/each}}
-          </ul>
-          <div
-            class="sticky bottom-0 left-0 h-12 w-full bg-gradient-to-t from-white to-white/0"
-          ></div>
-        </div>
-      </M.Body>
-
-    </Hds::Modal>
-  {{/in-element}}
 {{/if}}

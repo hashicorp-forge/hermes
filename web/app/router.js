@@ -20,6 +20,9 @@ Router.map(function () {
       this.route("doc");
       this.route("project");
     });
+    this.route("support", function () {
+      this.route("document-types");
+    });
   });
   this.route("authenticate");
   this.route("404", { path: "/*path" });

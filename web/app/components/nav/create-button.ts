@@ -9,22 +9,16 @@ export default class NavNewCreateButton extends Component<NavNewCreateButtonSign
   private get docTypes() {
     return [
       {
-        label: "Request for comments",
-        icon: "discussion-circle",
-        shortName: "RFC",
-        description: "Ask colleagues for feedback on a proposal.",
-      },
-      {
-        label: "Product requirements",
-        icon: "target",
-        shortName: "PRD",
-        description: "Plan a new product or feature.",
-      },
-      {
         label: "Funding request",
         icon: "dollar-sign",
         shortName: "FRD",
         description: "Get buy-in for your project's budget.",
+      },
+      {
+        label: "Memo",
+        icon: "radio",
+        shortName: "MEMO",
+        description: "Share freeform info with your team.",
       },
       {
         label: "Plan of record",
@@ -39,10 +33,16 @@ export default class NavNewCreateButton extends Component<NavNewCreateButtonSign
         description: "Write a press release for your project.",
       },
       {
-        label: "Memo",
-        icon: "radio",
-        shortName: "MEMO",
-        description: "Share freeform info with your team.",
+        label: "Product requirements",
+        icon: "target",
+        shortName: "PRD",
+        description: "Plan a new product or feature.",
+      },
+      {
+        label: "Request for comments",
+        icon: "discussion-circle",
+        shortName: "RFC",
+        description: "Ask colleagues for feedback on a proposal.",
       },
     ];
   }

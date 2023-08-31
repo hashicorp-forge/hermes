@@ -14,6 +14,7 @@ export default class AuthenticatedNewController extends Controller {
     },
     Project: {
       route: "authenticated.new.project",
+      icon: "grid",
     },
   };
 

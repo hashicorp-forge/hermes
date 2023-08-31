@@ -1,0 +1,30 @@
+u know its me
+
+{{!-- <ul class="mt-5 space-y-5">
+  {{#each (sort-by "longName" this.docTypes) as |docType|}}
+    <li>
+      <div class="flex items-center">
+        <h5 class="mb-0.5 flex text-display-200 font-semibold">
+          {{docType.longName}}
+          <span
+            class="ml-1.5 flex font-regular text-color-foreground-primary"
+          >
+            ({{docType.shortName}})
+          </span>
+        </h5>
+      </div>
+      <p class="text-body-200">
+        {{or docType.description "No description provided."}}
+      </p>
+      {{#if docType.moreInfoLink}}
+        <ExternalLink
+          href={{docType.moreInfoLink.url}}
+          @iconIsShown={{true}}
+          class="mt-1 text-body-200 text-color-foreground-action"
+        >
+          {{docType.moreInfoLink.text}}
+        </ExternalLink>
+      {{/if}}
+    </li>
+  {{/each}}
+</ul> --}}
