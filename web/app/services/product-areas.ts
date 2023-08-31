@@ -7,7 +7,6 @@ import FetchService from "./fetch";
 
 export type ProductArea = {
   abbreviation: string;
-  perDocDataType: unknown;
 };
 
 export default class ProductAreasService extends Service {
@@ -21,9 +20,7 @@ export default class ProductAreasService extends Service {
         .fetch("/api/v1/products")
         .then((resp) => resp?.json());
     } catch (err) {
-      // TODO: handle error
       this.index = null;
-      console.error(err);
       throw err;
     }
   });

@@ -32,3 +32,7 @@
     }
   }
 }
+
+.failed-to-load-text {
+  @apply mb-2 text-display-300 font-semibold text-color-foreground-faint opacity-50;
+}
