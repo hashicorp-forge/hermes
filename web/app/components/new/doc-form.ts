@@ -87,7 +87,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   docTypes = [
     {
       longName: "Request for comments",
-      icon: "discussion-circle",
+      // icon: "discussion-circle",
       shortName: "RFC",
       description:
         "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
@@ -98,7 +98,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
     {
       longName: "Product requirements",
-      icon: "target",
+      // icon: "target",
       shortName: "PRD",
       description:
         "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
@@ -109,27 +109,27 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
     {
       longName: "Funding request",
-      icon: "dollar-sign",
+      // icon: "dollar-sign",
       shortName: "FRD",
       description:
         "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
     },
     {
       longName: "Plan of record",
-      icon: "map",
+      // icon: "map",
       shortName: "POR",
       description:
         "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
     },
     {
       longName: "Press release / FAQ",
-      icon: "newspaper",
+      // icon: "newspaper",
       shortName: "PRFAQ",
       description: "Write a press release for your project.",
     },
     {
       longName: "Memo",
-      icon: "radio",
+      // icon: "radio",
       shortName: "MEMO",
       description: "Share freeform info with your team.",
     },

@@ -36,12 +36,12 @@
           <dd.ToggleAction
             class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium w-full"
           >
-            {{#if dd.selected}}
+            {{!-- {{#if dd.selected}}
               <FlightIcon
                 @name={{or dd.selected.icon "file-text"}}
                 class="mr-2.5"
               />
-            {{/if}}
+            {{/if}} --}}
             <div
               class={{unless
                 dd.selected.longName
@@ -64,10 +64,10 @@
             {{on "click" (fn this.changeDocType dd.attrs.shortName)}}
           >
             <div class="flex items-center">
-              <FlightIcon
+              {{!-- <FlightIcon
                 @name={{or dd.attrs.icon "file-text"}}
                 class="mr-2.5"
-              />
+              /> --}}
               {{dd.attrs.longName}}
               <div class="ml-2 text-body-100 opacity-50">
                 {{dd.attrs.shortName}}
