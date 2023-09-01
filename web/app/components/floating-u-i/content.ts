@@ -16,6 +16,13 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import htmlElement from "hermes/utils/html-element";
 
+export type MatchAnchorWidthOptions =
+  | boolean
+  | {
+      enabled: boolean;
+      additionalWidth: number;
+    };
+
 interface FloatingUIContentSignature {
   Element: HTMLDivElement;
   Args: {
@@ -25,7 +32,7 @@ interface FloatingUIContentSignature {
     placement?: Placement | null;
     renderOut?: boolean;
     offset?: OffsetOptions;
-    matchAnchorWidth?: boolean;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
   Blocks: {
     default: [];
@@ -46,14 +53,14 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
-    if (this.args.matchAnchorWidth) {
-      this.content.style.width = `${this.args.anchor.offsetWidth}px`;
-      this.content.style.maxWidth = "none";
-    }
+    const { matchAnchorWidth, anchor, placement } = this.args;
+    const { content } = this;
 
-    if (this.args.placement === null) {
-      this.content.removeAttribute("data-floating-ui-placement");
-      this.content.classList.add("non-floating-content");
+    this.maybeMatchAnchorWidth();
+
+    if (placement === null) {
+      content.removeAttribute("data-floating-ui-placement");
+      content.classList.add("non-floating-content");
       this.cleanup = () => {};
       return;
     }
@@ -73,9 +80,9 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     };
 
     let updatePosition = async () => {
-      let placement = this.args.placement || "bottom-start";
+      let _placement = placement || "bottom-start";
 
-      computePosition(this.args.anchor, this.content, {
+      computePosition(anchor, content, {
         platform,
         placement: placement as Placement,
         middleware: [
@@ -85,6 +92,8 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
           detectOverflowMiddleware,
         ],
       }).then(({ x, y, placement, middlewareData }) => {
+        this.maybeMatchAnchorWidth();
+
         this.content.setAttribute("data-floating-ui-placement", placement);
         // console.log("x", x);
         // console.log("y", y);
@@ -108,7 +117,26 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
       });
     };
 
-    this.cleanup = autoUpdate(this.args.anchor, this.content, updatePosition);
+    this.cleanup = autoUpdate(anchor, content, updatePosition);
+  }
+
+  private maybeMatchAnchorWidth() {
+    const { matchAnchorWidth, anchor } = this.args;
+    const { content } = this;
+
+    if (!matchAnchorWidth) {
+      return;
+    }
+
+    if (typeof matchAnchorWidth === "boolean") {
+      content.style.width = `${anchor.offsetWidth}px`;
+    } else {
+      content.style.width = `${
+        anchor.offsetWidth + matchAnchorWidth.additionalWidth
+      }px`;
+    }
+
+    content.style.maxWidth = "none";
   }
 }
 

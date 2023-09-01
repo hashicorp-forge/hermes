@@ -4,8 +4,9 @@
   <form class="relative w-full" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
       @items={{this.itemsToShow}}
-      @offset={{hash mainAxis=0 crossAxis=3}}
+      @offset={{hash mainAxis=0 crossAxis=2}}
       @placement="bottom-end"
+      @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
       class="search-popover
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
