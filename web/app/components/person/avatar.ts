@@ -3,6 +3,7 @@ import Component from "@glimmer/component";
 enum HermesAvatarSize {
   Small = "small",
   Medium = "medium",
+  Large = "large",
 }
 
 interface PersonAvatarComponentSignature {
@@ -10,7 +11,7 @@ interface PersonAvatarComponentSignature {
   Args: {
     imgURL?: string | null;
     email: string;
-    size: `${HermesAvatarSize}`;
+    size?: `${HermesAvatarSize}`;
   };
   Blocks: {
     default: [];
@@ -19,11 +20,15 @@ interface PersonAvatarComponentSignature {
 
 export default class PersonAvatarComponent extends Component<PersonAvatarComponentSignature> {
   protected get sizeIsSmall(): boolean {
-    return this.args.size === HermesAvatarSize.Small;
+    return this.args.size === HermesAvatarSize.Small || !this.args.size;
   }
 
   protected get sizeIsMedium(): boolean {
     return this.args.size === HermesAvatarSize.Medium;
+  }
+
+  protected get sizeIsLarge(): boolean {
+    return this.args.size === HermesAvatarSize.Large;
   }
 }
 

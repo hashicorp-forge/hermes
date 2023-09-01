@@ -1,0 +1,20 @@
+.secondary-nav {
+  @apply flex;
+
+  > a {
+    @apply relative flex h-8 items-center justify-center rounded-l-full rounded-r-full px-3.5 text-body-200 text-color-foreground-faint;
+
+    &:not(.active):hover {
+      @apply text-color-foreground-strong;
+    }
+  }
+
+  .active {
+    @apply z-10 bg-color-foreground-action text-color-foreground-action;
+
+    &::before {
+      content: "";
+      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-surface-action;
+    }
+  }
+}

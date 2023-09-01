@@ -59,6 +59,6 @@ module("Acceptance | authenticated/my", function (hooks) {
 
     assert
       .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/my?product=%5B%22Terraform%22%5D");
+      .hasAttribute("href", "/all?product=%5B%22Terraform%22%5D");
   });
 });

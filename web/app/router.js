@@ -15,7 +15,11 @@ Router.map(function () {
     this.route("document", { path: "/document/:document_id" });
     this.route("project", { path: "/project/:project_id" });
     this.route("drafts");
-    this.route("my");
+    this.route("my", function () {
+      this.route("index");
+      this.route("drafts");
+      this.route("published");
+    });
     this.route("results");
     this.route("settings");
     this.route("new", function () {

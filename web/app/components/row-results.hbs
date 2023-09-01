@@ -28,7 +28,7 @@
             </H.Tr>
           </:head>
           <:body>
-            {{#each @docs as |doc index|}}
+            {{#each @docs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"
@@ -39,26 +39,21 @@
                 @productArea="{{doc.product}}"
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
-                @isDraft={{@isDraft}}
+                @isDraft={{doc.isDraft}}
               />
             {{/each}}
           </:body>
         </Hds::Table>
         {{#if this.paginationIsShown}}
-          <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+          <Pagination
+            @nbPages={{this.nbPages}}
+            @currentPage={{this.currentPage}}
+          />
         {{/if}}
       {{else}}
-        {{#if @isDraft}}
-          <Hds::Alert @type="inline" as |A|>
-            <A.Title>No drafts found</A.Title>
-            <A.Button
-              @text="Create a document draft"
-              @color="primary"
-              @icon="file-plus"
-              @route="authenticated.new"
-            />
-          </Hds::Alert>
-        {{/if}}
+        <Hds::Alert @type="inline" as |A|>
+          <A.Title>No docs found</A.Title>
+        </Hds::Alert>
       {{/if}}
     </div>
   </div>

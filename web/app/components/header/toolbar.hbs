@@ -1,5 +1,5 @@
 {{#if @facets}}
-  <div class="toolbar">
+  <div class="toolbar" ...attributes>
     <div class="flex w-full justify-between">
       <div class="flex items-center">
         <h4 class="hermes-h4 mr-4">
@@ -22,7 +22,7 @@
           <Header::FacetDropdown
             @label="Product/Area"
             @facets={{get @facets "product"}}
-            @disabled={{not @facets.product}}
+            @disabled={{not @facets "product"}}
             @position="center"
             @placement="bottom"
             @offset={{hash mainAxis=3 crossAxis=0}}
@@ -37,5 +37,6 @@
         </div>
       </div>
     </div>
+    <Header::ActiveFilterList />
   </div>
 {{/if}}

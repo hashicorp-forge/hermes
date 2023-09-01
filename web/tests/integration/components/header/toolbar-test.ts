@@ -1,4 +1,4 @@
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
@@ -92,5 +92,19 @@ module("Integration | Component | header/toolbar", function (hooks) {
     assert
       .dom("[data-test-facet-dropdown-trigger='Status']")
       .hasAttribute("disabled");
+  });
+
+  /**
+   * Waiting for acceptance tests to be implemented
+   */
+  todo(
+    "the owner facet is disabled on the 'my' and 'drafts' routes",
+    async function (assert) {
+      throw new Error("Will be implemented in an acceptance test");
+    }
+  );
+
+  todo("the sort can be changed", async function (assert) {
+    throw new Error("Will be implemented in an acceptance test");
   });
 });

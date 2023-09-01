@@ -1,10 +1,9 @@
 import Component from "@glimmer/component";
-import { FacetDropdownGroups, FacetRecords } from "hermes/types/facets";
+import { FacetRecords } from "hermes/types/facets";
 
 interface HeaderComponentSignature {
   Args: {
     facets?: FacetRecords;
-    sortControlIsHidden?: boolean;
   };
 }
 

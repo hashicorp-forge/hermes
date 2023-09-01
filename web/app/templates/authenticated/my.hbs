@@ -1,11 +1,10 @@
 {{page-title "My Docs"}}
 
-<Header @facets={{@model.facets}} />
-
-<RowResults
-  @docs={{@model.results.hits}}
-  @nbPages={{@model.results.nbPages}}
-  @currentPage={{(add @model.results.page 1)}}
-  @sortDirection={{this.sortDirection}}
-  @currentSort="createdTime"
+{{! Make this just a nav }}
+<MyDocs
+  @latest={{@model.latest}}
+  @published={{@model.published}}
+  @drafts={{@model.draftResults}}
 />
+
+{{outlet}}

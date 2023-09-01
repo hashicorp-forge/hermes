@@ -4,7 +4,7 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex space-x-4 items-start"
+      class="flex items-start space-x-4"
     >
       <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
       <div>

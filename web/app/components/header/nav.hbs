@@ -18,17 +18,8 @@
         data-test-nav-link="my"
         @route="authenticated.my"
         @current-when="authenticated.my"
-        @query={{this.defaultBrowseScreenQueryParams}}
       >
         My Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="drafts"
-        @route="authenticated.drafts"
-        @current-when="authenticated.drafts"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Drafts
       </LinkTo>
     </div>
 

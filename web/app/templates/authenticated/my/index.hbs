@@ -1,0 +1,17 @@
+<div class="x-container mt-6">
+  <ol class="tile-list">
+    {{#each @model as |doc|}}
+      <li>
+        {{log doc.isDraft}}
+        <Doc::Tile
+          @docID={{doc.objectID}}
+          @title={{doc.title}}
+          @status={{doc.status}}
+          @owner={{get doc.owners 0}}
+          @productArea={{doc.product}}
+          @isDraft={{eq (lowercase doc.status) "wip"}}
+        />
+      </li>
+    {{/each}}
+  </ol>
+</div>

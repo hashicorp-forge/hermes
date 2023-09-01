@@ -1,0 +1,7 @@
+<RowResults
+  @sortDirection={{this.sortDirection}}
+  @nbPages={{@model.results.nbPages}}
+  @currentPage={{add @model.results.page 1}}
+  @docs={{@model.results.Hits}}
+  @currentSort="createdTime"
+/>

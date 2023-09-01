@@ -34,6 +34,7 @@ export default function (mirageConfig) {
 
         if (requestBody) {
           const { facetQuery, query } = requestBody;
+
           if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
@@ -50,6 +51,7 @@ export default function (mirageConfig) {
               return new Response(200, {}, { facetHits: [] });
             }
           } else if (query !== undefined) {
+            console.log("requestBody", requestBody);
             /**
              * A query exists, but may be empty.
              * Typically, this is a query for a document title or product,
