@@ -61,13 +61,13 @@ export default class DashboardRoute extends Route {
      *
      * If a user leaves and returns to the dashboard, we call `fetchAll`
      * but don't await it. This speeds up the transition and is especially
-     * efficient when the RecentDocs list hasn't changed since last load.
+     * efficient when the RecentDocs list hasn't changed since its last load.
      *
      * It's possible for the user to see the RecentDocs list update
      * in real time (by visiting a document and very quickly clicking back),
-     * but it's unlikely., since we call `fetchAll` in the `afterModel` hook
-     * of the `/document` route, just after the doc is marked viewed. In most cases,
-     * the task will be finished by the time the user returns to the dashboard.
+     * but unlikely, since we call `fetchAll` in the `/document` route,
+     * just after the doc is marked viewed. In most cases, the task will be
+     * finished by the time the user returns to the dashboard.
      *
      */
     if (this.recentDocs.all) {
