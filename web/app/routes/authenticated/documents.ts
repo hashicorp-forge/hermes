@@ -42,15 +42,17 @@ export default class AuthenticatedDocumentsRoute extends Route {
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    const [facets, _results] = await Promise.all([
+    const [facets, results] = await Promise.all([
       this.algolia.getFacets.perform(searchIndex, params),
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
 
-    const results = _results as SearchResponse<HermesDocument>;
-
     this.activeFilters.update(params);
 
-    return { facets, results, sortedBy };
+    return {
+      facets,
+      results: results as SearchResponse<HermesDocument>,
+      sortedBy,
+    };
   }
 }
