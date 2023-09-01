@@ -28,7 +28,7 @@
             </H.Tr>
           </:head>
           <:body>
-            {{#each this.shownDocs as |doc|}}
+            {{#each @docs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"
@@ -44,22 +44,11 @@
             {{/each}}
           </:body>
         </Hds::Table>
-        {{#if this.toggleCollapsedButtonIsShown}}
-          {{! TODO: component-ize this }}
-          <Action
-            {{on "click" this.toggleCollapsed}}
-            class="mt-4 flex items-center text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
-          >
-            <FlightIcon
-              data-test-docs-awaiting-review-toggle-icon
-              @name={{if @isCollapsed "plus" "minus"}}
-              class="mr-1.5"
-            />
-            {{if @isCollapsed "Show all" "Show fewer"}}
-          </Action>
-        {{/if}}
         {{#if this.paginationIsShown}}
-          <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+          <Pagination
+            @nbPages={{this.nbPages}}
+            @currentPage={{this.currentPage}}
+          />
         {{/if}}
       {{else}}
         <Hds::Alert @type="inline" as |A|>

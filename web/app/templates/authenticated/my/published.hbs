@@ -1,0 +1,16 @@
+<div class="x-container mt-3">
+  <div
+    class="mb-7 flex justify-between border-t border-t-color-border-primary pt-6"
+  >
+    <Header::Toolbar @facets={{@model.facets}} class="shrink-0" />
+    {{! <Hds::Form::TextInput::Base @type="search" @value="" class="max-w-xs" /> }}
+  </div>
+</div>
+
+<RowResults
+  @sortDirection={{this.sortDirection}}
+  @nbPages={{@model.results.nbPages}}
+  @currentPage={{add @model.results.page 1}}
+  @docs={{@model.results.hits}}
+  @currentSort="createdTime"
+/>

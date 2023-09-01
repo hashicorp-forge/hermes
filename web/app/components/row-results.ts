@@ -2,19 +2,15 @@ import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { SortAttribute, SortDirection } from "./table/sortable-header";
 import { assert } from "@ember/debug";
-import { action } from "@ember/object";
 
 interface RowResultsComponentSignature {
   Args: {
     docs: HermesDocument[];
     nbPages?: number;
-    isDraft?: boolean;
     currentPage?: number;
     changeSort?: (attribute: SortAttribute) => void;
-    toggleCollapsed?: () => void;
     currentSort: `${SortAttribute}`;
-    sortDirection: SortDirection;
-    isCollapsed?: boolean;
+    sortDirection: `${SortDirection}`;
   };
 }
 
@@ -23,24 +19,14 @@ export default class RowResultsComponent extends Component<RowResultsComponentSi
     return this.args.nbPages && this.args.currentPage !== undefined;
   }
 
-  protected get toggleCollapsedButtonIsShown() {
-    return (
-      this.args.docs.length > 12 &&
-      !this.paginationIsShown &&
-      this.args.toggleCollapsed
-    );
-  }
-  @action protected toggleCollapsed() {
-    assert("this.args.toggleCollapsed must exist", this.args.toggleCollapsed);
-    this.args.toggleCollapsed();
+  protected get nbPages() {
+    assert("nbPages must exist", this.args.nbPages);
+    return this.args.nbPages;
   }
 
-  get shownDocs() {
-    if (this.args.isCollapsed) {
-      return this.args.docs.slice(0, 12);
-    } else {
-      return this.args.docs;
-    }
+  protected get currentPage() {
+    assert("currentPage must exist", this.args.currentPage);
+    return this.args.currentPage;
   }
 }
 

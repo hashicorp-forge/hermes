@@ -13,9 +13,9 @@ Router.map(function () {
     this.route("document", { path: "/document/:document_id" });
     this.route("drafts");
     this.route("my", function () {
+      this.route("index");
       this.route("drafts");
-      this.route("approved");
-      this.route("in-review");
+      this.route("published");
     });
     this.route("results");
     this.route("settings");

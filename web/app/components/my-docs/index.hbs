@@ -29,21 +29,14 @@
         @route="authenticated.my"
         @current-when="authenticated.my.index"
       >
-        All Docs
+        Latest
       </LinkTo>
       <LinkTo
         {{on "click" this.resetLocalProperties}}
-        @route="authenticated.my.in-review"
-        @current-when="authenticated.my.in-review"
+        @route="authenticated.my.published"
+        @current-when="authenticated.my.published"
       >
-        In Review
-      </LinkTo>
-      <LinkTo
-        {{on "click" this.resetLocalProperties}}
-        @route="authenticated.my.approved"
-        @current-when="authenticated.my.approved"
-      >
-        Approved
+        Published
       </LinkTo>
       <LinkTo
         {{on "click" this.resetLocalProperties}}
@@ -55,14 +48,3 @@
     </div>
   </div>
 </div>
-
-{{#if this.docsToShow}}
-  <RowResults
-    @changeSort={{this.changeSort}}
-    @sortAttribute={{this.sortAttribute}}
-    @sortDirection={{this.sortDirection}}
-    @docs={{this.sortedDocs}}
-    @isCollapsed={{this.isCollapsed}}
-    @toggleCollapsed={{this.toggleCollapsed}}
-  />
-{{/if}}

@@ -39,6 +39,7 @@ export type ActiveFilters = {
 };
 
 interface ToolbarComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     facets?: FacetDropdownGroups;
   };

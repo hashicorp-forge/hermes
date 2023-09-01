@@ -5,16 +5,16 @@ import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { DraftResponseJSON } from "hermes/routes/authenticated/my";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 
 interface MyDocsIndexComponentSignature {
   Element: null;
   Args: {
-    allDocs: HermesDocument[];
-    inReviewDocs: HermesDocument[];
-    approvedDocs: HermesDocument[];
-    drafts: HermesDocument[];
+    latest: HermesDocument[];
+    published: HermesDocument[];
+    drafts: DraftResponseJSON;
   };
   Blocks: {
     default: [];
@@ -28,7 +28,6 @@ export enum SortDirection {
 
 export enum SortAttribute {
   CreatedTime = "createdTime",
-  ModifiedTime = "modifiedTime", // currently unused
   Owner = "owners",
   Product = "product",
   Status = "status",
@@ -40,7 +39,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  @tracked sortAttribute = SortAttribute.CreatedTime;
+  @tracked currentSort = SortAttribute.CreatedTime;
   @tracked sortDirection = SortDirection.Desc;
 
   @tracked isCollapsed = true;
@@ -49,16 +48,15 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
     return this.router.currentRouteName;
   }
 
+  // TODO: improve the performance of this?
   get docsToShow() {
     switch (this.currentRoute) {
       case "authenticated.my.drafts":
-        return this.args.drafts;
+        return this.args.drafts.Hits;
       case "authenticated.my.index":
-        return this.args.allDocs;
-      case "authenticated.my.approved":
-        return this.args.approvedDocs;
-      case "authenticated.my.in-review":
-        return this.args.inReviewDocs;
+        return this.args.latest;
+      case "authenticated.my.published":
+        return this.args.published;
     }
   }
 
@@ -67,8 +65,8 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
     // this only applies to the /my routes
     if (this.router.currentRouteName.startsWith("authenticated.my")) {
       return this.docsToShow.slice().sort((a, b) => {
-        const aProp = a[this.sortAttribute];
-        const bProp = b[this.sortAttribute];
+        const aProp = a[this.currentSort];
+        const bProp = b[this.currentSort];
 
         if (aProp === undefined || bProp === undefined) {
           return 0;
@@ -78,39 +76,39 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
           // if the attribute is a number, sort by number
           // otherwise, sort by string or the first item in the array
 
-          if (typeof a[this.sortAttribute] === "number") {
+          if (typeof a[this.currentSort] === "number") {
             // @ts-ignore
-            return a[this.sortAttribute] - b[this.sortAttribute];
+            return a[this.currentSort] - b[this.currentSort];
           }
 
-          if (typeof a[this.sortAttribute] === "string") {
+          if (typeof a[this.currentSort] === "string") {
             // @ts-ignore
-            return a[this.sortAttribute].localeCompare(b[this.sortAttribute]);
+            return a[this.currentSort].localeCompare(b[this.currentSort]);
           }
 
-          if (Array.isArray(a[this.sortAttribute])) {
+          if (Array.isArray(a[this.currentSort])) {
             // @ts-ignore
-            return a[this.sortAttribute][0].localeCompare(
+            return a[this.currentSort][0].localeCompare(
               // @ts-ignore
-              b[this.sortAttribute][0]
+              b[this.currentSort][0]
             );
           }
         } else {
-          if (typeof a[this.sortAttribute] === "number") {
+          if (typeof a[this.currentSort] === "number") {
             // @ts-ignore
-            return b[this.sortAttribute] - a[this.sortAttribute];
+            return b[this.currentSort] - a[this.currentSort];
           }
 
-          if (typeof a[this.sortAttribute] === "string") {
+          if (typeof a[this.currentSort] === "string") {
             // @ts-ignore
-            return b[this.sortAttribute].localeCompare(a[this.sortAttribute]);
+            return b[this.currentSort].localeCompare(a[this.currentSort]);
           }
 
-          if (Array.isArray(a[this.sortAttribute])) {
+          if (Array.isArray(a[this.currentSort])) {
             // @ts-ignore
-            return b[this.sortAttribute][0].localeCompare(
+            return b[this.currentSort][0].localeCompare(
               // @ts-ignore
-              a[this.sortAttribute][0]
+              a[this.currentSort][0]
             );
           }
         }
@@ -123,14 +121,14 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
     attribute: SortAttribute,
     sortDirection?: SortDirection
   ) {
-    if (this.sortAttribute === attribute) {
+    if (this.currentSort === attribute) {
       if (this.sortDirection === SortDirection.Asc) {
         this.sortDirection = SortDirection.Desc;
       } else {
         this.sortDirection = SortDirection.Asc;
       }
     } else {
-      this.sortAttribute = attribute;
+      this.currentSort = attribute;
       this.sortDirection = sortDirection ?? SortDirection.Asc;
     }
   }
@@ -140,7 +138,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
   }
 
   @action resetLocalProperties() {
-    this.sortAttribute = SortAttribute.CreatedTime;
+    this.currentSort = SortAttribute.CreatedTime;
     this.sortDirection = SortDirection.Desc;
     this.isCollapsed = true;
   }

@@ -17,11 +17,12 @@ import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
 import { dasherize } from "@ember/string";
 
-interface DraftResponseJSON {
+export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
   Hits: HermesDocument[];
   params: string;
   page: number;
+  nbPages: number;
 }
 
 export default class AuthenticatedMyRoute extends Route {
@@ -66,10 +67,9 @@ export default class AuthenticatedMyRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams): Promise<{
-    allDocs: HermesDocument[];
-    drafts: HermesDocument[];
-    inReviewDocs: HermesDocument[];
-    approvedDocs: HermesDocument[];
+    latest: HermesDocument[];
+    published: HermesDocument[];
+    draftResults?: DraftResponseJSON;
   }> {
     // const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
     const searchIndex =
@@ -79,11 +79,7 @@ export default class AuthenticatedMyRoute extends Route {
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform(params),
-      this.algolia.getDocResults.perform(
-        searchIndex,
-        { ...params, hitsPerPage: 1000 },
-        true
-      ),
+      this.algolia.getDocResults.perform(searchIndex, { ...params }, true),
     ]);
 
     docResults = docResults as SearchResponse<HermesDocument>;
@@ -92,24 +88,28 @@ export default class AuthenticatedMyRoute extends Route {
 
     // @ts-ignore - TODO: fix
     const docs = docResults?.hits ?? [];
-    const drafts = draftResults?.Hits ?? [];
 
-    const allDocs = [
+    const latest = [
       ...(draftResults?.Hits ?? []),
       ...((docResults as SearchResponse<HermesDocument>).hits ?? []),
-    ].sort((a, b) => {
-      assert("createdTime must be defined", a.createdTime && b.createdTime);
-      return b.createdTime - a.createdTime;
+    ]
+      .sort((a, b) => {
+        assert("createdTime must be defined", a.createdTime && b.createdTime);
+        return b.createdTime - a.createdTime;
+      })
+      .splice(0, 12);
+
+    const published = docs.filter((doc: HermesDocument) => {
+      const dasherizedName = dasherize(doc.status);
+      return (
+        dasherizedName === "in-review" ||
+        dasherizedName === "approved" ||
+        dasherizedName === "obsolete"
+      );
     });
 
-    const inReviewDocs = docs.filter(
-      (doc: HermesDocument) => dasherize(doc.status) === "in-review"
-    );
+    console.log("draftResults", draftResults);
 
-    const approvedDocs = docs.filter(
-      (doc: HermesDocument) => dasherize(doc.status) === "approved"
-    );
-
-    return { allDocs, drafts, inReviewDocs, approvedDocs };
+    return { latest, published, draftResults };
   }
 }

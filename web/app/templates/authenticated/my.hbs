@@ -1,8 +1,10 @@
 {{page-title "My Docs"}}
 
+{{! Make this just a nav }}
 <MyDocs
-  @allDocs={{@model.allDocs}}
-  @inReviewDocs={{@model.inReviewDocs}}
-  @approvedDocs={{@model.approvedDocs}}
-  @drafts={{@model.drafts}}
+  @latest={{@model.latest}}
+  @published={{@model.published}}
+  @drafts={{@model.draftResults}}
 />
+
+{{outlet}}
