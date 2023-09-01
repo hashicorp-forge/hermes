@@ -17,6 +17,7 @@ import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
+import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -53,6 +54,7 @@ interface XDropdownListComponentSignature {
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
 
     /**
      * Whether an asynchronous list is loading.
