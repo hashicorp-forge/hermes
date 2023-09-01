@@ -54,13 +54,26 @@ export default class DashboardRoute extends Route {
         return result.hits as HermesDocument[];
       });
 
-    try {
+    /**
+     * If the user is loading the dashboard for the first time,
+     * we await the `fetchAll` task so we can display the
+     * documents at the same time as the rest of the layout.
+     *
+     * If a user leaves and returns to the dashboard, we call `fetchAll`
+     * but don't await it. This speeds up the transition and is especially
+     * efficient when the RecentDocs list hasn't changed since last load.
+     *
+     * It's possible for the user to see the RecentDocs list update
+     * in real time (by visiting a document and very quickly clicking back),
+     * but it's unlikely., since we call `fetchAll` in the `afterModel` hook
+     * of the `/document` route, just after the doc is marked viewed. In most cases,
+     * the task will be finished by the time the user returns to the dashboard.
+     *
+     */
+    if (this.recentDocs.all) {
+      void this.recentDocs.fetchAll.perform();
+    } else {
       await this.recentDocs.fetchAll.perform();
-    } catch {
-      /**
-       * This tells our template to show the error state.
-       */
-      this.recentDocs.all = null;
     }
 
     return docsAwaitingReview;

@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import { inject as service } from "@ember/service";
-import { enqueueTask, restartableTask } from "ember-concurrency";
+import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
@@ -41,7 +41,7 @@ export default class RecentlyViewedDocsService extends Service {
    * Fetches an array of recently viewed docs.
    * Called in the dashboard route if the docs are not already loaded.
    */
-  fetchAll = restartableTask(async () => {
+  fetchAll = keepLatestTask(async () => {
     try {
       /**
        * Fetch the file IDs from the backend.
@@ -99,6 +99,7 @@ export default class RecentlyViewedDocsService extends Service {
        */
       this.all = newAll;
     } catch (e: unknown) {
+      this.all = null; // Causes the dashboard to show an error message.
       console.error("Error fetching recently viewed docs", e);
       throw e;
     }
