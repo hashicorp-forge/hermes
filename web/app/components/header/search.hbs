@@ -69,7 +69,7 @@
               {{else if (eq dd.value "productAreaMatch")}}
                 <dd.LinkTo
                   data-test-product-match-link
-                  @route="authenticated.all"
+                  @route="authenticated.documents"
                   @query={{hash
                     product=(array dd.attrs.productAreaName)
                     page=1

@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div class="x-container">
 
   <nav class="header-nav">
@@ -9,8 +8,8 @@
     <div class="primary-links">
       <LinkTo
         data-test-nav-link="all"
-        @route="authenticated.all"
-        @current-when="authenticated.all"
+        @route="authenticated.documents"
+        @current-when="authenticated.documents"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         All Docs
