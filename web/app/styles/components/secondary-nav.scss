@@ -19,6 +19,11 @@
   }
 }
 
+.header-nav-and-filters {
+  // @apply outline;
+  @apply h-14;
+}
+
 .big-tabs {
   @apply flex space-x-4;
 

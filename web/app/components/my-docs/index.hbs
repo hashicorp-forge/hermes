@@ -1,33 +1,37 @@
 <Header />
 
 <div class="x-container">
-  <div class="mb-4 flex w-full items-center justify-between">
-
+  <div
+    class="header-nav-and-filters mb-8 flex w-full items-center justify-between"
+  >
+    {{! TODO: don't just justify between }}
     <div class="relative flex items-center">
+
       <LinkTo @route="authenticated.my">
         <Person::Avatar
           @imgURL={{this.authenticatedUser.info.picture}}
           @email={{this.authenticatedUser.info.name}}
           @size="large"
-          class="mr-5 -ml-1"
+          class="mr-6 -ml-1"
         />
       </LinkTo>
       <div>
         <h1 class="mb-0 text-display-300">
           {{this.authenticatedUser.info.name}}
         </h1>
-        <p class="text-body-200 text-color-foreground-faint">
+        <p class="text-body-300 text-color-foreground-faint">
           {{this.authenticatedUser.info.email}}
         </p>
       </div>
     </div>
     {{! make this more like the product overview screen }}
 
-    <div class="secondary-nav">
+    <div class="big-tabs">
       <LinkTo
         {{on "click" this.resetLocalProperties}}
         @route="authenticated.my"
         @current-when="authenticated.my.index"
+        class="!text-display-300"
       >
         Latest
       </LinkTo>
@@ -35,6 +39,7 @@
         {{on "click" this.resetLocalProperties}}
         @route="authenticated.my.published"
         @current-when="authenticated.my.published"
+        class="!text-display-300"
       >
         Published
       </LinkTo>
@@ -42,6 +47,7 @@
         {{on "click" this.resetLocalProperties}}
         @route="authenticated.my.drafts"
         @current-when="authenticated.my.drafts"
+        class="!text-display-300"
       >
         Drafts
       </LinkTo>
