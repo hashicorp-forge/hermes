@@ -6,7 +6,6 @@ interface DocTileComponentSignature {
     avatar?: string;
     docID?: string;
     docNumber?: string;
-    isOwner?: boolean;
     isResult?: boolean;
     isDraft?: boolean;
     modifiedAgo?: string;
