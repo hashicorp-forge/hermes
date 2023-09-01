@@ -2,8 +2,18 @@
   .hds-modal {
     @apply overflow-visible;
 
+    &.scrollable {
+      .hds-modal__body {
+        @apply p-0;
+
+        > .scrollable-container {
+          @apply px-6;
+        }
+      }
+    }
+
     .ember-basic-dropdown {
-      @apply w-full mb-2 mt-1;
+      @apply mb-2 mt-1 w-full;
     }
 
     &__body {

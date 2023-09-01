@@ -1,0 +1,19 @@
+.scrollable-container {
+  @apply overflow-auto;
+
+  /* Style the scrollbar for Chrome, Safari, and Opera. */
+  &::-webkit-scrollbar {
+    @apply w-4 bg-transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    @apply min-h-[40px] rounded-t-full rounded-b-full border-[4.5px] border-solid border-transparent bg-color-palette-neutral-300 bg-clip-padding;
+
+    &:hover {
+      @apply bg-color-palette-neutral-400;
+    }
+  }
+
+  /* Style the scrollbar Firefox */
+  scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+}

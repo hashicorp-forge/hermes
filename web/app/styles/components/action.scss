@@ -1,4 +1,5 @@
 .action {
-  @apply appearance-none font-sans p-0 border-0 bg-transparent text-left cursor-pointer;
+  @apply cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans;
   font-weight: inherit;
+  font-size: inherit;
 }

@@ -37,6 +37,7 @@ export interface XDropdownListAnchorAPI
     XDropdownListToggleComponentBoundArgs | "color" | "text"
   >;
   focusedItemIndex: number;
+  selected: any;
   resetFocusedItemIndex: () => void;
   scheduleAssignMenuItemIDs: () => void;
   hideContent: () => void;
@@ -53,6 +54,7 @@ interface XDropdownListComponentSignature {
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+    matchAnchorWidth?: boolean;
 
     /**
      * Whether an asynchronous list is loading.

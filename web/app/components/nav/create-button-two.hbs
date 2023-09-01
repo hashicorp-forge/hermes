@@ -1,0 +1,30 @@
+<X::DropdownList
+  @items={{this.menuItems}}
+  @placement="bottom-end"
+  {{! class="w-[200px]" }}
+>
+  <:anchor as |dd|>
+    <Hds::Button
+      @text="New"
+      @icon="plus"
+      @route="authenticated.new.doc"
+      class="rounded-r-none pl-2.5 pr-3.5"
+    />
+    <dd.ToggleAction
+      class="hds-button hds-button--color-primary hds-button--size-medium flex rounded-l-none px-1.5"
+    >
+      <FlightIcon @name={{if dd.contentIsShown "chevron-up" "chevron-down"}} />
+    </dd.ToggleAction>
+  </:anchor>
+  <:item as |dd|>
+    <dd.LinkTo
+      @route={{dd.attrs.route}}
+      class="flex h-9 items-center justify-between rounded-none px-4"
+    >
+      <div class="flex items-center">
+        <FlightIcon @name={{or dd.attrs.icon "file-text"}} class="mr-3" />
+        {{dd.attrs.label}}
+      </div>
+    </dd.LinkTo>
+  </:item>
+</X::DropdownList>

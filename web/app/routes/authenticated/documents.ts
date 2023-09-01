@@ -35,6 +35,8 @@ export default class AuthenticatedDocumentsRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
+    const sortedBy = params.sortBy ?? SortByValue.DateDesc;
+
     const searchIndex =
       params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
@@ -45,7 +47,6 @@ export default class AuthenticatedDocumentsRoute extends Route {
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
 
-    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
     const results = _results as SearchResponse<HermesDocument>;
 
     this.activeFilters.update(params);

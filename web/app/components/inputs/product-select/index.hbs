@@ -11,7 +11,7 @@
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
         @icon={{this.icon}}
-        class="w-80 product-select-dropdown-list"
+        class="product-select-dropdown-list w-80"
         ...attributes
       >
         <:item as |dd|>
@@ -32,20 +32,27 @@
         @placement={{@placement}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
-        class="w-[300px] product-select-dropdown-list"
+        @matchAnchorWidth={{true}}
+        class="product-select-dropdown-list"
         ...attributes
       >
         <:anchor as |dd|>
           <dd.ToggleAction
-            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
+            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium
+              {{if @isFullWidth 'w-full'}}"
           >
-            <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
+            {{#if dd.selected}}
+              <FlightIcon
+                @name={{or (get-product-id @selected) "folder"}}
+                class="mr-2.5"
+              />
+            {{/if}}
 
             <span
               class="product-select-selected-value
                 {{unless @selected 'text-color-foreground-faint'}}"
             >
-              {{or @selected "Select a product/area"}}
+              {{or @selected "---"}}
             </span>
 
             {{#if this.selectedProductAbbreviation}}

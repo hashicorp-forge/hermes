@@ -24,6 +24,10 @@ Router.map(function () {
     this.route("settings");
     this.route("new", function () {
       this.route("doc");
+      this.route("project");
+    });
+    this.route("support", function () {
+      this.route("document-types");
     });
   });
   this.route("authenticate");

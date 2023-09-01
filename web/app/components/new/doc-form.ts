@@ -34,9 +34,7 @@ const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
 const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
-  Args: {
-    docType: string;
-  };
+  Args: {};
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
@@ -48,7 +46,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | null = null;
+  @tracked protected productArea: string | undefined = undefined;
   @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
@@ -83,6 +81,66 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Set true after an invalid submission attempt.
    */
   @tracked private validateEagerly = false;
+
+  docTypes = [
+    {
+      longName: "Request for comments",
+      // icon: "discussion-circle",
+      shortName: "RFC",
+      description:
+        "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
+      moreInfoLink: {
+        text: "When should I create an RFC?",
+        url: "https://works.hashicorp.com/articles/rfc-template",
+      },
+    },
+    {
+      longName: "Product requirements",
+      // icon: "target",
+      shortName: "PRD",
+      description:
+        "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
+      moreInfoLink: {
+        text: "When should I create a PRD?",
+        url: "https://works.hashicorp.com/articles/prd-template",
+      },
+    },
+    {
+      longName: "Funding request",
+      // icon: "dollar-sign",
+      shortName: "FRD",
+      description:
+        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
+    },
+    {
+      longName: "Plan of record",
+      // icon: "map",
+      shortName: "POR",
+      description:
+        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
+    },
+    {
+      longName: "Press release / FAQ",
+      // icon: "newspaper",
+      shortName: "PRFAQ",
+      description: "Write a press release for your project.",
+    },
+    {
+      longName: "Memo",
+      // icon: "radio",
+      shortName: "MEMO",
+      description: "Share freeform info with your team.",
+    },
+  ];
+
+  get objectTypeIsProject() {
+    return false;
+    // return this.selectedObjectType === "Project";
+  }
+
+  // TODO: give docType a type
+  // @tracked docType: any = this.docTypes[0];
+  @tracked selectedDocType: any = null;
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -139,6 +197,14 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this._form = form;
   }
 
+  @action protected changeDocType(docTypeShortName: string) {
+    const docType = this.docTypes.find(
+      (docType) => docType.shortName === docTypeShortName
+    );
+    assert("docType must exist", docType);
+    this.selectedDocType = docType;
+  }
+
   /**
    * Binds the FormData to our locally tracked properties.
    * If the summary is long, shows a gentle warning.
@@ -175,8 +241,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    attributes: ProductArea
+    attributes?: ProductArea
   ) {
+    assert("attributes must exist", attributes);
+
     this.productArea = productName;
     this.productAbbreviation = attributes.abbreviation;
     this.maybeValidate();
@@ -209,7 +277,17 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contributors: this.getEmails(this.contributors),
-            docType: this.args.docType,
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            docType: "rfc",
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
+            // TODO: fix this;
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),

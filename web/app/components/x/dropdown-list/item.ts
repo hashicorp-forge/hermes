@@ -51,6 +51,7 @@ export interface XDropdownListItemComponentArgs {
 interface XDropdownListItemComponentSignature {
   Args: XDropdownListItemComponentArgs & {
     value: string;
+    selected?: any;
   };
   Blocks: {
     default: [dd: XDropdownListItemAPI];
