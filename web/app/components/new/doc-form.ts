@@ -12,7 +12,7 @@ import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
-import { ProductArea } from "../inputs/product-select";
+import { ProductArea } from "hermes/services/product-areas";
 
 interface DocFormErrors {
   title: string | null;

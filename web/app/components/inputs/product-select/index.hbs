@@ -75,12 +75,24 @@
         </:item>
       </X::DropdownList>
     {{/if}}
-  {{else if this.fetchProducts.isRunning}}
+  {{else if this.fetchProductAreas.isRunning}}
     <FlightIcon data-test-product-select-spinner @name="loading" />
+  {{else if this.errorIsShown}}
+    <div class="failed-to-load-text">
+      Failed to load
+    </div>
+    <Hds::Button
+      data-test-product-select-failed-to-load-button
+      @color="secondary"
+      @size="small"
+      {{on "click" (perform this.fetchProductAreas)}}
+      @text="Retry"
+      @icon="reload"
+    />
   {{else}}
     <div
       class="absolute top-0 left-0"
-      {{did-insert (perform this.fetchProducts)}}
+      {{did-insert (perform this.fetchProductAreas)}}
     ></div>
   {{/if}}
 </div>
