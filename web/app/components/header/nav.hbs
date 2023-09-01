@@ -12,14 +12,18 @@
         @current-when="authenticated.documents authenticated.projects"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
-        Explore
+        <span>
+          Explore
+        </span>
       </LinkTo>
       <LinkTo
         data-test-nav-link="my"
         @route="authenticated.my"
         @current-when="authenticated.my"
       >
-        My Docs
+        <span>
+          My Docs
+        </span>
       </LinkTo>
     </div>
 

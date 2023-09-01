@@ -1,24 +1,12 @@
-.big-tabs {
-  @apply flex space-x-4;
-
-  > a {
-    @apply relative flex py-3 text-display-500 font-bold;
-
-    &.active::before {
-      content: "";
-      @apply absolute -bottom-px h-1 w-full bg-color-foreground-action;
-    }
-  }
-}
 .header-nav {
   @apply relative flex w-full flex-wrap items-center justify-between md:flex-nowrap;
 
   .header-nav-logo {
-    @apply order-1 mr-6 mt-3.5 flex shrink-0 items-center hover:text-color-foreground-strong md:mt-0 md:mr-0 md:h-16;
+    @apply order-1 mr-6 mt-3.5 flex shrink-0 items-center hover:text-color-foreground-strong md:mt-0 md:mr-0 md:h-[60px];
   }
 
   .primary-links {
-    @apply order-3 -ml-2.5 flex h-16 shrink-0 md:order-2 md:mx-6;
+    @apply relative order-3 -ml-2.5 flex h-[60px] shrink-0 md:order-2 md:mx-6;
 
     a {
       @apply flex h-full items-center px-2.5 text-color-foreground-faint md:px-3.5;
@@ -28,13 +16,21 @@
       }
 
       &.active {
-        @apply relative text-color-palette-blue-200;
+        @apply relative text-color-foreground-strong;
 
         /* Active indicator */
+        // &::before {
+        //   content: "";
+        //   @apply absolute left-0 -bottom-px h-0.5 w-full bg-color-foreground-strong;
+        // }
         &::before {
           content: "";
-          @apply absolute left-0 -bottom-px h-1 w-full bg-color-palette-blue-200;
+          @apply absolute left-1/2 top-1/2 h-[calc(100%-0px)] w-[calc(100%+4px)] -translate-y-1/2 -translate-x-1/2 bg-gradient-to-b from-color-surface-interactive-hover to-color-page-faint mix-blend-multiply;
         }
+      }
+
+      > span {
+        @apply relative;
       }
     }
   }

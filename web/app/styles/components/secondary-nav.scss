@@ -10,11 +10,33 @@
   }
 
   .active {
-    @apply z-10 bg-color-foreground-action text-color-foreground-action;
+    @apply z-10 text-color-page-primary;
 
     &::before {
       content: "";
-      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-surface-action;
+      @apply absolute -left-0.5 -right-0.5 -z-10 h-full rounded-l-full rounded-r-full bg-color-foreground-strong;
+    }
+  }
+}
+
+.big-tabs {
+  @apply flex space-x-4;
+
+  > a {
+    @apply relative flex text-display-500 font-bold;
+    // @apply text-color-foreground-disabled;
+    // @apply text-color-foreground-strong;
+    // @apply text-color-foreground-primary;
+    @apply text-color-foreground-faint;
+
+    &.active {
+      // @apply text-display-500;
+      @apply text-color-foreground-strong;
+
+      &::before {
+        content: "";
+        @apply absolute -bottom-3 h-[3px] w-full bg-color-foreground-action;
+      }
     }
   }
 }
