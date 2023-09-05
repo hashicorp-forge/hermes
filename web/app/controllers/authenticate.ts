@@ -1,6 +1,6 @@
 import Controller from "@ember/controller";
 import { inject as service } from "@ember/service";
-import SessionService from "hermes/services/session";
+import SessionService from "hermes/services/_session";
 import { dropTask } from "ember-concurrency";
 
 export default class AuthenticateController extends Controller {

@@ -14,7 +14,7 @@ import cleanString from "hermes/utils/clean-string";
 import { debounce } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
-import SessionService from "hermes/services/session";
+import SessionService from "hermes/services/_session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { HermesDocument, HermesUser } from "hermes/types/document";

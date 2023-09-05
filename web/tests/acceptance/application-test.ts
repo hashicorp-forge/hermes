@@ -6,7 +6,7 @@ import {
   invalidateSession,
 } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import SessionService from "hermes/services/session";
+import SessionService from "hermes/services/_session";
 import { TEST_SUPPORT_URL } from "hermes/utils/hermes-urls";
 
 module("Acceptance | application", function (hooks) {
