@@ -1,9 +1,5 @@
 import { GoogleUser } from "hermes/components/inputs/people-select";
 
-/**
- * NOTE: This is a partial type definition.
- * We are defining it incrementally as we expand TS coverage.
- */
 export interface HermesDocument {
   readonly objectID: string;
 
@@ -11,6 +7,8 @@ export interface HermesDocument {
   product?: string;
   modifiedAgo: string;
   modifiedTime: number;
+  created: string; // E.g., "Aug 15, 2032"
+  createdTime: number;
   docNumber: string;
   docType: string;
   title: string;

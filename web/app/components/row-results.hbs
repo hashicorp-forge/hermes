@@ -28,10 +28,11 @@
             </H.Tr>
           </:head>
           <:body>
-            {{#each @docs as |doc index|}}
+            {{#each @docs as |doc|}}
+              {{log "doc" doc}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
-                @createdDate="{{parse-date doc.created}}"
+                @created={{doc.created}}
                 @docID="{{doc.objectID}}"
                 @docNumber="{{doc.docNumber}}"
                 @docType="{{doc.docType}}"

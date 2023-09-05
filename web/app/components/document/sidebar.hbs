@@ -285,6 +285,7 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
+        {{! move the "createdDate" logic from the model to a helper }}
         <p>{{or @document.createdDate "Unknown"}}</p>
       </div>
 

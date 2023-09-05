@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 interface DocRowComponentSignature {
   Args: {
     avatar: string;
-    createdDate: string;
+    created: string;
     docID: string;
     docNumber: string;
     docType: string;
