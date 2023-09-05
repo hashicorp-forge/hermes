@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import { REDIRECT_STORAGE_KEY, isJSON } from "hermes/services/_session";
+import { REDIRECT_STORAGE_KEY, isJSON } from "hermes/services/session";
 import window from "ember-window-mock";
 
 const TEST_STORAGE_KEY = `test-${REDIRECT_STORAGE_KEY}`;

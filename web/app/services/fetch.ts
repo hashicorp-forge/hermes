@@ -2,7 +2,7 @@ import Service from "@ember/service";
 import fetch from "fetch";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
-import SessionService from "./_session";
+import SessionService from "./session";
 
 interface FetchOptions {
   method?: string;

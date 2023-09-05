@@ -4,7 +4,7 @@ import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
-import SessionService from "hermes/services/_session";
+import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 // @ts-ignore - Not yet typed
