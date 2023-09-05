@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
-import SessionService from "hermes/services/_session";
+import SessionService from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
 import AuthenticatedUserService, {
   AuthenticatedUser,
