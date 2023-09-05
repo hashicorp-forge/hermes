@@ -43,7 +43,12 @@
       {{#if @project.jiraObject}}
         Jira connected
       {{else}}
-        <Hds::Button @color="secondary" @size="small" @text="Add Jira link" />
+        <Hds::Button
+          @color="secondary"
+          @size="small"
+          @icon="jira"
+          @text="Attach Jira issue"
+        />
       {{/if}}
     </div>
   </div>
