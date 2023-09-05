@@ -1,7 +1,28 @@
-{{yield to="header"}}
+{{yield (hash showModal=this.showModal) to="header"}}
 
-{{yield to="list-loading"}}
+{{#if this.args.isLoading}}
+  {{yield to="list-loading"}}
+{{else if this.args.loadingHasFailed}}
+  {{yield to="list-error"}}
+{{else}}
+  {{yield to="list"}}
+{{/if}}
 
-{{yield to="list-error"}}
-
-{{yield to="list"}}
+{{#if this.modalIsShown}}
+  <Document::Sidebar::RelatedResources::Add
+    @headerTitle={{@modalHeaderTitle}}
+    @inputPlaceholder={{@modalInputPlaceholder}}
+    @onClose={{this.hideModal}}
+    @addResource={{this.addResource}}
+    @algoliaResults={{this.algoliaResults}}
+    @objectID={{@documentObjectID}}
+    @relatedDocuments={{this.relatedDocuments}}
+    @relatedLinks={{this.relatedLinks}}
+    @allowAddingExternalLinks={{@allowAddingExternalLinks}}
+    @search={{perform this.search}}
+    @getObject={{perform this.getObject}}
+    @resetAlgoliaResults={{this.resetAlgoliaResults}}
+    @searchErrorIsShown={{this.searchErrorIsShown}}
+    @searchIsRunning={{this.search.isRunning}}
+  />
+{{/if}}

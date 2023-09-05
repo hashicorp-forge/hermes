@@ -1,42 +1,45 @@
-<RelatedResources>
-  <:header>
+<RelatedResources
+  @items={{this.relatedResources}}
+  @isLoading={{this.loadRelatedResources.isRunning}}
+  @loadingHasFailed={{this.loadingHasFailed}}
+  @modalHeaderTitle={{@modalHeaderTitle}}
+  @modalInputPlaceholder={{@modalInputPlaceholder}}
+  @addResource={{this.addResource}}
+  @documentObjectID={{@objectID}}
+  @allowAddingExternalLinks={{@allowAddingExternalLinks}}
+>
+  <:header as |rr|>
     <Document::Sidebar::SectionHeader
-      {{! TODO: move this elsewhere }}
       {{did-insert (perform this.loadRelatedResources)}}
       @title={{@headerTitle}}
       @titleTooltipText={{this.titleTooltipText}}
       @badgeText="New"
       @buttonIsHidden={{this.sectionHeaderButtonIsHidden}}
-      @buttonAction={{this.showAddResourceModal}}
-      {{!-- @buttonAction={{rr.showModal}} --}}
+      @buttonAction={{rr.showModal}}
     />
   </:header>
   <:list-loading>
-    {{#if this.loadRelatedResources.isRunning}}
-      <div class="h-[26px] pt-1.5">
-        <FlightIcon
-          data-test-related-resources-list-loading-icon
-          @name="loading"
-        />
-      </div>
-    {{/if}}
+    <div class="h-[26px] pt-1.5">
+      <FlightIcon
+        data-test-related-resources-list-loading-icon
+        @name="loading"
+      />
+    </div>
   </:list-loading>
   <:list-error>
-    {{#if this.loadingHasFailed}}
-      <div class="h-16">
-        <div class="failed-to-load-text">
-          Failed to load
-        </div>
-        <Hds::Button
-          data-test-related-resources-error-button
-          @color="secondary"
-          @size="small"
-          @text="Retry"
-          @icon="reload"
-          {{on "click" (perform this.loadRelatedResources)}}
-        />
+    <div class="h-16">
+      <div class="failed-to-load-text">
+        Failed to load
       </div>
-    {{/if}}
+      <Hds::Button
+        data-test-related-resources-error-button
+        @color="secondary"
+        @size="small"
+        @text="Retry"
+        @icon="reload"
+        {{on "click" (perform this.loadRelatedResources)}}
+      />
+    </div>
   </:list-error>
   <:list>
     <Document::Sidebar::RelatedResources::List
@@ -54,61 +57,3 @@
     </Document::Sidebar::RelatedResources::List>
   </:list>
 </RelatedResources>
-
-<!--
-{{! yield this to a loading section }}
-{{#if this.loadRelatedResources.isRunning}}
-  <div class="h-[26px] pt-1.5">
-    <FlightIcon data-test-related-resources-list-loading-icon @name="loading" />
-  </div>
-{{else if this.loadingHasFailed}}
-  {{! yield this to a load error block }}
-  <div class="h-16">
-    <div class="failed-to-load-text">
-      Failed to load
-    </div>
-    <Hds::Button
-      data-test-related-resources-error-button
-      @color="secondary"
-      @size="small"
-      @text="Retry"
-      @icon="reload"
-      {{on "click" (perform this.loadRelatedResources)}}
-    />
-  </div>
-{{else}}
-  {{! yield this to a list block }}
-  <Document::Sidebar::RelatedResources::List
-    @items={{this.relatedResources}}
-    @itemLimit={{@itemLimit}}
-  >
-    <:resource as |r|>
-      <Document::Sidebar::RelatedResources::ListItem
-        @resource={{r}}
-        @removeResource={{this.removeResource}}
-        @editResource={{this.editResource}}
-        @editingIsDisabled={{@editingIsDisabled}}
-      />
-    </:resource>
-  </Document::Sidebar::RelatedResources::List>
-{{/if}}
--->
-
-{{#if this.addResourceModalIsShown}}
-  <Document::Sidebar::RelatedResources::Add
-    @headerTitle={{@modalHeaderTitle}}
-    @inputPlaceholder={{@modalInputPlaceholder}}
-    @onClose={{this.hideAddResourceModal}}
-    @addResource={{this.addResource}}
-    @algoliaResults={{this.algoliaResults}}
-    @objectID={{@objectID}}
-    @relatedDocuments={{this.relatedDocuments}}
-    @relatedLinks={{this.relatedLinks}}
-    @allowAddingExternalLinks={{@allowAddingExternalLinks}}
-    @search={{perform this.search}}
-    @getObject={{perform this.getObject}}
-    @resetAlgoliaResults={{this.resetAlgoliaResults}}
-    @searchErrorIsShown={{this.searchErrorIsShown}}
-    @searchIsRunning={{this.search.isRunning}}
-  />
-{{/if}}

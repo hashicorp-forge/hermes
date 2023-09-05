@@ -65,16 +65,21 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @tracked relatedLinks: RelatedExternalLink[] = [];
   @tracked relatedDocuments: RelatedHermesDocument[] = [];
 
-  @tracked _algoliaResults: HermesDocument[] | null = null;
-
-  @tracked addResourceModalIsShown = false;
-  @tracked loadingHasFailed = false;
+  @tracked protected loadingHasFailed = false;
 
   /**
-   * Whether to show an error message in the search modal.
-   * Set true when an Algolia search fails.
+   * The combined resources array, formatted for the RelatedResourcesList.
    */
-  @tracked searchErrorIsShown = false;
+  protected get relatedResources(): RelatedResource[] {
+    let resourcesArray: RelatedResource[] = [];
+
+    this.updateSortOrder();
+
+    resourcesArray.pushObjects(this.relatedDocuments);
+    resourcesArray.pushObjects(this.relatedLinks);
+
+    return resourcesArray;
+  }
 
   /**
    * The related resources object, minimally formatted for a PUT request to the API.
@@ -107,20 +112,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   * The combined resources array, formatted for the RelatedResourcesList.
-   */
-  protected get relatedResources(): RelatedResource[] {
-    let resourcesArray: RelatedResource[] = [];
-
-    this.updateSortOrder();
-
-    resourcesArray.pushObjects(this.relatedDocuments);
-    resourcesArray.pushObjects(this.relatedLinks);
-
-    return resourcesArray;
-  }
-
-  /**
    * Whether the "Add Resource" button should be hidden.
    * True when editing is explicitly disabled (e.g., when the viewer doesn't have edit
    * permissions), and when the item limit is reached (to be used for single-doc
@@ -139,201 +130,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   * The Algolia results for a query. Updated by the `search` task
-   * and displayed in the "add resources" modal.
-   */
-  protected get algoliaResults(): { [key: string]: HermesDocument } {
-    /**
-     * The array initially looks like this:
-     * [{title: "foo", objectID: "bar"...}, ...]
-     *
-     * We transform it to look like:
-     * { "bar": {title: "foo", objectID: "bar"...}, ...}
-     */
-    let documents: any = {};
-
-    if (this._algoliaResults) {
-      this._algoliaResults.forEach((doc) => {
-        documents[doc.objectID] = doc;
-      });
-    }
-    return documents;
-  }
-
-  /**
    * The text passed to the TooltipIcon beside the title.
    */
   protected get titleTooltipText(): string {
     return `Documents and links that are relevant to this work.`;
-  }
-
-  /**
-   * The action to update the `sortOrder` attribute of
-   * the resources, based on their position in the array.
-   * Called when the resource list is saved.
-   */
-  @action private updateSortOrder() {
-    this.relatedDocuments.forEach((doc, index) => {
-      doc.sortOrder = index + 1;
-    });
-
-    this.relatedLinks.forEach((link, index) => {
-      link.sortOrder = index + 1 + this.relatedDocuments.length;
-    });
-  }
-
-  /**
-   * Requests an Algolia document by ID.
-   * If found, sets the local Algolia results to an array
-   * with that document. If not, throws a 404 to the child component.
-   */
-  protected getObject = restartableTask(
-    async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
-      try {
-        let algoliaResponse = await this.algolia.getObject.perform(objectID);
-        if (algoliaResponse) {
-          this._algoliaResults = [
-            algoliaResponse,
-          ] as unknown as HermesDocument[];
-          if (dd) {
-            dd.resetFocusedItemIndex();
-          }
-          if (dd) {
-            next(() => {
-              dd.scheduleAssignMenuItemIDs();
-            });
-          }
-        }
-      } catch (e: unknown) {
-        const typedError = e as { status?: number };
-        if (typedError.status === 404) {
-          // This means the document wasn't found.
-          // Let the child component handle the error.
-          throw e;
-        } else {
-          this.handleSearchError(e);
-        }
-      }
-    }
-  );
-
-  /**
-   * The search task passed to the "Add..." modal.
-   * Returns Algolia document matches for a query and updates
-   * the dropdown with the correct menu item IDs.
-   * Runs whenever the input value changes.
-   */
-  protected search = restartableTask(
-    async (
-      dd: XDropdownListAnchorAPI | null,
-      query: string,
-      shouldIgnoreDelay?: boolean,
-      options?: SearchOptions
-    ) => {
-      let index = this.configSvc.config.algolia_docs_index_name;
-
-      // Make sure the current document is omitted from the results
-      let filterString = `(NOT objectID:"${this.args.objectID}")`;
-
-      // And if there are any related documents, omit those too
-      if (this.relatedDocuments.length) {
-        let relatedDocIDs = this.relatedDocuments.map(
-          (doc) => doc.googleFileID
-        );
-
-        filterString = filterString.slice(0, -1) + " ";
-
-        filterString += `AND NOT objectID:"${relatedDocIDs.join(
-          '" AND NOT objectID:"'
-        )}")`;
-      }
-
-      // If there are search filters, e.g., "doctype:RFC" add them to the query
-      if (this.args.searchFilters) {
-        filterString += ` AND (${this.args.searchFilters})`;
-      }
-
-      let maybeOptionalFilters = "";
-
-      if (this.args.optionalSearchFilters) {
-        maybeOptionalFilters = this.args.optionalSearchFilters;
-      }
-
-      if (options?.optionalFilters) {
-        maybeOptionalFilters += ` ${options.optionalFilters}`;
-      }
-
-      try {
-        let algoliaResponse = await this.algolia.searchIndex
-          .perform(index, query, {
-            hitsPerPage: options?.hitsPerPage || 4,
-            filters: filterString,
-            attributesToRetrieve: [
-              "title",
-              "product",
-              "docNumber",
-              "docType",
-              "status",
-              "owners",
-            ],
-
-            // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
-            // Include any optional search filters, e.g., "product:Terraform"
-            // to give a higher ranking to results that match the filter.
-            optionalFilters: maybeOptionalFilters,
-          })
-          .then((response) => response);
-        if (algoliaResponse) {
-          this._algoliaResults = algoliaResponse.hits as HermesDocument[];
-          if (dd) {
-            dd.resetFocusedItemIndex();
-          }
-        }
-        if (dd) {
-          next(() => {
-            dd.scheduleAssignMenuItemIDs();
-          });
-        }
-        this.searchErrorIsShown = false;
-
-        if (!shouldIgnoreDelay) {
-          // This will show the "loading" spinner for some additional time
-          // unless the task is restarted. This is to prevent the spinner
-          // from flashing when the user types and results return quickly.
-          await timeout(Ember.testing ? 0 : 200);
-        }
-      } catch (e: unknown) {
-        this.handleSearchError(e);
-      }
-    }
-  );
-
-  /**
-   * The action run when a search errors. Resets the Algolia results
-   * and causes a search error to appear.
-   */
-  @action private handleSearchError(e: unknown) {
-    // This triggers the "no matches" block,
-    // which is where we're displaying the error.
-    this.resetAlgoliaResults();
-    this.searchErrorIsShown = true;
-    console.error("Algolia search failed", e);
-  }
-
-  /**
-   * The action run when the "add resource" plus button is clicked.
-   * Shows the modal.
-   */
-  @action protected showAddResourceModal() {
-    this.addResourceModalIsShown = true;
-  }
-
-  /**
-   * The action run to close the "add resources" modal.
-   * Called on `esc` and by clicking the X button.
-   */
-  @action protected hideAddResourceModal() {
-    this.addResourceModalIsShown = false;
   }
 
   /**
@@ -386,17 +186,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       cachedLinks,
       resourceSelector
     );
-
-    this.hideAddResourceModal();
-  }
-
-  /**
-   * The action to set the locally tracked Algolia results to null.
-   * Used in template computations when a search fails, or when a link is
-   * recognized as an external resource by a child component.
-   */
-  @action protected resetAlgoliaResults() {
-    this._algoliaResults = null;
   }
 
   /**
@@ -417,31 +206,40 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
+   * The action to update the `sortOrder` attribute of
+   * the resources, based on their position in the array.
+   * Called when the resource list is saved.
+   */
+  @action private updateSortOrder() {
+    this.relatedDocuments.forEach((doc, index) => {
+      doc.sortOrder = index + 1;
+    });
+
+    this.relatedLinks.forEach((link, index) => {
+      link.sortOrder = index + 1 + this.relatedDocuments.length;
+    });
+  }
+
+  /**
    * The action run when the component is rendered.
    * Loads the document's related resources, if they exist.
    * On error, triggers the "retry" design.
    */
   protected loadRelatedResources = task(async () => {
-    try {
-      const resources = await this.fetchSvc
-        .fetch(
-          `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
-            this.args.objectID
-          }/related-resources`
-        )
-        .then((response) => response?.json());
+    const resources = await this.fetchSvc
+      .fetch(
+        `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+          this.args.objectID
+        }/related-resources`
+      )
+      .then((response) => response?.json());
 
-      if (resources.hermesDocuments) {
-        this.relatedDocuments = resources.hermesDocuments;
-      }
+    if (resources.hermesDocuments) {
+      this.relatedDocuments = resources.hermesDocuments;
+    }
 
-      if (resources.externalLinks) {
-        this.relatedLinks = resources.externalLinks;
-      }
-
-      this.loadingHasFailed = false;
-    } catch (e: unknown) {
-      this.loadingHasFailed = true;
+    if (resources.externalLinks) {
+      this.relatedLinks = resources.externalLinks;
     }
   });
 
@@ -522,6 +320,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       }
 
       try {
+        console.log("Saving related resources");
         await this.fetchSvc.fetch(
           `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
             this.args.objectID
@@ -534,6 +333,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             },
           }
         );
+        console.log("Saved related resources");
       } catch (e: unknown) {
         this.relatedLinks = cachedLinks;
         this.relatedDocuments = cachedDocuments;
