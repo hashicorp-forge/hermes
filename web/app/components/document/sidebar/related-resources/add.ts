@@ -35,6 +35,7 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
     allowAddingExternalLinks?: boolean;
+    allowAddingDocuments?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
@@ -212,6 +213,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True when there's results to show.
    */
   protected get listHeaderIsShown(): boolean {
+    if (this.args.allowAddingDocuments === false) {
+      return false;
+    }
+
     if (this.noMatchesFound) {
       return false;
     }
@@ -356,9 +361,12 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
     if (!this.linkIsDuplicate) {
       this.args.addResource(externalLink);
-      void this.args.search(null, "");
       this.externalLinkTitle = "";
       this.args.onClose();
+
+      if (this.args.allowAddingDocuments !== false) {
+        void this.args.search(null, "");
+      }
     }
   }
 
@@ -374,9 +382,14 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     this.searchInput = e;
     this._dd = dd;
     this.dd.registerAnchor(this.searchInput);
-    void this.loadInitialData.perform();
+
+    if (this.args.allowAddingDocuments !== false) {
+      void this.loadInitialData.perform();
+    }
 
     next(() => {
+      // not being hit
+      console.log("hit");
       assert("searchInput expected", this.searchInput);
       this.searchInput.focus();
     });
@@ -422,7 +435,11 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * If it's a URL, checks if it's a first- or third-party link.
    */
   @action private processQueryType() {
-    this.queryIsURL = isValidURL(this.query);
+    if (this.args.allowAddingDocuments === false) {
+      this.queryIsURL = true;
+    } else {
+      this.queryIsURL = isValidURL(this.query);
+    }
 
     if (this.queryIsURL) {
       if (this.queryIsFirstPartyURL(this.query)) {

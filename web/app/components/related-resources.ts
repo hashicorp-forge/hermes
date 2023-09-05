@@ -23,15 +23,14 @@ interface RelatedResourcesComponentSignature {
     items?: RelatedResource[];
     isLoading?: boolean;
     loadingHasFailed?: boolean;
-    modalHeaderTitle?: string;
-    modalInputPlaceholder?: string;
+    modalHeaderTitle: string;
+    modalInputPlaceholder: string;
     documentObjectID?: string;
     optionalSearchFilters?: string;
     searchFilters?: string;
-    addResource: (
-      resource: RelatedResource | RelatedHermesDocument | RelatedExternalLink
-    ) => void;
+    addResource: (resource: RelatedResource) => void;
     allowAddingExternalLinks?: boolean;
+    allowAddingDocuments?: boolean;
   };
   Blocks: {
     header: [

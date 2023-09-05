@@ -36,7 +36,6 @@ export interface RelatedHermesDocument {
   documentNumber: string;
   sortOrder: number;
   product?: string;
-  owner?: string;
   status?: string;
 }
 

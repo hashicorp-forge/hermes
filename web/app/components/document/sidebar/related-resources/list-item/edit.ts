@@ -7,10 +7,10 @@ import isValidURL from "hermes/utils/is-valid-u-r-l";
 
 interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
   Args: {
-    resource: RelatedExternalLink;
+    resource?: RelatedExternalLink;
     hideModal: () => void;
     onSave: (resource: RelatedExternalLink) => void;
-    removeResource: (resource: RelatedExternalLink) => void;
+    removeResource?: (resource: RelatedExternalLink) => void;
   };
   Blocks: {
     default: [];
@@ -22,16 +22,16 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
    * A locally tracked URL property. Starts as the passed-in value;
    * updated when the URL input-value changes.
    */
-  @tracked protected url = this.args.resource.url;
+  @tracked protected url = this.args.resource?.url ?? "";
 
   /**
    * The title of the resource. If the name is the same as the URL,
    * we treat it like it's an empty value so the placeholder text shows.
    */
   @tracked protected title =
-    this.args.resource.name === this.args.resource.url
+    this.args.resource?.name === this.args.resource?.url
       ? ""
-      : this.args.resource.name;
+      : this.args.resource?.name ?? "";
 
   /**
    * Whether the error warning is shown.
@@ -108,7 +108,16 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     // prevent the form from submitting on enter
     e.preventDefault();
 
-    let newResource = this.args.resource;
+    let newResource: RelatedExternalLink = {
+      name: "",
+      url: "",
+      sortOrder: 0,
+    };
+
+    if (this.args.resource) {
+      newResource = this.args.resource;
+    }
+
     newResource.url = this.url;
     newResource.name = this.title;
 

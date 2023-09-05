@@ -5,6 +5,7 @@ import { HermesProject } from "hermes/routes/authenticated/projects";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
+  RelatedResource,
   RelatedResourceSelector,
 } from "../document/sidebar/related-resources";
 import { inject as service } from "@ember/service";
@@ -33,6 +34,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.modalIsShown = false;
   }
 
+  @action protected addResource(resource: RelatedResource) {
+    if ("googleFileID" in resource) {
+      this.addDocument(resource as RelatedHermesDocument);
+    } else {
+      this.addLink(resource as RelatedExternalLink);
+    }
+  }
+
   /**
    * The action to add a resource to a document.
    * Adds a resource to the correct array, then saves it to the DB,
@@ -47,6 +56,18 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       cachedDocuments,
       this.relatedLinks.slice(),
       RelatedResourceSelector.HermesDocument
+    );
+  }
+
+  @action protected addLink(resource: RelatedExternalLink) {
+    const cachedLinks = this.relatedLinks.slice();
+
+    this.relatedLinks.unshiftObject(resource);
+
+    void this.saveRelatedResources.perform(
+      this.relatedDocuments.slice(),
+      cachedLinks,
+      RelatedResourceSelector.ExternalLink
     );
   }
 

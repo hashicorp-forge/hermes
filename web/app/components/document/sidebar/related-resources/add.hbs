@@ -24,7 +24,6 @@
       >
         <:anchor as |dd|>
           <div class="relative">
-
             <Hds::Form::TextInput::Base
               data-test-related-resources-search-input
               {{did-insert (fn this.didInsertInput dd)}}
@@ -32,7 +31,7 @@
               {{on "keydown" this.onInputKeydown}}
               {{on "focusin" this.enableKeyboardNav}}
               {{on "focusout" this.disableKeyboardNav}}
-              @type="search"
+              @type={{if (eq @allowAddingDocuments false) "text" "search"}}
               @value={{this.query}}
               name="related-resources-search"
               size="25"
@@ -45,7 +44,7 @@
             {{#if @searchIsRunning}}
               <div
                 data-test-related-resources-search-loading-icon
-                class="absolute top-1/2 -translate-y-1/2 right-3 flex bg-white"
+                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
               >
                 <FlightIcon @name="loading" />
               </div>
@@ -64,16 +63,21 @@
               </h4>
             </div>
           {{/if}}
+          {{#if (eq @allowAddingDocuments false)}}
+            {{! TODO: when it's just an external link, show a version of the "edit" form }}
+            /////
+          {{else}}
 
-          {{#if (and @allowAddingExternalLinks this.queryIsExternalURL)}}
-            <Document::Sidebar::RelatedResources::Add::ExternalResource
-              @onInput={{this.onExternalLinkTitleInput}}
-              @onSubmit={{this.onExternalLinkSubmit}}
-              @linkIsDuplicate={{this.linkIsDuplicate}}
-              @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
-              @title={{this.externalLinkTitle}}
-              @url={{this.query}}
-            />
+            {{#if (or (and @allowAddingExternalLinks this.queryIsExternalURL))}}
+              <Document::Sidebar::RelatedResources::Add::ExternalResource
+                @onInput={{this.onExternalLinkTitleInput}}
+                @onSubmit={{this.onExternalLinkSubmit}}
+                @linkIsDuplicate={{this.linkIsDuplicate}}
+                @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
+                @title={{this.externalLinkTitle}}
+                @url={{this.query}}
+              />
+            {{/if}}
           {{/if}}
         </:header>
         <:loading>

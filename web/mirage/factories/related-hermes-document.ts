@@ -14,7 +14,6 @@ export default Factory.extend({
     return `Related Document ${this.id}`;
   },
   type: "RFC",
-  owner: "testuser@example.com",
   documentNumber() {
     return `LAB-00${this.id}`;
   },
