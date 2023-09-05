@@ -65,19 +65,20 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
       return;
     }
 
-    const detectOverflowMiddleware = {
-      name: "detectOverflow",
-      async fn(state: MiddlewareState) {
-        const containerWidth = htmlElement(".header-nav").offsetWidth;
+    // const detectOverflowMiddleware = {
+    //   name: "detectOverflow",
+    //   async fn(state: MiddlewareState) {
+    //     // this is not always visible
+    //     const containerWidth = htmlElement(".header-nav").offsetWidth;
 
-        const overflow = await detectOverflow(state, {
-          boundary: htmlElement(".header-nav"),
-        });
-        return {
-          data: overflow,
-        };
-      },
-    };
+    //     const overflow = await detectOverflow(state, {
+    //       boundary: htmlElement(".header-nav"),
+    //     });
+    //     return {
+    //       data: overflow,
+    //     };
+    //   },
+    // };
 
     let updatePosition = async () => {
       let _placement = placement || "bottom-start";
@@ -89,7 +90,7 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
           offset(this.offset),
           flip(),
           shift(),
-          detectOverflowMiddleware,
+          // detectOverflowMiddleware,
         ],
       }).then(({ x, y, placement, middlewareData }) => {
         this.maybeMatchAnchorWidth();
@@ -99,16 +100,16 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
         // console.log("y", y);
         // console.log("middlewareData", middlewareData["detectOverflow"]);
 
-        const availableSpaceRight = middlewareData["detectOverflow"].right;
-        const availableSpaceLeft = middlewareData["detectOverflow"].left;
+        // const availableSpaceRight = middlewareData["detectOverflow"].right;
+        // const availableSpaceLeft = middlewareData["detectOverflow"].left;
 
         let left = x;
 
-        if (availableSpaceRight > 0) {
-          left = x - availableSpaceRight;
-        } else if (availableSpaceLeft > 0) {
-          left = x + availableSpaceLeft;
-        }
+        // if (availableSpaceRight > 0) {
+        //   left = x - availableSpaceRight;
+        // } else if (availableSpaceLeft > 0) {
+        //   left = x + availableSpaceLeft;
+        // }
 
         Object.assign(this.content.style, {
           left: `${left}px`,
