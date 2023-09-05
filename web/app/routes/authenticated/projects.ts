@@ -1,13 +1,16 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+} from "hermes/components/document/sidebar/related-resources";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
 
 export type HermesProject = {
   id: string; // at least in mirage...
   name: string;
-  documents?: HermesDocument[];
+  documents?: RelatedHermesDocument[];
   description?: string;
   jiraObject?: {
     key: string;

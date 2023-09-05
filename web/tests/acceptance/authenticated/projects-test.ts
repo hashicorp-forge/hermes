@@ -20,15 +20,30 @@ module("Acceptance | authenticated/projects", function (hooks) {
   });
 
   test("it renders a list of projects", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
-    this.server.create("document", {
-      product: "Terraform",
-      status: "In review",
-      docType: "PRFAQ",
+    this.server.create("related-hermes-document", {
+      id: 999,
+      product: "Vault",
     });
-    this.server.create("document");
 
-    const firstDoc = this.server.schema.document.first().attrs;
-    const secondDoc = this.server.schema.document.all().models[1].attrs;
+    this.server.create("related-hermes-document", {
+      id: 998,
+      product: "Terraform",
+    });
+
+    this.server.create("related-hermes-document", {
+      id: 997,
+      product: "Labs",
+    });
+
+    this.server.createList("document", 3);
+
+    const firstDoc = this.server.schema.relatedHermesDocument.first().attrs;
+    const secondDoc =
+      this.server.schema.relatedHermesDocument.all().models[1].attrs;
+
+    console.log(firstDoc);
+    console.log(secondDoc);
+
     this.server.create("project", {
       description: "This is a test project",
       documents: [firstDoc],

@@ -671,6 +671,20 @@ export default function (mirageConfig) {
         }
       );
 
+      // Project related resources
+      this.put("projects/:project_id", (schema, request) => {
+        let project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        if (project) {
+          let attrs = JSON.parse(request.requestBody);
+
+          project.update(attrs);
+          return new Response(200, {}, project.attrs);
+        }
+      });
+
       // Update whether a draft is shareable.
       this.put("/drafts/:document_id/shareable", (schema, request) => {
         const isShareable = JSON.parse(request.requestBody).isShareable;

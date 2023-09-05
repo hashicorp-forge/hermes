@@ -300,6 +300,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       type: attrs.docType,
       documentNumber: attrs.docNumber,
       sortOrder: 1,
+      product: attrs.product,
     } as RelatedHermesDocument;
 
     this.args.addResource(relatedHermesDocument);

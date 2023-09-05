@@ -2,7 +2,6 @@
   <ol class="tile-list">
     {{#each @model as |doc|}}
       <li>
-        {{log doc.isDraft}}
         <Doc::Tile
           @docID={{doc.objectID}}
           @title={{doc.title}}

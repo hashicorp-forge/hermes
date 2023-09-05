@@ -20,15 +20,17 @@ import { filter } from "@ember/object/computed";
 interface RelatedResourcesComponentSignature {
   Element: null;
   Args: {
-    items: RelatedResource[];
+    items?: RelatedResource[];
     isLoading?: boolean;
     loadingHasFailed?: boolean;
-    modalHeaderTitle: string;
-    modalInputPlaceholder: string;
+    modalHeaderTitle?: string;
+    modalInputPlaceholder?: string;
     documentObjectID?: string;
     optionalSearchFilters?: string;
     searchFilters?: string;
-    addResource: (resource: RelatedResource) => void;
+    addResource: (
+      resource: RelatedResource | RelatedHermesDocument | RelatedExternalLink
+    ) => void;
     allowAddingExternalLinks?: boolean;
   };
   Blocks: {
@@ -114,13 +116,13 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   }
 
   protected get relatedDocuments() {
-    return this.args.items.filter((resource) => {
+    return this.args.items?.filter((resource) => {
       return "googleFileID" in resource;
     }) as RelatedHermesDocument[];
   }
 
   protected get relatedLinks() {
-    return this.args.items.filter((resource) => {
+    return this.args.items?.filter((resource) => {
       return "url" in resource;
     }) as RelatedExternalLink[];
   }

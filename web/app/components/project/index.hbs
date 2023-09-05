@@ -56,68 +56,78 @@
   <div
     class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
   >
-    <div
-      class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-faint"
+    <RelatedResources
+      @allowAddingExternalLinks={{false}}
+      @items={{@project.documents}}
+      @addResource={{this.addDocument}}
     >
-      <div class="w-full px-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-body-100 font-semibold">
-            Documents
-          </h3>
-          <Hds::Button
-            @text="Add a document"
-            @size="small"
-            @color="secondary"
-            @icon="plus"
-            {{on "click" this.showModal}}
-            @isIconOnly={{true}}
-          />
+      <:header as |rr|>
+        <div
+          class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-faint"
+        >
+          <div class="w-full px-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-body-100 font-semibold">
+                Documents
+              </h3>
+              <Hds::Button
+                @text="Add a document"
+                @size="small"
+                @color="secondary"
+                @icon="plus"
+                {{on "click" rr.showModal}}
+                @isIconOnly={{true}}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    {{#if @project.documents}}
-      <ul class="divide-y divide-color-border-primary">
-        {{#each @project.documents as |document|}}
-          <li class="group">
-            <LinkTo
-              @route="authenticated.document"
-              @model={{document.objectID}}
-              class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
-            >
-              <div class="flex w-full items-center justify-between px-4">
-                <div class="flex items-center">
-                  <Person::Avatar
-                    @email="{{get document.owners 0}}"
-                    @size="small"
-                    class="mr-2"
-                  />
-                  <h4 class="text-display-200 font-semibold">
-                    {{document.title}}
-                  </h4>
-                </div>
-                <div class="flex space-x-1">
-                  <Doc::State
-                    @hideProgress={{true}}
-                    @state={{document.status}}
-                  />
-                  <Hds::Badge
-                    @text="{{document.product}}"
-                    @icon={{or (get-product-id document.product) undefined}}
-                  />
-                  <Hds::Badge @text={{document.docType}} />
-                </div>
-              </div>
-            </LinkTo>
-          </li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <div
-        class="text-color-foreground w-full-faint flex h-12 items-center justify-center text-color-foreground-faint opacity-70"
-      >
-        None
-      </div>
-    {{/if}}
+      </:header>
+      <:list>
+        {{#if @project.documents}}
+          <ul class="divide-y divide-color-border-primary">
+            {{#each @project.documents as |document|}}
+              <li class="group">
+                <LinkTo
+                  @route="authenticated.document"
+                  @model={{document.googleFileID}}
+                  class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
+                >
+                  <div class="flex w-full items-center justify-between px-4">
+                    <div class="flex items-center">
+                      <Person::Avatar
+                        @email="{{document.owner}}"
+                        @size="small"
+                        class="mr-2"
+                      />
+                      <h4 class="text-display-200 font-semibold">
+                        {{document.title}}
+                      </h4>
+                    </div>
+                    <div class="flex space-x-1">
+                      <Doc::State
+                        @hideProgress={{true}}
+                        @state={{document.status}}
+                      />
+                      <Hds::Badge
+                        @text="{{document.product}}"
+                        @icon={{or (get-product-id document.product) undefined}}
+                      />
+                      <Hds::Badge @text={{document.type}} />
+                    </div>
+                  </div>
+                </LinkTo>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <div
+            class="text-color-foreground w-full-faint flex h-12 items-center justify-center text-color-foreground-faint opacity-70"
+          >
+            None
+          </div>
+        {{/if}}
+      </:list>
+    </RelatedResources>
   </div>
 
   {{! PROJECTS }}

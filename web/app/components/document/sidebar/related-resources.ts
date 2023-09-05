@@ -17,7 +17,7 @@ import { SearchOptions } from "instantsearch.js";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
-enum RelatedResourceSelector {
+export enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
   HermesDocument = ".hermes-document",
 }
@@ -35,6 +35,9 @@ export interface RelatedHermesDocument {
   type: string;
   documentNumber: string;
   sortOrder: number;
+  product?: string;
+  owner?: string;
+  status?: string;
 }
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
