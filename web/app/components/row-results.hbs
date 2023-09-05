@@ -29,10 +29,9 @@
           </:head>
           <:body>
             {{#each @docs as |doc|}}
-              {{log "doc" doc}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
-                @created={{doc.created}}
+                @createdDate={{doc.created}}
                 @docID="{{doc.objectID}}"
                 @docNumber="{{doc.docNumber}}"
                 @docType="{{doc.docType}}"

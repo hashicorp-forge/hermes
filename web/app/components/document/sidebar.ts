@@ -83,8 +83,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Otherwise use the passed-in isDraft property.
    */
   get isDraft() {
-    console.log("draft was published: ", this.draftWasPublished);
-    console.log("isDraft: ", this.args.document?.isDraft);
     return this.draftWasPublished ? false : this.args.document?.isDraft;
   }
 
