@@ -5,7 +5,6 @@ export interface HermesDocument {
 
   status: string;
   product?: string;
-  modifiedAgo: string;
   modifiedTime: number;
   created: string; // E.g., "Aug 15, 2032"
   createdTime: number;

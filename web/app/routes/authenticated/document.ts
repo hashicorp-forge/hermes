@@ -18,6 +18,7 @@ import { HermesDocument, HermesUser } from "hermes/types/document";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
+import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -40,6 +41,8 @@ export default class DocumentRoute extends Route {
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
   @service declare router: RouterService;
+
+  declare controller: AuthenticatedDocumentController;
 
   // Ideally we'd refresh the model when the draft query param changes, but
   // because of a suspected bug in Ember, we can't do that.
@@ -64,6 +67,7 @@ export default class DocumentRoute extends Route {
     let doc = {};
     let draftFetched = false;
 
+    console.log("params.draft", params.draft);
     // Get doc data from the app backend.
     if (params.draft) {
       try {
@@ -77,7 +81,6 @@ export default class DocumentRoute extends Route {
             },
           })
           .then((r) => r?.json());
-
         (doc as HermesDocument).isDraft = params.draft;
         draftFetched = true;
       } catch (err) {
@@ -107,6 +110,7 @@ export default class DocumentRoute extends Route {
           .then((r) => r?.json());
 
         (doc as HermesDocument).isDraft = false;
+        console.log("isDraft?", (doc as HermesDocument).isDraft);
       } catch (err) {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
@@ -165,6 +169,8 @@ export default class DocumentRoute extends Route {
       }
     }
 
+    console.log("typedDoc", typedDoc);
+
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")
       .then((r) => r?.json());
@@ -174,7 +180,7 @@ export default class DocumentRoute extends Route {
     );
 
     return RSVP.hash({
-      typedDoc,
+      doc: typedDoc,
       docType,
     });
   }
@@ -193,14 +199,11 @@ export default class DocumentRoute extends Route {
           transition.from.params.document_id !==
           transition.to.params.document_id
         ) {
-          // @ts-ignore
-
           this.controller.set("modelIsChanging", true);
 
           htmlElement(".sidebar-body").scrollTop = 0;
 
           schedule("afterRender", () => {
-            // @ts-ignore
             this.controller.set("modelIsChanging", false);
           });
         }

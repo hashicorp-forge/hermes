@@ -37,20 +37,6 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
       "recently viewed docs retrieved and trimmed to 4"
     );
 
-    this.recentDocs.all?.forEach((recentDoc: RecentlyViewedDoc) => {
-      /**
-       * The Mirage factory sets the modifiedTime to 1 (1970),
-       * while we set our MockDate to 2000. That's obviously a 30 year difference,
-       * but our `timeAgo` function is inexact, assuming 28-day months, so it computes
-       * the difference as 32 years.
-       */
-      assert.equal(
-        recentDoc.doc.modifiedAgo,
-        "Modified 32 years ago",
-        "modifiedAgo property is added"
-      );
-    });
-
     MockDate.reset();
   });
 });
