@@ -8,7 +8,7 @@ interface DocTileComponentSignature {
     docNumber?: string;
     isResult?: boolean;
     isDraft?: boolean;
-    modifiedTime?: number;
+    modifiedTime: number;
     owner?: string;
     productArea?: string;
     snippet?: string;
