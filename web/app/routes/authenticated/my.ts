@@ -38,7 +38,7 @@ export default class AuthenticatedMyRoute extends Route {
   private createDraftURLSearchParams(): URLSearchParams {
     return new URLSearchParams(
       Object.entries({
-        hitsPerPage: 1000,
+        hitsPerPage: 12,
         maxValuesPerFacet: 1,
         page: 0,
         ownerEmail: this.authenticatedUser.info.email,
