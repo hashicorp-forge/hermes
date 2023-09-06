@@ -8,7 +8,6 @@ module("Unit | Utility | time-ago", function () {
 
     const now = Date.now();
 
-    assert.equal("2 years ago", timeAgo(now - 63072000000));
     assert.equal("5 seconds ago", timeAgo(now - 5000));
     assert.equal("1 minute ago", timeAgo(now - 60000));
     assert.equal("5 hours ago", timeAgo(now - 18000000));

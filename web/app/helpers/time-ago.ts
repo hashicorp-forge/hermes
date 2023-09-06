@@ -8,13 +8,11 @@ export interface TimeAgoHelperSignature {
   Return: string;
 }
 
-const timeAgoHelper = helper<TimeAgoHelperSignature>(([time]: [number]) => {
-  // if the time is in seconds, convert to milliseconds
-  if (time < 10000000000) {
-    time = time * 1000;
+const timeAgoHelper = helper<TimeAgoHelperSignature>(
+  ([secondsAgo]: [number]) => {
+    return `${timeAgo(secondsAgo)}`;
   }
-  return `${timeAgo(time)}`;
-});
+);
 
 export default timeAgoHelper;
 

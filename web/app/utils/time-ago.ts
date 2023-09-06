@@ -1,6 +1,6 @@
-export default function timeAgo(date: number) {
+export default function timeAgo(timeInSeconds: number) {
   const now = Date.now();
-  const before = new Date(date).getTime();
+  const before = new Date(timeInSeconds * 1000).getTime();
   const elapsed = now - before;
 
   const elapsedSeconds = elapsed / 1000;

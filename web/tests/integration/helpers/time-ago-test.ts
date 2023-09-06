@@ -15,10 +15,10 @@ module("Integration | Helper | time-ago", function (hooks) {
 
   test("it computes the time ago", async function (assert) {
     MockDate.set("2000-01-01T06:00:00.000-07:00");
-    const now = Date.now();
-    const fiveSecondsAgo = now - 5000;
-    const sevenMonthsAgo = now - 18144000000;
-    const twoYearsAgo = now - 63072000000;
+    const now = Date.now() / 1000;
+    const fiveSecondsAgo = now - 5;
+    const twoYearsAgo = now - 63072000;
+    const sevenMonthsAgo = now - 18144000;
 
     this.set("fiveSecondsAgo", fiveSecondsAgo);
     this.set("twoYearsAgo", twoYearsAgo);
