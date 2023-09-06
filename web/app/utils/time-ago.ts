@@ -9,8 +9,8 @@ export default function timeAgo(timeInSeconds: number) {
   const now = Date.now();
   const before = new Date(timeInSeconds * 1000).getTime();
   const elapsed = now - before;
-
   const elapsedSeconds = elapsed / 1000;
+
   if (elapsedSeconds < 2) {
     return "1 second ago";
   }
