@@ -2,7 +2,7 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
-import SessionService from "hermes/services/_session";
+import SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service("config") declare configSvc: ConfigService;

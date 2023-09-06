@@ -5,7 +5,7 @@ import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
-import SessionService from "./_session";
+import SessionService from "./session";
 
 export interface AuthenticatedUser {
   name: string;

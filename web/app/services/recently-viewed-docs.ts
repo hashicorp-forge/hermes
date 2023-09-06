@@ -6,9 +6,6 @@ import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
-// @ts-ignore - not yet typed
-import timeAgo from "hermes/utils/time-ago";
-
 type IndexedDoc = {
   id: string;
   isDraft: boolean;
@@ -86,12 +83,6 @@ export default class RecentlyViewedDocsService extends Service {
        */
       docResponses.forEach((response) => {
         if (response.status == "fulfilled") {
-          let recentlyViewed = response.value as RecentlyViewedDoc;
-          if (recentlyViewed.doc.modifiedTime) {
-            recentlyViewed.doc.modifiedAgo = `Modified ${timeAgo(
-              new Date(recentlyViewed.doc.modifiedTime * 1000)
-            )}`;
-          }
           newAll.push(response.value);
         }
       });

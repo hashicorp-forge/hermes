@@ -40,11 +40,9 @@
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
-        {{#if @modifiedAgo}}
-          <p class="text-body-100 text-color-foreground-faint">
-            {{@modifiedAgo}}
-          </p>
-        {{/if}}
+        <p class="text-body-100 text-color-foreground-faint">
+          {{time-ago @modifiedTime}}
+        </p>
       </div>
       {{#if (and @isResult @snippet)}}
         <Doc::Snippet @snippet={{@snippet}} class="mt-2" />

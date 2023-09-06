@@ -14,7 +14,7 @@ import {
   FacetRecord,
   FacetRecords,
 } from "hermes/types/facets";
-import SessionService from "./_session";
+import SessionService from "./session";
 
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
