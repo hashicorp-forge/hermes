@@ -1,9 +1,6 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-// @ts-ignore
-import timeAgo from "hermes/utils/time-ago";
 import RSVP from "rsvp";
-import parseDate from "hermes/utils/parse-date";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
 import { GoogleUser } from "hermes/components/inputs/people-select";
@@ -15,7 +12,6 @@ import SessionService from "hermes/services/session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument, HermesUser } from "hermes/types/document";
-import { DocumentsRouteParams } from "hermes/types/document-routes";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";

@@ -1,8 +1,6 @@
 import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import RecentlyViewedDocsService, {
-  RecentlyViewedDoc,
-} from "hermes/services/recently-viewed-docs";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
 import MockDate from "mockdate";

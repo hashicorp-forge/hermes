@@ -8,10 +8,11 @@ export interface TimeAgoHelperSignature {
   Return: string;
 }
 
-const timeAgoHelper = helper<TimeAgoHelperSignature>(([time]: [number]) => {
-  time = time * 1000;
-  return `${timeAgo(time)}`;
-});
+const timeAgoHelper = helper<TimeAgoHelperSignature>(
+  ([secondsAgo]: [number]) => {
+    return `${timeAgo(secondsAgo)}`;
+  }
+);
 
 export default timeAgoHelper;
 
