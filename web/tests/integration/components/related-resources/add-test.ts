@@ -10,6 +10,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
+import { RelatedResourcesScope } from "hermes/components/related-resources";
 
 const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
 const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
@@ -18,14 +19,13 @@ const LIST_ITEM_SELECTOR = ".x-dropdown-list-item";
 const DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const NO_MATCHES_SELECTOR = ".related-resources-modal-body-header";
 
-interface DocumentSidebarRelatedResourcesAddTestContext
-  extends MirageTestContext {
+interface RelatedResourcesAddTestContext extends MirageTestContext {
   noop: () => void;
   search: (dd: XDropdownListAnchorAPI | null, query: string) => Promise<void>;
   getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
   shownDocuments: Record<string, HermesDocument>;
-  allowAddingExternalLinks: boolean;
   searchIsRunning: boolean;
+  scope: `${RelatedResourcesScope}`;
 }
 
 module(
@@ -34,9 +34,7 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    hooks.beforeEach(function (
-      this: DocumentSidebarRelatedResourcesAddTestContext
-    ) {
+    hooks.beforeEach(function (this: RelatedResourcesAddTestContext) {
       this.server.createList("document", 10);
       this.set("noop", () => {});
 
@@ -93,14 +91,15 @@ module(
       });
     });
 
-    test("it renders correctly (initial load)", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-        <Document::Sidebar::RelatedResources::Add
+    test("it renders correctly (initial load)", async function (this: RelatedResourcesAddTestContext, assert) {
+      await render<RelatedResourcesAddTestContext>(hbs`
+        <RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @addResource={{this.noop}}
           @onClose={{this.noop}}
           @algoliaResults={{this.shownDocuments}}
+          @scope="documents"
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
@@ -118,15 +117,15 @@ module(
         .hasAttribute("placeholder", "Test placeholder");
     });
 
-    test("it conditionally renders a list header", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-        <Document::Sidebar::RelatedResources::Add
+    test("it conditionally renders a list header", async function (this: RelatedResourcesAddTestContext, assert) {
+      await render<RelatedResourcesAddTestContext>(hbs`
+        <RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
           @algoliaResults={{this.shownDocuments}}
-          @allowAddingExternalLinks={{true}}
+          @scope="all"
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
@@ -151,7 +150,7 @@ module(
       assert.dom(LIST_HEADER_SELECTOR).doesNotExist();
     });
 
-    test("it renders a loading spinner", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+    test("it renders a loading spinner", async function (this: RelatedResourcesAddTestContext, assert) {
       // The `search` task ultimately determines the loading state.
       // Here, we set it to resolve a promise after a timeout to
       // allow us to capture its `isRunning` state.
@@ -163,13 +162,14 @@ module(
         }) as Promise<void>;
       });
 
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-        <Document::Sidebar::RelatedResources::Add
+      await render<RelatedResourcesAddTestContext>(hbs`
+        <RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
           @algoliaResults={{this.shownDocuments}}
+          @scope="documents"
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
@@ -181,17 +181,15 @@ module(
       assert.dom("[data-test-add-related-resource-spinner]").exists();
     });
 
-    test("it renders a 'no matches' message when there are no results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
-      this.set("allowAddingExternalLinks", false);
-
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-        <Document::Sidebar::RelatedResources::Add
+    test("it renders a 'no matches' message when there are no results", async function (this: RelatedResourcesAddTestContext, assert) {
+      await render<RelatedResourcesAddTestContext>(hbs`
+        <RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
           @algoliaResults={{this.shownDocuments}}
-          @allowAddingExternalLinks={{this.allowAddingExternalLinks}}
+          @scope="documents"
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}
@@ -206,32 +204,17 @@ module(
       assert
         .dom(NO_MATCHES_SELECTOR)
         .exists('shows "No matches" when there are no results');
-
-      this.set("allowAddingExternalLinks", true);
-
-      await fillIn(SEARCH_INPUT_SELECTOR, "foobar");
-
-      assert
-        .dom(NO_MATCHES_SELECTOR)
-        .exists('shows "No matches" when there are no results');
-
-      await fillIn(SEARCH_INPUT_SELECTOR, "https://www.hashicorp.com");
-
-      assert
-        .dom(NO_MATCHES_SELECTOR)
-        .doesNotExist(
-          'does not show "No matches" when adding an external link'
-        );
     });
 
-    test("it returns query results", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-          <Document::Sidebar::RelatedResources::Add
+    test("it returns query results", async function (this: RelatedResourcesAddTestContext, assert) {
+      await render<RelatedResourcesAddTestContext>(hbs`
+          <RelatedResources::Add
             @headerTitle="Test title"
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
             @addResource={{this.noop}}
             @algoliaResults={{this.shownDocuments}}
+            @scope="documents"
             @objectID="test"
             @relatedDocuments={{array}}
             @relatedLinks={{array}}
@@ -248,14 +231,15 @@ module(
       assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 1 });
     });
 
-    test("it conditionally enables keyboard navigation", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-          <Document::Sidebar::RelatedResources::Add
+    test("it conditionally enables keyboard navigation", async function (this: RelatedResourcesAddTestContext, assert) {
+      await render<RelatedResourcesAddTestContext>(hbs`
+          <RelatedResources::Add
             @headerTitle="Test title"
             @inputPlaceholder="Test placeholder"
             @onClose={{this.noop}}
             @addResource={{this.noop}}
             @algoliaResults={{this.shownDocuments}}
+            @scope="documents"
             @objectID="test"
             @relatedDocuments={{array}}
             @relatedLinks={{array}}
@@ -294,16 +278,17 @@ module(
         .hasAttribute("aria-selected");
     });
 
-    test("it shows a loading icon while search is running", async function (this: DocumentSidebarRelatedResourcesAddTestContext, assert) {
+    test("it shows a loading icon while search is running", async function (this: RelatedResourcesAddTestContext, assert) {
       this.set("searchIsRunning", false);
 
-      await render<DocumentSidebarRelatedResourcesAddTestContext>(hbs`
-        <Document::Sidebar::RelatedResources::Add
+      await render<RelatedResourcesAddTestContext>(hbs`
+        <RelatedResources::Add
           @headerTitle="Test title"
           @inputPlaceholder="Test placeholder"
           @onClose={{this.noop}}
           @addResource={{this.noop}}
           @algoliaResults={{this.shownDocuments}}
+          @scope="documents"
           @objectID="test"
           @relatedDocuments={{array}}
           @relatedLinks={{array}}

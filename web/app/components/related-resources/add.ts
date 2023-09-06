@@ -17,8 +17,9 @@ import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
+import { RelatedResourcesScope } from "../related-resources";
 
-interface DocumentSidebarRelatedResourcesAddComponentSignature {
+interface RelatedResourcesAddComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
@@ -34,12 +35,13 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
       options?: SearchOptions
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
-    allowAddingExternalLinks?: boolean;
+    // TODO: remove
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
     searchIsRunning?: boolean;
     resetAlgoliaResults: () => void;
+    scope: `${RelatedResourcesScope}`;
   };
   Blocks: {
     default: [];
@@ -74,7 +76,7 @@ enum FirstPartyURLFormat {
   FullURL = "fullURL",
 }
 
-export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
+export default class RelatedResourcesAddComponent extends Component<RelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
@@ -149,6 +151,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     return this.args.algoliaResults;
   }
 
+  private allowAddingExternalLinks =
+    this.args.scope === RelatedResourcesScope.ExternalLinks ||
+    this.args.scope === RelatedResourcesScope.All;
+
+  private scopeIsExternalLinks =
+    this.args.scope === RelatedResourcesScope.ExternalLinks;
+
   /**
    * Whether the query is an external URL.
    * Used as a shorthand check when determining layout and behavior.
@@ -186,10 +195,22 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True unless the query is a URL and adding external links is allowed.
    */
   protected get listIsShown(): boolean {
-    if (this.args.allowAddingExternalLinks) {
+    if (this.scopeIsExternalLinks) {
+      return false;
+    }
+
+    if (this.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     } else {
       return true;
+    }
+  }
+
+  protected get externalResourceFormIsShown() {
+    if (this.args.scope === RelatedResourcesScope.ExternalLinks) {
+      return true;
+    } else {
+      return this.allowAddingExternalLinks && this.queryIsExternalURL;
     }
   }
 
@@ -212,6 +233,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True when there's results to show.
    */
   protected get listHeaderIsShown(): boolean {
+    if (this.scopeIsExternalLinks) {
+      return false;
+    }
+
     if (this.noMatchesFound) {
       return false;
     }
@@ -222,8 +247,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       }
       return !this.linkIsDuplicate;
     }
-
-    if (this.args.allowAddingExternalLinks) {
+    if (this.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     }
 
@@ -247,7 +271,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     if (this.args.searchErrorIsShown) {
       return false;
     }
-    if (this.args.allowAddingExternalLinks) {
+    // TODO: replace with `scope`
+    if (this.allowAddingExternalLinks) {
       return this.queryIsExternalURL || this.queryIsEmpty;
     } else {
       return false;
@@ -434,8 +459,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
             return;
         }
       }
-
-      if (this.args.allowAddingExternalLinks) {
+      // TODO: replace with `scope`
+      if (this.allowAddingExternalLinks) {
         this.queryType = RelatedResourceQueryType.ExternalLink;
         return;
       }
@@ -551,8 +576,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const docType = urlParts[urlParts.length - 2];
     const docNumber = urlParts[urlParts.length - 1];
     const hasTypeAndNumber = docType && docNumber;
-
-    if (this.args.allowAddingExternalLinks) {
+    // TODO: replace with `scope`
+    if (this.allowAddingExternalLinks) {
       if (!hasTypeAndNumber) {
         handleAsExternalLink();
         return;
@@ -575,7 +600,8 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const firstResult = Object.values(this.algoliaResults)[0] as HermesDocument;
 
     if (this.noMatchesFound) {
-      if (this.args.allowAddingExternalLinks) {
+      // TODO: replace with `scope`
+      if (this.allowAddingExternalLinks) {
         handleAsExternalLink();
         return;
       }
@@ -628,6 +654,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::Sidebar::RelatedResources::Add": typeof DocumentSidebarRelatedResourcesAddComponent;
+    "RelatedResources::Add": typeof RelatedResourcesAddComponent;
   }
 }

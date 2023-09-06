@@ -3,8 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
-interface DocumentSidebarRelatedResourcesAddExternalResourceTestContext
-  extends TestContext {
+interface RelatedResourcesAddExternalResourceTestContext extends TestContext {
   onSubmit: () => void;
   onInput: () => void;
 }
@@ -14,12 +13,12 @@ module(
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test("it renders as expected", async function (this: DocumentSidebarRelatedResourcesAddExternalResourceTestContext, assert) {
+    test("it renders as expected", async function (this: RelatedResourcesAddExternalResourceTestContext, assert) {
       this.set("onSubmit", () => {});
       this.set("onInput", () => {});
 
-      await render<DocumentSidebarRelatedResourcesAddExternalResourceTestContext>(hbs`
-      <Document::Sidebar::RelatedResources::Add::ExternalResource
+      await render<RelatedResourcesAddExternalResourceTestContext>(hbs`
+      <RelatedResources::Add::ExternalResource
         @title="Test"
         @url="https://example.com"
         @onSubmit={{this.onSubmit}}

@@ -22,34 +22,17 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
    * A locally tracked URL property. Starts as the passed-in value;
    * updated when the URL input-value changes.
    */
-  @tracked protected url = this.args.resource.url;
+  @tracked protected url = this.args.resource ? this.args.resource.url : "";
 
   /**
    * The title of the resource. If the name is the same as the URL,
    * we treat it like it's an empty value so the placeholder text shows.
    */
-  @tracked protected title =
-    this.args.resource.name === this.args.resource.url
-      ? ""
-      : this.args.resource.name;
-
-  /**
-   * Whether the error warning is shown.
-   * True when the URL is invalid.
-   */
-  @tracked protected urlErrorMessageIsShown = false;
-
-  /**
-   * Whether the error warning is shown.
-   * True if the title is empty on submit.
-   */
-  @tracked protected titleErrorMessageIsShown = false;
-
-  /**
-   * A local reference to the form element.
-   * Registered when inserted.
-   */
-  @tracked private _form: HTMLFormElement | null = null;
+  @tracked protected title = !this.args.resource
+    ? ""
+    : this.args.resource.name === this.args.resource.url
+    ? ""
+    : this.args.resource.name;
 
   /**
    * Whether the URL is valid, as determined by the `isValidURL` utility.
@@ -58,12 +41,16 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   @tracked protected urlIsValid = true;
 
   /**
-   * The action to register the form element locally.
-   * Called when the form is rendered.
+   * Whether the error warning is shown.
+   * True if the title is empty on submit.
    */
-  @action protected registerForm(form: HTMLFormElement): void {
-    this._form = form;
-  }
+  @tracked protected titleErrorIsShown = false;
+
+  /**
+   * A local reference to the form element.
+   * Registered when inserted.
+   */
+  @tracked private _form: HTMLFormElement | null = null;
 
   /**
    * An asserted-true reference to the form element.
@@ -71,6 +58,14 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   protected get form(): HTMLFormElement {
     assert("this._form must exist", this._form);
     return this._form;
+  }
+
+  /**
+   * The action to register the form element locally.
+   * Called when the form is rendered.
+   */
+  @action protected registerForm(form: HTMLFormElement): void {
+    this._form = form;
   }
 
   /**
@@ -100,27 +95,23 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   @action private validateURL() {
     this.urlIsValid = isValidURL(this.url);
   }
-  /**
-   * The action called to save the resource if its URL is valid.
-   * Formats the resource and calls the passed-in `onSave` action.
-   */
-  @action protected maybeSaveResource(e: Event) {
-    // prevent the form from submitting on enter
-    e.preventDefault();
 
-    let newResource = this.args.resource;
-    newResource.url = this.url;
-    newResource.name = this.title;
-
+  @action maybeSave() {
     this.validateURL();
 
     if (!this.title) {
-      this.titleErrorMessageIsShown = true;
+      this.titleErrorIsShown = true;
       return;
     }
 
     if (this.urlIsValid) {
-      this.args.onSave(newResource);
+      if (this.args.onSave) {
+        this.args.onSave({
+          sortOrder: this.args.resource.sortOrder,
+          name: this.title,
+          url: this.url,
+        });
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 
-interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
+interface RelatedResourcesAddExternalResourceSignature {
   Element: null;
   Args: {
     title: string;
@@ -12,7 +12,7 @@ interface DocumentSidebarRelatedResourcesAddExternalResourceSignature {
   };
 }
 
-export default class DocumentSidebarRelatedResourcesAddExternalResource extends Component<DocumentSidebarRelatedResourcesAddExternalResourceSignature> {
+export default class RelatedResourcesAddExternalResource extends Component<RelatedResourcesAddExternalResourceSignature> {
   /**
    * Whether an error message should be shown.
    * True if the title is empty or the URL is a duplicate.
@@ -24,6 +24,6 @@ export default class DocumentSidebarRelatedResourcesAddExternalResource extends 
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::Sidebar::RelatedResources::Add::ExternalResource": typeof DocumentSidebarRelatedResourcesAddExternalResource;
+    "RelatedResources::Add::ExternalResource": typeof RelatedResourcesAddExternalResource;
   }
 }
