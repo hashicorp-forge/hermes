@@ -1,3 +1,10 @@
+/**
+ * A simplified "time ago" calculation, based on 28-day months.
+ * Intended to give a rough estimate of how long ago something happened.
+ * Used by the `time-ago` helper to convert numeric timestamps to strings.
+ *
+ * TODO: Replace with something more precise.
+ */
 export default function timeAgo(timeInSeconds: number) {
   const now = Date.now();
   const before = new Date(timeInSeconds * 1000).getTime();
