@@ -28,6 +28,11 @@ interface DocumentRouteParams {
   draft: boolean;
 }
 
+interface DocumentRouteModel {
+  doc: HermesDocument;
+  docType: HermesDocumentType;
+}
+
 export default class DocumentRoute extends Route {
   @service("config") declare configSvcL: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
@@ -182,7 +187,7 @@ export default class DocumentRoute extends Route {
    * `modelIsChanging` property to remove and rerender the sidebar,
    * resetting its local state to reflect the new model data.
    */
-  afterModel(model: any, transition: any) {
+  afterModel(_model: DocumentRouteModel, transition: any) {
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (
