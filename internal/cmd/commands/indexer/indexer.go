@@ -105,6 +105,7 @@ func (c *Command) Run(args []string) int {
 		indexer.WithAlgoliaClient(algo),
 		indexer.WithBaseURL(cfg.BaseURL),
 		indexer.WithDatabase(db),
+		indexer.WithDocumentTypes(cfg.DocumentTypes.DocumentType),
 		indexer.WithDocumentsFolderID(cfg.GoogleWorkspace.DocsFolder),
 		indexer.WithDraftsFolderID(cfg.GoogleWorkspace.DraftsFolder),
 		indexer.WithGoogleWorkspaceService(goog),
