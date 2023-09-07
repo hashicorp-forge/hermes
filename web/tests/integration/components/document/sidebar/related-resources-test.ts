@@ -389,35 +389,6 @@ module(
         .doesNotExist("the add button is removed when the limit is reached");
     });
 
-    test("you can turn off the external link fallback", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
-      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
-        <Document::Sidebar::RelatedResources
-          @productArea={{this.document.product}}
-          @objectID={{this.document.objectID}}
-          @scope="documents"
-          @headerTitle="Test title"
-          @modalHeaderTitle="Add related resource"
-          @modalInputPlaceholder="Test placeholder"
-          @scrollContainer={{this.body}}
-        />
-      `);
-
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-
-      await fillIn(
-        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-        "http://test.com"
-      );
-
-      assert
-        .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
-        .doesNotExist("the external resource form is not shown");
-
-      assert
-        .dom(NO_RESOURCES_FOUND_SELECTOR)
-        .exists("the fallback message is shown");
-    });
-
     test("it calls the correct endpoint when editing a draft", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedExternalLink", {
         name: "Example",
