@@ -24,7 +24,7 @@ export default class RelatedResourcesAddFallbackExternalResource extends Compone
 
   @action protected onSubmit(e: Event) {
     e.preventDefault();
-    this.args.onSubmit?.();
+    this.args.onSubmit();
   }
 }
 

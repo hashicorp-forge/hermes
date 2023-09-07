@@ -1,5 +1,4 @@
 import { action } from "@ember/object";
-import { guidFor } from "@ember/object/internals";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { RelatedExternalLink } from "hermes/components/related-resources";
@@ -19,13 +18,6 @@ interface RelatedResourcesAddOrEditExternalResourceModalComponentSignature {
 }
 
 export default class RelatedResourcesAddOrEditExternalResourceModalComponent extends Component<RelatedResourcesAddOrEditExternalResourceModalComponentSignature> {
-  protected id = guidFor(this);
-  protected bodyID = `${this.id}-body`;
-  protected submitID = `${this.id}-submit`;
-
-  protected bodySelector = `#${this.bodyID}`;
-  protected submitSelector = `#${this.submitID}`;
-
   @tracked protected shouldValidateEagerly = false;
 
   /**

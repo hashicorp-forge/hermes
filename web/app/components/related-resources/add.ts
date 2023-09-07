@@ -152,11 +152,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   @tracked externalLinkTitleErrorIsShown = false;
 
   /**
-   * TODO: explain this
-   */
-  @tracked protected externalLinkFormIsRendered = false;
-
-  /**
    * The documents shown in the Algolia results list.
    */
   protected get algoliaResults(): Record<string, HermesDocument> {
@@ -291,13 +286,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     } else {
       return false;
     }
-  }
-
-  /**
-   * TODO: Explain this
-   */
-  @action protected renderExternalLinkForm() {
-    this.externalLinkFormIsRendered = true;
   }
 
   /**
