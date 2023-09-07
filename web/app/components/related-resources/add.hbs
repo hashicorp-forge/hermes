@@ -10,14 +10,12 @@
     </M.Header>
     <M.Body>
       {{#if this.scopeIsExternalLinks}}
-        {{! FIXME }}
         <RelatedResources::ExternalResourceForm
-          @url="todourl.com"
-          @title="todo title"
+          @url={{this.query}}
+          @title={{this.externalLinkTitle}}
           @onSave={{this.onExternalLinkSubmit}}
           @updateFormValues={{this.updateFormValues}}
-          @urlIsValid={{true}}
-          {{! TODO: handle urlIsValid}}
+          @urlIsValid={{this.queryIsURL}}
         />
       {{else}}
         <X::DropdownList

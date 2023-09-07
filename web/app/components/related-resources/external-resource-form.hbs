@@ -1,8 +1,13 @@
-<form class="px-6 pb-6" {{on "submit" this.onSave}} ...attributes>
+<form
+  class="px-6 pb-6"
+  {{did-insert this.registerForm}}
+  {{on "submit" this.maybeSubmit}}
+  ...attributes
+>
   <div class="mb-4">
     <Hds::Form::TextInput::Field
       {{on "input" this.updateFormValues}}
-      @value={{@title}}
+      @value={{this.title}}
       placeholder="Enter a title"
       required={{true}}
       name="title"
@@ -10,7 +15,7 @@
       as |F|
     >
       <F.Label>Title</F.Label>
-      {{#if @titleErrorIsShown}}
+      {{#if this.titleErrorIsShown}}
         <F.Error class="mt-3 mb-3" data-test-external-resource-title-error>
           A title is required.
         </F.Error>
@@ -20,19 +25,27 @@
   <Hds::Form::TextInput::Field
     data-test-external-resource-url-input
     {{on "input" this.updateFormValues}}
-    @value={{@url}}
+    @value={{this.url}}
     required={{true}}
     name="url"
     as |F|
   >
     <F.Label>URL</F.Label>
     {{! TODO: make this more accompanying to External-scoped components }}
-    {{#unless @urlIsValid}}
+    {{#unless this.urlIsValid}}
       <F.Error class="mt-3">
         A valid URL is required.
       </F.Error>
     {{/unless}}
   </Hds::Form::TextInput::Field>
+
   {{! This adds enter-to-submit functionality }}
   <input type="submit" class="hidden" />
+
+  {{#if (has-block "submit")}}
+    {{yield
+      (hash submit=this.maybeSubmit formIsValid=this.formIsValid)
+      to="submit"
+    }}
+  {{/if}}
 </form>

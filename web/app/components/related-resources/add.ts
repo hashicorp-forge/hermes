@@ -81,6 +81,9 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
 
+  private scopeIsExternalLinks =
+    this.args.scope === RelatedResourcesScope.ExternalLinks;
+
   /**
    * The query type, determined onInput. Dictates how the query is handled.
    */
@@ -110,7 +113,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * Whether the query is a URL and not a document search.
    * True if the text entered is deemed valid by the isValidURL utility.
    */
-  @tracked protected queryIsURL = false;
+  @tracked protected queryIsURL = this.scopeIsExternalLinks ? true : false;
 
   /**
    * The DOM element of the search input. Receives focus when inserted.
@@ -154,9 +157,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   private allowAddingExternalLinks =
     this.args.scope === RelatedResourcesScope.ExternalLinks ||
     this.args.scope === RelatedResourcesScope.All;
-
-  private scopeIsExternalLinks =
-    this.args.scope === RelatedResourcesScope.ExternalLinks;
 
   /**
    * Whether the query is an external URL.
@@ -271,7 +271,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     if (this.args.searchErrorIsShown) {
       return false;
     }
-    // TODO: replace with `scope`
     if (this.allowAddingExternalLinks) {
       return this.queryIsExternalURL || this.queryIsEmpty;
     } else {
@@ -462,7 +461,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
             return;
         }
       }
-      // TODO: replace with `scope`
       if (this.allowAddingExternalLinks) {
         this.queryType = RelatedResourceQueryType.ExternalLink;
         return;
@@ -579,7 +577,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     const docType = urlParts[urlParts.length - 2];
     const docNumber = urlParts[urlParts.length - 1];
     const hasTypeAndNumber = docType && docNumber;
-    // TODO: replace with `scope`
     if (this.allowAddingExternalLinks) {
       if (!hasTypeAndNumber) {
         handleAsExternalLink();
@@ -603,7 +600,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     const firstResult = Object.values(this.algoliaResults)[0] as HermesDocument;
 
     if (this.noMatchesFound) {
-      // TODO: replace with `scope`
       if (this.allowAddingExternalLinks) {
         handleAsExternalLink();
         return;

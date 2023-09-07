@@ -8,26 +8,15 @@
       Edit resource
     </M.Header>
     <M.Body>
-      <RelatedResources::ExternalResourceForm
-        {{did-insert this.registerForm}}
-        @url={{this.url}}
-        @title={{this.title}}
-        @onSave={{this.maybeSave}}
-        @resource={{@resource}}
-        @urlIsValid={{this.urlIsValid}}
-        @updateFormValues={{this.updateFormValues}}
-        @titleErrorIsShown={{this.titleErrorIsShown}}
-      />
+      <div id="{{this.id}}-body">
+        {{! Content placed via in-element }}
+      </div>
     </M.Body>
     <M.Footer>
       <Hds::ButtonSet>
-        <Hds::Button
-          data-test-edit-related-resource-modal-save-button
-          @text="Save changes"
-          @color="primary"
-          {{! TODO: fix me }}
-          {{on "click" this.maybeSave}}
-        />
+        <span id="{{this.id}}-submit">
+          {{! Button placed via in-element }}
+        </span>
         <Hds::Button
           @text="Cancel"
           @color="secondary"
@@ -45,3 +34,26 @@
     </M.Footer>
   </Hds::Modal>
 {{/in-element}}
+
+{{#if this.formIsRendered}}
+  {{! TODO: explain this: }}
+  {{#in-element (html-element this.bodySelector) insertBefore=null}}
+    <RelatedResources::ExternalResourceForm
+      @onSave={{@onSave}}
+      @resource={{@resource}}
+    >
+      <:submit as |rr|>
+        {{#in-element (html-element this.submitSelector) insertBefore=null}}
+          <Hds::Button
+            data-test-edit-related-resource-modal-save-button
+            @text="Save changes"
+            @color="primary"
+            {{on "click" rr.submit}}
+          />
+        {{/in-element}}
+      </:submit>
+    </RelatedResources::ExternalResourceForm>
+  {{/in-element}}
+{{else}}
+  <div class="absolute top-0 left-0" {{did-insert this.renderForm}}></div>
+{{/if}}
