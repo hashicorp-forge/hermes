@@ -16,13 +16,13 @@ interface RelatedResourcesExternalResourceFormComponentSignature {
     submit: [
       rr: {
         submit: (e: Event) => void;
-        formIsValid: boolean;
       }
     ];
   };
 }
 
 export default class RelatedResourcesExternalResourceFormComponent extends Component<RelatedResourcesExternalResourceFormComponentSignature> {
+  @tracked protected shouldValidateEagerly = false;
   /**
    * A locally tracked URL property. Starts as the passed-in value;
    * updated when the URL input-value changes.
@@ -89,7 +89,9 @@ export default class RelatedResourcesExternalResourceFormComponent extends Compo
     this.title = title;
     this.url = url;
 
-    this.processURL();
+    if (this.shouldValidateEagerly) {
+      this.processURL();
+    }
   }
 
   /**
@@ -108,12 +110,13 @@ export default class RelatedResourcesExternalResourceFormComponent extends Compo
 
     if (!this.title) {
       this.titleErrorIsShown = true;
+      this.shouldValidateEagerly = true;
       return;
     }
 
     if (this.urlIsValid) {
       const sortOrder = this.args.resource ? this.args.resource.sortOrder : 1;
-      console.log("submitting", sortOrder, this.title, this.url);
+
       this.args.onSave({
         sortOrder,
         name: this.title,

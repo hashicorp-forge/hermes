@@ -1,4 +1,5 @@
 <form
+  data-test-external-resource-form
   class="px-6 pb-6"
   {{did-insert this.registerForm}}
   {{on "submit" this.maybeSubmit}}
@@ -6,6 +7,7 @@
 >
   <div class="mb-4">
     <Hds::Form::TextInput::Field
+      data-test-external-resource-form-title-input
       {{on "input" this.updateFormValues}}
       @value={{this.title}}
       placeholder="Enter a title"
@@ -43,9 +45,6 @@
   <input type="submit" class="hidden" />
 
   {{#if (has-block "submit")}}
-    {{yield
-      (hash submit=this.maybeSubmit formIsValid=this.formIsValid)
-      to="submit"
-    }}
+    {{yield (hash submit=this.maybeSubmit) to="submit"}}
   {{/if}}
 </form>

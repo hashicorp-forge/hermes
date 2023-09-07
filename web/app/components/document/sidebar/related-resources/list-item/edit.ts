@@ -18,8 +18,11 @@ interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
 
 export default class DocumentSidebarRelatedResourcesListItemEditComponent extends Component<DocumentSidebarRelatedResourcesListItemEditComponentSignature> {
   protected id = guidFor(this);
-  protected bodySelector = `#${this.id}-body`;
-  protected submitSelector = `#${this.id}-submit`;
+  protected bodyID = `${this.id}-body`;
+  protected submitID = `${this.id}-submit`;
+
+  protected bodySelector = `#${this.bodyID}`;
+  protected submitSelector = `#${this.submitID}`;
 
   @tracked protected formIsRendered = false;
 

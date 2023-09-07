@@ -10,13 +10,9 @@
     </M.Header>
     <M.Body>
       {{#if this.scopeIsExternalLinks}}
-        <RelatedResources::ExternalResourceForm
-          @url={{this.query}}
-          @title={{this.externalLinkTitle}}
-          @onSave={{this.onExternalLinkSubmit}}
-          @updateFormValues={{this.updateFormValues}}
-          @urlIsValid={{this.queryIsURL}}
-        />
+        <div id={{this.externalLinkFormBodyID}}>
+          {{! Positioned via in-element }}
+        </div>
       {{else}}
         <X::DropdownList
           data-test-add-related-resources-list
@@ -113,10 +109,9 @@
     {{#if this.scopeIsExternalLinks}}
       <M.Footer>
         <Hds::ButtonSet>
-          <Hds::Button
-            @text="Add link"
-            {{on "click" this.onExternalLinkSubmit}}
-          />
+          <span id={{this.externalLinkFormSubmitID}}>
+            {{! Positioned via in-element }}
+          </span>
           <Hds::Button
             @text="Cancel"
             @color="secondary"
@@ -127,3 +122,35 @@
     {{/if}}
   </Hds::Modal>
 {{/in-element}}
+
+{{! TODO: explain this }}
+{{#if this.scopeIsExternalLinks}}
+  {{#if this.externalLinkFormIsRendered}}
+    {{#in-element
+      (html-element this.externalLinkFormBodySelector)
+      insertBefore=null
+    }}
+      <RelatedResources::ExternalResourceForm
+        @onSave={{this.onExternalLinkSubmit}}
+      >
+        <:submit as |rr|>
+          {{#in-element
+            (html-element this.externalLinkFormSubmitSelector)
+            insertBefore=null
+          }}
+            <Hds::Button
+              data-test-add-external-resource-button
+              @text="Add link"
+              {{on "click" rr.submit}}
+            />
+          {{/in-element}}
+        </:submit>
+      </RelatedResources::ExternalResourceForm>
+    {{/in-element}}
+  {{else}}
+    <div
+      class="absolute left-0 top-0"
+      {{did-insert this.renderExternalLinkForm}}
+    ></div>
+  {{/if}}
+{{/if}}

@@ -413,6 +413,13 @@ module("Integration | Component | related-resources", function (hooks) {
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
         </:header>
+        <:list as |rr|>
+          <div class="list"/>
+            {{#each rr.items as |item|}}
+              {{!@glint-ignore}}
+              <div class="item">{{item.name}} - {{item.url}}</div>
+            {{/each}}
+        </:list>
       </RelatedResources>
     `);
 
@@ -421,8 +428,18 @@ module("Integration | Component | related-resources", function (hooks) {
     await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
 
     assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotExist();
+    assert.dom("[data-test-external-resource-form]").exists();
+    await fillIn("[data-test-external-resource-form-title-input]", "Example");
+    await fillIn(
+      "[data-test-external-resource-url-input]",
+      "https://example.com"
+    );
+
     await this.pauseTest();
-    // TODO: assert the form exists
+    await click("[data-test-add-external-resource-button");
+
+    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist();
+    assert.dom(".item").hasText("Example - https://example.com");
   });
 
   test("first-class links are recognized (full URL)", async function (this: RelatedResourcesComponentTestContext, assert) {

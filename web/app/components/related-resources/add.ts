@@ -18,6 +18,7 @@ import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
 import { RelatedResourcesScope } from "../related-resources";
+import { guidFor } from "@ember/object/internals";
 
 interface RelatedResourcesAddComponentSignature {
   Element: null;
@@ -84,6 +85,12 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   private scopeIsExternalLinks =
     this.args.scope === RelatedResourcesScope.ExternalLinks;
 
+  protected id = guidFor(this);
+  protected externalLinkFormBodyID = `${this.id}-body`;
+  protected externalLinkFormSubmitID = `${this.id}-submit`;
+  protected externalLinkFormBodySelector = `#${this.externalLinkFormBodyID}`;
+  protected externalLinkFormSubmitSelector = `#${this.externalLinkFormSubmitID}`;
+
   /**
    * The query type, determined onInput. Dictates how the query is handled.
    */
@@ -143,6 +150,11 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * True if the input is empty on submit.
    */
   @tracked externalLinkTitleErrorIsShown = false;
+
+  /**
+   * TODO: explain this
+   */
+  @tracked protected externalLinkFormIsRendered = false;
 
   /**
    * The documents shown in the Algolia results list.
@@ -279,6 +291,13 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   }
 
   /**
+   * TODO: Explain this
+   */
+  @action protected renderExternalLinkForm() {
+    this.externalLinkFormIsRendered = true;
+  }
+
+  /**
    * The action to disable keyboard navigation.
    * Called when the search input loses focus.
    */
@@ -298,22 +317,18 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * The action to run when the external link form is submitted.
    * Validates the title input, then adds the link, if it's not a duplicate.
    */
-  @action onExternalLinkSubmit() {
-    if (this.externalLinkTitle.length === 0) {
-      this.externalLinkTitleErrorIsShown = true;
-      return;
+  @action onExternalLinkSubmit(resource: RelatedExternalLink) {
+    if (!this.scopeIsExternalLinks) {
+      // The "externalLinkTitle" property is only used for fallback link.
+      if (this.externalLinkTitle.length === 0) {
+        this.externalLinkTitleErrorIsShown = true;
+        return;
+      }
     }
 
     if (!this.linkIsDuplicate) {
-      this.addRelatedExternalLink();
-      this.args.onClose();
+      this.addRelatedExternalLink(resource);
     }
-  }
-
-  @action protected updateFormValues() {
-    // TODO
-    console.error("TODO TODO");
-    // i guess this needs validation
   }
 
   /**
@@ -370,11 +385,11 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * The action to add an external link to a document.
    * Correctly formats the link data and saves it, unless it already exists.
    */
-  @action private addRelatedExternalLink() {
+  @action private addRelatedExternalLink(resource?: RelatedExternalLink) {
     let externalLink = {
-      url: this.query,
-      name: this.externalLinkTitle || this.query,
-      sortOrder: 1,
+      url: resource?.url ?? this.query,
+      name: resource?.name ?? (this.externalLinkTitle || this.query),
+      sortOrder: resource?.sortOrder ?? 1,
     };
 
     // see if this is already covered
@@ -417,7 +432,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   @action protected onInputKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
-        this.onExternalLinkSubmit();
+        this.addRelatedExternalLink();
         return;
       }
     }
