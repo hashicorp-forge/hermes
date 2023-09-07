@@ -6,7 +6,6 @@
   @modalInputPlaceholder={{@modalInputPlaceholder}}
   @addResource={{this.addResource}}
   @documentObjectID={{@objectID}}
-  @allowAddingExternalLinks={{@allowAddingExternalLinks}}
 >
   <:header as |rr|>
     <Document::Sidebar::SectionHeader
@@ -41,9 +40,9 @@
       />
     </div>
   </:list-error>
-  <:list>
+  <:list as |rr|>
     <Document::Sidebar::RelatedResources::List
-      @items={{this.relatedResources}}
+      @items={{rr.items}}
       @itemLimit={{@itemLimit}}
     >
       <:resource as |r|>

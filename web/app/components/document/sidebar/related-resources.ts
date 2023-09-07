@@ -2,7 +2,6 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import { HermesDocument } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
@@ -12,37 +11,20 @@ import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
-import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
-
-export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+  RelatedResource,
+} from "hermes/components/related-resources";
 
 export enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
   HermesDocument = ".hermes-document",
 }
 
-export interface RelatedExternalLink {
-  name: string;
-  url: string;
-  sortOrder: number;
-}
-
-export interface RelatedHermesDocument {
-  id: number;
-  googleFileID: string;
-  title: string;
-  type: string;
-  documentNumber: string;
-  sortOrder: number;
-  product?: string;
-  status?: string;
-}
-
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
   objectID?: string;
-  allowAddingExternalLinks?: boolean;
   headerTitle: string;
   modalHeaderTitle: string;
   searchFilters?: string;
@@ -66,22 +48,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
   @tracked relatedDocuments: RelatedHermesDocument[] = [];
-
-  @tracked protected loadingHasFailed = false;
-
-  /**
-   * The combined resources array, formatted for the RelatedResourcesList.
-   */
-  protected get relatedResources(): RelatedResource[] {
-    let resourcesArray: RelatedResource[] = [];
-
-    this.updateSortOrder();
-
-    resourcesArray.pushObjects(this.relatedDocuments);
-    resourcesArray.pushObjects(this.relatedLinks);
-
-    return resourcesArray;
-  }
+  @tracked loadingHasFailed = false;
 
   /**
    * The related resources object, minimally formatted for a PUT request to the API.
@@ -114,6 +81,20 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
+   * The combined resources array, formatted for the RelatedResourcesList.
+   */
+  protected get relatedResources(): RelatedResource[] {
+    let resourcesArray: RelatedResource[] = [];
+
+    this.updateSortOrder();
+
+    resourcesArray.pushObjects(this.relatedDocuments);
+    resourcesArray.pushObjects(this.relatedLinks);
+
+    return resourcesArray;
+  }
+
+  /**
    * Whether the "Add Resource" button should be hidden.
    * True when editing is explicitly disabled (e.g., when the viewer doesn't have edit
    * permissions), and when the item limit is reached (to be used for single-doc
@@ -136,6 +117,21 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    */
   protected get titleTooltipText(): string {
     return `Documents and links that are relevant to this work.`;
+  }
+
+  /**
+   * The action to update the `sortOrder` attribute of
+   * the resources, based on their position in the array.
+   * Called when the resource list is saved.
+   */
+  @action private updateSortOrder() {
+    this.relatedDocuments.forEach((doc, index) => {
+      doc.sortOrder = index + 1;
+    });
+
+    this.relatedLinks.forEach((link, index) => {
+      link.sortOrder = index + 1 + this.relatedDocuments.length;
+    });
   }
 
   /**
@@ -208,40 +204,30 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   }
 
   /**
-   * The action to update the `sortOrder` attribute of
-   * the resources, based on their position in the array.
-   * Called when the resource list is saved.
-   */
-  @action private updateSortOrder() {
-    this.relatedDocuments.forEach((doc, index) => {
-      doc.sortOrder = index + 1;
-    });
-
-    this.relatedLinks.forEach((link, index) => {
-      link.sortOrder = index + 1 + this.relatedDocuments.length;
-    });
-  }
-
-  /**
    * The action run when the component is rendered.
    * Loads the document's related resources, if they exist.
    * On error, triggers the "retry" design.
    */
   protected loadRelatedResources = task(async () => {
-    const resources = await this.fetchSvc
-      .fetch(
-        `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
-          this.args.objectID
-        }/related-resources`
-      )
-      .then((response) => response?.json());
+    try {
+      const resources = await this.fetchSvc
+        .fetch(
+          `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+            this.args.objectID
+          }/related-resources`
+        )
+        .then((response) => response?.json());
 
-    if (resources.hermesDocuments) {
-      this.relatedDocuments = resources.hermesDocuments;
-    }
+      if (resources.hermesDocuments) {
+        this.relatedDocuments = resources.hermesDocuments;
+      }
 
-    if (resources.externalLinks) {
-      this.relatedLinks = resources.externalLinks;
+      if (resources.externalLinks) {
+        this.relatedLinks = resources.externalLinks;
+      }
+      this.loadingHasFailed = false;
+    } catch (e: unknown) {
+      this.loadingHasFailed = true;
     }
   });
 

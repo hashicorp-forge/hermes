@@ -1,14 +1,14 @@
-import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import { RelatedExternalLink } from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { assert } from "@ember/debug";
 
-interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
+interface RelatedResourcesAddOrEditExternalResourceModalComponentSignature {
   Args: {
     resource?: RelatedExternalLink;
-    hideModal: () => void;
+    onClose: () => void;
     onSave: (resource: RelatedExternalLink) => void;
     removeResource?: (resource: RelatedExternalLink) => void;
   };
@@ -17,39 +17,24 @@ interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
   };
 }
 
-export default class DocumentSidebarRelatedResourcesListItemEditComponent extends Component<DocumentSidebarRelatedResourcesListItemEditComponentSignature> {
+export default class RelatedResourcesAddOrEditExternalResourceModalComponent extends Component<RelatedResourcesAddOrEditExternalResourceModalComponentSignature> {
+  @tracked protected shouldValidateEagerly = false;
+
   /**
    * A locally tracked URL property. Starts as the passed-in value;
    * updated when the URL input-value changes.
    */
-  @tracked protected url = this.args.resource?.url ?? "";
+  @tracked protected url = this.args.resource ? this.args.resource.url : "";
 
   /**
    * The title of the resource. If the name is the same as the URL,
    * we treat it like it's an empty value so the placeholder text shows.
    */
-  @tracked protected title =
-    this.args.resource?.name === this.args.resource?.url
-      ? ""
-      : this.args.resource?.name ?? "";
-
-  /**
-   * Whether the error warning is shown.
-   * True when the URL is invalid.
-   */
-  @tracked protected urlErrorMessageIsShown = false;
-
-  /**
-   * Whether the error warning is shown.
-   * True if the title is empty on submit.
-   */
-  @tracked protected titleErrorMessageIsShown = false;
-
-  /**
-   * A local reference to the form element.
-   * Registered when inserted.
-   */
-  @tracked private _form: HTMLFormElement | null = null;
+  @tracked protected title = !this.args.resource
+    ? ""
+    : this.args.resource.name === this.args.resource.url
+    ? ""
+    : this.args.resource.name;
 
   /**
    * Whether the URL is valid, as determined by the `isValidURL` utility.
@@ -58,12 +43,16 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   @tracked protected urlIsValid = true;
 
   /**
-   * The action to register the form element locally.
-   * Called when the form is rendered.
+   * Whether the error warning is shown.
+   * True if the title is empty on submit.
    */
-  @action protected registerForm(form: HTMLFormElement): void {
-    this._form = form;
-  }
+  @tracked protected titleErrorIsShown = false;
+
+  /**
+   * A local reference to the form element.
+   * Registered when inserted.
+   */
+  @tracked private _form: HTMLFormElement | null = null;
 
   /**
    * An asserted-true reference to the form element.
@@ -71,6 +60,28 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
   protected get form(): HTMLFormElement {
     assert("this._form must exist", this._form);
     return this._form;
+  }
+
+  protected get removeResourceButtonIsShown() {
+    return !!this.args.removeResource && !!this.args.resource;
+  }
+
+  protected get removeResource() {
+    assert("this.args.removeResource must exist", this.args.removeResource);
+    return this.args.removeResource;
+  }
+
+  protected get resource() {
+    assert("this.args.resource must exist", this.args.resource);
+    return this.args.resource;
+  }
+
+  /**
+   * The action to register the form element locally.
+   * Called when the form is rendered.
+   */
+  @action protected registerForm(form: HTMLFormElement): void {
+    this._form = form;
   }
 
   /**
@@ -89,7 +100,9 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
     this.title = title;
     this.url = url;
 
-    this.validateURL();
+    if (this.shouldValidateEagerly) {
+      this.processURL();
+    }
   }
 
   /**
@@ -97,45 +110,36 @@ export default class DocumentSidebarRelatedResourcesListItemEditComponent extend
    * Updates the `urlIsValid` property, which is used to show
    * an error message for invalid URLs.
    */
-  @action private validateURL() {
+  @action private processURL() {
     this.urlIsValid = isValidURL(this.url);
   }
-  /**
-   * The action called to save the resource if its URL is valid.
-   * Formats the resource and calls the passed-in `onSave` action.
-   */
-  @action protected maybeSaveResource(e: Event) {
-    // prevent the form from submitting on enter
+
+  @action maybeSubmit(e: Event) {
     e.preventDefault();
 
-    let newResource: RelatedExternalLink = {
-      name: "",
-      url: "",
-      sortOrder: 0,
-    };
+    this.processURL();
 
-    if (this.args.resource) {
-      newResource = this.args.resource;
-    }
-
-    newResource.url = this.url;
-    newResource.name = this.title;
-
-    this.validateURL();
+    this.shouldValidateEagerly = true;
 
     if (!this.title) {
-      this.titleErrorMessageIsShown = true;
+      this.titleErrorIsShown = true;
       return;
     }
 
     if (this.urlIsValid) {
-      this.args.onSave(newResource);
+      const sortOrder = this.args.resource ? this.args.resource.sortOrder : 1;
+
+      this.args.onSave({
+        sortOrder,
+        name: this.title,
+        url: this.url,
+      });
     }
   }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::Sidebar::RelatedResources::ListItem::Edit": typeof DocumentSidebarRelatedResourcesListItemEditComponent;
+    "RelatedResources::AddOrEditExternalResourceModal": typeof RelatedResourcesAddOrEditExternalResourceModalComponent;
   }
 }

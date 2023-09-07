@@ -3,23 +3,22 @@ import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
-interface DocumentSidebarRelatedResourcesAddExternalResourceTestContext
-  extends TestContext {
+interface RelatedResourcesAddExternalResourceTestContext extends TestContext {
   onSubmit: () => void;
   onInput: () => void;
 }
 
 module(
-  "Integration | Component | document/sidebar/related-resources/add/external-resource",
+  "Integration | Component | related-resources/add/external-resource",
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test("it renders as expected", async function (this: DocumentSidebarRelatedResourcesAddExternalResourceTestContext, assert) {
+    test("it renders as expected", async function (this: RelatedResourcesAddExternalResourceTestContext, assert) {
       this.set("onSubmit", () => {});
       this.set("onInput", () => {});
 
-      await render<DocumentSidebarRelatedResourcesAddExternalResourceTestContext>(hbs`
-      <Document::Sidebar::RelatedResources::Add::ExternalResource
+      await render<RelatedResourcesAddExternalResourceTestContext>(hbs`
+      <RelatedResources::Add::FallbackExternalResource
         @title="Test"
         @url="https://example.com"
         @onSubmit={{this.onSubmit}}
@@ -28,14 +27,12 @@ module(
     `);
 
       assert
-        .dom("[data-test-add-external-resource-form]")
+        .dom("[data-test-add-fallback-external-resource]")
         .exists("shows the form when the URL is not loading");
 
       assert.dom(".external-resource-title-input").hasValue("Test");
 
-      assert
-        .dom("[data-test-add-external-resource-truncated-url]")
-        .hasText("https://example.com");
+      assert.dom("[data-test-url]").hasText("https://example.com");
     });
   }
 );

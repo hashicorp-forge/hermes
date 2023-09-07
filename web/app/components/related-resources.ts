@@ -3,19 +3,35 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import {
-  RelatedExternalLink,
-  RelatedHermesDocument,
-  RelatedResource,
-} from "./document/sidebar/related-resources";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import { restartableTask, timeout } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { XDropdownListAnchorAPI } from "./x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
-import { filter } from "@ember/object/computed";
+
+export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
+
+export interface RelatedExternalLink {
+  name: string;
+  url: string;
+  sortOrder: number;
+}
+
+export interface RelatedHermesDocument {
+  id: number;
+  googleFileID: string;
+  title: string;
+  type: string;
+  documentNumber: string;
+  sortOrder: number;
+}
+
+export enum RelatedResourcesScope {
+  ExternalLinks = "external-links",
+  Documents = "documents",
+}
 
 interface RelatedResourcesComponentSignature {
   Element: null;
@@ -23,14 +39,13 @@ interface RelatedResourcesComponentSignature {
     items?: RelatedResource[];
     isLoading?: boolean;
     loadingHasFailed?: boolean;
-    modalHeaderTitle: string;
-    modalInputPlaceholder: string;
+    modalHeaderTitle: string; // TODO: make optional
+    modalInputPlaceholder: string; // TODO: make optional
     documentObjectID?: string;
     optionalSearchFilters?: string;
     searchFilters?: string;
     addResource: (resource: RelatedResource) => void;
-    allowAddingExternalLinks?: boolean;
-    allowAddingDocuments?: boolean;
+    scope?: `${RelatedResourcesScope}`;
   };
   Blocks: {
     header: [
@@ -38,9 +53,13 @@ interface RelatedResourcesComponentSignature {
         showModal: () => void;
       }
     ];
-    "list-loading": [];
+    list: [
+      rr: {
+        items: RelatedResource[];
+      }
+    ];
     "list-error": [];
-    list: [];
+    "list-loading": [];
   };
 }
 
@@ -57,6 +76,10 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
    * Set true when an Algolia search fails.
    */
   @tracked searchErrorIsShown = false;
+
+  get items() {
+    return this.args.items ?? [];
+  }
 
   /**
    * The Algolia results for a query. Updated by the `search` task
@@ -115,15 +138,19 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   }
 
   protected get relatedDocuments() {
-    return this.args.items?.filter((resource) => {
-      return "googleFileID" in resource;
-    }) as RelatedHermesDocument[];
+    return (
+      (this.args.items?.filter((resource) => {
+        return "googleFileID" in resource;
+      }) as RelatedHermesDocument[]) ?? []
+    );
   }
 
   protected get relatedLinks() {
-    return this.args.items?.filter((resource) => {
-      return "url" in resource;
-    }) as RelatedExternalLink[];
+    return (
+      (this.args.items?.filter((resource) => {
+        return "url" in resource;
+      }) as RelatedExternalLink[]) ?? []
+    );
   }
 
   /**

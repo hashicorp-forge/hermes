@@ -5,11 +5,11 @@
 {{else if this.args.loadingHasFailed}}
   {{yield to="list-error"}}
 {{else}}
-  {{yield to="list"}}
+  {{yield (hash items=this.items) to="list"}}
 {{/if}}
 
 {{#if this.modalIsShown}}
-  <Document::Sidebar::RelatedResources::Add
+  <RelatedResources::Add
     @headerTitle={{@modalHeaderTitle}}
     @inputPlaceholder={{@modalInputPlaceholder}}
     @onClose={{this.hideModal}}
@@ -18,8 +18,7 @@
     @objectID={{@documentObjectID}}
     @relatedDocuments={{this.relatedDocuments}}
     @relatedLinks={{this.relatedLinks}}
-    @allowAddingExternalLinks={{@allowAddingExternalLinks}}
-    @allowAddingDocuments={{@allowAddingDocuments}}
+    @scope={{@scope}}
     @search={{perform this.search}}
     @getObject={{perform this.getObject}}
     @resetAlgoliaResults={{this.resetAlgoliaResults}}

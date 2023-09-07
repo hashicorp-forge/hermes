@@ -36,14 +36,13 @@
         @onEditClick={{this.showModal}}
       />
     {{/unless}}
-
   </div>
 </li>
 
 {{#if this.modalIsShown}}
-  <Document::Sidebar::RelatedResources::ListItem::Edit
+  <RelatedResources::AddOrEditExternalResourceModal
     @resource={{this.externalLink}}
-    @hideModal={{this.hideModal}}
+    @onClose={{this.hideModal}}
     @removeResource={{@removeResource}}
     @onSave={{this.saveChanges}}
   />
