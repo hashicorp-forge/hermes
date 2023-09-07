@@ -108,9 +108,10 @@ export default class RelatedResourcesExternalResourceFormComponent extends Compo
 
     this.processURL();
 
+    this.shouldValidateEagerly = true;
+
     if (!this.title) {
       this.titleErrorIsShown = true;
-      this.shouldValidateEagerly = true;
       return;
     }
 
