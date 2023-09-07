@@ -320,7 +320,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * The action to run when the external link form is submitted.
    * Validates the title input, then adds the link, if it's not a duplicate.
    */
-  @action onExternalLinkSubmit(resource: RelatedExternalLink) {
+  @action onExternalLinkSubmit(resource?: RelatedExternalLink) {
     if (!this.scopeIsExternalLinks) {
       // The "externalLinkTitle" property is only used for fallback link.
       if (this.externalLinkTitle.length === 0) {

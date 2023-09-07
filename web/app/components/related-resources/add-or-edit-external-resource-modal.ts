@@ -1,28 +1,33 @@
-import Component from "@glimmer/component";
 import { action } from "@ember/object";
+import { guidFor } from "@ember/object/internals";
+import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { assert } from "@ember/debug";
+import { RelatedExternalLink } from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
-import { RelatedExternalLink } from "../related-resources";
+import { assert } from "@ember/debug";
 
-interface RelatedResourcesExternalResourceFormComponentSignature {
-  Element: HTMLFormElement;
+interface RelatedResourcesAddOrEditExternalResourceModalComponentSignature {
   Args: {
     resource?: RelatedExternalLink;
+    onClose: () => void;
     onSave: (resource: RelatedExternalLink) => void;
+    removeResource?: (resource: RelatedExternalLink) => void;
   };
   Blocks: {
     default: [];
-    submit: [
-      rr: {
-        submit: (e: Event) => void;
-      }
-    ];
   };
 }
 
-export default class RelatedResourcesExternalResourceFormComponent extends Component<RelatedResourcesExternalResourceFormComponentSignature> {
+export default class RelatedResourcesAddOrEditExternalResourceModalComponent extends Component<RelatedResourcesAddOrEditExternalResourceModalComponentSignature> {
+  protected id = guidFor(this);
+  protected bodyID = `${this.id}-body`;
+  protected submitID = `${this.id}-submit`;
+
+  protected bodySelector = `#${this.bodyID}`;
+  protected submitSelector = `#${this.submitID}`;
+
   @tracked protected shouldValidateEagerly = false;
+
   /**
    * A locally tracked URL property. Starts as the passed-in value;
    * updated when the URL input-value changes.
@@ -63,6 +68,20 @@ export default class RelatedResourcesExternalResourceFormComponent extends Compo
   protected get form(): HTMLFormElement {
     assert("this._form must exist", this._form);
     return this._form;
+  }
+
+  protected get removeResourceButtonIsShown() {
+    return !!this.args.removeResource && !!this.args.resource;
+  }
+
+  protected get removeResource() {
+    assert("this.args.removeResource must exist", this.args.removeResource);
+    return this.args.removeResource;
+  }
+
+  protected get resource() {
+    assert("this.args.resource must exist", this.args.resource);
+    return this.args.resource;
   }
 
   /**
@@ -129,6 +148,6 @@ export default class RelatedResourcesExternalResourceFormComponent extends Compo
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "RelatedResources::ExternalResourceForm": typeof RelatedResourcesExternalResourceFormComponent;
+    "RelatedResources::AddOrEditExternalResourceModal": typeof RelatedResourcesAddOrEditExternalResourceModalComponent;
   }
 }

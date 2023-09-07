@@ -27,26 +27,20 @@ const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
 const OVERFLOW_BUTTON_SELECTOR = ".related-resource-overflow-button";
 const EDIT_BUTTON_SELECTOR = "[data-test-overflow-menu-action='edit']";
 const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";
-const EDIT_MODAL_SELECTOR = "[data-test-edit-related-resource-modal]";
-const EDIT_MODAL_HEADER_SELECTOR =
-  "[data-test-edit-related-resource-modal-header]";
+const EDIT_MODAL_SELECTOR = "[data-test-add-or-edit-external-resource-modal]";
+const EDIT_MODAL_HEADER_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-modal-header]`;
+const EDIT_RESOURCE_SAVE_BUTTON_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-save-button]`;
+const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-delete-button]`;
 const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
 const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
-const EDIT_RESOURCE_SAVE_BUTTON_SELECTOR =
-  "[data-test-edit-related-resource-modal-save-button]";
 const ADD_RESOURCE_BUTTON_SELECTOR = ".sidebar-section-header-button";
 const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
   ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
   "[data-test-related-resources-search-input]";
-const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
-const ADD_EXTERNAL_RESOURCE_FORM_SELECTOR =
-  "[data-test-add-external-resource-form]";
 const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
   "[data-test-add-external-resource-submit-button]";
-const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR =
-  "[data-test-edit-related-resource-modal-delete-button]";
 const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-external-resource-title-error]";
 const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";
@@ -167,7 +161,7 @@ module(
       ]);
     });
 
-    test("it shows an error message when the related resources fail to load", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+    test("it shows an error when related resources fail to load", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.get("/documents/:document_id/related-resources", () => {
         return new Response(500, {}, {});
       });
@@ -195,9 +189,7 @@ module(
 
       await click(ERROR_BUTTON_SELECTOR);
 
-      assert
-        .dom("[data-test-sidebar-related-resources-empty-list]")
-        .exists("the list is shown again");
+      assert.dom(LIST_SELECTOR).exists("the list is shown again");
     });
 
     test("resources can be deleted (overflow menu)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -250,6 +242,8 @@ module(
       await click(OVERFLOW_BUTTON_SELECTOR);
       await click(EDIT_BUTTON_SELECTOR);
 
+      await waitFor(EDIT_MODAL_SELECTOR);
+
       await click(ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR);
 
       assert.dom(LIST_ITEM_SELECTOR).doesNotExist("the item is removed");
@@ -274,6 +268,8 @@ module(
 
       await click(OVERFLOW_BUTTON_SELECTOR);
       await click(EDIT_BUTTON_SELECTOR);
+
+      await waitFor(EDIT_MODAL_SELECTOR);
 
       assert.dom(EDIT_MODAL_SELECTOR).exists("the edit modal is shown");
       assert.dom(EDIT_MODAL_HEADER_SELECTOR).hasText("Edit resource");

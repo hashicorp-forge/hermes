@@ -1,7 +1,7 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
-interface RelatedResourcesAddExternalResourceSignature {
+interface RelatedResourcesAddFallbackExternalResourceSignature {
   Element: null;
   Args: {
     title: string;
@@ -13,7 +13,7 @@ interface RelatedResourcesAddExternalResourceSignature {
   };
 }
 
-export default class RelatedResourcesAddExternalResource extends Component<RelatedResourcesAddExternalResourceSignature> {
+export default class RelatedResourcesAddFallbackExternalResource extends Component<RelatedResourcesAddFallbackExternalResourceSignature> {
   /**
    * Whether an error message should be shown.
    * True if the title is empty or the URL is a duplicate.
@@ -30,6 +30,6 @@ export default class RelatedResourcesAddExternalResource extends Component<Relat
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "RelatedResources::Add::ExternalResource": typeof RelatedResourcesAddExternalResource;
+    "RelatedResources::Add::FallbackExternalResource": typeof RelatedResourcesAddFallbackExternalResource;
   }
 }

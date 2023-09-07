@@ -28,6 +28,8 @@ const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
 const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-add-external-resource-error]";
 const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
+const EXTERNAL_RESOURCE_MODAL_SELECTOR =
+  "[data-test-add-or-edit-external-resource-modal]";
 const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
 const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
@@ -260,8 +262,6 @@ module("Integration | Component | related-resources", function (hooks) {
       </RelatedResources>
     `);
 
-    assert.dom(".list").doesNotExist();
-
     await click("button");
 
     await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
@@ -407,7 +407,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(EXTERNAL_RESOURCE_MODAL_SELECTOR);
 
     assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotExist();
     assert.dom("[data-test-external-resource-form]").exists();
@@ -419,7 +419,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("[data-test-add-external-resource-button");
 
-    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist();
+    assert.dom(EXTERNAL_RESOURCE_MODAL_SELECTOR).doesNotExist();
     assert.dom(".item").hasText("Example - https://example.com");
   });
 

@@ -173,15 +173,15 @@ module(
 
       await click(editButton);
 
-      assert
-        .dom("[data-test-edit-related-resource-modal]")
-        .exists("edit modal is visible");
+      const modalSelector = "[data-test-add-or-edit-external-resource-modal]";
+
+      assert.dom(modalSelector).exists("edit modal is visible");
 
       assert
         .dom(OVERFLOW_MENU_SELECTOR)
         .doesNotExist("overflow menu is closed");
 
-      await click("[data-test-edit-related-resource-modal-save-button]");
+      await click(`${modalSelector} [data-test-save-button]`);
       assert.equal(count, 1, "edit button was clicked");
 
       await click(OVERFLOW_BUTTON_SELECTOR);

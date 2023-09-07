@@ -224,7 +224,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       if (resources.externalLinks) {
         this.relatedLinks = resources.externalLinks;
       }
-
       this.loadingHasFailed = false;
     } catch (e: unknown) {
       this.loadingHasFailed = true;

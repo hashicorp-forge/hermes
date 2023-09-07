@@ -1,19 +1,20 @@
 {{#in-element (html-element ".ember-application") insertBefore=null}}
-  <Hds::Modal
-    data-test-add-related-resource-modal
-    @onClose={{@onClose}}
-    class={{unless this.scopeIsExternalLinks "h-[475px]"}}
-    as |M|
-  >
-    <M.Header data-test-add-related-resource-modal-title>
-      {{@headerTitle}}
-    </M.Header>
-    <M.Body>
-      {{#if this.scopeIsExternalLinks}}
-        <div id={{this.externalLinkFormBodyID}}>
-          {{! Positioned via in-element }}
-        </div>
-      {{else}}
+  {{#if this.scopeIsExternalLinks}}
+    <RelatedResources::AddOrEditExternalResourceModal
+      @onClose={{@onClose}}
+      @onSave={{this.onExternalLinkSubmit}}
+    />
+  {{else}}
+    <Hds::Modal
+      data-test-add-related-resource-modal
+      @onClose={{@onClose}}
+      class="h-[475px]"
+      as |M|
+    >
+      <M.Header data-test-add-related-resource-modal-title>
+        {{@headerTitle}}
+      </M.Header>
+      <M.Body>
         <X::DropdownList
           data-test-add-related-resources-list
           @items={{this.algoliaResults}}
@@ -69,9 +70,9 @@
               </div>
             {{/if}}
             {{#if this.externalResourceFormIsShown}}
-              <RelatedResources::Add::ExternalResource
+              <RelatedResources::Add::FallbackExternalResource
                 @onInput={{this.onExternalLinkTitleInput}}
-                @onSubmit={{this.addRelatedExternalLink}}
+                @onSubmit={{this.onExternalLinkSubmit}}
                 @linkIsDuplicate={{this.linkIsDuplicate}}
                 @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
                 @title={{this.externalLinkTitle}}
@@ -104,53 +105,7 @@
             </dd.Action>
           </:item>
         </X::DropdownList>
-      {{/if}}
-    </M.Body>
-    {{#if this.scopeIsExternalLinks}}
-      <M.Footer>
-        <Hds::ButtonSet>
-          <span id={{this.externalLinkFormSubmitID}}>
-            {{! Positioned via in-element }}
-          </span>
-          <Hds::Button
-            @text="Cancel"
-            @color="secondary"
-            {{on "click" @onClose}}
-          />
-        </Hds::ButtonSet>
-      </M.Footer>
-    {{/if}}
-  </Hds::Modal>
-{{/in-element}}
-
-{{! TODO: explain this }}
-{{#if this.scopeIsExternalLinks}}
-  {{#if this.externalLinkFormIsRendered}}
-    {{#in-element
-      (html-element this.externalLinkFormBodySelector)
-      insertBefore=null
-    }}
-      <RelatedResources::ExternalResourceForm
-        @onSave={{this.onExternalLinkSubmit}}
-      >
-        <:submit as |rr|>
-          {{#in-element
-            (html-element this.externalLinkFormSubmitSelector)
-            insertBefore=null
-          }}
-            <Hds::Button
-              data-test-add-external-resource-button
-              @text="Add link"
-              {{on "click" rr.submit}}
-            />
-          {{/in-element}}
-        </:submit>
-      </RelatedResources::ExternalResourceForm>
-    {{/in-element}}
-  {{else}}
-    <div
-      class="absolute left-0 top-0"
-      {{did-insert this.renderExternalLinkForm}}
-    ></div>
+      </M.Body>
+    </Hds::Modal>
   {{/if}}
-{{/if}}
+{{/in-element}}

@@ -18,7 +18,7 @@ module(
       this.set("onInput", () => {});
 
       await render<RelatedResourcesAddExternalResourceTestContext>(hbs`
-      <RelatedResources::Add::ExternalResource
+      <RelatedResources::Add::FallbackExternalResource
         @title="Test"
         @url="https://example.com"
         @onSubmit={{this.onSubmit}}
