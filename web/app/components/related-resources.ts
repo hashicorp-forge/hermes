@@ -58,7 +58,6 @@ interface RelatedResourcesComponentSignature {
         items: RelatedResource[];
       }
     ];
-    "list-empty": [];
     "list-error": [];
     "list-loading": [];
   };
@@ -78,7 +77,9 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
    */
   @tracked searchErrorIsShown = false;
 
-  @tracked items: RelatedResource[] = this.args.items || [];
+  get items() {
+    return this.args.items ?? [];
+  }
 
   /**
    * The Algolia results for a query. Updated by the `search` task

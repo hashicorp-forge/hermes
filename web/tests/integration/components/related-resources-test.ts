@@ -58,7 +58,9 @@ module("Integration | Component | related-resources", function (hooks) {
     this.set("items", undefined);
   });
 
-  test("it yields list blocks", async function (this: RelatedResourcesComponentTestContext, assert) {
+  test("it yields items to a list block", async function (this: RelatedResourcesComponentTestContext, assert) {
+    this.set("items", ["item1", "item2"]);
+
     await render<RelatedResourcesComponentTestContext>(hbs`
       <RelatedResources
         @items={{this.items}}
@@ -74,21 +76,9 @@ module("Integration | Component | related-resources", function (hooks) {
             <div class="item">{{item}}</div>
           {{/each}}
         </:list>
-        <:list-empty>
-          <div class="empty"/>
-        </:list-empty>
       </RelatedResources>
     `);
 
-    assert
-      .dom(".empty")
-      .exists("the list-empty block yields when there are no items");
-
-    assert.dom(".list").doesNotExist();
-
-    this.set("items", ["item1", "item2"]);
-
-    assert.dom(".empty").doesNotExist();
     assert.dom(".list").exists();
     assert.dom(".item").exists({ count: 2 });
   });
@@ -107,19 +97,19 @@ module("Integration | Component | related-resources", function (hooks) {
         <:list-loading>
           <div class="loading"/>
         </:list-loading>
-        <:list-empty>
-          <div class="empty"/>
-        </:list-empty>
+        <:list>
+          <div class="list"/>
+        </:list>
       </RelatedResources>
     `);
 
     assert.dom(".loading").exists();
-    assert.dom(".empty").doesNotExist();
+    assert.dom(".list").doesNotExist();
 
     this.set("isLoading", false);
 
     assert.dom(".loading").doesNotExist();
-    assert.dom(".empty").exists();
+    assert.dom(".list").exists();
   });
 
   test("it yields an error block when related resources fail to load", async function (this: RelatedResourcesComponentTestContext, assert) {
@@ -136,19 +126,19 @@ module("Integration | Component | related-resources", function (hooks) {
         <:list-error>
           <div class="error"/>
         </:list-error>
-        <:list-empty>
-          <div class="empty"/>
-        </:list-empty>
+        <:list>
+          <div class="list"/>
+        </:list>
       </RelatedResources>
     `);
 
     assert.dom(".error").exists();
-    assert.dom(".empty").doesNotExist();
+    assert.dom(".list").doesNotExist();
 
     this.set("loadingHasFailed", false);
 
     assert.dom(".error").doesNotExist();
-    assert.dom(".empty").exists();
+    assert.dom(".list").exists();
   });
 
   test('it yields a header block with a "show modal" action', async function (this: RelatedResourcesComponentTestContext, assert) {
@@ -202,13 +192,8 @@ module("Integration | Component | related-resources", function (hooks) {
             <div class="item">{{item.title}}</div>
           {{/each}}
         </:list>
-        <:list-empty>
-          <div class="empty"/>
-        </:list-empty>
       </RelatedResources>
     `);
-
-    assert.dom(".empty").exists();
 
     await click("button");
 

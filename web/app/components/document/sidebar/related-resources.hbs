@@ -40,10 +40,9 @@
       />
     </div>
   </:list-error>
-  <:list>
-    {{! TODO: yield something better than a generic block }}
+  <:list as |rr|>
     <Document::Sidebar::RelatedResources::List
-      @items={{this.relatedResources}}
+      @items={{rr.items}}
       @itemLimit={{@itemLimit}}
     >
       <:resource as |r|>
@@ -56,10 +55,4 @@
       </:resource>
     </Document::Sidebar::RelatedResources::List>
   </:list>
-  <:list-empty>
-    <div data-test-sidebar-related-resources-empty-list>
-      TODO
-
-    </div>
-  </:list-empty>
 </RelatedResources>

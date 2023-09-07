@@ -71,7 +71,7 @@
             {{#if this.externalResourceFormIsShown}}
               <RelatedResources::Add::ExternalResource
                 @onInput={{this.onExternalLinkTitleInput}}
-                @onSubmit={{this.onExternalLinkSubmit}}
+                @onSubmit={{this.addRelatedExternalLink}}
                 @linkIsDuplicate={{this.linkIsDuplicate}}
                 @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
                 @title={{this.externalLinkTitle}}

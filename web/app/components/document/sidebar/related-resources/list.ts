@@ -71,6 +71,17 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
       return;
     }
 
+    if (insertedSprites.length === 1 && removedSprites.length === 1) {
+      /**
+       * For unknown reasons, Ember Animated sees an updated sprite
+       * as both inserted and removed, causing unwanted animations.
+       * This check prevents that from happening.
+       *
+       * FIXME: Investigate and fix this.
+       */
+      return;
+    }
+
     for (let sprite of keptSprites) {
       void move(sprite, { duration: 250, easing: easeOutQuad });
     }
