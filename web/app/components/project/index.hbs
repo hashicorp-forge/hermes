@@ -138,12 +138,12 @@
     class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
   >
     <RelatedResources
-      @allowAddingExternalLinks={{true}}
-      @allowAddingDocuments={{false}}
-      @items={{@project.documents}}
+      {{! TODO: this needs to not be documents }}
+      @items={{this.relatedLinks}}
       @addResource={{this.addResource}}
       @modalHeaderTitle="Add related link"
       @modalInputPlaceholder="Enter a URL"
+      @scope="external-links"
     >
       <:header as |rr|>
         <div
@@ -166,16 +166,16 @@
           </div>
         </div>
       </:header>
-      <:list>
-
-        {{#if @project.relatedLinks}}
+      <:list as |rr|>
+        {{#if rr.items.length}}
           <ul class="divide-y divide-color-border-primary">
-            {{#each @project.relatedLinks as |link|}}
+            {{#each rr.items as |link|}}
               <li>
                 <ExternalLink href={{link.url}} class="flex h-12 items-center">
                   <div class="px-4">
                     {{link.name}}
                   </div>
+                  <div>{{link.url}}</div>
                 </ExternalLink>
               </li>
             {{/each}}

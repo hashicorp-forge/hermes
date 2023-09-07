@@ -6,8 +6,8 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
-  RelatedResourceSelector,
-} from "../document/sidebar/related-resources";
+} from "../related-resources";
+import { RelatedResourceSelector } from "../document/sidebar/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
@@ -84,6 +84,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       return {
         googleFileID: doc.googleFileID,
         sortOrder: doc.sortOrder,
+        // @ts-ignore
         product: doc.product,
       };
     });

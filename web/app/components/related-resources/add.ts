@@ -327,6 +327,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    */
   @action protected onItemClick(_item: any, attrs: any) {
     const relatedHermesDocument = {
+      id: attrs.objectID,
       googleFileID: attrs.objectID,
       title: attrs.title,
       type: attrs.docType,
@@ -390,10 +391,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       this.args.addResource(externalLink);
       this.externalLinkTitle = "";
       this.args.onClose();
-
-      if (this.args.allowAddingDocuments !== false) {
-        void this.args.search(null, "");
-      }
+      void this.args.search(null, "");
     }
   }
 
@@ -410,9 +408,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     this._dd = dd;
     this.dd.registerAnchor(this.searchInput);
 
-    if (this.args.allowAddingDocuments !== false) {
-      void this.loadInitialData.perform();
-    }
+    void this.loadInitialData.perform();
 
     next(() => {
       // not being hit
@@ -462,11 +458,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * If it's a URL, checks if it's a first- or third-party link.
    */
   @action private processQueryType() {
-    if (this.args.allowAddingDocuments === false) {
-      this.queryIsURL = true;
-    } else {
-      this.queryIsURL = isValidURL(this.query);
-    }
+    this.queryIsURL = isValidURL(this.query);
 
     if (this.queryIsURL) {
       if (this.queryIsFirstPartyURL(this.query)) {

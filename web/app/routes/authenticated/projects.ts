@@ -3,9 +3,8 @@ import { inject as service } from "@ember/service";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 import FetchService from "hermes/services/fetch";
-import { HermesDocument } from "hermes/types/document";
 
 export type HermesProject = {
   id: string; // at least in mirage...

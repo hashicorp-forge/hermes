@@ -17,6 +17,7 @@ export default class ProjectsProjectComponent extends Component<ProjectsProjectC
   }
 
   protected get productAreas() {
+    // @ts-ignore
     return this.documents?.map((doc) => doc.product).uniq();
   }
 }
