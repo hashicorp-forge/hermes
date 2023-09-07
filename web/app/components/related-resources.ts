@@ -3,11 +3,6 @@ import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import {
-  RelatedExternalLink,
-  RelatedHermesDocument,
-  RelatedResource,
-} from "./document/sidebar/related-resources";
 import { restartableTask, timeout } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
@@ -16,10 +11,26 @@ import { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
 
+export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
+
+export interface RelatedExternalLink {
+  name: string;
+  url: string;
+  sortOrder: number;
+}
+
+export interface RelatedHermesDocument {
+  id: number;
+  googleFileID: string;
+  title: string;
+  type: string;
+  documentNumber: string;
+  sortOrder: number;
+}
+
 export enum RelatedResourcesScope {
   ExternalLinks = "external-links",
   Documents = "documents",
-  All = "all",
 }
 
 interface RelatedResourcesComponentSignature {
@@ -34,7 +45,7 @@ interface RelatedResourcesComponentSignature {
     optionalSearchFilters?: string;
     searchFilters?: string;
     addResource: (resource: RelatedResource) => void;
-    scope: `${RelatedResourcesScope}`;
+    scope?: `${RelatedResourcesScope}`;
   };
   Blocks: {
     header: [

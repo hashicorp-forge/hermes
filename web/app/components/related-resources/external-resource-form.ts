@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
-import { RelatedExternalLink } from "../document/sidebar/related-resources";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { RelatedExternalLink } from "../related-resources";
 
 interface RelatedResourcesExternalResourceFormComponentSignature {
   Element: HTMLFormElement;

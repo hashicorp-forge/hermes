@@ -6,7 +6,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 import htmlElement from "hermes/utils/html-element";
 
 const RELATED_RESOURCE_SELECTOR = ".related-resource";

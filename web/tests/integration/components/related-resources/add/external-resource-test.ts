@@ -9,7 +9,7 @@ interface RelatedResourcesAddExternalResourceTestContext extends TestContext {
 }
 
 module(
-  "Integration | Component | document/sidebar/related-resources/add/external-resource",
+  "Integration | Component | related-resources/add/external-resource",
   function (hooks) {
     setupRenderingTest(hooks);
 

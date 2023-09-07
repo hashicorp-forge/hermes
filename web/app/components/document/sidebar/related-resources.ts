@@ -11,28 +11,15 @@ import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
-import { RelatedResourcesScope } from "hermes/components/related-resources";
-
-export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+  RelatedResource,
+} from "hermes/components/related-resources";
 
 enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
   HermesDocument = ".hermes-document",
-}
-
-export interface RelatedExternalLink {
-  name: string;
-  url: string;
-  sortOrder: number;
-}
-
-export interface RelatedHermesDocument {
-  id: number;
-  googleFileID: string;
-  title: string;
-  type: string;
-  documentNumber: string;
-  sortOrder: number;
 }
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
@@ -47,7 +34,6 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   documentIsDraft?: boolean;
   editingIsDisabled?: boolean;
   scrollContainer: HTMLElement;
-  scope: `${RelatedResourcesScope}`;
 }
 
 interface DocumentSidebarRelatedResourcesComponentSignature {

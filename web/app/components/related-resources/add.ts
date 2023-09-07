@@ -12,7 +12,7 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
@@ -42,7 +42,7 @@ interface RelatedResourcesAddComponentSignature {
     searchErrorIsShown?: boolean;
     searchIsRunning?: boolean;
     resetAlgoliaResults: () => void;
-    scope: `${RelatedResourcesScope}`;
+    scope?: `${RelatedResourcesScope}`;
   };
   Blocks: {
     default: [];
@@ -166,10 +166,13 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     return this.args.algoliaResults;
   }
 
-  private allowAddingExternalLinks =
-    this.args.scope === RelatedResourcesScope.ExternalLinks ||
-    this.args.scope === RelatedResourcesScope.All;
-
+  private get allowAddingExternalLinks() {
+    if (this.args.scope === RelatedResourcesScope.Documents) {
+      return false;
+    } else {
+      return true;
+    }
+  }
   /**
    * Whether the query is an external URL.
    * Used as a shorthand check when determining layout and behavior.

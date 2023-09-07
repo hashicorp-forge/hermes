@@ -2,7 +2,7 @@ import { action } from "@ember/object";
 import { guidFor } from "@ember/object/internals";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { RelatedExternalLink } from "hermes/components/document/sidebar/related-resources";
+import { RelatedExternalLink } from "hermes/components/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemEditComponentSignature {
   Args: {

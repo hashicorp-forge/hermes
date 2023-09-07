@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import {
   RelatedHermesDocument,
   RelatedResource,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
 
 interface DocumentSidebarRelatedResourcesListItemResourceComponentSignature {

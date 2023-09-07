@@ -13,7 +13,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { Response } from "miragejs";
 import config from "hermes/config/environment";
 import algoliaHosts from "hermes/mirage/algolia/hosts";
-import { RelatedResource } from "hermes/components/document/sidebar/related-resources";
+import { RelatedResource } from "hermes/components/related-resources";
 import { RelatedResourcesScope } from "hermes/components/related-resources";
 
 const RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
@@ -230,7 +230,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -262,7 +261,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -333,7 +331,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -461,7 +458,6 @@ module("Integration | Component | related-resources", function (hooks) {
           @modalHeaderTitle={{this.modalHeaderTitle}}
           @modalInputPlaceholder={{this.modalInputPlaceholder}}
           @addResource={{this.addResource}}
-          @scope="all"
         >
           <:header as |rr|>
             <button {{on "click" rr.showModal}}>Add</button>
@@ -520,7 +516,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -548,7 +543,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -575,7 +569,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -609,7 +602,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -652,7 +644,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -690,7 +681,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>
@@ -732,7 +722,6 @@ module("Integration | Component | related-resources", function (hooks) {
         @modalHeaderTitle={{this.modalHeaderTitle}}
         @modalInputPlaceholder={{this.modalInputPlaceholder}}
         @addResource={{this.addResource}}
-        @scope="all"
       >
         <:header as |rr|>
           <button {{on "click" rr.showModal}}>Add</button>

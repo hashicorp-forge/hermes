@@ -104,7 +104,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -177,7 +176,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -210,7 +208,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -241,7 +238,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -269,7 +265,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -312,7 +307,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -339,7 +333,6 @@ module(
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
@@ -380,7 +373,6 @@ module(
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
           @itemLimit={{1}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Test placeholder"
@@ -437,7 +429,6 @@ module(
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
           @documentIsDraft={{true}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -478,7 +469,6 @@ module(
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
           @documentIsDraft={{true}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -555,7 +545,6 @@ module(
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
           @documentIsDraft={{true}}
-          @scope="all"
           @headerTitle="Test title"
           @modalHeaderTitle="Test header"
           @modalInputPlaceholder="Paste a URL or search documents..."
