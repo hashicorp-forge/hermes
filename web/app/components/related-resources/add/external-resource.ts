@@ -1,3 +1,4 @@
+import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
 interface RelatedResourcesAddExternalResourceSignature {
@@ -5,7 +6,7 @@ interface RelatedResourcesAddExternalResourceSignature {
   Args: {
     title: string;
     url: string;
-    onSubmit: (e: Event) => void;
+    onSubmit: () => void;
     onInput: (e: Event) => void;
     linkIsDuplicate?: boolean;
     titleErrorIsShown?: boolean;
@@ -19,6 +20,11 @@ export default class RelatedResourcesAddExternalResource extends Component<Relat
    */
   get errorIsShown() {
     return this.args.titleErrorIsShown || this.args.linkIsDuplicate;
+  }
+
+  @action protected onSubmit(e: Event) {
+    e.preventDefault();
+    this.args.onSubmit?.();
   }
 }
 

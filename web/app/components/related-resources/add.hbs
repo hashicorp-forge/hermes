@@ -2,7 +2,7 @@
   <Hds::Modal
     data-test-add-related-resource-modal
     @onClose={{@onClose}}
-    class="h-[475px]"
+    class={{unless this.scopeIsExternalLinks "h-[475px]"}}
     as |M|
   >
     <M.Header data-test-add-related-resource-modal-title>
@@ -11,8 +11,14 @@
     <M.Body>
       {{#if this.scopeIsExternalLinks}}
         {{! FIXME }}
-        THIS NEED TO BE THE FORM
-        {{! <RelatedResources::ExternalResourceForm /> }}
+        <RelatedResources::ExternalResourceForm
+          @url="todourl.com"
+          @title="todo title"
+          @onSave={{this.onExternalLinkSubmit}}
+          @updateFormValues={{this.updateFormValues}}
+          @urlIsValid={{true}}
+          {{! TODO: handle urlIsValid}}
+        />
       {{else}}
         <X::DropdownList
           data-test-add-related-resources-list
@@ -106,5 +112,20 @@
         </X::DropdownList>
       {{/if}}
     </M.Body>
+    {{#if this.scopeIsExternalLinks}}
+      <M.Footer>
+        <Hds::ButtonSet>
+          <Hds::Button
+            @text="Add link"
+            {{on "click" this.onExternalLinkSubmit}}
+          />
+          <Hds::Button
+            @text="Cancel"
+            @color="secondary"
+            {{on "click" @onClose}}
+          />
+        </Hds::ButtonSet>
+      </M.Footer>
+    {{/if}}
   </Hds::Modal>
 {{/in-element}}

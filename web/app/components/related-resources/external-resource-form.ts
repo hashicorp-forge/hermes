@@ -9,7 +9,7 @@ interface RelatedResourcesExternalResourceFormComponentSignature {
     url: string;
     title: string;
     onSave: () => void;
-    updateFormValues: () => void;
+    updateFormValues?: () => void;
     titleErrorIsShown?: boolean;
     urlIsValid?: boolean;
   };
@@ -20,9 +20,16 @@ interface RelatedResourcesExternalResourceFormComponentSignature {
 
 export default class RelatedResourcesExternalResourceFormComponent extends Component<RelatedResourcesExternalResourceFormComponentSignature> {
   @action protected onSave(e: Event) {
-    // prevent the form from submitting on enter
     e.preventDefault();
     this.args.onSave?.();
+  }
+
+  @action protected updateFormValues(e: Event) {
+    if (this.args.updateFormValues) {
+      this.args.updateFormValues();
+    } else {
+      console.log("should i do something here");
+    }
   }
 }
 

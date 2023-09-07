@@ -299,10 +299,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * The action to run when the external link form is submitted.
    * Validates the title input, then adds the link, if it's not a duplicate.
    */
-  @action onExternalLinkSubmit(e: Event) {
-    // Prevent the form from blindly submitting
-    e.preventDefault();
-
+  @action onExternalLinkSubmit() {
     if (this.externalLinkTitle.length === 0) {
       this.externalLinkTitleErrorIsShown = true;
       return;
@@ -312,6 +309,12 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       this.addRelatedExternalLink();
       this.args.onClose();
     }
+  }
+
+  @action protected updateFormValues() {
+    // TODO
+    console.error("TODO TODO");
+    // i guess this needs validation
   }
 
   /**
@@ -415,7 +418,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   @action protected onInputKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
-        this.onExternalLinkSubmit(e);
+        this.onExternalLinkSubmit();
         return;
       }
     }

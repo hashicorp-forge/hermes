@@ -421,6 +421,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
 
     assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotExist();
+    await this.pauseTest();
     // TODO: assert the form exists
   });
 

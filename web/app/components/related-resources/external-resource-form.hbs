@@ -1,7 +1,7 @@
 <form class="px-6 pb-6" {{on "submit" this.onSave}} ...attributes>
   <div class="mb-4">
     <Hds::Form::TextInput::Field
-      {{on "input" @updateFormValues}}
+      {{on "input" this.updateFormValues}}
       @value={{@title}}
       placeholder="Enter a title"
       required={{true}}
@@ -19,13 +19,14 @@
   </div>
   <Hds::Form::TextInput::Field
     data-test-external-resource-url-input
-    {{on "input" @updateFormValues}}
+    {{on "input" this.updateFormValues}}
     @value={{@url}}
     required={{true}}
     name="url"
     as |F|
   >
     <F.Label>URL</F.Label>
+    {{! TODO: make this more accompanying to External-scoped components }}
     {{#unless @urlIsValid}}
       <F.Error class="mt-3">
         A valid URL is required.
