@@ -20,16 +20,15 @@ const RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
   "[data-test-related-resources-search-input]";
 const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
-const ADD_EXTERNAL_RESOURCE_FORM_SELECTOR =
-  "[data-test-add-external-resource-form]";
+const ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR =
+  "[data-test-add-fallback-external-resource]";
 const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
-const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
-  "[data-test-add-external-resource-submit-button]";
-const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR =
-  "[data-test-add-external-resource-error]";
+const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-error]`;
 const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
 const EXTERNAL_RESOURCE_MODAL_SELECTOR =
   "[data-test-add-or-edit-external-resource-modal]";
+const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${EXTERNAL_RESOURCE_MODAL_SELECTOR} [data-test-submit-button]`;
+const ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-submit-button]`;
 const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
 const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
@@ -276,7 +275,7 @@ module("Integration | Component | related-resources", function (hooks) {
     assert
       .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
       .doesNotExist("documents are removed when a valid URL is entered");
-    assert.dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR).exists();
+    assert.dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR).exists();
 
     assert
       .dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR)
@@ -284,7 +283,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     // Try to add a resource without a title
 
-    await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+    await click(ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
     // Confirm that it fails
 
@@ -295,7 +294,7 @@ module("Integration | Component | related-resources", function (hooks) {
     // Now add a a title
 
     await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "Example");
-    await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+    await click(ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
     assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist("the modal is closed");
     assert.dom(".item").hasText("Example");
@@ -338,7 +337,7 @@ module("Integration | Component | related-resources", function (hooks) {
       .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
       .hasText("This resource has already been added.");
 
-    await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+    await click(ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
     assert
       .dom(ADD_RESOURCE_MODAL_SELECTOR)
@@ -417,7 +416,7 @@ module("Integration | Component | related-resources", function (hooks) {
       "https://example.com"
     );
 
-    await click("[data-test-add-external-resource-button");
+    await click("[data-test-save-button]");
 
     assert.dom(EXTERNAL_RESOURCE_MODAL_SELECTOR).doesNotExist();
     assert.dom(".item").hasText("Example - https://example.com");
@@ -542,7 +541,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
 
     assert
-      .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
       .exists('the "add resource" form is shown');
   });
 
@@ -566,7 +565,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
 
     assert
-      .dom(ADD_EXTERNAL_RESOURCE_FORM_SELECTOR)
+      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
       .exists('the "add resource" form is shown');
   });
 

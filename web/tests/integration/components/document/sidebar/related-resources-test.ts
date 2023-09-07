@@ -39,8 +39,7 @@ const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
   ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
   "[data-test-related-resources-search-input]";
-const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR =
-  "[data-test-add-external-resource-submit-button]";
+const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `[data-test-add-fallback-external-resource] [data-test-submit-button]`;
 const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
   "[data-test-external-resource-title-error]";
 const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";

@@ -27,14 +27,12 @@ module(
     `);
 
       assert
-        .dom("[data-test-add-external-resource-form]")
+        .dom("[data-test-add-fallback-external-resource]")
         .exists("shows the form when the URL is not loading");
 
       assert.dom(".external-resource-title-input").hasValue("Test");
 
-      assert
-        .dom("[data-test-add-external-resource-truncated-url]")
-        .hasText("https://example.com");
+      assert.dom("[data-test-url]").hasText("https://example.com");
     });
   }
 );
