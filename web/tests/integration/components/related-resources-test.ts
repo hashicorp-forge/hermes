@@ -432,7 +432,6 @@ module("Integration | Component | related-resources", function (hooks) {
       "https://example.com"
     );
 
-    await this.pauseTest();
     await click("[data-test-add-external-resource-button");
 
     assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist();
