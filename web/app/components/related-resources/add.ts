@@ -36,7 +36,6 @@ interface RelatedResourcesAddComponentSignature {
       options?: SearchOptions
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
-    // TODO: remove
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
