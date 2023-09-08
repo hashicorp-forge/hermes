@@ -130,9 +130,9 @@ export default class RelatedResourcesAddOrEditExternalResourceModalComponent ext
       const sortOrder = this.args.resource ? this.args.resource.sortOrder : 1;
 
       this.args.onSave({
-        sortOrder,
-        name: this.title,
         url: this.url,
+        name: this.title,
+        sortOrder,
       });
     }
   }

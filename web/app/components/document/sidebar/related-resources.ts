@@ -16,6 +16,7 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
+import { assert } from "@ember/debug";
 
 export enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
@@ -147,7 +148,13 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     );
 
     if (resourceIndex !== -1) {
-      this.relatedLinks[resourceIndex] = resource;
+      const linkBeingEdited = this.relatedLinks[resourceIndex];
+      assert("linkBeingEdited must exist", linkBeingEdited);
+
+      // We replace the values rather than the object itself.
+      // This helps Ember Animated recognize the edited sprite as `kept`.
+      linkBeingEdited.url = resource.url;
+      linkBeingEdited.name = resource.name;
 
       // The getter doesn't update when a new resource is added, so we manually save it.
       // TODO: Improve this

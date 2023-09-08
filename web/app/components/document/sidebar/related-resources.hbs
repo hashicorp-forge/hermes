@@ -25,21 +25,6 @@
       />
     </div>
   </:list-loading>
-  <:list-error>
-    <div class="h-16">
-      <div class="failed-to-load-text">
-        Failed to load
-      </div>
-      <Hds::Button
-        data-test-related-resources-error-button
-        @color="secondary"
-        @size="small"
-        @text="Retry"
-        @icon="reload"
-        {{on "click" (perform this.loadRelatedResources)}}
-      />
-    </div>
-  </:list-error>
   <:list as |rr|>
     <Document::Sidebar::RelatedResources::List
       @items={{rr.items}}
@@ -55,4 +40,19 @@
       </:resource>
     </Document::Sidebar::RelatedResources::List>
   </:list>
+  <:list-error>
+    <div class="h-16">
+      <div class="failed-to-load-text">
+        Failed to load
+      </div>
+      <Hds::Button
+        data-test-related-resources-error-button
+        @color="secondary"
+        @size="small"
+        @text="Retry"
+        @icon="reload"
+        {{on "click" (perform this.loadRelatedResources)}}
+      />
+    </div>
+  </:list-error>
 </RelatedResources>
