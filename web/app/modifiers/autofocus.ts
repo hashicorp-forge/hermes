@@ -24,7 +24,6 @@ export default class AutofocusModifier extends Modifier<AutofocusModifierSignatu
   }
 
   @action private maybeAutofocus() {
-    console.log("maybeAutofocus");
     if (this.targetChildren) {
       const target = this.element.querySelector(FOCUSABLE);
       if (target instanceof HTMLElement) {
