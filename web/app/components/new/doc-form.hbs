@@ -1,18 +1,16 @@
 {{! @glint-nocheck: not typesafe yet }}
 {{#if this.docIsBeingCreated}}
-  <div class="text-center hds-typography-display-400 mt-3">
+  <div class="hds-typography-display-400 mt-3 text-center">
     <FlightIcon @name="loading" @size="24" />
     <div class="mt-8 text-display-200 font-semibold">
-      Creating
-      {{@docType}}
-      draft...
+      Creating draft in Google Drive...
     </div>
     <div class="text-body-200 text-color-foreground-faint">This usually takes
       10-20 seconds.</div>
   </div>
 {{else}}
   <form
-    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    class="grid grid-cols-[1fr_250px] grid-rows-1 gap-10"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
@@ -22,7 +20,7 @@
           class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
         >Create your {{@docType}}</h1>
       </div>
-      <div class="pt-10 space-y-7">
+      <div class="space-y-7 pt-10">
         <Hds::Form::TextInput::Field
           @type="text"
           @isRequired={{true}}
@@ -51,7 +49,7 @@
               <span
                 class={{if
                   this.summaryIsLong
-                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                  "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
                 }}
               >One or two sentences</span>
               outlining your doc.
@@ -160,7 +158,7 @@
           @owner={{this.authenticatedUser.info.email}}
         />
         <Hds::Button
-          @text="Create {{@docType}} in Google Drive"
+          @text="Create draft in Google Drive"
           type="submit"
           disabled={{not this.formRequirementsMet}}
           class="w-full"
