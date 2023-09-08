@@ -3,9 +3,7 @@
   <div class="hds-typography-display-400 mt-3 text-center">
     <FlightIcon @name="loading" @size="24" />
     <div class="mt-8 text-display-200 font-semibold">
-      Creating
-      {{@docType}}
-      draft...
+      Creating draft in Google Drive...
     </div>
     <div class="text-body-200 text-color-foreground-faint">This usually takes
       10-20 seconds.</div>
@@ -160,7 +158,7 @@
           @owner={{this.authenticatedUser.info.email}}
         />
         <Hds::Button
-          @text="Create doc in Google Drive"
+          @text="Create draft in Google Drive"
           type="submit"
           disabled={{not this.formRequirementsMet}}
           class="w-full"
