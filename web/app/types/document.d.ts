@@ -39,6 +39,7 @@ export interface CustomEditableFields {
 }
 
 export interface CustomEditableField {
+  name?: string;
   displayName: string;
   type: "STRING" | "PEOPLE";
   value?: string | string[];
