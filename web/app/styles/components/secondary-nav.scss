@@ -29,10 +29,10 @@
 
   > a {
     @apply relative flex text-display-500 font-bold;
-    // @apply text-color-foreground-disabled;
+    @apply text-color-foreground-disabled;
     // @apply text-color-foreground-strong;
     // @apply text-color-foreground-primary;
-    @apply text-color-foreground-faint;
+    // @apply text-color-foreground-faint;
 
     &.active {
       // @apply text-display-500;

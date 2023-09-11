@@ -1,6 +1,10 @@
 <li>
-  <LinkTo @route="authenticated.project" @model={{@project.id}}>
-    <Hds::Card::Container @hasBorder={{true}} class="h-48 p-4">
+  <LinkTo @route="authenticated.project" @model={{@project.id}} class="hover">
+    <Hds::Card::Container
+      @hasBorder={{true}}
+      class="h-48 p-4"
+      @levelHover="mid"
+    >
       <div class="relative h-full">
         <div class="flex justify-between">
           <h3 class="inline-flex font-semibold">

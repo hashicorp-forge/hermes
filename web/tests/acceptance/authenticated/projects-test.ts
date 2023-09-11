@@ -61,6 +61,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
       documents: [firstDoc, secondDoc],
     });
     this.server.create("project", {
+      description: "This is a test project two",
       jiraObject: {
         type: "Enhancement",
         key: "HERMES-123",

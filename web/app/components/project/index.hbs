@@ -11,17 +11,17 @@
       <FlightIcon @name="arrow-left" class="mr-2" />
       All projects
     </LinkTo>
+
     <div class="flex space-x-0.5">
       <CopyURLButton
         @url="TODO"
+        {{!-- @isIconOnly={{true}} --}}
+        @tooltipPlacement="bottom"
         class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
       />
       {{! TODO: figure out what links need to be here }}
       <X::DropdownList
         @items={{hash
-          edit=(hash
-            name="Edit title/description..." icon="edit" action=this.showModal
-          )
           archive=(hash name="Archive..." icon="archive" action=this.showModal)
           delete=(hash name="Delete..." icon="trash" action=this.showModal)
         }}
@@ -33,11 +33,7 @@
               class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong
                 {{if dd.contentIsShown 'border-color-border-strong'}}"
             >
-              <FlightIcon @name="settings" />
-              <FlightIcon
-                @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-                class="ml-0.5"
-              />
+              <FlightIcon @name="more-horizontal" />
             </div>
           </dd.ToggleAction>
         </:anchor>
@@ -48,22 +44,30 @@
           </dd.Action>
         </:item>
       </X::DropdownList>
-      {{! TODO: add settings dropdown }}
     </div>
   </div>
 
   <div class="mb-14">
     <div class="mx-auto max-w-lg">
-      <Action {{on "click" this.showModal}} class="w-full text-center">
-        <h1 class="mb-0 text-display-400">
+      <div class="relative text-center">
+        <h1 class="mb-0 text-display-500">
           {{@project.name}}
         </h1>
         {{#if @project.description}}
-          <p class="mt-2">
+          <p class="mt-1 text-color-foreground-faint">
             {{@project.description}}
           </p>
         {{/if}}
-      </Action>
+        <Hds::Button
+          {{on "click" this.showModal}}
+          @size="small"
+          @icon="edit"
+          @text="Edit"
+          @color="secondary"
+          class="mx-auto mt-3"
+        />
+      </div>
+
       {{#if this.modalIsShown}}
         <Hds::Modal @onClose={{this.hideModal}} as |M|>
           <M.Header>
@@ -103,13 +107,13 @@
       {{/if}}
     </div>
 
-    <div class="mt-3 flex justify-center">
+    {{!-- <div class="mt-8 flex justify-center">
       {{#if @project.jiraObject}}
         <div
           class="flex h-9 items-center rounded border border-color-border-primary px-3"
         >
 
-          <div class="flex h-9 items-center space-x-1.5">
+          <div class="flex h-9 items-center space-x-2">
             <FlightIcon @name="jira" class="mr-3" />
             {{#if @project.jiraObject.type}}
               <div class="flex">
@@ -149,15 +153,102 @@
         <Hds::Button
           @color="secondary"
           @icon="jira"
+          @size="small"
           @text="Attach Jira issue"
         />
       {{/if}}
-    </div>
+    </div> --}}
+
   </div>
 
   <div
-    class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
+    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
   >
+
+    <div
+      class="flex h-12 w-full items-center justify-between bg-color-surface-faint pl-4 pr-2"
+    >
+      <h3 class="mr-8 shrink-0 text-body-200 font-semibold">
+        Jira link
+      </h3>
+      {{#if @project.jiraObject}}
+        {{! maybe we want an icon still? }}
+        {{! <div class="mr-2 flex opacity-50">
+          <FlightIcon @name="zap" />
+        </div> }}
+      {{else}}
+        <Hds::Button
+          @text="Add a Jira link"
+          @color="tertiary"
+          class="ml-6 shrink-0 px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
+          @icon="plus"
+          @isIconOnly={{true}}
+        />
+      {{/if}}
+    </div>
+    {{#if @project.jiraObject}}
+      <div
+        class="flex h-12 w-full items-center justify-between border-t border-t-color-border-primary px-4"
+      >
+        <div class="flex w-full items-center justify-between">
+          <div class="flex items-center">
+
+            {{#if @project.jiraObject.type}}
+              <div
+                class="mr-2.5 flex shrink-0"
+                {{tooltip @project.jiraObject.type}}
+              >
+                <FlightIcon @name="square-fill" class="text-lime-600" />
+              </div>
+            {{/if}}
+            <div class="grid">
+              <TruncatedText
+                class="text-body-200 font-medium text-color-foreground-strong"
+              >
+                {{@project.jiraObject.summary}}
+              </TruncatedText>
+            </div>
+            <div
+              class="ml-4 shrink-0 text-color-foreground-faint
+                {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
+            >
+              {{@project.jiraObject.key}}
+            </div>
+          </div>
+          <div class="ml-2 flex items-center space-x-2">
+
+            {{#if @project.jiraObject.priority}}
+              <div
+                class="flex shrink-0"
+                {{tooltip (concat @project.jiraObject.priority " priority")}}
+              >
+                <FlightIcon
+                  @name="chevrons-up"
+                  class="text-color-foreground-critical"
+                />
+              </div>
+            {{/if}}
+            {{#if @project.jiraObject.assignee}}
+              <Person::Avatar
+                @email={{@project.jiraObject.assignee}}
+                class="shrink-0"
+                {{tooltip (concat "Assigned to " @project.jiraObject.assignee)}}
+              />
+            {{/if}}
+          </div>
+        </div>
+        <div class="ml-8 flex shrink-0">
+          <FlightIcon @name="more-vertical" />
+        </div>
+
+      </div>
+    {{/if}}
+  </div>
+
+  <div
+    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
+  >
+
     <RelatedResources
       @allowAddingExternalLinks={{false}}
       @items={{@project.documents}}
@@ -165,20 +256,18 @@
       @modalHeaderTitle="Add a document"
       @modalInputPlaceholder="Search by title, author, doc number..."
     >
-      <:header as |rr|>
-        <div
-          class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-faint"
-        >
-          <div class="w-full px-4">
+      <:header>
+        <div class="flex h-12 items-center rounded-t bg-color-surface-faint">
+          <div class="w-full pl-4 pr-2">
             <div class="flex items-center justify-between">
-              <h3 class="text-body-100 font-semibold">
+              <h3 class="text-body-200 font-semibold">
                 Documents
               </h3>
               <Hds::Button
                 @text="Add a document"
-                @size="small"
-                @color="secondary"
+                @color="tertiary"
                 @icon="plus"
+                class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
                 @isIconOnly={{true}}
               />
             </div>
@@ -187,7 +276,9 @@
       </:header>
       <:list>
         {{#if @project.documents}}
-          <ul class="divide-y divide-color-border-primary">
+          <ul
+            class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
+          >
             {{#each @project.documents as |document|}}
               <li class="group">
                 <LinkTo
@@ -223,12 +314,6 @@
               </li>
             {{/each}}
           </ul>
-        {{else}}
-          <div
-            class="text-color-foreground w-full-faint flex h-12 items-center justify-center text-color-foreground-faint opacity-70"
-          >
-            None
-          </div>
         {{/if}}
       </:list>
     </RelatedResources>
@@ -236,7 +321,7 @@
 
   {{! PROJECTS }}
   <div
-    class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
+    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
   >
     <RelatedResources
       @items={{this.relatedLinks}}
@@ -246,21 +331,19 @@
       @scope="external-links"
     >
       <:header as |rr|>
-        <div
-          class="flex h-12 items-center rounded-t border-b border-b-color-border-primary bg-color-surface-faint"
-        >
-          <div class="w-full px-4">
+        <div class="flex h-12 items-center bg-color-surface-faint">
+          <div class="w-full pl-4 pr-2">
             <div class="flex items-center justify-between">
-              <h3 class="text-body-100 font-semibold">
+              <h3 class="text-body-200 font-semibold">
                 Related links
               </h3>
               <Hds::Button
                 {{on "click" rr.showModal}}
                 @text="Add a related link"
-                @size="small"
-                @color="secondary"
+                @color="tertiary"
                 @icon="plus"
                 @isIconOnly={{true}}
+                class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
               />
             </div>
           </div>
@@ -268,7 +351,9 @@
       </:header>
       <:list as |rr|>
         {{#if rr.items.length}}
-          <ul class="divide-y divide-color-border-primary">
+          <ul
+            class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
+          >
             {{#each rr.items as |link|}}
               <li>
                 <ExternalLink href={{link.url}} class="flex h-12 items-center">
@@ -280,12 +365,6 @@
               </li>
             {{/each}}
           </ul>
-        {{else}}
-          <div
-            class="text-color-foreground w-full-faint flex h-12 items-center justify-center text-color-foreground-faint opacity-70"
-          >
-            None
-          </div>
         {{/if}}
       </:list>
     </RelatedResources>
