@@ -12,7 +12,9 @@ require (
 	github.com/hashicorp/go-hclog v1.2.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/cli v1.1.2
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/oauth2 v0.3.0
