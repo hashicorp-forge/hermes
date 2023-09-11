@@ -42,6 +42,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   }
 
+  @action protected saveProjectInfo() {
+    return;
+  }
+
   /**
    * The action to add a resource to a document.
    * Adds a resource to the correct array, then saves it to the DB,

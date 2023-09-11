@@ -19,9 +19,11 @@
       {{! TODO: figure out what links need to be here }}
       <X::DropdownList
         @items={{hash
-          edit=(hash name="Edit")
-          archive=(hash name="Archive")
-          delete=(hash name="Delete")
+          edit=(hash
+            name="Edit title/description..." icon="edit" action=this.showModal
+          )
+          archive=(hash name="Archive..." icon="archive" action=this.showModal)
+          delete=(hash name="Delete..." icon="trash" action=this.showModal)
         }}
         @placement="bottom-end"
       >
@@ -40,8 +42,8 @@
           </dd.ToggleAction>
         </:anchor>
         <:item as |dd|>
-          <dd.Action>
-
+          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-5">
+            <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
             {{dd.attrs.name}}
           </dd.Action>
         </:item>
@@ -50,16 +52,55 @@
     </div>
   </div>
 
-  <div class="mb-8 -mt-3">
-    <div class="text-center">
-      <h1 class="mb-1 text-display-400">
-        {{@project.name}}
-      </h1>
-      {{! TODO: also take into accent if its the owner, etc }}
-      {{#if @project.description}}
-        <p>
-          {{@project.description}}
-        </p>
+  <div class="mb-14">
+    <div class="mx-auto max-w-lg">
+      <Action {{on "click" this.showModal}} class="w-full text-center">
+        <h1 class="mb-0 text-display-400">
+          {{@project.name}}
+        </h1>
+        {{#if @project.description}}
+          <p class="mt-2">
+            {{@project.description}}
+          </p>
+        {{/if}}
+      </Action>
+      {{#if this.modalIsShown}}
+        <Hds::Modal @onClose={{this.hideModal}} as |M|>
+          <M.Header>
+            Project info
+          </M.Header>
+          <M.Body>
+            <Hds::Form::TextInput::Field
+              @value={{@project.name}}
+              class="mb-6"
+              as |T|
+            >
+              <T.Label>Name</T.Label>
+            </Hds::Form::TextInput::Field>
+            <Hds::Form::TextInput::Field
+              @value={{@project.description}}
+              @isOptional={{true}}
+              class="mb-5"
+              as |T|
+            >
+              <T.Label>Description</T.Label>
+            </Hds::Form::TextInput::Field>
+          </M.Body>
+          <M.Footer as |F|>
+            <Hds::ButtonSet>
+              <Hds::Button
+                {{on "click" this.saveProjectInfo}}
+                @text="Save changes"
+              />
+              <Hds::Button
+                {{on "click" F.close}}
+                @text="Cancel"
+                @color="secondary"
+              />
+            </Hds::ButtonSet>
+          </M.Footer>
+        </Hds::Modal>
+
       {{/if}}
     </div>
     {{! TODO: this should have some showJira logic }}
@@ -72,6 +113,7 @@
           @size="small"
           @icon="jira"
           @text="Attach Jira issue"
+          class="mt-1"
         />
       {{/if}}
     </div>
@@ -101,7 +143,6 @@
                 @size="small"
                 @color="secondary"
                 @icon="plus"
-                {{on "click" rr.showModal}}
                 @isIconOnly={{true}}
               />
             </div>
@@ -162,7 +203,6 @@
     class="mx-auto mb-8 max-w-2xl rounded border border-color-border-primary"
   >
     <RelatedResources
-      {{! TODO: this needs to not be documents }}
       @items={{this.relatedLinks}}
       @addResource={{this.addResource}}
       @modalHeaderTitle="Add related link"
@@ -222,10 +262,3 @@
     {{@project.creator}}
   </div>
 </div>
-
-{{#if this.modalIsShown}}
-  <Hds::Modal @onClose={{this.hideModal}} as |M|>
-    <M.Header>Add</M.Header>
-    <M.Body />
-  </Hds::Modal>
-{{/if}}
