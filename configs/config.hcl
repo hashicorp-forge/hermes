@@ -64,7 +64,7 @@ document_types {
     }
   }
 
-  // document_type "MEMO" {
+  // document_type "Memo" {
   //   long_name = "Memo"
   //   description = "Create a Memo document to share an idea or brief note with colleagues."
   //   template = "file-id-for-a-blank-doc"
