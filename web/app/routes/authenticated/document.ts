@@ -1,45 +1,27 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import RSVP from "rsvp";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
-import { GoogleUser } from "hermes/components/inputs/people-select";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
-import AlgoliaService from "hermes/services/algolia";
-import SessionService from "hermes/services/session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
 
-const serializePeople = (people: GoogleUser[]): HermesUser[] => {
-  return people.map((p) => ({
-    email: p.emailAddresses[0]?.value as string,
-    imgURL: p.photos?.[0]?.url,
-  }));
-};
-
-interface DocumentRouteParams {
+interface AuthenticatedDocumentRouteParams {
   document_id: string;
   draft: boolean;
 }
 
-interface DocumentRouteModel {
+interface AuthenticatedDocumentRouteModel {
   doc: HermesDocument;
   docType: HermesDocumentType;
 }
 
-export default class DocumentRoute extends Route {
-  @service("config") declare configSvcL: ConfigService;
+export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
-  @service declare algolia: AlgoliaService;
-  @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
   @service declare router: RouterService;
 
@@ -64,7 +46,10 @@ export default class DocumentRoute extends Route {
     });
   }
 
-  async model(params: DocumentRouteParams, transition: Transition) {
+  async model(
+    params: AuthenticatedDocumentRouteParams,
+    transition: Transition
+  ) {
     let doc = {};
     let draftFetched = false;
 
@@ -92,11 +77,11 @@ export default class DocumentRoute extends Route {
          */
         transition.abort();
         this.router.transitionTo("authenticated.document", params.document_id);
-        return;
       }
     }
 
     if (!draftFetched) {
+      console.log("fetching doc");
       try {
         doc = await this.fetchSvc
           .fetch("/api/v1/documents/" + params.document_id, {
@@ -120,64 +105,7 @@ export default class DocumentRoute extends Route {
       }
     }
 
-    // With the document fetched and added to the db's RecentlyViewedDocs index,
-    // make a background call to update the front-end index.
-    void this.recentDocs.fetchAll.perform();
-
-    let typedDoc = doc as HermesDocument;
-
-    // Record analytics.
-    try {
-      await this.fetchSvc.fetch("/api/v1/web/analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_id: params.document_id,
-          product_name: typedDoc.product,
-        }),
-      });
-    } catch (err) {
-      console.log("Error recording analytics: " + err);
-    }
-
-    // Load the document as well as the logged in user info
-
-    // Preload avatars for all approvers in the Algolia index.
-    if (typedDoc.contributors?.length) {
-      const contributors = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${typedDoc.contributors.join(",")}`)
-        .then((r) => r?.json());
-
-      if (contributors) {
-        typedDoc.contributors = serializePeople(contributors);
-      } else {
-        typedDoc.contributors = [];
-      }
-    }
-    if (typedDoc.approvers?.length) {
-      const approvers = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${typedDoc.approvers.join(",")}`)
-        .then((r) => r?.json());
-
-      if (approvers) {
-        typedDoc.approvers = serializePeople(approvers);
-      } else {
-        typedDoc.approvers = [];
-      }
-    }
-
-    let docTypes = await this.fetchSvc
-      .fetch("/api/v1/document-types")
-      .then((r) => r?.json());
-
-    let docType = docTypes.find(
-      (docType: HermesDocumentType) => docType.name === typedDoc.docType
-    );
-
-    return RSVP.hash({
-      doc: typedDoc,
-      docType,
-    });
+    return doc as HermesDocument;
   }
 
   /**
@@ -187,7 +115,7 @@ export default class DocumentRoute extends Route {
    * `modelIsChanging` property to remove and rerender the sidebar,
    * resetting its local state to reflect the new model data.
    */
-  afterModel(_model: DocumentRouteModel, transition: any) {
+  afterModel(_model: AuthenticatedDocumentRouteModel, transition: any) {
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (

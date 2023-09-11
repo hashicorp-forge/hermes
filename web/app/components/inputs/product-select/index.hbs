@@ -69,7 +69,9 @@
       </X::DropdownList>
     {{/if}}
   {{else if this.fetchProductAreas.isRunning}}
-    <FlightIcon data-test-product-select-spinner @name="loading" />
+    <div class="flex h-6 items-center" I>
+      <FlightIcon data-test-product-select-spinner @name="loading" />
+    </div>
   {{else if this.errorIsShown}}
     <div class="failed-to-load-text">
       Failed to load

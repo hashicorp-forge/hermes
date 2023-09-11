@@ -3,7 +3,7 @@
     data-test-custom-string-field
     @value={{get @document @field}}
     @onChange={{@onChange}}
-    @loading={{@loading}}
+    @isSaving={{@isSaving}}
     @disabled={{@disabled}}
   >
     <:default as |F|>
@@ -31,7 +31,7 @@
     data-test-custom-people-field
     @value={{get @attributes "value"}}
     @onChange={{@onChange}}
-    @loading={{@loading}}
+    @isSaving={{@isSaving}}
     @disabled={{@disabled}}
   >
     <:default>

@@ -1,5 +1,5 @@
 <div class="editable-field" ...attributes>
-  {{#if (and this.editingIsEnabled (not @loading))}}
+  {{#if this.editingBlockIsShown}}
     {{on-document "keydown" this.handleKeydown}}
     {{yield
       (hash
@@ -11,15 +11,21 @@
       to="editing"
     }}
   {{else}}
-    {{#if @loading}}
-      <FlightIcon @name="loading" class="loading-indicator" />
+    {{#if (or @isSaving @isLoading)}}
+      <div
+        class={{if @isSaving "absolute top-0 right-0" "flex h-5 items-center"}}
+      >
+        <FlightIcon @name="loading" />
+      </div>
     {{/if}}
-    <Action
-      class="field-toggle {{if @loading 'loading'}}"
-      disabled={{or @disabled @loading}}
-      {{on "click" this.enableEditing}}
-    >
-      {{yield (hash value=this.value)}}
-    </Action>
+    {{#unless @isLoading}}
+      <Action
+        class="field-toggle {{if @isSaving 'loading'}}"
+        disabled={{or @disabled @isSaving}}
+        {{on "click" this.enableEditing}}
+      >
+        {{yield (hash value=this.value)}}
+      </Action>
+    {{/unless}}
   {{/if}}
 </div>

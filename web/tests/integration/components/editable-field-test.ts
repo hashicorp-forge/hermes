@@ -84,7 +84,7 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value="foo"
         @onChange={{this.onChange}}
-        @loading={{this.isLoading}}
+        @isSaving={{this.isLoading}}
       />
     `);
 

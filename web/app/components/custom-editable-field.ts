@@ -13,7 +13,7 @@ interface CustomEditableFieldComponentSignature {
     field: string;
     attributes: CustomEditableField;
     onChange: (value: any) => void;
-    loading?: boolean;
+    isSaving?: boolean;
     disabled?: boolean;
   };
 }

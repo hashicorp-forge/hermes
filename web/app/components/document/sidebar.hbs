@@ -1,4 +1,5 @@
 <Document::Sidebar::Header
+  {{did-insert this.kickOffBackgroundTasks}}
   @document={{@document}}
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
@@ -104,7 +105,7 @@
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
             @onChange={{this.updateTitle}}
-            @loading={{this.save.isRunning}}
+            @isSaving={{this.save.isRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
           >
@@ -146,7 +147,7 @@
           data-test-editable={{this.isOwner}}
           @value={{this.summary}}
           @onChange={{perform this.updateSummary}}
-          @loading={{this.save.isRunning}}
+          @isSaving={{this.save.isRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default as |F|>
@@ -213,7 +214,8 @@
           data-test-editable={{this.isOwner}}
           @value={{this.contributors}}
           @onChange={{perform this.save "contributors"}}
-          @loading={{this.save.isRunning}}
+          @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
+          @isSaving={{this.save.isRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default>
@@ -251,7 +253,8 @@
           data-test-editable={{this.isOwner}}
           @value={{this.approvers}}
           @onChange={{perform this.save "approvers"}}
-          @loading={{this.save.isRunning}}
+          @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
+          @isSaving={{this.save.isRunning}}
           @disabled={{this.editingIsDisabled}}
         >
           <:default>
@@ -321,7 +324,7 @@
               @field={{field}}
               @attributes={{attributes}}
               @onChange={{perform this.save field}}
-              @loading={{this.save.isRunning}}
+              @isSaving={{this.save.isRunning}}
               @disabled={{not this.isOwner}}
             />
           </div>
@@ -378,7 +381,7 @@
                 @size="medium"
                 @color="primary"
                 class="w-full"
-                {{on "click" (fn (set this "requestReviewModalIsShown" true))}}
+                {{on "click" (set this "requestReviewModalIsShown" true)}}
               />
               <Hds::Button
                 @text="Delete"
@@ -506,8 +509,9 @@
       @hideFooterWhileSaving={{true}}
       @taskButtonIsDisabled={{and
         (not this.docTypeCheckboxValue)
-        @docType.checks.length
+        (not (is-empty this.docType.checks))
       }}
+      {{! TODO: get doctype here }}
     >
       <:default as |M|>
         {{#if M.taskIsRunning}}
@@ -575,9 +579,9 @@
             <F.Label>Approvers</F.Label>
           </Hds::Form::Field>
 
-          {{#if @docType.checks.length}}
+          {{#if this.docType.checks}}
             {{! For now, we only support one check }}
-            {{#each (take 1 @docType.checks) as |check|}}
+            {{#each (take 1 this.docType.checks) as |check|}}
               <div class="mt-3.5">
                 <Hds::Form::Checkbox::Field
                   {{on "change" this.onDocTypeCheckboxChange}}
