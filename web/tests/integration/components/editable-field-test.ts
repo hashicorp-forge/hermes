@@ -4,7 +4,6 @@ import {
   render,
   triggerEvent,
   triggerKeyEvent,
-  waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
@@ -13,11 +12,12 @@ import { module, test } from "qunit";
 
 const EDITABLE_FIELD_SELECTOR = ".editable-field";
 const FIELD_TOGGLE_SELECTOR = ".editable-field .field-toggle";
-const LOADING_SPINNER_SELECTOR = ".loading-indicator";
+const LOADING_SPINNER_SELECTOR = `${EDITABLE_FIELD_SELECTOR} [data-test-spinner]`;
 
 interface EditableFieldComponentTestContext extends MirageTestContext {
   onChange: (value: any) => void;
   isLoading: boolean;
+  isSaving: boolean;
   value: string;
   newArray: string[];
 }
@@ -77,6 +77,30 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom(EDITABLE_FIELD_SELECTOR).exists({ count: 1 }).hasText("foo two");
   });
 
+  test("it can show a saving state", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("isSaving", true);
+
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value="foo"
+        @onChange={{this.onChange}}
+        @isSaving={{this.isSaving}}
+      />
+    `);
+
+    assert.dom(FIELD_TOGGLE_SELECTOR).hasClass("saving").isDisabled();
+    assert.dom(LOADING_SPINNER_SELECTOR).exists();
+
+    this.set("isSaving", false);
+
+    assert
+      .dom(FIELD_TOGGLE_SELECTOR)
+      .doesNotHaveClass("saving")
+      .isNotDisabled();
+
+    assert.dom(LOADING_SPINNER_SELECTOR).doesNotExist();
+  });
+
   test("it can show a loading state", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("isLoading", true);
 
@@ -84,22 +108,19 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value="foo"
         @onChange={{this.onChange}}
-        @isSaving={{this.isLoading}}
+        @isLoading={{this.isLoading}}
       />
     `);
 
-    assert.dom(FIELD_TOGGLE_SELECTOR).hasClass("loading").isDisabled();
-
+    assert
+      .dom(FIELD_TOGGLE_SELECTOR)
+      .doesNotExist("content is not yielded while loading");
     assert.dom(LOADING_SPINNER_SELECTOR).exists();
 
     this.set("isLoading", false);
 
-    assert
-      .dom(FIELD_TOGGLE_SELECTOR)
-      .doesNotHaveClass("loading")
-      .isNotDisabled();
-
     assert.dom(LOADING_SPINNER_SELECTOR).doesNotExist();
+    assert.dom(FIELD_TOGGLE_SELECTOR).exists();
   });
 
   test("it yields an emptyValueErrorIsShown property to the editing block", async function (this: EditableFieldComponentTestContext, assert) {

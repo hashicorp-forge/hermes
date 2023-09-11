@@ -13,14 +13,15 @@
   {{else}}
     {{#if (or @isSaving @isLoading)}}
       <div
+        data-test-spinner
         class={{if @isSaving "absolute top-0 right-0" "flex h-5 items-center"}}
       >
-        <FlightIcon @name="loading" />
+        <FlightIcon @name="loading" data-test-loading-spinner />
       </div>
     {{/if}}
     {{#unless @isLoading}}
       <Action
-        class="field-toggle {{if @isSaving 'loading'}}"
+        class="field-toggle {{if @isSaving 'saving'}}"
         disabled={{or @disabled @isSaving}}
         {{on "click" this.enableEditing}}
       >
