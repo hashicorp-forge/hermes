@@ -42,7 +42,7 @@
           </dd.ToggleAction>
         </:anchor>
         <:item as |dd|>
-          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-5">
+          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
             <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
             {{dd.attrs.name}}
           </dd.Action>
@@ -100,20 +100,56 @@
             </Hds::ButtonSet>
           </M.Footer>
         </Hds::Modal>
-
       {{/if}}
     </div>
-    {{! TODO: this should have some showJira logic }}
+
     <div class="mt-3 flex justify-center">
       {{#if @project.jiraObject}}
-        Jira connected
+        <div
+          class="flex h-9 items-center rounded border border-color-border-primary px-3"
+        >
+
+          <div class="flex h-9 items-center space-x-1.5">
+            <FlightIcon @name="jira" class="mr-3" />
+            {{#if @project.jiraObject.type}}
+              <div class="flex">
+                <FlightIcon @name="square-fill" class="text-lime-600" />
+              </div>
+            {{/if}}
+            <div
+              class="text-color-foreground-faint
+                {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
+            >
+              {{@project.jiraObject.key}}
+            </div>
+            <div class="max-w-[180px]">
+              <TruncatedText
+                class="text-body-200 text-color-foreground-primary"
+              >
+                {{@project.jiraObject.summary}}
+              </TruncatedText>
+            </div>
+            {{#if @project.jiraObject.priority}}
+              <div class="flex">
+                <FlightIcon
+                  @name="chevrons-up"
+                  class="text-color-foreground-critical"
+                />
+              </div>
+            {{/if}}
+            {{#if @project.jiraObject.assignee}}
+              <Person::Avatar @email={{@project.jiraObject.assignee}} />
+            {{/if}}
+          </div>
+          <div class="ml-3 flex shrink-0">
+            <FlightIcon @name="more-vertical" />
+          </div>
+        </div>
       {{else}}
         <Hds::Button
           @color="secondary"
-          @size="small"
           @icon="jira"
           @text="Attach Jira issue"
-          class="mt-1"
         />
       {{/if}}
     </div>

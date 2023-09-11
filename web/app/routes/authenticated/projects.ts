@@ -16,7 +16,9 @@ export type HermesProject = {
     url: string;
     priority: string;
     status: string;
-    assignedTo: string;
+    assignee?: string;
+    type?: string;
+    summary: string;
   };
   relatedLinks?: RelatedExternalLink[];
   creator: string; // maybe a Google/HermesUser

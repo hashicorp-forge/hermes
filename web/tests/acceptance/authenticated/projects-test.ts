@@ -23,11 +23,13 @@ module("Acceptance | authenticated/projects", function (hooks) {
     this.server.create("related-hermes-document", {
       id: 999,
       product: "Vault",
+      status: "In review",
     });
 
     this.server.create("related-hermes-document", {
       id: 998,
       product: "Terraform",
+      status: "Approved",
     });
 
     this.server.create("related-hermes-document", {
@@ -60,11 +62,14 @@ module("Acceptance | authenticated/projects", function (hooks) {
     });
     this.server.create("project", {
       jiraObject: {
+        type: "Enhancement",
         key: "HERMES-123",
         url: "https://jira.example.com/browse/HERMES-123",
         priority: "High",
         status: "In Progress",
-        assignedTo: "testuser@example.com",
+        assignee: "testuser@example.com",
+        summary:
+          "Add Hermes application version & revision in the footer of the UI",
       },
     });
 
