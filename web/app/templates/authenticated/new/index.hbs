@@ -1,12 +1,11 @@
 {{page-title "New Doc"}}
 
 <h1>Choose a template</h1>
-<p>Start by choosing the document type you choose to create.</p>
 <ol class="mt-9 grid grid-cols-3 gap-4">
   {{#each @model as |docType|}}
     <li class="relative">
       <LinkTo
-        class="w-full h-full no-underline"
+        class="h-full w-full no-underline"
         @route="authenticated.new.doc"
         @query={{hash docType=docType.name}}
       >
@@ -18,7 +17,7 @@
             {{if docType.moreInfoLink 'template-card--with-link'}}"
         >
           <div>
-            <p class="text-display-200 text-color-foreground-primary mb-1">
+            <p class="mb-1 text-display-200 text-color-foreground-primary">
               {{docType.name}}
             </p>
             <h2
@@ -38,7 +37,7 @@
           @href={{docType.moreInfoLink.url}}
           @icon="external-link"
           @iconPosition="trailing"
-          class="small-external-link absolute bottom-6 left-5 whitespace-nowrap z-10"
+          class="small-external-link absolute bottom-6 left-5 z-10 whitespace-nowrap"
           @text={{docType.moreInfoLink.text}}
         />
       {{/if}}
