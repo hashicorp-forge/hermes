@@ -2086,10 +2086,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gavant/glint-template-types@npm:^0.3.3":
-  version: 0.3.3
-  resolution: "@gavant/glint-template-types@npm:0.3.3"
-  checksum: 9f80128b67635e93ecb951053812a2c2ce47119384941b76b5c446f2d920568642412ee049d6b1720bc6379adfa8d1b3edb2120112c32ab3862ec5edccde3ab6
+"@gavant/glint-template-types@npm:^0.3.6":
+  version: 0.3.6
+  resolution: "@gavant/glint-template-types@npm:0.3.6"
+  peerDependencies:
+    ember-animated: ^1.0.0
+    ember-basic-dropdown: ^6.0.1
+    ember-concurrency: ^2.0.3
+    ember-concurrency-async: ^1.0.0
+    ember-concurrency-ts: ^0.3.0
+    ember-intl: ^5.7.2
+    ember-modifier: ^3.2.7
+    ember-power-select: ^5.0.0
+    ember-source: ^3.28.0 || ^4.0.0 || ^5.0.0
+  peerDependenciesMeta:
+    ember-animated:
+      optional: true
+    ember-basic-dropdown:
+      optional: true
+    ember-concurrency:
+      optional: true
+    ember-concurrency-async:
+      optional: true
+    ember-concurrency-ts:
+      optional: true
+    ember-intl:
+      optional: true
+    ember-modifier:
+      optional: true
+    ember-power-select:
+      optional: true
+  checksum: 77a61d1272f3ea311606a27b4df50d22fac45cc729cbe8e83a5ee01c732ba33e579c7b9e075ebcf63d51d8944f96e4a8ca6452acd6706b6c86f2cd38bd4aa598
   languageName: node
   linkType: hard
 
@@ -11331,7 +11358,7 @@ __metadata:
     "@ember/optional-features": ^2.0.0
     "@ember/test-helpers": ^2.6.0
     "@floating-ui/dom": ^1.2.4
-    "@gavant/glint-template-types": ^0.3.3
+    "@gavant/glint-template-types": ^0.3.6
     "@glimmer/component": ^1.0.4
     "@glimmer/tracking": ^1.0.4
     "@glint/core": ^1.0.1

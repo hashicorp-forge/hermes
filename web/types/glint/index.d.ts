@@ -41,6 +41,7 @@ import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
 import { HdsFormErrorComponent } from "hds/form/error";
+import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -55,6 +56,7 @@ declare module "@glint/environment-ember-loose/registry" {
     AnimatedOrphans: typeof AnimatedOrphans;
     "animated-each": typeof AnimatedEachCurly;
     "animated-if": typeof AnimatedIfCurly;
+    PowerSelectMultiple: typeof PowerSelectMultiple;
     perform: typeof PerformHelper;
     or: typeof OrHelper;
     eq: typeof EqHelper;
