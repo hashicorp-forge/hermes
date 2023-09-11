@@ -555,9 +555,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
     const [contributors, approvers] = await Promise.all(maybePromises);
 
-    console.log("contributors", contributors);
-    console.log("approvers", approvers);
-
     if (contributors.length) {
       this.contributors = serializePeople(contributors);
     }

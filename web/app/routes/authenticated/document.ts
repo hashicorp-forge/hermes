@@ -81,7 +81,6 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     if (!draftFetched) {
-      console.log("fetching doc");
       try {
         doc = await this.fetchSvc
           .fetch("/api/v1/documents/" + params.document_id, {
