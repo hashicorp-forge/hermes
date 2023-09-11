@@ -68,6 +68,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
       },
     });
 
+    this.server.create("project", {});
+
     await visit("/projects");
 
     await this.pauseTest();

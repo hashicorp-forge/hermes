@@ -3,6 +3,7 @@
 </header>
 <div class="x-container -mt-2">
   <div class="flex items-center justify-between">
+    {{! TODO: componentize this button style }}
     <LinkTo
       @route="authenticated.projects"
       class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
@@ -10,16 +11,39 @@
       <FlightIcon @name="arrow-left" class="mr-2" />
       All projects
     </LinkTo>
-    <div class="flex">
-      <CopyURLButton @url="TODO" />
-      <X::DropdownList @items={{hash}} @placement="bottom-end">
+    <div class="flex space-x-0.5">
+      <CopyURLButton
+        @url="TODO"
+        class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
+      />
+      {{! TODO: figure out what links need to be here }}
+      <X::DropdownList
+        @items={{hash
+          edit=(hash name="Edit")
+          archive=(hash name="Archive")
+          delete=(hash name="Delete")
+        }}
+        @placement="bottom-end"
+      >
         <:anchor as |dd|>
           <dd.ToggleAction>
-            <FlightIcon @name="settings" />
+            <div
+              class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong
+                {{if dd.contentIsShown 'border-color-border-strong'}}"
+            >
+              <FlightIcon @name="settings" />
+              <FlightIcon
+                @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+                class="ml-0.5"
+              />
+            </div>
           </dd.ToggleAction>
         </:anchor>
         <:item as |dd|>
-          Butt
+          <dd.Action>
+
+            {{dd.attrs.name}}
+          </dd.Action>
         </:item>
       </X::DropdownList>
       {{! TODO: add settings dropdown }}
@@ -191,9 +215,9 @@
     </RelatedResources>
   </div>
 
-  <div class="mb-4 text-center text-color-foreground-faint">
+  <div class="mb-4 text-center text-body-100 text-color-foreground-faint">
     Created
-    {{@project.dateCreated}}
+    {{time-ago @project.dateCreated}}
     by
     {{@project.creator}}
   </div>
