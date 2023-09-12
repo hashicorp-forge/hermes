@@ -71,7 +71,16 @@
       </X::DropdownList>
     {{/if}}
   {{else if this.fetchProductAreas.isRunning}}
-    <FlightIcon data-test-product-select-spinner @name="loading" />
+    {{! TODO: format-specific styles }}
+    <div
+      class={{if
+        @formatIsBadge
+        "hds-badge hds-badge--size-medium hds-badge--type-filled hds-badge--color-neutral"
+        "x-dropdown-list-toggle-select"
+      }}
+    >
+      <FlightIcon data-test-product-select-spinner @name="loading" />
+    </div>
   {{else if this.errorIsShown}}
     <div class="failed-to-load-text">
       Failed to load
