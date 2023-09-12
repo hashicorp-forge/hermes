@@ -10,8 +10,11 @@
   class="x-dropdown-list-toggle-select"
   ...attributes
 >
-  {{yield}}
-
+  {{#if @isLoading}}
+    <FlightIcon @name="loading" />
+  {{else}}
+    {{yield}}
+  {{/if}}
   <FlightIcon
     @name="caret"
     class="absolute top-1/2 right-2 -translate-y-1/2 text-color-foreground-faint"

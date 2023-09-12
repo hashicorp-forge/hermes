@@ -7,6 +7,7 @@ interface InputsBadgeDropdownListComponentSignature {
   Element: HTMLDivElement;
   Args: XDropdownListSharedArgs & {
     isSaving?: boolean;
+    isLoading?: boolean;
     placement?: Placement;
     renderOut?: boolean;
 

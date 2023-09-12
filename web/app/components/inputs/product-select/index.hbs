@@ -4,7 +4,19 @@
   ...attributes
   {{did-insert this.maybeFetchProducts}}
 >
-  {{#if this.products}}
+  {{#if this.errorIsShown}}
+    <div class="failed-to-load-text">
+      Failed to load
+    </div>
+    <Hds::Button
+      data-test-product-select-failed-to-load-button
+      @color="secondary"
+      @size="small"
+      {{on "click" (perform this.fetchProductAreas)}}
+      @text="Retry"
+      @icon="reload"
+    />
+  {{else}}
     {{#if @formatIsBadge}}
       <Inputs::BadgeDropdownList
         @items={{this.products}}
@@ -13,6 +25,7 @@
         @selected={{@selected}}
         @placement={{if @placement @placement "bottom-start"}}
         @isSaving={{@isSaving}}
+        @isLoading={{this.fetchProductAreas.isRunning}}
         @renderOut={{@renderOut}}
         @icon={{this.icon}}
         class="product-select-dropdown-list w-80"
@@ -34,7 +47,7 @@
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
         @placement={{@placement}}
-        @isSaving={{@isSaving}}
+        @isLoading={{this.fetchProductAreas.isRunning}}
         @renderOut={{@renderOut}}
         @matchAnchorWidth={{true}}
         class="product-select-dropdown-list"
@@ -74,27 +87,5 @@
         </:item>
       </X::DropdownList>
     {{/if}}
-  {{else if this.errorIsShown}}
-    <div class="failed-to-load-text">
-      Failed to load
-    </div>
-    <Hds::Button
-      data-test-product-select-failed-to-load-button
-      @color="secondary"
-      @size="small"
-      {{on "click" (perform this.fetchProductAreas)}}
-      @text="Retry"
-      @icon="reload"
-    />
-  {{else}}
-    <div
-      class={{if
-        @formatIsBadge
-        "hds-badge hds-badge--size-medium hds-badge--type-filled hds-badge--color-neutral"
-        "x-dropdown-list-toggle-select"
-      }}
-    >
-      <FlightIcon data-test-product-select-spinner @name="loading" />
-    </div>
   {{/if}}
 </div>

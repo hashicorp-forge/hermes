@@ -9,5 +9,9 @@
   aria-haspopup="listbox"
   ...attributes
 >
-  {{yield}}
+  {{#if @isLoading}}
+    <FlightIcon @name="loading" />
+  {{else}}
+    {{yield}}
+  {{/if}}
 </Action>

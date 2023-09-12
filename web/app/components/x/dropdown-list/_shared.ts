@@ -30,4 +30,5 @@ export interface XDropdownListToggleComponentArgs {
   contentIsShown: boolean;
   ariaControls: string;
   disabled?: boolean;
+  isLoading?: boolean;
 }

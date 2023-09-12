@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { timeout } from "ember-animated/-private/ember-scheduler";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
