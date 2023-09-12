@@ -1,18 +1,18 @@
 import Component from "@glimmer/component";
 import { HermesProject } from "hermes/routes/authenticated/projects";
 
-interface ProjectsComponentSignature {
+interface ProjectListComponentSignature {
   Args: {
     projects: HermesProject[];
   };
 }
 
-export default class ProjectsComponent extends Component<ProjectsComponentSignature> {
+export default class ProjectListComponent extends Component<ProjectListComponentSignature> {
   // we may want some "sortedProjects" computed property here
 }
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    Projects: typeof ProjectsComponent;
+    "Project::List": typeof ProjectListComponent;
   }
 }
