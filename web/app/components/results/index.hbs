@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <section class="flex min-h-full flex-1 flex-col items-center">
   <div class="x-container">
     {{#if (and this.firstPageIsShown this.queryIsProductName)}}
@@ -8,7 +7,7 @@
       >
         <Hds::Card::Container
           @level="mid"
-          @hasBorder="true"
+          @hasBorder={{true}}
           @overflow="hidden"
           class="flex flex-col items-start space-y-3 px-4 pt-4 pb-3"
         >
@@ -27,16 +26,20 @@
       </div>
     {{/if}}
 
+    {{! TODO: this needs to include projects }}
+    {{! Projects can't really be filtered by much other than product/area }}
+
     <h1
       class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
     >{{@results.nbHits}} documents matching “{{@query}}”</h1>
     <div class="flex w-full flex-col space-y-12 py-10">
       <div class="tile-list">
-        {{#each @results.hits as |doc index|}}
+        {{#each @results.hits as |doc|}}
           <Doc::Tile
             @avatar="{{get doc.ownerPhotos 0}}"
             @docID="{{doc.objectID}}"
-            @isResult="{true}"
+            @isResult={{true}}
+            @modifiedTime={{doc.modifiedTime}}
             @owner="{{get doc.owners 0}}"
             @productArea="{{doc.product}}"
             @snippet="{{doc._snippetResult.content.value}}"
