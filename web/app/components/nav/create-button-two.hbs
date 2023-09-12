@@ -1,11 +1,14 @@
-<X::DropdownList @items={{this.menuItems}} @placement="bottom-end">
+<X::DropdownList
+  @items={{this.menuItems}}
+  @placement="bottom-end"
+  {{! class="w-[200px]" }}
+>
   <:anchor as |dd|>
     <Hds::Button
       @text="New"
-      @isIconOnly={{true}}
       @icon="plus"
       @route="authenticated.new.doc"
-      class="rounded-r-none pl-[11px] pr-2.5"
+      class="rounded-r-none pl-2.5 pr-3.5"
     />
     <dd.ToggleAction
       class="hds-button hds-button--color-primary hds-button--size-medium flex rounded-l-none px-1.5"

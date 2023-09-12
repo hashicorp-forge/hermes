@@ -7,7 +7,7 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
 import { Response } from "miragejs";
 
-const DEFAULT_DROPDOWN_SELECTOR = ".product-select-default-toggle";
+const TOGGLE_SELECTOR = "[data-test-x-dropdown-list-toggle-select]";
 const LIST_ITEM_SELECTOR = "[data-test-product-select-item]";
 
 interface InputsProductSelectContext extends MirageTestContext {
@@ -48,7 +48,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     assert.dom(badgeDropdownSelector).exists("badge dropdown is rendered");
     assert
-      .dom(DEFAULT_DROPDOWN_SELECTOR)
+      .dom(TOGGLE_SELECTOR)
       .doesNotExist("default dropdown is not rendered");
 
     this.set("formatIsBadge", false);
@@ -56,9 +56,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     assert
       .dom(badgeDropdownSelector)
       .doesNotExist("badge dropdown is not rendered");
-    assert
-      .dom(DEFAULT_DROPDOWN_SELECTOR)
-      .exists("default dropdown is rendered");
+    assert.dom(TOGGLE_SELECTOR).exists("default dropdown is rendered");
   });
 
   test("it can render the toggle with a product abbreviation", async function (this: InputsProductSelectContext, assert) {
@@ -83,9 +81,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
         @onChange={{this.onChange}}
       />
     `);
-    assert
-      .dom(".product-select-selected-value")
-      .hasText("Select a product/area");
+    assert.dom(TOGGLE_SELECTOR).hasText("Select a product/area");
   });
 
   test("it displays the products in a dropdown list with abbreviations", async function (this: InputsProductSelectContext, assert) {
@@ -96,7 +92,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    await click(DEFAULT_DROPDOWN_SELECTOR);
+    await click(TOGGLE_SELECTOR);
 
     assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
 
@@ -113,7 +109,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    await click(DEFAULT_DROPDOWN_SELECTOR);
+    await click(TOGGLE_SELECTOR);
 
     // In Mirage, we return a default product when there are no products in the database.
     // This simulates the `fetchProducts` task being run.
@@ -134,7 +130,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    await click(DEFAULT_DROPDOWN_SELECTOR);
+    await click(TOGGLE_SELECTOR);
     await click(LIST_ITEM_SELECTOR);
 
     assert.equal(count, 1, "the action was called once");

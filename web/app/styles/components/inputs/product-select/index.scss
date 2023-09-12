@@ -2,18 +2,10 @@
   @apply max-h-[217px];
 }
 
-.product-select-default-toggle {
-  @apply relative flex items-center justify-start leading-none;
-}
-
 .product-select-toggle-abbreviation {
   @apply ml-2 inline-flex text-body-100 leading-none opacity-50;
 }
 
 .product-select-selected-value {
-  @apply flex leading-none;
-}
-
-.product-select-toggle-caret {
-  @apply absolute top-1/2 right-2 -translate-y-1/2 text-color-foreground-faint;
+  @apply flex;
 }

@@ -7,7 +7,7 @@
         @listIsOrdered={{true}}
         @onItemClick={{this.onChange}}
         @selected={{@selected}}
-        @placement={{@placement}}
+        @placement={{if @placement @placement "bottom-start"}}
         @isSaving={{@isSaving}}
         @renderOut={{@renderOut}}
         @icon={{this.icon}}
@@ -37,10 +37,7 @@
         ...attributes
       >
         <:anchor as |dd|>
-          <dd.ToggleAction
-            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium
-              {{if @isFullWidth 'w-full'}}"
-          >
+          <dd.ToggleSelect>
             {{#if dd.selected}}
               <FlightIcon
                 @name={{or (get-product-id @selected) "folder"}}
@@ -49,8 +46,8 @@
             {{/if}}
 
             <span
-              class="product-select-selected-value
-                {{unless @selected 'text-color-foreground-faint'}}"
+              data-test-selected-value
+              class={{unless @selected "text-color-foreground-faint"}}
             >
               {{or @selected "---"}}
             </span>
@@ -60,9 +57,7 @@
                 {{this.selectedProductAbbreviation}}
               </span>
             {{/if}}
-
-            <FlightIcon @name="caret" class="product-select-toggle-caret" />
-          </dd.ToggleAction>
+          </dd.ToggleSelect>
         </:anchor>
         <:item as |dd|>
           <dd.Action class="pr-5">

@@ -18,6 +18,7 @@ import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
+import XDropdownListToggleSelectComponent from "./toggle-select";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -36,6 +37,10 @@ export interface XDropdownListAnchorAPI
   ToggleButton: WithBoundArgs<
     typeof XDropdownListToggleButtonComponent,
     XDropdownListToggleComponentBoundArgs | "color" | "text"
+  >;
+  ToggleSelect: WithBoundArgs<
+    typeof XDropdownListToggleSelectComponent,
+    XDropdownListToggleComponentBoundArgs
   >;
   focusedItemIndex: number;
   selected: any;

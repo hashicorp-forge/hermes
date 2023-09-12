@@ -1,5 +1,5 @@
 .x-dropdown-list-toggle-select {
-  @apply text-left border;
+  @apply relative flex w-full items-center justify-start border leading-none;
 
   .flight-icon {
     @apply shrink-0;
@@ -19,9 +19,5 @@
 
   &.hds-button--color-secondary:not(:hover) {
     @apply bg-color-surface-primary;
-
-    .caret {
-      @apply text-color-foreground-faint;
-    }
   }
 }

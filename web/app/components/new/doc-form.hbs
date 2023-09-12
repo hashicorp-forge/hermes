@@ -38,15 +38,9 @@
             </ExternalLink>
           </div>
 
-          <dd.ToggleAction
-            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium w-full"
+          <dd.ToggleSelect
+            class="hds-button hds-button--color-secondary hds-button--size-medium"
           >
-            {{!-- {{#if dd.selected}}
-              <FlightIcon
-                @name={{or dd.selected.icon "file-text"}}
-                class="mr-2.5"
-              />
-            {{/if}} --}}
             <div
               class={{unless
                 dd.selected.longName
@@ -60,8 +54,7 @@
                 {{dd.selected.shortName}}
               </div>
             {{/if}}
-            <FlightIcon @name="caret" class="product-select-toggle-caret" />
-          </dd.ToggleAction>
+          </dd.ToggleSelect>
         </:anchor>
         <:item as |dd|>
           <dd.Action

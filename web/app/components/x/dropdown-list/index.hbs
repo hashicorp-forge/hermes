@@ -53,6 +53,22 @@
             f.contentID
           )
         )
+        ToggleSelect=(component
+          "x/dropdown-list/toggle-select"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
+          toggleContent=f.toggleContent
+          disabled=@disabled
+          ariaControls=(concat
+            "x-dropdown-list-"
+            (if this.inputIsShown "container" "items")
+            "-"
+            f.contentID
+          )
+        )
         ariaControls=(concat
           "x-dropdown-list-"
           (if this.inputIsShown "container" "items")
