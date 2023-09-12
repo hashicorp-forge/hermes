@@ -1,13 +1,13 @@
 import Component from "@glimmer/component";
 import { HermesProject } from "hermes/routes/authenticated/projects";
 
-interface ProjectsProjectComponentSignature {
+interface ProjectsProjectTileComponentSignature {
   Args: {
     project: HermesProject;
   };
 }
 
-export default class ProjectsProjectComponent extends Component<ProjectsProjectComponentSignature> {
+export default class ProjectsProjectTileComponent extends Component<ProjectsProjectTileComponentSignature> {
   protected get documents() {
     return this.args.project.documents;
   }
@@ -24,6 +24,6 @@ export default class ProjectsProjectComponent extends Component<ProjectsProjectC
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Projects::Project": typeof ProjectsProjectComponent;
+    "Projects::ProjectTile": typeof ProjectsProjectTileComponent;
   }
 }
