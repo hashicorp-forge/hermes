@@ -8,10 +8,10 @@
       @text="New"
       @icon="plus"
       @route="authenticated.new.doc"
-      class="rounded-r-none pl-2.5 pr-3.5"
+      class="relative z-10 rounded-r-none pl-2.5 pr-3.5"
     />
     <dd.ToggleAction
-      class="hds-button hds-button--color-primary hds-button--size-medium flex rounded-l-none px-1.5"
+      class="hds-button hds-button--color-primary hds-button--size-medium relative -ml-px flex rounded-l-none px-1.5 focus-within:z-10 hover:z-10"
     >
       <FlightIcon @name={{if dd.contentIsShown "chevron-up" "chevron-down"}} />
     </dd.ToggleAction>

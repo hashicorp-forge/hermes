@@ -3,14 +3,16 @@
     data-test-sidebar-dashboard-link
     class="sidebar-header-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
-    {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
+    {{(if @isCollapsed (modifier "tooltip" "Back" placement="right"))}}
   >
     <FlightIcon
       @name={{if @isCollapsed "hashicorp" "arrow-left"}}
       @size={{if @isCollapsed "24"}}
     />
     {{#unless @isCollapsed}}
-      <span class="ml-2">Dashboard</span>
+      <span class="ml-2">
+        Back
+      </span>
     {{/unless}}
   </LinkTo>
   <div class="sidebar-header-icon-controls">
