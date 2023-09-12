@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 <section class="flex min-h-full flex-1 flex-col items-center">
   <div class="x-container">
     {{#if (and this.firstPageIsShown this.queryIsProductName)}}
@@ -32,11 +31,12 @@
     >{{@results.nbHits}} documents matching “{{@query}}”</h1>
     <div class="flex w-full flex-col space-y-12 py-10">
       <div class="tile-list">
-        {{#each @results.hits as |doc index|}}
+        {{#each @results.hits as |doc|}}
           <Doc::Tile
             @avatar="{{get doc.ownerPhotos 0}}"
             @docID="{{doc.objectID}}"
-            @isResult="{true}"
+            @isResult={{true}}
+            @modifiedTime={{doc.modifiedTime}}
             @owner="{{get doc.owners 0}}"
             @productArea="{{doc.product}}"
             @snippet="{{doc._snippetResult.content.value}}"
