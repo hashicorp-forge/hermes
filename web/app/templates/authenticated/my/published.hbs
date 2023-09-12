@@ -1,11 +1,5 @@
 <div class="x-container">
-  {{#in-element
-    (html-element ".header-nav-and-filters")
-    insertBefore=null
-  }}{{/in-element}}
   <Header::Toolbar @facets={{@model.facets}} class="mb-8" />
-
-  {{! <Hds::Form::TextInput::Base @type="search" @value="" class="max-w-xs" /> }}
   <Header::ActiveFilterList />
 </div>
 

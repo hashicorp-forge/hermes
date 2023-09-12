@@ -2,15 +2,17 @@ import Component from "@glimmer/component";
 import { SearchResponse } from "@algolia/client-search";
 import { HermesDocument } from "hermes/types/document";
 import { capitalize } from "@ember/string";
+import { FacetRecords } from "hermes/types/facets";
 
-interface ResultsIndexComponentSignature {
+interface SearchResultsComponentSignature {
   Args: {
     results: SearchResponse<HermesDocument>;
     query: string;
+    facets?: FacetRecords;
   };
 }
 
-export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
+export default class SearchResultsComponent extends Component<SearchResultsComponentSignature> {
   get firstPageIsShown(): boolean {
     return this.args.results.page === 0;
   }
@@ -29,5 +31,11 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     return hits.some(
       (hit) => hit.product?.toLowerCase() === this.lowercasedQuery
     );
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    SearchResults: typeof SearchResultsComponent;
   }
 }

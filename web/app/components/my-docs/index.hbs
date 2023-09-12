@@ -4,9 +4,7 @@
   <div
     class="header-nav-and-filters mb-8 flex w-full items-center justify-between"
   >
-    {{! TODO: don't just justify between }}
     <div class="relative flex items-center">
-
       <LinkTo @route="authenticated.my">
         <Person::Avatar
           @imgURL={{this.authenticatedUser.info.picture}}
@@ -24,8 +22,6 @@
         </p>
       </div>
     </div>
-    {{! make this more like the product overview screen }}
-
     <div class="big-tabs">
       <LinkTo
         {{on "click" this.resetLocalProperties}}

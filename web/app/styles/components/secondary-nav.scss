@@ -25,7 +25,7 @@
 }
 
 .big-tabs {
-  @apply flex space-x-4;
+  @apply flex items-center space-x-4;
 
   > a {
     @apply relative flex text-display-500 font-bold;

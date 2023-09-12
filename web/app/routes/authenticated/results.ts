@@ -4,8 +4,10 @@ import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { SearchResponse } from "instantsearch.js";
+import { HermesDocument } from "hermes/types/document";
 
-export default class ResultsRoute extends Route {
+export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -32,6 +34,8 @@ export default class ResultsRoute extends Route {
   };
 
   async model(params: ResultsRouteParams) {
+    // TODO: we also need to search projects
+
     const searchIndex = this.configSvc.config.algolia_docs_index_name;
 
     let [facets, results] = await Promise.all([
@@ -41,6 +45,6 @@ export default class ResultsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { facets, results: results as SearchResponse<HermesDocument> };
   }
 }
