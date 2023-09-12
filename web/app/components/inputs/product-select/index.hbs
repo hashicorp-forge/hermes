@@ -1,5 +1,9 @@
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
-<div data-test-product-select ...attributes>
+<div
+  data-test-product-select
+  ...attributes
+  {{did-insert this.maybeFetchProducts}}
+>
   {{#if this.products}}
     {{#if @formatIsBadge}}
       <Inputs::BadgeDropdownList
@@ -70,17 +74,6 @@
         </:item>
       </X::DropdownList>
     {{/if}}
-  {{else if this.fetchProductAreas.isRunning}}
-    {{! TODO: format-specific styles }}
-    <div
-      class={{if
-        @formatIsBadge
-        "hds-badge hds-badge--size-medium hds-badge--type-filled hds-badge--color-neutral"
-        "x-dropdown-list-toggle-select"
-      }}
-    >
-      <FlightIcon data-test-product-select-spinner @name="loading" />
-    </div>
   {{else if this.errorIsShown}}
     <div class="failed-to-load-text">
       Failed to load
@@ -95,8 +88,13 @@
     />
   {{else}}
     <div
-      class="absolute top-0 left-0"
-      {{did-insert (perform this.fetchProductAreas)}}
-    ></div>
+      class={{if
+        @formatIsBadge
+        "hds-badge hds-badge--size-medium hds-badge--type-filled hds-badge--color-neutral"
+        "x-dropdown-list-toggle-select"
+      }}
+    >
+      <FlightIcon data-test-product-select-spinner @name="loading" />
+    </div>
   {{/if}}
 </div>

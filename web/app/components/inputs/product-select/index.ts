@@ -57,6 +57,13 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     this.args.onChange(newValue, attributes);
   }
 
+  @action protected maybeFetchProducts() {
+    if (this.products) {
+      return;
+    }
+    void this.fetchProductAreas.perform();
+  }
+
   protected fetchProductAreas = task(async () => {
     try {
       await this.productAreas.fetch.perform();
