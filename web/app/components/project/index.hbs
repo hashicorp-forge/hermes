@@ -15,11 +15,22 @@
     <div class="flex space-x-0.5">
       <CopyURLButton
         @url="TODO"
-        {{!-- @isIconOnly={{true}} --}}
+        @isIconOnly={{true}}
         @tooltipPlacement="bottom"
         class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
       />
-      {{! TODO: figure out what links need to be here }}
+
+      <Hds::Button
+        {{on "click" this.showModal}}
+        {{! @size="small" }}
+        @icon="edit"
+        @text="Edit"
+        @isIconOnly={{true}}
+        @color="tertiary"
+        class="mx-auto text-color-foreground-primary"
+        {{tooltip "Edit project info" placement="bottom"}}
+      />
+
       <X::DropdownList
         @items={{hash
           archive=(hash name="Archive..." icon="archive" action=this.showModal)
@@ -44,6 +55,7 @@
           </dd.Action>
         </:item>
       </X::DropdownList>
+
     </div>
   </div>
 
@@ -58,20 +70,21 @@
             {{@project.description}}
           </p>
         {{/if}}
-        <Hds::Button
+        {{!-- <Hds::Button
           {{on "click" this.showModal}}
-          @size="small"
+          {{! @size="small" }}
           @icon="edit"
           @text="Edit"
-          @color="secondary"
-          class="mx-auto mt-3"
-        />
+          @isIconOnly={{true}}
+          @color="tertiary"
+          class="mx-auto mt-3 text-color-foreground-faint"
+        /> --}}
       </div>
 
       {{#if this.modalIsShown}}
         <Hds::Modal @onClose={{this.hideModal}} as |M|>
           <M.Header>
-            Project info
+            Edit project info
           </M.Header>
           <M.Body>
             <Hds::Form::TextInput::Field
