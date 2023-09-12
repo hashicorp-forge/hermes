@@ -250,13 +250,13 @@
   >
 
     <RelatedResources
-      @allowAddingExternalLinks={{false}}
+      @scope="documents"
       @items={{@project.documents}}
       @addResource={{this.addResource}}
       @modalHeaderTitle="Add a document"
       @modalInputPlaceholder="Search by title, author, doc number..."
     >
-      <:header>
+      <:header as |rr|>
         <div class="flex h-12 items-center rounded-t bg-color-surface-faint">
           <div class="w-full pl-4 pr-2">
             <div class="flex items-center justify-between">
@@ -264,6 +264,7 @@
                 Documents
               </h3>
               <Hds::Button
+                {{on "click" rr.showModal}}
                 @text="Add a document"
                 @color="tertiary"
                 @icon="plus"
