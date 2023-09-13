@@ -50,7 +50,9 @@
         </X::DropdownList>
       </h1>
       {{! TODO: move logic up a level }}
-      <form {{on "submit" this.submitForm}} {{did-insert this.registerForm}}>
+      <form {{on "submit" this.submitForm}}>
+        {{! TODO: figure out if we addresed this }}
+        {{!-- {{did-insert this.registerForm}} --}}
         <div class="space-y-7">
 
           {{! Title }}

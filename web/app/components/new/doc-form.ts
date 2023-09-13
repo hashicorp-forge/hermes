@@ -13,6 +13,8 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
+import { HermesDocumentType } from "hermes/types/document-type";
+import { next, schedule } from "@ember/runloop";
 
 interface DocFormErrors {
   title: string | null;
@@ -82,8 +84,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
-  docTypes = [
-    {
+  docTypes = {
+    rfc: {
       longName: "Request for comments",
       icon: "discussion-circle",
       shortName: "RFC",
@@ -93,7 +95,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
         url: "https://works.hashicorp.com/articles/rfc-template",
       },
     },
-    {
+    prd: {
       longName: "Product requirements",
       icon: "target",
       shortName: "PRD",
@@ -103,31 +105,31 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
         url: "https://works.hashicorp.com/articles/prd-template",
       },
     },
-    {
+    frd: {
       longName: "Funding request",
       icon: "dollar-sign",
       shortName: "FRD",
       description: "Request a budget, along with justifications and returns.",
     },
-    {
+    por: {
       longName: "Plan of record",
       icon: "map",
       shortName: "POR",
       description: "Outline a project and designate a team.",
     },
-    {
+    prfaq: {
       longName: "Press release / FAQ",
       icon: "newspaper",
       shortName: "PRFAQ",
       description: "Write about a new product or feature.",
     },
-    {
+    memo: {
       longName: "Memo",
       icon: "radio",
       shortName: "MEMO",
       description: "Capture an idea or make an announcement.",
     },
-  ];
+  };
 
   get objectTypeIsProject() {
     return false;
@@ -137,6 +139,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   // TODO: give docType a type
   // @tracked docType: any = this.docTypes[0];
   @tracked selectedDocType: any = null;
+  @tracked selectedDocTypeObject = {};
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -193,12 +196,18 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this._form = form;
   }
 
-  @action protected changeDocType(docTypeShortName: string) {
-    const docType = this.docTypes.find(
-      (docType) => docType.shortName === docTypeShortName
-    );
+  @action protected changeDocType(id: string) {
+    const docType = Object.entries(this.docTypes).find(([key]) => key === id);
+
     assert("docType must exist", docType);
-    this.selectedDocType = docType;
+
+    const [key, value] = docType;
+
+    this.selectedDocTypeObject = value;
+    next(() => {
+      // Wait for the dropdown to close.
+      this.selectedDocType = key;
+    });
   }
 
   /**
