@@ -85,10 +85,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   docTypes = [
     {
       longName: "Request for comments",
-      // icon: "discussion-circle",
+      icon: "discussion-circle",
       shortName: "RFC",
-      description:
-        "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
+      description: "Submit an idea for peer feedback.",
       moreInfoLink: {
         text: "When should I create an RFC?",
         url: "https://works.hashicorp.com/articles/rfc-template",
@@ -96,10 +95,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
     {
       longName: "Product requirements",
-      // icon: "target",
+      icon: "target",
       shortName: "PRD",
-      description:
-        "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
+      description: "Summarize a problem and propose a solution.",
       moreInfoLink: {
         text: "When should I create a PRD?",
         url: "https://works.hashicorp.com/articles/prd-template",
@@ -107,29 +105,27 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     },
     {
       longName: "Funding request",
-      // icon: "dollar-sign",
+      icon: "dollar-sign",
       shortName: "FRD",
-      description:
-        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
+      description: "Request a budget, along with justifications and returns.",
     },
     {
       longName: "Plan of record",
-      // icon: "map",
+      icon: "map",
       shortName: "POR",
-      description:
-        "Create a Funding Request Document to capture a request for additional funding, along with the business justification and the expected returns.",
+      description: "Outline a project and designate a team.",
     },
     {
       longName: "Press release / FAQ",
-      // icon: "newspaper",
+      icon: "newspaper",
       shortName: "PRFAQ",
-      description: "Write a press release for your project.",
+      description: "Write about a new product or feature.",
     },
     {
       longName: "Memo",
-      // icon: "radio",
+      icon: "radio",
       shortName: "MEMO",
-      description: "Share freeform info with your team.",
+      description: "Capture an idea or make an announcement.",
     },
   ];
 

@@ -12,10 +12,10 @@
     {{! Document type }}
     <div>
       <X::DropdownList
-        class="product-select-dropdown-list"
+        class="search-popover !max-h-[237px]"
         @items={{this.docTypes}}
         @selected={{this.selectedDocType}}
-        @matchAnchorWidth={{true}}
+        @matchAnchorWidth={{hash enabled=true additionalWidth=10}}
       >
         <:anchor as |dd|>
           <div class="mb-2 flex items-center justify-between">
@@ -28,29 +28,22 @@
                 <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
               </div>
             </div>
-            <ExternalLink
-              @iconIsShown={{true}}
-              href="/support/document-types"
-              target="_blank"
-              class="flex whitespace-nowrap text-body-100 text-color-foreground-faint opacity-75 hover:opacity-100"
-            >
-              About document types
-            </ExternalLink>
           </div>
 
           <dd.ToggleSelect
             class="hds-button hds-button--color-secondary hds-button--size-medium"
           >
-            <div
-              class={{unless
-                dd.selected.longName
-                "text-color-foreground-faint"
-              }}
-            >
+            <FlightIcon
+              @name={{or dd.selected.icon "file-text"}}
+              class="mr-3"
+            />
+            <div class="text-color-foreground-strong">
               {{or dd.selected.longName "---"}}
             </div>
             {{#if dd.selected.shortName}}
-              <div class="ml-2 text-body-100 leading-none opacity-50">
+              <div
+                class="ml-2 text-body-100 leading-none text-color-foreground-disabled"
+              >
                 {{dd.selected.shortName}}
               </div>
             {{/if}}
@@ -58,22 +51,47 @@
         </:anchor>
         <:item as |dd|>
           <dd.Action
-            class="pr-5"
+            class="items-start px-4 pr-5"
             {{on "click" (fn this.changeDocType dd.attrs.shortName)}}
           >
-            <div class="flex items-center">
-              {{!-- <FlightIcon
-                @name={{or dd.attrs.icon "file-text"}}
-                class="mr-2.5"
-              /> --}}
-              {{dd.attrs.longName}}
-              <div class="ml-2 text-body-100 opacity-50">
-                {{dd.attrs.shortName}}
+            <FlightIcon
+              @name={{or dd.attrs.icon "file-text"}}
+              class="mr-3 mt-0.5"
+            />
+            <div>
+
+              <div class="flex items-center leading-none">
+                <span
+                  class="font-Xsemibold text-body-200 text-color-foreground-strong"
+                >
+
+                  {{dd.attrs.longName}}
+                </span>
+                <span
+                  class="ml-2.5 text-body-100 leading-none text-color-foreground-disabled"
+                >
+                  {{dd.attrs.shortName}}
+                </span>
               </div>
+              {{! TODO: this should only be one line }}
+              {{#if dd.attrs.description}}
+                <div class="text-color-foreground-Xfaint mt-0.5 text-body-100">
+                  {{dd.attrs.description}}
+                </div>
+              {{/if}}
             </div>
+
           </dd.Action>
         </:item>
       </X::DropdownList>
+      <ExternalLink
+        @iconIsShown={{true}}
+        href="/support/document-types"
+        target="_blank"
+        class="mt-3 flex whitespace-nowrap text-body-100 text-color-foreground-action hover:text-color-foreground-action-hover"
+      >
+        About document types
+      </ExternalLink>
 
     </div>
 

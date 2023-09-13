@@ -1,9 +1,17 @@
 .product-select-dropdown-list {
   @apply max-h-[217px];
+
+  .x-dropdown-list-input-container {
+    @apply p-[5px];
+  }
+  .hds-form-text-input[type="search"] {
+    @apply pl-9;
+    background-position: 10px center;
+  }
 }
 
 .product-select-toggle-abbreviation {
-  @apply ml-2 inline-flex text-body-100 leading-none opacity-50;
+  @apply ml-2.5 inline-flex text-body-100 leading-none opacity-50;
 }
 
 .product-select-selected-value {

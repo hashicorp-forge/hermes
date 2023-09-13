@@ -49,23 +49,17 @@
         @placement={{@placement}}
         @isLoading={{this.fetchProductAreas.isRunning}}
         @renderOut={{@renderOut}}
-        @matchAnchorWidth={{true}}
+        @matchAnchorWidth={{hash enabled=true additionalWidth=10}}
         class="product-select-dropdown-list"
         ...attributes
       >
         <:anchor as |dd|>
           <dd.ToggleSelect>
-            {{#if dd.selected}}
-              <FlightIcon
-                @name={{or (get-product-id @selected) "folder"}}
-                class="mr-2.5"
-              />
-            {{/if}}
-
-            <span
-              data-test-selected-value
-              class={{unless @selected "text-color-foreground-faint"}}
-            >
+            <FlightIcon
+              @name={{or (get-product-id dd.selected) "folder"}}
+              class="mr-3"
+            />
+            <span data-test-selected-value class="text-color-foreground-strong">
               {{or @selected "---"}}
             </span>
 
@@ -82,6 +76,7 @@
               @product={{dd.value}}
               @isSelected={{dd.isSelected}}
               @abbreviation={{dd.attrs.abbreviation}}
+              class="px-[5px]"
             />
           </dd.Action>
         </:item>
