@@ -16,6 +16,7 @@ export type XDropdownListInteractiveComponentArgs = {
  */
 export interface XDropdownListSharedArgs {
   items?: any;
+  groups?: any;
   selected?: any;
   listIsOrdered?: boolean;
 }

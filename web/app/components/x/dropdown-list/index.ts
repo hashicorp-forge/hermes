@@ -153,6 +153,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     if (this.args.inputIsShown === false) {
       return false;
     }
+    // TODO: needs to account for groups
 
     if (!this.args.items) {
       return false;

@@ -1,7 +1,20 @@
 <div class="x-container mt-2 mb-4">
-  <ol class="grid grid-cols-3 gap-2.5">
-    {{#each @projects as |project|}}
-      <Project::Tile @project={{project}} />
-    {{/each}}
-  </ol>
+  <div class="mb-6">
+    <h3 class="mb-3">In progress</h3>
+    <ol class="grid grid-cols-2 gap-2.5">
+      {{#each @projects as |project|}}
+        <Project::Tile @project={{project}} />
+      {{/each}}
+    </ol>
+  </div>
+  <div class="mb-6">
+    <h3 class="mb-3">Completed</h3>
+    <ol class="grid grid-cols-2 gap-2.5">
+      {{#each (take 3 @projects) as |project|}}
+        <Project::Tile @project={{project}} />
+      {{/each}}
+    </ol>
+  </div>
+
+  <a>View archived projects</a>
 </div>

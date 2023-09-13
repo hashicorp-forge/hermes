@@ -16,9 +16,7 @@
     <Dashboard::DocsAwaitingReview @docs={{@model}} />
   {{/if}}
 
-  <div
-    class="hds-border-primary mt-10 flex w-full flex-col border-0 border-b pb-10"
-  >
+  <div class="mt-10 flex w-full flex-col pb-10">
     <div class="mb-8 flex items-center space-x-2">
       <FlightIcon @name="eye" @size="24" />
       <h2
@@ -65,11 +63,6 @@
         You havenʼt viewed any documents yet.
       </div>
     {{/if}}
-
-  </div>
-
-  <div class="flex w-full flex-col py-10">
-    <Dashboard::LatestUpdates />
   </div>
 
 </section>

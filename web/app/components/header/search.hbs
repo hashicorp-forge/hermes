@@ -23,8 +23,8 @@
           @value={{this.query}}
           name="query"
           size="25"
-          placeholder="Find a document..."
-          aria-label="Find a document..."
+          placeholder="Search docs, projects, people..."
+          aria-label="Search docs, projects, people..."
           aria-controls={{dd.ariaControls}}
           aria-expanded={{dd.contentIsShown}}
           aria-haspopup="listbox"
@@ -39,9 +39,10 @@
         <div id="global-search-popover-header">
           {{! content is placed here by the in-element helper below }}
         </div>
+        {{! TODO: this should go into some kind of <:list-group-header> component }}
         {{#if this.bestMatchesHeaderIsShown}}
           <div class="global-search-best-matches-header">
-            <h5>Best matches</h5>
+            <h5>Documents</h5>
           </div>
         {{/if}}
       </:header>
