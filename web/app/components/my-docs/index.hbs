@@ -1,9 +1,7 @@
 <Header />
 
-<div class="x-container">
-  <div
-    class="header-nav-and-filters mb-8 flex w-full items-center justify-between"
-  >
+<div class="x-container mb-8">
+  <div class="header-nav-and-filters flex w-full items-center justify-between">
     <div class="relative flex items-center">
       <LinkTo @route="authenticated.my">
         <Person::Avatar
@@ -14,7 +12,7 @@
         />
       </LinkTo>
       <div>
-        <h1 class="mb-0 text-display-300">
+        <h1 class="mb-0 text-display-300 font-semibold">
           {{this.authenticatedUser.info.name}}
         </h1>
         <p class="text-body-300 text-color-foreground-faint">
@@ -29,7 +27,7 @@
         @current-when="authenticated.my.index"
         class="!text-display-300"
       >
-        Latest
+        Overview
       </LinkTo>
       <LinkTo
         {{on "click" this.resetLocalProperties}}

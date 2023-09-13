@@ -1,17 +1,45 @@
-<div class="x-container mt-6">
-  <ol class="tile-list">
-    {{#each @model as |doc|}}
-      <li>
-        <Doc::Tile
-          @docID={{doc.objectID}}
-          @title={{doc.title}}
-          @status={{doc.status}}
-          @owner={{get doc.owners 0}}
-          @productArea={{doc.product}}
-          @isDraft={{eq (lowercase doc.status) "wip"}}
-          @modifiedTime={{doc.modifiedTime}}
-        />
-      </li>
-    {{/each}}
-  </ol>
+<div class="x-container">
+  <div class="max-w-screen-smX mx-auto">
+    <h2 class="hermes-h4 mb-3">
+      Last modified
+    </h2>
+
+    <ol class="divide-y divide-gray-200">
+      {{#each @model as |doc|}}
+        {{! TODO: this needs to fork depending on type }}
+        <li class="flex p-2">
+          <Doc::Thumbnail
+            class="mr-5"
+            @status={{doc.status}}
+            @product={{doc.product}}
+          />
+          <div class="global-search-result-text-content">
+            <h4 class="text-display-300 font-semibold">
+              {{doc.title}}
+            </h4>
+            {{#if doc.summary}}
+              <p>
+                {{doc.summary}}
+              </p>
+            {{/if}}
+            {{!-- <Person::Avatar
+              @size="medium"
+              @imgURL={{get doc.ownerPhotos 0}}
+              @email={{get doc.owners 0}}
+            /> --}}
+            {{#if doc._snippetResult.content.value}}
+              <Doc::Snippet
+                data-test-search-result-snippet
+                @snippet={{doc._snippetResult.content.value}}
+                class="truncate"
+              />
+            {{/if}}
+          </div>
+        </li>
+      {{/each}}
+    </ol>
+
+    <p>How do you "add" projects to your profile without the notions of
+      collaborators, approvers, etc</p>
+  </div>
 </div>

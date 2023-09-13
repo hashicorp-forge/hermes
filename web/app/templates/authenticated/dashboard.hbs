@@ -5,11 +5,12 @@
 <section class="x-container">
 
   <Dashboard::NewFeaturesBanner />
-
-  <h1 class="mb-7">
-    Welcome back,
-    {{this.authenticatedUser.info.given_name}}!
-  </h1>
+  <div class="mb-7 flex h-14 items-center">
+    <h1 class="mb-0">
+      Welcome back,
+      {{this.authenticatedUser.info.given_name}}!
+    </h1>
+  </div>
 
   {{#if @model}}
     <Dashboard::DocsAwaitingReview @docs={{@model}} />

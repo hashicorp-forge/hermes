@@ -29,6 +29,7 @@
           </:head>
           <:body>
             {{#each @docs as |doc|}}
+              {{log doc.status}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate={{doc.created}}
@@ -39,7 +40,8 @@
                 @productArea="{{doc.product}}"
                 @status="{{lowercase doc.status}}"
                 @title="{{doc.title}}"
-                @isDraft={{doc.isDraft}}
+                {{!-- @isDraft={{doc.isDraft}} --}}
+                @isDraft={{eq doc.status "WIP"}}
               />
             {{/each}}
           </:body>
