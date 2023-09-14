@@ -1,5 +1,6 @@
 .action {
-  @apply cursor-pointer appearance-none border-0 bg-transparent p-0 text-left font-sans;
+  @apply cursor-pointer appearance-none border-0 bg-transparent p-0 font-sans;
+  text-align: inherit;
   font-weight: inherit;
   font-size: inherit;
 }

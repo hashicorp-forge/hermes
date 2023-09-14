@@ -98,7 +98,7 @@ ol {
 }
 
 h1 {
-  @apply mb-1.5 text-display-500 font-bold text-color-foreground-strong;
+  @apply text-display-500 font-bold text-color-foreground-strong;
 
   + p {
     @apply text-body-300;

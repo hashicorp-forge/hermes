@@ -1,7 +1,6 @@
 // https://helios.hashicorp.design/components/form/text-input?tab=code#formtextinputbase-1
 
 import { ComponentLike } from "@glint/template";
-import { HdsFormTextInputArgs } from ".";
 
 export interface HdsFormTextInputBaseComponentSignature {
   Element: HTMLInputElement;

@@ -17,6 +17,9 @@ interface EditableFieldComponentSignature {
     loading?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
+    class?: string;
+    // currently the only custom element
+    element?: "h1";
   };
   Blocks: {
     default: [value: any];
@@ -83,6 +86,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   protected inputModifier = modifier((element: HTMLElement) => {
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
+    if (this.args.class) {
+      const classes = this.args.class.split(" ");
+      console.log(classes);
+      console.log(...classes);
+      this.inputElement.classList.add(...classes);
+    }
     this.inputElement.focus();
     element.addEventListener("blur", this.onBlur);
     return () => element.removeEventListener("blur", this.onBlur);

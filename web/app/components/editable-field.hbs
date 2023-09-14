@@ -1,3 +1,4 @@
+{{! The idea here, I think, is that we want to declare styles once and have them apply to both the button and the input. currently that's not the case. Maybe this is done with a modifier... maybe it's CSS.}}
 <div class="editable-field" ...attributes>
   {{#if (and this.editingIsEnabled (not @loading))}}
     {{on-document "keydown" this.handleKeydown}}
@@ -19,7 +20,12 @@
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}
     >
-      {{yield (hash value=this.value)}}
+      {{! pick and element and apply styles here }}
+      {{#let (element (or @element "p")) as |Field|}}
+        <Field class="w-full {{@class}}">
+          {{yield (hash value=this.value)}}
+        </Field>
+      {{/let}}
     </Action>
   {{/if}}
 </div>

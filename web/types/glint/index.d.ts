@@ -22,6 +22,7 @@ import { HdsLinkInlineComponent } from "hds/link/inline";
 import { HdsLinkStandaloneComponent } from "hds/link/standalone";
 import { HdsModalComponent } from "hds/modal";
 import { HdsFormCheckboxFieldComponent } from "hds/form/checkbox/fields";
+import { HdsFormTextareaBaseComponent } from "hds/form/textarea/base";
 import { HdsFormTextareaFieldComponent } from "hds/form/textarea/field";
 import { HdsFormToggleBaseComponent } from "hds/form/toggle/base";
 import { HdsFormFieldComponent } from "hds/form/field";
@@ -77,6 +78,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "Hds::Modal": HdsModalComponent;
     "Hds::Form::Error": HdsFormErrorComponent;
     "Hds::Form::Checkbox::Field": HdsFormCheckboxFieldComponent;
+    "Hds::Form::Textarea::Base": HdsFormTextareaBaseComponent;
     "Hds::Form::Textarea::Field": HdsFormTextareaFieldComponent;
     "Hds::Form::Toggle::Base": HdsFormToggleBaseComponent;
     "Hds::Form::Field": HdsFormFieldComponent;

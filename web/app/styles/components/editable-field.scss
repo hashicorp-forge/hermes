@@ -1,55 +1,33 @@
 .editable-field {
+  @apply flex; // TODO: Confirm this has no breaking changes
   @apply relative w-full;
 
-  & > .field-toggle {
-    all: unset;
-    width: 100%;
-    cursor: pointer;
-    position: relative;
+  > input[type="text"],
+  > textarea {
+    // color: inherit;
+    // text-align: unset;
+    // font-size: inherit;
+    // font-weight: inherit;
+    // padding: inherit;
+    // margin: inherit;
+    // line-height: inherit;
+  }
+
+  > .field-toggle {
+    @apply flex w-full border border-transparent;
+
+    &:hover,
+    &:focus-visible &:focus {
+      @apply rounded-button-md border-color-border-input;
+    }
 
     &[disabled] {
+      // TODO: Should this move to a higher level?
       cursor: default;
     }
 
     &.loading {
       opacity: 0.5;
-    }
-
-    &::before {
-      pointer-events: none;
-      content: "";
-      padding: 3px 5px;
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      bottom: -5px;
-      left: -5px;
-    }
-
-    &::after {
-      pointer-events: none;
-      content: "edit";
-      position: absolute;
-      right: -5px;
-      top: -5px;
-      padding: 3px 5px;
-      background: var(--token-form-control-base-border-color-default);
-      border-top-right-radius: var(--token-form-control-border-radius);
-      border-bottom-left-radius: var(--token-form-control-border-radius);
-      color: var(--token-color-foreground-high-contrast);
-      visibility: hidden;
-    }
-
-    &:not([disabled]):hover,
-    &:not([disabled]):focus {
-      &::before {
-        border: 1px solid var(--token-form-control-base-border-color-default);
-        border-radius: var(--token-form-control-border-radius);
-      }
-
-      &::after {
-        visibility: visible;
-      }
     }
   }
 

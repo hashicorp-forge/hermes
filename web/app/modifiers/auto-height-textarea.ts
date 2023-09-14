@@ -1,5 +1,6 @@
 import { assert } from "@ember/debug";
 import { registerDestructor } from "@ember/destroyable";
+import { schedule } from "@ember/runloop";
 import Modifier from "ember-modifier";
 
 interface AutoHeightTextareaModifierSignature {
@@ -31,8 +32,11 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
     this.element.style.resize = "none";
     this.element.style.overflow = "hidden";
 
-    // set initial height
-    this.updateHeight();
+    // TODO: confirm this change isn't destructive
+    schedule("afterRender", () => {
+      // set initial height
+      this.updateHeight();
+    });
 
     this.element.addEventListener("input", () => {
       this.updateHeight();

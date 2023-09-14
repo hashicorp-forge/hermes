@@ -1,9 +1,9 @@
 <header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
   <Header::Nav />
 </header>
-<div class="x-container -mt-2">
+<div class="x-container -mt-4">
   <div class="flex items-center justify-between">
-    {{! TODO: componentize this button style }}
+    {{! TODO: component-ize this button style }}
     <LinkTo
       @route="authenticated.projects"
       class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
@@ -20,7 +20,7 @@
         class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
       />
 
-      <Hds::Button
+      {{!-- <Hds::Button
         {{on "click" this.showModal}}
         {{! @size="small" }}
         @icon="edit"
@@ -29,12 +29,14 @@
         @color="tertiary"
         class="mx-auto text-color-foreground-primary"
         {{tooltip "Edit project info..." placement="bottom"}}
-      />
+      /> --}}
 
       <X::DropdownList
         @items={{hash
+          complete=(hash
+            name="Complete..." icon="check-circle" action=this.showModal
+          )
           archive=(hash name="Archive..." icon="archive" action=this.showModal)
-          delete=(hash name="Delete..." icon="trash" action=this.showModal)
         }}
         @placement="bottom-end"
       >
@@ -59,26 +61,53 @@
     </div>
   </div>
 
-  <div class="mb-14">
-    <div class="mx-auto max-w-lg">
-      <div class="relative text-center">
-        <h1 class="mb-0 text-display-500">
-          {{@project.name}}
-        </h1>
-        {{#if @project.description}}
-          <p class="mt-1 text-color-foreground-faint">
-            {{@project.description}}
-          </p>
-        {{/if}}
-        {{!-- <Hds::Button
-          {{on "click" this.showModal}}
-          {{! @size="small" }}
-          @icon="edit"
-          @text="Edit"
-          @isIconOnly={{true}}
-          @color="tertiary"
-          class="mx-auto mt-3 text-color-foreground-faint"
-        /> --}}
+  <div class="mb-10 mt-1">
+    <div class="mx-auto max-w-xl">
+      <div class="relative">
+        <EditableField
+          @value={{@project.name}}
+          @element="h1"
+          {{! TODO: replace with actual function }}
+          @onChange={{this.hideModal}}
+          @class="px-[4px] py-[2px] text-display-500 font-bold text-center"
+          class="-mb-px"
+          {{!-- @disabled={{true}} --}}
+        >
+          <:default as |F|>
+            {{F.value}}
+          </:default>
+          <:editing as |F|>
+            {{! this may need to be an auto-height-textarea }}
+            <Hds::Form::Textarea::Base
+              {{auto-height-textarea}}
+              {{F.input}}
+              {{! class="p-1 text-center text-display-500 font-bold" }}
+              @value={{F.value}}
+            />
+          </:editing>
+        </EditableField>
+        <EditableField
+          @value={{@project.description}}
+          {{! TODO: replace with actual function }}
+          @onChange={{this.hideModal}}
+          {{! TODO: pass style attrs here }}
+          {{! TODO: maybe pass an element arg here }}
+          @class="p-1 min-h-0 text-body-300 text-color-foreground-faint text-center"
+        >
+          <:default as |F|>
+            {{! TODO: stress test this with longer values }}
+            {{or F.value "Add a description"}}
+          </:default>
+          <:editing as |F|>
+            {{! this may need to be an auto-height-textarea }}
+            {{!-- <Hds::Form::TextInput::Base {{F.input}} @value={{F.value}} /> --}}
+            <Hds::Form::Textarea::Base
+              {{F.input}}
+              {{auto-height-textarea}}
+              @value={{F.value}}
+            />
+          </:editing>
+        </EditableField>
       </div>
 
       {{#if this.modalIsShown}}
@@ -120,7 +149,7 @@
       {{/if}}
     </div>
 
-    {{!-- <div class="mt-8 flex justify-center">
+    <div class="mt-8 flex justify-center">
       {{#if @project.jiraObject}}
         <div
           class="flex h-9 items-center rounded border border-color-border-primary px-3"
@@ -170,92 +199,8 @@
           @text="Attach Jira issue"
         />
       {{/if}}
-    </div> --}}
-
-  </div>
-
-  <div
-    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
-  >
-
-    <div
-      class="flex h-12 w-full items-center justify-between bg-color-surface-faint pl-4 pr-2"
-    >
-      <h3 class="mr-8 shrink-0 text-body-200 font-semibold">
-        Jira link
-      </h3>
-      {{#if @project.jiraObject}}
-        {{! maybe we want an icon still? }}
-        {{! <div class="mr-2 flex opacity-50">
-          <FlightIcon @name="zap" />
-        </div> }}
-      {{else}}
-        <Hds::Button
-          @text="Add a Jira link"
-          @color="tertiary"
-          class="ml-6 shrink-0 px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
-          @icon="plus"
-          @isIconOnly={{true}}
-        />
-      {{/if}}
     </div>
-    {{#if @project.jiraObject}}
-      <div
-        class="flex h-12 w-full items-center justify-between border-t border-t-color-border-primary px-4"
-      >
-        <div class="flex w-full items-center justify-between">
-          <div class="flex items-center">
 
-            {{#if @project.jiraObject.type}}
-              <div
-                class="mr-2.5 flex shrink-0"
-                {{tooltip @project.jiraObject.type}}
-              >
-                <FlightIcon @name="square-fill" class="text-lime-600" />
-              </div>
-            {{/if}}
-            <div class="grid">
-              <TruncatedText
-                class="text-body-200 font-medium text-color-foreground-strong"
-              >
-                {{@project.jiraObject.summary}}
-              </TruncatedText>
-            </div>
-            <div
-              class="ml-4 shrink-0 text-color-foreground-faint
-                {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
-            >
-              {{@project.jiraObject.key}}
-            </div>
-          </div>
-          <div class="ml-2 flex items-center space-x-2">
-
-            {{#if @project.jiraObject.priority}}
-              <div
-                class="flex shrink-0"
-                {{tooltip (concat @project.jiraObject.priority " priority")}}
-              >
-                <FlightIcon
-                  @name="chevrons-up"
-                  class="text-color-foreground-critical"
-                />
-              </div>
-            {{/if}}
-            {{#if @project.jiraObject.assignee}}
-              <Person::Avatar
-                @email={{@project.jiraObject.assignee}}
-                class="shrink-0"
-                {{tooltip (concat "Assigned to " @project.jiraObject.assignee)}}
-              />
-            {{/if}}
-          </div>
-        </div>
-        <div class="ml-8 flex shrink-0">
-          <FlightIcon @name="more-vertical" />
-        </div>
-
-      </div>
-    {{/if}}
   </div>
 
   <div
