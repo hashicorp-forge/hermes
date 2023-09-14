@@ -14,7 +14,8 @@
   }
 
   > .field-toggle {
-    @apply flex w-full border border-transparent;
+    @apply flex w-full items-center border border-transparent;
+    @apply min-h-[36px];
 
     &:hover,
     &:focus-visible &:focus {

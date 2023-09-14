@@ -98,7 +98,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        <div class="mb-8">
+        <div class="mb-8 -ml-[5px] -mr-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -107,13 +107,12 @@
             @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
+            @class="text-display-300 p-[5px] font-semibold foreground-strong"
+            class="mb-1.5"
+            @tag="h1"
           >
             <:default as |F|>
-              <h1
-                class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong mb-1.5"
-              >
-                {{F.value}}
-              </h1>
+              {{F.value}}
             </:default>
             <:editing as |F|>
               <Hds::Form::Textarea::Field
@@ -121,7 +120,6 @@
                 {{F.input}}
                 {{auto-height-textarea}}
                 @value={{F.value}}
-                class="primary-textarea"
                 name="title"
                 as |FF|
               >
@@ -148,13 +146,10 @@
           @onChange={{perform this.updateSummary}}
           @loading={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
+          @class="text-body-200 font-regular p-[5px]"
         >
           <:default as |F|>
-            <p
-              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-            >
-              {{or F.value "Enter a summary"}}
-            </p>
+            {{or F.value "Enter a summary"}}
           </:default>
           <:editing as |F|>
             <Hds::Form::Textarea::Field
@@ -162,7 +157,6 @@
               {{F.input}}
               {{auto-height-textarea}}
               @value={{F.value}}
-              class="primary-textarea"
               name="summary"
             />
           </:editing>

@@ -18,8 +18,9 @@ interface EditableFieldComponentSignature {
     disabled?: boolean;
     isRequired?: boolean;
     class?: string;
-    // currently the only custom element
-    element?: "h1";
+    tag?: "h1";
+    buttonPlacement?: "center";
+    buttonOverlayColor?: "white";
   };
   Blocks: {
     default: [value: any];
@@ -80,19 +81,28 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
     null;
 
+  @tracked private containerElement: HTMLElement | null = null;
+  @tracked private editingContainerElement: HTMLElement | null = null;
+  @tracked protected saveAndCancelButtons: HTMLElement[] = [];
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
    */
   protected inputModifier = modifier((element: HTMLElement) => {
+    console.log("uhfs");
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
+    console.log("cuhhhh");
+
     if (this.args.class) {
       const classes = this.args.class.split(" ");
-      console.log(classes);
-      console.log(...classes);
       this.inputElement.classList.add(...classes);
+      // Make sure the input sits above its
+      this.inputElement.classList.add("relative", "z-10");
     }
+
     this.inputElement.focus();
+    // console.log("cough");
+    // this might not be as good as dismissible
     element.addEventListener("blur", this.onBlur);
     return () => element.removeEventListener("blur", this.onBlur);
   });
@@ -103,6 +113,18 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * otherwise the value is passed to the `maybeUpdateValue` method.
    */
   @action private onBlur(event: FocusEvent) {
+    // if event.relatedTarget is one of the butts...
+    if (event.relatedTarget && this.containerElement) {
+      const relatedTarget = event.relatedTarget as HTMLElement;
+      if (
+        relatedTarget.closest(FOCUSABLE) &&
+        this.containerElement.contains(relatedTarget)
+      ) {
+        console.log("i made this");
+        return;
+      }
+    }
+
     if (this.hasCancelled) {
       this.value = this.args.value;
       schedule("actions", () => {
@@ -112,6 +134,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     }
 
     this.maybeUpdateValue(event);
+  }
+
+  @action protected registerElement(element: HTMLElement) {
+    this.containerElement = element;
+  }
+  @action protected registerEditingContainer(element: HTMLElement) {
+    this.editingContainerElement = element;
+    this.saveAndCancelButtons = Array.from(
+      this.editingContainerElement.querySelectorAll("button")
+    ) as HTMLElement[];
   }
 
   /**
@@ -145,10 +177,15 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
-        this.hasCancelled = true;
-        this.disableEditing();
+        this.cancelEditing();
         break;
     }
+  }
+
+  @action protected cancelEditing() {
+    console.log("yuhhh..");
+    this.hasCancelled = true;
+    this.disableEditing();
   }
 
   /**

@@ -5,15 +5,12 @@
     @onChange={{@onChange}}
     @loading={{@loading}}
     @disabled={{@disabled}}
+    @class="text-body-200 p-1"
   >
     <:default as |F|>
-      {{#if F.value}}
-        <p class="truncate text-body-200" title={{F.value}}>
-          {{F.value}}
-        </p>
-      {{else}}
-        <CustomEditableFields::EmptyState />
-      {{/if}}
+      <span class="truncate" title={{F.value}}>
+        {{or F.value "---"}}
+      </span>
     </:default>
     <:editing as |F|>
       <Hds::Form::Textarea::Field

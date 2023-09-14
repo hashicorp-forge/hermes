@@ -61,37 +61,29 @@
     </div>
   </div>
 
-  <div class="mb-10 mt-1">
+  <div class="mb-10 mt-1.5">
     <div class="mx-auto max-w-xl">
       <div class="relative">
         <EditableField
           @value={{@project.name}}
-          @element="h1"
+          @tag="h1"
+          @buttonPlacement="center"
+          @buttonOverlayColor="white"
           {{! TODO: replace with actual function }}
           @onChange={{this.hideModal}}
           @class="px-[4px] py-[2px] text-display-500 font-bold text-center"
           class="-mb-px"
-          {{!-- @disabled={{true}} --}}
         >
           <:default as |F|>
             {{F.value}}
           </:default>
-          <:editing as |F|>
-            {{! this may need to be an auto-height-textarea }}
-            <Hds::Form::Textarea::Base
-              {{auto-height-textarea}}
-              {{F.input}}
-              {{! class="p-1 text-center text-display-500 font-bold" }}
-              @value={{F.value}}
-            />
-          </:editing>
         </EditableField>
         <EditableField
           @value={{@project.description}}
           {{! TODO: replace with actual function }}
           @onChange={{this.hideModal}}
-          {{! TODO: pass style attrs here }}
-          {{! TODO: maybe pass an element arg here }}
+          @buttonPlacement="center"
+          @buttonOverlayColor="white"
           @class="p-1 min-h-0 text-body-300 text-color-foreground-faint text-center"
         >
           <:default as |F|>
@@ -99,8 +91,6 @@
             {{or F.value "Add a description"}}
           </:default>
           <:editing as |F|>
-            {{! this may need to be an auto-height-textarea }}
-            {{!-- <Hds::Form::TextInput::Base {{F.input}} @value={{F.value}} /> --}}
             <Hds::Form::Textarea::Base
               {{F.input}}
               {{auto-height-textarea}}

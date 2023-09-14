@@ -1,16 +1,63 @@
-{{! The idea here, I think, is that we want to declare styles once and have them apply to both the button and the input. currently that's not the case. Maybe this is done with a modifier... maybe it's CSS.}}
-<div class="editable-field" ...attributes>
+<div
+  {{did-insert this.registerElement}}
+  {{!-- {{dismissible dismiss=this.cancelEditing}} --}}
+  class="editable-field
+    {{if (and this.editingIsEnabled (not @loading)) 'z-10'}}"
+  ...attributes
+>
   {{#if (and this.editingIsEnabled (not @loading))}}
+
     {{on-document "keydown" this.handleKeydown}}
-    {{yield
-      (hash
-        value=this.value
-        update=this.maybeUpdateValue
-        input=this.inputModifier
-        emptyValueErrorIsShown=this.emptyValueErrorIsShown
-      )
-      to="editing"
-    }}
+
+    {{#if (has-block "editing")}}
+
+      {{yield
+        (hash
+          value=this.value
+          update=this.maybeUpdateValue
+          input=this.inputModifier
+          emptyValueErrorIsShown=this.emptyValueErrorIsShown
+        )
+        to="editing"
+      }}
+
+    {{else}}
+      <Hds::Form::Textarea::Base
+        {{auto-height-textarea}}
+        {{this.inputModifier}}
+        @value={{this.value}}
+      />
+    {{/if}}
+
+    <div
+      class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
+        {{if (eq @buttonPlacement 'center') 'justify-center' ''}}
+        {{if
+          (eq @buttonOverlayColor 'white')
+          'from-white via-white'
+          'via-page-faint from-color-page-faint to-transparent'
+        }}
+        to-white/0 pb-12 pt-2.5"
+    >
+      {{! TODO: allow these to be keyboard focusable }}
+      {{! TODO: add functionality }}
+      <Hds::Button
+        @size="small"
+        @text="Save"
+        @icon="check"
+        @isIconOnly={{true}}
+      />
+      <Hds::Button
+        @text="Cancel"
+        @icon="x"
+        @isIconOnly={{true}}
+        @size="small"
+        @color="secondary"
+        {{on "click" this.cancelEditing}}
+      />
+
+    </div>
+
   {{else}}
     {{#if @loading}}
       <FlightIcon @name="loading" class="loading-indicator" />
@@ -21,7 +68,7 @@
       {{on "click" this.enableEditing}}
     >
       {{! pick and element and apply styles here }}
-      {{#let (element (or @element "p")) as |Field|}}
+      {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full {{@class}}">
           {{yield (hash value=this.value)}}
         </Field>
