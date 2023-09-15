@@ -282,7 +282,9 @@
       {{! Last modified }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
-        <p>{{time-ago @document.modifiedTime}}</p>
+        {{#if @document.modifiedTime}}
+          <p>{{time-ago @document.modifiedTime}}</p>
+        {{/if}}
       </div>
 
       {{! Related resources }}
