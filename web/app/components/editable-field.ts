@@ -1,10 +1,11 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { schedule, scheduleOnce } from "@ember/runloop";
+import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { modifier } from "ember-modifier";
 import { ModifierLike } from "@glint/template";
+import { guidFor } from "@ember/object/internals";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -17,6 +18,12 @@ interface EditableFieldComponentSignature {
     loading?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
+    class?: string;
+    tag?: "h1";
+    buttonPlacement?: "center";
+    buttonOverlayColor?: "white";
+    buttonOverlayPaddingBottom?: string;
+    name?: string;
   };
   Blocks: {
     default: [value: any];
@@ -28,6 +35,7 @@ interface EditableFieldComponentSignature {
           Element: HTMLInputElement | HTMLTextAreaElement;
           Return: void;
         }>;
+        applyInputClasses: (element: HTMLElement) => void;
         emptyValueErrorIsShown: boolean;
       }
     ];
@@ -35,6 +43,8 @@ interface EditableFieldComponentSignature {
 }
 
 export default class EditableFieldComponent extends Component<EditableFieldComponentSignature> {
+  protected id = guidFor(this);
+
   /**
    * The cached value of the field.
    * Initially set to the value passed in; updated when committed.
@@ -64,45 +74,63 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected emptyValueErrorIsShown = false;
 
   /**
-   * Whether the user has cancelled their edit using the Escape key.
-   * Used on blur to determine whether to reset the value to the original.
-   * Set true by the `handleKeydown` task on Escape keydown.
-   */
-  @tracked private hasCancelled = false;
-
-  /**
    * The input or textarea element, if using.
    * Registered by the `inputModifier` action, used for focusing and blurring.
    */
   @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
     null;
 
+  @tracked private editingContainer: HTMLElement | null = null;
+  @tracked protected relatedButtons: HTMLElement[] = [];
+  @tracked protected toggleButton: HTMLElement | null = null;
+  @tracked protected cancelButton: HTMLElement | null = null;
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
    */
   protected inputModifier = modifier((element: HTMLElement) => {
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
-    this.inputElement.focus();
-    element.addEventListener("blur", this.onBlur);
-    return () => element.removeEventListener("blur", this.onBlur);
-  });
 
-  /**
-   * The action run when an `inputModifier`-registered input blurs.
-   * If blurring is the result of a cancel, the value is reset to the original,
-   * otherwise the value is passed to the `maybeUpdateValue` method.
-   */
-  @action private onBlur(event: FocusEvent) {
-    if (this.hasCancelled) {
-      this.value = this.args.value;
-      schedule("actions", () => {
-        this.hasCancelled = false;
-      });
-      return;
+    if (this.args.class) {
+      const classes = this.args.class.split(" ");
+      this.inputElement.classList.add(...classes);
+      // Make sure the input sits above its
     }
 
-    this.maybeUpdateValue(event);
+    this.applyInputClasses(this.inputElement, false);
+    this.inputElement.focus();
+  });
+
+  @action protected applyInputClasses(
+    element: HTMLElement,
+    onNextRunLoop = true
+  ) {
+    const addClasses = () => element.classList.add("relative", "z-10");
+
+    if (onNextRunLoop) {
+      next(() => {
+        addClasses();
+      });
+    } else {
+      addClasses();
+    }
+  }
+
+  @action protected registerEditingContainer(element: HTMLElement) {
+    this.editingContainer = element;
+    const relatedButtons = Array.from(
+      this.editingContainer.querySelectorAll("button")
+    ) as HTMLElement[];
+    this.relatedButtons.push(...relatedButtons);
+  }
+
+  @action protected registerToggleButton(element: HTMLElement) {
+    this.toggleButton = element;
+    this.relatedButtons = [element];
+  }
+
+  @action protected registerCancelButton(element: HTMLElement) {
+    this.cancelButton = element;
   }
 
   /**
@@ -119,6 +147,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected disableEditing() {
     this.editingIsEnabled = false;
+
+    schedule("afterRender", this, () => {
+      this.value = this.cachedValue;
+    });
   }
 
   /**
@@ -128,15 +160,18 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
     switch (ev.key) {
+      // TODO: in the case of "enter" we want to make sure the active element is not the cancel button. if it is, we want to cancel instead of save.
       case "Enter":
-        ev.preventDefault();
-        if (this.inputElement) {
-          this.inputElement.blur();
+        if (document.activeElement === this.cancelButton) {
+          ev.preventDefault();
+          this.disableEditing();
+          break;
         }
+        ev.preventDefault();
+        this.maybeUpdateValue(this.value);
         break;
       case "Escape":
         ev.preventDefault();
-        this.hasCancelled = true;
         this.disableEditing();
         break;
     }

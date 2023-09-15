@@ -8,6 +8,7 @@ import {
 } from "hermes/types/document";
 
 interface CustomEditableFieldComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     document: HermesDocument;
     field: string;

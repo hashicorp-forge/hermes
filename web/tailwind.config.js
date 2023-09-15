@@ -75,9 +75,12 @@ module.exports = {
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
+        "color-border-input":
+          "var(--token-form-control-base-border-color-default)",
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",
+        "color-page-faint-90": "#fafafa90",
         "color-page-primary": "var(--token-color-page-primary)",
 
         // Foreground

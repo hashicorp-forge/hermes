@@ -1,25 +1,100 @@
-<div class="editable-field" ...attributes>
+<div
+  class="editable-field
+    {{if (and this.editingIsEnabled (not @loading)) 'z-10'}}"
+  ...attributes
+>
   {{#if (and this.editingIsEnabled (not @loading))}}
+
     {{on-document "keydown" this.handleKeydown}}
-    {{yield
-      (hash
-        value=this.value
-        update=this.maybeUpdateValue
-        input=this.inputModifier
-        emptyValueErrorIsShown=this.emptyValueErrorIsShown
-      )
-      to="editing"
-    }}
+
+    <div {{did-insert this.registerEditingContainer}} class="w-full">
+      {{#if (has-block "editing")}}
+
+        {{yield
+          (hash
+            value=this.value
+            update=this.maybeUpdateValue
+            input=this.inputModifier
+            applyInputClasses=this.applyInputClasses
+            emptyValueErrorIsShown=this.emptyValueErrorIsShown
+          )
+          to="editing"
+        }}
+
+      {{else}}
+        <Hds::Form::Textarea::Field
+          {{auto-height-textarea}}
+          {{this.inputModifier}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+          }}
+          @value={{this.value}}
+          name={{@name}}
+          as |F|
+        >
+          {{#if this.emptyValueErrorIsShown}}
+            <F.Error>This field is required</F.Error>
+          {{/if}}
+        </Hds::Form::Textarea::Field>
+      {{/if}}
+      {{! TODO: move this to css? }}
+      <div
+        class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
+          {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}
+          {{if
+            (eq @buttonOverlayColor 'white')
+            'from-white via-white/90 to-white/0'
+            ' from-color-page-faint via-color-page-faint-90 to-transparent'
+          }}
+          to-white/0 pt-2.5"
+        style="padding-bottom: {{if
+          @buttonOverlayPaddingBottom
+          @buttonOverlayPaddingBottom
+          '125px'
+        }}"
+      >
+        <Hds::Button
+          @size="small"
+          @text="Save"
+          @icon="check"
+          @isIconOnly={{true}}
+          {{on "click" (fn this.maybeUpdateValue this.value)}}
+        />
+        <Hds::Button
+          @text="Cancel"
+          @icon="x"
+          @isIconOnly={{true}}
+          @size="small"
+          @color="secondary"
+          {{did-insert this.registerCancelButton}}
+          {{on "click" this.disableEditing}}
+        />
+
+      </div>
+    </div>
+
   {{else}}
     {{#if @loading}}
       <FlightIcon @name="loading" class="loading-indicator" />
     {{/if}}
     <Action
-      class="field-toggle {{if @loading 'loading'}}"
+      {{did-insert this.registerToggleButton}}
+      class="field-toggle group {{if @loading 'loading'}}"
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}
     >
-      {{yield (hash value=this.value)}}
+      {{! pick and element and apply styles here }}
+      {{#let (element (or @tag "p")) as |Field|}}
+        <Field class="w-full {{@class}}">
+          {{yield (hash value=this.value)}}
+        </Field>
+      {{/let}}
+      {{#unless @disabled}}
+        <span class="edit-affordance">
+          <FlightIcon @name="edit" class="text-color-foreground-faint" />
+        </span>
+      {{/unless}}
     </Action>
   {{/if}}
 </div>

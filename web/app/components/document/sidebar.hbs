@@ -11,7 +11,7 @@
 
 {{#unless @isCollapsed}}
   <div
-    class="sidebar-body"
+    class="sidebar-body scrollable-container"
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
@@ -98,7 +98,8 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        <div class="mb-8">
+        {{! TODO: class-ify this style }}
+        <div class="-mx-[5px] mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -107,31 +108,14 @@
             @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
+            @name="title"
+            @class="text-display-300 p-[5px] font-semibold foreground-strong"
+            class="mb-1.5"
+            @tag="h1"
           >
             <:default as |F|>
-              <h1
-                class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-              >
-                {{F.value}}
-              </h1>
+              {{F.value}}
             </:default>
-            <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                data-test-document-title-editable-field
-                {{F.input}}
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                class="primary-textarea"
-                name="title"
-                as |FF|
-              >
-                {{#if F.emptyValueErrorIsShown}}
-                  <FF.Error>
-                    Title is required.
-                  </FF.Error>
-                {{/if}}
-              </Hds::Form::Textarea::Field>
-            </:editing>
           </EditableField>
         </div>
       </div>
@@ -140,36 +124,27 @@
 
       {{! Summary }}
       <div class="mb-5">
-        <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
-        <EditableField
-          data-test-document-summary
-          data-test-editable={{this.isOwner}}
-          @value={{this.summary}}
-          @onChange={{perform this.updateSummary}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{not this.isOwner}}
-        >
-          <:default as |F|>
-            <p
-              class="hds-typography-body-200 hds-font-weight-medium hds-foreground-primary"
-            >
+        <Document::Sidebar::SectionHeader @title="Summary" />
+        <div class="-mx-[5px] mt-[3px]">
+          <EditableField
+            data-test-document-summary
+            data-test-editable={{this.isOwner}}
+            @value={{this.summary}}
+            @onChange={{perform this.updateSummary}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+            @class="text-body-200 font-regular p-[5px]"
+            @name="summary"
+          >
+            <:default as |F|>
               {{or F.value "Enter a summary"}}
-            </p>
-          </:default>
-          <:editing as |F|>
-            <Hds::Form::Textarea::Field
-              data-test-document-summary-editable-field
-              {{F.input}}
-              {{auto-height-textarea}}
-              @value={{F.value}}
-              class="primary-textarea"
-              name="summary"
-            />
-          </:editing>
-        </EditableField>
+            </:default>
+          </EditableField>
+        </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Status }}
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
         <div class="flex space-x-1">
           <Doc::State @state={{@document.status}} @hideProgress={{true}} />
@@ -177,7 +152,8 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Product/Area }}
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
           <div class="relative w-full">
@@ -194,11 +170,13 @@
           <ProductBadgeLink
             data-test-document-product-area-read-only
             @productArea={{@document.product}}
+            class="inline-block"
           />
         {{/if}}
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Owner }}
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
         <Person
           @imgURL={{get @document.ownerPhotos 0}}
@@ -206,102 +184,114 @@
         />
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Contributors }}
+      <div>
         <Document::Sidebar::SectionHeader @title="Contributors" />
-        <EditableField
-          data-test-document-contributors
-          data-test-editable={{this.isOwner}}
-          @value={{this.contributors}}
-          @onChange={{perform this.save "contributors"}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{not this.isOwner}}
-        >
-          <:default>
-            {{#if this.contributors.length}}
-              <ol class="person-list">
-                {{#each this.contributors as |contributor|}}
-                  <li>
-                    <Person
-                      @imgURL={{contributor.imgURL}}
-                      @email={{contributor.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <EmptyStateText />
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-contributors-editable
-              class="multiselect--narrow"
-              @selected={{this.contributors}}
-              @onChange={{this.updateContributors}}
-              {{click-outside (fn F.update this.contributors)}}
-            />
-          </:editing>
-        </EditableField>
+        <div class="-mx-[5px] mt-[3px]">
+
+          <EditableField
+            data-test-document-contributors
+            data-test-editable={{this.isOwner}}
+            @value={{this.contributors}}
+            @onChange={{perform this.save "contributors"}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+            @class="p-[5px]"
+          >
+            <:default>
+              {{#if this.contributors.length}}
+                <ol class="person-list">
+                  {{#each this.contributors as |contributor|}}
+                    <li>
+                      <Person
+                        @imgURL={{contributor.imgURL}}
+                        @email={{contributor.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <EmptyStateText />
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                {{did-insert F.applyInputClasses}}
+                data-test-document-contributors-editable
+                class="multiselect--narrow"
+                @selected={{this.contributors}}
+                @onChange={{this.updateContributors}}
+                {{click-outside (fn F.update this.contributors)}}
+              />
+            </:editing>
+          </EditableField>
+        </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div>
         <Document::Sidebar::SectionHeader @title="Approvers" />
-        <EditableField
-          data-test-document-approvers
-          data-test-editable={{this.isOwner}}
-          @value={{this.approvers}}
-          @onChange={{perform this.save "approvers"}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{this.editingIsDisabled}}
-        >
-          <:default>
-            {{#if this.approvers.length}}
-              <ol class="person-list">
-                {{#each this.approvers as |approver|}}
-                  <li>
-                    <Person::Approver
-                      @document={{@document}}
-                      @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <EmptyStateText />
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-approvers-editable
-              class="multiselect--narrow"
-              @selected={{this.approvers}}
-              @onChange={{this.updateApprovers}}
-              {{click-outside (fn F.update this.approvers)}}
-            />
-          </:editing>
-        </EditableField>
+        <div class="-mx-[5px] mt-[3px]">
+          <EditableField
+            data-test-document-approvers
+            data-test-editable={{this.isOwner}}
+            @value={{this.approvers}}
+            @onChange={{perform this.save "approvers"}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+            @class="p-[5px]"
+          >
+            <:default>
+              {{#if this.approvers.length}}
+                <ol class="person-list">
+                  {{#each this.approvers as |approver|}}
+                    <li>
+                      <Person::Approver
+                        @document={{@document}}
+                        @imgURL={{approver.imgURL}}
+                        @email={{approver.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <EmptyStateText />
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                {{did-insert F.applyInputClasses}}
+                data-test-document-approvers-editable
+                class="multiselect--narrow"
+                @selected={{this.approvers}}
+                @onChange={{this.updateApprovers}}
+                {{click-outside (fn F.update this.approvers)}}
+              />
+            </:editing>
+          </EditableField>
+        </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Created }}
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.createdDate "Unknown"}}</p>
+        <p>{{or @document.created "Unknown"}}</p>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      {{! Last modified }}
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
-        <p>{{@document.lastModified}}</p>
+        <p>{{time-ago @document.modifiedTime}}</p>
       </div>
 
-      <div class="flex flex-col items-start">
+      {{! Related resources }}
+      <div>
         <Document::Sidebar::RelatedResources
           @editingIsDisabled={{this.editingIsDisabled}}
           @documentIsDraft={{this.isDraft}}
           @productArea={{@document.product}}
           @objectID={{@document.objectID}}
-          @allowAddingExternalLinks={{true}}
           @headerTitle="Related resources"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Search docs or paste a URL..."
@@ -310,13 +300,15 @@
         />
       </div>
 
+      {{! Custom fields }}
       {{#each-in this.customEditableFields as |field attributes|}}
         {{#if (or attributes.value this.isOwner)}}
-          <div class="flex flex-col items-start space-y-2">
+          <div>
             <Document::Sidebar::SectionHeader
               @title={{attributes.displayName}}
             />
             <CustomEditableField
+              class="mt-[3px]"
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}
@@ -424,7 +416,7 @@
 
           {{else}}
             {{#if this.isApprover}}
-              <div class="flex flex-col items-start gap-2 px-3">
+              <div class="gap-2 px-3">
                 <Hds::Button
                   @text={{this.approveButtonText}}
                   @size="medium"

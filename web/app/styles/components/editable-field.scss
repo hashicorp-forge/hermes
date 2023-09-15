@@ -1,11 +1,25 @@
 .editable-field {
-  @apply relative w-full;
+  @apply relative flex w-full;
 
-  & > .field-toggle {
-    all: unset;
-    width: 100%;
-    cursor: pointer;
-    position: relative;
+  > .field-toggle {
+    @apply flex w-full items-center border border-transparent;
+    @apply min-h-[36px];
+
+    &:not([disabled]) {
+      &:hover,
+      &:focus-visible &:focus {
+        @apply rounded-button-md border-color-border-input;
+
+        .edit-affordance {
+          @apply visible;
+        }
+      }
+    }
+
+    .edit-affordance {
+      // This expects a gray background and will need to be expanded for white bg of project
+      @apply invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 pt-2;
+    }
 
     &[disabled] {
       cursor: default;
@@ -13,43 +27,6 @@
 
     &.loading {
       opacity: 0.5;
-    }
-
-    &::before {
-      pointer-events: none;
-      content: "";
-      padding: 3px 5px;
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      bottom: -5px;
-      left: -5px;
-    }
-
-    &::after {
-      pointer-events: none;
-      content: "edit";
-      position: absolute;
-      right: -5px;
-      top: -5px;
-      padding: 3px 5px;
-      background: var(--token-form-control-base-border-color-default);
-      border-top-right-radius: var(--token-form-control-border-radius);
-      border-bottom-left-radius: var(--token-form-control-border-radius);
-      color: var(--token-color-foreground-high-contrast);
-      visibility: hidden;
-    }
-
-    &:not([disabled]):hover,
-    &:not([disabled]):focus {
-      &::before {
-        border: 1px solid var(--token-form-control-base-border-color-default);
-        border-radius: var(--token-form-control-border-radius);
-      }
-
-      &::after {
-        visibility: visible;
-      }
     }
   }
 
