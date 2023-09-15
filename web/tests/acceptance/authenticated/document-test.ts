@@ -4,8 +4,10 @@ import {
   find,
   findAll,
   triggerEvent,
+  triggerKeyEvent,
   visit,
   waitFor,
+  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -520,7 +522,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await fillIn(`${SUMMARY_SELECTOR} textarea`, "");
 
-    await triggerEvent(`${SUMMARY_SELECTOR} textarea`, "blur");
+    await triggerKeyEvent(`${SUMMARY_SELECTOR} textarea`, "keydown", "Enter");
 
     assert.dom(SUMMARY_SELECTOR).hasText("Enter a summary");
   });

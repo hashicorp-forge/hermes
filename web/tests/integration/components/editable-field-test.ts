@@ -1,9 +1,11 @@
 import {
   click,
   fillIn,
+  find,
   render,
   triggerEvent,
   triggerKeyEvent,
+  waitFor,
   waitUntil,
 } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
@@ -14,6 +16,7 @@ import { module, test } from "qunit";
 const EDITABLE_FIELD_SELECTOR = ".editable-field";
 const FIELD_TOGGLE_SELECTOR = ".editable-field .field-toggle";
 const LOADING_SPINNER_SELECTOR = ".loading-indicator";
+const ERROR_SELECTOR = "[data-test-empty-value-error]";
 
 interface EditableFieldComponentTestContext extends MirageTestContext {
   onChange: (value: any) => void;
@@ -103,33 +106,31 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("it yields an emptyValueErrorIsShown property to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("onChange", (newValue: string) => {
+      console.log("testtestse");
+      this.set("value", newValue);
+    });
+
+    this.set("value", "foo");
+
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
-        @value="foo"
+        @value={{this.value}}
         @onChange={{this.onChange}}
         @isRequired={{true}}
-      >
-        <:default>Foo</:default>
-        <:editing as |F|>
-          <input type="text" value={{F.value}} {{F.input}} />
-
-          {{#if F.emptyValueErrorIsShown}}
-            <div class="error">Empty value error</div>
-          {{/if}}
-        </:editing>
-      </EditableField>
+      />
     `);
 
-    assert.dom(".error").doesNotExist();
+    assert.dom(ERROR_SELECTOR).doesNotExist();
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    assert.dom(".error").doesNotExist();
+    assert.dom(ERROR_SELECTOR).doesNotExist();
 
-    await fillIn("input", "");
-    await triggerEvent("input", "blur");
+    await fillIn("textarea", "");
+    await triggerKeyEvent(document, "keydown", "Enter");
 
-    assert.dom(".error").exists();
+    assert.dom(ERROR_SELECTOR).exists();
   });
 
   test("the edit button can be disabled", async function (this: EditableFieldComponentTestContext, assert) {
@@ -138,10 +139,7 @@ module("Integration | Component | editable-field", function (hooks) {
         @value="foo"
         @onChange={{this.onChange}}
         @disabled={{true}}
-      >
-        <:default>Foo</:default>
-        <:editing>Bar</:editing>
-      </EditableField>
+      />
     `);
 
     assert.dom(FIELD_TOGGLE_SELECTOR).isDisabled();
@@ -156,21 +154,13 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value={{this.value}}
         @onChange={{this.onChange}}
-      >
-        <:default as |F|>{{F.value}}</:default>
-        <:editing as |F|>
-          <input type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+      />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    await fillIn("input", "Baz");
-
-    await triggerEvent("input", "keydown", {
-      key: "Escape",
-    });
+    await fillIn("textarea", "Baz");
+    await triggerKeyEvent("textarea", "keydown", "Escape");
 
     assert
       .dom(EDITABLE_FIELD_SELECTOR)
@@ -188,21 +178,16 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value={{this.value}}
         @onChange={{this.onChange}}
-      >
-        <:default as |F|>{{F.value}}</:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+      />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    await fillIn("input", "bar");
+    await fillIn("textarea", "bar");
 
     // Keying "Enter" tests both `onBlur` and `handleKeydown`
     // since `handleKeydown` ultimately calls `onBlur`.
-    await triggerKeyEvent("input", "keydown", "Enter");
+    await triggerKeyEvent("textarea", "keydown", "Enter");
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
   });
@@ -218,9 +203,6 @@ module("Integration | Component | editable-field", function (hooks) {
         @value={{this.value}}
         @onChange={{this.onChange}}
       >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
         <:editing as |F|>
           <Action {{on "click" (fn F.update "bar")}}>
             F.update
@@ -248,9 +230,6 @@ module("Integration | Component | editable-field", function (hooks) {
         @value={{this.value}}
         @onChange={{this.onChange}}
       >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
         <:editing as |F|>
           <Action {{on "click" (fn F.update (array "bar"))}}>
             F.update
@@ -275,27 +254,20 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value="foo"
         @onChange={{this.onChange}}
-      >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+      />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    await fillIn("input", "foo");
-    await triggerEvent("input", "blur");
+    await fillIn("textarea", "foo");
+    await triggerKeyEvent(document, "keydown", "Enter");
 
     assert.equal(count, 0, "onChange has not been called");
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    await fillIn("input", "bar");
-    await triggerKeyEvent("input", "keydown", "Enter");
+    await fillIn("textarea", "bar");
+    await triggerKeyEvent(document, "keydown", "Enter");
 
     assert.equal(count, 1, "onChange has been called");
   });
@@ -311,11 +283,8 @@ module("Integration | Component | editable-field", function (hooks) {
         @value={{array "foo"}}
         @onChange={{this.onChange}}
       >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
         <:editing as |F|>
-         <div {{click-outside (fn F.update this.newArray)}} />
+          <div {{click-outside (fn F.update this.newArray)}} />
         </:editing>
       </EditableField>
       <div class="click-away"/>
@@ -336,25 +305,18 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("the input value resets on cancel", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField  @value="foo" @onChange={{this.onChange}}>
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+      <EditableField  @value="foo" @onChange={{this.onChange}} />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    await fillIn("input", "bar");
-    await triggerKeyEvent("input", "keydown", "Escape");
+    await fillIn("textarea", "bar");
+    await triggerKeyEvent("textarea", "keydown", "Escape");
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("foo");
 
     await click(FIELD_TOGGLE_SELECTOR);
 
-    assert.dom("input").hasValue("foo");
+    assert.dom("textarea").hasValue("foo");
   });
 });

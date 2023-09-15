@@ -14,9 +14,7 @@
           (hash
             value=this.value
             update=this.maybeUpdateValue
-            input=this.inputModifier
-            applyInputClasses=this.applyInputClasses
-            emptyValueErrorIsShown=this.emptyValueErrorIsShown
+            applyPeopleSelectClasses=this.applyPeopleSelectClasses
           )
           to="editing"
         }}
@@ -24,17 +22,20 @@
       {{else}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
+          {{! TODO: replace this modifier with something else? }}
           {{this.inputModifier}}
           {{dismissible
             dismiss=(fn this.maybeUpdateValue this.value)
             related=this.relatedButtons
+            shouldIgnoreEscape=true
           }}
           @value={{this.value}}
+          placeholder={{@placeholder}}
           name={{@name}}
           as |F|
         >
           {{#if this.emptyValueErrorIsShown}}
-            <F.Error>This field is required</F.Error>
+            <F.Error data-test-empty-value-error>This field is required</F.Error>
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
@@ -87,7 +88,11 @@
       {{! pick and element and apply styles here }}
       {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full {{@class}}">
-          {{yield (hash value=this.value)}}
+          {{#if (has-block "default")}}
+            {{yield (hash value=this.value)}}
+          {{else}}
+            {{or this.value @placeholder}}
+          {{/if}}
         </Field>
       {{/let}}
       {{#unless @disabled}}
