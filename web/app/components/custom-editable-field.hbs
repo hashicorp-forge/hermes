@@ -1,5 +1,5 @@
-{{#if this.typeIsString}}
-  <div class="-mx-[5px] w-full">
+<div class="-mx-[5px]">
+  {{#if this.typeIsString}}
 
     <EditableField
       data-test-custom-string-field
@@ -15,44 +15,47 @@
         </span>
       </:default>
     </EditableField>
-  </div>
 
-{{else if this.typeIsPeople}}
-  <EditableField
-    data-test-custom-people-field
-    @value={{get @attributes "value"}}
-    @onChange={{@onChange}}
-    @loading={{@loading}}
-    @disabled={{@disabled}}
-  >
-    <:default>
-      {{#if this.people.length}}
-        <ol>
-          {{#each this.people as |person|}}
-            <li class="whitespace-nowrap">
-              {{#if person.imgURL}}
-                <img
-                  src="{{person.imgURL}}"
-                  class="h-4 w-4 rounded-full align-middle"
-                />
-              {{/if}}
-              {{person.email}}
-            </li>
-          {{/each}}
-        </ol>
-      {{else}}
-        <CustomEditableFields::EmptyState />
-      {{/if}}
-    </:default>
-    <:editing as |F|>
-      <Inputs::PeopleSelect
-        {{autofocus targetChildren=true}}
-        class="multiselect--narrow"
-        @selected={{this.people}}
-        @onChange={{this.updateEmails}}
-        {{click-outside (fn F.update this.people)}}
-        data-test-custom-people-field-input
-      />
-    </:editing>
-  </EditableField>
-{{/if}}
+  {{else if this.typeIsPeople}}
+    <EditableField
+      data-test-custom-people-field
+      @value={{get @attributes "value"}}
+      @onChange={{@onChange}}
+      @loading={{@loading}}
+      @disabled={{@disabled}}
+      @class="p-[5px]"
+    >
+      <:default>
+        {{#if this.people.length}}
+          <ol>
+            {{#each this.people as |person|}}
+              <li class="whitespace-nowrap">
+                {{#if person.imgURL}}
+                  <img
+                    src="{{person.imgURL}}"
+                    class="h-4 w-4 rounded-full align-middle"
+                  />
+                {{/if}}
+                {{person.email}}
+              </li>
+            {{/each}}
+          </ol>
+        {{else}}
+          ---
+        {{/if}}
+      </:default>
+      <:editing as |F|>
+        <Inputs::PeopleSelect
+          {{autofocus targetChildren=true}}
+          {{did-insert F.applyInputClasses}}
+          class="multiselect--narrow"
+          @selected={{this.people}}
+          @onChange={{this.updateEmails}}
+          {{click-outside (fn F.update this.people)}}
+          data-test-custom-people-field-input
+        />
+      </:editing>
+    </EditableField>
+  {{/if}}
+
+</div>

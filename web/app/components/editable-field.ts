@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { schedule, scheduleOnce } from "@ember/runloop";
+import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { modifier } from "ember-modifier";
 import { ModifierLike } from "@glint/template";
@@ -34,6 +34,7 @@ interface EditableFieldComponentSignature {
           Element: HTMLInputElement | HTMLTextAreaElement;
           Return: void;
         }>;
+        applyInputClasses: (element: HTMLElement) => void;
         emptyValueErrorIsShown: boolean;
       }
     ];
@@ -93,11 +94,26 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       const classes = this.args.class.split(" ");
       this.inputElement.classList.add(...classes);
       // Make sure the input sits above its
-      this.inputElement.classList.add("relative", "z-10");
     }
 
+    this.applyInputClasses(this.inputElement, false);
     this.inputElement.focus();
   });
+
+  @action protected applyInputClasses(
+    element: HTMLElement,
+    onNextRunLoop = true
+  ) {
+    const addClasses = () => element.classList.add("relative", "z-10");
+
+    if (onNextRunLoop) {
+      next(() => {
+        addClasses();
+      });
+    } else {
+      addClasses();
+    }
+  }
 
   @action protected registerEditingContainer(element: HTMLElement) {
     this.editingContainer = element;

@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
         <div class="flex space-x-1">
           <Doc::State @state={{@document.status}} @hideProgress={{true}} />
@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
           <div class="relative w-full">
@@ -169,108 +169,119 @@
           <ProductBadgeLink
             data-test-document-product-area-read-only
             @productArea={{@document.product}}
+            class="inline-block"
           />
         {{/if}}
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
         <Person
           @imgURL={{get @document.ownerPhotos 0}}
           @email={{get @document.owners 0}}
+          class="pt-[5px]"
         />
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Contributors" />
-        <EditableField
-          data-test-document-contributors
-          data-test-editable={{this.isOwner}}
-          @value={{this.contributors}}
-          @onChange={{perform this.save "contributors"}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{not this.isOwner}}
-        >
-          <:default>
-            {{#if this.contributors.length}}
-              <ol class="person-list">
-                {{#each this.contributors as |contributor|}}
-                  <li>
-                    <Person
-                      @imgURL={{contributor.imgURL}}
-                      @email={{contributor.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No contributors</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-contributors-editable
-              class="multiselect--narrow"
-              @selected={{this.contributors}}
-              @onChange={{this.updateContributors}}
-              {{click-outside (fn F.update this.contributors)}}
-            />
-          </:editing>
-        </EditableField>
+        <div class="-mx-[5px]">
+
+          <EditableField
+            data-test-document-contributors
+            data-test-editable={{this.isOwner}}
+            @value={{this.contributors}}
+            @onChange={{perform this.save "contributors"}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+            @class="p-[5px]"
+          >
+            <:default>
+              {{#if this.contributors.length}}
+                <ol class="person-list">
+                  {{#each this.contributors as |contributor|}}
+                    <li>
+                      <Person
+                        @imgURL={{contributor.imgURL}}
+                        @email={{contributor.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No contributors</em>
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                {{did-insert F.applyInputClasses}}
+                data-test-document-contributors-editable
+                class="multiselect--narrow"
+                @selected={{this.contributors}}
+                @onChange={{this.updateContributors}}
+                {{click-outside (fn F.update this.contributors)}}
+              />
+            </:editing>
+          </EditableField>
+        </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Approvers" />
-        <EditableField
-          data-test-document-approvers
-          data-test-editable={{this.isOwner}}
-          @value={{this.approvers}}
-          @onChange={{perform this.save "approvers"}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{this.editingIsDisabled}}
-        >
-          <:default>
-            {{#if this.approvers.length}}
-              <ol class="person-list">
-                {{#each this.approvers as |approver|}}
-                  <li>
-                    <Person::Approver
-                      @document={{@document}}
-                      @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No approvers</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-approvers-editable
-              class="multiselect--narrow"
-              @selected={{this.approvers}}
-              @onChange={{this.updateApprovers}}
-              {{click-outside (fn F.update this.approvers)}}
-            />
-          </:editing>
-        </EditableField>
+        <div class="-mx-[5px]">
+          <EditableField
+            data-test-document-approvers
+            data-test-editable={{this.isOwner}}
+            @value={{this.approvers}}
+            @onChange={{perform this.save "approvers"}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{this.editingIsDisabled}}
+            @class="p-[5px]"
+          >
+            <:default>
+              {{#if this.approvers.length}}
+                <ol class="person-list">
+                  {{#each this.approvers as |approver|}}
+                    <li>
+                      <Person::Approver
+                        @document={{@document}}
+                        @imgURL={{approver.imgURL}}
+                        @email={{approver.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No approvers</em>
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                {{did-insert F.applyInputClasses}}
+                data-test-document-approvers-editable
+                class="multiselect--narrow"
+                @selected={{this.approvers}}
+                @onChange={{this.updateApprovers}}
+                {{click-outside (fn F.update this.approvers)}}
+              />
+            </:editing>
+          </EditableField>
+        </div>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
         <p>{{or @document.created "Unknown"}}</p>
       </div>
 
-      <div class="flex flex-col items-start space-y-2">
+      <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
         <p>{{time-ago @document.modifiedTime}}</p>
       </div>
 
-      <div class="flex flex-col items-start">
+      <div>
         <Document::Sidebar::RelatedResources
           @editingIsDisabled={{this.editingIsDisabled}}
           @documentIsDraft={{this.isDraft}}
@@ -286,7 +297,7 @@
 
       {{#each-in this.customEditableFields as |field attributes|}}
         {{#if (or attributes.value this.isOwner)}}
-          <div class="flex flex-col items-start space-y-2">
+          <div class="space-y-2">
             <Document::Sidebar::SectionHeader
               @title={{attributes.displayName}}
             />
@@ -398,7 +409,7 @@
 
           {{else}}
             {{#if this.isApprover}}
-              <div class="flex flex-col items-start gap-2 px-3">
+              <div class="gap-2 px-3">
                 <Hds::Button
                   @text={{this.approveButtonText}}
                   @size="medium"

@@ -87,7 +87,6 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
       return;
     } else {
       let target = event.target as HTMLElement;
-      console.log("related", this.related);
       if (!this.element.contains(target)) {
         if (!this.targetIsRelated(target, this.related)) {
           this.dismiss();
