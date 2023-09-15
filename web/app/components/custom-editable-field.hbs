@@ -1,27 +1,21 @@
 {{#if this.typeIsString}}
-  <EditableField
-    data-test-custom-string-field
-    @value={{get @document @field}}
-    @onChange={{@onChange}}
-    @loading={{@loading}}
-    @disabled={{@disabled}}
-    @class="text-body-200 p-1"
-  >
-    <:default as |F|>
-      <span class="truncate" title={{F.value}}>
-        {{or F.value "---"}}
-      </span>
-    </:default>
-    <:editing as |F|>
-      <Hds::Form::Textarea::Field
-        {{F.input}}
-        {{auto-height-textarea}}
-        @value={{F.value}}
-        name={{@field}}
-        data-test-custom-string-field-input
-      />
-    </:editing>
-  </EditableField>
+  <div class="-mx-[5px] w-full">
+
+    <EditableField
+      data-test-custom-string-field
+      @value={{get @document @field}}
+      @onChange={{@onChange}}
+      @loading={{@loading}}
+      @disabled={{@disabled}}
+      @class="text-body-200 p-[5px]"
+    >
+      <:default as |F|>
+        <span class="truncate" title={{F.value}}>
+          {{or F.value "---"}}
+        </span>
+      </:default>
+    </EditableField>
+  </div>
 
 {{else if this.typeIsPeople}}
   <EditableField

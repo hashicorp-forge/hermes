@@ -98,6 +98,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
+        {{! TODO: class-ify this style }}
         <div class="mb-8 -ml-[5px] -mr-[5px]">
           <EditableField
             data-test-document-title
@@ -107,6 +108,7 @@
             @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
+            @name="title"
             @class="text-display-300 p-[5px] font-semibold foreground-strong"
             class="mb-1.5"
             @tag="h1"
@@ -114,22 +116,6 @@
             <:default as |F|>
               {{F.value}}
             </:default>
-            {{!-- <:editing as |F|>
-              <Hds::Form::Textarea::Field
-                data-test-document-title-editable-field
-                {{F.input}}
-                {{auto-height-textarea}}
-                @value={{F.value}}
-                name="title"
-                as |FF|
-              >
-                {{#if F.emptyValueErrorIsShown}}
-                  <FF.Error>
-                    Title is required.
-                  </FF.Error>
-                {{/if}}
-              </Hds::Form::Textarea::Field>
-            </:editing> --}}
           </EditableField>
         </div>
       </div>
@@ -139,28 +125,23 @@
       {{! Summary }}
       <div class="mb-5">
         <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
-        <EditableField
-          data-test-document-summary
-          data-test-editable={{this.isOwner}}
-          @value={{this.summary}}
-          @onChange={{perform this.updateSummary}}
-          @loading={{this.saveIsRunning}}
-          @disabled={{not this.isOwner}}
-          @class="text-body-200 font-regular p-[5px]"
-        >
-          <:default as |F|>
-            {{or F.value "Enter a summary"}}
-          </:default>
-          <:editing as |F|>
-            <Hds::Form::Textarea::Field
-              data-test-document-summary-editable-field
-              {{F.input}}
-              {{auto-height-textarea}}
-              @value={{F.value}}
-              name="summary"
-            />
-          </:editing>
-        </EditableField>
+        <div class="-mx-[5px]">
+
+          <EditableField
+            data-test-document-summary
+            data-test-editable={{this.isOwner}}
+            @value={{this.summary}}
+            @onChange={{perform this.updateSummary}}
+            @loading={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+            @class="text-body-200 font-regular p-[5px]"
+            @name="summary"
+          >
+            <:default as |F|>
+              {{or F.value "Enter a summary"}}
+            </:default>
+          </EditableField>
+        </div>
       </div>
 
       <div class="flex flex-col items-start space-y-2">

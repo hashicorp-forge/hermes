@@ -23,6 +23,7 @@ interface EditableFieldComponentSignature {
     tag?: "h1";
     buttonPlacement?: "center";
     buttonOverlayColor?: "white";
+    name?: string;
   };
   Blocks: {
     default: [value: any];
@@ -88,6 +89,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked private containerElement: HTMLElement | null = null;
   @tracked private editingContainerElement: HTMLElement | null = null;
   @tracked protected relatedButtons: HTMLElement[] = [];
+  @tracked protected toggleButtonElement: HTMLElement | null = null;
+  @tracked protected cancelButton: HTMLElement | null = null;
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
@@ -103,9 +106,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     }
 
     this.inputElement.focus();
-    // this might not be as good as dismissible
-    element.addEventListener("blur", this.onBlur);
-    return () => element.removeEventListener("blur", this.onBlur);
   });
 
   /**
@@ -127,7 +127,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   @action protected registerElement(element: HTMLElement) {
     this.containerElement = element;
-    this.relatedButtons.push(htmlElement(`#${this.id}`));
   }
 
   @action protected registerEditingContainer(element: HTMLElement) {
@@ -135,9 +134,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     const relatedButtons = Array.from(
       this.editingContainerElement.querySelectorAll("button")
     ) as HTMLElement[];
-    debugger;
     this.relatedButtons.push(...relatedButtons);
-    // todo add trigger
+  }
+
+  @action protected registerToggleButton(element: HTMLElement) {
+    this.toggleButtonElement = element;
+    this.relatedButtons = [element];
+  }
+
+  @action protected registerCancelButton(element: HTMLElement) {
+    this.cancelButton = element;
   }
 
   /**
@@ -163,9 +169,15 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
     switch (ev.key) {
+      // TODO: in the case of "enter" we want to make sure the active element is not the cancel button. if it is, we want to cancel instead of save.
       case "Enter":
+        if (document.activeElement === this.cancelButton) {
+          ev.preventDefault();
+          this.cancelEditing();
+          break;
+        }
         ev.preventDefault();
-        this.save();
+        this.maybeUpdateValue(this.value);
         break;
       case "Escape":
         ev.preventDefault();
@@ -176,11 +188,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   @action protected cancelEditing() {
     this.hasCancelled = true;
-    this.disableEditing();
-  }
-
-  @action protected save() {
-    this.args.onChange?.(this.value);
     this.disableEditing();
   }
 
