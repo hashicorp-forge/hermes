@@ -22,6 +22,7 @@ interface EditableFieldComponentSignature {
     tag?: "h1";
     buttonPlacement?: "center";
     buttonOverlayColor?: "white";
+    buttonOverlayPaddingBottom?: string;
     name?: string;
   };
   Blocks: {

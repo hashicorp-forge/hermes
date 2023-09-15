@@ -56,6 +56,7 @@ interface RelatedResourcesComponentSignature {
     list: [
       rr: {
         items: RelatedResource[];
+        showModal: () => void;
       }
     ];
     "list-error": [];

@@ -62,13 +62,14 @@
   </div>
 
   <div class="mb-10 mt-1.5">
-    <div class="mx-auto max-w-xl">
+    <div class="mx-auto max-w-3xl">
       <div class="relative">
         <EditableField
           @value={{@project.name}}
           @tag="h1"
           @buttonPlacement="center"
           @buttonOverlayColor="white"
+          @buttonOverlayPaddingBottom="80px"
           {{! TODO: replace with actual function }}
           @onChange={{this.hideModal}}
           @class="px-[4px] py-[2px] text-display-500 font-bold text-center"
@@ -84,7 +85,8 @@
           @onChange={{this.hideModal}}
           @buttonPlacement="center"
           @buttonOverlayColor="white"
-          @class="p-1 min-h-0 text-body-300 text-color-foreground-faint text-center"
+          @buttonOverlayPaddingBottom="80px"
+          @class="p-1 text-body-300 text-color-foreground-faint text-center"
         >
           <:default as |F|>
             {{or F.value "Add a description"}}

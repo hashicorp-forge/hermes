@@ -99,7 +99,7 @@
           {{/if}}
         </div>
         {{! TODO: class-ify this style }}
-        <div class="mb-8 -ml-[5px] -mr-[5px]">
+        <div class="-mx-[5px] mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -124,9 +124,8 @@
 
       {{! Summary }}
       <div class="mb-5">
-        <Document::Sidebar::SectionHeader @title="Summary" class="mb-2" />
-        <div class="-mx-[5px]">
-
+        <Document::Sidebar::SectionHeader @title="Summary" />
+        <div class="-mx-[5px] mt-[3px]">
           <EditableField
             data-test-document-summary
             data-test-editable={{this.isOwner}}
@@ -144,6 +143,7 @@
         </div>
       </div>
 
+      {{! Status }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
         <div class="flex space-x-1">
@@ -152,6 +152,7 @@
         </div>
       </div>
 
+      {{! Product/Area }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
@@ -174,18 +175,19 @@
         {{/if}}
       </div>
 
+      {{! Owner }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
         <Person
           @imgURL={{get @document.ownerPhotos 0}}
           @email={{get @document.owners 0}}
-          class="pt-[5px]"
         />
       </div>
 
-      <div class="space-y-2">
+      {{! Contributors }}
+      <div>
         <Document::Sidebar::SectionHeader @title="Contributors" />
-        <div class="-mx-[5px]">
+        <div class="-mx-[5px] mt-[3px]">
 
           <EditableField
             data-test-document-contributors
@@ -227,9 +229,9 @@
         </div>
       </div>
 
-      <div class="space-y-2">
+      <div>
         <Document::Sidebar::SectionHeader @title="Approvers" />
-        <div class="-mx-[5px]">
+        <div class="-mx-[5px] mt-[3px]">
           <EditableField
             data-test-document-approvers
             data-test-editable={{this.isOwner}}
@@ -271,16 +273,19 @@
         </div>
       </div>
 
+      {{! Created }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
         <p>{{or @document.created "Unknown"}}</p>
       </div>
 
+      {{! Last modified }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
         <p>{{time-ago @document.modifiedTime}}</p>
       </div>
 
+      {{! Related resources }}
       <div>
         <Document::Sidebar::RelatedResources
           @editingIsDisabled={{this.editingIsDisabled}}
@@ -295,13 +300,15 @@
         />
       </div>
 
+      {{! Custom fields }}
       {{#each-in this.customEditableFields as |field attributes|}}
         {{#if (or attributes.value this.isOwner)}}
-          <div class="space-y-2">
+          <div>
             <Document::Sidebar::SectionHeader
               @title={{attributes.displayName}}
             />
             <CustomEditableField
+              class="mt-[3px]"
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}

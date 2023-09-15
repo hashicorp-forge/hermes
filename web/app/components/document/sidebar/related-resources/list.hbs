@@ -1,13 +1,26 @@
 <AnimatedContainer data-test-related-resources-list class="w-full">
   <div {{did-insert this.enableAnimation}}>
     {{#if this.listIsEmpty}}
-      <div class="mt-1.5" data-test-related-resources-list-empty-state>
-        ---
+      {{! TODO: can we share this with EditableField? }}
+      <div class="-mx-[5px]">
+        <div class="editable-field">
+          <Action
+            data-test-related-resources-list-empty-state
+            {{on "click" this.showModal}}
+            class="field-toggle group pl-[5px]"
+          >
+            ---
+
+            <span
+              class="invisible absolute right-px top-px grid h-[34px] place-items-center rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 group-focus-within:visible group-hover:visible"
+            >
+              <FlightIcon @name="plus" class="text-color-foreground-faint" />
+            </span>
+          </Action>
+        </div>
       </div>
     {{else}}
       <ul class="related-resources-list" ...attributes>
-        {{! This is being looped through twice for some reason... }}
-        {{! On immediate save, the order is wrong - maybe an array push thing? }}
         {{#animated-each
           @items
           rules=this.transitionRules
