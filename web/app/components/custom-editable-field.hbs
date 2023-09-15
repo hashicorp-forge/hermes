@@ -46,6 +46,7 @@
     </:default>
     <:editing as |F|>
       <Inputs::PeopleSelect
+        {{autofocus targetChildren=true}}
         class="multiselect--narrow"
         @selected={{this.people}}
         @onChange={{this.updateEmails}}
