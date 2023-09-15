@@ -1,6 +1,4 @@
 <div
-  {{did-insert this.registerElement}}
-  {{!-- {{dismissible dismiss=this.cancelEditing}} --}}
   class="editable-field
     {{if (and this.editingIsEnabled (not @loading)) 'z-10'}}"
   ...attributes
@@ -64,7 +62,7 @@
           @size="small"
           @color="secondary"
           {{did-insert this.registerCancelButton}}
-          {{on "click" this.cancelEditing}}
+          {{on "click" this.disableEditing}}
         />
 
       </div>

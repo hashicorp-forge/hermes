@@ -87,16 +87,8 @@
           @class="p-1 min-h-0 text-body-300 text-color-foreground-faint text-center"
         >
           <:default as |F|>
-            {{! TODO: stress test this with longer values }}
             {{or F.value "Add a description"}}
           </:default>
-          <:editing as |F|>
-            <Hds::Form::Textarea::Base
-              {{F.input}}
-              {{auto-height-textarea}}
-              @value={{F.value}}
-            />
-          </:editing>
         </EditableField>
       </div>
 

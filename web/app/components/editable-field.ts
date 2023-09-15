@@ -6,7 +6,6 @@ import { assert } from "@ember/debug";
 import { modifier } from "ember-modifier";
 import { ModifierLike } from "@glint/template";
 import { guidFor } from "@ember/object/internals";
-import htmlElement from "hermes/utils/html-element";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -73,23 +72,15 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected emptyValueErrorIsShown = false;
 
   /**
-   * Whether the user has cancelled their edit using the Escape key.
-   * Used on blur to determine whether to reset the value to the original.
-   * Set true by the `handleKeydown` task on Escape keydown.
-   */
-  @tracked private hasCancelled = false;
-
-  /**
    * The input or textarea element, if using.
    * Registered by the `inputModifier` action, used for focusing and blurring.
    */
   @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
     null;
 
-  @tracked private containerElement: HTMLElement | null = null;
-  @tracked private editingContainerElement: HTMLElement | null = null;
+  @tracked private editingContainer: HTMLElement | null = null;
   @tracked protected relatedButtons: HTMLElement[] = [];
-  @tracked protected toggleButtonElement: HTMLElement | null = null;
+  @tracked protected toggleButton: HTMLElement | null = null;
   @tracked protected cancelButton: HTMLElement | null = null;
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
@@ -108,37 +99,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.inputElement.focus();
   });
 
-  /**
-   * The action run when an `inputModifier`-registered input blurs.
-   * If blurring is the result of a cancel, the value is reset to the original,
-   * otherwise the value is passed to the `maybeUpdateValue` method.
-   */
-  @action private onBlur(event: FocusEvent) {
-    if (this.hasCancelled) {
-      this.value = this.args.value;
-      schedule("actions", () => {
-        this.hasCancelled = false;
-      });
-      return;
-    }
-
-    this.maybeUpdateValue(event);
-  }
-
-  @action protected registerElement(element: HTMLElement) {
-    this.containerElement = element;
-  }
-
   @action protected registerEditingContainer(element: HTMLElement) {
-    this.editingContainerElement = element;
+    this.editingContainer = element;
     const relatedButtons = Array.from(
-      this.editingContainerElement.querySelectorAll("button")
+      this.editingContainer.querySelectorAll("button")
     ) as HTMLElement[];
     this.relatedButtons.push(...relatedButtons);
   }
 
   @action protected registerToggleButton(element: HTMLElement) {
-    this.toggleButtonElement = element;
+    this.toggleButton = element;
     this.relatedButtons = [element];
   }
 
@@ -160,6 +130,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected disableEditing() {
     this.editingIsEnabled = false;
+
+    schedule("afterRender", this, () => {
+      this.value = this.cachedValue;
+    });
   }
 
   /**
@@ -173,7 +147,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       case "Enter":
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
-          this.cancelEditing();
+          this.disableEditing();
           break;
         }
         ev.preventDefault();
@@ -181,14 +155,9 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
-        this.cancelEditing();
+        this.disableEditing();
         break;
     }
-  }
-
-  @action protected cancelEditing() {
-    this.hasCancelled = true;
-    this.disableEditing();
   }
 
   /**
