@@ -59,9 +59,16 @@
               @name={{or (get-product-id dd.selected) "folder"}}
               class="mr-3"
             />
-            <span data-test-selected-value class="text-color-foreground-strong">
-              {{or dd.selected "---"}}
-            </span>
+            {{#if dd.selected}}
+              <span
+                data-test-selected-value
+                class="text-color-foreground-strong"
+              >
+                {{dd.selected}}
+              </span>
+            {{else}}
+              <EmptyStateText />
+            {{/if}}
 
             {{#if this.selectedProductAbbreviation}}
               <span class="product-select-toggle-abbreviation">

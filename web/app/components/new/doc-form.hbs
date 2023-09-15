@@ -36,14 +36,17 @@
           <dd.ToggleSelect
             class="hds-button hds-button--color-secondary hds-button--size-medium"
           >
-            {{log "this.selectedDocTypeObject" this.selectedDocTypeObject}}
             <FlightIcon
               @name={{or this.selectedDocTypeObject.icon "file-text"}}
               class="mr-3"
             />
-            <div class="text-color-foreground-strong">
-              {{or this.selectedDocTypeObject.longName "---"}}
-            </div>
+            {{#if this.selectedTypeObject.longName}}
+              <div class="text-color-foreground-strong">
+                {{this.selectedDocTypeObject.longName}}
+              </div>
+            {{else}}
+              <EmptyStateText />
+            {{/if}}
             {{#if this.selectedDocTypeObject.shortName}}
               <div
                 class="ml-2 text-body-100 leading-none text-color-foreground-disabled"

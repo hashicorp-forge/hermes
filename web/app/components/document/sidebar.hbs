@@ -211,7 +211,7 @@
                   {{/each}}
                 </ol>
               {{else}}
-                <em>No contributors</em>
+                <EmptyStateText />
               {{/if}}
             </:default>
             <:editing as |F|>
@@ -238,7 +238,7 @@
             @value={{this.approvers}}
             @onChange={{perform this.save "approvers"}}
             @loading={{this.saveIsRunning}}
-            @disabled={{this.editingIsDisabled}}
+            @disabled={{not this.isOwner}}
             @class="p-[5px]"
           >
             <:default>
@@ -255,7 +255,7 @@
                   {{/each}}
                 </ol>
               {{else}}
-                <em>No approvers</em>
+                <EmptyStateText />
               {{/if}}
             </:default>
             <:editing as |F|>

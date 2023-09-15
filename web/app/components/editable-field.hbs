@@ -42,17 +42,17 @@
       {{! The height/padding of this should be variable based on context. In the sidebar we can basically make it as tall as we want; in the projects context we need to limit }}
       <div
         class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
-          {{if (eq @buttonPlacement 'center') 'justify-center' ''}}
+          {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}
           {{if
             (eq @buttonOverlayColor 'white')
             'from-white via-white/90 to-white/0'
-            ' via-page-faint from-color-page-faint to-transparent'
+            ' from-color-page-faint via-color-page-faint-90 to-transparent'
           }}
           to-white/0 pt-2.5"
         style="padding-bottom: {{if
           @buttonOverlayPaddingBottom
           @buttonOverlayPaddingBottom
-          '175px'
+          '125px'
         }}"
       >
         <Hds::Button
@@ -91,13 +91,13 @@
           {{yield (hash value=this.value)}}
         </Field>
       {{/let}}
-
-      <span
-        class="invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 pt-2 group-focus-within:visible group-hover:visible"
-      >
-        <FlightIcon @name="edit" class="text-color-foreground-faint" />
-      </span>
-      {{! Floating edit button? }}
+      {{#unless @disabled}}
+        <span
+          class="invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 pt-2 group-focus-within:visible group-hover:visible"
+        >
+          <FlightIcon @name="edit" class="text-color-foreground-faint" />
+        </span>
+      {{/unless}}
     </Action>
   {{/if}}
 </div>

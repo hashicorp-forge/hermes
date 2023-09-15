@@ -80,6 +80,7 @@ module.exports = {
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",
+        "color-page-faint-90": "#fafafa90",
         "color-page-primary": "var(--token-color-page-primary)",
 
         // Foreground

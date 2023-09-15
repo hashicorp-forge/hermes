@@ -10,9 +10,13 @@
       @class="text-body-200 p-[5px]"
     >
       <:default as |F|>
-        <span class="truncate" title={{F.value}}>
-          {{or F.value "---"}}
-        </span>
+        {{#if F.value}}
+          <span class="truncate" title={{F.value}}>
+            {{F.value}}
+          </span>
+        {{else}}
+          <EmptyStateText />
+        {{/if}}
       </:default>
     </EditableField>
 
@@ -41,7 +45,7 @@
             {{/each}}
           </ol>
         {{else}}
-          ---
+          <EmptyStateText />
         {{/if}}
       </:default>
       <:editing as |F|>

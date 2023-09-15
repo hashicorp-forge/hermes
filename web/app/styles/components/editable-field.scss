@@ -17,9 +17,11 @@
     @apply flex w-full items-center border border-transparent;
     @apply min-h-[36px];
 
-    &:hover,
-    &:focus-visible &:focus {
-      @apply rounded-button-md border-color-border-input;
+    &:not([disabled]) {
+      &:hover,
+      &:focus-visible &:focus {
+        @apply rounded-button-md border-color-border-input;
+      }
     }
 
     &[disabled] {
