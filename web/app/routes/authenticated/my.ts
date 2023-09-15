@@ -108,8 +108,6 @@ export default class AuthenticatedMyRoute extends Route {
       );
     });
 
-    console.log("draftResults", draftResults);
-
     return { latest, published, draftResults };
   }
 }

@@ -14,7 +14,6 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
     if (typeof this.args.state === "string") {
       name = dasherize(this.args.state);
     }
-    console.log("name", name);
     switch (name) {
       case "in-review":
       case "approved":

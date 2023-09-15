@@ -74,7 +74,7 @@ export default class ApplicationRoute extends Route {
         this.config.setConfig(json);
       })
       .catch((err) => {
-        console.log("Error fetching and setting web config: " + err);
+        console.error("Error fetching and setting web config: " + err);
       });
 
     // Initialize the metrics service

@@ -43,9 +43,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
     const secondDoc =
       this.server.schema.relatedHermesDocument.all().models[1].attrs;
 
-    console.log(firstDoc);
-    console.log(secondDoc);
-
     this.server.create("project", {
       description: "This is a test project",
       documents: [firstDoc],

@@ -5,6 +5,8 @@ import { schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { modifier } from "ember-modifier";
 import { ModifierLike } from "@glint/template";
+import { guidFor } from "@ember/object/internals";
+import htmlElement from "hermes/utils/html-element";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -39,6 +41,8 @@ interface EditableFieldComponentSignature {
 }
 
 export default class EditableFieldComponent extends Component<EditableFieldComponentSignature> {
+  protected id = guidFor(this);
+
   /**
    * The cached value of the field.
    * Initially set to the value passed in; updated when committed.
@@ -83,15 +87,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   @tracked private containerElement: HTMLElement | null = null;
   @tracked private editingContainerElement: HTMLElement | null = null;
-  @tracked protected saveAndCancelButtons: HTMLElement[] = [];
+  @tracked protected relatedButtons: HTMLElement[] = [];
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
    */
   protected inputModifier = modifier((element: HTMLElement) => {
-    console.log("uhfs");
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
-    console.log("cuhhhh");
 
     if (this.args.class) {
       const classes = this.args.class.split(" ");
@@ -101,7 +103,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     }
 
     this.inputElement.focus();
-    // console.log("cough");
     // this might not be as good as dismissible
     element.addEventListener("blur", this.onBlur);
     return () => element.removeEventListener("blur", this.onBlur);
@@ -113,18 +114,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * otherwise the value is passed to the `maybeUpdateValue` method.
    */
   @action private onBlur(event: FocusEvent) {
-    // if event.relatedTarget is one of the butts...
-    if (event.relatedTarget && this.containerElement) {
-      const relatedTarget = event.relatedTarget as HTMLElement;
-      if (
-        relatedTarget.closest(FOCUSABLE) &&
-        this.containerElement.contains(relatedTarget)
-      ) {
-        console.log("i made this");
-        return;
-      }
-    }
-
     if (this.hasCancelled) {
       this.value = this.args.value;
       schedule("actions", () => {
@@ -138,12 +127,17 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   @action protected registerElement(element: HTMLElement) {
     this.containerElement = element;
+    this.relatedButtons.push(htmlElement(`#${this.id}`));
   }
+
   @action protected registerEditingContainer(element: HTMLElement) {
     this.editingContainerElement = element;
-    this.saveAndCancelButtons = Array.from(
+    const relatedButtons = Array.from(
       this.editingContainerElement.querySelectorAll("button")
     ) as HTMLElement[];
+    debugger;
+    this.relatedButtons.push(...relatedButtons);
+    // todo add trigger
   }
 
   /**
@@ -171,9 +165,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     switch (ev.key) {
       case "Enter":
         ev.preventDefault();
-        if (this.inputElement) {
-          this.inputElement.blur();
-        }
+        this.save();
         break;
       case "Escape":
         ev.preventDefault();
@@ -183,8 +175,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   @action protected cancelEditing() {
-    console.log("yuhhh..");
     this.hasCancelled = true;
+    this.disableEditing();
+  }
+
+  @action protected save() {
+    this.args.onChange?.(this.value);
     this.disableEditing();
   }
 

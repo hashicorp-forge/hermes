@@ -114,7 +114,7 @@
             <:default as |F|>
               {{F.value}}
             </:default>
-            <:editing as |F|>
+            {{!-- <:editing as |F|>
               <Hds::Form::Textarea::Field
                 data-test-document-title-editable-field
                 {{F.input}}
@@ -129,7 +129,7 @@
                   </FF.Error>
                 {{/if}}
               </Hds::Form::Textarea::Field>
-            </:editing>
+            </:editing> --}}
           </EditableField>
         </div>
       </div>

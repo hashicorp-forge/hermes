@@ -18,7 +18,7 @@ export default class SettingsRoute extends Route {
         return resp?.json();
       })
       .catch((err) => {
-        console.log(`Error requesting products: ${err}`);
+        console.error(`Error requesting products: ${err}`);
       });
 
     /**

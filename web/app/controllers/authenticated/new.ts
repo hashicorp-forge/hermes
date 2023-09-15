@@ -1,7 +1,6 @@
 import Controller from "@ember/controller";
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
-import Transition from "@ember/routing/transition";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 
@@ -20,9 +19,7 @@ export default class AuthenticatedNewController extends Controller {
 
   constructor() {
     super(...arguments);
-    console.log("AuthenticatedNewController");
     this.router.on("routeDidChange", (transition: any) => {
-      console.log("routeWillChange", transition);
       switch (transition.targetName) {
         case "authenticated.new.doc":
           this.selectedObjectType = "Document";

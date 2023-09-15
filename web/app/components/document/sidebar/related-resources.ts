@@ -315,7 +315,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       }
 
       try {
-        console.log("Saving related resources");
         await this.fetchSvc.fetch(
           `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
             this.args.objectID
@@ -328,7 +327,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             },
           }
         );
-        console.log("Saved related resources");
       } catch (e: unknown) {
         this.relatedLinks = cachedLinks;
         this.relatedDocuments = cachedDocuments;

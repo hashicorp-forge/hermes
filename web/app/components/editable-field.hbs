@@ -8,54 +8,56 @@
   {{#if (and this.editingIsEnabled (not @loading))}}
 
     {{on-document "keydown" this.handleKeydown}}
+    <div {{did-insert this.registerEditingContainer}}>
+      {{#if (has-block "editing")}}
 
-    {{#if (has-block "editing")}}
-
-      {{yield
-        (hash
-          value=this.value
-          update=this.maybeUpdateValue
-          input=this.inputModifier
-          emptyValueErrorIsShown=this.emptyValueErrorIsShown
-        )
-        to="editing"
-      }}
-
-    {{else}}
-      <Hds::Form::Textarea::Base
-        {{auto-height-textarea}}
-        {{this.inputModifier}}
-        @value={{this.value}}
-      />
-    {{/if}}
-
-    <div
-      class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
-        {{if (eq @buttonPlacement 'center') 'justify-center' ''}}
-        {{if
-          (eq @buttonOverlayColor 'white')
-          'from-white via-white'
-          'via-page-faint from-color-page-faint to-transparent'
+        {{yield
+          (hash
+            value=this.value
+            update=this.maybeUpdateValue
+            input=this.inputModifier
+            emptyValueErrorIsShown=this.emptyValueErrorIsShown
+          )
+          to="editing"
         }}
-        to-white/0 pb-12 pt-2.5"
-    >
-      {{! TODO: allow these to be keyboard focusable }}
-      {{! TODO: add functionality }}
-      <Hds::Button
-        @size="small"
-        @text="Save"
-        @icon="check"
-        @isIconOnly={{true}}
-      />
-      <Hds::Button
-        @text="Cancel"
-        @icon="x"
-        @isIconOnly={{true}}
-        @size="small"
-        @color="secondary"
-        {{on "click" this.cancelEditing}}
-      />
 
+      {{else}}
+        fed
+        <Hds::Form::Textarea::Base
+          {{auto-height-textarea}}
+          {{! TODO: make the buttons relatable }}
+          {{dismissible dismiss=this.cancelEditing related=this.relatedButtons}}
+          @value={{this.value}}
+        />
+      {{/if}}
+
+      <div
+        class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
+          {{if (eq @buttonPlacement 'center') 'justify-center' ''}}
+          {{if
+            (eq @buttonOverlayColor 'white')
+            'from-white via-white'
+            'via-page-faint from-color-page-faint to-transparent'
+          }}
+          to-white/0 pb-12 pt-2.5"
+      >
+        <Hds::Button
+          @size="small"
+          @text="Save"
+          @icon="check"
+          @isIconOnly={{true}}
+          {{on "click" this.save}}
+        />
+        <Hds::Button
+          @text="Cancel"
+          @icon="x"
+          @isIconOnly={{true}}
+          @size="small"
+          @color="secondary"
+          {{on "click" this.cancelEditing}}
+        />
+
+      </div>
     </div>
 
   {{else}}
@@ -63,6 +65,7 @@
       <FlightIcon @name="loading" class="loading-indicator" />
     {{/if}}
     <Action
+      id={{this.id}}
       class="field-toggle {{if @loading 'loading'}}"
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}

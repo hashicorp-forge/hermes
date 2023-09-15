@@ -63,7 +63,6 @@ export default class DocumentRoute extends Route {
     let doc = {};
     let draftFetched = false;
 
-    console.log("params.draft", params.draft);
     // Get doc data from the app backend.
     if (params.draft) {
       try {
@@ -106,7 +105,6 @@ export default class DocumentRoute extends Route {
           .then((r) => r?.json());
 
         (doc as HermesDocument).isDraft = false;
-        console.log("isDraft?", (doc as HermesDocument).isDraft);
       } catch (err) {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
@@ -121,8 +119,6 @@ export default class DocumentRoute extends Route {
     // make a background call to update the front-end index.
     void this.recentDocs.fetchAll.perform();
 
-    console.log("Document fetched: ", doc);
-
     let typedDoc = doc as HermesDocument;
 
     // Record analytics.
@@ -136,7 +132,7 @@ export default class DocumentRoute extends Route {
         }),
       });
     } catch (err) {
-      console.log("Error recording analytics: " + err);
+      console.error("Error recording analytics: " + err);
     }
 
     // Load the document as well as the logged in user info
@@ -164,8 +160,6 @@ export default class DocumentRoute extends Route {
         typedDoc.approvers = [];
       }
     }
-
-    console.log("typedDoc", typedDoc);
 
     let docTypes = await this.fetchSvc
       .fetch("/api/v1/document-types")
