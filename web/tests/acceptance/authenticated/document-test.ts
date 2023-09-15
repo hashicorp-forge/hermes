@@ -524,4 +524,38 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(SUMMARY_SELECTOR).hasText("Enter a summary");
   });
+
+  test('"people" inputs receive focus on click', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+      customEditableFields: {
+        Stakeholders: {
+          displayName: "Stakeholders",
+          type: "PEOPLE",
+        },
+      },
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${CONTRIBUTORS_SELECTOR} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${CONTRIBUTORS_SELECTOR} input`)
+    );
+
+    await click(`${APPROVERS_SELECTOR} .field-toggle`);
+
+    assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
+
+    const stakeholdersSelector = "[data-test-custom-people-field]";
+
+    await click(`${stakeholdersSelector} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${stakeholdersSelector} input`)
+    );
+  });
 });
