@@ -17,8 +17,15 @@
     }
 
     .edit-affordance {
-      // This expects a gray background and will need to be expanded for white bg of project
-      @apply invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 pt-2;
+      @apply invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l pr-[8px] pl-8 pt-2;
+
+      &.add-affordance {
+        @apply pt-[9px];
+      }
+
+      &.gray {
+        @apply from-color-page-faint via-color-page-faint to-transparent;
+      }
     }
 
     &[disabled] {
