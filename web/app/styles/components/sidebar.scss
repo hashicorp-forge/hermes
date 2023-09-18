@@ -17,6 +17,10 @@
     }
   }
 
+  .editable-field-container {
+    @apply mt-[3px];
+  }
+
   .sidebar-header {
     @apply sticky top-0 z-10 flex justify-between bg-color-page-faint px-3.5 py-4;
 

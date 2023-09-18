@@ -32,7 +32,6 @@ export default class AutoHeightTextareaModifier extends Modifier<AutoHeightTexta
     this.element.style.resize = "none";
     this.element.style.overflow = "hidden";
 
-    // TODO: confirm this change isn't destructive
     schedule("afterRender", () => {
       // set initial height
       this.updateHeight();

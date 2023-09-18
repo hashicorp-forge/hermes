@@ -98,8 +98,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        {{! TODO: class-ify this style }}
-        <div class="-mx-[5px] mb-8 -mt-[5px]">
+        <div class="editable-field-container mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -121,7 +120,7 @@
       {{! Summary }}
       <div class="mb-5">
         <Document::Sidebar::SectionHeader @title="Summary" />
-        <div class="-mx-[5px] mt-[3px]">
+        <div class="editable-field-container">
           <EditableField
             data-test-document-summary
             data-test-editable={{this.isOwner}}
@@ -129,7 +128,7 @@
             @onChange={{perform this.updateSummary}}
             @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
-            @class="text-body-200 font-regular p-[5px]"
+            @class="text-body-200 font-regular"
             @name="summary"
             @placeholder="Enter a summary"
           />
@@ -180,8 +179,7 @@
       {{! Contributors }}
       <div>
         <Document::Sidebar::SectionHeader @title="Contributors" />
-        <div class="-mx-[5px] mt-[3px]">
-
+        <div class="editable-field-container">
           <EditableField
             data-test-document-contributors
             data-test-editable={{this.isOwner}}
@@ -224,7 +222,7 @@
 
       <div>
         <Document::Sidebar::SectionHeader @title="Approvers" />
-        <div class="-mx-[5px] mt-[3px]">
+        <div class="editable-field-container mt-[3px]">
           <EditableField
             data-test-document-approvers
             data-test-editable={{this.isOwner}}

@@ -84,17 +84,18 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
    */
-  protected inputModifier = modifier((element: HTMLElement) => {
+  @action protected registerInput(element: HTMLElement) {
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
 
     if (this.args.class) {
       const classes = this.args.class.split(" ");
       this.inputElement.classList.add(...classes);
+      console.log("classes", classes);
     }
 
     this.applyPeopleSelectClasses(this.inputElement, false);
     this.inputElement.focus();
-  });
+  }
 
   @action protected applyPeopleSelectClasses(
     element: HTMLElement,
@@ -154,9 +155,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * On Escape, we disable editing.
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
-    console.log("handle keydown", ev);
     switch (ev.key) {
-      // TODO: in the case of "enter" we want to make sure the active element is not the cancel button. if it is, we want to cancel instead of save.
       case "Enter":
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
@@ -169,7 +168,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       case "Escape":
         ev.preventDefault();
         this.disableEditing();
-        console.log("escaperrr");
         break;
     }
   }
