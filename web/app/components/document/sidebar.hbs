@@ -232,6 +232,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-contributors-editable
               class="multiselect--narrow"
               @selected={{this.contributors}}
@@ -271,6 +272,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-approvers-editable
               class="multiselect--narrow"
               @selected={{this.approvers}}
