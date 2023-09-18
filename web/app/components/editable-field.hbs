@@ -22,8 +22,7 @@
       {{else}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
-          {{! TODO: replace this modifier with something else? }}
-          {{this.inputModifier}}
+          {{did-insert this.registerInput}}
           {{dismissible
             dismiss=(fn this.maybeUpdateValue this.value)
             related=this.relatedButtons
@@ -39,7 +38,6 @@
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
-      {{! TODO: move this to css? }}
       <div
         class="edit-overlay-affordance
           {{if (eq @buttonOverlayColor 'white') 'white' 'page-faint'}}
@@ -80,7 +78,6 @@
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}
     >
-      {{! pick and element and apply styles here }}
       {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full">
           {{#if (has-block "default")}}

@@ -1,3 +1,7 @@
+.editable-field-container {
+  @apply -mx-[5px];
+}
+
 .editable-field {
   @apply relative flex w-full;
 
@@ -101,14 +105,13 @@
 
     button {
       &:first-child {
-        animation: slideDownPx 300ms cubic-bezier(0, 1, 0.5, 1),
-          fadeIn 120ms ease-in-out;
+        animation: slideDownXs 300ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 80ms ease-in-out;
       }
 
       &:nth-child(2) {
-        opacity: 0;
-        animation: slideDownPx 300ms cubic-bezier(0, 1, 0.5, 1) 30ms,
-          fadeIn 120ms ease-in-out 30ms forwards;
+        animation: slideDownXs 600ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 100ms ease-in-out;
       }
     }
   }

@@ -27,9 +27,9 @@
   }
 }
 
-@keyframes slideDownPx {
+@keyframes slideDownXs {
   from {
-    transform: translateY(-1px);
+    transform: translateY(-1.5px);
   }
   to {
     transform: translateY(0);
