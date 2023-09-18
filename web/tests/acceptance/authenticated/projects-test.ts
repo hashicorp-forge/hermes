@@ -89,7 +89,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
     });
 
     this.server.create("project", {
-      name: "Shared admin interface overhaul",
+      name: "Shared Admin",
       documents: [thirdDoc, firstDoc, fifthDoc, fourthDoc],
     });
 

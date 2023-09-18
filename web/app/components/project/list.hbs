@@ -1,15 +1,18 @@
 <div class="x-container mt-2 mb-4">
-  <div class="mb-6">
+  <div class="relative mb-6">
     <h3 class="mb-3">In progress</h3>
-    <ol class="grid grid-cols-2 gap-2.5">
+    <ol {{did-insert this.configureMasonry}} class="relative grid grid-cols-3">
       {{#each @projects as |project|}}
-        <Project::Tile @project={{project}} />
+        <Project::Tile
+          @project={{project}}
+          class="mb-[10px] w-[calc((100%-20px)/3)]"
+        />
       {{/each}}
     </ol>
   </div>
   <div class="mb-6">
     <h3 class="mb-3">Completed</h3>
-    <ol class="grid grid-cols-2 gap-2.5">
+    <ol class="grid">
       {{#each (take 3 @projects) as |project|}}
         <Project::Tile @project={{project}} />
       {{/each}}

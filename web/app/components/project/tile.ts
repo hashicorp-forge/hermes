@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { HermesProject } from "hermes/routes/authenticated/projects";
 
 interface ProjectTileComponentSignature {
+  Element: HTMLLIElement;
   Args: {
     project: HermesProject;
   };
