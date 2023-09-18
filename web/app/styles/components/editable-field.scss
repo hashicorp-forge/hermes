@@ -28,7 +28,7 @@
   }
 
   .field-toggle {
-    @apply flex w-full rounded-button-md border border-transparent transition-colors;
+    @apply flex w-full rounded-button-md border border-transparent text-inherit transition-colors;
     @apply min-h-[36px];
 
     &:not([disabled]) {
@@ -48,12 +48,22 @@
           }
         }
       }
+
+      h1,
+      p {
+        @apply text-color-foreground-strong;
+      }
     }
 
     h1 {
       font-size: inherit;
       font-weight: inherit;
       line-height: inherit;
+      color: inherit;
+    }
+
+    p {
+      color: inherit;
     }
   }
 
@@ -92,7 +102,6 @@
     &::before {
       content: "";
       @apply absolute h-full w-full bg-gradient-to-b;
-      // animation: fadeIn 300ms;
     }
 
     &.white::before {
