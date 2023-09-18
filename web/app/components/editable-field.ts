@@ -24,6 +24,7 @@ interface EditableFieldComponentSignature {
     buttonOverlayColor?: "white";
     buttonOverlayPaddingBottom?: string;
     name?: string;
+    placeholder?: string;
   };
   Blocks: {
     default: [value: any];
@@ -31,12 +32,7 @@ interface EditableFieldComponentSignature {
       F: {
         value: any;
         update: (value: any) => void;
-        input: ModifierLike<{
-          Element: HTMLInputElement | HTMLTextAreaElement;
-          Return: void;
-        }>;
-        applyInputClasses: (element: HTMLElement) => void;
-        emptyValueErrorIsShown: boolean;
+        applyPeopleSelectClasses: (element: HTMLElement) => void;
       }
     ];
   };
@@ -94,14 +90,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     if (this.args.class) {
       const classes = this.args.class.split(" ");
       this.inputElement.classList.add(...classes);
-      // Make sure the input sits above its
     }
 
-    this.applyInputClasses(this.inputElement, false);
+    this.applyPeopleSelectClasses(this.inputElement, false);
     this.inputElement.focus();
   });
 
-  @action protected applyInputClasses(
+  @action protected applyPeopleSelectClasses(
     element: HTMLElement,
     onNextRunLoop = true
   ) {
@@ -159,6 +154,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * On Escape, we disable editing.
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
+    console.log("handle keydown", ev);
     switch (ev.key) {
       // TODO: in the case of "enter" we want to make sure the active element is not the cancel button. if it is, we want to cancel instead of save.
       case "Enter":
@@ -173,6 +169,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       case "Escape":
         ev.preventDefault();
         this.disableEditing();
+        console.log("escaperrr");
         break;
     }
   }
@@ -184,6 +181,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
+    console.log("maybe update value", eventOrValue);
     let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {

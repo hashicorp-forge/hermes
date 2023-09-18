@@ -112,11 +112,7 @@
             @class="text-display-300 p-[5px] font-semibold foreground-strong"
             class="mb-1.5"
             @tag="h1"
-          >
-            <:default as |F|>
-              {{F.value}}
-            </:default>
-          </EditableField>
+          />
         </div>
       </div>
 
@@ -135,11 +131,8 @@
             @disabled={{not this.isOwner}}
             @class="text-body-200 font-regular p-[5px]"
             @name="summary"
-          >
-            <:default as |F|>
-              {{or F.value "Enter a summary"}}
-            </:default>
-          </EditableField>
+            @placeholder="Enter a summary"
+          />
         </div>
       </div>
 
@@ -217,7 +210,7 @@
             <:editing as |F|>
               <Inputs::PeopleSelect
                 {{autofocus targetChildren=true}}
-                {{did-insert F.applyInputClasses}}
+                {{did-insert F.applyPeopleSelectClasses}}
                 data-test-document-contributors-editable
                 class="multiselect--narrow"
                 @selected={{this.contributors}}
@@ -261,7 +254,7 @@
             <:editing as |F|>
               <Inputs::PeopleSelect
                 {{autofocus targetChildren=true}}
-                {{did-insert F.applyInputClasses}}
+                {{did-insert F.applyPeopleSelectClasses}}
                 data-test-document-approvers-editable
                 class="multiselect--narrow"
                 @selected={{this.approvers}}
@@ -282,7 +275,9 @@
       {{! Last modified }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
-        <p>{{time-ago @document.modifiedTime}}</p>
+        {{#if @document.modifiedTime}}
+          <p>{{time-ago @document.modifiedTime}}</p>
+        {{/if}}
       </div>
 
       {{! Related resources }}

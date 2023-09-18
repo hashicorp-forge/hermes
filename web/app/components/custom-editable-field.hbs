@@ -51,7 +51,7 @@
       <:editing as |F|>
         <Inputs::PeopleSelect
           {{autofocus targetChildren=true}}
-          {{did-insert F.applyInputClasses}}
+          {{did-insert F.applyPeopleSelectClasses}}
           class="multiselect--narrow"
           @selected={{this.people}}
           @onChange={{this.updateEmails}}
@@ -61,5 +61,4 @@
       </:editing>
     </EditableField>
   {{/if}}
-
 </div>

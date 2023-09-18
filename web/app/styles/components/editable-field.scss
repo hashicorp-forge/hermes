@@ -1,17 +1,5 @@
 .editable-field {
-  @apply flex; // TODO: Confirm this has no breaking changes
-  @apply relative w-full;
-
-  > input[type="text"],
-  > textarea {
-    // color: inherit;
-    // text-align: unset;
-    // font-size: inherit;
-    // font-weight: inherit;
-    // padding: inherit;
-    // margin: inherit;
-    // line-height: inherit;
-  }
+  @apply relative flex w-full;
 
   > .field-toggle {
     @apply flex w-full items-center border border-transparent;
@@ -21,6 +9,22 @@
       &:hover,
       &:focus-visible &:focus {
         @apply rounded-button-md border-color-border-input;
+
+        .edit-affordance {
+          @apply visible;
+        }
+      }
+    }
+
+    .edit-affordance {
+      @apply invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l pr-[8px] pl-8 pt-2;
+
+      &.add-affordance {
+        @apply pt-[9px];
+      }
+
+      &.gray {
+        @apply from-color-page-faint via-color-page-faint to-transparent;
       }
     }
 

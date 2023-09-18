@@ -51,6 +51,15 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     this.args.showModal();
   }
   /**
+   * The action to show the "add resource" modal.
+   * Triggered when clicking the empty-state button.
+   */
+  @action protected showModal() {
+    assert("showModal is required", this.args.showModal);
+    this.args.showModal();
+  }
+
+  /**
    * The transition rules for the list.
    * Returns an empty transition on first render, and
    * on subsequent checks, returns the default transition.

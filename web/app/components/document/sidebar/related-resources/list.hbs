@@ -1,7 +1,6 @@
 <AnimatedContainer data-test-related-resources-list class="w-full">
   <div {{did-insert this.enableAnimation}}>
     {{#if this.listIsEmpty}}
-      {{! TODO: can we share this with EditableField? }}
       <div class="-mx-[5px]">
         <div class="editable-field">
           <Action
@@ -10,10 +9,7 @@
             class="field-toggle group pl-[5px]"
           >
             <EmptyStateText />
-
-            <span
-              class="invisible absolute right-px top-px grid h-[34px] place-items-center rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 group-focus-within:visible group-hover:visible"
-            >
+            <span class="edit-affordance gray add-affordance">
               <FlightIcon @name="plus" class="text-color-foreground-faint" />
             </span>
           </Action>

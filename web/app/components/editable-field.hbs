@@ -14,9 +14,7 @@
           (hash
             value=this.value
             update=this.maybeUpdateValue
-            input=this.inputModifier
-            applyInputClasses=this.applyInputClasses
-            emptyValueErrorIsShown=this.emptyValueErrorIsShown
+            applyPeopleSelectClasses=this.applyPeopleSelectClasses
           )
           to="editing"
         }}
@@ -24,22 +22,24 @@
       {{else}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
+          {{! TODO: replace this modifier with something else? }}
           {{this.inputModifier}}
           {{dismissible
             dismiss=(fn this.maybeUpdateValue this.value)
             related=this.relatedButtons
+            shouldIgnoreEscape=true
           }}
           @value={{this.value}}
+          placeholder={{@placeholder}}
           name={{@name}}
           as |F|
         >
           {{#if this.emptyValueErrorIsShown}}
-            <F.Error>This field is required</F.Error>
+            <F.Error data-test-empty-value-error>This field is required</F.Error>
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
-
-      {{! The height/padding of this should be variable based on context. In the sidebar we can basically make it as tall as we want; in the projects context we need to limit }}
+      {{! TODO: move this to css? }}
       <div
         class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
           {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}
@@ -88,13 +88,15 @@
       {{! pick and element and apply styles here }}
       {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full {{@class}}">
-          {{yield (hash value=this.value)}}
+          {{#if (has-block "default")}}
+            {{yield (hash value=this.value)}}
+          {{else}}
+            {{or this.value @placeholder}}
+          {{/if}}
         </Field>
       {{/let}}
       {{#unless @disabled}}
-        <span
-          class="invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l from-color-page-faint via-color-page-faint to-transparent pr-[8px] pl-8 pt-2 group-focus-within:visible group-hover:visible"
-        >
+        <span class="edit-affordance gray">
           <FlightIcon @name="edit" class="text-color-foreground-faint" />
         </span>
       {{/unless}}

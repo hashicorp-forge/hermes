@@ -11,6 +11,7 @@ interface DismissibleModifierSignature {
     Named: {
       dismiss: () => void;
       related?: HTMLElement | HTMLElement[];
+      shouldIgnoreEscape?: boolean;
     };
   };
 }
@@ -33,6 +34,7 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   @tracked private _element: HTMLElement | null = null;
   @tracked private _dismiss?: () => void;
   @tracked private related?: HTMLElement | HTMLElement[];
+  @tracked private shouldIgnoreEscape?: boolean;
 
   get element(): HTMLElement {
     assert("_element must exist", this._element);
@@ -72,16 +74,24 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
    * in which case we preserve the search's "clear" function.
    */
   @action maybeDismiss(event: FocusEvent | PointerEvent | KeyboardEvent) {
+    console.log("maybe dismiss", event);
     if (event instanceof KeyboardEvent) {
       if (event.key === "Escape") {
+        if (this.shouldIgnoreEscape) {
+          return;
+        }
+        console.log("escape");
         let activeElement = document.activeElement;
         if (
           activeElement?.attributes.getNamedItem("type")?.value === "search"
         ) {
+          console.log("escape2 ");
           if ((activeElement as HTMLInputElement).value !== "") {
+            console.log("escape3");
             return;
           }
         }
+        console.log("escape4");
         this.dismiss();
       }
       return;
@@ -102,14 +112,13 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   modify(
     element: HTMLElement,
     _positional: [],
-    named: {
-      dismiss: () => void;
-      related?: HTMLElement | HTMLElement[];
-    }
+    named: DismissibleModifierSignature["Args"]["Named"]
   ) {
     this._element = element;
     this._dismiss = named.dismiss;
     this.related = named.related;
+    this.shouldIgnoreEscape = named.shouldIgnoreEscape;
+
     document.addEventListener("focusin", this.maybeDismiss);
     document.addEventListener("click", this.maybeDismiss);
     document.addEventListener("keydown", this.maybeDismiss);

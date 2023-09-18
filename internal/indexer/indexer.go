@@ -499,8 +499,15 @@ func saveDocInAlgolia(
 	doc document.Document,
 	algo *algolia.Client,
 ) error {
+	// Convert document to Algolia object.
+	docObj, err := doc.ToAlgoliaObject(true)
+	if err != nil {
+		return fmt.Errorf(
+			"error converting document to Algolia object: %w", err)
+	}
+
 	// Save document object.
-	res, err := algo.Docs.SaveObject(doc)
+	res, err := algo.Docs.SaveObject(docObj)
 	if err != nil {
 		return fmt.Errorf("error saving document: %w", err)
 	}

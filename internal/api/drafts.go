@@ -1149,7 +1149,7 @@ func getDocTypeTemplate(
 	template := ""
 
 	for _, t := range docTypes {
-		if strings.ToUpper(t.Name) == docType {
+		if t.Name == docType {
 			template = t.Template
 			break
 		}

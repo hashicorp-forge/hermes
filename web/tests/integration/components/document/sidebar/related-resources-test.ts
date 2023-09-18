@@ -78,6 +78,29 @@ module(
       this.set("body", bodyDiv);
     });
 
+    test("the empty state is clickable to add a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      const emptyStateSelector =
+        "[data-test-related-resources-list-empty-state]";
+
+      assert.dom(emptyStateSelector).hasText("---");
+
+      await click("[data-test-related-resources-list-empty-state]");
+
+      assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
+    });
+
     test("it renders the related resources list", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedHermesDocument", {
         id: 1,
