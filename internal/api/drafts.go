@@ -989,6 +989,7 @@ func DraftsDocumentHandler(
 
 			// Product.
 			if req.Product != nil {
+				doc.Product = *req.Product
 				model.Product = models.Product{Name: *req.Product}
 
 				// Update doc number in document.
