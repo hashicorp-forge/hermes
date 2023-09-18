@@ -21,7 +21,7 @@
         <div
           class="product-badge
             {{productIcon}}
-            {{if this.save.isRunning 'opacity-50'}}"
+            {{if this.saveIsRunning 'opacity-50'}}"
         >
           <FlightIcon @name={{productIcon}} />
         </div>
@@ -105,14 +105,12 @@
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
             @onChange={{this.updateTitle}}
-            @isSaving={{this.save.isRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
           >
             <:default as |F|>
-              <h1
-                class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-              >
+              <h1 class="text-display-300 font-semibold">
                 {{F.value}}
               </h1>
             </:default>
@@ -147,7 +145,7 @@
           data-test-editable={{this.isOwner}}
           @value={{this.summary}}
           @onChange={{perform this.updateSummary}}
-          @isSaving={{this.save.isRunning}}
+          @isSaving={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default as |F|>
@@ -186,7 +184,7 @@
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.updateProduct.perform}}
-              @isSaving={{this.save.isRunning}}
+              @isSaving={{this.saveIsRunning}}
               @formatIsBadge={{true}}
               @renderOut={{true}}
             />
@@ -215,7 +213,7 @@
           @value={{this.contributors}}
           @onChange={{perform this.save "contributors"}}
           @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
-          @isSaving={{this.save.isRunning}}
+          @isSaving={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default>
@@ -236,6 +234,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-contributors-editable
               class="multiselect--narrow"
               @selected={{this.contributors}}
@@ -254,7 +253,7 @@
           @value={{this.approvers}}
           @onChange={{perform this.save "approvers"}}
           @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
-          @isSaving={{this.save.isRunning}}
+          @isSaving={{this.saveIsRunning}}
           @disabled={{this.editingIsDisabled}}
         >
           <:default>
@@ -276,6 +275,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-approvers-editable
               class="multiselect--narrow"
               @selected={{this.approvers}}
@@ -323,8 +323,8 @@
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}
-              @onChange={{perform this.save field}}
-              @isSaving={{this.save.isRunning}}
+              @onChange={{perform this.saveCustomField field attributes}}
+              @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             />
           </div>

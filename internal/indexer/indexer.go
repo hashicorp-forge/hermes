@@ -9,9 +9,10 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
@@ -42,6 +43,9 @@ type Indexer struct {
 	// DocumentsFolderID is the Google Drive ID of the folder containing published
 	// documents to index.
 	DocumentsFolderID string
+
+	// DocumentTypes are a slice of document types from the application config.
+	DocumentTypes []*config.DocumentType
 
 	// DraftsFolderID is the Google Drive ID of the folder containing draft
 	// documents to index.
@@ -101,6 +105,7 @@ func (idx *Indexer) validate() error {
 		validation.Field(&idx.BaseURL, validation.Required),
 		validation.Field(&idx.Database, validation.Required),
 		validation.Field(&idx.DocumentsFolderID, validation.Required),
+		validation.Field(&idx.DocumentTypes, validation.Required),
 		validation.Field(&idx.DraftsFolderID, validation.Required),
 		validation.Field(&idx.GoogleWorkspaceService, validation.Required),
 	)
@@ -131,6 +136,13 @@ func WithDatabase(db *gorm.DB) IndexerOption {
 func WithDocumentsFolderID(d string) IndexerOption {
 	return func(i *Indexer) {
 		i.DocumentsFolderID = d
+	}
+}
+
+// WithDocumentTypes sets the document types.
+func WithDocumentTypes(dts []*config.DocumentType) IndexerOption {
+	return func(i *Indexer) {
+		i.DocumentTypes = dts
 	}
 }
 
@@ -410,16 +422,18 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
-			// Create new document object of the proper document type.
-			docObj, err := hcd.NewEmptyDoc(dbDoc.DocumentType.Name)
-			if err != nil {
-				logError("error creating new empty document", err)
+			// Get document object from Algolia.
+			var algoObj map[string]any
+			if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+				logError("error retrieving document object from Algolia", err)
 				os.Exit(1)
 			}
 
-			// Get document object from Algolia.
-			if err := algo.Docs.GetObject(file.Id, &docObj); err != nil {
-				logError("error retrieving document object from Algolia", err)
+			// Convert Algolia object to a document.
+			doc, err := document.NewFromAlgoliaObject(
+				algoObj, idx.DocumentTypes)
+			if err != nil {
+				logError("error converting Algolia object to document", err)
 				os.Exit(1)
 			}
 
@@ -440,11 +454,11 @@ func (idx *Indexer) Run() error {
 			}
 
 			// Update document object with content and latest modified time.
-			docObj.SetContent(string(content))
-			docObj.SetModifiedTime(modifiedTime.Unix())
+			doc.Content = (string(content))
+			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Save the document in Algolia.
-			if err := saveDocInAlgolia(docObj, idx.AlgoliaClient); err != nil {
+			if err := saveDocInAlgolia(*doc, idx.AlgoliaClient); err != nil {
 				return fmt.Errorf("error saving document in Algolia: %w", err)
 			}
 
@@ -482,11 +496,18 @@ func (idx *Indexer) Run() error {
 
 // saveDoc saves a document struct and its redirect details in Algolia.
 func saveDocInAlgolia(
-	doc hcd.Doc,
+	doc document.Document,
 	algo *algolia.Client,
 ) error {
+	// Convert document to Algolia object.
+	docObj, err := doc.ToAlgoliaObject(true)
+	if err != nil {
+		return fmt.Errorf(
+			"error converting document to Algolia object: %w", err)
+	}
+
 	// Save document object.
-	res, err := algo.Docs.SaveObject(doc)
+	res, err := algo.Docs.SaveObject(docObj)
 	if err != nil {
 		return fmt.Errorf("error saving document: %w", err)
 	}
@@ -496,9 +517,9 @@ func saveDocInAlgolia(
 	}
 
 	// Save document redirect details.
-	if doc.GetDocNumber() != "" {
+	if doc.DocNumber != "" {
 		err = links.SaveDocumentRedirectDetails(
-			algo, doc.GetObjectID(), doc.GetDocType(), doc.GetDocNumber())
+			algo, doc.ObjectID, doc.DocType, doc.DocNumber)
 		if err != nil {
 			return err
 		}

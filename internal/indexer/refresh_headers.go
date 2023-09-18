@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"google.golang.org/api/drive/v3"
@@ -173,30 +173,37 @@ func refreshDocumentHeader(
 		return
 	}
 
-	// Get base document object from Algolia so we can determine the document
-	// type.
-	var baseDocObj hcd.BaseDoc
-	if err := getAlgoliaDocObject(algo, file.Id, ft, &baseDocObj); err != nil {
-		log.Error("error getting document object from Algolia",
-			"error", err,
-			"google_file_id", file.Id,
-		)
-		os.Exit(1)
-	}
-
-	// Create new document object of the proper document type.
-	docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-	if err != nil {
-		log.Error("error creating new empty document object",
-			"error", err,
-			"google_file_id", file.Id,
-		)
-		os.Exit(1)
-	}
-
 	// Get document object from Algolia.
-	if err := getAlgoliaDocObject(algo, file.Id, ft, &docObj); err != nil {
-		log.Error("error getting document object from Algolia",
+	var algoObj map[string]any
+	switch ft {
+	case draftsFolderType:
+		if err = algo.Drafts.GetObject(file.Id, &algoObj); err != nil {
+			log.Error("error getting draft document object from Algolia",
+				"error", err,
+				"google_file_id", file.Id,
+			)
+			os.Exit(1)
+		}
+	case documentsFolderType:
+		if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+			log.Error("error getting document object from Algolia",
+				"error", err,
+				"google_file_id", file.Id,
+			)
+			os.Exit(1)
+		}
+	default:
+		log.Error("bad folder type",
+			"folder_type", ft,
+		)
+		os.Exit(1)
+	}
+
+	// Convert Algolia object to a document.
+	doc, err := document.NewFromAlgoliaObject(
+		algoObj, idx.DocumentTypes)
+	if err != nil {
+		log.Error("error converting Algolia object to document",
 			"error", err,
 			"google_file_id", file.Id,
 		)
@@ -204,8 +211,8 @@ func refreshDocumentHeader(
 	}
 
 	// Replace document header.
-	if err := docObj.ReplaceHeader(
-		file.Id, idx.BaseURL, true, idx.GoogleWorkspaceService); err != nil {
+	if err := doc.ReplaceHeader(
+		idx.BaseURL, true, idx.GoogleWorkspaceService); err != nil {
 		log.Error("error replacing document header",
 			"error", err,
 			"google_file_id", file.Id,
@@ -243,21 +250,4 @@ func refreshDocumentHeader(
 	log.Info("refreshed document header",
 		"google_file_id", file.Id,
 	)
-}
-
-func getAlgoliaDocObject(
-	algo *algolia.Client,
-	objectID string,
-	ft folderType,
-	target interface{},
-) error {
-	switch ft {
-	case draftsFolderType:
-		return algo.Drafts.GetObject(objectID, &target)
-	case documentsFolderType:
-		return algo.Docs.GetObject(objectID, &target)
-	default:
-		return fmt.Errorf("bad folder type: %v", ft)
-	}
-
 }

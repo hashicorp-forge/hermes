@@ -6,8 +6,6 @@ export interface HermesDocument {
   status: string;
   product?: string;
   modifiedTime?: number; // Not available on drafts fetched as Hits from backend
-  created: string; // E.g., "Aug 15, 2032"
-  createdTime: number;
   docNumber: string;
   docType: string;
   title: string;
@@ -35,6 +33,7 @@ export interface CustomEditableFields {
 }
 
 export interface CustomEditableField {
+  name?: string;
   displayName: string;
   type: "STRING" | "PEOPLE";
   value?: string | string[];

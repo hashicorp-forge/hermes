@@ -17,7 +17,11 @@ import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import {
+  CustomEditableField,
+  HermesDocument,
+  HermesUser,
+} from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
@@ -641,6 +645,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // productAbbreviation is computed by the back end
   });
 
+  get saveIsRunning() {
+    return this.save.isRunning || this.saveCustomField.isRunning;
+  }
+
   save = task(async (field: string, val: string | HermesUser[]) => {
     if (field && val !== undefined) {
       let serializedValue;
@@ -660,6 +668,35 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     }
   });
+
+  saveCustomField = task(
+    async (
+      fieldName: string,
+      field: CustomEditableField,
+      val: string | HermesUser[]
+    ) => {
+      if (field && val !== undefined) {
+        let serializedValue;
+
+        if (typeof val === "string") {
+          serializedValue = cleanString(val);
+        } else {
+          serializedValue = val.map((p: HermesUser) => p.email);
+        }
+
+        field.name = fieldName;
+        field.value = serializedValue;
+
+        try {
+          await this.patchDocument.perform({
+            customFields: [field],
+          });
+        } catch (err) {
+          this.showFlashError(err as Error, "Unable to save document");
+        }
+      }
+    }
+  );
 
   patchDocument = task(async (fields) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
