@@ -5,6 +5,8 @@ export interface HermesDocument {
 
   status: string;
   product?: string;
+  created: string; // E.g., "Aug 16, 2023"
+  createdTime: number;
   modifiedTime?: number; // Not available on drafts fetched as Hits from backend
   docNumber: string;
   docType: string;
