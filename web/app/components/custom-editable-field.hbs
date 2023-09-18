@@ -1,6 +1,5 @@
 <div class="editable-field-container" ...attributes>
   {{#if this.typeIsString}}
-
     <EditableField
       data-test-custom-string-field
       @value={{get @document @field}}
@@ -19,7 +18,6 @@
         {{/if}}
       </:default>
     </EditableField>
-
   {{else if this.typeIsPeople}}
     <EditableField
       data-test-custom-people-field
