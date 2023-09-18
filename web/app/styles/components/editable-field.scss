@@ -1,45 +1,115 @@
 .editable-field {
   @apply relative flex w-full;
 
-  > .field-toggle {
-    @apply flex w-full items-center border border-transparent;
+  &[disabled] {
+    cursor: default;
+  }
+
+  &.loading {
+    opacity: 0.5;
+  }
+
+  &.button-affordance {
+    .field-toggle:not([disabled]) {
+      &:hover,
+      &:focus-visible &:focus {
+        @apply border-color-border-input bg-color-page-faint;
+      }
+    }
+  }
+
+  textarea,
+  .field-toggle {
+    @apply px-[5px] pb-[5px] pt-[7px];
+  }
+
+  .field-toggle {
+    @apply flex w-full rounded-button-md border border-transparent transition-colors;
     @apply min-h-[36px];
 
     &:not([disabled]) {
       &:hover,
       &:focus-visible &:focus {
-        @apply rounded-button-md border-color-border-input;
+        @apply bg-color-palette-neutral-200;
 
         .edit-affordance {
           @apply visible;
+
+          &::before {
+            animation: fadeIn 50ms ease-out forwards 150ms;
+          }
+
+          .flight-icon {
+            animation: slideLeftPx 250ms ease-out, fadeIn 100ms ease-out;
+          }
         }
       }
     }
 
-    .edit-affordance {
-      @apply invisible absolute right-px top-px h-[calc(100%-2px)] rounded-r bg-gradient-to-l pr-[8px] pl-8 pt-2;
+    h1 {
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+    }
+  }
 
-      &.add-affordance {
-        @apply pt-[9px];
+  .edit-affordance {
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-button-md rounded-r  pr-[8px] pl-8 pt-[9px];
+
+    &::before {
+      content: "";
+      @apply bg-gradient-to-l opacity-0;
+    }
+
+    .flight-icon-edit {
+      @apply -mt-px;
+    }
+
+    &.gray {
+      &::before {
+        @apply from-color-palette-neutral-200 via-color-palette-neutral-200 to-transparent;
       }
+    }
 
-      &.gray {
+    &.light-gray {
+      &::before {
         @apply from-color-page-faint via-color-page-faint to-transparent;
       }
-    }
-
-    &[disabled] {
-      cursor: default;
-    }
-
-    &.loading {
-      opacity: 0.5;
     }
   }
 
   .loading-indicator {
-    position: absolute;
-    top: 0;
-    right: 0;
+    @apply absolute top-2 right-2;
+  }
+
+  .edit-overlay-affordance {
+    @apply absolute left-0 bottom-0 flex w-full translate-y-full gap-1 pt-2.5;
+
+    &::before {
+      content: "";
+      @apply absolute h-full w-full bg-gradient-to-b;
+      // animation: fadeIn 300ms;
+    }
+
+    &.white::before {
+      @apply from-white via-white/90 to-white/0;
+    }
+
+    &.page-faint::before {
+      @apply from-color-page-faint via-color-page-faint-90 to-transparent;
+    }
+
+    button {
+      &:first-child {
+        animation: slideDownPx 300ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 120ms ease-in-out;
+      }
+
+      &:nth-child(2) {
+        opacity: 0;
+        animation: slideDownPx 300ms cubic-bezier(0, 1, 0.5, 1) 30ms,
+          fadeIn 120ms ease-in-out 30ms forwards;
+      }
+    }
   }
 }

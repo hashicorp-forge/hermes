@@ -41,14 +41,9 @@
       {{/if}}
       {{! TODO: move this to css? }}
       <div
-        class="absolute left-0 bottom-0 flex w-full translate-y-full gap-1 bg-gradient-to-b
-          {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}
-          {{if
-            (eq @buttonOverlayColor 'white')
-            'from-white via-white/90 to-white/0'
-            ' from-color-page-faint via-color-page-faint-90 to-transparent'
-          }}
-          to-white/0 pt-2.5"
+        class="edit-overlay-affordance
+          {{if (eq @buttonOverlayColor 'white') 'white' 'page-faint'}}
+          {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}"
         style="padding-bottom: {{if
           @buttonOverlayPaddingBottom
           @buttonOverlayPaddingBottom
@@ -81,13 +76,13 @@
     {{/if}}
     <Action
       {{did-insert this.registerToggleButton}}
-      class="field-toggle group {{if @loading 'loading'}}"
+      class="field-toggle group {{if @loading 'loading'}} {{@class}} "
       disabled={{or @disabled @loading}}
       {{on "click" this.enableEditing}}
     >
       {{! pick and element and apply styles here }}
       {{#let (element (or @tag "p")) as |Field|}}
-        <Field class="w-full {{@class}}">
+        <Field class="w-full">
           {{#if (has-block "default")}}
             {{yield (hash value=this.value)}}
           {{else}}

@@ -90,6 +90,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     if (this.args.class) {
       const classes = this.args.class.split(" ");
       this.inputElement.classList.add(...classes);
+      console.log("classes", classes);
     }
 
     this.applyPeopleSelectClasses(this.inputElement, false);
