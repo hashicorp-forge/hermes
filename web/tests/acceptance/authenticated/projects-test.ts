@@ -84,6 +84,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
       documents: [thirdDoc, secondDoc],
       jiraObject: {
         key: "LABS-103",
+        status: "Done",
       },
     });
 
@@ -96,7 +97,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     this.server.create("project", {
       name: "Shared Admin",
-      documents: [thirdDoc, firstDoc, fifthDoc, fourthDoc],
+      documents: [firstDoc, fifthDoc, fourthDoc, thirdDoc],
     });
 
     this.server.create("project", {

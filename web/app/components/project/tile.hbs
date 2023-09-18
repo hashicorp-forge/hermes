@@ -45,8 +45,15 @@
         {{/if}}
         {{#if this.jiraObject}}
           <span
-            class="absolute bottom-0 right-0 text-body-100 text-color-foreground-faint"
+            class="absolute
+              {{if (eq this.jiraObject.status 'Done') 'line-through'}}
+              bottom-0 right-0 flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
           >
+            {{#if @project.jiraObject.type}}
+              <div class="flex">
+                <FlightIcon @name="square-fill" class="text-lime-600" />
+              </div>
+            {{/if}}
             {{this.jiraObject.key}}
           </span>
         {{/if}}
