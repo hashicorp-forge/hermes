@@ -13,24 +13,6 @@
     </LinkTo>
 
     <div class="flex space-x-0.5">
-      <CopyURLButton
-        @url="TODO"
-        @isIconOnly={{true}}
-        @tooltipPlacement="bottom"
-        class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
-      />
-
-      {{!-- <Hds::Button
-        {{on "click" this.showModal}}
-        {{! @size="small" }}
-        @icon="edit"
-        @text="Edit"
-        @isIconOnly={{true}}
-        @color="tertiary"
-        class="mx-auto text-color-foreground-primary"
-        {{tooltip "Edit project info..." placement="bottom"}}
-      /> --}}
-
       <X::DropdownList
         @items={{hash
           complete=(hash
@@ -57,6 +39,22 @@
           </dd.Action>
         </:item>
       </X::DropdownList>
+      <CopyURLButton
+        @url="TODO"
+        @isIconOnly={{true}}
+        @tooltipPlacement="bottom"
+        class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
+      />
+
+      <Hds::Button
+        {{! @size="small" }}
+        @icon="pin"
+        @text="Pin to dashboard"
+        @isIconOnly={{true}}
+        @color="tertiary"
+        class="mx-auto text-color-foreground-primary"
+        {{tooltip "Pin to dashboard" placement="bottom"}}
+      />
 
     </div>
   </div>
