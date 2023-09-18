@@ -4,9 +4,10 @@
   class="product-badge-link"
   ...attributes
 >
-  <Hds::Badge
-    @icon={{or (get-product-id this.this.args.productArea) "folder"}}
-    @text={{this.productAreaName}}
-    title={{this.productAreaName}}
-  />
+  {{#let (get-product-id this.args.productArea) as |icon|}}
+    <div data-test-doc-thumbnail-product-badge class="product-badge {{icon}}">
+      <FlightIcon @name={{or icon "folder"}} />
+    </div>
+  {{/let}}
+  {{this.productAreaName}}
 </LinkTo>

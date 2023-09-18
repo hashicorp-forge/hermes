@@ -30,12 +30,20 @@
 
         {{#if this.productAreas}}
           {{! TODO: truncation }}
-          <ul class="absolute left-0 bottom-0 flex space-x-1">
+          <ul class="absolute left-0 bottom-0 flex space-x-2.5">
             {{#each this.productAreas as |productArea|}}
-              <Hds::Badge
-                @text="{{productArea}}"
-                @icon={{or (get-product-id productArea) undefined}}
-              />
+              <li class="flex items-center gap-1.5">
+
+                {{#let (get-product-id productArea) as |icon|}}
+                  <div
+                    data-test-doc-thumbnail-product-badge
+                    class="product-badge {{icon}} relative rounded-full p-1"
+                  >
+                    <FlightIcon @name={{or icon "folder"}} />
+                  </div>
+                {{/let}}
+                {{productArea}}
+              </li>
             {{/each}}
           </ul>
         {{/if}}

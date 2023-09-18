@@ -37,13 +37,30 @@ module("Acceptance | authenticated/projects", function (hooks) {
       product: "Labs",
     });
 
+    this.server.create("related-hermes-document", {
+      id: 996,
+      product: "Engineering",
+    });
+
+    this.server.create("related-hermes-document", {
+      id: 995,
+      product: "Consul",
+    });
+
     this.server.createList("document", 3);
 
     const firstDoc = this.server.schema.relatedHermesDocument.first().attrs;
     const secondDoc =
       this.server.schema.relatedHermesDocument.all().models[1].attrs;
+    const thirdDoc =
+      this.server.schema.relatedHermesDocument.all().models[2].attrs;
+    const fourthDoc =
+      this.server.schema.relatedHermesDocument.all().models[3].attrs;
+    const fifthDoc =
+      this.server.schema.relatedHermesDocument.all().models[4].attrs;
 
     this.server.create("project", {
+      name: "Listbox component rollout (Ember)",
       description: "This is a test project",
       documents: [firstDoc],
 
@@ -55,10 +72,31 @@ module("Acceptance | authenticated/projects", function (hooks) {
       ],
     });
     this.server.create("project", {
-      documents: [firstDoc, secondDoc],
+      name: "Hermes Responsive Design",
+      documents: [secondDoc, firstDoc],
     });
+
     this.server.create("project", {
-      description: "This is a test project two",
+      name: "Infrastructure Migration from AWS",
+      documents: [thirdDoc, secondDoc],
+    });
+
+    this.server.create("project", {
+      documents: [fourthDoc],
+      name: "Cross-Technology Integrations and Interoperability",
+      description:
+        "How a group of engineers built a thingy dingy out of ice and sweat tornados",
+    });
+
+    this.server.create("project", {
+      name: "Shared admin interface overhaul",
+      documents: [thirdDoc, firstDoc, fifthDoc, fourthDoc],
+    });
+
+    this.server.create("project", {
+      name: "UI/UX audit and improvements",
+      description:
+        "When we first heard about having a project for this, we wondered what it would be like to have a project for this.",
       jiraObject: {
         type: "Enhancement",
         key: "HERMES-123",
@@ -71,7 +109,9 @@ module("Acceptance | authenticated/projects", function (hooks) {
       },
     });
 
-    this.server.create("project", {});
+    this.server.create("project", {
+      name: "Hermes API v2",
+    });
 
     await visit("/projects");
 
