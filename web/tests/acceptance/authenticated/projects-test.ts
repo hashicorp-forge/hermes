@@ -74,11 +74,17 @@ module("Acceptance | authenticated/projects", function (hooks) {
     this.server.create("project", {
       name: "Hermes Responsive Design",
       documents: [secondDoc, firstDoc],
+      jiraObject: {
+        key: "HRD-041",
+      },
     });
 
     this.server.create("project", {
       name: "Infrastructure Migration from AWS",
       documents: [thirdDoc, secondDoc],
+      jiraObject: {
+        key: "LABS-103",
+      },
     });
 
     this.server.create("project", {

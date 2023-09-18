@@ -9,21 +9,21 @@
       <LinkTo
         data-test-nav-link="explore"
         @route="authenticated.documents"
-        @current-when="authenticated.documents"
+        @current-when="authenticated.documents authenticated.projects"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         <span>
-          Documents
+          Explore
         </span>
       </LinkTo>
       <LinkTo
         data-test-nav-link="explore"
-        @route="authenticated.projects"
-        @current-when="authenticated.projects"
+        @route="authenticated.my.index"
+        @current-when="authenticated.my.index"
         @query={{this.defaultBrowseScreenQueryParams}}
       >
         <span>
-          Projects
+          My Docs
         </span>
       </LinkTo>
     </div>
