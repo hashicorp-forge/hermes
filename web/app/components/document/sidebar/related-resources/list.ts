@@ -46,10 +46,6 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     this.shouldAnimate = true;
   }
 
-  @action protected showModal() {
-    assert("showModal is required", this.args.showModal);
-    this.args.showModal();
-  }
   /**
    * The action to show the "add resource" modal.
    * Triggered when clicking the empty-state button.
