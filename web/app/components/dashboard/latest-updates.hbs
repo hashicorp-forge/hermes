@@ -1,4 +1,4 @@
-<div class="flex items-center space-x-2 mb-6">
+<div class="mb-6 flex items-center space-x-2">
   <FlightIcon @name="collections" @size="24" />
   <h2
     class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
@@ -38,7 +38,7 @@
           @avatar={{get doc.ownerPhotos 0}}
           @docID={{doc.objectID}}
           @docNumber={{doc.docNumber}}
-          @modifiedAgo={{doc.modifiedAgo}}
+          @modifiedTime={{doc.modifiedTime}}
           @owner={{get doc.owners 0}}
           @productArea={{doc.product}}
           @status={{lowercase doc.status}}
@@ -48,7 +48,7 @@
       {{/each}}
     </div>
   {{else}}
-    <div class="text-display-200 mt-8">
+    <div class="mt-8 text-display-200">
       {{this.emptyStateMessage}}
     </div>
   {{/if}}

@@ -105,9 +105,6 @@ export default class DocumentRoute extends Route {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
     }
 
-    // Build strings for created and last-modified.
-    doc.lastModified = `${timeAgo(new Date(doc.modifiedTime * 1000))}`;
-
     // Record analytics.
     try {
       await this.fetchSvc.fetch("/api/v1/web/analytics", {
