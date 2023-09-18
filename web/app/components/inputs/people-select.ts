@@ -17,6 +17,8 @@ interface InputsPeopleSelectComponentSignature {
   Args: {
     selected: HermesUser[];
     onChange: (people: HermesUser[]) => void;
+    renderInPlace?: boolean;
+    disabled?: boolean;
   };
 }
 
