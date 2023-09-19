@@ -32,7 +32,7 @@
               {{log doc.status}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
-                @createdDate={{doc.created}}
+                @createdDate="{{parse-date doc.created}}"
                 @docID="{{doc.objectID}}"
                 @docNumber="{{doc.docNumber}}"
                 @docType="{{doc.docType}}"

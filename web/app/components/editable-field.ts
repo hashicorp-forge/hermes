@@ -3,8 +3,6 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
-import { modifier } from "ember-modifier";
-import { ModifierLike } from "@glint/template";
 import { guidFor } from "@ember/object/internals";
 
 export const FOCUSABLE =
@@ -15,7 +13,8 @@ interface EditableFieldComponentSignature {
   Args: {
     value: any;
     onChange: (value: any) => void;
-    loading?: boolean;
+    isLoading?: boolean;
+    isSaving?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
     class?: string;
@@ -33,7 +32,7 @@ interface EditableFieldComponentSignature {
         value: any;
         update: (value: any) => void;
         applyPeopleSelectClasses: (element: HTMLElement) => void;
-      }
+      },
     ];
   };
 }
@@ -80,6 +79,11 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected relatedButtons: HTMLElement[] = [];
   @tracked protected toggleButton: HTMLElement | null = null;
   @tracked protected cancelButton: HTMLElement | null = null;
+
+  protected get editingBlockIsShown() {
+    return this.editingIsEnabled && !this.args.isSaving && !this.args.isLoading;
+  }
+
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
@@ -99,7 +103,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   @action protected applyPeopleSelectClasses(
     element: HTMLElement,
-    onNextRunLoop = true
+    onNextRunLoop = true,
   ) {
     const addClasses = () => element.classList.add("relative", "z-10");
 
@@ -115,7 +119,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @action protected registerEditingContainer(element: HTMLElement) {
     this.editingContainer = element;
     const relatedButtons = Array.from(
-      this.editingContainer.querySelectorAll("button")
+      this.editingContainer.querySelectorAll("button"),
     ) as HTMLElement[];
     this.relatedButtons.push(...relatedButtons);
   }

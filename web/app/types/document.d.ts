@@ -5,7 +5,26 @@ export interface HermesDocument {
 
   status: string;
   product?: string;
-  modifiedTime?: number; // Not available on drafts fetched as Hits from backend
+
+  /**
+   * A human-readable date string, e.g., "Aug 16, 2028".
+   * Mutated in the layout by the `parse-date` helper to place
+   * the date before the month.
+   */
+  created: string;
+
+  /**
+   * A timestamp in seconds. Used for sorting.
+   */
+  createdTime: number;
+
+  /**
+   * A timestamp in seconds. Used Translated by the `time-ago` helper
+   * into a human-readable string, e.g., "2 days ago."
+   * Not available on drafts fetched as Hits from backend.
+   */
+  modifiedTime?: number;
+
   docNumber: string;
   docType: string;
   title: string;

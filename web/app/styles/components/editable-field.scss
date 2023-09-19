@@ -22,6 +22,10 @@
     }
   }
 
+  &.saving {
+    opacity: 0.5;
+  }
+
   textarea,
   .field-toggle {
     @apply px-[5px] pb-[5px] pt-[7px];
@@ -44,7 +48,9 @@
           }
 
           .flight-icon {
-            animation: slideLeftPx 250ms ease-out, fadeIn 100ms ease-out;
+            animation:
+              slideLeftPx 250ms ease-out,
+              fadeIn 100ms ease-out;
           }
         }
       }
@@ -114,12 +120,14 @@
 
     button {
       &:first-child {
-        animation: slideDownXs 300ms cubic-bezier(0, 1, 0.5, 1),
+        animation:
+          slideDownXs 300ms cubic-bezier(0, 1, 0.5, 1),
           fadeIn 80ms ease-in-out;
       }
 
       &:nth-child(2) {
-        animation: slideDownXs 600ms cubic-bezier(0, 1, 0.5, 1),
+        animation:
+          slideDownXs 600ms cubic-bezier(0, 1, 0.5, 1),
           fadeIn 100ms ease-in-out;
       }
     }

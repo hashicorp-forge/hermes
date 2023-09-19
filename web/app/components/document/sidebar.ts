@@ -28,13 +28,20 @@ import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { GoogleUser } from "../inputs/people-select";
 import { HermesDocumentType } from "hermes/types/document-type";
+
+const serializePeople = (people: GoogleUser[]): HermesUser[] => {
+  return people.map((p) => ({
+    email: p.emailAddresses[0]?.value as string,
+    imgURL: p.photos?.[0]?.url,
+  }));
+};
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
-    docType: HermesDocumentType;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -72,6 +79,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked docPublishedModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
+
+  @tracked protected docType: HermesDocumentType | null = null;
 
   get modalIsShown() {
     return (
@@ -471,6 +480,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return !this.editingIsDisabled;
   }
 
+  private getDocType = task(async () => {
+    const docTypes = (await this.fetchSvc
+      .fetch("/api/v1/document-types")
+      .then((r) => r?.json())) as HermesDocumentType[];
+
+    assert("docTypes must exist", docTypes);
+
+    const docType = docTypes.find(
+      (dt) => dt.name === this.args.document.docType
+    );
+
+    assert("docType must exist", docType);
+    this.docType = docType;
+  });
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -509,6 +533,40 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       extendedTimeout: 1000,
     });
   }
+
+  @action kickOffBackgroundTasks() {
+    void this.getDocType.perform();
+    void this.serializeContributorsAndApprovers.perform();
+  }
+
+  protected serializeContributorsAndApprovers = task(async () => {
+    let maybePromises = [];
+
+    const contributorsPromise = this.fetchSvc
+      .fetch(`/api/v1/people?emails=${this.contributors.join(",")}`)
+      .then((r) => r?.json());
+
+    const approversPromise = this.fetchSvc
+      .fetch(`/api/v1/people?emails=${this.approvers.join(",")}`)
+      .then((r) => r?.json());
+
+    maybePromises.push(this.contributors.length ? contributorsPromise : []);
+    maybePromises.push(this.approvers.length ? approversPromise : []);
+
+    if (!maybePromises.length) {
+      return;
+    }
+
+    const [contributors, approvers] = await Promise.all(maybePromises);
+
+    if (contributors.length) {
+      this.contributors = serializePeople(contributors);
+    }
+
+    if (approvers.length) {
+      this.approvers = serializePeople(approvers);
+    }
+  });
 
   /**
    * A task that waits for a short time and then resolves.

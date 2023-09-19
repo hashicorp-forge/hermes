@@ -1,10 +1,8 @@
 <div
-  class="editable-field
-    {{if (and this.editingIsEnabled (not @loading)) 'z-10'}}"
+  class="editable-field {{if this.editingBlockIsShown 'z-10'}}"
   ...attributes
 >
-  {{#if (and this.editingIsEnabled (not @loading))}}
-
+  {{#if this.editingBlockIsShown}}
     {{on-document "keydown" this.handleKeydown}}
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
@@ -69,8 +67,13 @@
     </div>
 
   {{else}}
-    {{#if @loading}}
-      <FlightIcon @name="loading" class="loading-indicator" />
+    {{#if (or @isSaving @isLoading)}}
+      <div
+        data-test-spinner
+        class={{if @isSaving "absolute top-0 right-0" "flex h-5 items-center"}}
+      >
+        <FlightIcon @name="loading" data-test-loading-spinner />
+      </div>
     {{/if}}
     <Action
       {{did-insert this.registerToggleButton}}
