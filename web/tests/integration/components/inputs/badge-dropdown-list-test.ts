@@ -5,7 +5,7 @@ import { click, findAll, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
-import getProductId from "hermes/utils/get-product-id";
+import getProductID from "hermes/utils/get-product-id";
 
 interface BadgeDropdownListTestContext extends MirageTestContext {
   items: any;
@@ -35,8 +35,8 @@ module(
 
       const updateIcon = () => {
         let icon = "folder";
-        if (this.selected && getProductId(this.selected)) {
-          icon = getProductId(this.selected) as string;
+        if (this.selected && getProductID(this.selected)) {
+          icon = getProductID(this.selected) as string;
         }
         this.set("icon", icon);
       };

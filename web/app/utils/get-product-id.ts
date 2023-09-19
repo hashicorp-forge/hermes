@@ -1,5 +1,5 @@
-export default function getProductId(
-  productName: string | null
+export default function getProductID(
+  productName?: string
 ): string | null {
   if (!productName) {
     return null;

@@ -10,7 +10,7 @@ import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
   ProductArea,
 } from "hermes/services/product-areas";
-import getProductId from "hermes/utils/get-product-id";
+import getProductID from "hermes/utils/get-product-id";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
@@ -38,8 +38,8 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
 
   get icon(): string {
     let icon = "folder";
-    if (this.selected && getProductId(this.selected)) {
-      icon = getProductId(this.selected) as string;
+    if (this.selected && getProductID(this.selected)) {
+      icon = getProductID(this.selected) as string;
     }
     return icon;
   }

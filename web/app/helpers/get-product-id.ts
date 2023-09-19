@@ -1,5 +1,5 @@
 import { helper } from "@ember/component/helper";
-import getProductId from "hermes/utils/get-product-id";
+import getProductID from "hermes/utils/get-product-id";
 
 export interface GetProductIDSignature {
   Args: {
@@ -12,7 +12,7 @@ const getProductIDHelper = helper<GetProductIDSignature>(([productName]) => {
   if (!productName) {
     return null;
   }
-  return getProductId(productName);
+  return getProductID(productName);
 });
 
 export default getProductIDHelper;

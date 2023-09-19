@@ -13,7 +13,7 @@ import GtHelper from "ember-truth-helpers/helpers/gt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
 import EmberSetBodyClassHelper from "ember-set-body-class";
-import { FlightIconComponent } from "hds/flight-icon";
+import { FlightIcon } from "hds/flight-icon";
 import { HdsButtonComponent } from "hds/button";
 import { HdsBadgeCountComponent } from "hds/badge-count";
 import { HdsFormTextInputBaseComponent } from "hds/form/text-input/base";
@@ -68,7 +68,7 @@ declare module "@glint/environment-ember-loose/registry" {
     gt: typeof GtHelper;
     "is-empty": IsEmptyHelper;
     FlashMessage: FlashMessageComponent;
-    FlightIcon: FlightIconComponent;
+    FlightIcon: FlightIcon;
     "Hds::Button": HdsButtonComponent;
     "Hds::BadgeCount": HdsBadgeCountComponent;
     "Hds::Form::TextInput::Base": HdsFormTextInputBaseComponent;

@@ -4,13 +4,5 @@
   class="product-badge-link"
   ...attributes
 >
-  {{#let (get-product-id this.args.productArea) as |icon|}}
-    <div
-      data-test-doc-thumbnail-product-badge
-      class="product-badge {{icon}} relative rounded-full p-[5px]"
-    >
-      <FlightIcon @name={{or icon "folder"}} class="h-[10px] w-[10px]" />
-    </div>
-  {{/let}}
-  {{this.productAreaName}}
+  <ProductAvatar @productArea={{this.productAreaName}} />
 </LinkTo>
