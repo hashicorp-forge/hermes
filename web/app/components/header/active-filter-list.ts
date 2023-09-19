@@ -4,6 +4,7 @@ import Component from "@glimmer/component";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface HeaderActiveFilterListComponentSignature {
+  Element: HTMLDivElement;
   Args: {};
 }
 

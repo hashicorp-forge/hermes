@@ -1,27 +1,30 @@
 <li class="project-tile" ...attributes>
   <LinkTo @route="authenticated.project" @model={{@project.id}} class="hover">
-    <Hds::Card::Container @hasBorder={{true}} class="p-4" @levelHover="mid">
+    <Hds::Card::Container
+      @hasBorder={{true}}
+      class="p-4 h-48"
+      @levelHover="mid"
+    >
       <div class="relative h-full pb-16">
         <div class="flex items-start justify-between">
           <div>
-            <h3 class="inline-flex text-display-300 font-semibold">
+            <h3
+              class="inline-flex text-display-300 font-semibold text-color-foreground-strong"
+            >
               {{@project.name}}
             </h3>
             {{#if @project.description}}
-              <p class="mt-1 text-body-200 text-color-foreground-faint">
+              <p class="mt-1 text-body-300 text-color-foreground-faint">
                 {{@project.description}}
               </p>
             {{/if}}
           </div>
-          {{#if this.documents}}
-            <span class="ml-2 flex shrink-0 items-center">
-              <FlightIcon
-                @name="files"
-                class="mr-2 text-color-foreground-disabled"
-              />
+          {{!-- {{#if this.documents}}
+            <span class="ml-2 flex gap-2 shrink-0 items-center">
               {{this.documents.length}}
+              <FlightIcon @name="files" class="ext-color-foreground-disabled" />
             </span>
-          {{/if}}
+          {{/if}} --}}
         </div>
 
         {{#if this.productAreas}}
@@ -29,16 +32,10 @@
           <ul class="absolute left-0 bottom-0 flex">
             {{#each this.productAreas as |productArea|}}
               <li class="flex items-center">
-
-                {{#let (get-product-id productArea) as |icon|}}
-                  <div
-                    {{tooltip productArea}}
-                    data-test-doc-thumbnail-product-badge
-                    class="product-badge {{icon}} relative rounded-full p-1.5"
-                  >
-                    <FlightIcon @name={{or icon "folder"}} />
-                  </div>
-                {{/let}}
+                <ProductAvatar
+                  {{tooltip productArea}}
+                  @productArea={{productArea}}
+                />
               </li>
             {{/each}}
           </ul>

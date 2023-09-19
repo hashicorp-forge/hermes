@@ -8,7 +8,8 @@
   .primary-links {
     @apply relative order-3 -ml-2.5 flex h-[60px] shrink-0 md:order-2 md:mx-6;
 
-    a {
+    a,
+    button {
       @apply flex h-full items-center px-2.5 text-color-foreground-faint md:px-3.5;
 
       &:hover {

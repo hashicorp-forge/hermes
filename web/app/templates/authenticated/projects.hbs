@@ -4,25 +4,5 @@
 <header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
   <Header::Nav />
 </header>
-<div class="x-container mb-8">
-  <div class="header-nav-and-filters flex w-full items-center justify-between">
-    <nav class="big-tabs">
-      {{! TODO: these need default queryParams }}
-      <LinkTo
-        @route="authenticated.documents"
-        @current-when="authenticated.documents"
-      >
-        Documents
-      </LinkTo>
-      <LinkTo
-        @route="authenticated.projects"
-        @current-when="authenticated.projects"
-      >
-        Projects
-      </LinkTo>
-    </nav>
-  </div>
-  <Header::ActiveFilterList />
-</div>
 
 <Project::List @projects={{@model}} />

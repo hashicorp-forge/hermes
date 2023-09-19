@@ -1,39 +1,47 @@
 <div class="x-container mt-2 mb-4">
 
   {{! <div class="relative mb-6">
-    <div class="mb-3 flex items-center gap-3">
+    <div class="mb-3 flex items-center gap-2.5">
       <FlightIcon @name="pin" />
       <h3 class="hermes-h4">Pinned</h3>
     </div>
   </div> }}
 
   <div class="relative mb-6">
-    <div class="mb-3 flex items-center gap-3">
-      <FlightIcon @name="zap" />
-      <h3 class="hermes-h4">Active</h3>
-    </div>
+    <nav class="flex gap-6 mb-10 justify-center">
+
+      <div class="flex items-center gap-2">
+        <FlightIcon @name="zap" />
+        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+          Active
+        </h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <FlightIcon @name="check-circle" />
+        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+          Completed
+        </h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <FlightIcon @name="archive" />
+        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+          Archived
+        </h3>
+      </div>
+    </nav>
     {{#if @projects}}
       <ol
-        {{did-insert this.configureMasonry}}
-        class="relative grid grid-cols-3"
+        {{!-- {{did-insert this.configureMasonry}} --}}
+        class="relative grid grid-cols-3 gap-2"
       >
         {{#each @projects as |project|}}
-          <Project::Tile
-            @project={{project}}
-            class="mb-[10px] w-[calc((100%-20px)/3)]"
-          />
+          <Project::Tile @project={{project}} />
         {{/each}}
         {{#each @projects as |project|}}
-          <Project::Tile
-            @project={{project}}
-            class="mb-[10px] w-[calc((100%-20px)/3)]"
-          />
+          <Project::Tile @project={{project}} />
         {{/each}}
         {{#each @projects as |project|}}
-          <Project::Tile
-            @project={{project}}
-            class="mb-[10px] w-[calc((100%-20px)/3)]"
-          />
+          <Project::Tile @project={{project}} />
         {{/each}}
       </ol>
     {{else}}
@@ -42,9 +50,11 @@
   </div>
 
   <div class="mb-6">
-    <div class="mb-3 flex items-center gap-3">
+    <div class="mb-3 flex items-center gap-2">
       <FlightIcon @name="check-circle" />
-      <h3 class="hermes-h4">Completed</h3>
+      <h3
+        class="text-body-200 font-semibold text-color-foreground-strong"
+      >Completed</h3>
     </div>
     {{#if @projects}}
       <ol class="grid">
@@ -56,9 +66,11 @@
   </div>
 
   <div class="mb-6">
-    <div class="mb-3 flex items-center gap-3">
+    <div class="mb-3 flex items-center gap-2">
       <FlightIcon @name="archive" />
-      <h3 class="hermes-h4">Archived</h3>
+      <h3
+        class="text-body-200 font-semibold text-color-foreground-strong"
+      >Archived</h3>
     </div>
   </div>
 </div>

@@ -1,6 +1,8 @@
-{{#in-element (html-element ".header-nav-and-filters") insertBefore=null}}
-  <Header::Toolbar @facets={{@facets}} />
-{{/in-element}}
+{{#if @facets}}
+  {{#in-element (html-element ".header-nav-and-filters") insertBefore=null}}
+    <Header::Toolbar @facets={{@facets}} />
+  {{/in-element}}
+{{/if}}
 
 <RowResults
   @docs={{@results.hits}}

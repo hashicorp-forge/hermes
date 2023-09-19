@@ -10,6 +10,7 @@ import AuthenticatedUserService, {
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 
 interface HeaderNavComponentSignature {
   Args: {};
@@ -24,6 +25,23 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   protected get profile(): AuthenticatedUser {
     return this.authenticatedUser.info;
   }
+
+  protected documentNavItems = {
+    all: {
+      label: "All Documents",
+      route: "authenticated.all",
+      icon: "globe",
+    },
+    my: {
+      label: "My Docs",
+      route: "authenticated.my.published",
+      icon: "user",
+    },
+    drafts: {
+      label: "Drafts",
+      route: "authenticated.my.drafts",
+    },
+  };
 
   protected get currentRouteName(): string {
     return this.router.currentRouteName;
@@ -79,6 +97,22 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @action protected onDropdownOpen(): void {
     this.userMenuHighlightIsShown = false;
     window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
+  }
+
+  @action protected maybeHideContent(
+    dd: XDropdownListAnchorAPI,
+    event: MouseEvent,
+  ): void {
+    // this runs on mouseleave of the dropdown anchor.
+    // if the target element is within the dropdown anchor, ignore the event.
+    // if the target element that's being hovered is part of the dropdown content,
+    // ignore the event.
+    // in other cases, run the hideContent function.
+    const target = event.target as HTMLElement;
+
+    // const id = dd.contentID;
+    // console.log("id", id);
+    console.log("target", target);
   }
 
   /**
