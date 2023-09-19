@@ -1,11 +1,11 @@
 import {
   click,
+  fillIn,
   find,
   findAll,
   triggerEvent,
   visit,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -33,21 +33,15 @@ const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
 const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
-const EDITABLE_TITLE_SELECTOR = "[data-test-document-title-editable]";
-const EDITABLE_SUMMARY_SELECTOR = "[data-test-document-summary-editable]";
+const TITLE_SELECTOR = "[data-test-document-title]";
+const SUMMARY_SELECTOR = "[data-test-document-summary]";
+const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
+const APPROVERS_SELECTOR = "[data-test-document-approvers]";
+
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
-const EDITABLE_CONTRIBUTORS_SELECTOR =
-  "[data-test-document-contributors-editable]";
-const EDITABLE_APPROVERS_SELECTOR = "[data-test-document-approvers-editable]";
-
-const READ_ONLY_TITLE_SELECTOR = "[data-test-document-title-read-only]";
-const READ_ONLY_SUMMARY_SELECTOR = "[data-test-document-summary-read-only]";
 const READ_ONLY_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-read-only]";
-const READ_ONLY_CONTRIBUTORS_SELECTOR =
-  "[data-test-document-contributors-read-only]";
-const READ_ONLY_APPROVERS_SELECTOR = "[data-test-document-approvers-read-only]";
 const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
   "[data-test-sidebar-publish-for-review-button";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
@@ -65,20 +59,16 @@ const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
 
 const assertEditingIsDisabled = (assert: Assert) => {
-  assert.dom(EDITABLE_TITLE_SELECTOR).doesNotExist();
-  assert.dom(EDITABLE_SUMMARY_SELECTOR).doesNotExist();
-  assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
-  assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).doesNotExist();
-  assert.dom(EDITABLE_APPROVERS_SELECTOR).doesNotExist();
+  assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
+  assert.dom(SUMMARY_SELECTOR).doesNotHaveAttribute("data-test-editable");
+  assert.dom(CONTRIBUTORS_SELECTOR).doesNotHaveAttribute("data-test-editable");
+  assert.dom(APPROVERS_SELECTOR).doesNotHaveAttribute("data-test-editable");
 
+  assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
   assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
   assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).doesNotExist();
 
-  assert.dom(READ_ONLY_TITLE_SELECTOR).exists();
-  assert.dom(READ_ONLY_SUMMARY_SELECTOR).exists();
   assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).exists();
-  assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).exists();
-  assert.dom(READ_ONLY_APPROVERS_SELECTOR).exists();
 };
 
 interface AuthenticatedDocumentRouteTestContext extends MirageTestContext {}
@@ -363,20 +353,16 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(EDITABLE_TITLE_SELECTOR).exists();
-    assert.dom(EDITABLE_SUMMARY_SELECTOR).exists();
-    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).exists();
-    assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
-    assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
+    assert.dom(TITLE_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(SUMMARY_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(CONTRIBUTORS_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(APPROVERS_SELECTOR).hasAttribute("data-test-editable");
 
+    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).exists();
     assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
-    assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
-    assert.dom(READ_ONLY_SUMMARY_SELECTOR).doesNotExist();
     assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).doesNotExist();
-    assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).doesNotExist();
-    assert.dom(READ_ONLY_APPROVERS_SELECTOR).doesNotExist();
   });
 
   test("owners can edit everything but the product area of a published doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -388,20 +374,17 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(EDITABLE_TITLE_SELECTOR).exists();
-    assert.dom(EDITABLE_SUMMARY_SELECTOR).exists();
-    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
-    assert.dom(EDITABLE_CONTRIBUTORS_SELECTOR).exists();
-    assert.dom(EDITABLE_APPROVERS_SELECTOR).exists();
+    assert.dom(TITLE_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(SUMMARY_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(CONTRIBUTORS_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(APPROVERS_SELECTOR).hasAttribute("data-test-editable");
 
+    assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
     assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
-    assert.dom(READ_ONLY_TITLE_SELECTOR).doesNotExist();
-    assert.dom(READ_ONLY_SUMMARY_SELECTOR).doesNotExist();
     assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).exists();
-    assert.dom(READ_ONLY_CONTRIBUTORS_SELECTOR).doesNotExist();
-    assert.dom(READ_ONLY_APPROVERS_SELECTOR).doesNotExist();
   });
 
   test("collaborators cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -523,5 +506,56 @@ module("Acceptance | authenticated/document", function (hooks) {
         "primary",
         "the Continue button becomes the primary button when the copy link is hidden"
       );
+  });
+
+  test("non-required values can be reset by saving an empty value", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      summary: "foo bar baz",
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${SUMMARY_SELECTOR} button`);
+
+    await fillIn(`${SUMMARY_SELECTOR} textarea`, "");
+
+    await triggerEvent(`${SUMMARY_SELECTOR} textarea`, "blur");
+
+    assert.dom(SUMMARY_SELECTOR).hasText("Enter a summary");
+  });
+
+  test('"people" inputs receive focus on click', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+      customEditableFields: {
+        Stakeholders: {
+          displayName: "Stakeholders",
+          type: "PEOPLE",
+        },
+      },
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${CONTRIBUTORS_SELECTOR} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${CONTRIBUTORS_SELECTOR} input`)
+    );
+
+    await click(`${APPROVERS_SELECTOR} .field-toggle`);
+
+    assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
+
+    const stakeholdersSelector = "[data-test-custom-people-field]";
+
+    await click(`${stakeholdersSelector} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${stakeholdersSelector} input`)
+    );
   });
 });

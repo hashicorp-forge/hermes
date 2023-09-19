@@ -1,14 +1,14 @@
 import Component from "@glimmer/component";
 
 interface DocTileComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     avatar?: string;
     docID?: string;
     docNumber?: string;
-    isOwner?: boolean;
     isResult?: boolean;
     isDraft?: boolean;
-    modifiedAgo?: string;
+    modifiedTime?: number;
     owner?: string;
     productArea?: string;
     snippet?: string;

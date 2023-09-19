@@ -15,7 +15,7 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     await render<MaybeQueryTestContext>(hbs`
       <LinkTo
-        @route="authenticated.all"
+        @route="authenticated.documents"
         @query={{maybe-query this.query}}
       >
        Link
@@ -24,7 +24,7 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     assert.equal(
       find("a")?.getAttribute("href"),
-      "/all?product=%5B%22waypoint%22%5D",
+      "/documents?product=%5B%22waypoint%22%5D",
       "the passed-in query is used"
     );
   });
@@ -34,13 +34,13 @@ module("Integration | Helper | maybe-query", function (hooks) {
 
     await render<MaybeQueryTestContext>(hbs`
       <LinkTo
-        @route="authenticated.all"
+        @route="authenticated.documents"
         @query={{maybe-query this.query}}
       >
         Link
       </LinkTo>
     `);
 
-    assert.equal(find("a")?.getAttribute("href"), "/all");
+    assert.equal(find("a")?.getAttribute("href"), "/documents");
   });
 });

@@ -49,11 +49,22 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   }
 
   /**
-   * The URL of a definitely ExternalResource
+   * The full URL of an ExternalResource
    */
   protected get url() {
     assert("url must exist in the resource", "url" in this.args.resource);
     return this.args.resource.url;
+  }
+
+  /**
+   * The url to display in the ResourceList.
+   * Strips the protocol, "www" and path.
+   */
+  protected get displayURL() {
+    return this.url
+      .replace(/(^\w+:|^)\/\//, "")
+      .replace("www.", "")
+      .split("/")[0];
   }
 
   /**

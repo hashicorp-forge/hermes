@@ -116,6 +116,8 @@ Hermes can be configured to point to any PostgreSQL database, but for running lo
 make docker/postgres/start
 ```
 
+The database password can be configured via the Hermes config.hcl or the `HERMES_SERVER_POSTGRES_PASSWORD` environment variable.
+
 ### Run the Server
 
 ```sh

@@ -28,6 +28,11 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
     if (this.args.productArea) {
       return {
         product: [this.args.productArea],
+        docType: [],
+        owners: [],
+        page: 1,
+        sortBy: "dateDesc",
+        status: [],
       };
     } else {
       return {};
@@ -47,7 +52,7 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
       case "authenticated.my":
         return currentRouteName;
       default:
-        return "authenticated.all";
+        return "authenticated.documents";
     }
   }
 }

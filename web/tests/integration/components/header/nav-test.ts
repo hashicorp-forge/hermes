@@ -37,7 +37,7 @@ module("Integration | Component | header/nav", function (hooks) {
     `);
 
     assert.dom(".header-nav").exists();
-    assert.dom('[data-test-nav-link="all"]').hasAttribute("href", "/all");
+    assert.dom('[data-test-nav-link="all"]').hasAttribute("href", "/documents");
     assert.dom('[data-test-nav-link="my"]').hasAttribute("href", "/my");
     assert.dom('[data-test-nav-link="drafts"]').hasAttribute("href", "/drafts");
 

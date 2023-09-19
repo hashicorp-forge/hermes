@@ -97,12 +97,13 @@ export default class DocumentRoute extends Route {
       }
     }
 
+    // With the document fetched and added to the db's RecentlyViewedDocs index,
+    // make a background call to update the front-end index.
+    void this.recentDocs.fetchAll.perform();
+
     if (!!doc.createdTime) {
       doc.createdDate = parseDate(doc.createdTime * 1000, "long");
     }
-
-    // Build strings for created and last-modified.
-    doc.lastModified = `${timeAgo(new Date(doc.modifiedTime * 1000))}`;
 
     // Record analytics.
     try {

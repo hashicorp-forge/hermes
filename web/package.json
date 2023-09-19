@@ -132,8 +132,8 @@
   "dependencies": {
     "@csstools/postcss-sass": "^5.0.1",
     "@floating-ui/dom": "^1.2.4",
-    "@hashicorp/design-system-components": "^2.0.0",
-    "@hashicorp/ember-flight-icons": "^3.0.2",
+    "@hashicorp/design-system-components": "^2.11.0",
+    "@hashicorp/ember-flight-icons": "^3.1.1",
     "@types/sinon": "^10.0.13",
     "algoliasearch": "^4.13.0",
     "autoprefixer": "^10.4.4",

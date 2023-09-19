@@ -1,6 +1,5 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{page-title "Search Results"}}
 
-<Header @facets={{@model.facets}} @sortControlIsHidden={{true}} />
+<Header @facets={{@model.facets}} />
 
 <Results @results={{@model.results}} @query={{this.q}} />

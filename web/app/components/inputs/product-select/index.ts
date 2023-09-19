@@ -6,6 +6,9 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import ProductAreasService, {
+  ProductArea,
+} from "hermes/services/product-areas";
 import getProductId from "hermes/utils/get-product-id";
 
 interface InputsProductSelectSignature {
@@ -20,21 +23,16 @@ interface InputsProductSelectSignature {
   };
 }
 
-type ProductAreas = {
-  [key: string]: ProductArea;
-};
-
-export type ProductArea = {
-  abbreviation: string;
-  perDocDataType: unknown;
-};
-
 export default class InputsProductSelectComponent extends Component<InputsProductSelectSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare productAreas: ProductAreasService;
 
   @tracked selected = this.args.selected;
+  @tracked protected errorIsShown = false;
 
-  @tracked products: ProductAreas | undefined = undefined;
+  get products() {
+    return this.productAreas.index;
+  }
 
   get icon(): string {
     let icon = "folder";
@@ -58,15 +56,12 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     this.args.onChange(newValue, attributes);
   }
 
-  protected fetchProducts = task(async () => {
+  protected fetchProductAreas = task(async () => {
     try {
-      let products = await this.fetchSvc
-        .fetch("/api/v1/products")
-        .then((resp) => resp?.json());
-      this.products = products;
-    } catch (err) {
-      console.error(err);
-      throw err;
+      await this.productAreas.fetch.perform();
+      this.errorIsShown = false;
+    } catch {
+      this.errorIsShown = true;
     }
   });
 }
