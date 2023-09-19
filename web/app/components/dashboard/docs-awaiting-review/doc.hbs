@@ -7,17 +7,23 @@
   >
     <div class="w-full">
       <div
-        class="relative flex w-full flex-wrap items-center gap-2.5 md:flex-nowrap"
+        class="relative flex w-full flex-wrap items-center gap-3 md:flex-nowrap"
       >
-
-        {{! Avatar }}
-        <Person::Avatar
-          data-test-doc-awaiting-review-owner-avatar
-          @email={{or (get @doc.owners 0) "Unknown"}}
-          @imgURL={{get @doc.ownerPhotos 0}}
-          @size="medium"
-          class="shrink-0"
-        />
+        <div class="flex shrink-0 gap-0.5">
+          {{! Product Avatar }}
+          <ProductAvatar
+            @productArea={{@doc.product}}
+            @iconSize={{16}}
+            class="p-1.5"
+          />
+          {{! Avatar }}
+          <Person::Avatar
+            data-test-doc-awaiting-review-owner-avatar
+            @email={{or (get @doc.owners 0) "Unknown"}}
+            @imgURL={{get @doc.ownerPhotos 0}}
+            @size="medium"
+          />
+        </div>
 
         <div class="block w-full overflow-hidden">
 
@@ -54,7 +60,7 @@
         <div
           class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
         >
-          <span class="mr-3">
+          <span class="mr-3 text-color-foreground-faint">
             {{@doc.product}}
           </span>
           <Hds::Badge
