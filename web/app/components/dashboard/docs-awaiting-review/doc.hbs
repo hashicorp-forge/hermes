@@ -54,11 +54,9 @@
         <div
           class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
         >
-          <Hds::Badge
-            data-test-doc-awaiting-review-product-badge
-            @icon={{or (get-product-id @doc.product) "folder"}}
-            @text={{or @doc.product "Unknown"}}
-          />
+          <span class="mr-3">
+            {{@doc.product}}
+          </span>
           <Hds::Badge
             data-test-doc-awaiting-review-doctype-badge
             @text={{@doc.docType}}

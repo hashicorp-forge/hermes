@@ -34,12 +34,13 @@
           </small>
         {{/if}}
       </div>
-      <div class="mt-2 max-w-full space-y-1">
+      <div class="mt-2 max-w-full space-y-2">
         <Person
           @ignoreUnknown={{true}}
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
+        <ProductBadgeLink @productArea={{@productArea}} class="relative" />
         {{#if @modifiedTime}}
           <p class="text-body-100 text-color-foreground-faint">
             Modified
@@ -53,5 +54,4 @@
     </div>
   </LinkTo>
 
-  <ProductBadgeLink @productArea={{@productArea}} class="relative" />
 </div>

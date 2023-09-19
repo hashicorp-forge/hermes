@@ -1,7 +1,7 @@
 .product-badge-link {
-  @apply flex items-center gap-2 outline;
+  @apply relative inline-flex items-center gap-2;
 
-  // &:hover .hds-badge--color-neutral {
-  //   @apply bg-color-palette-neutral-200;
-  // }
+  &:hover {
+    @apply text-color-foreground-strong underline;
+  }
 }
