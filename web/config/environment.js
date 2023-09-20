@@ -5,7 +5,7 @@ const getEnv = (key, defaultValue) => {
   const value = process.env[fullKey];
   if (value == null) {
     console.warn(
-      `env var ${fullKey} was not set! Proceeding with default value "${defaultValue}"`
+      `env var ${fullKey} was not set! Proceeding with default value "${defaultValue}"`,
     );
   }
   return value != null ? value : defaultValue;
@@ -32,6 +32,8 @@ module.exports = function (environment) {
       // Here you can pass flags/options to your application instance
       // when it is created
     },
+
+    flashMessageDefaults: {},
     metricsAdapters: [
       {
         name: "GoogleAnalyticsFour",

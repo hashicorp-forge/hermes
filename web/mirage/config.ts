@@ -45,7 +45,7 @@ export default function (mirageConfig) {
               return new Response(
                 200,
                 {},
-                { facetHits: [{ value: facetMatch.attrs.product }] }
+                { facetHits: [{ value: facetMatch.attrs.product }] },
               );
             } else {
               return new Response(200, {}, { facetHits: [] });
@@ -132,7 +132,7 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models }
+              { hits: schema.document.all().models },
             );
           }
         } else {
@@ -237,6 +237,15 @@ export default function (mirageConfig) {
         return new Response(404, {}, {});
       });
 
+      this.post("/projects", (schema, request) => {
+        let project = JSON.parse(request.requestBody);
+        schema.projects.create(project);
+        // TODO: make this work with ID
+        project = schema.projects.findBy({ name: project.name }).attrs;
+
+        return new Response(200, {}, project);
+      });
+
       /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
@@ -283,7 +292,7 @@ export default function (mirageConfig) {
             support_link_url: TEST_SUPPORT_URL,
             version: "1.2.3",
             short_revision: "abc123",
-          }
+          },
         );
       });
 
@@ -376,7 +385,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -387,7 +398,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -434,7 +447,7 @@ export default function (mirageConfig) {
             });
 
           return new Response(200, {}, { hermesDocuments, externalLinks });
-        }
+        },
       );
 
       /**
@@ -455,7 +468,7 @@ export default function (mirageConfig) {
             Hits: drafts,
             params: "",
             page: 0,
-          }
+          },
         );
       });
 
@@ -472,9 +485,12 @@ export default function (mirageConfig) {
        */
 
       this.get("/projects/:project_id", (schema, request) => {
+        console.log("request.params", request.params);
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
+
+        console.log("project", project);
 
         return new Response(200, {}, project.attrs);
       });
@@ -507,7 +523,7 @@ export default function (mirageConfig) {
           return new Response(
             200,
             {},
-            { "Default Fetched Product": { abbreviation: "NONE" } }
+            { "Default Fetched Product": { abbreviation: "NONE" } },
           );
         } else {
           let objects = this.schema.products.all().models.map((product) => {
@@ -580,7 +596,7 @@ export default function (mirageConfig) {
           schema.db.recentlyViewedDocs.remove();
           schema.db.recentlyViewedDocs.insert(index);
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
-        }
+        },
       );
 
       /**
@@ -654,7 +670,7 @@ export default function (mirageConfig) {
                 type: mirageDocument.docType,
                 documentNumber: mirageDocument.docNumber,
               });
-            }
+            },
           );
 
           externalLinks.forEach((link) => {
@@ -667,7 +683,7 @@ export default function (mirageConfig) {
           });
 
           return new Response(200, {}, {});
-        }
+        },
       );
 
       // Project related resources

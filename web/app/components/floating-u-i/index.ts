@@ -51,16 +51,10 @@ export default class FloatingUIComponent extends Component<FloatingUIComponentSi
   @tracked contentIsShown: boolean = this.args.disableClose || false;
 
   protected get isActive() {
-    console.log(
-      "isActive?",
-      this.args.currentWhen,
-      this.router.currentRouteName,
-    );
     if (!this.args.currentWhen) {
       return false;
     }
 
-    console.log(this.args.currentWhen);
     const currentWhenRoutes = this.args.currentWhen.split(" ");
 
     return currentWhenRoutes.some((route) => {

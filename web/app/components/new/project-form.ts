@@ -13,11 +13,11 @@ import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 
 interface ProjectFormErrors {
-  title: string | null;
+  name: string | null;
 }
 
 const FORM_ERRORS: ProjectFormErrors = {
-  title: null,
+  name: null,
 };
 
 interface NewProjectFormComponentSignature {
@@ -31,7 +31,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service declare modalAlerts: ModalAlertsService;
   @service declare router: RouterService;
 
-  @tracked protected title: string = "";
+  @tracked protected name: string = "";
   @tracked protected summary: string = "";
 
   @tracked protected jira = "";
@@ -88,7 +88,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
-    if (this.title) {
+    if (this.name) {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;
@@ -106,13 +106,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     this.formErrors = errors;
   }
 
-  /**
-   * Returns contributor emails as an array of strings.
-   */
-  private getEmails(values: HermesUser[]) {
-    return values.map((person) => person.email);
-  }
-
   @action protected registerForm(form: HTMLFormElement) {
     this._form = form;
   }
@@ -128,7 +121,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     assert("title is missing from formObject", "title" in formObject);
     assert("summary is missing from formObject", "summary" in formObject);
 
-    this.title = formObject["title"] as string;
+    this.name = formObject["title"] as string;
     this.summary = formObject["summary"] as string;
 
     if (this.summary.length > 200) {
@@ -148,7 +141,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     event.preventDefault();
     this.validateEagerly = true;
     this.validate();
-    console.log("submitting");
     if (this.formRequirementsMet && !this.hasErrors) {
       this.createProject.perform();
     }
@@ -169,14 +161,19 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             summary: cleanString(this.summary),
-            title: cleanString(this.title),
+            name: cleanString(this.name),
             // TODO: jira
           }),
         })
         .then((response) => response?.json());
 
-      this.router.transitionTo("authenticated.project", project.id, {
-        queryParams: { draft: true },
+      this.router.transitionTo("authenticated.project", project.id);
+      this.flashMessages.add({
+        title: "Project created",
+        message: "Your project has been created.",
+        type: "success",
+        timeout: 3000,
+        extendedTimeout: 1000,
       });
     } catch (err: unknown) {
       this.projectIsBeingCreated = false;

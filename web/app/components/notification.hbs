@@ -1,12 +1,16 @@
 <div class="notifications-container">
   {{#each this.flashMessages.queue as |flash|}}
+    {{log "flash" flash}}
     <FlashMessage
       data-test-flash-notification
+      {{! @glint-ignore - ember-cli-flash has missing types }}
       data-test-flash-notification-type={{flash.type}}
       @flash={{flash}}
       class="notification"
-      as |component flash close|
+      as |_component _flash close|
     >
+      {{log "_component" _component}}
+      {{log "_flash" _flash}}
       <Hds::Toast
         @color={{flash.type}}
         @icon={{flash.icon}}
@@ -19,7 +23,7 @@
         <T.Description data-test-flash-notification-description>
           {{flash.message}}
         </T.Description>
-        {{#if (and flash.buttonText flash.buttonAction)}}
+        {{#if (and _flash.buttonText _flash.buttonAction)}}
           <T.Button
             data-test-flash-notification-button
             @text={{flash.buttonText}}

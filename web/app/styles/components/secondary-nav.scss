@@ -29,15 +29,15 @@
 
   > a {
     @apply relative flex text-body-300;
-    @apply font-semibold;
+    // @apply font-medium;
     // @apply text-color-foreground-disabled;
-    @apply text-color-foreground-strong;
-    // @apply text-color-foreground-primary;
+    // @apply text-color-foreground-strong;
+    @apply text-color-foreground-primary;
     // @apply text-color-foreground-faint;
 
     &.active {
       // @apply text-display-500;
-      @apply text-color-foreground-strong;
+      @apply text-color-foreground-action;
 
       &::before {
         content: "";

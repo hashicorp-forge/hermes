@@ -94,7 +94,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     if (this.args.class) {
       const classes = this.args.class.split(" ");
       this.inputElement.classList.add(...classes);
-      console.log("classes", classes);
     }
 
     this.applyPeopleSelectClasses(this.inputElement, false);
@@ -183,7 +182,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
-    console.log("maybe update value", eventOrValue);
     let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {

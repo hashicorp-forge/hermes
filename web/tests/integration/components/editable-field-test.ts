@@ -120,7 +120,6 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("it yields an emptyValueErrorIsShown property to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("onChange", (newValue: string) => {
-      console.log("testtestse");
       this.set("value", newValue);
     });
 

@@ -9,6 +9,7 @@ import XDropdownListActionComponent from "./action";
 import XDropdownListLinkToComponent from "./link-to";
 import { restartableTask, timeout } from "ember-concurrency";
 import { FocusDirection } from ".";
+import { set } from "mockdate";
 
 type XDropdownListInteractiveComponentBoundArgs =
   | "role"
@@ -43,7 +44,7 @@ export interface XDropdownListItemComponentArgs {
   onItemClick?: (value: any, attributes: any) => void;
   setFocusedItemIndex: (
     focusDirection: FocusDirection | number,
-    maybeScrollIntoView?: boolean
+    maybeScrollIntoView?: boolean,
   ) => void;
   hideContent: () => void;
 }
@@ -119,7 +120,10 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     this._domElement = element;
   }
 
-  @action onClick() {
+  @action onClick(e: Event) {
+    // on "click", this is causing issues with
+    if (e instanceof MouseEvent) {
+    }
     if (this.args.onItemClick) {
       this.args.onItemClick(this.args.value, this.args.attributes);
     }
@@ -129,14 +133,14 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      * so that we don't interfere with Ember's <LinkTo> handling.
      *
      * This approach causes issues when testing, so we
-     * use `schedule` as an approximation.
+     * use `setTimeout` as an approximation.
      *
      * TODO: Improve this.
      */
     if (Ember.testing) {
-      schedule("afterRender", () => {
+      setTimeout(() => {
         this.args.hideContent();
-      });
+      }, 0);
     } else {
       next(() => {
         this.args.hideContent();

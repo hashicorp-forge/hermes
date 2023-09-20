@@ -109,8 +109,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     const target = event.target as HTMLElement;
 
     // const id = dd.contentID;
-    // console.log("id", id);
-    console.log("target", target);
   }
 
   /**

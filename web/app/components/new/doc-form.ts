@@ -263,7 +263,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     event.preventDefault();
     this.validateEagerly = true;
     this.validate();
-    console.log("submitting");
     if (this.formRequirementsMet && !this.hasErrors) {
       this.createDoc.perform();
     }
