@@ -239,10 +239,10 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @action protected didInsertContent() {
     assert(
       "didInsertContent expects a _scrollContainer",
-      this._scrollContainer
+      this._scrollContainer,
     );
     this.assignMenuItemIDs(
-      this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+      this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`),
     );
   }
 
@@ -284,7 +284,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @action protected onTriggerKeydown(
     contentIsShown: boolean,
     showContent: () => void,
-    event: KeyboardEvent
+    event: KeyboardEvent,
   ) {
     if (contentIsShown) {
       return;
@@ -318,7 +318,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    */
   @action protected setFocusedItemIndex(
     focusDirectionOrNumber: FocusDirection | number,
-    maybeScrollIntoView = true
+    maybeScrollIntoView = true,
   ) {
     let { _menuItems: menuItems, focusedItemIndex } = this;
 
@@ -434,18 +434,18 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         schedule("afterRender", () => {
           assert(
             "scheduleAssignMenuItemIDs expects a _scrollContainer",
-            this._scrollContainer
+            this._scrollContainer,
           );
           this.assignMenuItemIDs(
             this._scrollContainer.querySelectorAll(
-              `[role=${this.listItemRole}]`
-            )
+              `[role=${this.listItemRole}]`,
+            ),
           );
         });
       } else {
         if (i === 3) {
           throw new Error(
-            "scheduleAssignMenuItemIDs expects a _scrollContainer"
+            "scheduleAssignMenuItemIDs expects a _scrollContainer",
           );
         } else {
           await timeout(1);

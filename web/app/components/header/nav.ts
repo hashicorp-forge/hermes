@@ -11,6 +11,7 @@ import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import htmlElement from "hermes/utils/html-element";
 
 interface HeaderNavComponentSignature {
   Args: {};
@@ -21,6 +22,10 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
+
+  @tracked private _anchor: HTMLElement | null = null;
+
+  @tracked private _dd: XDropdownListAnchorAPI | null = null;
 
   protected get profile(): AuthenticatedUser {
     return this.authenticatedUser.info;
@@ -97,18 +102,45 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
   }
 
-  @action protected maybeHideContent(
+  @action protected registerAnchor(
     dd: XDropdownListAnchorAPI,
-    event: MouseEvent,
-  ): void {
+    element: HTMLElement,
+  ) {
+    this._anchor = element;
+    this._dd = dd;
+    this._dd.registerAnchor(this._anchor);
+  }
+
+  @action protected maybeHideContent(event: MouseEvent): void {
+    console.log("mouseEvent", event);
     // this runs on mouseleave of the dropdown anchor.
     // if the target element is within the dropdown anchor, ignore the event.
     // if the target element that's being hovered is part of the dropdown content,
     // ignore the event.
     // in other cases, run the hideContent function.
-    const target = event.target as HTMLElement;
+    const relatedTarget = event.relatedTarget as HTMLElement;
+    const popoverSelector = this._dd?.ariaControls;
+    const popover = htmlElement(`#${popoverSelector}`);
 
-    // const id = dd.contentID;
+    if (
+      this._anchor?.contains(relatedTarget) ||
+      popover?.contains(relatedTarget)
+    ) {
+      console.log("target is within anchor");
+      return;
+    } else {
+      console.log("target is not within anchor");
+      this._dd?.hideContent();
+    }
+  }
+
+  @action protected maybeShowContent(event: MouseEvent): void {
+    console.log("mouseEvent", event);
+    if (event.relatedTarget === event.target) {
+      console.log("target is relatedTarget");
+      return;
+    }
+    this._dd?.showContent();
   }
 
   /**

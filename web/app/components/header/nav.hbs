@@ -34,9 +34,18 @@
         @offset={{hash mainAxis=-5 crossAxis=0}}
         @placement="bottom-start"
         @currentWhen="authenticated.my.published authenticated.my.drafts"
+        {{on "mouseleave" this.maybeHideContent}}
       >
         <:anchor as |dd|>
-          <dd.ToggleAction class="flex items-center gap-0.5">
+          {{! TODO: this should be a LInkTo }}
+          <LinkTo
+            @route="authenticated.my.published"
+            {{on "mouseup" dd.hideContent}}
+            {{on "mouseenter" this.maybeShowContent}}
+            {{on "mouseleave" this.maybeHideContent}}
+            {{did-insert (fn this.registerAnchor dd)}}
+            class="flex items-center gap-0.5"
+          >
             <span>
               My Docs
             </span>
@@ -44,7 +53,7 @@
               class="text-color-foreground-faint relative translate-y-px"
               @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
             />
-          </dd.ToggleAction>
+          </LinkTo>
         </:anchor>
         <:item as |dd|>
           <dd.LinkTo
