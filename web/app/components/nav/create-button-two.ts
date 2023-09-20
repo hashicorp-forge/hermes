@@ -13,7 +13,7 @@ export default class NavNewCreateButtonTwo extends Component<NavNewCreateButtonT
         icon: "file-text",
         shortName: "RFC",
         description: "Ask colleagues for feedback on a proposal.",
-        route: "authenticated.new.doc",
+        route: "authenticated.new.document",
       },
       {
         label: "Project",

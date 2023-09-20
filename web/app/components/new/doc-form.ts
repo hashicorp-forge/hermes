@@ -24,6 +24,11 @@ interface DocFormErrors {
   contributors: string | null;
 }
 
+interface HermesDocumentTypeDropdownOption extends Partial<HermesDocumentType> {
+  icon: string;
+  shortName: string;
+}
+
 const FORM_ERRORS: DocFormErrors = {
   title: null,
   summary: null,
@@ -84,7 +89,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   @tracked private validateEagerly = false;
 
-  docTypes = {
+  docTypes: Record<string, HermesDocumentTypeDropdownOption> = {
     rfc: {
       longName: "Request for comments",
       icon: "discussion-circle",
@@ -139,7 +144,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   // TODO: give docType a type
   // @tracked docType: any = this.docTypes[0];
   @tracked selectedDocType: any = null;
-  @tracked selectedDocTypeObject = {};
+  @tracked selectedDocTypeObject: HermesDocumentType = {} as HermesDocumentType;
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -246,7 +251,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    attributes?: ProductArea
+    attributes?: ProductArea,
   ) {
     assert("attributes must exist", attributes);
 
@@ -263,6 +268,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     event.preventDefault();
     this.validateEagerly = true;
     this.validate();
+    console.log("submitting");
     if (this.formRequirementsMet && !this.hasErrors) {
       this.createDoc.perform();
     }
@@ -287,7 +293,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             // TODO: fix this;
             // TODO: fix this;
             // TODO: fix this;
-            docType: "rfc",
+            docType: this.selectedDocTypeObject.shortName,
             // TODO: fix this;
             // TODO: fix this;
             // TODO: fix this;
@@ -307,7 +313,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Set modal on a delay so it appears after transition.
       this.modalAlerts.setActive.perform(
         "draftCreated",
-        AWAIT_DOC_CREATED_MODAL_DELAY
+        AWAIT_DOC_CREATED_MODAL_DELAY,
       );
 
       this.router.transitionTo("authenticated.document", doc.id, {

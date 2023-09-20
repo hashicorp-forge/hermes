@@ -9,7 +9,7 @@ export default class AuthenticatedNewController extends Controller {
 
   protected objectTypes = {
     Document: {
-      route: "authenticated.new.doc",
+      route: "authenticated.new.document",
     },
     Project: {
       route: "authenticated.new.project",
@@ -21,7 +21,7 @@ export default class AuthenticatedNewController extends Controller {
     super(...arguments);
     this.router.on("routeDidChange", (transition: any) => {
       switch (transition.targetName) {
-        case "authenticated.new.doc":
+        case "authenticated.new.document":
           this.selectedObjectType = "Document";
           break;
         case "authenticated.new.project":

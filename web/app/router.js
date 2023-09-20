@@ -23,7 +23,7 @@ Router.map(function () {
     this.route("results");
     this.route("settings");
     this.route("new", function () {
-      this.route("doc");
+      this.route("document");
       this.route("project");
     });
     this.route("support", function () {

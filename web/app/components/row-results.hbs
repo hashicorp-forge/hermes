@@ -29,7 +29,6 @@
           </:head>
           <:body>
             {{#each @docs as |doc|}}
-              {{log doc.status}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"

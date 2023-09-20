@@ -1,16 +1,50 @@
-{{#if this.docIsBeingCreated}}
-  <div class="hds-typography-display-400 mt-3 text-center">
-    <FlightIcon @name="loading" @size="24" />
-    <div class="mt-8 text-display-200 font-semibold">
-      Creating draft in Google Drive...
+<form
+  {{did-insert this.registerForm}}
+  {{on "submit" this.submit}}
+  class="mb-10"
+>
+  <div class="space-y-7 mb-8">
+
+    {{! Title }}
+    <Hds::Form::TextInput::Field
+      @isRequired={{true}}
+      @value={{this.title}}
+      @type="text"
+      name="title"
+      {{on "input" this.updateForm}}
+      as |F|
+    >
+      <F.Label class="relative">
+        Title
+      </F.Label>
+    </Hds::Form::TextInput::Field>
+
+    {{! Summary }}
+    <div class="relative">
+      <Hds::Form::Textarea::Field
+        @value={{this.summary}}
+        rows="3"
+        name="summary"
+        {{on "input" this.updateForm}}
+        as |F|
+      >
+        <F.Label>Summary</F.Label>
+        <F.HelperText>
+          <span
+            class={{if
+              this.summaryIsLong
+              "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
+            }}
+          >One or two sentences</span>
+          outlining your
+          {{if this.objectTypeIsProject "project" "doc"}}.
+          {{if this.summaryIsLong "(Just a recommendation)"}}
+        </F.HelperText>
+      </Hds::Form::Textarea::Field>
     </div>
-    <div class="text-body-200 text-color-foreground-faint">This usually takes
-      10-20 seconds.</div>
-  </div>
-{{else}}
-  {{#if this.objectTypeIsProject}}
-    project form
-  {{else}}
+
+    {{outlet}}
+
     {{! Document type }}
     <div>
       <X::DropdownList
@@ -145,5 +179,21 @@
         People to share your doc with. You can always add more later.
       </F.HelperText>
     </Hds::Form::Field>
-  {{/if}}
+
+  </div>
+
+  <Hds::Button @text="Create new document" type="submit" />
+</form>
+
+{{#if this.docIsBeingCreated}}
+  <div class="hds-typography-display-400 mt-3 text-center">
+    <FlightIcon @name="loading" @size="24" />
+    <div class="mt-8 text-display-200 font-semibold">
+      Creating draft in Google Drive...
+    </div>
+    <div class="text-body-200 text-color-foreground-faint">This usually takes
+      10-20 seconds.</div>
+  </div>
+{{else}}
+  doc is not being created
 {{/if}}

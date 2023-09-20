@@ -49,64 +49,9 @@
           </:item>
         </X::DropdownList>
       </h1>
-      {{! TODO: move logic up a level }}
-      <form {{on "submit" this.submitForm}}>
-        {{! TODO: figure out if we addresed this }}
-        {{!-- {{did-insert this.registerForm}} --}}
-        <div class="space-y-7">
 
-          {{! Title }}
-          <Hds::Form::TextInput::Field
-            @isRequired={{true}}
-            @value={{this.title}}
-            @type="text"
-            name="title"
-            {{!-- {{on "input" this.updateForm}} --}}
-            as |F|
-          >
-            <F.Label class="relative">
-              Title
-            </F.Label>
-          </Hds::Form::TextInput::Field>
+      {{outlet}}
 
-          {{! Summary }}
-          <div class="relative">
-            <Hds::Form::Textarea::Field
-              @value={{this.summary}}
-              rows="3"
-              name="summary"
-              {{!-- {{on "input" this.updateForm}} --}}
-              as |F|
-            >
-              <F.Label>Summary</F.Label>
-              <F.HelperText>
-                <span
-                  class={{if
-                    this.summaryIsLong
-                    "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
-                  }}
-                >One or two sentences</span>
-                outlining your
-                {{if this.objectTypeIsProject "project" "doc"}}.
-                {{if this.summaryIsLong "(Just a recommendation)"}}
-              </F.HelperText>
-            </Hds::Form::Textarea::Field>
-          </div>
-
-          {{outlet}}
-
-        </div>
-
-        <Hds::Button
-          @text="Create new {{if
-            this.objectTypeIsProject
-            'project'
-            'document'
-          }}"
-          type="submit"
-          class="mt-8 mb-10"
-        />
-      </form>
     </div>
   </div>
 </section>
