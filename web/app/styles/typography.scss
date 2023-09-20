@@ -1,5 +1,9 @@
 @use "variables" as v;
 
+h3 {
+  @apply text-color-foreground-strong;
+}
+
 .hermes-form-label {
   @apply flex text-body-200 font-semibold text-color-foreground-strong;
 
