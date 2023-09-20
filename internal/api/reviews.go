@@ -434,6 +434,7 @@ func ReviewHandler(
 			}
 			d.Status = models.InReviewDocumentStatus
 			d.DocumentNumber = nextDocNum
+			d.DocumentModifiedAt = modifiedTime
 			if err := d.Upsert(db); err != nil {
 				l.Error("error upserting document in database",
 					"error", err,
