@@ -181,6 +181,7 @@ func DraftsHandler(
 				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
+				ModifiedTime: ct.Unix(),
 				Owners:       []string{userEmail},
 				OwnerPhotos:  op,
 				Product:      req.Product,
