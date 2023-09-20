@@ -5,6 +5,8 @@ import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { MatchAnchorWidthOptions } from "./content";
+import { inject as service } from "@ember/service";
+import RouterService from "@ember/routing/router-service";
 
 interface FloatingUIAnchorAPI {
   contentIsShown: boolean;
@@ -13,6 +15,7 @@ interface FloatingUIAnchorAPI {
   showContent: () => void;
   hideContent: () => void;
   contentID: string;
+  isActive: boolean;
 }
 
 interface FloatingUIContentAPI {
@@ -30,6 +33,7 @@ interface FloatingUIComponentSignature {
     disableClose?: boolean;
     offset?: OffsetOptions;
     matchAnchorWidth?: MatchAnchorWidthOptions;
+    currentWhen?: string;
   };
   Blocks: {
     anchor: [dd: FloatingUIAnchorAPI];
@@ -38,11 +42,31 @@ interface FloatingUIComponentSignature {
 }
 
 export default class FloatingUIComponent extends Component<FloatingUIComponentSignature> {
+  @service declare router: RouterService;
+
   readonly contentID = guidFor(this);
 
   @tracked _anchor: HTMLElement | null = null;
   @tracked content: HTMLElement | null = null;
   @tracked contentIsShown: boolean = this.args.disableClose || false;
+
+  protected get isActive() {
+    console.log(
+      "isActive?",
+      this.args.currentWhen,
+      this.router.currentRouteName,
+    );
+    if (!this.args.currentWhen) {
+      return false;
+    }
+
+    console.log(this.args.currentWhen);
+    const currentWhenRoutes = this.args.currentWhen.split(" ");
+
+    return currentWhenRoutes.some((route) => {
+      return this.router.isActive(route);
+    });
+  }
 
   get anchor() {
     assert("_anchor must exist", this._anchor);

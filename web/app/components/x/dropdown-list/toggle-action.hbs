@@ -7,6 +7,7 @@
   aria-controls={{@ariaControls}}
   aria-expanded={{@contentIsShown}}
   aria-haspopup="listbox"
+  class={{if @isActive "active"}}
   ...attributes
 >
   {{#if @isLoading}}

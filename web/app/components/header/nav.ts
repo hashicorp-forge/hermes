@@ -30,12 +30,10 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     all: {
       label: "All Documents",
       route: "authenticated.all",
-      icon: "globe",
     },
     my: {
       label: "My Docs",
       route: "authenticated.my.published",
-      icon: "user",
     },
     drafts: {
       label: "Drafts",

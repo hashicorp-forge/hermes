@@ -11,6 +11,7 @@
   @offset={{@offset}}
   @disableClose={{@disableClose}}
   @matchAnchorWidth={{@matchAnchorWidth}}
+  @currentWhen={{@currentWhen}}
   class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
@@ -45,6 +46,7 @@
           onTriggerKeydown=(fn
             this.onTriggerKeydown f.contentIsShown f.showContent
           )
+          isActive=f.isActive
           isLoading=@isLoading
           toggleContent=f.toggleContent
           disabled=@disabled

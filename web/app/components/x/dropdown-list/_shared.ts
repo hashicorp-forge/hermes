@@ -19,6 +19,7 @@ export interface XDropdownListSharedArgs {
   groups?: any;
   selected?: any;
   listIsOrdered?: boolean;
+  currentWhen?: string;
 }
 
 /**
@@ -32,4 +33,5 @@ export interface XDropdownListToggleComponentArgs {
   ariaControls: string;
   disabled?: boolean;
   isLoading?: boolean;
+  isActive?: boolean;
 }
