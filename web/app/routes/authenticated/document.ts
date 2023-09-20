@@ -48,7 +48,7 @@ export default class AuthenticatedDocumentRoute extends Route {
 
   async model(
     params: AuthenticatedDocumentRouteParams,
-    transition: Transition
+    transition: Transition,
   ) {
     let doc = {};
     let draftFetched = false;
