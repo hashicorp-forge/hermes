@@ -28,7 +28,7 @@
   @apply flex items-center space-x-4;
 
   > a {
-    @apply relative flex text-display-500 font-bold;
+    @apply relative flex text-display-300 font-semibold;
     @apply text-color-foreground-disabled;
     // @apply text-color-foreground-strong;
     // @apply text-color-foreground-primary;

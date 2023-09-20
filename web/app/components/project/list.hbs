@@ -8,26 +8,30 @@
   </div> }}
 
   <div class="relative mb-6">
-    <nav class="flex gap-6 mb-10 justify-center">
+    <nav class="big-tabs flex space-x-3 mb-10 justify-center">
 
-      <div class="flex items-center gap-2">
-        <FlightIcon @name="zap" />
-        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+      <a class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 active">
+        <FlightIcon @name="zap" class="ml-2 -mr-px" />
+        <div>
           Active
-        </h3>
-      </div>
-      <div class="flex items-center gap-2">
-        <FlightIcon @name="check-circle" />
-        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+        </div>
+      </a>
+      <a
+        class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 Xactive"
+      >
+        <FlightIcon @name="check-circle" class="ml-2" />
+        <div>
           Completed
-        </h3>
-      </div>
-      <div class="flex items-center gap-2">
-        <FlightIcon @name="archive" />
-        <h3 class="text-body-200 font-regular text-color-foreground-strong">
+        </div>
+      </a>
+      <a
+        class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 Xactive"
+      >
+        <FlightIcon @name="archive" class="ml-2" />
+        <div>
           Archived
-        </h3>
-      </div>
+        </div>
+      </a>
     </nav>
     {{#if @projects}}
       <ol

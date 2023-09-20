@@ -27,12 +27,12 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   }
 
   protected documentNavItems = {
-    all: {
-      label: "All Documents",
-      route: "authenticated.all",
-    },
+    // all: {
+    //   label: "All Documents",
+    //   route: "authenticated.documents",
+    // },
     my: {
-      label: "My Docs",
+      label: "Published",
       route: "authenticated.my.published",
     },
     drafts: {

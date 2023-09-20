@@ -21,27 +21,17 @@
       </div>
     </div>
     <div class="big-tabs">
-      {{!-- <LinkTo
-        {{on "click" this.resetLocalProperties}}
-        @route="authenticated.my"
-        @current-when="authenticated.my.index"
-        class="!text-display-300"
-      >
-        Overview
-      </LinkTo> --}}
       <LinkTo
         {{on "click" this.resetLocalProperties}}
         @route="authenticated.my.published"
         @current-when="authenticated.my.published"
-        class="!text-display-300"
       >
-        My Docs
+        Published
       </LinkTo>
       <LinkTo
         {{on "click" this.resetLocalProperties}}
         @route="authenticated.my.drafts"
         @current-when="authenticated.my.drafts"
-        class="!text-display-300"
       >
         Drafts
       </LinkTo>

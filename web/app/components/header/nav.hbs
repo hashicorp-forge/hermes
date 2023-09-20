@@ -6,39 +6,17 @@
     </LinkTo>
 
     <div class="primary-links">
-      <X::DropdownList
-        data-test-nav-link="explore"
-        class="flex gap-1"
-        @items={{this.documentNavItems}}
-        @offset={{hash mainAxis=-5 crossAxis=0}}
-        @placement="bottom-start"
-        @currentWhen="authenticated.documents authenticated.my.published authenticated.my.drafts"
+      <LinkTo
+        data-test-nav-link="documents"
+        @route="authenticated.documents"
+        @current-when="authenticated.documents"
+        @query={{this.defaultBrowseScreenQueryParams}}
       >
-        <:anchor as |dd|>
-          <dd.ToggleAction class="flex items-center gap-0.5">
-            <span>
-              Documents
-            </span>
-            <FlightIcon
-              class="text-color-foreground-faint mt-0.5"
-              @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-            />
-          </dd.ToggleAction>
-        </:anchor>
-        <:item as |dd|>
-          <dd.LinkTo
-            data-test-nav-link="explore"
-            {{! TODO: add @current-when }}
-            @route={{dd.attrs.route}}
-            @query={{this.defaultBrowseScreenQueryParams}}
-            class="px-2.5 md:px-3.5"
-          >
-            <span>
-              {{dd.attrs.label}}
-            </span>
-          </dd.LinkTo>
-        </:item>
-      </X::DropdownList>
+        <span>
+          Documents
+        </span>
+      </LinkTo>
+
       <LinkTo
         data-test-nav-link="explore"
         @route="authenticated.projects"
@@ -49,6 +27,39 @@
           Projects
         </span>
       </LinkTo>
+      <X::DropdownList
+        data-test-nav-link="explore"
+        class="flex gap-1"
+        @items={{this.documentNavItems}}
+        @offset={{hash mainAxis=-5 crossAxis=0}}
+        @placement="bottom-start"
+        @currentWhen="authenticated.my.published authenticated.my.drafts"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction class="flex items-center gap-0.5">
+            <span>
+              My Docs
+            </span>
+            <FlightIcon
+              class="text-color-foreground-faint relative translate-y-px"
+              @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
+            />
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.LinkTo
+            data-test-nav-link="explore"
+            {{! TODO: add @current-when }}
+            @route={{or dd.attrs.route "authenticated.documents"}}
+            @query={{or dd.attrs.query this.defaultBrowseScreenQueryParams}}
+            class="px-2.5 md:px-3.5"
+          >
+            <span>
+              {{dd.attrs.label}}
+            </span>
+          </dd.LinkTo>
+        </:item>
+      </X::DropdownList>
     </div>
 
     <Header::Search class="global-search" />
