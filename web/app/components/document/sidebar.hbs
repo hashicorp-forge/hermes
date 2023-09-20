@@ -267,7 +267,7 @@
       {{! Created }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.created "Unknown"}}</p>
+        <p>{{or (parse-date @document.created "long") "Unknown"}}</p>
       </div>
 
       {{! Last modified }}

@@ -6,7 +6,6 @@ import FetchService from "hermes/services/fetch";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import timeAgo from "hermes/utils/time-ago";
 import { HermesDocument } from "hermes/types/document";
 
 export default class DashboardRoute extends Route {

@@ -13,7 +13,6 @@ interface DocTileComponentSignature {
     productArea?: string;
     snippet?: string;
     status?: string;
-    thumbnail?: string;
     title?: string;
   };
 }

@@ -8,9 +8,6 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
 
-// @ts-ignore - not yet typed
-import timeAgo from "hermes/utils/time-ago";
-
 interface DashboardLatestUpdatesComponentSignature {
   Args: {};
 }
