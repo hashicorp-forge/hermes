@@ -1,9 +1,8 @@
 import Component from "@glimmer/component";
-import { task, timeout } from "ember-concurrency";
+import { task } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import Ember from "ember";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
@@ -12,39 +11,20 @@ import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
-import { ProductArea } from "hermes/services/product-areas";
-import { HermesDocumentType } from "hermes/types/document-type";
-import { next, schedule } from "@ember/runloop";
 
-interface DocFormErrors {
+interface ProjectFormErrors {
   title: string | null;
-  summary: string | null;
-  productAbbreviation: string | null;
-  tags: string | null;
-  contributors: string | null;
 }
 
-interface HermesDocumentTypeDropdownOption extends Partial<HermesDocumentType> {
-  icon: string;
-  shortName: string;
-}
-
-const FORM_ERRORS: DocFormErrors = {
+const FORM_ERRORS: ProjectFormErrors = {
   title: null,
-  summary: null,
-  productAbbreviation: null,
-  tags: null,
-  contributors: null,
 };
 
-const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
-const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
-
-interface NewDocFormComponentSignature {
+interface NewProjectFormComponentSignature {
   Args: {};
 }
 
-export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
+export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: FlashService;
@@ -53,9 +33,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | undefined = undefined;
-  @tracked protected productAbbreviation: string | null = null;
-  @tracked protected contributors: HermesUser[] = [];
+
+  @tracked protected jira = "";
 
   @tracked protected _form: HTMLFormElement | null = null;
 
@@ -70,7 +49,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Set true when the createDoc task is running.
    * Reverted only if an error occurs.
    */
-  @tracked protected docIsBeingCreated = false;
+  @tracked protected projectIsBeingCreated = false;
 
   /**
    * An object containing error messages for each applicable form field.
@@ -88,58 +67,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Set true after an invalid submission attempt.
    */
   @tracked private validateEagerly = false;
-
-  docTypes: Record<string, HermesDocumentTypeDropdownOption> = {
-    rfc: {
-      longName: "Request for comments",
-      icon: "discussion-circle",
-      shortName: "RFC",
-      description: "Submit an idea for peer feedback.",
-      moreInfoLink: {
-        text: "When should I create an RFC?",
-        url: "https://works.hashicorp.com/articles/rfc-template",
-      },
-    },
-    prd: {
-      longName: "Product requirements",
-      icon: "target",
-      shortName: "PRD",
-      description: "Summarize a problem and propose a solution.",
-      moreInfoLink: {
-        text: "When should I create a PRD?",
-        url: "https://works.hashicorp.com/articles/prd-template",
-      },
-    },
-    frd: {
-      longName: "Funding request",
-      icon: "dollar-sign",
-      shortName: "FRD",
-      description: "Request a budget, along with justifications and returns.",
-    },
-    por: {
-      longName: "Plan of record",
-      icon: "map",
-      shortName: "POR",
-      description: "Outline a project and designate a team.",
-    },
-    prfaq: {
-      longName: "Press release / FAQ",
-      icon: "newspaper",
-      shortName: "PRFAQ",
-      description: "Write about a new product or feature.",
-    },
-    memo: {
-      longName: "Memo",
-      icon: "radio",
-      shortName: "MEMO",
-      description: "Capture an idea or make an announcement.",
-    },
-  };
-
-  // @tracked docType: any = this.docTypes[0];
-  @tracked selectedDocType: string | null = null;
-  @tracked selectedDocTypeObject: HermesDocumentTypeDropdownOption =
-    {} as HermesDocumentTypeDropdownOption;
 
   /**
    * The form element. Used to bind FormData to our tracked elements.
@@ -161,7 +88,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Sets `formRequirementsMet` and conditionally validates the form.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
+    if (this.title) {
       this.formRequirementsMet = true;
     } else {
       this.formRequirementsMet = false;
@@ -176,12 +103,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   private validate() {
     const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
     this.formErrors = errors;
   }
 
@@ -194,20 +115,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected registerForm(form: HTMLFormElement) {
     this._form = form;
-  }
-
-  @action protected changeDocType(id: string) {
-    const docType = Object.entries(this.docTypes).find(([key]) => key === id);
-
-    assert("docType must exist", docType);
-
-    const [key, value] = docType;
-
-    this.selectedDocTypeObject = value;
-    next(() => {
-      // Wait for the dropdown to close.
-      this.selectedDocType = key;
-    });
   }
 
   /**
@@ -224,34 +131,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.title = formObject["title"] as string;
     this.summary = formObject["summary"] as string;
 
-    if ("productArea" in formObject) {
-      this.productArea = formObject["productArea"] as string;
-    }
-
     if (this.summary.length > 200) {
       this.summaryIsLong = true;
     } else {
       this.summaryIsLong = false;
     }
 
-    this.maybeValidate();
-  }
-
-  /**
-   * Updates the contributors property and conditionally validates the form.
-   */
-  @action protected updateContributors(contributors: HermesUser[]) {
-    this.contributors = contributors;
-  }
-
-  @action protected onProductSelect(
-    productName: string,
-    attributes?: ProductArea,
-  ) {
-    assert("attributes must exist", attributes);
-
-    this.productArea = productName;
-    this.productAbbreviation = attributes.abbreviation;
     this.maybeValidate();
   }
 
@@ -265,7 +150,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.validate();
     console.log("submitting");
     if (this.formRequirementsMet && !this.hasErrors) {
-      this.createDoc.perform();
+      this.createProject.perform();
     }
   }
 
@@ -273,41 +158,30 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Creates a document draft, then redirects to the document.
    * On error, show a flashMessage and allow users to try again.
    */
-  private createDoc = task(async () => {
-    this.docIsBeingCreated = true;
+  private createProject = task(async () => {
+    this.projectIsBeingCreated = true;
 
     try {
-      const doc = await this.fetchSvc
-        .fetch("/api/v1/drafts", {
+      // TODO: make this work
+      const project = await this.fetchSvc
+        .fetch("/api/v1/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contributors: this.getEmails(this.contributors),
-            docType: this.selectedDocTypeObject.shortName,
-            product: this.productArea,
-            productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
+            // TODO: jira
           }),
         })
         .then((response) => response?.json());
 
-      // Wait for document to be available.
-      await timeout(AWAIT_DOC_DELAY);
-
-      // Set modal on a delay so it appears after transition.
-      this.modalAlerts.setActive.perform(
-        "draftCreated",
-        AWAIT_DOC_CREATED_MODAL_DELAY,
-      );
-
-      this.router.transitionTo("authenticated.document", doc.id, {
+      this.router.transitionTo("authenticated.project", project.id, {
         queryParams: { draft: true },
       });
     } catch (err: unknown) {
-      this.docIsBeingCreated = false;
+      this.projectIsBeingCreated = false;
       this.flashMessages.add({
-        title: "Error creating document draft",
+        title: "Error creating project",
         message: `${err}`,
         type: "critical",
         timeout: 6000,
@@ -319,6 +193,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "New::DocForm": typeof NewDocFormComponent;
+    "New::ProjectForm": typeof NewProjectFormComponent;
   }
 }
