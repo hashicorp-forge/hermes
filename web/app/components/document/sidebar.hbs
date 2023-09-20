@@ -285,7 +285,7 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.createdDate "Unknown"}}</p>
+        <p>{{or (parse-date @document.created "long") "Unknown"}}</p>
       </div>
 
       <div class="flex flex-col items-start space-y-2">
