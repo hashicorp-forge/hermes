@@ -307,6 +307,58 @@ func DraftsHandler(
 
 			l.Info("created draft", "doc_id", f.Id)
 
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(f.Id, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: f.Id,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: f.Id,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+			}
+
 		case "GET":
 			// Get OIDC ID
 			id := r.Header.Get("x-amzn-oidc-identity")
@@ -583,6 +635,58 @@ func DraftsDocumentHandler(
 			}
 
 			l.Info("retrieved document draft", "doc_id", docId)
+
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(docId, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docId,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+			}
 
 		case "DELETE":
 			// Authorize request.
@@ -1072,6 +1176,58 @@ func DraftsDocumentHandler(
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched draft document", "doc_id", docId)
+
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(docId, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docId,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+			}
 
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
