@@ -7,7 +7,6 @@ import {
   triggerKeyEvent,
   visit,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -145,7 +144,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       assert.equal(
         option.textContent?.trim(),
         expectedProducts[index],
-        "the product list item is correct"
+        "the product list item is correct",
       );
     });
 
@@ -155,7 +154,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .dom(productSelectSelector)
       .hasText(
         "Test Product 0",
-        "The document product is updated to the selected product"
+        "The document product is updated to the selected product",
       );
   });
 
@@ -179,7 +178,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/500");
     const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
-      "data-test-url"
+      "data-test-url",
     );
 
     assert.true(shortLinkURL?.startsWith(TEST_SHORT_LINK_BASE_URL));
@@ -273,13 +272,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(
-        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`
+        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
       )
       .doesNotHaveAttribute("data-test-is-checked")
       .hasAttribute("data-test-value", DraftVisibility.Shareable);
 
     const clickPromise = click(
-      `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2) ${DRAFT_VISIBILITY_OPTION_SELECTOR}`
+      `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2) ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
     );
 
     await waitFor(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="running"]`);
@@ -320,7 +319,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasAttribute(
         "data-test-url",
         window.location.href,
-        "the URL to be copied is correct"
+        "the URL to be copied is correct",
       );
 
     await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
@@ -331,7 +330,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(
-        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`
+        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
       )
       .hasAttribute("data-test-is-checked");
 
@@ -506,7 +505,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasAttribute(
         "data-test-color",
         "primary",
-        "the Continue button becomes the primary button when the copy link is hidden"
+        "the Continue button becomes the primary button when the copy link is hidden",
       );
   });
 
@@ -545,7 +544,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(`${CONTRIBUTORS_SELECTOR} .field-toggle`);
 
     assert.true(
-      document.activeElement === find(`${CONTRIBUTORS_SELECTOR} input`)
+      document.activeElement === find(`${CONTRIBUTORS_SELECTOR} input`),
     );
 
     await click(`${APPROVERS_SELECTOR} .field-toggle`);
@@ -557,7 +556,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(`${stakeholdersSelector} .field-toggle`);
 
     assert.true(
-      document.activeElement === find(`${stakeholdersSelector} input`)
+      document.activeElement === find(`${stakeholdersSelector} input`),
     );
   });
 });
