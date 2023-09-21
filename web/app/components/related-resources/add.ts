@@ -33,7 +33,7 @@ interface RelatedResourcesAddComponentSignature {
       dd: XDropdownListAnchorAPI | null,
       query: string,
       shouldIgnoreDelay?: boolean,
-      options?: SearchOptions
+      options?: SearchOptions,
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
     headerTitle: string;
@@ -120,11 +120,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * True if the text entered is deemed valid by the isValidURL utility.
    */
   @tracked protected queryIsURL = this.scopeIsExternalLinks ? true : false;
-
-  /**
-   * The DOM element of the search input. Receives focus when inserted.
-   */
-  @tracked private searchInput: HTMLInputElement | null = null;
 
   /**
    * Whether to allow navigating with the keyboard.
@@ -354,7 +349,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    */
   @action private checkForDuplicate(
     urlOrID: string,
-    resourceIsHermesDocument = false
+    resourceIsHermesDocument = false,
   ) {
     let isDuplicate = false;
     if (resourceIsHermesDocument) {
@@ -402,20 +397,10 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    */
   @action protected didInsertInput(
     dd: XDropdownListAnchorAPI,
-    e: HTMLInputElement
+    e: HTMLInputElement,
   ) {
-    this.searchInput = e;
     this._dd = dd;
-    this.dd.registerAnchor(this.searchInput);
-
     void this.loadInitialData.perform();
-
-    next(() => {
-      // not being hit
-      console.log("hit");
-      assert("searchInput expected", this.searchInput);
-      this.searchInput.focus();
-    });
   }
 
   /**
@@ -631,7 +616,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   private getAlgoliaObject = restartableTask(async (id: string) => {
     assert(
       "full url format expected",
-      this.firstPartyURLFormat === FirstPartyURLFormat.FullURL
+      this.firstPartyURLFormat === FirstPartyURLFormat.FullURL,
     );
 
     this.checkForDuplicate(id, true);

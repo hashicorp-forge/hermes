@@ -75,6 +75,14 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
     this.modalIsShown = false;
   }
 
+  @action protected onInput(event: Event) {
+    return;
+  }
+
+  @action onKeydown(event: KeyboardEvent) {
+    return;
+  }
+
   @action protected loadProjects() {
     console.log("should load projects");
     this._loadProjects.perform();

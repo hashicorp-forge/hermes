@@ -1,0 +1,27 @@
+<div class="relative">
+  <Hds::Form::TextInput::Base
+    {{did-insert this.didInsertInput}}
+    data-test-related-resources-search-input
+    @type="search"
+    @value="{{@query}}"
+    name="related-resources-search"
+    size="25"
+    aria-label={{@inputPlaceholder}}
+    {{on "input" this.onInput}}
+    {{on "keydown" this.onKeydown}}
+    {{on "focusin" this.enableKeyboardNav}}
+    {{on "focusout" this.disableKeyboardNav}}
+    aria-controls={{@ariaControls}}
+    aria-expanded={{@contentIsShown}}
+    aria-haspopup="listbox"
+    ...attributes
+  />
+  {{#if @searchIsRunning}}
+    <div
+      data-test-related-resources-search-loading-icon
+      class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+    >
+      <FlightIcon @name="loading" />
+    </div>
+  {{/if}}
+</div>

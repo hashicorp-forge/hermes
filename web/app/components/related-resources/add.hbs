@@ -29,34 +29,15 @@
           class="non-floating-list"
         >
           <:anchor as |dd|>
-            <div class="relative">
-              {{! TODO: component-ize this }}
-              <Hds::Form::TextInput::Base
-                data-test-related-resources-search-input
-                {{did-insert (fn this.didInsertInput dd)}}
-                {{on "input" this.onInput}}
-                {{on "keydown" this.onInputKeydown}}
-                {{on "focusin" this.enableKeyboardNav}}
-                {{on "focusout" this.disableKeyboardNav}}
-                @type="search"
-                @value={{this.query}}
-                name="related-resources-search"
-                size="25"
-                placeholder={{@inputPlaceholder}}
-                aria-label={{@inputPlaceholder}}
-                aria-controls={{dd.ariaControls}}
-                aria-expanded={{dd.contentIsShown}}
-                aria-haspopup="listbox"
-              />
-              {{#if @searchIsRunning}}
-                <div
-                  data-test-related-resources-search-loading-icon
-                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-                >
-                  <FlightIcon @name="loading" />
-                </div>
-              {{/if}}
-            </div>
+            <dd.SearchInput
+              {{did-insert (fn this.didInsertInput dd)}}
+              placeholder={{@inputPlaceholder}}
+              aria-label={{@inputPlaceholder}}
+              @query={{this.query}}
+              @searchIsRunning={{@searchIsRunning}}
+              @onKeydown={{this.onInputKeydown}}
+              @onInput={{this.onInput}}
+            />
           </:anchor>
           <:header>
             {{#if this.listHeaderIsShown}}

@@ -19,6 +19,7 @@ import { restartableTask, timeout } from "ember-concurrency";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 import XDropdownListToggleSelectComponent from "./toggle-select";
+import XDropdownListSearchInputComponent from "./search-input";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -27,6 +28,13 @@ export type XDropdownListToggleComponentBoundArgs =
   | "onTriggerKeydown"
   | "disabled"
   | "ariaControls";
+
+export type XDropdownListSearchInputComponentBoundArgs =
+  | "registerAnchor"
+  | "ariaControls"
+  | "searchIsRunning"
+  | "inputPlaceholder"
+  | "query";
 
 export interface XDropdownListAnchorAPI
   extends XDropdownListToggleComponentArgs {
@@ -41,6 +49,10 @@ export interface XDropdownListAnchorAPI
   ToggleSelect: WithBoundArgs<
     typeof XDropdownListToggleSelectComponent,
     XDropdownListToggleComponentBoundArgs
+  >;
+  SearchInput: WithBoundArgs<
+    typeof XDropdownListSearchInputComponent,
+    XDropdownListSearchInputComponentBoundArgs
   >;
   focusedItemIndex: number;
   selected: any;

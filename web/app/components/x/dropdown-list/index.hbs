@@ -74,6 +74,14 @@
             f.contentID
           )
         )
+        SearchInput=(component
+          "x/dropdown-list/search-input"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          ariaControls=(concat
+            "x-dropdown-list-" (if this.inputIsShown "container" "items") "-"
+          )
+        )
         ariaControls=(concat
           "x-dropdown-list-"
           (if this.inputIsShown "container" "items")
