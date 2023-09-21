@@ -30,6 +30,7 @@
         >
           <:anchor as |dd|>
             <div class="relative">
+              {{! TODO: component-ize this }}
               <Hds::Form::TextInput::Base
                 data-test-related-resources-search-input
                 {{did-insert (fn this.didInsertInput dd)}}
