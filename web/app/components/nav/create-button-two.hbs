@@ -22,7 +22,8 @@
       @route={{dd.attrs.route}}
       class="flex h-9 items-center justify-between rounded-none px-4"
     >
-      <div class="flex items-center">
+      <div class="flex items-center gap-2.5">
+        <FlightIcon @name={{dd.attrs.icon}} />
         {{dd.attrs.label}}
       </div>
     </dd.LinkTo>

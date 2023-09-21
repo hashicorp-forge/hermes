@@ -111,7 +111,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     this._dd.registerAnchor(this._anchor);
   }
 
-  @action protected maybeHideContent(event: MouseEvent): void {
+  @action protected maybeHideContent(event: MouseEvent | FocusEvent): void {
     console.log("mouseEvent", event);
     // this runs on mouseleave of the dropdown anchor.
     // if the target element is within the dropdown anchor, ignore the event.
@@ -134,7 +134,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     }
   }
 
-  @action protected maybeShowContent(event: MouseEvent): void {
+  @action protected maybeShowContent(event: MouseEvent | FocusEvent): void {
     console.log("mouseEvent", event);
     if (event.relatedTarget === event.target) {
       console.log("target is relatedTarget");

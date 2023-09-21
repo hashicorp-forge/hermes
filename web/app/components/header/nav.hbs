@@ -41,6 +41,8 @@
           <LinkTo
             @route="authenticated.my.published"
             {{on "mouseup" dd.hideContent}}
+            {{on "focusin" this.maybeShowContent}}
+            {{on "focusout" this.maybeHideContent}}
             {{on "mouseenter" this.maybeShowContent}}
             {{on "mouseleave" this.maybeHideContent}}
             {{did-insert (fn this.registerAnchor dd)}}

@@ -10,9 +10,11 @@ export default class AuthenticatedNewController extends Controller {
   protected objectTypes = {
     Document: {
       route: "authenticated.new.document",
+      icon: "file-text",
     },
     Project: {
       route: "authenticated.new.project",
+      icon: "grid",
     },
   };
 
