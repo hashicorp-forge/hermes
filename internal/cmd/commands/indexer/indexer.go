@@ -8,11 +8,13 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp/go-hclog"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 type Command struct {
@@ -88,6 +90,26 @@ func (c *Command) Run(args []string) int {
 	default:
 		ui.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
 		return 1
+	}
+
+	// Initialize Datadog.
+	dd := datadog.NewConfig(*cfg)
+	if dd.Enabled {
+		tracerOpts := []tracer.StartOption{}
+		if dd.Env != "" {
+			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
+		}
+		if dd.Service != "" {
+			tracerOpts = append(tracerOpts, tracer.WithService(dd.Service))
+		}
+		if dd.ServiceVersion != "" {
+			tracerOpts = append(
+				tracerOpts,
+				tracer.WithServiceVersion(dd.ServiceVersion),
+			)
+		}
+
+		tracer.Start(tracerOpts...)
 	}
 
 	// Initialize database connection.
