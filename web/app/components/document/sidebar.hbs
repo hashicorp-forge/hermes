@@ -85,7 +85,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        <div class="editable-field-container mb-8 -mt-[5px]">
+        <div class="editable-field-container mb-5 -mt-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -96,7 +96,6 @@
             @isRequired={{true}}
             @name="title"
             @class="text-display-300 p-[5px] font-semibold foreground-strong"
-            class="mb-0.5"
             @tag="h1"
           />
           <EditableField
@@ -111,26 +110,26 @@
             @placeholder="Enter a summary"
           />
         </div>
-      </div>
-
-      <div>
-
         <Person
           @imgURL={{get @document.ownerPhotos 0}}
           @email={{get @document.owners 0}}
         />
-        <div class="mt-7">
-
-          <p class="text-body-100">
+      </div>
+      <div>
+        <p class="text-body-100">
+          {{#if @document.created}}
             Created
-            {{or (parse-date @document.created "long") "Unknown"}}</p>
-          {{#if @document.modifiedTime}}
-            <p class="mt-1 text-[11px] text-color-foreground-faint">
-              Modified
-              {{time-ago @document.modifiedTime}}
-            </p>
+            {{parse-date @document.created "long"}}
+          {{else}}
+            Unknown creation date
           {{/if}}
-        </div>
+        </p>
+        {{#if @document.modifiedTime}}
+          <p class="mt-1 text-[11px] text-color-foreground-faint">
+            Modified
+            {{time-ago @document.modifiedTime}}
+          </p>
+        {{/if}}
       </div>
 
       <div class="flex space-x-1">
