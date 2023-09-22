@@ -11,7 +11,6 @@
   <New::ObjectTypeDropdown @selected="Document" />
   <form
     {{! TODO: check if "change"/"input" actions work }}
-    {{!-- {{on "input" this.updateForm}} --}}
     {{did-insert this.registerForm}}
     {{on "submit" this.submit}}
     class="mb-10"
@@ -24,6 +23,7 @@
         @value={{this.title}}
         @type="text"
         name="title"
+        {{on "input" this.updateForm}}
         as |F|
       >
         <F.Label class="relative">
@@ -38,6 +38,7 @@
           @value={{this.summary}}
           name="summary"
           rows="3"
+          {{on "input" this.updateForm}}
           as |F|
         >
           <F.Label>Summary</F.Label>
