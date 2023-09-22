@@ -28,7 +28,7 @@
             </H.Tr>
           </:head>
           <:body>
-            {{#each @docs as |doc index|}}
+            {{#each @docs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
                 @createdDate="{{parse-date doc.created}}"

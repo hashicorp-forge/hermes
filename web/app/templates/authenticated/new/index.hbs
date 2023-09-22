@@ -1,6 +1,6 @@
 {{page-title "New Doc"}}
 
-<h1>Choose a template</h1>
+<h1 class="mb-1.5">Choose a template</h1>
 <ol class="mt-9 grid grid-cols-3 gap-4">
   {{#each @model as |docType|}}
     <li class="relative">
@@ -12,7 +12,7 @@
         <Hds::Card::Container
           @level="mid"
           @levelHover="high"
-          @hasBorder="true"
+          @hasBorder={{true}}
           class="template-card
             {{if docType.moreInfoLink 'template-card--with-link'}}"
         >
@@ -42,7 +42,5 @@
         />
       {{/if}}
     </li>
-
   {{/each}}
-
 </ol>

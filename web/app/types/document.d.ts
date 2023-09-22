@@ -1,16 +1,30 @@
 import { GoogleUser } from "hermes/components/inputs/people-select";
 
-/**
- * NOTE: This is a partial type definition.
- * We are defining it incrementally as we expand TS coverage.
- */
 export interface HermesDocument {
   readonly objectID: string;
 
   status: string;
   product?: string;
-  modifiedAgo: string;
-  modifiedTime: number;
+
+  /**
+   * A human-readable date string, e.g., "Aug 16, 2028".
+   * Mutated in the layout by the `parse-date` helper to place
+   * the date before the month.
+   */
+  created: string;
+
+  /**
+   * A timestamp in seconds. Used for sorting.
+   */
+  createdTime: number;
+
+  /**
+   * A timestamp in seconds. Used Translated by the `time-ago` helper
+   * into a human-readable string, e.g., "2 days ago."
+   * Not available on drafts fetched as Hits from backend.
+   */
+  modifiedTime?: number;
+
   docNumber: string;
   docType: string;
   title: string;
@@ -26,7 +40,6 @@ export interface HermesDocument {
   isDraft?: boolean;
   customEditableFields?: CustomEditableFields;
 
-  thumbnail?: string;
   _snippetResult?: {
     content: {
       value: string;
