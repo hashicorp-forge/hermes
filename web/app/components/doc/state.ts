@@ -5,6 +5,7 @@ interface DocStateComponentSignature {
   Args: {
     state?: string;
     hideProgress?: boolean;
+    hideBadge?: boolean;
   };
 }
 

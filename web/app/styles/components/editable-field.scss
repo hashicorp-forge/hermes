@@ -59,6 +59,10 @@
       p {
         @apply text-color-foreground-strong;
       }
+
+      .empty-state-text {
+        @apply text-color-foreground-disabled;
+      }
     }
 
     h1 {

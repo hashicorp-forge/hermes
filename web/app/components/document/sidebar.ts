@@ -30,6 +30,8 @@ import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { GoogleUser } from "../inputs/people-select";
 import { HermesDocumentType } from "hermes/types/document-type";
+import { HermesProject } from "hermes/routes/authenticated/projects";
+import { RelatedHermesDocument } from "../related-resources";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -77,6 +79,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
+  @tracked projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
@@ -111,6 +114,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors = this.args.document.contributors || [];
   @tracked approvers = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
+
+  @tracked protected projects: HermesProject[] = [];
 
   /**
    * Whether a draft was published during the session.
@@ -284,7 +289,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const eventTarget = event.target;
     assert(
       "event.target must be an HTMLInputElement",
-      eventTarget instanceof HTMLInputElement
+      eventTarget instanceof HTMLInputElement,
     );
     this.docTypeCheckboxValue = eventTarget.checked;
   }
@@ -374,13 +379,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // isApprover returns true if the logged in user is a document approver.
   get isApprover() {
     return this.args.document.approvers?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e.email === this.args.profile.email,
     );
   }
 
   get isContributor() {
     return this.args.document.contributors?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e.email === this.args.profile.email,
     );
   }
 
@@ -393,7 +398,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // changes of the document.
   get hasRequestedChanges() {
     return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email
+      this.args.profile.email,
     );
   }
 
@@ -488,7 +493,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("docTypes must exist", docTypes);
 
     const docType = docTypes.find(
-      (dt) => dt.name === this.args.document.docType
+      (dt) => dt.name === this.args.document.docType,
     );
 
     assert("docType must exist", docType);
@@ -501,7 +506,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const owner = getOwner(this);
     assert("owner must exist", owner);
     const route = owner.lookup(
-      `route:${this.router.currentRouteName}`
+      `route:${this.router.currentRouteName}`,
     ) as Route;
     assert("route must exist", route);
     route.refresh();
@@ -576,6 +581,19 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     await timeout(Ember.testing ? 0 : 1000);
   });
 
+  protected loadRelatedProjects = task(async () => {
+    // fetch projects that include this doc
+    const allProjects = await this.fetchSvc
+      .fetch("/api/v1/projects")
+      .then((response) => response?.json());
+
+    this.projects = allProjects.filter((project: HermesProject) => {
+      return project.documents?.filter(
+        (doc: RelatedHermesDocument) => doc.googleFileID === this.docID,
+      );
+    });
+  });
+
   /**
    * Sets the draft's `isShareable` property based on a selection
    * in the draft-visibility dropdown. Immediately updates the UI
@@ -630,13 +648,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       } catch (error: unknown) {
         this.showFlashError(
           error as Error,
-          "Unable to update draft visibility"
+          "Unable to update draft visibility",
         );
       } finally {
         // reset the new-visibility-intent icon
         this.newDraftVisibilityIcon = null;
       }
-    }
+    },
   );
 
   updateProduct = keepLatestTask(async (product: string) => {
@@ -673,7 +691,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[]
+      val: string | HermesUser[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -695,7 +713,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           this.showFlashError(err as Error, "Unable to save document");
         }
       }
-    }
+    },
   );
 
   patchDocument = task(async (fields) => {
@@ -820,6 +838,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     debounce(this, onScrollFunction, 50);
   }
 
+  @action protected showProjectsModal() {
+    this.projectsModalIsShown = true;
+  }
+
   /**
    * Registers the body element locally and, if the document is a draft,
    * kicks off the task to fetch the draft's `isShareable` attribute.
@@ -891,7 +913,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch (error: unknown) {
       this.maybeShowFlashError(
         error as Error,
-        "Unable to change document status"
+        "Unable to change document status",
       );
       throw error;
     }

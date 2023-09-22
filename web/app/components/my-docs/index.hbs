@@ -23,6 +23,13 @@
     <div class="big-tabs">
       <LinkTo
         {{on "click" this.resetLocalProperties}}
+        @route="authenticated.my.index"
+        @current-when="authenticated.my.index"
+      >
+        Recent
+      </LinkTo>
+      <LinkTo
+        {{on "click" this.resetLocalProperties}}
         @route="authenticated.my.published"
         @current-when="authenticated.my.published"
       >

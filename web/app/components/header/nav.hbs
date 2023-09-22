@@ -37,24 +37,10 @@
         {{on "mouseleave" this.maybeHideContent}}
       >
         <:anchor as |dd|>
-          {{! TODO: this should be a LInkTo }}
-          <LinkTo
-            @route="authenticated.my.published"
-            {{on "mouseup" dd.hideContent}}
-            {{on "focusin" this.maybeShowContent}}
-            {{on "focusout" this.maybeHideContent}}
-            {{on "mouseenter" this.maybeShowContent}}
-            {{on "mouseleave" this.maybeHideContent}}
-            {{did-insert (fn this.registerAnchor dd)}}
-            class="flex items-center gap-0.5"
-          >
+          <LinkTo @route="authenticated.my.index">
             <span>
               My Docs
             </span>
-            <FlightIcon
-              class="text-color-foreground-faint relative translate-y-px"
-              @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-            />
           </LinkTo>
         </:anchor>
         <:item as |dd|>

@@ -1,11 +1,9 @@
-// https://helios.hashicorp.design/components/badge?tab=code#component-api
-
+// declare module "@hashicorp/design-system-components/components/badge" {
 import { ComponentLike } from "@glint/template";
-import {
-  HdsBadgeColor,
-  HdsBadgeType,
-  HdsComponentSize,
-} from "hds/_shared";
+// import Component from "@glimmer/component";
+import { HdsBadgeColor, HdsBadgeType, HdsComponentSize } from "hds/_shared";
+
+// https://helios.hashicorp.design/components/badge?tab=code#component-api
 
 interface HdsBadgeComponentSignature {
   Element: HTMLDivElement;
@@ -20,3 +18,5 @@ interface HdsBadgeComponentSignature {
 }
 
 export type HdsBadgeComponent = ComponentLike<HdsBadgeComponentSignature>;
+// export default class HdsBadge extends Component<HdsBadgeComponentSignature> {}
+// }

@@ -9,8 +9,10 @@
   </ol>
 {{/unless}}
 
-<Hds::Badge
-  @text={{this.state.label}}
-  @color={{this.state.color}}
-  class="whitespace-nowrap"
-/>
+{{#unless @hideBadge}}
+  <Hds::Badge
+    @text={{this.state.label}}
+    @color={{this.state.color}}
+    class="whitespace-nowrap"
+  />
+{{/unless}}

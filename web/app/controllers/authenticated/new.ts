@@ -5,34 +5,23 @@ import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 
 export default class AuthenticatedNewController extends Controller {
-  @service declare router: RouterService;
+  // @service declare router: RouterService;
 
-  protected objectTypes = {
-    Document: {
-      route: "authenticated.new.document",
-      icon: "file-text",
-    },
-    Project: {
-      route: "authenticated.new.project",
-      icon: "grid",
-    },
-  };
+  // constructor() {
+  //   super(...arguments);
+  //   this.router.on("routeDidChange", (transition: any) => {
+  //     switch (transition.targetName) {
+  //       case "authenticated.new.document":
+  //         this.selectedObjectType = "Document";
+  //         break;
+  //       case "authenticated.new.project":
+  //         this.selectedObjectType = "Project";
+  //         break;
+  //     }
+  //   });
+  // }
 
-  constructor() {
-    super(...arguments);
-    this.router.on("routeDidChange", (transition: any) => {
-      switch (transition.targetName) {
-        case "authenticated.new.document":
-          this.selectedObjectType = "Document";
-          break;
-        case "authenticated.new.project":
-          this.selectedObjectType = "Project";
-          break;
-      }
-    });
-  }
-
-  @tracked selectedObjectType = "Document";
+  // @tracked selectedObjectType = "Document";
 
   @action submitForm() {
     return;

@@ -28,7 +28,7 @@ import { HdsFormTextareaFieldComponent } from "hds/form/textarea/field";
 import { HdsFormToggleBaseComponent } from "hds/form/toggle/base";
 import { HdsFormFieldComponent } from "hds/form/field";
 import { HdsToastComponent } from "hds/toast";
-import { HdsBadgeComponent } from "hds/badge";
+import { HdsBadgeComponent } from "@hashicorp/design-system-components/components/badge";
 import { HdsButtonSetComponent } from "hds/button-set";
 import { HdsIconTileComponent } from "hds/icon-tile";
 import { HdsCardContainerComponent } from "hds/card/container";

@@ -1,0 +1,43 @@
+<h1 class="mb-8 flex h-14 items-center">
+  New
+  <X::DropdownList
+    @items={{this.objectTypes}}
+    @selected={{@selected}}
+    @renderOut={{true}}
+    @offset={{hash crossAxis=-3 mainAxis=4}}
+    @placement="bottom-start"
+    class="w-[220px]"
+  >
+    <:anchor as |dd|>
+      <dd.ToggleAction
+        class="hover:hds-elevation-low group relative ml-[1px] -mt-0.5 -mb-[3px] flex items-center rounded-button-md border border-transparent px-2 pt-0.5 pb-[3px] hover:border-color-border-strong
+          {{if dd.contentIsShown 'has-focus-ring'}}"
+      >
+        {{dd.selected}}
+        <FlightIcon
+          @name="caret"
+          class="ml-1
+            {{unless dd.contentIsShown 'text-color-foreground-faint'}}
+            group-hover:text-color-foreground-strong"
+        />
+      </dd.ToggleAction>
+
+    </:anchor>
+    <:item as |dd|>
+      <dd.LinkTo
+        @route={{dd.attrs.route}}
+        class="flex h-9 items-center justify-between rounded-none px-4"
+      >
+        <div class="flex items-center gap-2.5">
+          <FlightIcon @name={{dd.attrs.icon}} />
+          {{dd.value}}
+        </div>
+        <FlightIcon
+          @name="check"
+          class="ml-8 text-color-foreground-action
+            {{unless dd.isSelected 'invisible'}}"
+        />
+      </dd.LinkTo>
+    </:item>
+  </X::DropdownList>
+</h1>

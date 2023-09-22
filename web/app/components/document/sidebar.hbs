@@ -293,6 +293,38 @@
         />
       </div>
 
+      {{! Projects }}
+      <div>
+        <Document::Sidebar::SectionHeader
+          {{did-insert (perform this.loadRelatedProjects)}}
+          @title="Projects"
+          @buttonAction={{this.showProjectsModal}}
+        />
+        {{#if this.projects.length}}
+          <ol class="space-y-0.5">
+
+            {{#each (take 1 this.projects) as |project|}}
+              <li class="overflow-hidden">
+                <LinkTo
+                  class="flex gap-2"
+                  @route="authenticated.project"
+                  @model={{project.id}}
+                >
+                  <FlightIcon @name="grid" />
+                  <TruncatedText
+                    class="text-color-foreground-strong text-body-200 font-semibold"
+                  >{{project.name}}</TruncatedText>
+                </LinkTo>
+              </li>
+            {{/each}}
+          </ol>
+        {{else}}
+          <div class="h-9 flex items-center">
+            <EmptyStateText />
+          </div>
+        {{/if}}
+      </div>
+
       {{! Custom fields }}
       {{#each-in this.customEditableFields as |field attributes|}}
         {{#if (or attributes.value this.isOwner)}}

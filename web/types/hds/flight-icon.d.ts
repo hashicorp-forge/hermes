@@ -14,6 +14,6 @@ declare module "@hashicorp/ember-flight-icons/components/flight-icon" {
     };
   }
 
-  export default class FlightIcon extends Component<FlightIconComponentSignature> {}
   export type FlightIconComponent = ComponentLike<FlightIconComponentSignature>;
+  export default class FlightIcon extends Component<FlightIconComponentSignature> {}
 }
