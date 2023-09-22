@@ -2,6 +2,10 @@
 // URL of the application.
 base_url = "http://localhost:8000"
 
+// log_format configures the logging format. Supported values are "standard" or
+// "json".
+log_format = "standard"
+
 // algolia configures Hermes to work with Algolia.
 algolia {
   application_id            = ""

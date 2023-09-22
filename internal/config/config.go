@@ -35,6 +35,10 @@ type Config struct {
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
 
+	// LogFormat configures the logging format. Supported values are "standard" or
+	// "json".
+	LogFormat string `hcl:"log_format,optional"`
+
 	// Okta configures Hermes to work with Okta.
 	Okta *oktaalb.Config `hcl:"okta,block"`
 
