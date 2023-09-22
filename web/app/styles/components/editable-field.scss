@@ -44,12 +44,13 @@
           @apply visible;
 
           &::before {
-            animation: fadeIn 50ms ease-out forwards 150ms;
+            @apply bg-gradient-to-l;
+            @apply opacity-100;
           }
 
           .flight-icon {
             animation:
-              slideLeftPx 250ms ease-out,
+              slideLeftPx 200ms ease-out,
               fadeIn 100ms ease-out;
           }
         }
@@ -78,11 +79,11 @@
   }
 
   .edit-affordance {
-    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-button-md rounded-r  pr-[8px] pl-8 pt-[9px];
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-button-md rounded-r  w-14 justify-end;
 
     &::before {
       content: "";
-      @apply bg-gradient-to-l opacity-0;
+      @apply w-full h-full absolute top-0 left-0 opacity-0 transition-opacity;
     }
 
     .flight-icon-edit {

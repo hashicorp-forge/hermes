@@ -738,6 +738,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       // Update approvers.
       await this.patchDocument.perform({
         approvers: this.approvers.compact().mapBy("email"),
+        // TODO:
+        // publishedDate: Date.now() / 1000,
       });
 
       await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {

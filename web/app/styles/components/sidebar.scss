@@ -43,7 +43,8 @@
     }
 
     &.out {
-      animation: fadeOut 50ms ease-out 200ms forwards,
+      animation:
+        fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
   }
@@ -73,12 +74,8 @@
   .sidebar-body {
     @apply relative h-full;
 
-    .product-badge {
-      @apply top-0 h-7 w-9 rounded-r;
-    }
-
     .sidebar-body-container {
-      @apply space-y-8 pt-14 pb-10 pl-7 pr-3;
+      @apply space-y-8 pt-10 pb-10 pl-7 pr-3;
     }
   }
 
@@ -87,7 +84,7 @@
   }
 
   .sidebar-section-header {
-    @apply hds-foreground-faint text-body-100 font-regular;
+    @apply text-body-100 font-regular;
   }
 
   .sidebar-section-header-button {

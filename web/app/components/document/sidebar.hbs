@@ -15,24 +15,11 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <div
-          class="product-badge
-            {{productIcon}}
-            {{if this.saveIsRunning 'opacity-50'}}"
-        >
-          <FlightIcon @name={{productIcon}} />
-        </div>
-      {{/if}}
-    {{/let}}
-
     <div class="sidebar-body-container">
       <div>
         {{! div to break the parent's space-y styles }}
         <div
-          class="flex items-center space-x-1.5
-            {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
+          class="flex items-center space-x-1.5 {{if this.isDraft 'mb-4 -mt-2'}}"
         >
           <Hds::Badge
             data-test-sidebar-title-badge
@@ -109,18 +96,9 @@
             @isRequired={{true}}
             @name="title"
             @class="text-display-300 p-[5px] font-semibold foreground-strong"
-            class="mb-1.5"
+            class="mb-0.5"
             @tag="h1"
           />
-        </div>
-      </div>
-
-      <hr class="hds-border-faint border-0 border-b" />
-
-      {{! Summary }}
-      <div class="mb-5">
-        <Document::Sidebar::SectionHeader @title="Summary" />
-        <div class="editable-field-container">
           <EditableField
             data-test-document-summary
             data-test-editable={{this.isOwner}}
@@ -128,20 +106,36 @@
             @onChange={{perform this.updateSummary}}
             @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
-            @class="text-body-200 font-regular"
+            @class="text-body-300 font-regular"
             @name="summary"
             @placeholder="Enter a summary"
           />
         </div>
       </div>
 
-      {{! Status }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Status" />
-        <div class="flex space-x-1">
-          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
-          <Hds::Badge @text={{@document.docType}} />
+      <div>
+
+        <Person
+          @imgURL={{get @document.ownerPhotos 0}}
+          @email={{get @document.owners 0}}
+        />
+        <div class="mt-7">
+
+          <p class="text-body-100">
+            Created
+            {{or (parse-date @document.created "long") "Unknown"}}</p>
+          {{#if @document.modifiedTime}}
+            <p class="mt-1 text-[11px] text-color-foreground-faint">
+              Modified
+              {{time-ago @document.modifiedTime}}
+            </p>
+          {{/if}}
         </div>
+      </div>
+
+      <div class="flex space-x-1">
+        <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       {{! Product/Area }}
@@ -162,18 +156,9 @@
           <ProductBadgeLink
             data-test-document-product-area-read-only
             @productArea={{@document.product}}
-            class="inline-block"
+            class="inline-flex"
           />
         {{/if}}
-      </div>
-
-      {{! Owner }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person
-          @imgURL={{get @document.ownerPhotos 0}}
-          @email={{get @document.owners 0}}
-        />
       </div>
 
       {{! Contributors }}
@@ -262,20 +247,6 @@
             </:editing>
           </EditableField>
         </div>
-      </div>
-
-      {{! Created }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.created "Unknown"}}</p>
-      </div>
-
-      {{! Last modified }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Last modified" />
-        {{#if @document.modifiedTime}}
-          <p>{{time-ago @document.modifiedTime}}</p>
-        {{/if}}
       </div>
 
       {{! Related resources }}

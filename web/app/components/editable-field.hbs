@@ -86,13 +86,19 @@
           {{#if (has-block "default")}}
             {{yield (hash value=this.value)}}
           {{else}}
-            {{or this.value @placeholder}}
+            {{#if this.value}}
+              {{this.value}}
+            {{else}}
+              <EmptyStateText @text={{@placeholder}} />
+            {{/if}}
           {{/if}}
         </Field>
       {{/let}}
       {{#unless @disabled}}
         <span class="edit-affordance gray">
-          <FlightIcon @name="edit" class="text-color-foreground-faint" />
+          <div class="pr-2.5 mt-[7px] relative">
+            <FlightIcon @name="edit" class="text-color-foreground-faint" />
+          </div>
         </span>
       {{/unless}}
     </Action>
