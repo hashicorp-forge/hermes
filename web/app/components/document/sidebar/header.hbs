@@ -3,15 +3,14 @@
     data-test-sidebar-dashboard-link
     class="sidebar-header-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
-    {{(if @isCollapsed (modifier "tooltip" "Back" placement="right"))}}
+    {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
-    <FlightIcon
-      @name={{if @isCollapsed "hashicorp" "arrow-left"}}
-      @size={{if @isCollapsed "24"}}
-    />
+    <FlightIcon @name="hashicorp" @size={{if @isCollapsed "24"}} />
     {{#unless @isCollapsed}}
-      <span class="ml-2">
-        Back
+      <span
+        class="border-l tracking-[-0.15px] border-l-color-border-strong pl-2 ml-2 font-medium py-px"
+      >
+        Hermes
       </span>
     {{/unless}}
   </LinkTo>
@@ -30,28 +29,6 @@
         id="sidebar-header-copy-url-button"
       />
     {{/if}}
-    <Action
-      {{on "click" this.showModal}}
-      class="sidebar-header-button"
-      {{tooltip "Add to project..."}}
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M1 2.25C1 1.55964 1.55964 1 2.25 1H5.75C6.44036 1 7 1.55964 7 2.25V5.75C7 6.44036 6.44036 7 5.75 7H2.25C1.55964 7 1 6.44036 1 5.75V2.25ZM2.5 2.5V5.5H5.5V2.5H2.5ZM9 2.25C9 1.55964 9.55964 1 10.25 1H13.75C14.4404 1 15 1.55964 15 2.25V5.75C15 6.44036 14.4404 7 13.75 7H10.25C9.55964 7 9 6.44036 9 5.75V2.25ZM10.5 2.5V5.5H13.5V2.5H10.5ZM2.25 9C1.55964 9 1 9.55964 1 10.25V13.75C1 14.4404 1.55964 15 2.25 15H5.75C6.44036 15 7 14.4404 7 13.75V10.25C7 9.55964 6.44036 9 5.75 9H2.25ZM2.5 13.5V10.5H5.5V13.5H2.5ZM11.25 9.625C11.25 9.21079 11.5858 8.875 12 8.875C12.4142 8.875 12.75 9.21079 12.75 9.625V11.25H14.375C14.7892 11.25 15.125 11.5858 15.125 12C15.125 12.4142 14.7892 12.75 14.375 12.75H12.75V14.375C12.75 14.7892 12.4142 15.125 12 15.125C11.5858 15.125 11.25 14.7892 11.25 14.375V12.75H9.625C9.21079 12.75 8.875 12.4142 8.875 12C8.875 11.5858 9.21079 11.25 9.625 11.25H11.25V9.625Z"
-          fill="currentColor"
-        />
-      </svg>
-    </Action>
-    {{! TODO: this should be a filterable dropdown/popover of options }}
-    {{! TODO: need to think about "create new project" flow }}
 
     <ExternalLink
       data-test-sidebar-google-docs-link
