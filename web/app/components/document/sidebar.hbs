@@ -117,8 +117,8 @@
         {{! Product/Area }}
         <div>
           <Document::Sidebar::SectionHeader @title="Product/Area" />
-          {{#if (and this.isDraft this.isOwner)}}
-            <div class="relative w-full mt-2">
+          <div class="h-9 flex items-center">
+            {{#if (and this.isDraft this.isOwner)}}
               <Inputs::ProductSelect
                 data-test-document-product-area-editable
                 @selected={{this.product}}
@@ -127,22 +127,20 @@
                 @formatIsBadge={{true}}
                 @renderOut={{true}}
               />
-            </div>
-          {{else}}
-            <div class="h-9 flex items-center mt-[3px]">
+            {{else}}
               <ProductBadgeLink
                 data-test-document-product-area-read-only
                 @productArea={{@document.product}}
                 class="inline-flex"
               />
-            </div>
-          {{/if}}
+            {{/if}}
+          </div>
         </div>
 
         {{! Status }}
         <div>
           <Document::Sidebar::SectionHeader @title="Status" />
-          <div class="flex space-x-1 mt-2">
+          <div class="flex space-x-1 h-9 items-center">
             <Doc::State @state={{@document.status}} @hideProgress={{true}} />
             <Hds::Badge @text={{@document.docType}} />
           </div>
@@ -151,7 +149,7 @@
         {{! Owner }}
         <div>
           <Document::Sidebar::SectionHeader @title="Owner" />
-          <div class="person-list readonly">
+          <div class="person-list readonly-string">
             <Person
               @imgURL={{get @document.ownerPhotos 0}}
               @email={{get @document.owners 0}}
@@ -207,7 +205,7 @@
         {{! Approvers] }}
         <div>
           <Document::Sidebar::SectionHeader @title="Approvers" />
-          <div class="editable-field-container mt-[3px]">
+          <div class="editable-field-container">
             <EditableField
               data-test-document-approvers
               data-test-editable={{this.isOwner}}
@@ -271,6 +269,7 @@
             {{did-insert (perform this.loadRelatedProjects)}}
             @title="Projects"
             @buttonAction={{this.showProjectsModal}}
+            @buttonIsHidden={{not this.projects.length}}
           />
           {{#if this.projects.length}}
             <ol class="space-y-0.5">
@@ -280,7 +279,7 @@
                   <LinkTo
                     @route="authenticated.project"
                     @model={{project.id}}
-                    class="flex gap-2 px-[5px] py-[6px] outline"
+                    class="flex gap-2 px-[5px] py-[6px]"
                   >
                     <div class="w-[22px] py-[2px] shrink-0">
 
@@ -310,8 +309,18 @@
               {{/each}}
             </ol>
           {{else}}
-            <div class="h-9 mt-1 flex items-center">
-              <EmptyStateText />
+            <div class="editable-field-container">
+              <div class="editable-field button-affordance">
+                <Action class="field-toggle group h-9 items-center">
+                  <EmptyStateText />
+                  <span class="edit-affordance">
+                    <FlightIcon
+                      @name="plus"
+                      class="text-color-foreground-faint"
+                    />
+                  </span>
+                </Action>
+              </div>
             </div>
           {{/if}}
         </div>

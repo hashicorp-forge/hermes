@@ -18,18 +18,18 @@
     .field-toggle:not([disabled], .disabled) {
       &:hover,
       &:focus-visible &:focus {
-        @apply border-color-border-input bg-color-page-faint;
+        @apply border-color-border-strong bg-color-page-primary;
       }
     }
   }
 
   textarea,
   .field-toggle {
-    @apply p-[5px] outline outline-gray-300;
+    @apply px-[5px] py-[7px];
   }
 
   .field-toggle {
-    @apply flex items-center w-full rounded-button-md border border-transparent text-inherit transition-colors;
+    @apply border border-transparent flex items-center w-full rounded-button-md text-inherit transition-colors;
     @apply min-h-[36px];
 
     &.disabled,
@@ -82,7 +82,7 @@
   }
 
   .edit-affordance {
-    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-r-button-md w-14 justify-end overflow-hidden;
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-r-button-md w-14 justify-end pr-[7px] overflow-hidden py-[8px];
 
     &::before {
       content: "";
@@ -90,7 +90,7 @@
     }
 
     .flight-icon-edit {
-      @apply -mt-px;
+      @apply mr-px;
     }
 
     &.gray {
