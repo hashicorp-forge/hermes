@@ -104,6 +104,8 @@ export default class AuthenticatedDocumentRoute extends Route {
       }
     }
 
+    console.log("doc", doc);
+
     return doc as HermesDocument;
   }
 
