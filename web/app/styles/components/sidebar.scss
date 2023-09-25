@@ -75,12 +75,12 @@
     @apply relative h-full;
 
     .sidebar-body-container {
-      @apply space-y-8 pt-10 pb-10 pl-7 pr-3;
+      @apply space-y-8 pt-6 pb-10 pl-7 pr-3;
     }
   }
 
   .sidebar-section-header-container {
-    @apply flex w-full items-center justify-between;
+    @apply flex w-full items-center justify-between  outline;
   }
 
   .sidebar-section-header {
@@ -91,6 +91,7 @@
     @apply grid place-items-center rounded border border-transparent;
     @apply h-[26px] w-[26px];
     @apply -mr-0.5;
+    @apply -my-1;
 
     &:hover {
       @apply border-color-border-strong;

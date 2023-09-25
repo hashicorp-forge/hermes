@@ -75,32 +75,53 @@
         <FlightIcon @name="loading" data-test-loading-spinner />
       </div>
     {{/if}}
-    <Action
-      {{did-insert this.registerToggleButton}}
-      class="field-toggle group {{if @loading 'loading'}} {{@class}} "
-      disabled={{or @disabled @loading}}
-      {{on "click" this.enableEditing}}
-    >
-      {{#let (element (or @tag "p")) as |Field|}}
-        <Field class="w-full">
-          {{#if (has-block "default")}}
-            {{yield (hash value=this.value)}}
-          {{else}}
-            {{#if this.value}}
-              {{this.value}}
+
+    {{#if @disabled}}
+      {{#if this.readValueIsShown}}
+        <div class="field-toggle disabled {{@class}}">
+          {{#let (element (or @tag "p")) as |Field|}}
+            <Field class="w-full">
+              {{#if (has-block "default")}}
+                {{yield (hash value=this.value)}}
+              {{else}}
+                {{#if this.value}}
+                  {{this.value}}
+                {{else}}
+                  <EmptyStateText @text={{@placeholder}} />
+                {{/if}}
+              {{/if}}
+            </Field>
+          {{/let}}
+        </div>
+      {{/if}}
+    {{else}}
+      <Action
+        {{did-insert this.registerToggleButton}}
+        class="field-toggle group {{if @isSaving 'saving'}} {{@class}} "
+        disabled={{@isSaving}}
+        {{on "click" this.enableEditing}}
+      >
+        {{#let (element (or @tag "p")) as |Field|}}
+          <Field class="w-full">
+            {{#if (has-block "default")}}
+              {{yield (hash value=this.value)}}
             {{else}}
-              <EmptyStateText @text={{@placeholder}} />
+              {{#if this.value}}
+                {{this.value}}
+              {{else}}
+                <EmptyStateText @text={{@placeholder}} />
+              {{/if}}
             {{/if}}
-          {{/if}}
-        </Field>
-      {{/let}}
-      {{#unless @disabled}}
-        <span class="edit-affordance gray">
-          <div class="pr-2.5 mt-[7px] relative">
-            <FlightIcon @name="edit" class="text-color-foreground-faint" />
-          </div>
-        </span>
-      {{/unless}}
-    </Action>
+          </Field>
+        {{/let}}
+        {{#unless @disabled}}
+          <span class="edit-affordance gray">
+            <div class="pr-2.5 mt-[7px] relative">
+              <FlightIcon @name="edit" class="text-color-foreground-faint" />
+            </div>
+          </span>
+        {{/unless}}
+      </Action>
+    {{/if}}
   {{/if}}
 </div>

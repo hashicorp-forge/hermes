@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import or from "ember-truth-helpers/helpers/or";
 
 interface EmptyStateTextComponentSignature {
-  Element: HTMLParagraphElement;
+  Element: HTMLSpanElement;
   Args: {
     text?: string;
   };
@@ -11,9 +11,9 @@ interface EmptyStateTextComponentSignature {
 
 export default class EmptyStateTextComponent extends Component<EmptyStateTextComponentSignature> {
   <template>
-    <p class="empty-state-text text-color-foreground-disabled" ...attributes>
+    <span class="empty-state-text text-color-foreground-disabled" ...attributes>
       {{or @text "None"}}
-    </p>
+    </span>
   </template>
 }
 

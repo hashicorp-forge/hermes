@@ -24,6 +24,7 @@ interface EditableFieldComponentSignature {
     buttonOverlayPaddingBottom?: string;
     name?: string;
     placeholder?: string;
+    hideIfEmpty?: boolean;
   };
   Blocks: {
     default: [value: any];
@@ -82,6 +83,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
   protected get editingBlockIsShown() {
     return this.editingIsEnabled && !this.args.isSaving && !this.args.isLoading;
+  }
+
+  protected get readValueIsShown() {
+    if (!this.value && this.args.hideIfEmpty) {
+      return false;
+    }
+    return true;
   }
 
   /**

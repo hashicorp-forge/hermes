@@ -91,7 +91,7 @@
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
             @onChange={{this.updateTitle}}
-            @loading={{this.saveIsRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
             @name="title"
@@ -103,9 +103,10 @@
             data-test-editable={{this.isOwner}}
             @value={{this.summary}}
             @onChange={{perform this.updateSummary}}
-            @loading={{this.saveIsRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
-            @class="text-body-300 font-regular"
+            @hideIfEmpty={{true}}
+            @class="text-body-300"
             @name="summary"
             @placeholder="Enter a summary"
           />
@@ -116,20 +117,14 @@
         />
       </div>
       <div>
-        <p class="text-body-100">
+        <p class="text-body-100 text-color-foreground-faint">
           {{#if @document.created}}
             Created
-            {{parse-date @document.created "long"}}
+            {{parse-date @document.created}}
           {{else}}
             Unknown creation date
           {{/if}}
         </p>
-        {{#if @document.modifiedTime}}
-          <p class="mt-1 text-[11px] text-color-foreground-faint">
-            Modified
-            {{time-ago @document.modifiedTime}}
-          </p>
-        {{/if}}
       </div>
 
       <div class="flex space-x-1">
@@ -138,10 +133,10 @@
       </div>
 
       {{! Product/Area }}
-      <div class="space-y-2">
+      <div>
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
-          <div class="relative w-full">
+          <div class="relative w-full mt-2">
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
@@ -152,11 +147,13 @@
             />
           </div>
         {{else}}
-          <ProductBadgeLink
-            data-test-document-product-area-read-only
-            @productArea={{@document.product}}
-            class="inline-flex"
-          />
+          <div class="h-9 flex items-center mt-[3px]">
+            <ProductBadgeLink
+              data-test-document-product-area-read-only
+              @productArea={{@document.product}}
+              class="inline-flex"
+            />
+          </div>
         {{/if}}
       </div>
 
@@ -169,7 +166,7 @@
             data-test-editable={{this.isOwner}}
             @value={{this.contributors}}
             @onChange={{perform this.save "contributors"}}
-            @loading={{this.saveIsRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @class="p-[5px]"
           >
@@ -212,7 +209,7 @@
             data-test-editable={{this.isOwner}}
             @value={{this.approvers}}
             @onChange={{perform this.save "approvers"}}
-            @loading={{this.saveIsRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @class="p-[5px]"
           >
@@ -289,7 +286,7 @@
             {{/each}}
           </ol>
         {{else}}
-          <div class="h-9 flex items-center">
+          <div class="h-9 mt-1 flex items-center">
             <EmptyStateText />
           </div>
         {{/if}}
@@ -308,12 +305,21 @@
               @field={{field}}
               @attributes={{attributes}}
               @onChange={{perform this.saveCustomField field attributes}}
-              @loading={{this.saveIsRunning}}
+              @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             />
           </div>
         {{/if}}
       {{/each-in}}
+
+      {{#if @document.modifiedTime}}
+        <p
+          class="mt-[3px] border-t border-t-color-border-primary pt-6 text-color-foreground-faint text-body-100"
+        >
+          Last modified
+          {{time-ago @document.modifiedTime}}
+        </p>
+      {{/if}}
     </div>
   </div>
 

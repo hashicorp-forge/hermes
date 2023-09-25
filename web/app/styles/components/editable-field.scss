@@ -9,21 +9,18 @@
     cursor: default;
   }
 
-  &.loading {
+  .loading,
+  .saving {
     opacity: 0.5;
   }
 
   &.button-affordance {
-    .field-toggle:not([disabled]) {
+    .field-toggle:not([disabled], .disabled) {
       &:hover,
       &:focus-visible &:focus {
         @apply border-color-border-input bg-color-page-faint;
       }
     }
-  }
-
-  &.saving {
-    opacity: 0.5;
   }
 
   textarea,
@@ -35,7 +32,12 @@
     @apply flex w-full rounded-button-md border border-transparent text-inherit transition-colors;
     @apply min-h-[36px];
 
-    &:not([disabled]) {
+    &.disabled,
+    &:disabled {
+      @apply cursor-auto items-center;
+    }
+
+    &:not(.disabled, disabled) {
       &:hover,
       &:focus-visible &:focus {
         @apply bg-color-palette-neutral-200;
@@ -79,7 +81,7 @@
   }
 
   .edit-affordance {
-    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-button-md rounded-r  w-14 justify-end;
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-r-button-md w-14 justify-end overflow-hidden;
 
     &::before {
       content: "";
