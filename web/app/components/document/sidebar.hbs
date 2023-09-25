@@ -276,19 +276,35 @@
             <ol class="space-y-0.5">
 
               {{#each (take 1 this.projects) as |project|}}
-                <li class="overflow-hidden">
+                <li class="-mx-[5px]">
                   <LinkTo
-                    class="flex gap-2"
                     @route="authenticated.project"
                     @model={{project.id}}
+                    class="flex gap-2 px-[5px] py-[6px] outline"
                   >
-                    <FlightIcon @name="grid" />
-                    <TruncatedText
-                      class="text-color-foreground-strong text-body-200 font-semibold"
-                    >
-                      {{project.name}}
-                    </TruncatedText>
-                    JIRA STATUS
+                    <div class="w-[22px] py-[2px] shrink-0">
+
+                      <FlightIcon @name="grid" />
+                    </div>
+                    <div class="overflow-hidden">
+
+                      <TruncatedText
+                        class="text-color-foreground-strong text-body-200 font-semibold"
+                      >
+                        {{project.name}}
+                      </TruncatedText>
+                      <div class="flex items-center gap-1">
+                        <FlightIcon
+                          @name="square-fill"
+                          class="text-color-palette-purple-200"
+                        />
+                        HDS-039
+                        <FlightIcon
+                          @name="chevrons-up"
+                          class="text-color-palette-blue-200"
+                        />
+                      </div>
+                    </div>
                   </LinkTo>
                 </li>
               {{/each}}
