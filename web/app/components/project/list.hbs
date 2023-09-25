@@ -1,11 +1,33 @@
 <div class="x-container mt-2 mb-4">
 
-  {{! <div class="relative mb-6">
+  <div class="relative mb-6">
     <div class="mb-3 flex items-center gap-2.5">
       <FlightIcon @name="pin" />
-      <h3 class="hermes-h4">Pinned</h3>
+      <h3 class="text-body-200 font-semibold text-color-foreground-strong">
+        Pinned
+      </h3>
     </div>
-  </div> }}
+    {{#if @projects}}
+      <ol>
+
+        {{#each (take 1 @projects) as |project|}}
+          <li class="project-tile">
+            <LinkTo @route="authenticated.project" @model={{project.id}}>
+              <Hds::Card::Container
+                @hasBorder={{true}}
+                @levelHover="mid"
+                class="p-4"
+              >
+                uhfdsa oh
+
+              </Hds::Card::Container>
+            </LinkTo>
+          </li>
+          {{!-- <Project::Tile @project={{project}} /> --}}
+        {{/each}}
+      </ol>
+    {{/if}}
+  </div>
 
   <div class="relative mb-6">
     <nav class="big-tabs flex space-x-3 mb-10 justify-center">
@@ -56,9 +78,9 @@
   <div class="mb-6">
     <div class="mb-3 flex items-center gap-2">
       <FlightIcon @name="check-circle" />
-      <h3
-        class="text-body-200 font-semibold text-color-foreground-strong"
-      >Completed</h3>
+      <h3 class="text-body-200 font-semibold text-color-foreground-strong">
+        Completed
+      </h3>
     </div>
     {{#if @projects}}
       <ol class="grid">
