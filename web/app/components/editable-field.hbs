@@ -78,7 +78,7 @@
 
     {{#if @disabled}}
       {{#if this.readValueIsShown}}
-        <div class="field-toggle disabled {{@class}}">
+        <div class="field-toggle readonly-string disabled {{@class}}">
           {{#let (element (or @tag "p")) as |Field|}}
             <Field class="w-full">
               {{#if (has-block "default")}}

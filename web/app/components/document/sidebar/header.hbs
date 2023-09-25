@@ -52,36 +52,3 @@
     </Action>
   </div>
 </div>
-
-{{#if this.modalIsShown}}
-  <Hds::Modal @onClose={{this.hideModal}} as |M|>
-    <M.Header>Add to project</M.Header>
-    <M.Body>
-      {{! TODO: first item should be an "add to..." }}
-      <X::DropdownList
-        @items={{this.dropdownItems}}
-        @placement={{null}}
-        @inputIsShown={{false}}
-        @disableClose={{true}}
-        class="non-floating-list"
-        {{did-insert this.loadProjects}}
-      >
-        <:anchor as |dd|>
-          <dd.SearchInput
-            placeholder="Find or create a project..."
-            aria-label="Find or create a project..."
-            @query=""
-            {{! TODO: add these }}
-            @searchIsRunning={{false}}
-            @onInput={{this.onInput}}
-            @onKeydown={{this.onKeydown}}
-          />
-        </:anchor>
-        <:item as |dd|>
-          {{! TODO: show if a doc is already in a project }}
-          {{dd.attrs.name}}
-        </:item>
-      </X::DropdownList>
-    </M.Body>
-  </Hds::Modal>
-{{/if}}

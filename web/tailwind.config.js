@@ -170,6 +170,7 @@ module.exports = {
         // Neutral
         "color-palette-neutral-50": "var(--token-color-palette-neutral-50)",
         "color-palette-neutral-100": "var(--token-color-palette-neutral-100)",
+        "color-palette-neutral-175": "#eaebed", // custom
         "color-palette-neutral-200": "var(--token-color-palette-neutral-200)",
         "color-palette-neutral-300": "var(--token-color-palette-neutral-300)",
         "color-palette-neutral-400": "var(--token-color-palette-neutral-400)",

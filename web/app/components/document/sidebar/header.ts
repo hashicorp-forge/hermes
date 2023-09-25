@@ -25,21 +25,6 @@ interface DocumentSidebarHeaderComponentSignature {
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
-  @tracked modalIsShown = false;
-  @tracked projectResults: Record<string, HermesProject> = {};
-
-  protected get dropdownItems() {
-    return [
-      {
-        // TODO: should be a link to create a new project
-        // TODO: maybe should display the name typed in the search box
-        name: "Create new project",
-        icon: "plus",
-      },
-      ...Object.values(this.projectResults),
-    ];
-  }
-
   /**
    * Whether the tooltip is forced open, regardless of hover state.
    * True if the parent component has passed a tooltip text prop,
@@ -66,37 +51,6 @@ export default class DocumentSidebarHeaderComponent extends Component<DocumentSi
     let { document } = this.args;
     return !document.isDraft && document.docNumber && document.docType;
   }
-
-  @action protected showModal() {
-    this.modalIsShown = true;
-  }
-
-  @action protected hideModal() {
-    this.modalIsShown = false;
-  }
-
-  @action protected onInput(event: Event) {
-    return;
-  }
-
-  @action onKeydown(event: KeyboardEvent) {
-    return;
-  }
-
-  @action protected loadProjects() {
-    console.log("should load projects");
-    this._loadProjects.perform();
-  }
-
-  private _loadProjects = task(async () => {
-    try {
-      this.projectResults = await this.fetchSvc
-        .fetch("/api/v1/projects")
-        .then((response) => response?.json());
-    } catch {
-      // TODO: handle error
-    }
-  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

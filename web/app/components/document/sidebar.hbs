@@ -151,7 +151,7 @@
         {{! Owner }}
         <div>
           <Document::Sidebar::SectionHeader @title="Owner" />
-          <div class="mt-2">
+          <div class="person-list readonly">
             <Person
               @imgURL={{get @document.ownerPhotos 0}}
               @email={{get @document.owners 0}}
@@ -170,6 +170,7 @@
               @onChange={{perform this.save "contributors"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
+              @tag="div"
               @class="p-[5px]"
             >
               <:default>
@@ -214,13 +215,13 @@
               @onChange={{perform this.save "approvers"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
+              @tag="div"
               @class="p-[5px]"
             >
               <:default>
                 {{#if this.approvers.length}}
                   <ol class="person-list">
                     {{#each this.approvers as |approver|}}
-                      {{log "approver:" approver}}
                       <li>
                         <Person::Approver
                           @document={{@document}}
@@ -322,21 +323,21 @@
         {{! Created }}
         <div>
           <Document::Sidebar::SectionHeader @title="Created" />
-          <p class="mt-3">
+          <div class="readonly-string">
             {{#if @document.created}}
               {{parse-date @document.created "long"}}
             {{else}}
               Unknown
             {{/if}}
-          </p>
+          </div>
         </div>
 
         {{! Last modified }}
         <div>
           <Document::Sidebar::SectionHeader @title="Last modified" />
-          <p class="mt-3">
+          <div class="readonly-string">
             {{time-ago @document.modifiedTime}}
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -470,7 +471,6 @@
           {{/if}}
         {{/if}}
       {{/if}}
-
     </div>
   {{/if}}
 {{/unless}}
@@ -490,6 +490,42 @@
       @taskButtonLoadingText="Archiving..."
       @taskButtonIcon="archive"
     />
+  {{/if}}
+
+  {{#if this.projectsModalIsShown}}
+
+    {{#if this.modalIsShown}}
+      <Hds::Modal @onClose={{this.hideProjectsModal}} as |M|>
+        <M.Header>Add to project</M.Header>
+        <M.Body>
+          {{! TODO: first item should be an "add to..." }}
+          <X::DropdownList
+            @items={{this.dropdownItems}}
+            @placement={{null}}
+            @inputIsShown={{false}}
+            @disableClose={{true}}
+            class="non-floating-list"
+            {{did-insert this.loadProjects}}
+          >
+            <:anchor as |dd|>
+              <dd.SearchInput
+                placeholder="Find or create a project..."
+                aria-label="Find or create a project..."
+                @query=""
+                {{! TODO: add these }}
+                @searchIsRunning={{false}}
+                @onInput={{this.onInput}}
+                @onKeydown={{this.onKeydown}}
+              />
+            </:anchor>
+            <:item as |dd|>
+              {{! TODO: show if a doc is already in a project }}
+              {{dd.attrs.name}}
+            </:item>
+          </X::DropdownList>
+        </M.Body>
+      </Hds::Modal>
+    {{/if}}
   {{/if}}
 
   {{#if this.deleteModalIsShown}}

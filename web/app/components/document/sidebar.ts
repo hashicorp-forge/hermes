@@ -82,14 +82,28 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
+  @tracked projectResults: Record<string, HermesProject> = {};
+
+  protected get dropdownItems() {
+    return [
+      {
+        // TODO: should be a link to create a new project
+        // TODO: maybe should display the name typed in the search box
+        name: "Create new project",
+        icon: "plus",
+      },
+      ...Object.values(this.projectResults),
+    ];
+  }
 
   @tracked protected docType: HermesDocumentType | null = null;
 
-  get modalIsShown() {
+  private get modalIsShown() {
     return (
       this.archiveModalIsShown ||
       this.deleteModalIsShown ||
-      this.requestReviewModalIsShown
+      this.requestReviewModalIsShown ||
+      this.projectsModalIsShown
     );
   }
 
@@ -544,6 +558,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     void this.serializeContributorsAndApprovers.perform();
   }
 
+  // projects search input
+  @action protected onInput() {
+    return;
+  }
+
+  // projects search input
+  @action protected onKeydown() {
+    return;
+  }
+
   protected serializeContributorsAndApprovers = task(async () => {
     let maybePromises = [];
 
@@ -763,6 +787,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
+  @action protected loadProjects() {
+    this._loadProjects.perform();
+  }
+
+  private _loadProjects = task(async () => {
+    try {
+      this.projectResults = await this.fetchSvc
+        .fetch("/api/v1/projects")
+        .then((response) => response?.json());
+    } catch {
+      // TODO: handle error
+    }
+  });
+
   /**
    * A task that awaits a newly published doc's docNumber assignment.
    * In the unlikely case where the docNumber doesn't appear after 10 seconds,
@@ -842,6 +880,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action protected showProjectsModal() {
     this.projectsModalIsShown = true;
+  }
+
+  @action protected hideProjectsModal() {
+    this.projectsModalIsShown = false;
   }
 
   /**

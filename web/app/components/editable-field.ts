@@ -18,7 +18,7 @@ interface EditableFieldComponentSignature {
     disabled?: boolean;
     isRequired?: boolean;
     class?: string;
-    tag?: "h1";
+    tag?: "h1" | "div";
     buttonPlacement?: "center";
     buttonOverlayColor?: "white";
     buttonOverlayPaddingBottom?: string;

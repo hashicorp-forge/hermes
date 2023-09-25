@@ -80,7 +80,19 @@
   }
 
   .sidebar-section-header-container {
-    @apply flex w-full items-center justify-between;
+    @apply flex w-full items-center justify-between outline outline-gray-200;
+  }
+
+  .readonly-string {
+    @apply min-h-[36px] py-[5px] flex items-center outline outline-dashed;
+  }
+
+  .readonly-people-list {
+    @apply outline outline-red-500;
+  }
+
+  .editable-field-container {
+    @apply outline outline-red-500/10;
   }
 
   .sidebar-section-header {
@@ -104,6 +116,10 @@
 
   .person-list {
     @apply w-full space-y-2;
+
+    &.readonly {
+      @apply outline;
+    }
   }
 
   .sidebar-footer {
