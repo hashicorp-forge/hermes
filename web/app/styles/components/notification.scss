@@ -33,3 +33,9 @@
       forwards;
   }
 }
+
+.flash-message {
+  .hds-toast {
+    @apply w-[400px];
+  }
+}

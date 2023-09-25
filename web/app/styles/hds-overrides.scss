@@ -38,9 +38,3 @@
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }
 }
-
-.flash-message {
-  .hds-toast {
-    @apply w-[400px];
-  }
-}
