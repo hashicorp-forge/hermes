@@ -94,7 +94,6 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
     return resourcesArray;
   }
-
   /**
    * Whether the "Add Resource" button should be hidden.
    * True when editing is explicitly disabled (e.g., when the viewer doesn't have edit

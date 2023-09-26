@@ -51,13 +51,13 @@ interface RelatedResourcesComponentSignature {
     header: [
       rr: {
         showModal: () => void;
-      }
+      },
     ];
     list: [
       rr: {
         items: RelatedResource[];
         showModal: () => void;
-      }
+      },
     ];
     "list-error": [];
     "list-loading": [];
@@ -165,7 +165,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       dd: XDropdownListAnchorAPI | null,
       query: string,
       shouldIgnoreDelay?: boolean,
-      options?: SearchOptions
+      options?: SearchOptions,
     ) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
@@ -179,13 +179,13 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       // And if there are any related documents, omit those too
       if (this.relatedDocuments.length) {
         let relatedDocIDs = this.relatedDocuments.map(
-          (doc) => doc.googleFileID
+          (doc) => doc.googleFileID,
         );
 
         filterString = filterString.slice(0, -1) + " ";
 
         filterString += `AND NOT objectID:"${relatedDocIDs.join(
-          '" AND NOT objectID:"'
+          '" AND NOT objectID:"',
         )}")`;
       }
 
@@ -246,7 +246,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       } catch (e: unknown) {
         this.handleSearchError(e);
       }
-    }
+    },
   );
 
   /**
@@ -281,7 +281,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
           this.handleSearchError(e);
         }
       }
-    }
+    },
   );
 }
 

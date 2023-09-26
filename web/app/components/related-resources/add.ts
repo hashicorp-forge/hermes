@@ -2,7 +2,6 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
-import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
