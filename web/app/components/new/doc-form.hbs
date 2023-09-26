@@ -19,10 +19,10 @@
 
       {{! Title }}
       <Hds::Form::TextInput::Field
-        @isRequired={{true}}
         @value={{this.title}}
         @type="text"
         name="title"
+        required
         {{on "input" this.updateForm}}
         as |F|
       >
@@ -72,7 +72,6 @@
                   <label class="hermes-form-label relative">
                     Document type
                   </label>
-                  <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
                 </div>
               </div>
             </div>
@@ -89,7 +88,7 @@
                   {{this.selectedDocTypeObject.longName}}
                 </div>
               {{else}}
-                <EmptyStateText @text="Select document type" />
+                <EmptyStateText @text="None selected" />
               {{/if}}
               {{#if this.selectedDocTypeObject.shortName}}
                 <div
@@ -158,7 +157,6 @@
         <div class="mb-2">
           <span class="hermes-form-label relative">
             Product/Area
-            <Hds::Badge @text="Required" @size="small" class="ml-1.5" />
           </span>
         </div>
         <Inputs::ProductSelect
