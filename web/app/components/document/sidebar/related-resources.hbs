@@ -1,62 +1,58 @@
-<Document::Sidebar::SectionHeader
-  {{did-insert (perform this.loadRelatedResources)}}
-  @title={{@headerTitle}}
-  @titleTooltipText={{this.titleTooltipText}}
-  @badgeText="New"
-  @buttonIsHidden={{this.sectionHeaderButtonIsHidden}}
-  @buttonAction={{this.showAddResourceModal}}
-/>
-
-{{#if this.loadRelatedResources.isRunning}}
-  <div class="h-[26px] pt-1.5">
-    <FlightIcon data-test-related-resources-list-loading-icon @name="loading" />
-  </div>
-{{else if this.loadingHasFailed}}
-  <div class="h-16">
-    <div class="failed-to-load-text">
-      Failed to load
-    </div>
-    <Hds::Button
-      data-test-related-resources-error-button
-      @color="secondary"
-      @size="small"
-      @text="Retry"
-      @icon="reload"
-      {{on "click" (perform this.loadRelatedResources)}}
+<RelatedResources
+  @items={{this.relatedResources}}
+  @isLoading={{this.loadRelatedResources.isRunning}}
+  @loadingHasFailed={{this.loadingHasFailed}}
+  @modalHeaderTitle={{@modalHeaderTitle}}
+  @modalInputPlaceholder={{@modalInputPlaceholder}}
+  @addResource={{this.addResource}}
+  @documentObjectID={{@objectID}}
+>
+  <:header as |rr|>
+    <Document::Sidebar::SectionHeader
+      {{did-insert (perform this.loadRelatedResources)}}
+      @title={{@headerTitle}}
+      @titleTooltipText={{this.titleTooltipText}}
+      @badgeText="New"
+      @buttonIsHidden={{this.sectionHeaderButtonIsHidden}}
+      @buttonAction={{rr.showModal}}
     />
-  </div>
-{{else}}
-  <Document::Sidebar::RelatedResources::List
-    @items={{this.relatedResources}}
-    @itemLimit={{@itemLimit}}
-    @showModal={{this.showAddResourceModal}}
-  >
-    <:resource as |r|>
-      <Document::Sidebar::RelatedResources::ListItem
-        @resource={{r}}
-        @removeResource={{this.removeResource}}
-        @editResource={{this.editResource}}
-        @editingIsDisabled={{@editingIsDisabled}}
+  </:header>
+  <:list-loading>
+    <div class="h-[26px] pt-1.5">
+      <FlightIcon
+        data-test-related-resources-list-loading-icon
+        @name="loading"
       />
-    </:resource>
-  </Document::Sidebar::RelatedResources::List>
-{{/if}}
-
-{{#if this.addResourceModalIsShown}}
-  <Document::Sidebar::RelatedResources::Add
-    @headerTitle={{@modalHeaderTitle}}
-    @inputPlaceholder={{@modalInputPlaceholder}}
-    @onClose={{this.hideAddResourceModal}}
-    @addResource={{this.addResource}}
-    @algoliaResults={{this.algoliaResults}}
-    @objectID={{@objectID}}
-    @relatedDocuments={{this.relatedDocuments}}
-    @relatedLinks={{this.relatedLinks}}
-    @allowAddingExternalLinks={{@allowAddingExternalLinks}}
-    @search={{perform this.search}}
-    @getObject={{perform this.getObject}}
-    @resetAlgoliaResults={{this.resetAlgoliaResults}}
-    @searchErrorIsShown={{this.searchErrorIsShown}}
-    @searchIsRunning={{this.search.isRunning}}
-  />
-{{/if}}
+    </div>
+  </:list-loading>
+  <:list as |rr|>
+    <Document::Sidebar::RelatedResources::List
+      @items={{rr.items}}
+      @itemLimit={{@itemLimit}}
+    >
+      <:resource as |r|>
+        <Document::Sidebar::RelatedResources::ListItem
+          @resource={{r}}
+          @removeResource={{this.removeResource}}
+          @editResource={{this.editResource}}
+          @editingIsDisabled={{@editingIsDisabled}}
+        />
+      </:resource>
+    </Document::Sidebar::RelatedResources::List>
+  </:list>
+  <:list-error>
+    <div class="h-16">
+      <div class="failed-to-load-text">
+        Failed to load
+      </div>
+      <Hds::Button
+        data-test-related-resources-error-button
+        @color="secondary"
+        @size="small"
+        @text="Retry"
+        @icon="reload"
+        {{on "click" (perform this.loadRelatedResources)}}
+      />
+    </div>
+  </:list-error>
+</RelatedResources>
