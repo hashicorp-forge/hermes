@@ -6,7 +6,7 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;

@@ -12,13 +12,15 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
+import { RelatedResourcesScope } from "../related-resources";
+import { guidFor } from "@ember/object/internals";
 
-interface DocumentSidebarRelatedResourcesAddComponentSignature {
+interface RelatedResourcesAddComponentSignature {
   Element: null;
   Args: {
     onClose: () => void;
@@ -34,12 +36,12 @@ interface DocumentSidebarRelatedResourcesAddComponentSignature {
       options?: SearchOptions
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
-    allowAddingExternalLinks?: boolean;
     headerTitle: string;
     inputPlaceholder: string;
     searchErrorIsShown?: boolean;
     searchIsRunning?: boolean;
     resetAlgoliaResults: () => void;
+    scope?: `${RelatedResourcesScope}`;
   };
   Blocks: {
     default: [];
@@ -74,10 +76,19 @@ enum FirstPartyURLFormat {
   FullURL = "fullURL",
 }
 
-export default class DocumentSidebarRelatedResourcesAddComponent extends Component<DocumentSidebarRelatedResourcesAddComponentSignature> {
+export default class RelatedResourcesAddComponent extends Component<RelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare flashMessages: FlashMessageService;
+
+  private scopeIsExternalLinks =
+    this.args.scope === RelatedResourcesScope.ExternalLinks;
+
+  protected id = guidFor(this);
+  protected externalLinkFormBodyID = `${this.id}-body`;
+  protected externalLinkFormSubmitID = `${this.id}-submit`;
+  protected externalLinkFormBodySelector = `#${this.externalLinkFormBodyID}`;
+  protected externalLinkFormSubmitSelector = `#${this.externalLinkFormSubmitID}`;
 
   /**
    * The query type, determined onInput. Dictates how the query is handled.
@@ -108,7 +119,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * Whether the query is a URL and not a document search.
    * True if the text entered is deemed valid by the isValidURL utility.
    */
-  @tracked protected queryIsURL = false;
+  @tracked protected queryIsURL = this.scopeIsExternalLinks ? true : false;
 
   /**
    * The DOM element of the search input. Receives focus when inserted.
@@ -149,6 +160,13 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     return this.args.algoliaResults;
   }
 
+  private get allowAddingExternalLinks() {
+    if (this.args.scope === RelatedResourcesScope.Documents) {
+      return false;
+    } else {
+      return true;
+    }
+  }
   /**
    * Whether the query is an external URL.
    * Used as a shorthand check when determining layout and behavior.
@@ -186,10 +204,22 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True unless the query is a URL and adding external links is allowed.
    */
   protected get listIsShown(): boolean {
-    if (this.args.allowAddingExternalLinks) {
+    if (this.scopeIsExternalLinks) {
+      return false;
+    }
+
+    if (this.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     } else {
       return true;
+    }
+  }
+
+  protected get externalResourceFormIsShown() {
+    if (this.args.scope === RelatedResourcesScope.ExternalLinks) {
+      return true;
+    } else {
+      return this.allowAddingExternalLinks && this.queryIsExternalURL;
     }
   }
 
@@ -212,6 +242,10 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * True when there's results to show.
    */
   protected get listHeaderIsShown(): boolean {
+    if (this.scopeIsExternalLinks) {
+      return false;
+    }
+
     if (this.noMatchesFound) {
       return false;
     }
@@ -222,8 +256,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
       }
       return !this.linkIsDuplicate;
     }
-
-    if (this.args.allowAddingExternalLinks) {
+    if (this.allowAddingExternalLinks) {
       return !this.queryIsExternalURL;
     }
 
@@ -247,7 +280,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     if (this.args.searchErrorIsShown) {
       return false;
     }
-    if (this.args.allowAddingExternalLinks) {
+    if (this.allowAddingExternalLinks) {
       return this.queryIsExternalURL || this.queryIsEmpty;
     } else {
       return false;
@@ -274,18 +307,17 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action to run when the external link form is submitted.
    * Validates the title input, then adds the link, if it's not a duplicate.
    */
-  @action onExternalLinkSubmit(e: Event) {
-    // Prevent the form from blindly submitting
-    e.preventDefault();
-
-    if (this.externalLinkTitle.length === 0) {
-      this.externalLinkTitleErrorIsShown = true;
-      return;
+  @action onExternalLinkSubmit(resource?: RelatedExternalLink) {
+    if (!this.scopeIsExternalLinks) {
+      // The "externalLinkTitle" property is only used for fallback link.
+      if (this.externalLinkTitle.length === 0) {
+        this.externalLinkTitleErrorIsShown = true;
+        return;
+      }
     }
 
     if (!this.linkIsDuplicate) {
-      this.addRelatedExternalLink();
-      this.args.onClose();
+      this.addRelatedExternalLink(resource);
     }
   }
 
@@ -343,11 +375,11 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
    * The action to add an external link to a document.
    * Correctly formats the link data and saves it, unless it already exists.
    */
-  @action private addRelatedExternalLink() {
+  @action private addRelatedExternalLink(resource?: RelatedExternalLink) {
     let externalLink = {
-      url: this.query,
-      name: this.externalLinkTitle || this.query,
-      sortOrder: 1,
+      url: resource?.url ?? this.query,
+      name: resource?.name ?? (this.externalLinkTitle || this.query),
+      sortOrder: resource?.sortOrder ?? 1,
     };
 
     // see if this is already covered
@@ -390,7 +422,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
   @action protected onInputKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       if (this.queryIsURL) {
-        this.onExternalLinkSubmit(e);
+        this.addRelatedExternalLink();
         return;
       }
     }
@@ -434,8 +466,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
             return;
         }
       }
-
-      if (this.args.allowAddingExternalLinks) {
+      if (this.allowAddingExternalLinks) {
         this.queryType = RelatedResourceQueryType.ExternalLink;
         return;
       }
@@ -551,8 +582,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const docType = urlParts[urlParts.length - 2];
     const docNumber = urlParts[urlParts.length - 1];
     const hasTypeAndNumber = docType && docNumber;
-
-    if (this.args.allowAddingExternalLinks) {
+    if (this.allowAddingExternalLinks) {
       if (!hasTypeAndNumber) {
         handleAsExternalLink();
         return;
@@ -575,7 +605,7 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
     const firstResult = Object.values(this.algoliaResults)[0] as HermesDocument;
 
     if (this.noMatchesFound) {
-      if (this.args.allowAddingExternalLinks) {
+      if (this.allowAddingExternalLinks) {
         handleAsExternalLink();
         return;
       }
@@ -628,6 +658,6 @@ export default class DocumentSidebarRelatedResourcesAddComponent extends Compone
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Document::Sidebar::RelatedResources::Add": typeof DocumentSidebarRelatedResourcesAddComponent;
+    "RelatedResources::Add": typeof RelatedResourcesAddComponent;
   }
 }
