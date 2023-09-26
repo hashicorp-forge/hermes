@@ -20,7 +20,7 @@
         <div
           class="product-badge
             {{productIcon}}
-            {{if this.save.isRunning 'opacity-50'}}"
+            {{if this.saveIsRunning 'opacity-50'}}"
         >
           <FlightIcon @name={{productIcon}} />
         </div>
@@ -104,14 +104,12 @@
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
             @onChange={{this.updateTitle}}
-            @loading={{this.save.isRunning}}
+            @loading={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
           >
             <:default as |F|>
-              <h1
-                class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-              >
+              <h1 class="text-display-300 font-semibold">
                 {{F.value}}
               </h1>
             </:default>
@@ -146,7 +144,7 @@
           data-test-editable={{this.isOwner}}
           @value={{this.summary}}
           @onChange={{perform this.updateSummary}}
-          @loading={{this.save.isRunning}}
+          @loading={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default as |F|>
@@ -185,7 +183,7 @@
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.updateProduct.perform}}
-              @isSaving={{this.save.isRunning}}
+              @isSaving={{this.saveIsRunning}}
               @formatIsBadge={{true}}
               @renderOut={{true}}
             />
@@ -213,7 +211,7 @@
           data-test-editable={{this.isOwner}}
           @value={{this.contributors}}
           @onChange={{perform this.save "contributors"}}
-          @loading={{this.save.isRunning}}
+          @loading={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
         >
           <:default>
@@ -234,6 +232,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-contributors-editable
               class="multiselect--narrow"
               @selected={{this.contributors}}
@@ -251,7 +250,7 @@
           data-test-editable={{this.isOwner}}
           @value={{this.approvers}}
           @onChange={{perform this.save "approvers"}}
-          @loading={{this.save.isRunning}}
+          @loading={{this.saveIsRunning}}
           @disabled={{this.editingIsDisabled}}
         >
           <:default>
@@ -273,6 +272,7 @@
           </:default>
           <:editing as |F|>
             <Inputs::PeopleSelect
+              {{autofocus targetChildren=true}}
               data-test-document-approvers-editable
               class="multiselect--narrow"
               @selected={{this.approvers}}
@@ -285,12 +285,14 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or @document.createdDate "Unknown"}}</p>
+        <p>{{or (parse-date @document.created "long") "Unknown"}}</p>
       </div>
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Last modified" />
-        <p>{{@document.lastModified}}</p>
+        {{#if @document.modifiedTime}}
+          <p>{{time-ago @document.modifiedTime}}</p>
+        {{/if}}
       </div>
 
       <div class="flex flex-col items-start">
@@ -317,8 +319,8 @@
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}
-              @onChange={{perform this.save field}}
-              @loading={{this.save.isRunning}}
+              @onChange={{perform this.saveCustomField field attributes}}
+              @loading={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             />
           </div>

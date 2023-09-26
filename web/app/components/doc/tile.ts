@@ -8,12 +8,11 @@ interface DocTileComponentSignature {
     docNumber?: string;
     isResult?: boolean;
     isDraft?: boolean;
-    modifiedAgo?: string;
+    modifiedTime?: number;
     owner?: string;
     productArea?: string;
     snippet?: string;
     status?: string;
-    thumbnail?: string;
     title?: string;
   };
 }

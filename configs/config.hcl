@@ -2,6 +2,10 @@
 // URL of the application.
 base_url = "http://localhost:8000"
 
+// log_format configures the logging format. Supported values are "standard" or
+// "json".
+log_format = "standard"
+
 // algolia configures Hermes to work with Algolia.
 algolia {
   application_id            = ""
@@ -14,9 +18,7 @@ algolia {
   write_api_key             = ""
 }
 
-// document_types configures document types. Currently this block should not be
-// modified, but Hermes will support custom document types in the near future.
-// *** DO NOT MODIFY document_types ***
+// document_types configures document types.
 document_types {
   document_type "RFC" {
     long_name   = "Request for Comments"
@@ -65,6 +67,12 @@ document_types {
       type = "people"
     }
   }
+
+  // document_type "Memo" {
+  //   long_name = "Memo"
+  //   description = "Create a Memo document to share an idea or brief note with colleagues."
+  //   template = "file-id-for-a-blank-doc"
+  // }
 }
 
 // email configures Hermes to send email notifications.

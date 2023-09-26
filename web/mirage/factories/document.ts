@@ -26,7 +26,6 @@ export default Factory.extend({
   status: "Draft",
   product: "Vault",
   docType: "RFC",
-  modifiedAgo: 1000000000,
   modifiedTime: 1,
   createdTime: 1,
   appCreated: true,

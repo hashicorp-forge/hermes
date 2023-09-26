@@ -40,9 +40,10 @@
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
-        {{#if @modifiedAgo}}
+        {{#if @modifiedTime}}
           <p class="text-body-100 text-color-foreground-faint">
-            {{@modifiedAgo}}
+            Modified
+            {{time-ago @modifiedTime}}
           </p>
         {{/if}}
       </div>

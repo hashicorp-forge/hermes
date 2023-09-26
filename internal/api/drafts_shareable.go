@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
@@ -25,7 +25,7 @@ func draftsShareableHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	docID string,
-	docObj hcd.Doc,
+	doc document.Document,
 	cfg config.Config,
 	l hclog.Logger,
 	algoRead *algolia.Client,
@@ -70,7 +70,7 @@ func draftsShareableHandler(
 	case "PUT":
 		// Authorize request (only the document owner is authorized).
 		userEmail := r.Context().Value("userEmail").(string)
-		if docObj.GetOwners()[0] != userEmail {
+		if doc.Owners[0] != userEmail {
 			http.Error(w, "Only the document owner can change shareable settings",
 				http.StatusForbidden)
 			return

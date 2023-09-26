@@ -1,4 +1,5 @@
 import "@glint/environment-ember-loose";
+import "@glint/environment-ember-template-imports";
 import EmberPageTitleHelper from "ember-page-title";
 import PerformHelper from "ember-concurrency/helpers/perform";
 import OnDocumentHelper from "ember-on-helper/helpers/on-document";

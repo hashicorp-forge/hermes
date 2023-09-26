@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp/go-hclog"
 )
 
 type Command struct {
@@ -76,6 +77,19 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		ui.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
+		return 1
+	}
+
 	// Initialize database connection.
 	db, err := db.NewDB(*cfg.Postgres)
 	if err != nil {
@@ -105,6 +119,7 @@ func (c *Command) Run(args []string) int {
 		indexer.WithAlgoliaClient(algo),
 		indexer.WithBaseURL(cfg.BaseURL),
 		indexer.WithDatabase(db),
+		indexer.WithDocumentTypes(cfg.DocumentTypes.DocumentType),
 		indexer.WithDocumentsFolderID(cfg.GoogleWorkspace.DocsFolder),
 		indexer.WithDraftsFolderID(cfg.GoogleWorkspace.DraftsFolder),
 		indexer.WithGoogleWorkspaceService(goog),

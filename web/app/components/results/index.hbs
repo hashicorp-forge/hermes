@@ -27,9 +27,8 @@
       </div>
     {{/if}}
 
-    <h1
-      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-    >{{@results.nbHits}} documents matching “{{@query}}”</h1>
+    <h1 class="text-display-300 font-semibold">{{@results.nbHits}}
+      documents matching “{{@query}}”</h1>
     <div class="flex w-full flex-col space-y-12 py-10">
       <div class="tile-list">
         {{#each @results.hits as |doc index|}}
