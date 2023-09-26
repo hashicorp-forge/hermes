@@ -10,9 +10,9 @@ interface InputsBadgeDropdownListComponentSignature {
     isLoading?: boolean;
     placement?: Placement;
     renderOut?: boolean;
-
     onItemClick: ((e: Event) => void) | ((e: string) => void);
     icon: string;
+    secondaryFilterAttribute?: string;
   };
   Blocks: {
     default: [];

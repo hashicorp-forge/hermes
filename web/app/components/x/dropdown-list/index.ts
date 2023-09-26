@@ -171,8 +171,8 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * aria-roles for various elements.
    */
   get inputIsShown() {
-    if (this.args.inputIsShown === false) {
-      return false;
+    if (this.args.inputIsShown !== undefined) {
+      return this.args.inputIsShown;
     }
     // TODO: needs to account for groups
 
