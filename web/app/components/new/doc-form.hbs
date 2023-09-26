@@ -9,6 +9,7 @@
   </div>
 {{else}}
   <New::ObjectTypeDropdown @selected="Document" />
+
   <form
     {{! TODO: check if "change"/"input" actions work }}
     {{did-insert this.registerForm}}
@@ -183,7 +184,7 @@
             <E.Message>{{this.formErrors.contributors}}</E.Message>
           </F.Error>
         {{/if}}
-        <F.HelperText>
+        <F.HelperText class="-mb-1.5">
           People to share your doc with. You can always add more later.
         </F.HelperText>
       </Hds::Form::Field>

@@ -1,5 +1,9 @@
 .product-badge {
-  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-100 to-color-palette-neutral-200 text-color-foreground-primary;
+  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-200 to-color-palette-neutral-200 text-color-foreground-faint;
+
+  .flight-icon-folder {
+    @apply stroke-[.5] stroke-current;
+  }
 
   &.hcp {
     @apply from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;

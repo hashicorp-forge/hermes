@@ -129,6 +129,7 @@
           {{did-insert this.didInsertContent}}
         >
           {{#if this.inputIsShown}}
+            {{! TODO: this need to conditionally handle a secondary key for search }}
             <div class="x-dropdown-list-input-container">
               <Hds::Form::TextInput::Base
                 data-test-x-dropdown-list-input

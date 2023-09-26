@@ -43,17 +43,17 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     return icon;
   }
 
-  get selectedProductAbbreviation(): string | null {
+  get selectedProductAbbreviation(): string | undefined {
     if (!this.selected) {
-      return null;
+      return;
     }
 
     if (!this.products) {
-      return null;
+      return;
     }
 
     if (this.args.productAbbreviationIsHidden) {
-      return null;
+      return;
     }
 
     const selectedProduct = this.products?.[this.selected];

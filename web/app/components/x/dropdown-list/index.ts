@@ -75,6 +75,15 @@ interface XDropdownListComponentSignature {
     matchAnchorWidth?: MatchAnchorWidthOptions;
 
     /**
+     * An additional attribute by which to search.
+     * Used to include secondary information when filtering.
+     * For example, we specify "abbreviation" for the `ProductSelect`
+     * component so that users can search by product's abbreviation
+     * in addition to its name.
+     */
+    secondaryFilterAttribute?: string;
+
+    /**
      * Whether an asynchronous list is loading.
      * Used to determine if a loading UI is shown.
      */
@@ -420,6 +429,11 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
+      } else if (this.args.secondaryFilterAttribute) {
+        const maybeValue = (value as any)[this.args.secondaryFilterAttribute];
+        if (maybeValue.toLowerCase().includes(this.query.toLowerCase())) {
+          shownItems[key] = value;
+        }
       }
     }
 

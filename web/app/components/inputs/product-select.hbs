@@ -25,29 +25,17 @@
       @placement={{@placement}}
       @isLoading={{this.fetchProductAreas.isRunning}}
       @renderOut={{@renderOut}}
-      @matchAnchorWidth={{hash enabled=true additionalWidth=10}}
+      @matchAnchorWidth={{hash enabled=true additionalWidth=6}}
+      @secondaryFilterAttribute="abbreviation"
       class="product-select-dropdown-list"
       ...attributes
     >
       <:anchor as |dd|>
         <dd.ToggleSelect class="gap-2">
-          <ProductAvatar @productArea={{dd.selected}} />
-          <div class="flex gap-1.5">
-
-            {{#if dd.selected}}
-              <span data-test-selected-value>
-                {{dd.selected}}
-              </span>
-            {{else}}
-              <EmptyStateText @text="None selected" />
-            {{/if}}
-
-            {{#if this.selectedProductAbbreviation}}
-              <span class="product-select-toggle-abbreviation">
-                {{this.selectedProductAbbreviation}}
-              </span>
-            {{/if}}
-          </div>
+          <Inputs::ProductSelect::Item
+            @product={{dd.selected}}
+            @abbreviation={{this.selectedProductAbbreviation}}
+          />
         </dd.ToggleSelect>
       </:anchor>
       <:item as |dd|>
@@ -57,7 +45,7 @@
             @product={{dd.value}}
             @isSelected={{dd.isSelected}}
             @abbreviation={{dd.attrs.abbreviation}}
-            class="px-[5px]"
+            class="px-[4px]"
           />
         </dd.Action>
       </:item>
