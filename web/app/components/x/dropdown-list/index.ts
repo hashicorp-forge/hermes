@@ -431,7 +431,10 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         shownItems[key] = value;
       } else if (this.args.secondaryFilterAttribute) {
         const maybeValue = (value as any)[this.args.secondaryFilterAttribute];
-        if (maybeValue.toLowerCase().includes(this.query.toLowerCase())) {
+        if (
+          maybeValue &&
+          maybeValue.toLowerCase().includes(this.query.toLowerCase())
+        ) {
           shownItems[key] = value;
         }
       }
