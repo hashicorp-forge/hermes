@@ -1,10 +1,4 @@
-import { action } from "@ember/object";
-import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
-import { task } from "ember-concurrency";
-import { HermesProject } from "hermes/routes/authenticated/projects";
-import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
 
 interface DocumentSidebarHeaderComponentSignature {
@@ -23,8 +17,6 @@ interface DocumentSidebarHeaderComponentSignature {
 }
 
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
-  @service("fetch") declare fetchSvc: FetchService;
-
   /**
    * Whether the tooltip is forced open, regardless of hover state.
    * True if the parent component has passed a tooltip text prop,
