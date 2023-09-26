@@ -215,6 +215,22 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Called when a user creates a new document.
+       */
+      this.post("/drafts", (schema, request) => {
+        const document = schema.document.create({
+          ...JSON.parse(request.requestBody),
+        });
+
+        document.update({
+          objectID: document.id,
+          owners: ["testuser@example.com"],
+        });
+
+        return new Response(200, {}, document.attrs);
+      });
+
+      /**
        * Used when publishing a draft for review.
        * Updates the document's status and isDraft properties.
        *

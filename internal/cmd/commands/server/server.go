@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/web"
+	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
 
@@ -156,6 +157,19 @@ func (c *Command) Run(args []string) int {
 			c.UI.Error("email from_address must be set if email is enabled")
 			return 1
 		}
+	}
+
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		c.Log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		c.UI.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
+		return 1
 	}
 
 	// Build configuration for Okta authentication.

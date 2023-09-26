@@ -20,6 +20,7 @@
 
       {{! Title }}
       <Hds::Form::TextInput::Field
+        data-test-title-input
         @value={{this.title}}
         @type="text"
         name="title"
@@ -35,6 +36,7 @@
       {{! Summary }}
       <div class="relative">
         <Hds::Form::Textarea::Field
+          data-test-summary-input
           {{! TODO: add min-rows arg to auto-height-textarea}}
           @value={{this.summary}}
           name="summary"

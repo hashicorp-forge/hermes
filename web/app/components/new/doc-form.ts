@@ -20,7 +20,6 @@ interface DocFormErrors {
   title: string | null;
   summary: string | null;
   productAbbreviation: string | null;
-  tags: string | null;
   contributors: string | null;
 }
 
@@ -33,7 +32,6 @@ const FORM_ERRORS: DocFormErrors = {
   title: null,
   summary: null,
   productAbbreviation: null,
-  tags: null,
   contributors: null,
 };
 
@@ -53,7 +51,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | undefined = undefined;
+  @tracked protected productArea?: string;
   @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
@@ -175,14 +173,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form and updates the `formErrors` property.
    */
   private validate() {
-    const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
-    this.formErrors = errors;
+    this.formErrors = { ...FORM_ERRORS };
   }
 
   /**
@@ -246,7 +237,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    attributes?: ProductArea,
+    attributes: ProductArea,
   ) {
     assert("attributes must exist", attributes);
 
@@ -305,6 +296,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       });
     } catch (err: unknown) {
       this.docIsBeingCreated = false;
+
+      // TODO: Improve error handling.
       this.flashMessages.add({
         title: "Error creating document draft",
         message: `${err}`,
