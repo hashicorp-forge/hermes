@@ -6,8 +6,6 @@
       </div>
     {{else}}
       <ul class="related-resources-list" ...attributes>
-        {{! This is being looped through twice for some reason... }}
-        {{! On immediate save, the order is wrong - maybe an array push thing? }}
         {{#animated-each
           @items
           rules=this.transitionRules
