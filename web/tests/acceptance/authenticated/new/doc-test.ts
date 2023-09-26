@@ -9,17 +9,18 @@ import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { DRAFT_CREATED_LOCAL_STORAGE_KEY } from "hermes/components/modals/draft-created";
 
-const DOC_FORM_SELECTOR = "[data-test-new-doc-form]";
-const PRODUCT_SELECT_SELECTOR = `${DOC_FORM_SELECTOR} [data-test-product-select]`;
-const PRODUCT_SELECT_TOGGLE_SELECTOR = `${PRODUCT_SELECT_SELECTOR} [data-test-x-dropdown-list-toggle-action]`;
-const CREATE_BUTTON_SELECTOR = `${DOC_FORM_SELECTOR} [data-test-create-button]`;
-const TITLE_INPUT_SELECTOR = `${DOC_FORM_SELECTOR} [data-test-title-input]`;
-const SUMMARY_INPUT_SELECTOR = `${DOC_FORM_SELECTOR} [data-test-summary-input]`;
-const PRODUCT_SELECT_LIST_ITEM_SELECTOR = `${PRODUCT_SELECT_SELECTOR} [data-test-x-dropdown-list-item]`;
-const FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR = `${PRODUCT_SELECT_LIST_ITEM_SELECTOR}:first-child button`;
-const CREATING_NEW_DOC_SELECTOR = "[data-test-creating-new-doc]";
-const FLASH_NOTIFICATION_SELECTOR = "[data-test-flash-notification]";
-const DRAFT_CREATED_MODAL_SELECTOR = "[data-test-draft-created-modal]";
+// Selectors
+const DOC_FORM = "[data-test-new-doc-form]";
+const PRODUCT_SELECT = `${DOC_FORM} [data-test-product-select]`;
+const PRODUCT_SELECT_TOGGLE = `${PRODUCT_SELECT} [data-test-x-dropdown-list-toggle-action]`;
+const CREATE_BUTTON = `${DOC_FORM} [data-test-create-button]`;
+const TITLE_INPUT = `${DOC_FORM} [data-test-title-input]`;
+const SUMMARY_INPUT = `${DOC_FORM} [data-test-summary-input]`;
+const PRODUCT_SELECT_ITEM = `${PRODUCT_SELECT} [data-test-x-dropdown-list-item]`;
+const FIRST_PRODUCT_SELECT_ITEM_BUTTON = `${PRODUCT_SELECT_ITEM}:first-child button`;
+const CREATING_NEW_DOC = "[data-test-creating-new-doc]";
+const FLASH_NOTIFICATION = "[data-test-flash-notification]";
+const DRAFT_CREATED_MODAL = "[data-test-draft-created-modal]";
 
 interface AuthenticatedNewDocRouteTestContext extends MirageTestContext {}
 
@@ -54,23 +55,23 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     const thumbnailBadgeSelector = "[data-test-doc-thumbnail-product-badge]";
 
-    assert.dom(PRODUCT_SELECT_TOGGLE_SELECTOR).exists();
+    assert.dom(PRODUCT_SELECT_TOGGLE).exists();
     assert
-      .dom(`${PRODUCT_SELECT_TOGGLE_SELECTOR} span`)
+      .dom(`${PRODUCT_SELECT_TOGGLE} span`)
       .hasText("Select a product/area");
     assert
-      .dom(`${PRODUCT_SELECT_TOGGLE_SELECTOR} .flight-icon`)
+      .dom(`${PRODUCT_SELECT_TOGGLE} .flight-icon`)
       .hasAttribute("data-test-icon", "folder");
 
     assert
       .dom(thumbnailBadgeSelector)
       .doesNotExist("badge not shown unless a product shortname exists");
 
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
+    await click(PRODUCT_SELECT_TOGGLE);
 
-    const lastItemSelector = `${PRODUCT_SELECT_LIST_ITEM_SELECTOR}:last-child`;
+    const lastItemSelector = `${PRODUCT_SELECT_ITEM}:last-child`;
 
-    assert.dom(PRODUCT_SELECT_LIST_ITEM_SELECTOR).exists({ count: 5 });
+    assert.dom(PRODUCT_SELECT_ITEM).exists({ count: 5 });
     assert.dom(lastItemSelector).hasText("Terraform TF");
     assert
       .dom(lastItemSelector + " .flight-icon")
@@ -78,9 +79,9 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await click(lastItemSelector + " button");
 
-    assert.dom(PRODUCT_SELECT_TOGGLE_SELECTOR).hasText("Terraform TF");
+    assert.dom(PRODUCT_SELECT_TOGGLE).hasText("Terraform TF");
     assert
-      .dom(PRODUCT_SELECT_TOGGLE_SELECTOR + " .flight-icon")
+      .dom(PRODUCT_SELECT_TOGGLE + " .flight-icon")
       .hasAttribute("data-test-icon", "terraform");
     assert.dom(thumbnailBadgeSelector).exists();
   });
@@ -90,20 +91,20 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    assert.dom(CREATE_BUTTON_SELECTOR).isDisabled();
+    assert.dom(CREATE_BUTTON).isDisabled();
 
-    await fillIn(TITLE_INPUT_SELECTOR, "Foo");
+    await fillIn(TITLE_INPUT, "Foo");
 
-    assert.dom(CREATE_BUTTON_SELECTOR).isDisabled();
+    assert.dom(CREATE_BUTTON).isDisabled();
 
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
-    await click(FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR);
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    assert.dom(CREATE_BUTTON_SELECTOR).isNotDisabled();
+    assert.dom(CREATE_BUTTON).isNotDisabled();
 
-    await fillIn(TITLE_INPUT_SELECTOR, "");
+    await fillIn(TITLE_INPUT, "");
 
-    assert.dom(CREATE_BUTTON_SELECTOR).isDisabled();
+    assert.dom(CREATE_BUTTON).isDisabled();
   });
 
   test("it shows a loading screen while the doc is being created", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
@@ -111,15 +112,15 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    await fillIn(TITLE_INPUT_SELECTOR, "Foo");
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
-    await click(FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR);
+    await fillIn(TITLE_INPUT, "Foo");
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    const clickPromise = click(CREATE_BUTTON_SELECTOR);
+    const clickPromise = click(CREATE_BUTTON);
 
-    await waitFor(CREATING_NEW_DOC_SELECTOR);
+    await waitFor(CREATING_NEW_DOC);
 
-    assert.dom(CREATING_NEW_DOC_SELECTOR).exists();
+    assert.dom(CREATING_NEW_DOC).exists();
 
     await clickPromise;
   });
@@ -133,16 +134,16 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    await fillIn(TITLE_INPUT_SELECTOR, "Foo");
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
-    await click(FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR);
+    await fillIn(TITLE_INPUT, "Foo");
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    const clickPromise = click(CREATE_BUTTON_SELECTOR);
+    const clickPromise = click(CREATE_BUTTON);
 
-    await waitFor(FLASH_NOTIFICATION_SELECTOR);
+    await waitFor(FLASH_NOTIFICATION);
 
     assert
-      .dom(FLASH_NOTIFICATION_SELECTOR)
+      .dom(FLASH_NOTIFICATION)
       .containsText("Error creating document draft");
 
     await clickPromise;
@@ -158,14 +159,14 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    await fillIn(TITLE_INPUT_SELECTOR, "Foo");
+    await fillIn(TITLE_INPUT, "Foo");
 
-    await fillIn(SUMMARY_INPUT_SELECTOR, "Bar");
+    await fillIn(SUMMARY_INPUT, "Bar");
 
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
-    await click(FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR);
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    await click(CREATE_BUTTON_SELECTOR);
+    await click(CREATE_BUTTON);
 
     const routerService = this.owner.lookup("service:router") as RouterService;
 
@@ -185,14 +186,14 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    await fillIn(TITLE_INPUT_SELECTOR, "Foo");
-    await click(PRODUCT_SELECT_TOGGLE_SELECTOR);
-    await click(FIRST_PRODUCT_SELECT_LIST_ITEM_BUTTON_SELECTOR);
+    await fillIn(TITLE_INPUT, "Foo");
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    await click(CREATE_BUTTON_SELECTOR);
+    await click(CREATE_BUTTON);
 
-    await waitFor(DRAFT_CREATED_MODAL_SELECTOR);
+    await waitFor(DRAFT_CREATED_MODAL);
 
-    assert.dom(DRAFT_CREATED_MODAL_SELECTOR).exists();
+    assert.dom(DRAFT_CREATED_MODAL).exists();
   });
 });
