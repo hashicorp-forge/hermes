@@ -111,7 +111,7 @@
   }
 
   .edit-overlay-affordance {
-    @apply absolute left-0 bottom-0 flex w-full translate-y-full gap-1 pt-2.5;
+    @apply absolute -left-[5px] bottom-0 flex w-[calc(100%+10px)] translate-y-full gap-1 pt-2.5;
 
     &::before {
       content: "";

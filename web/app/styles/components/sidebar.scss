@@ -106,6 +106,18 @@
     }
   }
 
+  .x-dropdown-list-toggle-select {
+    @apply px-[5px];
+
+    &:not(:hover, :focus, :focus-visible) {
+      @apply border-transparent;
+
+      .flight-icon-caret {
+        @apply invisible;
+      }
+    }
+  }
+
   .primary-textarea {
     @apply min-h-[76px];
   }

@@ -1,0 +1,66 @@
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div
+  data-test-product-select
+  ...attributes
+  {{did-insert this.maybeFetchProducts}}
+>
+  {{#if this.errorIsShown}}
+    <div class="failed-to-load-text">
+      Failed to load
+    </div>
+    <Hds::Button
+      data-test-product-select-failed-to-load-button
+      @color="secondary"
+      @size="small"
+      {{on "click" (perform this.fetchProductAreas)}}
+      @text="Retry"
+      @icon="reload"
+    />
+  {{else}}
+    <X::DropdownList
+      @items={{this.products}}
+      @listIsOrdered={{true}}
+      @onItemClick={{this.onChange}}
+      @selected={{@selected}}
+      @placement={{@placement}}
+      @isLoading={{this.fetchProductAreas.isRunning}}
+      @renderOut={{@renderOut}}
+      @matchAnchorWidth={{hash enabled=true additionalWidth=10}}
+      class="product-select-dropdown-list"
+      ...attributes
+    >
+      <:anchor as |dd|>
+        <dd.ToggleSelect class="gap-2">
+          <ProductAvatar @productArea={{dd.selected}} />
+          <div class="flex gap-1.5">
+
+            {{#if dd.selected}}
+              <span data-test-selected-value>
+                {{dd.selected}}
+              </span>
+            {{else}}
+              <EmptyStateText @text="Select a product/area" />
+            {{/if}}
+
+            {{#if this.selectedProductAbbreviation}}
+              <span class="product-select-toggle-abbreviation">
+                {{this.selectedProductAbbreviation}}
+              </span>
+            {{/if}}
+          </div>
+        </dd.ToggleSelect>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action class="pr-5">
+          {{! TODO: Should include color icons, needs to be searchable by abbreviation }}
+          <Inputs::ProductSelect::Item
+            @product={{dd.value}}
+            @isSelected={{dd.isSelected}}
+            @abbreviation={{dd.attrs.abbreviation}}
+            class="px-[5px]"
+          />
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+  {{/if}}
+</div>

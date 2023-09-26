@@ -4,7 +4,6 @@ import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { timeout } from "ember-animated/-private/ember-scheduler";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
@@ -17,11 +16,11 @@ interface InputsProductSelectSignature {
   Args: {
     selected?: string;
     onChange: (value: string, attributes?: ProductArea) => void;
-    formatIsBadge?: boolean;
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
     isFullWidth?: boolean;
+    productAbbreviationIsHidden?: boolean;
   };
 }
 
@@ -48,6 +47,15 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     if (!this.selected) {
       return null;
     }
+
+    if (!this.products) {
+      return null;
+    }
+
+    if (this.args.productAbbreviationIsHidden) {
+      return null;
+    }
+
     const selectedProduct = this.products?.[this.selected];
     assert("selected product must exist", selectedProduct);
     return selectedProduct.abbreviation;
