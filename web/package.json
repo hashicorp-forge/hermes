@@ -26,7 +26,7 @@
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.6.0",
-    "@gavant/glint-template-types": "^0.3.3",
+    "@gavant/glint-template-types": "^0.3.6",
     "@glimmer/component": "^1.0.4",
     "@glimmer/tracking": "^1.0.4",
     "@glint/core": "^1.0.1",
