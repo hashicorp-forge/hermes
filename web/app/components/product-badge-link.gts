@@ -1,6 +1,8 @@
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import { LinkTo } from "@ember/routing";
+import ProductAvatar from "hermes/components/product-avatar";
 
 interface ProductBadgeLinkComponentSignature {
   Element: HTMLAnchorElement;
@@ -55,6 +57,18 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
         return "authenticated.documents";
     }
   }
+
+  <template>
+    <LinkTo
+      @route={{this.route}}
+      @query={{this.query}}
+      class="product-badge-link"
+      ...attributes
+    >
+      <ProductAvatar @productArea={{@productArea}} />
+      {{this.productAreaName}}
+    </LinkTo>
+  </template>
 }
 
 declare module "@glint/environment-ember-loose/registry" {
