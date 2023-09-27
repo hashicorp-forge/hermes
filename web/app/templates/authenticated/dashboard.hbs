@@ -25,7 +25,7 @@
         <ol class="">
           {{#each this.recentDocs.all as |r|}}
             <li
-              class="pr-8 pl-2 border-t border-t-color-border-primary first:border-t-0 pt-6 pb-7"
+              class="border-t border-t-color-border-primary first:border-t-0 pt-6 pb-8"
             >
 
               <div class="flex justify-between gap-6">
@@ -34,21 +34,23 @@
                   @iconSize={{16}}
                   class="w-7 h-7 shrink-0 -mt-1.5"
                 /> --}}
-                <div class="shrink-0 relative">
+                <div class="shrink-0 relative -mt-1">
 
                   <Doc::Thumbnail
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
                     class="shrink-0 self-start medium -mt-0.5"
                   />
-                  <Hds::Badge
-                    @text={{r.doc.docType}}
-                    class="absolute left-0 top-0"
-                  />
+                  <span
+                    class="absolute left-[6px] top-[3px] leading-none bg-white pl-0.5 pr-1.5 py-0.5 text-body-100 font-medium text-color-foreground-disabled rounded-br-md"
+                  >
+                    {{r.doc.docType}}
+
+                  </span>
 
                 </div>
                 <div class="w-full">
-                  <div class="flex w-full items-start justify-between mb-1">
+                  <div class="flex w-full items-start justify-between mb-0.5">
                     <div
                       class="text-body-200 leading-none gap-2 flex text-color-foreground-faint"
                     >
@@ -62,7 +64,7 @@
                         {{r.doc.product}}
                       </span>
                     </div>
-                    <div class="-mr-6">
+                    <div>
                       <Doc::State @state="In-Review" @hideProgress={{true}} />
                     </div>
                   </div>
@@ -72,7 +74,7 @@
                     {{r.doc.title}}
                   </h3>
                   {{#if r.doc.summary}}
-                    <p class="text-body-200 mt-1 max-w-[500px]">
+                    <p class="text-body-200 mt-1 max-w-[470px]">
                       {{r.doc.summary}}
                     </p>
                   {{/if}}
