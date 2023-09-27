@@ -1,18 +1,19 @@
-<div class="mb-12 w-full">
+<div class="w-full mb-8">
   <div class="relative flex justify-between">
-    <h2 class="items-center self-center hermes-h4 leading-none gap-2 md:flex">
-      Awaiting your review
-      <Hds::BadgeCount
-        data-test-docs-awaiting-review-count
-        @text="{{@docs.length}}"
-        @type="inverted"
-        class="!bg-color-foreground-critical"
-      />
-    </h2>
-
+    <div class="flex items-center gap-2.5 mb-2">
+      <h2 class="items-center self-center hermes-h4 leading-none gap-2 md:flex">
+        Awaiting your review
+        <Hds::BadgeCount
+          data-test-docs-awaiting-review-count
+          @text="{{@docs.length}}"
+          @type="inverted"
+          class="!bg-color-foreground-critical"
+        />
+      </h2>
+    </div>
   </div>
 
-  <ul class="mt-3">
+  <ul>
     {{#each this.docsToShow as |doc|}}
       <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
     {{/each}}

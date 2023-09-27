@@ -41,6 +41,18 @@
     }
   }
 
+  &.medium {
+    @apply w-20;
+
+    .product-badge {
+      @apply w-[28px] h-[26px] rounded-bl rounded-tr;
+
+      .flight-icon {
+        @apply scale-100;
+      }
+    }
+  }
+
   &.large {
     // Match the width of the progress bars
     @apply w-28;

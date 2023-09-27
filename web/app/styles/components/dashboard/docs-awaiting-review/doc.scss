@@ -1,7 +1,7 @@
 .doc-awaiting-review {
-  // &:first-child > a {
-  //   @apply rounded-t;
-  // }
+  &:first-child > a {
+    @apply border-0;
+  }
 
   &:last-child > a {
     // @apply border-b;
