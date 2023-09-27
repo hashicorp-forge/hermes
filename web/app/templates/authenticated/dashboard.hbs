@@ -16,53 +16,157 @@
     <Dashboard::DocsAwaitingReview @docs={{@model}} />
   {{/if}}
 
-  <div class="mt-10 flex w-full flex-col pb-10">
-    <div class="mb-8 flex items-center space-x-2">
-      <FlightIcon @name="eye" @size="24" />
-      <h2
-        class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-      >Recently viewed</h2>
+  <div class="mt-10 flex">
+    <div class="pb-10">
+      <h2 class="hermes-h4 mb-3">
+        Latest documents
+      </h2>
+
+      {{#if this.recentDocs.all}}
+        <ol class="">
+          {{#each this.recentDocs.all as |r|}}
+            <li
+              class="border-t border-t-color-border-faint first:pt-0X first:border-t-0X pt-[24px] pb-[16px] pr-12 pl-2"
+            >
+
+              <div class="flex justify-between gap-3">
+                <ProductAvatar
+                  @productArea={{r.doc.product}}
+                  @iconSize={{16}}
+                  class="w-7 h-7 shrink-0 -mt-1"
+                />
+                <div class="w-full">
+                  <div class="flex w-full justify-between mb-2">
+                    <div class="text-body-200 text-color-foreground-faint">
+                      {{r.doc.product}}
+                    </div>
+                    <div class="-mr-6">
+                      <Hds::Badge @text={{r.doc.docType}} />
+                      <Doc::State @state="In-Review" @hideProgress={{true}} />
+                    </div>
+                  </div>
+                  <h3
+                    class="text-color-foreground-strong text-display-300 font-semibold"
+                  >
+                    {{r.doc.title}}
+                  </h3>
+                  {{#if r.doc.summary}}
+                    <p class="text-body-300 mt-1 max-w-[500px]">
+                      {{r.doc.summary}}
+                    </p>
+                  {{/if}}
+                  <div class="flex w-full items-center justify-between">
+                    <div class="flex gap-2 mt-4 items-center mb-4">
+                      <Person::Avatar
+                        @size="small"
+                        @email={{get r.doc.owners 0}}
+                        @imgURL={{get r.doc.ownerPhotos 0}}
+                        class="-ml-px"
+                      />
+                      <span class="text-color-foreground-strong">
+                        {{get r.doc.owners 0}}
+                      </span>
+                      <span class="text-color-foreground-faint">
+
+                        {{time-ago r.doc.createdTime}}
+                      </span>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </li>
+          {{/each}}
+        </ol>
+      {{else if this.recentDocs.fetchAll.isRunning}}
+        <div class="h-[100px]">
+          <FlightIcon @name="loading" class="mt-1" />
+        </div>
+      {{else if (eq this.recentDocs.all null)}}
+        <div class="h-[100px]">
+          <p class="mb-7 text-body-300 text-color-foreground-faint">
+            Error fetching documents.
+          </p>
+          <Hds::Button
+            @text="Retry"
+            @color="secondary"
+            @size="small"
+            @icon="reload"
+            {{on "click" (perform this.recentDocs.fetchAll)}}
+          />
+        </div>
+      {{else}}
+        <div class="text-display-200">
+          You havenʼt viewed any documents yet.
+        </div>
+      {{/if}}
+
     </div>
 
-    {{#if this.recentDocs.all}}
-      <div class="tile-list">
-        {{#each this.recentDocs.all as |r|}}
-          <Doc::Tile
-            data-test-recently-viewed-doc
-            @isDraft={{r.doc.isDraft}}
-            @avatar={{get r.doc.ownerPhotos 0}}
-            @docID={{r.doc.objectID}}
-            @docNumber={{r.doc.docNumber}}
-            @modifiedTime={{r.doc.modifiedTime}}
-            @owner={{get r.doc.owners 0}}
-            @productArea={{r.doc.product}}
-            @status={{lowercase r.doc.status}}
-            @title={{r.doc.title}}
-          />
-        {{/each}}
+    <div
+      class="shrink-0 w-80 border-l border-l-color-border-faint pl-12 gap-10 flex flex-col"
+    >
+      <div>
+        <h2 class="hermes-h4 mb-5">
+          Pinned
+        </h2>
+        {{! <div class="text-color-foreground-faint mt-2 flex items-center">
+          Stuff you
+          <span class="pl-1.5 pr-1 flex items-center gap-1">
+            <FlightIcon @name="pin" />
+            pin
+          </span>
+          will hang here.
+        </div> }}
+        <div class="text-color-foreground-faint">
+          <FlightIcon @name="pin" class="relative translate-y-0.5 mr-1.5" />
+          None yet
+        </div>
       </div>
-    {{else if this.recentDocs.fetchAll.isRunning}}
-      <div class="h-[100px]">
-        <FlightIcon @name="loading" class="mt-1" />
+
+      <div>
+        <h2 class="hermes-h4 mb-5">
+          Recently viewed
+        </h2>
+        <ol class="grid gap-3">
+          {{#each this.recentDocs.all as |r|}}
+            <li>
+              <div class="flex justify-between gap-6">
+                {{! TEXT }}
+                <div class="mb-2">
+                  <h3
+                    class="text-color-foreground-strong text-body-200 font-semibold"
+                  >
+                    {{r.doc.title}}
+                  </h3>
+                  <div class="text-body-100 text-color-foreground-faint mt-0.5">
+                    Modified
+                    {{time-ago r.doc.modifiedTime}}
+                  </div>
+                </div>
+
+              </div>
+              {{! ICONS }}
+              <div class="">
+                <div class="flex gap-1 items-center mb-2">
+                  <ProductAvatar
+                    @productArea={{r.doc.product}}
+                    class="w-5 h-5 shrink-0 -mt-px -mr-px"
+                  />
+                  <Person::Avatar
+                    @size="small"
+                    @email={{get r.doc.owners 0}}
+                    @imgURL={{get r.doc.ownerPhotos 0}}
+                  />
+                  <Doc::State @hideProgress={{true}} @text={{r.doc.status}} />
+                </div>
+              </div>
+            </li>
+          {{/each}}
+        </ol>
       </div>
-    {{else if (eq this.recentDocs.all null)}}
-      <div class="h-[100px]">
-        <p class="mb-7 text-body-300 text-color-foreground-faint">
-          Error fetching documents.
-        </p>
-        <Hds::Button
-          @text="Retry"
-          @color="secondary"
-          @size="small"
-          @icon="reload"
-          {{on "click" (perform this.recentDocs.fetchAll)}}
-        />
-      </div>
-    {{else}}
-      <div class="text-display-200">
-        You havenʼt viewed any documents yet.
-      </div>
-    {{/if}}
+    </div>
+
   </div>
 
 </section>

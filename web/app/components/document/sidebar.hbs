@@ -114,9 +114,17 @@
       </div>
       <div class="space-y-7">
 
+        {{! Status }}
+        <div>
+          <Document::Sidebar::SectionHeader @title="Status" />
+          <div class="flex space-x-1 h-9 items-center">
+            <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+            <Hds::Badge @text={{@document.docType}} />
+          </div>
+        </div>
+
         {{! Product/Area }}
         <div>
-
           <Document::Sidebar::SectionHeader @title="Product/Area" />
           <div class="editable-field-container">
             <div class="h-9 flex items-center w-full">
@@ -138,15 +146,6 @@
                 />
               {{/if}}
             </div>
-          </div>
-        </div>
-
-        {{! Status }}
-        <div>
-          <Document::Sidebar::SectionHeader @title="Status" />
-          <div class="flex space-x-1 h-9 items-center">
-            <Doc::State @state={{@document.status}} @hideProgress={{true}} />
-            <Hds::Badge @text={{@document.docType}} />
           </div>
         </div>
 

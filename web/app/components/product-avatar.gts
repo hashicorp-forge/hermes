@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import getProductID from "hermes/utils/get-product-id";
 import or from "ember-truth-helpers/helpers/or";
+import eq from "ember-truth-helpers/helpers/eq";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 
 interface ProductAvatarComponentSignature {
@@ -27,7 +28,11 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   <template>
     <div
       data-test-doc-thumbnail-product-badge
-      class="product-badge {{this.productID}} relative rounded-full p-1"
+      class="product-badge
+        {{if (eq @iconSize 24) 'large'}}
+        {{if (eq @iconSize 18) 'medium p-1.5' 'p-1'}}
+        {{this.productID}}
+        relative rounded-full"
       ...attributes
     >
       <FlightIcon

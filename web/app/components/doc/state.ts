@@ -44,7 +44,7 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
 
       default:
         return {
-          label: "WIP",
+          label: "Draft",
           color: "neutral",
         };
     }

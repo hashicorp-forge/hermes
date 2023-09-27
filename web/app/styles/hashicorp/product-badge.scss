@@ -1,6 +1,18 @@
 .product-badge {
   @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-200 to-color-palette-neutral-200 text-color-foreground-faint;
 
+  &.medium {
+    .flight-icon-folder {
+      @apply stroke-[.25];
+    }
+  }
+
+  &.large {
+    .flight-icon-folder {
+      @apply stroke-0;
+    }
+  }
+
   .flight-icon-folder {
     @apply stroke-[.5] stroke-current;
   }
