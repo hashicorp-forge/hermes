@@ -23,5 +23,14 @@
         />
       </div>
     {{/if}}
+
+    {{#if this.productShortName}}
+      <div
+        data-test-doc-thumbnail-product-badge
+        class="product-badge {{this.productShortName}}"
+      >
+        <FlightIcon @size="16" @name={{this.productShortName}} />
+      </div>
+    {{/if}}
   </div>
 </div>

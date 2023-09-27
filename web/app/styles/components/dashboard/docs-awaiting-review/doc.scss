@@ -1,13 +1,13 @@
 .doc-awaiting-review {
-  &:first-child > a {
-    @apply rounded-t;
-  }
+  // &:first-child > a {
+  //   @apply rounded-t;
+  // }
 
   &:last-child > a {
-    @apply rounded-b;
+    // @apply border-b;
   }
 
-  + .doc-awaiting-review > a {
-    @apply border-t-0;
-  }
+  // + .doc-awaiting-review > a {
+  //   @apply border-t-0;
+  // }
 }

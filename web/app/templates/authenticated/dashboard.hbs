@@ -6,43 +6,52 @@
 
   <Dashboard::NewFeaturesBanner />
   <div class="mb-7 flex h-14 items-center">
-    <h1>
+    <h1 class="text-display-500">
       Welcome back,
       {{this.authenticatedUser.info.given_name}}!
     </h1>
   </div>
 
-  {{#if @model}}
-    <Dashboard::DocsAwaitingReview @docs={{@model}} />
-  {{/if}}
-
-  <div class="mt-10 flex">
-    <div class="pb-10">
-      <h2 class="hermes-h4 mb-3">
-        Latest documents
+  <div class="mt-10 flex w-full">
+    <div class="pb-10 w-full overflow-hidden">
+      {{#if @model}}
+        <Dashboard::DocsAwaitingReview @docs={{@model}} />
+      {{/if}}
+      <h2 class="hermes-h4 mb-3 flex items-center h-6">
+        Newest
       </h2>
 
       {{#if this.recentDocs.all}}
         <ol class="">
           {{#each this.recentDocs.all as |r|}}
             <li
-              class="border-t border-t-color-border-faint first:pt-0X first:border-t-0X pt-[24px] pb-[16px] pr-12 pl-2"
+              class="border-t border-t-color-border-faint first:pt-0X first:border-t-0X pt-[22px] pb-[25px] pr-12 pl-2"
             >
 
-              <div class="flex justify-between gap-3">
+              <div class="flex justify-between gap-3.5">
                 <ProductAvatar
                   @productArea={{r.doc.product}}
                   @iconSize={{16}}
-                  class="w-7 h-7 shrink-0 -mt-1"
+                  class="w-7 h-7 shrink-0 -mt-1.5"
                 />
                 <div class="w-full">
-                  <div class="flex w-full justify-between mb-2">
-                    <div class="text-body-200 text-color-foreground-faint">
-                      {{r.doc.product}}
+                  <div class="flex w-full items-start justify-between mb-1">
+                    <div
+                      class="text-body-200 leading-none gap-2 flex text-color-foreground-faint"
+                    >
+                      <span>
+                        {{r.doc.docNumber}}
+                      </span>
+                      <span class="opacity-50">
+                        |
+                      </span>
+                      <span>
+                        {{r.doc.product}}
+                      </span>
                     </div>
                     <div class="-mr-6">
-                      <Hds::Badge @text={{r.doc.docType}} />
                       <Doc::State @state="In-Review" @hideProgress={{true}} />
+                      <Hds::Badge @text={{r.doc.docType}} />
                     </div>
                   </div>
                   <h3
@@ -56,7 +65,7 @@
                     </p>
                   {{/if}}
                   <div class="flex w-full items-center justify-between">
-                    <div class="flex gap-2 mt-4 items-center mb-4">
+                    <div class="flex gap-2 mt-4 items-center">
                       <Person::Avatar
                         @size="small"
                         @email={{get r.doc.owners 0}}
@@ -71,7 +80,6 @@
                         {{time-ago r.doc.createdTime}}
                       </span>
                     </div>
-
                   </div>
                 </div>
               </div>
@@ -107,7 +115,7 @@
       class="shrink-0 w-80 border-l border-l-color-border-faint pl-12 gap-10 flex flex-col"
     >
       <div>
-        <h2 class="hermes-h4 mb-5">
+        <h2 class="hermes-h4 flex items-center h-6 mb-5">
           Pinned
         </h2>
         {{! <div class="text-color-foreground-faint mt-2 flex items-center">
@@ -125,7 +133,7 @@
       </div>
 
       <div>
-        <h2 class="hermes-h4 mb-5">
+        <h2 class="hermes-h4 flex items-center h-6 mb-5">
           Recently viewed
         </h2>
         <ol class="grid gap-3">

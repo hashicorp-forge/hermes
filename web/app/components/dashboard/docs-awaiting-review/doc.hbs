@@ -3,18 +3,18 @@
     data-test-doc-awaiting-review-link
     @route="authenticated.document"
     @model={{@doc.objectID}}
-    class="group w-full overflow-hidden border border-color-border-primary bg-white px-3.5 py-3 hover:bg-color-surface-faint"
+    class="group w-full overflow-hidden border-t border-color-border-faint pl-2 pr-6 py-3"
   >
     <div class="w-full">
       <div
         class="relative flex w-full flex-wrap items-center gap-3 md:flex-nowrap"
       >
-        <div class="flex shrink-0 gap-0.5">
+        <div class="flex shrink-0 gap-1">
           {{! Product Avatar }}
           <ProductAvatar
             @productArea={{@doc.product}}
             @iconSize={{16}}
-            class="p-1.5"
+            class="p-1.5 w-7 h-7 shrink-0"
           />
           {{! Avatar }}
           <Person::Avatar
@@ -29,17 +29,20 @@
 
           {{! DocNumber & Title }}
           <div class="w-full md:flex">
-            <TruncatedText
-              @tagName="h4"
-              @startingBreakpoint="md"
-              class="max-w-[60%] text-display-200 font-semibold text-color-foreground-strong"
-              data-test-doc-awaiting-review-number-and-title
-            >
-              <span class="mr-0.5">
-                {{@doc.docNumber}}
-              </span>
-              {{@doc.title}}
-            </TruncatedText>
+            <div class="max-w-[60%]">
+
+              <TruncatedText
+                @tagName="h4"
+                @startingBreakpoint="md"
+                class="text-display-200 font-semibold text-color-foreground-strong"
+                data-test-doc-awaiting-review-number-and-title
+              >
+                <span class="mr-0.5">
+                  {{@doc.docNumber}}
+                </span>
+                {{@doc.title}}
+              </TruncatedText>
+            </div>
 
             {{! Email }}
             <div
@@ -60,9 +63,9 @@
         <div
           class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
         >
-          <span class="mr-3 text-color-foreground-faint">
+          {{!-- <span class="mr-3 text-color-foreground-faint">
             {{@doc.product}}
-          </span>
+          </span> --}}
           <Hds::Badge
             data-test-doc-awaiting-review-doctype-badge
             @text={{@doc.docType}}
