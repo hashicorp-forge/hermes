@@ -15,6 +15,9 @@
     {{/unless}}
   </LinkTo>
   <div class="sidebar-header-icon-controls">
+    <Action class="sidebar-header-button" {{tooltip "Pin to desktop"}}>
+      <FlightIcon @name="pin" />
+    </Action>
     {{#if this.shareButtonIsShown}}
       <CopyURLButton
         data-test-sidebar-copy-url-button
