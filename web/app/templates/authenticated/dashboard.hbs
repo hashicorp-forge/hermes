@@ -16,7 +16,7 @@
     <div
       class="pb-10 w-full overflow-hidden border-r border-r-color-border-faint"
     >
-      {{#if @moXdel}}
+      {{#if @modXel}}
         <Dashboard::DocsAwaitingReview @docs={{@model}} />
         <div
           class="w-full h-px border-t border-dashed border-t-color-border-faint -mt-1 mb-5"
@@ -25,8 +25,12 @@
 
       {{#if this.recentDocs.all}}
         <div class="flex items-center gap-2.5 mb-1.5">
-          <h2 class="hermes-h4">
-            Newest documents
+          <FlightIcon
+            @name="bulb"
+            class="-mt-px text-color-foreground-Xfaint"
+          />
+          <h2 class="text-body-300 font-regular">
+            {{if @mXodel "L" "Here‘s the l"}}atest @ HashiCorp
           </h2>
         </div>
         <ol>
@@ -131,14 +135,10 @@
           Pinned
         </h2>
         {{#if true}}
-          <div class="flex flex-col gap-1.5 mt-1">
+          <ul class="flex flex-col mt-1">
 
-            <div class="flex -mx-3 gap-3 items-start">
-              <Hds::Card::Container
-                @hasBorder={{true}}
-                @level="base"
-                class="px-3 py-2.5 w-full"
-              >
+            <li class="flex gap-3 items-start py-3.5">
+              <div class="w-full">
                 <div class="flex items-start justify-between">
                   <h4 class="mb-1">Listbox Rollout (Ember)</h4>
 
@@ -164,15 +164,13 @@
                     @name="chevrons-up"
                     class="text-color-foreground-critical"
                   /> }}
-              </Hds::Card::Container>
-            </div>
-            <div class="flex -mx-3 gap-3 items-start">
-              <Hds::Card::Container
-                @hasBorder={{true}}
-                @level="base"
-                class="px-3 py-2.5 w-full"
-              >
-                <div class="flex gap-2.5 items-start">
+              </div>
+            </li>
+            <li
+              class="flex gap-3 items-start py-3.5 border-t border-t-color-border-faint"
+            >
+              <div class="overflow-hidden">
+                <div class="flex gap-3 items-start">
                   <div class="overflow-hidden">
                     <h4 class="mb-1.5">Account synchronization API from HCP</h4>
                     <div class="flex items-center justify-between">
@@ -201,9 +199,9 @@
                     <Doc::Thumbnail @product="Vagrant" class="" />
                   </div>
                 </div>
-              </Hds::Card::Container>
-            </div>
-          </div>
+              </div>
+            </li>
+          </ul>
         {{else}}
           <div class="text-color-foreground-faint mt-3 mb-2">
             <FlightIcon @name="pin" class="relative translate-y-0.5 mr-1.5" />
