@@ -34,6 +34,13 @@ export default class RecentlyViewedDocsService extends Service {
    */
   @tracked all: RecentlyViewedDoc[] | null = null;
 
+  get doubleAllRandomized() {
+    assert("all should be set", this.all);
+    const all = this.all;
+    const doubleAll = all.concat(all);
+    return doubleAll.sort(() => Math.random() - 0.5);
+  }
+
   /**
    * Fetches an array of recently viewed docs.
    * Called in the dashboard route if the docs are not already loaded.
@@ -44,7 +51,7 @@ export default class RecentlyViewedDocsService extends Service {
        * Fetch the file IDs from the backend.
        */
       let fetchResponse = await this.fetchSvc.fetch(
-        "/api/v1/me/recently-viewed-docs"
+        "/api/v1/me/recently-viewed-docs",
       );
 
       this.index = (await fetchResponse?.json()) || [];
@@ -71,7 +78,7 @@ export default class RecentlyViewedDocsService extends Service {
           doc.isDraft = isDraft;
 
           return { doc, isDraft };
-        })
+        }),
       );
       /**
        * Set up an empty array to hold the documents.

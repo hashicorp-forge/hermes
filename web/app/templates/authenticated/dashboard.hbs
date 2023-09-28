@@ -5,55 +5,55 @@
 <section class="x-container">
 
   <Dashboard::NewFeaturesBanner />
-  <div class="mb-7 flex h-14 items-center">
+  <div class="mb-6">
     <h1 class="text-display-500">
       Welcome back,
       {{this.authenticatedUser.info.given_name}}!
     </h1>
   </div>
 
-  <div class="mt-8 flex gap-16 w-full">
-    <div class="pb-10 w-full overflow-hidden">
-      {{#if @model}}
+  <div class="mt-8 flex gap-14 w-full">
+    <div
+      class="pb-10 w-full overflow-hidden border-r border-r-color-border-faint"
+    >
+      {{#if @moXdel}}
         <Dashboard::DocsAwaitingReview @docs={{@model}} />
+        <div
+          class="w-full h-px border-t border-dashed border-t-color-border-faint -mt-1 mb-5"
+        />
       {{/if}}
-      <h2 class="hermes-h4 flex items-center h-6">
-        Newest
-      </h2>
 
       {{#if this.recentDocs.all}}
-        <ol class="">
-          {{#each this.recentDocs.all as |r|}}
+        <div class="flex items-center gap-2.5 mb-1.5">
+          <h2 class="hermes-h4">
+            Newest documents
+          </h2>
+        </div>
+        <ol>
+          {{#each this.recentDocs.doubleAllRandomized as |r|}}
             <li
-              class="border-t border-t-color-border-faint first:border-t-0 first:pt-5 pt-6 pb-7"
+              class="border-t border-t-color-border-faint first:border-t-0 pt-6 pb-7 pr-6 pl-2 hover:bg-color-surface-faint"
             >
 
               <div class="flex justify-between gap-6">
-                {{!-- <ProductAvatar
-                  @productArea={{r.doc.product}}
-                  @iconSize={{16}}
-                  class="w-7 h-7 shrink-0 -mt-1.5"
-                /> --}}
                 <div class="shrink-0 relative -mt-1">
-
                   <Doc::Thumbnail
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
                     class="shrink-0 self-start medium -mt-1"
                   />
-                  <span
-                    class="absolute left-[6px] top-[5px] leading-none bg-white pl-0.5 pr-1.5 w-full pt-0.5 pb-[5px] text-body-100 font-medium text-color-foreground-disabled rounded-br-md"
-                  >
-                    {{r.doc.docType}}
-
-                  </span>
-
                 </div>
                 <div class="w-full">
                   <div class="flex w-full items-start justify-between mb-0.5">
                     <div
                       class="text-body-200 leading-none gap-2 flex text-color-foreground-faint"
                     >
+                      <span>
+                        {{r.doc.docType}}
+                      </span>
+                      <span class="opacity-50">
+                        |
+                      </span>
                       <span>
                         {{r.doc.docNumber}}
                       </span>
@@ -173,9 +173,9 @@
               <div class="flex justify-between gap-6">
                 {{! TEXT }}
                 <div class="flex items-center mb-2 gap-2.5 overflow-hidden">
-                  <FlightIcon
-                    @name="file-text"
-                    class="text-color-foreground-disabled shrink-0"
+                  <ProductAvatar
+                    @productArea={{r.doc.product}}
+                    class="w-5 h-5 shrink-0"
                   />
                   <TruncatedText
                     @tagName="h3"
@@ -212,10 +212,7 @@
             <div class="flex justify-between gap-6">
               {{! TEXT }}
               <div class="flex items-center mb-2 gap-2 overflow-hidden">
-                <FlightIcon
-                  @name="file-text"
-                  class="text-color-foreground-disabled shrink-0"
-                />
+                <ProductAvatar @productArea="Nomad" />
                 <TruncatedText
                   @tagName="h3"
                   class="text-color-foreground-strong text-body-200"

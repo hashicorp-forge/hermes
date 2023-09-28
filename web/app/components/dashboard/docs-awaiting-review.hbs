@@ -1,14 +1,18 @@
 <div class="w-full mb-8">
   <div class="relative flex justify-between">
     <div class="flex items-center gap-2.5 mb-2">
-      <h2 class="items-center self-center hermes-h4 leading-none gap-2 md:flex">
-        Awaiting your review
+      <h2
+        class="items-center self-center text-body-300 Ztext-color-foreground-strong font-regular leading-none gap-2 md:flex"
+      >
+        You have
         <Hds::BadgeCount
           data-test-docs-awaiting-review-count
           @text="{{@docs.length}}"
           @type="inverted"
           class="!bg-color-foreground-critical"
         />
+        document{{if (gt @docs.length 1) "s"}}
+        awaiting your review
       </h2>
     </div>
   </div>
