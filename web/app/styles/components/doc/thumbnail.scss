@@ -27,8 +27,8 @@
   }
 
   .product-badge {
-    @apply bottom-0 left-0;
-    @apply w-[19px] h-[17px] rounded-bl rounded-tr;
+    @apply rounded-tl-none rounded-br-none;
+    @apply rounded-bl rounded-tr;
 
     .flight-icon {
       @apply scale-75;
@@ -45,7 +45,7 @@
     @apply w-20;
 
     .product-badge {
-      @apply w-[28px] h-[26px] rounded-bl rounded-tr;
+      @apply rounded-bl rounded-tr;
 
       .flight-icon {
         @apply scale-100;
@@ -62,7 +62,7 @@
     }
 
     .product-badge {
-      @apply w-[36px] h-[32px] rounded-bl rounded-tr;
+      @apply rounded-bl rounded-tr;
 
       .flight-icon {
         @apply scale-100;

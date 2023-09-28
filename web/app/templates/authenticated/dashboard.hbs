@@ -25,7 +25,7 @@
         <ol class="">
           {{#each this.recentDocs.all as |r|}}
             <li
-              class="border-t border-t-color-border-primary first:border-t-0 first:pt-5 pt-6 pb-8"
+              class="border-t border-t-color-border-faint first:border-t-0 first:pt-5 pt-6 pb-7"
             >
 
               <div class="flex justify-between gap-6">
@@ -39,10 +39,10 @@
                   <Doc::Thumbnail
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
-                    class="shrink-0 self-start medium -mt-0.5"
+                    class="shrink-0 self-start medium -mt-1"
                   />
                   <span
-                    class="absolute left-[6px] top-[3px] leading-none bg-white pl-0.5 pr-1.5 py-0.5 text-body-100 font-medium text-color-foreground-disabled rounded-br-md"
+                    class="absolute left-[6px] top-[5px] leading-none bg-white pl-0.5 pr-1.5 w-full pt-0.5 pb-[5px] text-body-100 font-medium text-color-foreground-disabled rounded-br-md"
                   >
                     {{r.doc.docType}}
 

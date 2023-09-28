@@ -20,11 +20,11 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get productShortName(): string | null {
+  protected get productShortName(): string | undefined {
     if (this.args.product) {
       return getProductID(this.args.product);
     } else {
-      return null;
+      return this.args.product;
     }
   }
 
