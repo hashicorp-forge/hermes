@@ -277,12 +277,22 @@ func (d *Document) UpsertCustomField(cf CustomField) error {
 						return fmt.Errorf("incorrect value type for custom field")
 					}
 				}
+				// If the value is empty, remove it from the document (by not appending
+				// here).
+				if len(cf.Value.([]any)) > 0 {
+					newCFs = append(newCFs, cf)
+				}
 			case "STRING":
-				if _, ok := cf.Value.(string); !ok {
+				v, ok := cf.Value.(string)
+				if !ok {
 					return fmt.Errorf("incorrect value type for custom field")
 				}
+				// If the value is empty, remove it from the document (by not appending
+				// here).
+				if v != "" {
+					newCFs = append(newCFs, cf)
+				}
 			}
-			newCFs = append(newCFs, cf)
 			foundCF = true
 		} else {
 			newCFs = append(newCFs, docCF)
