@@ -125,23 +125,91 @@
 
     </div>
 
-    <div class="shrink-0 w-64 gap-10 flex flex-col">
+    <div class="shrink-0 w-64 gap-8 flex flex-col">
       <div>
-        <h2 class="hermes-h4 flex items-center h-6 mb-3">
+        <h2 class="hermes-h4 flex items-center h-4">
           Pinned
         </h2>
-        {{! <div class="text-color-foreground-faint mt-2 flex items-center">
-          Stuff you
-          <span class="pl-1.5 pr-1 flex items-center gap-1">
-            <FlightIcon @name="pin" />
-            pin
-          </span>
-          will hang here.
-        </div> }}
-        <div class="text-color-foreground-faint">
-          <FlightIcon @name="pin" class="relative translate-y-0.5 mr-1.5" />
-          None yet
-        </div>
+        {{#if true}}
+          <div class="flex flex-col gap-1.5 mt-1">
+
+            <div class="flex -mx-3 gap-3 items-start">
+              <Hds::Card::Container
+                @hasBorder={{true}}
+                @level="base"
+                class="px-3 py-2.5 w-full"
+              >
+                <div class="flex items-start justify-between">
+                  <h4 class="mb-1">Listbox Rollout (Ember)</h4>
+
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex gap-0.5">
+                    <div class="flex items-center gap-1">
+                      <FlightIcon @name="square-fill" class="text-lime-600" />
+                      <p class="text-body-100 text-color-foreground-faint">
+                        HERMES-045
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <FlightIcon
+                      @name="files"
+                      class="text-color-foreground-faint"
+                    />
+                    2
+                  </div>
+                </div>
+                {{! <FlightIcon
+                    @name="chevrons-up"
+                    class="text-color-foreground-critical"
+                  /> }}
+              </Hds::Card::Container>
+            </div>
+            <div class="flex -mx-3 gap-3 items-start">
+              <Hds::Card::Container
+                @hasBorder={{true}}
+                @level="base"
+                class="px-3 py-2.5 w-full"
+              >
+                <div class="flex gap-2.5 items-start">
+                  <div class="overflow-hidden">
+                    <h4 class="mb-1.5">Account synchronization API from HCP</h4>
+                    <div class="flex items-center justify-between">
+                      {{! <ProductAvatar @productArea="Labs" /> }}
+                      <div class="flex overflow-hidden items-center gap-1.5">
+                        <Person::Avatar
+                          class="shrink-0"
+                          @email="jeff.daley@hashicorp.com"
+                          @imgURL="https://lh3.googleusercontent.com/a/ACg8ocJNv0AD-Ppm6Y_fllZqE_h-sInH67hPyXjCbt97f1KG2A=s100"
+                        />
+                        <TruncatedText>
+
+                          jeff.daley@hashicorp.com
+                        </TruncatedText>
+                      </div>
+                      <div class="shrink-0 ml-1">
+                        <Doc::State @state="Draft" @hideProgress={{true}} />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-X5 flex justify-center shrink-0">
+                    {{! <FlightIcon
+                  @name="file-text"
+                  class="text-color-foreground-faint"
+                /> }}
+                    <Doc::Thumbnail @product="Vagrant" class="" />
+                  </div>
+                </div>
+              </Hds::Card::Container>
+            </div>
+          </div>
+        {{else}}
+          <div class="text-color-foreground-faint mt-3 mb-2">
+            <FlightIcon @name="pin" class="relative translate-y-0.5 mr-1.5" />
+            None yet
+          </div>
+        {{/if}}
       </div>
 
       <div>
@@ -151,32 +219,18 @@
         <ol class="grid gap-1">
           {{#each this.recentDocs.all as |r|}}
             <li class="overflow-hidden">
-              {{! ICONS }}
-              {{!-- <div class="">
-                <div class="flex gap-1 items-center mb-2">
-                  <FlightIcon
-                    @name="file-text"
-                    class="text-color-foreground-faint"
-                  />
-                  <ProductAvatar
-                    @productArea={{r.doc.product}}
-                    class="w-5 h-5 shrink-0"
-                  />
-                  <Person::Avatar
-                    @size="small"
-                    @email={{get r.doc.owners 0}}
-                    @imgURL={{get r.doc.ownerPhotos 0}}
-                  />
-                </div>
-              </div> --}}
-
               <div class="flex justify-between gap-6">
-                {{! TEXT }}
                 <div class="flex items-center mb-2 gap-2.5 overflow-hidden">
                   <ProductAvatar
                     @productArea={{r.doc.product}}
                     class="w-5 h-5 shrink-0"
                   />
+                  {{! <div class="w-5 flex justify-center shrink-0">
+                    <FlightIcon
+                      @name="file-text"
+                      class="text-color-foreground-faint"
+                    />
+                  </div> }}
                   <TruncatedText
                     @tagName="h3"
                     class="text-color-foreground-strong text-body-200"
@@ -192,12 +246,13 @@
           {{#each (take 2 this.recentDocs.all) as |r|}}
             <li class="overflow-hidden">
               <div class="flex justify-between gap-6">
-                {{! TEXT }}
                 <div class="flex items-center mb-2 gap-2 overflow-hidden">
-                  <FlightIcon
-                    @name="grid"
-                    class="text-color-foreground-disabled shrink-0"
-                  />
+                  <div class="w-5 flex justify-center shrink-0">
+                    <FlightIcon
+                      @name="grid"
+                      class="text-color-foreground-faint"
+                    />
+                  </div>
                   <TruncatedText
                     @tagName="h3"
                     class="text-color-foreground-strong text-body-200"
@@ -210,9 +265,17 @@
           {{/each}}
           <li class="overflow-hidden">
             <div class="flex justify-between gap-6">
-              {{! TEXT }}
               <div class="flex items-center mb-2 gap-2 overflow-hidden">
-                <ProductAvatar @productArea="Nomad" />
+                <ProductAvatar
+                  @productArea={{r.doc.product}}
+                  class="w-5 h-5 shrink-0"
+                />
+                {{! <div class="w-5 flex justify-center shrink-0">
+                  <FlightIcon
+                    @name="file-text"
+                    class="text-color-foreground-faint"
+                  />
+                </div> }}
                 <TruncatedText
                   @tagName="h3"
                   class="text-color-foreground-strong text-body-200"

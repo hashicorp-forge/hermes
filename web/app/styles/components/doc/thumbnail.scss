@@ -45,6 +45,7 @@
     @apply w-20;
 
     .product-badge {
+      @apply w-8 h-8;
       @apply rounded-bl rounded-tr;
 
       .flight-icon {
