@@ -9,10 +9,14 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { HermesDocumentType } from "hermes/types/document-type";
 
 interface DocumentIndexComponentSignature {
-  document: HermesDocument;
-  modelIsChanging: boolean;
+  Args: {
+    document: HermesDocument;
+    modelIsChanging: boolean;
+    docType: Promise<HermesDocumentType>;
+  };
 }
 
 export default class DocumentIndexComponent extends Component<DocumentIndexComponentSignature> {

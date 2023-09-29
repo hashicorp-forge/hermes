@@ -10,6 +10,7 @@ import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import { assert } from "@ember/debug";
 
 interface AuthenticatedDocumentRouteParams {
   document_id: string;
@@ -42,6 +43,19 @@ export default class AuthenticatedDocumentRoute extends Route {
       sticky: true,
       extendedTimeout: 1000,
     });
+  }
+
+  async docType(doc: HermesDocument) {
+    const docTypes = (await this.fetchSvc
+      .fetch("/api/v1/document-types")
+      .then((r) => r?.json())) as HermesDocumentType[];
+
+    assert("docTypes must exist", docTypes);
+
+    const docType = docTypes.find((dt) => dt.name === doc.docType);
+
+    assert("docType must exist", docType);
+    return docType;
   }
 
   async model(
@@ -102,10 +116,18 @@ export default class AuthenticatedDocumentRoute extends Route {
       }
     }
 
-    return doc as HermesDocument;
+    const typedDoc = doc as HermesDocument;
+
+    return {
+      doc: typedDoc,
+      docType: this.docType(typedDoc),
+    };
   }
 
-  afterModel(model: HermesDocument, transition: any) {
+  afterModel(
+    model: { doc: HermesDocument; docType: Promise<HermesDocumentType> },
+    transition: any,
+  ) {
     /**
      * Generally speaking, ensure an up-to-date list of recently viewed docs
      * by the time the user returns to the dashboard.
@@ -119,8 +141,8 @@ export default class AuthenticatedDocumentRoute extends Route {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        document_id: model.objectID,
-        product_name: model.product,
+        document_id: model.doc.objectID,
+        product_name: model.doc.product,
       }),
     });
 

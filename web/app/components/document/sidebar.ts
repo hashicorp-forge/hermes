@@ -34,6 +34,7 @@ interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
+    docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -473,21 +474,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return !this.editingIsDisabled;
   }
 
-  private getDocType = task(async () => {
-    const docTypes = (await this.fetchSvc
-      .fetch("/api/v1/document-types")
-      .then((r) => r?.json())) as HermesDocumentType[];
-
-    assert("docTypes must exist", docTypes);
-
-    const docType = docTypes.find(
-      (dt) => dt.name === this.args.document.docType,
-    );
-
-    assert("docType must exist", docType);
-    this.docType = docType;
-  });
-
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -787,13 +773,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
 
-    // kick off whether the draft is shareable.
     if (this.isDraft) {
+      // kick off whether the draft is shareable.
       void this.getDraftPermissions.perform();
-    }
 
-    // get the doc type for the "request review?" checkbox
-    void this.getDocType.perform();
+      // get docType for the "request review?" modal
+      this.args.docType.then((docType) => {
+        this.docType = docType;
+      });
+    }
   }
 
   /**
