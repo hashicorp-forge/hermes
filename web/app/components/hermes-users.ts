@@ -24,6 +24,8 @@ interface HermesUsersComponentSignature {
 }
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
+  if (!people.length) return [];
+
   return people.map((p) => ({
     email: p.emailAddresses[0]?.value as string,
     imgURL: p.photos?.[0]?.url,

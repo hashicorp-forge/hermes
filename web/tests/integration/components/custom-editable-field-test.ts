@@ -62,7 +62,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
     this.set("onChange", (people: HermesUser[]) => {
       this.set(
         "peopleValue",
-        people.map((person) => person.email)
+        people.map((person) => person.email),
       );
     });
 
@@ -76,8 +76,11 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       <div class="click-away-target"/>
     `);
 
-    let listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
+    const textSelector =
+      "[data-test-custom-people-field] li [data-test-person-email]";
+
+    let listItemText = findAll(textSelector).map(
+      (li) => li.textContent?.trim(),
     );
 
     assert.deepEqual(listItemText, this.people, "shows the passed in people");
@@ -102,14 +105,12 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     assert.dom("[data-test-custom-people-field-input]").doesNotExist();
 
-    listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
-    );
+    listItemText = findAll(textSelector).map((li) => li.textContent?.trim());
 
     assert.deepEqual(
       listItemText,
       ["mishra@hashicorp.com", "user1@hashicorp.com"],
-      "the list updates via the onChange action"
+      "the list updates via the onChange action",
     );
   });
 });

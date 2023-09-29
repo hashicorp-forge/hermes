@@ -44,7 +44,7 @@ export default function (mirageConfig) {
               return new Response(
                 200,
                 {},
-                { facetHits: [{ value: facetMatch.attrs.product }] }
+                { facetHits: [{ value: facetMatch.attrs.product }] },
               );
             } else {
               return new Response(200, {}, { facetHits: [] });
@@ -131,7 +131,7 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models }
+              { hits: schema.document.all().models },
             );
           }
         } else {
@@ -282,7 +282,7 @@ export default function (mirageConfig) {
             support_link_url: TEST_SUPPORT_URL,
             version: "1.2.3",
             short_revision: "abc123",
-          }
+          },
         );
       });
 
@@ -365,6 +365,21 @@ export default function (mirageConfig) {
         if (request.queryParams.emails === "testuser@example.com") {
           return new Response(200, {}, []);
         }
+
+        if (request.queryParams.emails !== "") {
+          const emails = request.queryParams.emails.split(",");
+
+          if (emails.length === 0) {
+            return new Response(200, {}, []);
+          }
+
+          const hermesUsers = emails.map((email: string) => {
+            return { emailAddresses: [{ value: email }], photos: [] };
+          });
+
+          return new Response(200, {}, hermesUsers);
+        }
+
         return schema.people.all();
       });
 
@@ -375,7 +390,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -386,7 +403,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -433,7 +452,7 @@ export default function (mirageConfig) {
             });
 
           return new Response(200, {}, { hermesDocuments, externalLinks });
-        }
+        },
       );
 
       /**
@@ -454,7 +473,7 @@ export default function (mirageConfig) {
             Hits: drafts,
             params: "",
             page: 0,
-          }
+          },
         );
       });
 
@@ -486,7 +505,7 @@ export default function (mirageConfig) {
           return new Response(
             200,
             {},
-            { "Default Fetched Product": { abbreviation: "NONE" } }
+            { "Default Fetched Product": { abbreviation: "NONE" } },
           );
         } else {
           let objects = this.schema.products.all().models.map((product) => {
@@ -559,7 +578,7 @@ export default function (mirageConfig) {
           schema.db.recentlyViewedDocs.remove();
           schema.db.recentlyViewedDocs.insert(index);
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
-        }
+        },
       );
 
       /**
@@ -633,7 +652,7 @@ export default function (mirageConfig) {
                 type: mirageDocument.docType,
                 documentNumber: mirageDocument.docNumber,
               });
-            }
+            },
           );
 
           externalLinks.forEach((link) => {
@@ -646,7 +665,7 @@ export default function (mirageConfig) {
           });
 
           return new Response(200, {}, {});
-        }
+        },
       );
 
       // Update whether a draft is shareable.
