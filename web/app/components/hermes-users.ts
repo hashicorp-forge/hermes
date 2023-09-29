@@ -23,8 +23,8 @@ interface HermesUsersComponentSignature {
   };
 }
 
-const serializePeople = (people: GoogleUser[]): HermesUser[] => {
-  if (!people.length) return [];
+const serializePeople = (people: GoogleUser[] | null): HermesUser[] => {
+  if (!people || !people.length) return [];
 
   return people.map((p) => ({
     email: p.emailAddresses[0]?.value as string,
