@@ -17,6 +17,11 @@ interface AuthenticatedDocumentRouteParams {
   draft: boolean;
 }
 
+interface DocumentRouteModel {
+  doc: HermesDocument;
+  docType: HermesDocumentType;
+}
+
 export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
@@ -124,10 +129,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     };
   }
 
-  afterModel(
-    model: { doc: HermesDocument; docType: Promise<HermesDocumentType> },
-    transition: any,
-  ) {
+  afterModel(model: DocumentRouteModel, transition: any) {
     /**
      * Generally speaking, ensure an up-to-date list of recently viewed docs
      * by the time the user returns to the dashboard.
