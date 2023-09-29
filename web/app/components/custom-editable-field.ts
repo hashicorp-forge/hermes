@@ -1,11 +1,5 @@
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
-import { action } from "@ember/object";
-import {
-  CustomEditableField,
-  HermesDocument,
-  HermesUser,
-} from "hermes/types/document";
+import { CustomEditableField, HermesDocument } from "hermes/types/document";
 
 interface CustomEditableFieldComponentSignature {
   Args: {
@@ -19,9 +13,6 @@ interface CustomEditableFieldComponentSignature {
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  @tracked protected emails: string | string[] =
-    this.args.attributes.value || [];
-
   protected get typeIsString(): boolean {
     return this.args.attributes.type === "STRING";
   }
@@ -30,17 +21,15 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
     return this.args.attributes.type === "PEOPLE";
   }
 
-  protected get people(): HermesUser[] {
-    let emails = this.emails instanceof Array ? this.emails : [this.emails];
-    return emails.map((email: string) => {
-      return { email, imgURL: null };
-    });
-  }
-
-  @action protected updateEmails(people: HermesUser[]) {
-    this.emails = people.map((person: HermesUser) => {
-      return person.email;
-    });
+  protected get emails(): string[] {
+    if (this.args.attributes.value instanceof Array) {
+      return this.args.attributes.value;
+    }
+    if (this.args.attributes.value) {
+      return [this.args.attributes.value];
+    } else {
+      return [];
+    }
   }
 }
 

@@ -105,19 +105,16 @@ export default class AuthenticatedDocumentRoute extends Route {
     return doc as HermesDocument;
   }
 
-  /**
-   * Once the model has resolved, check if the document is loading from
-   * another document, as is the case in related Hermes documents.
-   * In those cases, we scroll the sidebar to the top and toggle the
-   * `modelIsChanging` property to remove and rerender the sidebar,
-   * resetting its local state to reflect the new model data.
-   */
   afterModel(model: HermesDocument, transition: any) {
-    console.log("afterModel", model);
-    // Ensure an up-to-date list of recently viewed docs
-    // by the time the user returns to the dashboard.
+    /**
+     * Generally speaking, ensure an up-to-date list of recently viewed docs
+     * by the time the user returns to the dashboard.
+     */
     void this.recentDocs.fetchAll.perform();
 
+    /**
+     * Record the document view with the analytics backend.
+     */
     void this.fetchSvc.fetch("/api/v1/web/analytics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,6 +124,13 @@ export default class AuthenticatedDocumentRoute extends Route {
       }),
     });
 
+    /**
+     * Once the model has resolved, check if the document is loading from
+     * another document, as is the case in related Hermes documents.
+     * In those cases, we scroll the sidebar to the top and toggle the
+     * `modelIsChanging` property to remove and rerender the sidebar,
+     * resetting its local state to reflect the new model data.
+     */
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (

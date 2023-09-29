@@ -1,5 +1,4 @@
 <Document::Sidebar::Header
-  {{did-insert this.kickOffBackgroundTasks}}
   @document={{@document}}
   @isCollapsed={{@isCollapsed}}
   @toggleCollapsed={{@toggleCollapsed}}
@@ -46,6 +45,7 @@
               }}
               "
           />
+
           {{#if (and this.isDraft this.isOwner)}}
             <X::DropdownList
               data-test-draft-visibility-dropdown
@@ -99,6 +99,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
+
         <div class="mb-8">
           <EditableField
             data-test-document-title
@@ -207,83 +208,88 @@
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Contributors" />
-        <EditableField
-          data-test-document-contributors
-          data-test-editable={{this.isOwner}}
-          @value={{this.contributors}}
-          @onChange={{perform this.save "contributors"}}
-          @isSaving={{this.saveIsRunning}}
-          @disabled={{not this.isOwner}}
-        >
-          <:default>
-            {{#if this.contributors.length}}
-              <ol class="person-list">
-                {{#each this.contributors as |contributor|}}
-                  <li>
-                    <Person
-                      @imageIsLoading={{this.serializeContributorsAndApprovers.isRunning}}
-                      @imgURL={{contributor.imgURL}}
-                      @email={{or contributor.email contributor}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No contributors</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-contributors-editable
-              class="multiselect--narrow"
-              @selected={{this.contributors}}
-              @onChange={{this.updateContributors}}
-              {{click-outside (fn F.update this.contributors)}}
-            />
-          </:editing>
-        </EditableField>
+        <HermesUsers class="w-full" @emails={{@document.contributors}} as |h|>
+          <EditableField
+            data-test-document-contributors
+            data-test-editable={{this.isOwner}}
+            @value={{this.contributors}}
+            @onChange={{perform this.save "contributors"}}
+            @isSaving={{this.saveIsRunning}}
+            @disabled={{not this.isOwner}}
+          >
+            <:default>
+              {{#if h.users.length}}
+                <ol class="person-list">
+                  {{#each h.users as |contributor|}}
+                    <li>
+                      <Person
+                        @imageIsLoading={{h.isLoading}}
+                        @imgURL={{contributor.imgURL}}
+                        @email={{contributor.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No contributors</em>
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                data-test-document-contributors-editable
+                class="multiselect--narrow"
+                @selected={{h.users}}
+                @onChange={{h.updateUsers}}
+                {{click-outside (fn F.update h.users)}}
+              />
+            </:editing>
+          </EditableField>
+        </HermesUsers>
       </div>
 
       <div class="flex flex-col items-start space-y-2">
         <Document::Sidebar::SectionHeader @title="Approvers" />
-        <EditableField
-          data-test-document-approvers
-          data-test-editable={{this.isOwner}}
-          @value={{this.approvers}}
-          @onChange={{perform this.save "approvers"}}
-          @isSaving={{this.saveIsRunning}}
-          @disabled={{this.editingIsDisabled}}
-        >
-          <:default>
-            {{#if this.approvers.length}}
-              <ol class="person-list">
-                {{#each this.approvers as |approver|}}
-                  <li>
-                    <Person::Approver
-                      @document={{@document}}
-                      @imageIsLoading={{this.serializeContributorsAndApprovers.isRunning}}
-                      @imgURL={{approver.imgURL}}
-                      @email={{or approver.email approver}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              <em>No approvers</em>
-            {{/if}}
-          </:default>
-          <:editing as |F|>
-            <Inputs::PeopleSelect
-              {{autofocus targetChildren=true}}
-              data-test-document-approvers-editable
-              class="multiselect--narrow"
-              @selected={{this.approvers}}
-              @onChange={{this.updateApprovers}}
-              {{click-outside (fn F.update this.approvers)}}
-            />
-          </:editing>
-        </EditableField>
+        <HermesUsers class="w-full" @emails={{@document.approvers}} as |h|>
+          <EditableField
+            data-test-document-approvers
+            data-test-editable={{this.isOwner}}
+            @value={{this.approvers}}
+            @onChange={{perform this.save "approvers"}}
+            @isSaving={{this.saveIsRunning}}
+            @disabled={{this.editingIsDisabled}}
+          >
+            <:default>
+              {{#if h.users.length}}
+                <ol class="person-list">
+                  {{#each h.users as |approver|}}
+                    <li>
+                      <Person::Approver
+                        @document={{@document}}
+                        @imageIsLoading={{h.isLoading}}
+                        @imgURL={{approver.imgURL}}
+                        @email={{approver.email}}
+                      />
+                    </li>
+                  {{/each}}
+                </ol>
+              {{else}}
+                <em>No approvers</em>
+              {{/if}}
+            </:default>
+            <:editing as |F|>
+              <Inputs::PeopleSelect
+                {{autofocus targetChildren=true}}
+                data-test-document-approvers-editable
+                class="multiselect--narrow"
+                @selected={{h.users}}
+                @onChange={{h.updateUsers}}
+                {{click-outside (fn F.update h.users)}}
+              />
+            </:editing>
+          </EditableField>
+        </HermesUsers>
+
       </div>
 
       <div class="flex flex-col items-start space-y-2">

@@ -28,15 +28,7 @@ import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
-import { GoogleUser } from "../inputs/people-select";
 import { HermesDocumentType } from "hermes/types/document-type";
-
-const serializePeople = (people: GoogleUser[]): HermesUser[] => {
-  return people.map((p) => ({
-    email: p.emailAddresses[0]?.value as string,
-    imgURL: p.photos?.[0]?.url,
-  }));
-};
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -110,8 +102,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked summary = this.args.document.summary || "";
   @tracked contributors: string[] | HermesUser[] =
     this.args.document.contributors || [];
-  @tracked approvers: string[] | HermesUser[] =
-    this.args.document.approvers || [];
+  @tracked approvers: HermesUser[] | null = null;
   @tracked product = this.args.document.product || "";
 
   /**
@@ -538,37 +529,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action kickOffBackgroundTasks() {
     void this.getDocType.perform();
-    void this.serializeContributorsAndApprovers.perform();
   }
-
-  protected serializeContributorsAndApprovers = task(async () => {
-    let maybePromises = [];
-
-    const contributorsPromise = this.fetchSvc
-      .fetch(`/api/v1/people?emails=${this.contributors.join(",")}`)
-      .then((r) => r?.json());
-
-    const approversPromise = this.fetchSvc
-      .fetch(`/api/v1/people?emails=${this.approvers.join(",")}`)
-      .then((r) => r?.json());
-
-    maybePromises.push(this.contributors.length ? contributorsPromise : []);
-    maybePromises.push(this.approvers.length ? approversPromise : []);
-
-    if (!maybePromises.length) {
-      return;
-    }
-
-    const [contributors, approvers] = await Promise.all(maybePromises);
-
-    if (contributors.length) {
-      this.contributors = serializePeople(contributors);
-    }
-
-    if (approvers.length) {
-      this.approvers = serializePeople(approvers);
-    }
-  });
 
   /**
    * A task that waits for a short time and then resolves.
@@ -721,7 +682,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
+        approvers: this.approvers?.compact().mapBy("email"),
       });
 
       await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
@@ -780,6 +741,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action
   updateContributors(contributors: HermesUser[]) {
+    debugger;
     this.contributors = contributors;
   }
 
@@ -828,6 +790,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
+    void this.getDocType.perform();
+
     // kick off whether the draft is shareable.
     if (this.isDraft) {
       void this.getDraftPermissions.perform();
