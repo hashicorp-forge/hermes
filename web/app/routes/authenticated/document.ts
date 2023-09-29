@@ -9,19 +9,17 @@ import { HermesDocument } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 
 interface AuthenticatedDocumentRouteParams {
   document_id: string;
   draft: boolean;
 }
 
-interface AuthenticatedDocumentRouteModel {
-  doc: HermesDocument;
-  docType: HermesDocumentType;
-}
-
 export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("recently-viewed-docs")
+  declare recentDocs: RecentlyViewedDocsService;
   @service declare flashMessages: FlashMessageService;
   @service declare router: RouterService;
 
@@ -114,7 +112,21 @@ export default class AuthenticatedDocumentRoute extends Route {
    * `modelIsChanging` property to remove and rerender the sidebar,
    * resetting its local state to reflect the new model data.
    */
-  afterModel(_model: AuthenticatedDocumentRouteModel, transition: any) {
+  afterModel(model: HermesDocument, transition: any) {
+    console.log("afterModel", model);
+    // Ensure an up-to-date list of recently viewed docs
+    // by the time the user returns to the dashboard.
+    void this.recentDocs.fetchAll.perform();
+
+    void this.fetchSvc.fetch("/api/v1/web/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_id: model.objectID,
+        product_name: model.product,
+      }),
+    });
+
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (

@@ -5,6 +5,7 @@ interface PersonComponentSignature {
   Args: {
     email: string;
     imgURL?: string | null;
+    imageIsLoading?: boolean;
     ignoreUnknown?: boolean;
     badge?: string;
   };

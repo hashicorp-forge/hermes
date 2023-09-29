@@ -212,7 +212,6 @@
           data-test-editable={{this.isOwner}}
           @value={{this.contributors}}
           @onChange={{perform this.save "contributors"}}
-          @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
           @isSaving={{this.saveIsRunning}}
           @disabled={{not this.isOwner}}
         >
@@ -222,8 +221,9 @@
                 {{#each this.contributors as |contributor|}}
                   <li>
                     <Person
+                      @imageIsLoading={{this.serializeContributorsAndApprovers.isRunning}}
                       @imgURL={{contributor.imgURL}}
-                      @email={{contributor.email}}
+                      @email={{or contributor.email contributor}}
                     />
                   </li>
                 {{/each}}
@@ -252,7 +252,6 @@
           data-test-editable={{this.isOwner}}
           @value={{this.approvers}}
           @onChange={{perform this.save "approvers"}}
-          @isLoading={{this.serializeContributorsAndApprovers.isRunning}}
           @isSaving={{this.saveIsRunning}}
           @disabled={{this.editingIsDisabled}}
         >
@@ -263,8 +262,9 @@
                   <li>
                     <Person::Approver
                       @document={{@document}}
+                      @imageIsLoading={{this.serializeContributorsAndApprovers.isRunning}}
                       @imgURL={{approver.imgURL}}
-                      @email={{approver.email}}
+                      @email={{or approver.email approver}}
                     />
                   </li>
                 {{/each}}

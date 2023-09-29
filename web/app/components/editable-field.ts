@@ -30,7 +30,7 @@ interface EditableFieldComponentSignature {
           Return: void;
         }>;
         emptyValueErrorIsShown: boolean;
-      }
+      },
     ];
   };
 }

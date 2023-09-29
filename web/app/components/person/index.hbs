@@ -1,4 +1,3 @@
-{{! @glint-nocheck - not typesafe yet}}
 {{#unless this.isHidden}}
   <div class="flex space-x-2 w-full" ...attributes>
     <div class="relative shrink-0">
@@ -13,7 +12,12 @@
           />
         </div>
       {{/if}}
-      <Person::Avatar @size="small" @email={{@email}} @imgURL={{@imgURL}} />
+      <Person::Avatar
+        @isLoading={{@imageIsLoading}}
+        @size="small"
+        @email={{@email}}
+        @imgURL={{@imgURL}}
+      />
     </div>
     <div
       class="person-email hds-typography-body-200 truncate hds-foreground-primary relative"

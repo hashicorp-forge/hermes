@@ -29,21 +29,6 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
     this.sidebarIsCollapsed = !this.sidebarIsCollapsed;
   }
 
-  @action kickOffBackgroundTasks() {
-    // Ensure an up-to-date list of recently viewed docs
-    // by the time the user returns to the dashboard.
-    void this.recentDocs.fetchAll.perform();
-
-    void this.fetchSvc.fetch("/api/v1/web/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        document_id: this.args.document.objectID,
-        product_name: this.args.document.product,
-      }),
-    });
-  }
-
   protected deleteDraft = dropTask(async (docID: string) => {
     try {
       let fetchResponse = await this.fetchSvc.fetch("/api/v1/drafts/" + docID, {
