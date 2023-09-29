@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, findAll, render } from "@ember/test-helpers";
+import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument, HermesUser } from "hermes/types/document";
@@ -111,6 +111,29 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       listItemText,
       ["mishra@hashicorp.com", "user1@hashicorp.com"],
       "the list updates via the onChange action",
+    );
+  });
+
+  test("PEOPLE inputs receive focus on click", async function (this: CustomEditableFieldComponentTestContext, assert) {
+    this.set("attributes", {
+      type: "PEOPLE",
+      value: this.people,
+    });
+
+    await render<CustomEditableFieldComponentTestContext>(hbs`
+      <CustomEditableField
+        @document={{this.document}}
+        @field="stakeholders"
+        @attributes={{this.attributes}}
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    const stakeholdersSelector = "[data-test-custom-people-field]";
+    await click(`${stakeholdersSelector} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${stakeholdersSelector} input`),
     );
   });
 });

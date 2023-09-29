@@ -38,6 +38,8 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
   @tracked isLoading = true;
 
   protected serializeUsers = task(async () => {
+    if (!this.args.emails?.length) return;
+
     const people: GoogleUser[] = await this.fetchSvc
       .fetch(`/api/v1/people?emails=${this.args.emails?.join(",")}`)
       .then((r) => r?.json());

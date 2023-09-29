@@ -549,12 +549,5 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(`${APPROVERS_SELECTOR} .field-toggle`);
 
     assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
-
-    const stakeholdersSelector = "[data-test-custom-people-field]";
-    await click(`${stakeholdersSelector} .field-toggle`);
-
-    assert.true(
-      document.activeElement === find(`${stakeholdersSelector} input`),
-    );
   });
 });
