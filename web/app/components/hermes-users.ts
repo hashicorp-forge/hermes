@@ -23,8 +23,8 @@ interface HermesUsersComponentSignature {
   };
 }
 
-const serializePeople = (people: GoogleUser[] | null): HermesUser[] => {
-  if (!people || !people.length) return [];
+const serializePeople = (people: GoogleUser[]): HermesUser[] => {
+  if (!people.length) return [];
 
   return people.map((p) => ({
     email: p.emailAddresses[0]?.value as string,
@@ -44,7 +44,10 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
       .fetch(`/api/v1/people?emails=${this.args.emails?.join(",")}`)
       .then((r) => r?.json());
 
-    this.serializedUsers = serializePeople(people);
+    if (people) {
+      this.serializedUsers = serializePeople(people);
+    }
+
     this.isLoading = false;
   });
 
