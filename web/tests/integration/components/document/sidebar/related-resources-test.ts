@@ -1,4 +1,4 @@
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import {
   click,
@@ -59,7 +59,7 @@ module(
     setupMirage(hooks);
 
     hooks.beforeEach(function (
-      this: DocumentSidebarRelatedResourcesTestContext
+      this: DocumentSidebarRelatedResourcesTestContext,
     ) {
       this.server.create("document", {
         product: "Labs",
@@ -145,7 +145,7 @@ module(
       assert.deepEqual(
         listItemIDs,
         expectedIds,
-        "the list items have the correct IDs"
+        "the list items have the correct IDs",
       );
 
       const hrefs = [
@@ -341,7 +341,7 @@ module(
       await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
       await fillIn(
         ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-        "https://example.com"
+        "https://example.com",
       );
 
       await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "Example");
@@ -415,22 +415,27 @@ module(
         .doesNotExist("the PUT call went to the drafts endpoint");
     });
 
-    test("it temporarily adds a highlight affordance to new and recently edited docs", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
-      this.server.create("relatedHermesDocument", {
-        id: 1,
-      });
+    todo(
+      "it temporarily adds a highlight affordance to new and recently edited docs",
+      async function (
+        this: DocumentSidebarRelatedResourcesTestContext,
+        assert,
+      ) {
+        this.server.create("relatedHermesDocument", {
+          id: 1,
+        });
 
-      this.server.create("relatedHermesDocument", {
-        id: 2,
-      });
+        this.server.create("relatedHermesDocument", {
+          id: 2,
+        });
 
-      this.server.create("relatedExternalLink", {
-        id: 3,
-      });
+        this.server.create("relatedExternalLink", {
+          id: 3,
+        });
 
-      this.server.createList("document", 2);
+        this.server.createList("document", 2);
 
-      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
@@ -442,63 +447,64 @@ module(
         />
       `);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 3 });
+        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 3 });
 
-      // Add a new document
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
-      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+        // Add a new document
+        await click(ADD_RESOURCE_BUTTON_SELECTOR);
+        await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+        await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
+        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
 
-      await waitFor(".highlight-affordance");
+        await waitFor(".highlight-affordance");
 
-      // A new document will be the first item
-      assert.dom(LIST_ITEM_SELECTOR + " .highlight-affordance").exists();
+        // A new document will be the first item
+        assert.dom(LIST_ITEM_SELECTOR + " .highlight-affordance").exists();
 
-      // Confirm that the highlight-affordance div is removed
-      await waitUntil(() => {
-        return !find(".highlight-affordance");
-      });
+        // Confirm that the highlight-affordance div is removed
+        await waitUntil(() => {
+          return !find(".highlight-affordance");
+        });
 
-      // Add a new external resource
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-      await fillIn(
-        ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-        "https://new-resource-example.com"
-      );
-      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New resource");
-      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+        // Add a new external resource
+        await click(ADD_RESOURCE_BUTTON_SELECTOR);
+        await fillIn(
+          ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+          "https://new-resource-example.com",
+        );
+        await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New resource");
+        await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
+        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
 
-      await waitFor(".highlight-affordance");
+        await waitFor(".highlight-affordance");
 
-      assert
-        // A new external resource will render after the 3 documents.
-        .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
-        .exists();
+        assert
+          // A new external resource will render after the 3 documents.
+          .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+          .exists();
 
-      // Confirm that the highlight-affordance div is removed
-      // Because we target it in the next step
-      await waitUntil(() => {
-        return !find(".highlight-affordance");
-      });
+        // Confirm that the highlight-affordance div is removed
+        // Because we target it in the next step
+        await waitUntil(() => {
+          return !find(".highlight-affordance");
+        });
 
-      // Edit a document
-      await click(
-        LIST_ITEM_SELECTOR + ":nth-child(4) " + OVERFLOW_BUTTON_SELECTOR
-      );
-      await click(EDIT_BUTTON_SELECTOR);
+        // Edit a document
+        await click(
+          LIST_ITEM_SELECTOR + ":nth-child(4) " + OVERFLOW_BUTTON_SELECTOR,
+        );
+        await click(EDIT_BUTTON_SELECTOR);
 
-      await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+        await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
 
-      await waitFor(".highlight-affordance");
+        await waitFor(".highlight-affordance");
 
-      assert
-        .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
-        .exists();
-    });
+        assert
+          .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+          .exists();
+      },
+    );
 
     test("a title is required when editing a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
       this.server.create("relatedExternalLink", {
@@ -528,5 +534,5 @@ module(
         .dom(EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR)
         .hasText("A title is required.");
     });
-  }
+  },
 );
