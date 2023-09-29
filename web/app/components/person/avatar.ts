@@ -9,6 +9,7 @@ interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
     imgURL?: string | null;
+    isLoading?: boolean;
     email: string;
     size: `${HermesAvatarSize}`;
   };
