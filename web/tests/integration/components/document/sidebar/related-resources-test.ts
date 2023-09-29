@@ -421,6 +421,9 @@ module(
         this: DocumentSidebarRelatedResourcesTestContext,
         assert,
       ) {
+        // Intentionally make it fail for `todo` purposes
+        assert.true(false);
+
         this.server.create("relatedHermesDocument", {
           id: 1,
         });
