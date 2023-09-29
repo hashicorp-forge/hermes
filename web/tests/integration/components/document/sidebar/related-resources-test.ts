@@ -13,7 +13,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
-import { wait } from "ember-animated/.";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -35,6 +34,8 @@ const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
 const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
 const ADD_RESOURCE_BUTTON_SELECTOR = ".sidebar-section-header-button";
+const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
+
 const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
   ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
