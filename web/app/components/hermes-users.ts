@@ -44,7 +44,10 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
       .fetch(`/api/v1/people?emails=${this.args.emails?.join(",")}`)
       .then((r) => r?.json());
 
-    this.serializedUsers = serializePeople(people);
+    if (people) {
+      this.serializedUsers = serializePeople(people);
+    }
+
     this.isLoading = false;
   });
 
