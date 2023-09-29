@@ -527,10 +527,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  @action kickOffBackgroundTasks() {
-    void this.getDocType.perform();
-  }
-
   /**
    * A task that waits for a short time and then resolves.
    * Used to trigger the "link created" state of the share button.
@@ -790,12 +786,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
-    void this.getDocType.perform();
 
     // kick off whether the draft is shareable.
     if (this.isDraft) {
       void this.getDraftPermissions.perform();
     }
+
+    // get the doc type for the request review? checkbox
+    void this.getDocType.perform();
   }
 
   /**
