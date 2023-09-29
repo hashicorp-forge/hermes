@@ -792,7 +792,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       void this.getDraftPermissions.perform();
     }
 
-    // get the doc type for the request review? checkbox
+    // get the doc type for the "request review?" checkbox
     void this.getDocType.perform();
   }
 
