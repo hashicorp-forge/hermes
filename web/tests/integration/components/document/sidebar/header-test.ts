@@ -59,27 +59,27 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     assert.dom(googleDocsLinkSelector).exists("external link shown");
     assert
       .dom(dashboardLinkSelector)
-      .hasText("Dashboard", "the dashboard text link is shown");
+      .hasText("Hermes", "the hermes link is shown");
 
     assert
       .dom(dashboardLinkSelector + " .flight-icon")
-      .hasAttribute("data-test-icon", "arrow-left", "back arrow is shown");
+      .hasAttribute("data-test-icon", "hashicorp", "hashicorp logo is shown");
     assert
       .dom(toggleButtonSelector)
       .doesNotHaveAttribute(
         "data-test-is-collapsed",
-        "the sidebar is not collapsed"
+        "the sidebar is not collapsed",
       );
     assert
       .dom(toggleButtonSelector + " .flight-icon")
       .hasAttribute(
         "data-test-icon",
         "sidebar-hide",
-        "the collapse-sidebar icon is shown"
+        "the collapse-sidebar icon is shown",
       );
 
     const externalLinkHref = htmlElement(googleDocsLinkSelector).getAttribute(
-      "href"
+      "href",
     );
     const urlStart = "https://docs.google.com/document/d/";
     const docID = this.document.objectID;
@@ -87,7 +87,7 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
     assert.equal(
       externalLinkHref,
       urlStart + docID,
-      "Google Docs link is correct"
+      "Google Docs link is correct",
     );
 
     this.server.schema.document.first().update({ isDraft: true });
@@ -107,21 +107,14 @@ module("Integration | Component | document/sidebar/header", function (hooks) {
       .hasAttribute(
         "data-test-icon",
         "sidebar-show",
-        "the expand-sidebar icon is shown"
+        "the expand-sidebar icon is shown",
       );
 
     assert
       .dom(dashboardLinkSelector)
       .doesNotHaveTextContaining(
-        "Dashboard",
-        "dashboard text is not shown when sidebar is collapsed"
-      );
-    assert
-      .dom(dashboardLinkSelector + " .flight-icon")
-      .hasAttribute(
-        "data-test-icon",
-        "hashicorp",
-        "the hashicorp logo becomes the dashboard link when the sidebar is collapsed"
+        "Hermes",
+        "hermes text is not shown when sidebar is collapsed",
       );
 
     this.set("userHasScrolled", true);

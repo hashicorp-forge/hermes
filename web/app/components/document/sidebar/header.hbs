@@ -5,12 +5,13 @@
     @route="authenticated.dashboard"
     {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
-    <FlightIcon
-      @name={{if @isCollapsed "hashicorp" "arrow-left"}}
-      @size={{if @isCollapsed "24"}}
-    />
+    <FlightIcon @name="hashicorp" @size={{if @isCollapsed "24"}} />
     {{#unless @isCollapsed}}
-      <span class="ml-2">Dashboard</span>
+      <span
+        class="border-l tracking-[-0.15px] border-l-color-border-strong pl-2 ml-2 font-semibold text-body-300"
+      >
+        Hermes
+      </span>
     {{/unless}}
   </LinkTo>
   <div class="sidebar-header-icon-controls">

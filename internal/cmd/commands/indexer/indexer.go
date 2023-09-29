@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp/go-hclog"
 )
 
 type Command struct {
@@ -73,6 +74,19 @@ func (c *Command) Run(args []string) int {
 	cfg, err := config.NewConfig(c.flagConfig)
 	if err != nil {
 		ui.Error(fmt.Sprintf("error parsing configuration file: %v", err))
+		return 1
+	}
+
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		ui.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
 		return 1
 	}
 

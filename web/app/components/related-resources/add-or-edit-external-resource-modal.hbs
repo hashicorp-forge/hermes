@@ -1,0 +1,85 @@
+{{#in-element (html-element ".ember-application") insertBefore=null}}
+  <Hds::Modal
+    data-test-add-or-edit-external-resource-modal
+    @onClose={{@onClose}}
+    as |M|
+  >
+    <M.Header data-test-modal-header>
+      Edit resource
+    </M.Header>
+    <M.Body>
+      <form
+        data-test-external-resource-form
+        class="px-6 pb-6"
+        {{did-insert this.registerForm}}
+        {{on "submit" this.maybeSubmit}}
+      >
+        <div class="mb-4">
+          <Hds::Form::TextInput::Field
+            data-test-external-resource-form-title-input
+            {{on "input" this.updateFormValues}}
+            @value={{this.title}}
+            placeholder="Enter a title"
+            required={{true}}
+            name="title"
+            class="external-resource-title-input"
+            as |F|
+          >
+            <F.Label>Title</F.Label>
+            {{#if this.titleErrorIsShown}}
+              <F.Error
+                class="mt-3 mb-3"
+                data-test-external-resource-title-error
+              >
+                A title is required.
+              </F.Error>
+            {{/if}}
+          </Hds::Form::TextInput::Field>
+        </div>
+        <Hds::Form::TextInput::Field
+          data-test-external-resource-url-input
+          {{on "input" this.updateFormValues}}
+          @value={{this.url}}
+          required={{true}}
+          name="url"
+          as |F|
+        >
+          <F.Label>URL</F.Label>
+          {{#unless this.urlIsValid}}
+            <F.Error class="mt-3">
+              A valid URL is required.
+            </F.Error>
+          {{/unless}}
+        </Hds::Form::TextInput::Field>
+
+        {{! This adds enter-to-submit functionality }}
+        <input type="submit" class="hidden" />
+      </form>
+    </M.Body>
+    <M.Footer>
+      <Hds::ButtonSet>
+        <Hds::Button
+          data-test-save-button
+          @text="Save changes"
+          @color="primary"
+          {{on "click" this.maybeSubmit}}
+        />
+        <Hds::Button
+          @text="Cancel"
+          @color="secondary"
+          {{on "click" @onClose}}
+        />
+        {{#if this.removeResourceButtonIsShown}}
+          <Hds::Button
+            data-test-delete-button
+            @text="Delete"
+            @color="tertiary"
+            @icon="trash"
+            class="text-color-foreground-critical hover:text-color-foreground-critical-on-surface"
+            {{on "click" (fn this.removeResource this.resource)}}
+          />
+        {{/if}}
+      </Hds::ButtonSet>
+    </M.Footer>
+  </Hds::Modal>
+{{/in-element}}

@@ -5,7 +5,7 @@ interface InputsProductSelectItemComponentSignature {
   Args: {
     product: string;
     isSelected?: boolean;
-    abbreviation?: boolean;
+    abbreviation?: string;
   };
 }
 
