@@ -14,7 +14,8 @@ interface EditableFieldComponentSignature {
   Args: {
     value: any;
     onChange: (value: any) => void;
-    loading?: boolean;
+    isLoading?: boolean;
+    isSaving?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
   };
@@ -29,7 +30,7 @@ interface EditableFieldComponentSignature {
           Return: void;
         }>;
         emptyValueErrorIsShown: boolean;
-      }
+      },
     ];
   };
 }
@@ -76,6 +77,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
     null;
+
+  protected get editingBlockIsShown() {
+    return this.editingIsEnabled && !this.args.isSaving && !this.args.isLoading;
+  }
 
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.

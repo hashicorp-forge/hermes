@@ -6,7 +6,8 @@ interface PersonApproverComponentSignature {
   Args: {
     document: HermesDocument;
     email: string;
-    imgURL?: string;
+    imgURL?: string | null;
+    imageIsLoading?: boolean;
   };
   Blocks: {
     default: [];
