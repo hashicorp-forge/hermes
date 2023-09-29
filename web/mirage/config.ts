@@ -381,6 +381,21 @@ export default function (mirageConfig) {
         if (request.queryParams.emails === "testuser@example.com") {
           return new Response(200, {}, []);
         }
+
+        if (request.queryParams.emails !== "") {
+          const emails = request.queryParams.emails.split(",");
+
+          if (emails.length === 0) {
+            return new Response(200, {}, []);
+          }
+
+          const hermesUsers = emails.map((email: string) => {
+            return { emailAddresses: [{ value: email }], photos: [] };
+          });
+
+          return new Response(200, {}, hermesUsers);
+        }
+
         return schema.people.all();
       });
 

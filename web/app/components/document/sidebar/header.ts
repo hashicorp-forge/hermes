@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 
 interface DocumentSidebarHeaderComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     document: HermesDocument;
     isCollapsed: boolean;

@@ -15,7 +15,8 @@ interface EditableFieldComponentSignature {
   Args: {
     value: any;
     onChange: (value: any) => void;
-    loading?: boolean;
+    isLoading?: boolean;
+    isSaving?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
     class?: string;

@@ -4,7 +4,7 @@
       data-test-custom-string-field
       @value={{get @document @field}}
       @onChange={{@onChange}}
-      @loading={{@loading}}
+      @isSaving={{@isSaving}}
       @disabled={{@disabled}}
       @class="text-body-200 p-[5px]"
     >
@@ -19,44 +19,44 @@
       </:default>
     </EditableField>
   {{else if this.typeIsPeople}}
-    <EditableField
-      data-test-custom-people-field
-      @value={{get @attributes "value"}}
-      @onChange={{@onChange}}
-      @loading={{@loading}}
-      @disabled={{@disabled}}
-      @class="p-[5px]"
-    >
-      <:default>
-        {{#if this.people.length}}
-          <ol>
-            {{#each this.people as |person|}}
-              <li class="whitespace-nowrap">
-                {{#if person.imgURL}}
-                  <img
-                    src="{{person.imgURL}}"
-                    class="h-4 w-4 rounded-full align-middle"
+    <HermesUsers class="w-full" @emails={{this.emails}} as |h|>
+      <EditableField
+        data-test-custom-people-field
+        @value={{get @attributes "value"}}
+        @onChange={{@onChange}}
+        @isSaving={{@isSaving}}
+        @disabled={{@disabled}}
+        @class="p-[5px]"
+      >
+        <:default>
+          {{#if h.users.length}}
+            <ol>
+              {{#each h.users as |user|}}
+                <li class="whitespace-nowrap">
+                  <Person
+                    @imageIsLoading={{h.isLoading}}
+                    @imgURL={{user.imgURL}}
+                    @email={{user.email}}
                   />
-                {{/if}}
-                {{person.email}}
-              </li>
-            {{/each}}
-          </ol>
-        {{else}}
-          <EmptyStateText />
-        {{/if}}
-      </:default>
-      <:editing as |F|>
-        <Inputs::PeopleSelect
-          {{autofocus targetChildren=true}}
-          {{did-insert F.applyPeopleSelectClasses}}
-          class="multiselect--narrow"
-          @selected={{this.people}}
-          @onChange={{this.updateEmails}}
-          {{click-outside (fn F.update this.people)}}
-          data-test-custom-people-field-input
-        />
-      </:editing>
-    </EditableField>
+                </li>
+              {{/each}}
+            </ol>
+          {{else}}
+            <EmptyStateText />
+          {{/if}}
+        </:default>
+        <:editing as |F|>
+          <Inputs::PeopleSelect
+            {{autofocus targetChildren=true}}
+            {{did-insert F.applyPeopleSelectClasses}}
+            class="multiselect--narrow"
+            @selected={{h.users}}
+            @onChange={{h.updateUsers}}
+            {{click-outside (fn F.update h.users)}}
+            data-test-custom-people-field-input
+          />
+        </:editing>
+      </EditableField>
+    </HermesUsers>
   {{/if}}
 </div>
