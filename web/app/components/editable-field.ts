@@ -97,6 +97,11 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.inputElement.focus();
   }
 
+  /**
+   * Applies z-index classes to the people-select dropdown.
+   * Called when the PeopleSelect component enters edit mode.
+   * Allows the dropdown focus styles to render correctly.
+   */
   @action protected applyPeopleSelectClasses(
     element: HTMLElement,
     onNextRunLoop = true,
@@ -112,6 +117,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     }
   }
 
+  /**
+   * Registers the <:editing> block container and its related buttons,
+   * which are passed to the `dismissible` modifier as `related` elements
+   * whose focus/click events should not dismiss the block.
+   * Called on insert.
+   */
   @action protected registerEditingContainer(element: HTMLElement) {
     this.editingContainer = element;
     const relatedButtons = Array.from(
@@ -120,11 +131,20 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.relatedButtons.push(...relatedButtons);
   }
 
+  /**
+   * Locally registers the toggle button and
+   * adds it to the list of related buttons to be passed to the `dismissible` modifier.
+   *
+   */
   @action protected registerToggleButton(element: HTMLElement) {
     this.toggleButton = element;
     this.relatedButtons = [element];
   }
 
+  /**
+   * Locally registers the cancel button for use in the `handleKeydown` action.
+   * Called on insert.
+   */
   @action protected registerCancelButton(element: HTMLElement) {
     this.cancelButton = element;
   }
