@@ -109,8 +109,8 @@
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
             @name="title"
-            class="mb-1.5"
             @tag="h1"
+            class="mb-1.5"
           />
         </div>
       </div>
@@ -183,7 +183,7 @@
             <EditableField
               data-test-document-contributors
               data-test-editable={{this.isOwner}}
-              @value={{this.contributors}}
+              @value={{h.users}}
               @onChange={{perform this.save "contributors"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
@@ -224,11 +224,15 @@
       <div>
         <Document::Sidebar::SectionHeader @title="Approvers" />
         <div class="editable-field-container mt-[3px]">
+          {{!
+          FIXME: this needs to be a local variable probably
+          so when people are added their avatars are available
+           }}
           <HermesUsers class="w-full" @emails={{@document.approvers}} as |h|>
             <EditableField
               data-test-document-approvers
               data-test-editable={{this.isOwner}}
-              @value={{this.approvers}}
+              @value={{h.users}}
               @onChange={{perform this.save "approvers"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}

@@ -167,6 +167,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * On Escape, we disable editing.
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
+    console.log("handleKeydown", ev.key);
     switch (ev.key) {
       case "Enter":
         if (document.activeElement === this.cancelButton) {
@@ -175,6 +176,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           break;
         }
         ev.preventDefault();
+        // FIXME: this is not the value we want
         this.maybeUpdateValue(this.value);
         break;
       case "Escape":

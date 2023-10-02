@@ -57,6 +57,7 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
     })) ?? [];
 
   @action updateUsers(users: HermesUser[]) {
+    console.log("updateUsers", users);
     this.serializedUsers = users;
   }
 }

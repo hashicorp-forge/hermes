@@ -723,7 +723,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action
   updateContributors(contributors: HermesUser[]) {
-    debugger;
     this.contributors = contributors;
   }
 

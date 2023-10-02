@@ -5,13 +5,15 @@
 .editable-field {
   @apply relative flex w-full;
 
-  &[disabled] {
+  &[disabled],
+  &.saving {
     cursor: default;
   }
 
-  .loading,
   .saving {
     opacity: 0.5;
+
+    // disable mouseover stfuf
   }
 
   &.button-affordance {
@@ -38,7 +40,7 @@
       @apply cursor-auto items-center;
     }
 
-    &:not(.disabled, disabled) {
+    &:not([disabled], .disabled, .saving) {
       &:hover,
       &:focus-visible &:focus {
         @apply bg-color-palette-neutral-175;

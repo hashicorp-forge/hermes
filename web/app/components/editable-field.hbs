@@ -5,6 +5,7 @@
 >
   {{#if (and this.editingIsEnabled (not @isSaving))}}
 
+    {{! FIXME: ...something here }}
     {{on-document "keydown" this.handleKeydown}}
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
@@ -72,7 +73,11 @@
     {{#if (or @isSaving @isLoading)}}
       <div
         data-test-spinner
-        class={{if @isSaving "absolute top-0 right-0" "flex h-5 items-center"}}
+        class={{if
+          @isSaving
+          "absolute top-2.5 right-[9px]"
+          "flex h-5 items-center"
+        }}
       >
         <FlightIcon @name="loading" data-test-loading-spinner />
       </div>
