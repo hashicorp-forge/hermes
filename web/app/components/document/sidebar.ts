@@ -106,6 +106,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers: HermesUser[] | null = null;
   @tracked product = this.args.document.product || "";
 
+  @tracked contributorEmails = this.args.document.contributors;
+
   /**
    * Whether a draft was published during the session.
    * Set true when the user successfully requests a review.
@@ -724,6 +726,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @action
   updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
+    console.log("UPDATE CONTRIBUTORS");
   }
 
   @action updateTitle(title: string) {

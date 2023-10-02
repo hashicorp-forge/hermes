@@ -12,7 +12,7 @@ interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
     value: any;
-    onChange: (value: any) => void;
+    onCommit: (value: any) => void;
     isLoading?: boolean;
     isSaving?: boolean;
     disabled?: boolean;
@@ -157,7 +157,9 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.editingIsEnabled = false;
 
     schedule("afterRender", this, () => {
+      console.log("this.value", this.value);
       this.value = this.cachedValue;
+      console.log("reverted to", this.value);
     });
   }
 
@@ -181,6 +183,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
+        console.log("this.value on handleKeydown", this.value);
         this.disableEditing();
         break;
     }
@@ -228,7 +231,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       }
 
       this.cachedValue = this.value = newValue;
-      this.args.onChange?.(this.value);
+      this.args.onCommit?.(this.value);
     }
 
     scheduleOnce("actions", this, () => {

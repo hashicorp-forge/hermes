@@ -10,7 +10,7 @@ const LOADING_SPINNER_SELECTOR = `${EDITABLE_FIELD_SELECTOR} [data-test-spinner]
 const ERROR_SELECTOR = "[data-test-empty-value-error]";
 
 interface EditableFieldComponentTestContext extends MirageTestContext {
-  onChange: (value: any) => void;
+  onCommit: (value: any) => void;
   isLoading: boolean;
   isSaving: boolean;
   value: string;
@@ -21,14 +21,14 @@ module("Integration | Component | editable-field", function (hooks) {
   setupRenderingTest(hooks);
 
   hooks.beforeEach(function (this: EditableFieldComponentTestContext) {
-    this.set("onChange", () => {});
+    this.set("onCommit", () => {});
   });
 
   test("it handles splattributes", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
         class="bar"
       />
     `);
@@ -40,7 +40,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       >
         <:default>Foo</:default>
         <:editing>Bar</:editing>
@@ -58,7 +58,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       >
         <:default as |F|>{{F.value}} one</:default>
         <:editing as |F|>{{F.value}} two</:editing>
@@ -78,7 +78,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
         @isSaving={{this.isSaving}}
       />
     `);
@@ -102,7 +102,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
         @isLoading={{this.isLoading}}
       />
     `);
@@ -119,7 +119,7 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("it yields an emptyValueErrorIsShown property to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
-    this.set("onChange", (newValue: string) => {
+    this.set("onCommit", (newValue: string) => {
       this.set("value", newValue);
     });
 
@@ -128,7 +128,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
         @isRequired={{true}}
       />
     `);
@@ -149,7 +149,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
         @disabled={{true}}
       />
     `);
@@ -165,7 +165,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       />
     `);
 
@@ -179,17 +179,17 @@ module("Integration | Component | editable-field", function (hooks) {
       .hasText(defaultText, "value reverts when escape is pressed");
   });
 
-  test("it runs the passed-in onChange action on blur", async function (this: EditableFieldComponentTestContext, assert) {
+  test("it runs the passed-in onCommit action on blur", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("value", "foo");
 
-    this.set("onChange", (e: unknown) => {
+    this.set("onCommit", (e: unknown) => {
       this.set("value", e);
     });
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       />
     `);
 
@@ -206,14 +206,14 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("it yields an `update` (string) function to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("value", "foo");
-    this.set("onChange", (newValue: string) => {
+    this.set("onCommit", (newValue: string) => {
       this.set("value", newValue);
     });
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       >
         <:editing as |F|>
           <Action {{on "click" (fn F.update "bar")}}>
@@ -233,14 +233,14 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("it yields an `update` (array) function to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("value", ["foo"]);
-    this.set("onChange", (newValue: string[]) => {
+    this.set("onCommit", (newValue: string[]) => {
       this.set("value", newValue);
     });
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       >
         <:editing as |F|>
           <Action {{on "click" (fn F.update (array "bar"))}}>
@@ -258,14 +258,14 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
   });
 
-  test("onChange only runs if the textInput value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+  test("onCommit only runs if the textInput value has changed", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
-    this.set("onChange", () => count++);
+    this.set("onCommit", () => count++);
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       />
     `);
 
@@ -274,26 +274,26 @@ module("Integration | Component | editable-field", function (hooks) {
     await fillIn("textarea", "foo");
     await triggerKeyEvent(document, "keydown", "Enter");
 
-    assert.equal(count, 0, "onChange has not been called");
+    assert.equal(count, 0, "onCommit has not been called");
 
     await click(FIELD_TOGGLE_SELECTOR);
 
     await fillIn("textarea", "bar");
     await triggerKeyEvent(document, "keydown", "Enter");
 
-    assert.equal(count, 1, "onChange has been called");
+    assert.equal(count, 1, "onCommit has been called");
   });
 
-  test("onChange only runs if the array value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+  test("onCommit only runs if the array value has changed", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
 
-    this.set("onChange", () => count++);
+    this.set("onCommit", () => count++);
     this.set("newArray", ["foo"]);
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{array "foo"}}
-        @onChange={{this.onChange}}
+        @onCommit={{this.onCommit}}
       >
         <:editing as |F|>
           <div {{click-outside (fn F.update this.newArray)}} />
@@ -305,19 +305,19 @@ module("Integration | Component | editable-field", function (hooks) {
     await click(FIELD_TOGGLE_SELECTOR);
     await click(".click-away");
 
-    assert.equal(count, 0, "onChange has not been called");
+    assert.equal(count, 0, "onCommit has not been called");
 
     this.set("newArray", ["bar"]);
 
     await click(FIELD_TOGGLE_SELECTOR);
     await click(".click-away");
 
-    assert.equal(count, 1, "onChange has been called");
+    assert.equal(count, 1, "onCommit has been called");
   });
 
   test("the input value resets on cancel", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField  @value="foo" @onChange={{this.onChange}} />
+      <EditableField  @value="foo" @onCommit={{this.onCommit}} />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
@@ -334,7 +334,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField @value="bar" @onChange={{this.onChange}} />
+      <EditableField @value="bar" @onCommit={{this.onCommit}} />
     `);
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
