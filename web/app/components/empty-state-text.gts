@@ -8,7 +8,13 @@ interface EmptyStateTextComponentSignature {
   Blocks: {};
 }
 
-export default class EmptyStateTextComponent extends Component<EmptyStateTextComponentSignature> {}
+export default class EmptyStateTextComponent extends Component<EmptyStateTextComponentSignature> {
+  <template>
+    <span class="empty-state-text text-color-foreground-disabled" ...attributes>
+      {{or @value "None"}}
+    </span>
+  </template>
+}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
