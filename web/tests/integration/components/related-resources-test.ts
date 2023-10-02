@@ -27,13 +27,13 @@ const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_S
 const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
 const EXTERNAL_RESOURCE_MODAL_SELECTOR =
   "[data-test-add-or-edit-external-resource-modal]";
-const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${EXTERNAL_RESOURCE_MODAL_SELECTOR} [data-test-submit-button]`;
 const ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-submit-button]`;
 const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
 const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
 const SHORT_LINK_BASE_URL = config.shortLinkBaseURL;
 const SEARCH_ERROR_MESSAGE = "Search error. Type to retry.";
+const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-people-field]";
 
 interface RelatedResourcesComponentTestContext extends MirageTestContext {
   modalHeaderTitle: string;
@@ -269,7 +269,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await fillIn(
       ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-      "https://example.com"
+      "https://example.com",
     );
 
     assert
@@ -373,7 +373,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await fillIn(
       ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-      "https://hashicorp.com"
+      "https://hashicorp.com",
     );
 
     assert.dom(NO_RESOURCES_FOUND_SELECTOR).exists();
@@ -413,7 +413,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await fillIn("[data-test-external-resource-form-title-input]", "Example");
     await fillIn(
       "[data-test-external-resource-url-input]",
-      "https://example.com"
+      "https://example.com",
     );
 
     await click("[data-test-save-button]");
@@ -676,14 +676,14 @@ module("Integration | Component | related-resources", function (hooks) {
     // Enter what looks like a valid URL to trigger an object lookup
     await fillIn(
       ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
-      `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/xyz`
+      `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/xyz`,
     );
 
     await waitFor(NO_RESOURCES_FOUND_SELECTOR);
 
     await waitUntil(() => {
       return find(NO_RESOURCES_FOUND_SELECTOR)?.textContent?.includes(
-        SEARCH_ERROR_MESSAGE
+        SEARCH_ERROR_MESSAGE,
       );
     });
 
@@ -719,7 +719,29 @@ module("Integration | Component | related-resources", function (hooks) {
       .dom(NO_RESOURCES_FOUND_SELECTOR)
       .containsText(
         SEARCH_ERROR_MESSAGE,
-        "the error message is shown in the modal"
+        "the error message is shown in the modal",
       );
+  });
+
+  test("the `list` block yields a `showModal` action", async function (this: RelatedResourcesComponentTestContext, assert) {
+    await render<RelatedResourcesComponentTestContext>(hbs`
+      <RelatedResources
+        @items={{this.items}}
+        @scope="documents"
+        @modalHeaderTitle={{this.modalHeaderTitle}}
+        @modalInputPlaceholder={{this.modalInputPlaceholder}}
+        @addResource={{this.addResource}}
+      >
+        <:list as |rr|>
+          <button data-test-button {{on "click" rr.showModal}}>Show modal</button>
+        </:list>
+      </RelatedResources>
+    `);
+
+    await click("button");
+
+    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+
+    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
   });
 });
