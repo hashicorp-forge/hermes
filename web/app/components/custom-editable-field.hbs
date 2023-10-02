@@ -12,7 +12,7 @@
           {{F.value}}
         </p>
       {{else}}
-        <CustomEditableFields::EmptyState />
+        <EmptyStateText />
       {{/if}}
     </:default>
     <:editing as |F|>
@@ -48,7 +48,7 @@
             {{/each}}
           </ol>
         {{else}}
-          <CustomEditableFields::EmptyState />
+          <EmptyStateText />
         {{/if}}
       </:default>
       <:editing as |F|>

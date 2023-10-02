@@ -40,14 +40,14 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       />
     `);
 
-    assert.dom("[data-test-custom-string-field]").hasText("---");
+    assert.dom("[data-test-custom-string-field]").hasText("None");
     assert.dom("[data-test-custom-people-field]").doesNotExist();
 
     this.set("attributes", {
       type: "PEOPLE",
     });
 
-    assert.dom("[data-test-custom-people-field]").hasText("---");
+    assert.dom("[data-test-custom-people-field]").hasText("None");
     assert.dom("[data-test-custom-string-field]").doesNotExist();
   });
 
