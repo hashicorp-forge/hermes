@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import or from "ember-truth-helpers/helpers/or";
 
 interface EmptyStateTextComponentSignature {
   Element: HTMLSpanElement;
