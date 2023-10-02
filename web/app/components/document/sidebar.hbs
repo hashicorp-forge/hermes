@@ -99,7 +99,7 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        <div class="editable-field-container mb-8 -mt-[5px]">
+        <div class="editable-field-container document-title mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
             data-test-editable={{this.isOwner}}
@@ -109,7 +109,6 @@
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
             @name="title"
-            @class="text-display-300 p-[5px] font-semibold foreground-strong"
             class="mb-1.5"
             @tag="h1"
           />
@@ -127,9 +126,8 @@
             data-test-editable={{this.isOwner}}
             @value={{this.summary}}
             @onChange={{perform this.updateSummary}}
-            @loading={{this.saveIsRunning}}
+            @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
-            @class="text-body-200 font-regular"
             @name="summary"
             @placeholder="Enter a summary"
           />
@@ -189,7 +187,6 @@
               @onChange={{perform this.save "contributors"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
-              @class="p-[5px]"
             >
               <:default>
                 {{#if h.users.length}}
@@ -235,7 +232,6 @@
               @onChange={{perform this.save "approvers"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
-              @class="p-[5px]"
             >
               <:default>
                 {{#if h.users.length}}

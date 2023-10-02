@@ -43,7 +43,8 @@
     }
 
     &.out {
-      animation: fadeOut 50ms ease-out 200ms forwards,
+      animation:
+        fadeOut 50ms ease-out 200ms forwards,
         slideDownAndRotateLeft 250ms ease-out forwards;
     }
   }
@@ -96,6 +97,13 @@
 
     /* Style the scrollbar Firefox */
     scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+  }
+
+  .document-title {
+    .field-toggle,
+    textarea {
+      @apply text-display-300 font-semibold text-color-foreground-strong;
+    }
   }
 
   .sidebar-section-header-container {

@@ -1,9 +1,9 @@
 <div
   class="editable-field
-    {{if (and this.editingIsEnabled (not @loading)) 'z-10'}}"
+    {{if (and this.editingIsEnabled (not @isSaving)) 'z-10'}}"
   ...attributes
 >
-  {{#if (and this.editingIsEnabled (not @loading))}}
+  {{#if (and this.editingIsEnabled (not @isSaving))}}
 
     {{on-document "keydown" this.handleKeydown}}
 
@@ -79,7 +79,7 @@
     {{/if}}
     <Action
       {{did-insert this.registerToggleButton}}
-      class="field-toggle group {{if @isSaving 'saving'}} {{@class}}"
+      class="field-toggle group {{if @isSaving 'saving'}}"
       disabled={{or @disabled @isSaving}}
       {{on "click" this.enableEditing}}
     >

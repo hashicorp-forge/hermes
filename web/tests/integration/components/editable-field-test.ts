@@ -331,4 +331,26 @@ module("Integration | Component | editable-field", function (hooks) {
 
     assert.dom("textarea").hasValue("foo");
   });
+
+  test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField @value="bar" @onChange={{this.onChange}} />
+    `);
+
+    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
+
+    await click(FIELD_TOGGLE_SELECTOR);
+
+    assert.dom("textarea").hasValue("bar");
+
+    await fillIn("textarea", " bar ");
+
+    await triggerKeyEvent("textarea", "keydown", "Enter");
+
+    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
+
+    await click(FIELD_TOGGLE_SELECTOR);
+
+    assert.dom("textarea").hasValue("bar");
+  });
 });

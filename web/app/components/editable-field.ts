@@ -3,8 +3,6 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
-import { modifier } from "ember-modifier";
-import { ModifierLike } from "@glint/template";
 import { guidFor } from "@ember/object/internals";
 
 export const FOCUSABLE =
@@ -19,7 +17,6 @@ interface EditableFieldComponentSignature {
     isSaving?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
-    class?: string;
     tag?: "h1";
     buttonPlacement?: "center";
     buttonOverlayColor?: "white";
@@ -87,11 +84,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected registerInput(element: HTMLElement) {
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
-
-    if (this.args.class) {
-      const classes = this.args.class.split(" ");
-      this.inputElement.classList.add(...classes);
-    }
 
     this.applyPeopleSelectClasses(this.inputElement, false);
     this.inputElement.focus();
@@ -213,7 +205,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
     // Stringified values work for both arrays and strings.
     if (JSON.stringify(newValue) !== JSON.stringify(this.cachedValue)) {
-      if (newValue === "") {
+      if (
+        newValue === "" ||
+        (newValue instanceof Array && newValue.length === 0)
+      ) {
         if (this.args.isRequired) {
           this.emptyValueErrorIsShown = true;
           return;
@@ -223,6 +218,11 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           this.disableEditing();
           return;
         }
+      }
+
+      // Trim whitespace from the beginning and end of the string.
+      if (typeof newValue === "string") {
+        newValue = newValue.trim();
       }
 
       this.cachedValue = this.value = newValue;
