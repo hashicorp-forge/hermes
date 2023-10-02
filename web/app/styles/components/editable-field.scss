@@ -9,51 +9,63 @@
     cursor: default;
   }
 
-  &.saving {
+  .loading,
+  .saving {
     opacity: 0.5;
   }
 
   &.button-affordance {
-    .field-toggle:not([disabled]) {
+    .field-toggle:not([disabled], .disabled) {
       &:hover,
       &:focus-visible &:focus {
-        @apply border-color-border-input bg-color-page-faint;
+        @apply border-color-border-strong bg-color-page-primary;
       }
     }
   }
 
   textarea,
   .field-toggle {
-    @apply px-[5px] pb-[5px] pt-[7px];
+    @apply px-[5px] py-[7px];
   }
 
   .field-toggle {
-    @apply flex w-full rounded-button-md border border-transparent text-inherit transition-colors;
+    @apply flex w-full items-center rounded-button-md border border-transparent text-inherit transition-colors;
     @apply min-h-[36px];
 
-    &:not([disabled]) {
+    &.disabled,
+    &:disabled {
+      @apply cursor-auto items-center;
+    }
+
+    &:not(.disabled, disabled) {
       &:hover,
       &:focus-visible &:focus {
-        @apply bg-color-palette-neutral-200;
+        @apply bg-color-palette-neutral-175;
 
         .edit-affordance {
           @apply visible;
 
           &::before {
-            animation: fadeIn 50ms ease-out forwards 150ms;
+            @apply bg-gradient-to-l;
+            @apply opacity-100;
           }
 
           .flight-icon {
+            @apply relative;
+
             animation:
-              slideLeftPx 250ms ease-out,
+              slideLeftPx 200ms ease-out,
               fadeIn 100ms ease-out;
           }
         }
       }
 
-      h1,
-      p {
+      h1 {
         @apply text-color-foreground-strong;
+      }
+
+      .empty-state-text {
+        @apply text-color-foreground-disabled;
       }
     }
 
@@ -70,20 +82,20 @@
   }
 
   .edit-affordance {
-    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] rounded-button-md rounded-r  pr-[8px] pl-8 pt-[9px];
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] w-14 justify-end overflow-hidden rounded-r-button-md py-[8px] pr-[7px];
 
     &::before {
       content: "";
-      @apply bg-gradient-to-l opacity-0;
+      @apply absolute top-0 left-0 h-full w-full opacity-0 transition-opacity;
     }
 
     .flight-icon-edit {
-      @apply -mt-px;
+      @apply mr-px;
     }
 
     &.gray {
       &::before {
-        @apply from-color-palette-neutral-200 via-color-palette-neutral-200 to-transparent;
+        @apply from-color-palette-neutral-175 via-color-palette-neutral-175 to-transparent;
       }
     }
 
@@ -99,7 +111,7 @@
   }
 
   .edit-overlay-affordance {
-    @apply absolute left-0 bottom-0 flex w-full translate-y-full gap-1 pt-2.5;
+    @apply absolute -left-[5px] bottom-0 flex w-[calc(100%+10px)] translate-y-full gap-1 pt-2.5;
 
     &::before {
       content: "";
