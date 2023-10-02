@@ -4,7 +4,7 @@ import or from "ember-truth-helpers/helpers/or";
 interface EmptyStateTextComponentSignature {
   Element: HTMLSpanElement;
   Args: {
-    text?: string;
+    value?: string;
   };
   Blocks: {};
 }

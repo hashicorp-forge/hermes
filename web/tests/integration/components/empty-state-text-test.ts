@@ -9,7 +9,7 @@ module("Integration | Component | empty-state-text", function (hooks) {
   test("it renders as expected", async function (assert) {
     await render(hbs`
       <EmptyStateText data-test-one />
-      <EmptyStateText data-test-two @text="foo" />
+      <EmptyStateText data-test-two @value="foo" />
     `);
 
     assert.dom("[data-test-one]").hasText("None");
