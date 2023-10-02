@@ -1,8 +1,10 @@
 import Component from "@glimmer/component";
 
 interface EmptyStateTextComponentSignature {
-  Element: HTMLParagraphElement;
-  Args: {};
+  Element: HTMLSpanElement;
+  Args: {
+    value?: string;
+  };
   Blocks: {};
 }
 
