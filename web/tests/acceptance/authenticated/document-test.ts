@@ -59,6 +59,8 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
 
+const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-people-field]";
+
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
   assert.dom(SUMMARY_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -550,5 +552,18 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(`${APPROVERS_SELECTOR} .field-toggle`);
 
     assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
+  });
+
+  test('clicking the empty state of the related resources list opens the "add related resource" modal', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await this.pauseTest();
+    // await click(`${} .field-toggle`);
   });
 });
