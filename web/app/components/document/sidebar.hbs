@@ -104,7 +104,7 @@
             data-test-document-title
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
-            @onCommit={{this.updateTitle}}
+            @onSave={{this.updateTitle}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
@@ -125,7 +125,7 @@
             data-test-document-summary
             data-test-editable={{this.isOwner}}
             @value={{this.summary}}
-            @onCommit={{perform this.updateSummary}}
+            @onSave={{this.updateSummary}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @name="summary"
@@ -181,15 +181,18 @@
         <div class="editable-field-container">
           {{! FIXME: this needs to update }}
           {{! maybe this is "items" and it can be an initial email list and then a tracked object array }}
-          <HermesUsers class="w-full" @emails={{this.contributorEmails}} as |h|>
+          <HermesUsers
+            class="w-full"
+            @emails={{this.contributorEmails}}
+            @onSave={{perform this.save "contributors"}}
+            as |h|
+          >
             <EditableField
               data-test-document-contributors
               data-test-editable={{this.isOwner}}
-              {{! secondary value? }}
-              @value={{this.contributorEmails}}
-              @hermesUsers={{h.users}}
-              @onCancel={{fn h.cancelUpdate this.contributorEmails}}
-              @onCommit={{perform this.save "contributors"}}
+              @value={{h.emails}}
+              @onCancel={{h.onCancel}}
+              @onSave={{h.onSave}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             >
@@ -216,10 +219,11 @@
                   {{did-insert F.applyPeopleSelectClasses}}
                   data-test-document-contributors-editable
                   class="multiselect--narrow"
+                  {{! does this want emails or hermesusers }}
                   @selected={{h.users}}
-                  @onCommit={{h.updateUsers}}
+                  @onChange={{h.onChange}}
                   {{! FIXME -- clicking check button doesnt commit }}
-                  {{click-outside (fn F.update h.users)}}
+                  {{click-outside h.onSave}}
                 />
               </:editing>
             </EditableField>
@@ -239,7 +243,7 @@
               data-test-document-approvers
               data-test-editable={{this.isOwner}}
               @value={{h.users}}
-              @onCommit={{perform this.save "approvers"}}
+              @onSave={{perform this.save "approvers"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             >
@@ -268,7 +272,7 @@
                   data-test-document-approvers-editable
                   class="multiselect--narrow"
                   @selected={{h.users}}
-                  @onCommit={{h.updateUsers}}
+                  @onChange={{h.onSave}}
                   {{click-outside (fn F.update h.users)}}
                 />
               </:editing>
@@ -565,7 +569,7 @@
               <Inputs::PeopleSelect
                 @renderInPlace={{true}}
                 @selected={{this.approvers}}
-                @onCommit={{this.updateApprovers}}
+                @onChange={{this.updateApprovers}}
                 @disabled={{M.taskIsRunning}}
                 class="mb-0"
               />

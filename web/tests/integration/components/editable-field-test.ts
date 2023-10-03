@@ -28,7 +28,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
         class="bar"
       />
     `);
@@ -40,7 +40,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       >
         <:default>Foo</:default>
         <:editing>Bar</:editing>
@@ -58,7 +58,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       >
         <:default as |F|>{{F.value}} one</:default>
         <:editing as |F|>{{F.value}} two</:editing>
@@ -78,7 +78,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
         @isSaving={{this.isSaving}}
       />
     `);
@@ -102,7 +102,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
         @isLoading={{this.isLoading}}
       />
     `);
@@ -128,7 +128,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
         @isRequired={{true}}
       />
     `);
@@ -149,7 +149,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
         @disabled={{true}}
       />
     `);
@@ -165,7 +165,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       />
     `);
 
@@ -189,7 +189,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       />
     `);
 
@@ -213,7 +213,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       >
         <:editing as |F|>
           <Action {{on "click" (fn F.update "bar")}}>
@@ -240,7 +240,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       >
         <:editing as |F|>
           <Action {{on "click" (fn F.update (array "bar"))}}>
@@ -265,7 +265,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       />
     `);
 
@@ -293,7 +293,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{array "foo"}}
-        @onCommit={{this.onCommit}}
+        @onSave={{this.onCommit}}
       >
         <:editing as |F|>
           <div {{click-outside (fn F.update this.newArray)}} />
@@ -317,7 +317,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("the input value resets on cancel", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField  @value="foo" @onCommit={{this.onCommit}} />
+      <EditableField  @value="foo" @onSave={{this.onCommit}} />
     `);
 
     await click(FIELD_TOGGLE_SELECTOR);
@@ -334,7 +334,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
   test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField @value="bar" @onCommit={{this.onCommit}} />
+      <EditableField @value="bar" @onSave={{this.onCommit}} />
     `);
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");

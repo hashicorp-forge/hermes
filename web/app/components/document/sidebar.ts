@@ -607,14 +607,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.save.isRunning || this.saveCustomField.isRunning;
   }
 
-  save = task(async (field: string, val: string | HermesUser[]) => {
+  save = task(async (field: string, val: string | string[]) => {
     if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
         serializedValue = cleanString(val);
       } else {
-        serializedValue = val.map((p: HermesUser) => p.email);
+        serializedValue = val;
       }
 
       try {
@@ -745,15 +745,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     void this.save.perform("title", this.title);
   }
 
-  protected updateSummary = task(async (summary: string) => {
-    const cachedValue = this.summary;
+  @action updateSummary(summary: string) {
     this.summary = summary;
-    try {
-      this.save.perform("summary", this.summary);
-    } catch {
-      this.summary = cachedValue;
-    }
-  });
+    void this.save.perform("summary", this.summary);
+  }
 
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;

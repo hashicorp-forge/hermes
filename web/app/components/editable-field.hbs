@@ -55,7 +55,7 @@
           @text="Save"
           @icon="check"
           @isIconOnly={{true}}
-          {{on "click" (fn this.maybeUpdateValue this.value)}}
+          {{on "click" this.maybeUpdateValue}}
         />
         <Hds::Button
           @text="Cancel"

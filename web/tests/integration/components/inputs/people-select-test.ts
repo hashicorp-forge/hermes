@@ -27,7 +27,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       {{! @glint-nocheck: not typesafe yet }}
       <Inputs::PeopleSelect
         @selected={{this.people}}
-        @onCommit={{this.onChange}}
+        @onChange={{this.onChange}}
       />
     `);
 
@@ -99,7 +99,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       {{! @glint-nocheck: not typesafe yet }}
       <Inputs::PeopleSelect
         @selected={{this.people}}
-        @onCommit={{this.onChange}}
+        @onChange={{this.onChange}}
       />
     `);
 

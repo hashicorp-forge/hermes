@@ -16,7 +16,7 @@ interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
     selected: HermesUser[];
-    onCommit: (people: HermesUser[]) => void;
+    onChange: (people: HermesUser[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
   };

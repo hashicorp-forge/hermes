@@ -1,9 +1,16 @@
 <div ...attributes {{did-insert this.serializeUsers.perform}}>
+  {{!
+
+    How does this get updates from other components?
+
+   }}
   {{yield
     (hash
-      updateUsers=this.updateUsers
-      cancelUpdate=this.cancelUpdate
-      users=this.serializedUsers
+      onChange=this.onChange
+      onCancel=this.onCancel
+      onSave=this.onSave
+      users=this.index
+      emails=this.emails
       isLoading=this.isLoading
     )
   }}

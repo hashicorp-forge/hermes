@@ -13,9 +13,8 @@ interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
     value: any;
-    onCommit: (value: any) => void;
-    onCancel?: () => void;
-    hermesUsers?: HermesUser[];
+    onSave: ((textValue: string) => void) | (() => void);
+    onCancel?: (cachedValue?: string[]) => void;
     isLoading?: boolean;
     isSaving?: boolean;
     disabled?: boolean;
@@ -160,13 +159,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @action protected disableEditing(revertValue?: boolean) {
     this.editingIsEnabled = false;
 
-    // FIXME: Does this work
     if (revertValue) {
       schedule("afterRender", this, () => {
-        console.log("revertValue", this.value);
-        this.args.onCancel?.();
-        this.value = this.cachedValue;
-        console.log("revertedValue", this.value);
+        if (this.args.onCancel) {
+          this.args.onCancel(this.cachedValue);
+        } else {
+          this.value = this.cachedValue;
+        }
       });
     }
   }
@@ -177,22 +176,20 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * On Escape, we disable editing.
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
-    console.log("handleKeydown", ev.key);
+    console.log("handleKeydown value", this.value);
     switch (ev.key) {
       case "Enter":
+        console.log("activeElement", document.activeElement);
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
-          this.disableEditing();
+          this.disableEditing(true);
           break;
         }
         ev.preventDefault();
-        console.log("this.value on handleKeydown", this.value);
-        console.log("this.args.hermesUsers", this.args.hermesUsers);
-        this.maybeUpdateValue(this.args.hermesUsers);
+        this.maybeUpdateValue(this.value);
         break;
       case "Escape":
         ev.preventDefault();
-        console.log("this.value on handleKeydown", this.value);
         this.disableEditing(true);
         break;
     }
@@ -206,15 +203,17 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
     console.log("maybeUpdateValue", eventOrValue);
-    console.log("hermesUsers", this.args.hermesUsers);
     let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {
       const target = eventOrValue.target;
       assert("target must exist", target);
-      assert("value must exist in the target", "value" in target);
-      const value = target.value;
-      newValue = value as string | string[];
+      if ("value" in target) {
+        const value = target.value;
+        newValue = value as string | string[];
+      } else {
+        newValue = undefined;
+      }
     } else {
       newValue = eventOrValue;
     }
@@ -243,12 +242,22 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
       this.cachedValue = this.value = newValue;
       console.log("this.value on maybeUpdateValue", this.value);
+      // in the case of text fields we want to pass in the value.
+      // in the case of people inputs, we don't
 
-      console.log("this.args.hermesUsers", this.args.hermesUsers);
-      this.args.onCommit?.(this.args.hermesUsers);
+      console.log("editablue field this.value", this.value);
+
+      if (typeof this.value === "string") {
+        console.log("this.value is a string");
+        this.args.onSave(this.value);
+      } else {
+        // @ts-ignore
+        this.args.onSave();
+      }
     }
 
     scheduleOnce("actions", this, () => {
+      // is this getting called?
       this.disableEditing();
     });
   }

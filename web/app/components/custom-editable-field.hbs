@@ -3,7 +3,7 @@
     <EditableField
       data-test-custom-string-field
       @value={{get @document @field}}
-      @onCommit={{@onCommit}}
+      @onSave={{@onCommit}}
       @isSaving={{@isSaving}}
       @disabled={{@disabled}}
     >
@@ -22,7 +22,7 @@
       <EditableField
         data-test-custom-people-field
         @value={{get @attributes "value"}}
-        @onCommit={{@onCommit}}
+        @onSave={{@onCommit}}
         @isSaving={{@isSaving}}
         @disabled={{@disabled}}
       >
@@ -49,7 +49,7 @@
             {{did-insert F.applyPeopleSelectClasses}}
             class="multiselect--narrow"
             @selected={{h.users}}
-            @onCommit={{h.updateUsers}}
+            @onChange={{h.onSave}}
             {{click-outside (fn F.update h.users)}}
             data-test-custom-people-field-input
           />

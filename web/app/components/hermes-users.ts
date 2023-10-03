@@ -11,14 +11,17 @@ interface HermesUsersComponentSignature {
   Element: HTMLDivElement;
   Args: {
     emails?: string[];
+    onSave: (value: string[]) => Promise<void>;
   };
   Blocks: {
     default: [
       h: {
         isLoading: boolean;
         users: HermesUser[];
-        updateUsers: (users: HermesUser[]) => void;
-        cancelUpdate: (emails?: string[]) => void;
+        emails: string[];
+        onChange: (users: HermesUser[]) => void;
+        onCancel: (emails?: string[]) => void;
+        onSave: () => void;
       },
     ];
   };
@@ -52,36 +55,40 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
       .then((r) => r?.json());
 
     if (people) {
-      this.serializedUsers = serializePeople(people);
-      this._cachedHermesUsers = this.serializedUsers;
+      this.index = serializePeople(people);
+      this._cachedHermesUsers = this.index;
     }
 
     this.isLoading = false;
   });
 
-  @tracked serializedUsers: HermesUser[] =
+  @tracked index: HermesUser[] =
     this.args.emails?.map((email) => ({
       email,
     })) ?? [];
 
+  get emails() {
+    return this.index.map((user) => user.email);
+  }
   /**
    * this runs when a person is added/removed within the people-select.
    * not when cancelled or committed.
    */
-  @action updateUsers(users: HermesUser[]) {
-    console.log("updateUsers", users);
-    console.log("updateUsers", this.serializedUsers);
-    console.log("cachedUsers", this._cachedHermesUsers);
-    this.serializedUsers = users;
+  @action onChange(users: HermesUser[]) {
+    console.log("onChange users", users);
+    this.index = users;
   }
 
-  @action cancelUpdate(emails?: HermesUser[]) {
-    console.log("HU cancelUpdate", emails);
+  @action onSave() {
+    void this.args.onSave(this.emails);
+  }
+
+  @action onCancel(emails?: HermesUser[]) {
     if (!emails) {
-      this.serializedUsers = [];
+      this.index = [];
       return;
     }
-    this.serializedUsers = this._cachedHermesUsers;
+    this.index = this._cachedHermesUsers;
   }
 }
 
