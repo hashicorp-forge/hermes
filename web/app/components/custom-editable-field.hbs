@@ -27,40 +27,38 @@
   </EditableField>
 
 {{else if this.typeIsPeople}}
-  <HermesUsers class="w-full" @emails={{this.emails}} as |h|>
-    <EditableField
-      data-test-custom-people-field
-      @value={{get @attributes "value"}}
-      @onChange={{@onChange}}
-      @isSaving={{@isSaving}}
-    >
-      <:default>
-        {{#if h.users.length}}
-          <ol class="person-list">
-            {{#each h.users as |user|}}
-              <li>
-                <Person
-                  @imageIsLoading={{h.isLoading}}
-                  @imgURL={{user.imgURL}}
-                  @email={{user.email}}
-                />
-              </li>
-            {{/each}}
-          </ol>
-        {{else}}
-          <EmptyStateText />
-        {{/if}}
-      </:default>
-      <:editing as |F|>
-        <Inputs::PeopleSelect
-          {{autofocus targetChildren=true}}
-          class="multiselect--narrow"
-          @selected={{h.users}}
-          @onChange={{h.updateUsers}}
-          {{click-outside (fn F.update h.users)}}
-          data-test-custom-people-field-input
-        />
-      </:editing>
-    </EditableField>
-  </HermesUsers>
+  <EditableField
+    data-test-custom-people-field
+    @value={{get @attributes "value"}}
+    @onChange={{@onChange}}
+    @isSaving={{@isSaving}}
+  >
+    <:default>
+      {{#if this.people.length}}
+        <ol class="person-list">
+          {{#each this.people as |user|}}
+            <li>
+              <Person
+                @imageIsLoading={{h.isLoading}}
+                @imgURL={{user.imgURL}}
+                @email={{user.email}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+      {{else}}
+        <EmptyStateText />
+      {{/if}}
+    </:default>
+    <:editing as |F|>
+      <Inputs::PeopleSelect
+        {{autofocus targetChildren=true}}
+        class="multiselect--narrow"
+        @selected={{this.people}}
+        @onChange={{this.updateEmails}}
+        {{click-outside (fn F.update this.people)}}
+        data-test-custom-people-field-input
+      />
+    </:editing>
+  </EditableField>
 {{/if}}
