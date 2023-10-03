@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
+import { HermesUser } from "hermes/types/document";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -13,6 +14,8 @@ interface EditableFieldComponentSignature {
   Args: {
     value: any;
     onCommit: (value: any) => void;
+    onCancel?: () => void;
+    hermesUsers?: HermesUser[];
     isLoading?: boolean;
     isSaving?: boolean;
     disabled?: boolean;
@@ -29,6 +32,7 @@ interface EditableFieldComponentSignature {
     editing: [
       F: {
         value: any;
+        relatedButtons: HTMLElement[];
         update: (value: any) => void;
         applyPeopleSelectClasses: (element: HTMLElement) => void;
       },
@@ -153,14 +157,18 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * The action to disable the <:editing> block.
    * Called when a user commits or cancels their edit.
    */
-  @action protected disableEditing() {
+  @action protected disableEditing(revertValue?: boolean) {
     this.editingIsEnabled = false;
 
-    schedule("afterRender", this, () => {
-      console.log("this.value", this.value);
-      this.value = this.cachedValue;
-      console.log("reverted to", this.value);
-    });
+    // FIXME: Does this work
+    if (revertValue) {
+      schedule("afterRender", this, () => {
+        console.log("revertValue", this.value);
+        this.args.onCancel?.();
+        this.value = this.cachedValue;
+        console.log("revertedValue", this.value);
+      });
+    }
   }
 
   /**
@@ -178,13 +186,14 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           break;
         }
         ev.preventDefault();
-        // FIXME: this is not the value we want
-        this.maybeUpdateValue(this.value);
+        console.log("this.value on handleKeydown", this.value);
+        console.log("this.args.hermesUsers", this.args.hermesUsers);
+        this.maybeUpdateValue(this.args.hermesUsers);
         break;
       case "Escape":
         ev.preventDefault();
         console.log("this.value on handleKeydown", this.value);
-        this.disableEditing();
+        this.disableEditing(true);
         break;
     }
   }
@@ -196,6 +205,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
+    console.log("maybeUpdateValue", eventOrValue);
+    console.log("hermesUsers", this.args.hermesUsers);
     let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {
@@ -225,13 +236,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         }
       }
 
-      // Trim whitespace from the beginning and end of the string.
+      // Trim whitespace from the string
       if (typeof newValue === "string") {
         newValue = newValue.trim();
       }
 
       this.cachedValue = this.value = newValue;
-      this.args.onCommit?.(this.value);
+      console.log("this.value on maybeUpdateValue", this.value);
+
+      console.log("this.args.hermesUsers", this.args.hermesUsers);
+      this.args.onCommit?.(this.args.hermesUsers);
     }
 
     scheduleOnce("actions", this, () => {

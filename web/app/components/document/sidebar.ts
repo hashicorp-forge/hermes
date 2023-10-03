@@ -106,7 +106,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers: HermesUser[] | null = null;
   @tracked product = this.args.document.product || "";
 
-  @tracked contributorEmails = this.args.document.contributors;
+  get contributorEmails() {
+    return this.args.document.contributors;
+  }
 
   /**
    * Whether a draft was published during the session.
@@ -491,6 +493,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @action maybeShowFlashError(error: Error, title: string) {
     if (!this.modalIsShown) {
       this.showFlashError(error, title);
+    }
+  }
+
+  @action handlePeopleSelectKeydown(h: any, f: any, e: KeyboardEvent) {
+    console.log("f", f);
+    console.log("h", h);
+    console.log("e", e.key);
+    if (e.key === "Enter") {
+      console.log("enter");
     }
   }
 

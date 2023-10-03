@@ -18,6 +18,7 @@ interface HermesUsersComponentSignature {
         isLoading: boolean;
         users: HermesUser[];
         updateUsers: (users: HermesUser[]) => void;
+        cancelUpdate: (emails?: string[]) => void;
       },
     ];
   };
@@ -35,8 +36,14 @@ const serializePeople = (people: GoogleUser[]): HermesUser[] => {
 export default class HermesUsersComponent extends Component<HermesUsersComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
+  // does this work more than once?
+  @tracked _cachedHermesUsers: HermesUser[] = [];
+
   @tracked isLoading = true;
 
+  /**
+   * This is only called once, fwiw
+   */
   protected serializeUsers = task(async () => {
     if (!this.args.emails?.length) return;
 
@@ -46,6 +53,7 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
 
     if (people) {
       this.serializedUsers = serializePeople(people);
+      this._cachedHermesUsers = this.serializedUsers;
     }
 
     this.isLoading = false;
@@ -56,9 +64,24 @@ export default class HermesUsersComponent extends Component<HermesUsersComponent
       email,
     })) ?? [];
 
+  /**
+   * this runs when a person is added/removed within the people-select.
+   * not when cancelled or committed.
+   */
   @action updateUsers(users: HermesUser[]) {
     console.log("updateUsers", users);
+    console.log("updateUsers", this.serializedUsers);
+    console.log("cachedUsers", this._cachedHermesUsers);
     this.serializedUsers = users;
+  }
+
+  @action cancelUpdate(emails?: HermesUser[]) {
+    console.log("HU cancelUpdate", emails);
+    if (!emails) {
+      this.serializedUsers = [];
+      return;
+    }
+    this.serializedUsers = this._cachedHermesUsers;
   }
 }
 

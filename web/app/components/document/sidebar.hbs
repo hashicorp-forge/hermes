@@ -180,11 +180,15 @@
         <Document::Sidebar::SectionHeader @title="Contributors" />
         <div class="editable-field-container">
           {{! FIXME: this needs to update }}
+          {{! maybe this is "items" and it can be an initial email list and then a tracked object array }}
           <HermesUsers class="w-full" @emails={{this.contributorEmails}} as |h|>
             <EditableField
               data-test-document-contributors
               data-test-editable={{this.isOwner}}
-              @value={{h.users}}
+              {{! secondary value? }}
+              @value={{this.contributorEmails}}
+              @hermesUsers={{h.users}}
+              @onCancel={{fn h.cancelUpdate this.contributorEmails}}
               @onCommit={{perform this.save "contributors"}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
@@ -207,8 +211,6 @@
                 {{/if}}
               </:default>
               <:editing as |F|>
-                {{log "F.value" F.value}}
-                {{log "h.users" h.users}}
                 <Inputs::PeopleSelect
                   {{autofocus targetChildren=true}}
                   {{did-insert F.applyPeopleSelectClasses}}
@@ -216,6 +218,7 @@
                   class="multiselect--narrow"
                   @selected={{h.users}}
                   @onCommit={{h.updateUsers}}
+                  {{! FIXME -- clicking check button doesnt commit }}
                   {{click-outside (fn F.update h.users)}}
                 />
               </:editing>
