@@ -195,7 +195,10 @@ func (c *Command) Run(args []string) int {
 	// Initialize Datadog.
 	dd := datadog.NewConfig(*cfg)
 	if dd.Enabled {
-		tracerOpts := []tracer.StartOption{}
+		tracerOpts := []tracer.StartOption{
+			tracer.WithLogStartup(false),
+		}
+
 		if dd.Env != "" {
 			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
 		}
