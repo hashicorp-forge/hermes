@@ -8,7 +8,7 @@
     {{on-document "keydown" this.handleKeydown}}
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
-      {{#if (eq @type "people")}}
+      {{#if this.typeIsPeople}}
 
         <Inputs::PeopleSelect
           {{autofocus targetChildren=true}}
@@ -92,11 +92,23 @@
       {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full">
           {{#if this.value.length}}
-            {{#if (eq @type "people")}}
+            {{#if this.typeIsPeople}}
               <ol class="person-list">
                 {{#each this.value as |person|}}
                   <li>
-                    <Person @imgURL={{person.imgURL}} @email={{person.email}} />
+                    {{#if (eq @type "approvers")}}
+                      {{! TODO: combine these }}
+                      <Person::Approver
+                        @document={{this.document}}
+                        @imgURL={{person.imgURL}}
+                        @email={{person.email}}
+                      />
+                    {{else}}
+                      <Person
+                        @imgURL={{person.imgURL}}
+                        @email={{person.email}}
+                      />
+                    {{/if}}
                   </li>
                 {{/each}}
               </ol>

@@ -4,7 +4,7 @@ import { action } from "@ember/object";
 import { next, schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
-import { HermesUser } from "hermes/types/document";
+import { HermesDocument, HermesUser } from "hermes/types/document";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -14,8 +14,9 @@ interface EditableFieldComponentSignature {
   Args: {
     value: any;
     field?: string;
-    onChange?: (value: any) => void;
+    document?: HermesDocument;
     onSave: ((textValue: string) => void) | (() => void);
+    onChange?: (value: any) => void;
     onCancel?: (cachedValue?: string[]) => void;
     isLoading?: boolean;
     isSaving?: boolean;
@@ -27,7 +28,7 @@ interface EditableFieldComponentSignature {
     buttonOverlayPaddingBottom?: string;
     name?: string;
     placeholder?: string;
-    type?: "people";
+    type?: "people" | "approvers";
   };
   Blocks: {};
 }
@@ -75,9 +76,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected toggleButton: HTMLElement | null = null;
   @tracked protected cancelButton: HTMLElement | null = null;
 
-  protected get field() {
-    assert("this.args.field must exist", this.args.field);
-    return this.args.field;
+  protected get typeIsPeople(): boolean {
+    return this.args.type === "people" || this.args.type === "approvers";
+  }
+
+  protected get document() {
+    assert("this.args.document must exist", this.args.document);
+    return this.args.document;
   }
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
