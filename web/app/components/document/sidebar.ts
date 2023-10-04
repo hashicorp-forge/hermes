@@ -499,15 +499,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
-  @action handlePeopleSelectKeydown(h: any, f: any, e: KeyboardEvent) {
-    console.log("f", f);
-    console.log("h", h);
-    console.log("e", e.key);
-    if (e.key === "Enter") {
-      console.log("enter");
-    }
-  }
-
   showFlashError(error: Error, title: string) {
     this.flashMessages.add({
       title,
@@ -636,18 +627,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       field: CustomEditableField,
       val: string | HermesUser[],
     ) => {
-      console.log('"save custom field" task');
-      console.log("fieldName", fieldName);
-      console.log("field", field);
-      console.log("val", val);
       if (field && val !== undefined) {
         let serializedValue;
 
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          console.log("val is array");
-          console.log("val", val);
           serializedValue = val.map((p: HermesUser) => p.email);
         }
 
@@ -655,7 +640,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         field.value = serializedValue;
 
         try {
-          console.log("attempting patch");
           await this.patchDocument.perform({
             customFields: [field],
           });
@@ -746,7 +730,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action
   updateContributors(contributors: HermesUser[]) {
-    console.log("UPDATE CONTRIBUTORS", contributors);
     this.contributors = contributors;
   }
 

@@ -121,7 +121,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     dropdown: any,
     event: KeyboardEvent,
   ) {
-    console.log("onPeopleSelectKeydown");
     const popoverSelector = ".ember-basic-dropdown-content";
 
     if (event.key === "Enter") {
@@ -198,7 +197,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       if (this.args.onCancel) {
         this.args.onCancel(this.cachedValue);
       } else {
-        console.log("about to rever to", this.cachedValue);
         this.value = this.cachedValue;
         this.onChange(this.value);
       }
@@ -237,8 +235,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
-    // this doesn't have the most updated people value when clicking button
-    console.log("maybeUpdateValue", eventOrValue);
     let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {
