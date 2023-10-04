@@ -627,7 +627,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       val: string | string[],
     ) => {
       if (field && val !== undefined) {
-        debugger;
         let serializedValue;
 
         if (typeof val === "string") {
