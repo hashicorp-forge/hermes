@@ -91,15 +91,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   /**
-   * An asserted-true reference to the @document argument.
-   * Passed to the `Person` component if the `type` argument is "approvers"
-   * so it can fetch the user's approval status.
-   */
-  protected get document() {
-    assert("this.args.document must exist", this.args.document);
-    return this.args.document;
-  }
-  /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
    */
@@ -167,7 +158,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         event.stopPropagation();
         powerSelectAPI.actions.close();
       } else {
-        this.value = this.cachedValue;
+        this.disableAndRevertChanges();
       }
     }
   }
@@ -226,15 +217,11 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * revert the local value. Called by the cancel button
    * and on Escape keydown.
    */
-  @action protected disableEditingAndRevert() {
+  @action protected disableAndRevertChanges() {
     this.disableEditing();
 
     schedule("afterRender", this, () => {
       this.value = this.cachedValue;
-      console.log(
-        "revering changes (should always be a hermesUser)",
-        this.value,
-      );
       this.onChange(this.value as HermesUser[]);
     });
   }
@@ -249,7 +236,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       case "Enter":
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
-          this.disableEditingAndRevert();
+          this.disableAndRevertChanges();
           break;
         }
         ev.preventDefault();
@@ -257,7 +244,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
-        this.disableEditingAndRevert();
+        this.disableAndRevertChanges();
         break;
     }
   }

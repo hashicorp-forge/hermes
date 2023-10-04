@@ -1,15 +1,17 @@
 {{#let (element (or @tag "p")) as |Field|}}
   <Field class="w-full">
-    {{#if @value.length}}
-      {{#if (eq @type (or "people" "approvers"))}}
+    {{#if this.valueIsEmpty}}
+      <EmptyStateText />
+    {{else}}
+      {{#if this.typeIsPeople}}
         <ol class="person-list">
-          {{#each @value as |person|}}
+          {{#each this.people as |person|}}
             <li>
               <Person
                 @badge={{if
                   (and
                     (eq @type "approvers")
-                    (has-approved-doc @document person.email)
+                    (has-approved-doc this.document person.email)
                   )
                   "approved"
                 }}
@@ -20,10 +22,8 @@
           {{/each}}
         </ol>
       {{else}}
-        {{@value}}
+        {{this.stringValue}}
       {{/if}}
-    {{else}}
-      <EmptyStateText />
     {{/if}}
   </Field>
 {{/let}}

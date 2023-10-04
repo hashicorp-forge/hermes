@@ -12,8 +12,6 @@
 
   .saving {
     opacity: 0.5;
-
-    // disable mouseover stfuf
   }
 
   &.button-affordance {
@@ -121,10 +119,6 @@
       @apply absolute left-0 h-full w-full bg-gradient-to-b;
     }
 
-    &.white::before {
-      @apply from-white via-white/90 to-white/0;
-    }
-
     &.page-faint::before {
       @apply from-color-page-faint via-color-page-faint-90 to-transparent;
     }
@@ -132,14 +126,14 @@
     button {
       &:first-child {
         animation:
-          slideDownXs 300ms cubic-bezier(0, 1, 0.5, 1),
+          slideDownXs 150ms cubic-bezier(0, 1, 0.5, 1),
           fadeIn 80ms ease-in-out;
       }
 
       &:nth-child(2) {
         animation:
-          slideDownXs 600ms cubic-bezier(0, 1, 0.5, 1),
-          fadeIn 100ms ease-in-out;
+          slideDownXs 350ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 120ms ease-in-out;
       }
     }
   }

@@ -53,7 +53,7 @@
           @size="small"
           @color="secondary"
           {{did-insert this.registerCancelButton}}
-          {{on "click" this.disableEditingAndRevert}}
+          {{on "click" this.disableAndRevertChanges}}
         />
       </div>
     </div>
@@ -69,7 +69,7 @@
           @tag={{@tag}}
           @value={{this.value}}
           @type={{@type}}
-          @document={{this.document}}
+          @document={{@document}}
         />
       </div>
     {{else}}
@@ -82,7 +82,7 @@
           @tag={{@tag}}
           @value={{this.value}}
           @type={{@type}}
-          @document={{this.document}}
+          @document={{@document}}
         />
         {{#unless @disabled}}
           <span class="edit-affordance gray">

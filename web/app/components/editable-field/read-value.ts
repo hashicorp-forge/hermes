@@ -1,10 +1,11 @@
+import { assert } from "@ember/debug";
 import Component from "@glimmer/component";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 
 interface EditableFieldReadValueSignature {
   Args: {
     tag?: "h1";
-    value: string | HermesUser[];
+    value?: string | HermesUser[];
     type?: "people" | "approvers";
     document?: HermesDocument;
   };
@@ -13,10 +14,40 @@ interface EditableFieldReadValueSignature {
   };
 }
 
-export default class EditableFieldReadValue extends Component<EditableFieldReadValueSignature> {}
+export default class EditableFieldReadValue extends Component<EditableFieldReadValueSignature> {
+  protected get typeIsPeople(): boolean {
+    return this.args.type === "people" || this.args.type === "approvers";
+  }
+
+  protected get valueIsEmpty(): boolean {
+    if (!this.args.value) {
+      return true;
+    }
+    if (typeof this.args.value === "string") {
+      return this.args.value === "";
+    } else {
+      return this.people.length === 0;
+    }
+  }
+
+  protected get stringValue(): string {
+    assert("value must be a string", typeof this.args.value === "string");
+    return this.args.value;
+  }
+
+  protected get document(): HermesDocument {
+    assert("document must exist", this.args.document);
+    return this.args.document;
+  }
+
+  protected get people(): HermesUser[] {
+    assert("value must be an array", Array.isArray(this.args.value));
+    return this.args.value;
+  }
+}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    'EditableField::ReadValue': typeof EditableFieldReadValue;
+    "EditableField::ReadValue": typeof EditableFieldReadValue;
   }
 }
