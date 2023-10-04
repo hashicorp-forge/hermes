@@ -8,18 +8,18 @@
     {{on-document "keydown" this.handleKeydown}}
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
-      {{#if (has-block "editing")}}
+      {{#if (eq @type "people")}}
 
-        {{yield
-          (hash
-            value=this.value
-            update=this.maybeUpdateValue
-            onChange=this.onChange
-            applyPeopleSelectClasses=this.applyPeopleSelectClasses
-            relatedButtons=this.relatedButtons
-          )
-          to="editing"
-        }}
+        <Inputs::PeopleSelect
+          {{autofocus targetChildren=true}}
+          data-test-document-contributors-editable
+          class="multiselect--narrow"
+          @selected={{this.value}}
+          @onChange={{this.onChange}}
+          @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
+          {{! we dont need to pass in this.value probably }}
+          {{click-outside (fn this.maybeUpdateValue this.value)}}
+        />
 
       {{else}}
         <Hds::Form::Textarea::Field
@@ -91,15 +91,25 @@
     >
       {{#let (element (or @tag "p")) as |Field|}}
         <Field class="w-full">
-          {{#if (has-block "default")}}
-            {{yield (hash value=this.value)}}
-          {{else}}
-            {{#if this.value}}
-              {{this.value}}
+          {{#if this.value.length}}
+            {{#if (eq @type "people")}}
+              <ol class="person-list">
+                {{#each this.value as |person|}}
+                  <li>
+                    <Person @imgURL={{person.imgURL}} @email={{person.email}} />
+                  </li>
+                {{/each}}
+              </ol>
             {{else}}
-              <EmptyStateText />
+              {{this.value}}
+
             {{/if}}
+
+          {{else}}
+            <EmptyStateText />
+
           {{/if}}
+
         </Field>
       {{/let}}
       {{#unless @disabled}}

@@ -187,39 +187,8 @@
             @onSave={{perform this.save "contributors"}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
-          >
-            <:default as |F|>
-              {{#if F.value.length}}
-                <ol class="person-list">
-                  {{#each F.value as |contributor|}}
-                    <li>
-                      <Person
-                        @imgURL={{contributor.imgURL}}
-                        @email={{contributor.email}}
-                      />
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <EmptyStateText />
-              {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                {{autofocus targetChildren=true}}
-                data-test-document-contributors-editable
-                class="multiselect--narrow"
-                @selected={{F.value}}
-                @onChange={{F.onChange}}
-                @onKeydown={{fn
-                  this.onPeopleSelectKeydown
-                  "contributors"
-                  F.update
-                }}
-                {{click-outside (fn F.update F.value)}}
-              />
-            </:editing>
-          </EditableField>
+            @type="people"
+          />
         </div>
       </div>
 
@@ -230,40 +199,13 @@
             data-test-document-approvers
             data-test-editable={{this.isOwner}}
             @value={{this.approvers}}
+            @onChange={{this.updateApprovers}}
             @onSave={{perform this.save "approvers"}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{this.editingIsDisabled}}
-          >
-            <:default>
-              {{#if this.approvers.length}}
-                <ol class="person-list">
-                  {{#each this.approvers as |approver|}}
-                    <li>
-                      <Person::Approver
-                        @document={{@document}}
-                        @imgURL={{approver.imgURL}}
-                        @email={{approver.email}}
-                      />
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <EmptyStateText />
-              {{/if}}
-            </:default>
-            <:editing as |F|>
-              <Inputs::PeopleSelect
-                {{autofocus targetChildren=true}}
-                data-test-document-approvers-editable
-                class="multiselect--narrow"
-                @selected={{this.approvers}}
-                @onChange={{this.updateApprovers}}
-                {{click-outside (fn F.update this.approvers)}}
-              />
-            </:editing>
-          </EditableField>
+            @type="people"
+          />
         </div>
-
       </div>
 
       {{! Created }}
@@ -307,7 +249,7 @@
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}
-              @onChange={{perform this.saveCustomField field attributes}}
+              @onSave={{perform this.saveCustomField field attributes}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             />

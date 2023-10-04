@@ -13,6 +13,7 @@ interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
     value: any;
+    field?: string;
     onChange?: (value: any) => void;
     onSave: ((textValue: string) => void) | (() => void);
     onCancel?: (cachedValue?: string[]) => void;
@@ -26,19 +27,9 @@ interface EditableFieldComponentSignature {
     buttonOverlayPaddingBottom?: string;
     name?: string;
     placeholder?: string;
+    type?: "people";
   };
-  Blocks: {
-    default: [value: any];
-    editing: [
-      F: {
-        value: any;
-        relatedButtons: HTMLElement[];
-        update: (value: any) => void;
-        onChange: (value: any) => void;
-        applyPeopleSelectClasses: (element: HTMLElement) => void;
-      },
-    ];
-  };
+  Blocks: {};
 }
 
 export default class EditableFieldComponent extends Component<EditableFieldComponentSignature> {
@@ -56,7 +47,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * The value of the field. Initially set to the value passed in.
    * Updated when the user commits their changes.
    */
-  @tracked protected value = this.args.value;
+  @tracked protected value = this.cachedValue;
 
   /**
    * Whether the <:editing> block is enabled.
@@ -83,6 +74,11 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected relatedButtons: HTMLElement[] = [];
   @tracked protected toggleButton: HTMLElement | null = null;
   @tracked protected cancelButton: HTMLElement | null = null;
+
+  protected get field() {
+    assert("this.args.field must exist", this.args.field);
+    return this.args.field;
+  }
   /**
    * The modifier passed to the `editing` block to apply to the input or textarea.
    * Autofocuses the input and adds a blur listener to commit changes.
@@ -117,6 +113,35 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       });
     } else {
       addClasses();
+    }
+  }
+
+  @action protected onPeopleSelectKeydown(
+    update: (value: any) => void,
+    dropdown: any,
+    event: KeyboardEvent,
+  ) {
+    console.log("onPeopleSelectKeydown");
+    const popoverSelector = ".ember-basic-dropdown-content";
+
+    if (event.key === "Enter") {
+      if (!document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        assert("updateFunction must exist", update);
+        update(dropdown.selected);
+      }
+    }
+
+    if (event.key === "Escape") {
+      if (document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropdown.actions.close();
+      } else {
+        this.value = this.cachedValue;
+      }
     }
   }
 
@@ -212,7 +237,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
-    debugger;
     // this doesn't have the most updated people value when clicking button
     console.log("maybeUpdateValue", eventOrValue);
     let newValue: string | string[] | undefined;

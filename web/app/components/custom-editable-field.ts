@@ -14,7 +14,7 @@ interface CustomEditableFieldComponentSignature {
     document: HermesDocument;
     field: string;
     attributes: CustomEditableField;
-    onChange: (value: any) => void;
+    onSave: (value: any) => void;
     isSaving?: boolean;
     disabled?: boolean;
   };

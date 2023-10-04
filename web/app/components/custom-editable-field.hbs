@@ -1,47 +1,11 @@
 <div class="editable-field-container" ...attributes>
-  {{#if this.typeIsString}}
-    <EditableField
-      data-test-custom-string-field
-      @value={{get @document @field}}
-      @onSave={{@onChange}}
-      @isSaving={{@isSaving}}
-      @disabled={{@disabled}}
-    />
-
-  {{else if this.typeIsPeople}}
-    <EditableField
-      data-test-custom-people-field
-      @value={{get @attributes "value"}}
-      @onSave={{@onChange}}
-      @isSaving={{@isSaving}}
-    >
-      <:default>
-        {{#if this.people.length}}
-          <ol class="person-list">
-            {{#each this.people as |user|}}
-              <li>
-                <Person @imgURL={{user.imgURL}} @email={{user.email}} />
-              </li>
-            {{/each}}
-          </ol>
-        {{else}}
-          <EmptyStateText />
-        {{/if}}
-      </:default>
-      <:editing as |F|>
-
-        {{! this knows things that editableField doesnt }}
-        <Inputs::PeopleSelect
-          {{autofocus targetChildren=true}}
-          class="multiselect--narrow"
-          @selected={{this.people}}
-          @onChange={{this.updateEmails}}
-          @onKeydown={{fn this.onPeopleSelectKeydown F.update}}
-          {{! better way than click-outside? }}
-          {{click-outside (fn this.onClickOutside F.update this.people)}}
-          data-test-custom-people-field-input
-        />
-      </:editing>
-    </EditableField>
-  {{/if}}
+  <EditableField
+    data-test-custom-string-field
+    @value={{if this.typeIsString (get @document @field) this.people}}
+    @onChange={{if this.typeIsPeople this.updateEmails}}
+    @onSave={{@onSave}}
+    @isSaving={{@isSaving}}
+    @disabled={{@disabled}}
+    @type={{if this.typeIsPeople "people"}}
+  />
 </div>

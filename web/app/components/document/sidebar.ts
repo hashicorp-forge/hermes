@@ -750,39 +750,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.contributors = contributors;
   }
 
-  @action protected onPeopleSelectKeydown(
-    field: string,
-    update: (value: any) => void,
-    dropdown: any,
-    event: KeyboardEvent,
-  ) {
-    console.log("onPeopleSelectKeydown");
-    const popoverSelector = ".ember-basic-dropdown-content";
-
-    if (event.key === "Enter") {
-      if (!document.querySelector(popoverSelector)) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        assert("updateFunction must exist", update);
-        update(dropdown.selected);
-      }
-    }
-
-    if (event.key === "Escape") {
-      if (document.querySelector(popoverSelector)) {
-        event.preventDefault();
-        event.stopPropagation();
-        dropdown.actions.close();
-      } else {
-        const cachedVariableName = `cached${capitalize(field)}`;
-
-        // @ts-ignore
-        this[field] = this[cachedVariableName];
-      }
-    }
-  }
-
   @action updateTitle(title: string) {
     this.title = title;
     void this.save.perform("title", this.title);

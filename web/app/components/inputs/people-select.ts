@@ -19,7 +19,7 @@ interface InputsPeopleSelectComponentSignature {
     onChange: (value: any) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
-    onKeydown?: (field: string, dropdown: any, event: KeyboardEvent) => void;
+    onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
   };
 }
 
