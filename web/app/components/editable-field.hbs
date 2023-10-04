@@ -1,5 +1,6 @@
 <div
   class="editable-field
+    {{if @isSaving 'saving'}}
     {{if (and this.editingIsEnabled (not @isSaving)) 'z-10'}}"
   ...attributes
 >
@@ -59,12 +60,12 @@
     </div>
   {{else}}
     {{#if @isSaving}}
-      <div data-test-spinner class="absolute top-2.5 right-[9px]">
+      <div data-test-spinner class="edit-affordance light-gray">
         <FlightIcon @name="loading" data-test-loading-spinner />
       </div>
     {{/if}}
     {{#if (or @disabled @isSaving)}}
-      <div class="field-toggle {{if @isSaving 'saving'}}">
+      <div class="field-toggle">
         <EditableField::ReadValue
           @tag={{@tag}}
           @value={{this.value}}

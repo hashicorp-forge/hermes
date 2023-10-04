@@ -5,13 +5,24 @@
 .editable-field {
   @apply relative flex w-full;
 
-  &[disabled],
   &.saving {
-    cursor: default;
-  }
-
-  .saving {
     opacity: 0.5;
+
+    .edit-affordance {
+      @apply visible;
+
+      &::before {
+        @apply bg-gradient-to-l;
+        @apply opacity-100;
+      }
+    }
+
+    .field-toggle.field-toggle:not([disabled], .disabled) {
+      &:hover,
+      &:focus-visible &:focus {
+        @apply bg-transparent;
+      }
+    }
   }
 
   &.button-affordance {
@@ -32,13 +43,14 @@
   .field-toggle {
     @apply flex w-full items-center rounded-button-md border border-transparent text-inherit transition-colors;
     @apply min-h-[36px];
+    @apply break-words;
 
     &.disabled,
     &:disabled {
       @apply cursor-auto items-center;
     }
 
-    &:not([disabled], .disabled, .saving) {
+    &:not([disabled], .disabled) {
       &:hover,
       &:focus-visible &:focus {
         @apply bg-color-palette-neutral-175;

@@ -116,10 +116,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * Updates the local and parent values when the user selects or deselects a person.
    *
    */
-  @action protected onChange(value: HermesUser[]) {
-    assert("this.args.onChange must exist", this.args.onChange);
+  @action protected onChange(value: string | HermesUser[]) {
     this.value = value;
-    this.args.onChange(this.value);
+
+    if (this.args.onChange) {
+      this.args.onChange(this.value);
+    }
   }
 
   /**
