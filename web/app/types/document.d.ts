@@ -34,6 +34,8 @@ export interface HermesDocument {
   appCreated?: boolean;
   contributors?: string[];
   approvers?: string[];
+  contributorObjects?: HermesUser[];
+  approverObjects?: HermesUser[];
   changesRequestedBy?: string[];
   approvedBy?: string[];
   summary?: string;
