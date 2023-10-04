@@ -108,10 +108,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
-  get contributorEmails() {
-    return this.args.document.contributors;
-  }
-
   /**
    * Whether a draft was published during the session.
    * Set true when the user successfully requests a review.
@@ -590,14 +586,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  updateProduct = keepLatestTask(async (product: string) => {
+  saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
     // productAbbreviation is computed by the back end
   });
 
   get saveIsRunning() {
-    return this.save.isRunning || this.saveCustomField.isRunning;
+    return (
+      this.save.isRunning ||
+      this.saveCustomField.isRunning ||
+      this.saveProduct.isRunning
+    );
   }
 
   save = task(async (field: string, val: string | HermesUser[]) => {
@@ -722,22 +722,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
-  @action
-  updateApprovers(approvers: HermesUser[]) {
+  @action updateApprovers(approvers: HermesUser[]) {
     this.approvers = approvers;
   }
 
-  @action
-  updateContributors(contributors: HermesUser[]) {
+  @action updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
 
-  @action updateTitle(title: string) {
+  @action saveTitle(title: string) {
     this.title = title;
     void this.save.perform("title", this.title);
   }
 
-  @action updateSummary(summary: string) {
+  @action saveSummary(summary: string) {
     this.summary = summary;
     void this.save.perform("summary", this.summary);
   }

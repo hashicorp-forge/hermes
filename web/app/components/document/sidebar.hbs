@@ -104,7 +104,7 @@
             data-test-document-title
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
-            @onSave={{this.updateTitle}}
+            @onSave={{this.saveTitle}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @isRequired={{true}}
@@ -125,7 +125,7 @@
             data-test-document-summary
             data-test-editable={{this.isOwner}}
             @value={{this.summary}}
-            @onSave={{this.updateSummary}}
+            @onSave={{this.saveSummary}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
             @name="summary"
@@ -151,7 +151,7 @@
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
-              @onChange={{this.updateProduct.perform}}
+              @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
               @formatIsBadge={{true}}
               @renderOut={{true}}
