@@ -9,7 +9,6 @@
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
       {{#if this.typeIsPeople}}
-
         <Inputs::PeopleSelect
           {{autofocus targetChildren=true}}
           data-test-document-contributors-editable
@@ -17,10 +16,8 @@
           @selected={{this.value}}
           @onChange={{this.onChange}}
           @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
-          {{! we dont need to pass in this.value probably }}
           {{click-outside (fn this.maybeUpdateValue this.value)}}
         />
-
       {{else}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
@@ -40,6 +37,8 @@
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
+
+      {{! "Confirm" and "Cancel" buttons }}
       <div
         class="edit-overlay-affordance
           {{if (eq @buttonOverlayColor 'white') 'white' 'page-faint'}}
@@ -66,10 +65,8 @@
           {{did-insert this.registerCancelButton}}
           {{on "click" this.revertChanges}}
         />
-
       </div>
     </div>
-
   {{else}}
     {{#if (or @isSaving @isLoading)}}
       <div
@@ -96,32 +93,26 @@
               <ol class="person-list">
                 {{#each this.value as |person|}}
                   <li>
-                    {{#if (eq @type "approvers")}}
-                      {{! TODO: combine these }}
-                      <Person::Approver
-                        @document={{this.document}}
-                        @imgURL={{person.imgURL}}
-                        @email={{person.email}}
-                      />
-                    {{else}}
-                      <Person
-                        @imgURL={{person.imgURL}}
-                        @email={{person.email}}
-                      />
-                    {{/if}}
+                    <Person
+                      @badge={{if
+                        (and
+                          (eq @type "approvers")
+                          (has-approved-doc this.document person.email)
+                        )
+                        "approved"
+                      }}
+                      @imgURL={{person.imgURL}}
+                      @email={{person.email}}
+                    />
                   </li>
                 {{/each}}
               </ol>
             {{else}}
               {{this.value}}
-
             {{/if}}
-
           {{else}}
             <EmptyStateText />
-
           {{/if}}
-
         </Field>
       {{/let}}
       {{#unless @disabled}}
