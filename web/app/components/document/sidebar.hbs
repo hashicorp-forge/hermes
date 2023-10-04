@@ -194,7 +194,6 @@
                   {{#each this.contributors as |contributor|}}
                     <li>
                       <Person
-                        @imageIsLoading={{h.isLoading}}
                         @imgURL={{contributor.imgURL}}
                         @email={{contributor.email}}
                       />
@@ -222,7 +221,6 @@
       <div>
         <Document::Sidebar::SectionHeader @title="Approvers" />
         <div class="editable-field-container mt-[3px]">
-
           <EditableField
             data-test-document-approvers
             data-test-editable={{this.isOwner}}
