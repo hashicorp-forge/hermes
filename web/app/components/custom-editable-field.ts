@@ -1,4 +1,3 @@
-import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -21,56 +20,53 @@ interface CustomEditableFieldComponentSignature {
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  @tracked private cached = this.args.attributes.value || [];
-  @tracked protected emails = this.cached;
+  /**
+   * Whether the field is a string or a PeopleSelect.
+   * Used in the template to determine which values and functions to pass.
+   */
+  protected typeIsString = this.args.attributes.type === "STRING";
+  protected typeIsPeople = this.args.attributes.type === "PEOPLE";
 
-  protected get typeIsString(): boolean {
-    return this.args.attributes.type === "STRING";
-  }
+  /**
+   * The cached value of the field.
+   * Starts as the value passed in; updated on save.
+   * Used to revert `emails` when the users hits Escape.
+   */
+  @tracked private cachedEmails = this.args.attributes.value || [];
 
-  protected get typeIsPeople(): boolean {
-    return this.args.attributes.type === "PEOPLE";
-  }
+  /**
+   * The value of the field. Initially set to the value passed in.
+   * Changes when the user updates or saves the PeopleSelect value.
+   */
+  @tracked protected emails = this.cachedEmails;
 
-  protected get people(): HermesUser[] {
+  /**
+   * The value of the field, serialized for the PeopleSelect.
+   */
+  protected get hermesUsers(): HermesUser[] {
     let emails = this.emails instanceof Array ? this.emails : [this.emails];
     return emails.map((email: string) => {
       return { email, imgURL: null };
     });
   }
 
-  @action protected updateEmails(people: HermesUser[]) {
+  /**
+   * The function to call when the user updates the PeopleSelect value.
+   * Deserializes the value and updates the local `emails` property.
+   */
+  @action protected onPeopleSelectChange(people: HermesUser[]) {
     this.emails = people.map((person: HermesUser) => {
       return person.email;
     });
   }
 
-  @action protected onPeopleSelectKeydown(
-    update: (value: any) => void,
-    dropdown: any,
-    event: KeyboardEvent,
-  ) {
-    const popoverSelector = ".ember-basic-dropdown-content";
-
-    if (event.key === "Enter") {
-      if (!document.querySelector(popoverSelector)) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        assert("updateFunction must exist", update);
-        update(dropdown.selected);
-      }
-    }
-
-    if (event.key === "Escape") {
-      if (document.querySelector(popoverSelector)) {
-        event.preventDefault();
-        event.stopPropagation();
-        dropdown.actions.close();
-      } else {
-        this.emails = this.cached;
-      }
-    }
+  /**
+   * The function to call when the user saves PeopleSelect changes.
+   * Calls the parent `onSave` action and updates the local `cached` property.
+   */
+  @action protected onPeopleSave() {
+    this.args.onSave(this.emails);
+    this.cachedEmails = this.emails;
   }
 }
 

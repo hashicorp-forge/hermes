@@ -1,9 +1,9 @@
 <div class="editable-field-container" ...attributes>
   <EditableField
     data-test-custom-string-field
-    @value={{if this.typeIsString (get @document @field) this.people}}
-    @onChange={{if this.typeIsPeople this.updateEmails}}
-    @onSave={{@onSave}}
+    @value={{if this.typeIsString (get @document @field) this.hermesUsers}}
+    @onChange={{if this.typeIsPeople this.onPeopleSelectChange}}
+    @onSave={{if this.typeIsPeople this.onPeopleSave @onSave}}
     @isSaving={{@isSaving}}
     @disabled={{@disabled}}
     @type={{if this.typeIsPeople "people"}}
