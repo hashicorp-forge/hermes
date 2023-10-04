@@ -1,3 +1,4 @@
+import { assert, debug } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -13,15 +14,15 @@ interface CustomEditableFieldComponentSignature {
     document: HermesDocument;
     field: string;
     attributes: CustomEditableField;
-    onCommit: (value: any) => void;
+    onChange: (value: any) => void;
     isSaving?: boolean;
     disabled?: boolean;
   };
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  @tracked protected emails: string | string[] =
-    this.args.attributes.value || [];
+  @tracked private cached = this.args.attributes.value || [];
+  @tracked protected emails = this.cached;
 
   protected get typeIsString(): boolean {
     return this.args.attributes.type === "STRING";
@@ -37,10 +38,44 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
       return { email, imgURL: null };
     });
   }
+
   @action protected updateEmails(people: HermesUser[]) {
     this.emails = people.map((person: HermesUser) => {
       return person.email;
     });
+  }
+
+  @action onClickOutside(update: (value: any) => void, value: any) {
+    this.cached = value;
+    update(value);
+  }
+
+  @action protected onPeopleSelectKeydown(
+    update: (value: any) => void,
+    dropdown: any,
+    event: KeyboardEvent,
+  ) {
+    const popoverSelector = ".ember-basic-dropdown-content";
+
+    if (event.key === "Enter") {
+      if (!document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        assert("updateFunction must exist", update);
+        update(dropdown.selected);
+      }
+    }
+
+    if (event.key === "Escape") {
+      if (document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropdown.actions.close();
+      } else {
+        this.emails = this.cached;
+      }
+    }
   }
 }
 

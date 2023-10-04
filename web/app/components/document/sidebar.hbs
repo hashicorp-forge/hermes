@@ -179,19 +179,19 @@
       <div>
         <Document::Sidebar::SectionHeader @title="Contributors" />
         <div class="editable-field-container">
-
           <EditableField
             data-test-document-contributors
             data-test-editable={{this.isOwner}}
             @value={{this.contributors}}
-            @onChange={{perform this.save "contributors"}}
+            @onChange={{this.updateContributors}}
+            @onSave={{perform this.save "contributors"}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{not this.isOwner}}
           >
-            <:default>
-              {{#if this.contributors.length}}
+            <:default as |F|>
+              {{#if F.value.length}}
                 <ol class="person-list">
-                  {{#each this.contributors as |contributor|}}
+                  {{#each F.value as |contributor|}}
                     <li>
                       <Person
                         @imgURL={{contributor.imgURL}}
@@ -209,9 +209,14 @@
                 {{autofocus targetChildren=true}}
                 data-test-document-contributors-editable
                 class="multiselect--narrow"
-                @selected={{this.contributors}}
-                @onChange={{this.updateContributors}}
-                {{click-outside (fn F.update this.contributors)}}
+                @selected={{F.value}}
+                @onChange={{F.onChange}}
+                @onKeydown={{fn
+                  this.onPeopleSelectKeydown
+                  "contributors"
+                  F.update
+                }}
+                {{click-outside (fn F.update F.value)}}
               />
             </:editing>
           </EditableField>
@@ -225,7 +230,7 @@
             data-test-document-approvers
             data-test-editable={{this.isOwner}}
             @value={{this.approvers}}
-            @onChange={{perform this.save "approvers"}}
+            @onSave={{perform this.save "approvers"}}
             @isSaving={{this.saveIsRunning}}
             @disabled={{this.editingIsDisabled}}
           >
@@ -302,7 +307,7 @@
               @document={{@document}}
               @field={{field}}
               @attributes={{attributes}}
-              @onCommit={{perform this.saveCustomField field attributes}}
+              @onChange={{perform this.saveCustomField field attributes}}
               @isSaving={{this.saveIsRunning}}
               @disabled={{not this.isOwner}}
             />

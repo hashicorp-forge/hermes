@@ -5,7 +5,6 @@
 >
   {{#if (and this.editingIsEnabled (not @isSaving))}}
 
-    {{! FIXME: ...something here }}
     {{on-document "keydown" this.handleKeydown}}
 
     <div {{did-insert this.registerEditingContainer}} class="w-full">
@@ -15,6 +14,7 @@
           (hash
             value=this.value
             update=this.maybeUpdateValue
+            onChange=this.onChange
             applyPeopleSelectClasses=this.applyPeopleSelectClasses
             relatedButtons=this.relatedButtons
           )
@@ -55,7 +55,7 @@
           @text="Save"
           @icon="check"
           @isIconOnly={{true}}
-          {{on "click" this.maybeUpdateValue}}
+          {{on "click" (fn this.maybeUpdateValue this.value)}}
         />
         <Hds::Button
           @text="Cancel"
@@ -64,7 +64,7 @@
           @size="small"
           @color="secondary"
           {{did-insert this.registerCancelButton}}
-          {{on "click" this.disableEditing}}
+          {{on "click" this.revertChanges}}
         />
 
       </div>
@@ -94,7 +94,11 @@
           {{#if (has-block "default")}}
             {{yield (hash value=this.value)}}
           {{else}}
-            {{or this.value @placeholder}}
+            {{#if this.value}}
+              {{this.value}}
+            {{else}}
+              <EmptyStateText />
+            {{/if}}
           {{/if}}
         </Field>
       {{/let}}

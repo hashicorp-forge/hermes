@@ -13,6 +13,7 @@ interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
     value: any;
+    onChange?: (value: any) => void;
     onSave: ((textValue: string) => void) | (() => void);
     onCancel?: (cachedValue?: string[]) => void;
     isLoading?: boolean;
@@ -33,6 +34,7 @@ interface EditableFieldComponentSignature {
         value: any;
         relatedButtons: HTMLElement[];
         update: (value: any) => void;
+        onChange: (value: any) => void;
         applyPeopleSelectClasses: (element: HTMLElement) => void;
       },
     ];
@@ -90,6 +92,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
     this.applyPeopleSelectClasses(this.inputElement, false);
     this.inputElement.focus();
+  }
+
+  @action protected onChange(value: any) {
+    assert("this.args.onChange must exist", this.args.onChange);
+    this.value = value;
+    this.args.onChange(this.value);
   }
 
   /**
@@ -152,22 +160,24 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.editingIsEnabled = true;
   }
 
+  @action protected disableEditing() {
+    this.editingIsEnabled = false;
+  }
+
   /**
    * The action to disable the <:editing> block.
    * Called when a user commits or cancels their edit.
    */
-  @action protected disableEditing(revertValue?: boolean) {
-    this.editingIsEnabled = false;
-
-    if (revertValue) {
-      schedule("afterRender", this, () => {
-        if (this.args.onCancel) {
-          this.args.onCancel(this.cachedValue);
-        } else {
-          this.value = this.cachedValue;
-        }
-      });
-    }
+  @action protected revertChanges() {
+    schedule("afterRender", this, () => {
+      if (this.args.onCancel) {
+        this.args.onCancel(this.cachedValue);
+      } else {
+        console.log("about to rever to", this.cachedValue);
+        this.value = this.cachedValue;
+        this.onChange(this.value);
+      }
+    });
   }
 
   /**
@@ -176,13 +186,12 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * On Escape, we disable editing.
    */
   @action protected handleKeydown(ev: KeyboardEvent) {
-    console.log("handleKeydown value", this.value);
     switch (ev.key) {
       case "Enter":
-        console.log("activeElement", document.activeElement);
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
-          this.disableEditing(true);
+          this.disableEditing();
+          this.revertChanges();
           break;
         }
         ev.preventDefault();
@@ -190,7 +199,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
-        this.disableEditing(true);
+        this.disableEditing();
+        this.revertChanges();
         break;
     }
   }
@@ -202,6 +212,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
+    debugger;
+    // this doesn't have the most updated people value when clicking button
     console.log("maybeUpdateValue", eventOrValue);
     let newValue: string | string[] | undefined;
 
@@ -241,19 +253,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       }
 
       this.cachedValue = this.value = newValue;
-      console.log("this.value on maybeUpdateValue", this.value);
-      // in the case of text fields we want to pass in the value.
-      // in the case of people inputs, we don't
 
-      console.log("editablue field this.value", this.value);
-
-      if (typeof this.value === "string") {
-        console.log("this.value is a string");
-        this.args.onSave(this.value);
-      } else {
-        // @ts-ignore
-        this.args.onSave();
-      }
+      this.args.onSave(this.value);
     }
 
     scheduleOnce("actions", this, () => {

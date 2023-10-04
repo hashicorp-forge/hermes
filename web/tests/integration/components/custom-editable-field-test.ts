@@ -36,7 +36,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onCommit={{this.onChange}}
+        @onChange={{this.onChange}}
       />
     `);
 
@@ -71,7 +71,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onCommit={{this.onChange}}
+        @onChange={{this.onChange}}
       />
       <div class="click-away-target"/>
     `);
@@ -125,7 +125,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onCommit={{this.onChange}}
+        @onChange={{this.onChange}}
       />
     `);
 

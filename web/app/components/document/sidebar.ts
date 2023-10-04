@@ -101,8 +101,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked contributors: HermesUser[] =
+
+  @tracked cachedContributors: HermesUser[] =
     this.args.document.contributorObjects || [];
+  @tracked contributors: HermesUser[] = this.cachedContributors;
+
   @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
@@ -607,14 +610,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.save.isRunning || this.saveCustomField.isRunning;
   }
 
-  save = task(async (field: string, val: string | string[]) => {
+  save = task(async (field: string, val: string | HermesUser[]) => {
     if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
         serializedValue = cleanString(val);
       } else {
-        serializedValue = val;
+        serializedValue = val.map((p: HermesUser) => p.email);
       }
 
       try {
@@ -633,12 +636,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       field: CustomEditableField,
       val: string | HermesUser[],
     ) => {
+      console.log('"save custom field" task');
+      console.log("fieldName", fieldName);
+      console.log("field", field);
+      console.log("val", val);
       if (field && val !== undefined) {
         let serializedValue;
 
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
+          console.log("val is array");
+          console.log("val", val);
           serializedValue = val.map((p: HermesUser) => p.email);
         }
 
@@ -646,6 +655,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         field.value = serializedValue;
 
         try {
+          console.log("attempting patch");
           await this.patchDocument.perform({
             customFields: [field],
           });
@@ -736,8 +746,41 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action
   updateContributors(contributors: HermesUser[]) {
+    console.log("UPDATE CONTRIBUTORS", contributors);
     this.contributors = contributors;
-    console.log("UPDATE CONTRIBUTORS");
+  }
+
+  @action protected onPeopleSelectKeydown(
+    field: string,
+    update: (value: any) => void,
+    dropdown: any,
+    event: KeyboardEvent,
+  ) {
+    console.log("onPeopleSelectKeydown");
+    const popoverSelector = ".ember-basic-dropdown-content";
+
+    if (event.key === "Enter") {
+      if (!document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        assert("updateFunction must exist", update);
+        update(dropdown.selected);
+      }
+    }
+
+    if (event.key === "Escape") {
+      if (document.querySelector(popoverSelector)) {
+        event.preventDefault();
+        event.stopPropagation();
+        dropdown.actions.close();
+      } else {
+        const cachedVariableName = `cached${capitalize(field)}`;
+
+        // @ts-ignore
+        this[field] = this[cachedVariableName];
+      }
+    }
   }
 
   @action updateTitle(title: string) {

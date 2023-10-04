@@ -16,9 +16,10 @@ interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
     selected: HermesUser[];
-    onChange: (people: HermesUser[]) => void;
+    onChange: (value: any) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
+    onKeydown?: (field: string, dropdown: any, event: KeyboardEvent) => void;
   };
 }
 

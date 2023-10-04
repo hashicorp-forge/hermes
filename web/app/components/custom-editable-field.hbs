@@ -3,35 +3,16 @@
     <EditableField
       data-test-custom-string-field
       @value={{get @document @field}}
-      @onChange={{@onChange}}
+      @onSave={{@onChange}}
       @isSaving={{@isSaving}}
       @disabled={{@disabled}}
-    >
-      <:default as |F|>
-        {{#if F.value}}
-          <p class="truncate text-body-200" title={{F.value}}>
-            {{F.value}}
-          </p>
-        {{else}}
-          <EmptyStateText />
-        {{/if}}
-      </:default>
-      <:editing as |F|>
-        <Hds::Form::Textarea::Field
-          {{F.input}}
-          {{auto-height-textarea}}
-          @value={{F.value}}
-          name={{@field}}
-          data-test-custom-string-field-input
-        />
-      </:editing>
-    </EditableField>
+    />
 
   {{else if this.typeIsPeople}}
     <EditableField
       data-test-custom-people-field
       @value={{get @attributes "value"}}
-      @onChange={{@onChange}}
+      @onSave={{@onChange}}
       @isSaving={{@isSaving}}
     >
       <:default>
@@ -48,12 +29,16 @@
         {{/if}}
       </:default>
       <:editing as |F|>
+
+        {{! this knows things that editableField doesnt }}
         <Inputs::PeopleSelect
           {{autofocus targetChildren=true}}
           class="multiselect--narrow"
           @selected={{this.people}}
           @onChange={{this.updateEmails}}
-          {{click-outside (fn F.update this.people)}}
+          @onKeydown={{fn this.onPeopleSelectKeydown F.update}}
+          {{! better way than click-outside? }}
+          {{click-outside (fn this.onClickOutside F.update this.people)}}
           data-test-custom-people-field-input
         />
       </:editing>
