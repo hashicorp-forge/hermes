@@ -79,7 +79,18 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @tracked protected relatedButtons: HTMLElement[] = [];
 
+  /**
+   * The button to toggle edit mode. Registered on insert and
+   * added to the `relatedButtons` argument of `dismissible` so
+   * it doesn't interfere with the toggle button on click.
+   */
   @tracked protected toggleButton: HTMLElement | null = null;
+
+  /**
+   * The cancel button. Registered on insert.
+   * Used by `onTextFieldKeydown` to check if the cancel button is focused,
+   * which determines how the `Enter` is handled.
+   */
   @tracked protected cancelButton: HTMLElement | null = null;
 
   /**
