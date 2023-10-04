@@ -28,7 +28,8 @@
   &.button-affordance {
     .field-toggle:not([disabled], .disabled) {
       &:hover,
-      &:focus-visible &:focus {
+      &:focus-visible,
+      &:focus {
         @apply border-color-border-strong bg-color-page-primary;
       }
     }
@@ -52,7 +53,8 @@
 
     &:not([disabled], .disabled) {
       &:hover,
-      &:focus-visible &:focus {
+      &:focus-visible,
+      &:focus {
         @apply bg-color-palette-neutral-175;
 
         .edit-affordance {

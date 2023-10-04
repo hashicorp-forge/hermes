@@ -624,15 +624,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[],
+      val: string | string[],
     ) => {
       if (field && val !== undefined) {
+        debugger;
         let serializedValue;
 
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          serializedValue = val.map((p: HermesUser) => p.email);
+          serializedValue = val;
         }
 
         field.name = fieldName;
