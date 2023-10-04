@@ -222,7 +222,6 @@
                 {{#each this.contributors as |contributor|}}
                   <li>
                     <Person
-                      @imageIsLoading={{h.isLoading}}
                       @imgURL={{contributor.imgURL}}
                       @email={{contributor.email}}
                     />

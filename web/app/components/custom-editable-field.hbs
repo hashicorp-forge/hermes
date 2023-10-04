@@ -38,11 +38,7 @@
         <ol class="person-list">
           {{#each this.people as |user|}}
             <li>
-              <Person
-                @imageIsLoading={{h.isLoading}}
-                @imgURL={{user.imgURL}}
-                @email={{user.email}}
-              />
+              <Person @imgURL={{user.imgURL}} @email={{user.email}} />
             </li>
           {{/each}}
         </ol>
