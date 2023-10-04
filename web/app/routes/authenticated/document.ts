@@ -5,12 +5,20 @@ import { schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
-import { HermesDocument } from "hermes/types/document";
+import { HermesDocument, HermesUser } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { assert } from "@ember/debug";
+import { GoogleUser } from "hermes/components/inputs/people-select";
+
+const serializePeople = (people: GoogleUser[]): HermesUser[] => {
+  return people.map((p) => ({
+    email: p.emailAddresses[0]?.value as string,
+    imgURL: p.photos?.[0]?.url,
+  }));
+};
 
 interface AuthenticatedDocumentRouteParams {
   document_id: string;
@@ -122,6 +130,30 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     const typedDoc = doc as HermesDocument;
+
+    // Preload avatars for all approvers in the Algolia index.
+    if (typedDoc.contributors?.length) {
+      const contributors = await this.fetchSvc
+        .fetch(`/api/v1/people?emails=${typedDoc.contributors.join(",")}`)
+        .then((r) => r?.json());
+
+      if (contributors) {
+        typedDoc.contributorObjects = serializePeople(contributors);
+      } else {
+        typedDoc.contributorObjects = [];
+      }
+    }
+    if (typedDoc.approvers?.length) {
+      const approvers = await this.fetchSvc
+        .fetch(`/api/v1/people?emails=${typedDoc.approvers.join(",")}`)
+        .then((r) => r?.json());
+
+      if (approvers) {
+        typedDoc.approverObjects = serializePeople(approvers);
+      } else {
+        typedDoc.approverObjects = [];
+      }
+    }
 
     return {
       doc: typedDoc,

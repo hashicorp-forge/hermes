@@ -1,60 +1,67 @@
 <div class="editable-field-container" ...attributes>
+
   {{#if this.typeIsString}}
     <EditableField
       data-test-custom-string-field
       @value={{get @document @field}}
-      @onSave={{@onCommit}}
+      @onChange={{@onChange}}
       @isSaving={{@isSaving}}
       @disabled={{@disabled}}
     >
       <:default as |F|>
         {{#if F.value}}
-          <span class="truncate" title={{F.value}}>
+          <p class="truncate text-body-200" title={{F.value}}>
             {{F.value}}
-          </span>
+          </p>
         {{else}}
           <EmptyStateText />
         {{/if}}
       </:default>
+      <:editing as |F|>
+        <Hds::Form::Textarea::Field
+          {{F.input}}
+          {{auto-height-textarea}}
+          @value={{F.value}}
+          name={{@field}}
+          data-test-custom-string-field-input
+        />
+      </:editing>
     </EditableField>
+
   {{else if this.typeIsPeople}}
-    <HermesUsers class="w-full" @emails={{this.emails}} as |h|>
-      <EditableField
-        data-test-custom-people-field
-        @value={{get @attributes "value"}}
-        @onSave={{@onCommit}}
-        @isSaving={{@isSaving}}
-        @disabled={{@disabled}}
-      >
-        <:default>
-          {{#if h.users.length}}
-            <ol>
-              {{#each h.users as |user|}}
-                <li class="whitespace-nowrap">
-                  <Person
-                    @imageIsLoading={{h.isLoading}}
-                    @imgURL={{user.imgURL}}
-                    @email={{user.email}}
-                  />
-                </li>
-              {{/each}}
-            </ol>
-          {{else}}
-            <EmptyStateText />
-          {{/if}}
-        </:default>
-        <:editing as |F|>
-          <Inputs::PeopleSelect
-            {{autofocus targetChildren=true}}
-            {{did-insert F.applyPeopleSelectClasses}}
-            class="multiselect--narrow"
-            @selected={{h.users}}
-            @onChange={{h.onSave}}
-            {{click-outside (fn F.update h.users)}}
-            data-test-custom-people-field-input
-          />
-        </:editing>
-      </EditableField>
-    </HermesUsers>
+    <EditableField
+      data-test-custom-people-field
+      @value={{get @attributes "value"}}
+      @onChange={{@onChange}}
+      @isSaving={{@isSaving}}
+    >
+      <:default>
+        {{#if this.people.length}}
+          <ol class="person-list">
+            {{#each this.people as |user|}}
+              <li>
+                <Person
+                  @imageIsLoading={{h.isLoading}}
+                  @imgURL={{user.imgURL}}
+                  @email={{user.email}}
+                />
+              </li>
+            {{/each}}
+          </ol>
+        {{else}}
+          <EmptyStateText />
+        {{/if}}
+      </:default>
+      <:editing as |F|>
+        <Inputs::PeopleSelect
+          {{autofocus targetChildren=true}}
+          class="multiselect--narrow"
+          @selected={{this.people}}
+          @onChange={{this.updateEmails}}
+          {{click-outside (fn F.update this.people)}}
+          data-test-custom-people-field-input
+        />
+      </:editing>
+    </EditableField>
   {{/if}}
 </div>
