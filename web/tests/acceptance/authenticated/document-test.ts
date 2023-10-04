@@ -562,8 +562,20 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1?draft=true");
-
     await this.pauseTest();
-    // await click(`${} .field-toggle`);
   });
+
+  test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("the summary attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("the contributors attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("the approvers attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("the product area attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("text customEditableFields save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("people customEditableFields save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 });

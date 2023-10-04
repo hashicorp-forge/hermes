@@ -21,7 +21,7 @@
         {{on-document "keydown" this.onTextFieldKeydown}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
-          {{did-insert this.registerInput}}
+          {{autofocus}}
           {{dismissible
             dismiss=(fn this.maybeUpdateValue this.value)
             related=this.relatedButtons
@@ -38,6 +38,7 @@
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
+
       {{! "Confirm" and "Cancel" buttons }}
       <div class="edit-overlay-affordance page-faint pb-[125px] pl-[5px]">
         <Hds::Button

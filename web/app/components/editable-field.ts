@@ -59,13 +59,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected emptyValueErrorIsShown = false;
 
   /**
-   * The input or textarea element, if using.
-   * Registered by the `inputModifier` action, used for focusing and blurring.
-   */
-  @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
-    null;
-
-  /**
    * The container div when editing. Registered on insert.
    * Used to locally capture its child buttons as `relatedButtons`
    * which are passed to the `dismissible` modifier.
@@ -102,16 +95,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   /**
-   * The modifier passed to the `editing` block to apply to the input or textarea.
-   * Autofocuses the input and adds a blur listener to commit changes.
-   */
-  @action protected registerInput(element: HTMLElement) {
-    this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
-    this.applyPeopleSelectClasses(this.inputElement, false);
-    this.inputElement.focus();
-  }
-
-  /**
    * The action passed to the `PowerSelectMultiple` component by way of `PeopleSelect`.
    * Updates the local and parent values when the user selects or deselects a person.
    *
@@ -121,26 +104,6 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
     if (this.args.onChange) {
       this.args.onChange(this.value);
-    }
-  }
-
-  /**
-   * Applies z-index classes to the people-select dropdown.
-   * Called when the PeopleSelect component enters edit mode.
-   * Allows the dropdown focus styles to render correctly.
-   */
-  @action protected applyPeopleSelectClasses(
-    element: HTMLElement,
-    onNextRunLoop = true,
-  ) {
-    const addClasses = () => element.classList.add("relative", "z-10");
-
-    if (onNextRunLoop) {
-      next(() => {
-        addClasses();
-      });
-    } else {
-      addClasses();
     }
   }
 
