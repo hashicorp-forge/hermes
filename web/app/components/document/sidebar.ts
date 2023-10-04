@@ -102,9 +102,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
 
-  @tracked cachedContributors: HermesUser[] =
+  @tracked contributors: HermesUser[] =
     this.args.document.contributorObjects || [];
-  @tracked contributors: HermesUser[] = this.cachedContributors;
 
   @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";

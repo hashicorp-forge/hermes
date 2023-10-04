@@ -1,4 +1,4 @@
-import { assert, debug } from "@ember/debug";
+import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -43,11 +43,6 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
     this.emails = people.map((person: HermesUser) => {
       return person.email;
     });
-  }
-
-  @action onClickOutside(update: (value: any) => void, value: any) {
-    this.cached = value;
-    update(value);
   }
 
   @action protected onPeopleSelectKeydown(
