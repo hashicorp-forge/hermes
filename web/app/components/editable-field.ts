@@ -12,23 +12,17 @@ export const FOCUSABLE =
 interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    value: any;
-    field?: string;
-    document?: HermesDocument;
-    onSave: ((textValue: string) => void) | (() => void);
-    onChange?: (value: any) => void;
-    onCancel?: (cachedValue?: string[]) => void;
-    isLoading?: boolean;
+    value: string | HermesUser[];
+    onSave: any; // TODO: type this
+    onChange?: (value: any) => void; // TODO: type this
     isSaving?: boolean;
     disabled?: boolean;
     isRequired?: boolean;
-    tag?: "h1";
-    buttonPlacement?: "center";
-    buttonOverlayColor?: "white";
-    buttonOverlayPaddingBottom?: string;
     name?: string;
     placeholder?: string;
-    type?: "people" | "approvers";
+    tag?: "h1"; // Default is `p`
+    type?: "people" | "approvers"; // Default is `string`
+    document?: HermesDocument; // Only needed for approvers
   };
   Blocks: {};
 }
@@ -51,16 +45,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked protected value = this.cachedValue;
 
   /**
-   * Whether the <:editing> block is enabled.
-   * Set true by clicking the <:default> content.
-   * Set false by the `disableEditing` action on blur.
+   * Whether the editing is enabled.
+   * Set true by clicking the "read-only" content.
+   * Set false on save or dismiss.
    */
   @tracked protected editingIsEnabled = false;
 
   /**
    * Whether the empty-value error is shown.
    * Set true when a required field is committed with an empty value.
-   * Yielded to the <:editing> block to show/hide the error.
+   * Used by the template to show/hide the error.
    */
   @tracked protected emptyValueErrorIsShown = false;
 
@@ -71,15 +65,36 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   @tracked private inputElement: HTMLInputElement | HTMLTextAreaElement | null =
     null;
 
+  /**
+   * The container div when editing. Registered on insert.
+   * Used to locally capture its child buttons as `relatedButtons`
+   * which are passed to the `dismissible` modifier.
+   */
   @tracked private editingContainer: HTMLElement | null = null;
+
+  /**
+   * The array of buttons that should not dismiss the block.
+   * Captured when the editingContainer is registered. Passed to the
+   * `dismissible` modifier so it doesn't interfere with these buttons on click.
+   */
   @tracked protected relatedButtons: HTMLElement[] = [];
+
   @tracked protected toggleButton: HTMLElement | null = null;
   @tracked protected cancelButton: HTMLElement | null = null;
 
+  /**
+   * Whether to use the `PeopleSelect` component. True if the
+   * `type` argument is "people" or "approvers".
+   */
   protected get typeIsPeople(): boolean {
     return this.args.type === "people" || this.args.type === "approvers";
   }
 
+  /**
+   * An asserted-true reference to the @document argument.
+   * Passed to the `Person` component if the `type` argument is "approvers"
+   * so it can fetch the user's approval status.
+   */
   protected get document() {
     assert("this.args.document must exist", this.args.document);
     return this.args.document;
@@ -90,12 +105,16 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected registerInput(element: HTMLElement) {
     this.inputElement = element as HTMLInputElement | HTMLTextAreaElement;
-
     this.applyPeopleSelectClasses(this.inputElement, false);
     this.inputElement.focus();
   }
 
-  @action protected onChange(value: any) {
+  /**
+   * The action passed to the `PowerSelectMultiple` component by way of `PeopleSelect`.
+   * Updates the local and parent values when the user selects or deselects a person.
+   *
+   */
+  @action protected onChange(value: HermesUser[]) {
     assert("this.args.onChange must exist", this.args.onChange);
     this.value = value;
     this.args.onChange(this.value);
@@ -121,9 +140,13 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     }
   }
 
+  /**
+   * Keydown handler ultimately passed to PowerSelectMultiple.
+   * Overrides
+   */
   @action protected onPeopleSelectKeydown(
     update: (value: any) => void,
-    dropdown: any,
+    powerSelectAPI: any,
     event: KeyboardEvent,
   ) {
     const popoverSelector = ".ember-basic-dropdown-content";
@@ -134,7 +157,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         event.stopPropagation();
 
         assert("updateFunction must exist", update);
-        update(dropdown.selected);
+        update(powerSelectAPI.selected);
       }
     }
 
@@ -142,7 +165,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       if (document.querySelector(popoverSelector)) {
         event.preventDefault();
         event.stopPropagation();
-        dropdown.actions.close();
+        powerSelectAPI.actions.close();
       } else {
         this.value = this.cachedValue;
       }
@@ -150,9 +173,9 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   /**
-   * Registers the <:editing> block container and its related buttons,
+   * Registers the editing container and its related buttons,
    * which are passed to the `dismissible` modifier as `related` elements
-   * whose focus/click events should not dismiss the block.
+   * whose focus/click events should not trigger dismissal.
    * Called on insert.
    */
   @action protected registerEditingContainer(element: HTMLElement) {
@@ -182,44 +205,51 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   /**
-   * The action to enable the <:editing> block.
-   * Called when a user clicks the <:default> content.
+   * The action to enable the editing functions.
+   * Called when a user clicks the "read only" content.
    */
   @action protected enableEditing() {
     this.editingIsEnabled = true;
   }
 
+  /**
+   * The action to disable the editing functions.
+   * Called when a user commits their changes or
+   * cancels a no-change edit.
+   */
   @action protected disableEditing() {
     this.editingIsEnabled = false;
   }
 
   /**
-   * The action to disable the <:editing> block.
-   * Called when a user commits or cancels their edit.
+   * The action to disable the editing functions and
+   * revert the local value. Called by the cancel button
+   * and on Escape keydown.
    */
-  @action protected revertChanges() {
+  @action protected disableEditingAndRevert() {
+    this.disableEditing();
+
     schedule("afterRender", this, () => {
-      if (this.args.onCancel) {
-        this.args.onCancel(this.cachedValue);
-      } else {
-        this.value = this.cachedValue;
-        this.onChange(this.value);
-      }
+      this.value = this.cachedValue;
+      console.log(
+        "revering changes (should always be a hermesUser)",
+        this.value,
+      );
+      this.onChange(this.value as HermesUser[]);
     });
   }
 
   /**
-   * The action to handle Enter and Escape keydowns while the <:editing> block is open.
-   * On Enter, the input blurs, causing `maybeUpdateValue` action to run.
-   * On Escape, we disable editing.
+   * The action to handle Enter and Escape keydowns while a textarea is open.
+   * On Enter, runs maybeUpdateValue unless the focused element is the cancel button.
+   * On Escape and cancelButtonClick, we disable editing and revert the text value.
    */
-  @action protected handleKeydown(ev: KeyboardEvent) {
+  @action protected onTextFieldKeydown(ev: KeyboardEvent) {
     switch (ev.key) {
       case "Enter":
         if (document.activeElement === this.cancelButton) {
           ev.preventDefault();
-          this.disableEditing();
-          this.revertChanges();
+          this.disableEditingAndRevert();
           break;
         }
         ev.preventDefault();
@@ -227,35 +257,36 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         break;
       case "Escape":
         ev.preventDefault();
-        this.disableEditing();
-        this.revertChanges();
+        this.disableEditingAndRevert();
         break;
     }
   }
 
   /**
-   * The action run when the <:editing> block is committed.
+   * The action run when a user commits their changes.
    * Checks the value to see if it has changed, and if so, updates the value
    * and resets the cached value. If the value is empty and the field is required,
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
-    let newValue: string | string[] | undefined;
+    let newValue: string | HermesUser[] | undefined;
 
     if (eventOrValue instanceof Event) {
       const target = eventOrValue.target;
       assert("target must exist", target);
       if ("value" in target) {
         const value = target.value;
-        newValue = value as string | string[];
+        newValue = value as string | HermesUser[];
       } else {
         newValue = undefined;
       }
     } else {
       newValue = eventOrValue;
     }
-
-    // Stringified values work for both arrays and strings.
+    /**
+     * We use JSON.stringify to compare the values because
+     * it works for both arrays and strings.
+     */
     if (JSON.stringify(newValue) !== JSON.stringify(this.cachedValue)) {
       if (
         newValue === "" ||
@@ -265,7 +296,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           this.emptyValueErrorIsShown = true;
           return;
         }
-        // Nothing has really changed, so we don't update the value.
+        /**
+         * We don't consider an empty value to be a change
+         * if the initial value is undefined.
+         */
         if (this.args.value === undefined) {
           this.disableEditing();
           return;
@@ -276,14 +310,15 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       if (typeof newValue === "string") {
         newValue = newValue.trim();
       }
+      this.cachedValue = this.value;
 
-      this.cachedValue = this.value = newValue;
+      assert("newValue must be defined", newValue !== undefined);
+      this.value = newValue;
 
       this.args.onSave(this.value);
     }
 
     scheduleOnce("actions", this, () => {
-      // is this getting called?
       this.disableEditing();
     });
   }

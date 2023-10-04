@@ -1,0 +1,29 @@
+{{#let (element (or @tag "p")) as |Field|}}
+  <Field class="w-full">
+    {{#if @value.length}}
+      {{#if (eq @type (or "people" "approvers"))}}
+        <ol class="person-list">
+          {{#each @value as |person|}}
+            <li>
+              <Person
+                @badge={{if
+                  (and
+                    (eq @type "approvers")
+                    (has-approved-doc @document person.email)
+                  )
+                  "approved"
+                }}
+                @imgURL={{person.imgURL}}
+                @email={{person.email}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+      {{else}}
+        {{@value}}
+      {{/if}}
+    {{else}}
+      <EmptyStateText />
+    {{/if}}
+  </Field>
+{{/let}}

@@ -118,7 +118,7 @@
 
     &::before {
       content: "";
-      @apply absolute h-full w-full bg-gradient-to-b;
+      @apply absolute left-0 h-full w-full bg-gradient-to-b;
     }
 
     &.white::before {

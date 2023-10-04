@@ -4,21 +4,20 @@
   ...attributes
 >
   {{#if (and this.editingIsEnabled (not @isSaving))}}
-
-    {{on-document "keydown" this.handleKeydown}}
-
     <div {{did-insert this.registerEditingContainer}} class="w-full">
       {{#if this.typeIsPeople}}
         <Inputs::PeopleSelect
           {{autofocus targetChildren=true}}
           data-test-document-contributors-editable
           class="multiselect--narrow"
+          {{! @glint-ignore - TODO: type this as an array }}
           @selected={{this.value}}
           @onChange={{this.onChange}}
           @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
           {{click-outside (fn this.maybeUpdateValue this.value)}}
         />
       {{else}}
+        {{on-document "keydown" this.onTextFieldKeydown}}
         <Hds::Form::Textarea::Field
           {{auto-height-textarea}}
           {{did-insert this.registerInput}}
@@ -27,6 +26,7 @@
             related=this.relatedButtons
             shouldIgnoreEscape=true
           }}
+          {{! @glint-ignore - TODO: type this as a string }}
           @value={{this.value}}
           placeholder={{@placeholder}}
           name={{@name}}
@@ -37,18 +37,8 @@
           {{/if}}
         </Hds::Form::Textarea::Field>
       {{/if}}
-
       {{! "Confirm" and "Cancel" buttons }}
-      <div
-        class="edit-overlay-affordance
-          {{if (eq @buttonOverlayColor 'white') 'white' 'page-faint'}}
-          {{if (eq @buttonPlacement 'center') 'justify-center' 'pl-[5px]'}}"
-        style="padding-bottom: {{if
-          @buttonOverlayPaddingBottom
-          @buttonOverlayPaddingBottom
-          '125px'
-        }}"
-      >
+      <div class="edit-overlay-affordance page-faint pb-[125px] pl-[5px]">
         <Hds::Button
           @size="small"
           @text="Save"
@@ -63,63 +53,43 @@
           @size="small"
           @color="secondary"
           {{did-insert this.registerCancelButton}}
-          {{on "click" this.revertChanges}}
+          {{on "click" this.disableEditingAndRevert}}
         />
       </div>
     </div>
   {{else}}
-    {{#if (or @isSaving @isLoading)}}
-      <div
-        data-test-spinner
-        class={{if
-          @isSaving
-          "absolute top-2.5 right-[9px]"
-          "flex h-5 items-center"
-        }}
-      >
+    {{#if @isSaving}}
+      <div data-test-spinner class="absolute top-2.5 right-[9px]">
         <FlightIcon @name="loading" data-test-loading-spinner />
       </div>
     {{/if}}
-    <Action
-      {{did-insert this.registerToggleButton}}
-      class="field-toggle group {{if @isSaving 'saving'}}"
-      disabled={{or @disabled @isSaving}}
-      {{on "click" this.enableEditing}}
-    >
-      {{#let (element (or @tag "p")) as |Field|}}
-        <Field class="w-full">
-          {{#if this.value.length}}
-            {{#if this.typeIsPeople}}
-              <ol class="person-list">
-                {{#each this.value as |person|}}
-                  <li>
-                    <Person
-                      @badge={{if
-                        (and
-                          (eq @type "approvers")
-                          (has-approved-doc this.document person.email)
-                        )
-                        "approved"
-                      }}
-                      @imgURL={{person.imgURL}}
-                      @email={{person.email}}
-                    />
-                  </li>
-                {{/each}}
-              </ol>
-            {{else}}
-              {{this.value}}
-            {{/if}}
-          {{else}}
-            <EmptyStateText />
-          {{/if}}
-        </Field>
-      {{/let}}
-      {{#unless @disabled}}
-        <span class="edit-affordance gray">
-          <FlightIcon @name="edit" class="text-color-foreground-faint" />
-        </span>
-      {{/unless}}
-    </Action>
+    {{#if (or @disabled @isSaving)}}
+      <div class="field-toggle {{if @isSaving 'saving'}}">
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @type={{@type}}
+          @document={{this.document}}
+        />
+      </div>
+    {{else}}
+      <Action
+        {{did-insert this.registerToggleButton}}
+        {{on "click" this.enableEditing}}
+        class="field-toggle group"
+      >
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @type={{@type}}
+          @document={{this.document}}
+        />
+        {{#unless @disabled}}
+          <span class="edit-affordance gray">
+            <FlightIcon @name="edit" class="text-color-foreground-faint" />
+          </span>
+        {{/unless}}
+      </Action>
+    {{/if}}
   {{/if}}
 </div>
