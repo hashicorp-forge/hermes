@@ -2,12 +2,14 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
+import ProductAreasService from "hermes/services/product-areas";
 import SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare productAreas: ProductAreasService;
 
   beforeModel(transition: any) {
     /**
@@ -28,6 +30,11 @@ export default class AuthenticatedRoute extends Route {
      * and redirects to the auth screen.
      */
     await this.authenticatedUser.loadInfo.perform();
+
+    /**
+     * Load the ProductAreas index
+     */
+    await this.productAreas.fetch.perform();
 
     /**
      * Kick off the task to poll for expired auth.

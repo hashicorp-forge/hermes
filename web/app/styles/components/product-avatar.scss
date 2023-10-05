@@ -1,0 +1,11 @@
+.letter-avatar {
+  @apply tracking-tighter;
+
+  &.letter-count-2 {
+    @apply text-[11px];
+  }
+
+  &.letter-count-3 {
+    @apply text-[9px];
+  }
+}

@@ -59,7 +59,7 @@ export default class ApplicationRoute extends Route {
         JSON.stringify({
           url: transitionTo,
           expiresOn: Date.now() + 60 * 5000, // 5 minutes
-        })
+        }),
       );
     }
 
