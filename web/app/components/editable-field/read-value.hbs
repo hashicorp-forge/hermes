@@ -1,18 +1,15 @@
 {{#let (element (or @tag "p")) as |Field|}}
-  <Field class="w-full">
+  <Field class="w-full" data-test-editable-field-read-value>
     {{#if this.valueIsEmpty}}
       <EmptyStateText />
     {{else}}
       {{#if this.typeIsPeople}}
-        <ol class="person-list">
+        <ol data-test-person-list class="person-list">
           {{#each this.people as |person|}}
             <li>
               <Person
                 @badge={{if
-                  (and
-                    (eq @type "approvers")
-                    (has-approved-doc this.document person.email)
-                  )
+                  (and @document (has-approved-doc this.document person.email))
                   "approved"
                 }}
                 @imgURL={{person.imgURL}}
@@ -22,7 +19,9 @@
           {{/each}}
         </ol>
       {{else}}
-        {{this.stringValue}}
+        <span data-test-string-value>
+          {{this.stringValue}}
+        </span>
       {{/if}}
     {{/if}}
   </Field>

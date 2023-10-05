@@ -21,8 +21,7 @@ interface EditableFieldComponentSignature {
     name?: string;
     placeholder?: string;
     tag?: "h1"; // Default is `p`
-    type?: "people" | "approvers"; // Default is `string`
-    document?: HermesDocument; // Only needed for approvers
+    document?: HermesDocument; // Used to check an approver's approval status
   };
   Blocks: {};
 }
@@ -91,7 +90,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * `type` argument is "people" or "approvers".
    */
   protected get typeIsPeople(): boolean {
-    return this.args.type === "people" || this.args.type === "approvers";
+    return this.args.value instanceof Array;
   }
 
   /**

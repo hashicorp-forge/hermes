@@ -9,6 +9,9 @@ const FIELD_TOGGLE_SELECTOR = ".editable-field .field-toggle";
 const LOADING_SPINNER_SELECTOR = `${EDITABLE_FIELD_SELECTOR} [data-test-spinner]`;
 const ERROR_SELECTOR = "[data-test-empty-value-error]";
 
+const STRING_VALUE_SELECTOR = "[data-test-string-value]";
+const PEOPLE_SELECT_SELECTOR = "[data-test-people-select]";
+
 interface EditableFieldComponentTestContext extends MirageTestContext {
   onCommit: (value: any) => void;
   isLoading: boolean;
@@ -256,7 +259,41 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom("textarea").hasValue("bar");
   });
 
-  test("it shows a text input or people input depending on the `type`", async function (this: EditableFieldComponentTestContext, assert) {});
+  test("it shows a text input or people input depending on the value", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        data-test-one
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+
+      <EditableField
+        data-test-two
+        @value={{array (hash email="bar")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    assert
+      .dom(`[data-test-one] ${STRING_VALUE_SELECTOR}`)
+      .exists("string value handled correctly");
+
+    assert
+      .dom(`[data-test-two] [data-test-person-list]`)
+      .exists("array value handled correctly");
+
+    await click(`[data-test-one] ${FIELD_TOGGLE_SELECTOR}`);
+
+    assert
+      .dom(`[data-test-one] textarea`)
+      .exists('strings become a "textarea"');
+
+    await click(`[data-test-two] ${FIELD_TOGGLE_SELECTOR}`);
+
+    assert
+      .dom(`[data-test-two] ${PEOPLE_SELECT_SELECTOR}`)
+      .exists('arrays become a "PeopleSelect"');
+  });
 
   test("it autofocuses the inputs when the editing functions are enabled", async function (this: EditableFieldComponentTestContext, assert) {});
 

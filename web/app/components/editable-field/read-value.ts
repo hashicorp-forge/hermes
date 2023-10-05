@@ -6,8 +6,7 @@ interface EditableFieldReadValueSignature {
   Args: {
     tag?: "h1";
     value?: string | HermesUser[];
-    type?: "people" | "approvers";
-    document?: HermesDocument;
+    document?: HermesDocument; // Used to check an approver's approval status
   };
   Blocks: {
     default: [];
@@ -16,7 +15,7 @@ interface EditableFieldReadValueSignature {
 
 export default class EditableFieldReadValue extends Component<EditableFieldReadValueSignature> {
   protected get typeIsPeople(): boolean {
-    return this.args.type === "people" || this.args.type === "approvers";
+    return this.args.value instanceof Array;
   }
 
   protected get valueIsEmpty(): boolean {
