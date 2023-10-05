@@ -106,6 +106,8 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("it conditionally determines whether to wrap the read-only value in a button", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("disabled", false);
+
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
@@ -114,7 +116,21 @@ module("Integration | Component | editable-field", function (hooks) {
       />
     `);
 
-    assert.true(false);
+    assert
+      .dom("button.field-toggle")
+      .exists('when enabled, the "read" value is a toggle');
+
+    this.set("disabled", true);
+
+    assert
+      .dom("button.field-toggle")
+      .doesNotExist(
+        "the field toggle is not rendered as a button when editing disabled",
+      );
+
+    assert
+      .dom("div.field-toggle")
+      .exists("the element is rendered as a div when editing is disabled");
   });
 
   test("it cancels when the escape key is pressed", async function (this: EditableFieldComponentTestContext, assert) {
@@ -159,8 +175,7 @@ module("Integration | Component | editable-field", function (hooks) {
     await triggerKeyEvent("textarea", "keydown", "Enter");
 
     assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
-
-    // TODO: confirm that edit mode is disabled
+    assert.dom("textarea").doesNotExist("textarea is removed on save");
   });
 
   test("onCommit only runs if the textInput value has changed", async function (this: EditableFieldComponentTestContext, assert) {
@@ -295,7 +310,21 @@ module("Integration | Component | editable-field", function (hooks) {
       .exists('arrays become a "PeopleSelect"');
   });
 
-  test("it autofocuses the inputs when the editing functions are enabled", async function (this: EditableFieldComponentTestContext, assert) {});
+  test("it autofocuses the inputs when the editing functions are enabled", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        data-test-one
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+
+      <EditableField
+        data-test-two
+        @value={{array (hash email="bar")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+  });
 
   test("edit affordances are shown on hover", async function (this: EditableFieldComponentTestContext, assert) {});
 
