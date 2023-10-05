@@ -166,6 +166,20 @@
         {{/if}}
       </div>
 
+      {{! Created }}
+      <div class="space-y-2">
+        <Document::Sidebar::SectionHeader @title="Created" />
+        <p>{{or (parse-date @document.created "long") "Unknown"}}</p>
+      </div>
+
+      {{! Last modified }}
+      <div class="space-y-2">
+        <Document::Sidebar::SectionHeader @title="Last modified" />
+        {{#if @document.modifiedTime}}
+          <p>{{time-ago @document.modifiedTime}}</p>
+        {{/if}}
+      </div>
+
       {{! Owner }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
@@ -207,20 +221,6 @@
             @document={{@document}}
           />
         </div>
-      </div>
-
-      {{! Created }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Created" />
-        <p>{{or (parse-date @document.created "long") "Unknown"}}</p>
-      </div>
-
-      {{! Last modified }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Last modified" />
-        {{#if @document.modifiedTime}}
-          <p>{{time-ago @document.modifiedTime}}</p>
-        {{/if}}
       </div>
 
       {{! Related resources }}

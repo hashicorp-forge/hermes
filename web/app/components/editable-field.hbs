@@ -15,7 +15,11 @@
           @selected={{this.value}}
           @onChange={{this.onChange}}
           @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
-          {{click-outside (fn this.maybeUpdateValue this.value)}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+            shouldIgnoreEscape=true
+          }}
         />
       {{else}}
         {{on-document "keydown" this.onTextFieldKeydown}}

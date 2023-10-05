@@ -15,6 +15,9 @@ const PEOPLE_SELECT = "[data-test-people-select]";
 const SAVE_BUTTON = "[data-test-save-button";
 const CANCEL_BUTTON = "[data-test-cancel-button]";
 
+const REMOVE_USER_BUTTON = ".ember-power-select-multiple-remove-btn";
+const EDITABLE_PERSON = ".ember-power-select-multiple-option";
+
 interface EditableFieldComponentTestContext extends MirageTestContext {
   onCommit: (value: any) => void;
   isLoading: boolean;
@@ -214,19 +217,22 @@ module("Integration | Component | editable-field", function (hooks) {
 
     // Make a change
     await click(FIELD_TOGGLE);
-    await click(".ember-power-select-multiple-remove-btn");
+    await click(REMOVE_USER_BUTTON);
     await click(SAVE_BUTTON);
 
     assert.equal(count, 1, "onCommit has been called");
   });
 
-  test("the input value resets on cancel", async function (this: EditableFieldComponentTestContext, assert) {
+  test("the value resets on cancel (STRING)", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField  @value="foo" @onSave={{this.onCommit}} />
     `);
 
-    await click(FIELD_TOGGLE);
+    assert.dom(EDITABLE_FIELD).hasText("foo");
 
+    // Cancel using Escape key
+
+    await click(FIELD_TOGGLE);
     await fillIn("textarea", "bar");
     await triggerKeyEvent("textarea", "keydown", "Escape");
 
@@ -235,6 +241,51 @@ module("Integration | Component | editable-field", function (hooks) {
     await click(FIELD_TOGGLE);
 
     assert.dom("textarea").hasValue("foo");
+
+    // Cancel using the button
+
+    await fillIn("textarea", "bar");
+    await click(CANCEL_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).hasText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("foo");
+  });
+
+  test("the value resets on cancel (PEOPLE)", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value={{array (hash email="foo")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    assert.dom(EDITABLE_FIELD).containsText("foo");
+
+    // Cancel using Escape key
+
+    await click(FIELD_TOGGLE);
+    await click(REMOVE_USER_BUTTON);
+    await triggerKeyEvent("input", "keydown", "Escape");
+
+    assert.dom(EDITABLE_FIELD).containsText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(EDITABLE_PERSON).containsText("foo");
+
+    // Cancel using the button
+
+    await click(REMOVE_USER_BUTTON);
+    await click(CANCEL_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).containsText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(EDITABLE_PERSON).containsText("foo");
   });
 
   test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
