@@ -562,7 +562,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1?draft=true");
-    await this.pauseTest();
+
+    assert.true(false);
   });
 
   test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});

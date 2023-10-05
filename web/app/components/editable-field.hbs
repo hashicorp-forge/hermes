@@ -42,6 +42,7 @@
       {{! "Confirm" and "Cancel" buttons }}
       <div class="edit-overlay-affordance page-faint pb-[125px] pl-[5px]">
         <Hds::Button
+          data-test-save-button
           @size="small"
           @text="Save"
           @icon="check"
@@ -49,6 +50,7 @@
           {{on "click" (fn this.maybeUpdateValue this.value)}}
         />
         <Hds::Button
+          data-test-cancel-button
           @text="Cancel"
           @icon="x"
           @isIconOnly={{true}}
@@ -61,8 +63,8 @@
     </div>
   {{else}}
     {{#if @isSaving}}
-      <div data-test-spinner class="edit-affordance light-gray">
-        <FlightIcon @name="loading" data-test-loading-spinner />
+      <div data-test-saving-spinner class="edit-affordance light-gray">
+        <FlightIcon @name="loading" />
       </div>
     {{/if}}
     {{#if (or @disabled @isSaving)}}
