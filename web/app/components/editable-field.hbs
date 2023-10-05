@@ -71,7 +71,7 @@
         <FlightIcon @name="loading" />
       </div>
     {{/if}}
-    {{#if (or @disabled @isSaving)}}
+    {{#if (or @isReadOnly @isSaving)}}
       <div class="field-toggle">
         <EditableField::ReadValue
           @tag={{@tag}}
@@ -92,7 +92,7 @@
           @document={{@document}}
           @placeholder={{@placeholder}}
         />
-        {{#unless @disabled}}
+        {{#unless @isReadOnly}}
           <span class="edit-affordance gray">
             <FlightIcon @name="edit" class="text-color-foreground-faint" />
           </span>

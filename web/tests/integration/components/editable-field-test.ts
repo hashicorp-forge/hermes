@@ -100,7 +100,7 @@ module("Integration | Component | editable-field", function (hooks) {
       <EditableField
         @value="foo"
         @onSave={{this.onCommit}}
-        @disabled={{this.disabled}}
+        @isReadOnly={{this.disabled}}
       />
     `);
 

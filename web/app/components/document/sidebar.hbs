@@ -106,7 +106,7 @@
             @value={{this.title}}
             @onSave={{this.saveTitle}}
             @isSaving={{this.saveIsRunning}}
-            @disabled={{not this.isOwner}}
+            @isReadOnly={{not this.isOwner}}
             @isRequired={{true}}
             @name="title"
             @tag="h1"
@@ -127,7 +127,7 @@
             @value={{this.summary}}
             @onSave={{this.saveSummary}}
             @isSaving={{this.saveIsRunning}}
-            @disabled={{not this.isOwner}}
+            @isReadOnly={{not this.isOwner}}
             @name="summary"
             @placeholder="Enter a summary"
           />
@@ -200,7 +200,7 @@
             @onChange={{this.updateContributors}}
             @onSave={{perform this.save "contributors"}}
             @isSaving={{this.saveIsRunning}}
-            @disabled={{not this.isOwner}}
+            @isReadOnly={{not this.isOwner}}
           />
         </div>
       </div>
@@ -216,7 +216,7 @@
             @onChange={{this.updateApprovers}}
             @onSave={{perform this.save "approvers"}}
             @isSaving={{this.saveIsRunning}}
-            @disabled={{this.editingIsDisabled}}
+            @isReadOnly={{this.editingIsDisabled}}
             {{! Provide the document to the `has-approved-doc` helper }}
             @document={{@document}}
           />

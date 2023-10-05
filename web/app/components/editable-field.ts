@@ -16,7 +16,7 @@ interface EditableFieldComponentSignature {
     onSave: any; // TODO: type this
     onChange?: (value: any) => void; // TODO: type this
     isSaving?: boolean;
-    disabled?: boolean;
+    isReadOnly?: boolean;
     isRequired?: boolean;
     name?: string;
     placeholder?: string;
