@@ -20,9 +20,13 @@ interface CustomEditableFieldComponentSignature {
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  // These are used in the template to determine which values and functions to pass.
-  protected typeIsString = this.args.attributes.type === "STRING";
-  protected typeIsPeople = this.args.attributes.type === "PEOPLE";
+  protected get typeIsString() {
+    return this.args.attributes.type === "STRING";
+  }
+
+  protected get typeIsPeople() {
+    return this.args.attributes.type === "PEOPLE";
+  }
 
   /**
    * The value of the field. Initially set to the value passed in.

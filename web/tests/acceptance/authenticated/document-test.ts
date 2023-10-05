@@ -25,6 +25,8 @@ import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
 const ADD_RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
+const ADD_RELATED_RESOURCE_MODAL_SELECTOR =
+  "[data-test-add-related-resource-modal]";
 const FLASH_MESSAGE_SELECTOR = "[data-test-flash-notification]";
 const SIDEBAR_TITLE_BADGE_SELECTOR = "[data-test-sidebar-title-badge]";
 const TOOLTIP_SELECTOR = ".hermes-tooltip";
@@ -563,7 +565,10 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.true(false);
+    await click("[data-test-related-resources-list-empty-state]");
+    await waitFor(ADD_RELATED_RESOURCE_MODAL_SELECTOR);
+
+    assert.dom(ADD_RELATED_RESOURCE_MODAL_SELECTOR).exists();
   });
 
   test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});

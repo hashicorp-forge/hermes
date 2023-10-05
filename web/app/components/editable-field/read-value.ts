@@ -6,6 +6,7 @@ interface EditableFieldReadValueSignature {
   Args: {
     tag?: "h1";
     value?: string | HermesUser[];
+    placeholder?: string;
     document?: HermesDocument; // Used to check an approver's approval status
   };
   Blocks: {
