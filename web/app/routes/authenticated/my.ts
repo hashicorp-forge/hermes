@@ -4,6 +4,7 @@ import ConfigService from "hermes/services/config";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import AlgoliaService from "hermes/services/algolia";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { SortByValue } from "hermes/components/header/toolbar";
 
 export default class AuthenticatedMyRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -32,8 +33,9 @@ export default class AuthenticatedMyRoute extends Route {
   };
 
   async model(params: DocumentsRouteParams) {
+    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
     const searchIndex =
-      params.sortBy === "dateAsc"
+      params.sortBy === SortByValue.DateAsc
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
@@ -44,6 +46,6 @@ export default class AuthenticatedMyRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { facets, results, sortedBy };
   }
 }

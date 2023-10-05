@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/pkg/featureflags"
+	"github.com/hashicorp-forge/hermes/internal/version"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp/go-hclog"
 )
@@ -63,6 +64,9 @@ type ConfigResponse struct {
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
 	SkipGoogleAuth           bool            `json:"skip_google_auth"`
+	SupportLinkURL           string          `json:"support_link_url"`
+	ShortRevision            string          `json:"short_revision"`
+	Version                  string          `json:"version"`
 }
 
 // ConfigHandler returns runtime configuration for the Hermes frontend.
@@ -116,6 +120,9 @@ func ConfigHandler(
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
 			ShortLinkBaseURL:         shortLinkBaseURL,
 			SkipGoogleAuth:           skipGoogleAuth,
+			SupportLinkURL:           cfg.SupportLinkURL,
+			ShortRevision:            version.GetShortRevision(),
+			Version:                  version.GetVersion(),
 		}
 
 		w.Header().Set("Content-Type", "application/json")

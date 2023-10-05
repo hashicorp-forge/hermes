@@ -1,11 +1,12 @@
 {{on-document "keydown" this.maybeFocusInput}}
 
 <div ...attributes>
-  <form class="w-full relative" {{on "submit" this.viewAllResults}}>
+  <form class="relative w-full" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
       @items={{this.itemsToShow}}
-      @offset={{hash mainAxis=0 crossAxis=3}}
+      @offset={{hash mainAxis=0 crossAxis=2}}
       @placement="bottom-end"
+      @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
       class="search-popover
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
@@ -68,7 +69,7 @@
               {{else if (eq dd.value "productAreaMatch")}}
                 <dd.LinkTo
                   data-test-product-match-link
-                  @route="authenticated.all"
+                  @route="authenticated.documents"
                   @query={{hash
                     product=(array dd.attrs.productAreaName)
                     page=1

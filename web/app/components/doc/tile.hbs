@@ -1,44 +1,57 @@
-<LinkTo
-  @route="authenticated.document"
-  @model={{@docID}}
-  @query={{hash draft=@isDraft}}
-  class="flex flex-col items-start space-y-2 p-4 -m-4 rounded-md hover:bg-color-palette-neutral-50 active:bg-color-palette-neutral-100 overflow-hidden"
->
-  <div class="space-y-2">
-    <Doc::Thumbnail
-      @status={{@status}}
-      @product={{@productArea}}
-      @isLarge={{true}}
-    />
-    <Doc::State @state={{@status}} />
-  </div>
+<div class="group relative" ...attributes>
+  <LinkTo
+    @route="authenticated.document"
+    @model={{@docID}}
+    @query={{hash draft=@isDraft}}
+    class="block pb-2"
+  >
+    {{!
+      We create a click area that extends beyond the edges of its relative container.
+      This makes the parent div clickable without having to wrap itself in a link,
+      and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
+    }}
+    <div
+      aria-hidden="true"
+      class="absolute -top-4 -left-4 -right-4 -bottom-6 rounded-md group-hover:bg-color-surface-faint"
+    ></div>
 
-  <div class="flex flex-col items-start space-y-1">
-    <h4 class="doc-tile-title">
-      {{@title}}
-    </h4>
-    {{#if (not (is-empty @docNumber))}}
-      <small class="text-body-100 text-color-foreground-faint">
-        {{@docNumber}}
-      </small>
-    {{/if}}
-  </div>
+    <div class="relative">
+      <div class="inline-block space-y-2.5">
+        <Doc::Thumbnail
+          @status={{@status}}
+          @product={{@productArea}}
+          @isLarge={{true}}
+        />
+        <Doc::State @state={{@status}} />
+      </div>
+      <div class="mt-2 space-y-1">
+        <h4 class="doc-tile-title">
+          {{@title}}
+        </h4>
+        {{#if @docNumber}}
+          <small class="text-body-100 text-color-foreground-faint">
+            {{@docNumber}}
+          </small>
+        {{/if}}
+      </div>
+      <div class="mt-2 max-w-full space-y-1">
+        <Person
+          @ignoreUnknown={{true}}
+          @imgURL={{@avatar}}
+          @email="{{@owner}}"
+        />
+        {{#if @modifiedTime}}
+          <p class="text-body-100 text-color-foreground-faint">
+            Modified
+            {{time-ago @modifiedTime}}
+          </p>
+        {{/if}}
+      </div>
+      {{#if (and @isResult @snippet)}}
+        <Doc::Snippet @snippet={{@snippet}} class="mt-2" />
+      {{/if}}
+    </div>
+  </LinkTo>
 
-  <div class="flex flex-col items-start space-y-1 pb-1 max-w-full">
-    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
-    {{#if (not (is-empty @modifiedAgo))}}
-      <p class="text-body-100 text-color-foreground-faint">
-        {{@modifiedAgo}}
-      </p>
-    {{/if}}
-  </div>
-
-  <Hds::Badge
-    @text={{this.productAreaName}}
-    @icon={{or (get-product-id this.this.args.productArea) "folder"}}
-  />
-
-  {{#if (and @isResult @snippet)}}
-    <Doc::Snippet @snippet={{@snippet}} class="pt-2" />
-  {{/if}}
-</LinkTo>
+  <ProductBadgeLink @productArea={{@productArea}} class="relative" />
+</div>

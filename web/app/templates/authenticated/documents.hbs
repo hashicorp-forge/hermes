@@ -1,0 +1,11 @@
+{{page-title "All Docs"}}
+
+<Header @facets={{@model.facets}} />
+
+<RowResults
+  @docs={{@model.results.hits}}
+  @nbPages={{@model.results.nbPages}}
+  @currentPage={{(add @model.results.page 1)}}
+  @sortDirection={{this.sortDirection}}
+  @currentSort="createdTime"
+/>

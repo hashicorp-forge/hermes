@@ -1,6 +1,6 @@
+import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { action } from "@ember/object";
 import {
   CustomEditableField,
   HermesDocument,
@@ -13,7 +13,7 @@ interface CustomEditableFieldComponentSignature {
     field: string;
     attributes: CustomEditableField;
     onChange: (value: any) => void;
-    loading?: boolean;
+    isSaving?: boolean;
     disabled?: boolean;
   };
 }
@@ -36,7 +36,6 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
       return { email, imgURL: null };
     });
   }
-
   @action protected updateEmails(people: HermesUser[]) {
     this.emails = people.map((person: HermesUser) => {
       return person.email;

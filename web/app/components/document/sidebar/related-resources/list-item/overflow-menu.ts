@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { RelatedResource } from "hermes/components/document/sidebar/related-resources";
+import { RelatedResource } from "hermes/components/related-resources";
 
 interface DocumentSidebarRelatedResourcesListItemOverflowMenuComponentSignature {
   Args: {

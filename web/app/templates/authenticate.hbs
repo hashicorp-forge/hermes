@@ -1,32 +1,34 @@
 {{! @glint-nocheck: not typesafe yet }}
 {{page-title "Authenticate"}}
-{{set-body-class "bg-color-page-faint"}}
+{{set-body-class "secondary-screen"}}
 
 <div
-  class="flex flex-col items-center justify-center flex-1 min-h-full py-12 relative"
+  class="relative flex min-h-full flex-1 flex-col items-center justify-center py-12"
 >
-  <Hds::Card::Container
-    @level="high"
-    @hasBorder="true"
-    @overflow="visible"
-    class="flex flex-col items-center px-24 pt-24 pb-32 text-center relative"
-  >
-    <HermesLogo class="mb-8" />
-    <h1 class="">
-      Welcome to Hermes.
-    </h1>
-    <p class="mb-8 text-display-300">
-      Log in to browse, search, and manage documents
-    </p>
-    <Hds::Button
-      @text="Authenticate with Google"
-      @size="large"
-      @icon="google"
-      {{on "click" (perform this.authenticate)}}
-    />
+  <div class="mx-auto w-full max-w-xl">
+    <Hds::Card::Container
+      @level="high"
+      @hasBorder="true"
+      @overflow="visible"
+      class="relative flex w-full flex-col items-center px-20 pt-24 pb-32 text-center"
+    >
+      <HermesLogo class="mb-8" />
+      <h1 class="mb-1.5">
+        Welcome to Hermes.
+      </h1>
+      <p class="mb-8 text-display-300">
+        Log in to browse, search, and manage documents
+      </p>
+      <Hds::Button
+        @text="Authenticate with Google"
+        @size="large"
+        @icon="google"
+        {{on "click" (perform this.authenticate)}}
+      />
 
-  </Hds::Card::Container>
-  <Footer/>
+    </Hds::Card::Container>
+    <Footer class="compact" />
+  </div>
 </div>
 
 {{outlet}}

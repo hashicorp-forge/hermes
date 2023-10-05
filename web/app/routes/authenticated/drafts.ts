@@ -14,6 +14,7 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { assert } from "@ember/debug";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { SortByValue } from "hermes/components/header/toolbar";
 
 interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -22,7 +23,7 @@ interface DraftResponseJSON {
   page: number;
 }
 
-export default class DraftsRoute extends Route {
+export default class AuthenticatedDraftsRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -133,6 +134,8 @@ export default class DraftsRoute extends Route {
   );
 
   async model(params: DocumentsRouteParams) {
+    const sortedBy = params.sortBy ?? SortByValue.DateDesc;
+
     let [facets, results] = await Promise.all([
       this.getDraftFacets.perform(params),
       this.getDraftResults.perform(params),
@@ -140,6 +143,6 @@ export default class DraftsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { facets, results, sortedBy };
   }
 }

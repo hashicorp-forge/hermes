@@ -1,29 +1,30 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{#if this.docIsBeingCreated}}
-  <div class="text-center hds-typography-display-400 mt-3">
+  <div
+    data-test-creating-new-doc
+    class="hds-typography-display-400 mt-3 text-center"
+  >
     <FlightIcon @name="loading" @size="24" />
     <div class="mt-8 text-display-200 font-semibold">
-      Creating
-      {{@docType}}
-      draft...
+      Creating draft in Google Drive...
     </div>
     <div class="text-body-200 text-color-foreground-faint">This usually takes
       10-20 seconds.</div>
   </div>
 {{else}}
   <form
-    class="grid gap-10 grid-cols-[1fr_250px] grid-rows-1"
+    data-test-new-doc-form
+    class="grid grid-cols-[1fr_250px] grid-rows-1 gap-10"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
     <div>
       <div class="space-y-4">
-        <h1
-          class="hds-typography-display-500 hds-font-weight-bold hds-foreground-strong"
-        >Create your {{@docType}}</h1>
+        <h1>Create your
+          {{@docType}}</h1>
       </div>
-      <div class="pt-10 space-y-7">
+      <div class="space-y-7 pt-10">
         <Hds::Form::TextInput::Field
+          data-test-title-input
           @type="text"
           @isRequired={{true}}
           @value={{this.title}}
@@ -40,6 +41,7 @@
 
         <div class="relative">
           <Hds::Form::Textarea::Field
+            data-test-summary-input
             @value={{this.summary}}
             rows="3"
             name="summary"
@@ -51,7 +53,7 @@
               <span
                 class={{if
                   this.summaryIsLong
-                  "transition-colors bg-color-surface-warning text-color-foreground-warning-on-surface"
+                  "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
                 }}
               >One or two sentences</span>
               outlining your doc.
@@ -76,43 +78,6 @@
             class="w-[300px]"
           />
         </div>
-
-        {{! Note: We are still refining the subscribe/follow feature set.
-                As part of that effort we will be looking into how the concept
-                of "tags" would be useful. For now, we are choosing to
-                comment out defining tags as part of the document draft
-                creation workflow.
-          }}
-        {{!-- <Hds::Form::Field @layout="vertical" @isOptional={{true}} as |F|>
-          {{yield
-            (hash
-              Error=F.Error
-              HelperText=F.HelperText
-              Label=F.Label
-              isRequired=F.isRequired
-              isOptional=F.isOptional
-            )
-          }}
-          <F.Control>
-            <Inputs::TagSelect
-              @selected={{this.tags}}
-              @onChange={{this.updateTags}}
-            />
-          </F.Control>
-          <F.Label><FlightIcon @name="tag" />
-            Add tags
-          </F.Label>
-          {{#if this.formErrors.tags}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.tags}}</E.Message>
-            </F.Error>
-          {{/if}}
-          <F.HelperText>
-            Use tags to help people discover this document based on their
-            cross-functional interests. For instance, "raft", "design" or
-            "a11y". There is a maximum of 5 tags.
-          </F.HelperText>
-        </Hds::Form::Field> --}}
 
         <Hds::Form::Field @layout="vertical" as |F|>
           {{yield
@@ -160,7 +125,8 @@
           @owner={{this.authenticatedUser.info.email}}
         />
         <Hds::Button
-          @text="Create {{@docType}} in Google Drive"
+          data-test-create-button
+          @text="Create draft in Google Drive"
           type="submit"
           disabled={{not this.formRequirementsMet}}
           class="w-full"

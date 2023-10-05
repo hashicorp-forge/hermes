@@ -60,11 +60,15 @@ func MeHandler(
 			return
 
 		case "GET":
-			errResp := func(httpCode int, userErrMsg, logErrMsg string, err error) {
+			errResp := func(
+				httpCode int, userErrMsg, logErrMsg string, err error,
+				extraArgs ...interface{}) {
 				l.Error(logErrMsg,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"error", err,
+					append([]interface{}{
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+					}, extraArgs...)...,
 				)
 				http.Error(w, userErrMsg, httpCode)
 			}
@@ -87,7 +91,8 @@ func MeHandler(
 					"Error getting user information",
 					fmt.Sprintf(
 						"wrong number of people in search result: %d", len(ppl)),
-					err,
+					nil,
+					"user_email", userEmail,
 				)
 				return
 			}

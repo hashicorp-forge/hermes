@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import { inject as service } from "@ember/service";
-import { enqueueTask, restartableTask } from "ember-concurrency";
+import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
@@ -41,7 +41,7 @@ export default class RecentlyViewedDocsService extends Service {
    * Fetches an array of recently viewed docs.
    * Called in the dashboard route if the docs are not already loaded.
    */
-  fetchAll = restartableTask(async () => {
+  fetchAll = keepLatestTask(async () => {
     try {
       /**
        * Fetch the file IDs from the backend.
@@ -67,13 +67,13 @@ export default class RecentlyViewedDocsService extends Service {
       let docResponses = await Promise.allSettled(
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
-          let fetchResponse = await this.fetchSvc.fetch(
-            `/api/v1/${endpoint}/${id}`
-          );
-          return {
-            doc: await fetchResponse?.json(),
-            isDraft,
-          };
+          let doc = await this.fetchSvc
+            .fetch(`/api/v1/${endpoint}/${id}`)
+            .then((resp) => resp?.json());
+
+          doc.isDraft = isDraft;
+
+          return { doc, isDraft };
         })
       );
       /**
@@ -86,10 +86,6 @@ export default class RecentlyViewedDocsService extends Service {
        */
       docResponses.forEach((response) => {
         if (response.status == "fulfilled") {
-          let recentlyViewed = response.value as RecentlyViewedDoc;
-          recentlyViewed.doc.modifiedAgo = `Modified ${timeAgo(
-            new Date(recentlyViewed.doc.modifiedTime * 1000)
-          )}`;
           newAll.push(response.value);
         }
       });
@@ -99,6 +95,7 @@ export default class RecentlyViewedDocsService extends Service {
        */
       this.all = newAll;
     } catch (e: unknown) {
+      this.all = null; // Causes the dashboard to show an error message.
       console.error("Error fetching recently viewed docs", e);
       throw e;
     }

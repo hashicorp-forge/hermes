@@ -139,7 +139,7 @@ module("Integration | Component | header/search", function (hooks) {
       .dom(PRODUCT_MATCH_LINK_SELECTOR)
       .exists()
       .hasText("View all Vault documents")
-      .hasAttribute("href", "/all?product=%5B%22Vault%22%5D");
+      .hasAttribute("href", "/documents?product=%5B%22Vault%22%5D");
   });
 
   test("the input can be focused with a keyboard shortcut", async function (this: HeaderSearchTestContext, assert) {

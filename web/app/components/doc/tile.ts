@@ -1,32 +1,23 @@
 import Component from "@glimmer/component";
 
 interface DocTileComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     avatar?: string;
     docID?: string;
     docNumber?: string;
-    isOwner?: boolean;
     isResult?: boolean;
-    modifiedAge?: string;
+    isDraft?: boolean;
+    modifiedTime?: number;
     owner?: string;
     productArea?: string;
     snippet?: string;
     status?: string;
-    thumbnail?: string;
     title?: string;
   };
 }
 
-export default class DocTileComponent extends Component<DocTileComponentSignature> {
-  protected get productAreaName(): string | undefined {
-    switch (this.args.productArea) {
-      case "Cloud Platform":
-        return "HCP";
-      default:
-        return this.args.productArea;
-    }
-  }
-}
+export default class DocTileComponent extends Component<DocTileComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

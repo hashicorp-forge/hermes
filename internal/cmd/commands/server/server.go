@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/auth"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
@@ -24,6 +25,9 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/web"
+	"github.com/hashicorp/go-hclog"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 	"gorm.io/gorm"
 )
 
@@ -158,6 +162,19 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		c.Log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		c.UI.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
+		return 1
+	}
+
 	// Build configuration for Okta authentication.
 	if !cfg.Okta.Disabled {
 		// Check for required Okta configuration.
@@ -173,6 +190,29 @@ func (c *Command) Run(args []string) int {
 			c.UI.Error("error initializing server: Okta client ID is required")
 			return 1
 		}
+	}
+
+	// Initialize Datadog.
+	dd := datadog.NewConfig(*cfg)
+	if dd.Enabled {
+		tracerOpts := []tracer.StartOption{
+			tracer.WithLogStartup(false),
+		}
+
+		if dd.Env != "" {
+			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
+		}
+		if dd.Service != "" {
+			tracerOpts = append(tracerOpts, tracer.WithService(dd.Service))
+		}
+		if dd.ServiceVersion != "" {
+			tracerOpts = append(
+				tracerOpts,
+				tracer.WithServiceVersion(dd.ServiceVersion),
+			)
+		}
+
+		tracer.Start(tracerOpts...)
 	}
 
 	// Initialize Google Workspace service.
@@ -216,6 +256,9 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Initialize database.
+	if val, ok := os.LookupEnv("HERMES_SERVER_POSTGRES_PASSWORD"); ok {
+		cfg.Postgres.Password = val
+	}
 	db, err := db.NewDB(*cfg.Postgres)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing database: %v", err))
@@ -254,7 +297,16 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
-	mux := http.NewServeMux()
+	type serveMux interface {
+		Handle(pattern string, handler http.Handler)
+		ServeHTTP(http.ResponseWriter, *http.Request)
+	}
+	var mux serveMux
+	if dd.Enabled {
+		mux = httptrace.NewServeMux()
+	} else {
+		mux = http.NewServeMux()
+	}
 
 	// Define handlers for authenticated endpoints.
 	// TODO: stop passing around all these arguments to handlers and use a struct

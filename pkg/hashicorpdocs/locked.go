@@ -68,10 +68,6 @@ func IsLocked(
 			log.Info("unlocked document",
 				"google_file_id", fileID,
 			)
-		} else {
-			log.Warn("document was already unlocked",
-				"google_file_id", fileID,
-			)
 		}
 	}
 

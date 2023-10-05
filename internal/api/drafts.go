@@ -1,11 +1,10 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -36,21 +36,13 @@ type DraftsRequest struct {
 // DraftsPatchRequest contains a subset of drafts fields that are allowed to
 // be updated with a PATCH request.
 type DraftsPatchRequest struct {
-	Approvers    []string `json:"approvers,omitempty"`
-	Contributors []string `json:"contributors,omitempty"`
-	Product      string   `json:"product,omitempty"`
-	Summary      string   `json:"summary,omitempty"`
+	Approvers    *[]string               `json:"approvers,omitempty"`
+	Contributors *[]string               `json:"contributors,omitempty"`
+	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
+	Product      *string                 `json:"product,omitempty"`
+	Summary      *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
-	Title string `json:"title,omitempty"`
-
-	// TODO: These are all current custom editable fields for all supported doc
-	// types. We should instead make this dynamic.
-	CurrentVersion string   `json:"currentVersion,omitempty"`
-	PRD            string   `json:"prd,omitempty"`
-	PRFAQ          string   `json:"prfaq,omitempty"`
-	RFC            string   `json:"rfc,omitempty"`
-	Stakeholders   []string `json:"stakeholders,omitempty"`
-	TargetVersion  string   `json:"targetVersion,omitempty"`
+	Title *string `json:"title,omitempty"`
 }
 
 type DraftsResponse struct {
@@ -98,17 +90,15 @@ func DraftsHandler(
 				return
 			}
 
-			switch req.DocType {
-			case "FRD":
-			case "RFC":
-			case "PRD":
-			case "":
-				l.Error("Bad request: docType is required")
-				http.Error(w, "Bad request: docType is required", http.StatusBadRequest)
-				return
-			default:
-				l.Error("Bad request: docType is required", "doc_type", req.DocType)
-				http.Error(w, "Bad request: invalid docType", http.StatusBadRequest)
+			// Validate document type.
+			if !validateDocType(cfg.DocumentTypes.DocumentType, req.DocType) {
+				l.Error("invalid document type",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_type", req.DocType,
+				)
+				http.Error(
+					w, "Bad request: invalid document type", http.StatusBadRequest)
 				return
 			}
 
@@ -180,7 +170,8 @@ func DraftsHandler(
 				"o_id:" + id,
 			}
 
-			baseDocObj := &hcd.BaseDoc{
+			// Build document.
+			doc := &document.Document{
 				ObjectID:     f.Id,
 				Title:        req.Title,
 				AppCreated:   true,
@@ -190,6 +181,7 @@ func DraftsHandler(
 				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
+				ModifiedTime: ct.Unix(),
 				Owners:       []string{userEmail},
 				OwnerPhotos:  op,
 				Product:      req.Product,
@@ -198,7 +190,7 @@ func DraftsHandler(
 				Tags:         req.Tags,
 			}
 
-			res, err := aw.Drafts.SaveObject(baseDocObj)
+			res, err := aw.Drafts.SaveObject(doc)
 			if err != nil {
 				l.Error("error saving draft doc in Algolia", "error", err, "doc_id", f.Id)
 				http.Error(w, "Error creating document draft",
@@ -213,34 +205,8 @@ func DraftsHandler(
 				return
 			}
 
-			// Create new document object of the proper doc type.
-			docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-			if err != nil {
-				l.Error("error creating new empty doc",
-					"error", err,
-					"doc_id", f.Id,
-				)
-				http.Error(w, "Error accessing draft document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Get document object from Algolia.
-			err = ar.Drafts.GetObject(f.Id, &docObj)
-			if err != nil {
-				l.Error("error requesting document draft from Algolia",
-					"error", err,
-					"doc_id", f.Id,
-				)
-				http.Error(w, "Error accessing draft document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				f.Id, cfg.BaseURL, true, s)
-			if err != nil {
+			if err = doc.ReplaceHeader(cfg.BaseURL, true, s); err != nil {
 				l.Error("error replacing draft doc header",
 					"error", err, "doc_id", f.Id)
 				http.Error(w, "Error creating document draft",
@@ -269,8 +235,7 @@ func DraftsHandler(
 					http.StatusInternalServerError)
 				return
 			}
-			// TODO: add custom fields.
-			d := models.Document{
+			model := models.Document{
 				GoogleFileID:       f.Id,
 				Approvers:          approvers,
 				Contributors:       contributors,
@@ -289,7 +254,7 @@ func DraftsHandler(
 				Summary: req.Summary,
 				Title:   req.Title,
 			}
-			if err := d.Create(db); err != nil {
+			if err := model.Create(db); err != nil {
 				l.Error("error creating document in database",
 					"error", err,
 					"doc_id", f.Id,
@@ -342,6 +307,58 @@ func DraftsHandler(
 			}
 
 			l.Info("created draft", "doc_id", f.Id)
+
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(f.Id, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: f.Id,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: f.Id,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+				)
+			}
 
 		case "GET":
 			// Get OIDC ID
@@ -452,13 +469,13 @@ func DraftsDocumentHandler(
 			return
 		}
 
-		// Get base document object from Algolia so we can determine the doc type.
-		baseDocObj := &hcd.BaseDoc{}
-		err = ar.Drafts.GetObject(docId, &baseDocObj)
+		// Get document object from Algolia.
+		var algoObj map[string]any
+		err = ar.Drafts.GetObject(docId, &algoObj)
 		if err != nil {
 			// Handle 404 from Algolia and only log a warning.
 			if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
-				l.Warn("base document object not found",
+				l.Warn("document object not found in Algolia",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -467,10 +484,8 @@ func DraftsDocumentHandler(
 				http.Error(w, "Draft document not found", http.StatusNotFound)
 				return
 			} else {
-				l.Error("error requesting base document object from Algolia",
+				l.Error("error requesting document draft from Algolia",
 					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
 					"doc_id", docId,
 				)
 				http.Error(w, "Error accessing draft document",
@@ -479,22 +494,11 @@ func DraftsDocumentHandler(
 			}
 		}
 
-		// Create new document object of the proper doc type.
-		docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
+		// Convert Algolia object to a document.
+		doc, err := document.NewFromAlgoliaObject(
+			algoObj, cfg.DocumentTypes.DocumentType)
 		if err != nil {
-			l.Error("error creating new empty doc",
-				"error", err,
-				"doc_id", docId,
-			)
-			http.Error(w, "Error accessing draft document",
-				http.StatusInternalServerError)
-			return
-		}
-
-		// Get document object from Algolia.
-		err = ar.Drafts.GetObject(docId, &docObj)
-		if err != nil {
-			l.Error("error requesting document draft from Algolia",
+			l.Error("error converting Algolia object to document type",
 				"error", err,
 				"doc_id", docId,
 			)
@@ -504,10 +508,10 @@ func DraftsDocumentHandler(
 		}
 
 		// Get document from database.
-		doc := models.Document{
+		model := models.Document{
 			GoogleFileID: docId,
 		}
-		if err := doc.Get(db); err != nil {
+		if err := model.Get(db); err != nil {
 			l.Error("error getting document draft from database",
 				"error", err,
 				"path", r.URL.Path,
@@ -524,13 +528,13 @@ func DraftsDocumentHandler(
 		// require owner access only.
 		userEmail := r.Context().Value("userEmail").(string)
 		var isOwner, isContributor bool
-		if docObj.GetOwners()[0] == userEmail {
+		if doc.Owners[0] == userEmail {
 			isOwner = true
 		}
-		if contains(docObj.GetContributors(), userEmail) {
+		if contains(doc.Contributors, userEmail) {
 			isContributor = true
 		}
-		if !isOwner && !isContributor && !doc.ShareableAsDraft {
+		if !isOwner && !isContributor && !model.ShareableAsDraft {
 			http.Error(w,
 				"Only owners or contributors can access a non-shared draft document",
 				http.StatusUnauthorized)
@@ -541,10 +545,10 @@ func DraftsDocumentHandler(
 		// draft document ID) handler, if appropriate.
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
-			documentsResourceRelatedResourcesHandler(w, r, docId, docObj, l, ar, db)
+			documentsResourceRelatedResourcesHandler(w, r, docId, *doc, cfg, l, ar, db)
 			return
 		case shareableDocumentSubcollectionRequestType:
-			draftsShareableHandler(w, r, docId, docObj, *cfg, l, ar, s, db)
+			draftsShareableHandler(w, r, docId, *doc, *cfg, l, ar, s, db)
 			return
 		}
 
@@ -577,14 +581,26 @@ func DraftsDocumentHandler(
 				http.Error(w, "Error requesting document draft", http.StatusInternalServerError)
 				return
 			}
-			docObj.SetModifiedTime(modifiedTime.Unix())
-
-			// Set custom editable fields.
-			docObj.SetCustomEditableFields()
+			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Set locked value for response to value from the database (this value
 			// isn't stored in Algolia).
-			docObj.SetLocked(doc.Locked)
+			doc.Locked = model.Locked
+
+			// Convert document to Algolia object because this is how it is expected
+			// by the frontend.
+			docObj, err := doc.ToAlgoliaObject(false)
+			if err != nil {
+				l.Error("error converting document to Algolia object",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				http.Error(w, "Error getting document draft",
+					http.StatusInternalServerError)
+				return
+			}
 
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
@@ -621,6 +637,58 @@ func DraftsDocumentHandler(
 
 			l.Info("retrieved document draft", "doc_id", docId)
 
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(docId, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docId,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+			}
+
 		case "DELETE":
 			// Authorize request.
 			if !isOwner {
@@ -630,7 +698,7 @@ func DraftsDocumentHandler(
 				return
 			}
 
-			// Delete document
+			// Delete document in Google Drive.
 			err = s.DeleteFile(docId)
 			if err != nil {
 				l.Error("error deleting document", "error", err, "doc_id", docId)
@@ -661,6 +729,19 @@ func DraftsDocumentHandler(
 				return
 			}
 
+			// Delete document in the database.
+			d := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := d.Delete(db); err != nil {
+				l.Error("error deleting document in database",
+					"error", err,
+					"doc_id", docId,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+
 			resp := &DraftsResponse{
 				ID: docId,
 			}
@@ -679,23 +760,6 @@ func DraftsDocumentHandler(
 			}
 
 		case "PATCH":
-			// Copy request body so we can use both for validation using the request
-			// struct, and then afterwards for patching the document JSON.
-			buf, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				l.Error("error reading request body",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docId)
-				http.Error(w, "Error patching document draft",
-					http.StatusInternalServerError)
-				return
-			}
-			body := ioutil.NopCloser(bytes.NewBuffer(buf))
-			newBody := ioutil.NopCloser(bytes.NewBuffer(buf))
-			r.Body = newBody
-
 			// Decode request. The request struct validates that the request only
 			// contains fields that are allowed to be patched.
 			var req DraftsPatchRequest
@@ -708,8 +772,8 @@ func DraftsDocumentHandler(
 
 			// Validate product if it is in the patch request.
 			var productAbbreviation string
-			if req.Product != "" {
-				p := models.Product{Name: req.Product}
+			if req.Product != nil && *req.Product != "" {
+				p := models.Product{Name: *req.Product}
 				if err := p.Get(db); err != nil {
 					l.Error("error getting product",
 						"error", err,
@@ -725,6 +789,48 @@ func DraftsDocumentHandler(
 				// Set product abbreviation because we use this later to update the
 				// doc number in the Algolia object.
 				productAbbreviation = p.Abbreviation
+			}
+
+			// Validate custom fields.
+			if req.CustomFields != nil {
+				for _, cf := range *req.CustomFields {
+					cef, ok := doc.CustomEditableFields[cf.Name]
+					if !ok {
+						l.Error("custom field not found",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"custom_field", cf.Name,
+							"doc_id", docId)
+						http.Error(w, "Bad request: invalid custom field",
+							http.StatusBadRequest)
+						return
+					}
+					if cf.DisplayName != cef.DisplayName {
+						l.Error("invalid custom field display name",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"custom_field", cf.Name,
+							"custom_field_display_name", cf.DisplayName,
+							"doc_id", docId)
+						http.Error(w, "Bad request: invalid custom field display name",
+							http.StatusBadRequest)
+						return
+					}
+					if cf.Type != cef.Type {
+						l.Error("invalid custom field type",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"custom_field", cf.Name,
+							"custom_field_type", cf.Type,
+							"doc_id", docId)
+						http.Error(w, "Bad request: invalid custom field type",
+							http.StatusBadRequest)
+						return
+					}
+				}
 			}
 
 			// Check if document is locked.
@@ -749,37 +855,26 @@ func DraftsDocumentHandler(
 			// before we save the patched objected
 			// Find out contributors to share the document with
 			var contributorsToAddSharing []string
-			if len(docObj.GetContributors()) == 0 && len(req.Contributors) != 0 {
-				// If there are no contributors of the document
-				// add the contributors in the request
-				contributorsToAddSharing = req.Contributors
-			} else if len(req.Contributors) != 0 {
-				// Only compare when there are stored contributors
-				// and contributors in the request
-				contributorsToAddSharing = compareSlices(docObj.GetContributors(), req.Contributors)
-			}
-			// Find out contributors to remove from sharing the document
 			var contributorsToRemoveSharing []string
-			// TODO: figure out how we want to handle user removing all contributors
-			// from the sidebar select
-			if len(docObj.GetContributors()) != 0 && len(req.Contributors) != 0 {
-				// Compare contributors when there are stored contributors
-				// and there are contributors in the request
-				contributorsToRemoveSharing = compareSlices(req.Contributors, docObj.GetContributors())
-			}
-
-			// Patch document by decoding the (now validated) request body JSON to the
-			// document object.
-			err = json.NewDecoder(body).Decode(docObj)
-			if err != nil {
-				l.Error("error decoding request body to document object",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docId)
-				http.Error(w, "Error patching document draft",
-					http.StatusInternalServerError)
-				return
+			if req.Contributors != nil {
+				if len(doc.Contributors) == 0 && len(*req.Contributors) != 0 {
+					// If there are no contributors of the document
+					// add the contributors in the request
+					contributorsToAddSharing = *req.Contributors
+				} else if len(*req.Contributors) != 0 {
+					// Only compare when there are stored contributors
+					// and contributors in the request
+					contributorsToAddSharing = compareSlices(doc.Contributors, *req.Contributors)
+				}
+				// Find out contributors to remove from sharing the document
+				// var contributorsToRemoveSharing []string
+				// TODO: figure out how we want to handle user removing all contributors
+				// from the sidebar select
+				if len(doc.Contributors) != 0 && len(*req.Contributors) != 0 {
+					// Compare contributors when there are stored contributors
+					// and there are contributors in the request
+					contributorsToRemoveSharing = compareSlices(*req.Contributors, doc.Contributors)
+				}
 			}
 
 			// Share file with contributors.
@@ -810,7 +905,7 @@ func DraftsDocumentHandler(
 				// Only remove contributor if the email
 				// associated with the permission doesn't
 				// match owner email(s).
-				if !contains(docObj.GetOwners(), c) {
+				if !contains(doc.Owners, c) {
 					if err := removeSharing(s, docId, c); err != nil {
 						l.Error("error removing contributor from file",
 							"error", err,
@@ -829,27 +924,220 @@ func DraftsDocumentHandler(
 					"contributors_count", len(contributorsToRemoveSharing))
 			}
 
-			// Update product (if it is in the patch request).
-			if req.Product != "" {
-				// Update in database.
-				d := models.Document{
-					GoogleFileID: docId,
-					Product:      models.Product{Name: req.Product},
-				}
-				if err := d.Upsert(db); err != nil {
-					l.Error("error upserting document to update product",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"product", req.Product,
-						"doc_id", docId)
-					http.Error(w, "Error patching document draft",
-						http.StatusInternalServerError)
-					return
-				}
+			// Approvers.
+			if req.Approvers != nil {
+				doc.Approvers = *req.Approvers
 
-				// Update doc number in Algolia object.
-				docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
+				var approvers []*models.User
+				for _, a := range doc.Approvers {
+					u := models.User{
+						EmailAddress: a,
+					}
+					approvers = append(approvers, &u)
+				}
+				model.Approvers = approvers
+			}
+
+			// Contributors.
+			if req.Contributors != nil {
+				doc.Contributors = *req.Contributors
+
+				var contributors []*models.User
+				for _, a := range doc.Contributors {
+					u := &models.User{
+						EmailAddress: a,
+					}
+					contributors = append(contributors, u)
+				}
+				model.Contributors = contributors
+			}
+
+			// Custom fields.
+			if req.CustomFields != nil {
+				for _, cf := range *req.CustomFields {
+					switch cf.Type {
+					case "STRING":
+						if v, ok := cf.Value.(string); ok {
+							if err := doc.UpsertCustomField(cf); err != nil {
+								l.Error("error upserting custom string field",
+									"error", err,
+									"method", r.Method,
+									"path", r.URL.Path,
+									"custom_field", cf.Name,
+									"doc_id", docId,
+								)
+								http.Error(w,
+									"Error patching document",
+									http.StatusInternalServerError)
+								return
+							}
+
+							model.CustomFields = models.UpsertStringDocumentCustomField(
+								model.CustomFields,
+								doc.DocType,
+								cf.DisplayName,
+								v,
+							)
+						} else {
+							l.Error("invalid value type for string custom field",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"custom_field", cf.Name,
+								"doc_id", docId)
+							http.Error(w,
+								fmt.Sprintf(
+									"Bad request: invalid value type for custom field %q",
+									cf.Name,
+								),
+								http.StatusBadRequest)
+							return
+						}
+					case "PEOPLE":
+						if reflect.TypeOf(cf.Value).Kind() != reflect.Slice {
+							l.Error("invalid value type for people custom field",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"custom_field", cf.Name,
+								"doc_id", docId)
+							http.Error(w,
+								fmt.Sprintf(
+									"Bad request: invalid value type for custom field %q",
+									cf.Name,
+								),
+								http.StatusBadRequest)
+							return
+						}
+						cfVal := []string{}
+						for _, v := range cf.Value.([]any) {
+							if v, ok := v.(string); ok {
+								cfVal = append(cfVal, v)
+							} else {
+								l.Error("invalid value type for people custom field",
+									"error", err,
+									"method", r.Method,
+									"path", r.URL.Path,
+									"custom_field", cf.Name,
+									"doc_id", docId)
+								http.Error(w,
+									fmt.Sprintf(
+										"Bad request: invalid value type for custom field %q",
+										cf.Name,
+									),
+									http.StatusBadRequest)
+								return
+							}
+						}
+
+						if err := doc.UpsertCustomField(cf); err != nil {
+							l.Error("error upserting custom people field",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"custom_field", cf.Name,
+								"doc_id", docId,
+							)
+							http.Error(w,
+								"Error patching document",
+								http.StatusInternalServerError)
+							return
+						}
+
+						model.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
+							model.CustomFields,
+							doc.DocType,
+							cf.DisplayName,
+							cfVal,
+						)
+						if err != nil {
+							l.Error("invalid value type for people custom field",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"custom_field", cf.Name,
+								"doc_id", docId)
+							http.Error(w,
+								fmt.Sprintf(
+									"Bad request: invalid value type for custom field %q",
+									cf.Name,
+								),
+								http.StatusBadRequest)
+							return
+						}
+					default:
+						l.Error("invalid custom field type",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"custom_field", cf.Name,
+							"custom_field_type", cf.Type,
+							"doc_id", docId)
+						http.Error(w,
+							fmt.Sprintf(
+								"Bad request: invalid type for custom field %q",
+								cf.Name,
+							),
+							http.StatusBadRequest)
+						return
+					}
+				}
+			}
+
+			// Make sure all custom fields in the database model have the document ID.
+			for _, cf := range model.CustomFields {
+				cf.DocumentID = model.ID
+			}
+
+			// Document modified time.
+			model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
+
+			// Product.
+			if req.Product != nil {
+				doc.Product = *req.Product
+				model.Product = models.Product{Name: *req.Product}
+
+				// Update doc number in document.
+				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
+			}
+
+			// Summary.
+			if req.Summary != nil {
+				doc.Summary = *req.Summary
+				model.Summary = *req.Summary
+			}
+
+			// Title.
+			if req.Title != nil {
+				doc.Title = *req.Title
+				model.Title = *req.Title
+			}
+
+			// Update document in the database.
+			if err := model.Upsert(db); err != nil {
+				l.Error("error updating document in the database",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+			// }
+
+			// Convert document to Algolia object.
+			docObj, err := doc.ToAlgoliaObject(true)
+			if err != nil {
+				l.Error("error converting document to Algolia object",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				http.Error(w, "Error patching document draft",
+					http.StatusInternalServerError)
+				return
 			}
 
 			// Save new modified draft doc object in Algolia.
@@ -871,22 +1159,76 @@ func DraftsDocumentHandler(
 			}
 
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				docId, cfg.BaseURL, true, s)
-			if err != nil {
+			if err := doc.ReplaceHeader(cfg.BaseURL, true, s); err != nil {
 				l.Error("error replacing draft doc header",
-					"error", err, "doc_id", docId)
-				http.Error(w, "Error patching document draft",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				http.Error(w, "Error replacing header of document draft",
 					http.StatusInternalServerError)
 				return
 			}
 
 			// Rename file with new title.
 			s.RenameFile(docId,
-				fmt.Sprintf("[%s] %s", docObj.GetDocNumber(), docObj.GetTitle()))
+				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			w.WriteHeader(http.StatusOK)
 			l.Info("patched draft document", "doc_id", docId)
+
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Drafts.GetObject(docId, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docId,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docId,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docId,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docId,
+				)
+			}
 
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -965,13 +1307,28 @@ func getDocTypeTemplate(
 	template := ""
 
 	for _, t := range docTypes {
-		if strings.ToUpper(t.Name) == docType {
+		if t.Name == docType {
 			template = t.Template
 			break
 		}
 	}
 
 	return template
+}
+
+// validateDocType returns true if the name (docType) is contained in the a
+// slice of configured document types.
+func validateDocType(
+	docTypes []*config.DocumentType,
+	docType string,
+) bool {
+	for _, t := range docTypes {
+		if t.Name == docType {
+			return true
+		}
+	}
+
+	return false
 }
 
 // removeSharing lists permissions for a document and then

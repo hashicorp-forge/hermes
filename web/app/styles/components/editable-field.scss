@@ -1,5 +1,5 @@
 .editable-field {
-  @apply w-full relative;
+  @apply relative w-full;
 
   & > .field-toggle {
     all: unset;
@@ -11,7 +11,7 @@
       cursor: default;
     }
 
-    &.loading {
+    &.saving {
       opacity: 0.5;
     }
 
@@ -51,11 +51,5 @@
         visibility: visible;
       }
     }
-  }
-
-  .loading-indicator {
-    position: absolute;
-    top: 0;
-    right: 0;
   }
 }

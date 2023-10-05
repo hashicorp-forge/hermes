@@ -17,17 +17,24 @@ import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import {
+  CustomEditableField,
+  HermesDocument,
+  HermesUser,
+} from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
+import ConfigService from "hermes/services/config";
+import isValidURL from "hermes/utils/is-valid-u-r-l";
+import { HermesDocumentType } from "hermes/types/document-type";
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
-    docType: string;
+    docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -53,27 +60,36 @@ export enum DraftVisibilityDescription {
 const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
 
-  @tracked archiveModalIsActive = false;
-  @tracked deleteModalIsActive = false;
-  @tracked requestReviewModalIsActive = false;
+  @tracked archiveModalIsShown = false;
+  @tracked deleteModalIsShown = false;
+  @tracked requestReviewModalIsShown = false;
+  @tracked docPublishedModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
-  get modalIsActive() {
+  @tracked protected docType: HermesDocumentType | null = null;
+
+  get modalIsShown() {
     return (
-      this.archiveModalIsActive ||
-      this.deleteModalIsActive ||
-      this.requestReviewModalIsActive
+      this.archiveModalIsShown ||
+      this.deleteModalIsShown ||
+      this.requestReviewModalIsShown
     );
   }
 
+  /**
+   * Whether the doc is a draft.
+   * If the draft was recently published, return false.
+   * Otherwise use the passed-in isDraft property.
+   */
   get isDraft() {
-    return this.args.document?.isDraft;
+    return this.draftWasPublished ? false : this.args.document?.isDraft;
   }
 
   get docID() {
@@ -85,9 +101,24 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked contributors = this.args.document.contributors || [];
-  @tracked approvers = this.args.document.approvers || [];
+  @tracked contributors: HermesUser[] =
+    this.args.document.contributorObjects || [];
+  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
+
+  /**
+   * Whether a draft was published during the session.
+   * Set true when the user successfully requests a review.
+   * Used in the `isDraft` getter to immediately update the UI
+   * to reflect the new state of the document.
+   */
+  @tracked private draftWasPublished: boolean | null = null;
+
+  /**
+   * Whether the `waitForDocNumber` task has has failed to find a docNumber.
+   * When true, the "doc published" modal will not show a URL or share button.
+   */
+  @tracked protected docNumberLookupHasFailed = false;
 
   /**
    * Whether the draft's `isShareable` property is true.
@@ -141,6 +172,39 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.draftIsShareable
       ? DraftVisibilityIcon.Shareable
       : DraftVisibilityIcon.Restricted;
+  }
+
+  /**
+   * The URL that the copyURLButton should copy to the clipboard.
+   * If the document is a draft, this is the current window location.
+   * If the doc is published, use the short link if it's available,
+   * otherwise use the current window location.s
+   */
+  protected get shareURL() {
+    // We only assign shortLinks to published documents
+    if (this.isDraft) {
+      return window.location.href;
+    }
+
+    let shortLinkBaseURL: string | undefined =
+      this.configSvc.config.short_link_base_url;
+
+    if (shortLinkBaseURL) {
+      // Add a trailing slash if the URL needs one
+      if (!shortLinkBaseURL.endsWith("/")) {
+        shortLinkBaseURL += "/";
+      }
+      // Reject invalid URLs
+      if (!isValidURL(shortLinkBaseURL)) {
+        shortLinkBaseURL = undefined;
+      }
+    }
+
+    return shortLinkBaseURL
+      ? `${
+          shortLinkBaseURL + this.args.document.docType.toLowerCase()
+        }/${this.args.document.docNumber.toLowerCase()}`
+      : window.location.href;
   }
 
   /**
@@ -214,7 +278,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const eventTarget = event.target;
     assert(
       "event.target must be an HTMLInputElement",
-      eventTarget instanceof HTMLInputElement
+      eventTarget instanceof HTMLInputElement,
     );
     this.docTypeCheckboxValue = eventTarget.checked;
   }
@@ -304,13 +368,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // isApprover returns true if the logged in user is a document approver.
   get isApprover() {
     return this.args.document.approvers?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e === this.args.profile.email,
     );
   }
 
   get isContributor() {
     return this.args.document.contributors?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e === this.args.profile.email,
     );
   }
 
@@ -323,7 +387,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // changes of the document.
   get hasRequestedChanges() {
     return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email
+      this.args.profile.email,
     );
   }
 
@@ -416,14 +480,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const owner = getOwner(this);
     assert("owner must exist", owner);
     const route = owner.lookup(
-      `route:${this.router.currentRouteName}`
+      `route:${this.router.currentRouteName}`,
     ) as Route;
     assert("route must exist", route);
     route.refresh();
   }
 
   @action maybeShowFlashError(error: Error, title: string) {
-    if (!this.modalIsActive) {
+    if (!this.modalIsShown) {
       this.showFlashError(error, title);
     }
   }
@@ -511,13 +575,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       } catch (error: unknown) {
         this.showFlashError(
           error as Error,
-          "Unable to update draft visibility"
+          "Unable to update draft visibility",
         );
       } finally {
         // reset the new-visibility-intent icon
         this.newDraftVisibilityIcon = null;
       }
-    }
+    },
   );
 
   updateProduct = keepLatestTask(async (product: string) => {
@@ -526,8 +590,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // productAbbreviation is computed by the back end
   });
 
+  get saveIsRunning() {
+    return this.save.isRunning || this.saveCustomField.isRunning;
+  }
+
   save = task(async (field: string, val: string | HermesUser[]) => {
-    if (field && val) {
+    if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
@@ -541,13 +609,39 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           [field]: serializedValue,
         });
       } catch (err) {
-        // revert field value on failure
-        (this as any)[field] = val;
-
         this.showFlashError(err as Error, "Unable to save document");
       }
     }
   });
+
+  saveCustomField = task(
+    async (
+      fieldName: string,
+      field: CustomEditableField,
+      val: string | HermesUser[],
+    ) => {
+      if (field && val !== undefined) {
+        let serializedValue;
+
+        if (typeof val === "string") {
+          serializedValue = cleanString(val);
+        } else {
+          serializedValue = val.map((p: HermesUser) => p.email);
+        }
+
+        field.name = fieldName;
+        field.value = serializedValue;
+
+        try {
+          await this.patchDocument.perform({
+            customFields: [field],
+          });
+        } catch (err) {
+          this.showFlashError(err as Error, "Unable to save document");
+        }
+      }
+    },
+  );
 
   patchDocument = task(async (fields) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
@@ -570,24 +664,47 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
+        approvers: this.approvers?.compact().mapBy("email"),
       });
 
       await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
         method: "POST",
       });
 
-      this.showFlashSuccess("Done!", "Document review requested");
-
       this.router.transitionTo({
         queryParams: { draft: false },
       });
+
+      this.refreshRoute();
+
+      await this.waitForDocNumber.perform();
+      this.draftWasPublished = true;
+      this.requestReviewModalIsShown = false;
+      this.docPublishedModalIsShown = true;
     } catch (error: unknown) {
+      this.draftWasPublished = null;
       this.maybeShowFlashError(error as Error, "Unable to request review");
       throw error;
     }
-    this.requestReviewModalIsActive = false;
-    this.refreshRoute();
+  });
+
+  /**
+   * A task that awaits a newly published doc's docNumber assignment.
+   * In the unlikely case where the docNumber doesn't appear after 10 seconds,
+   * we remove the URL and share button from the "doc published" modal.
+   */
+  private waitForDocNumber = task(async () => {
+    const numberOfTries = 10;
+
+    for (let i = 0; i < numberOfTries; i++) {
+      if (!this.args.document.docNumber.endsWith("?")) {
+        return;
+      } else {
+        await timeout(Ember.testing ? 0 : 1000);
+      }
+    }
+
+    this.docNumberLookupHasFailed = true;
   });
 
   deleteDraft = task(async () => {
@@ -609,16 +726,35 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.contributors = contributors;
   }
 
+  @action updateTitle(title: string) {
+    this.title = title;
+    void this.save.perform("title", this.title);
+  }
+
+  protected updateSummary = task(async (summary: string) => {
+    const cachedValue = this.summary;
+    this.summary = summary;
+    try {
+      this.save.perform("summary", this.summary);
+    } catch {
+      this.summary = cachedValue;
+    }
+  });
+
   @action closeDeleteModal() {
-    this.deleteModalIsActive = false;
+    this.deleteModalIsShown = false;
   }
 
   @action closeRequestReviewModal() {
-    this.requestReviewModalIsActive = false;
+    this.requestReviewModalIsShown = false;
   }
 
   @action closeArchiveModal() {
-    this.archiveModalIsActive = false;
+    this.archiveModalIsShown = false;
+  }
+
+  @action protected closeRequestReviewSuccessModal() {
+    this.requestReviewModalIsShown = false;
   }
 
   @action onScroll() {
@@ -635,9 +771,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
-    // kick off whether the draft is shareable.
+
     if (this.isDraft) {
+      // kick off whether the draft is shareable.
       void this.getDraftPermissions.perform();
+
+      // get docType for the "request review?" modal
+      this.args.docType.then((docType) => {
+        this.docType = docType;
+      });
     }
   }
 
@@ -700,7 +842,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch (error: unknown) {
       this.maybeShowFlashError(
         error as Error,
-        "Unable to change document status"
+        "Unable to change document status",
       );
       throw error;
     }

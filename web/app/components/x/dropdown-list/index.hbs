@@ -10,10 +10,10 @@
   @placement={{@placement}}
   @offset={{@offset}}
   @disableClose={{@disableClose}}
+  @matchAnchorWidth={{@matchAnchorWidth}}
   class="{{unless (eq @placement null) 'hermes-popover'}}
     x-dropdown-list
-    {{@theme}}
-    "
+    {{@theme}}"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -98,7 +98,7 @@
       {{else}}
         <div
           data-test-x-dropdown-list-loaded-content
-          class="overflow-hidden flex flex-col"
+          class="flex flex-col overflow-hidden"
           {{did-insert this.didInsertContent}}
         >
           {{#if this.inputIsShown}}

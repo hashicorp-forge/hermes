@@ -5,7 +5,7 @@ import { capitalize } from "@ember/string";
 
 interface ResultsIndexComponentSignature {
   Args: {
-    results: SearchResponse;
+    results: SearchResponse<HermesDocument>;
     query: string;
   };
 }

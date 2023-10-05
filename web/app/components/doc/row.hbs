@@ -4,7 +4,7 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex space-x-4 items-start"
+      class="flex items-start space-x-4"
     >
       <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
       <div>
@@ -24,11 +24,9 @@
   </Hds::Table::Td>
   <Hds::Table::Td class="status">
     <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
-  <Hds::Table::Td class="product"><Hds::Badge
-      @text={{this.productAreaName}}
-      @icon={{or (get-product-id @productArea) "folder"}}
-      title={{this.productAreaName}}
-    /></Hds::Table::Td>
+  <Hds::Table::Td class="product">
+    <ProductBadgeLink @productArea={{@productArea}} />
+  </Hds::Table::Td>
   <Hds::Table::Td class="owner">
     <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
   </Hds::Table::Td>

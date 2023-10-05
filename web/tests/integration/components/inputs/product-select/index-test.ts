@@ -5,6 +5,7 @@ import { click, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
+import { Response } from "miragejs";
 
 const DEFAULT_DROPDOWN_SELECTOR = ".product-select-default-toggle";
 const LIST_ITEM_SELECTOR = "[data-test-product-select-item]";
@@ -37,8 +38,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     this.set("formatIsBadge", true);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @selected={{this.selected}}
         @onChange={{this.onChange}}
@@ -64,8 +64,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
   test("it can render the toggle with a product abbreviation", async function (this: InputsProductSelectContext, assert) {
     this.set("selected", this.server.schema.products.first().name);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @selected={{this.selected}}
         @onChange={{this.onChange}}
@@ -78,8 +77,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
   test("it shows an empty state when nothing is selected (default toggle)", async function (this: InputsProductSelectContext, assert) {
     this.set("selected", undefined);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @selected={{this.selected}}
         @onChange={{this.onChange}}
@@ -91,8 +89,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
   });
 
   test("it displays the products in a dropdown list with abbreviations", async function (this: InputsProductSelectContext, assert) {
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @selected={{this.selected}}
         @onChange={{this.onChange}}
@@ -110,8 +107,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
   test("it fetches the products if they aren't already loaded", async function (this: InputsProductSelectContext, assert) {
     this.server.db.emptyData();
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @onChange={{this.onChange}}
       />
@@ -131,8 +127,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       count++;
     });
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
         @selected={{this.selected}}
         @onChange={{this.onChange}}
@@ -143,5 +138,23 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await click(LIST_ITEM_SELECTOR);
 
     assert.equal(count, 1, "the action was called once");
+  });
+
+  test("it shows an error when the index fails to fetch", async function (this: InputsProductSelectContext, assert) {
+    this.server.get("/products", () => {
+      return new Response(500, {});
+    });
+
+    await render<InputsProductSelectContext>(hbs`
+      <Inputs::ProductSelect
+        @selected={{this.selected}}
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    assert.dom(".failed-to-load-text").hasText("Failed to load");
+    assert
+      .dom("[data-test-product-select-failed-to-load-button]")
+      .hasText("Retry");
   });
 });

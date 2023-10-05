@@ -1,6 +1,6 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, findAll, render } from "@ember/test-helpers";
+import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument, HermesUser } from "hermes/types/document";
@@ -40,14 +40,14 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       />
     `);
 
-    assert.dom("[data-test-custom-string-field]").hasText("---");
+    assert.dom("[data-test-custom-string-field]").hasText("None");
     assert.dom("[data-test-custom-people-field]").doesNotExist();
 
     this.set("attributes", {
       type: "PEOPLE",
     });
 
-    assert.dom("[data-test-custom-people-field]").hasText("---");
+    assert.dom("[data-test-custom-people-field]").hasText("None");
     assert.dom("[data-test-custom-string-field]").doesNotExist();
   });
 
@@ -62,7 +62,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
     this.set("onChange", (people: HermesUser[]) => {
       this.set(
         "peopleValue",
-        people.map((person) => person.email)
+        people.map((person) => person.email),
       );
     });
 
@@ -76,8 +76,11 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       <div class="click-away-target"/>
     `);
 
-    let listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
+    const textSelector =
+      "[data-test-custom-people-field] li [data-test-person-email]";
+
+    let listItemText = findAll(textSelector).map(
+      (li) => li.textContent?.trim(),
     );
 
     assert.deepEqual(listItemText, this.people, "shows the passed in people");
@@ -102,14 +105,35 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     assert.dom("[data-test-custom-people-field-input]").doesNotExist();
 
-    listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
-    );
+    listItemText = findAll(textSelector).map((li) => li.textContent?.trim());
 
     assert.deepEqual(
       listItemText,
       ["mishra@hashicorp.com", "user1@hashicorp.com"],
-      "the list updates via the onChange action"
+      "the list updates via the onChange action",
+    );
+  });
+
+  test("PEOPLE inputs receive focus on click", async function (this: CustomEditableFieldComponentTestContext, assert) {
+    this.set("attributes", {
+      type: "PEOPLE",
+      value: this.people,
+    });
+
+    await render<CustomEditableFieldComponentTestContext>(hbs`
+      <CustomEditableField
+        @document={{this.document}}
+        @field="stakeholders"
+        @attributes={{this.attributes}}
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    const stakeholdersSelector = "[data-test-custom-people-field]";
+    await click(`${stakeholdersSelector} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${stakeholdersSelector} input`),
     );
   });
 });

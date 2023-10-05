@@ -1,4 +1,6 @@
 import "@glint/environment-ember-loose";
+import "@glint/environment-ember-template-imports";
+import EmberPageTitleHelper from "ember-page-title";
 import PerformHelper from "ember-concurrency/helpers/perform";
 import OnDocumentHelper from "ember-on-helper/helpers/on-document";
 import DidInsertModifier from "ember-render-modifiers/modifiers/did-insert";
@@ -7,8 +9,10 @@ import AndHelper from "ember-truth-helpers/helpers/and";
 import EqHelper from "ember-truth-helpers/helpers/eq";
 import IsEmptyHelper from "ember-truth-helpers/helpers/is-empty";
 import LtHelper from "ember-truth-helpers/helpers/lt";
+import GtHelper from "ember-truth-helpers/helpers/gt";
 import NotHelper from "ember-truth-helpers/helpers/not";
 import OrHelper from "ember-truth-helpers/helpers/or";
+import EmberSetBodyClassHelper from "ember-set-body-class";
 import { FlightIconComponent } from "hds/flight-icon";
 import { HdsButtonComponent } from "hds/button";
 import { HdsBadgeCountComponent } from "hds/badge-count";
@@ -38,24 +42,29 @@ import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
 import { HdsFormErrorComponent } from "hds/form/error";
+import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
+    "page-title": typeof EmberPageTitleHelper;
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
     "click-outside": typeof OnClickOutsideModifier;
+    "set-body-class": typeof EmberSetBodyClassHelper;
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;
     AnimatedOrphans: typeof AnimatedOrphans;
     "animated-each": typeof AnimatedEachCurly;
     "animated-if": typeof AnimatedIfCurly;
+    PowerSelectMultiple: typeof PowerSelectMultiple;
     perform: typeof PerformHelper;
     or: typeof OrHelper;
     eq: typeof EqHelper;
     and: typeof AndHelper;
     not: typeof NotHelper;
     lt: typeof LtHelper;
+    gt: typeof GtHelper;
     "is-empty": IsEmptyHelper;
     FlashMessage: FlashMessageComponent;
     FlightIcon: FlightIconComponent;

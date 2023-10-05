@@ -1,4 +1,3 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{page-title "My Docs"}}
 
 <Header @facets={{@model.facets}} />
@@ -7,4 +6,6 @@
   @docs={{@model.results.hits}}
   @nbPages={{@model.results.nbPages}}
   @currentPage={{(add @model.results.page 1)}}
+  @sortDirection={{this.sortDirection}}
+  @currentSort="createdTime"
 />

@@ -1,18 +1,15 @@
 import Route from "@ember/routing/route";
 import { UnauthorizedError } from "@ember-data/adapter/error";
 import { action } from "@ember/object";
-import config from "hermes/config/environment";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import SessionService from "hermes/services/session";
+import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
 
 import window from "ember-window-mock";
-import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
-import MetricsService from "hermes/services/metrics";
-import GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/google-analytics-four";
+import MetricsService from "hermes/services/_metrics";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -70,18 +67,15 @@ export default class ApplicationRoute extends Route {
 
     this.flags.initialize();
 
-    // Set config from the backend in production
-    if (config.environment === "production") {
-      await this.fetchSvc
-        .fetch("/api/v1/web/config")
-        .then((response) => response?.json())
-        .then((json) => {
-          this.config.setConfig(json);
-        })
-        .catch((err) => {
-          console.log("Error fetching and setting web config: " + err);
-        });
-    }
+    await this.fetchSvc
+      .fetch("/api/v1/web/config")
+      .then((response) => response?.json())
+      .then((json) => {
+        this.config.setConfig(json);
+      })
+      .catch((err) => {
+        console.log("Error fetching and setting web config: " + err);
+      });
 
     // Initialize the metrics service
     this.metrics;

@@ -16,8 +16,9 @@ interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
     selected: HermesUser[];
-    onBlur?: () => void;
     onChange: (people: HermesUser[]) => void;
+    renderInPlace?: boolean;
+    disabled?: boolean;
   };
 }
 
@@ -51,9 +52,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    */
   @action onClose() {
     this.people = [];
-    if (this.args.onBlur) {
-      this.args.onBlur();
-    }
   }
 
   /**
