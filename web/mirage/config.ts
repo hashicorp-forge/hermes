@@ -607,11 +607,18 @@ export default function (mirageConfig) {
         if (document) {
           let attrs = JSON.parse(request.requestBody);
 
+          if ("customFields" in attrs) {
+            attrs.customFields.forEach((field) => {
+              document.attrs[field.name] = field.value;
+            });
+          }
+
           if ("product" in attrs) {
             attrs.docNumber = getTestDocNumber(attrs.product);
           }
 
           document.update(attrs);
+
           return new Response(200, {}, document.attrs);
         }
       });

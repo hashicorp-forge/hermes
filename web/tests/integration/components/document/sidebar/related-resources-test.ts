@@ -19,7 +19,6 @@ const LIST_SELECTOR = "[data-test-related-resources-list]";
 const LIST_ITEM_SELECTOR = ".related-resource";
 const HERMES_DOCUMENT_SELECTOR = ".hermes-document";
 const EXTERNAL_RESOURCE_SELECTOR = ".external-resource";
-const BADGE_SELECTOR = "[data-test-sidebar-section-header-badge]";
 const HEADER_SELECTOR = ".sidebar-section-header";
 const ERROR_MESSAGE_SELECTOR = ".failed-to-load-text";
 const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
@@ -95,7 +94,7 @@ module(
       const emptyStateSelector =
         "[data-test-related-resources-list-empty-state]";
 
-      assert.dom(emptyStateSelector).hasText("---");
+      assert.dom(emptyStateSelector).hasText("None");
 
       await click("[data-test-related-resources-list-empty-state]");
 
@@ -146,8 +145,6 @@ module(
       assert
         .dom(".hermes-tooltip")
         .hasText("Documents and links that are relevant to this work.");
-
-      assert.dom(BADGE_SELECTOR).hasText("New", "the 'new' badge is rendered'");
 
       assert
         .dom(HERMES_DOCUMENT_SELECTOR)

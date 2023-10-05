@@ -28,7 +28,7 @@ module("Integration | Component | editable-field/read-value", function (hooks) {
     this.set("tag", undefined);
 
     assert.dom("h1").doesNotExist();
-    assert.dom("p").hasText("Hello World");
+    assert.dom("div").hasText("Hello World");
   });
 
   test("it shows a customizable empty state", async function (this: EditableFieldReadValueComponentTestContext, assert) {
@@ -68,7 +68,7 @@ module("Integration | Component | editable-field/read-value", function (hooks) {
 
     await render<EditableFieldReadValueComponentTestContext>(hbs`
       <EditableField::ReadValue
-        @value="{{this.value}}"
+        @value={{this.value}}
       />
     `);
 
