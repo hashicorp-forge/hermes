@@ -101,9 +101,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked contributors: string[] | HermesUser[] =
-    this.args.document.contributors || [];
-  @tracked approvers: HermesUser[] | null = null;
+  @tracked contributors: HermesUser[] =
+    this.args.document.contributorObjects || [];
+  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
   /**
@@ -723,7 +723,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action
   updateContributors(contributors: HermesUser[]) {
-    debugger;
     this.contributors = contributors;
   }
 
