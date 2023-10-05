@@ -18,6 +18,12 @@ algolia {
   write_api_key             = ""
 }
 
+// datadog configures Hermes to send metrics to Datadog.
+datadog {
+  enabled = false
+  env     = "local"
+}
+
 // document_types configures document types.
 document_types {
   document_type "RFC" {

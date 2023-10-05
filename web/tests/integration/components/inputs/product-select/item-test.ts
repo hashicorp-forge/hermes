@@ -21,8 +21,7 @@ module(
       this.set("product", "Vault");
       this.set("isSelected", false);
 
-      await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+      await render<InputsProductSelectItemContext>(hbs`
       <Inputs::ProductSelect::Item
         @product={{this.product}}
         @isSelected={{this.isSelected}}
@@ -35,7 +34,7 @@ module(
         .hasAttribute(
           "data-test-icon",
           "vault",
-          "the correct product icon is shown"
+          "the correct product icon is shown",
         );
 
       assert
@@ -58,8 +57,8 @@ module(
         .hasAttribute(
           "data-test-icon",
           "folder",
-          "the correct product icon is shown"
+          "the correct product icon is shown",
         );
     });
-  }
+  },
 );

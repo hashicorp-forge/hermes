@@ -1,20 +1,17 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import RSVP from "rsvp";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
-import { GoogleUser } from "hermes/components/inputs/people-select";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
-import AlgoliaService from "hermes/services/algolia";
-import SessionService from "hermes/services/session";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import { assert } from "@ember/debug";
+import { GoogleUser } from "hermes/components/inputs/people-select";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -23,7 +20,7 @@ const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   }));
 };
 
-interface DocumentRouteParams {
+interface AuthenticatedDocumentRouteParams {
   document_id: string;
   draft: boolean;
 }
@@ -33,13 +30,10 @@ interface DocumentRouteModel {
   docType: HermesDocumentType;
 }
 
-export default class DocumentRoute extends Route {
-  @service("config") declare configSvcL: ConfigService;
+export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
-  @service declare algolia: AlgoliaService;
-  @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
   @service declare router: RouterService;
 
@@ -64,7 +58,23 @@ export default class DocumentRoute extends Route {
     });
   }
 
-  async model(params: DocumentRouteParams, transition: Transition) {
+  async docType(doc: HermesDocument) {
+    const docTypes = (await this.fetchSvc
+      .fetch("/api/v1/document-types")
+      .then((r) => r?.json())) as HermesDocumentType[];
+
+    assert("docTypes must exist", docTypes);
+
+    const docType = docTypes.find((dt) => dt.name === doc.docType);
+
+    assert("docType must exist", docType);
+    return docType;
+  }
+
+  async model(
+    params: AuthenticatedDocumentRouteParams,
+    transition: Transition,
+  ) {
     let doc = {};
     let draftFetched = false;
 
@@ -92,7 +102,6 @@ export default class DocumentRoute extends Route {
          */
         transition.abort();
         this.router.transitionTo("authenticated.document", params.document_id);
-        return;
       }
     }
 
@@ -120,27 +129,7 @@ export default class DocumentRoute extends Route {
       }
     }
 
-    // With the document fetched and added to the db's RecentlyViewedDocs index,
-    // make a background call to update the front-end index.
-    void this.recentDocs.fetchAll.perform();
-
-    let typedDoc = doc as HermesDocument;
-
-    // Record analytics.
-    try {
-      await this.fetchSvc.fetch("/api/v1/web/analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_id: params.document_id,
-          product_name: typedDoc.product,
-        }),
-      });
-    } catch (err) {
-      console.log("Error recording analytics: " + err);
-    }
-
-    // Load the document as well as the logged in user info
+    const typedDoc = doc as HermesDocument;
 
     // Preload avatars for all approvers in the Algolia index.
     if (typedDoc.contributors?.length) {
@@ -149,9 +138,9 @@ export default class DocumentRoute extends Route {
         .then((r) => r?.json());
 
       if (contributors) {
-        typedDoc.contributors = serializePeople(contributors);
+        typedDoc.contributorObjects = serializePeople(contributors);
       } else {
-        typedDoc.contributors = [];
+        typedDoc.contributorObjects = [];
       }
     }
     if (typedDoc.approvers?.length) {
@@ -160,34 +149,44 @@ export default class DocumentRoute extends Route {
         .then((r) => r?.json());
 
       if (approvers) {
-        typedDoc.approvers = serializePeople(approvers);
+        typedDoc.approverObjects = serializePeople(approvers);
       } else {
-        typedDoc.approvers = [];
+        typedDoc.approverObjects = [];
       }
     }
 
-    let docTypes = await this.fetchSvc
-      .fetch("/api/v1/document-types")
-      .then((r) => r?.json());
-
-    let docType = docTypes.find(
-      (docType: HermesDocumentType) => docType.name === typedDoc.docType
-    );
-
-    return RSVP.hash({
+    return {
       doc: typedDoc,
-      docType,
-    });
+      docType: this.docType(typedDoc),
+    };
   }
 
-  /**
-   * Once the model has resolved, check if the document is loading from
-   * another document, as is the case in related Hermes documents.
-   * In those cases, we scroll the sidebar to the top and toggle the
-   * `modelIsChanging` property to remove and rerender the sidebar,
-   * resetting its local state to reflect the new model data.
-   */
-  afterModel(_model: DocumentRouteModel, transition: any) {
+  afterModel(model: DocumentRouteModel, transition: any) {
+    /**
+     * Generally speaking, ensure an up-to-date list of recently viewed docs
+     * by the time the user returns to the dashboard.
+     */
+    void this.recentDocs.fetchAll.perform();
+
+    /**
+     * Record the document view with the analytics backend.
+     */
+    void this.fetchSvc.fetch("/api/v1/web/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_id: model.doc.objectID,
+        product_name: model.doc.product,
+      }),
+    });
+
+    /**
+     * Once the model has resolved, check if the document is loading from
+     * another document, as is the case in related Hermes documents.
+     * In those cases, we scroll the sidebar to the top and toggle the
+     * `modelIsChanging` property to remove and rerender the sidebar,
+     * resetting its local state to reflect the new model data.
+     */
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (

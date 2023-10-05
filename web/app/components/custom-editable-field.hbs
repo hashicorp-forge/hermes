@@ -3,7 +3,7 @@
     data-test-custom-string-field
     @value={{get @document @field}}
     @onChange={{@onChange}}
-    @loading={{@loading}}
+    @isSaving={{@isSaving}}
     @disabled={{@disabled}}
   >
     <:default as |F|>
@@ -12,7 +12,7 @@
           {{F.value}}
         </p>
       {{else}}
-        <CustomEditableFields::EmptyState />
+        <EmptyStateText />
       {{/if}}
     </:default>
     <:editing as |F|>
@@ -31,26 +31,19 @@
     data-test-custom-people-field
     @value={{get @attributes "value"}}
     @onChange={{@onChange}}
-    @loading={{@loading}}
-    @disabled={{@disabled}}
+    @isSaving={{@isSaving}}
   >
     <:default>
       {{#if this.people.length}}
-        <ol>
-          {{#each this.people as |person|}}
-            <li class="whitespace-nowrap">
-              {{#if person.imgURL}}
-                <img
-                  src="{{person.imgURL}}"
-                  class="h-4 w-4 rounded-full align-middle"
-                />
-              {{/if}}
-              {{person.email}}
+        <ol class="person-list">
+          {{#each this.people as |user|}}
+            <li>
+              <Person @imgURL={{user.imgURL}} @email={{user.email}} />
             </li>
           {{/each}}
         </ol>
       {{else}}
-        <CustomEditableFields::EmptyState />
+        <EmptyStateText />
       {{/if}}
     </:default>
     <:editing as |F|>

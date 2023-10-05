@@ -1,6 +1,6 @@
 <div
   data-test-product-select-item
-  class="relative flex w-full product-select-item"
+  class="product-select-item relative flex w-full"
   ...attributes
 >
   <FlightIcon
@@ -9,14 +9,14 @@
     @name={{or (get-product-id @product) "folder"}}
   />
 
-  <span data-test-product-select-item-value class="flex ml-2.5 leading-none">
+  <span data-test-product-select-item-value class="ml-2.5 flex leading-none">
     {{@product}}
   </span>
 
   {{#if @abbreviation}}
     <span
       data-test-product-select-item-abbreviation
-      class="opacity-50 inline-flex ml-2 text-body-100 leading-none"
+      class="ml-2 inline-flex text-body-100 leading-none opacity-50"
     >
       {{@abbreviation}}
     </span>

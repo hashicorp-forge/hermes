@@ -34,7 +34,7 @@ interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
-    docType: HermesDocumentType;
+    docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -73,6 +73,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
+  @tracked protected docType: HermesDocumentType | null = null;
+
   get modalIsShown() {
     return (
       this.archiveModalIsShown ||
@@ -99,8 +101,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked contributors = this.args.document.contributors || [];
-  @tracked approvers = this.args.document.approvers || [];
+  @tracked contributors: HermesUser[] =
+    this.args.document.contributorObjects || [];
+  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
   /**
@@ -275,7 +278,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const eventTarget = event.target;
     assert(
       "event.target must be an HTMLInputElement",
-      eventTarget instanceof HTMLInputElement
+      eventTarget instanceof HTMLInputElement,
     );
     this.docTypeCheckboxValue = eventTarget.checked;
   }
@@ -365,13 +368,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // isApprover returns true if the logged in user is a document approver.
   get isApprover() {
     return this.args.document.approvers?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e === this.args.profile.email,
     );
   }
 
   get isContributor() {
     return this.args.document.contributors?.some(
-      (e) => e.email === this.args.profile.email
+      (e) => e === this.args.profile.email,
     );
   }
 
@@ -384,7 +387,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // changes of the document.
   get hasRequestedChanges() {
     return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email
+      this.args.profile.email,
     );
   }
 
@@ -477,7 +480,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const owner = getOwner(this);
     assert("owner must exist", owner);
     const route = owner.lookup(
-      `route:${this.router.currentRouteName}`
+      `route:${this.router.currentRouteName}`,
     ) as Route;
     assert("route must exist", route);
     route.refresh();
@@ -572,13 +575,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       } catch (error: unknown) {
         this.showFlashError(
           error as Error,
-          "Unable to update draft visibility"
+          "Unable to update draft visibility",
         );
       } finally {
         // reset the new-visibility-intent icon
         this.newDraftVisibilityIcon = null;
       }
-    }
+    },
   );
 
   updateProduct = keepLatestTask(async (product: string) => {
@@ -615,7 +618,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[]
+      val: string | HermesUser[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -637,7 +640,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           this.showFlashError(err as Error, "Unable to save document");
         }
       }
-    }
+    },
   );
 
   patchDocument = task(async (fields) => {
@@ -661,7 +664,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
+        approvers: this.approvers?.compact().mapBy("email"),
       });
 
       await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
@@ -768,9 +771,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
-    // kick off whether the draft is shareable.
+
     if (this.isDraft) {
+      // kick off whether the draft is shareable.
       void this.getDraftPermissions.perform();
+
+      // get docType for the "request review?" modal
+      this.args.docType.then((docType) => {
+        this.docType = docType;
+      });
     }
   }
 
@@ -833,7 +842,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch (error: unknown) {
       this.maybeShowFlashError(
         error as Error,
-        "Unable to change document status"
+        "Unable to change document status",
       );
       throw error;
     }

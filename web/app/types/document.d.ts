@@ -32,8 +32,10 @@ export interface HermesDocument {
   owners?: string[];
   ownerPhotos?: string[];
   appCreated?: boolean;
-  contributors?: HermesUser[];
-  approvers?: HermesUser[];
+  contributors?: string[];
+  approvers?: string[];
+  contributorObjects?: HermesUser[];
+  approverObjects?: HermesUser[];
   changesRequestedBy?: string[];
   approvedBy?: string[];
   summary?: string;
