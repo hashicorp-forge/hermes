@@ -50,6 +50,7 @@ const TOOLTIP_SELECTOR = ".hermes-tooltip";
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
   body: HTMLElement;
+  editingIsDisabled: boolean;
 }
 
 module(
@@ -78,12 +79,14 @@ module(
       this.set("body", bodyDiv);
     });
 
-    test("the empty state is clickable to add a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+    test("the empty state is conditionally clickable to add a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      this.set("editingIsDisabled", true);
+
       await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
         <Document::Sidebar::RelatedResources
           @productArea={{this.document.product}}
           @objectID={{this.document.objectID}}
-          @allowAddingExternalLinks={{true}}
+          @editingIsDisabled={{this.editingIsDisabled}}
           @headerTitle="Test title"
           @modalHeaderTitle="Add related resource"
           @modalInputPlaceholder="Paste a URL or search documents..."
@@ -91,10 +94,17 @@ module(
         />
       `);
 
-      const emptyStateSelector =
-        "[data-test-related-resources-list-empty-state]";
+      const readOnlyValue = "div.field-toggle.read-only";
+      const interactiveEmptyState = "button.field-toggle";
 
-      assert.dom(emptyStateSelector).hasText("None");
+      assert.dom(readOnlyValue).hasText("None");
+      assert.dom(interactiveEmptyState).doesNotExist();
+
+      // Enable editing
+      this.set("editingIsDisabled", false);
+
+      assert.dom(readOnlyValue).doesNotExist();
+      assert.dom(interactiveEmptyState).hasText("None");
 
       await click("[data-test-related-resources-list-empty-state]");
 

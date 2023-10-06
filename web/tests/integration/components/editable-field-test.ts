@@ -117,7 +117,7 @@ module("Integration | Component | editable-field", function (hooks) {
       );
 
     assert
-      .dom("div.field-toggle")
+      .dom("div.field-toggle.read-only")
       .exists("the element is rendered as a div when editing is disabled");
   });
 
