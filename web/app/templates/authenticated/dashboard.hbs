@@ -5,52 +5,51 @@
 <section class="x-container">
 
   <Dashboard::NewFeaturesBanner />
-  <div class="mb-6">
-    <h1 class="text-display-500">
+
+  <div class="mb-6 mt-1">
+    <h1 class="text-display-400">
       Welcome back,
       {{this.authenticatedUser.info.given_name}}!
     </h1>
   </div>
 
-  <div class="mt-8 flex gap-14 w-full">
+  <div class="mt-5 flex w-full gap-14">
     <div
-      class="pb-10 w-full overflow-hidden border-r border-r-color-border-faint"
+      class="w-full overflow-hidden border-r border-r-color-border-faint pt-2 pb-10"
     >
-      {{#if @modXel}}
+
+      {{#if @moXdel}}
         <Dashboard::DocsAwaitingReview @docs={{@model}} />
         <div
-          class="w-full h-px border-t border-dashed border-t-color-border-faint -mt-1 mb-5"
+          class="-mt-1 mb-5 h-px w-full border-t border-dashed border-t-color-border-faint"
         />
       {{/if}}
 
       {{#if this.recentDocs.all}}
-        <div class="flex items-center gap-2.5 mb-1.5">
-          <FlightIcon
-            @name="bulb"
-            class="-mt-px text-color-foreground-Xfaint"
-          />
-          <h2 class="text-body-300 font-regular">
-            {{if @mXodel "L" "Here‘s the l"}}atest @ HashiCorp
-          </h2>
+        <div class="mb-1.5 flex items-center gap-3">
+          <FlightIcon @name="rocket" class="text-color-foreground-faint" />
+          <h4 class="hermes-h4 text-color-foreground-primary">
+            Latest @ HashiCorp
+          </h4>
         </div>
         <ol>
           {{#each this.recentDocs.doubleAllRandomized as |r|}}
             <li
-              class="border-t border-t-color-border-faint first:border-t-0 pt-6 pb-7 pr-6 pl-2 hover:bg-color-surface-faint"
+              class="border-t border-t-color-border-faint pt-6 pb-7 pr-6 pl-2 first:border-t-0 hover:bg-color-surface-faint"
             >
 
               <div class="flex justify-between gap-6">
-                <div class="shrink-0 relative -mt-1">
+                <div class="relative -mt-1 shrink-0">
                   <Doc::Thumbnail
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
-                    class="shrink-0 self-start medium -mt-1"
+                    class="medium -mt-1 shrink-0 self-start"
                   />
                 </div>
                 <div class="w-full">
-                  <div class="flex w-full items-start justify-between mb-0.5">
+                  <div class="mb-0.5 flex w-full items-start justify-between">
                     <div
-                      class="text-body-200 leading-none gap-2 flex text-color-foreground-faint"
+                      class="flex gap-2 text-body-200 leading-none text-color-foreground-faint"
                     >
                       <span>
                         {{r.doc.docType}}
@@ -73,17 +72,17 @@
                     </div>
                   </div>
                   <h3
-                    class="text-color-foreground-strong text-display-300 font-semibold"
+                    class="text-display-300 font-semibold text-color-foreground-strong"
                   >
                     {{r.doc.title}}
                   </h3>
                   {{#if r.doc.summary}}
-                    <p class="text-body-200 mt-1 max-w-[470px]">
+                    <p class="mt-1 max-w-[470px] text-body-200">
                       {{r.doc.summary}}
                     </p>
                   {{/if}}
                   <div class="flex w-full items-center justify-between">
-                    <div class="flex gap-2 mt-4 items-center text-body-200">
+                    <div class="mt-4 flex items-center gap-2 text-body-200">
                       <Person::Avatar
                         @size="small"
                         @email={{get r.doc.owners 0}}
@@ -129,15 +128,20 @@
 
     </div>
 
-    <div class="shrink-0 w-64 gap-8 flex flex-col">
+    <div class="flex w-72 shrink-0 flex-col gap-8">
       <div>
-        <h2 class="hermes-h4 flex items-center h-4">
-          Pinned
-        </h2>
+        <div class="mb-2 flex h-4 items-center gap-3">
+          <FlightIcon @name="history" class="text-color-foreground-faint" />
+          <h2
+            class="hermes-h4 flex h-4 items-center text-color-foreground-primary"
+          >
+            Recently viewed
+          </h2>
+        </div>
         {{#if true}}
-          <ul class="flex flex-col mt-1">
-
-            <li class="flex gap-3 items-start py-3.5">
+          <ul class="mt-1 flex flex-col">
+            {{!-- {{! PROJECT: hidden }}
+            <li class="flex items-start gap-3 py-3.5">
               <div class="w-full">
                 <div class="flex items-start justify-between">
                   <h4 class="mb-1">Listbox Rollout (Ember)</h4>
@@ -165,63 +169,74 @@
                     class="text-color-foreground-critical"
                   /> }}
               </div>
-            </li>
-            <li
-              class="flex gap-3 items-start py-3.5 border-t border-t-color-border-faint"
-            >
-              <div class="overflow-hidden">
-                <div class="flex gap-3 items-start">
-                  <div class="overflow-hidden">
-                    <h4 class="mb-1.5">Account synchronization API from HCP</h4>
-                    <div class="flex items-center justify-between">
-                      {{! <ProductAvatar @productArea="Labs" /> }}
-                      <div class="flex overflow-hidden items-center gap-1.5">
-                        <Person::Avatar
-                          class="shrink-0"
-                          @email="jeff.daley@hashicorp.com"
-                          @imgURL="https://lh3.googleusercontent.com/a/ACg8ocJNv0AD-Ppm6Y_fllZqE_h-sInH67hPyXjCbt97f1KG2A=s100"
-                        />
-                        <TruncatedText>
+            </li> --}}
 
-                          jeff.daley@hashicorp.com
-                        </TruncatedText>
-                      </div>
-                      <div class="shrink-0 ml-1">
-                        <Doc::State @state="Draft" @hideProgress={{true}} />
-                      </div>
-                    </div>
-                  </div>
-                  <div class="w-X5 flex justify-center shrink-0">
-                    {{! <FlightIcon
-                  @name="file-text"
-                  class="text-color-foreground-faint"
-                /> }}
-                    <Doc::Thumbnail @product="Vagrant" class="" />
-                  </div>
-                </div>
-              </div>
-            </li>
+            <Doc::ThumbnailNew
+              @title="Account synchronization API from HCP"
+              @status="In review"
+              @product="Packer"
+              @docType="RFC"
+              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQaFB6VxEdgH7fMu9urq0HDRUTL3aZhMpTNBFwZMNXxfw=s100"
+            />
+            <Doc::ThumbnailNew
+              @title="mini-RFC Enrollment store for clusters on Vault Insights"
+              @status="Draft"
+              @product="Engineering"
+              @docType="RFC"
+              @avatarURL="https://lh3.googleusercontent.com/a-/ALV-UjUzSs8znJVwNgJo1gH9h28sL9njvnE-v5v9fLQl0szroQ=s100"
+            />
+            <Doc::ThumbnailNew
+              @title="HCP Vagrant Resource Type Changes"
+              @status="In review"
+              @product="Vagrant"
+              @docType="RFC"
+              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQXKU1RjO97v4m10RM3si3i_9DvlqMUAv6sxah5ToNkaQ=s100"
+            />
+            <Doc::ThumbnailNew
+              @title="HCP Boundary Telemetry v2"
+              @status="Approved"
+              @product="Boundary"
+              @docType="RFC"
+              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMS5DXDFQCVLmGfCzNS0RiO6iQffnTmkJ-MOxgRc=s100"
+            />
+            <Doc::ThumbnailNew
+              @title="BluBracket Integration Opportunities"
+              @status="In review"
+              @product="Packer"
+              @docType="Memo"
+              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMRVITo5hbppJmlUtvuAlS5DgcQWf3_y0-tdTsWYWg=s100"
+            />
+
           </ul>
+
+          {{#if true}}
+            <Action class="mt-3 text-color-foreground-faint">
+              + See older
+            </Action>
+          {{/if}}
         {{else}}
-          <div class="text-color-foreground-faint mt-3 mb-2">
-            <FlightIcon @name="pin" class="relative translate-y-0.5 mr-1.5" />
+          <div class="mt-3 mb-2 text-color-foreground-faint">
+            <FlightIcon @name="pin" class="relative mr-1.5 translate-y-0.5" />
             None yet
           </div>
         {{/if}}
       </div>
 
-      <div>
-        <h2 class="hermes-h4 flex items-center h-6 mb-3">
+      {{! Currently hidden }}
+      <div class="hidden">
+        <h2
+          class="hermes-h4 mb-3 flex h-6 items-center text-color-foreground-primary"
+        >
           Recently viewed
         </h2>
         <ol class="grid gap-1">
           {{#each this.recentDocs.all as |r|}}
             <li class="overflow-hidden">
               <div class="flex justify-between gap-6">
-                <div class="flex items-center mb-2 gap-2.5 overflow-hidden">
+                <div class="mb-2 flex items-center gap-2.5 overflow-hidden">
                   <ProductAvatar
                     @productArea={{r.doc.product}}
-                    class="w-5 h-5 shrink-0"
+                    class="h-5 w-5 shrink-0"
                   />
                   {{! <div class="w-5 flex justify-center shrink-0">
                     <FlightIcon
@@ -231,7 +246,7 @@
                   </div> }}
                   <TruncatedText
                     @tagName="h3"
-                    class="text-color-foreground-strong text-body-200"
+                    class="text-body-200 text-color-foreground-strong"
                   >
                     {{r.doc.title}}
                   </TruncatedText>
@@ -244,8 +259,8 @@
           {{#each (take 2 this.recentDocs.all) as |r|}}
             <li class="overflow-hidden">
               <div class="flex justify-between gap-6">
-                <div class="flex items-center mb-2 gap-2 overflow-hidden">
-                  <div class="w-5 flex justify-center shrink-0">
+                <div class="mb-2 flex items-center gap-2 overflow-hidden">
+                  <div class="flex w-5 shrink-0 justify-center">
                     <FlightIcon
                       @name="grid"
                       class="text-color-foreground-faint"
@@ -253,7 +268,7 @@
                   </div>
                   <TruncatedText
                     @tagName="h3"
-                    class="text-color-foreground-strong text-body-200"
+                    class="text-body-200 text-color-foreground-strong"
                   >
                     {{r.doc.title}}
                   </TruncatedText>
@@ -263,20 +278,15 @@
           {{/each}}
           <li class="overflow-hidden">
             <div class="flex justify-between gap-6">
-              <div class="flex items-center mb-2 gap-2 overflow-hidden">
+              <div class="mb-2 flex items-center gap-2 overflow-hidden">
                 <ProductAvatar
                   @productArea={{r.doc.product}}
-                  class="w-5 h-5 shrink-0"
+                  class="h-5 w-5 shrink-0"
                 />
-                {{! <div class="w-5 flex justify-center shrink-0">
-                  <FlightIcon
-                    @name="file-text"
-                    class="text-color-foreground-faint"
-                  />
-                </div> }}
+
                 <TruncatedText
                   @tagName="h3"
-                  class="text-color-foreground-strong text-body-200"
+                  class="text-body-200 text-color-foreground-strong"
                 >
                   TFC and HCP Unification - High Assurance Enablement
                 </TruncatedText>

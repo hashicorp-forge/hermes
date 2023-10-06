@@ -1,19 +1,23 @@
-<div class="w-full mb-8">
+<div class="mb-8 w-full">
   <div class="relative flex justify-between">
-    <div class="flex items-center gap-2.5 mb-2">
-      <h2
+    <div class="mb-2 flex items-center gap-2.5">
+      {{!-- <h2
         class="items-center self-center text-body-300 Ztext-color-foreground-strong font-regular leading-none gap-2 md:flex"
       >
         You have
-        <Hds::BadgeCount
-          data-test-docs-awaiting-review-count
-          @text="{{@docs.length}}"
-          @type="inverted"
-          class="!bXg-color-foreground-critical"
-        />
         document{{if (gt @docs.length 1) "s"}}
         awaiting your review
-      </h2>
+      </h2> --}}
+      <div class="mb-2 flex h-4 items-center gap-3">
+        <FlightIcon @name="test" class="text-color-foreground-faint" />
+        <div class="flex items-center gap-2">
+          <h4 class="hermes-h4">Awaiting your review</h4>
+          <Hds::BadgeCount
+            data-test-docs-awaiting-review-count
+            @text="{{@docs.length}}"
+          />
+        </div>
+      </div>
     </div>
   </div>
 

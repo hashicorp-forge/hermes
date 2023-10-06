@@ -1,0 +1,46 @@
+<li
+  class="flex items-start gap-3 border-t border-t-color-border-faint py-3.5 first:border-t-0"
+>
+  <div class="w-full overflow-hidden">
+    <div class="flex w-full items-start gap-3">
+
+      {{! Text }}
+      <div class="w-full">
+        <h4 class="mb-1.5">
+          {{@title}}
+        </h4>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 overflow-hidden">
+            {{!-- <Person::Avatar
+              class="shrink-0"
+              @size="small"
+              @email=""
+              @imgURL={{@avatarURL}}
+            /> --}}
+            {{#if (eq @status "Draft")}}{{/if}}
+            {{!-- <Doc::State @state={{@status}} @hideProgress={{true}} /> --}}
+            <div class="flex gap-[3px]">
+              <span class="tag doctype">
+                {{@docType}}
+              </span>
+              <span class="tag {{dasherize @status}}">
+                {{@status}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{! Thumbnail }}
+      <div class="relative flex shrink-0 justify-center">
+        <div class="doc-thumbnail w-9 self-start">
+          <img src="/images/document.png" class="h-auto w-full" />
+          <div class="absolute bottom-0 left-0">
+            <ProductAvatar @productArea={{@product}} @iconSize={{16}} />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</li>

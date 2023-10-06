@@ -1,9 +1,25 @@
-.active-filter-list-item {
-  @apply my-0.5 mr-1 flex items-center rounded-full border border-color-border-strong bg-color-surface-interactive py-0.5 pl-2 pr-3.5 text-color-foreground-primary  no-underline;
+.tag {
+  @apply flex items-center rounded border border-color-border-primary bg-color-surface-interactive py-[3px] px-1.5 text-color-foreground-primary  no-underline;
 
   &:hover {
     @apply bg-color-surface-interactive-hover;
   }
+
+  &.in-review {
+    @apply border-transparent bg-color-surface-highlight text-color-foreground-highlight;
+  }
+
+  &.draft {
+    @apply border-transparent bg-color-palette-neutral-400 text-color-page-primary;
+  }
+
+  &.doctype {
+    @apply border-transparent bg-color-palette-neutral-100;
+  }
+}
+
+.filter-tag {
+  @apply my-0.5 mr-1 rounded-full py-0.5 pl-2 pr-3.5;
 
   .flight-icon {
     @apply mr-1 scale-75;
