@@ -18,7 +18,7 @@
       class="w-full overflow-hidden border-r border-r-color-border-faint pt-2 pb-10"
     >
 
-      {{#if @moXdel}}
+      {{#if @model}}
         <Dashboard::DocsAwaitingReview @docs={{@model}} />
         <div
           class="-mt-1 mb-5 h-px w-full border-t border-dashed border-t-color-border-faint"
@@ -29,46 +29,50 @@
         <div class="mb-1.5 flex items-center gap-3">
           <FlightIcon @name="rocket" class="text-color-foreground-faint" />
           <h4 class="hermes-h4 text-color-foreground-primary">
-            Latest @ HashiCorp
+            Here's the Latest
           </h4>
         </div>
         <ol>
           {{#each this.recentDocs.doubleAllRandomized as |r|}}
             <li
-              class="border-t border-t-color-border-faint pt-6 pb-7 pr-6 pl-2 first:border-t-0 hover:bg-color-surface-faint"
+              class="border-t border-t-color-border-faint pt-4 pb-5 pr-6 pl-2 first:border-t-0 hover:bg-color-surface-faint"
             >
 
               <div class="flex justify-between gap-6">
-                <div class="relative -mt-1 shrink-0">
+                <div class="relative shrink-0">
                   <Doc::Thumbnail
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
-                    class="medium -mt-1 shrink-0 self-start"
+                    class="medium shrink-0 self-start"
                   />
                 </div>
                 <div class="w-full">
-                  <div class="mb-0.5 flex w-full items-start justify-between">
+                  <div class="mb-2 flex w-full items-center justify-between">
                     <div
-                      class="flex gap-2 text-body-200 leading-none text-color-foreground-faint"
+                      class="flex items-center gap-[5px] text-body-100 leading-none"
                     >
                       <span>
                         {{r.doc.docType}}
                       </span>
                       <span class="opacity-50">
-                        |
+                        ·
                       </span>
-                      <span>
-                        {{r.doc.docNumber}}
+                      <span class="tag {{dasherize r.doc.status}}">
+                        {{r.doc.status}}
                       </span>
                       <span class="opacity-50">
-                        |
+                        ·
                       </span>
                       <span>
                         {{r.doc.product}}
                       </span>
                     </div>
                     <div>
-                      <Doc::State @state="In-Review" @hideProgress={{true}} />
+                      <span class="text-body-100 text-color-foreground-faint">
+
+                        {{time-ago r.doc.createdTime}}
+                      </span>
+                      {{!-- <Doc::State @state="In-Review" @hideProgress={{true}} /> --}}
                     </div>
                   </div>
                   <h3
@@ -77,24 +81,20 @@
                     {{r.doc.title}}
                   </h3>
                   {{#if r.doc.summary}}
-                    <p class="mt-1 max-w-[470px] text-body-200">
+                    <p class="mt-1 max-w-[470px] text-body-300">
                       {{r.doc.summary}}
                     </p>
                   {{/if}}
                   <div class="flex w-full items-center justify-between">
-                    <div class="mt-4 flex items-center gap-2 text-body-200">
+                    <div class="mt-3.5 flex items-center text-body-200">
                       <Person::Avatar
                         @size="small"
                         @email={{get r.doc.owners 0}}
                         @imgURL={{get r.doc.ownerPhotos 0}}
                         class="-ml-px"
                       />
-                      <span class="text-color-foreground-strong">
+                      <span class="ml-1.5 text-color-foreground-strong">
                         {{get r.doc.owners 0}}
-                      </span>
-                      <span class="text-color-foreground-faint">
-
-                        {{time-ago r.doc.createdTime}}
                       </span>
                     </div>
                   </div>
@@ -128,9 +128,9 @@
 
     </div>
 
-    <div class="flex w-72 shrink-0 flex-col gap-8">
+    <div class="flex w-72 shrink-0 flex-col gap-8 pt-2">
       <div>
-        <div class="mb-2 flex h-4 items-center gap-3">
+        <div class="mb-3 flex h-4 items-center gap-3">
           <FlightIcon @name="history" class="text-color-foreground-faint" />
           <h2
             class="hermes-h4 flex h-4 items-center text-color-foreground-primary"
@@ -140,36 +140,6 @@
         </div>
         {{#if true}}
           <ul class="mt-1 flex flex-col">
-            {{!-- {{! PROJECT: hidden }}
-            <li class="flex items-start gap-3 py-3.5">
-              <div class="w-full">
-                <div class="flex items-start justify-between">
-                  <h4 class="mb-1">Listbox Rollout (Ember)</h4>
-
-                </div>
-                <div class="flex items-center justify-between">
-                  <div class="flex gap-0.5">
-                    <div class="flex items-center gap-1">
-                      <FlightIcon @name="square-fill" class="text-lime-600" />
-                      <p class="text-body-100 text-color-foreground-faint">
-                        HERMES-045
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    <FlightIcon
-                      @name="files"
-                      class="text-color-foreground-faint"
-                    />
-                    2
-                  </div>
-                </div>
-                {{! <FlightIcon
-                    @name="chevrons-up"
-                    class="text-color-foreground-critical"
-                  /> }}
-              </div>
-            </li> --}}
 
             <Doc::ThumbnailNew
               @title="Account synchronization API from HCP"
@@ -192,6 +162,49 @@
               @docType="RFC"
               @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQXKU1RjO97v4m10RM3si3i_9DvlqMUAv6sxah5ToNkaQ=s100"
             />
+            {{! PROJECT: }}
+            <li
+              class="flex items-start gap-3 border-t border-t-color-border-faint py-3.5"
+            >
+              {{! <div
+                class="relative mt-0.5 flex shrink-0 justify-center text-color-foreground-faint opacity-50"
+              >
+                <FlightIcon @name="grid" />
+              </div> }}
+              <div class="w-full">
+                <div class="flex gap-1">
+
+                  <ProductAvatar class="shrink-0" @productArea="Terraform" />
+                  <ProductAvatar class="shrink-0" @productArea="Sentinel" />
+                  <ProductAvatar class="shrink-0" @productArea="Labs" />
+                  <div class="ml-1.5 flex items-center gap-1 text-body-100">
+                    {{! <FlightIcon
+                      @name="file"
+                      class="text-color-foreground-faint"
+                    /> }}
+                    Project
+                  </div>
+                </div>
+                <div class="flex items-start justify-between">
+                  <h4 class="my-1.5 text-body-200">Listbox Rollout (Ember)</h4>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex gap-0.5">
+                    <div class="flex items-center gap-1">
+                      <FlightIcon @name="square-fill" class="text-lime-600" />
+                      <p class="text-body-100 text-color-foreground-faint">
+                        HERMES-045
+                      </p>
+                    </div>
+                    <FlightIcon
+                      @name="chevrons-up"
+                      class="text-color-foreground-critical"
+                    />
+                  </div>
+
+                </div>
+              </div>
+            </li>
             <Doc::ThumbnailNew
               @title="HCP Boundary Telemetry v2"
               @status="Approved"
@@ -209,11 +222,6 @@
 
           </ul>
 
-          {{#if true}}
-            <Action class="mt-3 text-color-foreground-faint">
-              + See older
-            </Action>
-          {{/if}}
         {{else}}
           <div class="mt-3 mb-2 text-color-foreground-faint">
             <FlightIcon @name="pin" class="relative mr-1.5 translate-y-0.5" />
@@ -222,80 +230,6 @@
         {{/if}}
       </div>
 
-      {{! Currently hidden }}
-      <div class="hidden">
-        <h2
-          class="hermes-h4 mb-3 flex h-6 items-center text-color-foreground-primary"
-        >
-          Recently viewed
-        </h2>
-        <ol class="grid gap-1">
-          {{#each this.recentDocs.all as |r|}}
-            <li class="overflow-hidden">
-              <div class="flex justify-between gap-6">
-                <div class="mb-2 flex items-center gap-2.5 overflow-hidden">
-                  <ProductAvatar
-                    @productArea={{r.doc.product}}
-                    class="h-5 w-5 shrink-0"
-                  />
-                  {{! <div class="w-5 flex justify-center shrink-0">
-                    <FlightIcon
-                      @name="file-text"
-                      class="text-color-foreground-faint"
-                    />
-                  </div> }}
-                  <TruncatedText
-                    @tagName="h3"
-                    class="text-body-200 text-color-foreground-strong"
-                  >
-                    {{r.doc.title}}
-                  </TruncatedText>
-                </div>
-              </div>
-            </li>
-          {{/each}}
-
-          {{! DUPLICATE }}
-          {{#each (take 2 this.recentDocs.all) as |r|}}
-            <li class="overflow-hidden">
-              <div class="flex justify-between gap-6">
-                <div class="mb-2 flex items-center gap-2 overflow-hidden">
-                  <div class="flex w-5 shrink-0 justify-center">
-                    <FlightIcon
-                      @name="grid"
-                      class="text-color-foreground-faint"
-                    />
-                  </div>
-                  <TruncatedText
-                    @tagName="h3"
-                    class="text-body-200 text-color-foreground-strong"
-                  >
-                    {{r.doc.title}}
-                  </TruncatedText>
-                </div>
-              </div>
-            </li>
-          {{/each}}
-          <li class="overflow-hidden">
-            <div class="flex justify-between gap-6">
-              <div class="mb-2 flex items-center gap-2 overflow-hidden">
-                <ProductAvatar
-                  @productArea={{r.doc.product}}
-                  class="h-5 w-5 shrink-0"
-                />
-
-                <TruncatedText
-                  @tagName="h3"
-                  class="text-body-200 text-color-foreground-strong"
-                >
-                  TFC and HCP Unification - High Assurance Enablement
-                </TruncatedText>
-              </div>
-            </div>
-          </li>
-          {{! /DUPLICATE }}
-        </ol>
-      </div>
     </div>
 
   </div>

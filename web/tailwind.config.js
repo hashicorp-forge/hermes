@@ -67,6 +67,7 @@ module.exports = {
           "var(--token-color-surface-interactive-active)",
         "color-surface-primary": "var(--token-color-surface-primary)",
         "color-surface-strong": "var(--token-color-surface-strong)",
+        "color-surface-success": "var(--token-color-surface-success)",
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border
@@ -99,8 +100,13 @@ module.exports = {
         "color-foreground-high-contrast":
           "var(--token-color-foreground-high-contrast)",
         "color-foreground-highlight": "var(--token-color-foreground-highlight)",
+        "color-foreground-highlight-on-surface":
+          "var(--token-color-foreground-highlight-on-surface)",
         "color-foreground-primary": "var(--token-color-foreground-primary)",
         "color-foreground-strong": "var(--token-color-foreground-strong)",
+        "color-foreground-success": "var(--token-color-foreground-success)",
+        "color-foreground-success-on-surface":
+          "var(--token-color-foreground-success-on-surface)",
         "color-foreground-warning": "var(--token-color-foreground-warning)",
         "color-foreground-warning-on-surface":
           "var(--token-color-foreground-warning-on-surface)",

@@ -9,3 +9,17 @@
     @apply text-[9px];
   }
 }
+
+.doc-thumbnail {
+  .letter-avatar {
+    @apply text-[13px];
+
+    &.letter-count-2 {
+      @apply text-[11px];
+    }
+
+    &.letter-count-3 {
+      @apply text-[11px];
+    }
+  }
+}

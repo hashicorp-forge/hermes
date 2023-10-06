@@ -3,25 +3,33 @@
 >
   <div class="w-full overflow-hidden">
     <div class="flex w-full items-start gap-3">
-
+      {{! Thumbnail icon }}
+      {{! <div
+        class="relative mt-0.5 flex shrink-0 justify-center text-color-foreground-faint opacity-50"
+      >
+        <FlightIcon @name="file-text" />
+      </div> }}
       {{! Text }}
       <div class="w-full">
-        <h4 class="mb-1.5">
-          {{@title}}
-        </h4>
+
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5 overflow-hidden">
-            {{!-- <Person::Avatar
-              class="shrink-0"
-              @size="small"
-              @email=""
-              @imgURL={{@avatarURL}}
-            /> --}}
             {{#if (eq @status "Draft")}}{{/if}}
             {{!-- <Doc::State @state={{@status}} @hideProgress={{true}} /> --}}
-            <div class="flex gap-[3px]">
-              <span class="tag doctype">
+            <div class="flex items-center gap-1">
+              <ProductAvatar class="shrink-0" @productArea={{@product}} />
+              <Person::Avatar
+                class="shrink-0"
+                F
+                @size="small"
+                @email=""
+                @imgURL={{@avatarURL}}
+              />
+              <span class="tag doctype ml-1.5">
                 {{@docType}}
+              </span>
+              <span class="text-color-foreground-disabled">
+                ·
               </span>
               <span class="tag {{dasherize @status}}">
                 {{@status}}
@@ -29,17 +37,29 @@
             </div>
           </div>
         </div>
+        <h4 class="mt-1.5 mb-1 truncate text-body-200">
+          {{@title}}
+        </h4>
+        <p class="text-body-100 text-color-foreground-faint">Modified 3 minutes
+          ago</p>
       </div>
 
-      {{! Thumbnail }}
-      <div class="relative flex shrink-0 justify-center">
-        <div class="doc-thumbnail w-9 self-start">
+      {{! Thumbnail w/ badge }}
+      {{!-- <div class="relative flex shrink-0 justify-center">
+        <div class="doc-thumbnail w-6 self-start">
           <img src="/images/document.png" class="h-auto w-full" />
           <div class="absolute bottom-0 left-0">
             <ProductAvatar @productArea={{@product}} @iconSize={{16}} />
           </div>
         </div>
-      </div>
+      </div> --}}
+
+      {{! Thumbnail w/o badge }}
+      {{! <div class="relative flex shrink-0 justify-center">
+        <div class="doc-thumbnail w-6 self-start">
+          <img src="/images/document.png" class="h-auto w-full" />
+        </div>
+      </div> }}
 
     </div>
   </div>

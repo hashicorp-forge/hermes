@@ -36,6 +36,7 @@ export default class RecentlyViewedDocsService extends Service {
 
   get doubleAllRandomized() {
     assert("all should be set", this.all);
+    console.log(this.all);
     const all = this.all;
     const doubleAll = all.concat(all);
     return doubleAll.sort(() => Math.random() - 0.5);
