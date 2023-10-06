@@ -4,6 +4,7 @@ import or from "ember-truth-helpers/helpers/or";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import getLetterCount from "hermes/helpers/get-letter-count";
 import getProductAbbreviation from "hermes/helpers/get-product-abbreviation";
+import eq from "ember-truth-helpers/helpers/eq";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -29,7 +30,9 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   <template>
     <div
       data-test-doc-thumbnail-product-badge
-      class="product-badge {{this.productID}} relative rounded-full p-1"
+      class="product-badge
+        {{this.productID}}
+        relative flex h-5 w-5 items-center justify-center rounded-full"
       ...attributes
     >
       {{#if this.productID}}
