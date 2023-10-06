@@ -1,4 +1,8 @@
-{{page-title (or @model.title "Document")}}
+{{page-title (or @model.doc.title "Document")}}
 {{set-body-class "secondary-screen"}}
 
-<Document @document={{@model}} @modelIsChanging={{this.modelIsChanging}} />
+<Document
+  @document={{@model.doc}}
+  @docType={{@model.docType}}
+  @modelIsChanging={{this.modelIsChanging}}
+/>

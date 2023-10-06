@@ -22,6 +22,7 @@
           class="flex items-center space-x-1.5
             {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
         >
+          {{log @document}}
           <Hds::Badge
             data-test-sidebar-title-badge
             @text={{if this.isDraft "Draft" @document.docNumber}}
