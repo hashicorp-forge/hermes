@@ -118,7 +118,7 @@
             @isSaving={{this.saveIsRunning}}
             @isReadOnly={{not this.isOwner}}
             @name="summary"
-            @placeholder="Enter a summary"
+            @placeholder={{if this.isOwner "Enter a summary"}}
           />
         </div>
       </div>

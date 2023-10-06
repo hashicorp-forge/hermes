@@ -17,7 +17,7 @@
       }
     }
 
-    .field-toggle.field-toggle:not([disabled], .disabled) {
+    .field-toggle.field-toggle:not(.read-only) {
       &:hover,
       &:focus-visible &:focus {
         @apply bg-transparent;
@@ -26,7 +26,7 @@
   }
 
   &.button-affordance {
-    .field-toggle:not([disabled], .disabled) {
+    .field-toggle:not(.read-only) {
       &:hover,
       &:focus-visible,
       &:focus {
@@ -46,12 +46,7 @@
     @apply min-h-[36px];
     @apply break-words;
 
-    &.disabled,
-    &:disabled {
-      @apply cursor-auto items-center;
-    }
-
-    &:not([disabled], .disabled) {
+    &:not(.read-only) {
       &:hover,
       &:focus-visible,
       &:focus {
