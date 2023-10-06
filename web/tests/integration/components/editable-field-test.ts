@@ -1,80 +1,49 @@
-import {
-  click,
-  fillIn,
-  render,
-  triggerEvent,
-  triggerKeyEvent,
-} from "@ember/test-helpers";
+import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
 
-const EDITABLE_FIELD_SELECTOR = ".editable-field";
-const FIELD_TOGGLE_SELECTOR = ".editable-field .field-toggle";
-const LOADING_SPINNER_SELECTOR = `${EDITABLE_FIELD_SELECTOR} [data-test-spinner]`;
+const EDITABLE_FIELD = ".editable-field";
+const FIELD_TOGGLE = ".field-toggle";
+const SAVING_SPINNER = `${EDITABLE_FIELD} [data-test-saving-spinner]`;
+const ERROR = "[data-test-empty-value-error]";
+
+const STRING_VALUE = "[data-test-string-value]";
+const PEOPLE_SELECT = "[data-test-people-select]";
+
+const SAVE_BUTTON = "[data-test-save-button";
+const CANCEL_BUTTON = "[data-test-cancel-button]";
+
+const REMOVE_USER_BUTTON = ".ember-power-select-multiple-remove-btn";
+const EDITABLE_PERSON = ".ember-power-select-multiple-option";
 
 interface EditableFieldComponentTestContext extends MirageTestContext {
-  onChange: (value: any) => void;
+  onCommit: (value: any) => void;
   isLoading: boolean;
   isSaving: boolean;
   value: string;
   newArray: string[];
+  disabled: boolean;
 }
 
 module("Integration | Component | editable-field", function (hooks) {
   setupRenderingTest(hooks);
 
   hooks.beforeEach(function (this: EditableFieldComponentTestContext) {
-    this.set("onChange", () => {});
+    this.set("onCommit", () => {});
   });
 
   test("it handles splattributes", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onSave={{this.onCommit}}
         class="bar"
       />
     `);
 
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasClass("bar");
-  });
-
-  test("it toggles between default and editing modes", async function (this: EditableFieldComponentTestContext, assert) {
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value="foo"
-        @onChange={{this.onChange}}
-      >
-        <:default>Foo</:default>
-        <:editing>Bar</:editing>
-      </EditableField>
-    `);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).exists({ count: 1 }).hasText("Foo");
-
-    await click(FIELD_TOGGLE_SELECTOR);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).exists({ count: 1 }).hasText("Bar");
-  });
-
-  test("it yields the expected value", async function (this: EditableFieldComponentTestContext, assert) {
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value="foo"
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>{{F.value}} one</:default>
-        <:editing as |F|>{{F.value}} two</:editing>
-      </EditableField>
-    `);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).exists({ count: 1 }).hasText("foo one");
-
-    await click(FIELD_TOGGLE_SELECTOR);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).exists({ count: 1 }).hasText("foo two");
+    assert.dom(EDITABLE_FIELD).hasClass("bar");
   });
 
   test("it can show a saving state", async function (this: EditableFieldComponentTestContext, assert) {
@@ -83,89 +52,73 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
+        @onSave={{this.onCommit}}
         @isSaving={{this.isSaving}}
       />
     `);
 
-    assert.dom(FIELD_TOGGLE_SELECTOR).hasClass("saving").isDisabled();
-    assert.dom(LOADING_SPINNER_SELECTOR).exists();
+    assert.dom(EDITABLE_FIELD).hasClass("saving");
+    assert.dom(SAVING_SPINNER).exists();
 
     this.set("isSaving", false);
 
-    assert
-      .dom(FIELD_TOGGLE_SELECTOR)
-      .doesNotHaveClass("saving")
-      .isNotDisabled();
-
-    assert.dom(LOADING_SPINNER_SELECTOR).doesNotExist();
+    assert.dom(EDITABLE_FIELD).doesNotHaveClass("saving");
+    assert.dom(SAVING_SPINNER).doesNotExist();
   });
 
-  test("it can show a loading state", async function (this: EditableFieldComponentTestContext, assert) {
-    this.set("isLoading", true);
+  test("it shows an error when a required field is left empty", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("onCommit", (newValue: string) => {
+      this.set("value", newValue);
+    });
+
+    this.set("value", "foo");
+
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value={{this.value}}
+        @onSave={{this.onCommit}}
+        @isRequired={{true}}
+      />
+    `);
+
+    assert.dom(ERROR).doesNotExist();
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(ERROR).doesNotExist();
+
+    await fillIn("textarea", "");
+    await triggerKeyEvent(document, "keydown", "Enter");
+
+    assert.dom(ERROR).exists();
+  });
+
+  test("it conditionally determines whether to wrap the read-only value in a button", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("disabled", false);
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
-        @isLoading={{this.isLoading}}
+        @onSave={{this.onCommit}}
+        @isReadOnly={{this.disabled}}
       />
     `);
 
     assert
-      .dom(FIELD_TOGGLE_SELECTOR)
-      .doesNotExist("content is not yielded while loading");
-    assert.dom(LOADING_SPINNER_SELECTOR).exists();
+      .dom("button.field-toggle")
+      .exists('when enabled, the "read" value is a toggle');
 
-    this.set("isLoading", false);
+    this.set("disabled", true);
 
-    assert.dom(LOADING_SPINNER_SELECTOR).doesNotExist();
-    assert.dom(FIELD_TOGGLE_SELECTOR).exists();
-  });
+    assert
+      .dom("button.field-toggle")
+      .doesNotExist(
+        "the field toggle is not rendered as a button when editing disabled",
+      );
 
-  test("it yields an emptyValueErrorIsShown property to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value="foo"
-        @onChange={{this.onChange}}
-        @isRequired={{true}}
-      >
-        <:default>Foo</:default>
-        <:editing as |F|>
-          <input type="text" value={{F.value}} {{F.input}} />
-
-          {{#if F.emptyValueErrorIsShown}}
-            <div class="error">Empty value error</div>
-          {{/if}}
-        </:editing>
-      </EditableField>
-    `);
-
-    assert.dom(".error").doesNotExist();
-
-    await click(FIELD_TOGGLE_SELECTOR);
-
-    assert.dom(".error").doesNotExist();
-
-    await fillIn("input", "");
-    await triggerEvent("input", "blur");
-
-    assert.dom(".error").exists();
-  });
-
-  test("the edit button can be disabled", async function (this: EditableFieldComponentTestContext, assert) {
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value="foo"
-        @onChange={{this.onChange}}
-        @disabled={{true}}
-      >
-        <:default>Foo</:default>
-        <:editing>Bar</:editing>
-      </EditableField>
-    `);
-
-    assert.dom(FIELD_TOGGLE_SELECTOR).isDisabled();
+    assert
+      .dom("div.field-toggle")
+      .exists("the element is rendered as a div when editing is disabled");
   });
 
   test("it cancels when the escape key is pressed", async function (this: EditableFieldComponentTestContext, assert) {
@@ -176,206 +129,287 @@ module("Integration | Component | editable-field", function (hooks) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>{{F.value}}</:default>
-        <:editing as |F|>
-          <input type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+        @onSave={{this.onCommit}}
+      />
     `);
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    await click(FIELD_TOGGLE);
 
-    await fillIn("input", "Baz");
-
-    await triggerEvent("input", "keydown", {
-      key: "Escape",
-    });
+    await fillIn("textarea", "Baz");
+    await triggerKeyEvent("textarea", "keydown", "Escape");
 
     assert
-      .dom(EDITABLE_FIELD_SELECTOR)
+      .dom(EDITABLE_FIELD)
       .hasText(defaultText, "value reverts when escape is pressed");
   });
 
-  test("it runs the passed-in onChange action on blur", async function (this: EditableFieldComponentTestContext, assert) {
+  test("it runs the passed-in onCommit action", async function (this: EditableFieldComponentTestContext, assert) {
     this.set("value", "foo");
 
-    this.set("onChange", (e: unknown) => {
+    this.set("onCommit", (e: unknown) => {
       this.set("value", e);
     });
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value={{this.value}}
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>{{F.value}}</:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+        @onSave={{this.onCommit}}
+      />
     `);
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    await click(FIELD_TOGGLE);
 
-    await fillIn("input", "bar");
+    await fillIn("textarea", "bar");
+    await triggerKeyEvent("textarea", "keydown", "Enter");
 
-    // Keying "Enter" tests both `onBlur` and `handleKeydown`
-    // since `handleKeydown` ultimately calls `onBlur`.
-    await triggerKeyEvent("input", "keydown", "Enter");
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
+    assert.dom(EDITABLE_FIELD).hasText("bar");
+    assert.dom("textarea").doesNotExist("textarea is removed on save");
   });
 
-  test("it yields an `update` (string) function to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
-    this.set("value", "foo");
-    this.set("onChange", (newValue: string) => {
-      this.set("value", newValue);
-    });
-
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value={{this.value}}
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <Action {{on "click" (fn F.update "bar")}}>
-            F.update
-          </Action>
-        </:editing>
-      </EditableField>
-    `);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("foo");
-    await click(FIELD_TOGGLE_SELECTOR);
-
-    await click("button");
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
-  });
-
-  test("it yields an `update` (array) function to the editing block", async function (this: EditableFieldComponentTestContext, assert) {
-    this.set("value", ["foo"]);
-    this.set("onChange", (newValue: string[]) => {
-      this.set("value", newValue);
-    });
-
-    await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField
-        @value={{this.value}}
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <Action {{on "click" (fn F.update (array "bar"))}}>
-            F.update
-          </Action>
-        </:editing>
-      </EditableField>
-    `);
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("foo");
-
-    await click(FIELD_TOGGLE_SELECTOR);
-    await click("button");
-
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("bar");
-  });
-
-  test("onChange only runs if the textInput value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+  test("onCommit only runs if the value has changed (STRING)", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
-    this.set("onChange", () => count++);
+
+    this.set("onCommit", () => count++);
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+        @onSave={{this.onCommit}}
+      />
     `);
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    await click(FIELD_TOGGLE);
 
-    await fillIn("input", "foo");
-    await triggerEvent("input", "blur");
+    await fillIn("textarea", "foo");
+    await click(SAVE_BUTTON);
 
-    assert.equal(count, 0, "onChange has not been called");
+    assert.equal(count, 0, "onCommit has not been called");
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    await click(FIELD_TOGGLE);
 
-    await fillIn("input", "bar");
-    await triggerKeyEvent("input", "keydown", "Enter");
+    await fillIn("textarea", "bar");
+    await click(SAVE_BUTTON);
 
-    assert.equal(count, 1, "onChange has been called");
+    assert.equal(count, 1, "onCommit has been called");
   });
 
-  test("onChange only runs if the array value has changed", async function (this: EditableFieldComponentTestContext, assert) {
+  test("onCommit only runs if the value has changed (PEOPLE)", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
 
-    this.set("onChange", () => count++);
-    this.set("newArray", ["foo"]);
+    this.set("value", [{ email: "foo" }]);
+
+    this.set("onCommit", () => {
+      count++;
+    });
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
-        @value={{array "foo"}}
-        @onChange={{this.onChange}}
-      >
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-         <div {{click-outside (fn F.update this.newArray)}} />
-        </:editing>
-      </EditableField>
-      <div class="click-away"/>
+        @value={{array (hash email="foo")}}
+        @onSave={{this.onCommit}}
+      />
     `);
 
-    await click(FIELD_TOGGLE_SELECTOR);
-    await click(".click-away");
+    // Make no change
+    await click(FIELD_TOGGLE);
+    await click(SAVE_BUTTON);
 
-    assert.equal(count, 0, "onChange has not been called");
+    assert.equal(count, 0, "onCommit has not been called");
 
-    this.set("newArray", ["bar"]);
+    // Make a change
+    await click(FIELD_TOGGLE);
+    await click(REMOVE_USER_BUTTON);
+    await click(SAVE_BUTTON);
 
-    await click(FIELD_TOGGLE_SELECTOR);
-    await click(".click-away");
-
-    assert.equal(count, 1, "onChange has been called");
+    assert.equal(count, 1, "onCommit has been called");
   });
 
-  test("the input value resets on cancel", async function (this: EditableFieldComponentTestContext, assert) {
+  test("the value resets on cancel (STRING)", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
-      <EditableField  @value="foo" @onChange={{this.onChange}}>
-        <:default as |F|>
-          {{F.value}}
-        </:default>
-        <:editing as |F|>
-          <input {{F.input}} type="text" value={{F.value}} />
-        </:editing>
-      </EditableField>
+      <EditableField  @value="foo" @onSave={{this.onCommit}} />
     `);
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    assert.dom(EDITABLE_FIELD).hasText("foo");
 
-    await fillIn("input", "bar");
+    // Cancel using Escape key
+
+    await click(FIELD_TOGGLE);
+    await fillIn("textarea", "bar");
+    await triggerKeyEvent("textarea", "keydown", "Escape");
+
+    assert.dom(EDITABLE_FIELD).hasText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("foo");
+
+    // Cancel using the button
+
+    await fillIn("textarea", "bar");
+    await click(CANCEL_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).hasText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("foo");
+  });
+
+  test("the value resets on cancel (PEOPLE)", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value={{array (hash email="foo")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    assert.dom(EDITABLE_FIELD).containsText("foo");
+
+    // Cancel using Escape key
+
+    await click(FIELD_TOGGLE);
+    await click(REMOVE_USER_BUTTON);
     await triggerKeyEvent("input", "keydown", "Escape");
 
-    assert.dom(EDITABLE_FIELD_SELECTOR).hasText("foo");
+    assert.dom(EDITABLE_FIELD).containsText("foo");
 
-    await click(FIELD_TOGGLE_SELECTOR);
+    await click(FIELD_TOGGLE);
 
-    assert.dom("input").hasValue("foo");
+    assert.dom(EDITABLE_PERSON).containsText("foo");
+
+    // Cancel using the button
+
+    await click(REMOVE_USER_BUTTON);
+    await click(CANCEL_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).containsText("foo");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(EDITABLE_PERSON).containsText("foo");
+  });
+
+  test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField @value="bar" @onSave={{this.onCommit}} />
+    `);
+
+    assert.dom(EDITABLE_FIELD).hasText("bar");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("bar");
+
+    await fillIn("textarea", " bar ");
+
+    await triggerKeyEvent("textarea", "keydown", "Enter");
+
+    assert.dom(EDITABLE_FIELD).hasText("bar");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("bar");
+  });
+
+  test("it shows a text input or people input depending on the value", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        data-test-one
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+
+      <EditableField
+        data-test-two
+        @value={{array (hash email="bar")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    assert
+      .dom(`[data-test-one] ${STRING_VALUE}`)
+      .exists("string value handled correctly");
+
+    assert
+      .dom(`[data-test-two] [data-test-person-list]`)
+      .exists("array value handled correctly");
+
+    await click(`[data-test-one] ${FIELD_TOGGLE}`);
+
+    assert
+      .dom(`[data-test-one] textarea`)
+      .exists('strings become a "textarea"');
+
+    await click(`[data-test-two] ${FIELD_TOGGLE}`);
+
+    assert
+      .dom(`[data-test-two] ${PEOPLE_SELECT}`)
+      .exists('arrays become a "PeopleSelect"');
+  });
+
+  test("it autofocuses the inputs when the editing functions are enabled", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        data-test-one
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+
+      <EditableField
+        data-test-two
+        @value={{array (hash email="bar")}}
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    await click(`[data-test-one] ${FIELD_TOGGLE}`);
+    assert.dom(`[data-test-one] textarea`).isFocused();
+
+    await click(`[data-test-two] ${FIELD_TOGGLE}`);
+    assert.dom(`[data-test-two] ${PEOPLE_SELECT} input`).isFocused();
+  });
+
+  test("it shows confirm and cancel buttons when in editing mode", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    assert.dom(SAVE_BUTTON).doesNotExist();
+    assert.dom(CANCEL_BUTTON).doesNotExist();
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(SAVE_BUTTON).exists();
+    assert.dom(CANCEL_BUTTON).exists();
+  });
+
+  test("the confirm and cancel buttons work as expected", async function (this: EditableFieldComponentTestContext, assert) {
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value="foo"
+        @onSave={{this.onCommit}}
+      />
+    `);
+
+    await click(FIELD_TOGGLE);
+    await fillIn("textarea", "bar");
+    await click(SAVE_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).hasText("bar");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("bar");
+
+    await fillIn("textarea", "baz");
+    await click(CANCEL_BUTTON);
+
+    assert.dom(EDITABLE_FIELD).hasText("bar");
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom("textarea").hasValue("bar");
   });
 });

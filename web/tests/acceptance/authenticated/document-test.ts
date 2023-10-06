@@ -4,6 +4,7 @@ import {
   find,
   findAll,
   triggerEvent,
+  triggerKeyEvent,
   visit,
   waitFor,
 } from "@ember/test-helpers";
@@ -24,6 +25,8 @@ import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
 const ADD_RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
+const ADD_RELATED_RESOURCE_MODAL_SELECTOR =
+  "[data-test-add-related-resource-modal]";
 const FLASH_MESSAGE_SELECTOR = "[data-test-flash-notification]";
 const SIDEBAR_TITLE_BADGE_SELECTOR = "[data-test-sidebar-title-badge]";
 const TOOLTIP_SELECTOR = ".hermes-tooltip";
@@ -33,10 +36,13 @@ const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
 const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
+
 const TITLE_SELECTOR = "[data-test-document-title]";
 const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
 const APPROVERS_SELECTOR = "[data-test-document-approvers]";
+const APPROVED_BADGE_SELECTOR = "[data-test-person-approved-badge]";
+const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
 
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
@@ -57,6 +63,13 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
   "[data-test-continue-to-document-button]";
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
+
+const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";
+const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-field-type='people']";
+const EDITABLE_FIELD_SAVE_BUTTON_SELECTOR =
+  ".editable-field [data-test-save-button]";
+const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
+  ".ember-power-select-multiple-remove-btn";
 
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -520,7 +533,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await fillIn(`${SUMMARY_SELECTOR} textarea`, "");
 
-    await triggerEvent(`${SUMMARY_SELECTOR} textarea`, "blur");
+    await triggerKeyEvent(`${SUMMARY_SELECTOR} textarea`, "keydown", "Enter");
 
     assert.dom(SUMMARY_SELECTOR).hasText("Enter a summary");
   });
@@ -549,5 +562,193 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(`${APPROVERS_SELECTOR} .field-toggle`);
 
     assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
+  });
+
+  test('clicking the empty state of the related resources list opens the "add related resource" modal', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click("[data-test-related-resources-list-empty-state]");
+    await waitFor(ADD_RELATED_RESOURCE_MODAL_SELECTOR);
+
+    assert.dom(ADD_RELATED_RESOURCE_MODAL_SELECTOR).exists();
+  });
+
+  test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${TITLE_SELECTOR} button`);
+
+    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
+
+    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+
+    assert.dom(TITLE_SELECTOR).hasText("New Title");
+  });
+
+  test("the summary attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      summary: "foo bar baz",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${SUMMARY_SELECTOR} button`);
+
+    await fillIn(`${SUMMARY_SELECTOR} textarea`, "New Summary");
+
+    await triggerKeyEvent(`${SUMMARY_SELECTOR} textarea`, "keydown", "Enter");
+
+    assert.dom(SUMMARY_SELECTOR).hasText("New Summary");
+  });
+
+  test("the contributors attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      contributors: ["foo@example.com"],
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${CONTRIBUTORS_SELECTOR} button`);
+
+    // Delete the existing contributor and save
+    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(CONTRIBUTORS_SELECTOR).hasText("None");
+  });
+
+  test("the approvers attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      approvers: ["foo@example.com"],
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${APPROVERS_SELECTOR} button`);
+
+    // Delete the existing approver and save
+    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(APPROVERS_SELECTOR).hasText("None");
+  });
+
+  test("the product area attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("product", {
+      name: "Foo",
+    });
+
+    this.server.create("product", {
+      name: "Bar",
+    });
+
+    this.server.create("document", {
+      objectID: 1,
+      product: "Bar",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Bar");
+
+    await click(`${PRODUCT_SELECT_SELECTOR} button`);
+
+    await click(`[data-test-product-select-badge-dropdown-item]`);
+
+    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Foo");
+
+    // confirm with the back end
+
+    assert.equal(
+      this.server.schema.document.first().attrs.product,
+      "Foo",
+      "the product is updated in the back end",
+    );
+  });
+
+  test("customEditableFields save (STRING)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      customEditableFields: {
+        foo: {
+          displayName: "Foo",
+          type: "STRING",
+        },
+      },
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${CUSTOM_STRING_FIELD_SELECTOR} button`);
+
+    await fillIn("textarea", "Bar");
+
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(CUSTOM_STRING_FIELD_SELECTOR).hasText("Bar");
+  });
+
+  test("customEditableFields save (PEOPLE)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      customEditableFields: {
+        foo: {
+          displayName: "Foo",
+          type: "PEOPLE",
+        },
+      },
+      foo: ["foo@example.com"],
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${CUSTOM_PEOPLE_FIELD_SELECTOR} button`);
+
+    // Delete the existing contributor and save
+    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(CUSTOM_PEOPLE_FIELD_SELECTOR).hasText("None");
+  });
+
+  test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      approvers: ["foo@example.com", "bar@example.com"],
+      approvedBy: ["foo@example.com"],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(`${APPROVERS_SELECTOR} li`).exists({ count: 2 });
+
+    assert
+      .dom(`${APPROVERS_SELECTOR} li:nth-child(1) ${APPROVED_BADGE_SELECTOR}`)
+      .exists("the first approver is badged with a check");
+
+    assert
+      .dom(`${APPROVERS_SELECTOR} li:nth-child(2) ${APPROVED_BADGE_SELECTOR}`)
+      .doesNotExist("the second approver is not badged");
   });
 });

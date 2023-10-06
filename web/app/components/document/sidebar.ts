@@ -101,8 +101,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
+
   @tracked contributors: HermesUser[] =
     this.args.document.contributorObjects || [];
+
   @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
@@ -584,14 +586,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  updateProduct = keepLatestTask(async (product: string) => {
+  saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
     // productAbbreviation is computed by the back end
   });
 
   get saveIsRunning() {
-    return this.save.isRunning || this.saveCustomField.isRunning;
+    return (
+      this.save.isRunning ||
+      this.saveCustomField.isRunning ||
+      this.saveProduct.isRunning
+    );
   }
 
   save = task(async (field: string, val: string | HermesUser[]) => {
@@ -618,7 +624,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[],
+      val: string | string[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -626,7 +632,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          serializedValue = val.map((p: HermesUser) => p.email);
+          serializedValue = val;
         }
 
         field.name = fieldName;
@@ -716,30 +722,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
-  @action
-  updateApprovers(approvers: HermesUser[]) {
+  @action updateApprovers(approvers: HermesUser[]) {
     this.approvers = approvers;
   }
 
-  @action
-  updateContributors(contributors: HermesUser[]) {
+  @action updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
 
-  @action updateTitle(title: string) {
+  @action saveTitle(title: string) {
     this.title = title;
     void this.save.perform("title", this.title);
   }
 
-  protected updateSummary = task(async (summary: string) => {
-    const cachedValue = this.summary;
+  @action saveSummary(summary: string) {
     this.summary = summary;
-    try {
-      this.save.perform("summary", this.summary);
-    } catch {
-      this.summary = cachedValue;
-    }
-  });
+    void this.save.perform("summary", this.summary);
+  }
 
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;

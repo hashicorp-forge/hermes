@@ -26,3 +26,21 @@
     transform: scale(1);
   }
 }
+
+@keyframes slideDownXs {
+  from {
+    transform: translateY(-1.5px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeftPx {
+  from {
+    transform: translateX(1px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

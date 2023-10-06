@@ -68,7 +68,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .hasText("No results found", "No duplicate users can be added");
 
     await click(
-      ".ember-power-select-multiple-option .ember-power-select-multiple-remove-btn"
+      ".ember-power-select-multiple-option .ember-power-select-multiple-remove-btn",
     );
 
     assert
@@ -107,7 +107,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     let fillInPromise = fillIn(
       ".ember-power-select-trigger-multiple-input",
-      "any text - we're not actually querying"
+      "any text - we're not actually querying",
     );
 
     await waitFor(".ember-power-select-option--loading-message");

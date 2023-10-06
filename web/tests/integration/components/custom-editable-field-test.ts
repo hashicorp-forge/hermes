@@ -36,19 +36,19 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onChange={{this.onChange}}
+        @onSave={{this.onChange}}
       />
     `);
 
-    assert.dom("[data-test-custom-string-field]").hasText("None");
-    assert.dom("[data-test-custom-people-field]").doesNotExist();
+    assert.dom("[data-test-custom-field-type='string']").hasText("None");
+    assert.dom("[data-test-custom-field-type='people']").doesNotExist();
 
     this.set("attributes", {
       type: "PEOPLE",
     });
 
-    assert.dom("[data-test-custom-people-field]").hasText("None");
-    assert.dom("[data-test-custom-string-field]").doesNotExist();
+    assert.dom("[data-test-custom-field-type='people']").hasText("None");
+    assert.dom("[data-test-custom-field-type='string']").doesNotExist();
   });
 
   test("PEOPLE can be removed", async function (this: CustomEditableFieldComponentTestContext, assert) {
@@ -61,7 +61,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     this.set("onChange", (people: HermesUser[]) => {
       this.set(
-        "peopleValue",
+        "people",
         people.map((person) => person.email),
       );
     });
@@ -71,13 +71,12 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onChange={{this.onChange}}
+        @onSave={{this.onChange}}
       />
       <div class="click-away-target"/>
     `);
 
-    const textSelector =
-      "[data-test-custom-people-field] li [data-test-person-email]";
+    const textSelector = "[data-test-custom-field] li [data-test-person-email]";
 
     let listItemText = findAll(textSelector).map(
       (li) => li.textContent?.trim(),
@@ -88,8 +87,9 @@ module("Integration | Component | custom-editable-field", function (hooks) {
     assert.dom("[data-test-custom-people-field-input]").doesNotExist();
 
     await click("button");
+
     assert
-      .dom("[data-test-custom-people-field-input]")
+      .dom("[data-test-custom-field]")
       .exists("shows the input field on click");
 
     // remove the first person
@@ -125,11 +125,11 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onChange={{this.onChange}}
+        @onSave={{this.onChange}}
       />
     `);
 
-    const stakeholdersSelector = "[data-test-custom-people-field]";
+    const stakeholdersSelector = "[data-test-custom-field]";
     await click(`${stakeholdersSelector} .field-toggle`);
 
     assert.true(

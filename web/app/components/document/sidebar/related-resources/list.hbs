@@ -1,8 +1,19 @@
 <AnimatedContainer data-test-related-resources-list class="w-full">
   <div {{did-insert this.enableAnimation}}>
     {{#if this.listIsEmpty}}
-      <div class="mt-1.5" data-test-related-resources-list-empty-state>
-        <EmptyStateText />
+      <div class="editable-field-container">
+        <div class="editable-field button-affordance">
+          <Action
+            data-test-related-resources-list-empty-state
+            {{on "click" this.showModal}}
+            class="field-toggle group pl-[5px]"
+          >
+            <EmptyStateText />
+            <span class="edit-affordance light-gray">
+              <FlightIcon @name="plus" class="text-color-foreground-faint" />
+            </span>
+          </Action>
+        </div>
       </div>
     {{else}}
       <ul class="related-resources-list" ...attributes>

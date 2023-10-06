@@ -5,7 +5,7 @@
 {{else if this.args.loadingHasFailed}}
   {{yield to="list-error"}}
 {{else}}
-  {{yield (hash items=this.items) to="list"}}
+  {{yield (hash items=this.items showModal=this.showModal) to="list"}}
 {{/if}}
 
 {{#if this.modalIsShown}}
