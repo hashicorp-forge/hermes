@@ -8,6 +8,7 @@ interface ProductBadgeLinkComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
     productArea?: string;
+    avatarIsHidden?: boolean;
   };
   Blocks: {
     default: [];
@@ -65,7 +66,9 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
       class="product-badge-link"
       ...attributes
     >
-      <ProductAvatar @productArea={{@productArea}} />
+      {{#unless this.args.avatarIsHidden}}
+        <ProductAvatar @productArea={{@productArea}} />
+      {{/unless}}
       {{this.productAreaName}}
     </LinkTo>
   </template>
