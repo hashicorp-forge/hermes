@@ -29,7 +29,6 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   @service declare productAreas: ProductAreasService;
 
   @tracked selected = this.args.selected;
-  @tracked protected errorIsShown = false;
 
   get products() {
     return this.productAreas.index;
@@ -65,22 +64,6 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     this.selected = newValue;
     this.args.onChange(newValue, attributes);
   }
-
-  @action protected maybeFetchProducts() {
-    if (this.products) {
-      return;
-    }
-    void this.fetchProductAreas.perform();
-  }
-
-  protected fetchProductAreas = task(async () => {
-    try {
-      await this.productAreas.fetch.perform();
-      this.errorIsShown = false;
-    } catch {
-      this.errorIsShown = true;
-    }
-  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

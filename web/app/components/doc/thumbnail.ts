@@ -24,7 +24,7 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     if (this.args.product) {
       return getProductID(this.args.product);
     } else {
-      return this.args.product;
+      return;
     }
   }
 

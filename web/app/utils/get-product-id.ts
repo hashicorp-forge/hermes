@@ -1,4 +1,4 @@
-export default function getProductID(productName?: string): string | undefined {
+export default function getProductId(productName?: string) {
   if (!productName) {
     return;
   }

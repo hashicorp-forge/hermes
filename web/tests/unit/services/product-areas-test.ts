@@ -14,7 +14,7 @@ module("Unit | Service | product-areas", function (hooks) {
 
   test("can set or close an active modal", async function (this: MirageTestContext, assert) {
     const productAreas = this.owner.lookup(
-      "service:product-areas"
+      "service:product-areas",
     ) as ProductAreasService;
 
     this.server.create("product", {

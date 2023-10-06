@@ -1,24 +1,8 @@
 .product-badge {
-  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-200 to-color-palette-neutral-300 text-color-foreground-primary;
-
-  &.medium {
-    .flight-icon-folder {
-      @apply stroke-0;
-    }
-  }
-
-  &.large {
-    .flight-icon-folder {
-      @apply stroke-0;
-    }
-  }
-
-  .flight-icon-folder {
-    @apply stroke-[.5] stroke-current;
-  }
+  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-400 to-color-palette-neutral-500 text-color-foreground-high-contrast;
 
   &.hcp {
-    @apply from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
+    @apply from-color-palette-neutral-500 to-color-palette-neutral-600;
   }
 
   &.nomad {
