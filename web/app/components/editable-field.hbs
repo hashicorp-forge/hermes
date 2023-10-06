@@ -1,32 +1,103 @@
-<div class="editable-field" ...attributes>
-  {{#if this.editingBlockIsShown}}
-    {{on-document "keydown" this.handleKeydown}}
-    {{yield
-      (hash
-        value=this.value
-        update=this.maybeUpdateValue
-        input=this.inputModifier
-        emptyValueErrorIsShown=this.emptyValueErrorIsShown
-      )
-      to="editing"
-    }}
+<div
+  class="editable-field
+    {{if @isSaving 'saving'}}
+    {{if (and this.editingIsEnabled (not @isSaving)) 'z-10'}}"
+  ...attributes
+>
+  {{#if (and this.editingIsEnabled (not @isSaving))}}
+    <div {{did-insert this.registerEditingContainer}} class="w-full">
+      {{#if this.typeIsPeople}}
+        <Inputs::PeopleSelect
+          {{autofocus targetChildren=true}}
+          data-test-document-contributors-editable
+          class="multiselect--narrow"
+          {{! @glint-ignore - TODO: type this as an array }}
+          @selected={{this.value}}
+          @onChange={{this.onChange}}
+          @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+            shouldIgnoreEscape=true
+          }}
+        />
+      {{else}}
+        {{on-document "keydown" this.onTextFieldKeydown}}
+        <Hds::Form::Textarea::Field
+          {{auto-height-textarea}}
+          {{autofocus}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+            shouldIgnoreEscape=true
+          }}
+          {{! @glint-ignore - TODO: type this as a string }}
+          @value={{this.value}}
+          placeholder={{@placeholder}}
+          name={{@name}}
+          as |F|
+        >
+          {{#if this.emptyValueErrorIsShown}}
+            <F.Error data-test-empty-value-error>This field is required</F.Error>
+          {{/if}}
+        </Hds::Form::Textarea::Field>
+      {{/if}}
+
+      {{! "Confirm" and "Cancel" buttons }}
+      <div class="edit-overlay-affordance page-faint pb-[125px] pl-[5px]">
+        <Hds::Button
+          data-test-save-button
+          @size="small"
+          @text="Save"
+          @icon="check"
+          @isIconOnly={{true}}
+          {{on "click" (fn this.maybeUpdateValue this.value)}}
+        />
+        <Hds::Button
+          data-test-cancel-button
+          @text="Cancel"
+          @icon="x"
+          @isIconOnly={{true}}
+          @size="small"
+          @color="secondary"
+          {{did-insert this.registerCancelButton}}
+          {{on "click" this.disableAndRevertChanges}}
+        />
+      </div>
+    </div>
   {{else}}
-    {{#if (or @isSaving @isLoading)}}
-      <div
-        data-test-spinner
-        class={{if @isSaving "absolute top-0 right-0" "flex h-5 items-center"}}
-      >
-        <FlightIcon @name="loading" data-test-loading-spinner />
+    {{#if @isSaving}}
+      <div data-test-saving-spinner class="edit-affordance light-gray">
+        <FlightIcon @name="loading" />
       </div>
     {{/if}}
-    {{#unless @isLoading}}
+    {{#if (or @isReadOnly @isSaving)}}
+      <div class="field-toggle">
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @document={{@document}}
+          @placeholder={{@placeholder}}
+        />
+      </div>
+    {{else}}
       <Action
-        class="field-toggle {{if @isSaving 'saving'}}"
-        disabled={{or @disabled @isSaving}}
+        {{did-insert this.registerToggleButton}}
         {{on "click" this.enableEditing}}
+        class="field-toggle group"
       >
-        {{yield (hash value=this.value)}}
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @document={{@document}}
+          @placeholder={{@placeholder}}
+        />
+        {{#unless @isReadOnly}}
+          <span class="edit-affordance gray">
+            <FlightIcon @name="edit" class="text-color-foreground-faint" />
+          </span>
+        {{/unless}}
       </Action>
-    {{/unless}}
+    {{/if}}
   {{/if}}
 </div>

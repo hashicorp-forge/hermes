@@ -143,7 +143,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     const cachedLinks = this.relatedLinks.slice();
 
     let resourceIndex = this.relatedLinks.findIndex(
-      (link) => link.sortOrder === resource.sortOrder
+      (link) => link.sortOrder === resource.sortOrder,
     );
 
     if (resourceIndex !== -1) {
@@ -162,7 +162,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
       void this.saveRelatedResources.perform(
         this.relatedDocuments,
         cachedLinks,
-        resource.sortOrder
+        resource.sortOrder,
       );
     }
   }
@@ -188,7 +188,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     void this.saveRelatedResources.perform(
       cachedDocuments,
       cachedLinks,
-      resourceSelector
+      resourceSelector,
     );
   }
 
@@ -220,7 +220,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         .fetch(
           `/api/v1/${this.args.documentIsDraft ? "drafts" : "documents"}/${
             this.args.objectID
-          }/related-resources`
+          }/related-resources`,
         )
         .then((response) => response?.json());
 
@@ -266,7 +266,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             target as HTMLElement,
             this.args.scrollContainer,
             "getBoundingClientRect",
-            10
+            10,
           );
         });
 
@@ -276,14 +276,14 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
         const fadeInAnimation = highlight.animate(
           [{ opacity: 0 }, { opacity: 1 }],
-          { duration: 50 }
+          { duration: 50 },
         );
 
         await timeout(Ember.testing ? 0 : 2000);
 
         const fadeOutAnimation = highlight.animate(
           [{ opacity: 1 }, { opacity: 0 }],
-          { duration: Ember.testing ? 50 : 400 }
+          { duration: Ember.testing ? 50 : 400 },
         );
 
         try {
@@ -295,7 +295,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           highlight.remove();
         }
       });
-    }
+    },
   );
 
   /**
@@ -307,7 +307,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     async (
       cachedDocuments,
       cachedLinks,
-      elementSelectorToHighlight?: string | number
+      elementSelectorToHighlight?: string | number,
     ) => {
       if (elementSelectorToHighlight) {
         void this.animateHighlight.perform(elementSelectorToHighlight);
@@ -324,7 +324,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
       } catch (e: unknown) {
         this.relatedLinks = cachedLinks;
@@ -338,7 +338,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           extendedTimeout: 1000,
         });
       }
-    }
+    },
   );
 }
 

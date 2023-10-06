@@ -13,14 +13,12 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
-import { wait } from "ember-animated/.";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
 const LIST_ITEM_SELECTOR = ".related-resource";
 const HERMES_DOCUMENT_SELECTOR = ".hermes-document";
 const EXTERNAL_RESOURCE_SELECTOR = ".external-resource";
-const BADGE_SELECTOR = "[data-test-sidebar-section-header-badge]";
 const HEADER_SELECTOR = ".sidebar-section-header";
 const ERROR_MESSAGE_SELECTOR = ".failed-to-load-text";
 const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
@@ -35,6 +33,8 @@ const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
 const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
 const ADD_RESOURCE_BUTTON_SELECTOR = ".sidebar-section-header-button";
+const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
+
 const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
   ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
@@ -76,6 +76,29 @@ module(
       this.set("document", this.server.schema.document.first().attrs);
       const bodyDiv = document.createElement("div");
       this.set("body", bodyDiv);
+    });
+
+    test("the empty state is clickable to add a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
+      await render<DocumentSidebarRelatedResourcesTestContext>(hbs`
+        <Document::Sidebar::RelatedResources
+          @productArea={{this.document.product}}
+          @objectID={{this.document.objectID}}
+          @allowAddingExternalLinks={{true}}
+          @headerTitle="Test title"
+          @modalHeaderTitle="Add related resource"
+          @modalInputPlaceholder="Paste a URL or search documents..."
+          @scrollContainer={{this.body}}
+        />
+      `);
+
+      const emptyStateSelector =
+        "[data-test-related-resources-list-empty-state]";
+
+      assert.dom(emptyStateSelector).hasText("None");
+
+      await click("[data-test-related-resources-list-empty-state]");
+
+      assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
     });
 
     test("it renders the related resources list", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -122,8 +145,6 @@ module(
       assert
         .dom(".hermes-tooltip")
         .hasText("Documents and links that are relevant to this work.");
-
-      assert.dom(BADGE_SELECTOR).hasText("New", "the 'new' badge is rendered'");
 
       assert
         .dom(HERMES_DOCUMENT_SELECTOR)
