@@ -78,10 +78,6 @@
     }
   }
 
-  .create-draft-button {
-    @apply w-9 rounded-full p-0;
-  }
-
   .highlighted-new {
     .hds-dropdown-list-item__interactive-text {
       &::after {

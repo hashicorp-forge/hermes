@@ -11,6 +11,7 @@ import ConfigService from "hermes/services/config";
 
 const SUPPORT_URL = "https://example.com/support";
 const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";
+const CREATE_NEW_BUTTON = "[data-test-create-new-button]";
 
 module("Integration | Component | header/nav", function (hooks) {
   setupRenderingTest(hooks);
@@ -19,7 +20,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
   hooks.beforeEach(function () {
     let authenticatedUserSvc = this.owner.lookup(
-      "service:authenticated-user"
+      "service:authenticated-user",
     ) as AuthenticatedUserService;
 
     authenticatedUserSvc._info = {
@@ -39,6 +40,8 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom(".header-nav").exists();
     assert.dom('[data-test-nav-link="all"]').hasAttribute("href", "/documents");
     assert.dom('[data-test-nav-link="my"]').hasAttribute("href", "/my");
+
+    assert.dom(CREATE_NEW_BUTTON).hasText("New").hasAttribute("href", "/new");
 
     assert.dom(".global-search").exists();
 
@@ -65,7 +68,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert.equal(
       window.localStorage.getItem("emailNotificationsHighlightIsShown"),
-      null
+      null,
     );
 
     assert.dom("[data-test-user-menu-highlight]").exists("highlight is shown");
@@ -81,7 +84,7 @@ module("Integration | Component | header/nav", function (hooks) {
       .hasPseudoElementStyle(
         "after",
         { content: '"New"' },
-        "highlighted link has the correct class and pseudoElement text"
+        "highlighted link has the correct class and pseudoElement text",
       );
 
     // close and reopen the menu
