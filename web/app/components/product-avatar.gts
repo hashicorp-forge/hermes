@@ -5,6 +5,7 @@ import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import getLetterCount from "hermes/helpers/get-letter-count";
 import getProductAbbreviation from "hermes/helpers/get-product-abbreviation";
 import eq from "ember-truth-helpers/helpers/eq";
+import isEmpty from "ember-truth-helpers/helpers/is-empty";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -32,24 +33,25 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
       data-test-doc-thumbnail-product-badge
       class="product-badge
         {{this.productID}}
-        relative flex h-5 w-5 items-center justify-center rounded-full"
+        relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
       ...attributes
     >
-      {{#if this.productID}}
-        <FlightIcon
-          @name={{or this.productID "folder"}}
-          style={{this.sizeStyles}}
-        />
-      {{else}}
-        <span
-          class="letter-avatar font-medium letter-count-{{getLetterCount
-              (getProductAbbreviation @productArea)
-            }}
-            absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-        >
-          {{getProductAbbreviation @productArea}}
-        </span>
-      {{/if}}
+      {{#let (getProductAbbreviation @productArea) as |abbreviation|}}
+        {{#if (or this.productID (isEmpty abbreviation))}}
+          <FlightIcon
+            @name={{or this.productID "folder"}}
+            style={{this.sizeStyles}}
+          />
+        {{else if abbreviation}}
+          <span
+            class="letter-avatar absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-medium letter-count-{{getLetterCount
+                abbreviation
+              }}"
+          >
+            {{getProductAbbreviation @productArea}}
+          </span>
+        {{/if}}
+      {{/let}}
     </div>
   </template>
 }
