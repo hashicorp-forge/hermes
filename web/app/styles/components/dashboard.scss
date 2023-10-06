@@ -1,0 +1,17 @@
+.dashboard {
+  .page-body {
+    a {
+      @apply relative;
+
+      &:hover,
+      &:focus,
+      &:focus-visible {
+        &::before {
+          content: "";
+          @apply absolute -left-4 -right-4 -top-px -bottom-px rounded bg-color-surface-interactive-hover-75;
+          animation: fadeIn 120ms ease-in;
+        }
+      }
+    }
+  }
+}

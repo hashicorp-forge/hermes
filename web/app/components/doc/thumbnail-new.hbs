@@ -1,8 +1,8 @@
 <li
-  class="flex items-start gap-3 border-t border-t-color-border-faint py-3.5 first:border-t-0"
+  class="flex items-start gap-3 border-t border-t-color-border-faint first:border-t-0"
 >
-  <div class="w-full">
-    <div class="flex w-full items-start gap-3">
+  <a class="w-full py-3.5">
+    <div class="relative flex w-full items-start gap-3">
       {{! Thumbnail icon }}
       {{! <div
         class="relative mt-0.5 flex shrink-0 justify-center text-color-foreground-faint opacity-50"
@@ -26,13 +26,13 @@
                 @imgURL={{@avatarURL}}
               />
               <div
-                class="ml-2 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
+                class="ml-2 flex items-center gap-[7px] text-body-100 leading-none text-color-foreground-faint"
               >
                 <span>
                   {{@docType}}
                 </span>
                 <span class="opacity-50">
-                  ·
+                  |
                 </span>
                 <span class="tag {{dasherize @status}}">
                   {{@status}}
@@ -66,5 +66,5 @@
       </div> }}
 
     </div>
-  </div>
+  </a>
 </li>

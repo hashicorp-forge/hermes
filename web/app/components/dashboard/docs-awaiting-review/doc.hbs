@@ -3,9 +3,10 @@
     data-test-doc-awaiting-review-link
     @route="authenticated.document"
     @model={{@doc.objectID}}
-    class="group w-full overflow-hidden border-t border-color-border-faint py-3 pl-2 pr-6"
+    class="group w-full border-t border-color-border-faint py-3"
   >
-    <div class="w-full">
+    {{! TODO: figure out least-destructive place for overflow hidden }}
+    <div class="relative w-full">
       <div
         class="relative flex w-full flex-wrap items-center gap-3.5 md:flex-nowrap"
       >
@@ -53,7 +54,7 @@
                   {{@doc.docType}}
                 </span>
                 <span class="opacity-50">
-                  ·
+                  |
                 </span>
                 <span class="tag {{dasherize @doc.status}}">
                   {{@doc.status}}

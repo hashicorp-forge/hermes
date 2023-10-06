@@ -63,6 +63,7 @@ module.exports = {
         "color-surface-interactive": "var(--token-color-surface-interactive)",
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
+        "color-surface-interactive-hover-75": "#f1f2f375", // custom
         "color-surface-interactive-active":
           "var(--token-color-surface-interactive-active)",
         "color-surface-primary": "var(--token-color-surface-primary)",
@@ -189,6 +190,9 @@ module.exports = {
         "color-palette-green-200": "var(--token-color-palette-green-200)",
         "color-palette-purple-100": "var(--token-color-palette-purple-100)",
         "color-palette-purple-200": "var(--token-color-palette-purple-200)",
+
+        // Hermes-specific colors
+        "blue-gray": "#6d768e",
       },
     },
   },
