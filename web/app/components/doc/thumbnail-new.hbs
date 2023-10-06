@@ -1,7 +1,7 @@
 <li
   class="flex items-start gap-3 border-t border-t-color-border-faint py-3.5 first:border-t-0"
 >
-  <div class="w-full overflow-hidden">
+  <div class="w-full">
     <div class="flex w-full items-start gap-3">
       {{! Thumbnail icon }}
       {{! <div
@@ -13,7 +13,7 @@
       <div class="w-full">
 
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5 overflow-hidden">
+          <div class="flex w-full items-center justify-between gap-1.5">
             {{#if (eq @status "Draft")}}{{/if}}
             {{!-- <Doc::State @state={{@status}} @hideProgress={{true}} /> --}}
             <div class="flex items-center gap-1">
@@ -25,15 +25,19 @@
                 @email=""
                 @imgURL={{@avatarURL}}
               />
-              <span class="tag doctype ml-1.5">
-                {{@docType}}
-              </span>
-              <span class="text-color-foreground-disabled">
-                ·
-              </span>
-              <span class="tag {{dasherize @status}}">
-                {{@status}}
-              </span>
+              <div
+                class="ml-2 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
+              >
+                <span>
+                  {{@docType}}
+                </span>
+                <span class="opacity-50">
+                  ·
+                </span>
+                <span class="tag {{dasherize @status}}">
+                  {{@status}}
+                </span>
+              </div>
             </div>
           </div>
         </div>

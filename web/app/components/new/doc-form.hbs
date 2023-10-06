@@ -16,7 +16,7 @@
     {{on "submit" this.submit}}
     class="mb-10"
   >
-    <div class="space-y-7 mb-8">
+    <div class="mb-8 space-y-7">
 
       {{! Title }}
       <Hds::Form::TextInput::Field
@@ -79,9 +79,7 @@
               </div>
             </div>
 
-            <dd.ToggleSelect
-              class="hds-button hds-button--color-secondary hds-button--size-medium"
-            >
+            <dd.ToggleSelect>
               <FlightIcon
                 @name={{or this.selectedDocTypeObject.icon "file-text"}}
                 class="mr-3"

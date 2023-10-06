@@ -20,16 +20,13 @@
 
       {{#if @model}}
         <Dashboard::DocsAwaitingReview @docs={{@model}} />
-        <div
-          class="-mt-1 mb-5 h-px w-full border-t border-dashed border-t-color-border-faint"
-        />
       {{/if}}
 
       {{#if this.recentDocs.all}}
         <div class="mb-1.5 flex items-center gap-3">
-          <FlightIcon @name="rocket" class="text-color-foreground-faint" />
-          <h4 class="hermes-h4 text-color-foreground-primary">
-            Here's the Latest
+          <FlightIcon @name="provider" class="text-color-foreground-faint" />
+          <h4 class="hermes-h4">
+            Here's the latest
           </h4>
         </div>
         <ol>
@@ -47,27 +44,25 @@
                   />
                 </div>
                 <div class="w-full">
+
                   <div class="mb-2 flex w-full items-center justify-between">
-                    <div
-                      class="flex items-center gap-[5px] text-body-100 leading-none"
-                    >
-                      <span>
-                        {{r.doc.docType}}
-                      </span>
-                      <span class="opacity-50">
-                        ·
-                      </span>
-                      <span class="tag {{dasherize r.doc.status}}">
-                        {{r.doc.status}}
-                      </span>
-                      <span class="opacity-50">
-                        ·
-                      </span>
-                      <span>
-                        {{r.doc.product}}
-                      </span>
+                    {{! Owner }}
+                    <div class="flex w-full items-center justify-between">
+                      <div class="flex items-center text-body-100">
+                        <Person::Avatar
+                          @size="small"
+                          @email={{get r.doc.owners 0}}
+                          @imgURL={{get r.doc.ownerPhotos 0}}
+                          class="-ml-px"
+                        />
+                        <span class="ml-1.5 text-color-foreground-strong">
+                          {{get r.doc.owners 0}}
+                        </span>
+                      </div>
                     </div>
-                    <div>
+
+                    {{! Created time }}
+                    <div class="shrink-0">
                       <span class="text-body-100 text-color-foreground-faint">
 
                         {{time-ago r.doc.createdTime}}
@@ -76,7 +71,7 @@
                     </div>
                   </div>
                   <h3
-                    class="text-display-300 font-semibold text-color-foreground-strong"
+                    class="mt-0.5 text-display-300 font-semibold text-color-foreground-strong"
                   >
                     {{r.doc.title}}
                   </h3>
@@ -85,18 +80,31 @@
                       {{r.doc.summary}}
                     </p>
                   {{/if}}
-                  <div class="flex w-full items-center justify-between">
-                    <div class="mt-3.5 flex items-center text-body-200">
-                      <Person::Avatar
-                        @size="small"
-                        @email={{get r.doc.owners 0}}
-                        @imgURL={{get r.doc.ownerPhotos 0}}
-                        class="-ml-px"
-                      />
-                      <span class="ml-1.5 text-color-foreground-strong">
-                        {{get r.doc.owners 0}}
-                      </span>
-                    </div>
+                  {{! Type and Product }}
+                  <div
+                    class="mt-3.5 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
+                  >
+                    <span>
+                      {{r.doc.docType}}
+                    </span>
+                    <span class="opacity-50">
+                      ·
+                    </span>
+                    <span class="tag {{dasherize r.doc.status}}">
+                      {{r.doc.status}}
+                    </span>
+                    <span class="opacity-50">
+                      ·
+                    </span>
+                    <span>
+                      {{r.doc.product}}
+                    </span>
+                    <span class="opacity-50">
+                      ·
+                    </span>
+                    <span>
+                      {{r.doc.docNumber}}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -132,9 +140,7 @@
       <div>
         <div class="mb-3 flex h-4 items-center gap-3">
           <FlightIcon @name="history" class="text-color-foreground-faint" />
-          <h2
-            class="hermes-h4 flex h-4 items-center text-color-foreground-primary"
-          >
+          <h2 class="hermes-h4 flex h-4 items-center">
             Recently viewed
           </h2>
         </div>
@@ -172,19 +178,21 @@
                 <FlightIcon @name="grid" />
               </div> }}
               <div class="w-full">
-                <div class="flex gap-1">
+                <div class="flex w-full justify-between">
 
-                  <ProductAvatar class="shrink-0" @productArea="Terraform" />
-                  <ProductAvatar class="shrink-0" @productArea="Sentinel" />
-                  <ProductAvatar class="shrink-0" @productArea="Labs" />
-                  <div class="ml-1.5 flex items-center gap-1 text-body-100">
-                    {{! <FlightIcon
-                      @name="file"
-                      class="text-color-foreground-faint"
-                    /> }}
-                    Project
+                  <div class="flex gap-1">
+
+                    <ProductAvatar class="shrink-0" @productArea="Terraform" />
+                    <ProductAvatar class="shrink-0" @productArea="Sentinel" />
+                    <ProductAvatar class="shrink-0" @productArea="Labs" />
+                    <div
+                      class="ml-1.5 flex items-center gap-1 text-body-100 text-color-foreground-faint"
+                    >
+                      Project
+                    </div>
                   </div>
                 </div>
+
                 <div class="flex items-start justify-between">
                   <h4 class="my-1.5 text-body-200">Listbox Rollout (Ember)</h4>
                 </div>

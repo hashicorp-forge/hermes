@@ -1,23 +1,20 @@
 .tag {
-  @apply text-body-100;
+  @apply flex h-5 items-center rounded text-body-100 leading-none;
 
   &.in-review {
-    @apply text-color-foreground-highlight-on-surface;
+    @apply text-color-foreground-highlight;
   }
 
   &.approved {
-    @apply text-color-foreground-success-on-surface;
+    // @apply text-color-foreground-success;
   }
 
   &.draft {
+    @apply text-color-palette-neutral-500;
     // @apply text-color-foreground-faint;
   }
 
   &.doctype {
-  }
-
-  & + .tag {
-    @apply ml-1.5;
   }
 }
 
