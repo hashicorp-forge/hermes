@@ -6,7 +6,7 @@ export interface GetProductAbbreviationHelperSignature {
   Args: {
     Positional: [productName?: string];
   };
-  Return: string;
+  Return: string | null;
 }
 
 // const getProductAbbreviation = helper<GetProductAbbreviationHelperSignature>(
@@ -26,17 +26,16 @@ export interface GetProductAbbreviationHelperSignature {
 export default class GetProductAbbreviationHelper extends Helper<GetProductAbbreviationHelperSignature> {
   @service declare productAreas: ProductAreasService;
 
-  compute([productName]: [string | undefined]): string {
+  compute([productName]: [string | undefined]): string | null {
     if (!productName) {
       return "";
     }
 
-    //  need to search the productAreas index for an object called `productName` and return the abbreviation
     const products = this.productAreas.index;
     const product = products?.[productName];
 
     if (!product) {
-      return "";
+      return null;
     }
 
     return product.abbreviation.slice(0, 3).toUpperCase();
@@ -45,6 +44,6 @@ export default class GetProductAbbreviationHelper extends Helper<GetProductAbbre
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "get-doc-abbreviation": typeof GetProductAbbreviationHelper;
+    "get-product-abbreviation": typeof GetProductAbbreviationHelper;
   }
 }
