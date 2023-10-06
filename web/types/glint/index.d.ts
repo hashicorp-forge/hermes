@@ -41,7 +41,6 @@ import AnimatedValue from "ember-animated/components/animated-value";
 import AnimatedOrphans from "ember-animated/components/animated-orphans";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
-import OnClickOutsideModifier from "ember-click-outside/modifiers/on-click-outside";
 import { HdsFormErrorComponent } from "hds/form/error";
 import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
 
@@ -51,7 +50,6 @@ declare module "@glint/environment-ember-loose/registry" {
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
-    "click-outside": typeof OnClickOutsideModifier;
     "set-body-class": typeof EmberSetBodyClassHelper;
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;

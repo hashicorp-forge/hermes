@@ -17,6 +17,9 @@ type Config struct {
 	// BaseURL is the base URL used for building links.
 	BaseURL string `hcl:"base_url,optional"`
 
+	// Datadog contains the configuration for Datadog.
+	Datadog *Datadog `hcl:"datadog,block"`
+
 	// DocumentTypes contain available document types.
 	DocumentTypes *DocumentTypes `hcl:"document_types,block"`
 
@@ -56,6 +59,21 @@ type Config struct {
 
 	// SupportLinkURL is the URL for the support documentation.
 	SupportLinkURL string `hcl:"support_link_url,optional"`
+}
+
+// Datadog configures Hermes to send metrics to Datadog.
+type Datadog struct {
+	// Enabled enables sending metrics to Datadog.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// Env overrides the Datadog environment.
+	Env string `hcl:"env,optional"`
+
+	// Service overrides the Datadog service name.
+	Service string `hcl:"service,optional"`
+
+	// ServiceVersion overrides the Datadog service version.
+	ServiceVersion string `hcl:"service_version,optional"`
 }
 
 // DocumentTypes contain available document types.

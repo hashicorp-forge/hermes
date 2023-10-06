@@ -9055,16 +9055,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-click-outside-modifier@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "ember-click-outside-modifier@npm:4.0.0"
-  dependencies:
-    "@embroider/addon-shim": ^1.5.0
-    ember-modifier: ^3.0.0
-  checksum: cabadc1db3778a0ede23ea78d3083bd133787ceebfed2a9eb5121a7313fbfae539edb623b09653d7730bd2ea26f58c443dd98f441f6b16c11760e58438e7761c
-  languageName: node
-  linkType: hard
-
 "ember-compatibility-helpers@npm:^1.1.2, ember-compatibility-helpers@npm:^1.2.0, ember-compatibility-helpers@npm:^1.2.1, ember-compatibility-helpers@npm:^1.2.5":
   version: 1.2.6
   resolution: "ember-compatibility-helpers@npm:1.2.6"
@@ -12095,7 +12085,6 @@ __metadata:
     ember-cli-string-helpers: ^6.1.0
     ember-cli-terser: ^4.0.2
     ember-cli-typescript: ^5.2.1
-    ember-click-outside-modifier: ^4.0.0
     ember-composable-helpers: ^5.0.0
     ember-concurrency: ^2.2.1
     ember-data: ~3.28.6

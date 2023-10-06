@@ -17,6 +17,10 @@
     }
   }
 
+  .editable-field-container {
+    @apply mt-[3px];
+  }
+
   .sidebar-header {
     @apply sticky top-0 z-10 flex justify-between bg-color-page-faint px-3.5 py-4;
 
@@ -68,19 +72,46 @@
   }
 
   .sidebar-body {
-    @apply relative h-full;
+    @apply relative h-full overflow-y-scroll;
+
+    .product-badge {
+      @apply top-0 h-7 w-9 rounded-r;
+    }
 
     .sidebar-body-container {
-      @apply pt-10 pb-10 pl-7 pr-3;
+      @apply space-y-8 pt-14 pb-10 pl-7 pr-3;
+    }
+
+    /* Style the scrollbar for Chrome, Safari, and Opera. */
+    &::-webkit-scrollbar {
+      @apply w-4 bg-transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      @apply min-h-[40px] rounded-t-full rounded-b-full border-[4.5px] border-solid border-transparent bg-color-palette-neutral-300 bg-clip-padding;
+
+      &:hover {
+        @apply bg-color-palette-neutral-400;
+      }
+    }
+
+    /* Style the scrollbar Firefox */
+    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+  }
+
+  .document-title {
+    .field-toggle,
+    textarea {
+      @apply text-display-300 font-semibold text-color-foreground-strong;
     }
   }
 
   .sidebar-section-header-container {
-    @apply flex w-full items-center justify-between mb-[3px];
+    @apply flex w-full items-center justify-between;
   }
 
   .readonly-string {
-    @apply h-9 py-[8px] flex items-center;
+    @apply flex h-9 items-center py-[8px];
   }
 
   // .readonly-people-list {
@@ -92,7 +123,7 @@
   // }
 
   .sidebar-section-header {
-    @apply text-body-100 font-regular text-color-foreground-faint;
+    @apply hds-foreground-faint text-body-100 font-regular;
   }
 
   .sidebar-section-header-button {

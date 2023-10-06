@@ -16,9 +16,10 @@ interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
     selected: HermesUser[];
-    onChange: (people: HermesUser[]) => void;
+    onChange: (value: HermesUser[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
+    onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
   };
 }
 
@@ -85,7 +86,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
             .filter((person: HermesUser) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedPerson) => selectedPerson.email === person.email
+                (selectedPerson) => selectedPerson.email === person.email,
               );
             });
         } else {

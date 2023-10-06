@@ -44,6 +44,7 @@ interface DocumentSidebarComponentSignature {
   Args: {
     profile: AuthenticatedUser;
     document: HermesDocument;
+    docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
@@ -84,21 +85,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked emailFields = ["approvers", "contributors"];
   @tracked projectResults: Record<string, HermesProject> = {};
 
-  protected get dropdownItems() {
-    return [
-      {
-        // TODO: should be a link to create a new project
-        // TODO: maybe should display the name typed in the search box
-        name: "Create new project",
-        icon: "plus",
-      },
-      ...Object.values(this.projectResults),
-    ];
-  }
-
   @tracked protected docType: HermesDocumentType | null = null;
 
-  private get modalIsShown() {
+  get modalIsShown() {
     return (
       this.archiveModalIsShown ||
       this.deleteModalIsShown ||
@@ -125,8 +114,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-  @tracked contributors = this.args.document.contributors || [];
-  @tracked approvers = this.args.document.approvers || [];
+
+  @tracked contributors: HermesUser[] =
+    this.args.document.contributorObjects || [];
+
+  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
   @tracked protected projects: HermesProject[] = [];
@@ -393,13 +385,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   // isApprover returns true if the logged in user is a document approver.
   get isApprover() {
     return this.args.document.approvers?.some(
-      (e) => e.email === this.args.profile.email,
+      (e) => e === this.args.profile.email,
     );
   }
 
   get isContributor() {
     return this.args.document.contributors?.some(
-      (e) => e.email === this.args.profile.email,
+      (e) => e === this.args.profile.email,
     );
   }
 
@@ -681,14 +673,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  updateProduct = keepLatestTask(async (product: string) => {
+  saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
     await this.save.perform("product", this.product);
     // productAbbreviation is computed by the back end
   });
 
   get saveIsRunning() {
-    return this.save.isRunning || this.saveCustomField.isRunning;
+    return (
+      this.save.isRunning ||
+      this.saveCustomField.isRunning ||
+      this.saveProduct.isRunning
+    );
   }
 
   save = task(async (field: string, val: string | HermesUser[]) => {
@@ -715,7 +711,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[],
+      val: string | string[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -723,7 +719,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          serializedValue = val.map((p: HermesUser) => p.email);
+          serializedValue = val;
         }
 
         field.name = fieldName;
@@ -761,9 +757,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers.compact().mapBy("email"),
-        // TODO:
-        // publishedDate: Date.now() / 1000,
+        approvers: this.approvers?.compact().mapBy("email"),
       });
 
       await this.fetchSvc.fetch(`/api/v1/reviews/${this.docID}`, {
@@ -829,30 +823,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
-  @action
-  updateApprovers(approvers: HermesUser[]) {
+  @action updateApprovers(approvers: HermesUser[]) {
     this.approvers = approvers;
   }
 
-  @action
-  updateContributors(contributors: HermesUser[]) {
+  @action updateContributors(contributors: HermesUser[]) {
     this.contributors = contributors;
   }
 
-  @action updateTitle(title: string) {
+  @action saveTitle(title: string) {
     this.title = title;
     void this.save.perform("title", this.title);
   }
 
-  protected updateSummary = task(async (summary: string) => {
-    const cachedValue = this.summary;
+  @action saveSummary(summary: string) {
     this.summary = summary;
-    try {
-      this.save.perform("summary", this.summary);
-    } catch {
-      this.summary = cachedValue;
-    }
-  });
+    void this.save.perform("summary", this.summary);
+  }
 
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;
@@ -892,9 +879,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected didInsertBody(element: HTMLElement) {
     this._body = element;
-    // kick off whether the draft is shareable.
+
     if (this.isDraft) {
+      // kick off whether the draft is shareable.
       void this.getDraftPermissions.perform();
+
+      // get docType for the "request review?" modal
+      this.args.docType.then((docType) => {
+        this.docType = docType;
+      });
     }
   }
 

@@ -11,6 +11,11 @@ interface DismissibleModifierSignature {
     Named: {
       dismiss: () => void;
       related?: HTMLElement | HTMLElement[];
+      /**
+       * Whether to defer the Escape key to the calling component.
+       * Used when the Escape key is used for something other than dismissing,
+       * such as cancelling an EditableField and restoring its original value.
+       */
       shouldIgnoreEscape?: boolean;
     };
   };

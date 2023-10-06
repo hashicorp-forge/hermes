@@ -16,7 +16,6 @@ interface DocumentSidebarRelatedResourcesListComponentSignature {
     items: any[];
     itemLimit?: number;
     showModal?: () => void;
-    editingIsDisabled?: boolean;
   };
   Blocks: {
     resource: [resource: any];

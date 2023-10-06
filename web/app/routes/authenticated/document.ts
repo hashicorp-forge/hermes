@@ -5,10 +5,20 @@ import { schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
-import { HermesDocument } from "hermes/types/document";
+import { HermesDocument, HermesUser } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import { assert } from "@ember/debug";
+import { GoogleUser } from "hermes/components/inputs/people-select";
+
+const serializePeople = (people: GoogleUser[]): HermesUser[] => {
+  return people.map((p) => ({
+    email: p.emailAddresses[0]?.value as string,
+    imgURL: p.photos?.[0]?.url,
+  }));
+};
 
 interface AuthenticatedDocumentRouteParams {
   document_id: string;
@@ -22,6 +32,8 @@ interface AuthenticatedDocumentRouteModel {
 
 export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("recently-viewed-docs")
+  declare recentDocs: RecentlyViewedDocsService;
   @service declare flashMessages: FlashMessageService;
   @service declare router: RouterService;
 
@@ -44,6 +56,19 @@ export default class AuthenticatedDocumentRoute extends Route {
       sticky: true,
       extendedTimeout: 1000,
     });
+  }
+
+  async docType(doc: HermesDocument) {
+    const docTypes = (await this.fetchSvc
+      .fetch("/api/v1/document-types")
+      .then((r) => r?.json())) as HermesDocumentType[];
+
+    assert("docTypes must exist", docTypes);
+
+    const docType = docTypes.find((dt) => dt.name === doc.docType);
+
+    assert("docType must exist", docType);
+    return docType;
   }
 
   async model(
@@ -104,19 +129,64 @@ export default class AuthenticatedDocumentRoute extends Route {
       }
     }
 
-    console.log("doc", doc);
+    const typedDoc = doc as HermesDocument;
 
-    return doc as HermesDocument;
+    // Preload avatars for all approvers in the Algolia index.
+    if (typedDoc.contributors?.length) {
+      const contributors = await this.fetchSvc
+        .fetch(`/api/v1/people?emails=${typedDoc.contributors.join(",")}`)
+        .then((r) => r?.json());
+
+      if (contributors) {
+        typedDoc.contributorObjects = serializePeople(contributors);
+      } else {
+        typedDoc.contributorObjects = [];
+      }
+    }
+    if (typedDoc.approvers?.length) {
+      const approvers = await this.fetchSvc
+        .fetch(`/api/v1/people?emails=${typedDoc.approvers.join(",")}`)
+        .then((r) => r?.json());
+
+      if (approvers) {
+        typedDoc.approverObjects = serializePeople(approvers);
+      } else {
+        typedDoc.approverObjects = [];
+      }
+    }
+
+    return {
+      doc: typedDoc,
+      docType: this.docType(typedDoc),
+    };
   }
 
-  /**
-   * Once the model has resolved, check if the document is loading from
-   * another document, as is the case in related Hermes documents.
-   * In those cases, we scroll the sidebar to the top and toggle the
-   * `modelIsChanging` property to remove and rerender the sidebar,
-   * resetting its local state to reflect the new model data.
-   */
-  afterModel(_model: AuthenticatedDocumentRouteModel, transition: any) {
+  afterModel(model: AuthenticatedDocumentRouteModel, transition: any) {
+    /**
+     * Generally speaking, ensure an up-to-date list of recently viewed docs
+     * by the time the user returns to the dashboard.
+     */
+    void this.recentDocs.fetchAll.perform();
+
+    /**
+     * Record the document view with the analytics backend.
+     */
+    void this.fetchSvc.fetch("/api/v1/web/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_id: model.doc.objectID,
+        product_name: model.doc.product,
+      }),
+    });
+
+    /**
+     * Once the model has resolved, check if the document is loading from
+     * another document, as is the case in related Hermes documents.
+     * In those cases, we scroll the sidebar to the top and toggle the
+     * `modelIsChanging` property to remove and rerender the sidebar,
+     * resetting its local state to reflect the new model data.
+     */
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (

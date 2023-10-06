@@ -1,7 +1,4 @@
-<div
-  class="flex max-h-screen flex-1 space-x-px"
-  {{did-insert this.kickOffBackgroundTasks}}
->
+<div class="flex max-h-screen flex-1 space-x-px">
   <div
     class="sidebar shrink-0 {{if this.sidebarIsCollapsed 'collapsed' 'w-80'}}"
   >
@@ -13,6 +10,7 @@
       <Document::Sidebar
         @profile={{this.authenticatedUser.info}}
         @document={{@document}}
+        @docType={{@docType}}
         @deleteDraft={{perform this.deleteDraft}}
         @isCollapsed={{this.sidebarIsCollapsed}}
         @toggleCollapsed={{this.toggleSidebarCollapsedState}}

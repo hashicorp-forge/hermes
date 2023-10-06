@@ -4,7 +4,7 @@ import or from "ember-truth-helpers/helpers/or";
 interface EmptyStateTextComponentSignature {
   Element: HTMLSpanElement;
   Args: {
-    text?: string;
+    value?: string;
   };
   Blocks: {};
 }
@@ -12,7 +12,7 @@ interface EmptyStateTextComponentSignature {
 export default class EmptyStateTextComponent extends Component<EmptyStateTextComponentSignature> {
   <template>
     <span class="empty-state-text text-color-foreground-disabled" ...attributes>
-      {{or @text "None"}}
+      {{or @value "None"}}
     </span>
   </template>
 }

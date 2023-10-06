@@ -1,11 +1,10 @@
-{{! @glint-nocheck - not typesafe yet}}
 {{#unless this.isHidden}}
-  <div class="flex space-x-2 w-full" ...attributes>
+  <div class="flex w-full space-x-2" ...attributes>
     <div class="relative shrink-0">
       {{#if (eq @badge "approved")}}
         <div
           data-test-person-approved-badge
-          class="bg-color-page-faint flex rounded-full absolute -bottom-1.5 -right-1.5 p-0.5 scale-[70%] origin-bottom-right"
+          class="absolute -bottom-1.5 -right-1.5 flex origin-bottom-right scale-[70%] rounded-full bg-color-page-faint p-0.5"
         >
           <FlightIcon
             @name="check-circle-fill"
@@ -16,7 +15,8 @@
       <Person::Avatar @size="small" @email={{@email}} @imgURL={{@imgURL}} />
     </div>
     <div
-      class="person-email hds-typography-body-200 truncate hds-foreground-primary relative"
+      data-test-person-email
+      class="person-email hds-typography-body-200 hds-foreground-primary relative truncate"
       title={{@email}}
     >
       {{or @email "Unknown"}}
