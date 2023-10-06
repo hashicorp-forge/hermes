@@ -63,7 +63,9 @@
 
                     {{! Created time }}
                     <div class="shrink-0">
-                      <span class="text-body-100 text-color-foreground-faint">
+                      <span
+                        class="text-body-100 text-color-foreground-disabled"
+                      >
 
                         {{time-ago r.doc.createdTime}}
                       </span>
@@ -84,14 +86,14 @@
                   <div
                     class="mt-3.5 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
                   >
-                    <span>
-                      {{r.doc.docType}}
+                    {{!-- <span class="tag {{dasherize r.doc.status}}">
+                      {{r.doc.status}}
                     </span>
                     <span class="opacity-50">
                       ·
-                    </span>
-                    <span class="tag {{dasherize r.doc.status}}">
-                      {{r.doc.status}}
+                    </span> --}}
+                    <span>
+                      {{r.doc.docType}}
                     </span>
                     <span class="opacity-50">
                       ·

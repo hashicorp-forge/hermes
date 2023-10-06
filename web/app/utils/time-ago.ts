@@ -1,6 +1,6 @@
 /**
- * A simplified "time ago" calculation, based on 28-day months.
- * Intended to give a rough estimate of how long ago something happened.
+ * A simplified "time" calculation, based on 28-day months.
+ * Intended to give a rough estimate of how long something happened.
  * Used by the `time-ago` helper to convert numeric timestamps to strings.
  *
  * TODO: Replace with something more precise.
@@ -12,55 +12,55 @@ export default function timeAgo(timeInSeconds: number) {
   const elapsedSeconds = elapsed / 1000;
 
   if (elapsedSeconds < 2) {
-    return "1 second ago";
+    return "1s";
   }
   if (elapsedSeconds < 60) {
-    return `${Math.floor(elapsedSeconds)} seconds ago`;
+    return `${Math.floor(elapsedSeconds)}s`;
   }
 
   const elapsedMinutes = elapsedSeconds / 60;
   if (elapsedMinutes < 2) {
-    return "1 minute ago";
+    return "1m";
   }
   if (elapsedMinutes < 60) {
-    return `${Math.floor(elapsedMinutes)} minutes ago`;
+    return `${Math.floor(elapsedMinutes)}m`;
   }
 
   const elapsedHours = elapsedMinutes / 60;
   if (elapsedHours < 2) {
-    return "1 hour ago";
+    return "1h";
   }
   if (elapsedHours < 24) {
-    return `${Math.floor(elapsedHours)} hours ago`;
+    return `${Math.floor(elapsedHours)}h`;
   }
 
   const elapsedDays = elapsedHours / 24;
   if (elapsedDays < 2) {
-    return "1 day ago";
+    return "1d";
   }
   if (elapsedDays < 30) {
-    return `${Math.floor(elapsedDays)} days ago`;
+    return `${Math.floor(elapsedDays)}d`;
   }
 
   const elapsedWeeks = elapsedDays / 7;
   if (elapsedWeeks < 2) {
-    return "1 week ago";
+    return "1w";
   }
   if (elapsedWeeks < 4) {
-    return `${Math.floor(elapsedWeeks)} weeks ago`;
+    return `${Math.floor(elapsedWeeks)}w`;
   }
 
   const elapsedMonths = elapsedWeeks / 4;
   if (elapsedMonths < 2) {
-    return "1 month ago";
+    return "1mo";
   }
   if (elapsedMonths < 12) {
-    return `${Math.floor(elapsedMonths)} months ago`;
+    return `${Math.floor(elapsedMonths)}mos`;
   }
 
   const elapsedYears = elapsedMonths / 12;
   if (elapsedYears < 2) {
-    return "1 year ago";
+    return "1y";
   }
-  return `${Math.floor(elapsedYears)} years ago`;
+  return `${Math.floor(elapsedYears)}y`;
 }

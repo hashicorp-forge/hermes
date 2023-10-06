@@ -29,33 +29,36 @@
 
           {{! DocNumber & Title }}
           <div class="w-full md:flex">
-            <div class="max-w-[60%]">
+            <div class="flex w-full justify-between">
 
-              <TruncatedText
-                @tagName="h4"
-                @startingBreakpoint="md"
-                class="text-display-300 font-semibold text-color-foreground-strong"
-                data-test-doc-awaiting-review-number-and-title
+              <div class="max-w-[60%]">
+
+                <TruncatedText
+                  @tagName="h4"
+                  @startingBreakpoint="md"
+                  class="text-display-300 font-semibold text-color-foreground-strong"
+                  data-test-doc-awaiting-review-number-and-title
+                >
+                  <span class="mr-0.5">
+                    {{@doc.docNumber}}
+                  </span>
+                  {{@doc.title}}
+                </TruncatedText>
+              </div>
+
+              <div
+                class="ml-3 flex shrink-0 items-center gap-1.5 text-body-100 leading-none text-color-foreground-faint"
               >
-                <span class="mr-0.5">
-                  {{@doc.docNumber}}
+                <span>
+                  {{@doc.docType}}
                 </span>
-                {{@doc.title}}
-              </TruncatedText>
-            </div>
-
-            <div
-              class="ml-3 flex items-center gap-1.5 text-body-100 leading-none text-color-foreground-faint"
-            >
-              <span>
-                {{@doc.docType}}
-              </span>
-              <span class="opacity-50">
-                ·
-              </span>
-              <span class="tag {{dasherize @doc.status}}">
-                {{@doc.status}}
-              </span>
+                <span class="opacity-50">
+                  ·
+                </span>
+                <span class="tag {{dasherize @doc.status}}">
+                  {{@doc.status}}
+                </span>
+              </div>
             </div>
           </div>
         </div>
