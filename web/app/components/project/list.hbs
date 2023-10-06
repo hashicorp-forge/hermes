@@ -1,44 +1,15 @@
 <div class="x-container mt-2 mb-4">
-
   <div class="relative mb-6">
-    <div class="mb-3 flex items-center gap-2.5">
-      <FlightIcon @name="pin" />
-      <h3 class="text-body-200 font-semibold text-color-foreground-strong">
-        Pinned
-      </h3>
-    </div>
-    {{#if @projects}}
-      <ol>
+    <nav class="big-tabs mb-10 flex justify-center space-x-3">
 
-        {{#each (take 1 @projects) as |project|}}
-          <li class="project-tile">
-            <LinkTo @route="authenticated.project" @model={{project.id}}>
-              <Hds::Card::Container
-                @hasBorder={{true}}
-                @levelHover="mid"
-                class="p-4"
-              >
-                EMPHASIZE JIRA HERE
-              </Hds::Card::Container>
-            </LinkTo>
-          </li>
-          {{!-- <Project::Tile @project={{project}} /> --}}
-        {{/each}}
-      </ol>
-    {{/if}}
-  </div>
-
-  <div class="relative mb-6">
-    <nav class="big-tabs flex space-x-3 mb-10 justify-center">
-
-      <a class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 active">
+      <a class="Xoutline active flex items-center gap-2 pr-2.5 outline-black/5">
         <FlightIcon @name="grid" class="ml-2 -mr-px" />
         <div>
           Active
         </div>
       </a>
       <a
-        class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 Xactive"
+        class="Xoutline Xactive flex items-center gap-2 pr-2.5 outline-black/5"
       >
         <FlightIcon @name="check-circle" class="ml-2" />
         <div>
@@ -46,7 +17,7 @@
         </div>
       </a>
       <a
-        class="flex items-center gap-2 pr-2.5 Xoutline outline-black/5 Xactive"
+        class="Xoutline Xactive flex items-center gap-2 pr-2.5 outline-black/5"
       >
         <FlightIcon @name="archive" class="ml-2" />
         <div>
