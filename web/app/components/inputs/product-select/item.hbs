@@ -4,7 +4,7 @@
   ...attributes
 >
   <FlightIcon
-    data-test-product-select-item-icon
+    data-test-product-icon
     data-test-icon={{or (get-product-id @product) "folder"}}
     @name={{or (get-product-id @product) "folder"}}
   />
@@ -16,7 +16,7 @@
         {{@product}}
       </span>
     {{else}}
-      <EmptyStateText @value="Select a product/area" />
+      <EmptyStateText data-test-empty-state @value="Select a product/area" />
     {{/if}}
 
     {{#if @abbreviation}}
@@ -28,7 +28,7 @@
 
   {{#if @isSelected}}
     <FlightIcon
-      data-test-product-select-item-selected
+      data-test-check
       @name="check"
       class="check absolute right-0 top-1/2 -translate-y-1/2"
     />

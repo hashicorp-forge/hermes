@@ -51,6 +51,7 @@ interface XDropdownListComponentTestContext extends TestContext {
   buttonWasClicked?: boolean;
   isLoading?: boolean;
   placement?: Placement | null;
+  selected?: string;
 }
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
@@ -940,5 +941,59 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .doesNotExist("the default empty state is not shown");
 
     assert.dom("[data-test-nothing]").exists("the custom empty state is shown");
+  });
+
+  test("it renders a ToggleSelect to the anchor API", async function (assert) {
+    this.set("items", {});
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleSelect data-test-toggle>
+            ---
+          </dd.ToggleSelect>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    const toggleSelect = "[data-test-toggle]";
+    const content = `.${CONTAINER_CLASS}`;
+
+    assert.dom(toggleSelect).hasClass("x-dropdown-list-toggle-select");
+    assert.dom(`${toggleSelect} [data-test-caret]`).exists();
+
+    assert.dom(content).doesNotExist();
+
+    await click(toggleSelect);
+
+    assert.dom(content).exists();
+
+    await click(toggleSelect);
+
+    assert.dom(content).doesNotExist();
+  });
+
+  test("it renders the selected value to the anchor API", async function (assert) {
+    this.set("items", {});
+    this.set("selected", {
+      3: {
+        name: "Three",
+      },
+    });
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList
+        @items={{this.items}}
+        @selected={{this.selected}}
+      >
+        <:anchor as |dd|>
+          <div data-test-div>
+            {{dd.selected}} - {{dd.selected.attrs.name}}
+          </div>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    assert.dom("[data-test-div]").hasText("3 - Three");
   });
 });
