@@ -1,6 +1,6 @@
 <div
   data-test-product-select-item
-  class="product-select-item relative flex w-full gap-2"
+  class="relative flex w-full gap-2"
   ...attributes
 >
   <ProductAvatar @productArea={{@product}} class="relative -translate-x-px" />
@@ -16,7 +16,7 @@
     {{/if}}
 
     {{#if @abbreviation}}
-      <span class="product-select-toggle-abbreviation">
+      <span class="opacity-50">
         {{@abbreviation}}
       </span>
     {{/if}}

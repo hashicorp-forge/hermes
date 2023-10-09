@@ -1,11 +1,12 @@
 import Component from "@glimmer/component";
 import getProductID from "hermes/utils/get-product-id";
 import or from "ember-truth-helpers/helpers/or";
+import { inject as service } from "@ember/service";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import getLetterCount from "hermes/helpers/get-letter-count";
-import getProductAbbreviation from "hermes/helpers/get-product-abbreviation";
-import eq from "ember-truth-helpers/helpers/eq";
-import isEmpty from "ember-truth-helpers/helpers/is-empty";
+import not from "ember-truth-helpers/helpers/not";
+import getProductAbbreviation from "hermes/utils/get-product-abbreviation";
+import ProductAreasService from "hermes/services/product-areas";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -19,39 +20,57 @@ interface ProductAvatarComponentSignature {
 }
 
 export default class ProductAvatarComponent extends Component<ProductAvatarComponentSignature> {
-  get productID() {
+  @service declare productAreas: ProductAreasService;
+
+  protected get productID(): string | undefined {
     return getProductID(this.args.productArea);
   }
 
-  get sizeStyles() {
+  protected get sizeStyles() {
     const iconSize = this.args.iconSize || 12;
     return `height: ${iconSize}px; width: ${iconSize}px;`;
+  }
+
+  protected get abbreviation() {
+    return getProductAbbreviation(
+      this.productAreas.index,
+      this.args.productArea,
+    );
+  }
+
+  protected get iconIsShown() {
+    if (this.productID) {
+      return true;
+    }
+
+    if (this.abbreviation) {
+      return false;
+    }
+
+    return true;
   }
 
   <template>
     <div
       data-test-doc-thumbnail-product-badge
-      class="product-badge
-        {{this.productID}}
-        relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+      class="product-badge relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full
+        {{or this.productID (or this.abbreviation 'no-product')}}"
       ...attributes
     >
-      {{#let (getProductAbbreviation @productArea) as |abbreviation|}}
-        {{#if (or this.productID (isEmpty abbreviation))}}
-          <FlightIcon
-            @name={{or this.productID "folder"}}
-            style={{this.sizeStyles}}
-          />
-        {{else if abbreviation}}
-          <span
-            class="product-abbreviation letter-count-{{getLetterCount
-                abbreviation
-              }}"
-          >
-            {{getProductAbbreviation @productArea}}
-          </span>
-        {{/if}}
-      {{/let}}
+      {{#if this.iconIsShown}}
+        <FlightIcon
+          @name={{or this.productID "folder"}}
+          style={{if this.abbreviation this.sizeStyles}}
+        />
+      {{else if this.abbreviation}}
+        <span
+          class="product-abbreviation letter-count-{{getLetterCount
+              this.abbreviation
+            }}"
+        >
+          {{this.abbreviation}}
+        </span>
+      {{/if}}
     </div>
   </template>
 }

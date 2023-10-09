@@ -37,6 +37,10 @@
     @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
   }
 
+  &.no-product {
+    @apply rounded-none bg-none text-color-foreground-faint;
+  }
+
   // Abbreviation
 
   .product-abbreviation {
