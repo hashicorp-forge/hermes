@@ -35,6 +35,12 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     return this.productAreas.index;
   }
 
+  protected get matchAnchorWidth() {
+    if (this.args.matchAnchorWidth === undefined) {
+      return;
+    }
+  }
+
   get icon(): string {
     let icon = "folder";
     if (this.selected && getProductId(this.selected)) {

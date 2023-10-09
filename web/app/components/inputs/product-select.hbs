@@ -1,5 +1,5 @@
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
-<div data-test-product-select>
+<div data-test-product-select ...attributes>
   <X::DropdownList
     @items={{this.products}}
     @listIsOrdered={{true}}
@@ -11,8 +11,7 @@
     @offset={{or @offset (hash mainAxis=0 crossAxis=-3)}}
     @matchAnchorWidth={{@matchAnchorWidth}}
     @secondaryFilterAttribute="abbreviation"
-    class="product-select-dropdown-list w-[300px]"
-    ...attributes
+    class="product-select-dropdown-list max-h-[275px] w-[340px]"
   >
     <:anchor as |dd|>
       <dd.ToggleSelect class="gap-2">
@@ -28,7 +27,6 @@
           @product={{dd.value}}
           @isSelected={{dd.isSelected}}
           @abbreviation={{dd.attrs.abbreviation}}
-          {{! TODO: maybe class "px-1" }}
         />
       </dd.Action>
     </:item>

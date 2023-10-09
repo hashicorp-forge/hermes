@@ -15,18 +15,6 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <div
-          class="product-badge
-            {{productIcon}}
-            {{if this.saveIsRunning 'opacity-50'}}"
-        >
-          <FlightIcon @name={{productIcon}} />
-        </div>
-      {{/if}}
-    {{/let}}
-
     <div class="sidebar-body-container">
       <div>
         {{! div to break the parent's space-y styles }}
@@ -144,17 +132,16 @@
       </div>
 
       {{! Product/Area }}
-      <div class="space-y-2">
+      <div>
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
-          <div class="relative w-full" data-test-document-product-area-editable>
+          <div class="editable-field-container select-input">
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
               @renderOut={{true}}
-              class="max-h-[300px]"
             />
           </div>
         {{else}}
