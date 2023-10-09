@@ -1,0 +1,38 @@
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div data-test-product-select>
+  <X::DropdownList
+    @items={{this.products}}
+    @listIsOrdered={{true}}
+    @onItemClick={{this.onChange}}
+    @selected={{@selected}}
+    @placement={{@placement}}
+    @isSaving={{@isSaving}}
+    @renderOut={{@renderOut}}
+    @matchAnchorWidth={{or
+      @matchAnchorWidth
+      (hash enabled=true additionalWidth=6)
+    }}
+    @secondaryFilterAttribute="abbreviation"
+    class="product-select-dropdown-list w-[300px]"
+    ...attributes
+  >
+    <:anchor as |dd|>
+      <dd.ToggleSelect class="gap-2">
+        <Inputs::ProductSelect::Item
+          @product={{dd.selected}}
+          @abbreviation={{this.selectedProductAbbreviation}}
+        />
+      </dd.ToggleSelect>
+    </:anchor>
+    <:item as |dd|>
+      <dd.Action data-test-product-select-item-button class="pr-5">
+        <Inputs::ProductSelect::Item
+          @product={{dd.value}}
+          @isSelected={{dd.isSelected}}
+          @abbreviation={{dd.attrs.abbreviation}}
+          {{! TODO: maybe class "px-1" }}
+        />
+      </dd.Action>
+    </:item>
+  </X::DropdownList>
+</div>
