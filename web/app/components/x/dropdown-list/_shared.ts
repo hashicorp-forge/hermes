@@ -21,7 +21,7 @@ export interface XDropdownListSharedArgs {
 }
 
 /**
- * Used by ToggleAction and ToggleButton
+ * Used by ToggleAction, ToggleSelect and ToggleButton
  */
 export interface XDropdownListToggleComponentArgs {
   registerAnchor: (e: HTMLElement) => void;
@@ -30,4 +30,5 @@ export interface XDropdownListToggleComponentArgs {
   contentIsShown: boolean;
   ariaControls: string;
   disabled?: boolean;
+  // TODO: do we need isLoading, isActive?
 }

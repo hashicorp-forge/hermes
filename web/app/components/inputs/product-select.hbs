@@ -38,26 +38,12 @@
         ...attributes
       >
         <:anchor as |dd|>
-          <dd.ToggleAction
-            class="x-dropdown-list-toggle-select product-select-default-toggle hds-button hds-button--color-secondary hds-button--size-medium"
-          >
-            <FlightIcon @name={{or (get-product-id @selected) "folder"}} />
-
-            <span
-              class="product-select-selected-value
-                {{unless @selected 'text-color-foreground-faint'}}"
-            >
-              {{or @selected "Select a product/area"}}
-            </span>
-
-            {{#if this.selectedProductAbbreviation}}
-              <span class="product-select-toggle-abbreviation">
-                {{this.selectedProductAbbreviation}}
-              </span>
-            {{/if}}
-
-            <FlightIcon @name="caret" class="product-select-toggle-caret" />
-          </dd.ToggleAction>
+          <dd.ToggleSelect class="gap-2">
+            <Inputs::ProductSelect::Item
+              @product={{dd.selected}}
+              @abbreviation={{this.selectedProductAbbreviation}}
+            />
+          </dd.ToggleSelect>
         </:anchor>
         <:item as |dd|>
           <dd.Action data-test-product-select-item-button class="pr-5">
