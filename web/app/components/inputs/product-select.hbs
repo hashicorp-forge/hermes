@@ -8,11 +8,8 @@
     @placement={{@placement}}
     @isSaving={{@isSaving}}
     @renderOut={{@renderOut}}
-    @offset={{hash mainAxis=0 crossAxis=-3}}
-    @matchAnchorWidth={{or
-      @matchAnchorWidth
-      (hash enabled=true additionalWidth=6)
-    }}
+    @offset={{or @offset (hash mainAxis=0 crossAxis=-3)}}
+    @matchAnchorWidth={{@matchAnchorWidth}}
     @secondaryFilterAttribute="abbreviation"
     class="product-select-dropdown-list w-[300px]"
     ...attributes

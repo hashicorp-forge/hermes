@@ -153,14 +153,14 @@
               @selected={{this.product}}
               @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
-              @formatIsBadge={{true}}
               @renderOut={{true}}
+              class="max-h-[300px]"
             />
           </div>
         {{else}}
-          <ProductBadgeLink
+          <Product::Link
             data-test-document-product-area-read-only
-            @productArea={{@document.product}}
+            @product={{@document.product}}
             class="inline-block"
           />
         {{/if}}

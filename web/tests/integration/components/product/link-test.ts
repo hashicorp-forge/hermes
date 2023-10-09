@@ -3,16 +3,16 @@ import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
-interface ProductBadgeLinkComponentTestContext extends TestContext {}
+interface ProductLinkComponentTestContext extends TestContext {}
 
-module("Integration | Component | product-badge-link", function (hooks) {
+module("Integration | Component | product/link", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it renders with the correct attributes", async function (this: ProductBadgeLinkComponentTestContext, assert) {
-    await render<ProductBadgeLinkComponentTestContext>(hbs`
-      <ProductBadgeLink class="foo" @productArea="Cloud Platform" />
-      <ProductBadgeLink class="bar" @productArea="Terraform" />
-      <ProductBadgeLink class="baz" />
+  test("it renders with the correct attributes", async function (this: ProductLinkComponentTestContext, assert) {
+    await render<ProductLinkComponentTestContext>(hbs`
+      <Product::Link class="foo" @product="Cloud Platform" />
+      <Product::Link class="bar" @product="Terraform" />
+      <Product::Link class="baz" />
     `);
 
     assert

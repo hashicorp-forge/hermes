@@ -1,84 +1,68 @@
 {{#if this.docIsBeingCreated}}
-  <div
-    data-test-creating-new-doc
-    class="hds-typography-display-400 mt-3 text-center"
-  >
-    <FlightIcon @name="loading" @size="24" />
-    <div class="mt-8 text-display-200 font-semibold">
+  <div data-test-creating-new-doc class="mt-10 mb-9 text-center">
+    <FlightIcon @name="running" @size="24" />
+    <h1 class="mt-2 text-display-300 font-semibold">
       Creating draft in Google Drive...
+    </h1>
+    <div class="mb-7 text-body-200 text-color-foreground-faint">
+      This usually takes 10-20 seconds.
     </div>
-    <div class="text-body-200 text-color-foreground-faint">This usually takes
-      10-20 seconds.</div>
   </div>
 {{else}}
   <form
     data-test-new-doc-form
-    class="grid grid-cols-[1fr_250px] grid-rows-1 gap-10"
+    class="mx-auto max-w-xl"
     {{on "submit" this.submit}}
     {{did-insert this.registerForm}}
   >
     <div>
-      <div class="space-y-4">
-        <h1>Create your
-          {{@docType}}</h1>
-      </div>
-      <div class="space-y-7 pt-10">
-        <Hds::Form::TextInput::Field
+      <h1 class="">
+        Create your
+        {{@docType}}
+      </h1>
+      <div class="flex flex-col gap-7 pt-8">
+        <Hds::Form::Textarea::Field
+          {{auto-height-textarea}}
+          {{autofocus}}
           data-test-title-input
-          @type="text"
-          @isRequired={{true}}
           @value={{this.title}}
+          class="px-2.5 text-display-300 font-semibold placeholder-color-palette-neutral-300"
+          placeholder="Enter a title"
           name="title"
-          placeholder="Enter a document title"
           {{on "input" this.updateForm}}
           as |F|
         >
           <F.Label>Title</F.Label>
-          <F.HelperText>
-            A succinct outline of the idea youʼre proposing.
-          </F.HelperText>
-        </Hds::Form::TextInput::Field>
+        </Hds::Form::Textarea::Field>
 
         <div class="relative">
           <Hds::Form::Textarea::Field
             data-test-summary-input
             @value={{this.summary}}
-            rows="3"
+            rows="2"
             name="summary"
+            class="px-2.5 py-2 placeholder-color-palette-neutral-400"
+            placeholder="One or two sentences outlining your doc."
             {{on "input" this.updateForm}}
             as |F|
           >
             <F.Label>Summary</F.Label>
-            <F.HelperText>
-              <span
-                class={{if
-                  this.summaryIsLong
-                  "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
-                }}
-              >One or two sentences</span>
-              outlining your doc.
-              {{if this.summaryIsLong "(Just a recommendation)"}}
-            </F.HelperText>
           </Hds::Form::Textarea::Field>
         </div>
 
         <div>
           <div class="mb-2">
             <span class="hermes-form-label">
-              Product/Area &nbsp;
-              <Hds::Badge @size="small" @text="Required" />
-            </span>
-            <span class="hermes-form-helper-text hds-form-helper-text">
-              Where your doc should be categorized.
+              Product/Area
             </span>
           </div>
-          <div class="w-[300px]">
-            <Inputs::ProductSelect
-              @selected={{this.productArea}}
-              @onChange={{this.onProductSelect}}
-              class="max-h-[240px]"
-            />
-          </div>
+          <Inputs::ProductSelect
+            @selected={{this.productArea}}
+            @onChange={{this.onProductSelect}}
+            @offset={{(hash mainAxis=0 crossAxis=-3)}}
+            @matchAnchorWidth={{(hash enabled=true additionalWidth=6)}}
+            class="max-h-[240px]"
+          />
         </div>
 
         <Hds::Form::Field @layout="vertical" as |F|>
@@ -93,47 +77,33 @@
           }}
           <F.Control>
             <Inputs::PeopleSelect
-              class="multiselect mt-2 w-auto"
+              class="multiselect w-full"
               @selected={{this.contributors}}
               @onChange={{this.updateContributors}}
             />
           </F.Control>
-          <F.Label>
-            <FlightIcon @name="users" />
+          <F.Label class="flex items-center gap-2">
             Contributors
+            <TooltipIcon
+              @text="People to share your doc with. You can always add more later."
+            />
           </F.Label>
           {{#if this.formErrors.contributors}}
             <F.Error as |E|>
               <E.Message>{{this.formErrors.contributors}}</E.Message>
             </F.Error>
           {{/if}}
-          <F.HelperText>
-            People to share your doc with. You can always add more later.
-          </F.HelperText>
         </Hds::Form::Field>
       </div>
-      <div class="h-24"></div>
-    </div>
-    <div>
-      <div class="preview-card">
-        <h3>
-          <FlightIcon @name="eye" />
-          Preview
-        </h3>
-        <Doc::Tile
-          @productArea={{this.productArea}}
-          @status="draft"
-          @title={{this.title}}
-          @owner={{this.authenticatedUser.info.email}}
-        />
-        <Hds::Button
-          data-test-create-button
-          @text="Create draft in Google Drive"
-          type="submit"
-          disabled={{not this.formRequirementsMet}}
-          class="w-full"
-        />
-      </div>
+      <Hds::Button
+        data-test-create-button
+        @text="Create draft in Google Drive"
+        type="submit"
+        disabled={{not this.formRequirementsMet}}
+        class="mt-8"
+      />
+      <div class="h-16"></div>
+
     </div>
   </form>
 {{/if}}

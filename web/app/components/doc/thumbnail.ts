@@ -7,6 +7,7 @@ interface DocThumbnailComponentSignature {
     isLarge?: boolean;
     status?: string;
     product?: string;
+    badgeIsHidden?: boolean;
   };
 }
 

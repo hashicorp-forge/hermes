@@ -47,6 +47,7 @@ module.exports = {
         "button-md": "5px",
       },
       boxShadow: {
+        "elevation-low": "var(--token-elevation-low-box-shadow)",
         "surface-low": "var(--token-surface-low-box-shadow)",
         "surface-mid": "var(--token-surface-mid-box-shadow)",
       },
