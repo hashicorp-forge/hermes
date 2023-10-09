@@ -44,7 +44,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
           />
         {{else if abbreviation}}
           <span
-            class="letter-avatar absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-medium letter-count-{{getLetterCount
+            class="product-abbreviation letter-count-{{getLetterCount
                 abbreviation
               }}"
           >

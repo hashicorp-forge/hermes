@@ -5,6 +5,7 @@ import { Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
+import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
   ProductArea,
@@ -20,6 +21,7 @@ interface InputsProductSelectSignature {
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
 }
 

@@ -1,6 +1,5 @@
 import Component from "@glimmer/component";
 import { dasherize } from "@ember/string";
-import getProductId from "hermes/utils/get-product-id";
 
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
@@ -17,14 +16,6 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
       return dasherize(this.args.status);
     } else {
       return null;
-    }
-  }
-
-  protected get productShortName(): string | undefined {
-    if (this.args.product) {
-      return getProductId(this.args.product);
-    } else {
-      return;
     }
   }
 
