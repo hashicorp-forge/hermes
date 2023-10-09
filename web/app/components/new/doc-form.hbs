@@ -72,11 +72,13 @@
               Where your doc should be categorized.
             </span>
           </div>
-          <Inputs::ProductSelect
-            @selected={{this.productArea}}
-            @onChange={{this.onProductSelect}}
-            class="max-h-[217px]"
-          />
+          <div class="w-[300px]">
+            <Inputs::ProductSelect
+              @selected={{this.productArea}}
+              @onChange={{this.onProductSelect}}
+              class="max-h-[240px]"
+            />
+          </div>
         </div>
 
         <Hds::Form::Field @layout="vertical" as |F|>

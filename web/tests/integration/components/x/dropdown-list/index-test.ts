@@ -975,11 +975,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
   test("it renders the selected value to the anchor API", async function (assert) {
     this.set("items", {});
-    this.set("selected", {
-      3: {
-        name: "Three",
-      },
-    });
+    this.set("selected", "Foo");
 
     await render<XDropdownListComponentTestContext>(hbs`
       <X::DropdownList
@@ -988,12 +984,12 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       >
         <:anchor as |dd|>
           <div data-test-div>
-            {{dd.selected}} - {{dd.selected.attrs.name}}
+            {{dd.selected}}
           </div>
         </:anchor>
       </X::DropdownList>
     `);
 
-    assert.dom("[data-test-div]").hasText("3 - Three");
+    assert.dom("[data-test-div]").hasText("Foo");
   });
 });
