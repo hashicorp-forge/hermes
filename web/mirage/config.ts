@@ -508,7 +508,6 @@ export default function (mirageConfig) {
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
-
         return new Response(200, {}, project.attrs);
       });
 
