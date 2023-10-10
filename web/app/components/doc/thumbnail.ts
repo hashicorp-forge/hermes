@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
-import getProductAbbreviation from "hermes/utils/get-product-abbreviation";
 import { inject as service } from "@ember/service";
 import ProductAreasService from "hermes/services/product-areas";
 
@@ -43,7 +42,7 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
       return true;
     }
 
-    if (getProductAbbreviation(this.productAreas.index, this.args.product)) {
+    if (this.productAreas.getAbbreviation(this.args.product)) {
       return true;
     }
 

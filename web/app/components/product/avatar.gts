@@ -4,7 +4,6 @@ import or from "ember-truth-helpers/helpers/or";
 import { inject as service } from "@ember/service";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import getLetterCount from "hermes/helpers/get-letter-count";
-import getProductAbbreviation from "hermes/utils/get-product-abbreviation";
 import ProductAreasService from "hermes/services/product-areas";
 
 interface ProductAvatarComponentSignature {
@@ -32,7 +31,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   }
 
   protected get abbreviation() {
-    return getProductAbbreviation(this.productAreas.index, this.args.product);
+    return this.productAreas.getAbbreviation(this.args.product);
   }
 
   protected get iconIsShown() {

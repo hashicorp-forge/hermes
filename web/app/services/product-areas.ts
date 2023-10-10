@@ -6,6 +6,7 @@ import { assert } from "@ember/debug";
 
 export type ProductArea = {
   abbreviation: string;
+  color?: string;
 };
 
 export default class ProductAreasService extends Service {
@@ -13,9 +14,29 @@ export default class ProductAreasService extends Service {
 
   @tracked _index: Record<string, ProductArea> | null = null;
 
-  get index() {
+  get index(): Record<string, ProductArea> {
     assert("_index must exist", this._index);
-    return this._index;
+
+    return Object.fromEntries(
+      Object.entries(this._index).map(([key, value]) => [
+        key,
+        { ...value, color: "#320984" },
+      ]),
+    );
+  }
+
+  getAbbreviation(productName?: string): string | undefined {
+    if (!productName) {
+      return;
+    }
+
+    const product = this.index[productName];
+
+    if (!product) {
+      return;
+    }
+
+    return product.abbreviation.slice(0, 3).toUpperCase();
   }
 
   fetch = task(async () => {
