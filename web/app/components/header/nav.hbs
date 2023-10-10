@@ -36,11 +36,11 @@
 
     <div class="user-buttons">
       <Hds::Button
+        data-test-create-new-button
         @route="authenticated.new"
-        @isIconOnly={{true}}
-        @text="Create draft"
-        @icon="file-plus"
-        class="create-draft-button"
+        @text="New"
+        @icon="plus"
+        class="pl-2.5 pr-4"
       />
       <div class="relative">
         {{#if this.userMenuHighlightIsShown}}
