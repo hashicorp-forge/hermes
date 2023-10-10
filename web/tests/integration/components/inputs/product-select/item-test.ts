@@ -11,6 +11,11 @@ const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
 const PRODUCT_AVATAR = "[data-test-product-avatar]";
 const CHECK = "[data-test-check]";
 
+const VALUE = "[data-test-selected-value]";
+const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
+const PRODUCT_ICON = "[data-test-product-icon]";
+const CHECK = "[data-test-check]";
+
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
   isSelected?: boolean;
@@ -51,8 +56,6 @@ module(
           "vault",
           "the correct product icon is shown",
         );
-
-      await this.pauseTest();
 
       assert.dom(VALUE).hasText("Vault", "the product name is rendered");
       assert.dom(ABBREVIATION).doesNotExist("no abbreviation specified");

@@ -5,7 +5,6 @@ import { click, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
-import { Response } from "miragejs";
 import ProductAreasService from "hermes/services/product-areas";
 
 const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";

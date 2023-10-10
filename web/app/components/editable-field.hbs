@@ -72,7 +72,7 @@
       </div>
     {{/if}}
     {{#if (or @isReadOnly @isSaving)}}
-      <div class="field-toggle">
+      <div class="field-toggle read-only">
         <EditableField::ReadValue
           @tag={{@tag}}
           @value={{this.value}}
