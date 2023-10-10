@@ -1,1 +1,11 @@
-projects index template
+{{page-title "All Projects"}}
+
+Projects
+
+<ol>
+  {{#each-in this.model as |_id project|}}
+    <li data-test-project>
+      {{project.title}}
+    </li>
+  {{/each-in}}
+</ol>

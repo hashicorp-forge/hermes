@@ -20,7 +20,7 @@ Router.map(function () {
       this.route("doc");
     });
 
-    if (config.environment === "development") {
+    if (config.environment === "development" || config.environment === "test") {
       this.route("projects", function () {
         this.route("project", { path: "/:project_id" });
       });

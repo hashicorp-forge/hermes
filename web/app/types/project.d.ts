@@ -4,8 +4,8 @@ import {
 } from "hermes/components/related-resources";
 
 export interface HermesProject {
-  id: string; // at least in mirage...
-  name: string;
+  id: string; // at least in Mirage...
+  title: string;
   documents?: RelatedHermesDocument[];
   description?: string;
   jiraObject?: {
