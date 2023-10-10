@@ -32,15 +32,16 @@
       <div class="tile-list">
         {{#each @results.hits as |doc|}}
           <Doc::Tile
-            @avatar="{{get doc.ownerPhotos 0}}"
-            @docID="{{doc.objectID}}"
+            @avatar={{get doc.ownerPhotos 0}}
+            @docID={{doc.objectID}}
+            @docNumber={{doc.docNumber}}
             @isResult={{true}}
             @modifiedTime={{doc.modifiedTime}}
-            @owner="{{get doc.owners 0}}"
-            @productArea="{{doc.product}}"
-            @snippet="{{doc._snippetResult.content.value}}"
-            @status="{{lowercase doc.status}}"
-            @title="{{doc.title}}"
+            @owner={{get doc.owners 0}}
+            @productArea={{doc.product}}
+            @snippet={{doc._snippetResult.content.value}}
+            @status={{lowercase doc.status}}
+            @title={{doc.title}}
           />
         {{/each}}
       </div>

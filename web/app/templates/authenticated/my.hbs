@@ -2,7 +2,7 @@
 
 <Header @facets={{@model.facets}} />
 
-<RowResults
+<Doc::Table
   @docs={{@model.results.hits}}
   @nbPages={{@model.results.nbPages}}
   @currentPage={{(add @model.results.page 1)}}

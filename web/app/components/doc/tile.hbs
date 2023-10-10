@@ -42,15 +42,16 @@
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
-        {{#if @modifiedTime}}
-          <p class="mt-2 text-body-100 text-color-foreground-faint">
-            Modified
-            {{time-ago @modifiedTime}}
-          </p>
-        {{/if}}
+
       </div>
       {{#if (and @isResult @snippet)}}
         <Doc::Snippet @snippet={{@snippet}} class="mt-2" />
+      {{/if}}
+      {{#if @modifiedTime}}
+        <p class="mt-2 text-body-100 text-color-foreground-faint">
+          Modified
+          {{time-ago @modifiedTime}}
+        </p>
       {{/if}}
     </div>
   </LinkTo>
