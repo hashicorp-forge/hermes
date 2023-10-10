@@ -1,0 +1,8 @@
+.product-link {
+  &:hover,
+  &:focus {
+    .name {
+      @apply underline;
+    }
+  }
+}

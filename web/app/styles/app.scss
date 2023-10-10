@@ -34,7 +34,8 @@
 @use "components/doc/state";
 @use "components/table/sortable-header";
 @use "components/preview-card";
-@use "components/product-avatar";
+@use "components/product/avatar";
+@use "components/product/link";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/document/related-resources";

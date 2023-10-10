@@ -26,7 +26,11 @@
 
     {{#unless @badgeIsHidden}}
       <div class="absolute left-0 bottom-0">
-        <ProductAvatar @product={{@product}} @iconSize={{16}} class="medium" />
+        <Product::Avatar
+          @product={{@product}}
+          @iconSize={{16}}
+          class="medium"
+        />
       </div>
     {{/unless}}
   </div>

@@ -2,7 +2,7 @@ import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import or from "ember-truth-helpers/helpers/or";
-import ProductAvatar from "hermes/components/product-avatar";
+import ProductAvatar from "hermes/components/product/avatar";
 
 interface ProductComponentSignature {
   Element: HTMLAnchorElement;
@@ -23,7 +23,9 @@ export default class ProductComponent extends Component<ProductComponentSignatur
       {{#unless this.args.avatarIsHidden}}
         <ProductAvatar @product={{@name}} />
       {{/unless}}
-      {{or this.args.name "Unknown"}}
+      <span class="name">
+        {{or this.args.name "Unknown"}}
+      </span>
     </div>
   </template>
 }

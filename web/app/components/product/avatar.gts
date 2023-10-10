@@ -12,6 +12,7 @@ interface ProductAvatarComponentSignature {
   Args: {
     product?: string;
     iconSize?: number;
+    fallbackIcon?: string;
   };
   Blocks: {
     default: [];
@@ -55,7 +56,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     >
       {{#if this.iconIsShown}}
         <FlightIcon
-          @name={{or this.productID "folder"}}
+          @name={{or this.productID (or @fallbackIcon "folder")}}
           style={{if this.abbreviation this.sizeStyles}}
         />
       {{else if this.abbreviation}}
@@ -73,6 +74,6 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    ProductAvatar: typeof ProductAvatarComponent;
+    "Product::Avatar": typeof ProductAvatarComponent;
   }
 }

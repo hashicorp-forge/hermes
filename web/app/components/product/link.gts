@@ -64,9 +64,10 @@ export default class ProductLinkComponent extends Component<ProductLinkComponent
       data-test-product-link
       @route={{this.route}}
       @query={{this.query}}
+      class="product-link"
       ...attributes
     >
-      <Product @name={{this.args.product}} />
+      <Product @name={{this.args.product}} @avatarIsHidden={{true}} />
     </LinkTo>
   </template>
 }

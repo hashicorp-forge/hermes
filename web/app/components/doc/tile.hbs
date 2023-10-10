@@ -29,19 +29,21 @@
           {{@title}}
         </h4>
         {{#if @docNumber}}
-          <small class="text-body-100 text-color-foreground-faint">
+          <div class="truncate text-body-100 text-color-foreground-faint">
+            {{@productArea}}
+            |
             {{@docNumber}}
-          </small>
+          </div>
         {{/if}}
       </div>
-      <div class="mt-2 max-w-full space-y-1">
+      <div class="mt-2 max-w-full">
         <Person
           @ignoreUnknown={{true}}
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
         {{#if @modifiedTime}}
-          <p class="text-body-100 text-color-foreground-faint">
+          <p class="mt-2 text-body-100 text-color-foreground-faint">
             Modified
             {{time-ago @modifiedTime}}
           </p>
@@ -52,6 +54,4 @@
       {{/if}}
     </div>
   </LinkTo>
-
-  <Product::Link @product={{@productArea}} class="relative" />
 </div>

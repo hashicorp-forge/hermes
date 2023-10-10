@@ -2,15 +2,15 @@
   <div class="x-container">
     <div class="row-results">
       {{#if @docs}}
-        <Hds::Table @isStriped={{false}} class="row-results__table">
-          <:head as |H|>
-            <H.Tr>
-              <H.Th class="name">Name</H.Th>
-              <H.Th class="type">Type</H.Th>
-              <H.Th class="status">Status</H.Th>
-              <H.Th class="product">Product/Area</H.Th>
-              <H.Th class="owner">Owner</H.Th>
-              <H.Th class="created">
+        <table class="hds-table">
+          <thead>
+            <tr>
+              <th class="name">Name</th>
+              <th class="type">Type</th>
+              <th class="status">Status</th>
+              <th class="product">Product/Area</th>
+              <th class="owner">Owner</th>
+              <th class="created">
                 <Table::SortableHeader
                   @changeSort={{@changeSort}}
                   @currentSort={{@currentSort}}
@@ -24,10 +24,10 @@
                 >
                   Created
                 </Table::SortableHeader>
-              </H.Th>
-            </H.Tr>
-          </:head>
-          <:body>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {{#each @docs as |doc|}}
               <Doc::Row
                 @avatar="{{get doc.ownerPhotos 0}}"
@@ -42,8 +42,9 @@
                 @isDraft={{@isDraft}}
               />
             {{/each}}
-          </:body>
-        </Hds::Table>
+          </tbody>
+        </table>
+
         {{#if this.paginationIsShown}}
           <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
         {{/if}}
