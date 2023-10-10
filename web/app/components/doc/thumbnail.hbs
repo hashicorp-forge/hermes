@@ -24,14 +24,15 @@
       </div>
     {{/if}}
 
-    {{#unless @badgeIsHidden}}
+    {{#if this.badgeIsShown}}
       <div class="absolute left-0 bottom-0">
         <Product::Avatar
+          data-test-doc-thumbnail-product-badge
           @product={{@product}}
           @iconSize={{16}}
           class="medium"
         />
       </div>
-    {{/unless}}
+    {{/if}}
   </div>
 </div>

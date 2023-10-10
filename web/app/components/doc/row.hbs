@@ -4,7 +4,7 @@
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex items-start space-x-4"
+      class="flex items-start gap-4"
     >
       {{!
       We create a click area that extends beyond the edges of its container.
@@ -30,18 +30,34 @@
     </LinkTo>
   </td>
   <td class="type">
-    <div class="relative">{{@docType}}</div>
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash docType=(array @docType)}}
+      class="relative"
+    >
+      {{@docType}}
+    </LinkTo>
   </td>
   <td class="status">
-    <div class="relative">
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash status=(array @status)}}
+      class="relative"
+    >
       <Doc::State @state={{@status}} @hideProgress={{true}} />
-    </div>
+    </LinkTo>
   </td>
   <td class="product">
     <Product::Link @avatarIsHidden={{true}} @product={{@productArea}} />
   </td>
   <td class="owner">
-    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash owners=(array @owner)}}
+      class="relative"
+    >
+      <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
+    </LinkTo>
   </td>
   <td class="created">
     <div class="relative">

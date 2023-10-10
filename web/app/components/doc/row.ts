@@ -1,3 +1,5 @@
+import RouterService from "@ember/routing/router-service";
+import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 
 interface DocRowComponentSignature {
@@ -17,7 +19,13 @@ interface DocRowComponentSignature {
   };
 }
 
-export default class DocRowComponent extends Component<DocRowComponentSignature> {}
+export default class DocRowComponent extends Component<DocRowComponentSignature> {
+  @service declare router: RouterService;
+
+  protected get currentRoute() {
+    return this.router.currentRouteName;
+  }
+}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

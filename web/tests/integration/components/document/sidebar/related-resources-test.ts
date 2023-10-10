@@ -13,6 +13,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
+import ProductAreasService from "hermes/services/product-areas";
 
 const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
 const LIST_SELECTOR = "[data-test-related-resources-list]";
@@ -58,7 +59,7 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    hooks.beforeEach(function (
+    hooks.beforeEach(async function (
       this: DocumentSidebarRelatedResourcesTestContext,
     ) {
       this.server.create("document", {
@@ -76,6 +77,14 @@ module(
       this.set("document", this.server.schema.document.first().attrs);
       const bodyDiv = document.createElement("div");
       this.set("body", bodyDiv);
+
+      const productAreasService = this.owner.lookup(
+        "service:product-areas",
+      ) as ProductAreasService;
+
+      this.server.createList("product", 4);
+
+      await productAreasService.fetch.perform();
     });
 
     test("the empty state is clickable to add a resource", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {

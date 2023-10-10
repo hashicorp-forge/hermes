@@ -49,7 +49,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   <template>
     <div
-      data-test-doc-thumbnail-product-badge
+      data-test-product-avatar
       class="product-badge relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full
         {{or this.productID (or this.abbreviation 'no-product')}}"
       ...attributes

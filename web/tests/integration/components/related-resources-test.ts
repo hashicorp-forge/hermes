@@ -15,6 +15,7 @@ import config from "hermes/config/environment";
 import algoliaHosts from "hermes/mirage/algolia/hosts";
 import { RelatedResource } from "hermes/components/related-resources";
 import { RelatedResourcesScope } from "hermes/components/related-resources";
+import ProductAreasService from "hermes/services/product-areas";
 
 const RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
@@ -33,7 +34,6 @@ const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
 const SHORT_LINK_BASE_URL = config.shortLinkBaseURL;
 const SEARCH_ERROR_MESSAGE = "Search error. Type to retry.";
-const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-people-field]";
 
 interface RelatedResourcesComponentTestContext extends MirageTestContext {
   modalHeaderTitle: string;
@@ -49,7 +49,7 @@ module("Integration | Component | related-resources", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function (this: RelatedResourcesComponentTestContext) {
+  hooks.beforeEach(async function (this: RelatedResourcesComponentTestContext) {
     this.set("modalHeaderTitle", "Modal title");
     this.set("modalInputPlaceholder", "Modal input placeholder");
     this.set("addResource", (resource: RelatedResource) => {
@@ -57,6 +57,14 @@ module("Integration | Component | related-resources", function (hooks) {
       this.set("items", [...items, resource]);
     });
     this.set("items", undefined);
+
+    const productAreasService = this.owner.lookup(
+      "service:product-areas",
+    ) as ProductAreasService;
+
+    this.server.createList("product", 4);
+
+    await productAreasService.fetch.perform();
   });
 
   test("it yields items to a list block", async function (this: RelatedResourcesComponentTestContext, assert) {

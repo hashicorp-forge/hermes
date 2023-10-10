@@ -12,9 +12,10 @@
     @matchAnchorWidth={{@matchAnchorWidth}}
     @secondaryFilterAttribute="abbreviation"
     class="product-select-dropdown-list max-h-[275px] w-[340px]"
+    data-test-product-select-dropdown
   >
     <:anchor as |dd|>
-      <dd.ToggleSelect class="gap-2">
+      <dd.ToggleSelect data-test-product-select-trigger class="gap-2">
         <Inputs::ProductSelect::Item
           @product={{dd.selected}}
           @abbreviation={{this.selectedProductAbbreviation}}

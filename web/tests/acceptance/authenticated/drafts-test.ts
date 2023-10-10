@@ -5,6 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
+const PRODUCT_LINK = "[data-test-product-link]";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
@@ -57,7 +58,7 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     await visit("/drafts");
 
     assert
-      .dom(".product-badge-link")
+      .dom(PRODUCT_LINK)
       .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
   });
 });

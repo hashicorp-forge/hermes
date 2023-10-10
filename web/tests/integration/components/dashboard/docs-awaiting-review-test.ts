@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
+import ProductAreasService from "hermes/services/product-areas";
 
 const DOCS_AWAITING_REVIEW_COUNT_SELECTOR =
   "[data-test-docs-awaiting-review-count]";
@@ -25,6 +26,18 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
+    hooks.beforeEach(async function (
+      this: DashboardDocsAwaitingReviewTestContext,
+    ) {
+      const productAreasService = this.owner.lookup(
+        "service:product-areas",
+      ) as ProductAreasService;
+
+      this.server.createList("product", 4);
+
+      await productAreasService.fetch.perform();
+    });
+
     test("it shows different text depending on the number of docs awaiting review", async function (this: DashboardDocsAwaitingReviewTestContext, assert) {
       this.server.create("document", {
         title: "Foo",
@@ -41,7 +54,7 @@ module(
       this.set("docs", this.server.schema.document.all().models);
 
       await render<DashboardDocsAwaitingReviewTestContext>(
-        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`
+        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`,
       );
 
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("2");
@@ -71,7 +84,7 @@ module(
       this.set("docs", this.server.schema.document.all().models);
 
       await render<DashboardDocsAwaitingReviewTestContext>(
-        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`
+        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`,
       );
 
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("5");
@@ -100,5 +113,5 @@ module(
         .dom(TOGGLE_SELECTOR)
         .doesNotExist("toggle not shown when there's fewer than 4 docs");
     });
-  }
+  },
 );

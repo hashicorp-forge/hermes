@@ -2,17 +2,38 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
 import { render } from "@ember/test-helpers";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import ProductAreasService from "hermes/services/product-areas";
+
+interface DocThumbnailTestContext extends MirageTestContext {
+  isLarge: boolean;
+  status: string;
+  product: string;
+}
 
 module("Integration | Component | doc/thumbnail", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
 
-  test("it renders as expected", async function (assert) {
+  hooks.beforeEach(async function (this: DocThumbnailTestContext) {
+    const productAreasService = this.owner.lookup(
+      "service:product-areas",
+    ) as ProductAreasService;
+
+    this.server.create("product", {
+      name: "Labs",
+      abbreviation: "LAB",
+    });
+
+    await productAreasService.fetch.perform();
+  });
+
+  test("it renders as expected", async function (this: DocThumbnailTestContext, assert) {
     this.set("isLarge", false);
     this.set("status", "In Review");
     this.set("product", "Labs");
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<DocThumbnailTestContext>(hbs`
       <Doc::Thumbnail
         @isLarge={{this.isLarge}}
         @status={{this.status}}
@@ -28,7 +49,8 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
 
     assert.dom("[data-test-doc-thumbnail-folder-affordance]").doesNotExist();
     assert.dom("[data-test-doc-status-icon]").doesNotExist();
-    assert.dom("[data-test-doc-thumbnail-product-badge]").doesNotExist();
+
+    assert.dom("[data-test-doc-thumbnail-product-badge]").hasText("LAB");
 
     this.set("isLarge", true);
 
@@ -60,6 +82,6 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
 
     assert
       .dom("[data-test-doc-thumbnail-product-badge].waypoint")
-      .exists("product badge is shown");
+      .exists("product icon is shown");
   });
 });

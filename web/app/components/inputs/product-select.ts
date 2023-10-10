@@ -53,9 +53,14 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
     if (!this.selected) {
       return;
     }
+
     const selectedProduct = this.products?.[this.selected];
-    assert("selected product must exist", selectedProduct);
-    return selectedProduct.abbreviation;
+
+    if (selectedProduct) {
+      return selectedProduct.abbreviation;
+    } else {
+      return;
+    }
   }
 
   @action onChange(newValue: any, attributes: ProductArea) {

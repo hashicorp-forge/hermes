@@ -11,6 +11,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 import { RelatedResourcesScope } from "hermes/components/related-resources";
+import ProductAreasService from "hermes/services/product-areas";
 
 const MODAL_TITLE_SELECTOR = "[data-test-add-related-resource-modal-title]";
 const SEARCH_INPUT_SELECTOR = "[data-test-related-resources-search-input]";
@@ -32,7 +33,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function (this: RelatedResourcesAddTestContext) {
+  hooks.beforeEach(async function (this: RelatedResourcesAddTestContext) {
     this.server.createList("document", 10);
     this.set("noop", () => {});
 
@@ -40,7 +41,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
 
     const reducerFunction = (
       acc: Record<string, HermesDocument>,
-      document: { attrs: HermesDocument }
+      document: { attrs: HermesDocument },
     ) => {
       acc[document.attrs.objectID] = document.attrs;
       return acc;
@@ -51,10 +52,13 @@ module("Integration | Component | related-resources/add", function (hooks) {
     const getFirstFourRecords = (documents: any) => {
       return Object.keys(documents)
         .slice(0, 4)
-        .reduce((acc, key) => {
-          acc[key] = documents[key];
-          return acc;
-        }, {} as Record<string, HermesDocument>);
+        .reduce(
+          (acc, key) => {
+            acc[key] = documents[key];
+            return acc;
+          },
+          {} as Record<string, HermesDocument>,
+        );
     };
 
     suggestions = getFirstFourRecords(suggestions);
@@ -66,7 +70,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
       (
         dd: XDropdownListAnchorAPI | null,
         query: string,
-        shouldIgnoreDelay?: boolean
+        shouldIgnoreDelay?: boolean,
       ) => {
         if (query === "") {
           this.set("shownDocuments", suggestions);
@@ -79,12 +83,20 @@ module("Integration | Component | related-resources/add", function (hooks) {
           this.set("shownDocuments", getFirstFourRecords(matches));
         }
         return Promise.resolve();
-      }
+      },
     );
 
     this.set("getObject", (dd: XDropdownListAnchorAPI | null, id: string) => {
       return Promise.resolve();
     });
+
+    const productAreasService = this.owner.lookup(
+      "service:product-areas",
+    ) as ProductAreasService;
+
+    this.server.createList("product", 4);
+
+    await productAreasService.fetch.perform();
   });
 
   test("it renders correctly (initial load)", async function (this: RelatedResourcesAddTestContext, assert) {

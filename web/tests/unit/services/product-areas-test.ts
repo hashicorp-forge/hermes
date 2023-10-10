@@ -22,6 +22,8 @@ module("Unit | Service | product-areas", function (hooks) {
       abbreviation: "LABS",
     });
 
+    await productAreas.fetch.perform();
+
     const expectedResponse = {
       Labs: {
         abbreviation: "LABS",
