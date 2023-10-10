@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 interface InputsProductSelectItemComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    product: string;
+    product?: string;
     isSelected?: boolean;
     abbreviation?: string;
   };

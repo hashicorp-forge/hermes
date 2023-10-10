@@ -147,7 +147,7 @@
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner)}}
-          <div class="relative w-full">
+          <div class="relative w-full" data-test-document-product-area-editable>
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}

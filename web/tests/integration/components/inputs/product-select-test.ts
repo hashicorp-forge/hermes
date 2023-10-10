@@ -7,8 +7,9 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
 import { Response } from "miragejs";
 
-const DEFAULT_DROPDOWN_SELECTOR = ".product-select-default-toggle";
-const LIST_ITEM_SELECTOR = "[data-test-product-select-item]";
+const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
+const DROPDOWN_PRODUCT =
+  "[data-test-x-dropdown-list-content] [data-test-product-select-item]";
 
 interface InputsProductSelectContext extends MirageTestContext {
   selected?: any;
@@ -30,7 +31,9 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     });
 
     this.set("selected", "Vault");
-    this.set("onChange", () => {});
+    this.set("onChange", (value: string) => {
+      this.set("selected", value);
+    });
   });
 
   test("it can render in two formats", async function (this: InputsProductSelectContext, assert) {
@@ -47,61 +50,31 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     `);
 
     assert.dom(badgeDropdownSelector).exists("badge dropdown is rendered");
-    assert
-      .dom(DEFAULT_DROPDOWN_SELECTOR)
-      .doesNotExist("default dropdown is not rendered");
+    assert.dom(TOGGLE).doesNotExist("default dropdown is not rendered");
 
     this.set("formatIsBadge", false);
 
     assert
       .dom(badgeDropdownSelector)
       .doesNotExist("badge dropdown is not rendered");
-    assert
-      .dom(DEFAULT_DROPDOWN_SELECTOR)
-      .exists("default dropdown is rendered");
+    assert.dom(TOGGLE).exists("default dropdown is rendered");
   });
 
-  test("it can render the toggle with a product abbreviation", async function (this: InputsProductSelectContext, assert) {
-    this.set("selected", this.server.schema.products.first().name);
-
+  test("it displays the products with abbreviations", async function (this: InputsProductSelectContext, assert) {
     await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
+        data-test-content
         @selected={{this.selected}}
         @onChange={{this.onChange}}
       />
     `);
 
-    assert.dom(".product-select-toggle-abbreviation").hasText("TP0");
-  });
+    assert.dom(TOGGLE).hasText("Vault VLT");
 
-  test("it shows an empty state when nothing is selected (default toggle)", async function (this: InputsProductSelectContext, assert) {
-    this.set("selected", undefined);
+    await click(TOGGLE);
 
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        @selected={{this.selected}}
-        @onChange={{this.onChange}}
-      />
-    `);
-    assert
-      .dom(".product-select-selected-value")
-      .hasText("Select a product/area");
-  });
-
-  test("it displays the products in a dropdown list with abbreviations", async function (this: InputsProductSelectContext, assert) {
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        @selected={{this.selected}}
-        @onChange={{this.onChange}}
-      />
-    `);
-
-    await click(DEFAULT_DROPDOWN_SELECTOR);
-
-    assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
-
-    let firstListItem = this.element.querySelector(LIST_ITEM_SELECTOR);
-    assert.dom(firstListItem).hasText("Test Product 0 TP0");
+    assert.dom(DROPDOWN_PRODUCT).exists({ count: 4 });
+    assert.dom(DROPDOWN_PRODUCT).hasText("Test Product 0 TP0");
   });
 
   test("it fetches the products if they aren't already loaded", async function (this: InputsProductSelectContext, assert) {
@@ -109,16 +82,17 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
+        data-test-content
         @onChange={{this.onChange}}
       />
     `);
 
-    await click(DEFAULT_DROPDOWN_SELECTOR);
+    await click(TOGGLE);
 
     // In Mirage, we return a default product when there are no products in the database.
     // This simulates the `fetchProducts` task being run.
-    assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
-    assert.dom(LIST_ITEM_SELECTOR).hasText("Default Fetched Product NONE");
+    assert.dom(DROPDOWN_PRODUCT).exists({ count: 1 });
+    assert.dom(DROPDOWN_PRODUCT).hasText("Default Fetched Product NONE");
   });
 
   test("it performs the passed-in action on click", async function (this: InputsProductSelectContext, assert) {
@@ -134,8 +108,8 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    await click(DEFAULT_DROPDOWN_SELECTOR);
-    await click(LIST_ITEM_SELECTOR);
+    await click(TOGGLE);
+    await click(DROPDOWN_PRODUCT);
 
     assert.equal(count, 1, "the action was called once");
   });

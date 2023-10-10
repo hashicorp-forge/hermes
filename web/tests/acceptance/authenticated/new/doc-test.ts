@@ -12,7 +12,7 @@ import { DRAFT_CREATED_LOCAL_STORAGE_KEY } from "hermes/components/modals/draft-
 // Selectors
 const DOC_FORM = "[data-test-new-doc-form]";
 const PRODUCT_SELECT = `${DOC_FORM} [data-test-product-select]`;
-const PRODUCT_SELECT_TOGGLE = `${PRODUCT_SELECT} [data-test-x-dropdown-list-toggle-action]`;
+const PRODUCT_SELECT_TOGGLE = `${PRODUCT_SELECT} [data-test-x-dropdown-list-toggle-select]`;
 const CREATE_BUTTON = `${DOC_FORM} [data-test-create-button]`;
 const TITLE_INPUT = `${DOC_FORM} [data-test-title-input]`;
 const SUMMARY_INPUT = `${DOC_FORM} [data-test-summary-input]`;
