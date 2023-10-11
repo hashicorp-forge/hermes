@@ -176,6 +176,45 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * Project requests
+       *
+       *************************************************************************/
+      // Create a project
+      this.post("/projects", (schema, request) => {
+        let project = schema.projects.create(JSON.parse(request.requestBody));
+        return new Response(200, {}, project.attrs);
+      });
+
+      // Fetch a list of projects.
+      this.get("/projects", () => {
+        const projects = this.schema.projects.all().models;
+        return new Response(200, {}, projects);
+      });
+
+      // Fetch a single project.
+      this.get("/projects/:project_id", (schema, request) => {
+        const project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+        return new Response(200, {}, project.attrs);
+      });
+
+      // Fetch a product's related resources
+      this.put("/projects/:project_id", (schema, request) => {
+        let project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        if (project) {
+          let attrs = JSON.parse(request.requestBody);
+
+          project.update(attrs);
+          return new Response(200, {}, project.attrs);
+        }
+      });
+
+      /*************************************************************************
+       *
        * HEAD requests
        *
        *************************************************************************/
@@ -494,24 +533,6 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used by the /projects route to fetch a list of projects.
-       */
-      this.get("/projects", () => {
-        const projects = this.schema.projects.all().models;
-        return new Response(200, {}, projects);
-      });
-
-      /**
-       * Used by the /projects/:project_id route to fetch a single project.
-       */
-      this.get("/projects/:project_id", (schema, request) => {
-        const project = schema.projects.findBy({
-          id: request.params.project_id,
-        });
-        return new Response(200, {}, project.attrs);
-      });
-
-      /**
        * Used by the Dashboard route to get a user's recently viewed documents.
        */
       this.get("/me/recently-viewed-docs", (schema) => {
@@ -708,20 +729,6 @@ export default function (mirageConfig) {
           return new Response(200, {}, {});
         },
       );
-
-      // Project related resources
-      this.put("projects/:project_id", (schema, request) => {
-        let project = schema.projects.findBy({
-          id: request.params.project_id,
-        });
-
-        if (project) {
-          let attrs = JSON.parse(request.requestBody);
-
-          project.update(attrs);
-          return new Response(200, {}, project.attrs);
-        }
-      });
 
       // Update whether a draft is shareable.
       this.put("/drafts/:document_id/shareable", (schema, request) => {
