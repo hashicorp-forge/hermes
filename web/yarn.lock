@@ -14422,9 +14422,9 @@ __metadata:
   linkType: hard
 
 "minimist@npm:^0.2.1":
-  version: 0.2.2
-  resolution: "minimist@npm:0.2.2"
-  checksum: c6b140b08b18bf315c65292d0d850279e5ec355d3d8d1f67bb7f7df3914d609c0215007fb876fd81f8dc99556b522d1b06f3b823f7f00fc297bf31cfdbd8b20b
+  version: 0.2.4
+  resolution: "minimist@npm:0.2.4"
+  checksum: 52ab5922f5fd4f2d17410619c5e8c2df79327e7d94a59a9d1e7c567c5ef991c5385f7adb5c090d213fe5701e1fa1b6bb3d89a319e3b1b656b5a17308c87e2513
   languageName: node
   linkType: hard
 

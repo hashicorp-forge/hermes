@@ -43,6 +43,8 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert.dom(CREATE_NEW_BUTTON).hasText("New").hasAttribute("href", "/new");
 
+    assert.dom(CREATE_NEW_BUTTON).hasText("New").hasAttribute("href", "/new");
+
     assert.dom(".global-search").exists();
 
     await click(USER_MENU_TOGGLE_SELECTOR);
