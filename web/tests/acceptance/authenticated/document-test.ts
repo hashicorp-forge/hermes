@@ -90,9 +90,7 @@ module("Acceptance | authenticated/document", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(async function (
-    this: AuthenticatedDocumentRouteTestContext,
-  ) {
+  hooks.beforeEach(async function () {
     await authenticateSession({});
   });
 
