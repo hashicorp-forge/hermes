@@ -9,19 +9,19 @@
       <div
         class="relative flex w-full flex-wrap items-center gap-3.5 md:flex-nowrap"
       >
-        <div class="flex gap-1">
+        <div class="relative flex items-center">
           {{! Avatars }}
           <Product::Avatar
             @product={{@doc.product}}
             @iconSize={{16}}
-            class="h-7 w-7 shrink-0 p-1.5"
+            class="h-7 w-7 shrink-0 p-1.5 outline outline-white"
           />
           <Person::Avatar
             data-test-doc-awaiting-review-owner-avatar
             @email={{or (get @doc.owners 0) "Unknown"}}
             @imgURL={{get @doc.ownerPhotos 0}}
             @size="medium"
-            class="shrink-0"
+            class="-ml-1"
           />
         </div>
 
@@ -60,19 +60,14 @@
         <div
           class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
         >
-          {{!-- <Hds::Badge
-            data-test-doc-awaiting-review-product-badge
-            @icon={{or (get-product-id @doc.product) "folder"}}
-            @text={{or @doc.product "Unknown"}}
-          /> --}}
-          <Hds::Badge
-            data-test-doc-awaiting-review-doctype-badge
-            @text={{@doc.docType}}
-          />
           <Doc::State
             data-test-doc-awaiting-review-status
             @state={{lowercase @doc.status}}
             @hideProgress={{true}}
+          />
+          <Hds::Badge
+            data-test-doc-awaiting-review-doctype-badge
+            @text={{@doc.docType}}
           />
         </div>
       </div>
