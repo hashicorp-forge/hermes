@@ -67,7 +67,10 @@ export default class ProductLinkComponent extends Component<ProductLinkComponent
       class="product-link"
       ...attributes
     >
-      <Product @name={{this.args.product}} @avatarIsHidden={{true}} />
+      <Product
+        @name={{this.args.product}}
+        @avatarIsHidden={{@avatarIsHidden}}
+      />
     </LinkTo>
   </template>
 }
