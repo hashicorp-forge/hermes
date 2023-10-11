@@ -1,8 +1,9 @@
 import RouterService from "@ember/routing/router-service";
-import { click, fillIn, visit } from "@ember/test-helpers";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
+import { Response } from "miragejs";
 import { module, test } from "qunit";
 
 const PROJECT_FORM = "[data-test-project-form]";
@@ -10,6 +11,8 @@ const TITLE_INPUT = `${PROJECT_FORM} [data-test-title]`;
 const DESCRIPTION_INPUT = `${PROJECT_FORM} [data-test-description]`;
 const SUBMIT_BUTTON = `${PROJECT_FORM} [data-test-submit]`;
 const TITLE_ERROR = `${PROJECT_FORM} [data-test-title-error]`;
+const FLASH_MESSAGE = "[data-test-flash-notification]";
+
 interface AuthenticatedNewProjectRouteTestContext extends MirageTestContext {}
 
 module("Acceptance | authenticated/new/project", function (hooks) {
@@ -67,5 +70,19 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     await click(SUBMIT_BUTTON);
 
     assert.dom(TITLE_ERROR).hasText("Title is required.");
+  });
+
+  test("it shows an error if creaing the project fails", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    this.server.post("/projects", () => {
+      return new Response(500, {}, {});
+    });
+
+    await visit("new/project");
+    await fillIn(TITLE_INPUT, "The Foo Project");
+
+    await click(SUBMIT_BUTTON);
+
+    await waitFor(FLASH_MESSAGE);
+    assert.dom(FLASH_MESSAGE).containsText("Error creating project");
   });
 });
