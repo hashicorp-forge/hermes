@@ -1,5 +1,6 @@
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
+import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -32,26 +33,21 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   }
 
   private validateForm() {
-    if (this.title.length === 0) {
-      this.errorIsShown = true;
-      this.formIsValid = false;
-      return;
-    }
-
-    this.errorIsShown = false;
-    this.formIsValid = true;
+    this.errorIsShown = this.title.length === 0;
+    this.formIsValid = this.title.length > 0;
   }
 
   @action protected onKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
+      // Replace newline function with submit action
       e.preventDefault();
       this.maybeSubmitForm();
     }
-  }
-
-  @action protected onKeyup() {
     if (this.errorIsShown) {
-      this.validateForm();
+      // Validate once the input value are captured
+      next("afterRender", () => {
+        this.validateForm();
+      });
     }
   }
 
@@ -67,12 +63,12 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         })
         .then((response) => response?.json());
       this.router.transitionTo("authenticated.projects.project", project.id);
-    } catch (e: unknown) {
-      const error = e as Error;
+    } catch (error: unknown) {
+      const typedError = error as Error;
 
       this.flashMessages.add({
         title: "Error creating project",
-        message: error.message,
+        message: typedError.message,
         type: "critical",
         timeout: 6000,
         extendedTimeout: 1000,

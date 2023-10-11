@@ -9,7 +9,6 @@
   <div class="mt-7 grid gap-7">
     <Hds::Form::Textarea::Field
       {{on "keydown" this.onKeydown}}
-      {{on "keyup" this.onKeyup}}
       {{auto-height-textarea}}
       {{autofocus}}
       data-test-title
@@ -29,7 +28,6 @@
     <Hds::Form::Textarea::Field
       data-test-description
       {{on "keydown" this.onKeydown}}
-      {{on "keyup" this.onKeyup}}
       @value={{this.description}}
       rows="2"
       placeholder="A short summary of your project"
