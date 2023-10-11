@@ -1,89 +1,51 @@
-{{!
-  <NewObjectForm
-
-    registerform
-    onsubmit
-    errors
-
-    container
-
-    onChange listener?
-  >
-
-  </NewObjectForm>
- }}
-
-{{#if this.projectIsBeingCreated}}
-  <div class="hds-typography-display-400 mt-3 text-center">
-    <FlightIcon @name="running" @size="24" />
-    <div class="mt-8 text-display-200 font-semibold">
-      Creating project...
-    </div>
-    <div class="text-body-200 text-color-foreground-faint">This usually takes
-      10-20 seconds.</div>
+<form
+  data-test-project-form
+  {{on "submit" this.maybeSubmitForm}}
+  class="mx-auto mb-10 max-w-xl"
+>
+  <div class="space-y-4">
+    <h1>Start a project</h1>
   </div>
-{{else}}
-  <New::ObjectTypeDropdown @selected="Project" />
-  <form
-    {{did-insert this.registerForm}}
-    {{on "submit" this.submit}}
-    class="mb-10"
-  >
-    <div class="space-y-7 mb-8">
+  <div class="mt-7 grid gap-7">
+    <Hds::Form::Textarea::Field
+      {{on "keydown" this.onKeydown}}
+      {{auto-height-textarea}}
+      {{autofocus}}
+      data-test-title
+      @value={{this.title}}
+      name="title"
+      placeholder="Enter a project title"
+      as |F|
+    >
+      <F.Label>Title</F.Label>
+      {{#if this.errorIsShown}}
+        <F.Error data-test-title-error>
+          Title is required.
+        </F.Error>
+      {{/if}}
+    </Hds::Form::Textarea::Field>
 
-      {{! Title }}
-      <Hds::Form::TextInput::Field
-        @isRequired={{true}}
-        @value={{this.name}}
-        @type="text"
-        name="title"
-        {{on "input" this.updateForm}}
-        as |F|
-      >
-        <F.Label class="relative">
-          Title
-        </F.Label>
-      </Hds::Form::TextInput::Field>
+    <Hds::Form::Textarea::Field
+      data-test-description
+      {{on "keydown" this.onKeydown}}
+      @value={{this.description}}
+      rows="2"
+      placeholder="A short summary of your project"
+      name="description"
+      as |F|
+    >
+      <F.Label>Description</F.Label>
+    </Hds::Form::Textarea::Field>
 
-      {{! Summary }}
-      <div class="relative">
-        <Hds::Form::Textarea::Field
-          {{! TODO: add min-rows arg to auto-height-textarea}}
-          @value={{this.summary}}
-          name="summary"
-          rows="3"
-          {{on "input" this.updateForm}}
-          as |F|
-        >
-          <F.Label>Summary</F.Label>
-          <F.HelperText>
-            <span
-              class={{if
-                this.summaryIsLong
-                "bg-color-surface-warning text-color-foreground-warning-on-surface transition-colors"
-              }}
-            >One or two sentences</span>
-            outlining your doc.
-            {{if this.summaryIsLong "(Just a recommendation)"}}
-          </F.HelperText>
-        </Hds::Form::Textarea::Field>
-      </div>
+    {{! TODO: Add Jira integration }}
 
-      {{! Jira }}
-      <div>
-        <label class="hermes-form-label mb-1">
-          Jira
-        </label>
-        <Hds::Button
-          @icon="jira"
-          @text="Attach Jira issue"
-          @color="secondary"
-          @size="small"
-        />
-      </div>
-
+    <div>
+      <Hds::Button
+        data-test-submit
+        @text="Create project"
+        {{on "click" this.maybeSubmitForm}}
+      />
     </div>
 
-    <Hds::Button @text="Create new project" type="submit" />
-  </form>
-{{/if}}
+  </div>
+</form>

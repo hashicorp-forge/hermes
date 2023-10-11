@@ -6,6 +6,9 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL;
 }
 
+const showProjectRoutes =
+  config.environment === "development" || config.environment === "test";
+
 Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
     this.route("dashboard");
@@ -23,12 +26,17 @@ Router.map(function () {
     this.route("results");
     this.route("settings");
     this.route("new", function () {
-      this.route("document");
-      this.route("project");
+      this.route("doc");
+      if (showProjectRoutes) {
+        this.route("project");
+      }
     });
-    this.route("support", function () {
-      this.route("document-types");
-    });
+
+    if (showProjectRoutes) {
+      this.route("projects", function () {
+        this.route("project", { path: "/:project_id" });
+      });
+    }
   });
   this.route("authenticate");
   this.route("404", { path: "/*path" });
