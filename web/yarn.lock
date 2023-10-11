@@ -3566,15 +3566,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/masonry-layout@npm:^4.2.5":
-  version: 4.2.5
-  resolution: "@types/masonry-layout@npm:4.2.5"
-  dependencies:
-    "@types/jquery": "*"
-  checksum: 68961e4dd393a8d51e6e80676a814a6741c0c9175501a1a556ec6d4ef5438aa1e982248a90c7f00099fb18da9529e9f6733be5ffebdb9b2e95cd36a6adeecb40
-  languageName: node
-  linkType: hard
-
 "@types/mime@npm:*":
   version: 3.0.1
   resolution: "@types/mime@npm:3.0.1"
@@ -7939,13 +7930,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"desandro-matches-selector@npm:^2.0.0":
-  version: 2.0.2
-  resolution: "desandro-matches-selector@npm:2.0.2"
-  checksum: 30979e6b45d7720d259d4db11ec026fcbee242deee5ec0944c265d7e386a7358ab29f7417cbc3631830d0dbe6e827940dee31f789ed865dba22880d209fc9f8e
-  languageName: node
-  linkType: hard
-
 "destroy@npm:1.2.0":
   version: 1.2.0
   resolution: "destroy@npm:1.2.0"
@@ -10400,13 +10384,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ev-emitter@npm:^1.0.0":
-  version: 1.1.1
-  resolution: "ev-emitter@npm:1.1.1"
-  checksum: 3dd78a7620701ef8095794f611dd251bdd9023badf322b3d6fa5e10a660c50e83eec5ee5bbc7654682635cf7b8858c94e2c77e1d10bdc188a2b0593436403476
-  languageName: node
-  linkType: hard
-
 "eventemitter3@npm:^4.0.0":
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
@@ -11068,15 +11045,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fizzy-ui-utils@npm:^2.0.0":
-  version: 2.0.7
-  resolution: "fizzy-ui-utils@npm:2.0.7"
-  dependencies:
-    desandro-matches-selector: ^2.0.0
-  checksum: 001e54effa22c4f62728b90a25e8eb5477057ab53d0184e1c3231bbdfc7c34e278418fbcaf7d63c75ede823d82e61245e668ce8cba90e1c5699de960188c654f
-  languageName: node
-  linkType: hard
-
 "flat-cache@npm:^3.0.4":
   version: 3.0.4
   resolution: "flat-cache@npm:3.0.4"
@@ -11490,13 +11458,6 @@ __metadata:
     has-proto: ^1.0.1
     has-symbols: ^1.0.3
   checksum: 5b61d88552c24b0cf6fa2d1b3bc5459d7306f699de060d76442cce49a4721f52b8c560a33ab392cf5575b7810277d54ded9d4d39a1ea61855619ebc005aa7e5f
-  languageName: node
-  linkType: hard
-
-"get-size@npm:^2.0.2":
-  version: 2.0.3
-  resolution: "get-size@npm:2.0.3"
-  checksum: 18d5a5fdb3f541db8b1e6ad46a5411d4bb7da3061d2ef7e544db3bbce7a13543f05c91fd40c7f68b4bc4bc035c160fed23c45514cde7d5fb18de1cce10208b19
   languageName: node
   linkType: hard
 
@@ -12059,7 +12020,6 @@ __metadata:
     "@types/ember__test": latest
     "@types/ember__test-helpers": latest
     "@types/ember__utils": latest
-    "@types/masonry-layout": ^4.2.5
     "@types/qunit": latest
     "@types/rsvp": latest
     "@types/sinon": ^10.0.13
@@ -12120,7 +12080,6 @@ __metadata:
     eslint-plugin-qunit: ^6.2.0
     instantsearch.js: ^4.40.2
     loader.js: ^4.7.0
-    masonry-layout: ^4.2.2
     miragejs: ^0.1.47
     mockdate: ^3.0.5
     npm-run-all: ^4.1.5
@@ -14177,16 +14136,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"masonry-layout@npm:^4.2.2":
-  version: 4.2.2
-  resolution: "masonry-layout@npm:4.2.2"
-  dependencies:
-    get-size: ^2.0.2
-    outlayer: ^2.1.0
-  checksum: b947029b8fdfb384d17d7749d80a4f00f88d885acea04d77e1fefd36827cc2a345fd40d9ccddf720ed9323e133d8ea498125eece91d2c8517f69fd4e9e1bbdf4
-  languageName: node
-  linkType: hard
-
 "matcher-collection@npm:^1.0.0, matcher-collection@npm:^1.1.1":
   version: 1.1.2
   resolution: "matcher-collection@npm:1.1.2"
@@ -15335,17 +15284,6 @@ __metadata:
     os-homedir: ^1.0.0
     os-tmpdir: ^1.0.0
   checksum: 779d261920f2a13e5e18cf02446484f12747d3f2ff82280912f52b213162d43d312647a40c332373cbccd5e3fb8126915d3bfea8dde4827f70f82da76e52d359
-  languageName: node
-  linkType: hard
-
-"outlayer@npm:^2.1.0":
-  version: 2.1.1
-  resolution: "outlayer@npm:2.1.1"
-  dependencies:
-    ev-emitter: ^1.0.0
-    fizzy-ui-utils: ^2.0.0
-    get-size: ^2.0.2
-  checksum: a8b69d07bad6b498ea1956f89a4bae6d38414d81a5feeae6af06cd8206a1bf47db82f664dc3ccd13b8d2c5886a6cded4a4642d0fafcbbd80f68873b7eb9f4153
   languageName: node
   linkType: hard
 
