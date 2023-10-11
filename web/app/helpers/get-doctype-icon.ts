@@ -7,6 +7,11 @@ export interface GetDoctypeIconSignature {
   Return: string;
 }
 
+/**
+ * Returns the FlightIcon name for a given document type.
+ * This is a temporary helper until "flight_icon" is added
+ * to the HermesDocumentType model.
+ */
 const getDoctypeIconHelper = helper<GetDoctypeIconSignature>(
   ([docTypeName]) => {
     switch (docTypeName.toLowerCase()) {
