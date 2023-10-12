@@ -7,7 +7,7 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
-import { OverflowItem } from "../../../related-resources/overflow-menu";
+import { OverflowItem } from "hermes/components/related-resources/overflow-menu";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
