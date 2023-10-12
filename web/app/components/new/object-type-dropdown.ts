@@ -18,7 +18,7 @@ interface NewObjectTypeDropdownComponentSignature {
 export default class NewObjectTypeDropdownComponent extends Component<NewObjectTypeDropdownComponentSignature> {
   protected objectTypes = {
     Document: {
-      route: "authenticated.new.document",
+      route: "authenticated.new.doc",
       icon: "file-text",
     },
     Project: {

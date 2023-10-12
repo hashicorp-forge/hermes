@@ -58,101 +58,6 @@
         </Hds::Form::Textarea::Field>
       </div>
 
-      {{! Document type }}
-      <div>
-        <X::DropdownList
-          class="max-h-[237px]"
-          @items={{this.docTypes}}
-          @selected={{this.selectedDocType}}
-          @onItemClick={{this.changeDocType}}
-          @matchAnchorWidth={{hash enabled=true additionalWidth=10}}
-        >
-          <:anchor as |dd|>
-            <div class="mb-2 flex items-center justify-between">
-              <div class="flex w-full items-center justify-between">
-                <div class="flex items-center">
-
-                  <label class="hermes-form-label relative">
-                    Document type
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <dd.ToggleSelect>
-              <FlightIcon
-                @name={{or this.selectedDocTypeObject.icon "file-text"}}
-                class="mr-3"
-              />
-              {{#if this.selectedDocTypeObject.longName}}
-                <div class="text-color-foreground-strong">
-                  {{this.selectedDocTypeObject.longName}}
-                </div>
-              {{else}}
-                <EmptyStateText @text="None selected" />
-              {{/if}}
-              {{#if this.selectedDocTypeObject.shortName}}
-                <div
-                  class="ml-2 text-body-100 leading-none text-color-foreground-disabled"
-                >
-                  {{this.selectedDocTypeObject.shortName}}
-                </div>
-              {{/if}}
-            </dd.ToggleSelect>
-          </:anchor>
-          <:item as |dd|>
-            <dd.Action class="group items-start px-4 pr-5">
-              <div class="relative flex w-full items-start">
-                <FlightIcon
-                  @name={{or dd.attrs.icon "file-text"}}
-                  class="mr-3 mt-0.5"
-                />
-                <div>
-                  {{! TODO: handle group-hover/focus in css }}
-                  <div class="flex items-center leading-none">
-                    <span
-                      class="text-body-200 text-color-foreground-strong group-focus-within:text-white group-hover:text-white"
-                    >
-
-                      {{dd.attrs.longName}}
-                    </span>
-                    <span
-                      class="ml-2.5 text-body-100 leading-none text-color-foreground-disabled group-focus-within:text-white group-hover:text-white"
-                    >
-                      {{dd.attrs.shortName}}
-                    </span>
-                  </div>
-                  {{! TODO: this should only ever be one line }}
-                  {{#if dd.attrs.description}}
-                    <div
-                      class="mt-0.5 text-body-100 text-color-foreground-faint group-focus-within:text-white group-hover:text-white"
-                    >
-                      {{dd.attrs.description}}
-                    </div>
-                  {{/if}}
-                </div>
-
-                {{#if dd.isSelected}}
-                  <div class="check absolute right-0 top-1">
-                    <FlightIcon @name="check" />
-                  </div>
-                {{/if}}
-              </div>
-
-            </dd.Action>
-          </:item>
-        </X::DropdownList>
-        <ExternalLink
-          @iconIsShown={{true}}
-          href="/support/document-types"
-          target="_blank"
-          class="mt-3 inline-flex text-body-100 text-color-foreground-action hover:text-color-foreground-action-hover"
-        >
-          About document types
-        </ExternalLink>
-
-      </div>
-
       {{! Product/Area }}
       <div>
         <div class="mb-2">
@@ -167,24 +72,7 @@
         />
       </div>
 
-      <div>
-        <div class="mb-2">
-          <span class="hermes-form-label">
-            Product/Area &nbsp;
-            <Hds::Badge @size="small" @text="Required" />
-          </span>
-          <span class="hermes-form-helper-text hds-form-helper-text">
-            Where your doc should be categorized.
-          </span>
-        </div>
-        <div class="w-[300px]">
-          <Inputs::ProductSelect
-            @selected={{this.productArea}}
-            @onChange={{this.onProductSelect}}
-            class="max-h-[240px]"
-          />
-        </div>
-      </div>
+      {{! TODO: COllaborators }}
 
     </div>
 

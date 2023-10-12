@@ -1,17 +1,17 @@
 import Route from "@ember/routing/route";
 
-interface AuthenticatedNewDocumentRouteParams {
+interface AuthenticatedNewDocRouteParams {
   docType: string;
 }
 
-export default class AuthenticatedNewDocumentRoute extends Route {
+export default class AuthenticatedNewDocRoute extends Route {
   queryParams = {
     docType: {
       refreshModel: true,
     },
   };
 
-  model(params: AuthenticatedNewDocumentRouteParams) {
+  model(params: AuthenticatedNewDocRouteParams) {
     return params.docType;
   }
 }
