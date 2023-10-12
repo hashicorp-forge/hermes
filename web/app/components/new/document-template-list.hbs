@@ -1,18 +1,16 @@
 <div class="flex items-center gap-3.5">
   <h1>Choose a template</h1>
-  {{! PENDING }}
-  {{!
-    <div class="hermes-h4 mt-[5px] mr-0.5">
-      or
-    </div>
-    <Hds::Button
-      @text="Start a project"
-      @icon="chevron-right"
-      @iconPosition="trailing"
-      @color="secondary"
-      class="mt-[4px]"
-    />
-  }}
+  <div class="hermes-h4 mt-[5px] mr-0.5">
+    or
+  </div>
+  <Hds::Button
+    @route="authenticated.new.project"
+    @text="Start a project"
+    @icon="chevron-right"
+    @iconPosition="trailing"
+    @color="secondary"
+    class="mt-[4px]"
+  />
 </div>
 
 <ol class="mt-8 grid auto-rows-fr grid-cols-2 gap-2">
