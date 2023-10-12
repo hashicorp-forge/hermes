@@ -46,7 +46,7 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
         edit: {
           label: "Edit",
           icon: "edit",
-          action: this.showModal,
+          action: () => this.showModal,
         },
       };
     }
@@ -55,7 +55,7 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
       delete: {
         label: "Remove",
         icon: "trash",
-        action: this.args.removeResource(this.args.resource),
+        action: () => this.args.removeResource(this.args.resource),
       },
     };
 
