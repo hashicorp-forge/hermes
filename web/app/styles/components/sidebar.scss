@@ -29,12 +29,8 @@
     }
   }
 
-  .sidebar-header-button {
-    @apply relative flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary;
-
-    &:hover {
-      @apply border-color-border-strong bg-color-foreground-high-contrast;
-    }
+  .quarternary-button {
+    @apply relative;
 
     @keyframes slideDownAndRotateLeft {
       to {
@@ -50,7 +46,7 @@
   }
 
   .draft-visibility-button {
-    @apply px-2.5;
+    @apply gap-0 px-2.5;
     // match the height of the header buttons
     @apply h-[38px];
     // offset the extra height relative to the badge
@@ -63,12 +59,6 @@
 
   .sidebar-header-icon-controls {
     @apply flex;
-
-    .sidebar-header-button {
-      &::hover {
-        @apply border-transparent  bg-color-surface-interactive-hover;
-      }
-    }
   }
 
   .sidebar-body {

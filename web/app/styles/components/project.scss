@@ -1,0 +1,53 @@
+.project-screen {
+  .project-title,
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply text-center;
+    }
+  }
+
+  .project-title {
+    .field-toggle,
+    textarea {
+      @apply text-display-500 font-bold text-color-foreground-strong;
+    }
+  }
+
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply text-body-300 text-color-foreground-faint;
+    }
+  }
+
+  .section {
+    @apply rounded border border-color-border-primary;
+
+    &.empty {
+      .section-header {
+        @apply rounded-b;
+      }
+    }
+  }
+
+  .section-header {
+    @apply flex h-12 w-full items-center justify-between rounded-t bg-color-surface-faint pl-4 pr-2;
+
+    h3 {
+      @apply text-body-200 font-semibold;
+    }
+
+    .tertiary-button-gray {
+      @apply px-2.5;
+    }
+  }
+
+  .resource-list {
+    @apply divide-y divide-color-border-primary border-t border-t-color-border-primary;
+  }
+
+  .resource-list-item {
+    @apply h-12 outline;
+  }
+}

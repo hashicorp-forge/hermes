@@ -1,14 +1,14 @@
 <div class="sidebar-header {{if @userHasScrolled 'scrolled'}}" ...attributes>
   <LinkTo
     data-test-sidebar-dashboard-link
-    class="sidebar-header-button sidebar-dashboard-link"
+    class="quarternary-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
     {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
     <FlightIcon @name="hashicorp" @size={{if @isCollapsed "24"}} />
     {{#unless @isCollapsed}}
       <span
-        class="border-l tracking-[-0.15px] border-l-color-border-strong pl-2 ml-2 font-semibold text-body-300"
+        class="ml-2 border-l border-l-color-border-strong pl-2 text-body-300 font-semibold tracking-[-0.15px]"
       >
         Hermes
       </span>
@@ -25,13 +25,13 @@
         @icon={{@shareButtonIcon}}
         @tooltipText={{@shareButtonTooltipText}}
         @isIconOnly={{true}}
-        class="sidebar-header-button"
+        class="quarternary-button"
         id="sidebar-header-copy-url-button"
       />
     {{/if}}
     <ExternalLink
       data-test-sidebar-google-docs-link
-      class="sidebar-header-button"
+      class="quarternary-button"
       href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
     >
@@ -40,7 +40,7 @@
     <Action
       data-test-sidebar-toggle-button
       data-test-is-collapsed={{@isCollapsed}}
-      class="sidebar-header-button"
+      class="quarternary-button"
       {{on "click" @toggleCollapsed}}
       {{tooltip
         (concat (if @isCollapsed "Expand" "Collapse") " sidebar")

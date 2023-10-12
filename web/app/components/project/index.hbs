@@ -1,0 +1,182 @@
+<div class="flex items-center justify-between">
+  <LinkTo
+    data-test-all-projects-link
+    @route="authenticated.projects"
+    class="quarternary-button"
+  >
+    <FlightIcon @name="grid" />
+    All projects
+  </LinkTo>
+
+  <div class="flex space-x-0.5">
+    <X::DropdownList
+      @items={{hash
+        complete=(hash
+          name="Complete..." icon="check-circle" action=this.showModal
+        )
+        archive=(hash name="Archive..." icon="archive" action=this.showModal)
+      }}
+      @placement="bottom-end"
+    >
+      <:anchor as |dd|>
+        <dd.ToggleAction>
+          <div class="quarternary-button {{if dd.contentIsShown 'active'}}">
+            <FlightIcon @name="more-horizontal" />
+          </div>
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
+          <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
+          {{dd.attrs.name}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+    <CopyURLButton
+      @url="TODO"
+      @tooltipPlacement="bottom"
+      class="quarternary-button"
+    />
+  </div>
+</div>
+
+<div class="mx-auto mt-1.5 w-full max-w-3xl">
+  <div class="project-title">
+    <EditableField
+      data-test-project-title
+      @value={{@project.title}}
+      @tag="h1"
+      @onChange={{this.hideModal}}
+      @onSave={{this.saveProjectInfo}}
+    />
+  </div>
+  <div class="project-description">
+    <EditableField
+      data-test-project-description
+      @value={{@project.description}}
+      @onChange={{this.hideModal}}
+      @onSave={{this.saveProjectInfo}}
+      @placeholder="Add a description"
+    />
+  </div>
+
+  {{! TODO: Jira section }}
+
+  <div class="section mt-10 {{unless @project.documents 'empty'}}">
+    <RelatedResources
+      @scope="documents"
+      @items={{@project.documents}}
+      @addResource={{this.addResource}}
+      @modalHeaderTitle="Add a document"
+      @modalInputPlaceholder="Search by title, author, doc number..."
+    >
+      <:header as |rr|>
+        <div class="section-header">
+          <h3>Documents</h3>
+          <Hds::Button
+            {{on "click" rr.showModal}}
+            @text="Add a document"
+            @color="tertiary"
+            @icon="plus"
+            class="tertiary-button-gray"
+            @isIconOnly={{true}}
+          />
+        </div>
+      </:header>
+      <:list>
+        {{#if @project.documents}}
+          <ul class="resource-list">
+            {{#each @project.documents as |document|}}
+              <li class="resource-list-item group">
+                <LinkTo
+                  @route="authenticated.document"
+                  @model={{document.googleFileID}}
+                  class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
+                >
+                  <div class="flex w-full items-center justify-between px-4">
+                    <div class="flex items-center">
+                      <Person::Avatar
+                        @email="{{document.product}}"
+                        @size="small"
+                        class="mr-2"
+                      />
+                      <h4 class="text-display-200 font-semibold">
+                        {{document.documentNumber}}
+                        {{document.title}}
+                      </h4>
+                    </div>
+                    <div class="flex space-x-1">
+                      {{!-- <Hds::Badge
+                        @text="{{document.product}}"
+                        @icon={{or (get-product-id document.product) undefined}}
+                      /> --}}
+                      <Hds::Badge @text={{document.type}} />
+                      <Doc::State
+                        @hideProgress={{true}}
+                        @state={{document.status}}
+                      />
+                    </div>
+                  </div>
+                </LinkTo>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          {{! TODO: Empty state }}
+        {{/if}}
+      </:list>
+    </RelatedResources>
+  </div>
+
+  {{! PROJECTS }}
+  <div class="section mt-8 {{unless this.relatedLinks.length 'empty'}}">
+    <RelatedResources
+      @items={{this.relatedLinks}}
+      @addResource={{this.addResource}}
+      @modalHeaderTitle="Add related link"
+      @modalInputPlaceholder="Enter a URL"
+      @scope="external-links"
+    >
+      <:header as |rr|>
+        <div class="section-header">
+          <h3>Related links</h3>
+          <Hds::Button
+            {{on "click" rr.showModal}}
+            @text="Add a related link"
+            @color="tertiary"
+            @icon="plus"
+            @isIconOnly={{true}}
+            class="tertiary-button-gray"
+          />
+        </div>
+      </:header>
+      <:list as |rr|>
+        {{#if rr.items.length}}
+          <ul class="resource-list">
+            {{#each rr.items as |link|}}
+              <li>
+                <ExternalLink href={{link.url}} class="flex h-12 items-center">
+                  <div class="px-4">
+                    {{link.name}}
+                  </div>
+                  <div>{{link.url}}</div>
+                </ExternalLink>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          {{! TODO: Empty state }}
+        {{/if}}
+      </:list>
+    </RelatedResources>
+  </div>
+
+  <div
+    class="mt-14 mb-4 text-center text-body-100 text-color-foreground-disabled"
+  >
+    Created
+    {{time-ago @project.dateCreated}}
+    by
+    {{@project.creator}}
+  </div>
+</div>

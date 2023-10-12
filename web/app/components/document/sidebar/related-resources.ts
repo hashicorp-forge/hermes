@@ -18,7 +18,7 @@ import {
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
 
-enum RelatedResourceSelector {
+export enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
   HermesDocument = ".hermes-document",
 }

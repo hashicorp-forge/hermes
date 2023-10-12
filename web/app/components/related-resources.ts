@@ -26,6 +26,7 @@ export interface RelatedHermesDocument {
   type: string;
   documentNumber: string;
   sortOrder: number;
+  status: string;
 }
 
 export enum RelatedResourcesScope {

@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { next, schedule, scheduleOnce } from "@ember/runloop";
+import { schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
 import { HermesDocument, HermesUser } from "hermes/types/document";
@@ -12,7 +12,7 @@ export const FOCUSABLE =
 interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    value: string | HermesUser[];
+    value?: string | HermesUser[];
     onSave: any; // TODO: type this
     onChange?: (value: any) => void; // TODO: type this
     isSaving?: boolean;
