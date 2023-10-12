@@ -46,7 +46,7 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
         edit: {
           label: "Edit",
           icon: "edit",
-          action: () => this.showModal,
+          action: () => this.showModal(),
         },
       };
     }
