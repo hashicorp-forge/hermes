@@ -1,7 +1,6 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject } from "hermes/routes/authenticated/projects";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
@@ -11,6 +10,7 @@ import { RelatedResourceSelector } from "../document/sidebar/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
+import { HermesProject } from "hermes/types/project";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -59,7 +59,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveRelatedResources.perform(
       cachedDocuments,
       this.relatedLinks.slice(),
-      RelatedResourceSelector.HermesDocument
+      RelatedResourceSelector.HermesDocument,
     );
   }
 
@@ -71,7 +71,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveRelatedResources.perform(
       this.relatedDocuments.slice(),
       cachedLinks,
-      RelatedResourceSelector.ExternalLink
+      RelatedResourceSelector.ExternalLink,
     );
   }
 
@@ -116,7 +116,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     async (
       cachedDocuments,
       cachedLinks,
-      elementSelectorToHighlight?: string | number
+      elementSelectorToHighlight?: string | number,
     ) => {
       if (elementSelectorToHighlight) {
         // void this.animateHighlight.perform(elementSelectorToHighlight);
@@ -142,7 +142,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         //   extendedTimeout: 1000,
         // });
       }
-    }
+    },
   );
 }
 

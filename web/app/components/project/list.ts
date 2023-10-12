@@ -1,7 +1,7 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject } from "hermes/routes/authenticated/projects";
+import { HermesProject } from "hermes/types/project";
 
 interface ProjectListComponentSignature {
   Args: {

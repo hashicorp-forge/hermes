@@ -30,8 +30,8 @@ import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { GoogleUser } from "../inputs/people-select";
 import { HermesDocumentType } from "hermes/types/document-type";
-import { HermesProject } from "hermes/routes/authenticated/projects";
 import { RelatedHermesDocument } from "../related-resources";
+import { HermesProject } from "hermes/types/project";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
