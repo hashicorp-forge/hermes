@@ -48,6 +48,35 @@
   }
 
   .resource-list-item {
-    @apply h-12 outline;
+    @apply relative flex h-12 items-stretch;
+
+    &:hover {
+      .hit-area {
+        @apply bg-color-surface-faint;
+      }
+    }
+
+    &:last-child {
+      a,
+      .hit-area {
+        @apply rounded-b;
+      }
+    }
+
+    a {
+      @apply flex w-full items-center;
+    }
+
+    .hit-area {
+      @apply absolute top-0 left-0 right-0 bottom-0 -z-10;
+    }
+
+    .title {
+      @apply text-display-200 font-semibold text-color-foreground-strong;
+    }
+
+    .owner {
+      @apply text-color-foreground-faint;
+    }
   }
 }

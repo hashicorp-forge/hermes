@@ -41,23 +41,26 @@
 </div>
 
 <div class="mx-auto mt-1.5 w-full max-w-3xl">
-  <div class="project-title">
-    <EditableField
-      data-test-project-title
-      @value={{@project.title}}
-      @tag="h1"
-      @onChange={{this.hideModal}}
-      @onSave={{this.saveProjectInfo}}
-    />
-  </div>
-  <div class="project-description">
-    <EditableField
-      data-test-project-description
-      @value={{@project.description}}
-      @onChange={{this.hideModal}}
-      @onSave={{this.saveProjectInfo}}
-      @placeholder="Add a description"
-    />
+  <div class="mx-auto w-full max-w-xl">
+
+    <div class="project-title">
+      <EditableField
+        data-test-project-title
+        @value={{@project.title}}
+        @tag="h1"
+        @onChange={{this.hideModal}}
+        @onSave={{this.saveProjectInfo}}
+      />
+    </div>
+    <div class="project-description">
+      <EditableField
+        data-test-project-description
+        @value={{@project.description}}
+        @onChange={{this.hideModal}}
+        @onSave={{this.saveProjectInfo}}
+        @placeholder="Add a description"
+      />
+    </div>
   </div>
 
   {{! TODO: Jira section }}
@@ -65,7 +68,7 @@
   <div class="section mt-10 {{unless @project.documents 'empty'}}">
     <RelatedResources
       @scope="documents"
-      @items={{@project.documents}}
+      @items={{this.relatedDocuments}}
       @addResource={{this.addResource}}
       @modalHeaderTitle="Add a document"
       @modalInputPlaceholder="Search by title, author, doc number..."
@@ -84,40 +87,48 @@
         </div>
       </:header>
       <:list>
-        {{#if @project.documents}}
+        {{#if this.relatedDocuments.length}}
           <ul class="resource-list">
-            {{#each @project.documents as |document|}}
-              <li class="resource-list-item group">
+            {{#each this.relatedDocuments as |document|}}
+              {{log "document" document}}
+              <li class="resource-list-item">
+                {{! TODO: hover-area hack }}
                 <LinkTo
                   @route="authenticated.document"
                   @model={{document.googleFileID}}
-                  class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
                 >
+                  {{!
+                    We create a click area that extends beyond the edges of its  container. This makes the parent div clickable without having to wrap itself in a link, and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
+                  }}
+                  <div aria-hidden="true" class="hit-area"></div>
                   <div class="flex w-full items-center justify-between px-4">
-                    <div class="flex items-center">
+                    <div class="flex items-center gap-2">
+                      {{! TODO: add product avatar }}
+                      {{! TODO: unity with docs awaiting review }}
                       <Person::Avatar
-                        @email="{{document.product}}"
+                        @email="{{get document.owners 0}}"
+                        @imgURL={{get document.ownerPhotos 0}}
                         @size="small"
-                        class="mr-2"
                       />
-                      <h4 class="text-display-200 font-semibold">
+                      <h4 class="title">
                         {{document.documentNumber}}
                         {{document.title}}
                       </h4>
+                      <p class="owner">
+                        {{get document.owners 0}}
+                      </p>
                     </div>
-                    <div class="flex space-x-1">
-                      {{!-- <Hds::Badge
-                        @text="{{document.product}}"
-                        @icon={{or (get-product-id document.product) undefined}}
-                      /> --}}
-                      <Hds::Badge @text={{document.type}} />
+                    <div class="flex gap-1">
                       <Doc::State
                         @hideProgress={{true}}
                         @state={{document.status}}
                       />
+                      <Hds::Badge @text={{document.docType}} />
                     </div>
                   </div>
                 </LinkTo>
+                {{! TODO: overflow menu }}
+                <FlightIcon @name="more-vertical" />
               </li>
             {{/each}}
           </ul>

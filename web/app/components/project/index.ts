@@ -22,7 +22,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked relatedDocuments = this.args.project.documents ?? [];
-  @tracked relatedLinks: RelatedExternalLink[] = [];
+  @tracked relatedLinks: RelatedExternalLink[] =
+    this.args.project.relatedLinks ?? [];
 
   @tracked modalIsShown = false;
 

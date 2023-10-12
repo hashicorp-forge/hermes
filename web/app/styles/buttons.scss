@@ -1,7 +1,8 @@
 .tertiary-button-gray {
   @apply text-color-foreground-primary;
 
-  &:hover {
+  &:hover,
+  &:focus {
     @apply text-color-foreground-strong;
   }
 }

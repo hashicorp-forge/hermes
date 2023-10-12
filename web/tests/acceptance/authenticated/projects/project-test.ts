@@ -4,6 +4,8 @@ import { module, test, todo } from "qunit";
 import { visit } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
+import { HermesDocument } from "hermes/types/document";
+import { RelatedExternalLink } from "hermes/components/related-resources";
 
 const ALL_PROJECTS_LINK = "[data-test-all-projects-link]";
 const TITLE = "[data-test-project-title]";
@@ -16,32 +18,50 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(async function () {
+  hooks.beforeEach(async function (
+    this: AuthenticatedProjectsProjectRouteTestContext,
+  ) {
     await authenticateSession({});
+    this.server.create("project", {
+      id: 1,
+      title: "Test Project",
+    });
   });
 
   test("the page title is correct", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    this.server.create("project", {
-      id: 1,
-      title: "Test Project",
-    });
-
     await visit("/projects/1");
-
     assert.equal(getPageTitle(), "Test Project | Hermes");
   });
 
-  test("it renders the expected elements (empty state)", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    this.server.create("project", {
-      id: 1,
-      title: "Test Project",
-    });
-
+  test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     await visit("/projects/1");
 
     assert.dom(ALL_PROJECTS_LINK).hasAttribute("href", "/projects");
     assert.dom(TITLE).hasText("Test Project");
     assert.dom(DESCRIPTION).hasText("Add a description");
+
+    // TODO: assert more things
+  });
+
+  test("it renders the correct filled-in state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.createList("document", 4);
+    this.server.createList("related-external-link", 2);
+
+    const project = this.server.schema.projects.find(1);
+    const documents = this.server.schema.document
+      .all()
+      .models.map((model: { attrs: HermesDocument }) => model.attrs);
+    const relatedLinks = this.server.schema.relatedExternalLinks
+      .all()
+      .models.map((model: { attrs: RelatedExternalLink }) => model.attrs);
+
+    project.update({
+      description: "Test description",
+      documents,
+      relatedLinks,
+    });
+
+    await visit("/projects/1");
 
     await this.pauseTest();
   });
@@ -54,6 +74,38 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     ) {
       assert.true(false);
     },
+  );
+
+  todo(
+    "you can edit a project title",
+    async function (
+      this: AuthenticatedProjectsProjectRouteTestContext,
+      assert,
+    ) {},
+  );
+
+  todo(
+    "you can't save an empty project title",
+    async function (
+      this: AuthenticatedProjectsProjectRouteTestContext,
+      assert,
+    ) {},
+  );
+
+  todo(
+    "you can add a document to a project",
+    async function (
+      this: AuthenticatedProjectsProjectRouteTestContext,
+      assert,
+    ) {},
+  );
+
+  todo(
+    "you can remove a document from a project",
+    async function (
+      this: AuthenticatedProjectsProjectRouteTestContext,
+      assert,
+    ) {},
   );
 
   todo(
