@@ -1,9 +1,7 @@
 {{page-title "All Documents"}}
 
-{{! TODO: move this into a shared component }}
-<header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
-  <Header::Nav />
-</header>
+<Header::Toolbar @facets={{@model.facets}} />
+
 {{#if @model.facets}}
   <div class="x-container mb-8">
     <div

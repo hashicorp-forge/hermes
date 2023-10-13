@@ -1,6 +1,7 @@
 {{page-title "My Docs"}}
 
-{{! Make this just a nav }}
+<Header::Toolbar @facets={{@model.facets}} />
+
 <MyDocs
   @latest={{@model.latest}}
   @published={{@model.published}}

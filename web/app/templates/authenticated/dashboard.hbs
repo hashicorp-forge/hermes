@@ -1,73 +1,73 @@
 {{page-title "Dashboard"}}
 {{set-body-class "dashboard"}}
 
-<Header />
+<Dashboard::NewFeaturesBanner />
 
-<section class="x-container page-body">
+{{#if @model}}
+  <Dashboard::DocsAwaitingReview @docs={{@model}} />
+{{/if}}
 
-  <Dashboard::NewFeaturesBanner />
+<div class="mb-6 mt-1">
+  <h1 class="text-display-400">
+    Welcome back,
+    {{this.authenticatedUser.info.given_name}}!
+  </h1>
+</div>
 
-  <div class="mb-6 mt-1">
-    <h1 class="text-display-400">
-      Welcome back,
-      {{this.authenticatedUser.info.given_name}}!
-    </h1>
-  </div>
+<div class="mt-5 flex w-full gap-20">
+  <div class="w-full pb-10">
 
-  <div class="mt-5 flex w-full gap-20">
-    <div class="w-full pb-10">
+    {{#if @model}}
+      <Dashboard::DocsAwaitingReview @docs={{@model}} />
+    {{/if}}
 
-      {{#if @model}}
-        <Dashboard::DocsAwaitingReview @docs={{@model}} />
-      {{/if}}
+    {{#if this.recentDocs.all}}
+      <div class="mb-1.5 flex items-center gap-3">
+        <FlightIcon @name="provider" class="text-blue-gray" />
+        <h4 class="hermes-h4">
+          Here's the latest
+        </h4>
+      </div>
+      <ol>
+        {{#each this.recentDocs.doubleAllRandomized as |r|}}
+          <li class="border-t border-t-color-border-faint first:border-t-0">
 
-      {{#if this.recentDocs.all}}
-        <div class="mb-1.5 flex items-center gap-3">
-          <FlightIcon @name="provider" class="text-blue-gray" />
-          <h4 class="hermes-h4">
-            Here's the latest
-          </h4>
-        </div>
-        <ol>
-          {{#each this.recentDocs.doubleAllRandomized as |r|}}
-            <li class="border-t border-t-color-border-faint first:border-t-0">
+            <a class="">
+              <div class="relative flex justify-between gap-6 pt-3 pb-4">
 
-              <a class="">
-                <div class="relative flex justify-between gap-6 pt-3 pb-4">
+                <div class="relative shrink-0">
+                  <Doc::Thumbnail
+                    @status={{r.doc.status}}
+                    @product={{r.doc.product}}
+                    class="medium shrink-0 self-start"
+                  />
+                </div>
+                <div class="w-full">
 
-                  <div class="relative shrink-0">
-                    <Doc::Thumbnail
-                      @status={{r.doc.status}}
-                      @product={{r.doc.product}}
-                      class="medium shrink-0 self-start"
-                    />
-                  </div>
-                  <div class="w-full">
+                  <div class="mb-2 flex w-full items-center justify-between">
+                    {{! Owner }}
+                    <div class="flex w-full items-center justify-between">
+                      <div class="flex items-center text-body-100">
+                        <Person::Avatar
+                          @size="small"
+                          @email={{get r.doc.owners 0}}
+                          @imgURL={{get r.doc.ownerPhotos 0}}
+                          class="-ml-px"
+                        />
+                        <span class="ml-1.5">
+                          {{get r.doc.owners 0}}
+                        </span>
+                        <span
+                          class="ml-2 text-body-100 text-color-foreground-disabled"
+                        >
 
-                    <div class="mb-2 flex w-full items-center justify-between">
-                      {{! Owner }}
-                      <div class="flex w-full items-center justify-between">
-                        <div class="flex items-center text-body-100">
-                          <Person::Avatar
-                            @size="small"
-                            @email={{get r.doc.owners 0}}
-                            @imgURL={{get r.doc.ownerPhotos 0}}
-                            class="-ml-px"
-                          />
-                          <span class="ml-1.5">
-                            {{get r.doc.owners 0}}
-                          </span>
-                          <span
-                            class="ml-2 text-body-100 text-color-foreground-disabled"
-                          >
-
-                            {{time-ago r.doc.createdTime}}
-                          </span>
-                        </div>
+                          {{time-ago r.doc.createdTime}}
+                        </span>
                       </div>
+                    </div>
 
-                      {{! Created time }}
-                      {{!-- <div class="shrink-0">
+                    {{! Created time }}
+                    {{!-- <div class="shrink-0">
                       <span
                         class="text-body-100 text-color-foreground-disabled"
                       >
@@ -75,186 +75,181 @@
                         {{time-ago r.doc.createdTime}}
                       </span>
                     </div> --}}
-                    </div>
-                    <h3
-                      class="mt-0.5 text-display-300 font-semibold text-color-foreground-strong"
-                    >
-                      {{r.doc.title}}
-                    </h3>
-                    {{#if r.doc.summary}}
-                      <p class="mt-1 text-body-300">
-                        {{r.doc.summary}}
-                      </p>
-                    {{/if}}
-                    {{! Type and Product }}
-                    <div
-                      class="mt-3.5 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
-                    >
-                      {{!-- <span class="tag {{dasherize r.doc.status}}">
+                  </div>
+                  <h3
+                    class="mt-0.5 text-display-300 font-semibold text-color-foreground-strong"
+                  >
+                    {{r.doc.title}}
+                  </h3>
+                  {{#if r.doc.summary}}
+                    <p class="mt-1 text-body-300">
+                      {{r.doc.summary}}
+                    </p>
+                  {{/if}}
+                  {{! Type and Product }}
+                  <div
+                    class="mt-3.5 flex items-center gap-[5px] text-body-100 leading-none text-color-foreground-faint"
+                  >
+                    {{!-- <span class="tag {{dasherize r.doc.status}}">
                       {{r.doc.status}}
                     </span>
                     <span class="opacity-50">
                       ·
                     </span> --}}
-                      <span>
-                        {{r.doc.docType}}
-                      </span>
-                      <span class="opacity-50">
-                        |
-                      </span>
-                      <span>
-                        {{r.doc.product}}
-                      </span>
-                      <span class="opacity-50">
-                        |
-                      </span>
-                      <span>
-                        {{r.doc.docNumber}}
-                      </span>
-                    </div>
+                    <span>
+                      {{r.doc.docType}}
+                    </span>
+                    <span class="opacity-50">
+                      |
+                    </span>
+                    <span>
+                      {{r.doc.product}}
+                    </span>
+                    <span class="opacity-50">
+                      |
+                    </span>
+                    <span>
+                      {{r.doc.docNumber}}
+                    </span>
                   </div>
                 </div>
-              </a>
-            </li>
-          {{/each}}
-        </ol>
-      {{else if this.recentDocs.fetchAll.isRunning}}
-        <div class="h-[100px]">
-          <FlightIcon @name="loading" class="mt-1" />
-        </div>
-      {{else if (eq this.recentDocs.all null)}}
-        <div class="h-[100px]">
-          <p class="mb-7 text-body-300 text-color-foreground-faint">
-            Error fetching documents.
-          </p>
-          <Hds::Button
-            @text="Retry"
-            @color="secondary"
-            @size="small"
-            @icon="reload"
-            {{on "click" (perform this.recentDocs.fetchAll)}}
+              </div>
+            </a>
+          </li>
+        {{/each}}
+      </ol>
+    {{else if this.recentDocs.fetchAll.isRunning}}
+      <div class="h-[100px]">
+        <FlightIcon @name="loading" class="mt-1" />
+      </div>
+    {{else if (eq this.recentDocs.all null)}}
+      <div class="h-[100px]">
+        <p class="mb-7 text-body-300 text-color-foreground-faint">
+          Error fetching documents.
+        </p>
+        <Hds::Button
+          @text="Retry"
+          @color="secondary"
+          @size="small"
+          @icon="reload"
+          {{on "click" (perform this.recentDocs.fetchAll)}}
+        />
+      </div>
+    {{else}}
+      <div class="text-display-200">
+        You havenʼt viewed any documents yet.
+      </div>
+    {{/if}}
+
+  </div>
+
+  <div class="relative flex w-72 shrink-0 flex-col gap-8">
+    <div class="absolute -left-10 top-0 h-full w-px bg-color-border-faint" />
+
+    <div>
+      <div class="mb-3 flex h-4 items-center gap-3">
+        <FlightIcon @name="history" class="text-blue-gray" />
+        <h2 class="hermes-h4 flex h-4 items-center">
+          Recently viewed
+        </h2>
+      </div>
+      {{#if true}}
+        <ul class="mt-1 flex flex-col">
+
+          <Doc::ThumbnailNew
+            @title="Account synchronization API from HCP"
+            @status="In review"
+            @product="Packer"
+            @docType="RFC"
+            @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQaFB6VxEdgH7fMu9urq0HDRUTL3aZhMpTNBFwZMNXxfw=s100"
           />
-        </div>
-      {{else}}
-        <div class="text-display-200">
-          You havenʼt viewed any documents yet.
-        </div>
-      {{/if}}
-
-    </div>
-
-    <div class="relative flex w-72 shrink-0 flex-col gap-8">
-      <div class="absolute -left-10 top-0 h-full w-px bg-color-border-faint" />
-
-      <div>
-        <div class="mb-3 flex h-4 items-center gap-3">
-          <FlightIcon @name="history" class="text-blue-gray" />
-          <h2 class="hermes-h4 flex h-4 items-center">
-            Recently viewed
-          </h2>
-        </div>
-        {{#if true}}
-          <ul class="mt-1 flex flex-col">
-
-            <Doc::ThumbnailNew
-              @title="Account synchronization API from HCP"
-              @status="In review"
-              @product="Packer"
-              @docType="RFC"
-              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQaFB6VxEdgH7fMu9urq0HDRUTL3aZhMpTNBFwZMNXxfw=s100"
-            />
-            <Doc::ThumbnailNew
-              @title="mini-RFC Enrollment store for clusters on Vault Insights"
-              @status="Draft"
-              @product="Engineering"
-              @docType="RFC"
-              @avatarURL="https://lh3.googleusercontent.com/a-/ALV-UjUzSs8znJVwNgJo1gH9h28sL9njvnE-v5v9fLQl0szroQ=s100"
-            />
-            <Doc::ThumbnailNew
-              @title="HCP Vagrant Resource Type Changes"
-              @status="In review"
-              @product="Vagrant"
-              @docType="RFC"
-              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQXKU1RjO97v4m10RM3si3i_9DvlqMUAv6sxah5ToNkaQ=s100"
-            />
-            {{! PROJECT: }}
-            <li
-              class="flex items-start gap-3 border-t border-t-color-border-faint"
-            >
-              {{! <div
+          <Doc::ThumbnailNew
+            @title="mini-RFC Enrollment store for clusters on Vault Insights"
+            @status="Draft"
+            @product="Engineering"
+            @docType="RFC"
+            @avatarURL="https://lh3.googleusercontent.com/a-/ALV-UjUzSs8znJVwNgJo1gH9h28sL9njvnE-v5v9fLQl0szroQ=s100"
+          />
+          <Doc::ThumbnailNew
+            @title="HCP Vagrant Resource Type Changes"
+            @status="In review"
+            @product="Vagrant"
+            @docType="RFC"
+            @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMQXKU1RjO97v4m10RM3si3i_9DvlqMUAv6sxah5ToNkaQ=s100"
+          />
+          {{! PROJECT: }}
+          <li
+            class="flex items-start gap-3 border-t border-t-color-border-faint"
+          >
+            {{! <div
                 class="relative mt-0.5 flex shrink-0 justify-center text-color-foreground-faint opacity-50"
               >
                 <FlightIcon @name="grid" />
               </div> }}
-              <a class="w-full py-3.5">
-                <div class="relative">
+            <a class="w-full py-3.5">
+              <div class="relative">
 
-                  <div class="flex w-full justify-between">
+                <div class="flex w-full justify-between">
 
-                    <div class="flex gap-1">
+                  <div class="flex gap-1">
 
-                      <ProductAvatar
-                        class="shrink-0"
-                        @productArea="Terraform"
-                      />
-                      <ProductAvatar class="shrink-0" @productArea="Sentinel" />
-                      <ProductAvatar class="shrink-0" @productArea="Labs" />
-                      <div
-                        class="ml-1.5 flex items-center gap-1 text-body-100 text-color-foreground-faint"
-                      >
-                        Project
-                      </div>
+                    <ProductAvatar class="shrink-0" @productArea="Terraform" />
+                    <ProductAvatar class="shrink-0" @productArea="Sentinel" />
+                    <ProductAvatar class="shrink-0" @productArea="Labs" />
+                    <div
+                      class="ml-1.5 flex items-center gap-1 text-body-100 text-color-foreground-faint"
+                    >
+                      Project
                     </div>
-                  </div>
-
-                  <div class="flex items-start justify-between">
-                    <h4 class="my-1.5 text-body-200">Listbox Rollout (Ember)</h4>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex gap-0.5">
-                      <div class="flex items-center gap-1">
-                        <FlightIcon @name="square-fill" class="text-lime-600" />
-                        <p class="text-body-100 text-color-foreground-faint">
-                          HERMES-045
-                        </p>
-                      </div>
-                      <FlightIcon
-                        @name="chevrons-up"
-                        class="text-color-foreground-critical"
-                      />
-                    </div>
-
                   </div>
                 </div>
-              </a>
-            </li>
-            <Doc::ThumbnailNew
-              @title="HCP Boundary Telemetry v2"
-              @status="Approved"
-              @product="Boundary"
-              @docType="RFC"
-              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMS5DXDFQCVLmGfCzNS0RiO6iQffnTmkJ-MOxgRc=s100"
-            />
-            <Doc::ThumbnailNew
-              @title="BluBracket Integration Opportunities"
-              @status="In review"
-              @product="Packer"
-              @docType="Memo"
-              @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMRVITo5hbppJmlUtvuAlS5DgcQWf3_y0-tdTsWYWg=s100"
-            />
 
-          </ul>
+                <div class="flex items-start justify-between">
+                  <h4 class="my-1.5 text-body-200">Listbox Rollout (Ember)</h4>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex gap-0.5">
+                    <div class="flex items-center gap-1">
+                      <FlightIcon @name="square-fill" class="text-lime-600" />
+                      <p class="text-body-100 text-color-foreground-faint">
+                        HERMES-045
+                      </p>
+                    </div>
+                    <FlightIcon
+                      @name="chevrons-up"
+                      class="text-color-foreground-critical"
+                    />
+                  </div>
 
-        {{else}}
-          <div class="mt-3 mb-2 text-color-foreground-faint">
-            <FlightIcon @name="pin" class="relative mr-1.5 translate-y-0.5" />
-            None yet
-          </div>
-        {{/if}}
-      </div>
+                </div>
+              </div>
+            </a>
+          </li>
+          <Doc::ThumbnailNew
+            @title="HCP Boundary Telemetry v2"
+            @status="Approved"
+            @product="Boundary"
+            @docType="RFC"
+            @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMS5DXDFQCVLmGfCzNS0RiO6iQffnTmkJ-MOxgRc=s100"
+          />
+          <Doc::ThumbnailNew
+            @title="BluBracket Integration Opportunities"
+            @status="In review"
+            @product="Packer"
+            @docType="Memo"
+            @avatarURL="https://lh3.googleusercontent.com/a-/AD_cMMRVITo5hbppJmlUtvuAlS5DgcQWf3_y0-tdTsWYWg=s100"
+          />
 
+        </ul>
+
+      {{else}}
+        <div class="mt-3 mb-2 text-color-foreground-faint">
+          <FlightIcon @name="pin" class="relative mr-1.5 translate-y-0.5" />
+          None yet
+        </div>
+      {{/if}}
     </div>
 
   </div>
 
-</section>
+</div>

@@ -1,11 +1,6 @@
 import Component from "@glimmer/component";
-import { FacetRecords } from "hermes/types/facets";
 
-interface HeaderComponentSignature {
-  Args: {
-    facets?: FacetRecords;
-  };
-}
+interface HeaderComponentSignature {}
 
 export default class HeaderComponent extends Component<HeaderComponentSignature> {}
 
