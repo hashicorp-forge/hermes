@@ -11,6 +11,12 @@ const ALL_PROJECTS_LINK = "[data-test-all-projects-link]";
 const TITLE = "[data-test-project-title]";
 const DESCRIPTION = "[data-test-project-description]";
 
+const DOCUMENT_LIST_ITEM = "[data-test-document-list-item]";
+const OVERFLOW_MENU_AFFORDANCE = "[data-test-overflow-menu-affordance]";
+
+const DOCUMENT_LINK = "[data-test-document-link]";
+const EXTERNAL_LINK = "[data-test-related-link]";
+
 interface AuthenticatedProjectsProjectRouteTestContext
   extends MirageTestContext {}
 
@@ -50,7 +56,14 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const project = this.server.schema.projects.find(1);
     const documents = this.server.schema.document
       .all()
-      .models.map((model: { attrs: HermesDocument }) => model.attrs);
+      .models.map((model: { attrs: HermesDocument }) => {
+        const relatedDoc = {
+          ...model.attrs,
+          googleFileID: model.attrs.objectID,
+        };
+
+        return relatedDoc;
+      });
     const relatedLinks = this.server.schema.relatedExternalLinks
       .all()
       .models.map((model: { attrs: RelatedExternalLink }) => model.attrs);
@@ -62,6 +75,24 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     });
 
     await visit("/projects/1");
+
+    assert.dom(DOCUMENT_LINK).exists({ count: 4 });
+    assert.dom(EXTERNAL_LINK).exists({ count: 2 });
+
+    assert
+      .dom(DOCUMENT_LINK)
+      .containsText("Test Document 0")
+      .containsText("testuser@example.com")
+      .containsText("RFC")
+      .containsText("WIP")
+      .hasAttribute("href", "/documents/0");
+
+    // confirm overflow menus
+
+    assert
+      .dom(EXTERNAL_LINK)
+      .containsText("Related External Link 0")
+      .hasAttribute("href", "https://0.hashicorp.com");
 
     await this.pauseTest();
   });

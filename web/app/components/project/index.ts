@@ -11,6 +11,7 @@ import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
 import { HermesProject } from "hermes/types/project";
+import { OverflowItem } from "../related-resources/overflow-menu";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -26,6 +27,43 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.args.project.relatedLinks ?? [];
 
   @tracked modalIsShown = false;
+
+  protected get overflowItemDeleteDoc(): OverflowItem {
+    return {
+      label: "Delete",
+      icon: "trash",
+      action: this.deleteDoc,
+    };
+  }
+
+  protected get overflowItemDeleteLink(): OverflowItem {
+    return {
+      label: "Delete",
+      icon: "trash",
+      action: this.deleteRelatedLink,
+    };
+  }
+
+  protected get overflowItemEdit(): OverflowItem {
+    return {
+      label: "Edit",
+      icon: "pencil-tool",
+      action: this.editResource,
+    };
+  }
+
+  protected get overflowItemsForDocument(): Record<string, OverflowItem> {
+    return {
+      delete: this.overflowItemDeleteDoc,
+    };
+  }
+
+  protected get overflowItemsForLink(): Record<string, OverflowItem> {
+    return {
+      edit: this.overflowItemEdit,
+      delete: this.overflowItemDeleteLink,
+    };
+  }
 
   @action showModal() {
     this.modalIsShown = true;
@@ -45,6 +83,35 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
   @action protected saveProjectInfo() {
     return;
+  }
+
+  @action protected deleteDoc(doc: RelatedHermesDocument) {
+    debugger;
+    this.relatedDocuments.removeObject(doc);
+    debugger;
+    void this.saveProject.perform();
+  }
+
+  @action protected deleteRelatedLink(link: RelatedExternalLink) {
+    this.relatedLinks.removeObject(link);
+    void this.saveProject.perform();
+  }
+
+  protected saveProject = task(async () => {
+    try {
+      console.log("we here");
+      await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(this.formattedRelatedResources),
+      });
+    } catch (e: unknown) {
+      console.log("error", e);
+      // TODO: Handle error
+    }
+  });
+
+  @action protected editResource(resource: RelatedResource) {
+    console.log("editResource", resource);
   }
 
   /**

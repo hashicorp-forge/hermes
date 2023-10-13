@@ -122,6 +122,11 @@
     @apply w-full space-y-2;
   }
 
+  .overflow-button-container {
+    @apply absolute top-0 -right-1 w-16 justify-end rounded-tr;
+    @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+  }
+
   .sidebar-footer {
     @apply w-full shrink-0 bg-color-page-faint py-4 px-3.5;
 

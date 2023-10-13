@@ -8,12 +8,12 @@
 >
   <:anchor as |dd|>
     <div
-      class="related-resources-overflow-button-container
-        {{if dd.contentIsShown 'visible' 'invisible'}}
+      class="overflow-button-container
+        {{unless @buttonIsShown (if dd.contentIsShown 'visible' 'invisible')}}
         "
     >
       <dd.ToggleAction
-        class="related-resource-overflow-button {{if dd.contentIsShown 'open'}}"
+        class="overflow-button {{if dd.contentIsShown 'active'}}"
       >
         <div class="button-affordance">
           <FlightIcon @name="more-vertical" />
@@ -26,7 +26,7 @@
       data-test-action
       data-test-overflow-menu-action={{dasherize dd.attrs.label}}
       {{on "click" dd.attrs.action}}
-      class="related-resources-overflow-menu-item-button"
+      class="overflow-menu-item-button"
     >
       <FlightIcon @name={{dd.attrs.icon}} class="shrink-0" />
       <span data-test-label>

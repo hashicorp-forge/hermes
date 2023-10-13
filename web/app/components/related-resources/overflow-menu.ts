@@ -1,3 +1,4 @@
+import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
 export interface OverflowItem {
@@ -10,10 +11,15 @@ interface RelatedResourcesOverflowMenuComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items: Record<string, OverflowItem>;
+    buttonIsShown?: boolean;
   };
 }
 
-export default class RelatedResourcesOverflowMenuComponent extends Component<RelatedResourcesOverflowMenuComponentSignature> {}
+export default class RelatedResourcesOverflowMenuComponent extends Component<RelatedResourcesOverflowMenuComponentSignature> {
+  @action onClick(args: unknown) {
+    debugger;
+  }
+}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

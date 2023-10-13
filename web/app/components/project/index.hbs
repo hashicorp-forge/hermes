@@ -91,44 +91,47 @@
           <ul class="resource-list">
             {{#each this.relatedDocuments as |document|}}
               {{log "document" document}}
-              <li class="resource-list-item">
-                {{! TODO: hover-area hack }}
-                <LinkTo
-                  @route="authenticated.document"
-                  @model={{document.googleFileID}}
+              {{! TODO: component-ize }}
+              <li data-test-document-list-item>
+                <Project::Resource
+                  @overflowMenuItems={{this.overflowItemsForDocument}}
                 >
-                  {{!
+                  <LinkTo
+                    data-test-document-link
+                    @route="authenticated.document"
+                    @model={{document.googleFileID}}
+                  >
+                    {{!
                     We create a click area that extends beyond the edges of its  container. This makes the parent div clickable without having to wrap itself in a link, and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
                   }}
-                  <div aria-hidden="true" class="hit-area"></div>
-                  <div class="flex w-full items-center justify-between px-4">
-                    <div class="flex items-center gap-2">
-                      {{! TODO: add product avatar }}
-                      {{! TODO: unity with docs awaiting review }}
-                      <Person::Avatar
-                        @email="{{get document.owners 0}}"
-                        @imgURL={{get document.ownerPhotos 0}}
-                        @size="small"
-                      />
-                      <h4 class="title">
-                        {{document.documentNumber}}
-                        {{document.title}}
-                      </h4>
-                      <p class="owner">
-                        {{get document.owners 0}}
-                      </p>
+                    <div aria-hidden="true" class="hit-area"></div>
+                    <div class="flex w-full items-center justify-between px-4">
+                      <div class="flex items-center gap-2">
+                        {{! TODO: add product avatar }}
+                        {{! TODO: unify with docs awaiting review }}
+                        <Person::Avatar
+                          @email="{{get document.owners 0}}"
+                          @imgURL={{get document.ownerPhotos 0}}
+                          @size="small"
+                        />
+                        <h4 class="title">
+                          {{document.documentNumber}}
+                          {{document.title}}
+                        </h4>
+                        <p class="owner">
+                          {{get document.owners 0}}
+                        </p>
+                      </div>
+                      <div class="flex gap-1">
+                        <Doc::State
+                          @hideProgress={{true}}
+                          @state={{document.status}}
+                        />
+                        <Hds::Badge @text={{document.docType}} />
+                      </div>
                     </div>
-                    <div class="flex gap-1">
-                      <Doc::State
-                        @hideProgress={{true}}
-                        @state={{document.status}}
-                      />
-                      <Hds::Badge @text={{document.docType}} />
-                    </div>
-                  </div>
-                </LinkTo>
-                {{! TODO: overflow menu }}
-                <FlightIcon @name="more-vertical" />
+                  </LinkTo>
+                </Project::Resource>
               </li>
             {{/each}}
           </ul>
@@ -166,12 +169,20 @@
           <ul class="resource-list">
             {{#each rr.items as |link|}}
               <li>
-                <ExternalLink href={{link.url}} class="flex h-12 items-center">
-                  <div class="px-4">
-                    {{link.name}}
-                  </div>
-                  <div>{{link.url}}</div>
-                </ExternalLink>
+                <Project::Resource
+                  @overflowMenuItems={{this.overflowItemsForLink}}
+                >
+                  <ExternalLink
+                    data-test-related-link
+                    href={{link.url}}
+                    class="flex h-12 items-center"
+                  >
+                    <div class="px-4">
+                      {{link.name}}
+                    </div>
+                    <div>{{link.url}}</div>
+                  </ExternalLink>
+                </Project::Resource>
               </li>
             {{/each}}
           </ul>

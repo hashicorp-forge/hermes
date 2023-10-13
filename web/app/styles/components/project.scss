@@ -47,7 +47,7 @@
     @apply divide-y divide-color-border-primary border-t border-t-color-border-primary;
   }
 
-  .resource-list-item {
+  .project-resource {
     @apply relative flex h-12 items-stretch;
 
     &:hover {
@@ -77,6 +77,10 @@
 
     .owner {
       @apply text-color-foreground-faint;
+    }
+
+    .overflow-button-container {
+      @apply self-center;
     }
   }
 }

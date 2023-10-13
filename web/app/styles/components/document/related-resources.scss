@@ -9,6 +9,10 @@
       .related-resource-link {
         @apply bg-color-surface-interactive-hover;
       }
+
+      .overflow-button-container {
+        @apply visible;
+      }
     }
   }
 
@@ -46,12 +50,14 @@
 
   &::after {
     @apply border-color-border-highlight bg-color-surface-highlight;
-    animation: fadeIn 400ms ease-out, scaleIn 500ms ease-out,
+    animation:
+      fadeIn 400ms ease-out,
+      scaleIn 500ms ease-out,
       fadeOut 500ms ease-out 600ms forwards;
   }
 }
 
-.related-resources-overflow-menu-item-button {
+.overflow-menu-item-button {
   @apply flex w-full space-x-2 py-2 px-4 leading-none;
 
   > .flight-icon {
@@ -59,11 +65,9 @@
   }
 }
 
-.related-resources-overflow-button-container {
-  @apply pointer-events-none absolute top-0 -right-1;
-  @apply flex w-16 justify-end rounded-tr;
-  @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
-  @apply group-focus-within:visible group-hover:visible;
+.overflow-button-container {
+  @apply pointer-events-none;
+  @apply flex;
 
   &:hover,
   &:focus-within {
@@ -71,16 +75,16 @@
   }
 }
 
-.related-resource-overflow-button {
+.overflow-button {
   @apply pointer-events-auto relative p-[3px];
 
   &:hover,
   &:focus,
   &:active,
   &:focus-visible,
-  &.open {
+  &.active {
     .button-affordance {
-      @apply border-color-border-strong bg-color-surface-faint;
+      @apply border-color-border-strong bg-color-foreground-high-contrast;
     }
   }
 
