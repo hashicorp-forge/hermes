@@ -16,7 +16,12 @@
         class="absolute top-0 -left-4 -right-4 -bottom-px -z-10 rounded-md group-hover:bg-color-surface-faint"
       ></div>
 
-      <Product::Avatar @product={{@productArea}} @fallbackIcon="file-text" />
+      <Product::Avatar
+        @product={{@productArea}}
+        @iconSize={{16}}
+        @fallbackIcon="file-text"
+        class="h-9 !w-9 shrink-0"
+      />
       <div class="relative">
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
