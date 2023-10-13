@@ -1,4 +1,9 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{outlet}}
-
-<Footer />
+{{#if this.standardTemplateIsShown}}
+  <div class="x-container">
+    <Header />
+    {{outlet}}
+    <Footer />
+  </div>
+{{else}}
+  {{outlet}}
+{{/if}}

@@ -1,7 +1,7 @@
 {{! @glint-nocheck: not typesafe yet }}
 {{page-title "My Drafts"}}
 
-<Header @facets={{@model.facets}} />
+<Header::Toolbar @facets={{@model.facets}} />
 
 <Doc::Table
   @docs={{@model.results.Hits}}
