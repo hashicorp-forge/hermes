@@ -26,19 +26,10 @@
       </a>
     </nav>
     {{#if @projects}}
-      <ol
-        {{!-- {{did-insert this.configureMasonry}} --}}
-        class="relative grid grid-cols-3 gap-2"
-      >
-        {{#each @projects as |project|}}
+      <ol class="relative grid grid-cols-3 gap-2">
+        {{#each-in @projects as |_id project|}}
           <Project::Tile @project={{project}} />
-        {{/each}}
-        {{#each @projects as |project|}}
-          <Project::Tile @project={{project}} />
-        {{/each}}
-        {{#each @projects as |project|}}
-          <Project::Tile @project={{project}} />
-        {{/each}}
+        {{/each-in}}
       </ol>
     {{else}}
       {{! TODO: No projects state }}

@@ -5,7 +5,7 @@ import { HermesProject } from "hermes/types/project";
 
 interface ProjectListComponentSignature {
   Args: {
-    projects: HermesProject[];
+    projects: Record<string, HermesProject>;
   };
 }
 

@@ -1,321 +1,307 @@
-<header class="mb-7 border-b border-b-color-border-faint bg-color-page-faint">
-  <Header::Nav />
-</header>
-
-<div class="x-container -mt-4">
-  <div class="flex items-center justify-between">
-    {{! TODO: component-ize this button style }}
-    <LinkTo
-      @route="authenticated.projects"
-      class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
-    >
-      <FlightIcon @name="grid" class="mr-2" />
-      All projects
-    </LinkTo>
-
-    <div class="flex space-x-0.5">
-      <X::DropdownList
-        @items={{hash
-          complete=(hash
-            name="Complete..." icon="check-circle" action=this.showModal
-          )
-          archive=(hash name="Archive..." icon="archive" action=this.showModal)
-        }}
-        @placement="bottom-end"
-      >
-        <:anchor as |dd|>
-          <dd.ToggleAction>
-            <div
-              class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong
-                {{if dd.contentIsShown 'border-color-border-strong'}}"
-            >
-              <FlightIcon @name="more-horizontal" />
-            </div>
-          </dd.ToggleAction>
-        </:anchor>
-        <:item as |dd|>
-          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
-            <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
-            {{dd.attrs.name}}
-          </dd.Action>
-        </:item>
-      </X::DropdownList>
-      <CopyURLButton
-        @url="TODO"
-        @isIconOnly={{true}}
-        @tooltipPlacement="bottom"
-        class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
-      />
-
-      <Hds::Button
-        {{! @size="small" }}
-        @icon="pin"
-        @text="Pin to dashboard"
-        @isIconOnly={{true}}
-        @color="tertiary"
-        class="mx-auto text-color-foreground-primary"
-        {{tooltip "Pin to dashboard" placement="bottom"}}
-      />
-
-    </div>
-  </div>
-
-  <div class="mb-10 mt-1.5">
-    <div class="mx-auto max-w-3xl">
-      <div class="relative">
-        <EditableField
-          @value={{@project.name}}
-          @tag="h1"
-          @buttonPlacement="center"
-          @buttonOverlayColor="white"
-          @buttonOverlayPaddingBottom="80px"
-          {{! TODO: replace with actual function }}
-          @onChange={{this.hideModal}}
-          @class="px-[4px] py-[2px] text-display-500 font-bold text-center"
-          class="-mb-px"
-        >
-          <:default as |F|>
-            {{F.value}}
-          </:default>
-        </EditableField>
-        <EditableField
-          @value={{@project.description}}
-          {{! TODO: replace with actual function }}
-          @onChange={{this.hideModal}}
-          @buttonPlacement="center"
-          @buttonOverlayColor="white"
-          @buttonOverlayPaddingBottom="80px"
-          @class="p-1 text-body-300 text-color-foreground-faint text-center"
-        >
-          <:default as |F|>
-            {{or F.value "Add a description"}}
-          </:default>
-        </EditableField>
-      </div>
-
-      {{#if this.modalIsShown}}
-        <Hds::Modal @onClose={{this.hideModal}} as |M|>
-          <M.Header>
-            Edit project info
-          </M.Header>
-          <M.Body>
-            <Hds::Form::TextInput::Field
-              @value={{@project.name}}
-              class="mb-6"
-              as |T|
-            >
-              <T.Label>Name</T.Label>
-            </Hds::Form::TextInput::Field>
-            <Hds::Form::TextInput::Field
-              @value={{@project.description}}
-              @isOptional={{true}}
-              class="mb-5"
-              as |T|
-            >
-              <T.Label>Description</T.Label>
-            </Hds::Form::TextInput::Field>
-          </M.Body>
-          <M.Footer as |F|>
-            <Hds::ButtonSet>
-              <Hds::Button
-                {{on "click" this.saveProjectInfo}}
-                @text="Save changes"
-              />
-              <Hds::Button
-                {{on "click" F.close}}
-                @text="Cancel"
-                @color="secondary"
-              />
-            </Hds::ButtonSet>
-          </M.Footer>
-        </Hds::Modal>
-      {{/if}}
-    </div>
-
-    <div class="mt-8 flex justify-center">
-      {{#if @project.jiraObject}}
-        <div
-          class="flex h-9 items-center rounded border border-color-border-primary px-3"
-        >
-
-          <div class="flex h-9 items-center space-x-2">
-            <FlightIcon @name="jira" class="mr-3" />
-            {{#if @project.jiraObject.type}}
-              <div class="flex">
-                <FlightIcon @name="square-fill" class="text-lime-600" />
-              </div>
-            {{/if}}
-            <div
-              class="text-color-foreground-faint
-                {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
-            >
-              {{@project.jiraObject.key}}
-            </div>
-            <div class="max-w-[180px]">
-              <TruncatedText
-                class="text-body-200 text-color-foreground-primary"
-              >
-                {{@project.jiraObject.summary}}
-              </TruncatedText>
-            </div>
-            {{#if @project.jiraObject.priority}}
-              <div class="flex">
-                <FlightIcon
-                  @name="chevrons-up"
-                  class="text-color-foreground-critical"
-                />
-              </div>
-            {{/if}}
-            {{#if @project.jiraObject.assignee}}
-              <Person::Avatar @email={{@project.jiraObject.assignee}} />
-            {{/if}}
-          </div>
-          <div class="ml-3 flex shrink-0">
-            <FlightIcon @name="more-vertical" />
-          </div>
-        </div>
-      {{else}}
-        <Hds::Button
-          @color="secondary"
-          @icon="jira"
-          @size="small"
-          @text="Attach Jira issue"
-        />
-      {{/if}}
-    </div>
-
-  </div>
-
-  <div
-    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
+<div class="-mt-4 flex items-center justify-between">
+  {{! TODO: component-ize this button style }}
+  <LinkTo
+    @route="authenticated.projects"
+    class="flex items-center rounded-button-md border border-transparent py-2 px-3 hover:border-color-border-strong"
   >
+    <FlightIcon @name="grid" class="mr-2" />
+    All projects
+  </LinkTo>
 
-    <RelatedResources
-      @scope="documents"
-      @items={{@project.documents}}
-      @addResource={{this.addResource}}
-      @modalHeaderTitle="Add a document"
-      @modalInputPlaceholder="Search by title, author, doc number..."
+  <div class="flex space-x-0.5">
+    <X::DropdownList
+      @items={{hash
+        complete=(hash
+          name="Complete..." icon="check-circle" action=this.showModal
+        )
+        archive=(hash name="Archive..." icon="archive" action=this.showModal)
+      }}
+      @placement="bottom-end"
     >
-      <:header as |rr|>
-        <div class="flex h-12 items-center rounded-t bg-color-surface-faint">
-          <div class="w-full pl-4 pr-2">
-            <div class="flex items-center justify-between">
-              <h3 class="text-body-200 font-semibold">
-                Documents
-              </h3>
-              <Hds::Button
-                {{on "click" rr.showModal}}
-                @text="Add a document"
-                @color="tertiary"
-                @icon="plus"
-                class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
-                @isIconOnly={{true}}
+      <:anchor as |dd|>
+        <dd.ToggleAction>
+          <div
+            class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong
+              {{if dd.contentIsShown 'border-color-border-strong'}}"
+          >
+            <FlightIcon @name="more-horizontal" />
+          </div>
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
+          <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
+          {{dd.attrs.name}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+    <CopyURLButton
+      @url="TODO"
+      @isIconOnly={{true}}
+      @tooltipPlacement="bottom"
+      class="flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary hover:border-color-border-strong"
+    />
+
+    <Hds::Button
+      {{! @size="small" }}
+      @icon="pin"
+      @text="Pin to dashboard"
+      @isIconOnly={{true}}
+      @color="tertiary"
+      class="mx-auto text-color-foreground-primary"
+      {{tooltip "Pin to dashboard" placement="bottom"}}
+    />
+
+  </div>
+</div>
+
+<div class="mb-10 mt-1.5">
+  <div class="mx-auto max-w-3xl">
+    <div class="relative">
+      <EditableField
+        @value={{@project.title}}
+        @tag="h1"
+        {{! @buttonPlacement="center" }}
+        {{! @buttonOverlayColor="white" }}
+        {{! @buttonOverlayPaddingBottom="80px" }}
+        {{! TODO }}
+        @onChange={{this.hideModal}}
+        {{! TODO }}
+        @onSave={{this.hideModal}}
+        class="-mb-px"
+      />
+      <EditableField
+        @value="{{@project.description}}"
+        {{! TODO }}
+        @onChange={{this.hideModal}}
+        {{! TODO }}
+        @onSave={{this.hideModal}}
+        {{! @buttonPlacement="center" }}
+        {{! @buttonOverlayColor="white" }}
+        {{! @buttonOverlayPaddingBottom="80px" }}
+      />
+    </div>
+
+    {{#if this.modalIsShown}}
+      <Hds::Modal @onClose={{this.hideModal}} as |M|>
+        <M.Header>
+          Edit project info
+        </M.Header>
+        <M.Body>
+          <Hds::Form::TextInput::Field
+            @value={{@project.name}}
+            class="mb-6"
+            as |T|
+          >
+            <T.Label>Name</T.Label>
+          </Hds::Form::TextInput::Field>
+          <Hds::Form::TextInput::Field
+            @value={{@project.description}}
+            @isOptional={{true}}
+            class="mb-5"
+            as |T|
+          >
+            <T.Label>Description</T.Label>
+          </Hds::Form::TextInput::Field>
+        </M.Body>
+        <M.Footer as |F|>
+          <Hds::ButtonSet>
+            <Hds::Button
+              {{on "click" this.saveProjectInfo}}
+              @text="Save changes"
+            />
+            <Hds::Button
+              {{on "click" F.close}}
+              @text="Cancel"
+              @color="secondary"
+            />
+          </Hds::ButtonSet>
+        </M.Footer>
+      </Hds::Modal>
+    {{/if}}
+  </div>
+
+  <div class="mt-8 flex justify-center">
+    {{#if @project.jiraObject}}
+      <div
+        class="flex h-9 items-center rounded border border-color-border-primary px-3"
+      >
+
+        <div class="flex h-9 items-center space-x-2">
+          <FlightIcon @name="jira" class="mr-3" />
+          {{#if @project.jiraObject.type}}
+            <div class="flex">
+              <FlightIcon @name="square-fill" class="text-lime-600" />
+            </div>
+          {{/if}}
+          <div
+            class="text-color-foreground-faint
+              {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
+          >
+            {{@project.jiraObject.key}}
+          </div>
+          <div class="max-w-[180px]">
+            <TruncatedText class="text-body-200 text-color-foreground-primary">
+              {{@project.jiraObject.summary}}
+            </TruncatedText>
+          </div>
+          {{#if @project.jiraObject.priority}}
+            <div class="flex">
+              <FlightIcon
+                @name="chevrons-up"
+                class="text-color-foreground-critical"
               />
             </div>
+          {{/if}}
+          {{#if @project.jiraObject.assignee}}
+            <Person::Avatar @email={{@project.jiraObject.assignee}} />
+          {{/if}}
+        </div>
+        <div class="ml-3 flex shrink-0">
+          <FlightIcon @name="more-vertical" />
+        </div>
+      </div>
+    {{else}}
+      <Hds::Button
+        @color="secondary"
+        @icon="jira"
+        @size="small"
+        @text="Attach Jira issue"
+      />
+    {{/if}}
+  </div>
+
+</div>
+
+<div
+  class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
+>
+
+  <RelatedResources
+    @scope="documents"
+    @items={{@project.documents}}
+    @addResource={{this.addResource}}
+    @modalHeaderTitle="Add a document"
+    @modalInputPlaceholder="Search by title, author, doc number..."
+  >
+    <:header as |rr|>
+      <div class="flex h-12 items-center rounded-t bg-color-surface-faint">
+        <div class="w-full pl-4 pr-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-body-200 font-semibold">
+              Documents
+            </h3>
+            <Hds::Button
+              {{on "click" rr.showModal}}
+              @text="Add a document"
+              @color="tertiary"
+              @icon="plus"
+              class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
+              @isIconOnly={{true}}
+            />
           </div>
         </div>
-      </:header>
-      <:list>
-        {{#if @project.documents}}
-          <ul
-            class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
-          >
-            {{#each @project.documents as |document|}}
-              <li class="group">
-                <LinkTo
-                  @route="authenticated.document"
-                  @model={{document.googleFileID}}
-                  class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
-                >
-                  <div class="flex w-full items-center justify-between px-4">
-                    <div class="flex items-center">
-                      <Person::Avatar
-                        @email="{{document.product}}"
-                        @size="small"
-                        class="mr-2"
-                      />
-                      <h4 class="text-display-200 font-semibold">
-                        {{document.documentNumber}}
-                        {{document.title}}
-                      </h4>
-                    </div>
-                    <div class="flex space-x-1">
-                      {{!-- <Hds::Badge
+      </div>
+    </:header>
+    <:list>
+      {{#if @project.documents}}
+        <ul
+          class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
+        >
+          {{#each @project.documents as |document|}}
+            <li class="group">
+              <LinkTo
+                @route="authenticated.document"
+                @model={{document.googleFileID}}
+                class="flex h-12 items-center hover:bg-color-surface-faint group-first:rounded-t group-last:rounded-b"
+              >
+                <div class="flex w-full items-center justify-between px-4">
+                  <div class="flex items-center">
+                    <Person::Avatar
+                      @email="{{document.product}}"
+                      @size="small"
+                      class="mr-2"
+                    />
+                    <h4 class="text-display-200 font-semibold">
+                      {{document.documentNumber}}
+                      {{document.title}}
+                    </h4>
+                  </div>
+                  <div class="flex space-x-1">
+                    {{!-- <Hds::Badge
                         @text="{{document.product}}"
                         @icon={{or (get-product-id document.product) undefined}}
                       /> --}}
-                      <Hds::Badge @text={{document.type}} />
-                      <Doc::State
-                        @hideProgress={{true}}
-                        @state={{document.status}}
-                      />
-                    </div>
+                    <Hds::Badge @text={{document.type}} />
+                    <Doc::State
+                      @hideProgress={{true}}
+                      @state={{document.status}}
+                    />
                   </div>
-                </LinkTo>
-              </li>
-            {{/each}}
-          </ul>
-        {{/if}}
-      </:list>
-    </RelatedResources>
-  </div>
+                </div>
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </:list>
+  </RelatedResources>
+</div>
 
-  {{! PROJECTS }}
-  <div
-    class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
+{{! PROJECTS }}
+<div
+  class="mx-auto mb-8 max-w-3xl overflow-hidden rounded border border-color-border-primary"
+>
+  <RelatedResources
+    @items={{this.relatedLinks}}
+    @addResource={{this.addResource}}
+    @modalHeaderTitle="Add related link"
+    @modalInputPlaceholder="Enter a URL"
+    @scope="external-links"
   >
-    <RelatedResources
-      @items={{this.relatedLinks}}
-      @addResource={{this.addResource}}
-      @modalHeaderTitle="Add related link"
-      @modalInputPlaceholder="Enter a URL"
-      @scope="external-links"
-    >
-      <:header as |rr|>
-        <div class="flex h-12 items-center bg-color-surface-faint">
-          <div class="w-full pl-4 pr-2">
-            <div class="flex items-center justify-between">
-              <h3 class="text-body-200 font-semibold">
-                Related links
-              </h3>
-              <Hds::Button
-                {{on "click" rr.showModal}}
-                @text="Add a related link"
-                @color="tertiary"
-                @icon="plus"
-                @isIconOnly={{true}}
-                class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
-              />
-            </div>
+    <:header as |rr|>
+      <div class="flex h-12 items-center bg-color-surface-faint">
+        <div class="w-full pl-4 pr-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-body-200 font-semibold">
+              Related links
+            </h3>
+            <Hds::Button
+              {{on "click" rr.showModal}}
+              @text="Add a related link"
+              @color="tertiary"
+              @icon="plus"
+              @isIconOnly={{true}}
+              class="px-2.5 text-color-foreground-primary hover:text-color-foreground-strong"
+            />
           </div>
         </div>
-      </:header>
-      <:list as |rr|>
-        {{#if rr.items.length}}
-          <ul
-            class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
-          >
-            {{#each rr.items as |link|}}
-              <li>
-                <ExternalLink href={{link.url}} class="flex h-12 items-center">
-                  <div class="px-4">
-                    {{link.name}}
-                  </div>
-                  <div>{{link.url}}</div>
-                </ExternalLink>
-              </li>
-            {{/each}}
-          </ul>
-        {{/if}}
-      </:list>
-    </RelatedResources>
-  </div>
+      </div>
+    </:header>
+    <:list as |rr|>
+      {{#if rr.items.length}}
+        <ul
+          class="divide-y divide-color-border-primary border-t border-t-color-border-primary"
+        >
+          {{#each rr.items as |link|}}
+            <li>
+              <ExternalLink href={{link.url}} class="flex h-12 items-center">
+                <div class="px-4">
+                  {{link.name}}
+                </div>
+                <div>{{link.url}}</div>
+              </ExternalLink>
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </:list>
+  </RelatedResources>
+</div>
 
-  <div class="mb-4 text-center text-body-100 text-color-foreground-faint">
-    Created
-    {{time-ago @project.dateCreated}}
-    by
-    {{@project.creator}}
-  </div>
+<div class="mb-4 text-center text-body-100 text-color-foreground-faint">
+  Created
+  {{time-ago @project.dateCreated}}
+  by
+  {{@project.creator}}
 </div>
