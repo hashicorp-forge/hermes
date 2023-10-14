@@ -41,26 +41,24 @@
 </div>
 
 <div class="mx-auto mt-1.5 w-full max-w-3xl">
-  <div class="mx-auto w-full max-w-xl">
 
-    <div class="project-title">
-      <EditableField
-        data-test-project-title
-        @value={{@project.title}}
-        @tag="h1"
-        @onChange={{this.hideModal}}
-        @onSave={{this.saveProjectInfo}}
-      />
-    </div>
-    <div class="project-description">
-      <EditableField
-        data-test-project-description
-        @value={{@project.description}}
-        @onChange={{this.hideModal}}
-        @onSave={{this.saveProjectInfo}}
-        @placeholder="Add a description"
-      />
-    </div>
+  <div class="project-title">
+    <EditableField
+      data-test-project-title
+      @value={{@project.title}}
+      @tag="h1"
+      @onChange={{this.hideModal}}
+      @onSave={{this.saveProjectInfo}}
+    />
+  </div>
+  <div class="project-description">
+    <EditableField
+      data-test-project-description
+      @value={{@project.description}}
+      @onChange={{this.hideModal}}
+      @onSave={{this.saveProjectInfo}}
+      @placeholder="Add a description"
+    />
   </div>
 
   {{! TODO: Jira section }}

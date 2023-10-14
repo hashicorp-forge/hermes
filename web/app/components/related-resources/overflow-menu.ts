@@ -10,6 +10,7 @@ interface RelatedResourcesOverflowMenuComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items: Record<string, OverflowItem>;
+    buttonIsShown?: boolean;
   };
 }
 

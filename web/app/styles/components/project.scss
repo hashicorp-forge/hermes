@@ -10,7 +10,7 @@
   .project-title {
     .field-toggle,
     textarea {
-      @apply text-display-500 font-bold text-color-foreground-strong;
+      @apply text-display-500 font-bold leading-none text-color-foreground-strong;
     }
   }
 
@@ -82,5 +82,9 @@
     .overflow-button-container {
       @apply self-center;
     }
+  }
+
+  .editable-field .edit-overlay-affordance {
+    @apply justify-center;
   }
 }
