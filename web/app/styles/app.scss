@@ -37,13 +37,13 @@
 @use "components/doc/state";
 @use "components/table/sortable-header";
 @use "components/preview-card";
-@use "components/product-avatar";
 @use "components/project";
+@use "components/product/avatar";
+@use "components/product/link";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
-@use "components/product-badge-link";
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
 @use "components/settings/subscription-list-item";

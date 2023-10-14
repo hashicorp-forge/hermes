@@ -125,13 +125,13 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     const { matchAnchorWidth, anchor } = this.args;
     const { content } = this;
 
-    if (!matchAnchorWidth) {
+    if (matchAnchorWidth === undefined) {
       return;
     }
 
-    if (typeof matchAnchorWidth === "boolean") {
+    if (matchAnchorWidth === true) {
       content.style.width = `${anchor.offsetWidth}px`;
-    } else {
+    } else if (typeof matchAnchorWidth === "object") {
       content.style.width = `${
         anchor.offsetWidth + matchAnchorWidth.additionalWidth
       }px`;

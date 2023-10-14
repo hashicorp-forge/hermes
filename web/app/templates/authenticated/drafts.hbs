@@ -1,13 +1,13 @@
-{{page-title "My Docs"}}
+{{! @glint-nocheck: not typesafe yet }}
+{{page-title "My Drafts"}}
 
 <Header::Toolbar @facets={{@model.facets}} />
 
 <Doc::Table
-  @docs={{@model.results.hits}}
+  @docs={{@model.results.Hits}}
   @nbPages={{@model.results.nbPages}}
   @currentPage={{(add @model.results.page 1)}}
+  @isDraft={{true}}
   @sortDirection={{this.sortDirection}}
   @currentSort="createdTime"
 />
-
-{{outlet}}

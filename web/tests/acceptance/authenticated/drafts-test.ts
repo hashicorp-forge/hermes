@@ -9,9 +9,9 @@ const PRODUCT_LINK = "[data-test-product-link]";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
-interface AuthenticatedMyRouteTestContext extends MirageTestContext {}
+interface AuthenticatedDraftRouteTestContext extends MirageTestContext {}
 
-module("Acceptance | authenticated/my", function (hooks) {
+module("Acceptance | authenticated/drafts", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -19,20 +19,20 @@ module("Acceptance | authenticated/my", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AuthenticatedMyRouteTestContext, assert) {
-    await visit("/my");
-    assert.equal(getPageTitle(), "My Docs | Hermes");
+  test("the page title is correct", async function (this: AuthenticatedDraftRouteTestContext, assert) {
+    await visit("/drafts");
+    assert.equal(getPageTitle(), "My Drafts | Hermes");
   });
 
-  test("documents can be sorted by created date", async function (this: AuthenticatedMyRouteTestContext, assert) {
+  test("documents can be sorted by created date", async function (this: AuthenticatedDraftRouteTestContext, assert) {
     this.server.createList("document", 2);
 
-    await visit("/my");
+    await visit("/drafts");
 
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/my?sortBy=dateAsc");
+      .hasAttribute("href", "/drafts?sortBy=dateAsc");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
@@ -43,22 +43,22 @@ module("Acceptance | authenticated/my", function (hooks) {
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
       .hasClass("active")
-      .hasAttribute("href", "/my");
+      .hasAttribute("href", "/drafts");
 
     assert
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
       .hasAttribute("data-test-icon", "arrow-up");
   });
 
-  test("product badges have the correct hrefs", async function (this: AuthenticatedMyRouteTestContext, assert) {
+  test("product badges have the correct hrefs", async function (this: AuthenticatedDraftRouteTestContext, assert) {
     this.server.create("document", {
-      product: "Terraform",
+      product: "Security",
     });
 
-    await visit("/my");
+    await visit("/drafts");
 
     assert
       .dom(PRODUCT_LINK)
-      .hasAttribute("href", "/my?product=%5B%22Terraform%22%5D");
+      .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
   });
 });

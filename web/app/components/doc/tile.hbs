@@ -29,12 +29,14 @@
           {{@title}}
         </h4>
         {{#if @docNumber}}
-          <small class="text-body-100 text-color-foreground-faint">
+          <div class="truncate text-body-100 text-color-foreground-faint">
+            {{@productArea}}
+            |
             {{@docNumber}}
-          </small>
+          </div>
         {{/if}}
       </div>
-      <div class="mt-2 max-w-full space-y-2">
+      <div class="mt-2 max-w-full">
         <Person
           @ignoreUnknown={{true}}
           @imgURL={{@avatar}}
@@ -51,7 +53,12 @@
       {{#if (and @isResult @snippet)}}
         <Doc::Snippet @snippet={{@snippet}} class="mt-2" />
       {{/if}}
+      {{#if @modifiedTime}}
+        <p class="mt-2 text-body-100 text-color-foreground-faint">
+          Modified
+          {{time-ago @modifiedTime}}
+        </p>
+      {{/if}}
     </div>
   </LinkTo>
-
 </div>

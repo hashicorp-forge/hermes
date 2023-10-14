@@ -54,8 +54,7 @@
            }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
-              (html-element "#global-search-popover-header")
-              insertBefore=null
+              (html-element "#global-search-popover-header") insertBefore=null
             }}
               {{#if (eq dd.value "viewAllResultsObject")}}
                 <dd.LinkTo
@@ -98,9 +97,9 @@
             @model={{dd.value}}
             class="global-search-result"
           >
-            <Doc::Thumbnail
-              @status={{dd.attrs.status}}
+            <Product::Avatar
               @product={{dd.attrs.product}}
+              @fallbackIcon="file-text"
             />
             <div class="global-search-result-text-content">
               <h4 class="global-search-result-title">

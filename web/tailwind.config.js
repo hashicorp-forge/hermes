@@ -47,6 +47,7 @@ module.exports = {
         "button-md": "5px",
       },
       boxShadow: {
+        "elevation-low": "var(--token-elevation-low-box-shadow)",
         "surface-low": "var(--token-surface-low-box-shadow)",
         "surface-mid": "var(--token-surface-mid-box-shadow)",
       },
@@ -184,6 +185,9 @@ module.exports = {
         "color-palette-neutral-500": "var(--token-color-palette-neutral-500)",
         "color-palette-neutral-600": "var(--token-color-palette-neutral-600)",
         "color-palette-neutral-700": "var(--token-color-palette-neutral-700)",
+
+        // Alpha
+        "color-palette-alpha-200": "var(--token-color-palette-alpha-200)",
 
         // Non-Semantic Color
         "color-palette-blue-200": "var(--token-color-palette-blue-200)",

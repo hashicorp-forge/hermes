@@ -2,34 +2,35 @@ import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { LinkTo } from "@ember/routing";
-import ProductAvatar from "hermes/components/product-avatar";
+import Product from "hermes/components/product";
 
-interface ProductBadgeLinkComponentSignature {
+interface ProductLinkComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
-    productArea?: string;
+    product?: string;
+    avatarIsHidden?: boolean;
   };
   Blocks: {
     default: [];
   };
 }
 
-export default class ProductBadgeLinkComponent extends Component<ProductBadgeLinkComponentSignature> {
+export default class ProductLinkComponent extends Component<ProductLinkComponentSignature> {
   @service declare router: RouterService;
 
   protected get productAreaName(): string {
-    switch (this.args.productArea) {
+    switch (this.args.product) {
       case "Cloud Platform":
         return "HCP";
       default:
-        return this.args.productArea || "Unknown";
+        return this.args.product || "Unknown";
     }
   }
 
   protected get query() {
-    if (this.args.productArea) {
+    if (this.args.product) {
       return {
-        product: [this.args.productArea],
+        product: [this.args.product],
         docType: [],
         owners: [],
         page: 1,
@@ -60,19 +61,22 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
 
   <template>
     <LinkTo
+      data-test-product-link
       @route={{this.route}}
       @query={{this.query}}
-      class="product-badge-link"
+      class="product-link"
       ...attributes
     >
-      <ProductAvatar @productArea={{@productArea}} />
-      {{this.productAreaName}}
+      <Product
+        @name={{this.args.product}}
+        @avatarIsHidden={{@avatarIsHidden}}
+      />
     </LinkTo>
   </template>
 }
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    ProductBadgeLink: typeof ProductBadgeLinkComponent;
+    "Product::Link": typeof ProductLinkComponent;
   }
 }

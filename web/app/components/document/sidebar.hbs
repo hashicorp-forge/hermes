@@ -135,27 +135,23 @@
       {{! Product/Area }}
       <div>
         <Document::Sidebar::SectionHeader @title="Product/Area" />
-        <div class="editable-field-container">
-          <div class="flex h-9 w-full items-center">
-            {{#if (and this.isDraft this.isOwner)}}
-              <Inputs::ProductSelect
-                data-test-document-product-area-editable
-                @selected={{this.product}}
-                @onChange={{this.updateProduct.perform}}
-                @productAbbreviationIsHidden={{true}}
-                @isSaving={{this.saveIsRunning}}
-                @renderOut={{true}}
-                class="w-[calc(100%+10px)]"
-              />
-            {{else}}
-              <ProductBadgeLink
-                data-test-document-product-area-read-only
-                @productArea={{@document.product}}
-                class="inline-flex"
-              />
-            {{/if}}
+        {{#if (and this.isDraft this.isOwner)}}
+          <div class="editable-field-container select-input">
+            <Inputs::ProductSelect
+              data-test-document-product-area-editable
+              @selected={{this.product}}
+              @onChange={{this.saveProduct.perform}}
+              @isSaving={{this.saveIsRunning}}
+              @renderOut={{true}}
+            />
           </div>
-        </div>
+        {{else}}
+          <Product::Link
+            data-test-document-product-area-read-only
+            @product={{@document.product}}
+            class="mt-2 inline-block"
+          />
+        {{/if}}
       </div>
 
       {{! Created }}

@@ -29,7 +29,7 @@ export default class SearchResultsComponent extends Component<SearchResultsCompo
     let hits = this.args.results?.hits as HermesDocument[];
     // Assume at least one of the first 12 hits is a product match for the query.
     return hits.some(
-      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery
+      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery,
     );
   }
 }

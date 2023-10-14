@@ -1,10 +1,10 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { task } from "ember-concurrency";
+import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
   ProductArea,
@@ -20,8 +20,8 @@ interface InputsProductSelectSignature {
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
-    isFullWidth?: boolean;
-    productAbbreviationIsHidden?: boolean;
+    offset?: OffsetOptions;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
 }
 
@@ -33,6 +33,12 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
 
   get products() {
     return this.productAreas.index;
+  }
+
+  protected get matchAnchorWidth() {
+    if (this.args.matchAnchorWidth === undefined) {
+      return;
+    }
   }
 
   get icon(): string {
@@ -48,17 +54,13 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
       return;
     }
 
-    if (!this.products) {
-      return;
-    }
-
-    if (this.args.productAbbreviationIsHidden) {
-      return;
-    }
-
     const selectedProduct = this.products?.[this.selected];
-    assert("selected product must exist", selectedProduct);
-    return selectedProduct.abbreviation;
+
+    if (selectedProduct) {
+      return selectedProduct.abbreviation;
+    } else {
+      return;
+    }
   }
 
   @action onChange(newValue: any, attributes: ProductArea) {

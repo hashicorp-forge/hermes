@@ -1,5 +1,5 @@
 .product-badge {
-  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-400 to-color-palette-neutral-500 text-color-foreground-high-contrast;
+  @apply absolute grid place-items-center bg-gradient-to-br from-color-palette-neutral-400 to-color-palette-neutral-500 text-[13px] text-color-foreground-high-contrast;
 
   &.hcp {
     @apply from-color-palette-neutral-500 to-color-palette-neutral-600;
@@ -35,5 +35,23 @@
 
   &.waypoint {
     @apply from-color-waypoint-gradient-primary-start to-color-waypoint-gradient-primary-stop text-color-waypoint-foreground;
+  }
+
+  &.no-product {
+    @apply rounded-none bg-none text-color-foreground-faint;
+  }
+
+  // Abbreviation
+
+  .product-abbreviation {
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-medium tracking-tighter;
+
+    &.letter-count-2 {
+      @apply text-[11px];
+    }
+
+    &.letter-count-3 {
+      @apply text-[9px];
+    }
   }
 }

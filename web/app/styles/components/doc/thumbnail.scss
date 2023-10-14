@@ -1,22 +1,22 @@
 .doc-thumbnail {
-  @apply relative w-12 shrink-0 flex overflow-hidden;
+  @apply relative flex w-12 shrink-0 overflow-hidden;
 
   // Outer border / shadow
   &::after {
     content: "";
-    @apply absolute z-10 pointer-events-none;
+    @apply pointer-events-none absolute z-10;
     // Make the element 1px smaller than its container
     // so its shadow picks up colors from the elements below it.
     @apply top-px right-px bottom-px left-px;
-    @apply shadow-surface-low rounded-sm;
+    @apply rounded-sm shadow-surface-low;
   }
 
   .status-icon {
     @apply absolute opacity-75 mix-blend-multiply;
-    @apply w-9 h-9;
+    @apply h-9 w-9;
 
     &.approved {
-      @apply fill-color-palette-green-200 -rotate-6;
+      @apply -rotate-6 fill-color-palette-green-200;
       @apply -right-[7px] top-[5px];
     }
 
@@ -27,11 +27,14 @@
   }
 
   .product-badge {
-    @apply rounded-tl-none rounded-br-none;
-    @apply rounded-bl rounded-tr;
+    @apply rounded-tl-none rounded-br-none rounded-bl rounded-tr;
 
     .flight-icon {
       @apply scale-75;
+    }
+
+    &.no-product {
+      @apply bg-gradient-to-br from-color-palette-neutral-200 to-color-palette-neutral-300 text-white;
     }
   }
 
@@ -45,7 +48,7 @@
     @apply w-20;
 
     .product-badge {
-      @apply w-8 h-8;
+      @apply h-8 w-8;
       @apply rounded-bl rounded-tr;
 
       .flight-icon {
@@ -59,11 +62,11 @@
     @apply w-28;
 
     &::after {
-      @apply shadow-surface-mid rounded;
+      @apply rounded shadow-surface-mid;
     }
 
     .product-badge {
-      @apply rounded-bl rounded-tr;
+      @apply h-[32px] w-[36px] rounded-bl rounded-tr;
 
       .flight-icon {
         @apply scale-100;
@@ -71,7 +74,7 @@
     }
 
     .status-icon {
-      @apply w-[84px] h-[84px] top-[8px];
+      @apply top-[8px] h-[84px] w-[84px];
 
       &.approved {
         @apply -right-3.5;
@@ -79,6 +82,13 @@
 
       &.obsolete {
         @apply -left-5;
+      }
+    }
+
+    .product-abbreviation {
+      &.letter-count-2,
+      &.letter-count-3 {
+        @apply text-[13px];
       }
     }
   }
