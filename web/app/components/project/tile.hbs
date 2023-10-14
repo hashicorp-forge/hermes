@@ -2,21 +2,16 @@
   <LinkTo @route="authenticated.project" @model={{@project.id}} class="hover">
     <Hds::Card::Container
       @hasBorder={{true}}
-      class="p-4 h-48"
+      class="h-48 p-4"
       @levelHover="mid"
     >
       <div class="relative h-full pb-16">
         <div class="flex items-start justify-between">
           <div class="w-full">
-            {{! <Action
-              class="float-right text-color-foreground-faint flex p-1 rounded ml-2.5 mb-2"
-            >
-              <FlightIcon @name="pin" />
-            </Action> }}
             <h3
               class="float-none text-display-300 font-semibold text-color-foreground-strong"
             >
-              {{@project.name}}
+              {{@project.title}}
             </h3>
             {{#if @project.description}}
               <p class="mt-1 text-body-300 text-color-foreground-faint">
@@ -24,12 +19,6 @@
               </p>
             {{/if}}
           </div>
-          {{!-- {{#if this.documents}}
-            <span class="ml-2 flex gap-2 shrink-0 items-center">
-              {{this.documents.length}}
-              <FlightIcon @name="files" class="ext-color-foreground-disabled" />
-            </span>
-          {{/if}} --}}
         </div>
 
         {{#if this.productAreas}}
@@ -37,9 +26,9 @@
           <ul class="absolute left-0 bottom-0 flex">
             {{#each this.productAreas as |productArea|}}
               <li class="flex items-center">
-                <ProductAvatar
+                <Product::Avatar
                   {{tooltip productArea}}
-                  @productArea={{productArea}}
+                  @product={{productArea}}
                 />
               </li>
             {{/each}}

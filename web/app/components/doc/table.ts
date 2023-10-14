@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { SortAttribute, SortDirection } from "../table/sortable-header";
+import { assert } from "@ember/debug";
 
 interface DocTableComponentSignature {
   Args: {
