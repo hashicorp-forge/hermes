@@ -42,4 +42,5 @@ export default Factory.extend({
   },
   approvers: [],
   owners: ["testuser@example.com"],
+  ownerPhotos: ["https://placehold.co/100x100"],
 });

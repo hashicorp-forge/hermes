@@ -1,0 +1,18 @@
+.tertiary-button-gray {
+  @apply text-color-foreground-primary;
+
+  &:hover,
+  &:focus {
+    @apply text-color-foreground-strong;
+  }
+}
+
+.quarternary-button {
+  @apply flex items-center gap-2 rounded-button-md border border-transparent px-3 py-2;
+
+  &:hover,
+  &:focus-visible,
+  .active {
+    @apply border-color-border-strong bg-color-foreground-high-contrast;
+  }
+}

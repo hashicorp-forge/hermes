@@ -320,12 +320,15 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * Adds the clicked document to the related-documents array in the correct format.
    */
   @action protected onItemClick(_item: any, attrs: any) {
+    console.log("attrs", attrs);
     const relatedHermesDocument = {
       id: attrs.objectID,
       googleFileID: attrs.objectID,
       title: attrs.title,
-      type: attrs.docType,
+      docType: attrs.docType,
       documentNumber: attrs.docNumber,
+      owners: attrs.owners,
+      ownerPhotos: attrs.ownerPhotos,
       sortOrder: 1,
       product: attrs.product,
     } as RelatedHermesDocument;

@@ -1,7 +1,7 @@
 <div class="sidebar-header {{if @userHasScrolled 'scrolled'}}" ...attributes>
   <LinkTo
     data-test-sidebar-dashboard-link
-    class="sidebar-header-button sidebar-dashboard-link"
+    class="quarternary-button sidebar-dashboard-link"
     @route="authenticated.dashboard"
     {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
@@ -28,14 +28,14 @@
         @icon={{@shareButtonIcon}}
         @tooltipText={{@shareButtonTooltipText}}
         @isIconOnly={{true}}
-        class="sidebar-header-button"
+        class="quarternary-button"
         id="sidebar-header-copy-url-button"
       />
     {{/if}}
 
     <ExternalLink
       data-test-sidebar-google-docs-link
-      class="sidebar-header-button"
+      class="quarternary-button"
       href="https://docs.google.com/document/d/{{@document.objectID}}"
       {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
     >
@@ -44,7 +44,7 @@
     <Action
       data-test-sidebar-toggle-button
       data-test-is-collapsed={{@isCollapsed}}
-      class="sidebar-header-button"
+      class="quarternary-button"
       {{on "click" @toggleCollapsed}}
       {{tooltip
         (concat (if @isCollapsed "Expand" "Collapse") " sidebar")

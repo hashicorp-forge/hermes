@@ -17,6 +17,7 @@
         <div class="mb-4">
           <Hds::Form::TextInput::Field
             data-test-external-resource-form-title-input
+            {{autofocus}}
             {{on "input" this.updateFormValues}}
             @value={{this.title}}
             placeholder="Enter a title"

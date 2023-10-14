@@ -8,6 +8,7 @@
 @use "./scrollable-container";
 @use "./animations";
 @use "./typography";
+@use "./buttons";
 
 @use "components/toolbar";
 @use "components/x-tooltip";
@@ -37,6 +38,7 @@
 @use "components/table/sortable-header";
 @use "components/preview-card";
 @use "components/product-avatar";
+@use "components/project";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/document/related-resources";

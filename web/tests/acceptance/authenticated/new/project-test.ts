@@ -72,7 +72,7 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     assert.dom(TITLE_ERROR).hasText("Title is required.");
   });
 
-  test("it shows an error if creaing the project fails", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+  test("it shows an error if creating the project fails", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
     this.server.post("/projects", () => {
       return new Response(500, {}, {});
     });
