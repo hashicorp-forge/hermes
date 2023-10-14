@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { SortAttribute, SortDirection } from "./my-docs";
+import { SortAttribute, SortDirection } from "./my/sub-nav";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
@@ -13,7 +13,7 @@ interface MaybeSortableTableHeaderComponentSignature {
     attribute: `${SortAttribute}`;
     changeSort?: (
       attribute: SortAttribute,
-      defaultSortDirection?: SortDirection
+      defaultSortDirection?: SortDirection,
     ) => void;
     defaultSortDirection?: `${SortDirection}`;
     queryParam?: Record<string, unknown>;
@@ -68,7 +68,7 @@ export default class MaybeSortableTableHeaderComponent extends Component<MaybeSo
     assert("this.args.changeSort must exists", this.args.changeSort);
     this.args.changeSort(
       this.args.attribute as SortAttribute,
-      this.sortDirection
+      this.sortDirection,
     );
   }
 }

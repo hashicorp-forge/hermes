@@ -42,7 +42,7 @@
           @imgURL={{@avatar}}
           @email="{{@owner}}"
         />
-        <ProductBadgeLink @productArea={{@productArea}} class="relative" />
+        <Product::Link @product={{@productArea}} class="relative" />
         {{#if @modifiedTime}}
           <p class="text-body-100 text-color-foreground-faint">
             Modified

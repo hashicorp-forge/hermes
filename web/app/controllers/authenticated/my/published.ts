@@ -1,6 +1,6 @@
 import Controller from "@ember/controller";
 import { SortByValue } from "hermes/components/header/toolbar";
-import { SortDirection } from "hermes/components/my-docs";
+import { SortDirection } from "hermes/components/my/sub-nav";
 import AuthenticatedMyPublishedRoute from "hermes/routes/authenticated/my/published";
 import { ModelFrom } from "hermes/types/route-models";
 

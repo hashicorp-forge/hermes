@@ -3,21 +3,14 @@
 >
   <a class="w-full py-3.5">
     <div class="relative flex w-full items-start gap-3">
-      {{! Thumbnail icon }}
-      {{! <div
-        class="relative mt-0.5 flex shrink-0 justify-center text-color-foreground-faint opacity-50"
-      >
-        <FlightIcon @name="file-text" />
-      </div> }}
       {{! Text }}
       <div class="w-full">
 
         <div class="flex items-center justify-between">
           <div class="flex w-full items-center justify-between gap-1.5">
             {{#if (eq @status "Draft")}}{{/if}}
-            {{!-- <Doc::State @state={{@status}} @hideProgress={{true}} /> --}}
             <div class="flex items-center gap-1">
-              <ProductAvatar class="shrink-0" @productArea={{@product}} />
+              <Product::Avatar class="shrink-0" @product={{@product}} />
               <Person::Avatar
                 class="shrink-0"
                 F
@@ -47,24 +40,6 @@
         <p class="text-body-100 text-color-foreground-faint">Modified 3 minutes
           ago</p>
       </div>
-
-      {{! Thumbnail w/ badge }}
-      {{!-- <div class="relative flex shrink-0 justify-center">
-        <div class="doc-thumbnail w-6 self-start">
-          <img src="/images/document.png" class="h-auto w-full" />
-          <div class="absolute bottom-0 left-0">
-            <ProductAvatar @productArea={{@product}} @iconSize={{16}} />
-          </div>
-        </div>
-      </div> --}}
-
-      {{! Thumbnail w/o badge }}
-      {{! <div class="relative flex shrink-0 justify-center">
-        <div class="doc-thumbnail w-6 self-start">
-          <img src="/images/document.png" class="h-auto w-full" />
-        </div>
-      </div> }}
-
     </div>
   </a>
 </li>

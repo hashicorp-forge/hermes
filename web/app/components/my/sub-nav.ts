@@ -1,6 +1,5 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import { sort } from "@ember/object/computed";
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
@@ -9,12 +8,12 @@ import { DraftResponseJSON } from "hermes/routes/authenticated/my";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 
-interface MyDocsIndexComponentSignature {
+interface MySubNavComponentSignature {
   Element: null;
   Args: {
     latest: HermesDocument[];
     published: HermesDocument[];
-    drafts: DraftResponseJSON;
+    drafts?: DraftResponseJSON;
   };
   Blocks: {
     default: [];
@@ -35,7 +34,7 @@ export enum SortAttribute {
   Name = "title",
 }
 
-export default class MyDocsIndexComponent extends Component<MyDocsIndexComponentSignature> {
+export default class MySubNavComponent extends Component<MySubNavComponentSignature> {
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
@@ -52,7 +51,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
   get docsToShow() {
     switch (this.currentRoute) {
       case "authenticated.my.drafts":
-        return this.args.drafts.Hits;
+        return this.args.drafts?.Hits;
       case "authenticated.my.index":
         return this.args.latest;
       case "authenticated.my.published":
@@ -60,7 +59,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
     }
   }
 
-  protected get sortedDocs() {
+  protected get sorted() {
     assert("docsToShow must exist", this.docsToShow);
     // this only applies to the /my routes
     if (this.router.currentRouteName.startsWith("authenticated.my")) {
@@ -90,7 +89,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
             // @ts-ignore
             return a[this.currentSort][0].localeCompare(
               // @ts-ignore
-              b[this.currentSort][0]
+              b[this.currentSort][0],
             );
           }
         } else {
@@ -108,7 +107,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
             // @ts-ignore
             return b[this.currentSort][0].localeCompare(
               // @ts-ignore
-              a[this.currentSort][0]
+              a[this.currentSort][0],
             );
           }
         }
@@ -119,7 +118,7 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
 
   @action protected changeSort(
     attribute: SortAttribute,
-    sortDirection?: SortDirection
+    sortDirection?: SortDirection,
   ) {
     if (this.currentSort === attribute) {
       if (this.sortDirection === SortDirection.Asc) {
@@ -146,6 +145,6 @@ export default class MyDocsIndexComponent extends Component<MyDocsIndexComponent
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    MyDocs: typeof MyDocsIndexComponent;
+    "My::SubNav": typeof MySubNavComponent;
   }
 }

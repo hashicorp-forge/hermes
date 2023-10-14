@@ -1,13 +1,9 @@
 {{page-title "My Docs"}}
 
-<Header::Toolbar @facets={{@model.facets}} />
-
-<Doc::Table
-  @docs={{@model.results.hits}}
-  @nbPages={{@model.results.nbPages}}
-  @currentPage={{(add @model.results.page 1)}}
-  @sortDirection={{this.sortDirection}}
-  @currentSort="createdTime"
+<My::SubNav
+  @latest={{this.model.latest}}
+  @published={{this.model.published}}
+  @drafts={{this.model.draftResults}}
 />
 
 {{outlet}}
