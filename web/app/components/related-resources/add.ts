@@ -324,6 +324,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     const relatedHermesDocument = {
       id: attrs.objectID,
       googleFileID: attrs.objectID,
+      status: attrs.status,
       title: attrs.title,
       docType: attrs.docType,
       documentNumber: attrs.docNumber,
