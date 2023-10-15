@@ -35,29 +35,4 @@
       {{! TODO: No projects state }}
     {{/if}}
   </div>
-
-  <div class="mb-6">
-    <div class="mb-3 flex items-center gap-2">
-      <FlightIcon @name="check-circle" />
-      <h3 class="text-body-200 font-semibold text-color-foreground-strong">
-        Completed
-      </h3>
-    </div>
-    {{#if @projects}}
-      <ol class="grid">
-        {{#each (take 3 @projects) as |project|}}
-          <Project::Tile @project={{project}} />
-        {{/each}}
-      </ol>
-    {{/if}}
-  </div>
-
-  <div class="mb-6">
-    <div class="mb-3 flex items-center gap-2">
-      <FlightIcon @name="archive" />
-      <h3
-        class="text-body-200 font-semibold text-color-foreground-strong"
-      >Archived</h3>
-    </div>
-  </div>
 </div>

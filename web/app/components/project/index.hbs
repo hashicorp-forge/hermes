@@ -1,65 +1,36 @@
-<div class="-mt-4 flex items-center justify-between">
-  <LinkTo
-    data-test-all-projects-link
-    @route="authenticated.projects"
-    class="quarternary-button"
-  >
-    <FlightIcon @name="grid" />
-    All projects
-  </LinkTo>
-
-  <div class="flex space-x-0.5">
-    <X::DropdownList
-      @items={{hash
-        complete=(hash
-          name="Complete..." icon="check-circle" action=this.showModal
-        )
-        archive=(hash name="Archive..." icon="archive" action=this.showModal)
-      }}
-      @placement="bottom-end"
-    >
-      <:anchor as |dd|>
-        <dd.ToggleAction>
-          <div class="quarternary-button {{if dd.contentIsShown 'active'}}">
-            <FlightIcon @name="more-horizontal" />
-          </div>
-        </dd.ToggleAction>
-      </:anchor>
-      <:item as |dd|>
-        <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
-          <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
-          {{dd.attrs.name}}
-        </dd.Action>
-      </:item>
-    </X::DropdownList>
-    <CopyURLButton
-      @url="TODO"
-      @tooltipPlacement="bottom"
-      class="quarternary-button"
-    />
-  </div>
-</div>
-
-<div class="mx-auto mt-1.5 w-full max-w-3xl">
+<div class="mx-auto mt-2 w-full max-w-3xl text-center">
 
   <div class="project-title">
-    <EditableField
-      data-test-project-title
-      @value={{@project.title}}
-      @tag="h1"
-      @onChange={{this.hideModal}}
-      @onSave={{this.saveProjectInfo}}
-    />
+    <div class="mx-auto max-w-xl">
+      <EditableField
+        data-test-project-title
+        @value={{@project.title}}
+        @tag="h1"
+        @onChange={{this.hideModal}}
+        @onSave={{this.saveProjectInfo}}
+      />
+    </div>
   </div>
   <div class="project-description">
-    <EditableField
-      data-test-project-description
-      @value={{@project.description}}
-      @onChange={{this.hideModal}}
-      @onSave={{this.saveProjectInfo}}
-      @placeholder="Add a description"
-    />
+    <div class="mx-auto max-w-xl">
+      <EditableField
+        data-test-project-description
+        @value={{@project.description}}
+        @onChange={{this.hideModal}}
+        @onSave={{this.saveProjectInfo}}
+        @placeholder="Add a description"
+      />
+    </div>
   </div>
+  {{! TODO: Jira section }}
+
+  <Hds::Button
+    @icon="jira"
+    @text="Add Jira link"
+    @color="secondary"
+    @size="small"
+    class="mx-auto mt-3.5"
+  />
 
   {{! TODO: Jira section }}
 
@@ -103,7 +74,9 @@
                     We create a click area that extends beyond the edges of its  container. This makes the parent div clickable without having to wrap itself in a link, and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
                   }}
                     <div aria-hidden="true" class="hit-area"></div>
-                    <div class="flex w-full items-center justify-between px-4">
+                    <div
+                      class="flex w-full items-center justify-between pl-4 pr-3"
+                    >
                       <div class="flex items-center gap-2">
                         {{! TODO: add product avatar }}
                         {{! TODO: unify with docs awaiting review }}
@@ -190,10 +163,56 @@
       </:list>
     </RelatedResources>
   </div>
-
   <div
-    class="mt-14 mb-4 text-center text-body-100 text-color-foreground-disabled"
+    class="mt-7 flex w-full items-center justify-center gap-1 text-body-100 text-color-foreground-faint"
   >
+
+    <div class="flex">
+      <CopyURLButton
+        @url="TODO"
+        @tooltipPlacement="bottom"
+        {{!-- @isIconOnly={{true}} --}}
+        class="quarternary-button text-color-foreground-faint"
+      />
+      <Action class="quarternary-button text-color-foreground-faint">
+        <FlightIcon @name="check-circle" />
+        Complete...
+      </Action>
+      <Action class="quarternary-button text-color-foreground-faint">
+        <FlightIcon @name="archive" />
+        Archive...
+      </Action>
+      {{!-- <X::DropdownList
+        @items={{hash
+          complete=(hash
+            name="Complete..." icon="check-circle" action=this.showModal
+          )
+          archive=(hash name="Archive..." icon="archive" action=this.showModal)
+        }}
+        @placement="bottom-end"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction>
+            <div
+              class="quarternary-button text-color-foreground-disabled
+                {{if dd.contentIsShown 'active'}}"
+            >
+              <FlightIcon @name="settings" />
+            </div>
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
+            <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
+            {{dd.attrs.name}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList> --}}
+    </div>
+
+  </div>
+
+  <div class="mt-7 text-center text-[11px] text-color-foreground-disabled">
     Created
     {{time-ago @project.dateCreated}}
     by

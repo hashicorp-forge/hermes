@@ -1,11 +1,17 @@
-{{! @glint-nocheck: not typesafe yet }}
 <div
-  class="hermes-logo"
+  data-test-hermes-logo
+  class="flex shrink-0 items-center text-color-foreground-primary
+    {{if this.isSmall 'gap-1.5' 'gap-2.5'}}"
   ...attributes
 >
-  <FlightIcon @name="hashicorp" @size="24" />
-  <div class="hermes-logo-divider"></div>
-  <div class="hermes-logo-text">
-    Hermes
-  </div>
+  <FlightIcon @name="hashicorp" @size={{if this.isSmall "16" "24"}} />
+  {{#unless @isIconOnly}}
+    <div class="relative h-6 w-px bg-color-border-strong"></div>
+    <div
+      class="font-semibold
+        {{if this.isSmall 'text-body-300' 'text-display-300'}}"
+    >
+      Hermes
+    </div>
+  {{/unless}}
 </div>

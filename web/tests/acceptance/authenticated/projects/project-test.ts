@@ -30,7 +30,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await authenticateSession({});
     this.server.create("project", {
       id: 1,
-      title: "Test Project",
+      title: "Introducing Projects",
+      description: "A way to organize documents across product areas.",
     });
   });
 
@@ -40,6 +41,12 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const project = this.server.schema.projects.find(1);
+
+    project.update({
+      description: "",
+    });
+
     await visit("/projects/1");
 
     assert.dom(ALL_PROJECTS_LINK).hasAttribute("href", "/projects");
@@ -69,7 +76,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .models.map((model: { attrs: RelatedExternalLink }) => model.attrs);
 
     project.update({
-      description: "Test description",
       documents,
       relatedLinks,
     });

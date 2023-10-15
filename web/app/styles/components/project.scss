@@ -1,9 +1,23 @@
 .project-screen {
+  .project-description {
+    @apply z-10;
+  }
+
+  .project-title {
+    @apply z-20;
+  }
+
   .project-title,
   .project-description {
+    @apply relative;
+
+    .editable-field.active {
+      @apply static;
+    }
+
     .field-toggle,
     textarea {
-      @apply text-center;
+      @apply text-center leading-none;
     }
   }
 

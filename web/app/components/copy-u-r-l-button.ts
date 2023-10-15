@@ -17,11 +17,16 @@ interface CopyURLButtonComponentSignature {
     tooltipText?: string;
     icon?: string;
     isIconOnly?: boolean;
+    label?: string;
+    copiedLabel?: string;
   };
 }
 
 export default class CopyURLButtonComponent extends Component<CopyURLButtonComponentSignature> {
   @service declare flashMessages: FlashMessageService;
+
+  @tracked private label = this.args.label ?? "Copy link";
+  @tracked private copiedLabel = this.args.copiedLabel ?? "Link copied";
 
   /**
    * Whether the URL was recently copied to the clipboard.
@@ -72,7 +77,7 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
   }
 
   protected get defaultText(): string {
-    return this.urlWasRecentlyCopied ? "Link copied!" : "Copy link";
+    return this.urlWasRecentlyCopied ? this.copiedLabel : this.label;
   }
 
   /**

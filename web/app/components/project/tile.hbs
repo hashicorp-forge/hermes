@@ -1,5 +1,9 @@
 <li class="project-tile" ...attributes>
-  <LinkTo @route="authenticated.project" @model={{@project.id}} class="hover">
+  <LinkTo
+    @route="authenticated.projects.project"
+    @model={{@project.id}}
+    class="hover"
+  >
     <Hds::Card::Container
       @hasBorder={{true}}
       class="h-48 p-4"

@@ -14,7 +14,7 @@
   )}}
   {{did-insert this.didInsertButton}}
   {{on "click" (perform this.copyURL)}}
-  class={{unless @isIconOnly "flex space-x-1.5"}}
+  class={{unless @isIconOnly "flex gap-1.5"}}
   ...attributes
 >
   <FlightIcon @name={{this.icon}} class={{unless @isIconOnly "-ml-[3px]"}} />

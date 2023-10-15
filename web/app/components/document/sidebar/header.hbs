@@ -5,19 +5,9 @@
     @route="authenticated.dashboard"
     {{(if @isCollapsed (modifier "tooltip" "Dashboard" placement="right"))}}
   >
-    <FlightIcon @name="hashicorp" @size={{if @isCollapsed "24"}} />
-    {{#unless @isCollapsed}}
-      <span
-        class="ml-2 border-l border-l-color-border-strong pl-2 text-body-300 font-semibold tracking-[-0.15px]"
-      >
-        Hermes
-      </span>
-    {{/unless}}
+    <HermesLogo @isIconOnly={{@isCollapsed}} @size="small" />
   </LinkTo>
   <div class="sidebar-header-icon-controls">
-    <Action class="sidebar-header-button" {{tooltip "Pin to dashboard"}}>
-      <FlightIcon @name="pin" />
-    </Action>
     {{#if this.shareButtonIsShown}}
       <CopyURLButton
         data-test-sidebar-copy-url-button
