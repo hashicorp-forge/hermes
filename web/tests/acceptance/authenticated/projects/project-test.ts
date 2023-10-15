@@ -78,6 +78,16 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     project.update({
       documents,
       relatedLinks,
+      jiraObject: {
+        type: "Enhancement",
+        key: "HERMES-123",
+        url: "https://jira.example.com/browse/HERMES-123",
+        priority: "High",
+        status: "In Progress",
+        assignee: "testuser@example.com",
+        summary:
+          "Add Hermes application version & revision in the footer of the UI",
+      },
     });
 
     await visit("/projects/1");

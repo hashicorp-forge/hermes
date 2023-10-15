@@ -23,14 +23,50 @@
     </div>
   </div>
   {{! TODO: Jira section }}
+  {{#if @project.jiraObject}}
+    <div
+      class="mt-3.5 inline-flex h-9 items-center rounded border border-color-border-primary px-3"
+    >
 
-  <Hds::Button
-    @icon="jira"
-    @text="Add Jira link"
-    @color="secondary"
-    @size="small"
-    class="mx-auto mt-3.5"
-  />
+      <div class="flex h-9 items-center space-x-2">
+        {{#if @project.jiraObject.type}}
+          <div class="flex">
+            <FlightIcon @name="square-fill" class="text-lime-600" />
+          </div>
+        {{/if}}
+        <div
+          class="text-color-foreground-faint
+            {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
+        >
+          {{@project.jiraObject.key}}
+        </div>
+        <div class="max-w-[180px]">
+          <TruncatedText class="text-body-200 text-color-foreground-primary">
+            {{@project.jiraObject.summary}}
+          </TruncatedText>
+        </div>
+        {{#if @project.jiraObject.priority}}
+          <div class="flex">
+            <FlightIcon
+              @name="chevrons-up"
+              class="text-color-foreground-critical"
+            />
+          </div>
+        {{/if}}
+        {{#if @project.jiraObject.assignee}}
+          <Person::Avatar @email={{@project.jiraObject.assignee}} />
+        {{/if}}
+      </div>
+    </div>
+  {{else}}
+    {{! <Hds::Button
+      @icon="jira"
+      @text="Add Jira link"
+      @color="secondary"
+      @size="small"
+      class="mx-auto mt-3.5"
+    /> }}
+  {{/if}}
 
   {{! TODO: Jira section }}
 
@@ -182,32 +218,6 @@
         <FlightIcon @name="archive" />
         Archive...
       </Action>
-      {{!-- <X::DropdownList
-        @items={{hash
-          complete=(hash
-            name="Complete..." icon="check-circle" action=this.showModal
-          )
-          archive=(hash name="Archive..." icon="archive" action=this.showModal)
-        }}
-        @placement="bottom-end"
-      >
-        <:anchor as |dd|>
-          <dd.ToggleAction>
-            <div
-              class="quarternary-button text-color-foreground-disabled
-                {{if dd.contentIsShown 'active'}}"
-            >
-              <FlightIcon @name="settings" />
-            </div>
-          </dd.ToggleAction>
-        </:anchor>
-        <:item as |dd|>
-          <dd.Action {{on "click" dd.attrs.action}} class="h-9 pl-4 pr-6">
-            <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
-            {{dd.attrs.name}}
-          </dd.Action>
-        </:item>
-      </X::DropdownList> --}}
     </div>
 
   </div>
