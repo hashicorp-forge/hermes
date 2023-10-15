@@ -29,25 +29,25 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   ) {
     await authenticateSession({});
     this.server.create("project", {
-      id: 1,
+      id: 100,
       title: "Introducing Projects",
       description: "A way to organize documents across product areas.",
     });
   });
 
   test("the page title is correct", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    await visit("/projects/1");
+    await visit("/projects/100");
     assert.equal(getPageTitle(), "Test Project | Hermes");
   });
 
   test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    const project = this.server.schema.projects.find(1);
+    const project = this.server.schema.projects.find(100);
 
     project.update({
       description: "",
     });
 
-    await visit("/projects/1");
+    await visit("/projects/100");
 
     assert.dom(ALL_PROJECTS_LINK).hasAttribute("href", "/projects");
     assert.dom(TITLE).hasText("Test Project");
@@ -60,7 +60,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     this.server.createList("document", 4);
     this.server.createList("related-external-link", 2);
 
-    const project = this.server.schema.projects.find(1);
+    const project = this.server.schema.projects.find(100);
     const documents = this.server.schema.document
       .all()
       .models.map((model: { attrs: HermesDocument }) => {
@@ -85,12 +85,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
         priority: "High",
         status: "In Progress",
         assignee: "testuser@example.com",
-        summary:
-          "Add Hermes application version & revision in the footer of the UI",
+        summary: "Rollout plan for projects",
       },
     });
 
-    await visit("/projects/1");
+    await visit("/projects/100");
 
     assert.dom(DOCUMENT_LINK).exists({ count: 4 });
     assert.dom(EXTERNAL_LINK).exists({ count: 2 });

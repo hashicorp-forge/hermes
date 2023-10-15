@@ -182,7 +182,11 @@ export default function (mirageConfig) {
        *************************************************************************/
       // Create a project
       this.post("/projects", (schema, request) => {
-        let project = schema.projects.create(JSON.parse(request.requestBody));
+        let project = schema.projects.create({
+          ...JSON.parse(request.requestBody),
+          creator: "testuser@example.com",
+          dateCreated: 1,
+        });
         return new Response(200, {}, project.attrs);
       });
 
@@ -302,15 +306,6 @@ export default function (mirageConfig) {
         }
 
         return new Response(404, {}, {});
-      });
-
-      this.post("/projects", (schema, request) => {
-        let project = JSON.parse(request.requestBody);
-        schema.projects.create(project);
-        // TODO: make this work with ID
-        project = schema.projects.findBy({ name: project.name }).attrs;
-
-        return new Response(200, {}, project);
       });
 
       /**

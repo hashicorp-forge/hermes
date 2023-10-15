@@ -1,4 +1,4 @@
-<div class="mx-auto mt-2 w-full max-w-3xl text-center">
+<div class="relative mx-auto mt-4 w-full max-w-3xl text-center">
 
   <div class="project-title">
     <div class="mx-auto max-w-xl">
@@ -24,40 +24,49 @@
   </div>
   {{! TODO: Jira section }}
   {{#if @project.jiraObject}}
-    <div
-      class="mt-3.5 inline-flex h-9 items-center rounded border border-color-border-primary px-3"
-    >
+    <div class="relative mt-3">
 
-      <div class="flex h-9 items-center space-x-2">
-        {{#if @project.jiraObject.type}}
-          <div class="flex">
-            <FlightIcon @name="square-fill" class="text-lime-600" />
+      <div
+        class="mb-7 inline-flex h-9 items-center rounded border border-color-border-primary px-3"
+      >
+        <div class="flex h-9 items-center space-x-2">
+          {{#if @project.jiraObject.type}}
+            <div class="flex">
+              <FlightIcon @name="square-fill" class="text-lime-600" />
+            </div>
+          {{/if}}
+          {{!-- <div class="max-w-[150px]">
+            <TruncatedText class="text-body-200 text-color-foreground-primary">
+              {{@project.jiraObject.summary}}
+            </TruncatedText>
+          </div> --}}
+          <div
+            class="text-color-foreground-faint
+              {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
+          >
+            {{@project.jiraObject.key}}
           </div>
-        {{/if}}
-        <div
-          class="text-color-foreground-faint
-            {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
-        >
-          {{@project.jiraObject.key}}
+          {{#if @project.jiraObject.priority}}
+            <div class="flex">
+              <FlightIcon
+                @name="chevrons-up"
+                class="text-color-foreground-critical"
+              />
+            </div>
+          {{/if}}
+          {{#if @project.jiraObject.assignee}}
+            <Person::Avatar @email={{@project.jiraObject.assignee}} />
+          {{/if}}
+
         </div>
-        <div class="max-w-[180px]">
-          <TruncatedText class="text-body-200 text-color-foreground-primary">
-            {{@project.jiraObject.summary}}
-          </TruncatedText>
-        </div>
-        {{#if @project.jiraObject.priority}}
-          <div class="flex">
-            <FlightIcon
-              @name="chevrons-up"
-              class="text-color-foreground-critical"
-            />
-          </div>
-        {{/if}}
-        {{#if @project.jiraObject.assignee}}
-          <Person::Avatar @email={{@project.jiraObject.assignee}} />
-        {{/if}}
       </div>
+      <Action
+        class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[11px] text-color-foreground-disabled underline"
+      >
+        Remove Jira link
+      </Action>
     </div>
+
   {{else}}
     {{! <Hds::Button
       @icon="jira"

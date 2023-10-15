@@ -62,6 +62,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           }),
         })
         .then((response) => response?.json());
+      console.log("projectid?", project);
       this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (error: unknown) {
       const typedError = error as Error;
