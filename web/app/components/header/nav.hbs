@@ -10,12 +10,12 @@
       @current-when="authenticated.documents"
       @query={{this.defaultBrowseScreenQueryParams}}
     >
-      All Docs
+      Documents
     </LinkTo>
     <LinkTo
       data-test-nav-link="explore"
       @route="authenticated.projects"
-      @current-when="authenticated.projects"
+      @current-when="authenticated.projects.index"
     >
       <span>
         Projects
@@ -29,14 +29,14 @@
     >
       My Docs
     </LinkTo>
-    <LinkTo
+    {{!-- <LinkTo
       data-test-nav-link="drafts"
       @route="authenticated.drafts"
       @current-when="authenticated.drafts"
       @query={{this.defaultBrowseScreenQueryParams}}
     >
       My Drafts
-    </LinkTo>
+    </LinkTo> --}}
   </div>
 
   <Header::Search class="global-search" />

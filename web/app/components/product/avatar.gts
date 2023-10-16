@@ -56,7 +56,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
       {{#if this.iconIsShown}}
         <FlightIcon
           @name={{or this.productID (or @fallbackIcon "folder")}}
-          style={{if this.abbreviation this.sizeStyles}}
+          style={{unless this.abbreviation this.sizeStyles}}
         />
       {{else if this.abbreviation}}
         <span

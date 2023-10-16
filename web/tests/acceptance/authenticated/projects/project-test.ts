@@ -57,8 +57,221 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("it renders the correct filled-in state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    this.server.createList("document", 4);
-    this.server.createList("related-external-link", 2);
+    const FAKE_DOCUMENTS = [
+      {
+        title: "The Tao of HashiCorp",
+        status: "Approved",
+        product: "Cloud Platform",
+        docType: "Memo",
+        owners: ["armon@hashicorp.com"],
+        ownerPhotos: [
+          "https://lh3.googleusercontent.com/a-/ALV-UjXorptEFt6Ua_rLpNaCWjEVmWF8tbo_uPzA3BaPTjkwVmo=s100",
+        ],
+      },
+      {
+        title: "HCP Vault Secrets and Radar",
+        status: "In Review",
+        docType: "PRFAQ",
+        owners: ["jfreda@hashicorp.com"],
+        ownerPhotos: [
+          "https://lh3.googleusercontent.com/a-/ACB-R5TEQbIzp4iI581C82PUOQUv6OHWQnoelGgg4g3e=s100",
+        ],
+      },
+      {
+        title: "Announcing Boundary Desktop",
+        status: "In Review",
+        docType: "RFC",
+        product: "Boundary",
+        owners: ["nsmith@hashicorp.com"],
+        ownerPhotos: [
+          "https://lh3.googleusercontent.com/a-/ACB-R5SnPc89zyde2LB2cG8402-3ArtK1U1UwVoxcNHH=s100",
+        ],
+      },
+      {
+        title:
+          "Creating a multi-cloud golden image pipeline with Terraform Cloud and HCP Packer",
+        status: "In Review",
+        docType: "PRD",
+        product: "Packer",
+        owners: ["sean.fitzgerald@hashicorp.com"],
+        ownerPhotos: [
+          "https://lh3.googleusercontent.com/a-/ALV-UjX1D1Tlr2TAdJ8G1p3ry8JjzsaLSLcNZ4puJUbL4-FNjg=s100",
+        ],
+      },
+      {
+        title: "Webhooks and streamlined run-task reviews",
+        status: "In Review",
+        docType: "RFC",
+        product: "Labs",
+      },
+      {
+        title: "UI updates for 1.15",
+        status: "In Review",
+        docType: "RFC",
+        product: "Terraform",
+      },
+      {
+        title: "No-code provisioning",
+        status: "In Review",
+        docType: "RFC",
+        product: "Terraform",
+      },
+    ];
+
+    this.server.create("document", FAKE_DOCUMENTS[0]);
+    this.server.create("document", FAKE_DOCUMENTS[1]);
+    this.server.create("document", FAKE_DOCUMENTS[2]);
+    this.server.create("document", FAKE_DOCUMENTS[3]);
+    this.server.create("document", FAKE_DOCUMENTS[4]);
+    this.server.create("document", FAKE_DOCUMENTS[5]);
+    this.server.create("document", FAKE_DOCUMENTS[6]);
+
+    this.server.create("product", {
+      name: "Labs",
+      abbreviation: "LAB",
+    });
+
+    this.server.create("product", {
+      name: "Engineering",
+      abbreviation: "ENG",
+    });
+
+    this.server.create("product", {
+      name: "Community",
+      abbreviation: "OC",
+    });
+    this.server.create("product", {
+      name: "Sentinel",
+      abbreviation: "SL",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Vault",
+      status: "In review",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Terraform",
+      status: "Approved",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Labs",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Engineering",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Consul",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Terraform",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Sentinel",
+    });
+
+    this.server.create("related-hermes-document", {
+      product: "Cloud Platform",
+    });
+
+    this.server.createList("document", 3);
+
+    const firstDoc = this.server.schema.relatedHermesDocument.first().attrs;
+    const secondDoc =
+      this.server.schema.relatedHermesDocument.all().models[1].attrs;
+    const thirdDoc =
+      this.server.schema.relatedHermesDocument.all().models[2].attrs;
+    const fourthDoc =
+      this.server.schema.relatedHermesDocument.all().models[3].attrs;
+    const fifthDoc =
+      this.server.schema.relatedHermesDocument.all().models[4].attrs;
+    const sixthDoc =
+      this.server.schema.relatedHermesDocument.all().models[5].attrs;
+    const seventhDoc =
+      this.server.schema.relatedHermesDocument.all().models[6].attrs;
+
+    this.server.create("project", {
+      title: "Listbox component rollout (Ember)",
+      description: "Migrating from our old component",
+      documents: [firstDoc],
+
+      relatedLinks: [
+        {
+          title: "Hashicorp",
+          url: "https://hashicorp.com",
+        },
+      ],
+    });
+
+    this.server.create("project", {
+      title: "Hermes Responsive Design",
+      description: "Making Hermes work on mobile",
+      documents: [secondDoc, seventhDoc],
+      jiraObject: {
+        key: "HRD-041",
+      },
+    });
+
+    this.server.create("project", {
+      title: "Infrastructure Migration from AWS",
+      documents: [thirdDoc, seventhDoc],
+      jiraObject: {
+        key: "LABS-103",
+        status: "Done",
+      },
+    });
+
+    this.server.create("project", {
+      documents: [fourthDoc],
+      title: "Cross-Technology Integrations and Interoperability",
+      description:
+        "How a group of engineers built a thingy dingy out of ice and sweat tornados",
+    });
+
+    this.server.create("project", {
+      title: "Shared Admin",
+      documents: [firstDoc, fifthDoc, fourthDoc, thirdDoc],
+    });
+
+    this.server.create("project", {
+      title: "UI/UX audit and improvements",
+      description:
+        "When we first heard about having a project for this, we wondered what it would be like to have a project for this.",
+      documents: [fifthDoc, fourthDoc],
+      jiraObject: {
+        type: "Enhancement",
+        key: "RD-092",
+        url: "https://jira.example.com/browse/HERMES-123",
+        priority: "High",
+        status: "In Progress",
+        assignee: "testuser@example.com",
+        summary:
+          "Add Hermes application version & revision in the footer of the UI",
+      },
+    });
+
+    this.server.create("project", {
+      title: "Hermes API v2",
+      documents: [thirdDoc],
+      jiraObject: {
+        key: "HERMES-123",
+        type: "Task",
+        url: "https://jira.example.com/browse/HERMES-123",
+        priority: "High",
+        status: "In Progress",
+        assignee: "",
+      },
+    });
+
+    this.server.create("related-external-link", {
+      title: "Slideshow",
+      url: "https://docs.google.com/presentation/d/1BTVXH5wOHDUh2lm-75NH5wqQ6O9C9OSwv27RHnsaXAc/edit#slide=id.g22512317f0d_0_0",
+    });
 
     const project = this.server.schema.projects.find(100);
     const documents = this.server.schema.document
@@ -76,7 +289,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .models.map((model: { attrs: RelatedExternalLink }) => model.attrs);
 
     project.update({
-      documents,
+      documents: documents.slice(0, 3),
       relatedLinks,
       jiraObject: {
         type: "Enhancement",

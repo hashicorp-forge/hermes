@@ -36,10 +36,16 @@
     >
       <F.Label>Description</F.Label>
     </Hds::Form::Textarea::Field>
-
-    {{! TODO: Add Jira integration }}
-
     <div>
+      <Hds::Button
+        @color="secondary"
+        @icon="jira"
+        @text="Add a Jira link..."
+        @size="small"
+      />
+    </div>
+
+    <div class="mb-1">
       <Hds::Button
         data-test-submit
         @text="Create project"

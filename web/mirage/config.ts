@@ -123,7 +123,7 @@ export default function (mirageConfig) {
               });
             }
 
-            return new Response(200, {}, { hits: docMatches });
+            return new Response(200, {}, { hits: docMatches.slice(0, 4) });
           } else {
             /**
              * A request we're not currently handling with any specificity.
@@ -379,6 +379,17 @@ export default function (mirageConfig) {
               longName: "Product Requirements",
               description:
                 "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+            {
+              name: "FRD",
+              longName: "Funding Request",
+              description:
+                "Request a budget along with justifications and expected returns.",
+            },
+            {
+              name: "Memo",
+              longName: "Memo",
+              description: "Share an idea or announcement with colleagues.",
             },
           ]);
         }

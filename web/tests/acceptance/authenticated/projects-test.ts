@@ -61,7 +61,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
       this.server.schema.relatedHermesDocument.all().models[4].attrs;
 
     this.server.create("project", {
-      name: "Listbox component rollout (Ember)",
+      title: "Listbox component rollout (Ember)",
       description: "This is a test project",
       documents: [firstDoc],
 
@@ -73,7 +73,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
       ],
     });
     this.server.create("project", {
-      name: "Hermes Responsive Design",
+      title: "Hermes Responsive Design",
       documents: [secondDoc, firstDoc],
       jiraObject: {
         key: "HRD-041",
@@ -81,7 +81,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
     });
 
     this.server.create("project", {
-      name: "Infrastructure Migration from AWS",
+      title: "Infrastructure Migration from AWS",
       documents: [thirdDoc, secondDoc],
       jiraObject: {
         key: "LABS-103",
@@ -91,18 +91,18 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     this.server.create("project", {
       documents: [fourthDoc],
-      name: "Cross-Technology Integrations and Interoperability",
+      title: "Cross-Technology Integrations and Interoperability",
       description:
         "How a group of engineers built a thingy dingy out of ice and sweat tornados",
     });
 
     this.server.create("project", {
-      name: "Shared Admin",
+      title: "Shared Admin",
       documents: [firstDoc, fifthDoc, fourthDoc, thirdDoc],
     });
 
     this.server.create("project", {
-      name: "UI/UX audit and improvements",
+      title: "UI/UX audit and improvements",
       description:
         "When we first heard about having a project for this, we wondered what it would be like to have a project for this.",
       jiraObject: {
@@ -118,7 +118,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
     });
 
     this.server.create("project", {
-      name: "Hermes API v2",
+      title: "Hermes API v2",
     });
 
     await visit("/projects");

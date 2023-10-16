@@ -32,17 +32,17 @@
     // @apply font-medium;
     // @apply text-color-foreground-disabled;
     // @apply text-color-foreground-strong;
-    @apply text-color-foreground-primary;
-    // @apply text-color-foreground-faint;
+    // @apply text-color-foreground-primary;
+    @apply text-color-foreground-disabled;
 
     &.active {
       // @apply text-display-500;
-      @apply text-color-foreground-action;
+      @apply text-color-foreground-strong;
 
-      &::before {
-        content: "";
-        @apply absolute -bottom-3 h-[3px] w-full bg-color-foreground-action;
-      }
+      // &::before {
+      //   content: "";
+      //   @apply absolute -bottom-3 h-[3px] w-full bg-color-foreground-action;
+      // }
     }
   }
 }

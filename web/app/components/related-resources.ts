@@ -29,6 +29,7 @@ export interface RelatedHermesDocument {
   status: string;
   owners?: string[];
   ownerPhotos?: string[];
+  product: string;
 }
 
 export enum RelatedResourcesScope {

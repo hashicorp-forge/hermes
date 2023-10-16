@@ -31,21 +31,19 @@
       >
         <div class="flex h-9 items-center space-x-2">
           {{#if @project.jiraObject.type}}
-            <div class="flex">
-              <FlightIcon @name="square-fill" class="text-lime-600" />
-            </div>
+            <img
+              src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
+            />
           {{/if}}
-          {{!-- <div class="max-w-[150px]">
-            <TruncatedText class="text-body-200 text-color-foreground-primary">
-              {{@project.jiraObject.summary}}
-            </TruncatedText>
-          </div> --}}
           <div
             class="text-color-foreground-faint
               {{if (eq @project.jiraObject.status 'done') 'line-through'}}"
           >
             {{@project.jiraObject.key}}
           </div>
+          {{#if @project.jiraObject.assignee}}
+            <Person::Avatar @email={{@project.jiraObject.assignee}} />
+          {{/if}}
           {{#if @project.jiraObject.priority}}
             <div class="flex">
               <FlightIcon
@@ -54,27 +52,24 @@
               />
             </div>
           {{/if}}
-          {{#if @project.jiraObject.assignee}}
-            <Person::Avatar @email={{@project.jiraObject.assignee}} />
-          {{/if}}
 
         </div>
       </div>
       <Action
-        class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[11px] text-color-foreground-disabled underline"
+        class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[11px] text-color-foreground-disabled underline decoration-color-palette-neutral-200 underline-offset-[3px]"
       >
         Remove Jira link
       </Action>
     </div>
 
   {{else}}
-    {{! <Hds::Button
+    <Hds::Button
       @icon="jira"
       @text="Add Jira link"
       @color="secondary"
       @size="small"
       class="mx-auto mt-3.5"
-    /> }}
+    />
   {{/if}}
 
   {{! TODO: Jira section }}
@@ -123,27 +118,27 @@
                       class="flex w-full items-center justify-between pl-4 pr-3"
                     >
                       <div class="flex items-center gap-2">
-                        {{! TODO: add product avatar }}
+                        <Product::Avatar @product={{document.product}} />
                         {{! TODO: unify with docs awaiting review }}
                         <Person::Avatar
                           @email="{{get document.owners 0}}"
                           @imgURL={{get document.ownerPhotos 0}}
                           @size="small"
                         />
-                        <h4 class="title">
+                        <h4 class="title max-w-[320px] truncate">
                           {{document.documentNumber}}
                           {{document.title}}
                         </h4>
-                        <p class="owner">
+                        <p class="owner max-w-[180px] truncate">
                           {{get document.owners 0}}
                         </p>
                       </div>
                       <div class="flex gap-1">
+                        <Hds::Badge @text={{document.docType}} />
                         <Doc::State
                           @hideProgress={{true}}
                           @state={{document.status}}
                         />
-                        <Hds::Badge @text={{document.docType}} />
                       </div>
                     </div>
                   </LinkTo>
@@ -191,12 +186,21 @@
                   <ExternalLink
                     data-test-related-link
                     href={{link.url}}
-                    class="flex h-12 items-center"
+                    class="flex h-12 items-center gap-3 px-4"
                   >
-                    <div class="px-4">
+                    {{!
+                    We create a click area that extends beyond the edges of its  container. This makes the parent div clickable without having to wrap itself in a link, and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
+                  }}
+                    <div aria-hidden="true" class="hit-area"></div>
+                    <Favicon @url={{link.url}} />
+                    <div
+                      class="truncate font-semibold text-color-foreground-strong"
+                    >
                       {{link.name}}
                     </div>
-                    <div>{{link.url}}</div>
+                    <div
+                      class="max-w-[200px] truncate text-color-foreground-faint"
+                    >{{link.url}}</div>
                   </ExternalLink>
                 </Project::Resource>
               </li>
@@ -209,7 +213,7 @@
     </RelatedResources>
   </div>
   <div
-    class="mt-7 flex w-full items-center justify-center gap-1 text-body-100 text-color-foreground-faint"
+    class="mt-8 flex w-full items-center justify-center gap-1 text-color-foreground-faint"
   >
 
     <div class="flex">
@@ -217,13 +221,13 @@
         @url="TODO"
         @tooltipPlacement="bottom"
         {{!-- @isIconOnly={{true}} --}}
-        class="quarternary-button text-color-foreground-faint"
+        class="quarternary-button text-color-foreground-primary"
       />
-      <Action class="quarternary-button text-color-foreground-faint">
+      <Action class="quarternary-button text-color-foreground-primary">
         <FlightIcon @name="check-circle" />
         Complete...
       </Action>
-      <Action class="quarternary-button text-color-foreground-faint">
+      <Action class="quarternary-button text-color-foreground-primary">
         <FlightIcon @name="archive" />
         Archive...
       </Action>
@@ -231,7 +235,9 @@
 
   </div>
 
-  <div class="mt-7 text-center text-[11px] text-color-foreground-disabled">
+  <div
+    class="mt-9 -mb-2 text-center text-[11px] text-color-foreground-disabled"
+  >
     Created
     {{time-ago @project.dateCreated}}
     by
