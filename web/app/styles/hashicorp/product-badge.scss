@@ -38,7 +38,7 @@
   }
 
   &.no-product {
-    @apply rounded-none bg-none text-color-foreground-faint;
+    @apply bg-gradient-to-br from-color-palette-neutral-100 to-color-palette-neutral-200 text-color-foreground-faint;
   }
 
   // Abbreviation

@@ -32,10 +32,6 @@
     .flight-icon {
       @apply scale-75;
     }
-
-    &.no-product {
-      @apply bg-gradient-to-br from-color-palette-neutral-200 to-color-palette-neutral-300 text-white;
-    }
   }
 
   &.obsolete {
@@ -53,7 +49,7 @@
     }
 
     .product-badge {
-      @apply h-[32px] w-[36px] rounded-bl rounded-tr;
+      @apply rounded-bl rounded-tr;
 
       .flight-icon {
         @apply scale-100;
