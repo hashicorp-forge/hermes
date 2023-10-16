@@ -545,11 +545,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
   }
 
-  @action kickOffBackgroundTasks() {
-    void this.getDocType.perform();
-    void this.serializeContributorsAndApprovers.perform();
-  }
-
   // projects search input
   @action protected onInput() {
     return;
@@ -559,35 +554,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @action protected onKeydown() {
     return;
   }
-
-  protected serializeContributorsAndApprovers = task(async () => {
-    let maybePromises = [];
-
-    const contributorsPromise = this.fetchSvc
-      .fetch(`/api/v1/people?emails=${this.contributors.join(",")}`)
-      .then((r) => r?.json());
-
-    const approversPromise = this.fetchSvc
-      .fetch(`/api/v1/people?emails=${this.approvers.join(",")}`)
-      .then((r) => r?.json());
-
-    maybePromises.push(this.contributors.length ? contributorsPromise : []);
-    maybePromises.push(this.approvers.length ? approversPromise : []);
-
-    if (!maybePromises.length) {
-      return;
-    }
-
-    const [contributors, approvers] = await Promise.all(maybePromises);
-
-    if (contributors.length) {
-      this.contributors = serializePeople(contributors);
-    }
-
-    if (approvers.length) {
-      this.approvers = serializePeople(approvers);
-    }
-  });
 
   /**
    * A task that waits for a short time and then resolves.
