@@ -194,6 +194,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.relatedHermesDocument.all().models[5].attrs;
     const seventhDoc =
       this.server.schema.relatedHermesDocument.all().models[6].attrs;
+    const eighthDoc =
+      this.server.schema.relatedHermesDocument.all().models[7].attrs;
 
     this.server.create("project", {
       title: "Listbox component rollout (Ember)",
@@ -227,10 +229,20 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     });
 
     this.server.create("project", {
-      documents: [fourthDoc],
+      documents: [eighthDoc, fourthDoc],
       title: "Cross-Technology Integrations and Interoperability",
       description:
         "How a group of engineers built a thingy dingy out of ice and sweat tornados",
+      jiraObject: {
+        type: "Enhancement",
+        key: "RD-092",
+        url: "https://jira.example.com/browse/HERMES-123",
+        priority: "High",
+        status: "In Progress",
+        assignee: "testuser@example.com",
+        summary:
+          "Add Hermes application version & revision in the footer of the UI",
+      },
     });
 
     this.server.create("project", {

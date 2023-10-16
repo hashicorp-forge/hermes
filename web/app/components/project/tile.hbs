@@ -45,9 +45,9 @@
               bottom-0 right-0 flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
           >
             {{#if @project.jiraObject.type}}
-              <div class="flex">
-                <FlightIcon @name="square-fill" class="text-lime-600" />
-              </div>
+              <img
+                src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
+              />
             {{/if}}
             {{this.jiraObject.key}}
           </span>

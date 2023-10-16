@@ -235,7 +235,7 @@
           @buttonIsHidden={{not this.projects.length}}
         />
         {{#if this.projects.length}}
-          <ol class="space-y-0.5">
+          <ol class="mt-1 space-y-0.5">
 
             {{#each (take 1 this.projects) as |project|}}
               <li class="-mx-[5px]">
@@ -244,26 +244,30 @@
                   @model={{project.id}}
                   class="flex gap-2 px-[5px] py-[6px]"
                 >
-                  <div class="w-[22px] shrink-0 py-[2px]">
+                  <div class="flex w-[22px] shrink-0 justify-center py-[2px]">
 
-                    <FlightIcon @name="grid" />
+                    <FlightIcon
+                      @name="grid"
+                      class="text-color-foreground-disabled"
+                    />
                   </div>
                   <div class="overflow-hidden">
 
                     <TruncatedText
                       class="text-body-200 font-semibold text-color-foreground-strong"
                     >
-                      {{project.name}}
+                      {{project.title}}
                     </TruncatedText>
-                    <div class="flex items-center gap-1">
-                      <FlightIcon
-                        @name="square-fill"
-                        class="text-color-palette-purple-200"
+                    <div class="mt-1 flex items-center gap-1">
+                      <img
+                        src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
                       />
-                      HDS-039
+
+                      HDS-123
+                      <Person::Avatar @email="t" class="ml-0.5" />
                       <FlightIcon
                         @name="chevrons-up"
-                        class="text-color-palette-blue-200"
+                        class="text-color-foreground-critical"
                       />
                     </div>
                   </div>
