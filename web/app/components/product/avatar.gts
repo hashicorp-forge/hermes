@@ -26,11 +26,6 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     return getProductID(this.args.product);
   }
 
-  protected get sizeStyles() {
-    const iconSize = this.args.iconSize || 12;
-    return `height: ${iconSize}px; width: ${iconSize}px;`;
-  }
-
   private get sizeIsSmall() {
     return this.args.size === "small" || !this.args.size;
   }
@@ -41,6 +36,16 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get sizeIsLarge() {
     return this.args.size === "large";
+  }
+
+  protected get style() {
+    if (!this.productID && this.color) {
+      return `background: ${this.color};`;
+    }
+  }
+
+  protected get color() {
+    return this.productAreas.getColor(this.args.product);
   }
 
   protected get abbreviation() {
@@ -62,6 +67,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   <template>
     <div
       data-test-product-avatar
+      style={{this.style}}
       class="product-badge relative flex shrink-0 shrink-0 items-center justify-center rounded-md
         {{or this.productID (or this.abbreviation 'no-product')}}
         {{if
