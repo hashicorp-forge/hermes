@@ -24,11 +24,15 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected formIsValid = false;
   @tracked protected errorIsShown = false;
 
-  @action maybeSubmitForm() {
+  @action maybeSubmitForm(event?: SubmitEvent) {
+    if (event) {
+      event.preventDefault();
+    }
+
     this.validateForm();
 
     if (this.formIsValid) {
-      this.createProject.perform();
+      void this.createProject.perform();
     }
   }
 
