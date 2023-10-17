@@ -1,6 +1,6 @@
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
-import { next, schedule } from "@ember/runloop";
+import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
