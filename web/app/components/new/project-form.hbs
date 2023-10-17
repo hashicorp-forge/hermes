@@ -1,12 +1,14 @@
 <form
   data-test-project-form
   {{on "submit" this.maybeSubmitForm}}
-  class="mx-auto mb-10 max-w-xl"
+  class="new-form"
 >
-  <div class="space-y-4">
-    <h1>Start a project</h1>
+  {{! Icon }}
+  <div class="relative mb-4 flex justify-center">
+    <FlightIcon @name="grid" @size="24" class="feature-icon" />
   </div>
-  <div class="mt-7 grid gap-7">
+  <h1>Start a project</h1>
+  <div class="mt-8 grid gap-7">
     <Hds::Form::Textarea::Field
       {{on "keydown" this.onKeydown}}
       {{auto-height-textarea}}
@@ -39,13 +41,13 @@
 
     {{! TODO: Add Jira integration }}
 
-    <div>
-      <Hds::Button
-        data-test-submit
-        @text="Create project"
-        {{on "click" this.maybeSubmitForm}}
-      />
-    </div>
-
   </div>
+
+  <Hds::Button
+    data-test-submit
+    @text="Create project"
+    @isFullWidth={{true}}
+    type="submit"
+    {{on "click" this.maybeSubmitForm}}
+  />
 </form>

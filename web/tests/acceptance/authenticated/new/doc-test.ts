@@ -53,8 +53,6 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     await visit("/new/doc?docType=RFC");
 
-    const thumbnailBadgeSelector = "[data-test-doc-thumbnail-product-badge]";
-
     assert.dom(PRODUCT_SELECT_TOGGLE).exists();
     assert
       .dom(`${PRODUCT_SELECT_TOGGLE} span`)
@@ -62,10 +60,6 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     assert
       .dom(`${PRODUCT_SELECT_TOGGLE} .flight-icon`)
       .hasAttribute("data-test-icon", "folder");
-
-    assert
-      .dom(thumbnailBadgeSelector)
-      .doesNotExist("badge not shown unless a product shortname exists");
 
     await click(PRODUCT_SELECT_TOGGLE);
 
@@ -83,7 +77,6 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     assert
       .dom(PRODUCT_SELECT_TOGGLE + " .flight-icon")
       .hasAttribute("data-test-icon", "terraform");
-    assert.dom(thumbnailBadgeSelector).exists();
   });
 
   test("the create button is disabled until the form requirements are met", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
@@ -109,7 +102,6 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
   test("it shows a loading screen while the doc is being created", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
     this.server.createList("product", 1);
-
     await visit("/new/doc?docType=RFC");
 
     await fillIn(TITLE_INPUT, "Foo");
