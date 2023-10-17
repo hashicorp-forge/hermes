@@ -39,13 +39,11 @@
 
     {{! TODO: Add Jira integration }}
 
-    <div>
-      <Hds::Button
-        data-test-submit
-        @text="Create project"
-        {{on "click" this.maybeSubmitForm}}
-      />
-    </div>
-
   </div>
+  <Hds::Button
+    data-test-submit
+    @text="Create project"
+    @isFullWidth={{true}}
+    type="submit"
+  />
 </form>

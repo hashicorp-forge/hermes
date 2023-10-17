@@ -1,6 +1,6 @@
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
-import { next, schedule } from "@ember/runloop";
+import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -24,7 +24,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected formIsValid = false;
   @tracked protected errorIsShown = false;
 
-  @action maybeSubmitForm() {
+  @action maybeSubmitForm(event?: SubmitEvent) {
+    if (event) {
+      event.preventDefault();
+    }
+
     this.validateForm();
 
     if (this.formIsValid) {
