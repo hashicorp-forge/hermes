@@ -15,7 +15,7 @@ import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
 import { TransitionContext } from "ember-animated/.";
 import { Resize } from "ember-animated/motions/resize";
-import { easeOutQuad } from "hermes/utils/ember-animated/easings";
+import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
 
@@ -44,8 +44,8 @@ interface NewDocFormComponentSignature {
 
 class ResizeMotion extends Resize {
   *animate() {
-    this.opts.easing = easeOutQuad;
-    this.opts.duration = 650;
+    this.opts.easing = easeOutExpo;
+    this.opts.duration = 750;
     yield* super.animate();
   }
 }
