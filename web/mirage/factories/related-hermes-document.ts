@@ -5,7 +5,7 @@ import { Factory } from "miragejs";
 // but that doesn't work when using `createList` in tests.
 
 export default Factory.extend({
-  id: (i) => i,
+  id: 0,
   sortOrder: (i) => i,
   googleFileID() {
     return `${this.id}`;
