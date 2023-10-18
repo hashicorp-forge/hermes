@@ -1,10 +1,10 @@
 .new {
-  .new-form {
-    @apply mx-auto mt-2 max-w-xl;
+  h1 {
+    @apply text-center text-display-400;
+  }
 
-    h1 {
-      @apply text-center text-display-400;
-    }
+  .create-new-form {
+    @apply mx-auto mt-2 max-w-xl;
   }
 
   button[type="submit"] {

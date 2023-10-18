@@ -13,6 +13,11 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
+import { TransitionContext } from "ember-animated/.";
+import { Resize } from "ember-animated/motions/resize";
+import { easeOutQuad } from "hermes/utils/ember-animated/easings";
+import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import move from "ember-animated/motions/move";
 
 interface DocFormErrors {
   title: string | null;
@@ -35,6 +40,14 @@ interface NewDocFormComponentSignature {
   Args: {
     docType: string;
   };
+}
+
+class ResizeMotion extends Resize {
+  *animate() {
+    this.opts.easing = easeOutQuad;
+    this.opts.duration = 650;
+    yield* super.animate();
+  }
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
@@ -186,12 +199,28 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     }
   }
 
+  resizeMotion = ResizeMotion;
+
+  *transition({ insertedSprites, removedSprites }: TransitionContext) {
+    for (const sprite of insertedSprites) {
+      sprite.startTranslatedBy(0, -2);
+      void fadeIn(sprite, { duration: 50 });
+      void move(sprite, { easing: easeOutQuad, duration: 350 });
+    }
+
+    for (const sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 0 });
+    }
+  }
+
   /**
    * Creates a document draft, then redirects to the document.
    * On error, show a flashMessage and allow users to try again.
    */
   private createDoc = task(async () => {
     this.docIsBeingCreated = true;
+
+    await timeout(80000);
 
     try {
       const doc = await this.fetchSvc
