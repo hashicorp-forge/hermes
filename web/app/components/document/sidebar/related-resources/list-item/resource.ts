@@ -26,7 +26,7 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
    */
   protected get docType() {
     this.assertResourceIsDocument(this.args.resource);
-    return this.args.resource.type;
+    return this.args.resource.documentType;
   }
 
   /**
@@ -73,7 +73,7 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
    * with the correct data model.
    */
   private assertResourceIsDocument(
-    document: RelatedResource
+    document: RelatedResource,
   ): asserts document is RelatedHermesDocument {
     if (!("googleFileID" in document)) {
       throw new Error("resource must be a document");

@@ -33,7 +33,7 @@ interface RelatedResourcesAddComponentSignature {
       dd: XDropdownListAnchorAPI | null,
       query: string,
       shouldIgnoreDelay?: boolean,
-      options?: SearchOptions
+      options?: SearchOptions,
     ) => Promise<void>;
     getObject: (dd: XDropdownListAnchorAPI | null, id: string) => Promise<void>;
     headerTitle: string;
@@ -329,8 +329,11 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     const relatedHermesDocument = {
       googleFileID: attrs.objectID,
       title: attrs.title,
-      type: attrs.docType,
+      documentType: attrs.docType,
       documentNumber: attrs.docNumber,
+      owners: attrs.owners,
+      ownerPhotos: attrs.ownerPhotos,
+      product: attrs.product,
       sortOrder: 1,
     } as RelatedHermesDocument;
 
@@ -352,7 +355,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    */
   @action private checkForDuplicate(
     urlOrID: string,
-    resourceIsHermesDocument = false
+    resourceIsHermesDocument = false,
   ) {
     let isDuplicate = false;
     if (resourceIsHermesDocument) {
@@ -400,7 +403,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    */
   @action protected didInsertInput(
     dd: XDropdownListAnchorAPI,
-    e: HTMLInputElement
+    e: HTMLInputElement,
   ) {
     this.searchInput = e;
     this._dd = dd;
@@ -626,7 +629,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   private getAlgoliaObject = restartableTask(async (id: string) => {
     assert(
       "full url format expected",
-      this.firstPartyURLFormat === FirstPartyURLFormat.FullURL
+      this.firstPartyURLFormat === FirstPartyURLFormat.FullURL,
     );
 
     this.checkForDuplicate(id, true);
