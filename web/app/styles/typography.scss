@@ -12,6 +12,10 @@
   @apply text-body-100;
 }
 
+.hermes-h-300 {
+  @apply text-display-300 font-semibold text-color-foreground-strong;
+}
+
 .hermes-h4 {
   @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
 }

@@ -345,49 +345,33 @@ export default function (mirageConfig) {
        * Used in the /new routes when creating a document.
        */
       this.get("/document-types", () => {
-        return new Response(200, {}, [
-          {
-            name: "RFC",
-            longName: "Request for Comments",
-            description:
-              "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
-            moreInfoLink: {
-              text: "More-info link",
-              url: "example.com",
+        if (this.schema.documentTypes.all().models.length === 0) {
+          return new Response(200, {}, [
+            {
+              name: "RFC",
+              longName: "Request for Comments",
+              description:
+                "Present a proposal to colleagues for their review and feedback.",
+              moreInfoLink: {
+                text: "More-info link",
+                url: "example.com",
+              },
             },
-            checks: [
-              {
-                label: "I have read the Terms and Conditions",
-                helperText:
-                  "Please read the Terms and Conditions before proceeding.",
-                links: [
-                  {
-                    text: "Terms and Conditions",
-                    url: "example.com",
-                  },
-                ],
-              },
-            ],
-            customFields: [
-              {
-                name: "Current Version",
-                readOnly: false,
-                type: "string",
-              },
-              {
-                name: "Stakeholders",
-                readOnly: false,
-                type: "people",
-              },
-            ],
-          },
-          {
-            name: "PRD",
-            longName: "Product Requirements",
-            description:
-              "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
-          },
-        ]);
+            {
+              name: "PRD",
+              longName: "Product Requirements",
+              description:
+                "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+          ]);
+        }
+        return new Response(
+          200,
+          {},
+          this.schema.documentTypes.all().models.map((docType) => {
+            return docType.attrs;
+          }),
+        );
       });
 
       /**
@@ -530,6 +514,24 @@ export default function (mirageConfig) {
             page: 0,
           },
         );
+      });
+
+      /**
+       * Used by the /projects route to fetch a list of projects.
+       */
+      this.get("/projects", () => {
+        const projects = this.schema.projects.all().models;
+        return new Response(200, {}, projects);
+      });
+
+      /**
+       * Used by the /projects/:project_id route to fetch a single project.
+       */
+      this.get("/projects/:project_id", (schema, request) => {
+        const project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+        return new Response(200, {}, project.attrs);
       });
 
       /**
@@ -729,6 +731,20 @@ export default function (mirageConfig) {
           return new Response(200, {}, {});
         },
       );
+
+      // Project related resources
+      this.put("projects/:project_id", (schema, request) => {
+        let project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        if (project) {
+          let attrs = JSON.parse(request.requestBody);
+
+          project.update(attrs);
+          return new Response(200, {}, project.attrs);
+        }
+      });
 
       // Update whether a draft is shareable.
       this.put("/drafts/:document_id/shareable", (schema, request) => {

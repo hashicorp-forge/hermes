@@ -1,9 +1,10 @@
 <X::DropdownList
-  @items={{this.items}}
+  @items={{@items}}
   @renderOut={{true}}
   @placement="bottom-end"
   @offset={{hash mainAxis=-3 crossAxis=-3}}
   data-test-related-resources-list-item-overflow-menu
+  ...attributes
 >
   <:anchor as |dd|>
     <div
@@ -22,16 +23,15 @@
   </:anchor>
   <:item as |dd|>
     <dd.Action
-      data-test-overflow-menu-action={{if
-        (eq dd.attrs.label "Edit")
-        "edit"
-        "remove"
-      }}
+      data-test-action
+      data-test-overflow-menu-action={{dasherize dd.attrs.label}}
       {{on "click" dd.attrs.action}}
       class="related-resources-overflow-menu-item-button"
     >
-      <FlightIcon @name={{dd.attrs.icon}} />
-      <span>{{dd.attrs.label}}</span>
+      <FlightIcon @name={{dd.attrs.icon}} class="shrink-0" />
+      <span data-test-label>
+        {{dd.attrs.label}}
+      </span>
     </dd.Action>
   </:item>
 </X::DropdownList>
