@@ -5,7 +5,7 @@ import { Factory } from "miragejs";
 // but that doesn't work when using `createList` in tests.
 
 export default Factory.extend({
-  id: 0,
+  id: (i) => i,
   sortOrder: (i) => i,
   googleFileID() {
     return `${this.id}`;
@@ -13,8 +13,12 @@ export default Factory.extend({
   title() {
     return `Related Document ${this.id}`;
   },
-  type: "RFC",
+  documentType: "RFC",
   documentNumber() {
     return `LAB-00${this.id}`;
   },
+  status: "In review",
+  product: "Labs",
+  owners: ["testuser@example.com"],
+  ownerPhotos: ["https://placehold.co/100x100"],
 });

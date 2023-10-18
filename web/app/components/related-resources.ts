@@ -23,9 +23,13 @@ export interface RelatedHermesDocument {
   id: number;
   googleFileID: string;
   title: string;
-  type: string;
+  documentType: string;
   documentNumber: string;
   sortOrder: number;
+  status: string;
+  owners?: string[];
+  ownerPhotos?: string[];
+  product?: string;
 }
 
 export enum RelatedResourcesScope {
