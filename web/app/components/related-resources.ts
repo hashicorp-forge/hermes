@@ -26,10 +26,6 @@ export interface RelatedHermesDocument {
   documentType: string;
   documentNumber: string;
   sortOrder: number;
-  status: string;
-  owners?: string[];
-  ownerPhotos?: string[];
-  product?: string;
 }
 
 export enum RelatedResourcesScope {
