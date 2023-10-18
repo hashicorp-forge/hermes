@@ -82,6 +82,15 @@
         </div>
 
         <Hds::Form::Field @layout="vertical" as |F|>
+          {{yield
+            (hash
+              Error=F.Error
+              HelperText=F.HelperText
+              Label=F.Label
+              isRequired=F.isRequired
+              isOptional=F.isOptional
+            )
+          }}
           <F.Control>
             <Inputs::PeopleSelect
               class="multiselect mt-2 w-auto"
