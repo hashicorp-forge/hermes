@@ -23,7 +23,7 @@ export interface RelatedHermesDocument {
   id: number;
   googleFileID: string;
   title: string;
-  type: string;
+  documentType: string;
   documentNumber: string;
   sortOrder: number;
 }

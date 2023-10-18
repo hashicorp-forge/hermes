@@ -36,7 +36,7 @@ module(
     setupMirage(hooks);
 
     hooks.beforeEach(async function (
-      this: DocumentSidebarRelatedResourcesListItemTestContext
+      this: DocumentSidebarRelatedResourcesListItemTestContext,
     ) {
       this.server.create("document");
 
@@ -44,7 +44,7 @@ module(
       this.set("document", {
         googleFileID: documentAttrs.objectID,
         title: documentAttrs.title,
-        type: documentAttrs.docType,
+        documentType: documentAttrs.docType,
         documentNumber: documentAttrs.docNumber,
         sortOrder: 1,
       });
@@ -166,7 +166,7 @@ module(
         .exists({ count: 2 }, "two buttons are present for external resources");
 
       const editButton = htmlElement(
-        `${DROPDOWN_LIST_ITEM_SELECTOR}:nth-child(1) button`
+        `${DROPDOWN_LIST_ITEM_SELECTOR}:nth-child(1) button`,
       );
 
       assert.dom(editButton).hasText("Edit", "edit button is present");
@@ -187,7 +187,7 @@ module(
       await click(OVERFLOW_BUTTON_SELECTOR);
 
       const removeButton = htmlElement(
-        `${DROPDOWN_LIST_ITEM_SELECTOR}:nth-child(2) button`
+        `${DROPDOWN_LIST_ITEM_SELECTOR}:nth-child(2) button`,
       );
       assert.dom(removeButton).hasText("Remove", "remove button is present");
 
@@ -195,5 +195,5 @@ module(
 
       assert.equal(count, 2, "remove button was clicked");
     });
-  }
+  },
 );
