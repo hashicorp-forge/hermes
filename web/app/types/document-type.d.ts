@@ -14,6 +14,7 @@ export interface HermesDocumentType {
   name: string;
   longName: string;
   description: string;
+  flightIcon?: string;
   moreInfoLink?: {
     text: string;
     url: string;

@@ -306,49 +306,33 @@ export default function (mirageConfig) {
        * Used in the /new routes when creating a document.
        */
       this.get("/document-types", () => {
-        return new Response(200, {}, [
-          {
-            name: "RFC",
-            longName: "Request for Comments",
-            description:
-              "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
-            moreInfoLink: {
-              text: "More-info link",
-              url: "example.com",
+        if (this.schema.documentTypes.all().models.length === 0) {
+          return new Response(200, {}, [
+            {
+              name: "RFC",
+              longName: "Request for Comments",
+              description:
+                "Present a proposal to colleagues for their review and feedback.",
+              moreInfoLink: {
+                text: "More-info link",
+                url: "example.com",
+              },
             },
-            checks: [
-              {
-                label: "I have read the Terms and Conditions",
-                helperText:
-                  "Please read the Terms and Conditions before proceeding.",
-                links: [
-                  {
-                    text: "Terms and Conditions",
-                    url: "example.com",
-                  },
-                ],
-              },
-            ],
-            customFields: [
-              {
-                name: "Current Version",
-                readOnly: false,
-                type: "string",
-              },
-              {
-                name: "Stakeholders",
-                readOnly: false,
-                type: "people",
-              },
-            ],
-          },
-          {
-            name: "PRD",
-            longName: "Product Requirements",
-            description:
-              "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
-          },
-        ]);
+            {
+              name: "PRD",
+              longName: "Product Requirements",
+              description:
+                "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+          ]);
+        }
+        return new Response(
+          200,
+          {},
+          this.schema.documentTypes.all().models.map((docType) => {
+            return docType.attrs;
+          }),
+        );
       });
 
       /**
