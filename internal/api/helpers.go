@@ -379,8 +379,24 @@ func compareAlgoliaAndDatabaseDocument(
 				"doc type %q not found", algoDocType))
 	}
 
-	// Compare file revisions.
-	// TODO: need to store this in the database first.
+	// Compare fileRevisions.
+	algoFileRevisions, err := getMapStringStringValue(algoDoc, "fileRevisions")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting fileRevisions value: %w", err))
+	} else {
+		dbFileRevisions := make(map[string]string)
+		for _, fr := range dbDoc.FileRevisions {
+			dbFileRevisions[fr.GoogleDriveFileRevisionID] = fr.Name
+		}
+		if !reflect.DeepEqual(algoFileRevisions, dbFileRevisions) {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"fileRevisions not equal, algolia=%v, db=%v",
+					algoFileRevisions, dbFileRevisions),
+			)
+		}
+	}
 
 	// Compare modifiedTime.
 	algoModifiedTime, err := getInt64Value(algoDoc, "modifiedTime")
@@ -511,6 +527,30 @@ func getInt64Value(in map[string]any, key string) (int64, error) {
 		} else {
 			return 0, fmt.Errorf(
 				"invalid type: value is not an float64 (expected), type: %T", v)
+		}
+	}
+
+	return result, nil
+}
+
+func getMapStringStringValue(in map[string]any, key string) (
+	map[string]string, error,
+) {
+	result := make(map[string]string)
+
+	if v, ok := in[key]; ok {
+		if reflect.TypeOf(v).Kind() == reflect.Map {
+			for vk, vv := range v.(map[string]any) {
+				if vv, ok := vv.(string); ok {
+					result[vk] = vv
+				} else {
+					return nil, fmt.Errorf(
+						"invalid type: map value element is not a string")
+				}
+			}
+			return result, nil
+		} else {
+			return nil, fmt.Errorf("invalid type: value is not a map")
 		}
 	}
 

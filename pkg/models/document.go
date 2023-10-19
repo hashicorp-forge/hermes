@@ -42,6 +42,9 @@ type Document struct {
 	DocumentType   DocumentType
 	DocumentTypeID uint
 
+	// DocumentFileRevision are the file revisions for the document.
+	FileRevisions []DocumentFileRevision
+
 	// Imported is true if the document was not created through the application.
 	Imported bool
 

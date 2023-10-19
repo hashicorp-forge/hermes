@@ -138,6 +138,10 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				"createdTime": float64(time.Date(
 					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
 				"currentVersion": "1.2.3",
+				"fileRevisions": map[string]any{
+					"1": "FileRevision1",
+					"2": "FileRevision2",
+				},
 				"modifiedTime": float64(time.Date(
 					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
 				"owners": []any{
@@ -204,6 +208,16 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
 				DocumentModifiedAt: time.Date(
 					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				FileRevisions: []models.DocumentFileRevision{
+					{
+						GoogleDriveFileRevisionID: "1",
+						Name:                      "FileRevision1",
+					},
+					{
+						GoogleDriveFileRevisionID: "2",
+						Name:                      "FileRevision2",
+					},
+				},
 				Owner: &models.User{
 					EmailAddress: "owner1@hashicorp.com",
 				},
