@@ -207,7 +207,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				Owner: &models.User{
 					EmailAddress: "owner1@hashicorp.com",
 				},
-				Summary: "Summary1",
+				Summary: &[]string{"Summary1"}[0],
 				Status:  models.InReviewDocumentStatus,
 			},
 			dbDocReviews: models.DocumentReviews{
@@ -839,7 +839,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				Owner: &models.User{
 					EmailAddress: "owner1@hashicorp.com",
 				},
-				Summary: "BadSummary1",
+				Summary: &[]string{"BadSummary1"}[0],
 			},
 			shouldErr:   true,
 			errContains: "summary not equal",

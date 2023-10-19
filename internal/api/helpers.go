@@ -473,7 +473,7 @@ func compareAlgoliaAndDatabaseDocument(
 			result, fmt.Errorf("error getting summary value: %w", err))
 	} else {
 		dbSummary := dbDoc.Summary
-		if algoSummary != dbSummary {
+		if dbSummary != nil && algoSummary != *dbSummary {
 			result = multierror.Append(result,
 				fmt.Errorf(
 					"summary not equal, algolia=%v, db=%v",

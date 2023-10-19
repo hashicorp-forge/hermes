@@ -251,7 +251,7 @@ func DraftsHandler(
 					Name: req.Product,
 				},
 				Status:  models.WIPDocumentStatus,
-				Summary: req.Summary,
+				Summary: &req.Summary,
 				Title:   req.Title,
 			}
 			if err := model.Create(db); err != nil {
@@ -1104,7 +1104,7 @@ func DraftsDocumentHandler(
 			// Summary.
 			if req.Summary != nil {
 				doc.Summary = *req.Summary
-				model.Summary = *req.Summary
+				model.Summary = req.Summary
 			}
 
 			// Title.

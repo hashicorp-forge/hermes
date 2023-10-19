@@ -717,7 +717,7 @@ Hermes
 
 				// Summary.
 				if req.Summary != nil {
-					model.Summary = *req.Summary
+					model.Summary = req.Summary
 				}
 
 				// Title.
