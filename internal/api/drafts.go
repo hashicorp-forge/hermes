@@ -1176,7 +1176,11 @@ func DraftsDocumentHandler(
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			w.WriteHeader(http.StatusOK)
-			l.Info("patched draft document", "doc_id", docId)
+			l.Info("patched draft document",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docId,
+			)
 
 			// Compare Algolia and database documents to find data inconsistencies.
 			// Get document object from Algolia.
