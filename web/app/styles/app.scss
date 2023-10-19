@@ -29,7 +29,7 @@
 @use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
-@use "components/doc/tile";
+@use "components/doc/tile" as doc-tile;
 @use "components/doc/state";
 @use "components/table/sortable-header";
 @use "components/preview-card";
@@ -38,6 +38,7 @@
 @use "components/document/related-resources";
 @use "components/hds-badge";
 @use "components/product-badge-link";
+@use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
 @use "components/settings/subscription-list-item";
