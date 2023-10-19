@@ -229,6 +229,19 @@ func (s *Service) KeepRevisionForever(
 	return resp, nil
 }
 
+// KeepRevisionForever keeps a Google Drive file revision forever.
+func (s *Service) UpdateKeepRevisionForever(
+	fileID, revisionID string, keepForever bool) error {
+
+	_, err := s.Drive.Revisions.Update(fileID, revisionID, &drive.Revision{
+		KeepForever: keepForever,
+	}).
+		Fields("keepForever").
+		Do()
+
+	return err
+}
+
 // ListFiles lists files in a Google Drive folder using the provided query.
 func (s *Service) ListFiles(folderID, query string) ([]*drive.File, error) {
 	var files []*drive.File
