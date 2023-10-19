@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-multierror"
 	"github.com/iancoleman/strcase"
+	"github.com/stretchr/testify/assert"
 )
 
 // contains returns true if a string is present in a slice of strings.
@@ -114,6 +115,12 @@ func respondError(
 	)
 	http.Error(w, userErrMsg, httpCode)
 }
+
+// fakeT fulfills the assert.TestingT interface so we can use
+// assert.ElementsMatch.
+type fakeT struct{}
+
+func (t fakeT) Errorf(string, ...interface{}) {}
 
 // compareAlgoliaAndDatabaseDocument compares data for a document stored in
 // Algolia and the database to determine any inconsistencies, which are returned
@@ -224,7 +231,7 @@ func compareAlgoliaAndDatabaseDocument(
 			dbApprovedBy = append(dbApprovedBy, r.User.EmailAddress)
 		}
 	}
-	if !reflect.DeepEqual(algoApprovedBy, dbApprovedBy) {
+	if !assert.ElementsMatch(fakeT{}, algoApprovedBy, dbApprovedBy) {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"approvedBy not equal, algolia=%v, db=%v",
@@ -242,7 +249,7 @@ func compareAlgoliaAndDatabaseDocument(
 	for _, a := range dbDoc.Approvers {
 		dbApprovers = append(dbApprovers, a.EmailAddress)
 	}
-	if !reflect.DeepEqual(algoApprovers, dbApprovers) {
+	if !assert.ElementsMatch(fakeT{}, algoApprovers, dbApprovers) {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"approvers not equal, algolia=%v, db=%v",
@@ -263,7 +270,7 @@ func compareAlgoliaAndDatabaseDocument(
 			dbChangesRequestedBy = append(dbChangesRequestedBy, r.User.EmailAddress)
 		}
 	}
-	if !reflect.DeepEqual(algoChangesRequestedBy, dbChangesRequestedBy) {
+	if !assert.ElementsMatch(fakeT{}, algoChangesRequestedBy, dbChangesRequestedBy) {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"changesRequestedBy not equal, algolia=%v, db=%v",
@@ -281,7 +288,7 @@ func compareAlgoliaAndDatabaseDocument(
 	for _, c := range dbDoc.Contributors {
 		dbContributors = append(dbContributors, c.EmailAddress)
 	}
-	if !reflect.DeepEqual(algoContributors, dbContributors) {
+	if !assert.ElementsMatch(fakeT{}, algoContributors, dbContributors) {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"contributors not equal, algolia=%v, db=%v",
@@ -353,7 +360,7 @@ func compareAlgoliaAndDatabaseDocument(
 									)
 								}
 
-								if !reflect.DeepEqual(algoCFVal, dbCFVal) {
+								if !assert.ElementsMatch(fakeT{}, algoCFVal, dbCFVal) {
 									result = multierror.Append(result,
 										fmt.Errorf(
 											"custom field %s not equal, algolia=%v, db=%v",

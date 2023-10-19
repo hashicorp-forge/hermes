@@ -284,6 +284,124 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			},
 		},
 
+		"good with different order of slice and map fields": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"approvedBy": []any{
+					"approver2@hashicorp.com",
+					"approver1@hashicorp.com",
+				},
+				"approvers": []any{
+					"approver2@hashicorp.com",
+					"approver1@hashicorp.com",
+				},
+				"changesRequestedBy": []any{
+					"changerequester2@hashicorp.com",
+					"changerequester1@hashicorp.com",
+				},
+				"contributors": []any{
+					"contributor2@hashicorp.com",
+					"contributor1@hashicorp.com",
+				},
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"docNumber": "ABC-123",
+				"docType":   "RFC",
+				"fileRevisions": map[string]any{
+					"2": "FileRevision2",
+					"1": "FileRevision1",
+				},
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+				"stakeholders": []any{
+					"stakeholder2@hashicorp.com",
+					"stakeholder1@hashicorp.com",
+				},
+			},
+			dbDoc: models.Document{
+				DocumentNumber: 123,
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				Approvers: []*models.User{
+					{
+						EmailAddress: "approver1@hashicorp.com",
+					},
+					{
+						EmailAddress: "approver2@hashicorp.com",
+					},
+				},
+				Contributors: []*models.User{
+					{
+						EmailAddress: "contributor1@hashicorp.com",
+					},
+					{
+						EmailAddress: "contributor2@hashicorp.com",
+					},
+				},
+				CustomFields: []*models.DocumentCustomField{
+					{
+						DocumentTypeCustomField: models.DocumentTypeCustomField{
+							Name: "Stakeholders",
+							DocumentType: models.DocumentType{
+								Name: "RFC",
+							},
+						},
+						Value: `["stakeholder1@hashicorp.com","stakeholder2@hashicorp.com"]`,
+					},
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				FileRevisions: []models.DocumentFileRevision{
+					{
+						GoogleDriveFileRevisionID: "1",
+						Name:                      "FileRevision1",
+					},
+					{
+						GoogleDriveFileRevisionID: "2",
+						Name:                      "FileRevision2",
+					},
+				},
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			dbDocReviews: models.DocumentReviews{
+				{
+					Status: models.ApprovedDocumentReviewStatus,
+					User: models.User{
+						EmailAddress: "approver1@hashicorp.com",
+					},
+				},
+				{
+					Status: models.ApprovedDocumentReviewStatus,
+					User: models.User{
+						EmailAddress: "approver2@hashicorp.com",
+					},
+				},
+				{
+					Status: models.ChangesRequestedDocumentReviewStatus,
+					User: models.User{
+						EmailAddress: "changerequester1@hashicorp.com",
+					},
+				},
+				{
+					Status: models.ChangesRequestedDocumentReviewStatus,
+					User: models.User{
+						EmailAddress: "changerequester2@hashicorp.com",
+					},
+				},
+			},
+		},
+
 		"bad objectID": {
 			algoDoc: map[string]any{
 				"objectID":   "GoogleFileID1",
