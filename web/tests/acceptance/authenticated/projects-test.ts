@@ -25,6 +25,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     await visit("/projects");
 
+    await this.pauseTest();
+
     assert.dom("[data-test-project]").exists({ count: 3 });
 
     const expectedTitles = this.server.schema.projects

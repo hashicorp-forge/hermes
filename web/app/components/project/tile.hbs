@@ -1,0 +1,50 @@
+<Hds::Card::Container
+  @hasBorder={{true}}
+  class="h-48 p-4"
+  @levelHover="mid"
+  ...attributes
+>
+  {{log "PROJECT" @project}}
+  <div class="relative h-full pb-16">
+    <div class="flex items-start justify-between">
+      <div class="w-full">
+        <h3
+          class="float-none text-display-300 font-semibold text-color-foreground-strong"
+        >
+          {{@project.title}}
+        </h3>
+        {{#if @project.description}}
+          <p class="mt-1 text-body-300 text-color-foreground-faint">
+            {{@project.description}}
+          </p>
+        {{/if}}
+      </div>
+    </div>
+
+    {{#if this.productAreas}}
+      {{! TODO: truncation }}
+      <ul class="absolute left-0 bottom-0 flex gap-px">
+        {{#each this.productAreas as |productArea|}}
+          <li class="flex items-center">
+            {{productArea}}
+            {{!-- <Product::Avatar {{tooltip productArea}} @product={{productArea}} /> --}}
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+    {{#if this.jiraObject}}
+      <span
+        class="absolute
+          {{if (eq this.jiraObject.status 'Done') 'line-through'}}
+          bottom-0 right-0 flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
+      >
+        {{#if @project.jiraObject.type}}
+          <img
+            src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
+          />
+        {{/if}}
+        {{this.jiraObject.key}}
+      </span>
+    {{/if}}
+  </div>
+</Hds::Card::Container>
