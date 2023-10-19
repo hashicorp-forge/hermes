@@ -42,7 +42,7 @@ interface NewDocFormComponentSignature {
   };
 }
 
-class ResizeMotion extends Resize {
+class DocFormResize extends Resize {
   *animate() {
     this.opts.easing = easeOutExpo;
     this.opts.duration = 750;
@@ -199,7 +199,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     }
   }
 
-  resizeMotion = ResizeMotion;
+  protected resizeMotion = DocFormResize;
 
   *transition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of insertedSprites) {
@@ -219,8 +219,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    */
   private createDoc = task(async () => {
     this.docIsBeingCreated = true;
-
-    await timeout(80000);
 
     try {
       const doc = await this.fetchSvc
