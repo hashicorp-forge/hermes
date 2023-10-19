@@ -13,7 +13,7 @@ export const FOCUSABLE =
 interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    value?: string | HermesUser[];
+    value: string | HermesUser[];
     onSave: any; // TODO: type this
     onChange?: (value: any) => void; // TODO: type this
     isSaving?: boolean;
