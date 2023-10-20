@@ -1,11 +1,43 @@
-.letter-avatar {
-  @apply tracking-tighter;
+.product-avatar {
+  &.small {
+    .letter-count-2 {
+      @apply text-[9px];
+    }
 
-  &.letter-count-2 {
-    @apply text-[11px];
+    .letter-count-3 {
+      @apply text-[7px];
+    }
   }
 
-  &.letter-count-3 {
-    @apply text-[9px];
+  &.medium {
+    .letter-count-2 {
+      @apply text-[11px];
+    }
+
+    .letter-count-3 {
+      @apply text-[9px];
+    }
+  }
+
+  &.large {
+    .letter-count-2 {
+      @apply text-[13px];
+    }
+    .letter-count-3 {
+      @apply text-[11px];
+    }
+  }
+
+  &.xl {
+    .letter-count-2 {
+      @apply text-[14px];
+    }
+    .letter-count-3 {
+      @apply text-[12px];
+    }
+  }
+
+  .letter-avatar {
+    @apply tracking-tighter;
   }
 }

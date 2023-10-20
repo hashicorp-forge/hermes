@@ -96,9 +96,11 @@
             @model={{dd.value}}
             class="global-search-result"
           >
-            <Product::Avatar
+            <Doc::Thumbnail
+              @size="small"
               @product={{dd.attrs.product}}
-              @fallbackIcon="file-text"
+              @status={{dd.attrs.status}}
+              class="shrink-0"
             />
             <div class="global-search-result-text-content">
               <h4 class="global-search-result-title">

@@ -77,7 +77,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     <div
       data-test-product-avatar
       style={{this.backgroundStyle}}
-      class="product-badge relative flex shrink-0 shrink-0 items-center justify-center rounded-md
+      class="product-badge product-avatar relative flex shrink-0 shrink-0 items-center justify-center overflow-hidden rounded-md
         {{this.size}}
         {{or this.productID (unless this.abbreviation 'no-product')}}
         {{if this.sizeIsXLarge 'h-10 w-10'}}
