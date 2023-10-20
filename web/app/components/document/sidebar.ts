@@ -800,13 +800,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   private getDraftPermissions = task(async () => {
     try {
-      let apiVersion = "v1";
-      if (this.configSvc.config.feature_flags["api_v2"]) {
-        apiVersion = "v2";
-      }
-
       const response = await this.fetchSvc
-        .fetch(`/api/${apiVersion}/drafts/${this.docID}/shareable`)
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
+        )
         .then((response) => response?.json());
       if (response?.isShareable) {
         this._docIsShareable = true;
