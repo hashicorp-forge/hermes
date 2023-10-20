@@ -6,15 +6,12 @@
   ...attributes
 >
   <div class="relative h-full pb-16">
-    {{! Want the max height to be around 150px }}
-    {{! TODO: max lines }}
     <h3
       data-test-title
       class="title text-display-300 font-semibold text-color-foreground-strong"
     >
       {{@project.title}}
     </h3>
-    {{! TODO: max lines }}
     {{#if @project.description}}
       <p
         data-test-description
@@ -24,11 +21,9 @@
       </p>
     {{/if}}
 
-    {{! Approx 16px tall }}
     <div
       class="absolute bottom-0 left-0 flex w-full items-center justify-between"
     >
-      {{! TODO: truncation }}
       {{#if this.productAreas}}
         <ul class="flex gap-px">
           {{#each this.productAreas as |productArea|}}

@@ -18,7 +18,6 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
   }
 
   protected get productAreas() {
-    // @ts-ignore
     return this.documents?.map((doc) => doc.product).uniq();
   }
 }
