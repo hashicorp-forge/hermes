@@ -10,7 +10,6 @@ const FORM_RESIZE_DURATION = Ember.testing ? 0 : 750;
 
 class HermesFormResize extends Resize {
   *animate() {
-    console.log("calllllt");
     this.opts.easing = easeOutExpo;
     this.opts.duration = FORM_RESIZE_DURATION;
     yield* super.animate();
@@ -37,14 +36,12 @@ export default class NewFormComponent extends Component<NewFormComponentSignatur
 
   *transition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of insertedSprites) {
-      console.log("insertedSprite", sprite);
       sprite.startTranslatedBy(0, -2);
       void fadeIn(sprite, { duration: 50 });
       void move(sprite, { easing: easeOutQuad, duration: 350 });
     }
 
     for (const sprite of removedSprites) {
-      console.log("removedSprite", sprite);
       void fadeOut(sprite, { duration: 0 });
     }
   }

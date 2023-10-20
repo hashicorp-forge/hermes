@@ -9,9 +9,7 @@ import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import cleanString from "hermes/utils/clean-string";
 
-interface NewProjectFormComponentSignature {
-  Args: {};
-}
+interface NewProjectFormComponentSignature {}
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
@@ -29,14 +27,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
 
   @tracked protected title: string = "";
   @tracked protected description: string = "";
-
   @tracked protected titleErrorIsShown = false;
 
+  /**
+   * The action to attempt a form submission.
+   * If the form is valid, the createProject task is run.
+   */
   @action maybeSubmitForm(event?: SubmitEvent) {
-    if (event) {
-      event.preventDefault();
-    }
-
+    event?.preventDefault();
     this.validate();
 
     if (!this.titleErrorIsShown) {
@@ -48,10 +46,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     this.titleErrorIsShown = this.title.length === 0;
   }
 
-  @action protected onKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      // Override newline function
-      e.preventDefault();
+  /**
+   * The action run on title- and description-input keydown.
+   * If the key is Enter, a form submission is attempted.
+   * If the title error is shown, validation is run eagerly.
+   */
+  @action protected onKeydown(event: KeyboardEvent) {
+    if (event.key === "Enter") {
+      event.preventDefault();
       this.maybeSubmitForm();
     }
     if (this.titleErrorIsShown) {
@@ -62,6 +64,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
+  /**
+   * The task that creates a project and, if successful,
+   * transitions to it. On error, displays a FlashMessage
+   * and reverts the `projectIsBeingCreated` state.
+   */
   private createProject = task(async () => {
     try {
       this.projectIsBeingCreated = true;
@@ -77,7 +84,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
       this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (error: unknown) {
       const typedError = error as Error;
-
       this.flashMessages.add({
         title: "Error creating project",
         message: typedError.message,
@@ -85,7 +91,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         timeout: 6000,
         extendedTimeout: 1000,
       });
-
       this.projectIsBeingCreated = false;
     }
   });

@@ -56,7 +56,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * An object containing error messages for each applicable form field.
    */
-  @tracked protected formErrors: DocFormErrors | undefined;
+  @tracked protected formErrors: DocFormErrors = {
+    title: null,
+    productAbbreviation: null,
+  };
 
   /**
    * Whether to validate eagerly, that is, after every change to the form.
@@ -76,9 +79,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Whether the form has errors.
    */
   private get hasErrors(): boolean {
-    if (!this.formErrors) {
-      return false;
-    }
     return Object.values(this.formErrors).some((error) => error !== null);
   }
 
@@ -137,7 +137,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       return;
     }
 
-    if (this.formErrors?.title || this.formErrors?.productAbbreviation) {
+    if (this.formErrors.title || this.formErrors.productAbbreviation) {
       // Validate once the input values are captured
       next("afterRender", () => {
         this.validate();
@@ -214,7 +214,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     } catch (err: unknown) {
       this.docIsBeingCreated = false;
 
-      // TODO: Improve error handling.
       this.flashMessages.add({
         title: "Error creating document draft",
         message: `${err}`,
