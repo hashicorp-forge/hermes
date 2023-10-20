@@ -5,9 +5,9 @@ import getProductId from "hermes/utils/get-product-id";
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    isLarge?: boolean;
     status?: string;
     product?: string;
+    size?: "large";
   };
 }
 
@@ -18,6 +18,10 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     } else {
       return null;
     }
+  }
+
+  protected get sizeIsLarge(): boolean {
+    return this.args.size === "large";
   }
 
   protected get productShortName(): string | null {
