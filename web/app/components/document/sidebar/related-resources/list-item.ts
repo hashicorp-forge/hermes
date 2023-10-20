@@ -71,7 +71,7 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
    */
   protected get documentObjectID(): string | null {
     if ("googleFileID" in this.args.resource) {
-      return this.args.resource.googleFileID;
+      return (this.args.resource as RelatedHermesDocument).googleFileID;
     } else {
       return null;
     }

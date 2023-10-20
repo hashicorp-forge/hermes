@@ -40,7 +40,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
 
     const reducerFunction = (
       acc: Record<string, HermesDocument>,
-      document: { attrs: HermesDocument },
+      document: { attrs: HermesDocument }
     ) => {
       acc[document.attrs.objectID] = document.attrs;
       return acc;
@@ -51,13 +51,10 @@ module("Integration | Component | related-resources/add", function (hooks) {
     const getFirstFourRecords = (documents: any) => {
       return Object.keys(documents)
         .slice(0, 4)
-        .reduce(
-          (acc, key) => {
-            acc[key] = documents[key];
-            return acc;
-          },
-          {} as Record<string, HermesDocument>,
-        );
+        .reduce((acc, key) => {
+          acc[key] = documents[key];
+          return acc;
+        }, {} as Record<string, HermesDocument>);
     };
 
     suggestions = getFirstFourRecords(suggestions);
@@ -69,7 +66,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
       (
         dd: XDropdownListAnchorAPI | null,
         query: string,
-        shouldIgnoreDelay?: boolean,
+        shouldIgnoreDelay?: boolean
       ) => {
         if (query === "") {
           this.set("shownDocuments", suggestions);
@@ -82,7 +79,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
           this.set("shownDocuments", getFirstFourRecords(matches));
         }
         return Promise.resolve();
-      },
+      }
     );
 
     this.set("getObject", (dd: XDropdownListAnchorAPI | null, id: string) => {
@@ -153,11 +150,11 @@ module("Integration | Component | related-resources/add", function (hooks) {
     // Here, we set it to resolve a promise after a timeout to
     // allow us to capture its `isRunning` state.
     this.set("search", () => {
-      return new Promise<void>((resolve) => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           resolve();
         }, 1000);
-      });
+      }) as Promise<void>;
     });
 
     await render<RelatedResourcesAddTestContext>(hbs`
