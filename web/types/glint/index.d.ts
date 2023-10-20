@@ -42,6 +42,7 @@ import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import { HdsFormErrorComponent } from "hds/form/error";
 import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
+import { HdsFormLabelComponent } from "hds/form/label";
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
@@ -79,6 +80,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "Hds::Form::Textarea::Field": HdsFormTextareaFieldComponent;
     "Hds::Form::Toggle::Base": HdsFormToggleBaseComponent;
     "Hds::Form::Field": HdsFormFieldComponent;
+    "Hds::Form::Label": HdsFormLabelComponent;
     "Hds::Toast": HdsToastComponent;
     "Hds::Badge": HdsBadgeComponent;
     "Hds::ButtonSet": HdsButtonSetComponent;

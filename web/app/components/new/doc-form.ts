@@ -13,24 +13,15 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
-import { TransitionContext } from "ember-animated/.";
-import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
-import move from "ember-animated/motions/move";
 
 interface DocFormErrors {
   title: string | null;
-  summary: string | null;
   productAbbreviation: string | null;
-  contributors: string | null;
 }
 
 const FORM_ERRORS: DocFormErrors = {
   title: null,
-  summary: null,
   productAbbreviation: null,
-  contributors: null,
 };
 
 const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
@@ -40,14 +31,6 @@ interface NewDocFormComponentSignature {
   Args: {
     docType: string;
   };
-}
-
-class DocFormResize extends Resize {
-  *animate() {
-    this.opts.easing = easeOutExpo;
-    this.opts.duration = 750;
-    yield* super.animate();
-  }
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
@@ -129,7 +112,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form and updates the `formErrors` property.
    */
   private validate() {
-    this.formErrors = { ...FORM_ERRORS };
+    this.formErrors = {
+      title: this.title ? null : "Title is required",
+      productAbbreviation: this.productAbbreviation
+        ? null
+        : "Product/area is required",
+    };
   }
 
   /**
@@ -145,10 +133,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   /**
    * Binds the FormData to our locally tracked properties.
-   * If the summary is long, shows a gentle warning.
    * Conditionally validates.
    */
-  @action protected updateForm() {
+  @action protected updateForm(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.submit();
+    }
     const formObject = Object.fromEntries(new FormData(this.form).entries());
 
     assert("title is missing from formObject", "title" in formObject);
@@ -190,26 +181,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
    */
-  @action protected submit(event: SubmitEvent) {
-    event.preventDefault();
+  @action protected submit(event?: SubmitEvent) {
+    event?.preventDefault();
     this.validateEagerly = true;
     this.validate();
     if (this.formRequirementsMet && !this.hasErrors) {
       this.createDoc.perform();
-    }
-  }
-
-  protected resizeMotion = DocFormResize;
-
-  *transition({ insertedSprites, removedSprites }: TransitionContext) {
-    for (const sprite of insertedSprites) {
-      sprite.startTranslatedBy(0, -2);
-      void fadeIn(sprite, { duration: 50 });
-      void move(sprite, { easing: easeOutQuad, duration: 350 });
-    }
-
-    for (const sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 0 });
     }
   }
 

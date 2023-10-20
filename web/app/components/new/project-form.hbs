@@ -1,51 +1,46 @@
-<form
+<New::Form
   data-test-project-form
+  @taskIsRunning={{this.createProject.isRunning}}
+  @icon="grid"
+  @headline="Start a project"
+  @taskIsRunningHeadline="Creating project..."
+  @taskIsRunningDescription="This shouldn't take long."
+  @buttonText="Create project"
+  {{did-insert this.registerForm}}
   {{on "submit" this.maybeSubmitForm}}
-  class="create-new-form"
 >
-  {{! Icon }}
-  <div class="relative mb-4 flex justify-center">
-    <FlightIcon @name="grid" @size="24" class="feature-icon" />
-  </div>
-  <h1>Start a project</h1>
-  <div class="mt-8 grid gap-7">
-    <Hds::Form::Textarea::Field
-      {{on "keydown" this.onKeydown}}
-      {{auto-height-textarea}}
-      {{autofocus}}
-      data-test-title
-      @value={{this.title}}
-      name="title"
-      placeholder="Enter a project title"
-      as |F|
-    >
-      <F.Label>Title</F.Label>
-      {{#if this.errorIsShown}}
-        <F.Error data-test-title-error>
-          Title is required.
-        </F.Error>
-      {{/if}}
-    </Hds::Form::Textarea::Field>
+  <Hds::Form::Textarea::Field
+    {{on "keydown" this.onKeydown}}
+    {{auto-height-textarea}}
+    {{autofocus}}
+    data-test-title
+    @value={{this.title}}
+    name="title"
+    placeholder="Enter a project title"
+    as |F|
+  >
+    <F.Label @isRequired={{true}}>
+      Title
+    </F.Label>
+    {{#if this.errorIsShown}}
+      <F.Error data-test-title-error>
+        Title is required.
+      </F.Error>
+    {{/if}}
+  </Hds::Form::Textarea::Field>
 
-    <Hds::Form::Textarea::Field
-      data-test-description
-      {{on "keydown" this.onKeydown}}
-      @value={{this.description}}
-      rows="2"
-      placeholder="A short summary of your project"
-      name="description"
-      as |F|
-    >
-      <F.Label>Description</F.Label>
-    </Hds::Form::Textarea::Field>
+  <Hds::Form::Textarea::Field
+    data-test-description
+    {{on "keydown" this.onKeydown}}
+    @value={{this.description}}
+    rows="2"
+    placeholder="A short summary of your project"
+    name="description"
+    as |F|
+  >
+    <F.Label>Description</F.Label>
+  </Hds::Form::Textarea::Field>
 
-    {{! TODO: Add Jira integration }}
+  {{! TODO: Add Jira integration }}
 
-  </div>
-  <Hds::Button
-    data-test-submit
-    @text="Create project"
-    @isFullWidth={{true}}
-    type="submit"
-  />
-</form>
+</New::Form>

@@ -5,7 +5,7 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { task } from "ember-concurrency";
+import { task, timeout } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import cleanString from "hermes/utils/clean-string";
 
@@ -24,6 +24,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected formIsValid = false;
   @tracked protected errorIsShown = false;
 
+  @tracked protected _formElement?: HTMLFormElement;
+
   @action maybeSubmitForm(event?: SubmitEvent) {
     if (event) {
       event.preventDefault();
@@ -34,6 +36,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     if (this.formIsValid) {
       void this.createProject.perform();
     }
+  }
+
+  @action protected registerForm(element: HTMLFormElement) {
+    this._formElement = element;
   }
 
   private validateForm() {
