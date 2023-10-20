@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { task, timeout } from "ember-concurrency";
+import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 
 export type ProductArea = {
@@ -10,6 +11,7 @@ export type ProductArea = {
 };
 
 export default class ProductAreasService extends Service {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked index: Record<string, ProductArea> | null = null;
@@ -17,7 +19,7 @@ export default class ProductAreasService extends Service {
   fetch = task(async () => {
     try {
       this.index = await this.fetchSvc
-        .fetch("/api/v1/products")
+        .fetch(`/api/${this.configSvc.config.api_version}/products`)
         .then((resp) => resp?.json());
     } catch (err) {
       this.index = null;
