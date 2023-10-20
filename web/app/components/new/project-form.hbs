@@ -1,12 +1,11 @@
 <New::Form
   data-test-project-form
-  @taskIsRunning={{this.createProject.isRunning}}
+  @taskIsRunning={{this.projectIsBeingCreated}}
   @icon="grid"
   @headline="Start a project"
   @taskIsRunningHeadline="Creating project..."
   @taskIsRunningDescription="This shouldn't take long."
   @buttonText="Create project"
-  {{did-insert this.registerForm}}
   {{on "submit" this.maybeSubmitForm}}
 >
   <Hds::Form::Textarea::Field
@@ -22,7 +21,7 @@
     <F.Label @isRequired={{true}}>
       Title
     </F.Label>
-    {{#if this.errorIsShown}}
+    {{#if this.titleErrorIsShown}}
       <F.Error data-test-title-error>
         Title is required.
       </F.Error>

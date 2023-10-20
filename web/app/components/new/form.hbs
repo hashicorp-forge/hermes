@@ -1,18 +1,20 @@
 <div class="relative mt-2 mb-5 flex justify-center">
   <FlightIcon
+    data-test-feature-icon
     @name={{if @taskIsRunning "running" @icon}}
     @size="24"
     class={{unless @taskIsRunning "feature-icon"}}
   />
 </div>
 
-<h1>
+<h1 data-test-form-headline>
   {{if @taskIsRunning @taskIsRunningHeadline @headline}}
 </h1>
 
 <AnimatedContainer @motion={{this.motion}}>
   {{#animated-if @taskIsRunning use=this.transition}}
     <div
+      data-test-task-is-running-description
       class="mt-2 -mb-3 text-center text-body-300 text-color-foreground-faint"
     >
       {{@taskIsRunningDescription}}

@@ -7,15 +7,18 @@ import { Response } from "miragejs";
 import { module, test } from "qunit";
 
 const PROJECT_FORM = "[data-test-project-form]";
+const HEADLINE = "[data-test-form-headline]";
+const ICON = "[data-test-feature-icon]";
 const TITLE_INPUT = `${PROJECT_FORM} [data-test-title]`;
 const DESCRIPTION_INPUT = `${PROJECT_FORM} [data-test-description]`;
 const SUBMIT_BUTTON = `${PROJECT_FORM} [data-test-submit]`;
 const TITLE_ERROR = `${PROJECT_FORM} [data-test-title-error]`;
 const FLASH_MESSAGE = "[data-test-flash-notification]";
+const TASK_IS_RUNNING_DESCRIPTION = "[data-test-task-is-running-description]";
 
 interface AuthenticatedNewProjectRouteTestContext extends MirageTestContext {}
 
-module("Acceptance | authenticated/new/project", function (hooks) {
+module("Acceptance | authenticated/new/project-form", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -70,6 +73,28 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     await click(SUBMIT_BUTTON);
 
     assert.dom(TITLE_ERROR).hasText("Title is required.");
+  });
+
+  test("it shows a loading screen while a project is being created", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    await visit("new/project");
+
+    assert.dom(HEADLINE).hasText("Start a project");
+    assert.dom(ICON).hasAttribute("data-test-icon", "grid");
+    assert.dom(TASK_IS_RUNNING_DESCRIPTION).doesNotExist();
+
+    await fillIn(TITLE_INPUT, "The Foo Project");
+
+    const clickPromise = click(SUBMIT_BUTTON);
+
+    await waitFor(TASK_IS_RUNNING_DESCRIPTION);
+
+    assert.dom(HEADLINE).hasText("Creating project...");
+    assert.dom(ICON).hasAttribute("data-test-icon", "running");
+    assert
+      .dom(TASK_IS_RUNNING_DESCRIPTION)
+      .hasText("This shouldn't take long.");
+
+    await clickPromise;
   });
 
   test("it shows an error if creating the project fails", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {

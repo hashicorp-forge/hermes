@@ -13,16 +13,12 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
+import { next } from "@ember/runloop";
 
 interface DocFormErrors {
   title: string | null;
   productAbbreviation: string | null;
 }
-
-const FORM_ERRORS: DocFormErrors = {
-  title: null,
-  productAbbreviation: null,
-};
 
 const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
 const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
@@ -49,13 +45,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected _form: HTMLFormElement | null = null;
 
   /**
-   * Whether the form has all required fields filled out.
-   * True if the title and product area are filled out.
-   */
-  @tracked protected formRequirementsMet = false;
-
-  /**
-   * Whether the document is being created.
+   * Whether the document is being created, or in the process of
+   * transitioning to the document screen after successful creation.
+   * Used by the `New::Form` component for conditional rendering.
    * Set true when the createDoc task is running.
    * Reverted only if an error occurs.
    */
@@ -64,13 +56,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * An object containing error messages for each applicable form field.
    */
-  @tracked protected formErrors = { ...FORM_ERRORS };
-
-  /**
-   * Whether the summary is more than 200 characters.
-   * Used in the template to gently discourage long summaries.
-   */
-  @tracked protected summaryIsLong = false;
+  @tracked protected formErrors: DocFormErrors | undefined;
 
   /**
    * Whether to validate eagerly, that is, after every change to the form.
@@ -90,19 +76,16 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Whether the form has errors.
    */
   private get hasErrors(): boolean {
-    const defined = (a: unknown) => a != null;
-    return Object.values(this.formErrors).filter(defined).length > 0;
+    if (!this.formErrors) {
+      return false;
+    }
+    return Object.values(this.formErrors).some((error) => error !== null);
   }
 
   /**
-   * Sets `formRequirementsMet` and conditionally validates the form.
+   * Validates the form if `validateEagerly` is true.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
-      this.formRequirementsMet = true;
-    } else {
-      this.formRequirementsMet = false;
-    }
     if (this.validateEagerly) {
       this.validate();
     }
@@ -135,11 +118,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Binds the FormData to our locally tracked properties.
    * Conditionally validates.
    */
-  @action protected updateForm(e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      this.submit();
-    }
+  @action protected onKeydown(e: KeyboardEvent) {
     const formObject = Object.fromEntries(new FormData(this.form).entries());
 
     assert("title is missing from formObject", "title" in formObject);
@@ -152,10 +131,17 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       this.productArea = formObject["productArea"] as string;
     }
 
-    if (this.summary.length > 200) {
-      this.summaryIsLong = true;
-    } else {
-      this.summaryIsLong = false;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.submit();
+      return;
+    }
+
+    if (this.formErrors?.title || this.formErrors?.productAbbreviation) {
+      // Validate once the input values are captured
+      next("afterRender", () => {
+        this.validate();
+      });
     }
 
     this.maybeValidate();
@@ -185,7 +171,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     event?.preventDefault();
     this.validateEagerly = true;
     this.validate();
-    if (this.formRequirementsMet && !this.hasErrors) {
+    if (!this.hasErrors) {
       this.createDoc.perform();
     }
   }

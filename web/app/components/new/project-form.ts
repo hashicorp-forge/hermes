@@ -5,7 +5,7 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { task, timeout } from "ember-concurrency";
+import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import cleanString from "hermes/utils/clean-string";
 
@@ -18,51 +18,53 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service declare router: RouterService;
   @service declare flashMessages: FlashMessageService;
 
+  /**
+   * Whether the project is being created, or in the process of
+   * transitioning to the project screen after successful creation.
+   * Used by the `New::Form` component for conditional rendering.
+   * Set true when the createProject task is running.
+   * Reverted only if an error occurs.
+   */
+  @tracked protected projectIsBeingCreated = false;
+
   @tracked protected title: string = "";
   @tracked protected description: string = "";
 
-  @tracked protected formIsValid = false;
-  @tracked protected errorIsShown = false;
-
-  @tracked protected _formElement?: HTMLFormElement;
+  @tracked protected titleErrorIsShown = false;
 
   @action maybeSubmitForm(event?: SubmitEvent) {
     if (event) {
       event.preventDefault();
     }
 
-    this.validateForm();
+    this.validate();
 
-    if (this.formIsValid) {
+    if (!this.titleErrorIsShown) {
       void this.createProject.perform();
     }
   }
 
-  @action protected registerForm(element: HTMLFormElement) {
-    this._formElement = element;
-  }
-
-  private validateForm() {
-    this.errorIsShown = this.title.length === 0;
-    this.formIsValid = this.title.length > 0;
+  private validate() {
+    this.titleErrorIsShown = this.title.length === 0;
   }
 
   @action protected onKeydown(e: KeyboardEvent) {
     if (e.key === "Enter") {
-      // Replace newline function with submit action
+      // Override newline function
       e.preventDefault();
       this.maybeSubmitForm();
     }
-    if (this.errorIsShown) {
-      // Validate once the input value are captured
+    if (this.titleErrorIsShown) {
+      // Validate once the input values are captured
       next("afterRender", () => {
-        this.validateForm();
+        this.validate();
       });
     }
   }
 
   private createProject = task(async () => {
     try {
+      this.projectIsBeingCreated = true;
       const project = await this.fetchSvc
         .fetch("/api/v1/projects", {
           method: "POST",
@@ -83,6 +85,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         timeout: 6000,
         extendedTimeout: 1000,
       });
+
+      this.projectIsBeingCreated = false;
     }
   });
 }
