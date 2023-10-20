@@ -88,9 +88,39 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom(ERROR).doesNotExist();
 
     await fillIn("textarea", "");
-    await triggerKeyEvent(document, "keydown", "Enter");
+    await click(SAVE_BUTTON);
 
     assert.dom(ERROR).exists();
+
+    // Cancel and try again
+
+    await click(CANCEL_BUTTON);
+
+    assert.dom(ERROR).doesNotExist();
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(ERROR).doesNotExist("the error state resets on cancel");
+
+    // Cause another error
+
+    await fillIn("textarea", "");
+    await click(SAVE_BUTTON);
+
+    assert.dom(ERROR).exists();
+
+    // Save a valid value
+
+    await fillIn("textarea", "bar");
+    await click(SAVE_BUTTON);
+
+    assert.dom(ERROR).doesNotExist();
+
+    // Reenable edit mode
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(ERROR).doesNotExist("the error state resets on save");
   });
 
   test("it conditionally determines whether to wrap the read-only value in a button", async function (this: EditableFieldComponentTestContext, assert) {

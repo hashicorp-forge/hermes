@@ -1,20 +1,25 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { render } from "@ember/test-helpers";
+import { TestContext, render } from "@ember/test-helpers";
+
+interface DocThumbnailTestContext extends TestContext {
+  size?: "large";
+  status?: string;
+  product?: string;
+}
 
 module("Integration | Component | doc/thumbnail", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders as expected", async function (assert) {
-    this.set("isLarge", false);
+    this.set("size", undefined);
     this.set("status", "In Review");
     this.set("product", "Labs");
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<DocThumbnailTestContext>(hbs`
       <Doc::Thumbnail
-        @isLarge={{this.isLarge}}
+        @size={{this.size}}
         @status={{this.status}}
         @product={{this.product}}
       />
@@ -30,7 +35,7 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
     assert.dom("[data-test-doc-status-icon]").doesNotExist();
     assert.dom("[data-test-doc-thumbnail-product-badge]").doesNotExist();
 
-    this.set("isLarge", true);
+    this.set("size", "large");
 
     assert
       .dom("[data-test-doc-thumbnail]")

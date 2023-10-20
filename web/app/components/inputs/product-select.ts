@@ -1,7 +1,7 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import { Placement } from "@floating-ui/dom";
+import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
@@ -10,6 +10,7 @@ import ProductAreasService, {
   ProductArea,
 } from "hermes/services/product-areas";
 import getProductId from "hermes/utils/get-product-id";
+import { MatchAnchorWidthOptions } from "../floating-u-i/content";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
@@ -20,6 +21,8 @@ interface InputsProductSelectSignature {
     placement?: Placement;
     isSaving?: boolean;
     renderOut?: boolean;
+    offset?: OffsetOptions;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
 }
 
