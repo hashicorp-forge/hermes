@@ -1,179 +1,175 @@
-<div class="x-container">
-  <div class="w-full max-w-3xl mx-auto">
-    {{! Header and subscribe }}
-    <div class="mb-6 border-bXborder-b-color-border-primary pb-X8">
-      <div class="flex w-full justify-between">
-        <div class="flex w-full items-start space-x-4">
+<div class="mx-auto w-full max-w-3xl">
+  {{! Header and subscribe }}
+  <div class="border-bXborder-b-color-border-primary pb-X8 mb-6">
+    <div class="flex w-full justify-between">
+      <div class="flex w-full items-start space-x-4">
 
-          {{#let (get-product-id @model.hits.0.product) as |productID|}}
-            <Hds::IconTile
-              @size="large"
-              @logo={{productID}}
-              @icon={{unless productID "folder"}}
-              class="shrink-0"
-            />
-          {{/let}}
-          <div class="w-full">
-            <div class="flex">
-
-              <h1 class="mt-0.5 mb-0">{{@model.hits.0.product}}</h1>
-              <Hds::BadgeCount
-                @type="inverted"
-                @text="{{@model.nbHits}} Docs"
-                class="self-start mt-2.5 ml-2"
-              />
-            </div>
-
-            <div class="hidden flex items-center space-x-3 text-body-300">
-              <ExternalLink class="flex items-center space-x-2">
-                <FlightIcon @name="slack-color" />
-                <span>
-                  Slack channel
-                </span>
-              </ExternalLink>
-              <ExternalLink class="flex items-center space-x-2">
-                <FlightIcon @name="globe" />
-                <span>
-                  Jira Projects
-                </span>
-              </ExternalLink>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex mt-0.5 space-x-3 self-start items-center shrink-0 mr-8"
-        >
-          <div class="w-32">
-
-            <Hds::Button
-              @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
-              @icon={{if this.isSubscribed "check" "plus"}}
-              @color="secondary"
-              @isFullWidth={{true}}
-              class="pr-"
-              {{on "click" this.toggleSubscribed}}
-            />
-          </div>
-          <TooltipIcon
-            @text="Receive an email when a document is published in this product/area."
+        {{#let (get-product-id @model.hits.0.product) as |productID|}}
+          <Hds::IconTile
+            @size="large"
+            @logo={{productID}}
+            @icon={{unless productID "folder"}}
+            class="shrink-0"
           />
-          <div class="absolute right-3 top-1/2 -translate-y-1/2">
+        {{/let}}
+        <div class="w-full">
+          <div class="flex">
+
+            <h1 class="mt-0.5 mb-0">{{@model.hits.0.product}}</h1>
+            <Hds::BadgeCount
+              @type="inverted"
+              @text="{{@model.nbHits}} Docs"
+              class="mt-2.5 ml-2 self-start"
+            />
+          </div>
+
+          <div class="flex hidden items-center space-x-3 text-body-300">
+            <ExternalLink class="flex items-center space-x-2">
+              <FlightIcon @name="slack-color" />
+              <span>
+                Slack channel
+              </span>
+            </ExternalLink>
+            <ExternalLink class="flex items-center space-x-2">
+              <FlightIcon @name="globe" />
+              <span>
+                Jira Projects
+              </span>
+            </ExternalLink>
           </div>
         </div>
-
       </div>
+      <div class="mt-0.5 mr-8 flex shrink-0 items-center space-x-3 self-start">
+        <div class="w-32">
+
+          <Hds::Button
+            @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
+            @icon={{if this.isSubscribed "check" "plus"}}
+            @color="secondary"
+            @isFullWidth={{true}}
+            class="pr-"
+            {{on "click" this.toggleSubscribed}}
+          />
+        </div>
+        <TooltipIcon
+          @text="Receive an email when a document is published in this product/area."
+        />
+        <div class="absolute right-3 top-1/2 -translate-y-1/2">
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    {{! Tags }}
-    <div
-      class="pl-16 border-color-border-primary relative mb-5 flex items-center"
-    >
-      {{! <FlightIcon @name="filter-fill" @size="24" /> }}
-      {{! <h4 class="hermes-h4 mr-3">Explore:</h4> }}
+  {{! Tags }}
+  <div
+    class="relative mb-5 flex items-center border-color-border-primary pl-16"
+  >
+    {{! <FlightIcon @name="filter-fill" @size="24" /> }}
+    {{! <h4 class="hermes-h4 mr-3">Explore:</h4> }}
 
-      <ul class="flex space-x-1">
-        {{#each this.tags as |tag|}}
-          <li>
-            <LinkTo
-              @route="authenticated.all"
-              @query={{hash
-                product=(array @model.hits.0.product)
-                status=(if (eq tag.facet "status") (array tag.name) (array))
-                docType=(if (eq tag.facet "docType") (array tag.name) (array))
-                owners=(array)
-              }}
-              class="tag"
+    <ul class="flex space-x-1">
+      {{#each this.tags as |tag|}}
+        <li>
+          <LinkTo
+            @route="authenticated.all"
+            @query={{hash
+              product=(array @model.hits.0.product)
+              status=(if (eq tag.facet "status") (array tag.name) (array))
+              docType=(if (eq tag.facet "docType") (array tag.name) (array))
+              owners=(array)
+            }}
+            class="tag"
+          >
+            {{tag.name}}
+          </LinkTo>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+
+  {{! LATEST docs }}
+  <div class="relative flex">
+    <div class="px-16">
+
+      <ol class="divide-ydivide-color-border-primary">
+        {{#each-in @model.hits as |_key doc|}}
+          <li class="group peer relative">
+            <div
+              class="absolute top-0 -bottom-px -left-8 -right-8 rounded-md border group-hover:border-color-border-primary group-hover:bg-color-surface-faint"
+            ></div>
+            <div
+              class="relative border-t border-color-border-primary pt-5 pb-7 group-hover:border-transparent"
             >
-              {{tag.name}}
-            </LinkTo>
-          </li>
-        {{/each}}
-      </ul>
-    </div>
+              <div class="flex items-start">
 
-    {{! LATEST docs }}
-    <div class="flex relative">
-      <div class="px-16">
-
-        <ol class="divide-ydivide-color-border-primary">
-          {{#each-in @model.hits as |_key doc|}}
-            <li class="relative group peer">
-              <div
-                class="absolute top-0 -bottom-px -left-8 -right-8 group-hover:bg-color-surface-faint rounded-md border group-hover:border-color-border-primary"
-              ></div>
-              <div
-                class="relative pt-5 pb-7 border-t border-color-border-primary group-hover:border-transparent"
-              >
-                <div class="flex items-start">
-
-                  <div class="w-full pr-8">
-                    <div class="flex items-center mb-3 space-x-3">
-                      <div>
-                        <Person
-                          class="text-color-foreground-strong"
-                          @email={{get doc.owners 0}}
-                          @imgURL={{get doc.ownerPhotos 0}}
-                        />
-                      </div>
-                      <span class="text-color-foreground-faint">4h ago</span>
-                    </div>
+                <div class="w-full pr-8">
+                  <div class="mb-3 flex items-center space-x-3">
                     <div>
-                      <h4
-                        class="text-display-300 mb-1 text-color-foreground-strong"
-                      >
-                        {{doc.title}}
-                      </h4>
-                      {{! can we do better than this tiny snippet }}
-                      <p class="text-body-300 mb-4">
-                        {{doc.summary}}
-                      </p>
-                      <div class="flex justify-between w-full">
-                        <div class="flex space-x-1.5">
-                          {{#if doc.docNumber}}
-                            <Hds::Badge @text={{doc.docNumber}} />
-                          {{/if}}
-                          <Hds::Badge @text={{doc.docType}} />
-                          <Doc::State
-                            @state={{doc.status}}
-                            @hideProgress={{true}}
-                          />
-                        </div>
+                      <Person
+                        class="text-color-foreground-strong"
+                        @email={{get doc.owners 0}}
+                        @imgURL={{get doc.ownerPhotos 0}}
+                      />
+                    </div>
+                    <span class="text-color-foreground-faint">4h ago</span>
+                  </div>
+                  <div>
+                    <h4
+                      class="mb-1 text-display-300 text-color-foreground-strong"
+                    >
+                      {{doc.title}}
+                    </h4>
+                    {{! can we do better than this tiny snippet }}
+                    <p class="mb-4 text-body-300">
+                      {{doc.summary}}
+                    </p>
+                    <div class="flex w-full justify-between">
+                      <div class="flex space-x-1.5">
+                        {{#if doc.docNumber}}
+                          <Hds::Badge @text={{doc.docNumber}} />
+                        {{/if}}
+                        <Hds::Badge @text={{doc.docType}} />
+                        <Doc::State
+                          @state={{doc.status}}
+                          @hideProgress={{true}}
+                        />
                       </div>
                     </div>
                   </div>
-                  <Doc::Thumbnail
-                    @product={{doc.product}}
-                    @status={{doc.status}}
-                    @isLarge={{true}}
-                    class="-mt-1 -mb-6 shrink-0 origin-top-right scale-[75%]"
-                  />
                 </div>
+                <Doc::Thumbnail
+                  @product={{doc.product}}
+                  @status={{doc.status}}
+                  @isLarge={{true}}
+                  class="-mt-1 -mb-6 shrink-0 origin-top-right scale-[75%]"
+                />
               </div>
-            </li>
-          {{/each-in}}
-        </ol>
-      </div>
+            </div>
+          </li>
+        {{/each-in}}
+      </ol>
     </div>
-
-    {{#if (gte @model.nbHits 12)}}
-      <div class="px-16 mt-8">
-        <Hds::Button
-          @route="authenticated.all"
-          @icon="arrow-right"
-          @iconPosition="trailing"
-          @query={{hash
-            product=(array @model.hits.0.product)
-            status=(array)
-            docType=(array)
-            owners=(array)
-            page=2
-          }}
-          @color="secondary"
-          @isFullWidth={{true}}
-          @text="See more {{@model.hits.0.product}} documents"
-        />
-      </div>
-    {{/if}}
-
   </div>
+
+  {{#if (gte @model.nbHits 12)}}
+    <div class="mt-8 px-16">
+      <Hds::Button
+        @route="authenticated.all"
+        @icon="arrow-right"
+        @iconPosition="trailing"
+        @query={{hash
+          product=(array @model.hits.0.product)
+          status=(array)
+          docType=(array)
+          owners=(array)
+          page=2
+        }}
+        @color="secondary"
+        @isFullWidth={{true}}
+        @text="See more {{@model.hits.0.product}} documents"
+      />
+    </div>
+  {{/if}}
+
 </div>

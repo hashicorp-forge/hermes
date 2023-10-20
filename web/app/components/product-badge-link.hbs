@@ -1,11 +1,11 @@
 <LinkTo
-  @route={{this.route}}
-  @query={{this.query}}
+  @route="authenticated.product-area"
+  @model={{@productArea}}
   class="product-badge-link"
   ...attributes
 >
   <Hds::Badge
-    @icon={{or (get-product-id this.this.args.productArea) "folder"}}
+    @icon={{or (get-product-id this.args.productArea) "folder"}}
     @text={{this.productAreaName}}
     title={{this.productAreaName}}
   />
