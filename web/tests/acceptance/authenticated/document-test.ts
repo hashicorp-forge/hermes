@@ -42,7 +42,8 @@ const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
 const APPROVERS_SELECTOR = "[data-test-document-approvers]";
 const APPROVED_BADGE_SELECTOR = "[data-test-person-approved-badge]";
-const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
+const PRODUCT_SELECT = "[data-test-product-select]";
+const PRODUCT_SELECT_VALUE = `${PRODUCT_SELECT} [data-test-selected-value]`;
 
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
@@ -134,14 +135,14 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit(`/document/${docID}?draft=true`);
 
     const productSelectSelector = "[data-test-product-select]";
-    const productSelectTriggerSelector = "[data-test-badge-dropdown-trigger]";
+    const productSelectTriggerSelector = "[data-test-product-select-trigger]";
     const productSelectDropdownItemSelector =
-      "[data-test-product-select-badge-dropdown-item]";
+      "[data-test-product-select-dropdown] [data-test-selected-value]";
 
     assert
       .dom(productSelectSelector)
       .exists("drafts show a product select element")
-      .hasText(initialProductName, "The document product is selected");
+      .containsText(initialProductName, "The document product is selected");
 
     await click(productSelectTriggerSelector);
     const options = findAll(productSelectDropdownItemSelector);
@@ -164,7 +165,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(productSelectSelector)
-      .hasText(
+      .containsText(
         "Test Product 0",
         "The document product is updated to the selected product",
       );
@@ -668,13 +669,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Bar");
+    assert.dom(PRODUCT_SELECT_VALUE).hasText("Bar");
 
-    await click(`${PRODUCT_SELECT_SELECTOR} button`);
+    await click(`${PRODUCT_SELECT} button`);
 
-    await click(`[data-test-product-select-badge-dropdown-item]`);
+    await click(`[data-test-product-select-item-button]`);
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Foo");
+    assert.dom(PRODUCT_SELECT_VALUE).hasText("Foo");
 
     // confirm with the back end
 

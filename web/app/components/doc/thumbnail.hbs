@@ -3,12 +3,12 @@
   class="doc-thumbnail
     {{if @isLarge 'large'}}
     {{if this.isObsolete 'obsolete'}}
-    bg-color-palette-neutral-100 rounded"
+    rounded bg-color-palette-neutral-100"
   ...attributes
 >
-  <img src="/images/document.png" class="w-full h-auto" />
+  <img src="/images/document.png" class="h-auto w-full" />
 
-  <div class="w-full h-full absolute">
+  <div class="absolute h-full w-full">
     {{#if this.isObsolete}}
       <Doc::FolderAffordance @isLarge={{@isLarge}} />
     {{/if}}
@@ -24,12 +24,13 @@
       </div>
     {{/if}}
 
-    {{#if this.productShortName}}
-      <div
-        data-test-doc-thumbnail-product-badge
-        class="product-badge {{this.productShortName}}"
-      >
-        <FlightIcon @size="16" @name={{this.productShortName}} />
+    {{#if this.badgeIsShown}}
+      <div class="absolute left-0 bottom-0">
+        <Product::Avatar
+          data-test-doc-thumbnail-product-badge
+          @product={{@product}}
+          @size="large"
+        />
       </div>
     {{/if}}
   </div>

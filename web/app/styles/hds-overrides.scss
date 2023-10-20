@@ -11,13 +11,6 @@
   transition: none !important;
 }
 
-.hds-link-standalone.small-external-link {
-  @apply font-regular;
-
-  .hds-link-standalone__text {
-    @apply text-body-100;
-  }
-}
 /* Maintain contrast across hover and focus states */
 .hds-badge-count--color-neutral.hds-badge-count--type-filled {
   @apply mix-blend-multiply;

@@ -1,12 +1,30 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { render, rerender } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import ProductAreasService from "hermes/services/product-areas";
+
+interface ResultsIndexTestContext extends MirageTestContext {
+  results: any;
+  query: string;
+}
 
 module("Integration | Component | results", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
 
-  test("it conditionally shows a product link", async function (assert) {
+  hooks.beforeEach(async function (this: ResultsIndexTestContext) {
+    const productAreasService = this.owner.lookup(
+      "service:product-areas",
+    ) as ProductAreasService;
+
+    this.server.createList("product", 4);
+
+    await productAreasService.fetch.perform();
+  });
+
+  test("it conditionally shows a product link", async function (this: ResultsIndexTestContext, assert) {
     let hits = [{ product: "Consul" }, { product: "Terraform" }];
 
     this.set("results", {
@@ -16,22 +34,21 @@ module("Integration | Component | results", function (hooks) {
 
     this.set("query", "teRRaForM");
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
-      <Results::Index @results={{this.results}} @query={{this.query}} />
+    await render<ResultsIndexTestContext>(hbs`
+      <Results @results={{this.results}} @query={{this.query}} />
     `);
 
     assert
       .dom("[data-test-results-product-link]")
       .exists(
-        "Product link is shown when query matches a product name of the first 12 hits"
+        "Product link is shown when query matches a product name of the first 12 hits",
       );
 
     assert
       .dom(".hds-badge__text")
       .hasText(
         "Terraform",
-        "Product name is shown in badge, properly capitalized"
+        "Product name is shown in badge, properly capitalized",
       );
     assert
       .dom("[data-test-results-product-link] a")
@@ -42,7 +59,7 @@ module("Integration | Component | results", function (hooks) {
     assert
       .dom("[data-test-results-product-link]")
       .doesNotExist(
-        "only shown when query matches a product name of the first 12 hits"
+        "only shown when query matches a product name of the first 12 hits",
       );
 
     this.set("query", "consul");

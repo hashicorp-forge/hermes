@@ -1,9 +1,9 @@
 <button
-  class="text-body-300 text-color-foreground-primary flex items-center space-x-6 hover:cursor-pointer bg-transparent hover:bg-color-surface-action border-0 w-full h-full justify-between py-3 px-3.5 transition-colors"
+  class="flex h-full w-full items-center justify-between space-x-6 border-0 bg-transparent py-3 px-3.5 text-body-300 text-color-foreground-primary transition-colors hover:cursor-pointer hover:bg-color-surface-action"
   type="button"
   {{on "click" this.toggleChecked}}
 >
-  <div class="flex space-x-3 items-center">
+  <div class="flex items-center space-x-3">
     {{#let (get-product-id @productArea) as |productID|}}
       <Hds::IconTile
         @size="small"
@@ -15,7 +15,7 @@
       {{@productArea}}
     </div>
   </div>
-  <div class="shrink-0 flex items-center justify-end relative">
+  <div class="relative flex shrink-0 items-center justify-end">
     <Hds::Form::Toggle::Base
       tabindex="-1"
       name="toggle-subscription"

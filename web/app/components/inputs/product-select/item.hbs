@@ -1,13 +1,9 @@
 <div
   data-test-product-select-item
-  class="product-select-item relative flex w-full gap-2"
+  class="relative flex w-full gap-2"
   ...attributes
 >
-  <FlightIcon
-    data-test-product-icon
-    data-test-icon={{or (get-product-id @product) "folder"}}
-    @name={{or (get-product-id @product) "folder"}}
-  />
+  <Product::Avatar @product={{@product}} class="relative -translate-x-px" />
 
   <div class="flex items-center gap-1.5">
 
@@ -20,7 +16,7 @@
     {{/if}}
 
     {{#if @abbreviation}}
-      <span class="product-select-toggle-abbreviation">
+      <span class="opacity-50">
         {{@abbreviation}}
       </span>
     {{/if}}

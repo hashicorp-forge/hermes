@@ -2,14 +2,21 @@
   @apply w-full;
 
   .hds-table {
-    @apply table-auto lg:table-fixed mb-8;
+    @apply mb-8 table-auto lg:table-fixed;
     @apply border-0;
 
-    &__th,
-    &__td {
+    tr {
+      @apply relative;
+    }
+
+    th,
+    td {
+      @apply py-3 pr-5 text-left align-top;
+
       &.name {
         @apply w-auto;
         @apply pl-0;
+        @apply pb-2.5;
       }
 
       &.type {
@@ -25,7 +32,7 @@
       }
 
       &.owner {
-        @apply w-48;
+        @apply w-40;
       }
 
       &.created {
@@ -34,17 +41,9 @@
       }
     }
 
-    .hds-table__thead .hds-table__tr {
-      @apply bg-transparent;
-    }
-
-    .hds-table__thead .hds-table__tr .hds-table__th {
-      &.name {
-        @apply pl-0;
-      }
-      &.created {
-        @apply text-right;
-        @apply pr-0;
+    tbody {
+      td {
+        @apply border-t border-t-color-border-faint;
       }
     }
   }

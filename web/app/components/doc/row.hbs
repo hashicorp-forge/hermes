@@ -1,13 +1,27 @@
-<Hds::Table::Tr class="row-results__table__row">
-  <Hds::Table::Td class="name">
+<tr class="group">
+  <td class="name">
     <LinkTo
       @route="authenticated.document"
       @model="{{@docID}}"
       @query={{hash draft=@isDraft}}
-      class="flex items-start space-x-4"
+      class="flex items-start gap-3.5"
     >
-      <Doc::Thumbnail @status={{@status}} @product={{@productArea}} />
-      <div>
+      {{!
+      We create a click area that extends beyond the edges of its container.
+      This makes the entire row clickable without having to wrap itself in a link,
+      and lets us nest interactive elements (e.g., ProductBadgeLink) in a way that improves the mouse experience without sacrificing accessibility.
+    }}
+      <div
+        aria-hidden="true"
+        class="absolute top-0 -left-4 -right-4 -bottom-px -z-10 rounded-md group-hover:bg-color-surface-faint"
+      ></div>
+
+      <Product::Avatar
+        @product={{@productArea}}
+        @fallbackIcon="file-text"
+        @size="small"
+      />
+      <div class="relative">
         <h4
           class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
         >{{@title}}</h4>
@@ -18,17 +32,40 @@
         {{/if}}
       </div>
     </LinkTo>
-  </Hds::Table::Td>
-  <Hds::Table::Td class="type">
-    {{@docType}}
-  </Hds::Table::Td>
-  <Hds::Table::Td class="status">
-    <Doc::State @state={{@status}} @hideProgress={{true}} /></Hds::Table::Td>
-  <Hds::Table::Td class="product">
-    <ProductBadgeLink @productArea={{@productArea}} />
-  </Hds::Table::Td>
-  <Hds::Table::Td class="owner">
-    <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
-  </Hds::Table::Td>
-  <Hds::Table::Td class="created">{{@createdDate}}</Hds::Table::Td>
-</Hds::Table::Tr>
+  </td>
+  <td class="type">
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash docType=(array @docType)}}
+      class="relative"
+    >
+      {{@docType}}
+    </LinkTo>
+  </td>
+  <td class="status">
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash status=(array @status)}}
+      class="relative"
+    >
+      <Doc::State @state={{@status}} @hideProgress={{true}} />
+    </LinkTo>
+  </td>
+  <td class="product">
+    <Product::Link @avatarIsHidden={{true}} @product={{@productArea}} />
+  </td>
+  <td class="owner">
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{hash owners=(array @owner)}}
+      class="relative"
+    >
+      <Person @ignoreUnknown={{true}} @imgURL={{@avatar}} @email={{@owner}} />
+    </LinkTo>
+  </td>
+  <td class="created">
+    <div class="relative">
+      {{@createdDate}}
+    </div>
+  </td>
+</tr>

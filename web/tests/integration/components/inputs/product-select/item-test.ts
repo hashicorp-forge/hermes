@@ -4,10 +4,11 @@ import { hbs } from "ember-cli-htmlbars";
 import { render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
+import ProductAreasService from "hermes/services/product-areas";
 
 const VALUE = "[data-test-selected-value]";
 const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
-const PRODUCT_ICON = "[data-test-product-icon]";
+const PRODUCT_AVATAR = "[data-test-product-avatar]";
 const CHECK = "[data-test-check]";
 
 interface InputsProductSelectItemContext extends MirageTestContext {
@@ -22,6 +23,16 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
+    hooks.beforeEach(async function (this: InputsProductSelectItemContext) {
+      const productAreasService = this.owner.lookup(
+        "service:product-areas",
+      ) as ProductAreasService;
+
+      this.server.createList("product", 4);
+
+      await productAreasService.fetch.perform();
+    });
+
     test("it functions as expected", async function (this: InputsProductSelectItemContext, assert) {
       this.set("product", "Vault");
       this.set("isSelected", false);
@@ -34,7 +45,7 @@ module(
     `);
 
       assert
-        .dom(PRODUCT_ICON)
+        .dom(PRODUCT_AVATAR)
         .hasAttribute(
           "data-test-icon",
           "vault",
@@ -49,7 +60,7 @@ module(
       this.set("isSelected", true);
 
       assert
-        .dom(PRODUCT_ICON)
+        .dom(`${PRODUCT_AVATAR} .flight-icon`)
         .hasAttribute(
           "data-test-icon",
           "folder",

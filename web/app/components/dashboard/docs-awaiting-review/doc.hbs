@@ -7,17 +7,18 @@
   >
     <div class="w-full">
       <div
-        class="relative flex w-full flex-wrap items-center gap-2.5 md:flex-nowrap"
+        class="relative flex w-full flex-wrap items-center gap-3.5 md:flex-nowrap"
       >
-
-        {{! Avatar }}
-        <Person::Avatar
-          data-test-doc-awaiting-review-owner-avatar
-          @email={{or (get @doc.owners 0) "Unknown"}}
-          @imgURL={{get @doc.ownerPhotos 0}}
-          @size="medium"
-          class="shrink-0"
-        />
+        <div class="relative flex items-center gap-0.5">
+          {{! Avatars }}
+          <Product::Avatar @product={{@doc.product}} @size="medium" />
+          <Person::Avatar
+            data-test-doc-awaiting-review-owner-avatar
+            @email={{or (get @doc.owners 0) "Unknown"}}
+            @imgURL={{get @doc.ownerPhotos 0}}
+            @size="medium"
+          />
+        </div>
 
         <div class="block w-full overflow-hidden">
 
@@ -54,10 +55,10 @@
         <div
           class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
         >
-          <Hds::Badge
-            data-test-doc-awaiting-review-product-badge
-            @icon={{or (get-product-id @doc.product) "folder"}}
-            @text={{or @doc.product "Unknown"}}
+          <Doc::State
+            data-test-doc-awaiting-review-status
+            @state={{lowercase @doc.status}}
+            @hideProgress={{true}}
           />
           <Hds::Badge
             data-test-doc-awaiting-review-doctype-badge

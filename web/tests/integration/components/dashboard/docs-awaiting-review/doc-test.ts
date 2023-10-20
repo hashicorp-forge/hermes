@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
+import ProductAreasService from "hermes/services/product-areas";
 
 const DOC_AWAITING_REVIEW_LINK_SELECTOR =
   "[data-test-doc-awaiting-review-link]";
@@ -14,8 +15,7 @@ const DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR =
 const DOC_AWAITING_REVIEW_OWNER_SELECTOR =
   "[data-test-doc-awaiting-review-owner]";
 
-const DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR =
-  "[data-test-doc-awaiting-review-product-badge]";
+const STATUS_BADGE = "[data-test-doc-awaiting-review-status]";
 
 const DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR =
   "[data-test-doc-awaiting-review-doctype-badge]";
@@ -29,6 +29,19 @@ module(
   function (hooks) {
     setupRenderingTest(hooks);
     setupMirage(hooks);
+
+    hooks.beforeEach(async function (
+      this: DashboardDocsAwaitingReviewDocTestContext,
+      assert,
+    ) {
+      const productAreasService = this.owner.lookup(
+        "service:product-areas",
+      ) as ProductAreasService;
+
+      this.server.createList("product", 4);
+
+      await productAreasService.fetch.perform();
+    });
 
     test("it renders as expected", async function (this: DashboardDocsAwaitingReviewDocTestContext, assert) {
       this.server.create("document", {
@@ -57,34 +70,30 @@ module(
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`,
+          ),
         )
         .hasText("HCP-001 Foo", "Shows the doc number and title");
 
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_OWNER_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_OWNER_SELECTOR}`,
+          ),
         )
         .hasText("foo@example.com", "Shows the doc owner");
 
       assert
-        .dom(
-          find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR}`
-          )
-        )
-        .hasText("Cloud Platform", "Shows the product name");
+        .dom(find(`${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${STATUS_BADGE}`))
+        .hasText("In review", "Shows the doc status");
 
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR}`,
+          ),
         )
         .hasText("PRFAQ", "Shows the doc type");
     });
-  }
+  },
 );

@@ -74,10 +74,6 @@
   .sidebar-body {
     @apply relative h-full overflow-y-scroll;
 
-    .product-badge {
-      @apply top-0 h-7 w-9 rounded-r;
-    }
-
     .sidebar-body-container {
       @apply space-y-8 pt-14 pb-10 pl-7 pr-3;
     }

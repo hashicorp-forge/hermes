@@ -5,7 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
+const PRODUCT_LINK = "[data-test-product-link]";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
@@ -58,7 +58,7 @@ module("Acceptance | authenticated/my", function (hooks) {
     await visit("/my");
 
     assert
-      .dom(PRODUCT_BADGE_LINK_SELECTOR)
+      .dom(PRODUCT_LINK)
       .hasAttribute("href", "/my?product=%5B%22Terraform%22%5D");
   });
 });

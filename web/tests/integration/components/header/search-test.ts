@@ -4,6 +4,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
+import ProductAreasService from "hermes/services/product-areas";
 
 const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
@@ -23,8 +24,16 @@ module("Integration | Component | header/search", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function (this: HeaderSearchTestContext) {
+  hooks.beforeEach(async function (this: HeaderSearchTestContext) {
     this.server.createList("document", 10);
+
+    const productAreasService = this.owner.lookup(
+      "service:product-areas",
+    ) as ProductAreasService;
+
+    this.server.createList("product", 4);
+
+    await productAreasService.fetch.perform();
   });
 
   test("it renders correctly", async function (this: HeaderSearchTestContext, assert) {
@@ -49,7 +58,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert
       .dom(KEYBOARD_SHORTCUT_SELECTOR)
       .doesNotExist(
-        "the keyboard shortcut icon is hidden when the user enters a query"
+        "the keyboard shortcut icon is hidden when the user enters a query",
       );
   });
 

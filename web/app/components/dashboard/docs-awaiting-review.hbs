@@ -5,8 +5,7 @@
       <Hds::BadgeCount
         data-test-docs-awaiting-review-count
         @text="{{@docs.length}}"
-        @type="inverted"
-        class="mx-0.5 !bg-color-foreground-critical md:mx-1.5"
+        class="mx-0.5 md:mx-1.5"
       />
       document{{if (gt @docs.length 1) "s"}}
       awaiting your review:
