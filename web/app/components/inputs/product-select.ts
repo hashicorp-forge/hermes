@@ -1,4 +1,3 @@
-import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
@@ -10,7 +9,6 @@ import ProductAreasService, {
   ProductArea,
 } from "hermes/services/product-areas";
 import getProductId from "hermes/utils/get-product-id";
-import { MatchAnchorWidthOptions } from "../floating-u-i/content";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
