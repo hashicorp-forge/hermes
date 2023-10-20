@@ -1,10 +1,11 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { next, schedule, scheduleOnce } from "@ember/runloop";
+import { schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
 import { HermesDocument, HermesUser } from "hermes/types/document";
+import blinkElement from "hermes/utils/blink-element";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -185,6 +186,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   @action protected disableEditing() {
     this.editingIsEnabled = false;
+    this.emptyValueErrorIsShown = false;
   }
 
   /**
@@ -255,9 +257,17 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
         (newValue instanceof Array && newValue.length === 0)
       ) {
         if (this.args.isRequired) {
+          if (this.emptyValueErrorIsShown) {
+            const error =
+              this.editingContainer?.querySelector(".hds-form-error");
+            blinkElement(error);
+            return;
+          }
+
           this.emptyValueErrorIsShown = true;
           return;
         }
+
         /**
          * We don't consider an empty value to be a change
          * if the initial value is undefined.
