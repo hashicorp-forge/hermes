@@ -31,7 +31,6 @@ module.exports = {
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/await-thenable": "off",
     "@typescript-eslint/no-unsafe-enum-comparison": "off",
-    "@typescript-eslint/no-unnecessary-type-assertion": "off",
     "no-case-declarations": "off",
     "no-fallthrough": "off",
     "prefer-const": "off",
