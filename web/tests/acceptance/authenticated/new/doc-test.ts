@@ -23,6 +23,8 @@ const ICON = "[data-test-feature-icon]";
 const PRODUCT_SELECT = `${DOC_FORM} [data-test-product-select]`;
 const PRODUCT_SELECT_TOGGLE = `${PRODUCT_SELECT} [data-test-x-dropdown-list-toggle-select]`;
 const CREATE_BUTTON = `${DOC_FORM} [data-test-submit]`;
+const SECONDARY_CREATE_BUTTON = `${DOC_FORM} .hds-button--color-secondary`;
+const PRIMARY_CREATE_BUTTON = `${DOC_FORM} .hds-button--color-primary`;
 const TITLE_INPUT = `${DOC_FORM} [data-test-title-input]`;
 const TITLE_ERROR = `${DOC_FORM} [data-test-title-error]`;
 const SUMMARY_INPUT = `${DOC_FORM} [data-test-summary-input]`;
@@ -211,6 +213,8 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     await click(PRODUCT_SELECT_TOGGLE);
     await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
+    await waitUntil(() => !this.element.querySelector(PRODUCT_ERROR));
+
     assert.dom(PRODUCT_ERROR).doesNotExist();
 
     await fillIn(TITLE_INPUT, "");
@@ -219,5 +223,21 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     await triggerKeyEvent(TITLE_INPUT, "keydown", "Escape");
 
     assert.dom(TITLE_ERROR).exists();
+  });
+
+  test("the button changes color when the form is valid", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
+    this.server.createList("product", 1);
+
+    await visit("/new/doc?docType=RFC");
+
+    assert.dom(SECONDARY_CREATE_BUTTON).exists();
+    assert.dom(PRIMARY_CREATE_BUTTON).doesNotExist();
+
+    await fillIn(TITLE_INPUT, "Foo");
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
+
+    assert.dom(SECONDARY_CREATE_BUTTON).doesNotExist();
+    assert.dom(PRIMARY_CREATE_BUTTON).exists();
   });
 });

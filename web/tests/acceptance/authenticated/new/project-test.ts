@@ -12,6 +12,8 @@ const ICON = "[data-test-feature-icon]";
 const TITLE_INPUT = `${PROJECT_FORM} [data-test-title]`;
 const DESCRIPTION_INPUT = `${PROJECT_FORM} [data-test-description]`;
 const SUBMIT_BUTTON = `${PROJECT_FORM} [data-test-submit]`;
+const SECONDARY_CREATE_BUTTON = `${PROJECT_FORM} .hds-button--color-secondary`;
+const PRIMARY_CREATE_BUTTON = `${PROJECT_FORM} .hds-button--color-primary`;
 const TITLE_ERROR = `${PROJECT_FORM} [data-test-title-error]`;
 const FLASH_MESSAGE = "[data-test-flash-notification]";
 const TASK_IS_RUNNING_DESCRIPTION = "[data-test-task-is-running-description]";
@@ -109,5 +111,17 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
 
     await waitFor(FLASH_MESSAGE);
     assert.dom(FLASH_MESSAGE).containsText("Error creating project");
+  });
+
+  test("the button changes color when the form is valid", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    await visit("/new/project");
+
+    assert.dom(SECONDARY_CREATE_BUTTON).exists();
+    assert.dom(PRIMARY_CREATE_BUTTON).doesNotExist();
+
+    await fillIn(TITLE_INPUT, "Foo");
+
+    assert.dom(SECONDARY_CREATE_BUTTON).doesNotExist();
+    assert.dom(PRIMARY_CREATE_BUTTON).exists();
   });
 });

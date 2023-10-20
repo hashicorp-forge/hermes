@@ -6,7 +6,7 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 
-const FORM_RESIZE_DURATION = Ember.testing ? 0 : 750;
+const FORM_RESIZE_DURATION = Ember.testing ? 0 : 1250;
 
 class HermesFormResize extends Resize {
   *animate() {
@@ -25,6 +25,7 @@ interface NewFormComponentSignature {
     taskIsRunningHeadline: string;
     taskIsRunningDescription: string;
     buttonText: string;
+    buttonIsActive: boolean;
   };
   Blocks: {
     default: [];

@@ -2,6 +2,7 @@
   @taskIsRunning={{this.docIsBeingCreated}}
   @icon={{get-doctype-icon @docType}}
   @headline="Create your {{@docType}}"
+  @buttonIsActive={{this.buttonIsActive}}
   @taskIsRunningHeadline="Creating draft in Google Drive..."
   @taskIsRunningDescription="This usually takes 10-20 seconds."
   @buttonText="Create draft in Google Drive"
@@ -59,9 +60,9 @@
       @matchAnchorWidth={{hash enabled=true additionalWidth=6}}
       class="max-h-[240px]"
     />
-    {{#if this.formErrors.product}}
+    {{#if this.formErrors.productAbbreviation}}
       <Hds::Form::Error data-test-product-error class="mt-2">
-        {{this.formErrors.product}}
+        {{this.formErrors.productAbbreviation}}
       </Hds::Form::Error>
     {{/if}}
   </div>

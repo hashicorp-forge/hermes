@@ -6,6 +6,7 @@
   @taskIsRunningHeadline="Creating project..."
   @taskIsRunningDescription="This shouldn't take long."
   @buttonText="Create project"
+  @buttonIsActive={{gt this.title.length 0}}
   {{on "submit" this.maybeSubmitForm}}
 >
   <Hds::Form::Textarea::Field

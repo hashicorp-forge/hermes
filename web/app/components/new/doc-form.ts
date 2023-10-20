@@ -82,6 +82,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     return Object.values(this.formErrors).some((error) => error !== null);
   }
 
+  protected get buttonIsActive() {
+    return !!this.title && !!this.productAbbreviation;
+  }
+
   /**
    * Validates the form if `validateEagerly` is true.
    */
