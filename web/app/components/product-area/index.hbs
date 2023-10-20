@@ -4,14 +4,7 @@
     <div class="flex w-full justify-between">
       <div class="flex w-full items-start space-x-4">
 
-        {{#let (get-product-id @model.hits.0.product) as |productID|}}
-          <Hds::IconTile
-            @size="large"
-            @logo={{productID}}
-            @icon={{unless productID "folder"}}
-            class="shrink-0"
-          />
-        {{/let}}
+        <Product::Avatar @product={{@model.hits.0.product}} @size="xl" />
         <div class="w-full">
           <div class="flex">
 
@@ -142,7 +135,7 @@
                   @product={{doc.product}}
                   @status={{doc.status}}
                   @isLarge={{true}}
-                  class="-mt-1 -mb-6 shrink-0 origin-top-right scale-[75%]"
+                  class="-mt-1 -mb-6 shrink-0"
                 />
               </div>
             </div>

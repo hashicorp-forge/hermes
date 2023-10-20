@@ -12,7 +12,7 @@ interface ProductAvatarComponentSignature {
     product?: string;
     iconSize?: number;
     fallbackIcon?: string;
-    size?: "small" | "medium" | "large";
+    size?: "small" | "medium" | "large" | "xl";
   };
   Blocks: {
     default: [];
@@ -36,6 +36,14 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get sizeIsLarge() {
     return this.args.size === "large";
+  }
+
+  private get sizeIsXLarge() {
+    return this.args.size === "xl";
+  }
+
+  private get size() {
+    return this.args.size || "small";
   }
 
   protected get style() {
@@ -69,19 +77,22 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
       data-test-product-avatar
       style={{this.style}}
       class="product-badge relative flex shrink-0 shrink-0 items-center justify-center rounded-md
-        {{or this.productID (or this.abbreviation 'no-product')}}
-        {{if
-          this.sizeIsLarge
-          'h-8 w-8'
-          (if this.sizeIsMedium 'h-7 w-7' 'h-5 w-5')
-        }}
+        {{this.size}}
+        {{or this.productID (unless this.abbreviation 'no-product')}}
+        {{if this.sizeIsXLarge 'h-10 w-10'}}
+        {{if this.sizeIsLarge 'h-8 w-8'}}
+        {{if this.sizeIsMedium 'h-7 w-7'}}
+        {{if this.sizeIsSmall 'h-5 w-5'}}
         "
       ...attributes
     >
       {{#if this.iconIsShown}}
         <FlightIcon
           @name={{or this.productID (or @fallbackIcon "folder")}}
-          class={{if this.sizeIsSmall "h-3 w-3" "h-4 w-4"}}
+          class="{{if this.sizeIsXLarge 'h-5 w-5'}}
+            {{if (or this.sizeIsLarge this.sizeIsMedium) 'h-4 w-4'}}
+            {{if this.sizeIsSmall 'h-3 w-3'}}
+            "
         />
       {{else if this.abbreviation}}
         <span

@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./app/**/*.{html,js,hbs,gts,gjs}"],
+  content: ["./app/**/*.{html,js,ts,hbs,gts,gjs}"],
   theme: {
     fontSize: {
       "display-500": [

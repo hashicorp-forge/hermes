@@ -67,12 +67,5 @@
         @apply -left-5;
       }
     }
-
-    .product-abbreviation {
-      &.letter-count-2,
-      &.letter-count-3 {
-        @apply text-[13px];
-      }
-    }
   }
 }
