@@ -1,5 +1,5 @@
-{{! @glint-nocheck: not typesafe yet }}
 <PowerSelectMultiple
+  data-test-people-select
   class="hds-form-field__control multiselect w-full"
   @searchEnabled={{true}}
   @search={{perform this.searchDirectory}}
@@ -11,6 +11,7 @@
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
+  @onKeydown={{@onKeydown}}
   @disabled={{@disabled}}
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
   ...attributes

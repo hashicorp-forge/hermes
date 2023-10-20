@@ -1,21 +1,29 @@
 <div
-  class="overflow-hidden rounded-full flex justify-center items-center bg-color-palette-alpha-300 bg-color-palette-neutral-200 border border-transparent
-    {{if this.sizeIsSmall 'w-5 h-5'}}
-    {{if this.sizeIsMedium 'w-7 h-7'}}
+  class="{{unless @isLoading 'bg-color-palette-alpha-300'}}
+    flex items-center justify-center overflow-hidden rounded-full
+    {{if this.sizeIsSmall 'h-5 w-5'}}
+    {{if this.sizeIsMedium 'h-7 w-7'}}
     "
   ...attributes
 >
-  {{#if @imgURL}}
-    <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
+  {{#if @isLoading}}
+    {{! Avatar loading affordance }}
+    <div
+      class="w-full h-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200 animate-spin rounded-full"
+    ></div>
   {{else}}
-    <div class="text-body-100 flex">
-      {{#if @email}}
-        <span class="capitalize">
-          {{get-first-letter @email}}
-        </span>
-      {{else}}
-        <FlightIcon @name="user" class="scale-90" />
-      {{/if}}
-    </div>
+    {{#if @imgURL}}
+      <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
+    {{else}}
+      <div class="flex text-body-100">
+        {{#if @email}}
+          <span class="capitalize">
+            {{get-first-letter @email}}
+          </span>
+        {{else}}
+          <FlightIcon @name="user" class="scale-90" />
+        {{/if}}
+      </div>
+    {{/if}}
   {{/if}}
 </div>

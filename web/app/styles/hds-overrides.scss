@@ -38,3 +38,11 @@
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
   }
 }
+
+a.hds-button {
+  &:hover,
+  &:focus,
+  &:active {
+    @apply no-underline;
+  }
+}

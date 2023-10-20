@@ -21,7 +21,7 @@
       <ExternalLink
         data-test-item-type="external-resource"
         href={{this.externalResourceURL}}
-        class="related-resource-link peer items-center"
+        class="related-resource-link peer"
       >
         <Document::Sidebar::RelatedResources::ListItem::Resource
           @resource={{@resource}}
@@ -30,20 +30,15 @@
       </ExternalLink>
     {{/if}}
     {{#unless @editingIsDisabled}}
-      <Document::Sidebar::RelatedResources::ListItem::OverflowMenu
-        @resource={{@resource}}
-        @onRemoveClick={{@removeResource}}
-        @onEditClick={{this.showModal}}
-      />
+      <RelatedResources::OverflowMenu @items={{this.overflowMenuItems}} />
     {{/unless}}
-
   </div>
 </li>
 
 {{#if this.modalIsShown}}
-  <Document::Sidebar::RelatedResources::ListItem::Edit
+  <RelatedResources::AddOrEditExternalResourceModal
     @resource={{this.externalLink}}
-    @hideModal={{this.hideModal}}
+    @onClose={{this.hideModal}}
     @removeResource={{@removeResource}}
     @onSave={{this.saveChanges}}
   />

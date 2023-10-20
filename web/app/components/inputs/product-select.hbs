@@ -1,0 +1,81 @@
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div data-test-product-select>
+  {{#if this.products}}
+    {{#if @formatIsBadge}}
+      <Inputs::BadgeDropdownList
+        @items={{this.products}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        @renderOut={{@renderOut}}
+        @secondaryFilterAttribute="abbreviation"
+        @icon={{this.icon}}
+        class="product-select-dropdown-list w-80"
+        ...attributes
+      >
+        <:item as |dd|>
+          <dd.Action data-test-product-select-badge-dropdown-item>
+            <Inputs::ProductSelect::Item
+              @product={{dd.value}}
+              @isSelected={{dd.isSelected}}
+            />
+          </dd.Action>
+        </:item>
+      </Inputs::BadgeDropdownList>
+    {{else}}
+      <X::DropdownList
+        @items={{this.products}}
+        @listIsOrdered={{true}}
+        @onItemClick={{this.onChange}}
+        @selected={{@selected}}
+        @placement={{@placement}}
+        @isSaving={{@isSaving}}
+        @renderOut={{@renderOut}}
+        @secondaryFilterAttribute="abbreviation"
+        class="product-select-dropdown-list w-[300px]"
+        ...attributes
+      >
+        <:anchor as |dd|>
+          <dd.ToggleSelect class="gap-2">
+            <Inputs::ProductSelect::Item
+              @product={{dd.selected}}
+              @abbreviation={{this.selectedProductAbbreviation}}
+            />
+          </dd.ToggleSelect>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-product-select-item-button class="pr-5">
+            <Inputs::ProductSelect::Item
+              @product={{dd.value}}
+              @isSelected={{dd.isSelected}}
+              @abbreviation={{dd.attrs.abbreviation}}
+            />
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    {{/if}}
+  {{else if this.fetchProductAreas.isRunning}}
+    <div class="flex h-6 items-center" I>
+      <FlightIcon data-test-product-select-spinner @name="loading" />
+    </div>
+  {{else if this.errorIsShown}}
+    <div class="failed-to-load-text">
+      Failed to load
+    </div>
+    <Hds::Button
+      data-test-product-select-failed-to-load-button
+      @color="secondary"
+      @size="small"
+      {{on "click" (perform this.fetchProductAreas)}}
+      @text="Retry"
+      @icon="reload"
+    />
+  {{else}}
+    <div
+      class="absolute top-0 left-0"
+      {{did-insert (perform this.fetchProductAreas)}}
+    ></div>
+  {{/if}}
+</div>

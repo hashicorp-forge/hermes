@@ -1,116 +1,109 @@
-{{! @glint-nocheck: not typesafe yet }}
-<div class="x-container">
+<nav class="header-nav x-container">
+  <LinkTo @route="authenticated.dashboard" class="header-nav-logo">
+    <HermesLogo />
+  </LinkTo>
 
-  <nav class="header-nav">
-    <LinkTo @route="authenticated.dashboard" class="header-nav-logo">
-      <HermesLogo />
+  <div class="primary-links">
+    <LinkTo
+      data-test-nav-link="all"
+      @route="authenticated.documents"
+      @current-when="authenticated.documents"
+      @query={{this.defaultBrowseScreenQueryParams}}
+    >
+      All Docs
     </LinkTo>
+    <LinkTo
+      data-test-nav-link="my"
+      @route="authenticated.my"
+      @current-when="authenticated.my"
+      @query={{this.defaultBrowseScreenQueryParams}}
+    >
+      My Docs
+    </LinkTo>
+    <LinkTo
+      data-test-nav-link="drafts"
+      @route="authenticated.drafts"
+      @current-when="authenticated.drafts"
+      @query={{this.defaultBrowseScreenQueryParams}}
+    >
+      My Drafts
+    </LinkTo>
+  </div>
 
-    <div class="primary-links">
-      <LinkTo
-        data-test-nav-link="all"
-        @route="authenticated.all"
-        @current-when="authenticated.all"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        All Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="my"
-        @route="authenticated.my"
-        @current-when="authenticated.my"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="drafts"
-        @route="authenticated.drafts"
-        @current-when="authenticated.drafts"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Drafts
-      </LinkTo>
-    </div>
+  <Header::Search class="global-search" />
 
-    <Header::Search class="global-search" />
-
-    <div class="user-buttons">
-      <Hds::Button
-        @route="authenticated.new"
-        @isIconOnly={{true}}
-        @text="Create draft"
-        @icon="file-plus"
-        class="create-draft-button"
-      />
-      <div class="relative">
-        {{#if this.userMenuHighlightIsShown}}
-          <Header::UserMenuHighlight />
-        {{/if}}
-        {{#if this.profile.picture}}
-          {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-          <img
-            src={{this.profile.picture}}
-            class="user-avatar"
-            role="presentation"
-            referrerpolicy="no-referrer"
-          />
-        {{/if}}
-        <Hds::Dropdown as |dd|>
-          <dd.ToggleIcon
-            data-test-user-menu-toggle
-            @text="User menu"
-            @icon="user"
-          />
-          <dd.Title
-            data-test-user-menu-title
-            {{did-insert this.onDropdownOpen}}
-            {{will-destroy this.onDropdownClose}}
-            @text={{this.profile.name}}
-            class="text-body-200"
-          />
-          <dd.Description
-            data-test-user-menu-email
-            @text={{this.profile.email}}
-            class="text-body-200"
-          />
-          <dd.Separator class="mt-2" />
+  <div class="user-buttons">
+    <Hds::Button
+      data-test-create-new-button
+      @route="authenticated.new"
+      @text="New"
+      @icon="plus"
+      class="pl-2.5 pr-4"
+    />
+    <div class="relative">
+      {{#if this.userMenuHighlightIsShown}}
+        <Header::UserMenuHighlight />
+      {{/if}}
+      {{#if this.profile.picture}}
+        {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
+        <img
+          src={{this.profile.picture}}
+          class="user-avatar"
+          role="presentation"
+          referrerpolicy="no-referrer"
+        />
+      {{/if}}
+      <Hds::Dropdown as |dd|>
+        <dd.ToggleIcon
+          data-test-user-menu-toggle
+          @text="User menu"
+          @icon="user"
+        />
+        <dd.Title
+          data-test-user-menu-title
+          {{did-insert this.onDropdownOpen}}
+          {{will-destroy this.onDropdownClose}}
+          @text={{this.profile.name}}
+          class="text-body-200"
+        />
+        <dd.Description
+          data-test-user-menu-email
+          @text={{this.profile.email}}
+          class="text-body-200"
+        />
+        <dd.Separator class="mt-2" />
+        <dd.Interactive
+          data-test-user-menu-item="email-notifications"
+          @route="authenticated.settings"
+          @text="Email notifications"
+          class={{if this.emailNotificationsHighlightIsShown "highlighted-new"}}
+        />
+        <dd.Interactive
+          data-test-user-menu-github
+          @href={{this.gitHubRepoURL}}
+          @isHrefExternal={{true}}
+          @text="GitHub"
+          @icon="external-link"
+          class="user-menu-external-link"
+        />
+        {{#if this.supportDocsURL}}
           <dd.Interactive
-            data-test-user-menu-item="email-notifications"
-            @route="authenticated.settings"
-            @text="Email notifications"
-            class={{if
-              this.emailNotificationsHighlightIsShown
-              "highlighted-new"
-            }}
-          />
-          <dd.Interactive
-            data-test-user-menu-github
-            @href={{this.gitHubRepoURL}}
+            data-test-user-menu-support
+            @href={{this.supportDocsURL}}
             @isHrefExternal={{true}}
-            @text="GitHub"
+            @text="Support"
             @icon="external-link"
             class="user-menu-external-link"
           />
-          {{#if this.supportDocsURL}}
-            <dd.Interactive
-              data-test-user-menu-support
-              @href={{this.supportDocsURL}}
-              @isHrefExternal={{true}}
-              @text="Support"
-              @icon="external-link"
-              class="user-menu-external-link"
-            />
-          {{/if}}
-          {{#if this.showSignOut}}
-            <dd.Interactive
-              data-test-user-menu-item="sign-out"
-              {{on "click" this.invalidateSession}}
-              @text="Sign out"
-            />
-          {{/if}}
-        </Hds::Dropdown>
-      </div>
+        {{/if}}
+        {{#if this.showSignOut}}
+          <dd.Interactive
+            data-test-user-menu-item="sign-out"
+            {{on "click" this.invalidateSession}}
+            @text="Sign out"
+          />
+        {{/if}}
+      </Hds::Dropdown>
     </div>
-  </nav>
-</div>
+  </div>
+</nav>

@@ -835,6 +835,73 @@ func TestDocumentModel(t *testing.T) {
 			assert.Equal("string value 1", d.CustomFields[0].Value)
 		})
 	})
+
+	t.Run("Create, get, and delete a draft document",
+		func(t *testing.T) {
+			db, tearDownTest := setupTest(t, dsn)
+			defer tearDownTest(t)
+
+			t.Run("Create a document type", func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+				dt := DocumentType{
+					Name:     "DT1",
+					LongName: "DocumentType1",
+				}
+				err := dt.FirstOrCreate(db)
+				require.NoError(err)
+			})
+
+			t.Run("Create a product", func(t *testing.T) {
+				_, require := assert.New(t), require.New(t)
+
+				p := Product{
+					Name:         "Product1",
+					Abbreviation: "P1",
+				}
+				err := p.FirstOrCreate(db)
+				require.NoError(err)
+			})
+
+			t.Run("Create a document", func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+
+				d := Document{
+					GoogleFileID: "GoogleFileID1",
+					DocumentType: DocumentType{
+						Name: "DT1",
+					},
+					Product: Product{
+						Name: "Product1",
+					},
+					Status: WIPDocumentStatus,
+				}
+				err := d.Create(db)
+				require.NoError(err)
+				assert.EqualValues(1, d.ID)
+			})
+
+			t.Run("Get the document", func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+				d := Document{
+					GoogleFileID: "GoogleFileID1",
+				}
+				err := d.Get(db)
+				require.NoError(err)
+				assert.EqualValues(1, d.ID)
+				assert.False(d.DeletedAt.Valid)
+			})
+
+			t.Run("Delete a document", func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+
+				d := Document{
+					GoogleFileID: "GoogleFileID1",
+				}
+				err := d.Delete(db)
+				require.NoError(err)
+				assert.True(d.DeletedAt.Valid)
+			})
+		})
 }
 
 func TestGetLatestProductNumber(t *testing.T) {
@@ -1162,5 +1229,4 @@ func TestDocumentReplaceRelatedResources(t *testing.T) {
 			assert.Equal(3, hdrrs[1].RelatedResource.SortOrder)
 		})
 	})
-
 }

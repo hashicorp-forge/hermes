@@ -40,8 +40,7 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    facets: FacetDropdownGroups;
-    sortControlIsHidden?: boolean;
+    facets?: FacetDropdownGroups;
   };
 }
 
@@ -49,52 +48,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @service declare router: RouterService;
   @service declare activeFilters: ActiveFiltersService;
 
-  get currentSortByValue() {
-    if (!this.router.currentRoute) {
-      return SortByValue.DateDesc;
-    }
-    let sortBy = this.router.currentRoute.queryParams["sortBy"];
-
-    switch (sortBy) {
-      case SortByValue.DateAsc:
-        return sortBy;
-      default:
-        return SortByValue.DateDesc;
-    }
-  }
-
-  protected get getSortByLabel(): SortByLabel {
-    if (this.currentSortByValue === SortByValue.DateDesc) {
-      return SortByLabel.Newest;
-    } else {
-      return SortByLabel.Oldest;
-    }
-  }
-
   get currentRouteName(): string {
     return this.router.currentRouteName;
-  }
-
-  /**
-   * Whether the owner facet is disabled.
-   * True on the My Docs and My Drafts screens.
-   */
-  protected get ownerFacetIsDisabled() {
-    switch (this.currentRouteName) {
-      case "authenticated.my":
-      case "authenticated.drafts":
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  /**
-   * Whether the sort control is disabled.
-   * True when there are no drafts or docs.
-   */
-  protected get sortControlIsDisabled() {
-    return Object.keys(this.args.facets).length === 0;
   }
 
   /**
@@ -102,7 +57,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get statuses(): FacetDropdownObjects | null {
     let statuses: FacetDropdownObjects = {};
-    for (let status in this.args.facets.status) {
+    for (let status in this.args.facets?.status) {
       if (
         status === "Approved" ||
         status === "In-Review" ||
@@ -110,7 +65,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        statuses[status] = this.args.facets.status[
+        statuses[status] = this.args.facets?.status[
           status
         ] as FacetDropdownObjectDetails;
       }
@@ -122,19 +77,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     } else {
       return statuses;
     }
-  }
-
-  get sortByFacets(): SortByFacets {
-    return {
-      Newest: {
-        count: 0,
-        isSelected: this.currentSortByValue === SortByValue.DateDesc,
-      },
-      Oldest: {
-        count: 0,
-        isSelected: this.currentSortByValue === SortByValue.DateAsc,
-      },
-    };
   }
 
   /**

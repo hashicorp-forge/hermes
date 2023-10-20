@@ -1,6 +1,6 @@
 # Hermes
 
-![](https://github.com/hashicorp-forge/hermes/workflows/ci/badge.svg)
+[![CI](https://github.com/hashicorp-forge/hermes/workflows/ci/badge.svg?branch=main)](https://github.com/hashicorp-forge/hermes/actions/workflows/ci.yml?query=branch%3Amain)
 
 > Hermes is not an official HashiCorp project.
 > The repository contains software which is under active development and is in the alpha stage. Please read the “[Project Status](#project-status)” section for more information.
@@ -115,6 +115,8 @@ Hermes can be configured to point to any PostgreSQL database, but for running lo
 # Start PostgreSQL in Docker.
 make docker/postgres/start
 ```
+
+The database password can be configured via the Hermes config.hcl or the `HERMES_SERVER_POSTGRES_PASSWORD` environment variable.
 
 ### Run the Server
 

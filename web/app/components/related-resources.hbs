@@ -1,0 +1,28 @@
+{{yield (hash showModal=this.showModal) to="header"}}
+
+{{#if this.args.isLoading}}
+  {{yield to="list-loading"}}
+{{else if this.args.loadingHasFailed}}
+  {{yield to="list-error"}}
+{{else}}
+  {{yield (hash items=this.items showModal=this.showModal) to="list"}}
+{{/if}}
+
+{{#if this.modalIsShown}}
+  <RelatedResources::Add
+    @headerTitle={{@modalHeaderTitle}}
+    @inputPlaceholder={{@modalInputPlaceholder}}
+    @onClose={{this.hideModal}}
+    @addResource={{this.addResource}}
+    @algoliaResults={{this.algoliaResults}}
+    @objectID={{@documentObjectID}}
+    @relatedDocuments={{this.relatedDocuments}}
+    @relatedLinks={{this.relatedLinks}}
+    @scope={{@scope}}
+    @search={{perform this.search}}
+    @getObject={{perform this.getObject}}
+    @resetAlgoliaResults={{this.resetAlgoliaResults}}
+    @searchErrorIsShown={{this.searchErrorIsShown}}
+    @searchIsRunning={{this.search.isRunning}}
+  />
+{{/if}}

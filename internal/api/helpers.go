@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
+	"regexp"
 	"strings"
 
+	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-multierror"
+	"github.com/iancoleman/strcase"
 )
 
 // contains returns true if a string is present in a slice of strings.
@@ -107,4 +113,441 @@ func respondError(
 		}, extraArgs...)...,
 	)
 	http.Error(w, userErrMsg, httpCode)
+}
+
+// compareAlgoliaAndDatabaseDocument compares data for a document stored in
+// Algolia and the database to determine any inconsistencies, which are returned
+// back as a (multierror) error.
+func compareAlgoliaAndDatabaseDocument(
+	algoDoc map[string]any,
+	dbDoc models.Document,
+	dbDocReviews models.DocumentReviews,
+	docTypes []*config.DocumentType,
+) error {
+
+	var result *multierror.Error
+
+	// Compare objectID.
+	algoGoogleFileID, err := getStringValue(algoDoc, "objectID")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting objectID value: %w", err))
+	}
+	if algoGoogleFileID != dbDoc.GoogleFileID {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"objectID not equal, algolia=%v, db=%v",
+				algoGoogleFileID, dbDoc.GoogleFileID),
+		)
+	}
+
+	// Compare title.
+	algoTitle, err := getStringValue(algoDoc, "title")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting title value: %w", err))
+	} else {
+		if algoTitle != dbDoc.Title {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"title not equal, algolia=%v, db=%v",
+					algoTitle, dbDoc.Title),
+			)
+		}
+	}
+
+	// Compare docType.
+	algoDocType, err := getStringValue(algoDoc, "docType")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting docType value: %w", err))
+	} else {
+		dbDocType := dbDoc.DocumentType.Name
+		if algoDocType != dbDocType {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"docType not equal, algolia=%v, db=%v",
+					algoTitle, dbDocType),
+			)
+		}
+	}
+
+	// Compare docNumber.
+	algoDocNumber, err := getStringValue(algoDoc, "docNumber")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting docNumber value: %w", err))
+	} else {
+		// Replace "-???" (how draft doc numbers are defined in Algolia) with a
+		// zero.
+		re := regexp.MustCompile(`-\?\?\?$`)
+		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000")
+
+		// Note that we pad the database document number to three digits here like
+		// we do when assigning a document number when a doc review is requested.
+		dbDocNumber := fmt.Sprintf(
+			"%s-%03d", dbDoc.Product.Abbreviation, dbDoc.DocumentNumber)
+		if algoDocNumber != dbDocNumber {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"docNumber not equal, algolia=%v, db=%v",
+					algoDocNumber, dbDocNumber),
+			)
+		}
+	}
+
+	// Compare appCreated.
+	algoAppCreated, err := getBooleanValue(algoDoc, "appCreated")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting appCreated value: %w", err))
+	} else {
+		dbAppCreated := !dbDoc.Imported
+		if algoAppCreated != dbAppCreated {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"appCreated not equal, algolia=%v, db=%v",
+					algoAppCreated, dbAppCreated),
+			)
+		}
+	}
+
+	// Compare approvedBy.
+	algoApprovedBy, err := getStringSliceValue(algoDoc, "approvedBy")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting approvedBy value: %w", err))
+	}
+	dbApprovedBy := []string{}
+	for _, r := range dbDocReviews {
+		if r.Status == models.ApprovedDocumentReviewStatus {
+			dbApprovedBy = append(dbApprovedBy, r.User.EmailAddress)
+		}
+	}
+	if !reflect.DeepEqual(algoApprovedBy, dbApprovedBy) {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"approvedBy not equal, algolia=%v, db=%v",
+				algoApprovedBy, dbApprovedBy),
+		)
+	}
+
+	// Compare approvers.
+	algoApprovers, err := getStringSliceValue(algoDoc, "approvers")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting approvers value: %w", err))
+	}
+	dbApprovers := []string{}
+	for _, a := range dbDoc.Approvers {
+		dbApprovers = append(dbApprovers, a.EmailAddress)
+	}
+	if !reflect.DeepEqual(algoApprovers, dbApprovers) {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"approvers not equal, algolia=%v, db=%v",
+				algoApprovers, dbApprovers),
+		)
+	}
+
+	// Compare changesRequestedBy.
+	algoChangesRequestedBy, err := getStringSliceValue(
+		algoDoc, "changesRequestedBy")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting changesRequestedBy value: %w", err))
+	}
+	dbChangesRequestedBy := []string{}
+	for _, r := range dbDocReviews {
+		if r.Status == models.ChangesRequestedDocumentReviewStatus {
+			dbChangesRequestedBy = append(dbChangesRequestedBy, r.User.EmailAddress)
+		}
+	}
+	if !reflect.DeepEqual(algoChangesRequestedBy, dbChangesRequestedBy) {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"changesRequestedBy not equal, algolia=%v, db=%v",
+				algoChangesRequestedBy, dbChangesRequestedBy),
+		)
+	}
+
+	// Compare contributors.
+	algoContributors, err := getStringSliceValue(algoDoc, "contributors")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting contributors value: %w", err))
+	}
+	dbContributors := []string{}
+	for _, c := range dbDoc.Contributors {
+		dbContributors = append(dbContributors, c.EmailAddress)
+	}
+	if !reflect.DeepEqual(algoContributors, dbContributors) {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"contributors not equal, algolia=%v, db=%v",
+				algoContributors, dbContributors),
+		)
+	}
+
+	// Compare createdTime.
+	algoCreatedTime, err := getInt64Value(algoDoc, "createdTime")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting createdTime value: %w", err))
+	} else {
+		dbCreatedTime := dbDoc.DocumentCreatedAt.Unix()
+		if algoCreatedTime != dbCreatedTime {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"createdTime not equal, algolia=%v, db=%v",
+					algoCreatedTime, dbCreatedTime),
+			)
+		}
+	}
+
+	// Compare custom fields.
+	foundDocType := false
+	for _, dt := range docTypes {
+		if dt.Name == algoDocType {
+			foundDocType = true
+			for _, cf := range dt.CustomFields {
+				algoCFName := strcase.ToLowerCamel(cf.Name)
+
+				switch cf.Type {
+				case "string":
+					algoCFVal, err := getStringValue(algoDoc, algoCFName)
+					if err != nil {
+						result = multierror.Append(
+							result, fmt.Errorf(
+								"error getting custom field (%s) value: %w", algoCFName, err))
+					} else {
+						for _, c := range dbDoc.CustomFields {
+							if c.DocumentTypeCustomField.Name == cf.Name {
+								if algoCFVal != c.Value {
+									result = multierror.Append(result,
+										fmt.Errorf(
+											"custom field %s not equal, algolia=%v, db=%v",
+											algoCFName, algoCFVal, c.Value),
+									)
+								}
+								break
+							}
+						}
+					}
+				case "people":
+					algoCFVal, err := getStringSliceValue(algoDoc, algoCFName)
+					if err != nil {
+						result = multierror.Append(
+							result, fmt.Errorf(
+								"error getting custom field (%s) value: %w", algoCFName, err))
+					} else {
+						for _, c := range dbDoc.CustomFields {
+							if c.DocumentTypeCustomField.Name == cf.Name {
+								// Unmarshal person custom field value to string slice.
+								var dbCFVal []string
+								if err := json.Unmarshal([]byte(c.Value), &dbCFVal); err != nil {
+									result = multierror.Append(result,
+										fmt.Errorf(
+											"error unmarshaling custom field %s to string slice",
+											algoCFName),
+									)
+								}
+
+								if !reflect.DeepEqual(algoCFVal, dbCFVal) {
+									result = multierror.Append(result,
+										fmt.Errorf(
+											"custom field %s not equal, algolia=%v, db=%v",
+											algoCFName, algoCFVal, dbCFVal),
+									)
+								}
+								break
+							}
+						}
+					}
+				default:
+					result = multierror.Append(result,
+						fmt.Errorf(
+							"unknown type for custom field key %q: %s", dt.Name, cf.Type))
+				}
+			}
+			break
+		}
+	}
+	if !foundDocType {
+		result = multierror.Append(result,
+			fmt.Errorf(
+				"doc type %q not found", algoDocType))
+	}
+
+	// Compare file revisions.
+	// TODO: need to store this in the database first.
+
+	// Compare modifiedTime.
+	algoModifiedTime, err := getInt64Value(algoDoc, "modifiedTime")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting modifiedTime value: %w", err))
+	} else {
+		dbModifiedTime := dbDoc.DocumentModifiedAt.Unix()
+		if algoModifiedTime != dbModifiedTime {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"modifiedTime not equal, algolia=%v, db=%v",
+					algoModifiedTime, dbModifiedTime),
+			)
+		}
+	}
+
+	// Compare owner.
+	// NOTE: this does not address multiple owners, which can exist for Algolia
+	// document objects (documents in the database currently only have one owner).
+	algoOwners, err := getStringSliceValue(algoDoc, "owners")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting owners value: %w", err))
+	} else {
+		var dbOwner string
+		if dbDoc.Owner != nil {
+			dbOwner = dbDoc.Owner.EmailAddress
+		}
+		if len(algoOwners) > 0 {
+			if algoOwners[0] != dbOwner {
+				result = multierror.Append(result,
+					fmt.Errorf(
+						"owners not equal, algolia=%#v, db=%#v",
+						algoOwners, dbOwner),
+				)
+			}
+		} else {
+			result = multierror.Append(
+				result, fmt.Errorf("owners in Algolia was length %d", len(algoOwners)))
+		}
+	}
+
+	// Compare product.
+	algoProduct, err := getStringValue(algoDoc, "product")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting product value: %w", err))
+	} else {
+		dbProduct := dbDoc.Product.Name
+		if algoProduct != dbProduct {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"product not equal, algolia=%v, db=%v",
+					algoProduct, dbProduct),
+			)
+		}
+	}
+
+	// Compare status.
+	algoStatus, err := getStringValue(algoDoc, "status")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting status value: %w", err))
+	} else {
+		var dbStatus string
+		switch dbDoc.Status {
+		case models.WIPDocumentStatus:
+			dbStatus = "WIP"
+		case models.InReviewDocumentStatus:
+			dbStatus = "In-Review"
+		case models.ApprovedDocumentStatus:
+			dbStatus = "Approved"
+		case models.ObsoleteDocumentStatus:
+			dbStatus = "Obsolete"
+		}
+		if algoStatus != dbStatus {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"status not equal, algolia=%v, db=%v",
+					algoStatus, dbStatus),
+			)
+		}
+	}
+
+	// Compare summary.
+	algoSummary, err := getStringValue(algoDoc, "summary")
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error getting summary value: %w", err))
+	} else {
+		dbSummary := dbDoc.Summary
+		if algoSummary != dbSummary {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"summary not equal, algolia=%v, db=%v",
+					algoSummary, dbSummary),
+			)
+		}
+	}
+
+	return result.ErrorOrNil()
+}
+
+func getBooleanValue(in map[string]any, key string) (bool, error) {
+	var result bool
+
+	if v, ok := in[key]; ok {
+		if vv, ok := v.(bool); ok {
+			return vv, nil
+		} else {
+			return false, fmt.Errorf(
+				"invalid type: value is not a boolean, type: %T", v)
+		}
+	}
+
+	return result, nil
+}
+
+func getInt64Value(in map[string]any, key string) (int64, error) {
+	var result int64
+
+	if v, ok := in[key]; ok {
+		// These interface{} values are inferred as float64 and need to be converted
+		// to int64.
+		if vv, ok := v.(float64); ok {
+			return int64(vv), nil
+		} else {
+			return 0, fmt.Errorf(
+				"invalid type: value is not an float64 (expected), type: %T", v)
+		}
+	}
+
+	return result, nil
+}
+
+func getStringValue(in map[string]any, key string) (string, error) {
+	var result string
+
+	if v, ok := in[key]; ok {
+		if vv, ok := v.(string); ok {
+			return vv, nil
+		} else {
+			return "", fmt.Errorf("invalid type: value is not a string, type: %T", v)
+		}
+	}
+
+	return result, nil
+}
+
+func getStringSliceValue(in map[string]any, key string) ([]string, error) {
+	result := []string{}
+
+	if v, ok := in[key]; ok {
+		if reflect.TypeOf(v).Kind() == reflect.Slice {
+			for _, vv := range v.([]any) {
+				if vv, ok := vv.(string); ok {
+					result = append(result, vv)
+				} else {
+					return nil, fmt.Errorf("invalid type: slice element is not a string")
+				}
+			}
+			return result, nil
+		} else {
+			return nil, fmt.Errorf("invalid type: value is not a slice")
+		}
+	}
+
+	return result, nil
 }

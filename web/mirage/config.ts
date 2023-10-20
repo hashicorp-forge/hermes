@@ -44,7 +44,7 @@ export default function (mirageConfig) {
               return new Response(
                 200,
                 {},
-                { facetHits: [{ value: facetMatch.attrs.product }] }
+                { facetHits: [{ value: facetMatch.attrs.product }] },
               );
             } else {
               return new Response(200, {}, { facetHits: [] });
@@ -131,7 +131,7 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models }
+              { hits: schema.document.all().models },
             );
           }
         } else {
@@ -214,6 +214,22 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Called when a user creates a new document.
+       */
+      this.post("/drafts", (schema, request) => {
+        const document = schema.document.create({
+          ...JSON.parse(request.requestBody),
+        });
+
+        document.update({
+          objectID: document.id,
+          owners: ["testuser@example.com"],
+        });
+
+        return new Response(200, {}, document.attrs);
+      });
+
+      /**
        * Used when publishing a draft for review.
        * Updates the document's status and isDraft properties.
        *
@@ -280,7 +296,9 @@ export default function (mirageConfig) {
             skip_google_auth: false,
             google_analytics_tag_id: undefined,
             support_link_url: TEST_SUPPORT_URL,
-          }
+            version: "1.2.3",
+            short_revision: "abc123",
+          },
         );
       });
 
@@ -288,49 +306,33 @@ export default function (mirageConfig) {
        * Used in the /new routes when creating a document.
        */
       this.get("/document-types", () => {
-        return new Response(200, {}, [
-          {
-            name: "RFC",
-            longName: "Request for Comments",
-            description:
-              "Create a Request for Comments document to present a proposal to colleagues for their review and feedback.",
-            moreInfoLink: {
-              text: "More-info link",
-              url: "example.com",
+        if (this.schema.documentTypes.all().models.length === 0) {
+          return new Response(200, {}, [
+            {
+              name: "RFC",
+              longName: "Request for Comments",
+              description:
+                "Present a proposal to colleagues for their review and feedback.",
+              moreInfoLink: {
+                text: "More-info link",
+                url: "example.com",
+              },
             },
-            checks: [
-              {
-                label: "I have read the Terms and Conditions",
-                helperText:
-                  "Please read the Terms and Conditions before proceeding.",
-                links: [
-                  {
-                    text: "Terms and Conditions",
-                    url: "example.com",
-                  },
-                ],
-              },
-            ],
-            customFields: [
-              {
-                name: "Current Version",
-                readOnly: false,
-                type: "string",
-              },
-              {
-                name: "Stakeholders",
-                readOnly: false,
-                type: "people",
-              },
-            ],
-          },
-          {
-            name: "PRD",
-            longName: "Product Requirements",
-            description:
-              "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem.",
-          },
-        ]);
+            {
+              name: "PRD",
+              longName: "Product Requirements",
+              description:
+                "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+          ]);
+        }
+        return new Response(
+          200,
+          {},
+          this.schema.documentTypes.all().models.map((docType) => {
+            return docType.attrs;
+          }),
+        );
       });
 
       /**
@@ -363,6 +365,21 @@ export default function (mirageConfig) {
         if (request.queryParams.emails === "testuser@example.com") {
           return new Response(200, {}, []);
         }
+
+        if (request.queryParams.emails !== "") {
+          const emails = request.queryParams.emails.split(",");
+
+          if (emails.length === 0) {
+            return new Response(200, {}, []);
+          }
+
+          const hermesUsers = emails.map((email: string) => {
+            return { emailAddresses: [{ value: email }], photos: [] };
+          });
+
+          return new Response(200, {}, hermesUsers);
+        }
+
         return schema.people.all();
       });
 
@@ -373,7 +390,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -384,7 +403,9 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          schema.document.findBy({ objectID: request.params.document_id }).attrs
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
         );
       });
 
@@ -431,7 +452,7 @@ export default function (mirageConfig) {
             });
 
           return new Response(200, {}, { hermesDocuments, externalLinks });
-        }
+        },
       );
 
       /**
@@ -452,8 +473,26 @@ export default function (mirageConfig) {
             Hits: drafts,
             params: "",
             page: 0,
-          }
+          },
         );
+      });
+
+      /**
+       * Used by the /projects route to fetch a list of projects.
+       */
+      this.get("/projects", () => {
+        const projects = this.schema.projects.all().models;
+        return new Response(200, {}, projects);
+      });
+
+      /**
+       * Used by the /projects/:project_id route to fetch a single project.
+       */
+      this.get("/projects/:project_id", (schema, request) => {
+        const project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+        return new Response(200, {}, project.attrs);
       });
 
       /**
@@ -484,7 +523,7 @@ export default function (mirageConfig) {
           return new Response(
             200,
             {},
-            { "Default Fetched Product": { abbreviation: "NONE" } }
+            { "Default Fetched Product": { abbreviation: "NONE" } },
           );
         } else {
           let objects = this.schema.products.all().models.map((product) => {
@@ -557,7 +596,7 @@ export default function (mirageConfig) {
           schema.db.recentlyViewedDocs.remove();
           schema.db.recentlyViewedDocs.insert(index);
           return new Response(200, {}, schema.recentlyViewedDocs.all().models);
-        }
+        },
       );
 
       /**
@@ -570,11 +609,18 @@ export default function (mirageConfig) {
         if (document) {
           let attrs = JSON.parse(request.requestBody);
 
+          if ("customFields" in attrs) {
+            attrs.customFields.forEach((field) => {
+              document.attrs[field.name] = field.value;
+            });
+          }
+
           if ("product" in attrs) {
             attrs.docNumber = getTestDocNumber(attrs.product);
           }
 
           document.update(attrs);
+
           return new Response(200, {}, document.attrs);
         }
       });
@@ -631,7 +677,7 @@ export default function (mirageConfig) {
                 type: mirageDocument.docType,
                 documentNumber: mirageDocument.docNumber,
               });
-            }
+            },
           );
 
           externalLinks.forEach((link) => {
@@ -644,8 +690,22 @@ export default function (mirageConfig) {
           });
 
           return new Response(200, {}, {});
-        }
+        },
       );
+
+      // Project related resources
+      this.put("projects/:project_id", (schema, request) => {
+        let project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        if (project) {
+          let attrs = JSON.parse(request.requestBody);
+
+          project.update(attrs);
+          return new Response(200, {}, project.attrs);
+        }
+      });
 
       // Update whether a draft is shareable.
       this.put("/drafts/:document_id/shareable", (schema, request) => {

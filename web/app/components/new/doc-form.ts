@@ -12,13 +12,12 @@ import { HermesUser } from "hermes/types/document";
 import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
-import { ProductArea } from "../inputs/product-select";
+import { ProductArea } from "hermes/services/product-areas";
 
 interface DocFormErrors {
   title: string | null;
   summary: string | null;
   productAbbreviation: string | null;
-  tags: string | null;
   contributors: string | null;
 }
 
@@ -26,7 +25,6 @@ const FORM_ERRORS: DocFormErrors = {
   title: null,
   summary: null,
   productAbbreviation: null,
-  tags: null,
   contributors: null,
 };
 
@@ -48,7 +46,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | null = null;
+  @tracked protected productArea?: string;
   @tracked protected productAbbreviation: string | null = null;
   @tracked protected contributors: HermesUser[] = [];
 
@@ -118,14 +116,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form and updates the `formErrors` property.
    */
   private validate() {
-    const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
-    this.formErrors = errors;
+    this.formErrors = { ...FORM_ERRORS };
   }
 
   /**
@@ -175,7 +166,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @action protected onProductSelect(
     productName: string,
-    attributes: ProductArea
+    attributes: ProductArea,
   ) {
     this.productArea = productName;
     this.productAbbreviation = attributes.abbreviation;
@@ -224,7 +215,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Set modal on a delay so it appears after transition.
       this.modalAlerts.setActive.perform(
         "draftCreated",
-        AWAIT_DOC_CREATED_MODAL_DELAY
+        AWAIT_DOC_CREATED_MODAL_DELAY,
       );
 
       this.router.transitionTo("authenticated.document", doc.id, {
@@ -232,6 +223,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       });
     } catch (err: unknown) {
       this.docIsBeingCreated = false;
+
+      // TODO: Improve error handling.
       this.flashMessages.add({
         title: "Error creating document draft",
         message: `${err}`,

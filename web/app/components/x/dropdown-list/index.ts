@@ -17,6 +17,8 @@ import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
+import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
+import XDropdownListToggleSelectComponent from "./toggle-select";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -36,7 +38,12 @@ export interface XDropdownListAnchorAPI
     typeof XDropdownListToggleButtonComponent,
     XDropdownListToggleComponentBoundArgs | "color" | "text"
   >;
+  ToggleSelect: WithBoundArgs<
+    typeof XDropdownListToggleSelectComponent,
+    XDropdownListToggleComponentBoundArgs
+  >;
   focusedItemIndex: number;
+  selected: any;
   resetFocusedItemIndex: () => void;
   scheduleAssignMenuItemIDs: () => void;
   hideContent: () => void;
@@ -53,6 +60,16 @@ interface XDropdownListComponentSignature {
     disabled?: boolean;
     offset?: OffsetOptions;
     label?: string;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
+
+    /**
+     * An additional attribute by which to search.
+     * Used to include secondary information when filtering.
+     * For example, we specify "abbreviation" for the `ProductSelect`
+     * component so that users can search by product's abbreviation
+     * in addition to its name.
+     */
+    secondaryFilterAttribute?: string;
 
     /**
      * Whether an asynchronous list is loading.
@@ -142,8 +159,8 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * aria-roles for various elements.
    */
   get inputIsShown() {
-    if (this.args.inputIsShown === false) {
-      return false;
+    if (this.args.inputIsShown !== undefined) {
+      return this.args.inputIsShown;
     }
 
     if (!this.args.items) {
@@ -230,10 +247,10 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @action protected didInsertContent() {
     assert(
       "didInsertContent expects a _scrollContainer",
-      this._scrollContainer
+      this._scrollContainer,
     );
     this.assignMenuItemIDs(
-      this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`)
+      this._scrollContainer.querySelectorAll(`[role=${this.listItemRole}]`),
     );
   }
 
@@ -275,7 +292,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   @action protected onTriggerKeydown(
     contentIsShown: boolean,
     showContent: () => void,
-    event: KeyboardEvent
+    event: KeyboardEvent,
   ) {
     if (contentIsShown) {
       return;
@@ -309,7 +326,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    */
   @action protected setFocusedItemIndex(
     focusDirectionOrNumber: FocusDirection | number,
-    maybeScrollIntoView = true
+    maybeScrollIntoView = true,
   ) {
     let { _menuItems: menuItems, focusedItemIndex } = this;
 
@@ -399,6 +416,11 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
     for (const [key, value] of Object.entries(items)) {
       if (key.toLowerCase().includes(this.query.toLowerCase())) {
         shownItems[key] = value;
+      } else if (this.args.secondaryFilterAttribute) {
+        const maybeValue = (value as any)[this.args.secondaryFilterAttribute];
+        if (maybeValue.toLowerCase().includes(this.query.toLowerCase())) {
+          shownItems[key] = value;
+        }
       }
     }
 
@@ -425,18 +447,18 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
         schedule("afterRender", () => {
           assert(
             "scheduleAssignMenuItemIDs expects a _scrollContainer",
-            this._scrollContainer
+            this._scrollContainer,
           );
           this.assignMenuItemIDs(
             this._scrollContainer.querySelectorAll(
-              `[role=${this.listItemRole}]`
-            )
+              `[role=${this.listItemRole}]`,
+            ),
           );
         });
       } else {
         if (i === 3) {
           throw new Error(
-            "scheduleAssignMenuItemIDs expects a _scrollContainer"
+            "scheduleAssignMenuItemIDs expects a _scrollContainer",
           );
         } else {
           await timeout(1);

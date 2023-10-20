@@ -1,73 +1,68 @@
 {{page-title "Dashboard"}}
 
-<Header />
+<Dashboard::NewFeaturesBanner />
 
-<section class="x-container">
+<h1 class="mb-7">
+  Welcome back,
+  {{this.authenticatedUser.info.given_name}}!
+</h1>
 
-  <Dashboard::NewFeaturesBanner />
+{{#if @model}}
+  <Dashboard::DocsAwaitingReview @docs={{@model}} />
+{{/if}}
 
-  <h1 class="mb-7">
-    Welcome back,
-    {{this.authenticatedUser.info.given_name}}!
-  </h1>
+<div
+  class="hds-border-primary mt-10 flex w-full flex-col border-0 border-b pb-10"
+>
+  <div class="mb-8 flex items-center space-x-2">
+    <FlightIcon @name="eye" @size="24" />
+    <h2
+      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
+    >Recently viewed</h2>
+  </div>
 
-  {{#if @model}}
-    <Dashboard::DocsAwaitingReview @docs={{@model}} />
+  {{#if this.recentDocs.all}}
+    <div class="tile-list">
+      {{#each this.recentDocs.all as |r|}}
+        <Doc::Tile
+          data-test-recently-viewed-doc
+          @isDraft={{r.doc.isDraft}}
+          @avatar={{get r.doc.ownerPhotos 0}}
+          @docID={{r.doc.objectID}}
+          @docNumber={{r.doc.docNumber}}
+          @modifiedTime={{r.doc.modifiedTime}}
+          @owner={{get r.doc.owners 0}}
+          @productArea={{r.doc.product}}
+          @status={{lowercase r.doc.status}}
+          @title={{r.doc.title}}
+        />
+      {{/each}}
+    </div>
+  {{else if this.recentDocs.fetchAll.isRunning}}
+    <div class="h-[100px]">
+      <FlightIcon @name="loading" class="mt-1" />
+    </div>
+  {{else if (eq this.recentDocs.all null)}}
+    <div class="h-[100px]">
+      <p class="mb-7 text-body-300 text-color-foreground-faint">
+        Error fetching documents.
+      </p>
+      <Hds::Button
+        @text="Retry"
+        @color="secondary"
+        @size="small"
+        @icon="reload"
+        {{on "click" (perform this.recentDocs.fetchAll)}}
+      />
+    </div>
+  {{else}}
+    <div class="text-display-200">
+      You havenʼt viewed any documents yet.
+    </div>
   {{/if}}
 
-  <div
-    class="hds-border-primary mt-10 flex w-full flex-col border-0 border-b pb-10"
-  >
-    <div class="mb-8 flex items-center space-x-2">
-      <FlightIcon @name="eye" @size="24" />
-      <h2
-        class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-      >Recently viewed</h2>
-    </div>
+</div>
 
-    {{#if this.recentDocs.all}}
-      <div class="tile-list">
-        {{#each this.recentDocs.all as |r|}}
-          <Doc::Tile
-            @isDraft={{r.doc.isDraft}}
-            @avatar={{get r.doc.ownerPhotos 0}}
-            @docID={{r.doc.objectID}}
-            @docNumber={{r.doc.docNumber}}
-            @modifiedAgo={{r.doc.modifiedAgo}}
-            @owner={{get r.doc.owners 0}}
-            @productArea={{r.doc.product}}
-            @status={{lowercase r.doc.status}}
-            @title={{r.doc.title}}
-          />
-        {{/each}}
-      </div>
-    {{else if this.recentDocs.fetchAll.isRunning}}
-      <div class="h-[100px]">
-        <FlightIcon @name="loading" class="mt-1" />
-      </div>
-    {{else if (eq this.recentDocs.all null)}}
-      <div class="h-[100px]">
-        <p class="mb-7 text-body-300 text-color-foreground-faint">
-          Error fetching documents.
-        </p>
-        <Hds::Button
-          @text="Retry"
-          @color="secondary"
-          @size="small"
-          @icon="reload"
-          {{on "click" (perform this.recentDocs.fetchAll)}}
-        />
-      </div>
-    {{else}}
-      <div class="text-display-200">
-        You havenʼt viewed any documents yet.
-      </div>
-    {{/if}}
-
-  </div>
-
-  <div class="flex w-full flex-col py-10">
-    <Dashboard::LatestUpdates />
-  </div>
-
-</section>
+<div class="flex w-full flex-col py-10">
+  <Dashboard::LatestUpdates />
+</div>

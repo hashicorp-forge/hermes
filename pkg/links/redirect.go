@@ -99,7 +99,8 @@ func parseAndValidatePath(p string) (string, error) {
 		return "", fmt.Errorf("invalid url path")
 	}
 
-	return fmt.Sprintf("/%s/%s", resultPath[0], resultPath[1]), nil
+	return fmt.Sprintf("/%s/%s",
+		strings.ToLower(resultPath[0]), strings.ToLower(resultPath[1])), nil
 }
 
 // matchStaticPathRedirects matches the URL path provided

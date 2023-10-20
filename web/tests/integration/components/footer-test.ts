@@ -2,7 +2,7 @@ import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { config, module, test } from "qunit";
 import MockDate from "mockdate";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
@@ -16,11 +16,23 @@ module("Integration | Component | footer", function (hooks) {
   test("it renders as expected (default setup)", async function (assert) {
     MockDate.set("2000-01-01T06:00:00.000-07:00");
 
+    const configService = this.owner.lookup("service:config") as ConfigService;
+
+    configService.config.version = "1.2.3";
+    configService.config.short_revision = "abc123";
+
     await render(hbs`<Footer />`);
 
     assert
       .dom("[data-test-footer-copyright]")
       .containsText("2000", "The current year is shown");
+
+    assert
+      .dom("[data-test-footer-version]")
+      .containsText(
+        "Hermes v1.2.3 (abc123)",
+        "The version and revision are shown"
+      );
 
     assert
       .dom("[data-test-footer-github-link]")

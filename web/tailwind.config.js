@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./app/**/*.{html,js,hbs}"],
+  content: ["./app/**/*.{html,js,hbs,gts}"],
   theme: {
     fontSize: {
       "display-500": [
@@ -63,6 +63,8 @@ module.exports = {
         "color-surface-interactive": "var(--token-color-surface-interactive)",
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
+        "color-surface-interactive-active":
+          "var(--token-color-surface-interactive-active)",
         "color-surface-primary": "var(--token-color-surface-primary)",
         "color-surface-strong": "var(--token-color-surface-strong)",
         "color-surface-warning": "var(--token-color-surface-warning)",
@@ -75,9 +77,12 @@ module.exports = {
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
+        "color-border-input":
+          "var(--token-form-control-base-border-color-default)",
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",
+        "color-page-faint-90": "#fafafa90",
         "color-page-primary": "var(--token-color-page-primary)",
 
         // Foreground
@@ -165,6 +170,7 @@ module.exports = {
         // Neutral
         "color-palette-neutral-50": "var(--token-color-palette-neutral-50)",
         "color-palette-neutral-100": "var(--token-color-palette-neutral-100)",
+        "color-palette-neutral-175": "#eaebed", // custom
         "color-palette-neutral-200": "var(--token-color-palette-neutral-200)",
         "color-palette-neutral-300": "var(--token-color-palette-neutral-300)",
         "color-palette-neutral-400": "var(--token-color-palette-neutral-400)",
