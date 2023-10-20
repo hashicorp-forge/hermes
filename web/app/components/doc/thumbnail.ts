@@ -4,13 +4,19 @@ import getProductId from "hermes/utils/get-product-id";
 import { inject as service } from "@ember/service";
 import ProductAreasService from "hermes/services/product-areas";
 
+export enum DocThumbnailSize {
+  Small = "small",
+  Medium = "medium",
+  Large = "large",
+}
+
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
     status?: string;
     product?: string;
     badgeIsHidden?: boolean;
-    size?: "large";
+    size?: `${DocThumbnailSize}`;
   };
 }
 
@@ -23,6 +29,24 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     } else {
       return null;
     }
+  }
+
+  protected get productAvatarSize() {
+    if (this.sizeIsLarge) {
+      return "large";
+    } else if (this.sizeIsMedium) {
+      return "medium";
+    } else {
+      return "small";
+    }
+  }
+
+  protected get sizeIsSmall(): boolean {
+    return this.args.size === "small" || !this.args.size;
+  }
+
+  protected get sizeIsMedium(): boolean {
+    return this.args.size === "medium";
   }
 
   protected get sizeIsLarge(): boolean {

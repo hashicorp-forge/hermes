@@ -13,6 +13,7 @@ interface ProductAvatarComponentSignature {
     iconSize?: number;
     fallbackIcon?: string;
     size?: "small" | "medium" | "large" | "xl";
+    isGrayedOut?: boolean;
   };
   Blocks: {
     default: [];
@@ -21,10 +22,6 @@ interface ProductAvatarComponentSignature {
 
 export default class ProductAvatarComponent extends Component<ProductAvatarComponentSignature> {
   @service declare productAreas: ProductAreasService;
-
-  protected get productID(): string | undefined {
-    return getProductID(this.args.product);
-  }
 
   private get sizeIsSmall() {
     return this.args.size === "small" || !this.args.size;
@@ -46,18 +43,22 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     return this.args.size || "small";
   }
 
-  protected get style() {
-    if (!this.productID && this.color) {
-      return `background: ${this.color};`;
-    }
+  protected get productID(): string | undefined {
+    return getProductID(this.args.product);
   }
 
-  protected get color() {
+  protected get color(): string | undefined {
     return this.productAreas.getColor(this.args.product);
   }
 
-  protected get abbreviation() {
+  protected get abbreviation(): string | undefined {
     return this.productAreas.getAbbreviation(this.args.product);
+  }
+
+  protected get backgroundStyle() {
+    if (!this.productID && this.color && this.args.isGrayedOut !== true) {
+      return `background: ${this.color};`;
+    }
   }
 
   protected get iconIsShown() {
@@ -75,7 +76,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   <template>
     <div
       data-test-product-avatar
-      style={{this.style}}
+      style={{this.backgroundStyle}}
       class="product-badge relative flex shrink-0 shrink-0 items-center justify-center rounded-md
         {{this.size}}
         {{or this.productID (unless this.abbreviation 'no-product')}}
