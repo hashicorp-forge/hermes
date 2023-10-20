@@ -1,8 +1,12 @@
+import Ember from "ember";
+
 /**
  * Blinks an element twice by toggling its visibility.
  * Used for emphasis, such as to reiterate an
  * already-visible form error.
  */
+const DURATION = Ember.testing ? 0 : 100;
+
 export default function blinkElement(element?: Element | null) {
   if (!element) {
     return;
@@ -16,6 +20,6 @@ export default function blinkElement(element?: Element | null) {
       if (element) {
         element.setAttribute("style", `visibility: ${visibility}`);
       }
-    }, i * 100);
+    }, i * DURATION);
   }
 }
