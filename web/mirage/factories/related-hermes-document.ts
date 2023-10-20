@@ -13,7 +13,7 @@ export default Factory.extend({
   title() {
     return `Related Document ${this.id}`;
   },
-  type: "RFC",
+  documentType: "RFC",
   documentNumber() {
     return `LAB-00${this.id}`;
   },
