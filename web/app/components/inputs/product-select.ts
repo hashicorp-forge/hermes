@@ -10,6 +10,7 @@ import ProductAreasService, {
   ProductArea,
 } from "hermes/services/product-areas";
 import getProductId from "hermes/utils/get-product-id";
+import { MatchAnchorWidthOptions } from "../floating-u-i/content";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;
