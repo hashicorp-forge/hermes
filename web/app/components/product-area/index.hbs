@@ -1,98 +1,55 @@
-<div class="mx-auto w-full max-w-3xl">
+<div class="mx-auto w-full max-w-2xl">
   {{! Header and subscribe }}
-  <div class="border-bXborder-b-color-border-primary pb-X8 mb-6">
-    <div class="flex w-full justify-between">
-      <div class="flex w-full items-start space-x-4">
-
-        <Product::Avatar @product={{@model.hits.0.product}} @size="xl" />
-        <div class="w-full">
-          <div class="flex">
-
-            <h1 class="mt-0.5 mb-0">{{@model.hits.0.product}}</h1>
-            <Hds::BadgeCount
-              @type="inverted"
-              @text="{{@model.nbHits}} Docs"
-              class="mt-2.5 ml-2 self-start"
-            />
-          </div>
-
-          <div class="flex hidden items-center space-x-3 text-body-300">
-            <ExternalLink class="flex items-center space-x-2">
-              <FlightIcon @name="slack-color" />
-              <span>
-                Slack channel
-              </span>
-            </ExternalLink>
-            <ExternalLink class="flex items-center space-x-2">
-              <FlightIcon @name="globe" />
-              <span>
-                Jira Projects
-              </span>
-            </ExternalLink>
-          </div>
-        </div>
-      </div>
-      <div class="mt-0.5 mr-8 flex shrink-0 items-center space-x-3 self-start">
-        <div class="w-32">
-
-          <Hds::Button
-            @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
-            @icon={{if this.isSubscribed "check" "plus"}}
-            @color="secondary"
-            @isFullWidth={{true}}
-            class="pr-"
-            {{on "click" this.toggleSubscribed}}
-          />
-        </div>
-        <TooltipIcon
-          @text="Receive an email when a document is published in this product/area."
-        />
-        <div class="absolute right-3 top-1/2 -translate-y-1/2">
-        </div>
-      </div>
-
+  <div class="relative flex">
+    <div class="absolute -left-6 top-0 -translate-x-full">
+      <Product::Avatar @product={{@model.hits.0.product}} @size="xl" />
     </div>
-  </div>
-
-  {{! Tags }}
-  <div
-    class="relative mb-5 flex items-center border-color-border-primary pl-16"
-  >
-    {{! <FlightIcon @name="filter-fill" @size="24" /> }}
-    {{! <h4 class="hermes-h4 mr-3">Explore:</h4> }}
-
-    <ul class="flex space-x-1">
-      {{#each this.tags as |tag|}}
-        <li>
-          <LinkTo
-            @route="authenticated.all"
-            @query={{hash
-              product=(array @model.hits.0.product)
-              status=(if (eq tag.facet "status") (array tag.name) (array))
-              docType=(if (eq tag.facet "docType") (array tag.name) (array))
-              owners=(array)
-            }}
-            class="tag"
-          >
-            {{tag.name}}
-          </LinkTo>
-        </li>
-      {{/each}}
-    </ul>
+    <div class="flex w-full items-start gap-3">
+      <h1>{{@model.hits.0.product}}</h1>
+      <Hds::BadgeCount @text="{{@model.nbHits}} Docs" class="mt-2 shrink-0" />
+    </div>
+    <div class="relative w-[120px] shrink-0 justify-self-end">
+      <Hds::Button
+        @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
+        @icon={{if this.isSubscribed "check" "plus"}}
+        @color="secondary"
+        class="mt-1.5 pl-2 pr-3.5"
+        @size="small"
+        @isFullWidth={{true}}
+        {{on "click" this.toggleSubscribed}}
+      />
+      <TooltipIcon
+        @text="Get emailed when a document is published in this product/area."
+        class="absolute -right-2.5 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
+      />
+    </div>
+    {{!-- <div class="font-bold">
+      <div class="mb-1 flex items-center justify-center gap-1.5">
+        Notifications
+        <TooltipIcon
+          @text="Get emailed when a document is published in this product/area."
+          class="-mr-1 text-color-foreground-disabled"
+        />
+      </div>
+    </div>
+    <Hds::Form::Toggle::Base
+      tabindex="-1"
+      name="toggle-subscription"
+      aria-label={{if this.isSubscribed "Unsubscribe" "Subscribe"}}
+      checked={{this.isSubscribed}}
+      {{on "click" this.toggleSubscribed}}
+    /> --}}
   </div>
 
   {{! LATEST docs }}
-  <div class="relative flex">
-    <div class="px-16">
+  <div class="relative mt-8 flex">
+    <div>
 
-      <ol class="divide-ydivide-color-border-primary">
+      <ol>
         {{#each-in @model.hits as |_key doc|}}
-          <li class="group peer relative">
+          <li>
             <div
-              class="absolute top-0 -bottom-px -left-8 -right-8 rounded-md border group-hover:border-color-border-primary group-hover:bg-color-surface-faint"
-            ></div>
-            <div
-              class="relative border-t border-color-border-primary pt-5 pb-7 group-hover:border-transparent"
+              class="relative border-t border-color-border-primary pt-5 pb-7"
             >
               <div class="flex items-start">
 
