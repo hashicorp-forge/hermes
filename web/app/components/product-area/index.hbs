@@ -1,26 +1,26 @@
-<div class="mx-auto w-full max-w-2xl">
+<div class="mx-auto mb-24 w-full max-w-2xl">
   {{! Header and subscribe }}
-  <div class="relative flex">
-    <div class="absolute -left-6 top-0 -translate-x-full">
+  <div class="relative flex gap-2">
+    <div class="absolute -left-4 top-0 -translate-x-full">
       <Product::Avatar @product={{@model.hits.0.product}} @size="xl" />
     </div>
     <div class="flex w-full items-start gap-3">
       <h1>{{@model.hits.0.product}}</h1>
       <Hds::BadgeCount @text="{{@model.nbHits}} Docs" class="mt-2 shrink-0" />
     </div>
-    <div class="relative w-[120px] shrink-0 justify-self-end">
+    <div class="relative mt-1.5 w-[120px] shrink-0 self-start justify-self-end">
       <Hds::Button
         @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
         @icon={{if this.isSubscribed "check" "plus"}}
         @color="secondary"
-        class="mt-1.5 pl-2 pr-3.5"
+        class="pl-2 pr-3.5"
         @size="small"
         @isFullWidth={{true}}
         {{on "click" this.toggleSubscribed}}
       />
       <TooltipIcon
         @text="Get emailed when a document is published in this product/area."
-        class="absolute -right-2.5 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
+        class="absolute -right-3 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
       />
     </div>
     {{!-- <div class="font-bold">
@@ -103,7 +103,7 @@
   </div>
 
   {{#if (gte @model.nbHits 12)}}
-    <div class="mt-8 px-16">
+    <div class="mt-6">
       <Hds::Button
         @route="authenticated.all"
         @icon="arrow-right"
