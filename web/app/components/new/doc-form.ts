@@ -3,6 +3,7 @@ import { task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import ConfigService from "hermes/services/config";
 import Ember from "ember";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
@@ -28,7 +29,7 @@ const FORM_ERRORS: DocFormErrors = {
   contributors: null,
 };
 
-const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
+const AWAIT_DOC_DELAY = Ember.testing ? 0 : 1000;
 const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
@@ -38,6 +39,7 @@ interface NewDocFormComponentSignature {
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: FlashService;
@@ -195,7 +197,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
     try {
       const doc = await this.fetchSvc
-        .fetch("/api/v1/drafts", {
+        .fetch(`/api/${this.configSvc.config.api_version}/drafts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

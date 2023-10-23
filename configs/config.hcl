@@ -90,6 +90,14 @@ email {
   from_address = "hermes@yourorganization.com"
 }
 
+// FeatureFlags contain available feature flags.
+feature_flags {
+  // api_v2 enables v2 of the API.
+  flag "api_v2" {
+    enabled = false
+  }
+}
+
 // google_workspace configures Hermes to work with Google Workspace.
 google_workspace {
   // create_doc_shortcuts enables creating a shortcut in the shortcuts_folder

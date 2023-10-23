@@ -9,14 +9,10 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
-	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
 
@@ -41,20 +37,13 @@ const (
 	shareableDocumentSubcollectionRequestType
 )
 
-func DocumentHandler(
-	cfg *config.Config,
-	l hclog.Logger,
-	ar *algolia.Client,
-	aw *algolia.Client,
-	s *gw.Service,
-	db *gorm.DB) http.Handler {
-
+func DocumentHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse document ID and request type from the URL path.
 		docID, reqType, err := parseDocumentsURLPath(
 			r.URL.Path, "documents")
 		if err != nil {
-			l.Error("error parsing documents URL path",
+			srv.Logger.Error("error parsing documents URL path",
 				"error", err,
 				"path", r.URL.Path,
 				"method", r.Method,
@@ -63,40 +52,49 @@ func DocumentHandler(
 			return
 		}
 
-		// Get document object from Algolia.
-		var algoObj map[string]any
-		err = ar.Docs.GetObject(docID, &algoObj)
-		if err != nil {
-			// Handle 404 from Algolia and only log a warning.
-			if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
-				l.Warn("document object not found in Algolia",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Document not found", http.StatusNotFound)
-				return
-			} else {
-				l.Error("error requesting document from Algolia",
-					"error", err,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing document",
-					http.StatusInternalServerError)
-				return
-			}
+		// Get document from database.
+		model := models.Document{
+			GoogleFileID: docID,
 		}
-
-		// Convert Algolia object to a document.
-		doc, err := document.NewFromAlgoliaObject(
-			algoObj, cfg.DocumentTypes.DocumentType)
-		if err != nil {
-			l.Error("error converting Algolia object to document type",
+		if err := model.Get(srv.DB); err != nil {
+			srv.Logger.Error("error getting document draft from database",
 				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
 				"doc_id", docID,
 			)
-			http.Error(w, "Error accessing document",
+			http.Error(w, "Error requesting document draft",
+				http.StatusInternalServerError)
+			return
+		}
+
+		// Get reviews for the document.
+		var reviews models.DocumentReviews
+		if err := reviews.Find(srv.DB, models.DocumentReview{
+			Document: models.Document{
+				GoogleFileID: docID,
+			},
+		}); err != nil {
+			srv.Logger.Error("error getting reviews for document",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			return
+		}
+
+		// Convert database model to a document.
+		doc, err := document.NewFromDatabaseModel(
+			model, reviews)
+		if err != nil {
+			srv.Logger.Error("error converting database model to document type",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			http.Error(w, "Error accessing draft document",
 				http.StatusInternalServerError)
 			return
 		}
@@ -106,10 +104,10 @@ func DocumentHandler(
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(
-				w, r, docID, *doc, cfg, l, ar, db)
+				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB)
 			return
 		case shareableDocumentSubcollectionRequestType:
-			l.Warn("invalid shareable request for documents collection",
+			srv.Logger.Warn("invalid shareable request for documents collection",
 				"error", err,
 				"path", r.URL.Path,
 				"method", r.Method,
@@ -123,57 +121,57 @@ func DocumentHandler(
 			now := time.Now()
 
 			// Get file from Google Drive so we can return the latest modified time.
-			file, err := s.GetFile(docID)
+			file, err := srv.GWService.GetFile(docID)
 			if err != nil {
-				l.Error("error getting document file from Google",
+				srv.Logger.Error("error getting document file from Google",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, "Error requesting document", http.StatusInternalServerError)
+				http.Error(w,
+					"Error requesting document", http.StatusInternalServerError)
 				return
 			}
 
 			// Parse and set modified time.
 			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
 			if err != nil {
-				l.Error("error parsing modified time",
+				srv.Logger.Error("error parsing modified time",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
 					"doc_id", docID,
 				)
-				http.Error(w, "Error requesting document", http.StatusInternalServerError)
+				http.Error(w,
+					"Error requesting document", http.StatusInternalServerError)
 				return
 			}
 			doc.ModifiedTime = modifiedTime.Unix()
 
-			// Get document from database.
-			model := models.Document{
-				GoogleFileID: docID,
+			// Get owner photo by searching Google Workspace directory.
+			if len(doc.Owners) > 0 {
+				people, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
+				if err != nil {
+					srv.Logger.Error("error searching directory for person",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"person", doc.Owners[0],
+					)
+				}
+				if len(people) > 0 {
+					if len(people[0].Photos) > 0 {
+						doc.OwnerPhotos = []string{people[0].Photos[0].Url}
+					}
+				}
 			}
-			if err := model.Get(db); err != nil {
-				l.Error("error getting document from database",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error requesting document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Set locked value for response to value from the database (this value
-			// isn't stored in Algolia).
-			doc.Locked = model.Locked
 
 			// Convert document to Algolia object because this is how it is expected
 			// by the frontend.
 			docObj, err := doc.ToAlgoliaObject(false)
 			if err != nil {
-				l.Error("error converting document to Algolia object",
+				srv.Logger.Error("error converting document to Algolia object",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -191,7 +189,7 @@ func DocumentHandler(
 			enc := json.NewEncoder(w)
 			err = enc.Encode(docObj)
 			if err != nil {
-				l.Error("error encoding document",
+				srv.Logger.Error("error encoding document",
 					"error", err,
 					"doc_id", docID,
 				)
@@ -208,12 +206,14 @@ func DocumentHandler(
 				// Get authenticated user's email address.
 				email := r.Context().Value("userEmail").(string)
 
-				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
+				if err := updateRecentlyViewedDocs(
+					email, docID, srv.DB, now,
+				); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
 					// TODO: change this log back to an error when this handles incomplete
 					// data in the database.
-					l.Warn("error updating recently viewed docs",
+					srv.Logger.Warn("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
@@ -223,61 +223,71 @@ func DocumentHandler(
 				}
 			}
 
-			l.Info("retrieved document",
+			srv.Logger.Info("retrieved document",
 				"doc_id", docID,
+				"method", r.Method,
+				"path", r.URL.Path,
 			)
 
-			// Compare Algolia and database documents to find data inconsistencies.
-			// Get document object from Algolia.
-			var algoDoc map[string]any
-			err = ar.Docs.GetObject(docID, &algoDoc)
-			if err != nil {
-				l.Error("error getting Algolia object for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get document from database.
-			dbDoc := models.Document{
-				GoogleFileID: docID,
-			}
-			if err := dbDoc.Get(db); err != nil {
-				l.Error("error getting document from database for data comparison",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get all reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
+			// Request post-processing.
+			go func() {
+				// Compare Algolia and database documents to find data inconsistencies.
+				// Get document object from Algolia.
+				var algoDoc map[string]any
+				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
+				if err != nil {
+					// Only warn because we might be in the process of saving the Algolia
+					// object for a new document.
+					srv.Logger.Warn("error getting Algolia object for data comparison",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+				// Get document from database.
+				dbDoc := models.Document{
 					GoogleFileID: docID,
-				},
-			}); err != nil {
-				l.Error("error getting all reviews for document for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			if err := compareAlgoliaAndDatabaseDocument(
-				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
-			); err != nil {
-				l.Warn("inconsistencies detected between Algolia and database docs",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-			}
+				}
+				if err := dbDoc.Get(srv.DB); err != nil {
+					srv.Logger.Error(
+						"error getting document from database for data comparison",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					return
+				}
+				// Get all reviews for the document.
+				var reviews models.DocumentReviews
+				if err := reviews.Find(srv.DB, models.DocumentReview{
+					Document: models.Document{
+						GoogleFileID: docID,
+					},
+				}); err != nil {
+					srv.Logger.Error(
+						"error getting all reviews for document for data comparison",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+				if err := compareAlgoliaAndDatabaseDocument(
+					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
+				); err != nil {
+					srv.Logger.Warn(
+						"inconsistencies detected between Algolia and database docs",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+				}
+			}()
 
 		case "PATCH":
 			// Authorize request (only the owner can PATCH the doc).
@@ -291,7 +301,7 @@ func DocumentHandler(
 			// contains fields that are allowed to be patched.
 			var req DocumentPatchRequest
 			if err := decodeRequest(r, &req); err != nil {
-				l.Error("error decoding document patch request", "error", err)
+				srv.Logger.Error("error decoding document patch request", "error", err)
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
 				return
@@ -302,7 +312,7 @@ func DocumentHandler(
 				for _, cf := range *req.CustomFields {
 					cef, ok := doc.CustomEditableFields[cf.Name]
 					if !ok {
-						l.Error("custom field not found",
+						srv.Logger.Error("custom field not found",
 							"error", err,
 							"method", r.Method,
 							"path", r.URL.Path,
@@ -313,7 +323,7 @@ func DocumentHandler(
 						return
 					}
 					if cf.DisplayName != cef.DisplayName {
-						l.Error("invalid custom field display name",
+						srv.Logger.Error("invalid custom field display name",
 							"error", err,
 							"method", r.Method,
 							"path", r.URL.Path,
@@ -325,7 +335,7 @@ func DocumentHandler(
 						return
 					}
 					if cf.Type != cef.Type {
-						l.Error("invalid custom field type",
+						srv.Logger.Error("invalid custom field type",
 							"error", err,
 							"method", r.Method,
 							"path", r.URL.Path,
@@ -340,9 +350,9 @@ func DocumentHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
 			if err != nil {
-				l.Error("error checking document locked status",
+				srv.Logger.Error("error checking document locked status",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -373,7 +383,7 @@ func DocumentHandler(
 					case "STRING":
 						if _, ok := cf.Value.(string); ok {
 							if err := doc.UpsertCustomField(cf); err != nil {
-								l.Error("error upserting custom string field",
+								srv.Logger.Error("error upserting custom string field",
 									"error", err,
 									"method", r.Method,
 									"path", r.URL.Path,
@@ -388,7 +398,7 @@ func DocumentHandler(
 						}
 					case "PEOPLE":
 						if reflect.TypeOf(cf.Value).Kind() != reflect.Slice {
-							l.Error("invalid value type for people custom field",
+							srv.Logger.Error("invalid value type for people custom field",
 								"error", err,
 								"method", r.Method,
 								"path", r.URL.Path,
@@ -404,7 +414,7 @@ func DocumentHandler(
 						}
 						for _, v := range cf.Value.([]any) {
 							if _, ok := v.(string); !ok {
-								l.Error("invalid value type for people custom field",
+								srv.Logger.Error("invalid value type for people custom field",
 									"error", err,
 									"method", r.Method,
 									"path", r.URL.Path,
@@ -420,7 +430,7 @@ func DocumentHandler(
 							}
 						}
 						if err := doc.UpsertCustomField(cf); err != nil {
-							l.Error("error upserting custom people field",
+							srv.Logger.Error("error upserting custom people field",
 								"error", err,
 								"method", r.Method,
 								"path", r.URL.Path,
@@ -433,7 +443,7 @@ func DocumentHandler(
 							return
 						}
 					default:
-						l.Error("invalid custom field type",
+						srv.Logger.Error("invalid custom field type",
 							"error", err,
 							"method", r.Method,
 							"path", r.URL.Path,
@@ -467,7 +477,8 @@ func DocumentHandler(
 			// Compare approvers in req and stored object in Algolia
 			// before we save the patched objected
 			var approversToEmail []string
-			if len(doc.Approvers) == 0 && req.Approvers != nil && len(*req.Approvers) != 0 {
+			if len(doc.Approvers) == 0 && req.Approvers != nil &&
+				len(*req.Approvers) != 0 {
 				// If there are no approvers of the document
 				// email the approvers in the request
 				approversToEmail = *req.Approvers
@@ -477,46 +488,8 @@ func DocumentHandler(
 				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
 			}
 
-			// Convert document to Algolia object.
-			docObj, err := doc.ToAlgoliaObject(true)
-			if err != nil {
-				l.Error("error converting document to Algolia object",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error patching document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Save new modified doc object in Algolia.
-			res, err := aw.Docs.SaveObject(docObj)
-			if err != nil {
-				l.Error("error saving patched document in Algolia",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error patching document",
-					http.StatusInternalServerError)
-				return
-			}
-			err = res.Wait()
-			if err != nil {
-				l.Error("error saving patched document in Algolia",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error patching document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Send emails to new approvers.
-			if cfg.Email != nil && cfg.Email.Enabled {
+			if srv.Config.Email != nil && srv.Config.Email.Enabled {
 				if len(approversToEmail) > 0 {
 					// TODO: use a template for email content.
 					rawBody := `
@@ -533,9 +506,9 @@ Hermes
 </body>
 </html>`
 
-					docURL, err := getDocumentURL(cfg.BaseURL, docID)
+					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
 					if err != nil {
-						l.Error("error getting document URL",
+						srv.Logger.Error("error getting document URL",
 							"error", err,
 							"doc_id", docID,
 							"method", r.Method,
@@ -550,14 +523,14 @@ Hermes
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully on a failure here.
 					for _, approverEmail := range approversToEmail {
-						_, err = s.SendEmail(
+						_, err = srv.GWService.SendEmail(
 							[]string{approverEmail},
-							cfg.Email.FromAddress,
+							srv.Config.Email.FromAddress,
 							fmt.Sprintf("Document review requested for %s", doc.DocNumber),
 							body,
 						)
 						if err != nil {
-							l.Error("error sending email",
+							srv.Logger.Error("error sending email",
 								"error", err,
 								"doc_id", docID,
 								"method", r.Method,
@@ -568,13 +541,19 @@ Hermes
 							return
 						}
 					}
-					l.Info("approver emails sent")
+					srv.Logger.Info("approver emails sent",
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
 				}
 			}
 
 			// Replace the doc header.
-			if err := doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
-				l.Error("error replacing document header",
+			if err := doc.ReplaceHeader(
+				srv.Config.BaseURL, false, srv.GWService,
+			); err != nil {
+				srv.Logger.Error("error replacing document header",
 					"error", err, "doc_id", docID)
 				http.Error(w, "Error patching document",
 					http.StatusInternalServerError)
@@ -582,22 +561,23 @@ Hermes
 			}
 
 			// Rename file with new title.
-			s.RenameFile(docID,
+			srv.GWService.RenameFile(docID,
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			// Get document record from database so we can modify it for updating.
 			model := models.Document{
 				GoogleFileID: docID,
 			}
-			if err := model.Get(db); err != nil {
-				l.Error("error getting document from database",
+			if err := model.Get(srv.DB); err != nil {
+				srv.Logger.Error("error getting document from database",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
 					"doc_id", docID,
 				)
-				// Don't return an HTTP error because the database isn't the source of
-				// truth yet.
+				http.Error(w, "Error patching document",
+					http.StatusInternalServerError)
+				return
 			} else {
 				// Approvers.
 				if req.Approvers != nil {
@@ -636,61 +616,65 @@ Hermes
 									v,
 								)
 							} else {
-								l.Warn("invalid value type for string custom field",
+								srv.Logger.Error("invalid value type for string custom field",
 									"error", err,
 									"method", r.Method,
 									"path", r.URL.Path,
 									"custom_field", cf.Name,
 									"doc_id", docID)
-								// Don't return an HTTP error because the database isn't the
-								// source of truth yet.
+								http.Error(w, "Error patching document",
+									http.StatusInternalServerError)
+								return
 							}
 						case "PEOPLE":
 							if reflect.TypeOf(cf.Value).Kind() != reflect.Slice {
-								l.Warn("invalid value type for people custom field",
+								srv.Logger.Error("invalid value type for people custom field",
 									"error", err,
 									"method", r.Method,
 									"path", r.URL.Path,
 									"custom_field", cf.Name,
 									"doc_id", docID)
-								// Don't return an HTTP error because the database isn't the
-								// source of truth yet.
-								break
+								http.Error(w, "Error patching document",
+									http.StatusInternalServerError)
+								return
 							}
 							cfVal := []string{}
 							for _, v := range cf.Value.([]any) {
 								if v, ok := v.(string); ok {
 									cfVal = append(cfVal, v)
 								} else {
-									l.Warn("invalid value type for people custom field",
+									srv.Logger.Error("invalid value type for people custom field",
 										"error", err,
 										"method", r.Method,
 										"path", r.URL.Path,
 										"custom_field", cf.Name,
 										"doc_id", docID)
-									// Don't return an HTTP error because the database isn't the
-									// source of truth yet.
+									http.Error(w, "Error patching document",
+										http.StatusInternalServerError)
+									return
 								}
 							}
 
-							model.CustomFields, err = models.UpsertStringSliceDocumentCustomField(
-								model.CustomFields,
-								doc.DocType,
-								cf.DisplayName,
-								cfVal,
-							)
+							model.CustomFields, err = models.
+								UpsertStringSliceDocumentCustomField(
+									model.CustomFields,
+									doc.DocType,
+									cf.DisplayName,
+									cfVal,
+								)
 							if err != nil {
-								l.Warn("invalid value type for people custom field",
+								srv.Logger.Error("invalid value type for people custom field",
 									"error", err,
 									"method", r.Method,
 									"path", r.URL.Path,
 									"custom_field", cf.Name,
 									"doc_id", docID)
-								// Don't return an HTTP error because the database isn't the
-								// source of truth yet.
+								http.Error(w, "Error patching document",
+									http.StatusInternalServerError)
+								return
 							}
 						default:
-							l.Error("invalid custom field type",
+							srv.Logger.Error("invalid custom field type",
 								"error", err,
 								"method", r.Method,
 								"path", r.URL.Path,
@@ -717,6 +701,7 @@ Hermes
 
 				// Summary.
 				if req.Summary != nil {
+					// model.Summary = *req.Summary
 					model.Summary = req.Summary
 				}
 
@@ -726,76 +711,115 @@ Hermes
 				}
 
 				// Update document in the database.
-				if err := model.Upsert(db); err != nil {
-					l.Error("error updating document",
+				if err := model.Upsert(srv.DB); err != nil {
+					srv.Logger.Error("error updating document",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
 						"doc_id", docID,
 					)
-					// Don't return an HTTP error because the database isn't the source of
-					// truth yet.
+					http.Error(w, "Error patching document",
+						http.StatusInternalServerError)
+					return
 				}
 			}
 
 			w.WriteHeader(http.StatusOK)
-			l.Info("patched document",
+			srv.Logger.Info("patched document",
+				"doc_id", docID,
 				"method", r.Method,
 				"path", r.URL.Path,
-				"doc_id", docID,
 			)
 
-			// Compare Algolia and database documents to find data inconsistencies.
-			// Get document object from Algolia.
-			var algoDoc map[string]any
-			err = ar.Docs.GetObject(docID, &algoDoc)
-			if err != nil {
-				l.Error("error getting Algolia object for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get document from database.
-			dbDoc := models.Document{
-				GoogleFileID: docID,
-			}
-			if err := dbDoc.Get(db); err != nil {
-				l.Error("error getting document from database for data comparison",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get all reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
+			// Request post-processing.
+			go func() {
+				// Convert document to Algolia object.
+				docObj, err := doc.ToAlgoliaObject(true)
+				if err != nil {
+					srv.Logger.Error("error converting document to Algolia object",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+
+				// Save new modified doc object in Algolia.
+				res, err := srv.AlgoWrite.Docs.SaveObject(docObj)
+				if err != nil {
+					srv.Logger.Error("error saving patched document in Algolia",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					return
+				}
+				err = res.Wait()
+				if err != nil {
+					srv.Logger.Error("error saving patched document in Algolia",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					return
+				}
+
+				// Compare Algolia and database documents to find data inconsistencies.
+				// Get document object from Algolia.
+				var algoDoc map[string]any
+				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
+				if err != nil {
+					srv.Logger.Error("error getting Algolia object for data comparison",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+				// Get document from database.
+				dbDoc := models.Document{
 					GoogleFileID: docID,
-				},
-			}); err != nil {
-				l.Error("error getting all reviews for document for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			if err := compareAlgoliaAndDatabaseDocument(
-				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
-			); err != nil {
-				l.Warn("inconsistencies detected between Algolia and database docs",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-			}
+				}
+				if err := dbDoc.Get(srv.DB); err != nil {
+					srv.Logger.Error(
+						"error getting document from database for data comparison",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					return
+				}
+				// Get all reviews for the document.
+				var reviews models.DocumentReviews
+				if err := reviews.Find(srv.DB, models.DocumentReview{
+					Document: models.Document{
+						GoogleFileID: docID,
+					},
+				}); err != nil {
+					srv.Logger.Error(
+						"error getting all reviews for document for data comparison",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+				if err := compareAlgoliaAndDatabaseDocument(
+					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
+				); err != nil {
+					srv.Logger.Warn(
+						"inconsistencies detected between Algolia and database docs",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+				}
+			}()
 
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -890,16 +914,16 @@ func parseDocumentsURLPath(path, collection string) (
 ) {
 	noSubcollectionRE := regexp.MustCompile(
 		fmt.Sprintf(
-			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)$`,
+			`^\/api\/v2\/%s\/([0-9A-Za-z_\-]+)$`,
 			collection))
 	relatedResourcesSubcollectionRE := regexp.MustCompile(
 		fmt.Sprintf(
-			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)\/related-resources$`,
+			`^\/api\/v2\/%s\/([0-9A-Za-z_\-]+)\/related-resources$`,
 			collection))
 	// shareable isn't really a subcollection, but we'll go with it.
 	shareableRE := regexp.MustCompile(
 		fmt.Sprintf(
-			`^\/api\/v1\/%s\/([0-9A-Za-z_\-]+)\/shareable$`,
+			`^\/api\/v2\/%s\/([0-9A-Za-z_\-]+)\/shareable$`,
 			collection))
 
 	switch {

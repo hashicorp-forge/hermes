@@ -100,7 +100,7 @@ func TestDocumentModel(t *testing.T) {
 				Name: "Product1",
 			},
 			Status:  InReviewDocumentStatus,
-			Summary: "test summary",
+			Summary: &[]string{"test summary"}[0],
 			Title:   "test title",
 		}
 		err = d.Create(db)
@@ -164,7 +164,7 @@ func TestDocumentModel(t *testing.T) {
 			assert.Equal(InReviewDocumentStatus, d.Status)
 
 			// Summary.
-			assert.Equal("test summary", d.Summary)
+			assert.Equal("test summary", *d.Summary)
 
 			// Title.
 			assert.Equal("test title", d.Title)
@@ -592,13 +592,13 @@ func TestDocumentModel(t *testing.T) {
 					Name:         "Product1",
 					Abbreviation: "P1",
 				},
-				Summary: "summary1",
+				Summary: &[]string{"summary1"}[0],
 			}
 			err := d.Upsert(db)
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("fileID1", d.GoogleFileID)
-			assert.Equal("summary1", d.Summary)
+			assert.Equal("summary1", *d.Summary)
 		})
 
 		t.Run("Get the document", func(t *testing.T) {
@@ -610,20 +610,58 @@ func TestDocumentModel(t *testing.T) {
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("fileID1", d.GoogleFileID)
-			assert.Equal("summary1", d.Summary)
+			assert.Equal("summary1", *d.Summary)
 		})
 
 		t.Run("Update the Summary field by Upsert", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d := Document{
 				GoogleFileID: "fileID1",
-				Summary:      "summary2",
+				Summary:      &[]string{"summary2"}[0],
 			}
 			err := d.Upsert(db)
 			require.NoError(err)
 			assert.EqualValues(1, d.ID)
 			assert.Equal("fileID1", d.GoogleFileID)
-			assert.Equal("summary2", d.Summary)
+			assert.Equal("summary2", *d.Summary)
+		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("summary2", *d.Summary)
+		})
+
+		t.Run("Update the Summary field to an empty string by Upsert",
+			func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+				d := Document{
+					GoogleFileID: "fileID1",
+					Summary:      &[]string{""}[0],
+				}
+				err := d.Upsert(db)
+				require.NoError(err)
+				assert.EqualValues(1, d.ID)
+				assert.Equal("fileID1", d.GoogleFileID)
+				assert.Equal("", *d.Summary)
+			})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("", *d.Summary)
 		})
 	})
 

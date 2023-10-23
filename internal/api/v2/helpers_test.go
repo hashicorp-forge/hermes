@@ -20,19 +20,19 @@ func TestParseResourceIDFromURL(t *testing.T) {
 		shouldErr bool
 	}{
 		"good": {
-			url:     "/api/v1/drafts/myID",
+			url:     "/api/v2/drafts/myID",
 			apiPath: "drafts",
 
 			want: "myID",
 		},
 		"extra path after resource ID": {
-			url:     "/api/v1/drafts/myID/something",
+			url:     "/api/v2/drafts/myID/something",
 			apiPath: "drafts",
 
 			shouldErr: true,
 		},
 		"no resource ID": {
-			url:     "/api/v1/drafts",
+			url:     "/api/v2/drafts",
 			apiPath: "drafts",
 
 			shouldErr: true,

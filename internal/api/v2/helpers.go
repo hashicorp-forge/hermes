@@ -68,10 +68,10 @@ func decodeRequest(r *http.Request, reqStruct interface{}) error {
 }
 
 // parseResourceIDFromURL parses a URL path with the format
-// "/api/v1/{apiPath}/{resourceID}" and returns the resource ID.
+// "/api/v2/{apiPath}/{resourceID}" and returns the resource ID.
 func parseResourceIDFromURL(url, apiPath string) (string, error) {
 	// Remove API path from URL.
-	url = strings.TrimPrefix(url, fmt.Sprintf("/api/v1/%s", apiPath))
+	url = strings.TrimPrefix(url, fmt.Sprintf("/api/v2/%s", apiPath))
 
 	// Remove empty entries and validate path.
 	urlPath := strings.Split(url, "/")
@@ -270,7 +270,9 @@ func compareAlgoliaAndDatabaseDocument(
 			dbChangesRequestedBy = append(dbChangesRequestedBy, r.User.EmailAddress)
 		}
 	}
-	if !assert.ElementsMatch(fakeT{}, algoChangesRequestedBy, dbChangesRequestedBy) {
+	if !assert.ElementsMatch(
+		fakeT{}, algoChangesRequestedBy, dbChangesRequestedBy,
+	) {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"changesRequestedBy not equal, algolia=%v, db=%v",
@@ -352,7 +354,9 @@ func compareAlgoliaAndDatabaseDocument(
 							if c.DocumentTypeCustomField.Name == cf.Name {
 								// Unmarshal person custom field value to string slice.
 								var dbCFVal []string
-								if err := json.Unmarshal([]byte(c.Value), &dbCFVal); err != nil {
+								if err := json.Unmarshal(
+									[]byte(c.Value), &dbCFVal,
+								); err != nil {
 									result = multierror.Append(result,
 										fmt.Errorf(
 											"error unmarshaling custom field %s to string slice",
