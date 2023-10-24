@@ -489,17 +489,17 @@ func DocumentHandler(srv server.Server) http.Handler {
 				doc.Title = *req.Title
 			}
 
-			// Compare approvers in req and stored object in Algolia
-			// before we save the patched objected
+			// Compare approvers in request and stored object in Algolia before we
+			// save the patched object.
 			var approversToEmail []string
 			if len(doc.Approvers) == 0 && req.Approvers != nil &&
 				len(*req.Approvers) != 0 {
-				// If there are no approvers of the document
-				// email the approvers in the request
+				// If there are no approvers of the document email the approvers in the
+				// request.
 				approversToEmail = *req.Approvers
 			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
-				// Only compare when there are stored approvers
-				// and approvers in the request
+				// Only compare when there are stored approvers and approvers in the
+				// request.
 				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
 			}
 
