@@ -349,6 +349,22 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
+			// Validate document Status.
+			if req.Status != nil {
+				switch *req.Status {
+				case "Approved":
+				case "In-Review":
+				case "Obsolete":
+				default:
+					srv.Logger.Warn("invalid status",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Bad request: invalid status", http.StatusBadRequest)
+					return
+				}
+			}
+
 			// Check if document is locked.
 			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
 			if err != nil {
@@ -461,7 +477,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 			// Status.
-			// TODO: validate status.
 			if req.Status != nil {
 				doc.Status = *req.Status
 			}
