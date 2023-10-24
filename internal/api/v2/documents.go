@@ -714,9 +714,20 @@ Hermes
 				// Document modified time.
 				model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
 
+				// Status.
+				if req.Status != nil {
+					switch *req.Status {
+					case "Approved":
+						model.Status = models.ApprovedDocumentStatus
+					case "In-Review":
+						model.Status = models.InReviewDocumentStatus
+					case "Obsolete":
+						model.Status = models.ObsoleteDocumentStatus
+					}
+				}
+
 				// Summary.
 				if req.Summary != nil {
-					// model.Summary = *req.Summary
 					model.Summary = req.Summary
 				}
 
