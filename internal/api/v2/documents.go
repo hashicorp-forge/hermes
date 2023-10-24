@@ -349,6 +349,22 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
+			// Validate document Status.
+			if req.Status != nil {
+				switch *req.Status {
+				case "Approved":
+				case "In-Review":
+				case "Obsolete":
+				default:
+					srv.Logger.Warn("invalid status",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Bad request: invalid status", http.StatusBadRequest)
+					return
+				}
+			}
+
 			// Check if document is locked.
 			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
 			if err != nil {
@@ -461,7 +477,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 			// Status.
-			// TODO: validate status.
 			if req.Status != nil {
 				doc.Status = *req.Status
 			}
@@ -474,17 +489,17 @@ func DocumentHandler(srv server.Server) http.Handler {
 				doc.Title = *req.Title
 			}
 
-			// Compare approvers in req and stored object in Algolia
-			// before we save the patched objected
+			// Compare approvers in request and stored object in Algolia before we
+			// save the patched object.
 			var approversToEmail []string
 			if len(doc.Approvers) == 0 && req.Approvers != nil &&
 				len(*req.Approvers) != 0 {
-				// If there are no approvers of the document
-				// email the approvers in the request
+				// If there are no approvers of the document email the approvers in the
+				// request.
 				approversToEmail = *req.Approvers
 			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
-				// Only compare when there are stored approvers
-				// and approvers in the request
+				// Only compare when there are stored approvers and approvers in the
+				// request.
 				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
 			}
 
@@ -699,9 +714,20 @@ Hermes
 				// Document modified time.
 				model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
 
+				// Status.
+				if req.Status != nil {
+					switch *req.Status {
+					case "Approved":
+						model.Status = models.ApprovedDocumentStatus
+					case "In-Review":
+						model.Status = models.InReviewDocumentStatus
+					case "Obsolete":
+						model.Status = models.ObsoleteDocumentStatus
+					}
+				}
+
 				// Summary.
 				if req.Summary != nil {
-					// model.Summary = *req.Summary
 					model.Summary = req.Summary
 				}
 
