@@ -1,0 +1,18 @@
+.project-tile {
+  .title,
+  .description {
+    @apply overflow-hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+
+  .title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .description {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
