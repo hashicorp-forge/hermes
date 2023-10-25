@@ -62,8 +62,6 @@
     "@types/ember__utils": "latest",
     "@types/qunit": "latest",
     "@types/rsvp": "latest",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
     "ember-animated": "^1.0.4",
@@ -107,7 +105,7 @@
     "ember-template-lint": "^5.8.0",
     "ember-test-selectors": "^6.0.0",
     "ember-window-mock": "^0.8.1",
-    "eslint": "^8.51.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-ember": "^11.10.0",
     "eslint-plugin-node": "^11.1.0",
@@ -121,7 +119,7 @@
     "prettier-plugin-tailwindcss": "^0.4.1",
     "qunit": "^2.17.2",
     "qunit-dom": "^1.6.0",
-    "typescript": "^5.2.2"
+    "typescript": "latest"
   },
   "engines": {
     "node": ">=16",
