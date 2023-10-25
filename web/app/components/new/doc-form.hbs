@@ -31,18 +31,28 @@
   </Hds::Form::Textarea::Field>
 
   {{! Summary }}
-  <Hds::Form::Textarea::Field
-    data-test-summary-input
-    @value={{this.summary}}
-    rows="2"
-    name="summary"
-    class="px-2.5 py-2 placeholder-color-palette-neutral-400"
-    placeholder="One or two sentences outlining your doc."
-    {{on "keydown" this.onKeydown}}
-    as |F|
-  >
-    <F.Label>Summary</F.Label>
-  </Hds::Form::Textarea::Field>
+  <div>
+    <div class="flex gap-2.5">
+      <Hds::Form::Label>Summary</Hds::Form::Label>
+      {{#if this.summaryIsLong}}
+        <span
+          data-test-summary-warning
+          class="mt-px text-body-100 text-color-foreground-warning"
+        >
+          Limit this to 1 or 2 sentences if possible.
+        </span>
+      {{/if}}
+    </div>
+    <Hds::Form::Textarea::Field
+      data-test-summary-input
+      @value={{this.summary}}
+      rows="3"
+      name="summary"
+      class="mt-2 px-2.5 py-2 placeholder-color-palette-neutral-400"
+      placeholder="One or two sentences outlining your doc."
+      {{on "keydown" this.onKeydown}}
+    />
+  </div>
 
   {{! Product/area }}
   <div>

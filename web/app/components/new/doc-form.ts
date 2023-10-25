@@ -46,6 +46,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected _form: HTMLFormElement | null = null;
 
+  @tracked protected summaryIsLong = false;
+
   /**
    * Whether the document is being created, or in the process of
    * transitioning to the document screen after successful creation.
@@ -132,6 +134,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
     this.title = formObject["title"] as string;
     this.summary = formObject["summary"] as string;
+
+    if (this.summary.length > 200) {
+      this.summaryIsLong = true;
+    } else {
+      this.summaryIsLong = false;
+    }
 
     if ("productArea" in formObject) {
       this.productArea = formObject["productArea"] as string;

@@ -240,4 +240,19 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     assert.dom(SECONDARY_CREATE_BUTTON).doesNotExist();
     assert.dom(PRIMARY_CREATE_BUTTON).exists();
   });
+
+  test("it shows a message if the summary is more than 200 characters", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
+    this.server.createList("product", 1);
+
+    await visit("/new/doc?docType=RFC");
+
+    assert.dom("[data-test-summary-length-warning]").doesNotExist();
+
+    await fillIn(SUMMARY_INPUT, "A".repeat(201));
+
+    // Trigger a keydown event to start validation
+    await triggerKeyEvent(TITLE_INPUT, "keydown", "A");
+
+    assert.dom("[data-test-summary-warning]").exists();
+  });
 });
