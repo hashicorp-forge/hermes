@@ -17,4 +17,8 @@ export default Factory.extend({
   documentNumber() {
     return `LAB-00${this.id}`;
   },
+  status: "In review",
+  product: "Labs",
+  owners: ["testuser@example.com"],
+  ownerPhotos: ["https://placehold.co/100x100"],
 });

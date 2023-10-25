@@ -7,6 +7,7 @@ import AlgoliaService, {
   HITS_PER_PAGE,
   MAX_VALUES_PER_FACET,
 } from "hermes/services/algolia";
+import ConfigService from "hermes/services/config";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import { FacetRecords } from "hermes/types/facets";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
@@ -24,6 +25,7 @@ interface DraftResponseJSON {
 }
 
 export default class AuthenticatedDraftsRoute extends Route {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -55,7 +57,7 @@ export default class AuthenticatedDraftsRoute extends Route {
    */
   private createDraftURLSearchParams(
     params: AlgoliaSearchParams,
-    ownerFacetOnly: boolean
+    ownerFacetOnly: boolean,
   ): URLSearchParams {
     /**
      * In the case of facets, we want to filter by just the owner facet.
@@ -76,7 +78,7 @@ export default class AuthenticatedDraftsRoute extends Route {
         ownerEmail: this.authenticatedUser.info.email,
       })
         .map(([key, val]) => `${key}=${val}`)
-        .join("&")
+        .join("&"),
     );
   }
 
@@ -86,20 +88,20 @@ export default class AuthenticatedDraftsRoute extends Route {
   private getDraftResults = task(
     async (
       params: AlgoliaSearchParams,
-      ownerFacetOnly = false
+      ownerFacetOnly = false,
     ): Promise<DraftResponseJSON | undefined> => {
       try {
         let response = await this.fetchSvc
           .fetch(
-            "/api/v1/drafts?" +
-              this.createDraftURLSearchParams(params, ownerFacetOnly)
+            `/api/${this.configSvc.config.api_version}/drafts?` +
+              this.createDraftURLSearchParams(params, ownerFacetOnly),
           )
           .then((response) => response?.json());
         return response;
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
   /**
    * Gets facets for the drafts page. Scoped to the current user.
@@ -116,7 +118,7 @@ export default class AuthenticatedDraftsRoute extends Route {
          * Map the facets to a new object with additional nested properties
          */
         let facets: FacetRecords = this.algolia.mapStatefulFacetKeys(
-          algoliaFacets.facets
+          algoliaFacets.facets,
         );
 
         Object.entries(facets).forEach(([name, facet]) => {
@@ -130,7 +132,7 @@ export default class AuthenticatedDraftsRoute extends Route {
       } catch (e) {
         console.error(e);
       }
-    }
+    },
   );
 
   async model(params: DocumentsRouteParams) {

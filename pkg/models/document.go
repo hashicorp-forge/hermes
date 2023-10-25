@@ -42,6 +42,9 @@ type Document struct {
 	DocumentType   DocumentType
 	DocumentTypeID uint
 
+	// DocumentFileRevision are the file revisions for the document.
+	FileRevisions []DocumentFileRevision
+
 	// Imported is true if the document was not created through the application.
 	Imported bool
 
@@ -67,7 +70,7 @@ type Document struct {
 	ShareableAsDraft bool
 
 	// Summary is a summary of the document.
-	Summary string
+	Summary *string
 
 	// Title is the title of the document. It only contains the title, and not the
 	// product abbreviation, document number, or document type.
@@ -447,6 +450,7 @@ func (d *Document) Upsert(db *gorm.DB) error {
 		if err := tx.
 			Model(&d).
 			Where(Document{GoogleFileID: d.GoogleFileID}).
+			Select("*").
 			Omit(clause.Associations). // We manage associations in the BeforeSave hook.
 			Assign(*d).
 			FirstOrCreate(&d).

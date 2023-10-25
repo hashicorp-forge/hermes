@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
+import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
@@ -26,6 +27,7 @@ enum SubscriptionType {
 }
 
 export default class AuthenticatedUserService extends Service {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare store: Store;
@@ -46,7 +48,7 @@ export default class AuthenticatedUserService extends Service {
   private get subscriptionsPostBody(): string {
     assert("subscriptions must be defined", this.subscriptions);
     let subscriptions = this.subscriptions.map(
-      (subscription: Subscription) => subscription.productArea
+      (subscription: Subscription) => subscription.productArea,
     );
     return JSON.stringify({ subscriptions });
   }
@@ -69,7 +71,7 @@ export default class AuthenticatedUserService extends Service {
   loadInfo = task(async () => {
     try {
       this._info = await this.fetchSvc
-        .fetch("/api/v1/me")
+        .fetch(`/api/${this.configSvc.config.api_version}/me`)
         .then((response) => response?.json());
     } catch (e: unknown) {
       console.error("Error getting user information: ", e);
@@ -84,7 +86,7 @@ export default class AuthenticatedUserService extends Service {
   fetchSubscriptions = task(async () => {
     try {
       let subscriptions = await this.fetchSvc
-        .fetch("/api/v1/me/subscriptions", {
+        .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
           method: "GET",
         })
         .then((response) => response?.json());
@@ -113,11 +115,11 @@ export default class AuthenticatedUserService extends Service {
   addSubscription = task(
     async (
       productArea: string,
-      subscriptionType = SubscriptionType.Instant
+      subscriptionType = SubscriptionType.Instant,
     ) => {
       assert(
         "removeSubscription expects a valid subscriptions array",
-        this.subscriptions
+        this.subscriptions,
       );
 
       let cached = this.subscriptions;
@@ -128,17 +130,20 @@ export default class AuthenticatedUserService extends Service {
       });
 
       try {
-        await this.fetchSvc.fetch(`/api/v1/me/subscriptions`, {
-          method: "POST",
-          headers: this.subscriptionsPostHeaders,
-          body: this.subscriptionsPostBody,
-        });
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
+          {
+            method: "POST",
+            headers: this.subscriptionsPostHeaders,
+            body: this.subscriptionsPostBody,
+          },
+        );
       } catch (e: unknown) {
         console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
         throw e;
       }
-    }
+    },
   );
 
   /**
@@ -147,36 +152,39 @@ export default class AuthenticatedUserService extends Service {
   removeSubscription = task(
     async (
       productArea: string,
-      subscriptionType = SubscriptionType.Instant
+      subscriptionType = SubscriptionType.Instant,
     ) => {
       assert(
         "removeSubscription expects a subscriptions array",
-        this.subscriptions
+        this.subscriptions,
       );
 
       let cached = this.subscriptions;
       let subscriptionToRemove = this.subscriptions.find(
-        (subscription) => subscription.productArea === productArea
+        (subscription) => subscription.productArea === productArea,
       );
 
       assert(
         "removeSubscription expects a valid productArea",
-        subscriptionToRemove
+        subscriptionToRemove,
       );
 
       this.subscriptions.removeObject(subscriptionToRemove);
 
       try {
-        await this.fetchSvc.fetch("/api/v1/me/subscriptions", {
-          method: "POST",
-          headers: this.subscriptionsPostHeaders,
-          body: this.subscriptionsPostBody,
-        });
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
+          {
+            method: "POST",
+            headers: this.subscriptionsPostHeaders,
+            body: this.subscriptionsPostBody,
+          },
+        );
       } catch (e: unknown) {
         console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
         throw e;
       }
-    }
+    },
   );
 }

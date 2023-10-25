@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/api"
+	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/auth"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
+	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -308,12 +310,22 @@ func (c *Command) Run(args []string) int {
 		mux = http.NewServeMux()
 	}
 
+	srv := server.Server{
+		AlgoSearch: algoSearch,
+		AlgoWrite:  algoWrite,
+		Config:     cfg,
+		DB:         db,
+		GWService:  goog,
+		Logger:     c.Log,
+	}
+
 	// Define handlers for authenticated endpoints.
-	// TODO: stop passing around all these arguments to handlers and use a struct
-	// with (functional) options.
 	authenticatedEndpoints := []endpoint{
+		// Algolia proxy.
 		{"/1/indexes/",
 			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
+
+		// API v1.
 		{"/api/v1/approvals/",
 			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
@@ -333,6 +345,20 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/reviews/",
 			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
+
+		// API v2.
+		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
+		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
+		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
+		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
+		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
+		{"/api/v2/me", apiv2.MeHandler(srv)},
+		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
+		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
+		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
+		{"/api/v2/products", apiv2.ProductsHandler(srv)},
+		{"/api/v2/reviews/", apiv2.ReviewsHandler(srv)},
+		{"/api/v2/web/analytics", apiv2.AnalyticsHandler(srv)},
 	}
 
 	// Define handlers for unauthenticated endpoints.
@@ -345,6 +371,7 @@ func (c *Command) Run(args []string) int {
 	webEndpoints := []endpoint{
 		{"/", web.Handler()},
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
+		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
 	}
 

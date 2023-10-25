@@ -2,6 +2,7 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
+import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
@@ -31,6 +32,7 @@ interface DocumentRouteModel {
 }
 
 export default class AuthenticatedDocumentRoute extends Route {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
@@ -60,7 +62,7 @@ export default class AuthenticatedDocumentRoute extends Route {
 
   async docType(doc: HermesDocument) {
     const docTypes = (await this.fetchSvc
-      .fetch("/api/v1/document-types")
+      .fetch(`/api/${this.configSvc.config.api_version}/document-types`)
       .then((r) => r?.json())) as HermesDocumentType[];
 
     assert("docTypes must exist", docTypes);
@@ -82,14 +84,18 @@ export default class AuthenticatedDocumentRoute extends Route {
     if (params.draft) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/drafts/" + params.document_id, {
-            method: "GET",
-            headers: {
-              // We set this header to differentiate between document views and
-              // requests to only retrieve document metadata.
-              "Add-To-Recently-Viewed": "true",
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/drafts/` +
+              params.document_id,
+            {
+              method: "GET",
+              headers: {
+                // We set this header to differentiate between document views and
+                // requests to only retrieve document metadata.
+                "Add-To-Recently-Viewed": "true",
+              },
             },
-          })
+          )
           .then((r) => r?.json());
         (doc as HermesDocument).isDraft = params.draft;
         draftFetched = true;
@@ -108,14 +114,18 @@ export default class AuthenticatedDocumentRoute extends Route {
     if (!draftFetched) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/documents/" + params.document_id, {
-            method: "GET",
-            headers: {
-              // We set this header to differentiate between document views and
-              // requests to only retrieve document metadata.
-              "Add-To-Recently-Viewed": "true",
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/documents/` +
+              params.document_id,
+            {
+              method: "GET",
+              headers: {
+                // We set this header to differentiate between document views and
+                // requests to only retrieve document metadata.
+                "Add-To-Recently-Viewed": "true",
+              },
             },
-          })
+          )
           .then((r) => r?.json());
 
         (doc as HermesDocument).isDraft = false;
@@ -134,7 +144,11 @@ export default class AuthenticatedDocumentRoute extends Route {
     // Preload avatars for all approvers in the Algolia index.
     if (typedDoc.contributors?.length) {
       const contributors = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${typedDoc.contributors.join(",")}`)
+        .fetch(
+          `/api/${
+            this.configSvc.config.api_version
+          }/people?emails=${typedDoc.contributors.join(",")}`,
+        )
         .then((r) => r?.json());
 
       if (contributors) {
@@ -145,7 +159,11 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
     if (typedDoc.approvers?.length) {
       const approvers = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${typedDoc.approvers.join(",")}`)
+        .fetch(
+          `/api/${
+            this.configSvc.config.api_version
+          }/people?emails=${typedDoc.approvers.join(",")}`,
+        )
         .then((r) => r?.json());
 
       if (approvers) {
@@ -171,14 +189,17 @@ export default class AuthenticatedDocumentRoute extends Route {
     /**
      * Record the document view with the analytics backend.
      */
-    void this.fetchSvc.fetch("/api/v1/web/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        document_id: model.doc.objectID,
-        product_name: model.doc.product,
-      }),
-    });
+    void this.fetchSvc.fetch(
+      `/api/${this.configSvc.config.api_version}/web/analytics`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          document_id: model.doc.objectID,
+          product_name: model.doc.product,
+        }),
+      },
+    );
 
     /**
      * Once the model has resolved, check if the document is loading from

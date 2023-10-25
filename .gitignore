@@ -13,6 +13,7 @@
 node_modules
 /web/.pnp.*
 /web/.yarn/*
+/web/.eslintcache
 /web/dist
 
 # Terraform related

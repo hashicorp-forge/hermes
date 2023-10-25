@@ -40,15 +40,11 @@ type externalLinkRelatedResourceGetResponse struct {
 }
 
 type hermesDocumentRelatedResourceGetResponse struct {
-	GoogleFileID   string   `json:"googleFileID"`
-	Title          string   `json:"title"`
-	DocumentType   string   `json:"documentType"`
-	DocumentNumber string   `json:"documentNumber"`
-	SortOrder      int      `json:"sortOrder"`
-	Status         string   `json:"status"`
-	Owners         []string `json:"owners"`
-	OwnerPhotos    []string `json:"ownerPhotos"`
-	Product        string   `json:"product"`
+	GoogleFileID   string `json:"googleFileID"`
+	Title          string `json:"title"`
+	DocumentType   string `json:"documentType"`
+	DocumentNumber string `json:"documentNumber"`
+	SortOrder      int    `json:"sortOrder"`
 }
 
 func documentsResourceRelatedResourcesHandler(
@@ -157,10 +153,6 @@ func documentsResourceRelatedResourcesHandler(
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
-					Status:         doc.Status,
-					Owners:         doc.Owners,
-					OwnerPhotos:    doc.OwnerPhotos,
-					Product:        doc.Product,
 				})
 		}
 
