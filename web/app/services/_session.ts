@@ -77,7 +77,11 @@ export default class SessionService extends EmberSimpleAuthSessionService {
 
     // Make a HEAD request to the back end.
     // On 401, the fetch service will set `this.pollResponseIs401` true.
-    await this.fetch.fetch("/api/v1/me", { method: "HEAD" }, true);
+    await this.fetch.fetch(
+      `/api/${this.configSvc.config.api_version}/me`,
+      { method: "HEAD" },
+      true,
+    );
 
     if (this.isUsingOkta) {
       this.tokenIsValid = !this.pollResponseIs401;
@@ -105,7 +109,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         "warning",
         () => {
           this.preventReauthMessage = true;
-        }
+        },
       );
     }
 
@@ -123,7 +127,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     title: string,
     message: string,
     type: "warning" | "critical",
-    onDestroy?: () => void
+    onDestroy?: () => void,
   ) {
     const buttonIcon = this.isUsingOkta ? "okta" : "google";
 
@@ -218,7 +222,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       transition = this.router.transitionTo(redirectTarget);
     } else {
       transition = this.router.transitionTo(
-        `authenticated.${routeAfterAuthentication}`
+        `authenticated.${routeAfterAuthentication}`,
       );
     }
     transition.followRedirects().then(() => {

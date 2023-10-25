@@ -6,6 +6,13 @@ import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { HermesProject } from "hermes/types/project";
 
+const PROJECT_TILE = "[data-test-project-tile]";
+const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
+const PROJECT_DESCRIPTION = `${PROJECT_TILE} [data-test-description]`;
+const PROJECT_PRODUCT = `${PROJECT_TILE} [data-test-product]`;
+const PROJECT_JIRA_TYPE = `${PROJECT_TILE} [data-test-jira-type]`;
+const PROJECT_JIRA_KEY = `${PROJECT_TILE} [data-test-jira-key]`;
+
 interface AuthenticatedProjectsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/projects", function (hooks) {
   setupApplicationTest(hooks);
@@ -27,14 +34,60 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     assert.dom("[data-test-project]").exists({ count: 3 });
 
-    const expectedTitles = this.server.schema.projects
-      .all()
-      .models.map((project: HermesProject) => project.title);
+    let expectedTitles: string[] = [];
+    let expectedDescriptions: string[] = [];
+    let expectedProducts: string[] = [];
+    let expectedKeys: string[] = [];
+    let expectedJiraTypes: string[] = [];
 
-    const renderedTitles = findAll("[data-test-project]").map(
+    this.server.schema.projects
+      .all()
+      .models.forEach((project: HermesProject) => {
+        expectedTitles.push(project.title);
+
+        if (project.description) {
+          expectedDescriptions.push(project.description);
+        }
+
+        if (project.jiraObject) {
+          expectedKeys.push(project.jiraObject.key);
+          if (project.jiraObject.type) {
+            expectedJiraTypes.push(project.jiraObject.type);
+          }
+        }
+        if (project.documents) {
+          project.documents.forEach((doc) => {
+            if (doc.product) {
+              expectedProducts.push(doc.product);
+            }
+          });
+        }
+      });
+
+    const renderedTitles = findAll(PROJECT_TITLE).map(
+      (e) => e.textContent?.trim(),
+    );
+
+    const renderedDescriptions = findAll(PROJECT_DESCRIPTION).map(
+      (e) => e.textContent?.trim(),
+    );
+
+    const renderedProducts = findAll(PROJECT_PRODUCT).map(
+      (e) => e.textContent?.trim(),
+    );
+
+    const renderedKeys = findAll(PROJECT_JIRA_KEY).map(
+      (e) => e.textContent?.trim(),
+    );
+
+    const renderedJiraTypes = findAll(PROJECT_JIRA_TYPE).map(
       (e) => e.textContent?.trim(),
     );
 
     assert.deepEqual(renderedTitles, expectedTitles);
+    assert.deepEqual(renderedDescriptions, expectedDescriptions);
+    assert.deepEqual(renderedProducts, expectedProducts);
+    assert.deepEqual(renderedKeys, expectedKeys);
+    assert.deepEqual(renderedJiraTypes, expectedJiraTypes);
   });
 });
