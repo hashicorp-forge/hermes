@@ -55,8 +55,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
             expectedJiraTypes.push(project.jiraObject.type);
           }
         }
-        if (project.documents) {
-          project.documents.forEach((doc) => {
+        if (project.hermesDocuments) {
+          project.hermesDocuments.forEach((doc) => {
             if (doc.product) {
               expectedProducts.push(doc.product);
             }

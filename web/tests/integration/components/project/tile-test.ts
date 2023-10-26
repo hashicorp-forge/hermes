@@ -46,8 +46,8 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, documents, jiraObject } = this.project;
-    const documentProducts = documents
+    const { title, description, hermesDocuments, jiraObject } = this.project;
+    const documentProducts = hermesDocuments
       ?.map((doc) => doc.product as string)
       .uniq();
 
