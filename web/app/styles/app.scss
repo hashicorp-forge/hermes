@@ -10,7 +10,6 @@
 
 @use "components/toolbar";
 @use "components/x-tooltip";
-@use "components/overflow-menu";
 @use "components/popover";
 @use "components/footer";
 @use "components/nav";
@@ -21,6 +20,7 @@
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
+@use "components/overflow-menu";
 @use "components/page";
 @use "components/row-results";
 @use "components/header/active-filter-list";
