@@ -2,6 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { CheckmarkPosition } from "hermes/components/x/dropdown-list/checkable-item";
 
 const ITEM = "[data-test-checkable-item]";
 const CONTENT = "[data-test-checkable-item-content]";
@@ -11,7 +12,7 @@ const COUNT = "[data-test-x-dropdown-list-checkable-item-count]";
 interface XDropdownListCheckableItemTestContext extends TestContext {
   isSelected: boolean;
   count?: number;
-  checkmarkPosition?: "trailing" | "leading";
+  checkmarkPosition?: `${CheckmarkPosition}`;
 }
 
 module("Integration | Component | x/dropdown-list", function (hooks) {

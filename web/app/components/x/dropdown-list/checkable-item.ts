@@ -1,10 +1,15 @@
 import Component from "@glimmer/component";
 
+export enum CheckmarkPosition {
+  Leading = "leading",
+  Trailing = "trailing",
+}
+
 export interface XDropdownListCheckableItemComponentArgs {
   value?: string;
   isSelected?: boolean;
   count?: number;
-  checkmarkPosition?: "trailing" | "leading";
+  checkmarkPosition?: `${CheckmarkPosition}`;
 }
 
 interface XDropdownListCheckableItemComponentSignature {
