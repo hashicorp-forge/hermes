@@ -8,16 +8,10 @@
               <EmptyStateText />
             </div>
           {{else}}
-            <Action
+            <Sidebar::EmptyStateAddButton
               data-test-related-resources-list-empty-state
               {{on "click" this.showModal}}
-              class="field-toggle group pl-[5px]"
-            >
-              <EmptyStateText />
-              <span class="edit-affordance light-gray">
-                <FlightIcon @name="plus" class="text-color-foreground-faint" />
-              </span>
-            </Action>
+            />
           {{/if}}
         </div>
       </div>

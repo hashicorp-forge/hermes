@@ -70,6 +70,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
+  @tracked protected projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
@@ -474,6 +475,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   protected get editingIsEnabled() {
     return !this.editingIsDisabled;
+  }
+
+  @action protected showProjectsModal() {
+    this.projectsModalIsShown = true;
+  }
+
+  @action protected hideProjectsModal() {
+    this.projectsModalIsShown = false;
   }
 
   @action refreshRoute() {

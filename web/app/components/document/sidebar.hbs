@@ -238,6 +238,16 @@
         />
       </div>
 
+      {{! Projects }}
+      <div>
+        <Document::Sidebar::SectionHeader
+          @title="Projects"
+          @badgeText="New"
+          @buttonAction={{this.showProjectsModal}}
+        />
+
+      </div>
+
       {{! Custom fields }}
       {{#each-in this.customEditableFields as |field attributes|}}
         {{#if (or attributes.value this.isOwner)}}
@@ -396,6 +406,17 @@
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
+  {{#if this.projectsModalIsShown}}
+    <Hds::Modal as |M|>
+      <M.Header>
+        header
+      </M.Header>
+      <M.Body>
+        Body
+      </M.Body>
+    </Hds::Modal>
+  {{/if}}
+
   {{#if this.archiveModalIsShown}}
     <Document::Modal
       @color="critical"
