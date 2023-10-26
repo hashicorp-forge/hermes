@@ -26,7 +26,7 @@ module("Integration | Component | project/tile", function (hooks) {
     this.project = this.server.create("project", {
       title: "Test Title",
       description: "Test Description",
-      documents: [
+      hermesDocuments: [
         {
           product: "Foo",
         },
@@ -77,7 +77,7 @@ module("Integration | Component | project/tile", function (hooks) {
 
     project.update({
       description: null,
-      documents: null,
+      hermesDocuments: null,
       jiraObject: null,
     });
 
