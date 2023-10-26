@@ -7,7 +7,7 @@ import { on } from "@ember/modifier";
 interface DocumentSidebarEmptyStateAddButtonSignature {
   Element: HTMLButtonElement;
   Args: {
-    editingIsDisabled?: boolean;
+    isReadOnly?: boolean;
     action: () => void;
   };
 }
@@ -16,12 +16,12 @@ export default class DocumentSidebarEmptyStateAddButton extends Component<Docume
   <template>
     <div class="editable-field-container">
       <div class="editable-field button-affordance">
-        {{#if @editingIsDisabled}}
-          <div class="field-toggle read-only pl-[5px]">
+        {{#if @isReadOnly}}
+          <div class="field-toggle read-only">
             <EmptyStateText />
           </div>
         {{else}}
-          <Action {{on "click" @action}} class="field-toggle group pl-[5px]">
+          <Action {{on "click" @action}} class="field-toggle">
             <EmptyStateText />
             <span class="edit-affordance light-gray">
               <FlightIcon @name="plus" class="text-color-foreground-faint" />
