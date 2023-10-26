@@ -1,13 +1,18 @@
 import Component from "@glimmer/component";
 
 export interface XDropdownListCheckableItemComponentArgs {
-  value: string;
+  value?: string;
   isSelected?: boolean;
   count?: number;
+  checkmarkPosition?: "trailing" | "leading";
 }
 
 interface XDropdownListCheckableItemComponentSignature {
+  Element: HTMLDivElement;
   Args: XDropdownListCheckableItemComponentArgs;
+  Blocks: {
+    default: [];
+  };
 }
 
 export default class XDropdownListCheckableItemComponent extends Component<XDropdownListCheckableItemComponentSignature> {}
