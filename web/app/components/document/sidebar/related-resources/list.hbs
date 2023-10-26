@@ -2,7 +2,7 @@
   <div {{did-insert this.enableAnimation}}>
     {{#if this.listIsEmpty}}
       <Document::Sidebar::EmptyStateAddButton
-        @editingIsDisabled={{@editingIsDisabled}}
+        @isReadOnly={{@editingIsDisabled}}
         @action={{this.showModal}}
         data-test-related-resources-list-empty-state
       />
