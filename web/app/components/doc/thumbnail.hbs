@@ -2,6 +2,7 @@
   data-test-doc-thumbnail
   class="doc-thumbnail
     {{if this.sizeIsLarge 'large'}}
+    {{if this.sizeIsMedium 'medium'}}
     {{if this.isObsolete 'obsolete'}}
     rounded bg-color-palette-neutral-100"
   ...attributes
@@ -24,12 +25,14 @@
       </div>
     {{/if}}
 
-    {{#if this.productShortName}}
-      <div
-        data-test-doc-thumbnail-product-badge
-        class="product-badge {{this.productShortName}}"
-      >
-        <FlightIcon @size="16" @name={{this.productShortName}} />
+    {{#if this.badgeIsShown}}
+      <div class="absolute left-0 bottom-0">
+        <Product::Avatar
+          data-test-doc-thumbnail-product-badge
+          @product={{@product}}
+          @size={{this.productAvatarSize}}
+          @isGrayedOut={{this.isObsolete}}
+        />
       </div>
     {{/if}}
   </div>
