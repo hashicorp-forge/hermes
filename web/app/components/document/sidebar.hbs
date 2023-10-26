@@ -410,14 +410,7 @@
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.projectsModalIsShown}}
-    <Hds::Modal @onClose={{this.hideProjectsModal}} as |M|>
-      <M.Header>
-        header
-      </M.Header>
-      <M.Body>
-        Body
-      </M.Body>
-    </Hds::Modal>
+    <Projects::AddOrCreate @onClose={{this.hideProjectsModal}} />
   {{/if}}
 
   {{#if this.archiveModalIsShown}}

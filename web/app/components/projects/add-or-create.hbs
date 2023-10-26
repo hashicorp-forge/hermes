@@ -1,0 +1,46 @@
+<Hds::Modal @onClose={{@onClose}} as |M|>
+  <M.Header>
+    Add doc to a project
+  </M.Header>
+  <M.Body>
+    <X::DropdownList
+      @inputIsShown={{false}}
+      @items={{this.algoliaResults}}
+      @listIsShown={{true}}
+      @disableClose={{true}}
+      @placement={{null}}
+    >
+      <:anchor as |dd|>
+        <div class="relative">
+
+          <Hds::Form::TextInput::Base
+            {{did-insert dd.registerAnchor}}
+            @type="search"
+            @value={{this.inputValue}}
+            placeholder="Search projects"
+            aria-label="Search projects"
+            aria-controls={{dd.ariaControls}}
+            aria-expanded={{dd.contentIsShown}}
+            aria-haspopup="listbox"
+          />
+          {{#if this.searchIsRunning}}
+            <div
+              data-test-search-loading-icon
+              class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+            >
+              <FlightIcon @name="loading" />
+            </div>
+          {{/if}}
+        </div>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action>
+          {{dd.attrs.title}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+  </M.Body>
+  <M.Footer>
+    <Hds::Button @text="Create a new project" />
+  </M.Footer>
+</Hds::Modal>
