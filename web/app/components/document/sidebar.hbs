@@ -245,6 +245,9 @@
           @badgeText="New"
           @buttonAction={{this.showProjectsModal}}
         />
+        <Document::Sidebar::EmptyStateAddButton
+          @action={{this.showProjectsModal}}
+        />
 
       </div>
 
@@ -407,7 +410,7 @@
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.projectsModalIsShown}}
-    <Hds::Modal as |M|>
+    <Hds::Modal @onClose={{this.hideProjectsModal}} as |M|>
       <M.Header>
         header
       </M.Header>
