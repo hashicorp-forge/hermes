@@ -2,6 +2,7 @@ import { dasherize } from "@ember/string";
 import Component from "@glimmer/component";
 
 interface DocStateComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     state?: string;
     hideProgress?: boolean;
