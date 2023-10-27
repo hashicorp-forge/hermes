@@ -7,6 +7,7 @@ import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
 
 interface NewProjectFormComponentSignature {}
@@ -78,6 +79,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           body: JSON.stringify({
             title: cleanString(this.title),
             description: cleanString(this.description),
+            status: ProjectStatus.Active,
           }),
         })
         .then((response) => response?.json());
