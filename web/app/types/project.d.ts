@@ -10,7 +10,7 @@ export interface JiraObject {
   priority: string;
   status: string;
   assignee?: string;
-  type?: string;
+  type: string;
   summary: string;
 }
 

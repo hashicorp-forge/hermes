@@ -51,9 +51,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
         if (project.jiraObject) {
           expectedKeys.push(project.jiraObject.key);
-          if (project.jiraObject.type) {
-            expectedJiraTypes.push(project.jiraObject.type);
-          }
+          expectedJiraTypes.push(project.jiraObject.type);
         }
         if (project.hermesDocuments) {
           project.hermesDocuments.forEach((doc) => {
