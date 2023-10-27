@@ -6,7 +6,7 @@ import { HdsBadgeColor, HdsBadgeType, HdsComponentSize } from "hds/_shared";
 interface HdsBadgeComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    text: string | number;
+    text: string;
     color?: HdsBadgeColor;
     type?: HdsBadgeType;
     size?: HdsComponentSize;
