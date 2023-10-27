@@ -48,7 +48,8 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await render<XDropdownListCheckableItemTestContext>(hbs`
       <X::DropdownList::CheckableItem
         @checkmarkPosition={{this.checkmarkPosition}}
-        @isSelected={{false}}
+        @isSelected={{true}}
+        @count={{1}}
         @value="foo"
       />
     `);
@@ -69,8 +70,8 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
         "can render checkmark in trailing position",
       );
 
-    assert.dom(CONTENT).hasClass("order-1");
-    assert.dom(COUNT).hasClass("order-2");
-    assert.dom(CHECK).hasClass("order-3");
+    assert.dom(CONTENT).hasStyle({ order: "1" });
+    assert.dom(COUNT).hasStyle({ order: "2" });
+    assert.dom(CHECK).hasStyle({ order: "3" });
   });
 });
