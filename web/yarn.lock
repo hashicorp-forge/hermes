@@ -3262,6 +3262,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ember__modifier@npm:latest":
+  version: 4.0.7
+  resolution: "@types/ember__modifier@npm:4.0.7"
+  dependencies:
+    "@types/ember": "*"
+    "@types/ember__owner": "*"
+  checksum: 29716c3b7b21712691b08ed96bb0060c32e06713e6ae4fb7e092b60d74e6798d68ef60ab34b4fda8310d1e30cdc9f9c8e30527929e2048e78c98993e66520c29
+  languageName: node
+  linkType: hard
+
 "@types/ember__object@npm:*, @types/ember__object@npm:latest":
   version: 4.0.5
   resolution: "@types/ember__object@npm:4.0.5"
@@ -12176,6 +12186,7 @@ __metadata:
     "@types/ember__destroyable": latest
     "@types/ember__engine": latest
     "@types/ember__error": latest
+    "@types/ember__modifier": latest
     "@types/ember__object": latest
     "@types/ember__polyfills": latest
     "@types/ember__routing": latest
