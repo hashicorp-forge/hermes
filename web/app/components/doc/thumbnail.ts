@@ -53,6 +53,10 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     return this.args.size === "large";
   }
 
+  protected get productShortName(): string | undefined {
+    return getProductId(this.args.product);
+  }
+
   protected get isApproved(): boolean {
     return this.status === "approved";
   }
