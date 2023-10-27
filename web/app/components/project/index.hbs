@@ -1,0 +1,435 @@
+<div class="project-header mt-1 flex w-full justify-between">
+
+  <div class="flex h-9 items-center gap-1">
+    <div class="flex w-9 justify-center">
+      {{! Placeholder until we have ProductAvatars  }}
+      <FlightIcon @name="grid" @size="24" />
+    </div>
+  </div>
+
+  <div class="flex h-9 gap-1.5">
+    <div class="flex gap-2.5">
+
+      <span class="self-center text-color-foreground-faint">
+        Status:
+      </span>
+      <X::DropdownList
+        @items={{this.statuses}}
+        @placement="bottom"
+        @selected={{this.status}}
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            data-test-project-status-toggle
+            class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
+          >
+            <FlightIcon @name={{this.statusIcon}} class="-mr-1" />
+            <span class="status ml-2">
+              {{this.statusLabel}}
+            </span>
+            <FlightIcon @name="chevron-down" />
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action
+            data-test-status-action={{dd.value}}
+            {{on "click" (fn this.changeStatus dd.value)}}
+          >
+            <X::DropdownList::CheckableItem
+              @isSelected={{dd.isSelected}}
+              @checkmarkPosition="trailing"
+              class=""
+            >
+              <:default>
+                <div class="flex items-center gap-2 pl-1">
+                  <FlightIcon @name={{dd.attrs.icon}} class="" />
+                  <span class="status">
+                    {{dd.attrs.label}}
+                  </span>
+                </div>
+              </:default>
+            </X::DropdownList::CheckableItem>
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    </div>
+
+    <CopyURLButton
+      @isIconOnly={{true}}
+      @url="TODO"
+      class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+    />
+  </div>
+</div>
+
+<div class="mt-7 flex">
+  <EditableField
+    class="project-title"
+    data-test-project-title
+    @value={{this.title}}
+    @tag="h1"
+    @placeholder="Add project title"
+    @onChange={{this.hideEditModal}}
+    @onSave={{this.saveTitle}}
+    @isRequired={{true}}
+  />
+</div>
+<div class="flex">
+  <EditableField
+    class="project-description"
+    data-test-project-description
+    @value="{{this.description}}"
+    @onChange={{this.hideEditModal}}
+    @onSave={{this.saveDescription}}
+    @placeholder="Add a description"
+  />
+</div>
+
+<div class="relative mt-10 flex h-8 max-w-2xl items-center gap-3.5">
+  {{#if this.jiraObject}}
+    <div data-test-jira-object class="flex items-center gap-3.5">
+      <FlightIcon @name="jira" class="" />
+      <div class="h-4 w-px bg-color-border-strong"></div>
+    </div>
+    <ExternalLink
+      data-test-jira-link
+      href={{this.jiraObject.url}}
+      class="inline-flex h-full items-center hover:underline"
+    >
+      <div class="flex items-center gap-2.5">
+        {{#if this.jiraObject.type}}
+          <img
+            data-test-jira-type-icon
+            src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
+          />
+        {{/if}}
+        <div class="w-full text-color-foreground-faint">
+          <span
+            data-test-jira-key
+            class={{if (eq this.jiraObject.status "done") "line-through"}}
+          >
+            {{this.jiraObject.key}}
+          </span>
+          <span>
+            ·
+          </span>
+          <span data-test-jira-summary>
+            {{this.jiraObject.summary}}
+          </span>
+        </div>
+      </div>
+    </ExternalLink>
+    <div class="flex shrink-0 items-center gap-2">
+      {{#if this.jiraObject.priority}}
+        <div class="flex">
+          <FlightIcon
+            data-test-jira-priority-icon
+            @name="chevrons-up"
+            class="text-color-foreground-critical"
+          />
+        </div>
+      {{/if}}
+      {{#if this.jiraObject.assignee}}
+        <Person::Avatar
+          data-test-jira-assignee-avatar
+          data-test-assignee={{this.jiraObject.assignee}}
+          @email={{this.jiraObject.assignee}}
+          @size="small"
+        />
+      {{/if}}
+      {{#if this.jiraObject.status}}
+        <div
+          data-test-jira-status
+          class="rounded-sm bg-color-surface-strong px-1.5 py-px text-body-100 font-medium uppercase"
+        >
+          {{this.jiraObject.status}}
+        </div>
+      {{/if}}
+    </div>
+    <X::DropdownList
+      @items={{hash
+        unlink=(hash
+          label="Remove Jira link"
+          icon="x-circle"
+          action=(fn this.removeJiraLink)
+        )
+      }}
+      @placement="bottom-end"
+    >
+      <:anchor as |dd|>
+        <dd.ToggleAction
+          data-test-jira-overflow-button
+          class="quarternary-button grid h-6 w-6 place-items-center items-center p-0"
+        >
+          <FlightIcon @name="more-vertical" />
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action
+          data-test-remove-jira-button
+          {{on "click" dd.attrs.action}}
+          class="flex items-center gap-2"
+        >
+          <FlightIcon @name={{dd.attrs.icon}} />
+          {{dd.attrs.label}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+  {{else}}
+    <Action
+      data-test-add-jira-button
+      {{on "click" this.addJiraLink}}
+      class="text-body-100 text-color-foreground-disabled underline decoration-color-palette-neutral-200 underline-offset-[3px]"
+    >
+      + Add Jira link
+    </Action>
+  {{/if}}
+</div>
+
+<div class="relative mt-6 border-t border-t-color-border-primary">
+  <RelatedResources
+    @modalHeaderTitle="Add project resource"
+    @modalInputPlaceholder="Search docs or paste a URL..."
+    @addResource={{this.addResource}}
+  >
+    <:header as |rr|>
+      <div class="sticky top-24 -mb-20 pr-14">
+        <div class="pointer-events-none -translate-y-1/2">
+          <Action
+            data-test-add-project-resource-button
+            {{on "click" rr.showModal}}
+            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+          >
+            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+          </Action>
+        </div>
+      </div>
+    </:header>
+  </RelatedResources>
+
+  <div class="max-w-3xl">
+    {{#if (or this.relatedDocuments.length this.relatedLinks.length)}}
+
+      {{#if this.relatedDocuments.length}}
+        <div class="mt-7 flex h-6 items-center gap-2">
+          <h3 data-test-documents-header class="hermes-h4">
+            Documents
+          </h3>
+          <Hds::BadgeCount
+            data-test-document-count
+            @text="{{this.relatedDocuments.length}}"
+          />
+        </div>
+        <ol data-test-document-list class="project-resource-list mt-3">
+          {{#each this.relatedDocuments as |resource|}}
+            <li class="group relative" data-test-document-list-item>
+              <Project::Resource
+                @overflowMenuItems={{hash
+                  delete=(hash
+                    label="Remove"
+                    icon="trash"
+                    action=(fn this.deleteResource resource)
+                  )
+                }}
+              >
+                <div class="px-2 pt-5 pb-7">
+
+                  <div class="flex items-start gap-4">
+                    <LinkTo
+                      data-test-document-owner-avatar
+                      @route="authenticated.documents"
+                      @query={{hash owners=(array (get resource.owners 0))}}
+                    >
+                      <Person::Avatar
+                        @email="{{get resource.owners 0}}"
+                        @imgURL={{get resource.ownerPhotos 0}}
+                        @size="large"
+                        class="relative z-10 -mt-1 shrink-0"
+                      />
+                    </LinkTo>
+
+                    <div class="w-full overflow-hidden">
+
+                      <LinkTo
+                        data-test-document-link
+                        @route="authenticated.document"
+                        @model={{resource.googleFileID}}
+                      >
+                        {{! Primary click area }}
+                        <div
+                          aria-hidden="true"
+                          class="absolute top-0 left-0 -bottom-px w-full group-focus-within:bg-color-surface-faint group-hover:bg-color-surface-faint"
+                        ></div>
+
+                        <div class="relative z-10 overflow-hidden">
+                          <h4
+                            class="text-display-300 text-color-foreground-strong"
+                          >
+                            <span data-test-document-title class="mr-1.5">
+                              {{resource.title}}
+                            </span>
+                            <span
+                              data-test-document-number
+                              class="shrink-0 font-regular text-color-foreground-faint"
+                            >
+                              <span class="whitespace-nowrap">
+                                {{resource.documentNumber}}
+                              </span>
+                            </span>
+                          </h4>
+                        </div>
+                      </LinkTo>
+
+                      <div class="pointer-events-none relative z-10 mt-1.5">
+                        By
+                        <LinkTo
+                          data-test-document-owner-name
+                          @route="authenticated.documents"
+                          @query={{hash owners=(array (get resource.owners 0))}}
+                          class="pointer-events-auto text-color-foreground-faint underline underline-offset-[3px] hover:text-color-foreground-strong"
+                        >
+                          {{get resource.owners 0}}
+                        </LinkTo>
+                      </div>
+                      <div class="pointer-events-none relative z-10">
+
+                        {{#if resource.summary}}
+                          <p
+                            data-test-document-summary
+                            class="relative z-10 mt-2.5 text-body-200"
+                          >
+                            {{resource.summary}}
+                          </p>
+                        {{/if}}
+
+                        {{! Tags }}
+                        <div class="mt-3.5 flex items-center gap-1">
+                          <LinkTo
+                            data-test-document-status
+                            @route="authenticated.documents"
+                            @query={{hash status=(array resource.status)}}
+                            class="pointer-events-auto"
+                          >
+                            <Doc::State
+                              @state={{resource.status}}
+                              @hideProgress={{true}}
+                              class="interactive"
+                            />
+                          </LinkTo>
+                          <LinkTo
+                            data-test-document-type
+                            @route="authenticated.documents"
+                            @query={{hash
+                              docType=(array resource.documentType)
+                            }}
+                            class="pointer-events-auto"
+                          >
+                            <Hds::Badge
+                              @text={{resource.documentType}}
+                              class="hover:bg-color-palette-neutral-200"
+                            />
+                          </LinkTo>
+                        </div>
+                      </div>
+                    </div>
+                    <Doc::Thumbnail
+                      @product={{resource.product}}
+                      @status={{resource.status}}
+                      @size="medium"
+                      class="pointer-events-none ml-6 mr-8 shrink-0"
+                    />
+                  </div>
+                </div>
+              </Project::Resource>
+            </li>
+          {{/each}}
+        </ol>
+      {{/if}}
+
+      {{#if this.relatedLinks.length}}
+        <div class="mt-7 flex h-6 items-center gap-2">
+          <h3 data-test-external-links-header class="hermes-h4">
+            External links
+          </h3>
+          <Hds::BadgeCount
+            data-test-external-link-count
+            @text="{{this.relatedLinks.length}}"
+          />
+        </div>
+        <ol data-test-external-link-list class="project-resource-list mt-5">
+
+          {{#each this.relatedLinks as |resource i|}}
+            <li class="group" data-test-document-list-item>
+              <Project::Resource
+                @overflowMenuItems={{hash
+                  edit=(hash
+                    label="Edit"
+                    icon="edit"
+                    action=(fn this.showEditModal resource i)
+                  )
+                  delete=(hash
+                    label="Remove"
+                    icon="trash"
+                    action=(fn this.deleteResource resource)
+                  )
+                }}
+              >
+                <ExternalLink
+                  data-test-related-link
+                  href={{resource.url}}
+                  class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
+                >
+                  <div class="flex items-center gap-4">
+
+                    <div class="flex w-9 justify-end">
+                      <Favicon @url={{resource.url}} />
+                    </div>
+                    <div class="flex w-full gap-2">
+                      <h4
+                        class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
+                      >
+                        {{resource.name}}
+                      </h4>
+                      <div
+                        class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
+                      >
+                        {{resource.url}}
+                      </div>
+                    </div>
+                  </div>
+                </ExternalLink>
+              </Project::Resource>
+            </li>
+          {{/each}}
+        </ol>
+      {{/if}}
+    {{else}}
+      <div
+        data-test-empty-body
+        class="mt-7 flex h-48 flex-col items-start justify-center"
+      >
+        <div class="text-display-300 font-bold text-color-foreground-strong">
+          Nothing here yet
+        </div>
+        <div class="mt-1.5 text-body-200">
+          Add documents and links using the + button
+        </div>
+      </div>
+    {{/if}}
+
+    <div class="mt-14 -mb-6 text-body-100 text-color-foreground-disabled">
+      Project created
+      {{time-ago @project.dateCreated}}
+      by
+      {{@project.creator}}
+    </div>
+  </div>
+</div>
+
+{{#if this.editModalIsShown}}
+  <RelatedResources::AddOrEditExternalResourceModal
+    @resource={{this.resourceToEdit}}
+    @onClose={{this.hideEditModal}}
+    @onSave={{this.saveExternalLink}}
+  />
+{{/if}}
