@@ -25,11 +25,12 @@
     {{/if}}
 
     {{#if this.productShortName}}
-      <div
-        data-test-doc-thumbnail-product-badge
-        class="product-badge {{this.productShortName}}"
-      >
-        <FlightIcon @size="16" @name={{this.productShortName}} />
+      <div class="absolute left-0 bottom-0">
+        <Product::Avatar
+          data-test-doc-thumbnail-product-badge
+          @product={{@product}}
+          @size={{this.productAvatarSize}}
+        />
       </div>
     {{/if}}
   </div>

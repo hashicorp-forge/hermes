@@ -1,9 +1,5 @@
 import Component from "@glimmer/component";
-
-enum HermesAvatarSize {
-  Small = "small",
-  Medium = "medium",
-}
+import { HermesAvatarSize } from "hermes/types/avatar-size";
 
 interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;

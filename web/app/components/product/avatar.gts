@@ -1,17 +1,16 @@
 import Component from "@glimmer/component";
 import getProductID from "hermes/utils/get-product-id";
-import or from "ember-truth-helpers/helpers/or";
 import { inject as service } from "@ember/service";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import ProductAreasService from "hermes/services/product-areas";
+import { assert } from "@ember/debug";
+import { HermesAvatarSize } from "hermes/types/avatar-size";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    product?: string;
-    iconSize?: number;
-    fallbackIcon?: string;
-    size?: "small" | "medium" | "large";
+    product: string;
+    size?: `${HermesAvatarSize}`;
   };
   Blocks: {
     default: [];
@@ -21,33 +20,25 @@ interface ProductAvatarComponentSignature {
 export default class ProductAvatarComponent extends Component<ProductAvatarComponentSignature> {
   @service declare productAreas: ProductAreasService;
 
-  protected get productID(): string | undefined {
-    return getProductID(this.args.product);
-  }
-
-  private get sizeIsSmall() {
-    return this.args.size === "small" || !this.args.size;
+  private get productID(): string {
+    const productID = getProductID(this.args.product);
+    assert("productID must edxist", productID);
+    return productID;
   }
 
   private get sizeIsMedium() {
-    return this.args.size === "medium";
+    return this.args.size === HermesAvatarSize.Medium;
   }
 
   private get sizeIsLarge() {
-    return this.args.size === "large";
-  }
-
-  protected get iconIsShown() {
-    if (this.productID) {
-      return true;
-    }
+    return this.args.size === HermesAvatarSize.Large;
   }
 
   <template>
     <div
       data-test-product-avatar
       class="product-badge relative flex shrink-0 shrink-0 items-center justify-center rounded-md
-        {{or this.productID 'no-product'}}
+        {{this.productID}}
         {{if
           this.sizeIsLarge
           'h-8 w-8'
@@ -56,12 +47,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
         "
       ...attributes
     >
-      {{#if this.iconIsShown}}
-        <FlightIcon
-          @name={{or this.productID (or @fallbackIcon "folder")}}
-          class={{if this.sizeIsSmall "h-3 w-3" "h-4 w-4"}}
-        />
-      {{/if}}
+      <FlightIcon @name={{this.productID}} class="h-4 w-4" />
     </div>
   </template>
 }
