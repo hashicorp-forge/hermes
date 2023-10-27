@@ -35,11 +35,9 @@
       {{/if}}
       {{#if this.jiraObject}}
         <div class="flex items-center gap-1.5">
-          {{#if @project.jiraObject.type}}
-            <span data-test-jira-type>
-              {{@project.jiraObject.type}}
-            </span>
-          {{/if}}
+          <span data-test-jira-type>
+            {{@project.jiraObject.type}}
+          </span>
           <span
             data-test-jira-key
             class="text-body-100 text-color-foreground-faint
