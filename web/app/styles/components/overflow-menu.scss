@@ -1,0 +1,38 @@
+.overflow-button {
+  @apply pointer-events-auto relative p-[3px];
+
+  &:hover,
+  &:focus,
+  &:active,
+  &:focus-visible,
+  &.open {
+    .button-affordance {
+      @apply border-color-border-strong bg-color-surface-faint;
+    }
+  }
+
+  .button-affordance {
+    @apply top-[4px] right-0 flex rounded p-1;
+    @apply border border-transparent text-color-foreground-primary;
+  }
+}
+
+.overflow-menu-item-button {
+  @apply flex w-full space-x-2 py-2 px-4 leading-none;
+
+  > .flight-icon {
+    @apply text-inherit;
+  }
+}
+
+.overflow-button-container {
+  @apply pointer-events-none absolute top-0 -right-1;
+  @apply flex w-16 justify-end rounded-tr;
+  @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+  @apply group-focus-within:visible group-hover:visible;
+
+  &:hover,
+  &:focus-within {
+    @apply visible;
+  }
+}

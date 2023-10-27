@@ -2,7 +2,7 @@ module.exports = {
   plugins: ["ember", "@typescript-eslint"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: "./tsconfig.json",
+    project: "web/tsconfig.json",
   },
   ignorePatterns: ["*.js", "/mirage/**/*", "/node_modules/**/*", "/dist/**/*"],
   extends: [
@@ -31,7 +31,6 @@ module.exports = {
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/await-thenable": "off",
     "@typescript-eslint/no-unsafe-enum-comparison": "off",
-    "@typescript-eslint/no-unnecessary-type-assertion": "off",
     "no-case-declarations": "off",
     "no-fallthrough": "off",
     "prefer-const": "off",
