@@ -14,12 +14,6 @@ interface ProductAvatarTestContext extends TestContext {
 module("Integration | Component | product/avatar", function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(async function (this: ProductAvatarTestContext) {
-    const productAreasService = this.owner.lookup(
-      "service:product-areas",
-    ) as ProductAreasService;
-  });
-
   test("it renders the product icon", async function (this: ProductAvatarTestContext, assert) {
     this.set("product", "Terraform");
 
@@ -41,5 +35,19 @@ module("Integration | Component | product/avatar", function (hooks) {
     assert.throws(() => {
       this.set("product", "foo");
     });
+  });
+
+  test("it renders at different sizes", async function (this: ProductAvatarTestContext, assert) {
+    await render<ProductAvatarTestContext>(hbs`
+      <Product::Avatar class="default" @product="Terraform" />
+      <Product::Avatar class="small" @product="Terraform" @size="small" />
+      <Product::Avatar class="medium" @product="Terraform" @size="medium" />
+      <Product::Avatar class="large" @product="Terraform" @size="large" />
+    `);
+
+    assert.dom(".default").hasClass("small");
+    assert.dom(".small").hasClass("small");
+    assert.dom(".medium").hasClass("medium");
+    assert.dom(".large").hasClass("large");
   });
 });
