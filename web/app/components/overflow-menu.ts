@@ -6,17 +6,17 @@ export interface OverflowItem {
   action: any;
 }
 
-interface RelatedResourcesOverflowMenuComponentSignature {
+interface OverflowMenuComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items: Record<string, OverflowItem>;
   };
 }
 
-export default class RelatedResourcesOverflowMenuComponent extends Component<RelatedResourcesOverflowMenuComponentSignature> {}
+export default class OverflowMenuComponent extends Component<OverflowMenuComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "RelatedResources::OverflowMenu": typeof RelatedResourcesOverflowMenuComponent;
+    OverflowMenu: typeof OverflowMenuComponent;
   }
 }

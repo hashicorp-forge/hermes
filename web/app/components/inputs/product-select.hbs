@@ -36,11 +36,11 @@
         @offset={{@offset}}
         @matchAnchorWidth={{@matchAnchorWidth}}
         @secondaryFilterAttribute="abbreviation"
-        class="product-select-dropdown-list w-[300px]"
+        class="product-select-dropdown-list"
         ...attributes
       >
         <:anchor as |dd|>
-          <dd.ToggleSelect class="gap-2">
+          <dd.ToggleSelect class="gap-2" id="product-select">
             <Inputs::ProductSelect::Item
               @product={{dd.selected}}
               @abbreviation={{this.selectedProductAbbreviation}}
