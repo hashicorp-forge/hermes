@@ -203,8 +203,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
-    await this.pauseTest();
-
     assert.dom(DOCUMENT_LINK).hasAttribute("href", "/document/doc-0");
 
     assert.dom(DOCUMENT_TITLE).containsText(docTitle);
