@@ -6,6 +6,7 @@
     <div class="w-full">
       <form {{on "submit" this.onSubmit}} class="mb-3">
         <Hds::Form::TextInput::Field
+          data-test-title-input
           {{on "input" @onInput}}
           @value={{@title}}
           placeholder="Enter a title"

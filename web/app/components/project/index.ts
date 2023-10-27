@@ -6,7 +6,7 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "../related-resources";
-import { RelatedResourceSelector } from "../document/sidebar/related-resources";
+import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";

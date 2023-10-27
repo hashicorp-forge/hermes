@@ -1,0 +1,64 @@
+.project-screen {
+  .editable-field {
+    @apply -mx-2;
+    &:not(.active) {
+      @apply w-auto min-w-[30%];
+    }
+  }
+
+  .project-title,
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply px-2 pr-10;
+      @apply items-start;
+    }
+  }
+
+  .project-title {
+    .field-toggle,
+    textarea {
+      @apply py-0.5 text-[45px] font-bold leading-[55px] text-color-foreground-strong;
+    }
+  }
+
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply py-1 text-display-400 text-color-foreground-primary;
+    }
+  }
+
+  .add-project-resource-button:hover {
+    @apply scale-105 transition-transform;
+  }
+
+  .project-resource-list {
+    > li:not(:first-child) {
+      @apply border-t border-t-color-border-faint;
+    }
+  }
+
+  .project-resource {
+    @apply relative;
+
+    &:hover,
+    &:focus-within {
+      .overflow-button-container {
+        @apply visible;
+      }
+    }
+
+    .title {
+      @apply text-display-200 font-semibold text-color-foreground-strong;
+    }
+
+    .owner {
+      @apply text-color-foreground-faint;
+    }
+
+    .overflow-button-container {
+      @apply absolute right-1 top-1;
+    }
+  }
+}
