@@ -11,7 +11,7 @@ import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
 import { HermesProject } from "hermes/types/project";
-import { OverflowItem } from "../related-resources/overflow-menu";
+import { OverflowItem } from "hermes/components/overflow-menu";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -22,9 +22,9 @@ interface ProjectIndexComponentSignature {
 export default class ProjectIndexComponent extends Component<ProjectIndexComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
 
-  @tracked relatedDocuments = this.args.project.documents ?? [];
+  @tracked relatedDocuments = this.args.project.hermesDocuments ?? [];
   @tracked relatedLinks: RelatedExternalLink[] =
-    this.args.project.relatedLinks ?? [];
+    this.args.project.externalLinks ?? [];
 
   @tracked modalIsShown = false;
 

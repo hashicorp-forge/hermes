@@ -570,7 +570,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       .then((response) => response?.json());
 
     this.projects = allProjects.filter((project: HermesProject) => {
-      return project.documents?.filter(
+      return project.hermesDocuments?.filter(
         (doc: RelatedHermesDocument) => doc.googleFileID === this.docID,
       );
     });

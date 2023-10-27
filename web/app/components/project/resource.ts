@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { OverflowItem } from "../related-resources/overflow-menu";
+import { OverflowItem } from "hermes/components/overflow-menu";
 
 interface ProjectResourceComponentSignature {
   Element: HTMLDivElement;
