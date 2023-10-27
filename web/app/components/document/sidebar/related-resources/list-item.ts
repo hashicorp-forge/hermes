@@ -7,7 +7,7 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
-import { OverflowItem } from "hermes/components/related-resources/overflow-menu";
+import { OverflowItem } from "hermes/components/overflow-menu";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
@@ -71,7 +71,7 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
    */
   protected get documentObjectID(): string | null {
     if ("googleFileID" in this.args.resource) {
-      return (this.args.resource as RelatedHermesDocument).googleFileID;
+      return this.args.resource.googleFileID;
     } else {
       return null;
     }

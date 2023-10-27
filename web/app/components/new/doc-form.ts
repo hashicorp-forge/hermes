@@ -14,22 +14,14 @@ import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
+import { next } from "@ember/runloop";
 
 interface DocFormErrors {
   title: string | null;
-  summary: string | null;
   productAbbreviation: string | null;
-  contributors: string | null;
 }
 
-const FORM_ERRORS: DocFormErrors = {
-  title: null,
-  summary: null,
-  productAbbreviation: null,
-  contributors: null,
-};
-
-const AWAIT_DOC_DELAY = Ember.testing ? 0 : 1000;
+const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
 const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
@@ -54,14 +46,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected _form: HTMLFormElement | null = null;
 
-  /**
-   * Whether the form has all required fields filled out.
-   * True if the title and product area are filled out.
-   */
-  @tracked protected formRequirementsMet = false;
+  @tracked protected summaryIsLong = false;
 
   /**
-   * Whether the document is being created.
+   * Whether the document is being created, or in the process of
+   * transitioning to the document screen after successful creation.
+   * Used by the `New::Form` component for conditional rendering.
    * Set true when the createDoc task is running.
    * Reverted only if an error occurs.
    */
@@ -70,13 +60,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * An object containing error messages for each applicable form field.
    */
-  @tracked protected formErrors = { ...FORM_ERRORS };
-
-  /**
-   * Whether the summary is more than 200 characters.
-   * Used in the template to gently discourage long summaries.
-   */
-  @tracked protected summaryIsLong = false;
+  @tracked protected formErrors: DocFormErrors = {
+    title: null,
+    productAbbreviation: null,
+  };
 
   /**
    * Whether to validate eagerly, that is, after every change to the form.
@@ -96,19 +83,17 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Whether the form has errors.
    */
   private get hasErrors(): boolean {
-    const defined = (a: unknown) => a != null;
-    return Object.values(this.formErrors).filter(defined).length > 0;
+    return Object.values(this.formErrors).some((error) => error !== null);
+  }
+
+  protected get buttonIsActive() {
+    return !!this.title && !!this.productAbbreviation;
   }
 
   /**
-   * Sets `formRequirementsMet` and conditionally validates the form.
+   * Validates the form if `validateEagerly` is true.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
-      this.formRequirementsMet = true;
-    } else {
-      this.formRequirementsMet = false;
-    }
     if (this.validateEagerly) {
       this.validate();
     }
@@ -118,7 +103,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form and updates the `formErrors` property.
    */
   private validate() {
-    this.formErrors = { ...FORM_ERRORS };
+    this.formErrors = {
+      title: this.title ? null : "Title is required",
+      productAbbreviation: this.productAbbreviation
+        ? null
+        : "Product/area is required",
+    };
   }
 
   /**
@@ -134,10 +124,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   /**
    * Binds the FormData to our locally tracked properties.
-   * If the summary is long, shows a gentle warning.
    * Conditionally validates.
    */
-  @action protected updateForm() {
+  @action protected onKeydown(e: KeyboardEvent) {
     const formObject = Object.fromEntries(new FormData(this.form).entries());
 
     assert("title is missing from formObject", "title" in formObject);
@@ -146,14 +135,27 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.title = formObject["title"] as string;
     this.summary = formObject["summary"] as string;
 
-    if ("productArea" in formObject) {
-      this.productArea = formObject["productArea"] as string;
-    }
-
     if (this.summary.length > 200) {
       this.summaryIsLong = true;
     } else {
       this.summaryIsLong = false;
+    }
+
+    if ("productArea" in formObject) {
+      this.productArea = formObject["productArea"] as string;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.submit();
+      return;
+    }
+
+    if (this.formErrors.title || this.formErrors.productAbbreviation) {
+      // Validate once the input values are captured
+      next("afterRender", () => {
+        this.validate();
+      });
     }
 
     this.maybeValidate();
@@ -179,11 +181,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
    */
-  @action protected submit(event: SubmitEvent) {
-    event.preventDefault();
+  @action protected submit(event?: SubmitEvent) {
+    event?.preventDefault();
     this.validateEagerly = true;
     this.validate();
-    if (this.formRequirementsMet && !this.hasErrors) {
+    if (!this.hasErrors) {
       this.createDoc.perform();
     }
   }
@@ -226,7 +228,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     } catch (err: unknown) {
       this.docIsBeingCreated = false;
 
-      // TODO: Improve error handling.
       this.flashMessages.add({
         title: "Error creating document draft",
         message: `${err}`,
