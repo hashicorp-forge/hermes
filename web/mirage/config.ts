@@ -212,7 +212,7 @@ export default function (mirageConfig) {
         }
       });
 
-      // Fetch a product's related resources
+      // Fetch a project's related resources
       this.put("/projects/:project_id", (schema, request) => {
         let project = schema.projects.findBy({
           id: request.params.project_id,

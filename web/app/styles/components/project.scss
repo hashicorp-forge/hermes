@@ -1,88 +1,52 @@
 .project-screen {
-  .project-description {
-    @apply z-10;
-  }
-
-  .project-title {
-    @apply z-20;
+  .editable-field {
+    @apply -mx-2;
+    &:not(.active) {
+      @apply w-auto min-w-[30%];
+    }
   }
 
   .project-title,
   .project-description {
-    @apply relative;
-
-    .editable-field.active {
-      @apply static;
-    }
-
     .field-toggle,
     textarea {
-      @apply text-center leading-none;
+      @apply px-2 pr-10;
+      @apply items-start;
     }
   }
 
   .project-title {
     .field-toggle,
     textarea {
-      @apply text-display-500 font-bold leading-none text-color-foreground-strong;
+      @apply py-0.5 text-[45px] font-bold leading-[55px] text-color-foreground-strong;
     }
   }
 
   .project-description {
     .field-toggle,
     textarea {
-      @apply text-display-300 text-color-foreground-faint;
+      @apply py-1 text-display-400 text-color-foreground-primary;
     }
   }
 
-  .section {
-    @apply rounded border border-color-border-primary;
-
-    &.empty {
-      .section-header {
-        @apply rounded-b;
-      }
-    }
+  .add-project-resource-button:hover {
+    @apply scale-105 transition-transform;
   }
 
-  .section-header {
-    @apply flex h-12 w-full items-center justify-between rounded-t bg-color-surface-faint pl-4 pr-2;
-
-    h3 {
-      @apply text-body-200 font-semibold;
+  .project-resource-list {
+    > li:not(:first-child) {
+      @apply border-t border-t-color-border-faint;
     }
-
-    .tertiary-button-gray {
-      @apply px-2.5;
-    }
-  }
-
-  .resource-list {
-    @apply divide-y divide-color-border-primary border-t border-t-color-border-primary;
   }
 
   .project-resource {
-    @apply relative flex h-12 items-stretch;
+    @apply relative;
 
-    &:hover {
-      .hit-area {
-        @apply bg-color-surface-faint;
+    &:hover,
+    &:focus-within {
+      .overflow-button-container {
+        @apply visible;
       }
-    }
-
-    &:last-child {
-      a,
-      .hit-area {
-        @apply rounded-b;
-      }
-    }
-
-    a {
-      @apply flex w-full items-center;
-    }
-
-    .hit-area {
-      @apply absolute top-0 left-0 right-0 bottom-0 -z-10;
     }
 
     .title {
@@ -94,11 +58,7 @@
     }
 
     .overflow-button-container {
-      @apply self-center;
+      @apply absolute right-1 top-1;
     }
-  }
-
-  .editable-field .edit-overlay-affordance {
-    @apply justify-center;
   }
 }

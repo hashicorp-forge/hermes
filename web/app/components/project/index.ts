@@ -6,12 +6,13 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "../related-resources";
-import { RelatedResourceSelector } from "../document/sidebar/related-resources";
+import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
-import { HermesProject } from "hermes/types/project";
-import { OverflowItem } from "hermes/components/overflow-menu";
+import { HermesProject, JiraObject } from "hermes/types/project";
+import { ProjectStatus } from "hermes/types/project-status";
+import { assert } from "@ember/debug";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -26,51 +27,57 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked relatedLinks: RelatedExternalLink[] =
     this.args.project.externalLinks ?? [];
 
-  @tracked modalIsShown = false;
+  @tracked title = this.args.project.title;
+  @tracked description = this.args.project.description;
+  @tracked jiraObject: JiraObject | undefined = this.args.project.jiraObject;
 
-  protected get overflowItemDeleteDoc(): OverflowItem {
-    return {
-      label: "Delete",
-      icon: "trash",
-      action: this.deleteDoc,
-    };
+  @tracked protected editModalIsShown = false;
+
+  @tracked protected resourceToEdit: RelatedExternalLink | undefined;
+  @tracked protected resourceToEditIndex: number | undefined;
+
+  protected get sortedResources(): RelatedResource[] {
+    let array: RelatedResource[] = [];
+    return array.concat(this.relatedDocuments, this.relatedLinks);
   }
 
-  protected get overflowItemDeleteLink(): OverflowItem {
-    return {
-      label: "Delete",
-      icon: "trash",
-      action: this.deleteRelatedLink,
-    };
+  @tracked protected status = this.args.project.status;
+
+  statuses = {
+    [ProjectStatus.Active]: {
+      label: "Active",
+      icon: "circle-dot",
+    },
+    [ProjectStatus.Completed]: {
+      label: "Completed",
+      icon: "check-circle",
+    },
+    [ProjectStatus.Archived]: {
+      label: "Archived",
+      icon: "archive",
+    },
+  };
+
+  get statusLabel() {
+    return this.statuses[this.status].label;
   }
 
-  protected get overflowItemEdit(): OverflowItem {
-    return {
-      label: "Edit",
-      icon: "pencil-tool",
-      action: this.editResource,
-    };
+  get statusIcon() {
+    return this.statuses[this.status].icon;
   }
 
-  protected get overflowItemsForDocument(): Record<string, OverflowItem> {
-    return {
-      delete: this.overflowItemDeleteDoc,
-    };
+  get products() {
+    // should this be sorted?
+    return this.relatedDocuments
+      .reverse()
+      .map((doc) => doc.product)
+      .uniq();
   }
 
-  protected get overflowItemsForLink(): Record<string, OverflowItem> {
-    return {
-      edit: this.overflowItemEdit,
-      delete: this.overflowItemDeleteLink,
-    };
-  }
-
-  @action showModal() {
-    this.modalIsShown = true;
-  }
-
-  @action hideModal() {
-    this.modalIsShown = false;
+  @action hideEditModal() {
+    this.editModalIsShown = false;
+    this.resourceToEdit = undefined;
+    this.resourceToEditIndex = undefined;
   }
 
   @action protected addResource(resource: RelatedResource) {
@@ -79,39 +86,92 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     } else {
       this.addLink(resource as RelatedExternalLink);
     }
+    void this.save.perform();
   }
 
-  @action protected saveProjectInfo() {
-    return;
-  }
-
-  @action protected deleteDoc(doc: RelatedHermesDocument) {
-    debugger;
-    this.relatedDocuments.removeObject(doc);
-    debugger;
-    void this.saveProject.perform();
-  }
-
-  @action protected deleteRelatedLink(link: RelatedExternalLink) {
-    this.relatedLinks.removeObject(link);
-    void this.saveProject.perform();
-  }
-
-  protected saveProject = task(async () => {
-    try {
-      console.log("we here");
-      await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(this.formattedRelatedResources),
-      });
-    } catch (e: unknown) {
-      console.log("error", e);
-      // TODO: Handle error
+  @action protected deleteResource(doc: RelatedResource) {
+    if ("googleFileID" in doc) {
+      this.relatedDocuments.removeObject(doc as RelatedHermesDocument);
+    } else {
+      this.relatedLinks.removeObject(doc as RelatedExternalLink);
     }
-  });
+    void this.save.perform();
+  }
 
-  @action protected editResource(resource: RelatedResource) {
-    console.log("editResource", resource);
+  @action protected changeStatus(status: ProjectStatus) {
+    this.status = status;
+    void this.save.perform("status", status);
+  }
+
+  @action protected saveTitle(newValue: string) {
+    this.title = newValue;
+    void this.save.perform("title", newValue);
+  }
+
+  @action protected saveDescription(newValue: string) {
+    this.description = newValue;
+    void this.save.perform("description", newValue);
+  }
+
+  @action protected archiveProject() {
+    void this.save.perform("status", ProjectStatus.Archived);
+  }
+
+  @action protected completeProject() {
+    void this.save.perform("status", ProjectStatus.Completed);
+  }
+
+  @action protected addJiraLink() {
+    // TODO: implement this
+    this.jiraObject = {
+      key: "HER-123",
+      url: "https://www.google.com",
+      priority: "High",
+      status: "Open",
+      type: "Bug",
+      summary: "Vault Data Gathering Initiative: Support",
+      assignee: "John Dobis",
+    };
+    void this.save.perform("jiraObject", this.jiraObject);
+  }
+
+  @action protected removeJiraLink() {
+    this.jiraObject = undefined;
+    void this.save.perform("jiraObject", undefined);
+  }
+
+  protected save = task(
+    async (key?: string, newValue?: string | JiraObject) => {
+      try {
+        const valueToSave = key
+          ? { [key]: newValue }
+          : this.formattedRelatedResources;
+        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        });
+      } catch (e: unknown) {
+        if (key) {
+          switch (key) {
+            case "title":
+              this.title = this.args.project.title;
+              break;
+            case "description":
+              this.description = this.args.project.description;
+              break;
+          }
+        } else {
+          this.relatedDocuments = this.args.project.hermesDocuments ?? [];
+          this.relatedLinks = this.args.project.externalLinks ?? [];
+        }
+      }
+    },
+  );
+
+  @action protected showEditModal(resource: RelatedResource, index: number) {
+    this.resourceToEdit = resource as RelatedExternalLink;
+    this.resourceToEditIndex = index;
+    this.editModalIsShown = true;
   }
 
   /**
@@ -154,9 +214,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     const hermesDocuments = this.relatedDocuments.map((doc) => {
       return {
+        ...doc,
         googleFileID: doc.googleFileID,
         sortOrder: doc.sortOrder,
-        // @ts-ignore
         product: doc.product,
       };
     });
@@ -173,6 +233,31 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       externalLinks,
       hermesDocuments,
     };
+  }
+
+  @action protected saveExternalLink(link: RelatedExternalLink) {
+    const cachedLinks = this.relatedLinks.slice();
+
+    assert(
+      "resourceToEditIndex must exist",
+      this.resourceToEditIndex !== undefined,
+    );
+
+    this.relatedLinks[this.resourceToEditIndex] = link;
+
+    // Replacing an individual link doesn't cause the getter
+    // to recompute, so we manually save the array.
+    this.relatedLinks = this.relatedLinks;
+
+    void this.saveRelatedResources.perform(
+      this.relatedDocuments.slice(),
+      cachedLinks,
+      this.resourceToEditIndex,
+    );
+
+    this.editModalIsShown = false;
+    this.resourceToEdit = undefined;
+    this.resourceToEditIndex = undefined;
   }
 
   /**

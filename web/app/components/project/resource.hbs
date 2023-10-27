@@ -1,9 +1,6 @@
-<div class="project-resource relative pr-[11px]" ...attributes>
+<div class="project-resource" ...attributes>
 
   {{yield}}
 
-  <RelatedResources::OverflowMenu
-    @buttonIsShown={{true}}
-    @items={{@overflowMenuItems}}
-  />
+  <OverflowMenu @items={{@overflowMenuItems}} />
 </div>
