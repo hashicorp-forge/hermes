@@ -120,7 +120,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected projects: HermesProject[] = [
     {
       id: "2",
-      title: "Hello",
+      title: "Adding Search to HDS Documentation",
       creator: "test",
       dateCreated: 123,
       dateModified: 123,
