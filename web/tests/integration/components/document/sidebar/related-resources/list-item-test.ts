@@ -11,11 +11,9 @@ import htmlElement from "hermes/utils/html-element";
 
 const RELATED_RESOURCE_SELECTOR = ".related-resource";
 const RELATED_RESOURCE_LINK_SELECTOR = ".related-resource-link";
-const OVERFLOW_BUTTON_SELECTOR = ".related-resource-overflow-button";
-const OVERFLOW_MENU_BUTTON_SELECTOR =
-  ".related-resources-overflow-menu-item-button";
-const OVERFLOW_MENU_SELECTOR =
-  "[data-test-related-resources-list-item-overflow-menu]";
+const OVERFLOW_BUTTON_SELECTOR = ".overflow-button";
+const OVERFLOW_MENU_BUTTON_SELECTOR = ".overflow-menu-item-button";
+const OVERFLOW_MENU_SELECTOR = "[data-test-overflow-menu]";
 const DROPDOWN_LIST_ITEM_SELECTOR = ".x-dropdown-list-item";
 
 const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";

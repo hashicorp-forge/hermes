@@ -2,10 +2,12 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
 } from "hermes/components/related-resources";
+import { ProjectStatus } from "./project-status";
 
 export interface HermesProject {
   id: string; // at least in Mirage...
   title: string;
+  status: ProjectStatus;
   documents?: RelatedHermesDocument[];
   description?: string;
   jiraObject?: {
