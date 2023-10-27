@@ -3,18 +3,16 @@
   @renderOut={{true}}
   @placement="bottom-end"
   @offset={{hash mainAxis=-3 crossAxis=-3}}
-  data-test-related-resources-list-item-overflow-menu
+  data-test-overflow-menu
   ...attributes
 >
   <:anchor as |dd|>
     <div
-      class="related-resources-overflow-button-container
+      class="overflow-button-container
         {{if dd.contentIsShown 'visible' 'invisible'}}
         "
     >
-      <dd.ToggleAction
-        class="related-resource-overflow-button {{if dd.contentIsShown 'open'}}"
-      >
+      <dd.ToggleAction class="overflow-button {{if dd.contentIsShown 'open'}}">
         <div class="button-affordance">
           <FlightIcon @name="more-vertical" />
         </div>
@@ -26,7 +24,7 @@
       data-test-action
       data-test-overflow-menu-action={{dasherize dd.attrs.label}}
       {{on "click" dd.attrs.action}}
-      class="related-resources-overflow-menu-item-button"
+      class="overflow-menu-item-button"
     >
       <FlightIcon @name={{dd.attrs.icon}} class="shrink-0" />
       <span data-test-label>
