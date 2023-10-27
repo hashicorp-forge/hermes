@@ -1,6 +1,6 @@
 <Hds::Modal @onClose={{@onClose}} as |M|>
   <M.Header>
-    Add doc to a project
+    Add to project
   </M.Header>
   <M.Body>
     <X::DropdownList
@@ -12,8 +12,8 @@
     >
       <:anchor as |dd|>
         <div class="relative">
-
           <Hds::Form::TextInput::Base
+            {{autofocus waitUntilNextRunloop=true}}
             {{did-insert dd.registerAnchor}}
             @type="search"
             @value={{this.inputValue}}

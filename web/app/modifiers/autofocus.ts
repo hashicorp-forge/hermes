@@ -1,5 +1,6 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
+import { next } from "@ember/runloop";
 import { tracked } from "@glimmer/tracking";
 import Modifier from "ember-modifier";
 import { FOCUSABLE } from "hermes/components/editable-field";
@@ -10,6 +11,7 @@ interface AutofocusModifierSignature {
     Positional: [];
     Named: {
       targetChildren?: boolean;
+      waitUntilNextRunloop?: boolean;
     };
   };
 }
@@ -39,12 +41,15 @@ export default class AutofocusModifier extends Modifier<AutofocusModifierSignatu
   modify(
     element: Element,
     _positional: [],
-    named: AutofocusModifierSignature["Args"]["Named"]
+    named: AutofocusModifierSignature["Args"]["Named"],
   ) {
     this._element = element;
     this.targetChildren = named.targetChildren ?? false;
-
-    this.maybeAutofocus();
+    if (named.waitUntilNextRunloop) {
+      next(this, this.maybeAutofocus);
+    } else {
+      this.maybeAutofocus();
+    }
   }
 }
 

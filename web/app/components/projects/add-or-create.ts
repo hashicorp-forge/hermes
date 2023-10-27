@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesProject } from "hermes/types/project";
+import { ProjectStatus } from "hermes/types/project-status";
 
 interface ProjectsAddOrCreateSignature {
   Args: {
@@ -19,6 +20,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
         creator: "test",
         dateCreated: 123,
         dateModified: 123,
+        status: ProjectStatus.Active,
       },
       "2": {
         id: "2",
@@ -26,6 +28,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
         creator: "test",
         dateCreated: 123,
         dateModified: 123,
+        status: ProjectStatus.Active,
       },
     };
   }

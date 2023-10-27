@@ -29,6 +29,9 @@ import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
+import { HermesProject } from "hermes/types/project";
+import { RelatedHermesDocument } from "../related-resources";
+import { ProjectStatus } from "hermes/types/project-status";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -108,6 +111,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
+
+  /**
+   * Projects this document is associated with.
+   * Set by `loadRelatedProjects` and used to render a list
+   * of projects or an empty state.
+   */
+  @tracked protected projects: HermesProject[] = [
+    {
+      id: "2",
+      title: "Hello",
+      creator: "test",
+      dateCreated: 123,
+      dateModified: 123,
+      status: ProjectStatus.Active,
+    },
+  ];
 
   /**
    * Whether a draft was published during the session.
@@ -532,6 +551,19 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     await timeout(Ember.testing ? 0 : 1000);
   });
 
+  protected loadRelatedProjects = task(async () => {
+    // fetch projects that include this doc
+    const allProjects = await this.fetchSvc
+      .fetch("/api/v1/projects")
+      .then((response) => response?.json());
+
+    this.projects = allProjects.filter((project: HermesProject) => {
+      return project.hermesDocuments?.filter(
+        (doc: RelatedHermesDocument) => doc.googleFileID === this.docID,
+      );
+    });
+  });
+
   /**
    * Sets the draft's `isShareable` property based on a selection
    * in the draft-visibility dropdown. Immediately updates the UI
@@ -600,6 +632,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     },
   );
+
+  removeProject = task(async (projectId: string) => {
+    try {
+      // TODO:
+    } catch (error: unknown) {
+      this.maybeShowFlashError(error as Error, "Unable to remove project");
+      throw error;
+    }
+    this.refreshRoute();
+  });
 
   saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
