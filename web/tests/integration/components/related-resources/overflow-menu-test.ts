@@ -1,23 +1,23 @@
 import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
-import { OverflowItem } from "hermes/components/related-resources/overflow-menu";
+import { OverflowItem } from "hermes/components/overflow-menu";
 import { module, test } from "qunit";
 
-const POPOVER = "[data-test-related-resources-list-item-overflow-menu]";
+const POPOVER = "[data-test-overflow-menu]";
 const TOGGLE = "[data-test-x-dropdown-list-toggle-action]";
 const ACTION = `${POPOVER} [data-test-action]`;
 const ICON = `${POPOVER} .flight-icon`;
 const LABEL = `${POPOVER} [data-test-label]`;
 
-interface RelatedResourcesOverflowMenuTestContext extends TestContext {
+interface OverflowMenuTestContext extends TestContext {
   items: Record<string, OverflowItem>;
 }
 
 module("Integration | Component | related-resources/add", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it creates a menu from a list of items", async function (this: RelatedResourcesOverflowMenuTestContext, assert) {
+  test("it creates a menu from a list of items", async function (this: OverflowMenuTestContext, assert) {
     let actionOneCount = 0;
     let actionTwoCount = 0;
 
@@ -34,8 +34,8 @@ module("Integration | Component | related-resources/add", function (hooks) {
       },
     });
 
-    await render<RelatedResourcesOverflowMenuTestContext>(hbs`
-      <RelatedResources::OverflowMenu
+    await render<OverflowMenuTestContext>(hbs`
+      <OverflowMenu
         data-test-overflow-popover
         @items={{this.items}}
       />
