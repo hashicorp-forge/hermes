@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
 )
@@ -49,7 +50,8 @@ type Document struct {
 	// Content is the plaintext content of the document.
 	Content string `json:"content,omitempty"`
 
-	// Created is the UTC time of document creation, in a RFC 3339 string format.
+	// Created is the UTC time of document creation, in a "Jan 2, 2006" string
+	// format.
 	Created string `json:"created,omitempty"`
 
 	// CreatedTime is the time of document creation, in Unix time.
@@ -221,6 +223,149 @@ func NewFromAlgoliaObject(
 		doc.CustomFields = cfs
 		doc.CustomEditableFields = cefs
 	}
+
+	return doc, nil
+}
+
+// NewFromDatabaseModel creates a document from a document database model.
+func NewFromDatabaseModel(
+	model models.Document, reviews models.DocumentReviews,
+) (*Document, error) {
+	doc := &Document{}
+
+	// ObjectID.
+	doc.ObjectID = model.GoogleFileID
+
+	// Title.
+	doc.Title = model.Title
+
+	// DocType.
+	doc.DocType = model.DocumentType.Name
+
+	// DocNumber.
+	doc.DocNumber = fmt.Sprintf(
+		"%s-%03d", model.Product.Abbreviation, model.DocumentNumber)
+	if model.DocumentNumber == 0 {
+		doc.DocNumber = fmt.Sprintf("%s-???", model.Product.Abbreviation)
+	}
+
+	// AppCreated.
+	doc.AppCreated = !model.Imported
+
+	// ApprovedBy, Approvers, ChangesRequestedBy.
+	var approvedBy, approvers, changesRequestedBy []string
+	for _, r := range reviews {
+		approvers = append(approvers, r.User.EmailAddress)
+
+		switch r.Status {
+		case models.ApprovedDocumentReviewStatus:
+			approvedBy = append(approvedBy, r.User.EmailAddress)
+		case models.ChangesRequestedDocumentReviewStatus:
+			changesRequestedBy = append(changesRequestedBy, r.User.EmailAddress)
+		}
+	}
+	doc.ApprovedBy = approvedBy
+	doc.Approvers = approvers
+	doc.ChangesRequestedBy = changesRequestedBy
+
+	// Contributors.
+	contributors := []string{}
+	for _, c := range model.Contributors {
+		contributors = append(contributors, c.EmailAddress)
+	}
+	doc.Contributors = contributors
+
+	// Created.
+	doc.Created = model.CreatedAt.Format("Jan 2, 2006")
+
+	// CreatedTime.
+	doc.CreatedTime = model.DocumentCreatedAt.Unix()
+
+	// CustomEditableFields.
+	customEditableFields := make(map[string]CustomDocTypeField)
+	for _, c := range model.DocumentType.CustomFields {
+		var cType string
+		switch c.Type {
+		case models.PeopleDocumentTypeCustomFieldType:
+			cType = "PEOPLE"
+		case models.PersonDocumentTypeCustomFieldType:
+			cType = "PERSON"
+		case models.StringDocumentTypeCustomFieldType:
+			cType = "STRING"
+		}
+		customEditableFields[strcase.ToLowerCamel(c.Name)] = CustomDocTypeField{
+			DisplayName: c.Name,
+			Type:        cType,
+		}
+	}
+	doc.CustomEditableFields = customEditableFields
+
+	// CustomFields.
+	var customFields []CustomField
+	for _, c := range model.CustomFields {
+		cf := CustomField{
+			Name:        strcase.ToLowerCamel(c.DocumentTypeCustomField.Name),
+			DisplayName: c.DocumentTypeCustomField.Name,
+		}
+		switch c.DocumentTypeCustomField.Type {
+		case models.PeopleDocumentTypeCustomFieldType:
+			cf.Type = "PEOPLE"
+			var val []string
+			if err := json.Unmarshal([]byte(c.Value), &val); err != nil {
+				return nil, fmt.Errorf("error unmarshaling value for field %q: %w",
+					c.DocumentTypeCustomField.Name, err)
+			}
+			cf.Value = val
+		case models.PersonDocumentTypeCustomFieldType:
+			cf.Type = "PERSON"
+			cf.Value = c.Value
+		case models.StringDocumentTypeCustomFieldType:
+			cf.Type = "STRING"
+			cf.Value = c.Value
+		}
+		customFields = append(customFields, cf)
+	}
+	doc.CustomFields = customFields
+
+	// FileRevisions.
+	fileRevisions := make(map[string]string)
+	for _, fr := range model.FileRevisions {
+		fileRevisions[fr.GoogleDriveFileRevisionID] = fr.Name
+	}
+	doc.FileRevisions = fileRevisions
+
+	// Locked is true if the document is locked for editing.
+	doc.Locked = model.Locked
+
+	// ModifiedTime.
+	doc.ModifiedTime = model.DocumentModifiedAt.Unix()
+
+	// Owners.
+	doc.Owners = []string{model.Owner.EmailAddress}
+
+	// Note: OwnerPhotos is not stored in the database.
+
+	// Product.
+	doc.Product = model.Product.Name
+
+	// Summary.
+	doc.Summary = *model.Summary
+
+	// Status.
+	var status string
+	switch model.Status {
+	case models.ApprovedDocumentStatus:
+		status = "Approved"
+	case models.InReviewDocumentStatus:
+		status = "In-Review"
+	case models.ObsoleteDocumentStatus:
+		status = "Obsolete"
+	case models.WIPDocumentStatus:
+		status = "WIP"
+	}
+	doc.Status = status
+
+	// Note: ThumbnailLink is not stored in the database.
 
 	return doc, nil
 }

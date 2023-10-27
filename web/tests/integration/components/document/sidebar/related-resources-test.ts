@@ -23,7 +23,7 @@ const EXTERNAL_RESOURCE_SELECTOR = ".external-resource";
 const HEADER_SELECTOR = ".sidebar-section-header";
 const ERROR_MESSAGE_SELECTOR = ".failed-to-load-text";
 const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
-const OVERFLOW_BUTTON_SELECTOR = ".related-resource-overflow-button";
+const OVERFLOW_BUTTON_SELECTOR = ".overflow-button";
 const EDIT_BUTTON_SELECTOR = "[data-test-overflow-menu-action='edit']";
 const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";
 const EDIT_MODAL_SELECTOR = "[data-test-add-or-edit-external-resource-modal]";

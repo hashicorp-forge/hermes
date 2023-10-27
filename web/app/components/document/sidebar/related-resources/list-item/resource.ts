@@ -26,7 +26,7 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
    */
   protected get docType() {
     this.assertResourceIsDocument(this.args.resource);
-    return this.args.resource.docType;
+    return this.args.resource.documentType;
   }
 
   /**

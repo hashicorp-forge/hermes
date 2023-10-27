@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
+import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
@@ -17,6 +18,7 @@ export type RecentlyViewedDoc = {
 };
 
 export default class RecentlyViewedDocsService extends Service {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: any;
 
@@ -52,7 +54,7 @@ export default class RecentlyViewedDocsService extends Service {
        * Fetch the file IDs from the backend.
        */
       let fetchResponse = await this.fetchSvc.fetch(
-        "/api/v1/me/recently-viewed-docs",
+        `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
       );
 
       this.index = (await fetchResponse?.json()) || [];
@@ -73,7 +75,9 @@ export default class RecentlyViewedDocsService extends Service {
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
           let doc = await this.fetchSvc
-            .fetch(`/api/v1/${endpoint}/${id}`)
+            .fetch(
+              `/api/${this.configSvc.config.api_version}/${endpoint}/${id}`,
+            )
             .then((resp) => resp?.json());
 
           doc.isDraft = isDraft;

@@ -182,11 +182,7 @@ export default function (mirageConfig) {
        *************************************************************************/
       // Create a project
       this.post("/projects", (schema, request) => {
-        let project = schema.projects.create({
-          ...JSON.parse(request.requestBody),
-          creator: "testuser@example.com",
-          dateCreated: 1,
-        });
+        let project = schema.projects.create(JSON.parse(request.requestBody));
         return new Response(200, {}, project.attrs);
       });
 
@@ -545,7 +541,7 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used by the /all/projects route to fetch a list of projects.
+       * Used by the /projects route to fetch a list of projects.
        */
       this.get("/projects", () => {
         const projects = this.schema.projects.all().models;
@@ -561,8 +557,6 @@ export default function (mirageConfig) {
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
-
-        console.log("project", project);
 
         return new Response(200, {}, project.attrs);
       });

@@ -13,11 +13,12 @@ export default Factory.extend({
   title() {
     return `Related Document ${this.id}`;
   },
-  docType: "RFC",
+  documentType: "RFC",
   documentNumber() {
     return `LAB-00${this.id}`;
   },
-  product: "Vault",
-  status: "In Review",
+  status: "In review",
+  product: "Labs",
   owners: ["testuser@example.com"],
+  ownerPhotos: ["https://placehold.co/100x100"],
 });

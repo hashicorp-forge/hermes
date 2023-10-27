@@ -1,9 +1,11 @@
 // @ts-ignore -- TODO: Add Types
 import Torii from "ember-simple-auth/authenticators/torii";
 import { inject as service } from "@ember/service";
+import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 
 export default class ToriiAuthenticator extends Torii {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
   // Appears unused, but necessary for the session service
@@ -16,7 +18,7 @@ export default class ToriiAuthenticator extends Torii {
      * in the session being invalidated or remaining unauthenticated.
      */
     return this.fetchSvc
-      .fetch("/api/v1/me", {
+      .fetch(`/api/${this.configSvc.config.api_version}/me`, {
         method: "HEAD",
         headers: {
           "Hermes-Google-Access-Token": data.access_token,

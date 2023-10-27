@@ -1,7 +1,7 @@
 <div
   data-test-doc-thumbnail
   class="doc-thumbnail
-    {{if @isLarge 'large'}}
+    {{if this.sizeIsLarge 'large'}}
     {{if this.isObsolete 'obsolete'}}
     rounded bg-color-palette-neutral-100"
   ...attributes
@@ -10,7 +10,7 @@
 
   <div class="absolute h-full w-full">
     {{#if this.isObsolete}}
-      <Doc::FolderAffordance @isLarge={{@isLarge}} />
+      <Doc::FolderAffordance @size={{@size}} />
     {{/if}}
 
     {{#if (or this.isApproved this.isObsolete)}}

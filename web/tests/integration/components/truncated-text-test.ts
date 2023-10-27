@@ -27,7 +27,7 @@ module("Integration | Component | truncated-text", function (hooks) {
 
     emberAssert(
       "container must be an HTMLElement",
-      container instanceof HTMLElement
+      container instanceof HTMLElement,
     );
     emberAssert("text must be an HTMLElement", text instanceof HTMLElement);
 

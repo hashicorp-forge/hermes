@@ -326,12 +326,12 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       googleFileID: attrs.objectID,
       status: attrs.status,
       title: attrs.title,
-      docType: attrs.docType,
+      documentType: attrs.docType,
       documentNumber: attrs.docNumber,
       owners: attrs.owners,
       ownerPhotos: attrs.ownerPhotos,
-      sortOrder: 1,
       product: attrs.product,
+      sortOrder: 1,
     } as RelatedHermesDocument;
 
     this.args.addResource(relatedHermesDocument);

@@ -251,7 +251,7 @@ func DraftsHandler(
 					Name: req.Product,
 				},
 				Status:  models.WIPDocumentStatus,
-				Summary: req.Summary,
+				Summary: &req.Summary,
 				Title:   req.Title,
 			}
 			if err := model.Create(db); err != nil {
@@ -1104,7 +1104,7 @@ func DraftsDocumentHandler(
 			// Summary.
 			if req.Summary != nil {
 				doc.Summary = *req.Summary
-				model.Summary = *req.Summary
+				model.Summary = req.Summary
 			}
 
 			// Title.
@@ -1176,7 +1176,11 @@ func DraftsDocumentHandler(
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			w.WriteHeader(http.StatusOK)
-			l.Info("patched draft document", "doc_id", docId)
+			l.Info("patched draft document",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docId,
+			)
 
 			// Compare Algolia and database documents to find data inconsistencies.
 			// Get document object from Algolia.

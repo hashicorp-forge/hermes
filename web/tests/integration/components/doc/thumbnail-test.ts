@@ -1,14 +1,14 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { render } from "@ember/test-helpers";
-import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import ProductAreasService from "hermes/services/product-areas";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import { render } from "@ember/test-helpers";
 
 interface DocThumbnailTestContext extends MirageTestContext {
-  isLarge: boolean;
-  status: string;
-  product: string;
+  size?: "large";
+  status?: string;
+  product?: string;
 }
 
 module("Integration | Component | doc/thumbnail", function (hooks) {
@@ -35,7 +35,7 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
 
     await render<DocThumbnailTestContext>(hbs`
       <Doc::Thumbnail
-        @isLarge={{this.isLarge}}
+        @size={{this.size}}
         @status={{this.status}}
         @product={{this.product}}
       />
@@ -52,7 +52,7 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
 
     assert.dom("[data-test-doc-thumbnail-product-badge]").hasText("LAB");
 
-    this.set("isLarge", true);
+    this.set("size", "large");
 
     assert
       .dom("[data-test-doc-thumbnail]")

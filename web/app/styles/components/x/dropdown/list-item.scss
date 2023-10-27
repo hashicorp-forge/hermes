@@ -40,3 +40,19 @@
 .x-dropdown-list-item-count {
   @apply ml-8 shrink-0;
 }
+
+.checkable-item {
+  &.checkmark-position--trailing {
+    .checkable-item-content {
+      @apply order-1;
+    }
+
+    .checkable-item-count {
+      @apply order-2;
+    }
+
+    .check {
+      @apply order-3;
+    }
+  }
+}

@@ -7,10 +7,10 @@ import ProductAreasService from "hermes/services/product-areas";
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    isLarge?: boolean;
     status?: string;
     product?: string;
     badgeIsHidden?: boolean;
+    size?: "large";
   };
 }
 
@@ -23,6 +23,14 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     } else {
       return null;
     }
+  }
+
+  protected get sizeIsLarge(): boolean {
+    return this.args.size === "large";
+  }
+
+  protected get productShortName(): string | undefined {
+    return getProductId(this.args.product);
   }
 
   protected get isApproved(): boolean {

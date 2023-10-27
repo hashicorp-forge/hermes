@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { HermesProject } from "hermes/types/project";
 
 interface ProjectTileComponentSignature {
-  Element: HTMLLIElement;
+  Element: HTMLDivElement;
   Args: {
     project: HermesProject;
   };
@@ -10,7 +10,7 @@ interface ProjectTileComponentSignature {
 
 export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
   protected get documents() {
-    return this.args.project.documents;
+    return this.args.project.hermesDocuments;
   }
 
   protected get jiraObject() {
@@ -18,7 +18,6 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
   }
 
   protected get productAreas() {
-    // @ts-ignore
     return this.documents?.map((doc) => doc.product).uniq();
   }
 }

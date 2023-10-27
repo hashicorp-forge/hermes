@@ -68,7 +68,7 @@ export default class ApplicationRoute extends Route {
     this.flags.initialize();
 
     await this.fetchSvc
-      .fetch("/api/v1/web/config")
+      .fetch(`/api/${this.config.config.api_version}/web/config`)
       .then((response) => response?.json())
       .then((json) => {
         this.config.setConfig(json);

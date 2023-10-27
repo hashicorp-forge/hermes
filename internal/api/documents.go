@@ -717,7 +717,7 @@ Hermes
 
 				// Summary.
 				if req.Summary != nil {
-					model.Summary = *req.Summary
+					model.Summary = req.Summary
 				}
 
 				// Title.
@@ -739,7 +739,11 @@ Hermes
 			}
 
 			w.WriteHeader(http.StatusOK)
-			l.Info("patched document", "doc_id", docID)
+			l.Info("patched document",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
 
 			// Compare Algolia and database documents to find data inconsistencies.
 			// Get document object from Algolia.

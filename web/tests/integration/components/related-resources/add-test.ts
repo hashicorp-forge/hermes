@@ -162,11 +162,11 @@ module("Integration | Component | related-resources/add", function (hooks) {
     // Here, we set it to resolve a promise after a timeout to
     // allow us to capture its `isRunning` state.
     this.set("search", () => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();
         }, 1000);
-      }) as Promise<void>;
+      });
     });
 
     await render<RelatedResourcesAddTestContext>(hbs`

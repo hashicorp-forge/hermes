@@ -57,43 +57,6 @@
   }
 }
 
-.overflow-menu-item-button {
-  @apply flex w-full space-x-2 py-2 px-4 leading-none;
-
-  > .flight-icon {
-    @apply text-inherit;
-  }
-}
-
-.overflow-button-container {
-  @apply pointer-events-none;
-  @apply flex;
-
-  &:hover,
-  &:focus-within {
-    @apply visible;
-  }
-}
-
-.overflow-button {
-  @apply pointer-events-auto relative p-[3px];
-
-  &:hover,
-  &:focus,
-  &:active,
-  &:focus-visible,
-  &.active {
-    .button-affordance {
-      @apply border-color-border-strong bg-color-foreground-high-contrast;
-    }
-  }
-
-  .button-affordance {
-    @apply top-[4px] right-0 flex rounded p-1;
-    @apply border border-transparent text-color-foreground-primary;
-  }
-}
-
 .related-resource-link {
   @apply relative grid items-start gap-2 rounded border border-transparent py-[5px];
   @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;

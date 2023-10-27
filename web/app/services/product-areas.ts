@@ -1,6 +1,7 @@
 import Service, { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
+import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 import { assert } from "@ember/debug";
 
@@ -10,6 +11,7 @@ export type ProductArea = {
 };
 
 export default class ProductAreasService extends Service {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked _index: Record<string, ProductArea> | null = null;
@@ -42,7 +44,7 @@ export default class ProductAreasService extends Service {
   fetch = task(async () => {
     try {
       this._index = await this.fetchSvc
-        .fetch("/api/v1/products")
+        .fetch(`/api/${this.configSvc.config.api_version}/products`)
         .then((resp) => resp?.json());
     } catch (err) {
       this._index = null;

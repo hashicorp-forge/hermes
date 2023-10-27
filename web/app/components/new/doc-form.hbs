@@ -1,117 +1,96 @@
-{{#if this.docIsBeingCreated}}
-  <div data-test-creating-new-doc class="mt-10 mb-9 text-center">
-    <FlightIcon @name="running" @size="24" />
-    <h1 class="mt-2 text-display-300 font-semibold">
-      Creating draft in Google Drive...
-    </h1>
-    <div class="mb-7 text-body-200 text-color-foreground-faint">
-      This usually takes 10-20 seconds.
-    </div>
-  </div>
-{{else}}
-  <New::ObjectTypeDropdown @selected="Document" />
-
-  <form
-    data-test-new-doc-form
-    {{! add photo of doc }}
-    class="mx-auto max-w-xl"
-    {{on "submit" this.submit}}
-    {{did-insert this.registerForm}}
-    {{on "submit" this.submit}}
-    class="mb-10"
+<New::Form
+  @taskIsRunning={{this.docIsBeingCreated}}
+  @icon={{get-doctype-icon @docType}}
+  @headline="Create your {{@docType}}"
+  @buttonIsActive={{this.buttonIsActive}}
+  @taskIsRunningHeadline="Creating draft in Google Drive..."
+  @taskIsRunningDescription="This usually takes 10-20 seconds."
+  @buttonText="Create draft in Google Drive"
+  {{did-insert this.registerForm}}
+  {{on "submit" this.submit}}
+  data-test-new-doc-form
+>
+  {{! Title }}
+  <Hds::Form::Textarea::Field
+    {{auto-height-textarea}}
+    {{autofocus}}
+    data-test-title-input
+    @value={{this.title}}
+    class="px-2.5"
+    placeholder="Enter a title"
+    name="title"
+    {{on "keydown" this.onKeydown}}
+    as |F|
   >
-    <div>
-      <h1 class="">
-        Create your
-        {{@docType}}
-      </h1>
-      <div class="flex flex-col gap-7 pt-8">
-        <Hds::Form::Textarea::Field
-          {{auto-height-textarea}}
-          {{autofocus}}
-          data-test-title-input
-          @value={{this.title}}
-          class="px-2.5 text-display-300 font-semibold placeholder-color-palette-neutral-300"
-          placeholder="Enter a title"
-          name="title"
-          {{on "input" this.updateForm}}
-          as |F|
+    <F.Label @isRequired={{true}}>Title</F.Label>
+    {{#if this.formErrors.title}}
+      <F.Error data-test-title-error>
+        {{this.formErrors.title}}
+      </F.Error>
+    {{/if}}
+  </Hds::Form::Textarea::Field>
+
+  {{! Summary }}
+  <div>
+    <div class="flex gap-2.5">
+      <Hds::Form::Label>Summary</Hds::Form::Label>
+      {{#if this.summaryIsLong}}
+        <span
+          data-test-summary-warning
+          class="mt-px text-body-100 text-color-foreground-warning"
         >
-          <F.Label>Title</F.Label>
-        </Hds::Form::Textarea::Field>
-
-        <div class="relative">
-          <Hds::Form::Textarea::Field
-            data-test-summary-input
-            @value={{this.summary}}
-            rows="2"
-            name="summary"
-            class="px-2.5 py-2 placeholder-color-palette-neutral-400"
-            placeholder="One or two sentences outlining your doc."
-            {{on "input" this.updateForm}}
-            as |F|
-          >
-            <F.Label>Summary</F.Label>
-          </Hds::Form::Textarea::Field>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <span class="hermes-form-label">
-              Product/Area
-            </span>
-          </div>
-          <Inputs::ProductSelect
-            @selected={{this.productArea}}
-            @onChange={{this.onProductSelect}}
-            @offset={{(hash mainAxis=0 crossAxis=-3)}}
-            @matchAnchorWidth={{(hash enabled=true additionalWidth=6)}}
-            class="max-h-[240px]"
-          />
-        </div>
-
-        <Hds::Form::Field @layout="vertical" as |F|>
-          {{yield
-            (hash
-              Error=F.Error
-              HelperText=F.HelperText
-              Label=F.Label
-              isRequired=F.isRequired
-              isOptional=F.isOptional
-            )
-          }}
-          <F.Control>
-            <Inputs::PeopleSelect
-              class="multiselect w-full"
-              @selected={{this.contributors}}
-              @onChange={{this.updateContributors}}
-            />
-          </F.Control>
-          <F.Label class="flex items-center gap-1.5">
-            Contributors
-            <TooltipIcon
-              @text="People to share your doc with. You can always add more later."
-            />
-          </F.Label>
-          {{#if this.formErrors.contributors}}
-            <F.Error as |E|>
-              <E.Message>{{this.formErrors.contributors}}</E.Message>
-            </F.Error>
-          {{/if}}
-        </Hds::Form::Field>
-      </div>
-      <Hds::Button
-        data-test-create-button
-        @text="Create draft in Google Drive"
-        type="submit"
-        disabled={{not this.formRequirementsMet}}
-        class="mt-8"
-      />
-      <div class="h-16"></div>
-
+          Limit this to 1 or 2 sentences if possible.
+        </span>
+      {{/if}}
     </div>
+    <Hds::Form::Textarea::Field
+      data-test-summary-input
+      @value={{this.summary}}
+      rows="3"
+      name="summary"
+      class="mt-2 px-2.5 py-2 placeholder-color-palette-neutral-400"
+      placeholder="One or two sentences outlining your doc."
+      {{on "keydown" this.onKeydown}}
+    />
+  </div>
 
-    <Hds::Button @text="Create new document" type="submit" />
-  </form>
+  {{! Product/area }}
+  <div>
+    <Hds::Form::Label
+      class="mb-2 flex"
+      @controlId="product-select"
+      @isRequired={{true}}
+    >
+      Product/Area
+    </Hds::Form::Label>
+    <Inputs::ProductSelect
+      @selected={{this.productArea}}
+      @onChange={{this.onProductSelect}}
+      @offset={{(hash mainAxis=0 crossAxis=-3)}}
+      @matchAnchorWidth={{hash enabled=true additionalWidth=6}}
+      class="max-h-[240px]"
+    />
+    {{#if this.formErrors.productAbbreviation}}
+      <Hds::Form::Error data-test-product-error class="mt-2">
+        {{this.formErrors.productAbbreviation}}
+      </Hds::Form::Error>
+    {{/if}}
+  </div>
 
-{{/if}}
+  {{! Contributors }}
+  <Hds::Form::Field @layout="vertical" as |F|>
+    <F.Control>
+      <Inputs::PeopleSelect
+        class="multiselect w-full"
+        @selected={{this.contributors}}
+        @onChange={{this.updateContributors}}
+      />
+    </F.Control>
+    <F.Label class="flex items-center gap-1.5">
+      Contributors
+      <TooltipIcon
+        @text="People to share your doc with. You can always add more later."
+      />
+    </F.Label>
+  </Hds::Form::Field>
+</New::Form>
