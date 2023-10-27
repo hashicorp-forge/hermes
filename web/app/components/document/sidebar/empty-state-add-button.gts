@@ -5,7 +5,7 @@ import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import { on } from "@ember/modifier";
 
 interface DocumentSidebarEmptyStateAddButtonSignature {
-  Element: HTMLButtonElement;
+  Element: HTMLButtonElement | HTMLDivElement;
   Args: {
     isReadOnly?: boolean;
     action: () => void;
@@ -17,11 +17,11 @@ export default class DocumentSidebarEmptyStateAddButton extends Component<Docume
     <div class="editable-field-container">
       <div class="editable-field button-affordance">
         {{#if @isReadOnly}}
-          <div class="field-toggle read-only">
+          <div class="field-toggle read-only" ...attributes>
             <EmptyStateText />
           </div>
         {{else}}
-          <Action {{on "click" @action}} class="field-toggle">
+          <Action {{on "click" @action}} class="field-toggle" ...attributes>
             <EmptyStateText />
             <span class="edit-affordance light-gray">
               <FlightIcon @name="plus" class="text-color-foreground-faint" />
