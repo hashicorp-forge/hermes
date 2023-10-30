@@ -1,7 +1,6 @@
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
-import ProductAreasService from "hermes/services/product-areas";
 import { module, test } from "qunit";
 
 const AVATAR = "[data-test-product-avatar]";

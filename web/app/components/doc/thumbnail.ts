@@ -25,7 +25,9 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected size = this.args.size ?? DocThumbnailSize.Small;
+  protected get size() {
+    return this.args.size ?? DocThumbnailSize.Small;
+  }
 
   protected get productShortName(): string | undefined {
     return getProductId(this.args.product);

@@ -26,7 +26,9 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     return productID;
   }
 
-  private size = this.args.size ?? HermesAvatarSize.Small;
+  private get size() {
+    return this.args.size ?? HermesAvatarSize.Small;
+  }
 
   <template>
     <div
