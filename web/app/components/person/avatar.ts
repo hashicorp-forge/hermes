@@ -15,17 +15,7 @@ interface PersonAvatarComponentSignature {
 }
 
 export default class PersonAvatarComponent extends Component<PersonAvatarComponentSignature> {
-  protected get sizeIsSmall(): boolean {
-    return this.args.size === HermesAvatarSize.Small || !this.args.size;
-  }
-
-  protected get sizeIsMedium(): boolean {
-    return this.args.size === HermesAvatarSize.Medium;
-  }
-
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === HermesAvatarSize.Large;
-  }
+  protected size = this.args.size ?? HermesAvatarSize.Small;
 }
 
 declare module "@glint/environment-ember-loose/registry" {
