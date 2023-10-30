@@ -9,7 +9,7 @@ import { HermesAvatarSize } from "hermes/types/avatar-size";
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    product: string;
+    product?: string;
     size?: `${HermesAvatarSize}`;
   };
   Blocks: {
