@@ -10,7 +10,11 @@ import FetchService from "hermes/services/fetch";
 import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
 
-interface NewProjectFormComponentSignature {}
+interface NewProjectFormComponentSignature {
+  Args: {
+    onlyFormIsShown?: boolean;
+  };
+}
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;

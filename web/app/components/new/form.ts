@@ -20,12 +20,13 @@ interface NewFormComponentSignature {
   Element: HTMLFormElement;
   Args: {
     taskIsRunning: boolean;
-    icon: string;
-    headline: string;
-    taskIsRunningHeadline: string;
-    taskIsRunningDescription: string;
+    icon?: string;
+    headline?: string;
+    taskIsRunningHeadline?: string;
+    taskIsRunningDescription?: string;
     buttonText: string;
     buttonIsActive: boolean;
+    onlyFormIsShown?: boolean;
   };
   Blocks: {
     default: [];

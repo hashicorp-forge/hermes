@@ -1,46 +1,103 @@
 <Hds::Modal @onClose={{@onClose}} as |M|>
   <M.Header>
-    Add to project
+    <div class="flex w-full items-center gap-1.5">
+      {{if this.newProjectFormIsShowing "Start a project" "Add to project"}}
+      <div class="flex gap-px text-body-200 font-regular">
+        {{!-- {{#if this.newProjectFormIsShowing}}
+          <span class="text-normal">
+            containing
+          </span>
+        {{/if}} --}}
+        {{!-- <span
+          class="mx-1 inline-flex max-w-[250px] rounded border border-color-border-strong px-1"
+        >
+          <span class="truncate">
+            {{@docTitle}}
+          </span>
+        </span> --}}
+      </div>
+      {{!-- {{#unless this.newProjectFormIsShowing}}
+        to project
+      {{/unless}} --}}
+    </div>
   </M.Header>
   <M.Body>
     <X::DropdownList
       @inputIsShown={{false}}
       @items={{this.algoliaResults}}
-      @listIsShown={{true}}
+      @listIsShown={{not this.newProjectFormIsShowing}}
       @disableClose={{true}}
       @placement={{null}}
     >
       <:anchor as |dd|>
-        <div class="relative">
-          <Hds::Form::TextInput::Base
-            {{autofocus waitUntilNextRunloop=true}}
-            {{did-insert dd.registerAnchor}}
-            @type="search"
-            @value={{this.inputValue}}
-            placeholder="Search projects"
-            aria-label="Search projects"
-            aria-controls={{dd.ariaControls}}
-            aria-expanded={{dd.contentIsShown}}
-            aria-haspopup="listbox"
-          />
-          {{#if this.searchIsRunning}}
-            <div
-              data-test-search-loading-icon
-              class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-            >
-              <FlightIcon @name="loading" />
-            </div>
+        <div class="relative" {{did-insert dd.registerAnchor}}>
+          {{#if this.newProjectFormIsShowing}}
+            <New::ProjectForm @onlyFormIsShown={{true}} />
+          {{else}}
+            <Hds::Form::TextInput::Base
+              {{autofocus waitUntilNextRunloop=true}}
+              @type="search"
+              @value={{this.inputValue}}
+              placeholder="Search projects"
+              aria-label="Search projects"
+              aria-controls={{dd.ariaControls}}
+              aria-expanded={{dd.contentIsShown}}
+              aria-haspopup="listbox"
+            />
+            {{#if this.searchIsRunning}}
+              <div
+                data-test-search-loading-icon
+                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+              >
+                <FlightIcon @name="loading" />
+              </div>
+            {{/if}}
+
           {{/if}}
         </div>
       </:anchor>
       <:item as |dd|>
-        <dd.Action>
-          {{dd.attrs.title}}
+        <dd.Action class="block">
+          <div class="flex w-full gap-2">
+            <FlightIcon
+              @name={{get-project-status-icon dd.attrs.status}}
+              class="shrink-0"
+            />
+
+            <div>
+              <div class="text-display-300 font-semibold">
+                {{dd.attrs.title}}
+                {{#if dd.attrs.jiraObject}}
+                  <span class="font-regular text-color-foreground-faint">
+                    {{dd.attrs.jiraObject.key}}
+                  </span>
+                {{/if}}
+              </div>
+              {{#if dd.attrs.hermesDocuments}}
+                <div class="flex gap-2 text-color-foreground-faint">
+                  {{#each
+                    (get-products-from-docs dd.attrs.hermesDocuments)
+                    as |product|
+                  }}
+                    <div>
+                      {{product}}
+                    </div>
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+          </div>
         </dd.Action>
       </:item>
     </X::DropdownList>
   </M.Body>
-  <M.Footer>
-    <Hds::Button @text="Create a new project" />
-  </M.Footer>
+  {{#unless this.newProjectFormIsShowing}}
+    <M.Footer>
+      <Hds::Button
+        {{on "click" this.showNewProjectForm}}
+        @text="Start a new project..."
+        @color="secondary"
+      />
+    </M.Footer>
+  {{/unless}}
 </Hds::Modal>

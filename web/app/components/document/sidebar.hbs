@@ -260,7 +260,10 @@
                   >
                     <div class="flex w-[22px] shrink-0 justify-center py-[2px]">
 
-                      <FlightIcon @name="circle-dot" class="" />
+                      <FlightIcon
+                        @name={{get-project-status-icon project.status}}
+                        class=""
+                      />
                     </div>
                     <div class="overflow-hidden">
 
@@ -470,7 +473,10 @@
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.projectsModalIsShown}}
-    <Projects::AddOrCreate @onClose={{this.hideProjectsModal}} />
+    <Projects::AddOrCreate
+      @docTitle={{@document.title}}
+      @onClose={{this.hideProjectsModal}}
+    />
   {{/if}}
 
   {{#if this.archiveModalIsShown}}

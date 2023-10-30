@@ -6,6 +6,7 @@
   @taskIsRunningHeadline="Creating project..."
   @taskIsRunningDescription="This shouldn't take long."
   @buttonText="Create project"
+  @onlyFormIsShown={{@onlyFormIsShown}}
   @buttonIsActive={{gt this.title.length 0}}
   {{on "submit" this.maybeSubmitForm}}
 >
@@ -41,6 +42,19 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
-  {{! TODO: Add Jira integration }}
+  {{#unless @onlyFormIsShown}}
+    <Hds::Form::TextInput::Field
+      data-test-title
+      @value={{this.title}}
+      name="jira"
+      @type="search"
+      placeholder="Find a ..."
+      as |F|
+    >
+      <F.Label>
+        Jira
+      </F.Label>
+    </Hds::Form::TextInput::Field>
+  {{/unless}}
 
 </New::Form>
