@@ -1,6 +1,6 @@
 <div
   data-test-product-select-item
-  class="product-select-item relative flex w-full gap-2"
+  class="relative flex w-full gap-2"
   ...attributes
 >
   <FlightIcon
@@ -19,10 +19,8 @@
       <EmptyStateText data-test-empty-state @value="Select a product/area" />
     {{/if}}
 
-    {{#if @abbreviation}}
-      <span class="product-select-toggle-abbreviation">
-        {{@abbreviation}}
-      </span>
+    {{#if this.abbreviationIsShown}}
+      {{@abbreviation}}
     {{/if}}
   </div>
 

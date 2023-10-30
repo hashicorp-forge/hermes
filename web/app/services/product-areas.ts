@@ -31,9 +31,13 @@ export default class ProductAreasService extends Service {
       return;
     }
 
-    return product.abbreviation.slice(0, 3).toUpperCase();
+    return product.abbreviation;
   }
 
+  /**
+   * The fetch call to the `/products` endpoint.
+   * Awaited on login by the `/authenticated` route.
+   */
   fetch = task(async () => {
     try {
       this._index = await this.fetchSvc
