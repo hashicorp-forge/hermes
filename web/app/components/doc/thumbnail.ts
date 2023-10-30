@@ -31,26 +31,8 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get productAvatarSize() {
-    if (this.sizeIsLarge) {
-      return "large";
-    } else if (this.sizeIsMedium) {
-      return "medium";
-    } else {
-      return "small";
-    }
-  }
-
-  protected get sizeIsSmall(): boolean {
-    return this.args.size === "small" || !this.args.size;
-  }
-
-  protected get sizeIsMedium(): boolean {
-    return this.args.size === "medium";
-  }
-
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === "large";
+  protected get size() {
+    return this.args.size ?? DocThumbnailSize.Small;
   }
 
   protected get productShortName(): string | undefined {
