@@ -474,7 +474,7 @@
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.projectsModalIsShown}}
     <Projects::AddOrCreate
-      @docTitle={{@document.title}}
+      @document={{@document}}
       @onClose={{this.hideProjectsModal}}
     />
   {{/if}}

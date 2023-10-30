@@ -20,7 +20,7 @@ export interface RelatedExternalLink {
 }
 
 export interface RelatedHermesDocument {
-  id: number;
+  id: string;
   googleFileID: string;
   title: string;
   documentType: string;

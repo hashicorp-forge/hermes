@@ -4,15 +4,17 @@ import { HermesProject, JiraObject } from "hermes/types/project";
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import { action } from "@ember/object";
+import { HermesDocument } from "hermes/types/document";
 
 interface ProjectsAddOrCreateSignature {
   Args: {
     onClose: () => void;
-    docTitle: string;
+    document: HermesDocument;
   };
 }
 
 export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSignature> {
+  @tracked protected searchIsRunning = false;
   @tracked protected inputValue = "";
 
   @tracked protected newProjectFormIsShowing = false;
@@ -20,7 +22,12 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
 
-  get algoliaResults(): Record<string, HermesProject> {
+  protected get inputValueIsEmpty(): boolean {
+    console.log("inputValueIsEmpty");
+    return this.inputValue.length === 0;
+  }
+
+  protected get algoliaResults(): Record<string, HermesProject> {
     return {
       "1": {
         id: "1",
@@ -43,7 +50,34 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
         title: "Login flow for new users",
         hermesDocuments: [{ product: "Terraform" }] as RelatedHermesDocument[],
         jiraObject: {
-          key: "TES-333",
+          key: "HERMES-022",
+        } as JiraObject,
+        creator: "test",
+        dateCreated: 123,
+        dateModified: 123,
+        status: ProjectStatus.Active,
+      },
+      "3": {
+        id: "3",
+        title: "Surveying users about their account creation experience",
+        hermesDocuments: [
+          { product: "Labs" },
+          { product: "Waypoint" },
+        ] as RelatedHermesDocument[],
+        creator: "test",
+        dateCreated: 123,
+        dateModified: 123,
+        status: ProjectStatus.Active,
+      },
+      "4": {
+        id: "4",
+        title: "Login flow for new users",
+        hermesDocuments: [
+          { product: "Cloud Platform" },
+          { product: "Security" },
+        ] as RelatedHermesDocument[],
+        jiraObject: {
+          key: "SEC-418",
         } as JiraObject,
         creator: "test",
         dateCreated: 123,
@@ -53,10 +87,17 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     };
   }
 
-  @tracked protected searchIsRunning = false;
-
   @action protected showNewProjectForm() {
     this.newProjectFormIsShowing = true;
+  }
+
+  @action protected updateInputValue(event: Event) {
+    this.searchIsRunning = true;
+    this.inputValue = (event.target as HTMLInputElement).value;
+
+    setTimeout(() => {
+      this.searchIsRunning = false;
+    }, 400);
   }
 }
 

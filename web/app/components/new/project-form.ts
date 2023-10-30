@@ -7,12 +7,16 @@ import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
+import { HermesDocument } from "hermes/types/document";
+import { HermesProject } from "hermes/types/project";
 import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
+import { RelatedHermesDocument } from "../related-resources";
 
 interface NewProjectFormComponentSignature {
   Args: {
     onlyFormIsShown?: boolean;
+    document?: HermesDocument;
   };
 }
 
@@ -69,6 +73,27 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
+  get hermesDocument(): RelatedHermesDocument | undefined {
+    const doc = this.args.document;
+
+    if (!doc) {
+      return;
+    }
+
+    const { title, product, status } = doc;
+
+    return {
+      id: doc.objectID,
+      googleFileID: doc.objectID,
+      title,
+      product,
+      status,
+      documentType: doc.docType,
+      documentNumber: doc.docNumber,
+      sortOrder: 1,
+    };
+  }
+
   /**
    * The task that creates a project and, if successful,
    * transitions to it. On error, displays a FlashMessage
@@ -87,6 +112,9 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           }),
         })
         .then((response) => response?.json());
+
+      console.log("created project", project);
+
       this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (error: unknown) {
       const typedError = error as Error;

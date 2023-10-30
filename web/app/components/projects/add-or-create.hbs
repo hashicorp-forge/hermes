@@ -1,24 +1,20 @@
 <Hds::Modal @onClose={{@onClose}} as |M|>
   <M.Header>
-    <div class="flex w-full items-center gap-1.5">
-      {{if this.newProjectFormIsShowing "Start a project" "Add to project"}}
-      <div class="flex gap-px text-body-200 font-regular">
-        {{!-- {{#if this.newProjectFormIsShowing}}
-          <span class="text-normal">
-            containing
-          </span>
-        {{/if}} --}}
-        {{!-- <span
-          class="mx-1 inline-flex max-w-[250px] rounded border border-color-border-strong px-1"
-        >
-          <span class="truncate">
-            {{@docTitle}}
-          </span>
-        </span> --}}
-      </div>
-      {{!-- {{#unless this.newProjectFormIsShowing}}
-        to project
-      {{/unless}} --}}
+    <div class="flex w-full items-center gap-2.5">
+      {{if
+        this.newProjectFormIsShowing
+        "Start a project"
+        "Add document to project"
+      }}
+      {{#unless this.newProjectFormIsShowing}}
+        <span class="hermes-h4 mt-0.5">or</span>
+        <Hds::Button
+          {{on "click" this.showNewProjectForm}}
+          @text="Start a new project..."
+          @color="secondary"
+          @size="small"
+        />
+      {{/unless}}
     </div>
   </M.Header>
   <M.Body>
@@ -28,16 +24,21 @@
       @listIsShown={{not this.newProjectFormIsShowing}}
       @disableClose={{true}}
       @placement={{null}}
+      class="non-floating-list"
     >
       <:anchor as |dd|>
         <div class="relative" {{did-insert dd.registerAnchor}}>
           {{#if this.newProjectFormIsShowing}}
-            <New::ProjectForm @onlyFormIsShown={{true}} />
+            <New::ProjectForm
+              @onlyFormIsShown={{true}}
+              @document={{@document}}
+            />
           {{else}}
             <Hds::Form::TextInput::Base
-              {{autofocus waitUntilNextRunloop=true}}
+              autofocus
               @type="search"
               @value={{this.inputValue}}
+              {{on "input" this.updateInputValue}}
               placeholder="Search projects"
               aria-label="Search projects"
               aria-controls={{dd.ariaControls}}
@@ -52,29 +53,41 @@
                 <FlightIcon @name="loading" />
               </div>
             {{/if}}
-
           {{/if}}
         </div>
       </:anchor>
+      <:header>
+        {{#unless this.newProjectFormIsShowing}}
+          <h4 class="hermes-h4 mt-3.5">
+            {{if this.inputValueIsEmpty "Latest" "Results"}}
+          </h4>
+        {{/unless}}
+      </:header>
       <:item as |dd|>
         <dd.Action class="block">
-          <div class="flex w-full gap-2">
+          <div class="flex w-full gap-3.5">
             <FlightIcon
               @name={{get-project-status-icon dd.attrs.status}}
-              class="shrink-0"
+              class="mt-[3px] shrink-0"
             />
 
-            <div>
-              <div class="text-display-300 font-semibold">
-                {{dd.attrs.title}}
+            <div class="w-full overflow-hidden">
+              <div class="flex w-full justify-between">
+                <div
+                  class="w-full max-w-[70%] truncate text-display-300 font-semibold"
+                >
+                  {{dd.attrs.title}}
+                </div>
                 {{#if dd.attrs.jiraObject}}
-                  <span class="font-regular text-color-foreground-faint">
+                  <span class="shrink-0 text-color-foreground-faint">
                     {{dd.attrs.jiraObject.key}}
                   </span>
                 {{/if}}
               </div>
               {{#if dd.attrs.hermesDocuments}}
-                <div class="flex gap-2 text-color-foreground-faint">
+                <div
+                  class="flex gap-2 text-body-100 text-color-foreground-faint"
+                >
                   {{#each
                     (get-products-from-docs dd.attrs.hermesDocuments)
                     as |product|
@@ -92,12 +105,13 @@
     </X::DropdownList>
   </M.Body>
   {{#unless this.newProjectFormIsShowing}}
-    <M.Footer>
+    {{!-- <M.Footer>
       <Hds::Button
         {{on "click" this.showNewProjectForm}}
         @text="Start a new project..."
         @color="secondary"
+
       />
-    </M.Footer>
+    </M.Footer> --}}
   {{/unless}}
 </Hds::Modal>

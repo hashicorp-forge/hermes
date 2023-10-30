@@ -31,6 +31,7 @@
           <:anchor as |dd|>
             <div class="relative">
               <Hds::Form::TextInput::Base
+                autofocus
                 data-test-related-resources-search-input
                 {{did-insert (fn this.didInsertInput dd)}}
                 {{on "input" this.onInput}}
