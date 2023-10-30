@@ -11,14 +11,6 @@ export default class DocFolderAffordance extends Component<DocFolderAffordanceSi
   protected get sizeIsSmall(): boolean {
     return this.args.size === "small" || !this.args.size;
   }
-
-  protected get sizeIsMedium(): boolean {
-    return this.args.size === "medium";
-  }
-
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === "large";
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
