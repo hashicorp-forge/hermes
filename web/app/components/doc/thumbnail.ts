@@ -25,17 +25,7 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get productAvatarSize() {
-    if (this.sizeIsLarge) {
-      return DocThumbnailSize.Large;
-    } else {
-      return DocThumbnailSize.Small;
-    }
-  }
-
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === "large";
-  }
+  protected size = this.args.size ?? DocThumbnailSize.Small;
 
   protected get productShortName(): string | undefined {
     return getProductId(this.args.product);

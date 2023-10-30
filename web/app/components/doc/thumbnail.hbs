@@ -1,7 +1,7 @@
 <div
   data-test-doc-thumbnail
   class="doc-thumbnail
-    {{if this.sizeIsLarge 'large'}}
+    {{this.size}}
     {{if this.isObsolete 'obsolete'}}
     rounded bg-color-palette-neutral-100"
   ...attributes
@@ -28,7 +28,7 @@
       <Product::Avatar
         data-test-doc-thumbnail-product-badge
         @product={{@product}}
-        @size={{this.productAvatarSize}}
+        @size={{this.size}}
         class="absolute left-0 bottom-0"
       />
     {{/if}}
