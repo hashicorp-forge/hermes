@@ -190,16 +190,28 @@ func CompareAlgoliaAndDatabaseDocument(
 		re := regexp.MustCompile(`-\?\?\?$`)
 		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000")
 
-		// Note that we pad the database document number to three digits here like
-		// we do when assigning a document number when a doc review is requested.
-		dbDocNumber := fmt.Sprintf(
-			"%s-%03d", dbDoc.Product.Abbreviation, dbDoc.DocumentNumber)
+		var dbDocNumber string
+		// If document number in Algolia isn't empty, build the database document
+		// number. If it is empty, we expect the database document number to be
+		// empty too.
+		if algoDocNumber != "" {
+			// Note that we pad the database document number to three digits here like
+			// we do when assigning a document number when a doc review is requested.
+			dbDocNumber = fmt.Sprintf(
+				"%s-%03d", dbDoc.Product.Abbreviation, dbDoc.DocumentNumber)
+		}
 		if algoDocNumber != dbDocNumber {
-			result = multierror.Append(result,
-				fmt.Errorf(
-					"docNumber not equal, algolia=%v, db=%v",
-					algoDocNumber, dbDocNumber),
-			)
+			// Some legacy documents may not have the three digit number padding so
+			// check that too.
+			dbDocNumberNoPadding := fmt.Sprintf(
+				"%s-%d", dbDoc.Product.Abbreviation, dbDoc.DocumentNumber)
+			if algoDocNumber != dbDocNumberNoPadding {
+				result = multierror.Append(result,
+					fmt.Errorf(
+						"docNumber not equal, algolia=%v, db=%v",
+						algoDocNumber, dbDocNumber),
+				)
+			}
 		}
 	}
 

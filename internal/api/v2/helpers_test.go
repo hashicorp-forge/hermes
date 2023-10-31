@@ -284,6 +284,37 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			},
 		},
 
+		"good legacy doc number without three digit padding": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-23",
+				"docType":    "RFC",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+			},
+			dbDoc: models.Document{
+				DocumentNumber: 23,
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+		},
+
 		"good with different order of slice and map fields": {
 			algoDoc: map[string]any{
 				"appCreated": true,
