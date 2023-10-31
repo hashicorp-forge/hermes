@@ -675,6 +675,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 									"doc_id", docID,
 									"method", r.Method,
 									"path", r.URL.Path,
+									"product", doc.Product,
 								)
 							}
 						}
