@@ -544,16 +544,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
           shareButton.classList.add("out");
 
-          void this.fetchSvc.fetch(
-            `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                isShareable: false,
-              }),
-            },
-          );
+          void this.fetchSvc.fetch(`/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: false,
+            }),
+          });
 
           // Give time for the link icon to animate out
           await timeout(Ember.testing ? 0 : 300);
@@ -566,16 +563,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           this.newDraftVisibilityIcon = DraftVisibilityIcon.Shareable;
           this._docIsShareable = true;
 
-          await this.fetchSvc.fetch(
-            `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                isShareable: true,
-              }),
-            },
-          );
+          await this.fetchSvc.fetch(`/drafts/${this.docID}/shareable`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              isShareable: true,
+            }),
+          });
 
           // Kick off the timer for the "link created" state.
           void this.showCreateLinkSuccessMessage.perform();
@@ -659,14 +653,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/${endpoint}/${this.docID}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(fields),
-        },
-      );
+      await this.fetchSvc.fetch(`/${endpoint}/${this.docID}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to save document");
       throw error;
@@ -682,12 +673,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         approvers: this.approvers?.compact().mapBy("email"),
       });
 
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/reviews/${this.docID}`,
-        {
-          method: "POST",
-        },
-      );
+      await this.fetchSvc.fetch(`/reviews/${this.docID}`, {
+        method: "POST",
+      });
 
       this.router.transitionTo({
         queryParams: { draft: false },
@@ -801,9 +789,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   private getDraftPermissions = task(async () => {
     try {
       const response = await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
-        )
+        .fetch(`/drafts/${this.docID}/shareable`)
         .then((response) => response?.json());
       if (response?.isShareable) {
         this._docIsShareable = true;
@@ -813,13 +799,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   approve = task(async () => {
     try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      await this.fetchSvc.fetch(`/approvals/${this.docID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
       this.showFlashSuccess("Done!", "Document approved");
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to approve");
@@ -831,13 +814,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   requestChanges = task(async () => {
     try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      await this.fetchSvc.fetch(`/approvals/${this.docID}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
       // Add a notification for the user
       let msg = "Requested changes for document";
       // FRDs are a special case that can be approved or not approved.

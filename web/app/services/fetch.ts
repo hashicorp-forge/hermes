@@ -38,7 +38,10 @@ export default class FetchService extends Service {
     }
 
     try {
-      const resp = await fetch(url, options);
+      const resp = await fetch(
+        `/api/${this.configSvc.config.api_version}${url}`,
+        options,
+      );
 
       // if it's a poll call, tell the SessionService if the response was a 401
       if (isPollCall) {

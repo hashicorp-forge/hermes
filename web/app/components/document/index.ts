@@ -37,13 +37,10 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
 
   protected deleteDraft = dropTask(async (docID: string) => {
     try {
-      let fetchResponse = await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/drafts/` + docID,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      let fetchResponse = await this.fetchSvc.fetch("/drafts/" + docID, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!fetchResponse?.ok) {
         this.showError(fetchResponse?.statusText);

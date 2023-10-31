@@ -19,7 +19,7 @@ export function initialize(application) {
   // Set Google OAuth config from the backend in production (and if not skipping
   // Google auth).
   if (config.environment === "production") {
-    fetch("/api/v1/web/config")
+    fetch("/web/config")
       .then((response) => response?.json())
       .then((json) => {
         if (!json.skip_google_auth) {

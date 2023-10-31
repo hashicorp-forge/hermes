@@ -74,7 +74,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     try {
       this.projectIsBeingCreated = true;
       const project = await this.fetchSvc
-        .fetch("/api/v1/projects", {
+        .fetch("/projects", {
           method: "POST",
           body: JSON.stringify({
             title: cleanString(this.title),

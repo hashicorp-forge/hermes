@@ -62,7 +62,7 @@ export default class AuthenticatedDocumentRoute extends Route {
 
   async docType(doc: HermesDocument) {
     const docTypes = (await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/document-types`)
+      .fetch("/document-types")
       .then((r) => r?.json())) as HermesDocumentType[];
 
     assert("docTypes must exist", docTypes);
@@ -84,18 +84,14 @@ export default class AuthenticatedDocumentRoute extends Route {
     if (params.draft) {
       try {
         doc = await this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/drafts/` +
-              params.document_id,
-            {
-              method: "GET",
-              headers: {
-                // We set this header to differentiate between document views and
-                // requests to only retrieve document metadata.
-                "Add-To-Recently-Viewed": "true",
-              },
+          .fetch("/drafts/" + params.document_id, {
+            method: "GET",
+            headers: {
+              // We set this header to differentiate between document views and
+              // requests to only retrieve document metadata.
+              "Add-To-Recently-Viewed": "true",
             },
-          )
+          })
           .then((r) => r?.json());
         (doc as HermesDocument).isDraft = params.draft;
         draftFetched = true;
@@ -114,18 +110,14 @@ export default class AuthenticatedDocumentRoute extends Route {
     if (!draftFetched) {
       try {
         doc = await this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/documents/` +
-              params.document_id,
-            {
-              method: "GET",
-              headers: {
-                // We set this header to differentiate between document views and
-                // requests to only retrieve document metadata.
-                "Add-To-Recently-Viewed": "true",
-              },
+          .fetch("/documents/" + params.document_id, {
+            method: "GET",
+            headers: {
+              // We set this header to differentiate between document views and
+              // requests to only retrieve document metadata.
+              "Add-To-Recently-Viewed": "true",
             },
-          )
+          })
           .then((r) => r?.json());
 
         (doc as HermesDocument).isDraft = false;
@@ -144,11 +136,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     // Preload avatars for all approvers in the Algolia index.
     if (typedDoc.contributors?.length) {
       const contributors = await this.fetchSvc
-        .fetch(
-          `/api/${
-            this.configSvc.config.api_version
-          }/people?emails=${typedDoc.contributors.join(",")}`,
-        )
+        .fetch(`/people?emails=${typedDoc.contributors.join(",")}`)
         .then((r) => r?.json());
 
       if (contributors) {
@@ -159,11 +147,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
     if (typedDoc.approvers?.length) {
       const approvers = await this.fetchSvc
-        .fetch(
-          `/api/${
-            this.configSvc.config.api_version
-          }/people?emails=${typedDoc.approvers.join(",")}`,
-        )
+        .fetch(`/people?emails=${typedDoc.approvers.join(",")}`)
         .then((r) => r?.json());
 
       if (approvers) {
@@ -189,17 +173,14 @@ export default class AuthenticatedDocumentRoute extends Route {
     /**
      * Record the document view with the analytics backend.
      */
-    void this.fetchSvc.fetch(
-      `/api/${this.configSvc.config.api_version}/web/analytics`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_id: model.doc.objectID,
-          product_name: model.doc.product,
-        }),
-      },
-    );
+    void this.fetchSvc.fetch("/web/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_id: model.doc.objectID,
+        product_name: model.doc.product,
+      }),
+    });
 
     /**
      * Once the model has resolved, check if the document is loading from

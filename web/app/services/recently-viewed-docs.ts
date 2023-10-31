@@ -48,9 +48,7 @@ export default class RecentlyViewedDocsService extends Service {
       /**
        * Fetch the file IDs from the backend.
        */
-      let fetchResponse = await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
-      );
+      let fetchResponse = await this.fetchSvc.fetch("/me/recently-viewed-docs");
 
       this.index = (await fetchResponse?.json()) || [];
 
@@ -70,9 +68,7 @@ export default class RecentlyViewedDocsService extends Service {
         (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
           let endpoint = isDraft ? "drafts" : "documents";
           let doc = await this.fetchSvc
-            .fetch(
-              `/api/${this.configSvc.config.api_version}/${endpoint}/${id}`,
-            )
+            .fetch(`/${endpoint}/${id}`)
             .then((resp) => resp?.json());
 
           doc.isDraft = isDraft;

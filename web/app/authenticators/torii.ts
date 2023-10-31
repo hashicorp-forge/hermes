@@ -18,7 +18,7 @@ export default class ToriiAuthenticator extends Torii {
      * in the session being invalidated or remaining unauthenticated.
      */
     return this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/me`, {
+      .fetch("/me", {
         method: "HEAD",
         headers: {
           "Hermes-Google-Access-Token": data.access_token,

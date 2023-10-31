@@ -17,7 +17,7 @@ export default class ProductAreasService extends Service {
   fetch = task(async () => {
     try {
       this.index = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/products`)
+        .fetch("/products")
         .then((resp) => resp?.json());
     } catch (err) {
       this.index = null;

@@ -218,9 +218,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     try {
       const resources = await this.fetchSvc
         .fetch(
-          `/api/${this.configSvc.config.api_version}/${
-            this.args.documentIsDraft ? "drafts" : "documents"
-          }/${this.args.objectID}/related-resources`,
+          `/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+            this.args.objectID
+          }/related-resources`,
         )
         .then((response) => response?.json());
 
@@ -315,9 +315,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
       try {
         await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/${
-            this.args.documentIsDraft ? "drafts" : "documents"
-          }/${this.args.objectID}/related-resources`,
+          `/${this.args.documentIsDraft ? "drafts" : "documents"}/${
+            this.args.objectID
+          }/related-resources`,
           {
             method: "PUT",
             body: JSON.stringify(this.formattedRelatedResources),

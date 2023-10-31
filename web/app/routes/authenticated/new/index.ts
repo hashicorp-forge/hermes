@@ -10,7 +10,7 @@ export default class AuthenticatedNewIndexRoute extends Route {
 
   async model() {
     return (await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/document-types`)
+      .fetch("/document-types")
       .then((r) => r?.json())) as HermesDocumentType[];
   }
 }

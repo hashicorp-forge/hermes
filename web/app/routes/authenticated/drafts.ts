@@ -93,7 +93,7 @@ export default class AuthenticatedDraftsRoute extends Route {
       try {
         let response = await this.fetchSvc
           .fetch(
-            `/api/${this.configSvc.config.api_version}/drafts?` +
+            "/drafts?" +
               this.createDraftURLSearchParams(params, ownerFacetOnly),
           )
           .then((response) => response?.json());

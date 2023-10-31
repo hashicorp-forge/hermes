@@ -67,16 +67,13 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        let response = await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/people`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              query: query,
-            }),
-          },
-        );
+        let response = await this.fetchSvc.fetch("/people", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: query,
+          }),
+        });
 
         const peopleJson = await response?.json();
 

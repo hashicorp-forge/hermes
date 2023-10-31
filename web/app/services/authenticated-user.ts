@@ -71,7 +71,7 @@ export default class AuthenticatedUserService extends Service {
   loadInfo = task(async () => {
     try {
       this._info = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/me`)
+        .fetch("/me")
         .then((response) => response?.json());
     } catch (e: unknown) {
       console.error("Error getting user information: ", e);
@@ -86,7 +86,7 @@ export default class AuthenticatedUserService extends Service {
   fetchSubscriptions = task(async () => {
     try {
       let subscriptions = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
+        .fetch("/me/subscriptions", {
           method: "GET",
         })
         .then((response) => response?.json());
@@ -130,14 +130,11 @@ export default class AuthenticatedUserService extends Service {
       });
 
       try {
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
-          {
-            method: "POST",
-            headers: this.subscriptionsPostHeaders,
-            body: this.subscriptionsPostBody,
-          },
-        );
+        await this.fetchSvc.fetch("/me/subscriptions", {
+          method: "POST",
+          headers: this.subscriptionsPostHeaders,
+          body: this.subscriptionsPostBody,
+        });
       } catch (e: unknown) {
         console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
@@ -172,14 +169,11 @@ export default class AuthenticatedUserService extends Service {
       this.subscriptions.removeObject(subscriptionToRemove);
 
       try {
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
-          {
-            method: "POST",
-            headers: this.subscriptionsPostHeaders,
-            body: this.subscriptionsPostBody,
-          },
-        );
+        await this.fetchSvc.fetch("/me/subscriptions", {
+          method: "POST",
+          headers: this.subscriptionsPostHeaders,
+          body: this.subscriptionsPostBody,
+        });
       } catch (e: unknown) {
         console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;

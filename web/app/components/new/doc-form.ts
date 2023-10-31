@@ -199,7 +199,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
     try {
       const doc = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/drafts`, {
+        .fetch("/drafts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

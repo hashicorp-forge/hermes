@@ -14,7 +14,7 @@ export default class SettingsRoute extends Route {
 
   async model(): Promise<string[]> {
     const allProducts = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/products`)
+      .fetch("/products")
       .then((resp) => {
         return resp?.json();
       })

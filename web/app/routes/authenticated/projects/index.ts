@@ -8,7 +8,7 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
 
   async model(): Promise<Record<string, HermesProject>> {
     return await this.fetchSvc
-      .fetch("/api/v1/projects")
+      .fetch("/projects")
       .then((response) => response?.json());
   }
 }
