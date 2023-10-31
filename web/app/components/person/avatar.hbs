@@ -8,13 +8,19 @@
   {{#if @isLoading}}
     {{! Avatar loading affordance }}
     <div
+      data-test-loading
       class="h-full w-full animate-spin rounded-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200"
     ></div>
   {{else}}
     {{#if @imgURL}}
-      <img src={{@imgURL}} referrerpolicy="no-referrer" class="w-full" />
+      <img
+        data-test-image
+        src={{@imgURL}}
+        referrerpolicy="no-referrer"
+        class="w-full"
+      />
     {{else}}
-      <div class="flex text-body-100">
+      <div data-test-fallback class="flex text-body-100">
         {{#if @email}}
           <span class="capitalize">
             {{get-first-letter @email}}

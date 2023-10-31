@@ -7,7 +7,7 @@ interface PersonAvatarComponentSignature {
     imgURL?: string | null;
     isLoading?: boolean;
     email: string;
-    size: `${HermesAvatarSize}`;
+    size?: `${HermesAvatarSize}`;
   };
   Blocks: {
     default: [];
