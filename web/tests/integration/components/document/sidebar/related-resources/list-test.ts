@@ -26,12 +26,6 @@ module(
     `);
 
       assert.dom(".related-resources-list").exists("list is rendered");
-
-      this.set("items", []);
-
-      assert
-        .dom("[data-test-related-resources-list-empty-state]")
-        .exists("empty state is rendered when the list is empty");
     });
 
     test("it shows an empty state when the list is empty", async function (this: DocumentSidebarRelatedResourcesListTestContext, assert) {
@@ -49,5 +43,5 @@ module(
 
       assert.dom("[data-test-related-resources-list-empty-state]").exists();
     });
-  }
+  },
 );

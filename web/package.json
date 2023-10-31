@@ -50,6 +50,7 @@
     "@types/ember__destroyable": "latest",
     "@types/ember__engine": "latest",
     "@types/ember__error": "latest",
+    "@types/ember__modifier": "latest",
     "@types/ember__object": "latest",
     "@types/ember__polyfills": "latest",
     "@types/ember__routing": "latest",
