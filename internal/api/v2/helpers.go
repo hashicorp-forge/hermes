@@ -174,7 +174,7 @@ func CompareAlgoliaAndDatabaseDocument(
 			result = multierror.Append(result,
 				fmt.Errorf(
 					"docType not equal, algolia=%v, db=%v",
-					algoTitle, dbDocType),
+					algoDocType, dbDocType),
 			)
 		}
 	}
