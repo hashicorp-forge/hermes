@@ -122,10 +122,10 @@ type fakeT struct{}
 
 func (t fakeT) Errorf(string, ...interface{}) {}
 
-// compareAlgoliaAndDatabaseDocument compares data for a document stored in
+// CompareAlgoliaAndDatabaseDocument compares data for a document stored in
 // Algolia and the database to determine any inconsistencies, which are returned
 // back as a (multierror) error.
-func compareAlgoliaAndDatabaseDocument(
+func CompareAlgoliaAndDatabaseDocument(
 	algoDoc map[string]any,
 	dbDoc models.Document,
 	dbDocReviews models.DocumentReviews,
