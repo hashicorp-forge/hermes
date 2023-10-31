@@ -1,0 +1,40 @@
+<div class="mb-8">
+  <div class="header-nav-and-filters flex w-full items-center justify-between">
+    <div class="relative flex items-center">
+      <LinkTo @route="authenticated.my">
+        <Person::Avatar
+          @imgURL={{this.authenticatedUser.info.picture}}
+          @email={{this.authenticatedUser.info.name}}
+          {{! TODO: make this large }}
+          @size="medium"
+          class="mr-6 -ml-1"
+        />
+      </LinkTo>
+      <div>
+        <h1 class="text-display-300 font-semibold">
+          {{this.authenticatedUser.info.name}}
+        </h1>
+        <p class="text-body-300 text-color-foreground-faint">
+          {{this.authenticatedUser.info.email}}
+        </p>
+      </div>
+    </div>
+    <div class="sub-nav">
+      <LinkTo @route="authenticated.my" @current-when="authenticated.my">
+        Recent
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.my.documents"
+        @current-when="authenticated.my.documents"
+      >
+        Published
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.my.drafts"
+        @current-when="authenticated.my.drafts"
+      >
+        Drafts
+      </LinkTo>
+    </div>
+  </div>
+</div>
