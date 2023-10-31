@@ -1,0 +1,12 @@
+.sub-nav {
+  @apply flex shrink-0 justify-center;
+
+  > a {
+    @apply px-2 py-1;
+    @apply text-color-foreground-disabled;
+
+    &.active {
+      @apply text-color-foreground-strong;
+    }
+  }
+}
