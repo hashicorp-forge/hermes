@@ -1,10 +1,10 @@
 import Controller from "@ember/controller";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
-import AuthenticatedDraftsRoute from "hermes/routes/authenticated/drafts";
+import AuthenticatedMyDraftsRoute from "hermes/routes/authenticated/my/drafts";
 import { ModelFrom } from "hermes/types/route-models";
 
-export default class AuthenticatedDraftsController extends Controller {
+export default class AuthenticatedMyIndexController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
   docType = [];
   page = 1;
@@ -13,7 +13,7 @@ export default class AuthenticatedDraftsController extends Controller {
   sortBy = "dateDesc";
   status = [];
 
-  declare model: ModelFrom<AuthenticatedDraftsRoute>;
+  declare model: ModelFrom<AuthenticatedMyDraftsRoute>;
 
   get sortDirection() {
     switch (this.model.sortedBy) {

@@ -1,51 +1,17 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import { DocumentsRouteParams } from "hermes/types/document-routes";
-import AlgoliaService from "hermes/services/algolia";
-import ActiveFiltersService from "hermes/services/active-filters";
-import { SortByValue } from "hermes/components/header/toolbar";
+import { AlgoliaFacetsObject } from "hermes/services/algolia";
+import RouterService from "@ember/routing/router-service";
+import { HermesDocument } from "hermes/types/document";
+
+export interface DraftResponseJSON {
+  facets: AlgoliaFacetsObject;
+  Hits: HermesDocument[];
+  params: string;
+  page: number;
+  nbPages: number;
+}
 
 export default class AuthenticatedMyRoute extends Route {
-  @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
-  @service declare activeFilters: ActiveFiltersService;
-
-  queryParams = {
-    docType: {
-      refreshModel: true,
-    },
-    owners: {
-      refreshModel: true,
-    },
-    page: {
-      refreshModel: true,
-    },
-    product: {
-      refreshModel: true,
-    },
-    sortBy: {
-      refreshModel: true,
-    },
-    status: {
-      refreshModel: true,
-    },
-  };
-
-  async model(params: DocumentsRouteParams) {
-    const sortedBy = (params.sortBy as SortByValue) ?? SortByValue.DateDesc;
-    const searchIndex =
-      params.sortBy === SortByValue.DateAsc
-        ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
-        : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
-
-    let [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params, true),
-      this.algolia.getDocResults.perform(searchIndex, params, true),
-    ]);
-
-    this.activeFilters.update(params);
-
-    return { facets, results, sortedBy };
-  }
+  @service declare router: RouterService;
 }

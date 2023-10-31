@@ -15,8 +15,14 @@ Router.map(function () {
     this.route("all"); // legacy route; redirects to /documents
     this.route("documents");
     this.route("document", { path: "/document/:document_id" });
-    this.route("drafts");
-    this.route("my");
+
+    this.route("drafts"); // legacy route; redirects to /my/drafts
+
+    // legacy route; redirects to /my/documents
+    this.route("my", function () {
+      this.route("documents");
+      this.route("drafts");
+    });
     this.route("results");
     this.route("settings");
     this.route("new", function () {
