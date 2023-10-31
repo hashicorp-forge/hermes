@@ -342,17 +342,19 @@ func CompareAlgoliaAndDatabaseDocument(
 							result, fmt.Errorf(
 								"error getting custom field (%s) value: %w", algoCFName, err))
 					} else {
+						var dbCFVal string
 						for _, c := range dbDoc.CustomFields {
 							if c.DocumentTypeCustomField.Name == cf.Name {
-								if algoCFVal != c.Value {
-									result = multierror.Append(result,
-										fmt.Errorf(
-											"custom field %s not equal, algolia=%v, db=%v",
-											algoCFName, algoCFVal, c.Value),
-									)
-								}
+								dbCFVal = c.Value
 								break
 							}
+						}
+						if algoCFVal != dbCFVal {
+							result = multierror.Append(result,
+								fmt.Errorf(
+									"custom field %s not equal, algolia=%v, db=%v",
+									algoCFName, algoCFVal, dbCFVal),
+							)
 						}
 					}
 				case "people":
@@ -362,10 +364,10 @@ func CompareAlgoliaAndDatabaseDocument(
 							result, fmt.Errorf(
 								"error getting custom field (%s) value: %w", algoCFName, err))
 					} else {
+						var dbCFVal []string
 						for _, c := range dbDoc.CustomFields {
 							if c.DocumentTypeCustomField.Name == cf.Name {
 								// Unmarshal person custom field value to string slice.
-								var dbCFVal []string
 								if err := json.Unmarshal(
 									[]byte(c.Value), &dbCFVal,
 								); err != nil {
@@ -376,15 +378,15 @@ func CompareAlgoliaAndDatabaseDocument(
 									)
 								}
 
-								if !assert.ElementsMatch(fakeT{}, algoCFVal, dbCFVal) {
-									result = multierror.Append(result,
-										fmt.Errorf(
-											"custom field %s not equal, algolia=%v, db=%v",
-											algoCFName, algoCFVal, dbCFVal),
-									)
-								}
 								break
 							}
+						}
+						if !assert.ElementsMatch(fakeT{}, algoCFVal, dbCFVal) {
+							result = multierror.Append(result,
+								fmt.Errorf(
+									"custom field %s not equal, algolia=%v, db=%v",
+									algoCFName, algoCFVal, dbCFVal),
+							)
 						}
 					}
 				default:
@@ -445,21 +447,19 @@ func CompareAlgoliaAndDatabaseDocument(
 		result = multierror.Append(
 			result, fmt.Errorf("error getting owners value: %w", err))
 	} else {
-		var dbOwner string
+		var algoOwner, dbOwner string
 		if dbDoc.Owner != nil {
 			dbOwner = dbDoc.Owner.EmailAddress
 		}
 		if len(algoOwners) > 0 {
-			if algoOwners[0] != dbOwner {
-				result = multierror.Append(result,
-					fmt.Errorf(
-						"owners not equal, algolia=%#v, db=%#v",
-						algoOwners, dbOwner),
-				)
-			}
-		} else {
-			result = multierror.Append(
-				result, fmt.Errorf("owners in Algolia was length %d", len(algoOwners)))
+			algoOwner = algoOwners[0]
+		}
+		if algoOwner != dbOwner {
+			result = multierror.Append(result,
+				fmt.Errorf(
+					"owners not equal, algolia=%#v, db=%#v",
+					algoOwner, dbOwner),
+			)
 		}
 	}
 
@@ -496,6 +496,12 @@ func CompareAlgoliaAndDatabaseDocument(
 		case models.ObsoleteDocumentStatus:
 			dbStatus = "Obsolete"
 		}
+
+		// Standardize on "In-Review" Algolia status for the sake of comparison.
+		if algoStatus == "In Review" {
+			algoStatus = "In-Review"
+		}
+
 		if algoStatus != dbStatus {
 			result = multierror.Append(result,
 				fmt.Errorf(
