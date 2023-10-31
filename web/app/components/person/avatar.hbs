@@ -1,15 +1,14 @@
 <div
-  class="{{unless @isLoading 'bg-color-palette-alpha-300'}}
-    flex items-center justify-center overflow-hidden rounded-full
-    {{if this.sizeIsSmall 'h-5 w-5'}}
-    {{if this.sizeIsMedium 'h-7 w-7'}}
+  class="avatar overflow-hidden rounded-full
+    {{unless @isLoading 'bg-color-palette-alpha-300'}}
+    {{this.size}}
     "
   ...attributes
 >
   {{#if @isLoading}}
     {{! Avatar loading affordance }}
     <div
-      class="w-full h-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200 animate-spin rounded-full"
+      class="h-full w-full animate-spin rounded-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200"
     ></div>
   {{else}}
     {{#if @imgURL}}
