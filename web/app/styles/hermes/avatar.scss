@@ -12,4 +12,8 @@
   &.large {
     @apply h-9 w-9;
   }
+
+  &.xl {
+    @apply h-16 w-16;
+  }
 }

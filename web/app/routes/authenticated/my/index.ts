@@ -67,8 +67,12 @@ export default class AuthenticatedMyIndexRoute extends Route {
       ...((docResults as SearchResponse<HermesDocument>).hits ?? []),
     ]
       .sort((a, b) => {
-        assert("createdTime must be defined", a.createdTime && b.createdTime);
-        return b.createdTime - a.createdTime;
+        if (a.modifiedTime && b.modifiedTime) {
+          return b.modifiedTime - a.modifiedTime;
+        } else {
+          assert("createdTime is expected", a.createdTime && b.createdTime);
+          return b.createdTime - a.createdTime;
+        }
       })
       .splice(0, 12);
     return latest;

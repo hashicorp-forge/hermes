@@ -1,43 +1,41 @@
-<div
-  class="mx-auto mb-8 flex w-full max-w-3xl items-center justify-between outline outline-red-500/10"
->
-
-  <LinkTo @route="authenticated.my" class="relative flex items-center">
-    <Person::Avatar
-      @imgURL={{this.authenticatedUser.info.picture}}
-      @email={{this.authenticatedUser.info.name}}
-      @size="large"
-      class="mr-5 -ml-0.5"
-    />
-    <div>
-      <h1 class="text-body-200">
-        {{this.authenticatedUser.info.name}}
-      </h1>
-      <p class="text-body-200 text-color-foreground-faint">
-        {{this.authenticatedUser.info.email}}
-      </p>
+<div class="mb-10">
+  <div class="flex items-center justify-between">
+    <LinkTo @route="authenticated.my" class="relative flex items-center gap-5">
+      <Person::Avatar
+        @imgURL={{this.authenticatedUser.info.picture}}
+        @email={{this.authenticatedUser.info.name}}
+        @size="xl"
+        class="-ml-0.5"
+      />
+      <div>
+        <h1 class="text-display-300">
+          {{this.authenticatedUser.info.name}}
+        </h1>
+        <p class="mt-0.5 text-body-200 text-color-foreground-faint">
+          {{this.authenticatedUser.info.email}}
+        </p>
+      </div>
+    </LinkTo>
+    <div class="sub-nav">
+      <LinkTo
+        @route="authenticated.my.index"
+        @current-when="authenticated.my.index"
+      >
+        Recent
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.my.documents"
+        @current-when="authenticated.my.documents"
+      >
+        Published
+      </LinkTo>
+      <LinkTo
+        @route="authenticated.my.drafts"
+        @current-when="authenticated.my.drafts"
+      >
+        Drafts
+      </LinkTo>
     </div>
-  </LinkTo>
-
-  <div class="sub-nav">
-    <LinkTo
-      @route="authenticated.my.index"
-      @current-when="authenticated.my.index"
-    >
-      Recent
-    </LinkTo>
-    <LinkTo
-      @route="authenticated.my.documents"
-      @current-when="authenticated.my.documents"
-    >
-      Published
-    </LinkTo>
-    <LinkTo
-      @route="authenticated.my.drafts"
-      @current-when="authenticated.my.drafts"
-    >
-      Drafts
-    </LinkTo>
   </div>
 
 </div>

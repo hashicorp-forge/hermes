@@ -16,13 +16,7 @@
       }
 
       &.active {
-        @apply relative text-color-palette-blue-200;
-
-        /* Active indicator */
-        &::before {
-          content: "";
-          @apply absolute left-0 -bottom-px h-1 w-full bg-color-palette-blue-200;
-        }
+        @apply relative bg-color-palette-neutral-100;
       }
     }
   }
