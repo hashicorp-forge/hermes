@@ -28,15 +28,27 @@
 
   .product-badge {
     @apply rounded-tl-none rounded-br-none rounded-bl rounded-tr;
-
-    .flight-icon {
-      @apply scale-75;
-    }
   }
 
   &.obsolete {
     .product-badge {
       @apply bg-gradient-to-br from-color-palette-neutral-300 to-color-palette-neutral-400 text-color-palette-neutral-50;
+    }
+  }
+
+  &.medium {
+    @apply w-16;
+
+    .status-icon {
+      @apply top-[6px] h-[60px] w-[60px];
+
+      &.approved {
+        @apply -right-2.5;
+      }
+
+      &.obsolete {
+        @apply -left-3.5;
+      }
     }
   }
 
@@ -49,10 +61,6 @@
 
     .product-badge {
       @apply rounded-bl rounded-tr;
-
-      .flight-icon {
-        @apply scale-100;
-      }
     }
 
     .status-icon {
