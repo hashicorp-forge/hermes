@@ -1,16 +1,23 @@
-<div class="mb-8 flex w-full items-center">
+<div
+  class="mx-auto mb-8 flex w-full max-w-3xl items-center justify-between outline outline-red-500/10"
+>
 
-  <div class="relative flex items-center">
-    <LinkTo @route="authenticated.my">
-      <Person::Avatar
-        @imgURL={{this.authenticatedUser.info.picture}}
-        @email={{this.authenticatedUser.info.name}}
-        {{! TODO: make this large }}
-        @size="medium"
-        class="mr-6 -ml-0.5"
-      />
-    </LinkTo>
-  </div>
+  <LinkTo @route="authenticated.my" class="relative flex items-center">
+    <Person::Avatar
+      @imgURL={{this.authenticatedUser.info.picture}}
+      @email={{this.authenticatedUser.info.name}}
+      @size="large"
+      class="mr-5 -ml-0.5"
+    />
+    <div>
+      <h1 class="text-body-200">
+        {{this.authenticatedUser.info.name}}
+      </h1>
+      <p class="text-body-200 text-color-foreground-faint">
+        {{this.authenticatedUser.info.email}}
+      </p>
+    </div>
+  </LinkTo>
 
   <div class="sub-nav">
     <LinkTo

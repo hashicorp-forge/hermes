@@ -1,20 +1,23 @@
 {{page-title "Recent"}}
 
 {{log "my index model" this.model}}
-<div class="mt-10">
+<div class="mx-auto mt-10 max-w-3xl outline outline-black/10">
   <ol class="tile-list">
     {{#each this.model as |doc|}}
-      <Doc::Tile
-        @avatar={{get doc.ownerPhotos 0}}
-        @docID={{doc.objectID}}
-        @docNumber={{doc.docNumber}}
-        @isDraft={{doc.isDraft}}
-        @modifiedTime={{doc.modifiedTime}}
-        @owner={{get doc.owners 0}}
-        @productArea={{doc.product}}
-        @title={{doc.title}}
-        @status={{doc.status}}
-      />
+      <li>
+
+        <Doc::Tile
+          @avatar={{get doc.ownerPhotos 0}}
+          @docID={{doc.objectID}}
+          @docNumber={{doc.docNumber}}
+          @isDraft={{doc.isDraft}}
+          @modifiedTime={{doc.modifiedTime}}
+          @owner={{get doc.owners 0}}
+          @productArea={{doc.product}}
+          @title={{doc.title}}
+          @status={{doc.status}}
+        />
+      </li>
     {{/each}}
   </ol>
 </div>
