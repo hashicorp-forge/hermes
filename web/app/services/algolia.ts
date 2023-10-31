@@ -45,7 +45,7 @@ export default class AlgoliaService extends Service {
      */
     if (config.environment != "production") {
       console.log(
-        "Running as non-production environment: Algolia client configured to directly interact with Algolia's API."
+        "Running as non-production environment: Algolia client configured to directly interact with Algolia's API.",
       );
       return algoliaSearch(config.algolia.appID, config.algolia.apiKey);
     }
@@ -58,7 +58,7 @@ export default class AlgoliaService extends Service {
       window.location.hostname === "localhost"
     ) {
       console.log(
-        "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API."
+        "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API.",
       );
       return algoliaSearch("", "", {
         headers: {
@@ -148,7 +148,7 @@ export default class AlgoliaService extends Service {
         newObj[key] = newVal;
         return newObj;
       },
-      {}
+      {},
     );
     /**
      * e.g., entries === {
@@ -195,11 +195,11 @@ export default class AlgoliaService extends Service {
     async (
       indexName: string,
       query: string,
-      params: AlgoliaSearchParams
+      params: AlgoliaSearchParams,
     ): Promise<SearchResponse<unknown>> => {
       let index: SearchIndex = this.client.initIndex(indexName);
       return await index.search(query, params);
-    }
+    },
   );
 
   /**
@@ -220,6 +220,8 @@ export default class AlgoliaService extends Service {
 
     for (let facet of facets) {
       let facetValues = [];
+
+      if (!params[facet]) continue;
 
       for (let val of params[facet]) {
         facetValues.push(`${facet}:${val}`);
@@ -247,7 +249,7 @@ export default class AlgoliaService extends Service {
     async (objectID: string, indexName?: string): Promise<unknown> => {
       const index = indexName ? this.client.initIndex(indexName) : this.index;
       return await index.getObject(objectID);
-    }
+    },
   );
 
   /**
@@ -257,7 +259,7 @@ export default class AlgoliaService extends Service {
   search = restartableTask(
     async (
       query: string,
-      params
+      params,
     ): Promise<SearchResponse<unknown> | undefined> => {
       try {
         return await this.index
@@ -266,7 +268,7 @@ export default class AlgoliaService extends Service {
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 
   /**
@@ -277,7 +279,7 @@ export default class AlgoliaService extends Service {
     async (
       searchIndex: string,
       params: AlgoliaSearchParams,
-      userIsOwner = false
+      userIsOwner = false,
     ): Promise<FacetRecords | undefined> => {
       let query = params["q"] || "";
       try {
@@ -296,7 +298,7 @@ export default class AlgoliaService extends Service {
          * Map the facets to a new object with additional nested properties
          */
         let facets: FacetRecords = this.mapStatefulFacetKeys(
-          algoliaFacets.facets
+          algoliaFacets.facets,
         );
 
         // Mark facets as selected based on query parameters
@@ -312,7 +314,7 @@ export default class AlgoliaService extends Service {
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 
   /**
@@ -324,7 +326,7 @@ export default class AlgoliaService extends Service {
     async (
       searchIndex: string,
       params: AlgoliaSearchParams,
-      userIsOwner = false
+      userIsOwner = false,
     ): Promise<SearchResponse | unknown> => {
       let query = params["q"] || "";
 
@@ -339,7 +341,7 @@ export default class AlgoliaService extends Service {
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 
   /**
@@ -351,7 +353,7 @@ export default class AlgoliaService extends Service {
       indexName: string,
       facetName: string,
       query: string,
-      params: RequestOptions
+      params: RequestOptions,
     ): Promise<SearchForFacetValuesResponse | undefined> => {
       try {
         let index = this.client.initIndex(indexName);
@@ -359,6 +361,6 @@ export default class AlgoliaService extends Service {
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 }

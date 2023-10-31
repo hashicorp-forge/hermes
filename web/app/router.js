@@ -20,6 +20,7 @@ Router.map(function () {
 
     // legacy route; redirects to /my/documents
     this.route("my", function () {
+      this.route("index", { path: "/" });
       this.route("documents");
       this.route("drafts");
     });
