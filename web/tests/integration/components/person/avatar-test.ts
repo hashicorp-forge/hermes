@@ -22,6 +22,7 @@ module("Integration | Component | person/avatar", async function (hooks) {
       <Person::Avatar class="small" @email="" @size="small" />
       <Person::Avatar class="medium" @email="" @size="medium" />
       <Person::Avatar class="large" @email="" @size="large" />
+      <Person::Avatar class="xl" @email="" @size="xl" />
     `);
 
     assert.dom(".default").hasStyle({ width: "20px" });
@@ -35,6 +36,9 @@ module("Integration | Component | person/avatar", async function (hooks) {
 
     assert.dom(".large").hasStyle({ width: "36px" });
     assert.dom(".large").hasStyle({ height: "36px" });
+
+    assert.dom(".xl").hasStyle({ width: "64px" });
+    assert.dom(".xl").hasStyle({ height: "64px" });
   });
 
   test("it can render a loading state", async function (this: PersonAvatarTestContext, assert) {
