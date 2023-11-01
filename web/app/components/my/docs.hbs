@@ -1,0 +1,78 @@
+<div class="row-results">
+  {{#if @docs}}
+    <table class="hds-table">
+      <thead>
+        <tr>
+          <th class="name">Name</th>
+          <th class="type">Type</th>
+          <th class="status">Status</th>
+          <th class="product">Product/Area</th>
+          <th class="owner">Owner</th>
+          <th class="modified">
+            <Table::SortableHeader
+              @onSort={{this.onSort}}
+              @attribute="modifiedTime"
+              @currentSort="modifiedTime"
+              @sortDirection={{this.sortDirection}}
+            >
+
+              {{! TODO: make this sortable }}
+              Modified
+            </Table::SortableHeader>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each this.sortedDocs as |doc|}}
+          <tr>
+            <td class="name">
+              <LinkTo
+                @route="authenticated.document"
+                @model="{{doc.objectID}}"
+                @query={{hash draft=(eq doc.status "wip")}}
+                class="flex items-start gap-3.5"
+              >
+                <Doc::Thumbnail
+                  @product={{doc.product}}
+                  @status={{doc.status}}
+                />
+                <div class="relative">
+                  <h4
+                    class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
+                  >{{doc.title}}</h4>
+                  {{#if (not (is-empty doc.docNumber))}}
+                    {{doc.docNumber}}
+                  {{/if}}
+                </div>
+              </LinkTo>
+            </td>
+            <td class="type">
+              {{doc.docType}}
+            </td>
+            <td class="status">
+              <Doc::State @state={{doc.status}} @hideProgress={{true}} />
+            </td>
+            <td class="product">
+              {{doc.product}}
+            </td>
+            <td class="owner">
+              <Person
+                @ignoreUnknown={{true}}
+                @imgURL={{get doc.ownerPhotos 0}}
+                @email={{get doc.owners 0}}
+              />
+            </td>
+            <td class="modified">
+              <div class="relative">
+                {{time-ago doc.modifiedTime}}
+              </div>
+            </td>
+          </tr>
+
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    {{! TODO: empty state }}
+  {{/if}}
+</div>

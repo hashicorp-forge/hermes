@@ -73,6 +73,7 @@ export default class AuthenticatedMyIndexRoute extends Route {
         return b.createdTime - a.createdTime;
       }
     });
+
     return latest;
   }
 }

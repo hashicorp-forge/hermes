@@ -1,10 +1,10 @@
-{{#if @changeSort}}
+{{#if @onSort}}
   <Action
     data-test-sortable-table-header
     data-test-attribute={{@attribute}}
     data-test-element="button"
     class="sortable-table-header {{if this.isActive 'active'}}"
-    {{on "click" this.changeSort}}
+    {{on "click" @onSort}}
     ...attributes
   >
     <div class="sort-icon">
