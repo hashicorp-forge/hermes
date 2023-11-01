@@ -28,10 +28,6 @@
 
   .product-badge {
     @apply rounded-tl-none rounded-br-none rounded-bl rounded-tr;
-
-    .flight-icon {
-      @apply scale-75;
-    }
   }
 
   &.obsolete {
@@ -65,10 +61,6 @@
 
     .product-badge {
       @apply rounded-bl rounded-tr;
-
-      .flight-icon {
-        @apply scale-100;
-      }
     }
 
     .status-icon {

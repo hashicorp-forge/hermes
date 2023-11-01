@@ -7,33 +7,7 @@
       @apply h-12 py-0 pr-10 align-middle;
 
       > .inner {
-        @apply relative overflow-hidden;
-      }
-    }
-  }
-
-  tr {
-    @apply relative;
-
-    &:focus-within,
-    &:hover {
-      td {
-        @apply bg-color-surface-faint;
-      }
-    }
-
-    &:focus-within {
-      @apply relative z-10;
-
-      .name {
-        &::before {
-          content: "";
-          @apply absolute -left-2 top-px h-[calc(100%-1px)]  w-[calc(100%+16px)] rounded border-t bg-color-surface-faint outline outline-2 outline-color-border-strong;
-        }
-      }
-
-      td {
-        @apply border-t-transparent;
+        @apply overflow-hidden;
       }
     }
   }
@@ -55,9 +29,7 @@
       @apply w-24;
     }
 
-    &.status,
-    &.created,
-    &.modified {
+    &.status {
       @apply w-32;
     }
 
@@ -65,16 +37,50 @@
     &.owner {
       @apply w-40;
     }
+
+    &.time {
+      @apply w-28;
+    }
   }
 
   tbody {
     td,
     th {
       @apply border-t border-t-color-border-faint;
+
+      .inner {
+        @apply relative;
+      }
     }
 
     + tbody th {
       @apply border-t-0 pt-16;
+    }
+
+    tr {
+      @apply relative;
+
+      &:focus-within,
+      &:hover {
+        td {
+          @apply bg-color-surface-faint;
+        }
+      }
+
+      &:focus-within {
+        @apply relative z-10;
+
+        .name {
+          &::before {
+            content: "";
+            @apply absolute -left-2 top-px h-[calc(100%-1px)]  w-[calc(100%+16px)] rounded border-t bg-color-surface-faint outline outline-2 outline-color-border-strong;
+          }
+        }
+
+        td {
+          @apply border-t-transparent;
+        }
+      }
     }
   }
 }

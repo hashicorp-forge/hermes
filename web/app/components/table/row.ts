@@ -14,6 +14,7 @@ interface TableRowComponentSignature {
   Args: {
     doc: HermesDocument;
     timeColumn: `${TimeColumn}`;
+    thumbnailIsShown?: boolean;
   };
 }
 
@@ -34,9 +35,7 @@ export default class TableRowComponent extends Component<TableRowComponentSignat
     const { modifiedTime, created } = this.args.doc;
 
     let label = "Unknown";
-    console.log(this.args.timeColumn);
-    console.log(TimeColumn.Modified);
-    console.log(modifiedTime);
+
     if (this.args.timeColumn === TimeColumn.Modified) {
       if (modifiedTime) {
         label = timeAgo(modifiedTime) as string;
