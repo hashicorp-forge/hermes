@@ -1,20 +1,62 @@
 {{page-title "Recent"}}
 
-{{log "my index model" this.model}}
-<ol class="tile-list">
+<RowResults @docs={{this.model}} sortDirection="desc" />
+
+<ol>
   {{#each this.model as |doc|}}
     <li>
-      <Doc::Tile
-        @avatar={{get doc.ownerPhotos 0}}
-        @docID={{doc.objectID}}
-        @docNumber={{doc.docNumber}}
-        @isDraft={{doc.isDraft}}
-        @modifiedTime={{doc.modifiedTime}}
-        @owner={{get doc.owners 0}}
-        @productArea={{doc.product}}
-        @title={{doc.title}}
-        @status={{doc.status}}
-      />
+      <LinkTo
+        data-test-document-link
+        @route="authenticated.document"
+        @model={{doc.googleFileID}}
+        class="flex items-center py-2 outline"
+      >
+        <div class="w-full">
+
+          <div class="relative flex w-full gap-2 overflow-hidden">
+            <h4
+              data-test-document-title
+              class="text-display-200 text-color-foreground-strong"
+            >
+              {{doc.title}}
+            </h4>
+            <div>
+              {{doc.docNumber}}
+            </div>
+          </div>
+          <div class="flex">
+            <div
+              data-test-document-owner-name
+              class="text-color-foreground-faint"
+            >
+              {{!-- {{get doc.owners 0}} --}}
+              You
+            </div>
+
+          </div>
+        </div>
+
+        <div
+          data-test-document-owner-name
+          class="w-44 shrink-0 justify-self-end truncate text-color-foreground-faint outline"
+        >
+          {{!-- {{get doc.owners 0}} --}}
+          {{doc.product}}
+        </div>
+        <div
+          data-test-document-owner-name
+          class="w-44 shrink-0 justify-self-end truncate text-color-foreground-faint outline"
+        >
+          {{!-- {{get doc.owners 0}} --}}
+          {{time-ago doc.modifiedTime}}
+        </div>
+        <div class="flex w-44 shrink-0 justify-end gap-2 outline">
+          <Doc::State @state={{doc.status}} @hideProgress={{true}} />
+          <Hds::Badge @text={{doc.docType}} />
+        </div>
+
+      </LinkTo>
+
     </li>
   {{/each}}
 </ol>

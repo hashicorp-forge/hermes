@@ -1,4 +1,4 @@
-<div class="mb-10">
+<div class="mb-8">
   <div class="flex items-center justify-between">
     <LinkTo @route="authenticated.my" class="relative flex items-center gap-5">
       <Person::Avatar
@@ -16,7 +16,7 @@
         </p>
       </div>
     </LinkTo>
-    <div class="sub-nav">
+    {{! <div class="sub-nav">
       <LinkTo
         @route="authenticated.my.index"
         @current-when="authenticated.my.index"
@@ -35,7 +35,7 @@
       >
         Drafts
       </LinkTo>
-    </div>
+    </div> }}
   </div>
 
 </div>

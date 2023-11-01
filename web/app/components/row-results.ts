@@ -6,8 +6,8 @@ interface RowResultsComponentSignature {
   Args: {
     docs: HermesDocument[];
     isDraft?: boolean;
-    nbPages: number;
-    currentPage: number;
+    nbPages?: number;
+    currentPage?: number;
     changeSort?: (attribute: SortAttribute) => void;
     currentSort: `${SortAttribute}`;
     sortDirection: SortDirection;
