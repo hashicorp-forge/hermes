@@ -32,7 +32,7 @@
             </tr>
           {{/if}}
           {{#each docs as |doc|}}
-            <My::Docs::Row @doc={{doc}} @timeColumn="modifiedTime" />
+            <Table::Row @doc={{doc}} @timeColumn="modifiedTime" />
           {{/each}}
         </tbody>
       {{/if}}

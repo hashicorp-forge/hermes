@@ -28,18 +28,7 @@
       </thead>
       <tbody>
         {{#each @docs as |doc|}}
-          <Doc::Row
-            @avatar="{{get doc.ownerPhotos 0}}"
-            @createdDate="{{parse-date doc.created}}"
-            @docID="{{doc.objectID}}"
-            @docNumber="{{doc.docNumber}}"
-            @docType="{{doc.docType}}"
-            @owner="{{get doc.owners 0}}"
-            @productArea="{{doc.product}}"
-            @status="{{lowercase doc.status}}"
-            @title="{{doc.title}}"
-            @isDraft={{@isDraft}}
-          />
+          <Table::Row @doc={{doc}} @timeColumn="createdTime" />
         {{/each}}
       </tbody>
     </table>

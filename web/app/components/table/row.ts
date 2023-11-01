@@ -10,14 +10,14 @@ enum TimeColumn {
   Created = "createdTime",
 }
 
-interface MyDocsRowComponentSignature {
+interface TableRowComponentSignature {
   Args: {
     doc: HermesDocument;
     timeColumn: `${TimeColumn}`;
   };
 }
 
-export default class MyDocsRowComponent extends Component<MyDocsRowComponentSignature> {
+export default class TableRowComponent extends Component<TableRowComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
   protected get ownerIsAuthenticatedUser() {
@@ -51,6 +51,6 @@ export default class MyDocsRowComponent extends Component<MyDocsRowComponentSign
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "My::Docs::Row": typeof MyDocsRowComponent;
+    "Table::Row": typeof TableRowComponent;
   }
 }
