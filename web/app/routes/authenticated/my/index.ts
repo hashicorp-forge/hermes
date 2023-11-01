@@ -69,8 +69,9 @@ export default class AuthenticatedMyIndexRoute extends Route {
       if (a.modifiedTime && b.modifiedTime) {
         return b.modifiedTime - a.modifiedTime;
       } else {
-        assert("createdTime is expected", a.createdTime && b.createdTime);
-        return b.createdTime - a.createdTime;
+        // if one has modifiedTime and the other doesn't,
+        // the one with the modifiedTime is newer
+        return a.modifiedTime ? -1 : 1;
       }
     });
 

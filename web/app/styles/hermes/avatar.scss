@@ -3,6 +3,10 @@
 
   &.small {
     @apply h-5 w-5;
+
+    .flight-icon {
+      @apply h-3 w-3;
+    }
   }
 
   &.medium {

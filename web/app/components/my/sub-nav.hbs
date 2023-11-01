@@ -1,6 +1,6 @@
 <div class="mb-8">
   <div class="flex items-center justify-between">
-    <LinkTo @route="authenticated.my" class="relative flex items-center gap-5">
+    <div class="relative flex items-center gap-5">
       <Person::Avatar
         @imgURL={{this.userImgURL}}
         @email={{this.userName}}
@@ -15,25 +15,21 @@
           {{this.userEmail}}
         </p>
       </div>
-    </LinkTo>
+    </div>
+    <div
+      class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
+    >
+      <label for="owner-filter" class="text-body-200">
+        Include drafts I'm a contributor on
+      </label>
+      <Hds::Form::Toggle::Base id="owner-filter" checked />
+    </div>
     {{! <div class="sub-nav">
       <LinkTo
         @route="authenticated.my.index"
         @current-when="authenticated.my.index"
       >
-        Recent
-      </LinkTo>
-      <LinkTo
-        @route="authenticated.my.documents"
-        @current-when="authenticated.my.documents"
-      >
-        Published
-      </LinkTo>
-      <LinkTo
-        @route="authenticated.my.drafts"
-        @current-when="authenticated.my.drafts"
-      >
-        Drafts
+        All documents
       </LinkTo>
     </div> }}
   </div>

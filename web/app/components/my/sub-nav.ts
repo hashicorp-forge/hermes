@@ -3,7 +3,9 @@ import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 interface MySubNavComponentSignature {
-  Args: {};
+  Args: {
+    toggleOwnerFilter: () => void;
+  };
 }
 
 export default class MySubNavComponent extends Component<MySubNavComponentSignature> {

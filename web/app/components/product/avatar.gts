@@ -11,6 +11,7 @@ interface ProductAvatarComponentSignature {
   Args: {
     product?: string;
     size?: `${HermesBasicAvatarSize}`;
+    icon?: string;
   };
   Blocks: {
     default: [];
@@ -30,13 +31,17 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     return this.args.size ?? HermesBasicAvatarSize.Small;
   }
 
+  private get id() {
+    return this.args.icon ?? this.productID;
+  }
+
   <template>
     <div
       data-test-product-avatar
-      class="product-badge avatar rounded-md {{this.productID}} {{this.size}}"
+      class="product-badge avatar rounded-md {{this.id}} {{this.size}}"
       ...attributes
     >
-      <FlightIcon @name={{this.productID}} class="h-4 w-4" />
+      <FlightIcon @name={{this.id}} />
     </div>
   </template>
 }

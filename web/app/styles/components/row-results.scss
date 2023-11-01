@@ -1,55 +1,86 @@
-.row-results {
-  @apply w-full;
+.hds-table {
+  @apply mb-8 table-auto lg:table-fixed;
+  @apply border-0;
 
-  .hds-table {
-    @apply mb-8 table-auto lg:table-fixed;
-    @apply border-0;
-
-    tr {
-      @apply relative;
-    }
-
-    th,
+  &.my-docs {
     td {
-      @apply py-3 pr-5 text-left align-top;
+      @apply h-12 py-0 pr-10 align-middle;
 
-      &.name {
-        @apply w-auto;
-        @apply pl-0;
-      }
-
-      &.type {
-        @apply w-24;
-      }
-
-      &.status {
-        @apply w-32;
-      }
-
-      &.product {
-        @apply w-40;
-      }
-
-      &.owner {
-        @apply w-40;
-      }
-
-      &.modified {
-        @apply w-28 text-right;
-        @apply pr-0;
+      > .inner {
+        @apply relative overflow-hidden;
       }
     }
+  }
 
-    tbody {
+  tr {
+    @apply relative;
+
+    &:focus-within,
+    &:hover {
       td {
-        @apply border-t border-t-color-border-faint;
+        @apply bg-color-surface-faint;
+      }
+    }
+
+    &:focus-within {
+      @apply relative z-10;
+
+      .name {
+        &::before {
+          content: "";
+          @apply absolute -left-2 top-px h-[calc(100%-1px)]  w-[calc(100%+16px)] rounded border-t bg-color-surface-faint outline outline-2 outline-color-border-strong;
+        }
+      }
+
+      td {
+        @apply border-t-transparent;
       }
     }
   }
 
-  .sort-icon {
-    @apply absolute -left-1.5 top-1/2 flex -translate-y-1/2 -translate-x-full;
+  th,
+  td {
+    @apply py-3 pr-5 text-left align-top;
+
+    &:last-child:not(:first-child) {
+      @apply pr-0 text-right;
+    }
+
+    &.name {
+      @apply w-auto;
+      @apply pl-0;
+    }
+
+    &.type {
+      @apply w-24;
+    }
+
+    &.status,
+    &.created,
+    &.modified {
+      @apply w-32;
+    }
+
+    &.product,
+    &.owner {
+      @apply w-40;
+    }
   }
+
+  tbody {
+    td,
+    th {
+      @apply border-t border-t-color-border-faint;
+    }
+
+    + tbody th {
+      @apply border-t-0 pt-16;
+    }
+  }
+}
+
+.sort-icon {
+  @apply absolute -left-1.5 top-1/2 flex -translate-y-1/2 -translate-x-full;
 }
 
 @keyframes sortIconIn {

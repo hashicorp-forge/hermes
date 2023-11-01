@@ -1,0 +1,70 @@
+<tr>
+  <td class="name">
+    <div class="inner h-full">
+      <LinkTo
+        @route="authenticated.document"
+        @model="{{@doc.objectID}}"
+        @query={{hash draft=(eq @doc.status "wip")}}
+        class="flex h-full w-full items-center gap-3.5"
+      >
+        {{#let (get-product-id @doc.product) as |productID|}}
+          <Product::Avatar
+            @product={{@doc.product}}
+            @icon={{unless productID "file-text"}}
+          />
+        {{/let}}
+        {{!-- <Doc::Thumbnail @product={{@doc.product}} @status={{@doc.status}} /> --}}
+        <div class="relative overflow-hidden">
+          <h4
+            class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong truncate"
+          >
+            {{#if @doc.docNumber}}
+              <span>{{@doc.docNumber}}</span>
+            {{/if}}
+            {{@doc.title}}
+
+          </h4>
+        </div>
+      </LinkTo>
+    </div>
+  </td>
+
+  <td class="type">
+    <div class="inner">
+      {{@doc.docType}}
+    </div>
+  </td>
+
+  <td class="status">
+    <div class="inner">
+      <Doc::State @state={{@doc.status}} @hideProgress={{true}} />
+    </div>
+  </td>
+
+  <td class="product">
+    <div class="inner">
+      <div class="truncate">
+        {{@doc.product}}
+      </div>
+    </div>
+  </td>
+
+  <td class="owner">
+    <div class="inner">
+      <Person
+        @imgURL={{get @doc.ownerPhotos 0}}
+        @email="{{get @doc.owners 0}}"
+      />
+    </div>
+  </td>
+
+  <td class="modified">
+    <div class="inner">
+      <div
+        class={{if (eq this.time "Unknown") "text-color-foreground-disabled"}}
+      >
+        {{this.time}}
+      </div>
+    </div>
+  </td>
+</tr>
