@@ -2,11 +2,17 @@
   @apply w-full;
 
   .hds-table {
-    @apply table-auto lg:table-fixed mb-8;
+    @apply mb-8 table-auto lg:table-fixed;
     @apply border-0;
 
-    &__th,
-    &__td {
+    tr {
+      @apply relative;
+    }
+
+    th,
+    td {
+      @apply py-3 pr-5 text-left align-top;
+
       &.name {
         @apply w-auto;
         @apply pl-0;
@@ -25,27 +31,53 @@
       }
 
       &.owner {
-        @apply w-48;
+        @apply w-40;
       }
 
-      &.created {
+      &.modified {
         @apply w-28 text-right;
         @apply pr-0;
       }
     }
 
-    .hds-table__thead .hds-table__tr {
-      @apply bg-transparent;
+    tbody {
+      td {
+        @apply border-t border-t-color-border-faint;
+      }
+    }
+  }
+
+  .sort-icon {
+    @apply absolute -left-1.5 top-1/2 flex -translate-y-1/2 -translate-x-full;
+  }
+}
+
+@keyframes sortIconIn {
+  from {
+    transform: translateX(2px);
+  }
+}
+
+.sortable-table-header {
+  @apply relative;
+
+  .sort-icon {
+    @apply text-color-foreground-faint;
+  }
+
+  &:not(.active) {
+    &:hover,
+    &:focus-within {
+      .sort-icon {
+        @apply visible;
+        > .flight-icon {
+          animation: sortIconIn 85ms ease-in;
+        }
+      }
     }
 
-    .hds-table__thead .hds-table__tr .hds-table__th {
-      &.name {
-        @apply pl-0;
-      }
-      &.created {
-        @apply text-right;
-        @apply pr-0;
-      }
+    .sort-icon {
+      @apply invisible text-color-foreground-disabled;
     }
   }
 }
