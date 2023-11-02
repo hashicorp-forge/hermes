@@ -16,14 +16,9 @@ Router.map(function () {
     this.route("documents");
     this.route("document", { path: "/document/:document_id" });
 
-    this.route("drafts"); // legacy route; redirects to /my/drafts
+    this.route("drafts"); // legacy route; redirects to /my
 
-    // legacy route; redirects to /my/documents
-    this.route("my", function () {
-      this.route("index", { path: "/" });
-      this.route("documents");
-      this.route("drafts");
-    });
+    this.route("my");
     this.route("results");
     this.route("settings");
     this.route("new", function () {

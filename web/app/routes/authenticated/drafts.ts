@@ -7,6 +7,6 @@ export default class AuthenticatedDraftsRoute extends Route {
   @service declare router: RouterService;
 
   beforeModel(_transition: Transition) {
-    void this.router.transitionTo("authenticated.my.drafts");
+    void this.router.transitionTo("authenticated.my");
   }
 }
