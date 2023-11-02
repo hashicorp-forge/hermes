@@ -4,9 +4,10 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+import MockDate from "mockdate";
 
 const TABLE_HEADER_CREATED_SELECTOR =
-  "[data-test-sortable-table-header][data-test-attribute=createdTime]";
+  "[data-test-sortable-table-header][data-test-attribute=modifiedTime]";
 
 interface AuthenticatedMyRouteTestContext extends MirageTestContext {}
 
@@ -49,11 +50,31 @@ module("Acceptance | authenticated/my", function (hooks) {
       .hasAttribute("data-test-icon", "arrow-up");
   });
 
-  test("documents and drafts have the correct hrefs", async function (this: AuthenticatedMyRouteTestContext, assert) {
+  test("documents are grouped by recency", async function (this: AuthenticatedMyRouteTestContext, assert) {
+    const dateString = "2000-01-01T06:00:00.000-07:00";
+
+    MockDate.set(dateString);
+
+    const modifiedTime = new Date(dateString).getTime() / 1000;
+
+    console.log("modifiedTime", modifiedTime);
+
     this.server.create("document", {
-      product: "Terraform",
+      modifiedTime,
+    });
+
+    this.server.create("document", {
+      modifiedTime: 1,
     });
 
     await visit("/my");
+
+    await this.pauseTest();
+
+    MockDate.reset();
   });
+
+  test("an owner filter is conditionally shown", async function (this: AuthenticatedMyRouteTestContext, assert) {});
+
+  test("you can filter out drafts shared with you", async function (this: AuthenticatedMyRouteTestContext, assert) {});
 });

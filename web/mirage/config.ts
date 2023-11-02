@@ -34,7 +34,26 @@ export default function (mirageConfig) {
 
         if (requestBody) {
           const { facetQuery, query } = requestBody;
-          if (facetQuery) {
+          let { facetFilters } = requestBody;
+
+          // Ignore the facetFilters if they're empty.
+          if (facetFilters) {
+            if (facetFilters.length === 0) {
+              facetFilters = undefined;
+            }
+            if (facetFilters[0] === "") {
+              facetFilters = undefined;
+            }
+          }
+
+          if (facetFilters) {
+            // What is here to tell me to filter to drafts
+            // Facet filters arrive like ["owners:testuser@example,com"]
+            console.error("YUT OH");
+            console.log(facetFilters);
+            console.log(requestBody);
+            //
+          } else if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()

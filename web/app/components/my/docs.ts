@@ -9,18 +9,21 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 interface MyDocsComponentSignature {
   Args: {
     docs: HermesDocument[];
+    sortDirection: SortDirection;
   };
 }
 
 export default class MyDocsComponent extends Component<MyDocsComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  @tracked protected sortDirection = SortDirection.Desc;
+  @tracked protected sortDirection = this.args.sortDirection;
 
   @tracked protected docsModifiedWithin30Days: HermesDocument[] = [];
   @tracked protected docsModifiedMoreThan30DaysAgo: HermesDocument[] = [];
 
   @tracked protected includeDraftsSharedWithMe = true;
+
+  // this is fucked
 
   protected get docGroups() {
     this.processDocs();

@@ -41,6 +41,19 @@
       {{/if}}
     {{/each}}
   </table>
+
+  {{#if this.loadMoreDocsButtonIsShown}}
+    {{!
+      We can probably eschew pagination for now in favor or a load-in-chunks approach
+      Basically should be solved by merging indexes, not recreating Algolia functions.
+      Ideal implementation would update the URL with queryparams
+      }}
+
+    <div>
+      {{! grab this style from the docs awaiting review }}
+      Load more
+    </div>
+  {{/if}}
 {{else}}
   <div
     class="mt-7 flex h-64 items-center justify-center text-display-300 text-color-foreground-faint"

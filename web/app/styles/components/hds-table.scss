@@ -2,16 +2,6 @@
   @apply mb-8 table-auto lg:table-fixed;
   @apply border-0;
 
-  &.my-docs {
-    td {
-      @apply h-12 py-0 pr-10 align-middle;
-
-      > .inner {
-        @apply overflow-hidden;
-      }
-    }
-  }
-
   thead {
     @apply sticky top-0 z-10 bg-color-page-primary;
   }
@@ -57,7 +47,7 @@
     }
 
     + tbody th {
-      @apply pt-16;
+      @apply pt-10;
     }
 
     tr {

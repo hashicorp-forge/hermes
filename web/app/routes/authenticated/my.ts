@@ -1,15 +1,15 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AlgoliaService, {
-  AlgoliaFacetsObject,
-  AlgoliaSearchParams,
-} from "hermes/services/algolia";
+import AlgoliaService, { AlgoliaFacetsObject } from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
 import { SearchResponse } from "instantsearch.js";
 import { HermesDocument } from "hermes/types/document";
+import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search-params";
+import { SortByValue } from "hermes/components/header/toolbar";
+import { SortDirection } from "hermes/components/table/sortable-header";
 
 export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -19,65 +19,87 @@ export interface DraftResponseJSON {
   nbPages: number;
 }
 
-export default class AuthenticatedMyIndexRoute extends Route {
+interface AuthenticatedMyRouteParams {
+  page?: number;
+  sortBy?: SortByValue;
+  excludeSharedDrafts?: boolean;
+}
+
+export default class AuthenticatedMyRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  /**
-   * TODO: move to shared location
-   * Generates a URLSearchParams object for the drafts endpoint.
-   */
-  private createDraftURLSearchParams(): URLSearchParams {
-    // TODO: break this up into multiple chunks.
-    // Grab the first 20, assess, then grab the next 20, etc.
-    return new URLSearchParams(
-      Object.entries({
-        hitsPerPage: 200,
-        maxValuesPerFacet: 1,
-        page: 0,
-        ownerEmail: this.authenticatedUser.info.email,
-      })
-        .map(([key, val]) => `${key}=${val}`)
-        .join("&"),
-    );
-  }
+  queryParams = {
+    excludeSharedDrafts: {
+      refreshModel: true,
+    },
+    page: {
+      refreshModel: true,
+    },
+    sortBy: {
+      refreshModel: true,
+    },
+  };
 
   /**
    * Fetches draft doc information based on searchParams and the current user.
    */
   private getDraftResults = task(
-    async (
-      params: AlgoliaSearchParams,
-    ): Promise<DraftResponseJSON | undefined> => {
+    async (page?: number): Promise<DraftResponseJSON | undefined> => {
       try {
         let response = await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/drafts?` +
-              this.createDraftURLSearchParams(),
+              createDraftURLSearchParams(
+                this.authenticatedUser.info.email,
+                page,
+              ),
           )
           .then((response) => response?.json());
         return response;
       } catch (e: unknown) {
+        // TODO: handle error
         console.error(e);
       }
     },
   );
 
-  async model() {
-    // TODO: break this up into multiple chunks.
-    // Grab the first 20, assess, then grab the next 20, etc.
-    const searchIndex =
-      this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
+  async model(params: AuthenticatedMyRouteParams) {
+    const sortedBy = params.sortBy ?? SortByValue.DateDesc;
+    const sortDirection =
+      params.sortBy === SortByValue.DateAsc
+        ? SortDirection.Asc
+        : SortDirection.Desc;
+    const indexName = this.configSvc.config.algolia_docs_index_name;
+    const { page } = params;
+
+    // Do we have sorted indexes for drafts and docs?
+    // if so they need to be set here
+    console.log("params", params);
+    // debugger;
+
+    // This shit sucks because its sorted by createdTime not modifiedTime
+
+    const searchIndex = `${indexName}_createdTime_${sortDirection}`;
+
     let [draftResults, docResults] = await Promise.all([
-      this.getDraftResults.perform({}),
-      this.algolia.getDocResults.perform(searchIndex, {}, true),
+      this.getDraftResults.perform(page),
+      this.algolia.getDocResults.perform(
+        searchIndex,
+        {
+          page,
+        },
+        true,
+      ),
     ]);
 
-    const latest = [
+    const typedDocResults = docResults as SearchResponse<HermesDocument>;
+
+    const docs = [
       ...(draftResults?.Hits ?? []),
-      ...((docResults as SearchResponse<HermesDocument>).hits ?? []),
+      ...(typedDocResults.hits ?? []),
     ].sort((a, b) => {
       if (a.modifiedTime && b.modifiedTime) {
         return b.modifiedTime - a.modifiedTime;
@@ -88,6 +110,6 @@ export default class AuthenticatedMyIndexRoute extends Route {
       }
     });
 
-    return latest;
+    return { docs, sortedBy };
   }
 }

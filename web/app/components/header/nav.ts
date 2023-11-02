@@ -10,6 +10,7 @@ import AuthenticatedUserService, {
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
+import { SortByValue } from "./toolbar";
 
 interface HeaderNavComponentSignature {
   Args: {};
@@ -51,7 +52,13 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     page: 1,
     product: [],
     status: [],
-    sortBy: "dateDesc",
+    sortBy: SortByValue.DateDesc,
+  };
+
+  protected defaultMyQueryParams = {
+    excludeSharedDrafts: false,
+    page: 1,
+    sortBy: SortByValue.DateDesc,
   };
 
   /**
