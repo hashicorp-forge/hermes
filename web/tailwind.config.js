@@ -70,7 +70,6 @@ module.exports = {
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border
-        "color-border-action": "var(--token-color-border-action)",
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",

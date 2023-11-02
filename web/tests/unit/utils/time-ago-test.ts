@@ -12,8 +12,8 @@ module("Unit | Utility | time-ago", function () {
     assert.equal("1 minute ago", timeAgo(now - 60));
     assert.equal("5 minutes ago", timeAgo(now - 300));
     assert.equal("6 hours ago", timeAgo(now - 21600));
-    assert.equal("2 months ago", timeAgo(now - 5184000));
-    assert.equal("2 years ago", timeAgo(now - 63072000));
+    assert.equal("2 Nov. 1999", timeAgo(now - 5184000));
+    assert.equal("1 Jan. 1998", timeAgo(now - 63072000));
 
     MockDate.reset();
   });

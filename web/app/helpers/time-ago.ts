@@ -1,16 +1,18 @@
 import { helper } from "@ember/component/helper";
-import timeAgo, { TimeAgoFormat } from "hermes/utils/time-ago";
+import timeAgo from "hermes/utils/time-ago";
 
 export interface TimeAgoHelperSignature {
   Args: {
-    Positional: [time: number, format?: `${TimeAgoFormat}`];
+    Positional: [time: number];
   };
-  Return: string | null;
+  Return: string;
 }
 
-const timeAgoHelper = helper<TimeAgoHelperSignature>(([time, format]) => {
-  return timeAgo(time, format);
-});
+const timeAgoHelper = helper<TimeAgoHelperSignature>(
+  ([secondsAgo]: [number]) => {
+    return `${timeAgo(secondsAgo)}`;
+  },
+);
 
 export default timeAgoHelper;
 
