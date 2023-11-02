@@ -30,6 +30,8 @@ export default class AuthenticatedMyIndexRoute extends Route {
    * Generates a URLSearchParams object for the drafts endpoint.
    */
   private createDraftURLSearchParams(): URLSearchParams {
+    // TODO: break this up into multiple chunks.
+    // Grab the first 20, assess, then grab the next 20, etc.
     return new URLSearchParams(
       Object.entries({
         hitsPerPage: 200,
@@ -64,6 +66,8 @@ export default class AuthenticatedMyIndexRoute extends Route {
   );
 
   async model() {
+    // TODO: break this up into multiple chunks.
+    // Grab the first 20, assess, then grab the next 20, etc.
     const searchIndex =
       this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
     let [draftResults, docResults] = await Promise.all([

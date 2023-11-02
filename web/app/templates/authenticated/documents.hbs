@@ -1,8 +1,9 @@
 {{page-title "All Docs"}}
+{{set-body-class "all-docs"}}
 
 <Header::Toolbar @facets={{@model.facets}} />
 
-<RowResults
+<All::Table
   @docs={{@model.results.hits}}
   @nbPages={{@model.results.nbPages}}
   @currentPage={{(add @model.results.page 1)}}

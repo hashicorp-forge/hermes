@@ -35,6 +35,16 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     }
   }
 
+  protected get toggleOwnerFilterIsShown() {
+    if (this.args.docs.length === 0) {
+      return false;
+    }
+
+    return this.args.docs.some((doc) => {
+      return doc.owners?.[0] !== this.authenticatedUser.info.email;
+    });
+  }
+
   protected get filteredDocGroups() {
     if (!this.includeDraftsSharedWithMe) {
       return this.docGroups.filter((docs) => {
@@ -66,15 +76,21 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
   }
 
   @action protected toggleOwnerFilter() {
+    // TODO: this needs to update queryparams
+
     this.includeDraftsSharedWithMe = !this.includeDraftsSharedWithMe;
   }
 
   @action protected onSort() {
+    // TODO: this needs to update queryparams
+
     if (this.sortDirection === SortDirection.Asc) {
       this.sortDirection = SortDirection.Desc;
     } else {
       this.sortDirection = SortDirection.Asc;
     }
+
+    window.scrollTo(0, 0);
   }
 }
 

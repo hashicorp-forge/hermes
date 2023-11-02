@@ -1,8 +1,11 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { SortAttribute, SortDirection } from "./table/sortable-header";
+import {
+  SortAttribute,
+  SortDirection,
+} from "hermes/components/table/sortable-header";
 
-interface RowResultsComponentSignature {
+interface AllTableComponentSignature {
   Args: {
     docs: HermesDocument[];
     isDraft?: boolean;
@@ -13,7 +16,7 @@ interface RowResultsComponentSignature {
     sortDirection: SortDirection;
   };
 }
-export default class RowResultsComponent extends Component<RowResultsComponentSignature> {
+export default class AllTableComponent extends Component<AllTableComponentSignature> {
   protected get paginationIsShown() {
     return this.args.nbPages && this.args.currentPage !== undefined;
   }
@@ -21,6 +24,6 @@ export default class RowResultsComponent extends Component<RowResultsComponentSi
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    RowResults: typeof RowResultsComponent;
+    "All::Table": typeof AllTableComponent;
   }
 }

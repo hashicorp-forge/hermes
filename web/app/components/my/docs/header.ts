@@ -5,6 +5,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 interface MyDocsHeaderComponentSignature {
   Args: {
     toggleOwnerFilter: () => void;
+    toggleOwnerFilterIsShown?: boolean;
   };
 }
 

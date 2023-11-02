@@ -1,7 +1,10 @@
-<My::Docs::Header @toggleOwnerFilter={{this.toggleOwnerFilter}} />
+<My::Docs::Header
+  @toggleOwnerFilter={{this.toggleOwnerFilter}}
+  @toggleOwnerFilterIsShown={{this.toggleOwnerFilterIsShown}}
+/>
 
 {{#if @docs}}
-  <table class="hds-table my-docs">
+  <table class="hds-table mt-7">
     <thead>
       <tr>
         <th class="name">Name</th>
@@ -39,5 +42,9 @@
     {{/each}}
   </table>
 {{else}}
-  {{! TODO }}
+  <div
+    class="mt-7 flex h-64 items-center justify-center text-display-300 text-color-foreground-faint"
+  >
+    You don't have any docs yet.
+  </div>
 {{/if}}

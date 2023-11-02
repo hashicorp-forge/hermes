@@ -12,9 +12,14 @@
     }
   }
 
+  thead {
+    @apply sticky top-0 z-10 bg-color-page-primary;
+  }
+
   th,
   td {
     @apply py-3 pr-5 text-left align-top;
+    @apply border-b border-b-color-border-faint;
 
     &:last-child:not(:first-child) {
       @apply pr-0 text-right;
@@ -46,15 +51,13 @@
   tbody {
     td,
     th {
-      @apply border-t border-t-color-border-faint;
-
       .inner {
         @apply relative;
       }
     }
 
     + tbody th {
-      @apply border-t-0 pt-16;
+      @apply pt-16;
     }
 
     tr {
@@ -79,6 +82,12 @@
 
         td {
           @apply border-t-transparent;
+        }
+      }
+
+      &:last-child {
+        td {
+          @apply border-b-0;
         }
       }
     }
