@@ -1,5 +1,8 @@
 import Component from "@glimmer/component";
-import { HermesAvatarSize } from "hermes/types/avatar-size";
+import {
+  HermesBasicAvatarSize,
+  HermesPersonAvatarSize,
+} from "hermes/types/avatar-size";
 
 interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -7,7 +10,7 @@ interface PersonAvatarComponentSignature {
     imgURL?: string | null;
     isLoading?: boolean;
     email: string;
-    size?: `${HermesAvatarSize}`;
+    size?: `${HermesPersonAvatarSize}`;
   };
   Blocks: {
     default: [];
@@ -15,17 +18,7 @@ interface PersonAvatarComponentSignature {
 }
 
 export default class PersonAvatarComponent extends Component<PersonAvatarComponentSignature> {
-  protected get sizeIsSmall(): boolean {
-    return this.args.size === HermesAvatarSize.Small || !this.args.size;
-  }
-
-  protected get sizeIsMedium(): boolean {
-    return this.args.size === HermesAvatarSize.Medium;
-  }
-
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === HermesAvatarSize.Large;
-  }
+  protected size = this.args.size ?? HermesBasicAvatarSize.Small;
 }
 
 declare module "@glint/environment-ember-loose/registry" {

@@ -276,7 +276,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(
@@ -834,7 +834,7 @@ Hermes
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(

@@ -1,0 +1,19 @@
+.avatar {
+  @apply relative flex shrink-0 items-center justify-center;
+
+  &.small {
+    @apply h-5 w-5;
+  }
+
+  &.medium {
+    @apply h-7 w-7;
+  }
+
+  &.large {
+    @apply h-9 w-9;
+  }
+
+  &.xl {
+    @apply h-16 w-16;
+  }
+}

@@ -3,9 +3,14 @@ package document
 import (
 	"encoding/json"
 	"fmt"
+	"net/mail"
 	"reflect"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
@@ -334,7 +339,7 @@ func NewFromDatabaseModel(
 	}
 	doc.FileRevisions = fileRevisions
 
-	// Locked is true if the document is locked for editing.
+	// Locked.
 	doc.Locked = model.Locked
 
 	// ModifiedTime.
@@ -399,6 +404,198 @@ func (d Document) ToAlgoliaObject(
 	}
 
 	return obj, nil
+}
+
+// ToDatabaseModels converts a document to a document and document reviews
+// database records.
+func (d Document) ToDatabaseModels(
+	docTypes []*config.DocumentType, products []*config.Product,
+) (
+	models.Document, models.DocumentReviews, error,
+) {
+	doc := models.Document{}
+	reviews := models.DocumentReviews{}
+
+	// GoogleFileID.
+	doc.GoogleFileID = d.ObjectID
+
+	// Title.
+	doc.Title = d.Title
+
+	// DocumentType.Name.
+	foundDocType := false
+	for _, dt := range docTypes {
+		if dt.Name == d.DocType {
+			foundDocType = true
+			doc.DocumentType.Name = dt.Name
+			break
+		}
+	}
+	if !foundDocType {
+		return doc, reviews, fmt.Errorf("document type not found: %s", d.DocType)
+	}
+
+	// DocumentNumber.
+	splitDocNum := strings.Split(d.DocNumber, "-")
+	if len(splitDocNum) == 2 {
+		docNumInt, err := strconv.Atoi(splitDocNum[1])
+		if err == nil {
+			doc.DocumentNumber = docNumInt
+		}
+	}
+
+	// Imported.
+	doc.Imported = !d.AppCreated
+
+	// Contributors.
+	var contributors []*models.User
+	for _, c := range d.Contributors {
+		// Validate email address.
+		if _, err := mail.ParseAddress(c); err == nil {
+			u := &models.User{
+				EmailAddress: c,
+			}
+			contributors = append(contributors, u)
+		}
+	}
+	doc.Contributors = contributors
+
+	// DocumentCreatedAt.
+	doc.DocumentCreatedAt = time.Unix(d.CreatedTime, 0)
+
+	// CustomFields.
+	customFields := []*models.DocumentCustomField{}
+	for _, cf := range d.CustomFields {
+		switch cf.Type {
+		case "STRING":
+			if v, ok := cf.Value.(string); ok {
+				customFields = append(customFields, &models.DocumentCustomField{
+					DocumentTypeCustomField: models.DocumentTypeCustomField{
+						Name: cf.DisplayName,
+						DocumentType: models.DocumentType{
+							Name: doc.DocumentType.Name,
+						},
+					},
+					Value: v,
+				})
+			}
+		case "PEOPLE":
+			if reflect.TypeOf(cf.Value).Kind() == reflect.Slice {
+				if v, ok := cf.Value.([]string); ok {
+					cfValJSON, err := json.Marshal(v)
+					if err != nil {
+						return doc, reviews, fmt.Errorf(
+							"error marshaling custom field value to JSON: %w", err)
+					}
+					customFields = append(customFields, &models.DocumentCustomField{
+						DocumentTypeCustomField: models.DocumentTypeCustomField{
+							Name: cf.DisplayName,
+							DocumentType: models.DocumentType{
+								Name: doc.DocumentType.Name,
+							},
+						},
+						Value: string(cfValJSON),
+					})
+				}
+			}
+		}
+	}
+	doc.CustomFields = customFields
+
+	// FileRevisions.
+	fileRevisions := models.DocumentFileRevisions{}
+	for frID, frName := range d.FileRevisions {
+		fileRevisions = append(fileRevisions, models.DocumentFileRevision{
+			Document: models.Document{
+				GoogleFileID: doc.GoogleFileID,
+			},
+			GoogleDriveFileRevisionID: frID,
+			Name:                      frName,
+		})
+	}
+	doc.FileRevisions = fileRevisions
+
+	// Locked.
+	doc.Locked = d.Locked
+
+	// DocumentModifiedAt.
+	doc.DocumentModifiedAt = time.Unix(d.ModifiedTime, 0)
+
+	// Owners.
+	if len(d.Owners) > 0 {
+		doc.Owner = &models.User{
+			EmailAddress: d.Owners[0],
+		}
+	}
+
+	// Note: OwnerPhotos is not stored in the database.
+
+	// Product.
+	foundProduct := false
+	for _, p := range products {
+		if p.Name == d.Product {
+			foundProduct = true
+			doc.Product.Name = d.Product
+			doc.Product.Abbreviation = p.Abbreviation
+		}
+	}
+	if !foundProduct {
+		return doc, reviews, fmt.Errorf("product not found: %s", d.Product)
+	}
+
+	// Summary.
+	summary := d.Summary
+	doc.Summary = &summary
+
+	// Status.
+	switch strings.ToLower(d.Status) {
+	case "wip":
+		doc.Status = models.WIPDocumentStatus
+	case "in review":
+		fallthrough
+	case "in-review":
+		doc.Status = models.InReviewDocumentStatus
+	case "approved":
+		doc.Status = models.ApprovedDocumentStatus
+	case "obsolete":
+		doc.Status = models.ObsoleteDocumentStatus
+	}
+
+	// Note: ThumbnailLink is not stored in the database.
+
+	// Build approvers and document reviews.
+	var approvers []*models.User
+	for _, a := range d.Approvers {
+		u := models.User{
+			EmailAddress: a,
+		}
+		// Validate email address.
+		if _, err := mail.ParseAddress(u.EmailAddress); err != nil {
+			continue
+		}
+		approvers = append(approvers, &u)
+
+		if helpers.StringSliceContains(d.ApprovedBy, a) {
+			reviews = append(reviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: d.ObjectID,
+				},
+				User:   u,
+				Status: models.ApprovedDocumentReviewStatus,
+			})
+		} else if helpers.StringSliceContains(d.ChangesRequestedBy, a) {
+			reviews = append(reviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: d.ObjectID,
+				},
+				User:   u,
+				Status: models.ChangesRequestedDocumentReviewStatus,
+			})
+		}
+	}
+	doc.Approvers = approvers
+
+	return doc, reviews, nil
 }
 
 func (d *Document) UpsertCustomField(cf CustomField) error {
