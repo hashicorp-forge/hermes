@@ -10,11 +10,6 @@ export enum DocThumbnailSize {
   Large = "large",
 }
 
-export enum DocThumbnailSize {
-  Small = "small",
-  Large = "large",
-}
-
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
