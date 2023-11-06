@@ -208,27 +208,27 @@
   </RelatedResources>
 
   <div class="max-w-3xl">
-    {{#if (or this.relatedDocuments.length this.relatedLinks.length)}}
+    {{#if (or this.hermesDocuments.length this.externalLinks.length)}}
 
-      {{#if this.relatedDocuments.length}}
+      {{#if this.hermesDocuments.length}}
         <div class="mt-7 flex h-6 items-center gap-2">
           <h3 data-test-documents-header class="hermes-h4">
             Documents
           </h3>
           <Hds::BadgeCount
             data-test-document-count
-            @text="{{this.relatedDocuments.length}}"
+            @text="{{this.hermesDocuments.length}}"
           />
         </div>
         <ol data-test-document-list class="project-resource-list mt-3">
-          {{#each this.relatedDocuments as |resource|}}
+          {{#each this.hermesDocuments as |document|}}
             <li class="group relative" data-test-document-list-item>
               <Project::Resource
                 @overflowMenuItems={{hash
                   delete=(hash
                     label="Remove"
                     icon="trash"
-                    action=(fn this.deleteResource resource)
+                    action=(fn this.deleteResource document)
                   )
                 }}
               >
@@ -238,11 +238,11 @@
                     <LinkTo
                       data-test-document-owner-avatar
                       @route="authenticated.documents"
-                      @query={{hash owners=(array (get resource.owners 0))}}
+                      @query={{hash owners=(array (get document.owners 0))}}
                     >
                       <Person::Avatar
-                        @email="{{get resource.owners 0}}"
-                        @imgURL={{get resource.ownerPhotos 0}}
+                        @email="{{get document.owners 0}}"
+                        @imgURL={{get document.ownerPhotos 0}}
                         @size="large"
                         class="relative z-10 -mt-1 shrink-0"
                       />
@@ -253,7 +253,7 @@
                       <LinkTo
                         data-test-document-link
                         @route="authenticated.document"
-                        @model={{resource.googleFileID}}
+                        @model={{document.googleFileID}}
                       >
                         {{! Primary click area }}
                         <div
@@ -266,14 +266,14 @@
                             class="text-display-300 text-color-foreground-strong"
                           >
                             <span data-test-document-title class="mr-1.5">
-                              {{resource.title}}
+                              {{document.title}}
                             </span>
                             <span
                               data-test-document-number
                               class="shrink-0 font-regular text-color-foreground-faint"
                             >
                               <span class="whitespace-nowrap">
-                                {{resource.documentNumber}}
+                                {{document.documentNumber}}
                               </span>
                             </span>
                           </h4>
@@ -285,20 +285,20 @@
                         <LinkTo
                           data-test-document-owner-name
                           @route="authenticated.documents"
-                          @query={{hash owners=(array (get resource.owners 0))}}
+                          @query={{hash owners=(array (get document.owners 0))}}
                           class="pointer-events-auto text-color-foreground-faint underline underline-offset-[3px] hover:text-color-foreground-strong"
                         >
-                          {{get resource.owners 0}}
+                          {{get document.owners 0}}
                         </LinkTo>
                       </div>
                       <div class="pointer-events-none relative z-10">
 
-                        {{#if resource.summary}}
+                        {{#if document.summary}}
                           <p
                             data-test-document-summary
                             class="relative z-10 mt-2.5 text-body-200"
                           >
-                            {{resource.summary}}
+                            {{document.summary}}
                           </p>
                         {{/if}}
 
@@ -307,11 +307,11 @@
                           <LinkTo
                             data-test-document-status
                             @route="authenticated.documents"
-                            @query={{hash status=(array resource.status)}}
+                            @query={{hash status=(array document.status)}}
                             class="pointer-events-auto"
                           >
                             <Doc::State
-                              @state={{resource.status}}
+                              @state={{document.status}}
                               @hideProgress={{true}}
                               class="interactive"
                             />
@@ -320,12 +320,12 @@
                             data-test-document-type
                             @route="authenticated.documents"
                             @query={{hash
-                              docType=(array resource.documentType)
+                              docType=(array document.documentType)
                             }}
                             class="pointer-events-auto"
                           >
                             <Hds::Badge
-                              @text={{resource.documentType}}
+                              @text={{document.documentType}}
                               class="hover:bg-color-palette-neutral-200"
                             />
                           </LinkTo>
@@ -333,8 +333,8 @@
                       </div>
                     </div>
                     <Doc::Thumbnail
-                      @product={{resource.product}}
-                      @status={{resource.status}}
+                      @product={{document.product}}
+                      @status={{document.status}}
                       @size="medium"
                       class="pointer-events-none ml-6 mr-8 shrink-0"
                     />
@@ -346,54 +346,52 @@
         </ol>
       {{/if}}
 
-      {{#if this.relatedLinks.length}}
+      {{#if this.externalLinks.length}}
         <div class="mt-7 flex h-6 items-center gap-2">
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
           <Hds::BadgeCount
             data-test-external-link-count
-            @text="{{this.relatedLinks.length}}"
+            @text="{{this.externalLinks.length}}"
           />
         </div>
         <ol data-test-external-link-list class="project-resource-list mt-5">
-
-          {{#each this.relatedLinks as |resource i|}}
+          {{#each this.externalLinks as |link i|}}
             <li class="group" data-test-document-list-item>
               <Project::Resource
                 @overflowMenuItems={{hash
                   edit=(hash
                     label="Edit"
                     icon="edit"
-                    action=(fn this.showEditModal resource i)
+                    action=(fn this.showEditModal link i)
                   )
                   delete=(hash
                     label="Remove"
                     icon="trash"
-                    action=(fn this.deleteResource resource)
+                    action=(fn this.deleteResource link)
                   )
                 }}
               >
                 <ExternalLink
                   data-test-related-link
-                  href={{resource.url}}
+                  href={{link.url}}
                   class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
                 >
                   <div class="flex items-center gap-4">
-
                     <div class="flex w-9 justify-end">
-                      <Favicon @url={{resource.url}} />
+                      <Favicon @url={{link.url}} />
                     </div>
                     <div class="flex w-full gap-2">
                       <h4
                         class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
                       >
-                        {{resource.name}}
+                        {{link.name}}
                       </h4>
                       <div
                         class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
                       >
-                        {{resource.url}}
+                        {{link.url}}
                       </div>
                     </div>
                   </div>
