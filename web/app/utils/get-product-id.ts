@@ -1,8 +1,6 @@
-export default function getProductId(
-  productName: string | null
-): string | null {
+export default function getProductId(productName?: string) {
   if (!productName) {
-    return null;
+    return;
   }
   let product = productName.toLowerCase();
 
@@ -19,6 +17,6 @@ export default function getProductId(
     case "cloud platform":
       return "hcp";
     default:
-      return null;
+      return;
   }
 }

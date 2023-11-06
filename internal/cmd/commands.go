@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/indexer"
+	"github.com/hashicorp-forge/hermes/internal/cmd/commands/operator"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/server"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/version"
 )
@@ -19,6 +20,16 @@ func initCommands(log hclog.Logger, ui cli.Ui) {
 	Commands = map[string]cli.CommandFactory{
 		"indexer": func() (cli.Command, error) {
 			return &indexer.Command{
+				Command: b,
+			}, nil
+		},
+		"operator": func() (cli.Command, error) {
+			return &operator.Command{
+				Command: b,
+			}, nil
+		},
+		"operator migrate-algolia-to-postgresql": func() (cli.Command, error) {
+			return &operator.MigrateAlgoliaToPostgreSQLCommand{
 				Command: b,
 			}, nil
 		},

@@ -2,6 +2,11 @@ import Component from "@glimmer/component";
 import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
 
+export enum DocThumbnailSize {
+  Small = "small",
+  Large = "large",
+}
+
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
@@ -20,16 +25,12 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get sizeIsLarge(): boolean {
-    return this.args.size === "large";
+  protected get size() {
+    return this.args.size ?? DocThumbnailSize.Small;
   }
 
-  protected get productShortName(): string | null {
-    if (this.args.product) {
-      return getProductId(this.args.product);
-    } else {
-      return null;
-    }
+  protected get productShortName(): string | undefined {
+    return getProductId(this.args.product);
   }
 
   protected get isApproved(): boolean {

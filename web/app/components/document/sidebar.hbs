@@ -17,13 +17,10 @@
   >
     {{#let (get-product-id this.product) as |productIcon|}}
       {{#if productIcon}}
-        <div
-          class="product-badge
-            {{productIcon}}
-            {{if this.saveIsRunning 'opacity-50'}}"
-        >
-          <FlightIcon @name={{productIcon}} />
-        </div>
+        <Product::Avatar
+          @product={{this.product}}
+          class="rounded-l-none {{if this.saveIsRunning 'opacity-50'}}"
+        />
       {{/if}}
     {{/let}}
 

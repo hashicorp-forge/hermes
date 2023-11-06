@@ -3,7 +3,7 @@
 }
 
 .x-dropdown-list-item-link {
-  @apply no-underline flex text-body-200 items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
+  @apply flex w-full items-center py-[7px] pl-2.5 pr-8 text-body-200 text-color-foreground-primary no-underline;
 
   &.is-aria-selected {
     @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;
@@ -38,4 +38,20 @@
 
 .x-dropdown-list-item-count {
   @apply ml-8 shrink-0;
+}
+
+.checkable-item {
+  &.checkmark-position--trailing {
+    .checkable-item-content {
+      @apply order-1;
+    }
+
+    .checkable-item-count {
+      @apply order-2;
+    }
+
+    .check {
+      @apply order-3;
+    }
+  }
 }
