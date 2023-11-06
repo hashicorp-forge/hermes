@@ -13,6 +13,7 @@
       <span class="self-center text-color-foreground-faint">
         Status:
       </span>
+
       <X::DropdownList
         @items={{this.statuses}}
         @placement="bottom"
@@ -54,14 +55,17 @@
       </X::DropdownList>
     </div>
 
+    {{! TODO }}
     <CopyURLButton
       @isIconOnly={{true}}
-      @url="TODO"
+      @url=""
       class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
     />
+
   </div>
 </div>
 
+{{! Title }}
 <div class="mt-7 flex">
   <EditableField
     class="project-title"
@@ -69,22 +73,24 @@
     @value={{this.title}}
     @tag="h1"
     @placeholder="Add project title"
-    @onChange={{this.hideEditModal}}
     @onSave={{this.saveTitle}}
     @isRequired={{true}}
   />
 </div>
+
+{{! Description }}
 <div class="flex">
   <EditableField
     class="project-description"
     data-test-project-description
     @value="{{this.description}}"
-    @onChange={{this.hideEditModal}}
     @onSave={{this.saveDescription}}
     @placeholder="Add a description"
   />
 </div>
 
+{{! Jira }}
+{{! Currently placeholder }}
 <div class="relative mt-10 flex h-8 max-w-2xl items-center gap-3.5">
   {{#if this.jiraObject}}
     <div data-test-jira-object class="flex items-center gap-3.5">
@@ -187,6 +193,8 @@
 </div>
 
 <div class="relative mt-6 border-t border-t-color-border-primary">
+
+  {{! Plus button }}
   <RelatedResources
     @modalHeaderTitle="Add project resource"
     @modalInputPlaceholder="Search docs or paste a URL..."
@@ -207,10 +215,12 @@
     </:header>
   </RelatedResources>
 
+  {{! Resources }}
   <div class="max-w-3xl">
     {{#if (or this.hermesDocuments.length this.externalLinks.length)}}
-
       {{#if this.hermesDocuments.length}}
+
+        {{! Documents }}
         <div class="mt-7 flex h-6 items-center gap-2">
           <h3 data-test-documents-header class="hermes-h4">
             Documents
@@ -233,8 +243,8 @@
                 }}
               >
                 <div class="px-2 pt-5 pb-7">
-
                   <div class="flex items-start gap-4">
+                    {{! Avatar }}
                     <LinkTo
                       data-test-document-owner-avatar
                       @route="authenticated.documents"
@@ -248,8 +258,8 @@
                       />
                     </LinkTo>
 
+                    {{! Text }}
                     <div class="w-full overflow-hidden">
-
                       <LinkTo
                         data-test-document-link
                         @route="authenticated.document"
@@ -261,6 +271,7 @@
                           class="absolute top-0 left-0 -bottom-px w-full group-focus-within:bg-color-surface-faint group-hover:bg-color-surface-faint"
                         ></div>
 
+                        {{! Title and docNumber }}
                         <div class="relative z-10 overflow-hidden">
                           <h4
                             class="text-display-300 text-color-foreground-strong"
@@ -279,7 +290,6 @@
                           </h4>
                         </div>
                       </LinkTo>
-
                       <div class="pointer-events-none relative z-10 mt-1.5">
                         By
                         <LinkTo
@@ -292,7 +302,6 @@
                         </LinkTo>
                       </div>
                       <div class="pointer-events-none relative z-10">
-
                         {{#if document.summary}}
                           <p
                             data-test-document-summary
@@ -302,7 +311,7 @@
                           </p>
                         {{/if}}
 
-                        {{! Tags }}
+                        {{! Document tags }}
                         <div class="mt-3.5 flex items-center gap-1">
                           <LinkTo
                             data-test-document-status
@@ -347,6 +356,7 @@
       {{/if}}
 
       {{#if this.externalLinks.length}}
+        {{! External links }}
         <div class="mt-7 flex h-6 items-center gap-2">
           <h3 data-test-external-links-header class="hermes-h4">
             External links
