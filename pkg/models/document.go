@@ -493,6 +493,14 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 	}
 	d.Contributors = contributors
 
+	// Get document type if DocumentTypeID is not set.
+	if d.DocumentTypeID == 0 && d.DocumentType.Name != "" {
+		if err := d.DocumentType.Get(db); err != nil {
+			return fmt.Errorf("error getting document type: %w", err)
+		}
+		d.DocumentTypeID = d.DocumentType.ID
+	}
+
 	// Find or create owner.
 	if d.Owner != nil && d.Owner.EmailAddress != "" {
 		if err := d.Owner.FirstOrCreate(db); err != nil {
