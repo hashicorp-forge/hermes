@@ -3,7 +3,6 @@ import { inject as service } from "@ember/service";
 import { dropTask } from "ember-concurrency";
 import { HermesDocument } from "hermes/types/document";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
@@ -22,7 +21,6 @@ interface DocumentIndexComponentSignature {
 
 export default class DocumentIndexComponent extends Component<DocumentIndexComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUser;
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare flashMessages: FlashMessageService;
