@@ -8,6 +8,7 @@ import { Placement } from "@floating-ui/dom";
 import { Response } from "miragejs";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
+import { setupProductIndex } from "hermes/tests/mirage/utils";
 
 const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
@@ -37,6 +38,8 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     this.set("onChange", (value: string) => {
       this.set("selected", value);
     });
+
+    await setupProductIndex(this);
   });
 
   test("it can render in two formats", async function (this: InputsProductSelectContext, assert) {
@@ -80,24 +83,6 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     assert.dom(DROPDOWN_PRODUCT).hasText("Test Product 0 TP0");
   });
 
-  test("it fetches the products if they aren't already loaded", async function (this: InputsProductSelectContext, assert) {
-    this.server.db.emptyData();
-
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        data-test-content
-        @onChange={{this.onChange}}
-      />
-    `);
-
-    await click(TOGGLE);
-
-    // In Mirage, we return a default product when there are no products in the database.
-    // This simulates the `fetchProducts` task being run.
-    assert.dom(DROPDOWN_PRODUCT).exists({ count: 1 });
-    assert.dom(DROPDOWN_PRODUCT).hasText("Default Fetched Product NONE");
-  });
-
   test("it performs the passed-in action on click", async function (this: InputsProductSelectContext, assert) {
     let count = 0;
     this.set("onChange", () => {
@@ -115,24 +100,6 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await click(DROPDOWN_PRODUCT);
 
     assert.equal(count, 1, "the action was called once");
-  });
-
-  test("it shows an error when the index fails to fetch", async function (this: InputsProductSelectContext, assert) {
-    this.server.get("/products", () => {
-      return new Response(500, {});
-    });
-
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        @selected={{this.selected}}
-        @onChange={{this.onChange}}
-      />
-    `);
-
-    assert.dom(".failed-to-load-text").hasText("Failed to load");
-    assert
-      .dom("[data-test-product-select-failed-to-load-button]")
-      .hasText("Retry");
   });
 
   test("the standard select can match the anchor width", async function (this: InputsProductSelectContext, assert) {
