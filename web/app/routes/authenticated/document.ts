@@ -55,7 +55,7 @@ export default class AuthenticatedDocumentRoute extends Route {
       title: "Error fetching document",
       message: err.message,
       type: "critical",
-      sticky: true,
+      timeout: 10000,
       extendedTimeout: 1000,
     });
   }
@@ -133,8 +133,13 @@ export default class AuthenticatedDocumentRoute extends Route {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
 
+        if (transition.from && transition.from.name !== transition.to.name) {
+          this.router.transitionTo(transition.from.name);
+        } else {
+          this.router.transitionTo("authenticated.dashboard");
+        }
+
         // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
         throw new Error(typedError.message);
       }
     }

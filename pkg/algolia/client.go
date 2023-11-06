@@ -261,6 +261,7 @@ func configureReplicaIndexes(
 	_, err = modifiedTimeDescIndex.SetSettings(search.Settings{
 		AttributesForFaceting: opt.AttributesForFaceting(
 			"status",
+			"owners",
 		),
 
 		Ranking: opt.Ranking(

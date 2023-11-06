@@ -43,16 +43,14 @@
   </table>
 
   {{#if this.loadMoreDocsButtonIsShown}}
-    {{!
-      We can probably eschew pagination for now in favor or a load-in-chunks approach
-      Basically should be solved by merging indexes, not recreating Algolia functions.
-      Ideal implementation would update the URL with queryparams
-      }}
-
-    <div>
-      {{! grab this style from the docs awaiting review }}
-      Load more
-    </div>
+    {{! should this happen when scrolled into view? }}
+    <Action
+      {{on "click" this.loadMoreDocs}}
+      class="mt-4 flex items-center gap-1.5 text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
+    >
+      <FlightIcon @name={{if this._loadMoreDocs.isRunning "loading" "plus"}} />
+      {{if this._loadMoreDocs.isRunning "Loading..." "Load more"}}
+    </Action>
   {{/if}}
 {{else}}
   <div

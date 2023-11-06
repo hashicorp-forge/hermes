@@ -16,7 +16,8 @@ import {
 } from "hermes/types/facets";
 import SessionService from "./session";
 
-export const HITS_PER_PAGE = 24;
+// drafts endpoint doesnt seem to like this being higher than ~40
+export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
 
@@ -216,19 +217,24 @@ export default class AlgoliaService extends Service {
    */
   buildFacetFilters(params: AlgoliaSearchParams, userIsOwner = false) {
     let facets = FACET_NAMES;
+
     let facetFilters = [];
 
-    for (let facet of facets) {
-      let facetValues = [];
+    // if params.facetFilters is an empty array, it means we're intentionally
+    // requesting no facet filters
+    if (!(params.facetFilters && params.facetFilters.length === 0)) {
+      for (let facet of facets) {
+        let facetValues = [];
 
-      if (!params[facet]) continue;
+        if (!params[facet]) continue;
 
-      for (let val of params[facet]) {
-        facetValues.push(`${facet}:${val}`);
-      }
+        for (let val of params[facet]) {
+          facetValues.push(`${facet}:${val}`);
+        }
 
-      if (facetValues.length > 0) {
-        facetFilters.push(facetValues);
+        if (facetValues.length > 0) {
+          facetFilters.push(facetValues);
+        }
       }
     }
 

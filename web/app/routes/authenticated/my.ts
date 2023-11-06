@@ -75,14 +75,11 @@ export default class AuthenticatedMyRoute extends Route {
     const indexName = this.configSvc.config.algolia_docs_index_name;
     const { page } = params;
 
-    // Do we have sorted indexes for drafts and docs?
-    // if so they need to be set here
-    console.log("params", params);
-    // debugger;
+    // TODO: need to create modifiedTime_asc indexes
+    //TODO: need to allow filtering on this index
+    const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
 
-    // This shit sucks because its sorted by createdTime not modifiedTime
-
-    const searchIndex = `${indexName}_createdTime_${sortDirection}`;
+    console.log("page", page);
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform(page),
@@ -90,12 +87,21 @@ export default class AuthenticatedMyRoute extends Route {
         searchIndex,
         {
           page,
+          facetFilters: [],
         },
         true,
       ),
     ]);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
+
+    console.log("TYPED DOC RESULTS", typedDocResults);
+    console.log("DRAFT RESULTS", draftResults);
+
+    const nbPages = Math.max(
+      draftResults?.nbPages ?? 1,
+      typedDocResults.nbPages,
+    );
 
     const docs = [
       ...(draftResults?.Hits ?? []),
@@ -110,6 +116,6 @@ export default class AuthenticatedMyRoute extends Route {
       }
     });
 
-    return { docs, sortedBy };
+    return { docs, sortedBy, currentPage: page ?? 1, nbPages };
   }
 }

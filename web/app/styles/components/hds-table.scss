@@ -60,7 +60,7 @@
         }
       }
 
-      &:focus-within {
+      &:has(a:focus-visible) {
         @apply relative z-10;
 
         .name {
