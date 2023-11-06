@@ -23,7 +23,6 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   @tracked protected newProjectJiraObject = {};
 
   protected get inputValueIsEmpty(): boolean {
-    console.log("inputValueIsEmpty");
     return this.inputValue.length === 0;
   }
 
