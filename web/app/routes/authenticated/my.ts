@@ -49,6 +49,12 @@ export default class AuthenticatedMyRoute extends Route {
   private getDraftResults = task(
     async (page?: number): Promise<DraftResponseJSON | undefined> => {
       try {
+        console.log("GETTING DRAFT RESULTS page", page);
+
+        console.log(
+          "draftURLSearchParams",
+          createDraftURLSearchParams(this.authenticatedUser.info.email, page),
+        );
         let response = await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/drafts?` +

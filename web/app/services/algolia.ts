@@ -16,7 +16,7 @@ import {
 } from "hermes/types/facets";
 import SessionService from "./session";
 
-// drafts endpoint doesnt seem to like this being higher than ~40
+// FIXME: drafts endpoint breaks when you increase this number (to 100, e.g.)
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
