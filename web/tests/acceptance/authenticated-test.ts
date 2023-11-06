@@ -10,7 +10,7 @@ import ProductAreasService, {
   ProductArea,
 } from "hermes/services/product-areas";
 import { module, test } from "qunit";
-import { startFactories } from "../mirage/utils";
+import { startFactories } from "../mirage-helpers/utils";
 
 interface AuthenticatedRouteTestContext extends MirageTestContext {}
 

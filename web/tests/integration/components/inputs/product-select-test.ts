@@ -8,7 +8,7 @@ import { Placement } from "@floating-ui/dom";
 import { Response } from "miragejs";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
-import { setupProductIndex } from "hermes/tests/mirage/utils";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
