@@ -18,7 +18,7 @@
     {{#let (get-product-id this.product) as |productIcon|}}
       {{#if productIcon}}
         <Product::Avatar
-          @product={{productIcon}}
+          @product={{this.product}}
           class="rounded-l-none {{if this.saveIsRunning 'opacity-50'}}"
         />
       {{/if}}
