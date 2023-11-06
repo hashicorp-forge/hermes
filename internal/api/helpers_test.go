@@ -111,6 +111,8 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 
 		shouldErr   bool
 		errContains string
+		// Use multiErrContains if there are multiple errors expected.
+		multiErrContains []string
 	}{
 		"good": {
 			algoDoc: map[string]any{
@@ -267,6 +269,37 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			},
 			dbDoc: models.Document{
 				DocumentNumber: 0,
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+		},
+
+		"good legacy doc number without three digit padding": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-23",
+				"docType":    "RFC",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+			},
+			dbDoc: models.Document{
+				DocumentNumber: 23,
 				DocumentType: models.DocumentType{
 					Name: "RFC",
 				},
@@ -497,6 +530,39 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			errContains: "docType not equal",
 		},
 
+		"bad doc number": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-123",
+				"docType":    "RFC",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+			},
+			dbDoc: models.Document{
+				DocumentNumber: 321,
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			shouldErr:   true,
+			errContains: "docNumber not equal",
+		},
+
 		"bad appCreated": {
 			algoDoc: map[string]any{
 				"appCreated": false,
@@ -582,6 +648,78 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 					"approver2@hashicorp.com",
 				},
 				"docNumber": "ABC-123",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+			},
+			dbDoc: models.Document{
+				Title:          "BadTitle",
+				DocumentNumber: 123,
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+				Approvers: []*models.User{
+					{
+						EmailAddress: "badapprover1@hashicorp.com",
+					},
+					{
+						EmailAddress: "badapprover2@hashicorp.com",
+					},
+				},
+			},
+			shouldErr:   true,
+			errContains: "approvers not equal",
+		},
+
+		"approvers exist only in Algolia object": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"approvers": []any{
+					"approver1@hashicorp.com",
+					"approver2@hashicorp.com",
+				},
+				"docNumber": "ABC-123",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+			},
+			dbDoc: models.Document{
+				Title:          "BadTitle",
+				DocumentNumber: 123,
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			shouldErr:   true,
+			errContains: "approvers not equal",
+		},
+
+		"approvers exist only in database record": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-123",
 				"createdTime": float64(time.Date(
 					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
 				"modifiedTime": float64(time.Date(
@@ -780,6 +918,55 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			errContains: "custom field currentVersion not equal",
 		},
 
+		"bad mismatched string custom fields currentVersion and prd": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-123",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"currentVersion": "1",
+				"docType":        "RFC",
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+				"prd":     "PRD1",
+			},
+			dbDoc: models.Document{
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				DocumentNumber: 123,
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				CustomFields: []*models.DocumentCustomField{
+					{
+						DocumentTypeCustomField: models.DocumentTypeCustomField{
+							Name: "Current Version",
+							DocumentType: models.DocumentType{
+								Name: "RFC",
+							},
+						},
+						Value: "PRD1",
+					},
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			shouldErr: true,
+			multiErrContains: []string{
+				"custom field currentVersion not equal",
+				"custom field prd not equal",
+			},
+		},
+
 		"bad people custom field stakeholders": {
 			algoDoc: map[string]any{
 				"appCreated": true,
@@ -795,6 +982,86 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 					"stakeholder1@hashicorp.com",
 					"stakeholder2@hashicorp.com",
 				},
+			},
+			dbDoc: models.Document{
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				DocumentNumber: 123,
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				CustomFields: []*models.DocumentCustomField{
+					{
+						DocumentTypeCustomField: models.DocumentTypeCustomField{
+							Name: "Stakeholders",
+							DocumentType: models.DocumentType{
+								Name: "RFC",
+							},
+						},
+						Value: `["stakeholder1@hashicorp.com","badstakeholder2@hashicorp.com"]`,
+					},
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			shouldErr:   true,
+			errContains: "custom field stakeholders not equal",
+		},
+
+		"bad people custom field stakeholders only exists in Algolia": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-123",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"docType": "RFC",
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
+				"stakeholders": []any{
+					"stakeholder1@hashicorp.com",
+				},
+			},
+			dbDoc: models.Document{
+				DocumentType: models.DocumentType{
+					Name: "RFC",
+				},
+				DocumentNumber: 123,
+				Product: models.Product{
+					Name:         "Product1",
+					Abbreviation: "ABC",
+				},
+				DocumentCreatedAt: time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC),
+				DocumentModifiedAt: time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
+				Owner: &models.User{
+					EmailAddress: "owner1@hashicorp.com",
+				},
+			},
+			shouldErr:   true,
+			errContains: "custom field stakeholders not equal",
+		},
+
+		"bad people custom field stakeholders only exists in database": {
+			algoDoc: map[string]any{
+				"appCreated": true,
+				"docNumber":  "ABC-123",
+				"createdTime": float64(time.Date(
+					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
+				"docType": "RFC",
+				"modifiedTime": float64(time.Date(
+					2023, time.April, 5, 23, 0, 0, 0, time.UTC).Unix()),
+				"owners":  []any{"owner1@hashicorp.com"},
+				"product": "Product1",
 			},
 			dbDoc: models.Document{
 				DocumentType: models.DocumentType{
@@ -992,6 +1259,10 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 							Type: "string",
 						},
 						{
+							Name: "PRD",
+							Type: "string",
+						},
+						{
 							Name: "Stakeholders",
 							Type: "people",
 						},
@@ -999,15 +1270,21 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				},
 			}
 
-			if err := compareAlgoliaAndDatabaseDocument(
+			err := compareAlgoliaAndDatabaseDocument(
 				c.algoDoc, c.dbDoc, c.dbDocReviews, docTypes,
-			); err != nil {
-				if c.shouldErr {
-					require.Error(err)
+			)
+			if c.shouldErr {
+				if len(c.multiErrContains) > 0 {
+					for _, m := range c.multiErrContains {
+						assert.ErrorContains(err, m)
+					}
+				} else if c.errContains != "" {
 					assert.ErrorContains(err, c.errContains)
 				} else {
-					require.NoError(err)
+					require.Error(err)
 				}
+			} else {
+				require.NoError(err)
 			}
 		})
 	}
