@@ -92,18 +92,18 @@
 {{! Jira }}
 {{! Currently placeholder }}
 <div class="relative mt-10 flex h-8 max-w-2xl items-center gap-3.5">
-  {{#if this.jiraObject}}
+  {{#if this.jiraIssue}}
     <div data-test-jira-object class="flex items-center gap-3.5">
       <FlightIcon @name="jira" class="" />
       <div class="h-4 w-px bg-color-border-strong"></div>
     </div>
     <ExternalLink
       data-test-jira-link
-      href={{this.jiraObject.url}}
+      href={{this.jiraIssue.url}}
       class="inline-flex h-full items-center hover:underline"
     >
       <div class="flex items-center gap-2.5">
-        {{#if this.jiraObject.type}}
+        {{#if this.jiraIssue.type}}
           <img
             data-test-jira-type-icon
             src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
@@ -112,21 +112,21 @@
         <div class="w-full text-color-foreground-faint">
           <span
             data-test-jira-key
-            class={{if (eq this.jiraObject.status "done") "line-through"}}
+            class={{if (eq this.jiraIssue.status "done") "line-through"}}
           >
-            {{this.jiraObject.key}}
+            {{this.jiraIssue.key}}
           </span>
           <span>
             ·
           </span>
           <span data-test-jira-summary>
-            {{this.jiraObject.summary}}
+            {{this.jiraIssue.summary}}
           </span>
         </div>
       </div>
     </ExternalLink>
     <div class="flex shrink-0 items-center gap-2">
-      {{#if this.jiraObject.priority}}
+      {{#if this.jiraIssue.priority}}
         <div class="flex">
           <FlightIcon
             data-test-jira-priority-icon
@@ -135,20 +135,20 @@
           />
         </div>
       {{/if}}
-      {{#if this.jiraObject.assignee}}
+      {{#if this.jiraIssue.assignee}}
         <Person::Avatar
           data-test-jira-assignee-avatar
-          data-test-assignee={{this.jiraObject.assignee}}
-          @email={{this.jiraObject.assignee}}
+          data-test-assignee={{this.jiraIssue.assignee}}
+          @email={{this.jiraIssue.assignee}}
           @size="small"
         />
       {{/if}}
-      {{#if this.jiraObject.status}}
+      {{#if this.jiraIssue.status}}
         <div
           data-test-jira-status
           class="rounded-sm bg-color-surface-strong px-1.5 py-px text-body-100 font-medium uppercase"
         >
-          {{this.jiraObject.status}}
+          {{this.jiraIssue.status}}
         </div>
       {{/if}}
     </div>

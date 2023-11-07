@@ -10,7 +10,7 @@ import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
-import { HermesProject, JiraObject } from "hermes/types/project";
+import { HermesProject, JiraIssue } from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,
@@ -42,7 +42,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected title = this.args.project.title;
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
-  @tracked protected jiraObject?: JiraObject = this.args.project.jiraObject;
+  @tracked protected jiraIssue?: JiraIssue = this.args.project.jiraIssue;
   @tracked protected hermesDocuments: RelatedHermesDocument[] =
     this.args.project.hermesDocuments ?? [];
   @tracked protected externalLinks: RelatedExternalLink[] =
@@ -203,7 +203,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected addJiraLink(): void {
     // TODO: implement this
-    this.jiraObject = {
+    this.jiraIssue = {
       key: "HER-123",
       url: "https://www.google.com",
       priority: "High",
@@ -212,7 +212,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       summary: "Vault Data Gathering Initiative: Support",
       assignee: "John Dobis",
     };
-    void this.save.perform("jiraObject", this.jiraObject);
+    void this.save.perform("jiraIssue", this.jiraIssue);
   }
 
   /**
@@ -221,8 +221,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Accessible in the overflow menu of a project resource.
    */
   @action protected removeJiraLink(): void {
-    this.jiraObject = undefined;
-    void this.save.perform("jiraObject", undefined);
+    this.jiraIssue = undefined;
+    void this.save.perform("jiraIssue", undefined);
   }
 
   /**
@@ -299,27 +299,25 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    *
    * TODO: Explain why this is a PATCH request.
    */
-  protected save = task(
-    async (key?: string, newValue?: string | JiraObject) => {
-      try {
-        const valueToSave = key
-          ? { [key]: newValue }
-          : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        });
-      } catch (e: unknown) {
-        this.flashMessages.add({
-          title: "Unable to save",
-          message: (e as any).message,
-          type: "critical",
-          timeout: 10000,
-          extendedTimeout: 1000,
-        });
-      }
-    },
-  );
+  protected save = task(async (key?: string, newValue?: string | JiraIssue) => {
+    try {
+      const valueToSave = key
+        ? { [key]: newValue }
+        : this.formattedRelatedResources;
+      await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(valueToSave),
+      });
+    } catch (e: unknown) {
+      this.flashMessages.add({
+        title: "Unable to save",
+        message: (e as any).message,
+        type: "critical",
+        timeout: 10000,
+        extendedTimeout: 1000,
+      });
+    }
+  });
 
   /**
    * The task to save the document's related resources.
