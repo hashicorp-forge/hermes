@@ -22,10 +22,16 @@ export default class SettingsSubscriptionListComponent extends Component<Setting
     let input = event.target.value;
     if (input.length > 0) {
       this.shownItems = this.args.allProductAreas.filter((item) =>
-        item.toLowerCase().includes(input.toLowerCase())
+        item.toLowerCase().includes(input.toLowerCase()),
       );
     } else {
       this.shownItems = this.args.allProductAreas;
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Settings::SubscriptionList": typeof SettingsSubscriptionListComponent;
+  }
 }
