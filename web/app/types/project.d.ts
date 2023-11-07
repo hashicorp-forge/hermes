@@ -18,12 +18,12 @@ export interface HermesProject {
   id: string;
   title: string;
   status: ProjectStatus;
+  hermesDocuments?: RelatedHermesDocument[];
   description?: string;
   jiraIssueID?: string;
+  jiraIssue?: JiraIssue;
   creator: string;
   createdDate: number;
   modifiedTime: number;
-  hermesDocuments?: RelatedHermesDocument[];
   externalLinks?: RelatedExternalLink[];
-  jiraIssue?: JiraIssue;
 }

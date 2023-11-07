@@ -49,17 +49,17 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedDescriptions.push(project.description);
         }
 
+        if (project.jiraIssue) {
+          expectedKeys.push(project.jiraIssue.key);
+          expectedJiraTypes.push(project.jiraIssue.type);
+        }
+
         if (project.hermesDocuments) {
           project.hermesDocuments.forEach((doc) => {
             if (doc.product) {
               expectedProducts.push(doc.product);
             }
           });
-        }
-
-        if (project.jiraIssue) {
-          expectedKeys.push(project.jiraIssue.key);
-          expectedJiraTypes.push(project.jiraIssue.type);
         }
       });
 
