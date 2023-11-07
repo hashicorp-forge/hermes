@@ -346,7 +346,11 @@ func NewFromDatabaseModel(
 	doc.ModifiedTime = model.DocumentModifiedAt.Unix()
 
 	// Owners.
-	doc.Owners = []string{model.Owner.EmailAddress}
+	if model.Owner != nil {
+		doc.Owners = []string{model.Owner.EmailAddress}
+	} else {
+		doc.Owners = []string{}
+	}
 
 	// Note: OwnerPhotos is not stored in the database.
 
