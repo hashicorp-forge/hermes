@@ -4,7 +4,7 @@ import {
 } from "hermes/components/related-resources";
 import { ProjectStatus } from "./project-status";
 
-export interface JiraObject {
+export interface JiraIssue {
   key: string;
   url: string;
   priority: string;
@@ -23,9 +23,7 @@ export interface HermesProject {
   creator: string;
   createdDate: number;
   modifiedTime: number;
-}
-
-export interface ProjectRelatedResources {
   hermesDocuments?: RelatedHermesDocument[];
   externalLinks?: RelatedExternalLink[];
+  jiraIssue?: JiraIssue;
 }

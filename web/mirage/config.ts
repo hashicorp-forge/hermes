@@ -188,7 +188,11 @@ export default function (mirageConfig) {
       // Fetch a list of projects.
       this.get("/projects", () => {
         const projects = this.schema.projects.all().models;
-        return new Response(200, {}, projects);
+        return new Response(
+          200,
+          {},
+          projects.map((project) => project.attrs),
+        );
       });
 
       // Fetch a single project.
@@ -197,6 +201,14 @@ export default function (mirageConfig) {
           id: request.params.project_id,
         });
         return new Response(200, {}, project.attrs);
+      });
+
+      // Fetch a single project's related resources.
+      this.get("/projects/:project_id/related_resources", (schema, request) => {
+        const projectID = request.params.project_id;
+        const project = schema.projects.findBy({ id: projectID });
+        const { hermesDocuments, externalLinks } = project.attrs;
+        return new Response(200, {}, { hermesDocuments, externalLinks });
       });
 
       // Fetch a project's related resources

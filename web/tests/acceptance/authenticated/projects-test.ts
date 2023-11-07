@@ -48,20 +48,19 @@ module("Acceptance | authenticated/projects", function (hooks) {
         if (project.description) {
           expectedDescriptions.push(project.description);
         }
-        // TODO: Fix this
-        // if (project.jiraObject) {
-        //   expectedKeys.push(project.jiraObject.key);
-        //   expectedJiraTypes.push(project.jiraObject.type);
-        // }
 
-        // TODO: Fix this
-        // if (project.hermesDocuments) {
-        //   project.hermesDocuments.forEach((doc) => {
-        //     if (doc.product) {
-        //       expectedProducts.push(doc.product);
-        //     }
-        //   });
-        // }
+        if (project.hermesDocuments) {
+          project.hermesDocuments.forEach((doc) => {
+            if (doc.product) {
+              expectedProducts.push(doc.product);
+            }
+          });
+        }
+
+        if (project.jiraIssue) {
+          expectedKeys.push(project.jiraIssue.key);
+          expectedJiraTypes.push(project.jiraIssue.type);
+        }
       });
 
     const renderedTitles = findAll(PROJECT_TITLE).map(

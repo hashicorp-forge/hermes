@@ -9,12 +9,22 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
   @service("config") declare configSvc: ConfigService;
 
   async model() {
-    return await this.fetchSvc
+    const projects = await this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/projects`)
       .then((response) => response?.json());
 
-    // we're fetching all the projects
-    // now we need to get the related hermes documents for every projects
-    // so we can display the product icons in the tile
+    return await Promise.all(
+      projects.map(async (project: HermesProject) => {
+        const resources = await this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/projects/${project.id}/related_resources`,
+          )
+          .then((response) => response?.json());
+
+        const { hermesDocuments, externalLinks } = resources;
+
+        return { ...project, hermesDocuments, externalLinks };
+      }),
+    );
   }
 }

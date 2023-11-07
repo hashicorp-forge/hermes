@@ -1,9 +1,9 @@
-import { find, findAll, render } from "@ember/test-helpers";
+import { findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import { HermesProject } from "hermes/types/project";
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
 
@@ -34,7 +34,7 @@ module("Integration | Component | project/tile", function (hooks) {
           product: "Bar",
         },
       ],
-      jiraObject: {
+      jiraIssue: {
         key: "TEST-123",
         type: "Epic",
       },
@@ -46,10 +46,10 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description } = this.project;
-    // const documentProducts = hermesDocuments
-    //   ?.map((doc) => doc.product as string)
-    //   .uniq();
+    const { title, description, hermesDocuments, jiraIssue } = this.project;
+    const documentProducts = hermesDocuments
+      ?.map((doc) => doc.product as string)
+      .uniq();
 
     assert.dom(PROJECT_TITLE).hasText(title);
 
@@ -57,19 +57,19 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.dom(PROJECT_DESCRIPTION).hasText(description);
 
-    // assert.deepEqual(
-    //   findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
-    //   documentProducts,
-    // );
+    assert.deepEqual(
+      findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
+      documentProducts,
+    );
 
-    // emberAssert("jiraObject must exist", jiraObject);
+    emberAssert("jiraIssue must exist", jiraIssue);
 
-    // const { key, type } = jiraObject;
+    const { key, type } = jiraIssue;
 
-    // emberAssert("jiraObject type must exist", type);
+    emberAssert("jiraIssue type must exist", type);
 
-    // assert.dom(PROJECT_JIRA_KEY).hasText(key);
-    // assert.dom(PROJECT_JIRA_TYPE).hasText(type);
+    assert.dom(PROJECT_JIRA_KEY).hasText(key);
+    assert.dom(PROJECT_JIRA_TYPE).hasText(type);
   });
 
   test("it renders as expected (incomplete model)", async function (this: ProjectTileComponentTestContext, assert) {
@@ -78,7 +78,7 @@ module("Integration | Component | project/tile", function (hooks) {
     project.update({
       description: null,
       hermesDocuments: null,
-      jiraObject: null,
+      jiraIssue: null,
     });
 
     this.set("project", project);
@@ -93,30 +93,27 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PROJECT_JIRA_TYPE).doesNotExist();
   });
 
-  todo(
-    'if the status of a jiraObject is "Done," the key is rendered with a line through it',
-    async function (this: ProjectTileComponentTestContext, assert) {
-      await render<ProjectTileComponentTestContext>(hbs`
+  test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
+    await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
 
-      assert.dom(PROJECT_JIRA_KEY).doesNotHaveClass("line-through");
+    assert.dom(PROJECT_JIRA_KEY).doesNotHaveClass("line-through");
 
-      const project = this.server.schema.projects.first();
+    const project = this.server.schema.projects.first();
 
-      project.update({
-        jiraObject: {
-          key: "TEST-123",
-          type: "Epic",
-          status: "Done",
-        },
-      });
+    project.update({
+      jiraIssue: {
+        key: "TEST-123",
+        type: "Epic",
+        status: "Done",
+      },
+    });
 
-      this.set("project", project);
+    this.set("project", project);
 
-      assert.dom(PROJECT_JIRA_KEY).hasClass("line-through");
-    },
-  );
+    assert.dom(PROJECT_JIRA_KEY).hasClass("line-through");
+  });
 
   test("it truncates long titles and descriptions", async function (this: ProjectTileComponentTestContext, assert) {
     this.set(
