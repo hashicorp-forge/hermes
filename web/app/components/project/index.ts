@@ -17,6 +17,7 @@ import {
 } from "hermes/types/project-status";
 import { assert } from "@ember/debug";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import ConfigService from "hermes/services/config";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -26,6 +27,7 @@ interface ProjectIndexComponentSignature {
 
 export default class ProjectIndexComponent extends Component<ProjectIndexComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: FlashMessageService;
 
   /**
@@ -158,11 +160,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Removes the resource from the correct array, then saves the project.
    */
   @action protected deleteResource(doc: RelatedResource): void {
+    const cachedDocuments = this.hermesDocuments.slice();
+    const cachedLinks = this.externalLinks.slice();
+
     if ("googleFileID" in doc) {
       this.hermesDocuments.removeObject(doc);
     } else {
       this.externalLinks.removeObject(doc);
     }
+    void this.saveRelatedResources.perform(cachedDocuments, cachedLinks);
   }
 
   /**
@@ -338,7 +344,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
       try {
         await this.fetchSvc.fetch(
-          `/api/v1/projects/${this.args.project.id}/related-resources`,
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
           {
             method: "PUT",
             body: JSON.stringify(this.formattedRelatedResources),
