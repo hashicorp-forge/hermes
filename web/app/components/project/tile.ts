@@ -10,15 +10,18 @@ interface ProjectTileComponentSignature {
 
 export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
   protected get documents() {
-    return this.args.project.hermesDocuments;
+    // return this.args.project.hermesDocuments;
+    return;
   }
 
   protected get jiraObject() {
-    return this.args.project.jiraObject;
+    // return this.args.project.jiraObject;
+    return;
   }
 
   protected get productAreas() {
-    return this.documents?.map((doc) => doc.product).uniq();
+    // return this.documents?.map((doc) => doc.product).uniq();
+    return;
   }
 }
 

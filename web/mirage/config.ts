@@ -680,7 +680,14 @@ export default function (mirageConfig) {
           objectID: request.params.document_id,
         });
 
+        // TODO: we don't want to update the "doc" here,
+        // rather we just want to update the RelatedResource values in the sidebar.
+        // These need to be associated with the doc somehow.
+
+        // maybe doc.create?
+
         if (doc) {
+          debugger;
           doc.update({
             hermesDocuments,
             externalLinks,
@@ -715,6 +722,7 @@ export default function (mirageConfig) {
                 title: mirageDocument.title,
                 type: mirageDocument.docType,
                 documentNumber: mirageDocument.docNumber,
+                // TODO: add full RelatedHermesDoc model
               });
             },
           );

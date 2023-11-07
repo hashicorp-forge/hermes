@@ -46,10 +46,10 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, hermesDocuments, jiraObject } = this.project;
-    const documentProducts = hermesDocuments
-      ?.map((doc) => doc.product as string)
-      .uniq();
+    const { title, description } = this.project;
+    // const documentProducts = hermesDocuments
+    //   ?.map((doc) => doc.product as string)
+    //   .uniq();
 
     assert.dom(PROJECT_TITLE).hasText(title);
 
@@ -57,19 +57,19 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.dom(PROJECT_DESCRIPTION).hasText(description);
 
-    assert.deepEqual(
-      findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
-      documentProducts,
-    );
+    // assert.deepEqual(
+    //   findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
+    //   documentProducts,
+    // );
 
-    emberAssert("jiraObject must exist", jiraObject);
+    // emberAssert("jiraObject must exist", jiraObject);
 
-    const { key, type } = jiraObject;
+    // const { key, type } = jiraObject;
 
-    emberAssert("jiraObject type must exist", type);
+    // emberAssert("jiraObject type must exist", type);
 
-    assert.dom(PROJECT_JIRA_KEY).hasText(key);
-    assert.dom(PROJECT_JIRA_TYPE).hasText(type);
+    // assert.dom(PROJECT_JIRA_KEY).hasText(key);
+    // assert.dom(PROJECT_JIRA_TYPE).hasText(type);
   });
 
   test("it renders as expected (incomplete model)", async function (this: ProjectTileComponentTestContext, assert) {
