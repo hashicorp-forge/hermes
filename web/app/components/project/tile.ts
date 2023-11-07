@@ -9,7 +9,7 @@ interface ProjectTileComponentSignature {
 }
 
 export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
-  protected get documents() {
+  private get documents() {
     // return this.args.project.hermesDocuments;
     return;
   }

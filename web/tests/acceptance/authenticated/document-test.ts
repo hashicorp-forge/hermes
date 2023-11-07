@@ -9,7 +9,7 @@ import {
   waitFor,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
-import { module, test } from "qunit";
+import { module, test, todo } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
@@ -196,11 +196,15 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.true(shortLinkURL?.startsWith(TEST_SHORT_LINK_BASE_URL));
   });
 
-  test("related resources are displayed if they exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    // need to make sure mirage is set up to create related resources
-    // outside of the context of clicking it through the document.
-    // i.e., how do we connect the mirage Document and RelatedResource models?
-  });
+  todo(
+    "related resources are displayed if they exist",
+    function (this: AuthenticatedDocumentRouteTestContext, assert) {
+      assert.true(false);
+      // need to make sure mirage is set up to create related resources
+      // outside of the context of clicking it through the document.
+      // i.e., how do we connect the mirage Document and RelatedResource models?
+    },
+  );
 
   test("a flash message displays when a related resource fails to save", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.put("/documents/:document_id/related-resources", {}, 500);
