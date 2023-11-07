@@ -204,7 +204,7 @@ export default function (mirageConfig) {
       });
 
       // Fetch a single project's related resources.
-      this.get("/projects/:project_id/related_resources", (schema, request) => {
+      this.get("/projects/:project_id/related-resources", (schema, request) => {
         const projectID = request.params.project_id;
         const project = schema.projects.findBy({ id: projectID });
         const { hermesDocuments, externalLinks } = project.attrs;

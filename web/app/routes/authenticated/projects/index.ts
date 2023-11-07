@@ -17,7 +17,7 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
       projects.map(async (project: HermesProject) => {
         const resources = await this.fetchSvc
           .fetch(
-            `/api/${this.configSvc.config.api_version}/projects/${project.id}/related_resources`,
+            `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
           )
           .then((response) => response?.json());
 
