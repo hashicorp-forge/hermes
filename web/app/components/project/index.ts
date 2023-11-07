@@ -150,7 +150,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     } else {
       this.addLink(resource);
     }
-    void this.save.perform();
   }
 
   /**
@@ -164,7 +163,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     } else {
       this.externalLinks.removeObject(doc);
     }
-    void this.save.perform();
   }
 
   /**
@@ -341,13 +339,16 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       }
 
       try {
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PUT",
-          body: JSON.stringify(this.formattedRelatedResources),
-          headers: {
-            "Content-Type": "application/json",
+        await this.fetchSvc.fetch(
+          `/api/v1/projects/${this.args.project.id}/related-resources`,
+          {
+            method: "PUT",
+            body: JSON.stringify(this.formattedRelatedResources),
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
       } catch (e: unknown) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;
