@@ -203,7 +203,12 @@ export default function (mirageConfig) {
         return new Response(200, {}, project.attrs);
       });
 
-      // Fetch a single project's related resources.
+      /**
+       * Fetch a project's related resources.
+       * Since Mirage doesn't yet know the relationship between projects and resources,
+       * so simply return the documents and links created within tests via
+       * `project.update({ hermesDocuments, externalLinks })`.
+       */
       this.get("/projects/:project_id/related-resources", (schema, request) => {
         const projectID = request.params.project_id;
         const project = schema.projects.findBy({ id: projectID });
