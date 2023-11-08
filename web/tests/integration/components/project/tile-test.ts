@@ -1,4 +1,4 @@
-import { find, findAll, render } from "@ember/test-helpers";
+import { findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
@@ -34,7 +34,7 @@ module("Integration | Component | project/tile", function (hooks) {
           product: "Bar",
         },
       ],
-      jiraObject: {
+      jiraIssue: {
         key: "TEST-123",
         type: "Epic",
       },
@@ -46,7 +46,7 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, hermesDocuments, jiraObject } = this.project;
+    const { title, description, hermesDocuments, jiraIssue } = this.project;
     const documentProducts = hermesDocuments
       ?.map((doc) => doc.product as string)
       .uniq();
@@ -62,11 +62,11 @@ module("Integration | Component | project/tile", function (hooks) {
       documentProducts,
     );
 
-    emberAssert("jiraObject must exist", jiraObject);
+    emberAssert("jiraIssue must exist", jiraIssue);
 
-    const { key, type } = jiraObject;
+    const { key, type } = jiraIssue;
 
-    emberAssert("jiraObject type must exist", type);
+    emberAssert("jiraIssue type must exist", type);
 
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
     assert.dom(PROJECT_JIRA_TYPE).hasText(type);
@@ -78,7 +78,7 @@ module("Integration | Component | project/tile", function (hooks) {
     project.update({
       description: null,
       hermesDocuments: null,
-      jiraObject: null,
+      jiraIssue: null,
     });
 
     this.set("project", project);
@@ -93,7 +93,7 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PROJECT_JIRA_TYPE).doesNotExist();
   });
 
-  test('if the status of a jiraObject is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
+  test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
@@ -103,7 +103,7 @@ module("Integration | Component | project/tile", function (hooks) {
     const project = this.server.schema.projects.first();
 
     project.update({
-      jiraObject: {
+      jiraIssue: {
         key: "TEST-123",
         type: "Epic",
         status: "Done",

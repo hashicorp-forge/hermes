@@ -260,6 +260,7 @@ func GetLatestProductNumber(db *gorm.DB,
 			DocumentTypeID: dt.ID,
 			ProductID:      p.ID,
 		}).
+		Where("document_number IS NOT NULL").
 		Order("document_number desc").
 		First(&d).
 		Error; err != nil {

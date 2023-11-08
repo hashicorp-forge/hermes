@@ -13,7 +13,7 @@ const CHECK = "[data-test-check]";
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
   isSelected?: boolean;
-  abbreviation?: boolean;
+  abbreviation?: string;
 }
 
 module(
@@ -63,6 +63,24 @@ module(
       `);
 
       assert.dom("[data-test-empty-state]").hasText("Select a product/area");
+    });
+
+    test("it shows an abbreviation when one exists, unless its the same as the product name", async function (this: InputsProductSelectItemContext, assert) {
+      this.set("product", "Vault");
+      this.set("abbreviation", "VLT");
+
+      await render<InputsProductSelectItemContext>(hbs`
+        <Inputs::ProductSelect::Item
+          @product={{this.product}}
+          @abbreviation={{this.abbreviation}}
+        />
+      `);
+
+      assert.dom(ABBREVIATION).hasText("VLT");
+
+      this.set("abbreviation", "Vault");
+
+      assert.dom(ABBREVIATION).doesNotExist();
     });
   },
 );
