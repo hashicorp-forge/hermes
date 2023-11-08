@@ -99,6 +99,20 @@ func DocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// If the document was created through Hermes and has a status of "WIP", it
+		// is a document draft and should be instead accessed through the drafts
+		// API. We return a 404 to be consistent with v1 of the API, and will
+		// improve this UX in the future when these APIs are combined.
+		if doc.AppCreated && doc.Status == "WIP" {
+			srv.Logger.Warn("attempted to access document draft via documents API",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			http.Error(w, "Document not found", http.StatusNotFound)
+			return
+		}
+
 		// Pass request off to associated subcollection (part of the URL after the
 		// document ID) handler, if appropriate.
 		switch reqType {
