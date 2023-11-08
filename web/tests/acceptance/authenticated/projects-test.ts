@@ -49,10 +49,11 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedDescriptions.push(project.description);
         }
 
-        if (project.jiraObject) {
-          expectedKeys.push(project.jiraObject.key);
-          expectedJiraTypes.push(project.jiraObject.type);
+        if (project.jiraIssue) {
+          expectedKeys.push(project.jiraIssue.key);
+          expectedJiraTypes.push(project.jiraIssue.type);
         }
+
         if (project.hermesDocuments) {
           project.hermesDocuments.forEach((doc) => {
             if (doc.product) {

@@ -6,6 +6,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { task } from "ember-concurrency";
+import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
 import { HermesProject } from "hermes/types/project";
@@ -22,6 +23,7 @@ interface NewProjectFormComponentSignature {
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare flashMessages: FlashMessageService;
 
@@ -103,7 +105,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     try {
       this.projectIsBeingCreated = true;
       const project = await this.fetchSvc
-        .fetch("/api/v1/projects", {
+        .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
           body: JSON.stringify({
             title: cleanString(this.title),

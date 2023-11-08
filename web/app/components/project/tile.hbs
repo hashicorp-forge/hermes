@@ -33,20 +33,22 @@
           {{/each}}
         </ul>
       {{/if}}
-      {{#if this.jiraObject}}
+
+      {{#if @project.jiraIssue}}
         <div class="flex items-center gap-1.5">
           <span data-test-jira-type>
-            {{@project.jiraObject.type}}
+            {{@project.jiraIssue.type}}
           </span>
           <span
             data-test-jira-key
             class="text-body-100 text-color-foreground-faint
-              {{if (eq this.jiraObject.status 'Done') 'line-through'}}"
+              {{if (eq @project.jiraIssue.status 'Done') 'line-through'}}"
           >
-            {{this.jiraObject.key}}
+            {{@project.jiraIssue.key}}
           </span>
         </div>
       {{/if}}
+
     </div>
   </div>
 </Hds::Card::Container>
