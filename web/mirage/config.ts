@@ -230,7 +230,7 @@ export default function (mirageConfig) {
       });
 
       // Fetch a project's related resources
-      this.put("/projects/:project_id", (schema, request) => {
+      this.put("/projects/:project_id/related-resources", (schema, request) => {
         let project = schema.projects.findBy({
           id: request.params.project_id,
         });

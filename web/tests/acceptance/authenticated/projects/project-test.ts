@@ -104,7 +104,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     let project = this.server.schema.projects.first();
 
     project.update({
-      jiraObject: undefined,
+      jiraIssue: undefined,
       hermesDocuments: undefined,
     });
 
@@ -187,7 +187,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       status: projectStatus,
       hermesDocuments: [relatedDocument],
       externalLinks: [externalLink],
-      jiraObject: {
+      jiraIssue: {
         key: jiraKey,
         url: jiraURL,
         priority: jiraPriority,

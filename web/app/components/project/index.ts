@@ -10,9 +10,14 @@ import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { task } from "ember-concurrency";
-import { HermesProject, JiraObject } from "hermes/types/project";
-import { ProjectStatus } from "hermes/types/project-status";
+import { HermesProject, JiraIssue } from "hermes/types/project";
+import {
+  ProjectStatus,
+  projectStatusObjects,
+} from "hermes/types/project-status";
 import { assert } from "@ember/debug";
+import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import ConfigService from "hermes/services/config";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -22,185 +27,61 @@ interface ProjectIndexComponentSignature {
 
 export default class ProjectIndexComponent extends Component<ProjectIndexComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("config") declare configSvc: ConfigService;
+  @service declare flashMessages: FlashMessageService;
 
-  @tracked relatedDocuments = this.args.project.hermesDocuments ?? [];
-  @tracked relatedLinks: RelatedExternalLink[] =
+  /**
+   * The array of possible project statuses.
+   * Used in the status dropdown.
+   */
+  protected statuses = projectStatusObjects;
+
+  /**
+   * Locally tracked project attributes.
+   * Initially set to the project's attributes;
+   * updated as the user makes changes.
+   */
+  @tracked protected title = this.args.project.title;
+  @tracked protected description = this.args.project.description;
+  @tracked protected status = this.args.project.status;
+  @tracked protected jiraIssue?: JiraIssue = this.args.project.jiraIssue;
+  @tracked protected hermesDocuments: RelatedHermesDocument[] =
+    this.args.project.hermesDocuments ?? [];
+  @tracked protected externalLinks: RelatedExternalLink[] =
     this.args.project.externalLinks ?? [];
 
-  @tracked title = this.args.project.title;
-  @tracked description = this.args.project.description;
-  @tracked jiraObject: JiraObject | undefined = this.args.project.jiraObject;
-
+  /**
+   * Whether the "edit external link" modal is shown.
+   */
   @tracked protected editModalIsShown = false;
 
-  @tracked protected resourceToEdit: RelatedExternalLink | undefined;
-  @tracked protected resourceToEditIndex: number | undefined;
+  /**
+   * The external link that's currently being edited.
+   * Used by the modal to display current values and
+   * run the save action.
+   */
+  @tracked protected resourceToEdit?: RelatedExternalLink;
 
-  protected get sortedResources(): RelatedResource[] {
-    let array: RelatedResource[] = [];
-    return array.concat(this.relatedDocuments, this.relatedLinks);
-  }
+  /**
+   * The index of the resource to edit.
+   * Used to update the resource in the array.
+   */
+  @tracked private resourceToEditIndex?: number;
 
-  @tracked protected status = this.args.project.status;
-
-  statuses = {
-    [ProjectStatus.Active]: {
-      label: "Active",
-      icon: "circle-dot",
-    },
-    [ProjectStatus.Completed]: {
-      label: "Completed",
-      icon: "check-circle",
-    },
-    [ProjectStatus.Archived]: {
-      label: "Archived",
-      icon: "archive",
-    },
-  };
-
-  get statusLabel() {
+  /**
+   * The label for the status dropdown.
+   * Represents the current status of the project.
+   */
+  protected get statusLabel() {
     return this.statuses[this.status].label;
   }
 
-  get statusIcon() {
-    return this.statuses[this.status].icon;
-  }
-
-  get products() {
-    // should this be sorted?
-    return this.relatedDocuments
-      .reverse()
-      .map((doc) => doc.product)
-      .uniq();
-  }
-
-  @action hideEditModal() {
-    this.editModalIsShown = false;
-    this.resourceToEdit = undefined;
-    this.resourceToEditIndex = undefined;
-  }
-
-  @action protected addResource(resource: RelatedResource) {
-    if ("googleFileID" in resource) {
-      this.addDocument(resource as RelatedHermesDocument);
-    } else {
-      this.addLink(resource as RelatedExternalLink);
-    }
-    void this.save.perform();
-  }
-
-  @action protected deleteResource(doc: RelatedResource) {
-    if ("googleFileID" in doc) {
-      this.relatedDocuments.removeObject(doc as RelatedHermesDocument);
-    } else {
-      this.relatedLinks.removeObject(doc as RelatedExternalLink);
-    }
-    void this.save.perform();
-  }
-
-  @action protected changeStatus(status: ProjectStatus) {
-    this.status = status;
-    void this.save.perform("status", status);
-  }
-
-  @action protected saveTitle(newValue: string) {
-    this.title = newValue;
-    void this.save.perform("title", newValue);
-  }
-
-  @action protected saveDescription(newValue: string) {
-    this.description = newValue;
-    void this.save.perform("description", newValue);
-  }
-
-  @action protected archiveProject() {
-    void this.save.perform("status", ProjectStatus.Archived);
-  }
-
-  @action protected completeProject() {
-    void this.save.perform("status", ProjectStatus.Completed);
-  }
-
-  @action protected addJiraLink() {
-    // TODO: implement this
-    this.jiraObject = {
-      key: "HER-123",
-      url: "https://www.google.com",
-      priority: "High",
-      status: "Open",
-      type: "Bug",
-      summary: "Vault Data Gathering Initiative: Support",
-      assignee: "John Dobis",
-    };
-    void this.save.perform("jiraObject", this.jiraObject);
-  }
-
-  @action protected removeJiraLink() {
-    this.jiraObject = undefined;
-    void this.save.perform("jiraObject", undefined);
-  }
-
-  protected save = task(
-    async (key?: string, newValue?: string | JiraObject) => {
-      try {
-        const valueToSave = key
-          ? { [key]: newValue }
-          : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        });
-      } catch (e: unknown) {
-        if (key) {
-          switch (key) {
-            case "title":
-              this.title = this.args.project.title;
-              break;
-            case "description":
-              this.description = this.args.project.description;
-              break;
-          }
-        } else {
-          this.relatedDocuments = this.args.project.hermesDocuments ?? [];
-          this.relatedLinks = this.args.project.externalLinks ?? [];
-        }
-      }
-    },
-  );
-
-  @action protected showEditModal(resource: RelatedResource, index: number) {
-    this.resourceToEdit = resource as RelatedExternalLink;
-    this.resourceToEditIndex = index;
-    this.editModalIsShown = true;
-  }
-
   /**
-   * The action to add a resource to a document.
-   * Adds a resource to the correct array, then saves it to the DB,
-   * triggering a resource-highlight animation.
+   * The icon for the status dropdown.
+   * Represents the current status of the project.
    */
-  @action protected addDocument(resource: RelatedHermesDocument) {
-    const cachedDocuments = this.relatedDocuments.slice();
-
-    this.relatedDocuments.unshiftObject(resource);
-
-    void this.saveRelatedResources.perform(
-      cachedDocuments,
-      this.relatedLinks.slice(),
-      RelatedResourceSelector.HermesDocument,
-    );
-  }
-
-  @action protected addLink(resource: RelatedExternalLink) {
-    const cachedLinks = this.relatedLinks.slice();
-
-    this.relatedLinks.unshiftObject(resource);
-
-    void this.saveRelatedResources.perform(
-      this.relatedDocuments.slice(),
-      cachedLinks,
-      RelatedResourceSelector.ExternalLink,
-    );
+  protected get statusIcon() {
+    return this.statuses[this.status].icon;
   }
 
   /**
@@ -210,9 +91,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     hermesDocuments: Partial<RelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
-    // this.updateSortOrder();
+    this.updateSortOrder();
 
-    const hermesDocuments = this.relatedDocuments.map((doc) => {
+    const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
         ...doc,
         googleFileID: doc.googleFileID,
@@ -221,7 +102,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       };
     });
 
-    const externalLinks = this.relatedLinks.map((link) => {
+    const externalLinks = this.externalLinks.map((link) => {
       return {
         name: link.name,
         url: link.url,
@@ -235,22 +116,180 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     };
   }
 
+  /**
+   * The action to update the `sortOrder` attribute of
+   * the resources, based on their position in the array.
+   * Called when the resource list is saved.
+   */
+  private updateSortOrder() {
+    this.hermesDocuments.forEach((doc, index) => {
+      doc.sortOrder = index + 1;
+    });
+
+    this.externalLinks.forEach((link, index) => {
+      link.sortOrder = index + 1 + this.hermesDocuments.length;
+    });
+  }
+
+  /**
+   * The action to run when the "edit external link" modal is dismissed.
+   * Hides the modal and resets the local state.
+   */
+  @action protected hideEditModal(): void {
+    this.editModalIsShown = false;
+    this.resourceToEdit = undefined;
+    this.resourceToEditIndex = undefined;
+  }
+
+  /**
+   * The action to add a resource to a project.
+   * Used by the `RelatedResources` component to add a resource.
+   * Adds the resource to the correct array, then saves the project.
+   */
+  @action protected addResource(resource: RelatedResource): void {
+    if ("googleFileID" in resource) {
+      this.addDocument(resource);
+    } else {
+      this.addLink(resource);
+    }
+  }
+
+  /**
+   * The action to delete a resource from a project.
+   * Accessible in the overflow menu of a project resource.
+   * Removes the resource from the correct array, then saves the project.
+   */
+  @action protected deleteResource(doc: RelatedResource): void {
+    const cachedDocuments = this.hermesDocuments.slice();
+    const cachedLinks = this.externalLinks.slice();
+
+    if ("googleFileID" in doc) {
+      this.hermesDocuments.removeObject(doc);
+    } else {
+      this.externalLinks.removeObject(doc);
+    }
+    void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
+  }
+
+  /**
+   * The action to change the project's status.
+   * Updates the local status, then saves the project.
+   * Runs when a user selects a new status from the dropdown.
+   */
+  @action protected changeStatus(status: ProjectStatus): void {
+    this.status = status;
+    void this.saveProjectInfo.perform("status", status);
+  }
+
+  /**
+   * The action to save the project's title.
+   * Updates the local title, then saves the project.
+   * Runs when the user accepts the EditableField changes.
+   */
+  @action protected saveTitle(newValue: string): void {
+    this.title = newValue;
+    void this.saveProjectInfo.perform("title", newValue);
+  }
+
+  /**
+   * The action to save the project's description.
+   * Updates the local description, then saves the project.
+   * Runs when the user accepts the EditableField changes.
+   */
+  @action protected saveDescription(newValue: string): void {
+    this.description = newValue;
+    void this.saveProjectInfo.perform("description", newValue);
+  }
+
+  /**
+   * TODO: Implement this.
+   * ---------------------
+   * The placeholder action for adding a Jira object.
+   * Updates the local Jira object, then saves the project.
+   */
+  @action protected addJiraIssue(): void {
+    // TODO: implement this
+    this.jiraIssue = {
+      key: "HER-123",
+      url: "https://www.google.com",
+      priority: "High",
+      status: "Open",
+      type: "Bug",
+      summary: "Vault Data Gathering Initiative: Support",
+      assignee: "John Dobis",
+    };
+    void this.saveProjectInfo.perform("jiraIssue", this.jiraIssue);
+  }
+
+  /**
+   * The action to remove a Jira object from a project.
+   * Updates the local Jira object, then saves the project.
+   * Accessible in the overflow menu of a project resource.
+   */
+  @action protected removeJiraIssue(): void {
+    this.jiraIssue = undefined;
+    void this.saveProjectInfo.perform("jiraIssue", undefined);
+  }
+
+  /**
+   * The action to show the "edit external link" modal.
+   * Run when a user clicks the "edit" button in the overflow menu.
+   * Sets the local resource references and shows the modal.
+   */
+  @action protected showEditModal(resource: RelatedResource, index: number) {
+    this.resourceToEdit = resource as RelatedExternalLink;
+    this.resourceToEditIndex = index;
+    this.editModalIsShown = true;
+  }
+
+  /**
+   * The action to add a document to a project.
+   * Adds a resource to the correct array, then saves the project.
+   */
+  @action protected addDocument(resource: RelatedHermesDocument) {
+    const cachedDocuments = this.hermesDocuments.slice();
+
+    this.hermesDocuments.unshiftObject(resource);
+
+    void this.saveProjectResources.perform(
+      cachedDocuments,
+      this.externalLinks.slice(),
+      RelatedResourceSelector.HermesDocument,
+    );
+  }
+
+  /**
+   * The action to add a link to a project.
+   * Adds a resource to the correct array, then saves the project.
+   */
+  @action protected addLink(resource: RelatedExternalLink) {
+    const cachedLinks = this.externalLinks.slice();
+
+    this.externalLinks.unshiftObject(resource);
+
+    void this.saveProjectResources.perform(
+      this.hermesDocuments.slice(),
+      cachedLinks,
+      RelatedResourceSelector.ExternalLink,
+    );
+  }
+
   @action protected saveExternalLink(link: RelatedExternalLink) {
-    const cachedLinks = this.relatedLinks.slice();
+    const cachedLinks = this.externalLinks.slice();
 
     assert(
       "resourceToEditIndex must exist",
       this.resourceToEditIndex !== undefined,
     );
 
-    this.relatedLinks[this.resourceToEditIndex] = link;
+    this.externalLinks[this.resourceToEditIndex] = link;
 
     // Replacing an individual link doesn't cause the getter
     // to recompute, so we manually save the array.
-    this.relatedLinks = this.relatedLinks;
+    this.externalLinks = this.externalLinks;
 
-    void this.saveRelatedResources.perform(
-      this.relatedDocuments.slice(),
+    void this.saveProjectResources.perform(
+      this.hermesDocuments.slice(),
       cachedLinks,
       this.resourceToEditIndex,
     );
@@ -261,11 +300,37 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * The action to save basic project attributes,
+   * such as title, description, and status.
+   */
+  protected saveProjectInfo = task(
+    async (key?: string, newValue?: string | JiraIssue) => {
+      try {
+        const valueToSave = key
+          ? { [key]: newValue }
+          : this.formattedRelatedResources;
+        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        });
+      } catch (e: unknown) {
+        this.flashMessages.add({
+          title: "Unable to save",
+          message: (e as any).message,
+          type: "critical",
+          timeout: 10000,
+          extendedTimeout: 1000,
+        });
+      }
+    },
+  );
+
+  /**
    * The task to save the document's related resources.
    * Creates a PUT request to the DB and conditionally triggers
    * the resource-highlight animation.
    */
-  protected saveRelatedResources = task(
+  protected saveProjectResources = task(
     async (
       cachedDocuments,
       cachedLinks,
@@ -276,24 +341,27 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       }
 
       try {
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PUT",
-          body: JSON.stringify(this.formattedRelatedResources),
-          headers: {
-            "Content-Type": "application/json",
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
+          {
+            method: "PUT",
+            body: JSON.stringify(this.formattedRelatedResources),
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
       } catch (e: unknown) {
-        this.relatedLinks = cachedLinks;
-        this.relatedDocuments = cachedDocuments;
+        this.externalLinks = cachedLinks;
+        this.hermesDocuments = cachedDocuments;
 
-        // this.flashMessages.add({
-        //   title: "Unable to save resource",
-        //   message: (e as any).message,
-        //   type: "critical",
-        //   sticky: true,
-        //   extendedTimeout: 1000,
-        // });
+        this.flashMessages.add({
+          title: "Unable to save resource",
+          message: (e as any).message,
+          type: "critical",
+          sticky: true,
+          extendedTimeout: 1000,
+        });
       }
     },
   );
