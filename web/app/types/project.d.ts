@@ -23,7 +23,7 @@ export interface HermesProject {
   jiraIssueID?: string;
   jiraIssue?: JiraIssue;
   creator: string;
-  createdDate: number;
+  createdTime: number;
   modifiedTime: number;
   externalLinks?: RelatedExternalLink[];
 }
