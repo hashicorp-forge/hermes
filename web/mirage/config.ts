@@ -203,6 +203,18 @@ export default function (mirageConfig) {
         return new Response(200, {}, project.attrs);
       });
 
+      // Update a project.
+      this.patch("/projects/:project_id", (schema, request) => {
+        const project = schema.projects.findBy({
+          id: request.params.project_id,
+        });
+
+        if (project) {
+          project.update(JSON.parse(request.requestBody));
+          return new Response(200, {}, project.attrs);
+        }
+      });
+
       /**
        * Fetch a project's related resources.
        * Since Mirage doesn't yet know the relationship between projects and resources,
@@ -217,7 +229,7 @@ export default function (mirageConfig) {
       });
 
       // Fetch a project's related resources
-      this.put("/projects/:project_id", (schema, request) => {
+      this.put("/projects/:project_id/related-resources", (schema, request) => {
         let project = schema.projects.findBy({
           id: request.params.project_id,
         });

@@ -13,6 +13,11 @@ import Ember from "ember";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
+export enum RelatedResourceSelector {
+  ExternalLink = ".external-resource",
+  HermesDocument = ".hermes-document",
+}
+
 export interface RelatedExternalLink {
   name: string;
   url: string;
