@@ -44,10 +44,9 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
     return true;
   }
-  private get productID(): string {
-    const productID = getProductID(this.args.product);
-    assert("productID must edxist", productID);
-    return productID;
+
+  private get productID(): string | undefined {
+    return getProductID(this.args.product);
   }
 
   private get size() {
@@ -58,6 +57,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     <div
       data-test-product-avatar
       class="product-badge avatar rounded-md
+        {{this.size}}
         {{or this.productID (or this.abbreviation 'no-product')}}"
       ...attributes
     >
