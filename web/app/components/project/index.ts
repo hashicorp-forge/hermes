@@ -168,7 +168,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     } else {
       this.externalLinks.removeObject(doc);
     }
-    void this.saveRelatedResources.perform(cachedDocuments, cachedLinks);
+    void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
   }
 
   /**
@@ -178,7 +178,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected changeStatus(status: ProjectStatus): void {
     this.status = status;
-    void this.save.perform("status", status);
+    void this.saveProjectInfo.perform("status", status);
   }
 
   /**
@@ -188,7 +188,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected saveTitle(newValue: string): void {
     this.title = newValue;
-    void this.save.perform("title", newValue);
+    void this.saveProjectInfo.perform("title", newValue);
   }
 
   /**
@@ -198,7 +198,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected saveDescription(newValue: string): void {
     this.description = newValue;
-    void this.save.perform("description", newValue);
+    void this.saveProjectInfo.perform("description", newValue);
   }
 
   /**
@@ -218,7 +218,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       summary: "Vault Data Gathering Initiative: Support",
       assignee: "John Dobis",
     };
-    void this.save.perform("jiraIssue", this.jiraIssue);
+    void this.saveProjectInfo.perform("jiraIssue", this.jiraIssue);
   }
 
   /**
@@ -228,7 +228,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
-    void this.save.perform("jiraIssue", undefined);
+    void this.saveProjectInfo.perform("jiraIssue", undefined);
   }
 
   /**
@@ -251,7 +251,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     this.hermesDocuments.unshiftObject(resource);
 
-    void this.saveRelatedResources.perform(
+    void this.saveProjectResources.perform(
       cachedDocuments,
       this.externalLinks.slice(),
       RelatedResourceSelector.HermesDocument,
@@ -267,7 +267,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     this.externalLinks.unshiftObject(resource);
 
-    void this.saveRelatedResources.perform(
+    void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
       RelatedResourceSelector.ExternalLink,
@@ -288,7 +288,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     // to recompute, so we manually save the array.
     this.externalLinks = this.externalLinks;
 
-    void this.saveRelatedResources.perform(
+    void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
       this.resourceToEditIndex,
@@ -300,39 +300,37 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * The action to save the project.
-   * Runs when the user adds, removes, or otherwise changes a project attribute.
-   *
-   * TODO: Explain why this is a PATCH request.
+   * The action to save basic project attributes,
+   * such as title, description, and status.
    */
-  protected save = task(async (key?: string, newValue?: string | JiraIssue) => {
-    try {
-      const valueToSave = key
-        ? { [key]: newValue }
-        : this.formattedRelatedResources;
-      await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(valueToSave),
-      });
-    } catch (e: unknown) {
-      this.flashMessages.add({
-        title: "Unable to save",
-        message: (e as any).message,
-        type: "critical",
-        timeout: 10000,
-        extendedTimeout: 1000,
-      });
-    }
-  });
+  protected saveProjectInfo = task(
+    async (key?: string, newValue?: string | JiraIssue) => {
+      try {
+        const valueToSave = key
+          ? { [key]: newValue }
+          : this.formattedRelatedResources;
+        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        });
+      } catch (e: unknown) {
+        this.flashMessages.add({
+          title: "Unable to save",
+          message: (e as any).message,
+          type: "critical",
+          timeout: 10000,
+          extendedTimeout: 1000,
+        });
+      }
+    },
+  );
 
   /**
    * The task to save the document's related resources.
    * Creates a PUT request to the DB and conditionally triggers
    * the resource-highlight animation.
-   *
-   * TODO: Explain why this is a PUT request.
    */
-  protected saveRelatedResources = task(
+  protected saveProjectResources = task(
     async (
       cachedDocuments,
       cachedLinks,
