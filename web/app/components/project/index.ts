@@ -207,7 +207,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The placeholder action for adding a Jira object.
    * Updates the local Jira object, then saves the project.
    */
-  @action protected addJiraLink(): void {
+  @action protected addJiraIssue(): void {
     // TODO: implement this
     this.jiraIssue = {
       key: "HER-123",
@@ -226,7 +226,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Updates the local Jira object, then saves the project.
    * Accessible in the overflow menu of a project resource.
    */
-  @action protected removeJiraLink(): void {
+  @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
     void this.save.perform("jiraIssue", undefined);
   }

@@ -157,7 +157,7 @@
         unlink=(hash
           label="Remove Jira link"
           icon="x-circle"
-          action=(fn this.removeJiraLink)
+          action=(fn this.removeJiraIssue)
         )
       }}
       @placement="bottom-end"
@@ -184,7 +184,7 @@
   {{else}}
     <Action
       data-test-add-jira-button
-      {{on "click" this.addJiraLink}}
+      {{on "click" this.addJiraIssue}}
       class="text-body-100 text-color-foreground-disabled underline decoration-color-palette-neutral-200 underline-offset-[3px]"
     >
       + Add Jira link
