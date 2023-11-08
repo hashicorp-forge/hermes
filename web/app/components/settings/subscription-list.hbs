@@ -8,6 +8,8 @@
 />
 <ol
   data-test-subscription-list
+  {{! Fetch the most up-to-date product areas in the background }}
+  {{did-insert (perform this.productAreas.fetch)}}
   class="mt-5 w-full divide-y divide-color-border-primary"
 >
   {{#each this.shownItems as |listItem|}}
