@@ -55,8 +55,11 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     void this.saveProjectRelatedResources.perform(project);
   }
 
+  protected loadInitialData = task(async () => {
+    await this.searchProjects.perform();
+  });
+
   protected searchProjects = restartableTask(async () => {
-    //  need to make an algolia request to a projects index
     try {
       this.searchIsRunning = true;
       await this.algolia.searchIndex
@@ -68,11 +71,10 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           },
         )
         .then((response) => {
-          console.log("lugged");
-          console.log(response);
           // TODO: do we want to trim to 4 or let the user scroll?
           // do we want to do it as a hitsPerPage param?
           this.shownProjects = response.hits as unknown as HermesProject[];
+          this.searchIsRunning = false;
         });
     } catch (e: unknown) {
       this.searchIsRunning = false;

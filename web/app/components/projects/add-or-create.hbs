@@ -16,6 +16,7 @@
       @disableClose={{true}}
       @onItemClick={{this.addDocumentToProject}}
       @placement={{null}}
+      @isLoading={{this.loadInitialData.isRunning}}
       class="non-floating-list"
     >
       <:anchor as |dd|>
@@ -26,27 +27,28 @@
               @document={{@document}}
             />
           {{else}}
-            <Hds::Form::TextInput::Base
-              autofocus
-              @type="search"
-              @value={{this.inputValue}}
-              {{did-insert (fn this.updateInputValue "")}}
-              {{on "input" this.updateInputValue}}
-              placeholder="Search projects"
-              aria-label="Search projects"
-              aria-controls={{dd.ariaControls}}
-              aria-expanded={{dd.contentIsShown}}
-              aria-haspopup="listbox"
-              class="mb-4"
-            />
-            {{#if this.searchIsRunning}}
-              <div
-                data-test-search-loading-icon
-                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-              >
-                <FlightIcon @name="loading" />
-              </div>
-            {{/if}}
+            <div class="relative mb-4">
+              <Hds::Form::TextInput::Base
+                autofocus
+                @type="search"
+                @value={{this.inputValue}}
+                {{did-insert (perform this.loadInitialData)}}
+                {{on "input" this.updateInputValue}}
+                placeholder="Search projects"
+                aria-label="Search projects"
+                aria-controls={{dd.ariaControls}}
+                aria-expanded={{dd.contentIsShown}}
+                aria-haspopup="listbox"
+              />
+              {{#if this.searchIsRunning}}
+                <div
+                  data-test-search-loading-icon
+                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+                >
+                  <FlightIcon @name="loading" />
+                </div>
+              {{/if}}
+            </div>
           {{/if}}
         </div>
       </:anchor>
@@ -97,6 +99,11 @@
           </div>
         {{/unless}}
       </:no-matches>
+      <:loading>
+        <div class="h-48">
+          <FlightIcon @name="loading" class="mt-4" />
+        </div>
+      </:loading>
     </X::DropdownList>
   </M.Body>
   {{#unless this.newProjectFormIsShowing}}
