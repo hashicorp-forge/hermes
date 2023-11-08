@@ -48,15 +48,6 @@
           {{/if}}
         </div>
       </:anchor>
-      <:header>
-        {{#unless
-          (or this.newProjectFormIsShowing (eq this.shownProjects.length 0))
-        }}
-          <h4 class="hermes-h4 mt-3.5">
-            {{if this.inputValueIsEmpty "Latest" "Results"}}
-          </h4>
-        {{/unless}}
-      </:header>
       <:item as |dd|>
         <dd.Action class="block">
           <div class="flex w-full gap-3.5">
