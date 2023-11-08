@@ -30,6 +30,7 @@
               autofocus
               @type="search"
               @value={{this.inputValue}}
+              {{did-insert (fn this.updateInputValue "")}}
               {{on "input" this.updateInputValue}}
               placeholder="Search projects"
               aria-label="Search projects"

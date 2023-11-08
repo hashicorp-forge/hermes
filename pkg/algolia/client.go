@@ -46,6 +46,9 @@ type Client struct {
 	// Internal is an Algolia index for storing internal Hermes metadata.
 	Internal *search.Index
 
+	// Projects is an Algolia index for storing project metadata
+	Projects *search.Index
+
 	// Links is an Algolia index for storing links of documents
 	Links *search.Index
 
@@ -70,6 +73,9 @@ type Config struct {
 	// InternalIndexName is the name of the Algolia index for storing internal
 	// Hermes metadata.
 	InternalIndexName string `hcl:"internal_index_name,optional"`
+
+	// ProjectsIndexName is the name of the Algolia index for storing project metadata
+	ProjectsIndexName string `hcl:"projects_index_name,optional"`
 
 	// LinksIndexName is the name of the Algolia index for storing links
 	LinksIndexName string `hcl:"links_index_name,optional"`
@@ -105,6 +111,7 @@ func New(cfg *Config) (*Client, error) {
 	c.Docs = a.InitIndex(cfg.DocsIndexName)
 	c.Drafts = a.InitIndex(cfg.DraftsIndexName)
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
+	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 	c.MissingFields = a.InitIndex(cfg.MissingFieldsIndexName)
 
@@ -296,6 +303,7 @@ func NewSearchClient(cfg *Config) (*Client, error) {
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
 	c.DraftsModifiedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_desc")
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
+	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 
 	return c, nil
@@ -308,6 +316,7 @@ func validate(c *Config) error {
 		validation.Field(&c.DocsIndexName, validation.Required),
 		validation.Field(&c.DraftsIndexName, validation.Required),
 		validation.Field(&c.InternalIndexName, validation.Required),
+		validation.Field(&c.ProjectsIndexName, validation.Required),
 		validation.Field(&c.LinksIndexName, validation.Required),
 		validation.Field(&c.MissingFieldsIndexName, validation.Required),
 		validation.Field(&c.SearchAPIKey, validation.Required),

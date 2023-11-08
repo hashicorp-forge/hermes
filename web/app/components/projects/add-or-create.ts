@@ -40,8 +40,12 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     this.newProjectFormIsShowing = true;
   }
 
-  @action protected updateInputValue(event: Event) {
-    this.inputValue = (event.target as HTMLInputElement).value;
+  @action protected updateInputValue(eventOrValue: Event | string) {
+    if (typeof eventOrValue === "string") {
+      this.inputValue = eventOrValue;
+    } else {
+      this.inputValue = (eventOrValue.target as HTMLInputElement).value;
+    }
 
     void this.searchProjects.perform();
   }
@@ -55,6 +59,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     //  need to make an algolia request to a projects index
     try {
       this.searchIsRunning = true;
+      debugger;
       await this.algolia.searchIndex
         .perform(
           this.configSvc.config.algolia_projects_index_name,

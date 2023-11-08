@@ -33,6 +33,8 @@ export default function (mirageConfig) {
         const requestBody = JSON.parse(request.requestBody);
 
         if (requestBody) {
+          debugger;
+          // theres currently no way of distinguishing algolia indexes
           const { facetQuery, query } = requestBody;
           if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
@@ -358,6 +360,7 @@ export default function (mirageConfig) {
             algolia_docs_index_name: config.algolia.docsIndexName,
             algolia_drafts_index_name: config.algolia.draftsIndexName,
             algolia_internal_index_name: config.algolia.internalIndexName,
+            algolia_projects_index_name: config.algolia.projectsIndexName,
             feature_flags: null,
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
