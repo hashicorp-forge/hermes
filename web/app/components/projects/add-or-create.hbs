@@ -37,6 +37,7 @@
               aria-controls={{dd.ariaControls}}
               aria-expanded={{dd.contentIsShown}}
               aria-haspopup="listbox"
+              class="mb-4"
             />
             {{#if this.searchIsRunning}}
               <div
@@ -90,9 +91,7 @@
       </:item>
       <:no-matches>
         {{#unless this.newProjectFormIsShowing}}
-          <div
-            class="mt-4 grid h-48 place-items-center text-color-foreground-faint"
-          >
+          <div class="grid h-48 place-items-center text-color-foreground-faint">
             {{! should also include a "no projects state" }}
             No matches
           </div>

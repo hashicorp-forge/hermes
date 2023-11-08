@@ -28,7 +28,22 @@ export default function (mirageConfig) {
        *
        */
       const handleAlgoliaProjectsRequest = (schema, request) => {
-        debugger;
+        const requestBody = JSON.parse(request.requestBody);
+        const { query } = requestBody;
+        const projects = schema.projects.all().models;
+
+        if (query === "") {
+          return new Response(200, {}, { hits: projects });
+        }
+
+        // Name filtering as a simplified Algolia simulation
+        let filteredProjects = projects.filter((project) => {
+          return project.attrs.title
+            .toLowerCase()
+            .includes(query.toLowerCase());
+        });
+
+        return new Response(200, {}, { hits: filteredProjects });
       };
 
       /**

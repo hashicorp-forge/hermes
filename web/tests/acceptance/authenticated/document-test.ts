@@ -387,8 +387,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    await this.pauseTest();
-
     assert.dom(TITLE_SELECTOR).hasAttribute("data-test-editable");
     assert.dom(SUMMARY_SELECTOR).hasAttribute("data-test-editable");
     assert.dom(CONTRIBUTORS_SELECTOR).hasAttribute("data-test-editable");

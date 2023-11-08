@@ -64,12 +64,15 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           this.configSvc.config.algolia_projects_index_name,
           this.inputValue,
           {
-            filters: "",
+            // we may want to add some optionalFilters here
           },
         )
-        .then((results) => {
+        .then((response) => {
           console.log("lugged");
-          console.log(results);
+          console.log(response);
+          // TODO: do we want to trim to 4 or let the user scroll?
+          // do we want to do it as a hitsPerPage param?
+          this.shownProjects = response.hits as unknown as HermesProject[];
         });
     } catch (e: unknown) {
       this.searchIsRunning = false;
