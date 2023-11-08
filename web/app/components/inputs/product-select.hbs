@@ -1,5 +1,9 @@
 {{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
-<div data-test-product-select>
+<div
+  data-test-product-select
+  {{! Fetch the most up-to-date product areas in the background }}
+  {{did-insert (perform this.productAreas.fetch)}}
+>
   {{#if @formatIsBadge}}
     <Inputs::BadgeDropdownList
       @items={{this.products}}
