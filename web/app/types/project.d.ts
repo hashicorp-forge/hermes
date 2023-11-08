@@ -4,7 +4,7 @@ import {
 } from "hermes/components/related-resources";
 import { ProjectStatus } from "./project-status";
 
-export interface JiraObject {
+export interface JiraIssue {
   key: string;
   url: string;
   priority: string;
@@ -15,14 +15,15 @@ export interface JiraObject {
 }
 
 export interface HermesProject {
-  id: string; // at least in Mirage...
+  id: string;
   title: string;
   status: ProjectStatus;
   hermesDocuments?: RelatedHermesDocument[];
   description?: string;
-  jiraObject?: JiraObject;
+  jiraIssueID?: string;
+  jiraIssue?: JiraIssue;
+  creator: string;
+  createdDate: number;
+  modifiedTime: number;
   externalLinks?: RelatedExternalLink[];
-  creator: string; // maybe a Google/HermesUser
-  dateCreated: number;
-  dateModified: number;
 }

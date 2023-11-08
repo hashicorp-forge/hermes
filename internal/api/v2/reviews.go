@@ -675,6 +675,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 									"doc_id", docID,
 									"method", r.Method,
 									"path", r.URL.Path,
+									"product", doc.Product,
 								)
 							}
 						}
@@ -724,7 +725,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(

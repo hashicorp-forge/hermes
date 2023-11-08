@@ -50,6 +50,7 @@
     "@types/ember__destroyable": "latest",
     "@types/ember__engine": "latest",
     "@types/ember__error": "latest",
+    "@types/ember__modifier": "latest",
     "@types/ember__object": "latest",
     "@types/ember__polyfills": "latest",
     "@types/ember__routing": "latest",
@@ -149,7 +150,7 @@
     "sinon": "^15.0.1",
     "tailwindcss": "^3.0.23",
     "torii": "^0.10.1",
-    "webpack": "^5.70.0"
+    "webpack": "^5.76.0"
   },
   "packageManager": "yarn@3.3.0"
 }

@@ -1,10 +1,8 @@
 <div
   data-test-person-avatar
-  class="flex items-center justify-center overflow-hidden rounded-full
-    {{if this.sizeIsSmall 'h-5 w-5'}}
-    {{if this.sizeIsMedium 'h-7 w-7'}}
-    {{if this.sizeIsLarge 'h-9 w-9'}}
+  class="avatar overflow-hidden rounded-full
     {{unless @isLoading 'bg-color-palette-alpha-300'}}
+    {{this.size}}
     "
   ...attributes
 >

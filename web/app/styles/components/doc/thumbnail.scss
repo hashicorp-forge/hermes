@@ -58,7 +58,6 @@
   }
 
   &.large {
-    // Match the width of the progress bars
     @apply w-28;
 
     &::after {
@@ -66,7 +65,7 @@
     }
 
     .product-badge {
-      @apply h-[32px] w-[36px] rounded-bl rounded-tr;
+      @apply rounded-bl rounded-tr;
 
       .flight-icon {
         @apply scale-100;
