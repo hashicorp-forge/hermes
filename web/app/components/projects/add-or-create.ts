@@ -59,7 +59,6 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     //  need to make an algolia request to a projects index
     try {
       this.searchIsRunning = true;
-      debugger;
       await this.algolia.searchIndex
         .perform(
           this.configSvc.config.algolia_projects_index_name,
@@ -71,7 +70,6 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
         .then((results) => {
           console.log("lugged");
           console.log(results);
-          debugger;
         });
     } catch (e: unknown) {
       this.searchIsRunning = false;

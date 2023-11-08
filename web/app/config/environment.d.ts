@@ -15,6 +15,7 @@ declare const config: {
     docsIndexName: string;
     draftsIndexName: string;
     internalIndexName: string;
+    projectsIndexName: string;
   };
   featureFlags: Record<string, boolean>;
   google: {

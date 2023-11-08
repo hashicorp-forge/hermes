@@ -24,6 +24,12 @@ export default function (mirageConfig) {
        * Algolia requests
        *
        *************************************************************************/
+      /**
+       *
+       */
+      const handleAlgoliaProjectsRequest = (schema, request) => {
+        debugger;
+      };
 
       /**
        * A triage function for all Algolia requests.
@@ -33,8 +39,6 @@ export default function (mirageConfig) {
         const requestBody = JSON.parse(request.requestBody);
 
         if (requestBody) {
-          debugger;
-          // theres currently no way of distinguishing algolia indexes
           const { facetQuery, query } = requestBody;
           if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
@@ -111,7 +115,6 @@ export default function (mirageConfig) {
                   );
                 });
               } else {
-                // This
                 setDefaultDocMatches();
               }
             } else {
@@ -166,13 +169,23 @@ export default function (mirageConfig) {
        * Additionally, we support the remaining Algolia routes.
        */
 
-      algoliaHosts.forEach((host) => {
+      algoliaHosts.documentHosts.forEach((host) => {
         this.post(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
         });
 
         this.get(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
+        });
+      });
+
+      algoliaHosts.projectHosts.forEach((host) => {
+        this.post(host, (schema, request) => {
+          return handleAlgoliaProjectsRequest(schema, request);
+        });
+
+        this.get(host, (schema, request) => {
+          return handleAlgoliaProjectsRequest(schema, request);
         });
       });
 
