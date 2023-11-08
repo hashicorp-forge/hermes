@@ -6,23 +6,15 @@
         "Start a project"
         "Add document to project"
       }}
-      {{#unless this.newProjectFormIsShowing}}
-        <span class="hermes-h4 mt-0.5">or</span>
-        <Hds::Button
-          {{on "click" this.showNewProjectForm}}
-          @text="Start a new project..."
-          @color="secondary"
-          @size="small"
-        />
-      {{/unless}}
     </div>
   </M.Header>
   <M.Body>
     <X::DropdownList
       @inputIsShown={{false}}
-      @items={{this.algoliaResults}}
+      @items={{this.shownProjects}}
       @listIsShown={{not this.newProjectFormIsShowing}}
       @disableClose={{true}}
+      @onItemClick={{this.addDocumentToProject}}
       @placement={{null}}
       class="non-floating-list"
     >
@@ -57,7 +49,9 @@
         </div>
       </:anchor>
       <:header>
-        {{#unless this.newProjectFormIsShowing}}
+        {{#unless
+          (or this.newProjectFormIsShowing (eq this.shownProjects.length 0))
+        }}
           <h4 class="hermes-h4 mt-3.5">
             {{if this.inputValueIsEmpty "Latest" "Results"}}
           </h4>
@@ -102,16 +96,27 @@
           </div>
         </dd.Action>
       </:item>
+      <:no-matches>
+        {{#unless this.newProjectFormIsShowing}}
+          <div
+            class="mt-4 grid h-48 place-items-center text-color-foreground-faint"
+          >
+            {{! should also include a "no projects state" }}
+            No matches
+          </div>
+        {{/unless}}
+      </:no-matches>
     </X::DropdownList>
   </M.Body>
   {{#unless this.newProjectFormIsShowing}}
-    {{!-- <M.Footer>
+    <M.Footer>
       <Hds::Button
         {{on "click" this.showNewProjectForm}}
+        @icon="plus"
         @text="Start a new project..."
-        @color="secondary"
-
+        @color="tertiary"
+        class="-ml-1 pl-2.5"
       />
-    </M.Footer> --}}
+    </M.Footer>
   {{/unless}}
 </Hds::Modal>

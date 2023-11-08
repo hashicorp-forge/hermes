@@ -85,7 +85,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     const { title, product, status } = doc;
 
     return {
-      id: doc.objectID,
       googleFileID: doc.objectID,
       title,
       product,

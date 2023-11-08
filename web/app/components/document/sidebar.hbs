@@ -241,7 +241,7 @@
         <Document::Sidebar::SectionHeader
           {{did-insert (perform this.loadRelatedProjects)}}
           @title="Projects"
-          {{! @badgeText="New" }}
+          @badgeText="New"
           @buttonAction={{this.showProjectsModal}}
         />
         {{#if this.projects.length}}
@@ -290,7 +290,9 @@
                       </div>
                     </div>
                   </LinkTo>
-                  <OverflowMenu
+
+                  {{! Don't think we need overflow control from this view }}
+                  {{!-- <OverflowMenu
                     @items={{hash
                       remove=(hash
                         icon="trash"
@@ -298,7 +300,7 @@
                         action=(perform this.removeProject project.id)
                       )
                     }}
-                  />
+                  /> --}}
                 </div>
               </li>
             {{/each}}

@@ -633,15 +633,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  removeProject = task(async (projectId: string) => {
-    try {
-      // TODO:
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to remove project");
-      throw error;
-    }
-    this.refreshRoute();
-  });
+  // removeProject = task(async (projectId: string) => {
+  //   try {
+  //     // TODO:
+  //   } catch (error: unknown) {
+  //     this.maybeShowFlashError(error as Error, "Unable to remove project");
+  //     throw error;
+  //   }
+  //   this.refreshRoute();
+  // });
 
   saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
