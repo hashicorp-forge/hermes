@@ -122,8 +122,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       id: "2",
       title: "Adding Search to HDS Documentation",
       creator: "test",
-      dateCreated: 123,
-      dateModified: 123,
+      createdTime: 123,
+      modifiedTime: 123,
       status: ProjectStatus.Active,
     },
   ];

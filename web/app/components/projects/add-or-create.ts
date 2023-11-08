@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject, JiraObject } from "hermes/types/project";
+import { HermesProject, JiraIssue } from "hermes/types/project";
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import { action } from "@ember/object";
@@ -36,24 +36,24 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           { product: "Labs" },
           { product: "Engineering" },
         ] as RelatedHermesDocument[],
-        jiraObject: {
+        jiraIssue: {
           key: "TES-333",
-        } as JiraObject,
+        } as JiraIssue,
         creator: "test",
-        dateCreated: 123,
-        dateModified: 123,
+        createdTime: 123,
+        modifiedTime: 123,
         status: ProjectStatus.Active,
       },
       "2": {
         id: "2",
         title: "Login flow for new users",
         hermesDocuments: [{ product: "Terraform" }] as RelatedHermesDocument[],
-        jiraObject: {
+        jiraIssue: {
           key: "HERMES-022",
-        } as JiraObject,
+        } as JiraIssue,
         creator: "test",
-        dateCreated: 123,
-        dateModified: 123,
+        createdTime: 123,
+        modifiedTime: 123,
         status: ProjectStatus.Active,
       },
       "3": {
@@ -64,8 +64,8 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           { product: "Waypoint" },
         ] as RelatedHermesDocument[],
         creator: "test",
-        dateCreated: 123,
-        dateModified: 123,
+        createdTime: 123,
+        modifiedTime: 123,
         status: ProjectStatus.Active,
       },
       "4": {
@@ -75,12 +75,12 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           { product: "Cloud Platform" },
           { product: "Security" },
         ] as RelatedHermesDocument[],
-        jiraObject: {
+        jiraIssue: {
           key: "SEC-418",
-        } as JiraObject,
+        } as JiraIssue,
         creator: "test",
-        dateCreated: 123,
-        dateModified: 123,
+        createdTime: 123,
+        modifiedTime: 123,
         status: ProjectStatus.Active,
       },
     };
