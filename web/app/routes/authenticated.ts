@@ -29,7 +29,18 @@ export default class AuthenticatedRoute extends Route {
      * application error method which invalidates the session
      * and redirects to the auth screen.
      */
-    await this.authenticatedUser.loadInfo.perform();
+    const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+
+    /**
+     * Fetch the product areas for the ProductAvatar and
+     * ProductSelect components.
+     */
+    const loadProductAreasPromise = this.productAreas.fetch.perform();
+
+    /**
+     * Wait for both promises to resolve.
+     */
+    await Promise.all([loadInfoPromise, loadProductAreasPromise]);
 
     /**
      * Load the ProductAreas index

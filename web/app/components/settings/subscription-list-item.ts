@@ -27,10 +27,10 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
   protected get isChecked(): boolean {
     assert(
       "isChecked expects a subscriptions list",
-      this.authenticatedUser.subscriptions
+      this.authenticatedUser.subscriptions,
     );
     return this.authenticatedUser.subscriptions.some(
-      (subscription) => subscription.productArea === this.args.productArea
+      (subscription) => subscription.productArea === this.args.productArea,
     );
   }
 
@@ -41,11 +41,11 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
   @action protected toggleChecked(): void {
     if (this.isChecked) {
       void this.authenticatedUser.removeSubscription.perform(
-        this.args.productArea
+        this.args.productArea,
       );
     } else {
       void this.authenticatedUser.addSubscription.perform(
-        this.args.productArea
+        this.args.productArea,
       );
     }
     void this.temporarilyShowConfirmation.perform();
@@ -66,4 +66,10 @@ export default class SettingsSubscriptionListItemComponent extends Component<Set
     this.confirmationIsShown = false;
     this.confirmationIsClosing = false;
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Settings::SubscriptionListItem": typeof SettingsSubscriptionListItemComponent;
+  }
 }

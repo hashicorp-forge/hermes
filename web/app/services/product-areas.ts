@@ -16,9 +16,11 @@ export default class ProductAreasService extends Service {
 
   @tracked _index: Record<string, ProductArea> | null = null;
 
+  /**
+   * An asserted-true reference to the `_index` property.
+   */
   get index(): Record<string, ProductArea> {
     assert("_index must exist", this._index);
-
     return Object.fromEntries(
       Object.entries(this._index).map(([key, value]) => [
         key,
@@ -27,6 +29,11 @@ export default class ProductAreasService extends Service {
     );
   }
 
+  /**
+   * A helper function to get the abbreviation for a product.
+   * Used wherever the abbreviation is needed, e.g.,
+   * the ProductSelect component.
+   */
   getAbbreviation(productName?: string): string | undefined {
     if (!productName) {
       return;
@@ -38,9 +45,14 @@ export default class ProductAreasService extends Service {
       return;
     }
 
-    return product.abbreviation.slice(0, 3).toUpperCase();
+    return product.abbreviation;
   }
 
+  /**
+   * The fetch request to the `/products` endpoint.
+   * Called on login by the `/authenticated` route.
+   * Stores the response in the `_index` property.
+   */
   fetch = task(async () => {
     try {
       this._index = await this.fetchSvc

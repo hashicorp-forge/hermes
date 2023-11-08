@@ -15,8 +15,8 @@
       <EmptyStateText data-test-empty-state @value="Select a product/area" />
     {{/if}}
 
-    {{#if @abbreviation}}
-      <span class="opacity-50">
+    {{#if this.abbreviationIsShown}}
+      <span data-test-product-select-item-abbreviation>
         {{@abbreviation}}
       </span>
     {{/if}}

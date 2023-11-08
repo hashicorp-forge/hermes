@@ -5,9 +5,9 @@ import { click, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
-import { Response } from "miragejs";
 import htmlElement from "hermes/utils/html-element";
 import ProductAreasService from "hermes/services/product-areas";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
@@ -38,11 +38,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       this.set("selected", value);
     });
 
-    const productAreasService = this.owner.lookup(
-      "service:product-areas",
-    ) as ProductAreasService;
-
-    await productAreasService.fetch.perform();
+    await setupProductIndex(this);
   });
 
   test("it displays the products with abbreviations", async function (this: InputsProductSelectContext, assert) {
@@ -59,7 +55,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await click(TOGGLE);
 
     assert.dom(DROPDOWN_PRODUCT).exists({ count: 4 });
-    assert.dom(DROPDOWN_PRODUCT).containsText("Test Product 0 TP0");
+    assert.dom(DROPDOWN_PRODUCT).hasText("Test Product 0 TP0");
   });
 
   test("it performs the passed-in action on click", async function (this: InputsProductSelectContext, assert) {
@@ -79,24 +75,6 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await click(DROPDOWN_PRODUCT);
 
     assert.equal(count, 1, "the action was called once");
-  });
-
-  test("it shows an error when the index fails to fetch", async function (this: InputsProductSelectContext, assert) {
-    this.server.get("/products", () => {
-      return new Response(500, {});
-    });
-
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        @selected={{this.selected}}
-        @onChange={{this.onChange}}
-      />
-    `);
-
-    assert.dom(".failed-to-load-text").hasText("Failed to load");
-    assert
-      .dom("[data-test-product-select-failed-to-load-button]")
-      .hasText("Retry");
   });
 
   test("the standard select can match the anchor width", async function (this: InputsProductSelectContext, assert) {

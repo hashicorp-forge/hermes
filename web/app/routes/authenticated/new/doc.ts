@@ -15,11 +15,7 @@ export default class AuthenticatedNewDocRoute extends Route {
     },
   };
 
-  async model(params: AuthenticatedNewDocRouteParams) {
-    if (!this.productAreas.index) {
-      await this.productAreas.fetch.perform();
-    }
-
+  model(params: AuthenticatedNewDocRouteParams) {
     return params.docType;
   }
 }
