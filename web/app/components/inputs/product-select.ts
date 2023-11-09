@@ -4,7 +4,6 @@ import { inject as service } from "@ember/service";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import ProductAreasService, {
   ProductArea,
@@ -31,7 +30,6 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   @service declare productAreas: ProductAreasService;
 
   @tracked selected = this.args.selected;
-  @tracked protected errorIsShown = false;
 
   get products() {
     return this.productAreas.index;
@@ -46,27 +44,13 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   }
 
   get selectedProductAbbreviation(): string | undefined {
-    if (!this.selected) {
-      return;
-    }
-    const selectedProduct = this.products?.[this.selected];
-    assert("selected product must exist", selectedProduct);
-    return selectedProduct.abbreviation;
+    return this.productAreas.getAbbreviation(this.selected);
   }
 
   @action onChange(newValue: any, attributes: ProductArea) {
     this.selected = newValue;
     this.args.onChange(newValue, attributes);
   }
-
-  protected fetchProductAreas = task(async () => {
-    try {
-      await this.productAreas.fetch.perform();
-      this.errorIsShown = false;
-    } catch {
-      this.errorIsShown = true;
-    }
-  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

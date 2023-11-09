@@ -1,8 +1,12 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import ProductAreasService from "hermes/services/product-areas";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
+
+interface ProductAreasServiceTestContext extends MirageTestContext {
+  productAreas: ProductAreasService;
+}
 
 module("Unit | Service | product-areas", function (hooks) {
   setupTest(hooks);
@@ -10,28 +14,45 @@ module("Unit | Service | product-areas", function (hooks) {
 
   hooks.beforeEach(function () {
     authenticateSession({});
-  });
-
-  test("can set or close an active modal", async function (this: MirageTestContext, assert) {
     const productAreas = this.owner.lookup(
-      "service:product-areas"
+      "service:product-areas",
     ) as ProductAreasService;
 
+    this.set("productAreas", productAreas);
+  });
+
+  test("it fetches product areas from the back end", async function (this: ProductAreasServiceTestContext, assert) {
+    const key = "Labs";
+    const abbreviation = "LABS";
+
     this.server.create("product", {
-      name: "Labs",
-      abbreviation: "LABS",
+      name: key,
+      abbreviation,
     });
 
-    const expectedResponse = {
-      Labs: {
-        abbreviation: "LABS",
-      },
-    };
+    await this.productAreas.fetch.perform();
 
-    assert.equal(productAreas.index, null);
+    assert.equal(Object.keys(this.productAreas.index)[0], key);
 
-    await productAreas.fetch.perform();
+    assert.equal(
+      Object.values(this.productAreas.index)[0]?.abbreviation,
+      abbreviation,
+    );
+  });
 
-    assert.deepEqual(productAreas.index, expectedResponse);
+  test("it returns a product abbreviation if it exists", async function (this: ProductAreasServiceTestContext, assert) {
+    const key = "Labs";
+    const abbreviation = "LABS";
+
+    this.server.create("product", {
+      name: key,
+      abbreviation,
+    });
+
+    await this.productAreas.fetch.perform();
+
+    assert.equal(this.productAreas.getAbbreviation(key), abbreviation);
+    assert.equal(this.productAreas.getAbbreviation("foo"), undefined);
+    assert.equal(this.productAreas.getAbbreviation(), undefined);
   });
 });

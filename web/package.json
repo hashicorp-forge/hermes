@@ -134,8 +134,8 @@
   "dependencies": {
     "@csstools/postcss-sass": "^5.0.1",
     "@floating-ui/dom": "^1.2.4",
-    "@hashicorp/design-system-components": "^2.11.0",
-    "@hashicorp/ember-flight-icons": "^3.1.1",
+    "@hashicorp/design-system-components": "^3.1.0",
+    "@hashicorp/ember-flight-icons": "^4.0.2",
     "@types/sinon": "^10.0.13",
     "algoliasearch": "^4.13.0",
     "autoprefixer": "^10.4.4",
@@ -150,7 +150,7 @@
     "sinon": "^15.0.1",
     "tailwindcss": "^3.0.23",
     "torii": "^0.10.1",
-    "webpack": "^5.70.0"
+    "webpack": "^5.76.0"
   },
   "packageManager": "yarn@3.3.0"
 }
