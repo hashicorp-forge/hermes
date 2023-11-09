@@ -5,13 +5,13 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import { task } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
 import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
-import { RelatedHermesDocument } from "../related-resources";
+import { JiraIssue } from "hermes/types/project";
 
 interface NewProjectFormComponentSignature {
   Args: {
@@ -28,6 +28,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service declare flashMessages: FlashMessageService;
 
   @tracked protected jiraSearchIsShowing = false;
+  @tracked protected jiraSearchQuery = "";
+  @tracked protected jiraIssue: JiraIssue | null = null;
+
+  @tracked protected shownJiraIssues = [];
 
   /**
    * Whether the project is being created, or in the process of
@@ -41,6 +45,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
+
+  private validate() {
+    this.titleErrorIsShown = this.title.length === 0;
+  }
 
   /**
    * The action to attempt a form submission.
@@ -63,8 +71,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     this.jiraSearchIsShowing = false;
   }
 
-  private validate() {
-    this.titleErrorIsShown = this.title.length === 0;
+  @action protected addJiraIssue(issue: JiraIssue) {
+    // TODO: Add to project
+    this.jiraIssue = issue;
+
+    this.hideJiraSearch();
   }
 
   /**
@@ -85,25 +96,23 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
-  get hermesDocument(): RelatedHermesDocument | undefined {
-    const doc = this.args.document;
-
-    if (!doc) {
-      return;
+  @action protected updateJiraSearchQuery(eventOrValue: Event | string) {
+    if (typeof eventOrValue === "string") {
+      this.jiraSearchQuery = eventOrValue;
+    } else {
+      this.jiraSearchQuery = (eventOrValue.target as HTMLInputElement).value;
     }
 
-    const { title, product, status } = doc;
-
-    return {
-      googleFileID: doc.objectID,
-      title,
-      product,
-      status,
-      documentType: doc.docType,
-      documentNumber: doc.docNumber,
-      sortOrder: 1,
-    };
+    void this.searchJiraIssues.perform();
   }
+
+  protected loadInitialJiraIssues = task(async () => {
+    // TODO: Load initial Jira issues
+  });
+
+  protected searchJiraIssues = restartableTask(async () => {
+    // TODO: Search Jira issues
+  });
 
   /**
    * The task that creates a project and, if successful,
