@@ -1,6 +1,5 @@
 import { assert } from "@ember/debug";
 import { Server } from "miragejs";
-
 /**
  * Provides access to the Mirage server outside of test contexts (e.g. in a Factory).
  * If you are in a test, use MirageTestContext instead.

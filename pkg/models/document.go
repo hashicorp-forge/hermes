@@ -260,6 +260,7 @@ func GetLatestProductNumber(db *gorm.DB,
 			DocumentTypeID: dt.ID,
 			ProductID:      p.ID,
 		}).
+		Where("document_number IS NOT NULL").
 		Order("document_number desc").
 		First(&d).
 		Error; err != nil {
@@ -492,6 +493,14 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 		contributors = append(contributors, c)
 	}
 	d.Contributors = contributors
+
+	// Get document type if DocumentTypeID is not set.
+	if d.DocumentTypeID == 0 && d.DocumentType.Name != "" {
+		if err := d.DocumentType.Get(db); err != nil {
+			return fmt.Errorf("error getting document type: %w", err)
+		}
+		d.DocumentTypeID = d.DocumentType.ID
+	}
 
 	// Find or create owner.
 	if d.Owner != nil && d.Owner.EmailAddress != "" {

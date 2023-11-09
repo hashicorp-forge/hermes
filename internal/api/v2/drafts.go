@@ -401,7 +401,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(
@@ -777,7 +777,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(
@@ -1365,7 +1365,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
-				if err := compareAlgoliaAndDatabaseDocument(
+				if err := CompareAlgoliaAndDatabaseDocument(
 					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
 				); err != nil {
 					srv.Logger.Warn(

@@ -556,6 +556,7 @@ func ReviewHandler(
 							"doc_id", docID,
 							"method", r.Method,
 							"path", r.URL.Path,
+							"product", doc.Product,
 						)
 					}
 				}
