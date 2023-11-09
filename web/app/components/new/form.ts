@@ -26,10 +26,11 @@ interface NewFormComponentSignature {
     taskIsRunningDescription?: string;
     buttonText: string;
     buttonIsActive: boolean;
-    onlyFormIsShown?: boolean;
+    isModal?: boolean;
   };
   Blocks: {
     default: [];
+    submit: [];
   };
 }
 

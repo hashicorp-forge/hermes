@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject, JiraIssue } from "hermes/types/project";
+import { HermesProject } from "hermes/types/project";
 import { action } from "@ember/object";
 import { HermesDocument } from "hermes/types/document";
 import { restartableTask, task } from "ember-concurrency";
@@ -26,7 +26,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   @tracked protected searchIsRunning = false;
   @tracked protected inputValue = "";
 
-  @tracked protected newProjectFormIsShowing = false;
+  @tracked protected newProjectFormIsShown = false;
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
@@ -36,8 +36,14 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     return this.inputValue.length === 0;
   }
 
+  @action protected maybeClose() {
+    if (!this.newProjectFormIsShown) {
+      this.args.onClose();
+    }
+  }
+
   @action protected showNewProjectForm() {
-    this.newProjectFormIsShowing = true;
+    this.newProjectFormIsShown = true;
   }
 
   @action protected updateInputValue(eventOrValue: Event | string) {

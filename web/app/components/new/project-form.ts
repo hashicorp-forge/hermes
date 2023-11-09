@@ -9,15 +9,15 @@ import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
-import { HermesProject } from "hermes/types/project";
 import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
 import { RelatedHermesDocument } from "../related-resources";
 
 interface NewProjectFormComponentSignature {
   Args: {
-    onlyFormIsShown?: boolean;
+    isModal?: boolean;
     document?: HermesDocument;
+    onModalClose?: () => void;
   };
 }
 
@@ -26,6 +26,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare flashMessages: FlashMessageService;
+
+  @tracked protected jiraSearchIsShowing = false;
 
   /**
    * Whether the project is being created, or in the process of
@@ -51,6 +53,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     if (!this.titleErrorIsShown) {
       void this.createProject.perform();
     }
+  }
+
+  @action protected showJiraSearch() {
+    this.jiraSearchIsShowing = true;
+  }
+
+  @action protected hideJiraSearch() {
+    this.jiraSearchIsShowing = false;
   }
 
   private validate() {

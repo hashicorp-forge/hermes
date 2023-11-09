@@ -1,112 +1,100 @@
-<Hds::Modal @onClose={{@onClose}} as |M|>
-  <M.Header>
-    <div class="flex w-full items-center gap-2.5">
-      {{if
-        this.newProjectFormIsShowing
-        "Start a project"
-        "Add document to project"
-      }}
-    </div>
-  </M.Header>
-  <M.Body>
-    <X::DropdownList
-      @inputIsShown={{false}}
-      @items={{this.shownProjects}}
-      @listIsShown={{not this.newProjectFormIsShowing}}
-      @disableClose={{true}}
-      @onItemClick={{this.addDocumentToProject}}
-      @placement={{null}}
-      @isLoading={{this.loadInitialData.isRunning}}
-      class="non-floating-list"
-    >
-      <:anchor as |dd|>
-        <div class="relative" {{did-insert dd.registerAnchor}}>
-          {{#if this.newProjectFormIsShowing}}
-            <New::ProjectForm
-              @onlyFormIsShown={{true}}
-              @document={{@document}}
+{{#if this.newProjectFormIsShown}}
+  <New::ProjectForm
+    @document={{@document}}
+    @isModal={{true}}
+    @onModalClose={{@onClose}}
+  />
+{{else}}
+  <Hds::Modal @onClose={{this.maybeClose}} as |M|>
+    <M.Header>
+      Add doc to project
+    </M.Header>
+    <M.Body>
+      <X::DropdownList
+        @inputIsShown={{false}}
+        @items={{this.shownProjects}}
+        @disableClose={{true}}
+        @onItemClick={{this.addDocumentToProject}}
+        @placement={{null}}
+        @isLoading={{this.loadInitialData.isRunning}}
+        class="non-floating-list"
+      >
+        <:anchor as |dd|>
+          <div class="relative mb-4" {{did-insert dd.registerAnchor}}>
+            <Hds::Form::TextInput::Base
+              autofocus
+              @type="search"
+              @value={{this.inputValue}}
+              {{did-insert (perform this.loadInitialData)}}
+              {{on "input" this.updateInputValue}}
+              placeholder="Search projects"
+              aria-label="Search projects"
+              aria-controls={{dd.ariaControls}}
+              aria-expanded={{dd.contentIsShown}}
+              aria-haspopup="listbox"
             />
-          {{else}}
-            <div class="relative mb-4">
-              <Hds::Form::TextInput::Base
-                autofocus
-                @type="search"
-                @value={{this.inputValue}}
-                {{did-insert (perform this.loadInitialData)}}
-                {{on "input" this.updateInputValue}}
-                placeholder="Search projects"
-                aria-label="Search projects"
-                aria-controls={{dd.ariaControls}}
-                aria-expanded={{dd.contentIsShown}}
-                aria-haspopup="listbox"
+            {{#if this.searchIsRunning}}
+              <div
+                data-test-search-loading-icon
+                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+              >
+                <FlightIcon @name="loading" />
+              </div>
+            {{/if}}
+          </div>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action class="block">
+            <div class="flex w-full gap-3.5">
+              <FlightIcon
+                @name={{get-project-status-icon dd.attrs.status}}
+                class="mt-[3px] shrink-0"
               />
-              {{#if this.searchIsRunning}}
-                <div
-                  data-test-search-loading-icon
-                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-                >
-                  <FlightIcon @name="loading" />
-                </div>
-              {{/if}}
-            </div>
-          {{/if}}
-        </div>
-      </:anchor>
-      <:item as |dd|>
-        <dd.Action class="block">
-          <div class="flex w-full gap-3.5">
-            <FlightIcon
-              @name={{get-project-status-icon dd.attrs.status}}
-              class="mt-[3px] shrink-0"
-            />
 
-            <div class="w-full overflow-hidden">
-              <div class="flex w-full justify-between">
-                <div
-                  class="w-full max-w-[70%] truncate text-display-300 font-semibold"
-                >
-                  {{dd.attrs.title}}
+              <div class="w-full overflow-hidden">
+                <div class="flex w-full justify-between">
+                  <div
+                    class="w-full max-w-[70%] truncate text-display-300 font-semibold"
+                  >
+                    {{dd.attrs.title}}
+                  </div>
+                  {{#if dd.attrs.jiraObject}}
+                    <span class="shrink-0 text-color-foreground-faint">
+                      {{dd.attrs.jiraObject.key}}
+                    </span>
+                  {{/if}}
                 </div>
-                {{#if dd.attrs.jiraObject}}
-                  <span class="shrink-0 text-color-foreground-faint">
-                    {{dd.attrs.jiraObject.key}}
-                  </span>
+                {{#if dd.attrs.hermesDocuments}}
+                  <div
+                    class="flex gap-2 text-body-100 text-color-foreground-faint"
+                  >
+                    {{#each
+                      (get-products-from-docs dd.attrs.hermesDocuments)
+                      as |product|
+                    }}
+                      <div>
+                        {{product}}
+                      </div>
+                    {{/each}}
+                  </div>
                 {{/if}}
               </div>
-              {{#if dd.attrs.hermesDocuments}}
-                <div
-                  class="flex gap-2 text-body-100 text-color-foreground-faint"
-                >
-                  {{#each
-                    (get-products-from-docs dd.attrs.hermesDocuments)
-                    as |product|
-                  }}
-                    <div>
-                      {{product}}
-                    </div>
-                  {{/each}}
-                </div>
-              {{/if}}
             </div>
-          </div>
-        </dd.Action>
-      </:item>
-      <:no-matches>
-        {{#unless this.newProjectFormIsShowing}}
+          </dd.Action>
+        </:item>
+        <:no-matches>
           <div class="grid h-48 place-items-center text-color-foreground-faint">
             {{! should also include a "no projects state" }}
             No matches
           </div>
-        {{/unless}}
-      </:no-matches>
-      <:loading>
-        <div class="h-48">
-          <FlightIcon @name="loading" class="mt-4" />
-        </div>
-      </:loading>
-    </X::DropdownList>
-  </M.Body>
-  {{#unless this.newProjectFormIsShowing}}
+        </:no-matches>
+        <:loading>
+          <div class="h-48">
+            <FlightIcon @name="loading" class="mt-4" />
+          </div>
+        </:loading>
+      </X::DropdownList>
+    </M.Body>
     <M.Footer>
       <Hds::Button
         {{on "click" this.showNewProjectForm}}
@@ -116,5 +104,5 @@
         class="-ml-1 pl-2.5"
       />
     </M.Footer>
-  {{/unless}}
-</Hds::Modal>
+  </Hds::Modal>
+{{/if}}
