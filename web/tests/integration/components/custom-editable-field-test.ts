@@ -4,6 +4,7 @@ import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument, HermesUser } from "hermes/types/document";
+import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 interface CustomEditableFieldComponentTestContext extends MirageTestContext {
   attributes: any;
@@ -17,6 +18,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: CustomEditableFieldComponentTestContext) {
+    authenticateTestUser(this);
     this.server.createList("person", 10);
     this.server.create("document");
 

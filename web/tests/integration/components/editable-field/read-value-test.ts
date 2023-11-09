@@ -1,10 +1,12 @@
-import { TestContext, render } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import { HermesUser } from "hermes/types/document";
+import { authenticateTestUser } from "hermes/utils/mirage-utils";
 import { module, test } from "qunit";
 
-interface EditableFieldReadValueComponentTestContext extends TestContext {
+interface EditableFieldReadValueComponentTestContext extends MirageTestContext {
   tag?: "h1";
   value?: string | HermesUser[];
   placeholder?: string;
@@ -12,6 +14,11 @@ interface EditableFieldReadValueComponentTestContext extends TestContext {
 
 module("Integration | Component | editable-field/read-value", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
+
+  hooks.beforeEach(function (this: EditableFieldReadValueComponentTestContext) {
+    authenticateTestUser(this);
+  });
 
   test("it renders the correct tag", async function (this: EditableFieldReadValueComponentTestContext, assert) {
     this.set("tag", "h1");

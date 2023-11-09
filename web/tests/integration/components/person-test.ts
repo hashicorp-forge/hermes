@@ -3,7 +3,10 @@ import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { authenticateSession } from "ember-simple-auth/test-support";
+import {
+  TEST_USER_EMAIL,
+  authenticateTestUser,
+} from "hermes/utils/mirage-utils";
 
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
@@ -17,7 +20,7 @@ module("Integration | Component | person", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: PersonComponentTestContext) {
-    authenticateSession({});
+    authenticateTestUser(this);
   });
 
   test("it renders correctly", async function (this: PersonComponentTestContext, assert) {
@@ -66,10 +69,7 @@ module("Integration | Component | person", function (hooks) {
     this.set("badge", undefined);
 
     await render<PersonComponentTestContext>(hbs`
-      <Person
-        @email=""
-        @badge={{this.badge}}
-      />
+      <Person @email="" @badge={{this.badge}} />
     `);
 
     assert.dom("[data-test-person-approved-badge]").doesNotExist();
@@ -86,11 +86,10 @@ module("Integration | Component | person", function (hooks) {
   });
 
   test(`the person is labeled "Me" if it's them`, async function (this: PersonComponentTestContext, assert) {
+    this.set("email", TEST_USER_EMAIL);
+
     await render<PersonComponentTestContext>(hbs`
-      <Person
-       {{! use the default test user }}
-        @email="testuser@example.com"
-      />
+      <Person @email={{this.email}} />
     `);
 
     assert.dom(".person-email").hasText("Me");
