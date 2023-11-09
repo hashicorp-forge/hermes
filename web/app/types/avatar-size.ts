@@ -1,13 +1,3 @@
-export enum HermesBasicAvatarSize {
-  Small = "small",
-  Medium = "medium",
-  Large = "large",
-}
+import { HermesSize } from "./sizes";
 
-export enum HermesExtendedAvatarSize {
-  XL = "xl",
-}
-
-export type HermesPersonAvatarSize =
-  | HermesBasicAvatarSize
-  | HermesExtendedAvatarSize;
+export type HermesPersonAvatarSize = HermesSize;
