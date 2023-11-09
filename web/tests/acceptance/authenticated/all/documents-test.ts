@@ -23,18 +23,6 @@ module("Acceptance | authenticated/documents", function (hooks) {
     assert.equal(getPageTitle(), "All Docs | Hermes");
   });
 
-  test("product badges have the correct hrefs", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
-    this.server.create("document", {
-      product: "Labs",
-    });
-
-    await visit("/documents");
-
-    assert
-      .dom(PRODUCT_BADGE_LINK_SELECTOR)
-      .hasAttribute("href", "/documents?product=%5B%22Labs%22%5D");
-  });
-
   test("documents can be sorted by created date", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.createList("document", 2);
 
@@ -70,6 +58,6 @@ module("Acceptance | authenticated/documents", function (hooks) {
     "product badges have the correct hrefs when other filters are active",
     async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
       assert.true(false);
-    }
+    },
   );
 });

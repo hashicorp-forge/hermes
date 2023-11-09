@@ -1,6 +1,10 @@
 .product-badge {
   @apply absolute bg-gradient-to-br from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;
 
+  &.file-text {
+    @apply border border-color-surface-interactive-active from-color-foreground-high-contrast to-color-surface-interactive-active text-color-foreground-faint;
+  }
+
   // `.hcp` uses the default styles
 
   &.nomad {
