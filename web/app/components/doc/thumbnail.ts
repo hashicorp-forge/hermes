@@ -45,12 +45,6 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
   protected get isObsolete(): boolean {
     return this.status === "obsolete";
   }
-
-  protected get badgeIsShown(): boolean {
-    if (getProductId(this.args.product)) {
-      return true;
-    }
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
