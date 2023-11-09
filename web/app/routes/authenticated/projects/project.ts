@@ -14,9 +14,7 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
       .then((response) => response?.json());
 
     const projectResources = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${params.project_id}/related-resources`,
-      )
+      .fetch(`/projects/${params.project_id}/related-resources`)
       .then((response) => response?.json());
 
     const { hermesDocuments, externalLinks } = projectResources;
