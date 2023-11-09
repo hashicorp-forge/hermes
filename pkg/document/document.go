@@ -358,7 +358,9 @@ func NewFromDatabaseModel(
 	doc.Product = model.Product.Name
 
 	// Summary.
-	doc.Summary = *model.Summary
+	if model.Summary != nil {
+		doc.Summary = *model.Summary
+	}
 
 	// Status.
 	var status string
