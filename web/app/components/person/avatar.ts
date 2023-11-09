@@ -1,5 +1,4 @@
 import Component from "@glimmer/component";
-import { HermesPersonAvatarSize } from "hermes/types/avatar-size";
 import { HermesSize } from "hermes/types/sizes";
 
 interface PersonAvatarComponentSignature {
@@ -8,7 +7,7 @@ interface PersonAvatarComponentSignature {
     imgURL?: string | null;
     isLoading?: boolean;
     email: string;
-    size?: `${HermesPersonAvatarSize}`;
+    size?: `${HermesSize}`;
   };
   Blocks: {
     default: [];

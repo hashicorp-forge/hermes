@@ -6,13 +6,11 @@ import ProductAreasService from "hermes/services/product-areas";
 import { assert } from "@ember/debug";
 import { HermesSize } from "hermes/types/sizes";
 
-export type ProductAvatarSize = Exclude<HermesSize, HermesSize.XL>;
-
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
     product?: string;
-    size?: `${ProductAvatarSize}`;
+    size?: `${Exclude<HermesSize, HermesSize.XL>}`;
   };
   Blocks: {
     default: [];
