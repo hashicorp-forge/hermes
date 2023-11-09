@@ -17,9 +17,9 @@
     <div
       data-test-person-email
       class="person-email hds-typography-body-200 hds-foreground-primary relative truncate"
-      title={{@email}}
+      title={{this.label}}
     >
-      {{or @email "Unknown"}}
+      {{this.label}}
     </div>
   </div>
 {{/unless}}

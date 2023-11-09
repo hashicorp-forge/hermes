@@ -2,16 +2,30 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import { authenticateSession } from "ember-simple-auth/test-support";
+
+interface PersonComponentTestContext extends MirageTestContext {
+  ignoreUnknown: boolean;
+  imgURL: string;
+  email: string;
+  badge: string | undefined;
+}
 
 module("Integration | Component | person", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
 
-  test("it renders correctly", async function (assert) {
+  hooks.beforeEach(function (this: PersonComponentTestContext) {
+    authenticateSession({});
+  });
+
+  test("it renders correctly", async function (this: PersonComponentTestContext, assert) {
     this.set("ignoreUnknown", false);
     this.set("imgURL", "https://hashicorp-avatar-url.com");
     this.set("email", "engineering@hashicorp.com");
 
-    await render(hbs`
+    await render<PersonComponentTestContext>(hbs`
         <Person
           @ignoreUnknown={{this.ignoreUnknown}}
           @imgURL={{this.imgURL}}
@@ -48,11 +62,12 @@ module("Integration | Component | person", function (hooks) {
     assert.dom(".person").doesNotExist();
   });
 
-  test("it renders a contextual checkmark", async function (assert) {
-    this.set("badge", null);
+  test("it renders a contextual checkmark", async function (this: PersonComponentTestContext, assert) {
+    this.set("badge", undefined);
 
-    await render(hbs`
+    await render<PersonComponentTestContext>(hbs`
       <Person
+        @email=""
         @badge={{this.badge}}
       />
     `);
@@ -68,5 +83,16 @@ module("Integration | Component | person", function (hooks) {
     assert
       .dom("[data-test-person-approved-badge]")
       .doesNotExist("only shows a badge if the correct value is passed in");
+  });
+
+  test(`the person is labeled "Me" if it's them`, async function (this: PersonComponentTestContext, assert) {
+    await render<PersonComponentTestContext>(hbs`
+      <Person
+       {{! use the default test user }}
+        @email="testuser@example.com"
+      />
+    `);
+
+    assert.dom(".person-email").hasText("Me");
   });
 });
