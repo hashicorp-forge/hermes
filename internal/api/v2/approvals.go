@@ -390,9 +390,9 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Authorize request.
 			userEmail := r.Context().Value("userEmail").(string)
-			if doc.Status != "In-Review" && doc.Status != "In Review" {
+			if doc.Status != "In-Review" && doc.Status != "Approved" {
 				http.Error(w,
-					"Only documents in the \"In-Review\" status can be approved",
+					`Document status must be "In-Review" or "Approved" to approve`,
 					http.StatusBadRequest)
 				return
 			}

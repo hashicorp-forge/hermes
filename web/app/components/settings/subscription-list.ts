@@ -1,6 +1,8 @@
 import Component from "@glimmer/component";
-import { restartableTask, task } from "ember-concurrency";
+import { restartableTask } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
+import { inject as service } from "@ember/service";
+import ProductAreasService from "hermes/services/product-areas";
 
 interface SettingsSubscriptionListComponentSignature {
   Args: {
@@ -9,6 +11,8 @@ interface SettingsSubscriptionListComponentSignature {
 }
 
 export default class SettingsSubscriptionListComponent extends Component<SettingsSubscriptionListComponentSignature> {
+  @service declare productAreas: ProductAreasService;
+
   /**
    * The list of product areas to show. Updated by the `onInput` task.
    */
@@ -22,10 +26,16 @@ export default class SettingsSubscriptionListComponent extends Component<Setting
     let input = event.target.value;
     if (input.length > 0) {
       this.shownItems = this.args.allProductAreas.filter((item) =>
-        item.toLowerCase().includes(input.toLowerCase())
+        item.toLowerCase().includes(input.toLowerCase()),
       );
     } else {
       this.shownItems = this.args.allProductAreas;
     }
   });
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    "Settings::SubscriptionList": typeof SettingsSubscriptionListComponent;
+  }
 }

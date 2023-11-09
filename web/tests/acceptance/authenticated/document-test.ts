@@ -151,10 +151,9 @@ module("Acceptance | authenticated/document", function (hooks) {
       "Test Product 1",
       "Test Product 2",
     ];
-
     options.forEach((option: Element, index: number) => {
       assert.equal(
-        option.textContent?.trim(),
+        option.querySelector("span")?.textContent?.trim(),
         expectedProducts[index],
         "the product list item is correct",
       );
