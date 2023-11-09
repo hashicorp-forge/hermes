@@ -55,11 +55,17 @@ module("Acceptance | authenticated/projects", function (hooks) {
         }
 
         if (project.hermesDocuments) {
+          let uniqueProductAreas: string[] = [];
+
           project.hermesDocuments.forEach((doc) => {
             if (doc.product) {
-              expectedProducts.push(doc.product);
+              if (!uniqueProductAreas.includes(doc.product)) {
+                uniqueProductAreas.push(doc.product);
+              }
             }
           });
+
+          expectedProducts.push(...uniqueProductAreas);
         }
       });
 

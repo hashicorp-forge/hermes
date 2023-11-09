@@ -118,14 +118,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * of projects or an empty state.
    */
   @tracked protected projects: HermesProject[] = [
-    {
-      id: "2",
-      title: "Adding Search to HDS Documentation",
-      creator: "test",
-      createdTime: 123,
-      modifiedTime: 123,
-      status: ProjectStatus.Active,
-    },
+    // {
+    //   id: "2",
+    //   title: "Adding Search to HDS Documentation",
+    //   creator: "test",
+    //   createdTime: 123,
+    //   modifiedTime: 123,
+    //   status: ProjectStatus.Active,
+    // },
   ];
 
   /**
@@ -552,13 +552,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   protected loadRelatedProjects = task(async () => {
+    // TODO: this is gonna change substantially
     // fetch projects that include this doc
     const allProjects = await this.fetchSvc
       .fetch("/api/v1/projects")
       .then((response) => response?.json());
 
     this.projects = allProjects.filter((project: HermesProject) => {
-      return project.hermesDocuments?.filter(
+      return project.hermesDocuments?.some(
         (doc: RelatedHermesDocument) => doc.googleFileID === this.docID,
       );
     });
