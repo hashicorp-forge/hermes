@@ -15,7 +15,6 @@ interface DocThumbnailComponentSignature {
   Args: {
     status?: string;
     product?: string;
-    badgeIsHidden?: boolean;
     size?: `${DocThumbnailSize}`;
   };
 }
@@ -48,19 +47,9 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
   }
 
   protected get badgeIsShown(): boolean {
-    if (this.args.badgeIsHidden) {
-      return false;
-    }
-
     if (getProductId(this.args.product)) {
       return true;
     }
-
-    if (this.productAreas.getAbbreviation(this.args.product)) {
-      return true;
-    }
-
-    return false;
   }
 }
 
