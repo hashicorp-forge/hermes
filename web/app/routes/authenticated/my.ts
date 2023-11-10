@@ -83,7 +83,6 @@ export default class AuthenticatedMyRoute extends Route {
     console.log("page", page);
 
     let [draftResults, docResults] = await Promise.all([
-      // TODO: get all drafts at once.
       this.getDraftResults.perform(),
       this.algolia.getDocResults.perform(
         searchIndex,
