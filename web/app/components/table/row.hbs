@@ -35,7 +35,10 @@
   </td>
   <td class="product">
     <div class="inner">
-      <ProductLink @product={{@doc.product}} class="hover:underline">
+      <ProductLink
+        @product={{@doc.product}}
+        class="decoration-color-palette-neutral-300 underline-offset-[3px] hover:underline"
+      >
         {{get-product-label @doc.product}}
       </ProductLink>
     </div>
