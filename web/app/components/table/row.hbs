@@ -35,9 +35,9 @@
   </td>
   <td class="product">
     <div class="inner">
-      <div class="truncate">
-        {{@doc.product}}
-      </div>
+      <ProductLink @product={{@doc.product}} class="hover:underline">
+        {{get-product-label @doc.product}}
+      </ProductLink>
     </div>
   </td>
   <td class="owner">

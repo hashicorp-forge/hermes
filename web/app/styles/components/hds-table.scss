@@ -65,7 +65,7 @@
         }
       }
 
-      &:has(a:focus-visible) {
+      &:has(.name a:focus-visible) {
         @apply relative z-10;
 
         .name {
