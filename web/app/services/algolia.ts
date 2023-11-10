@@ -340,7 +340,7 @@ export default class AlgoliaService extends Service {
         return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
           facets: FACET_NAMES,
-          hitsPerPage: HITS_PER_PAGE,
+          hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,
         });

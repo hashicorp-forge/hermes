@@ -47,21 +47,16 @@ export default class AuthenticatedMyRoute extends Route {
    * Fetches draft doc information based on searchParams and the current user.
    */
   private getDraftResults = task(
-    async (page?: number): Promise<DraftResponseJSON | undefined> => {
+    async (): Promise<DraftResponseJSON | undefined> => {
       try {
-        console.log("GETTING DRAFT RESULTS page", page);
-
         console.log(
           "draftURLSearchParams",
-          createDraftURLSearchParams(this.authenticatedUser.info.email, page),
+          createDraftURLSearchParams(this.authenticatedUser.info.email),
         );
         let response = await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/drafts?` +
-              createDraftURLSearchParams(
-                this.authenticatedUser.info.email,
-                page,
-              ),
+              createDraftURLSearchParams(this.authenticatedUser.info.email),
           )
           .then((response) => response?.json());
         return response;
@@ -88,10 +83,12 @@ export default class AuthenticatedMyRoute extends Route {
     console.log("page", page);
 
     let [draftResults, docResults] = await Promise.all([
-      this.getDraftResults.perform(page),
+      // TODO: get all drafts at once.
+      this.getDraftResults.perform(),
       this.algolia.getDocResults.perform(
         searchIndex,
         {
+          hitsPerPage: 100,
           page,
           facetFilters: [],
         },
@@ -100,14 +97,6 @@ export default class AuthenticatedMyRoute extends Route {
     ]);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
-
-    console.log("TYPED DOC RESULTS", typedDocResults);
-    console.log("DRAFT RESULTS", draftResults);
-
-    const nbPages = Math.max(
-      draftResults?.nbPages ?? 1,
-      typedDocResults.nbPages,
-    );
 
     const docs = [
       ...(draftResults?.Hits ?? []),
@@ -122,6 +111,11 @@ export default class AuthenticatedMyRoute extends Route {
       }
     });
 
-    return { docs, sortedBy, currentPage: page ?? 1, nbPages };
+    return {
+      docs,
+      sortedBy,
+      currentPage: page ?? 1,
+      nbPages: typedDocResults.nbPages,
+    };
   }
 }
