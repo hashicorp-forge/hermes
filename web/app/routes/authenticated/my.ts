@@ -77,10 +77,8 @@ export default class AuthenticatedMyRoute extends Route {
     const { page } = params;
 
     // TODO: need to create modifiedTime_asc indexes
-    //TODO: need to allow filtering on this index
+    // TODO: need to allow filtering on this index
     const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
-
-    console.log("page", page);
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform(),
@@ -96,6 +94,11 @@ export default class AuthenticatedMyRoute extends Route {
     ]);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
+
+    const nbPages = Math.max(
+      draftResults?.nbPages ?? 1,
+      typedDocResults.nbPages,
+    );
 
     const docs = [
       ...(draftResults?.Hits ?? []),
@@ -114,7 +117,7 @@ export default class AuthenticatedMyRoute extends Route {
       docs,
       sortedBy,
       currentPage: page ?? 1,
-      nbPages: typedDocResults.nbPages,
+      nbPages,
     };
   }
 }
