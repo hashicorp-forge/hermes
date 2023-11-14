@@ -23,7 +23,7 @@
 @use "components/multiselect";
 @use "components/overflow-menu";
 @use "components/page";
-@use "components/row-results";
+@use "components/hds-table";
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
 @use "components/header/search";
@@ -40,7 +40,7 @@
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
-@use "components/product-badge-link";
+@use "components/product-link";
 @use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
