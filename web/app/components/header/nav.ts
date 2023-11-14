@@ -41,6 +41,32 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     return this.configSvc.config.support_link_url;
   }
 
+  protected get dropdownListItems(): Record<string, any> {
+    const defaultItems = [
+      {
+        label: "Email notifications",
+        route: "authenticated.settings",
+      },
+      {
+        label: "GitHub",
+        href: this.gitHubRepoURL,
+      },
+      {
+        label: "Support",
+        href: this.supportDocsURL,
+      },
+    ] as any[];
+
+    if (this.showSignOut) {
+      defaultItems.push({
+        label: "Sign out",
+        action: this.invalidateSession,
+      });
+    }
+
+    return defaultItems;
+  }
+
   /**
    * The default query params for the browse screens.
    * Ensures a clear filter state when navigating tabs.

@@ -40,25 +40,59 @@
       @icon="plus"
       class="pl-2.5 pr-4"
     />
-    <div class="relative">
+    <div class="relative flex">
+      {{! TYODO; make sure this still works }}
       {{#if this.userMenuHighlightIsShown}}
         <Header::UserMenuHighlight />
       {{/if}}
-      {{#if this.profile.picture}}
-        {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-        <img
-          src={{this.profile.picture}}
-          class="user-avatar"
-          role="presentation"
-          referrerpolicy="no-referrer"
-        />
-      {{/if}}
-      <Hds::Dropdown as |dd|>
-        <dd.ToggleIcon
-          data-test-user-menu-toggle
-          @text="User menu"
-          @icon="user"
-        />
+
+      <X::DropdownList
+        @items={{this.dropdownListItems}}
+        @placement="bottom-end"
+        class="user-dropdown"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction @hasChevron={{true}} aria-label="User menu`">
+            <Person::Avatar
+              @email={{this.profile.email}}
+              @imgURL={{this.profile.picture}}
+              @size="large"
+              data-test-user-menu-toggle
+            />
+          </dd.ToggleAction>
+        </:anchor>
+        <:header>
+          <div class="mb-1 border-b border-b-color-border-primary py-3.5 px-5">
+            <div class="font-semibold">
+              {{this.profile.name}}
+            </div>
+            <div class="text-color-foreground-faint">
+              {{this.profile.email}}
+            </div>
+          </div>
+        </:header>
+        {{! will the empty object appera as a list item }}
+        <:item as |dd|>
+          {{log "dd" dd}}
+          {{#if dd.attrs.route}}
+            <dd.LinkTo @route={{dd.attrs.route}}>
+              {{dd.attrs.label}}
+            </dd.LinkTo>
+          {{else if dd.attrs.href}}
+            <dd.ExternalLink href={{dd.attrs.href}} @iconIsShown={{true}}>
+              {{dd.attrs.label}}
+            </dd.ExternalLink>
+            {{! DD external link }}
+          {{else if dd.attrs.action}}
+            <dd.Action {{on "click" dd.attrs.action}}>
+              {{dd.attrs.label}}
+            </dd.Action>
+          {{/if}}
+        </:item>
+
+      </X::DropdownList>
+
+      {{!-- <Hds::Dropdown as |dd|>
         <dd.Title
           data-test-user-menu-title
           {{did-insert this.onDropdownOpen}}
@@ -103,7 +137,7 @@
             @text="Sign out"
           />
         {{/if}}
-      </Hds::Dropdown>
+      </Hds::Dropdown> --}}
     </div>
   </div>
 </nav>
