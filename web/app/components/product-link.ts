@@ -1,33 +1,29 @@
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import getProductLabel from "hermes/utils/get-product-label";
 
-interface ProductBadgeLinkComponentSignature {
+interface ProductLinkComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
-    productArea?: string;
+    product?: string;
   };
   Blocks: {
     default: [];
   };
 }
 
-export default class ProductBadgeLinkComponent extends Component<ProductBadgeLinkComponentSignature> {
+export default class ProductLinkComponent extends Component<ProductLinkComponentSignature> {
   @service declare router: RouterService;
 
-  protected get productAreaName(): string {
-    switch (this.args.productArea) {
-      case "Cloud Platform":
-        return "HCP";
-      default:
-        return this.args.productArea || "Unknown";
-    }
+  protected get productAreaName(): string | undefined {
+    return getProductLabel(this.args.product);
   }
 
   protected get query() {
-    if (this.args.productArea) {
+    if (this.args.product) {
       return {
-        product: [this.args.productArea],
+        product: [this.args.product],
         docType: [],
         owners: [],
         page: 1,
@@ -59,6 +55,6 @@ export default class ProductBadgeLinkComponent extends Component<ProductBadgeLin
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    ProductBadgeLink: typeof ProductBadgeLinkComponent;
+    ProductLink: typeof ProductLinkComponent;
   }
 }

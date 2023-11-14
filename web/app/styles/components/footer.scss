@@ -13,3 +13,10 @@
     }
   }
 }
+
+.hds-table,
+.pagination {
+  & + .footer {
+    @apply mt-24;
+  }
+}

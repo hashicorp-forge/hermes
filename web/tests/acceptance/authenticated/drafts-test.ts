@@ -49,7 +49,7 @@ module("Acceptance | authenticated/drafts", function (hooks) {
       .hasAttribute("data-test-icon", "arrow-up");
   });
 
-  test("product badges have the correct hrefs", async function (this: AuthenticatedDraftRouteTestContext, assert) {
+  test("product links have the correct hrefs", async function (this: AuthenticatedDraftRouteTestContext, assert) {
     this.server.create("document", {
       product: "Security",
     });
@@ -57,7 +57,7 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     await visit("/drafts");
 
     assert
-      .dom(".product-badge-link")
+      .dom(".product-link")
       .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
   });
 });

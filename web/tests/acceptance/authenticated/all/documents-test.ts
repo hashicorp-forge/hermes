@@ -5,7 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-const PRODUCT_BADGE_LINK_SELECTOR = ".product-badge-link";
+const PRODUCT_LINK_SELECTOR = ".product-link";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
@@ -31,7 +31,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
     await visit("/documents");
 
     assert
-      .dom(PRODUCT_BADGE_LINK_SELECTOR)
+      .dom(PRODUCT_LINK_SELECTOR)
       .hasAttribute("href", "/documents?product=%5B%22Labs%22%5D");
   });
 
@@ -70,6 +70,6 @@ module("Acceptance | authenticated/documents", function (hooks) {
     "product badges have the correct hrefs when other filters are active",
     async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
       assert.true(false);
-    }
+    },
   );
 });
