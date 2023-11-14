@@ -50,8 +50,7 @@
       @apply outline-none;
 
       .avatar {
-        @apply outline outline-1 outline-color-page-faint;
-        box-shadow: var(--token-focus-ring-action-box-shadow);
+        @apply shadow-focus-ring-action outline outline-1 outline-color-page-faint;
       }
     }
   }
@@ -86,12 +85,11 @@
     }
   }
 
-  .highlighted-new {
-    .hds-dropdown-list-item__interactive-text {
-      &::after {
-        content: "New";
-        @apply ml-0.5 rounded bg-color-surface-highlight px-2 py-1 text-body-100 font-medium text-color-foreground-highlight;
-      }
+  .is-aria-selected .highlighted-new-badge {
+    @apply bg-color-palette-alpha-300 mix-blend-normal;
+
+    .hds-badge__text {
+      @apply text-color-page-primary;
     }
   }
 }

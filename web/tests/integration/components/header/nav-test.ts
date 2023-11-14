@@ -51,7 +51,7 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom("[data-test-user-menu-title]").hasText("Foo Bar");
     assert.dom("[data-test-user-menu-email]").hasText("foo@example.com");
     assert
-      .dom("[data-test-user-menu-github]")
+      .dom("[data-test-user-menu-item='git-hub'] a")
       .hasText("GitHub")
       .hasAttribute("href", HERMES_GITHUB_REPO_URL);
 
@@ -71,6 +71,8 @@ module("Integration | Component | header/nav", function (hooks) {
       window.localStorage.getItem("emailNotificationsHighlightIsShown"),
       null,
     );
+
+    await this.pauseTest();
 
     assert.dom("[data-test-user-menu-highlight]").exists("highlight is shown");
 
@@ -111,7 +113,7 @@ module("Integration | Component | header/nav", function (hooks) {
     await click(USER_MENU_TOGGLE_SELECTOR);
 
     assert
-      .dom("[data-test-user-menu-support]")
+      .dom("[data-test-user-menu-item='support'] a")
       .hasText("Support")
       .hasAttribute("href", SUPPORT_URL);
   });

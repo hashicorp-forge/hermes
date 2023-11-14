@@ -46,6 +46,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
       {
         label: "Email notifications",
         route: "authenticated.settings",
+        isNew: this.emailNotificationsHighlightIsShown,
       },
       {
         label: "GitHub",

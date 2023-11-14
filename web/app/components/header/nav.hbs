@@ -67,33 +67,40 @@
         </:anchor>
         <:header>
           <div class="mb-1 border-b border-b-color-border-primary py-3.5 px-5">
-            <div class="font-semibold">
+            <div class="font-semibold" data-test-user-menu-title>
               {{this.profile.name}}
             </div>
-            <div class="text-color-foreground-faint">
+            <div class="text-color-foreground-faint" data-test-user-menu-email>
               {{this.profile.email}}
             </div>
           </div>
         </:header>
-        {{! will the empty object appera as a list item }}
         <:item as |dd|>
-          {{log "dd" dd}}
-          {{#if dd.attrs.route}}
-            <dd.LinkTo @route={{dd.attrs.route}}>
-              {{dd.attrs.label}}
-            </dd.LinkTo>
-          {{else if dd.attrs.href}}
-            <dd.ExternalLink href={{dd.attrs.href}} @iconIsShown={{true}}>
-              {{dd.attrs.label}}
-            </dd.ExternalLink>
-            {{! DD external link }}
-          {{else if dd.attrs.action}}
-            <dd.Action {{on "click" dd.attrs.action}}>
-              {{dd.attrs.label}}
-            </dd.Action>
-          {{/if}}
+          <div
+            data-test-user-menu-item={{dasherize dd.attrs.label}}
+            class="w-full"
+          >
+            {{#if dd.attrs.route}}
+              <dd.LinkTo @route={{dd.attrs.route}}>
+                {{dd.attrs.label}}
+                {{#if dd.attrs.isNew}}
+                  <Hds::Badge
+                    @text="New"
+                    class="highlighted-new-badge ml-1.5"
+                  />
+                {{/if}}
+              </dd.LinkTo>
+            {{else if dd.attrs.href}}
+              <dd.ExternalLink href={{dd.attrs.href}} @iconIsShown={{true}}>
+                {{dd.attrs.label}}
+              </dd.ExternalLink>
+            {{else if dd.attrs.action}}
+              <dd.Action {{on "click" dd.attrs.action}}>
+                {{dd.attrs.label}}
+              </dd.Action>
+            {{/if}}
+          </div>
         </:item>
-
       </X::DropdownList>
 
       {{!-- <Hds::Dropdown as |dd|>
