@@ -38,11 +38,6 @@
     {{/each}}
   </table>
 
-  {{! Maybve we just say fuck it and make this paginatied }}
-  {{!  at least youre seeing docs in page two that dont appear above already loaded ones }}
-
-  {{! Maybe we don't show docs older than 1 year old by default }}
-
   {{#if this.paginationIsShown}}
     <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
   {{/if}}
