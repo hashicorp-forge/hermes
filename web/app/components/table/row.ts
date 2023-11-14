@@ -14,6 +14,7 @@ interface TableRowComponentSignature {
   Args: {
     doc: HermesDocument;
     timeColumn: `${TimeColumn}`;
+    ownerColumnIsHidden?: boolean;
   };
 }
 

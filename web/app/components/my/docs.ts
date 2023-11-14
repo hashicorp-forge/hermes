@@ -16,6 +16,7 @@ interface MyDocsComponentSignature {
     sortDirection: SortDirection;
     currentPage: number;
     nbPages: number;
+    excludeSharedDrafts: boolean;
   };
 }
 
@@ -31,8 +32,6 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
   @tracked protected docGroupTwo: HermesDocument[] = [];
   @tracked protected docGroupThree: HermesDocument[] = [];
   @tracked protected docGroupFour: HermesDocument[] = [];
-
-  @tracked protected includeDraftsSharedWithMe = true;
 
   protected get sortParams() {
     const sortBy =
@@ -76,18 +75,8 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     ];
   }
 
-  protected get filteredDocGroups() {
-    if (!this.includeDraftsSharedWithMe) {
-      return this.docGroups.filter((docGroup) => {
-        return docGroup.docs.every((doc) => {
-          return doc.owners?.[0] === this.authenticatedUser.info.email;
-        });
-      });
-    }
-  }
-
   protected get paginationIsShown() {
-    return this.args.nbPages && this.args.currentPage !== undefined;
+    return this.args.nbPages > 1 && this.args.currentPage !== undefined;
   }
 
   @action processDocs() {

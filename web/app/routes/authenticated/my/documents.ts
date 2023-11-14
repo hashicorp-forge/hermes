@@ -125,6 +125,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       sortedBy,
       currentPage: page ?? 1,
       nbPages,
+      excludeSharedDrafts: params.excludeSharedDrafts ?? false,
     };
   }
 }

@@ -43,14 +43,16 @@
       </ProductLink>
     </div>
   </td>
-  <td class="owner">
-    <div class="inner">
-      <Person
-        @imgURL={{get @doc.ownerPhotos 0}}
-        @email="{{get @doc.owners 0}}"
-      />
-    </div>
-  </td>
+  {{#unless @ownerColumnIsHidden}}
+    <td class="owner">
+      <div class="inner">
+        <Person
+          @imgURL={{get @doc.ownerPhotos 0}}
+          @email="{{get @doc.owners 0}}"
+        />
+      </div>
+    </td>
+  {{/unless}}
   <td class="time">
     <div class="inner">
       <div
