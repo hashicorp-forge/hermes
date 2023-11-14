@@ -15,13 +15,9 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
+  RelatedResourceSelector,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
-
-enum RelatedResourceSelector {
-  ExternalLink = ".external-resource",
-  HermesDocument = ".hermes-document",
-}
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
