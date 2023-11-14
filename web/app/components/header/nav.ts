@@ -24,7 +24,7 @@ interface UserNavExternalLink extends UserNavItem {
   href: string;
 }
 
-interface UserNavAction {
+interface UserNavAction extends UserNavItem {
   action: () => void;
 }
 
