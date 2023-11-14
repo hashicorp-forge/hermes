@@ -1,10 +1,15 @@
-export function createDraftURLSearchParams(
-  ownerEmail: string,
-  page?: number,
-): URLSearchParams {
+import { HITS_PER_PAGE } from "hermes/services/algolia";
+
+export function createDraftURLSearchParams(options: {
+  ownerEmail: string;
+  page?: number;
+  hitsPerPage?: number;
+}): URLSearchParams {
+  const { ownerEmail, page, hitsPerPage } = options;
+
   return new URLSearchParams(
     Object.entries({
-      hitsPerPage: 100,
+      hitsPerPage: hitsPerPage ?? HITS_PER_PAGE,
       maxValuesPerFacet: 1,
       page: page ?? 0,
       ownerEmail,

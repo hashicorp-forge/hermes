@@ -58,8 +58,6 @@ module("Acceptance | authenticated/my", function (hooks) {
 
     const modifiedTime = new Date(dateString).getTime() / 1000;
 
-    console.log("modifiedTime", modifiedTime);
-
     this.server.create("document", {
       modifiedTime,
     });

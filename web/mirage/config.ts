@@ -49,10 +49,6 @@ export default function (mirageConfig) {
           if (facetFilters) {
             // What is here to tell me to filter to drafts
             // Facet filters arrive like ["owners:testuser@example,com"]
-            console.error("YUT OH");
-            console.log(facetFilters);
-            console.log(requestBody);
-            //
           } else if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product

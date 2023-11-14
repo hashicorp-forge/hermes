@@ -1,6 +1,6 @@
 <My::Header
-  @toggleOwnerFilter={{this.toggleOwnerFilter}}
-  @toggleOwnerFilterIsShown={{this.toggleOwnerFilterIsShown}}
+  @toggleOwnerFilterIsShown={{true}}
+  @ownerToggleIsChecked={{this.includeDraftsSharedWithMe}}
 />
 
 {{#if @docs}}
@@ -14,27 +14,26 @@
         <th class="owner">Owner</th>
         <th class="time">
           <Table::SortableHeader
-            @onSort={{this.onSort}}
+            @queryParam={{this.sortParams}}
             @attribute="modifiedTime"
             @currentSort="modifiedTime"
             @sortDirection={{this.sortDirection}}
+            @defaultSortDirection="desc"
           >
             Last modified
           </Table::SortableHeader>
         </th>
       </tr>
     </thead>
-    {{#each this.docGroups as |docs i|}}
-      {{#if docs.length}}
-        <tbody class="">
-          {{#if (eq this.docGroups.length 2)}}
-            <tr>
-              <th colspan="6" class="hermes-h4 pt-24">
-                {{if (eq i 1) "More than 30 days old" "Recently active"}}
-              </th>
-            </tr>
-          {{/if}}
-          {{#each docs as |doc|}}
+    {{#each this.docGroups as |docGroup|}}
+      {{#if docGroup.docs.length}}
+        <tbody>
+          <tr>
+            <th colspan="6" class="hermes-h4 pt-24">
+              {{docGroup.label}}
+            </th>
+          </tr>
+          {{#each docGroup.docs as |doc|}}
             <Table::Row @doc={{doc}} @timeColumn="modifiedTime" />
           {{/each}}
         </tbody>
@@ -42,17 +41,13 @@
     {{/each}}
   </table>
 
+  {{! Maybve we just say fuck it and make this paginatied }}
+  {{!  at least youre seeing docs in page two that dont appear above already loaded ones }}
+
   {{! Maybe we don't show docs older than 1 year old by default }}
 
-  {{#if this.loadMoreDocsButtonIsShown}}
-    {{! should this happen when scrolled into view? }}
-    <Action
-      {{on "click" this.loadMoreDocs}}
-      class="mt-4 flex items-center gap-1.5 text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
-    >
-      <FlightIcon @name={{if this._loadMoreDocs.isRunning "loading" "plus"}} />
-      {{if this._loadMoreDocs.isRunning "Loading..." "Load more"}}
-    </Action>
+  {{#if this.paginationIsShown}}
+    <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
   {{/if}}
 {{else}}
   <div

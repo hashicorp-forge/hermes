@@ -5,11 +5,13 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
-import { SearchResponse } from "instantsearch.js";
+import { SearchOptions, SearchResponse } from "instantsearch.js";
 import { HermesDocument } from "hermes/types/document";
 import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search-params";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
+import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import Transition from "@ember/routing/transition";
 
 export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -30,6 +32,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare flashMessages: FlashMessageService;
 
   queryParams = {
     excludeSharedDrafts: {
@@ -47,22 +50,23 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
    * Fetches draft doc information based on searchParams and the current user.
    */
   private getDraftResults = task(
-    async (): Promise<DraftResponseJSON | undefined> => {
+    async (options: SearchOptions): Promise<DraftResponseJSON | undefined> => {
       try {
-        console.log(
-          "draftURLSearchParams",
-          createDraftURLSearchParams(this.authenticatedUser.info.email),
-        );
-        let response = await this.fetchSvc
+        return await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/drafts?` +
-              createDraftURLSearchParams(this.authenticatedUser.info.email),
+              createDraftURLSearchParams({
+                ...options,
+                ownerEmail: this.authenticatedUser.info.email,
+              }),
           )
           .then((response) => response?.json());
-        return response;
       } catch (e: unknown) {
-        // TODO: handle error
-        console.error(e);
+        this.flashMessages.add({
+          title: "Failed to fetch draft documents",
+          message: (e as Error).message,
+          type: "critical",
+        });
       }
     },
   );
@@ -77,11 +81,14 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
     const { page } = params;
 
     // TODO: need to create modifiedTime_asc indexes
-    // TODO: need to allow filtering on this index
+    // TODO: need to allow filtering on this index (maybe)
     const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
 
     let [draftResults, docResults] = await Promise.all([
-      this.getDraftResults.perform(),
+      this.getDraftResults.perform({
+        hitsPerPage: 100,
+        page,
+      }),
       this.algolia.getDocResults.perform(
         searchIndex,
         {
@@ -96,8 +103,8 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
 
     const nbPages = Math.max(
-      draftResults?.nbPages ?? 1,
       typedDocResults.nbPages,
+      draftResults?.nbPages ?? 1,
     );
 
     const docs = [

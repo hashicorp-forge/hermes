@@ -7,7 +7,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   @service declare router: RouterService;
 
   beforeModel(transition: Transition) {
-    console.log(transition.to);
     if (transition.to.name === "authenticated.my.index") {
       this.router.transitionTo("authenticated.my.documents");
     }

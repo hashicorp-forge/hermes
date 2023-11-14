@@ -16,13 +16,19 @@
     </div>
   </div>
   {{#if @toggleOwnerFilterIsShown}}
-    <div
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{this.ownerFilterQueryParams}}
       class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
     >
+      {{! this should toggle the query params }}
       <label for="owner-filter" class="text-body-200">
         Include drafts I'm a contributor on
       </label>
-      <Hds::Form::Toggle::Base id="owner-filter" checked />
-    </div>
+      <Hds::Form::Toggle::Base
+        id="owner-filter"
+        checked={{this.ownerToggleIsChecked}}
+      />
+    </LinkTo>
   {{/if}}
 </div>
