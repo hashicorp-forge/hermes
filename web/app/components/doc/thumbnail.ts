@@ -3,12 +3,9 @@ import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
 import { inject as service } from "@ember/service";
 import ProductAreasService from "hermes/services/product-areas";
+import { HermesSize } from "hermes/types/sizes";
 
-export enum DocThumbnailSize {
-  Small = "small",
-  Medium = "medium",
-  Large = "large",
-}
+export type DocThumbnailSize = Exclude<HermesSize, HermesSize.XL>;
 
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
@@ -32,7 +29,7 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
   }
 
   protected get size() {
-    return this.args.size ?? DocThumbnailSize.Small;
+    return this.args.size ?? HermesSize.Small;
   }
 
   protected get productShortName(): string | undefined {

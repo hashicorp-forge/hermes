@@ -5,7 +5,7 @@ import {
   SortDirection,
 } from "hermes/components/table/sortable-header";
 
-interface AllTableComponentSignature {
+interface DocumentsTableComponentSignature {
   Args: {
     docs: HermesDocument[];
     isDraft?: boolean;
@@ -16,7 +16,7 @@ interface AllTableComponentSignature {
     sortDirection: SortDirection;
   };
 }
-export default class AllTableComponent extends Component<AllTableComponentSignature> {
+export default class DocumentsTableComponent extends Component<DocumentsTableComponentSignature> {
   protected get paginationIsShown() {
     return this.args.nbPages && this.args.currentPage !== undefined;
   }
@@ -24,6 +24,6 @@ export default class AllTableComponent extends Component<AllTableComponentSignat
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "All::Table": typeof AllTableComponent;
+    "Documents::Table": typeof DocumentsTableComponent;
   }
 }

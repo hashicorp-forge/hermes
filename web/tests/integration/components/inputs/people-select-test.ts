@@ -6,6 +6,7 @@ import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { HermesUser } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
+import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: HermesUser[];
@@ -16,6 +17,10 @@ interface PeopleSelectContext extends MirageTestContext {
 module("Integration | Component | inputs/people-select", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
+
+  hooks.beforeEach(function (this: PeopleSelectContext) {
+    authenticateTestUser(this);
+  });
 
   test("it functions as expected", async function (this: PeopleSelectContext, assert) {
     this.server.createList("person", 10);

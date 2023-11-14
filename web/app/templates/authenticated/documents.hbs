@@ -3,7 +3,7 @@
 
 <Header::Toolbar @facets={{@model.facets}} />
 
-<All::Table
+<Documents::Table
   @docs={{@model.results.hits}}
   @nbPages={{@model.results.nbPages}}
   @currentPage={{(add @model.results.page 1)}}

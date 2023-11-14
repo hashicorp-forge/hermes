@@ -7,8 +7,13 @@
   }
 
   th,
+  td .inner {
+    @apply py-3;
+  }
+
+  th,
   td {
-    @apply py-3 pr-5 text-left align-top;
+    @apply pr-5 text-left align-top;
     @apply border-b border-b-color-border-faint;
 
     &:last-child:not(:first-child) {
@@ -60,7 +65,7 @@
         }
       }
 
-      &:has(a:focus-visible) {
+      &:has(.name a:focus-visible) {
         @apply relative z-10;
 
         .name {

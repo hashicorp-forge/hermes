@@ -6,6 +6,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 import MockDate from "mockdate";
 
+const PRODUCT_LINK_SELECTOR = ".product-link";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=modifiedTime]";
 
@@ -69,7 +70,9 @@ module("Acceptance | authenticated/my", function (hooks) {
 
     await visit("/my");
 
-    await this.pauseTest();
+    assert
+      .dom(PRODUCT_LINK_SELECTOR)
+      .hasAttribute("href", "/my?product=%5B%22Terraform%22%5D");
 
     MockDate.reset();
   });

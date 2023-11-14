@@ -2,8 +2,8 @@ import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import timeAgo from "hermes/utils/time-ago";
 import parseDate from "hermes/utils/parse-date";
+import timeAgo from "hermes/utils/time-ago";
 
 enum TimeColumn {
   Modified = "modifiedTime",

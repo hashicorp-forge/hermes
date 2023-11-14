@@ -4,14 +4,14 @@ import { inject as service } from "@ember/service";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import ProductAreasService from "hermes/services/product-areas";
 import { assert } from "@ember/debug";
-import { HermesBasicAvatarSize } from "hermes/types/avatar-size";
+import { HermesSize } from "hermes/types/sizes";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
     product?: string;
-    size?: `${HermesBasicAvatarSize}`;
     icon?: string;
+    size?: `${Exclude<HermesSize, HermesSize.XL>}`;
   };
   Blocks: {
     default: [];
@@ -28,7 +28,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   }
 
   private get size() {
-    return this.args.size ?? HermesBasicAvatarSize.Small;
+    return this.args.size ?? HermesSize.Small;
   }
 
   private get id() {
@@ -43,6 +43,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     >
       <FlightIcon @name={{this.id}} />
     </div>
+
   </template>
 }
 

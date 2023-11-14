@@ -26,7 +26,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     await visit("/results");
 
     assert
-      .dom(".product-badge-link")
+      .dom(".product-link")
       .hasAttribute("href", "/documents?product=%5B%22Vault%22%5D");
   });
 });
