@@ -14,7 +14,6 @@ interface TableRowComponentSignature {
   Args: {
     doc: HermesDocument;
     timeColumn: `${TimeColumn}`;
-    thumbnailIsShown?: boolean;
   };
 }
 

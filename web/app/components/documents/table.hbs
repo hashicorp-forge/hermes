@@ -9,7 +9,7 @@
         <th class="owner">Owner</th>
         <th class="time">
           <Table::SortableHeader
-            @onChange={{@changeSort}}
+            @onSort={{@changeSort}}
             @currentSort={{@currentSort}}
             @sortDirection={{@sortDirection}}
             @queryParam={{hash
@@ -26,11 +26,7 @@
     </thead>
     <tbody>
       {{#each @docs as |doc|}}
-        <Table::Row
-          @doc={{doc}}
-          @timeColumn="createdTime"
-          @thumbnailIsShown={{true}}
-        />
+        <Table::Row @doc={{doc}} @timeColumn="createdTime" />
       {{/each}}
     </tbody>
   </table>
