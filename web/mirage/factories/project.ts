@@ -4,8 +4,8 @@ import { HermesProject } from "hermes/types/project";
 export default Factory.extend({
   id: (i: number) => i,
   title: (i: number) => `Test Project ${i}`,
-  createdDate: 1,
-  modifiedDate: 1,
+  createdTime: 1,
+  modifiedTime: 1,
   creator: "testuser@example.com",
   status: "active",
 

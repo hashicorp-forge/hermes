@@ -12,7 +12,10 @@
         {{if dd.contentIsShown 'visible' 'invisible'}}
         "
     >
-      <dd.ToggleAction class="overflow-button {{if dd.contentIsShown 'open'}}">
+      <dd.ToggleAction
+        data-test-overflow-menu-button
+        class="overflow-button {{if dd.contentIsShown 'open'}}"
+      >
         <div class="button-affordance">
           <FlightIcon @name="more-vertical" />
         </div>

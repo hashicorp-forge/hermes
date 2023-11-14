@@ -99,6 +99,20 @@ func DocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// If the document was created through Hermes and has a status of "WIP", it
+		// is a document draft and should be instead accessed through the drafts
+		// API. We return a 404 to be consistent with v1 of the API, and will
+		// improve this UX in the future when these APIs are combined.
+		if doc.AppCreated && doc.Status == "WIP" {
+			srv.Logger.Warn("attempted to access document draft via documents API",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			http.Error(w, "Document not found", http.StatusNotFound)
+			return
+		}
+
 		// Pass request off to associated subcollection (part of the URL after the
 		// document ID) handler, if appropriate.
 		switch reqType {
@@ -151,18 +165,19 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 			// Get owner photo by searching Google Workspace directory.
 			if len(doc.Owners) > 0 {
-				people, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
+				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
 				if err != nil {
-					srv.Logger.Error("error searching directory for person",
+					srv.Logger.Error("error searching directory for owner",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
+						"doc_id", docID,
 						"person", doc.Owners[0],
 					)
 				}
-				if len(people) > 0 {
-					if len(people[0].Photos) > 0 {
-						doc.OwnerPhotos = []string{people[0].Photos[0].Url}
+				if len(ppl) > 0 {
+					if len(ppl[0].Photos) > 0 {
+						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
 					}
 				}
 			}

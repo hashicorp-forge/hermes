@@ -167,6 +167,9 @@ module.exports = {
         "color-focus-action-internal":
           "var(--token-color-focus-action-internal)",
 
+        // Alpha
+        "color-palette-alpha-100": "var(--token-color-palette-alpha-100)",
+
         // Neutral
         "color-palette-neutral-50": "var(--token-color-palette-neutral-50)",
         "color-palette-neutral-100": "var(--token-color-palette-neutral-100)",

@@ -1,3 +1,7 @@
+.hds-badge {
+  @apply mix-blend-multiply;
+}
+
 .hds-badge__text {
   @apply truncate;
 }
