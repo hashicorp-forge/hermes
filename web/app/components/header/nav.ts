@@ -11,6 +11,25 @@ import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 
+interface UserNavItem {
+  label: string;
+  isNew?: boolean;
+}
+
+interface UserNavLinkTo extends UserNavItem {
+  route: string;
+}
+
+interface UserNavExternalLink extends UserNavItem {
+  href: string;
+}
+
+interface UserNavAction {
+  action: () => void;
+}
+
+type UserNavMenuItem = UserNavLinkTo | UserNavExternalLink | UserNavAction;
+
 interface HeaderNavComponentSignature {
   Args: {};
 }
@@ -41,7 +60,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     return this.configSvc.config.support_link_url;
   }
 
-  protected get dropdownListItems(): Record<string, any> {
+  protected get dropdownListItems(): UserNavMenuItem[] {
     const defaultItems = [
       {
         label: "Email notifications",
@@ -56,7 +75,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
         label: "Support",
         href: this.supportDocsURL,
       },
-    ] as any[];
+    ] as UserNavMenuItem[];
 
     if (this.showSignOut) {
       defaultItems.push({
