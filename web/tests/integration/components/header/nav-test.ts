@@ -12,6 +12,7 @@ import ConfigService from "hermes/services/config";
 const SUPPORT_URL = "https://example.com/support";
 const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";
 const CREATE_NEW_BUTTON = "[data-test-create-new-button]";
+const HIGHLIGHT_BADGE = ".highlighted-new-badge";
 
 module("Integration | Component | header/nav", function (hooks) {
   setupRenderingTest(hooks);
@@ -57,7 +58,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert
       .dom('[data-test-user-menu-item="email-notifications"]')
-      .hasText("Email notifications");
+      .containsText("Email notifications");
 
     assert.dom('[data-test-user-menu-item="sign-out"]').hasText("Sign out");
   });
@@ -72,8 +73,6 @@ module("Integration | Component | header/nav", function (hooks) {
       null,
     );
 
-    await this.pauseTest();
-
     assert.dom("[data-test-user-menu-highlight]").exists("highlight is shown");
 
     await click(USER_MENU_TOGGLE_SELECTOR);
@@ -82,13 +81,7 @@ module("Integration | Component | header/nav", function (hooks) {
       .dom("[data-test-user-menu-highlight]")
       .doesNotExist("highlight is hidden when the menu is open");
 
-    assert
-      .dom(".highlighted-new .hds-dropdown-list-item__interactive-text")
-      .hasPseudoElementStyle(
-        "after",
-        { content: '"New"' },
-        "highlighted link has the correct class and pseudoElement text",
-      );
+    assert.dom(HIGHLIGHT_BADGE).hasText("New");
 
     // close and reopen the menu
     await click(USER_MENU_TOGGLE_SELECTOR);
