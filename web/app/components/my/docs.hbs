@@ -1,4 +1,4 @@
-<My::Docs::Header
+<My::Header
   @toggleOwnerFilter={{this.toggleOwnerFilter}}
   @toggleOwnerFilterIsShown={{this.toggleOwnerFilterIsShown}}
 />
@@ -41,6 +41,8 @@
       {{/if}}
     {{/each}}
   </table>
+
+  {{! Maybe we don't show docs older than 1 year old by default }}
 
   {{#if this.loadMoreDocsButtonIsShown}}
     {{! should this happen when scrolled into view? }}

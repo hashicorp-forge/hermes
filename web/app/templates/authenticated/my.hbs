@@ -1,9 +1,3 @@
-{{page-title "My Docs"}}
 {{set-body-class "my"}}
 
-<My::Docs
-  @docs={{this.model.docs}}
-  @sortDirection={{this.sortDirection}}
-  @currentPage={{this.model.currentPage}}
-  @nbPages={{this.model.nbPages}}
-/>
+{{outlet}}

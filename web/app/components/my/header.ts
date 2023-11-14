@@ -2,14 +2,14 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 
-interface MyDocsHeaderComponentSignature {
+interface MyHeaderComponentSignature {
   Args: {
     toggleOwnerFilter: () => void;
     toggleOwnerFilterIsShown?: boolean;
   };
 }
 
-export default class MyDocsHeaderComponent extends Component<MyDocsHeaderComponentSignature> {
+export default class MyHeaderComponent extends Component<MyHeaderComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
   protected get userImgURL() {
@@ -27,6 +27,6 @@ export default class MyDocsHeaderComponent extends Component<MyDocsHeaderCompone
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "My::Docs::Header": typeof MyDocsHeaderComponent;
+    "My::Header": typeof MyHeaderComponent;
   }
 }

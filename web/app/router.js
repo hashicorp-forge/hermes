@@ -18,7 +18,9 @@ Router.map(function () {
 
     this.route("drafts"); // legacy route; redirects to /my
 
-    this.route("my");
+    this.route("my", function () {
+      this.route("documents");
+    });
     this.route("results");
     this.route("settings");
     this.route("new", function () {
