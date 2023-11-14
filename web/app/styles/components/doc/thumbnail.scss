@@ -40,6 +40,22 @@
     }
   }
 
+  &.medium {
+    @apply w-16;
+
+    .status-icon {
+      @apply top-[6px] h-[60px] w-[60px];
+
+      &.approved {
+        @apply -right-2.5;
+      }
+
+      &.obsolete {
+        @apply -left-3.5;
+      }
+    }
+  }
+
   &.large {
     @apply w-28;
 
