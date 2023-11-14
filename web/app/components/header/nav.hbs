@@ -52,7 +52,11 @@
         class="user-dropdown"
       >
         <:anchor as |dd|>
-          <dd.ToggleAction @hasChevron={{true}} aria-label="User menu`">
+          <dd.ToggleAction
+            @hasChevron={{true}}
+            aria-label="User menu"
+            class="user-menu-button -mr-1"
+          >
             <Person::Avatar
               @email={{this.profile.email}}
               @imgURL={{this.profile.picture}}

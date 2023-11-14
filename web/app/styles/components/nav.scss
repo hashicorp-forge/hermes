@@ -44,6 +44,18 @@
     }
   }
 
+  .user-menu-button {
+    &:focus,
+    &.open {
+      @apply outline-none;
+
+      .avatar {
+        @apply outline outline-1 outline-color-page-faint;
+        box-shadow: var(--token-focus-ring-action-box-shadow);
+      }
+    }
+  }
+
   .user-menu-external-link {
     @apply flex-row-reverse justify-end;
 
