@@ -14,6 +14,9 @@
 >
   {{yield}}
   {{#if @hasChevron}}
-    <FlightIcon @name={{if @contentIsShown "chevron-up" "chevron-down"}} />
+    <FlightIcon
+      data-test-toggle-action-chevron
+      @name={{if @contentIsShown "chevron-up" "chevron-down"}}
+    />
   {{/if}}
 </Action>

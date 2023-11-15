@@ -45,6 +45,7 @@ const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
 const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
 const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
 const DEFAULT_LOADER_SELECTOR = ".x-dropdown-list-default-loading-container";
+const TOGGLE_ACTION_CHEVRON = "[data-test-toggle-action-chevron]";
 
 interface XDropdownListComponentTestContext extends TestContext {
   items: Record<string, { count: number; isSelected: boolean }>;
@@ -53,6 +54,7 @@ interface XDropdownListComponentTestContext extends TestContext {
   isLoading?: boolean;
   placement?: Placement | null;
   selected?: string;
+  hasChevron?: boolean;
 }
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
@@ -1014,5 +1016,30 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     `);
 
     assert.dom("[data-test-div]").hasText("Foo");
+  });
+
+  test("the toggle action can render with a reactive chevron", async function (assert) {
+    this.set("hasChevron", false);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList>
+        <:anchor as |dd|>
+          <dd.ToggleAction @hasChevron={{this.hasChevron}} data-test-toggle>
+            ---
+          </dd.ToggleAction>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).doesNotExist();
+
+    this.set("hasChevron", true);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).exists();
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-down");
+
+    await click(TOGGLE_ACTION_SELECTOR);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-up");
   });
 });
