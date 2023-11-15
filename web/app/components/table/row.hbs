@@ -1,4 +1,4 @@
-<tr>
+<tr ...attributes>
   <td class="name">
     <LinkTo
       @route="authenticated.document"
@@ -54,6 +54,7 @@
   <td class="time">
     <div class="inner">
       <div
+        data-test-table-row-time-cell
         class={{if (eq this.time "Unknown") "text-color-foreground-disabled"}}
       >
         {{this.time}}
