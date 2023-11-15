@@ -79,58 +79,70 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
    * Looped through by the template to render the documents
    * in human-readable groups.
    */
-  protected get docGroups() {
+  protected get docGroups(): { label?: string; docs: HermesDocument[] }[] {
     let docGroupOne: HermesDocument[] = [];
     let docGroupTwo: HermesDocument[] = [];
     let docGroupThree: HermesDocument[] = [];
     let docGroupFour: HermesDocument[] = [];
 
-    this.args.docs.filter((doc) => {
-      if (!doc.modifiedTime) {
-        docGroupFour.push(doc);
-      } else {
-        const modifiedTime = new Date(doc.modifiedTime * 1000).getTime();
-        const now = Date.now();
-        const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-        const ninetyDaysAgo = now - 90 * 24 * 60 * 60 * 1000;
-        const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+    const sortIsDesc = this.args.sortDirection === SortDirection.Desc;
 
-        if (modifiedTime > thirtyDaysAgo) {
-          docGroupOne.push(doc);
-        } else if (modifiedTime > ninetyDaysAgo) {
-          docGroupTwo.push(doc);
-        } else if (modifiedTime > oneYearAgo) {
-          docGroupThree.push(doc);
+    if (sortIsDesc) {
+      // Return the whole array in reverse order, ungrouped.
+      return [
+        {
+          label: undefined,
+          docs: this.args.docs.reverse(),
+        },
+      ];
+    } else {
+      this.args.docs.filter((doc) => {
+        if (!doc.modifiedTime) {
+          docGroupFour.push(doc);
         } else {
-          docGroupFour.unshift(doc);
+          const modifiedTime = new Date(doc.modifiedTime * 1000).getTime();
+          const now = Date.now();
+          const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+          const ninetyDaysAgo = now - 90 * 24 * 60 * 60 * 1000;
+          const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+
+          if (modifiedTime > thirtyDaysAgo) {
+            docGroupOne.push(doc);
+          } else if (modifiedTime > ninetyDaysAgo) {
+            docGroupTwo.push(doc);
+          } else if (modifiedTime > oneYearAgo) {
+            docGroupThree.push(doc);
+          } else {
+            docGroupFour.unshift(doc);
+          }
         }
+      });
+
+      let groupFourLabel = "More than 1 year old";
+
+      if (!docGroupFour.every((doc) => typeof doc.modifiedTime === "number")) {
+        groupFourLabel += " / Unknown";
       }
-    });
 
-    let groupFourLabel = "More than 1 year old";
-
-    if (!docGroupFour.every((doc) => typeof doc.modifiedTime === "number")) {
-      groupFourLabel += " / Unknown";
+      return [
+        {
+          label: "Recently active",
+          docs: docGroupOne,
+        },
+        {
+          label: "More than 30 days old",
+          docs: docGroupTwo,
+        },
+        {
+          label: "More than 90 days old",
+          docs: docGroupThree,
+        },
+        {
+          label: groupFourLabel,
+          docs: docGroupFour,
+        },
+      ];
     }
-
-    return [
-      {
-        label: "Recently active",
-        docs: docGroupOne,
-      },
-      {
-        label: "More than 30 days old",
-        docs: docGroupTwo,
-      },
-      {
-        label: "More than 90 days old",
-        docs: docGroupThree,
-      },
-      {
-        label: groupFourLabel,
-        docs: docGroupFour,
-      },
-    ];
   }
 
   /**

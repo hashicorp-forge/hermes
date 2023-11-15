@@ -42,11 +42,13 @@
     {{#each this.docGroups as |docGroup|}}
       {{#if docGroup.docs.length}}
         <tbody>
-          <tr>
-            <th colspan="6" class="hermes-h4 pt-28">
-              {{docGroup.label}}
-            </th>
-          </tr>
+          {{#if docGroup.label}}
+            <tr>
+              <th colspan="6" class="hermes-h4 pt-28">
+                {{docGroup.label}}
+              </th>
+            </tr>
+          {{/if}}
           {{#each docGroup.docs as |doc|}}
             <Table::Row @doc={{doc}} @timeColumn="modifiedTime" />
           {{/each}}
