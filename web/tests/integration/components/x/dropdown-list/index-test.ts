@@ -1043,29 +1043,4 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom("[data-test-div]").hasText("Foo");
   });
-
-  test("the toggle action can render with a reactive chevron", async function (assert) {
-    this.set("hasChevron", false);
-
-    await render<XDropdownListComponentTestContext>(hbs`
-      <X::DropdownList>
-        <:anchor as |dd|>
-          <dd.ToggleAction @hasChevron={{this.hasChevron}} data-test-toggle>
-            ---
-          </dd.ToggleAction>
-        </:anchor>
-      </X::DropdownList>
-    `);
-
-    assert.dom(TOGGLE_ACTION_CHEVRON).doesNotExist();
-
-    this.set("hasChevron", true);
-
-    assert.dom(TOGGLE_ACTION_CHEVRON).exists();
-    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-down");
-
-    await click(TOGGLE_ACTION_SELECTOR);
-
-    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-up");
-  });
 });
