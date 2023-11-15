@@ -13,6 +13,7 @@ import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { assert } from "@ember/debug";
 import { GoogleUser } from "hermes/components/inputs/people-select";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -53,7 +54,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   showErrorMessage(err: Error) {
     this.flashMessages.critical(err.message, {
       title: "Error fetching document",
-      timeout: 10000,
+      timeout: FLASH_MESSAGES_LONG_TIMEOUT,
     });
   }
 

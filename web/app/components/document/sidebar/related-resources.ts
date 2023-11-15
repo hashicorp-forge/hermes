@@ -18,6 +18,7 @@ import {
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
@@ -328,7 +329,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save resource",
-          timeout: 10000,
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       }
     },

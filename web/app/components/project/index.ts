@@ -18,6 +18,7 @@ import {
 import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -316,7 +317,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
-          timeout: 10000,
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       }
     },
@@ -354,7 +355,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save resource",
-          timeout: 10000,
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       }
     },
