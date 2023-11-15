@@ -5,10 +5,11 @@
       @query={{this.ownerFilterQueryParams}}
       class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
     >
-      <label for="owner-filter" class="text-body-200">
+      <label tabindex="-1" for="owner-filter" class="text-body-200">
         Include drafts I'm a contributor on
       </label>
       <Hds::Form::Toggle::Base
+        tabindex="-1"
         id="owner-filter"
         checked={{this.ownerToggleIsChecked}}
       />
