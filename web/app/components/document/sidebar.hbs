@@ -61,6 +61,7 @@
                     "up"
                     "down"
                   }}
+                  @hasChevron={{true}}
                   class="sidebar-header-button draft-visibility-button flex items-center text-color-foreground-faint"
                   {{tooltip
                     this.toggleDraftVisibilityTooltipText
@@ -68,9 +69,6 @@
                   }}
                 >
                   <FlightIcon @name={{this.draftVisibilityIcon}} />
-                  <FlightIcon
-                    @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-                  />
                 </dd.ToggleAction>
               </:anchor>
               <:item as |dd|>
