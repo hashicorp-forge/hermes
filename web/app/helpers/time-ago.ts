@@ -11,7 +11,7 @@ export interface TimeAgoHelperSignature {
 const timeAgoHelper = helper<TimeAgoHelperSignature>(
   ([secondsAgo]: [number]) => {
     return `${timeAgo(secondsAgo)}`;
-  }
+  },
 );
 
 export default timeAgoHelper;

@@ -37,8 +37,8 @@ module("Integration | Helper | time-ago", function (hooks) {
     `);
 
     assert.dom(".one").hasText("5 seconds ago");
-    assert.dom(".two").hasText("2 years ago");
-    assert.dom(".three").hasText("7 months ago");
+    assert.dom(".two").hasText("1 Jan. 1998");
+    assert.dom(".three").hasText("5 Jun. 1999");
 
     MockDate.reset();
   });
