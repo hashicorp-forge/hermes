@@ -1,5 +1,6 @@
 import {
   click,
+  currentURL,
   fillIn,
   find,
   findAll,
@@ -7,6 +8,7 @@ import {
   triggerKeyEvent,
   visit,
   waitFor,
+  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -21,6 +23,8 @@ import {
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
 import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
+import RouterService from "@ember/routing/router-service";
+import { wait } from "ember-animated/.";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -92,6 +96,22 @@ module("Acceptance | authenticated/document", function (hooks) {
 
   hooks.beforeEach(async function () {
     await authenticateSession({});
+  });
+
+  test("it redirects to the dashboard by default if the document doesn't exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    await visit("/");
+    assert.equal(currentURL(), "/dashboard");
+
+    await visit("/document/1");
+    assert.equal(currentURL(), "/dashboard");
+  });
+
+  test("it redirects to the previous page if the document doesn't exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    await visit("/documents");
+    assert.equal(currentURL(), "/documents");
+
+    await visit("/document/1");
+    assert.equal(currentURL(), "/documents");
   });
 
   test("the page title is correct (published doc)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
