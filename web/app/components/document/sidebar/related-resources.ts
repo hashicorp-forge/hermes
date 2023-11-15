@@ -9,7 +9,6 @@ import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import {
   RelatedExternalLink,
@@ -18,6 +17,7 @@ import {
   RelatedResourceSelector,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
@@ -41,7 +41,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
   @tracked relatedDocuments: RelatedHermesDocument[] = [];
@@ -322,16 +322,13 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
             },
           },
         );
-      } catch (e: unknown) {
+      } catch (e) {
         this.relatedLinks = cachedLinks;
         this.relatedDocuments = cachedDocuments;
 
-        this.flashMessages.add({
+        this.flashMessages.critical((e as any).message, {
           title: "Unable to save resource",
-          message: (e as any).message,
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
+          timeout: 10000,
         });
       }
     },

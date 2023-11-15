@@ -15,7 +15,6 @@ import { debounce } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import {
   CustomEditableField,
@@ -29,6 +28,7 @@ import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -64,7 +64,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare session: SessionService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
@@ -495,12 +495,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   showFlashError(error: Error, title: string) {
-    this.flashMessages.add({
+    this.flashMessages.critical(error.message, {
       title,
-      message: error.message,
-      type: "critical",
-      timeout: 6000,
-      extendedTimeout: 1000,
       preventDuplicates: true,
     });
   }
@@ -509,9 +505,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.flashMessages.add({
       message,
       title,
-      type: "success",
-      timeout: 6000,
-      extendedTimeout: 1000,
     });
   }
 

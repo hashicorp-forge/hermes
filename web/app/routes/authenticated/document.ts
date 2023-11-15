@@ -4,7 +4,6 @@ import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
@@ -13,6 +12,7 @@ import AuthenticatedDocumentController from "hermes/controllers/authenticated/do
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { assert } from "@ember/debug";
 import { GoogleUser } from "hermes/components/inputs/people-select";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -36,7 +36,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
 
   declare controller: AuthenticatedDocumentController;
@@ -51,12 +51,9 @@ export default class AuthenticatedDocumentRoute extends Route {
   // };
 
   showErrorMessage(err: Error) {
-    this.flashMessages.add({
+    this.flashMessages.critical(err.message, {
       title: "Error fetching document",
-      message: err.message,
-      type: "critical",
-      sticky: true,
-      extendedTimeout: 1000,
+      timeout: 10000,
     });
   }
 
