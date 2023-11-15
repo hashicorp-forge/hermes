@@ -653,6 +653,32 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom(EXTERNAL_LINK).exists({ count: 3 });
     assert.dom(EXTERNAL_LINK).hasAttribute("target", "_blank");
   });
+  test("the toggle action can render with a chevron", async function (assert) {
+    this.set("hasChevron", false);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList>
+        <:anchor as |dd|>
+          <dd.ToggleAction @hasChevron={{this.hasChevron}} data-test-toggle>
+            ---
+          </dd.ToggleAction>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).doesNotExist();
+
+    this.set("hasChevron", true);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).exists();
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-down");
+
+    await click(TOGGLE_ACTION_SELECTOR);
+
+    assert.dom(TOGGLE_ACTION_SELECTOR).hasClass("open");
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-up");
+  });
 
   test("the list can be rendered with a toggle button", async function (assert) {
     this.set("items", SHORT_ITEM_LIST);

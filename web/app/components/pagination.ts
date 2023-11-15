@@ -4,8 +4,8 @@ import RouterService from "@ember/routing/router-service";
 
 interface PaginationComponentSignature {
   Args: {
-    nbPages: number;
-    currentPage: number;
+    nbPages?: number;
+    currentPage?: number;
   };
 }
 
@@ -17,7 +17,12 @@ export default class PaginationComponent extends Component<PaginationComponentSi
   }
 
   get pages(): number[] {
+    if (!this.args.nbPages || !this.args.currentPage) {
+      return [];
+    }
+
     let pages = [];
+
     // If there are less than 10 pages of results, show all pages.
     // Or if the current page is 6 or less and there are more than 10 pages of
     // results, show the first 10 pages.

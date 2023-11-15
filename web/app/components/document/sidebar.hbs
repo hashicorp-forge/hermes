@@ -56,17 +56,12 @@
                 <dd.ToggleAction
                   data-test-draft-visibility-toggle
                   data-test-icon={{this.draftVisibilityIcon}}
-                  data-test-chevron-direction={{if
-                    dd.contentIsShown
-                    "up"
-                    "down"
-                  }}
-                  @hasChevron={{true}}
                   class="sidebar-header-button draft-visibility-button flex items-center text-color-foreground-faint"
                   {{tooltip
                     this.toggleDraftVisibilityTooltipText
                     placement="bottom"
                   }}
+                  @hasChevron={{true}}
                 >
                   <FlightIcon @name={{this.draftVisibilityIcon}} />
                 </dd.ToggleAction>

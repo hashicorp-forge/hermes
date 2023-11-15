@@ -4,14 +4,17 @@ import timeAgo from "hermes/utils/time-ago";
 export interface TimeAgoHelperSignature {
   Args: {
     Positional: [time: number];
+    Named: {
+      limitTo24Hours?: boolean;
+    };
   };
-  Return: string;
+  Return: string | null;
 }
 
 const timeAgoHelper = helper<TimeAgoHelperSignature>(
-  ([secondsAgo]: [number]) => {
-    return `${timeAgo(secondsAgo)}`;
-  }
+  ([time], { limitTo24Hours }) => {
+    return timeAgo(time, { limitTo24Hours });
+  },
 );
 
 export default timeAgoHelper;
