@@ -38,7 +38,7 @@ export default class TableRowComponent extends Component<TableRowComponentSignat
 
     if (this.args.timeColumn === TimeColumn.Modified) {
       if (modifiedTime) {
-        label = timeAgo(modifiedTime) as string;
+        label = timeAgo(modifiedTime, { limitTo24Hours: true }) as string;
       }
     } else {
       label = parseDate(created) as string;
