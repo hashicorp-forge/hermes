@@ -59,7 +59,7 @@ module("Integration | Component | table/row", function (hooks) {
   });
 
   test('it renders "Unknown" as a fallback', async function (this: TableRowComponentTestContext, assert) {
-    this.server.document.first().update({ createdTime: null });
+    this.set("doc", this.server.create("document", { createdTime: null }));
 
     await render<TableRowComponentTestContext>(hbs`
       <Table::Row
