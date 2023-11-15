@@ -9,6 +9,7 @@ import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { SortByValue } from "../header/toolbar";
+import RouterService from "@ember/routing/router-service";
 
 interface MyDocsComponentSignature {
   Args: {
@@ -25,17 +26,48 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare router: RouterService;
 
-  @tracked protected sortDirection = this.args.sortDirection;
+  /**
+   * The current route name.
+   * Passed to the SortableHeader's `@route` argument.
+   */
+  protected get currentRoute() {
+    return this.router.currentRouteName;
+  }
 
-  @tracked protected docGroupOne: HermesDocument[] = [];
-  @tracked protected docGroupTwo: HermesDocument[] = [];
-  @tracked protected docGroupThree: HermesDocument[] = [];
-  @tracked protected docGroupFour: HermesDocument[] = [];
+  /**
+   * Whether the owner filter is checked.
+   * True of the current route's `excludeSharedDrafts` query param is false.
+   */
+  protected get ownerToggleIsChecked() {
+    return !this.router.currentRoute.queryParams["excludeSharedDrafts"];
+  }
 
+  /**
+   * The params passed to SortableHeader's `@query` argument.
+   * Resets the page to 1 and sets the new sort direction.
+   */
+  protected get ownerFilterQueryParams() {
+    if (this.router.currentRoute.queryParams["excludeSharedDrafts"]) {
+      return {
+        excludeSharedDrafts: false,
+        page: 1,
+      };
+    }
+    return {
+      excludeSharedDrafts: true,
+      page: 1,
+    };
+  }
+
+  /**
+   * The params passed to the sort-column LinkTo.
+   * Resets the page to 1 and sets the new sort direction.
+   */
   protected get sortParams() {
     const sortBy =
-      this.sortDirection === SortDirection.Asc
+      this.args.sortDirection === SortDirection.Asc
         ? SortByValue.DateDesc
         : SortByValue.DateAsc;
     return {
@@ -44,50 +76,20 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     };
   }
 
+  /**
+   * Documents grouped by modified date.
+   * Looped through by the template to render the documents
+   * in human-readable groups.
+   */
   protected get docGroups() {
-    this.processDocs();
+    let docGroupOne: HermesDocument[] = [];
+    let docGroupTwo: HermesDocument[] = [];
+    let docGroupThree: HermesDocument[] = [];
+    let docGroupFour: HermesDocument[] = [];
 
-    let groupFourLabel = "More than 1 year old";
-
-    if (
-      !this.docGroupFour.every((doc) => typeof doc.modifiedTime === "number")
-    ) {
-      groupFourLabel += " / Unknown";
-    }
-
-    return [
-      {
-        label: "Recently active",
-        docs: this.docGroupOne,
-      },
-      {
-        label: "More than 30 days old",
-        docs: this.docGroupTwo,
-      },
-      {
-        label: "More than 90 days old",
-        docs: this.docGroupThree,
-      },
-      {
-        label: groupFourLabel,
-        docs: this.docGroupFour,
-      },
-    ];
-  }
-
-  protected get paginationIsShown() {
-    return this.args.nbPages > 1 && this.args.currentPage !== undefined;
-  }
-
-  @action processDocs() {
-    this.docGroupOne = [];
-    this.docGroupTwo = [];
-    this.docGroupThree = [];
-    this.docGroupFour = [];
-
-    return this.args.docs.filter((doc) => {
+    this.args.docs.filter((doc) => {
       if (!doc.modifiedTime) {
-        this.docGroupFour.push(doc);
+        docGroupFour.push(doc);
       } else {
         const modifiedTime = new Date(doc.modifiedTime * 1000).getTime();
         const now = Date.now();
@@ -96,16 +98,49 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
         const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
 
         if (modifiedTime > thirtyDaysAgo) {
-          this.docGroupOne.push(doc);
+          docGroupOne.push(doc);
         } else if (modifiedTime > ninetyDaysAgo) {
-          this.docGroupTwo.push(doc);
+          docGroupTwo.push(doc);
         } else if (modifiedTime > oneYearAgo) {
-          this.docGroupThree.push(doc);
+          docGroupThree.push(doc);
         } else {
-          this.docGroupFour.unshift(doc);
+          docGroupFour.unshift(doc);
         }
       }
     });
+
+    let groupFourLabel = "More than 1 year old";
+
+    if (!docGroupFour.every((doc) => typeof doc.modifiedTime === "number")) {
+      groupFourLabel += " / Unknown";
+    }
+
+    return [
+      {
+        label: "Recently active",
+        docs: docGroupOne,
+      },
+      {
+        label: "More than 30 days old",
+        docs: docGroupTwo,
+      },
+      {
+        label: "More than 90 days old",
+        docs: docGroupThree,
+      },
+      {
+        label: groupFourLabel,
+        docs: docGroupFour,
+      },
+    ];
+  }
+
+  /**
+   * Whether the pagination component is shown.
+   * True if there are more than 1 page of results and the current page defined.
+   */
+  protected get paginationIsShown() {
+    return this.args.nbPages > 1 && this.args.currentPage !== undefined;
   }
 }
 

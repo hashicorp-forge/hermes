@@ -1,4 +1,20 @@
-<My::Header @toggleOwnerFilterIsShown={{true}} />
+<My::Header>
+  <:controls>
+    <LinkTo
+      @route={{this.currentRoute}}
+      @query={{this.ownerFilterQueryParams}}
+      class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
+    >
+      <label for="owner-filter" class="text-body-200">
+        Include drafts I'm a contributor on
+      </label>
+      <Hds::Form::Toggle::Base
+        id="owner-filter"
+        checked={{this.ownerToggleIsChecked}}
+      />
+    </LinkTo>
+  </:controls>
+</My::Header>
 
 {{#if @docs}}
   <table class="hds-table mt-7">
@@ -14,7 +30,7 @@
             @queryParam={{this.sortParams}}
             @attribute="modifiedTime"
             @currentSort="modifiedTime"
-            @sortDirection={{this.sortDirection}}
+            @sortDirection={{@sortDirection}}
             @defaultSortDirection="desc"
           >
             Last modified
@@ -26,7 +42,7 @@
       {{#if docGroup.docs.length}}
         <tbody>
           <tr>
-            <th colspan="6" class="hermes-h4 pt-24">
+            <th colspan="6" class="hermes-h4 pt-28">
               {{docGroup.label}}
             </th>
           </tr>

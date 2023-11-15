@@ -16,7 +16,7 @@
       }
 
       &.active {
-        @apply relative bg-color-palette-neutral-100;
+        @apply relative bg-gradient-to-b from-color-palette-neutral-175 to-color-palette-neutral-100;
       }
     }
   }

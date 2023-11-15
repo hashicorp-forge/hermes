@@ -11,7 +11,6 @@ interface DocumentsTableComponentSignature {
     isDraft?: boolean;
     nbPages?: number;
     currentPage?: number;
-    changeSort?: () => void;
     currentSort: `${SortAttribute}`;
     sortDirection: SortDirection;
   };
