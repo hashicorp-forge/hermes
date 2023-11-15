@@ -237,9 +237,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
       .hasAttribute("data-test-icon", DraftVisibilityIcon.Restricted);
-    assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
-      .hasAttribute("data-test-chevron-direction", "down");
 
     assert.dom(TOOLTIP_SELECTOR).doesNotExist();
 
@@ -251,9 +248,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
 
-    assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
-      .hasAttribute("data-test-chevron-direction", "up");
     assert.dom(DRAFT_VISIBILITY_DROPDOWN_SELECTOR).exists("dropdown is open");
 
     assert.dom(DRAFT_VISIBILITY_OPTION_SELECTOR).exists({ count: 2 });

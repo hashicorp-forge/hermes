@@ -54,6 +54,10 @@ export default class XDropdownListItemsComponent extends Component<XDropdownList
    * "no matches found" message should be shown.
    */
   protected get itemsAreShown(): boolean {
+    if (this.args.shownItems === undefined) {
+      return false;
+    }
+
     return Object.entries(this.args.shownItems).length !== 0;
   }
 

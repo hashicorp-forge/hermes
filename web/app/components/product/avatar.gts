@@ -22,7 +22,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get productID(): string {
     const productID = getProductID(this.args.product);
-    assert("productID must edxist", productID);
+    assert("productID must exist", productID);
     return productID;
   }
 
