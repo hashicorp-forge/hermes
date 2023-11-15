@@ -85,12 +85,6 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     this.docGroupThree = [];
     this.docGroupFour = [];
 
-    // FIXME: this needs to be a single index so nbPages are resolved.
-    // Currently we grab two sets of docs and sort them. When someone clicks
-    // "load more" we grab another set of docs and sort them. This can result
-    // in new docs appearing above the "load more" button because they were
-    // modified more recently than the docs that were already loaded.
-
     return this.args.docs.filter((doc) => {
       if (!doc.modifiedTime) {
         this.docGroupFour.push(doc);
