@@ -15,7 +15,7 @@ interface MyDocsComponentSignature {
     sortDirection: SortDirection;
     currentPage: number;
     nbPages: number;
-    excludeSharedDrafts: boolean;
+    includeSharedDrafts: boolean;
   };
 }
 
@@ -36,10 +36,10 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
 
   /**
    * Whether the owner filter is checked.
-   * True of the current route's `excludeSharedDrafts` query param is false.
+   * True of the current route's `includeSharedDrafts` query param is false.
    */
   protected get ownerToggleIsChecked() {
-    return !this.router.currentRoute.queryParams["excludeSharedDrafts"];
+    return !this.router.currentRoute.queryParams["includeSharedDrafts"];
   }
 
   /**
@@ -47,14 +47,14 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
    * Resets the page to 1 and sets the new sort direction.
    */
   protected get ownerFilterQueryParams() {
-    if (this.router.currentRoute.queryParams["excludeSharedDrafts"]) {
+    if (this.router.currentRoute.queryParams["includeSharedDrafts"]) {
       return {
-        excludeSharedDrafts: false,
+        includeSharedDrafts: true,
         page: 1,
       };
     }
     return {
-      excludeSharedDrafts: true,
+      includeSharedDrafts: false,
       page: 1,
     };
   }

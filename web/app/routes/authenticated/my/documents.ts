@@ -24,7 +24,7 @@ export interface DraftResponseJSON {
 interface AuthenticatedMyDocumentsRouteParams {
   page?: number;
   sortBy?: SortByValue;
-  excludeSharedDrafts?: boolean;
+  includeSharedDrafts?: boolean;
 }
 
 export default class AuthenticatedMyDocumentsRoute extends Route {
@@ -35,7 +35,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   @service declare flashMessages: FlashMessageService;
 
   queryParams = {
-    excludeSharedDrafts: {
+    includeSharedDrafts: {
       refreshModel: true,
     },
     page: {
@@ -125,7 +125,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       sortedBy,
       currentPage: page ?? 1,
       nbPages,
-      excludeSharedDrafts: params.excludeSharedDrafts ?? false,
+      includeSharedDrafts: params.includeSharedDrafts ?? false,
     };
   }
 }

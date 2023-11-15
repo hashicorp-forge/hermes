@@ -5,8 +5,8 @@ import AuthenticatedMyDocumentsRoute from "hermes/routes/authenticated/my/docume
 import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedMyDocumentsController extends Controller {
-  queryParams = ["excludeSharedDrafts", "page", "sortBy"];
-  excludeSharedDrafts = false;
+  queryParams = ["includeSharedDrafts", "page", "sortBy"];
+  includeSharedDrafts = true;
   page = 1;
   sortBy = SortByValue.DateDesc;
 

@@ -56,7 +56,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   };
 
   protected defaultMyQueryParams = {
-    excludeSharedDrafts: false,
+    includeSharedDrafts: true,
     page: 1,
     sortBy: SortByValue.DateDesc,
   };
