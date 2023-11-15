@@ -22,6 +22,7 @@ export default class PaginationComponent extends Component<PaginationComponentSi
     }
 
     let pages = [];
+
     // If there are less than 10 pages of results, show all pages.
     // Or if the current page is 6 or less and there are more than 10 pages of
     // results, show the first 10 pages.
