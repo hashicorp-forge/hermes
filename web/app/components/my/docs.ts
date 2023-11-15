@@ -1,6 +1,4 @@
-import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 import { SortDirection } from "../table/sortable-header";
 import { inject as service } from "@ember/service";
