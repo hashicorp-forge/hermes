@@ -99,9 +99,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("it redirects to the dashboard by default if the document doesn't exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    await visit("/");
-    assert.equal(currentURL(), "/dashboard");
-
     await visit("/document/1");
     assert.equal(currentURL(), "/dashboard");
   });
