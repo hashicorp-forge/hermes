@@ -32,7 +32,7 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
     assert
       .dom(SORTABLE_HEADER)
       .hasClass("active")
-      .hasAttribute("href", "/my?sortBy=dateAsc");
+      .hasAttribute("href", "/my/documents?sortBy=dateAsc");
 
     assert
       .dom(`${SORTABLE_HEADER} .flight-icon`)
@@ -40,7 +40,10 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
 
     await click(SORTABLE_HEADER);
 
-    assert.dom(SORTABLE_HEADER).hasClass("active").hasAttribute("href", "/my");
+    assert
+      .dom(SORTABLE_HEADER)
+      .hasClass("active")
+      .hasAttribute("href", "/my/documents");
 
     assert
       .dom(`${SORTABLE_HEADER} .flight-icon`)

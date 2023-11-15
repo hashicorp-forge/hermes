@@ -26,6 +26,8 @@ module("Acceptance | authenticated/documents", function (hooks) {
   test("product badges have the correct hrefs", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.create("document", {
       product: "Labs",
+      isDraft: false,
+      status: "Approved",
     });
 
     await visit("/documents");
@@ -38,7 +40,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
   test("documents can be sorted by created date", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.createList("document", 2);
 
-    await visit("/all");
+    await visit("/documents");
 
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)

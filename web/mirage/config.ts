@@ -40,8 +40,7 @@ export default function (mirageConfig) {
           if (facetFilters) {
             if (facetFilters.length === 0) {
               facetFilters = undefined;
-            }
-            if (facetFilters[0] === "") {
+            } else if (facetFilters[0] === "") {
               facetFilters = undefined;
             }
           }
