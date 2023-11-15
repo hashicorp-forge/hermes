@@ -139,7 +139,6 @@ export default class AuthenticatedDocumentRoute extends Route {
           this.router.transitionTo("authenticated.dashboard");
         }
 
-        // Transition to dashboard
         throw new Error(typedError.message);
       }
     }
