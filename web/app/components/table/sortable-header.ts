@@ -11,6 +11,7 @@ export enum SortDirection {
 
 export enum SortAttribute {
   CreatedTime = "createdTime",
+  ModifiedTime = "modifiedTime",
   Owner = "owners",
   Product = "product",
   Status = "status",
@@ -26,7 +27,7 @@ interface TableSortableHeaderSignature {
     attribute: `${SortAttribute}`;
     changeSort?: (
       attribute: SortAttribute,
-      defaultSortDirection?: SortDirection
+      defaultSortDirection?: SortDirection,
     ) => void;
     defaultSortDirection?: `${SortDirection}`;
     queryParam?: Record<string, unknown>;
@@ -79,7 +80,7 @@ export default class TableSortableHeader extends Component<TableSortableHeaderSi
     assert("this.args.changeSort must exists", this.args.changeSort);
     this.args.changeSort(
       this.args.attribute as SortAttribute,
-      this.sortDirection
+      this.sortDirection,
     );
   }
 }
