@@ -1,10 +1,16 @@
 import parseDate from "./parse-date";
 /**
- * A function to return a "time ago" string from timestamps within 24 hours,
- * with older values being formatted like "15 Nov. 1956."
+ * Returns a "time ago" string from a seconds-based timestamp.
+ * If set, the `limitTo24Hours` option will use the short `parseDate`
+ * formatting. e.g., "22 Dec. 1976," for values older than a day.
  * Used throughout the app to format document metadata.
  */
-export default function timeAgo(timeInSeconds: number) {
+export default function timeAgo(
+  timeInSeconds: number,
+  options?: {
+    limitTo24Hours?: boolean;
+  },
+) {
   const now = Date.now();
   const before = new Date(timeInSeconds * 1000).getTime();
   const elapsed = now - before;
@@ -38,5 +44,45 @@ export default function timeAgo(timeInSeconds: number) {
     return `${Math.floor(elapsedHours)} hours ago`;
   }
 
-  return parseDate(timeInSeconds * 1000);
+  if (options?.limitTo24Hours) {
+    return parseDate(timeInSeconds * 1000);
+  }
+
+  const elapsedDays = elapsedHours / 24;
+
+  if (elapsedDays < 2) {
+    return "1 day ago";
+  }
+
+  if (elapsedDays < 30) {
+    return `${Math.floor(elapsedDays)} days ago`;
+  }
+
+  const elapsedWeeks = elapsedDays / 7;
+
+  if (elapsedWeeks < 2) {
+    return "1 week ago";
+  }
+
+  if (elapsedWeeks < 4) {
+    return `${Math.floor(elapsedWeeks)} weeks ago`;
+  }
+
+  const elapsedMonths = elapsedWeeks / 4;
+
+  if (elapsedMonths < 2) {
+    return "1 month ago";
+  }
+
+  if (elapsedMonths < 12) {
+    return `${Math.floor(elapsedMonths)} months ago`;
+  }
+
+  const elapsedYears = elapsedMonths / 12;
+
+  if (elapsedYears < 2) {
+    return "1 year ago";
+  }
+
+  return `${Math.floor(elapsedYears)} years ago`;
 }

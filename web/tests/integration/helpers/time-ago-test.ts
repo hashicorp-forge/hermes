@@ -28,17 +28,25 @@ module("Integration | Helper | time-ago", function (hooks) {
       <div class="one">
         {{time-ago this.fiveSecondsAgo}}
       </div>
-      <div class="two">
+      <div class="two-a">
         {{time-ago this.twoYearsAgo}}
       </div>
-      <div class="three">
+      <div class="two-b">
+        {{time-ago this.twoYearsAgo limitTo24Hours=true}}
+      </div>
+      <div class="three-a">
         {{time-ago this.sevenMonthsAgo}}
+      </div>
+      <div class="three-b">
+        {{time-ago this.sevenMonthsAgo limitTo24Hours=true}}
       </div>
     `);
 
     assert.dom(".one").hasText("5 seconds ago");
-    assert.dom(".two").hasText("1 Jan. 1998");
-    assert.dom(".three").hasText("5 Jun. 1999");
+    assert.dom(".two-a").hasText("2 years ago");
+    assert.dom(".two-b").hasText("1 Jan. 1998");
+    assert.dom(".three-a").hasText("7 months ago");
+    assert.dom(".three-b").hasText("5 Jun. 1999");
 
     MockDate.reset();
   });
