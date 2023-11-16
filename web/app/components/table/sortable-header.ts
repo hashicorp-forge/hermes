@@ -23,7 +23,6 @@ interface TableSortableHeaderSignature {
     currentSort: `${SortAttribute}`;
     sortDirection: `${SortDirection}`;
     attribute: `${SortAttribute}`;
-    onSort?: () => void;
     defaultSortDirection?: `${SortDirection}`;
     queryParam?: Record<string, unknown>;
   };
@@ -49,14 +48,6 @@ export default class TableSortableHeader extends Component<TableSortableHeaderSi
     } else {
       return "swap-vertical";
     }
-  }
-
-  protected get isReadOnly() {
-    if (this.args.attribute === SortAttribute.CreatedTime) {
-      return false;
-    }
-
-    return true;
   }
 
   protected get isActive() {
