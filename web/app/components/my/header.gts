@@ -29,7 +29,7 @@ export default class MyHeaderComponent extends Component<MyHeaderComponentSignat
   }
 
   <template>
-    <div class="flex items-center justify-between">
+    <div class="mt-2 flex items-center justify-between">
       <div class="relative flex items-center gap-5">
         <PersonAvatar
           @imgURL={{this.userImgURL}}

@@ -12,7 +12,7 @@ import RouterService from "@ember/routing/router-service";
 interface MyDocsComponentSignature {
   Args: {
     docs: HermesDocument[];
-    sortDirection: SortDirection;
+    sortDirection: `${SortDirection}`;
     currentPage: number;
     nbPages: number;
     includeSharedDrafts: boolean;
@@ -39,7 +39,7 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
    * True of the current route's `includeSharedDrafts` query param is false.
    */
   protected get ownerToggleIsChecked() {
-    return !this.router.currentRoute.queryParams["includeSharedDrafts"];
+    return this.args.includeSharedDrafts;
   }
 
   /**
@@ -47,14 +47,14 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
    * Resets the page to 1 and sets the new sort direction.
    */
   protected get ownerFilterQueryParams() {
-    if (this.router.currentRoute.queryParams["includeSharedDrafts"]) {
+    if (this.args.includeSharedDrafts) {
       return {
-        includeSharedDrafts: true,
+        includeSharedDrafts: false,
         page: 1,
       };
     }
     return {
-      includeSharedDrafts: false,
+      includeSharedDrafts: true,
       page: 1,
     };
   }
@@ -85,9 +85,11 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     let docGroupThree: HermesDocument[] = [];
     let docGroupFour: HermesDocument[] = [];
 
-    const sortIsDesc = this.args.sortDirection === SortDirection.Desc;
+    const sortIsAsc = this.args.sortDirection === SortDirection.Asc;
 
-    if (sortIsDesc) {
+    console.log("SORT IS ASC??", sortIsAsc);
+
+    if (sortIsAsc) {
       // Return the whole array in reverse order, ungrouped.
       return [
         {
@@ -95,7 +97,17 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
           docs: this.args.docs.reverse(),
         },
       ];
+    } else if (this.args.currentPage > 1) {
+      console.log("CURRENT PAGE > 1");
+      // Return the whole array, ungrouped.
+      return [
+        {
+          label: undefined,
+          docs: this.args.docs,
+        },
+      ];
     } else {
+      console.log("SORT IS DESC?", !sortIsAsc);
       this.args.docs.filter((doc) => {
         if (!doc.modifiedTime) {
           docGroupFour.push(doc);

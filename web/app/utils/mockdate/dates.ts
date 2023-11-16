@@ -1,0 +1,1 @@
+export const DEFAULT_MOCK_DATE = "2000-01-01T06:00:00.000-07:00";

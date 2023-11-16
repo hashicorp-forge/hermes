@@ -21,7 +21,7 @@ interface TableSortableHeaderSignature {
   Element: HTMLButtonElement | HTMLAnchorElement;
   Args: {
     currentSort: `${SortAttribute}`;
-    sortDirection: SortDirection;
+    sortDirection: `${SortDirection}`;
     attribute: `${SortAttribute}`;
     onSort?: () => void;
     defaultSortDirection?: `${SortDirection}`;

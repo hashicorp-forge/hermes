@@ -1,11 +1,12 @@
 import parseDate from "hermes/utils/parse-date";
 import { module, test } from "qunit";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 module("Unit | Utility | parse-date", function () {
   // Make sure the date is always the same
   // TODO: Freeze timezone
-  MockDate.set("2000-01-01T06:00:00.000-07:00");
+  MockDate.set(DEFAULT_MOCK_DATE);
 
   test("it parses dates", function (assert) {
     // Valid

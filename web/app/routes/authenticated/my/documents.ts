@@ -11,7 +11,6 @@ import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import Transition from "@ember/routing/transition";
 
 export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -74,20 +73,25 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   async model(params: AuthenticatedMyDocumentsRouteParams) {
     const sortedBy = params.sortBy ?? SortByValue.DateDesc;
     const sortDirection =
-      params.sortBy === SortByValue.DateAsc
-        ? SortDirection.Asc
-        : SortDirection.Desc;
+      sortedBy === SortByValue.DateDesc
+        ? SortDirection.Desc
+        : SortDirection.Asc;
     const indexName = this.configSvc.config.algolia_docs_index_name;
     const { page } = params;
 
     // TODO: need to create modifiedTime_asc indexes
     // TODO: need to allow filtering on this index (maybe)
+
     const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
+
+    const sortIsDesc = sortDirection === SortDirection.Desc;
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform({
         hitsPerPage: 100,
         page,
+        // TODO: if `params.includeSharedDrafts` is false, we need to filter
+        // to only the drafts that are owned by the current user
       }),
       this.algolia.getDocResults.perform(
         searchIndex,
@@ -107,25 +111,33 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       draftResults?.nbPages ?? 1,
     );
 
-    const docs = [
+    let docs = [
       ...(draftResults?.Hits ?? []),
       ...(typedDocResults.hits ?? []),
     ].sort((a, b) => {
       if (a.modifiedTime && b.modifiedTime) {
-        return b.modifiedTime - a.modifiedTime;
+        if (sortIsDesc) {
+          return a.modifiedTime - b.modifiedTime;
+        } else {
+          return b.modifiedTime - a.modifiedTime;
+        }
       } else {
-        // if one has modifiedTime and the other doesn't,
-        // the one with the modifiedTime is newer
-        return a.modifiedTime ? -1 : 1;
+        if (sortIsDesc) {
+          return a.modifiedTime ? -1 : 1;
+        } else {
+          return a.modifiedTime ? 1 : -1;
+        }
       }
     });
+
+    // FIXME: for some reason when you sort Asc we dont get published docs
 
     return {
       docs,
       sortedBy,
       currentPage: page ?? 1,
       nbPages,
-      includeSharedDrafts: params.includeSharedDrafts ?? false,
+      includeSharedDrafts: params.includeSharedDrafts ?? true,
     };
   }
 }

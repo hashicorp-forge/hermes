@@ -3,6 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 interface TimeAgoTestContext extends TestContext {
   fiveSecondsAgo: number;
@@ -14,7 +15,7 @@ module("Integration | Helper | time-ago", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it computes the time ago", async function (assert) {
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
     const now = Date.now() / 1000;
     const fiveSecondsAgo = now - 5;
     const twoYearsAgo = now - 63072000;
