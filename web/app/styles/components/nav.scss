@@ -45,12 +45,28 @@
   }
 
   .user-menu-button {
+    &:hover {
+      .avatar {
+        box-shadow: 0 0 0 3px var(--token-color-border-strong);
+      }
+    }
+
+    &:focus,
+    &.open {
+      .avatar {
+        @apply shadow-focus-ring-action;
+      }
+    }
+  }
+
+  .user-menu-button {
+    &:hover,
     &:focus,
     &.open {
       @apply outline-none;
 
       .avatar {
-        @apply shadow-focus-ring-action outline outline-1 outline-color-page-faint;
+        @apply outline outline-1 outline-color-page-faint;
       }
     }
   }
