@@ -87,8 +87,6 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
 
     const sortIsAsc = this.args.sortDirection === SortDirection.Asc;
 
-    console.log("SORT IS ASC??", sortIsAsc);
-
     if (sortIsAsc) {
       // Return the whole array in reverse order, ungrouped.
       return [
@@ -98,7 +96,6 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
         },
       ];
     } else if (this.args.currentPage > 1) {
-      console.log("CURRENT PAGE > 1");
       // Return the whole array, ungrouped.
       return [
         {
@@ -107,7 +104,6 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
         },
       ];
     } else {
-      console.log("SORT IS DESC?", !sortIsAsc);
       this.args.docs.filter((doc) => {
         if (!doc.modifiedTime) {
           docGroupFour.push(doc);

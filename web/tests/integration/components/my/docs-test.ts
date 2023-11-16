@@ -11,6 +11,7 @@ import { SortDirection } from "hermes/components/table/sortable-header";
 
 const PAGINATION = "[data-test-pagination]";
 const TABLE_BODY_HEADER = "[data-test-table-body-header]";
+const EMPTY_STATE = "[data-test-my-docs-empty-state]";
 
 interface MyDocsComponentTestContext extends MirageTestContext {
   docs: HermesDocument[];
@@ -26,10 +27,27 @@ module("Integration | Component | my/docs", function (hooks) {
     authenticateTestUser(this);
   });
 
-  test("a blank state is shown when there are no docs", async function (this: MyDocsComponentTestContext, assert) {});
+  test("a blank state is shown when there are no docs", async function (this: MyDocsComponentTestContext, assert) {
+    this.set("docs", []);
+
+    await render<MyDocsComponentTestContext>(hbs`
+      <My::Docs
+        @docs={{this.docs}}
+        @sortDirection="desc"
+        @currentPage={{1}}
+        @nbPages={{1}}
+        @includeSharedDrafts={{false}}
+      />
+    `);
+
+    assert.dom(EMPTY_STATE).hasText("You don't have any docs yet.");
+  });
 
   test("pagination is conditionally shown", async function (this: MyDocsComponentTestContext, assert) {
-    this.set("docs", this.server.schema.documents.all().models);
+    // The component requires at least one document to render the table
+    this.server.createList("document", 1);
+    this.set("docs", this.server.schema.document.all().models);
+
     this.set("nbPages", 2);
 
     await render<MyDocsComponentTestContext>(hbs`
