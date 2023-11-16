@@ -130,8 +130,4 @@ module("Integration | Component | my/docs", function (hooks) {
 
     MockDate.reset();
   });
-
-  test("the ascending view ignores groups", async function (this: MyDocsComponentTestContext, assert) {});
-
-  test("the sortable headers have the correct hrefs", async function (this: MyDocsComponentTestContext, assert) {});
 });
