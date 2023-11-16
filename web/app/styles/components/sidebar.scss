@@ -56,15 +56,10 @@
   }
 
   .draft-visibility-button {
-    @apply gap-0 px-2.5;
     // match the height of the header buttons
     @apply h-[38px];
     // offset the extra height relative to the badge
     @apply my-[-7px];
-
-    [class*=" flight-icon-chevron"] {
-      @apply ml-px -mr-px;
-    }
   }
 
   .sidebar-header-icon-controls {

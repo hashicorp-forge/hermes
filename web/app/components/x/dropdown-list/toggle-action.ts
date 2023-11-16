@@ -3,7 +3,9 @@ import { XDropdownListToggleComponentArgs } from "./_shared";
 
 interface XDropdownListToggleActionComponentSignature {
   Element: HTMLButtonElement;
-  Args: XDropdownListToggleComponentArgs;
+  Args: XDropdownListToggleComponentArgs & {
+    hasChevron?: boolean;
+  };
   Blocks: {
     default: [];
   };

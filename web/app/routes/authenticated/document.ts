@@ -133,8 +133,12 @@ export default class AuthenticatedDocumentRoute extends Route {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
 
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
+        if (transition.from && transition.from.name !== transition.to.name) {
+          this.router.transitionTo(transition.from.name);
+        } else {
+          this.router.transitionTo("authenticated.dashboard");
+        }
+
         throw new Error(typedError.message);
       }
     }

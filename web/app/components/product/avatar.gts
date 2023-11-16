@@ -5,7 +5,6 @@ import or from "ember-truth-helpers/helpers/or";
 import { inject as service } from "@ember/service";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import ProductAreasService from "hermes/services/product-areas";
-import { assert } from "@ember/debug";
 import { HermesBasicAvatarSize } from "hermes/types/avatar-size";
 
 interface ProductAvatarComponentSignature {
