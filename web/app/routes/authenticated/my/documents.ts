@@ -88,6 +88,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform({
+        // FIXME: when this was set to 10, the results were not being sorted correctly
         hitsPerPage: 100,
         page,
         // TODO: if `params.includeSharedDrafts` is false, we need to filter
