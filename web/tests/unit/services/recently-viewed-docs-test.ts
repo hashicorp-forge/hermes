@@ -4,6 +4,7 @@ import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 interface RecentlyViewedDocsContext extends MirageTestContext {
   recentDocs: RecentlyViewedDocsService;
@@ -18,7 +19,7 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
   });
 
   test("it fetches recently viewed docs", async function (this: RecentlyViewedDocsContext, assert) {
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
 
     this.server.createList("recently-viewed-doc", 10);
     this.server.createList("document", 10);
@@ -32,7 +33,7 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
     assert.equal(
       this.recentDocs.all?.length,
       4,
-      "recently viewed docs retrieved and trimmed to 4"
+      "recently viewed docs retrieved and trimmed to 4",
     );
 
     MockDate.reset();

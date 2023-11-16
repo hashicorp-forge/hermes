@@ -3,12 +3,13 @@ import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { getPageTitle } from "ember-page-title/test-support";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 module("Acceptance | 404", function (hooks) {
   setupApplicationTest(hooks);
 
   test("unknown URLs get the 404 treatment", async function (assert) {
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
 
     await visit("/not_real_url");
 
