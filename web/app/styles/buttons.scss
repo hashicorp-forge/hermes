@@ -12,7 +12,7 @@
 
   &:hover,
   &:focus-visible,
-  .active {
+  .open {
     @apply border-color-border-strong bg-color-foreground-high-contrast;
   }
 }
