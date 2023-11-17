@@ -31,7 +31,7 @@ import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
 import { HermesProject } from "hermes/types/project";
 import { RelatedHermesDocument } from "../related-resources";
-import { ProjectStatus } from "hermes/types/project-status";
+import FlagsService from "hermes/services/flags";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -68,6 +68,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: FlashMessageService;
+  @service declare flags: FlagsService;
 
   @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
