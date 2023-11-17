@@ -1,8 +1,5 @@
-// @ts-nocheck
-// TODO: Type this file.
-
 import Service from "@ember/service";
-import config from "hermes/config/environment";
+import config, { HermesConfig } from "hermes/config/environment";
 
 export default class ConfigService extends Service {
   config = {
@@ -21,7 +18,7 @@ export default class ConfigService extends Service {
     short_revision: config.shortRevision,
   };
 
-  setConfig(param) {
+  setConfig(param: HermesConfig) {
     this.set("config", param);
 
     // Set API version.
