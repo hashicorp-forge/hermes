@@ -226,15 +226,12 @@ func DocumentHandler(srv server.Server) http.Handler {
 				); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
-					// TODO: change this log back to an error when this handles incomplete
-					// data in the database.
-					srv.Logger.Warn("error updating recently viewed docs",
+					srv.Logger.Error("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					return
 				}
 			}
 
@@ -916,6 +913,9 @@ func updateRecentlyViewedDocs(
 			},
 		}
 		if err := dd.Get(db); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
 			return fmt.Errorf("error getting document: %w", err)
 		}
 		docs = append(docs, dd)
