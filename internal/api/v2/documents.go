@@ -916,6 +916,9 @@ func updateRecentlyViewedDocs(
 			},
 		}
 		if err := dd.Get(db); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
 			return fmt.Errorf("error getting document: %w", err)
 		}
 		docs = append(docs, dd)
