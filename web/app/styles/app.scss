@@ -8,6 +8,7 @@
 @use "./animations";
 @use "./typography";
 
+@use "components/dashboard";
 @use "components/new";
 @use "components/toolbar";
 @use "components/x-tooltip";
@@ -95,7 +96,7 @@ ol {
 }
 
 .x-container {
-  @apply mx-auto w-full max-w-screen-lg px-8;
+  @apply mx-auto w-full max-w-screen-xl px-8;
 }
 
 h1 {

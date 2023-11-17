@@ -252,6 +252,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .hasText(jiraAssignee.charAt(0));
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
+
+    await this.pauseTest();
   });
 
   test("you can edit a project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

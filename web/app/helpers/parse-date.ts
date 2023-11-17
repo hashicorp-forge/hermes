@@ -4,16 +4,17 @@ export interface ParseDateHelperSignature {
   Args: {
     Positional: [
       time: string | number | Date | undefined,
-      monthFormat?: "short" | "long"
+      monthFormat?: "short" | "long",
+      hideYear?: boolean,
     ];
     Return: Date | undefined;
   };
 }
 
 const parseDateHelper = helper<ParseDateHelperSignature>(
-  ([time, monthFormat = "short"]) => {
-    return parseDate(time, monthFormat);
-  }
+  ([time, monthFormat = "short", hideYear]) => {
+    return parseDate(time, monthFormat, hideYear);
+  },
 );
 
 export default parseDateHelper;

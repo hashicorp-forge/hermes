@@ -40,18 +40,25 @@
     }
   }
 
+  &.medium,
+  &.large {
+    .flight-icon {
+      @apply scale-100;
+    }
+  }
+
   &.medium {
     @apply w-16;
 
     .status-icon {
-      @apply top-[6px] h-[60px] w-[60px];
+      @apply h-[52px] w-[52px];
 
       &.approved {
-        @apply -right-2.5;
+        @apply top-1 -right-2;
       }
 
       &.obsolete {
-        @apply -left-3.5;
+        @apply top-[3px] -left-2.5;
       }
     }
   }
@@ -65,10 +72,6 @@
 
     .product-badge {
       @apply rounded-bl rounded-tr;
-
-      .flight-icon {
-        @apply scale-100;
-      }
     }
 
     .status-icon {

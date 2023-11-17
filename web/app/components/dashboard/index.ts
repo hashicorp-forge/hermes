@@ -7,6 +7,7 @@ import { task } from "ember-concurrency";
 import AlgoliaService from "hermes/services/algolia";
 import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
+import { assert } from "@ember/debug";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -20,12 +21,13 @@ interface DashboardIndexComponentSignature {
 
 export default class DashboardIndexComponent extends Component<DashboardIndexComponentSignature> {
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare recentlyViewedDocs: RecentlyViewedDocsService;
   @service("config") declare configSvc: ConfigService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare algolia: AlgoliaService;
 
   @tracked latestDocs: HermesDocument[] | null = null;
+  @tracked linkToAllDocsIsShown = false;
 
   // TODO: consider if this is now worth including in the model
 
@@ -34,7 +36,7 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
     await this.algolia.clearCache.perform();
 
     // TODO: confirm if we need searchIndex and not search
-    const latestDocs = await this.algolia.searchIndex
+    const response = await this.algolia.searchIndex
       .perform(
         this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc",
         "",
@@ -42,9 +44,12 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
           hitsPerPage: 12,
         },
       )
-      .then((response) => response.hits);
+      .then((response) => response);
 
-    this.latestDocs = latestDocs as HermesDocument[];
+    assert("response must exist", response);
+
+    this.linkToAllDocsIsShown = response.nbPages > 1;
+    this.latestDocs = response.hits as HermesDocument[];
   });
 }
 
