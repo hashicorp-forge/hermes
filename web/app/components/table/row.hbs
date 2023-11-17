@@ -3,7 +3,7 @@
     <LinkTo
       @route="authenticated.document"
       @model="{{@doc.objectID}}"
-      @query={{hash draft=(eq @doc.status "wip")}}
+      @query={{hash draft=this.isDraft}}
       class="inner flex h-full w-full items-start gap-3.5 focus:outline-none"
     >
       <Doc::Thumbnail @product={{@doc.product}} @status={{@doc.status}} />

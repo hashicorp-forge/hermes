@@ -16,6 +16,14 @@ interface TableRowComponentSignature {
 }
 
 export default class TableRowComponent extends Component<TableRowComponentSignature> {
+  protected get isDraft() {
+    if (this.args.doc.isDraft) {
+      return true;
+    }
+
+    return this.args.doc.status === "WIP";
+  }
+
   protected get time() {
     const { modifiedTime, createdTime } = this.args.doc;
     const { timeColumn } = this.args;
