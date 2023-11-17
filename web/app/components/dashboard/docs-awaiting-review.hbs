@@ -1,20 +1,18 @@
-<div class="mb-12 w-full">
+<div class="mb-10 w-full">
   <div class="relative flex justify-between">
-    <h2 class="items-center self-center text-body-300 font-regular md:flex">
-      You have
-      <Hds::BadgeCount
-        data-test-docs-awaiting-review-count
-        @text="{{@docs.length}}"
-        @type="inverted"
-        class="mx-0.5 !bg-color-foreground-critical md:mx-1.5"
-      />
-      document{{if (gt @docs.length 1) "s"}}
-      awaiting your review:
-    </h2>
-
+    <div class="mb-2 flex h-4 items-center gap-3">
+      <FlightIcon @name="test" class="text-blue-gray" />
+      <div class="flex items-center gap-2">
+        <h4 class="hermes-h4">Awaiting your review</h4>
+        <Hds::BadgeCount
+          data-test-docs-awaiting-review-count
+          @text="{{@docs.length}}"
+        />
+      </div>
+    </div>
   </div>
 
-  <ul class="mt-4">
+  <ul>
     {{#each this.docsToShow as |doc|}}
       <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
     {{/each}}

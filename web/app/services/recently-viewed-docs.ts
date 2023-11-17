@@ -7,9 +7,6 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
-// @ts-ignore - not yet typed
-import timeAgo from "hermes/utils/time-ago";
-
 type IndexedDoc = {
   id: string;
   isDraft: boolean;
@@ -61,7 +58,7 @@ export default class RecentlyViewedDocsService extends Service {
        * Applies to legacy users viewing the dashboard for the
        * first time since drafts were added to the index.
        */
-      this.index = this.index.slice(0, 4);
+      this.index = this.index.slice(0, 8);
 
       /**
        * Get the documents from the backend.
