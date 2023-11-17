@@ -7,6 +7,7 @@ import { getPageTitle } from "ember-page-title/test-support";
 
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
+const DOCUMENT_LINK = "[data-test-document-link]";
 
 interface AuthenticatedDraftRouteTestContext extends MirageTestContext {}
 
@@ -59,5 +60,19 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     assert
       .dom(".product-link")
       .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
+  });
+
+  test("document links have the correct query params", async function (this: AuthenticatedDraftRouteTestContext, assert) {
+    this.server.create("document");
+
+    await visit("/drafts");
+
+    assert
+      .dom(DOCUMENT_LINK)
+      .hasAttribute(
+        "href",
+        "/document/doc-0?draft=true",
+        "correctly has the draft param",
+      );
   });
 });
