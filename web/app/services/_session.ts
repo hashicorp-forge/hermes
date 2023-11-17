@@ -3,7 +3,6 @@ import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
 import { dropTask, keepLatestTask, timeout } from "ember-concurrency";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
@@ -12,6 +11,7 @@ import FetchService from "./fetch";
 import AuthenticatedUserService from "./authenticated-user";
 import { capitalize } from "@ember/string";
 import FlashObject from "ember-cli-flash/flash/object";
+import HermesFlashMessagesService from "./flash-messages";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -29,7 +29,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @service declare router: RouterService;
   @service declare fetch: FetchService;
   @service declare session: SessionService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   /**
@@ -176,9 +176,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
             ? `, ${this.authenticatedUser.info.given_name}`
             : ""
         }!`,
-        type: "success",
-        timeout: 1500,
-        extendedTimeout: 1000,
         destroyOnClick: true,
       });
 
