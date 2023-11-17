@@ -10,6 +10,7 @@ const SORTABLE_HEADER = "[data-test-attribute=modifiedTime]";
 const OWNER_FILTER = "[data-test-owner-filter]";
 const TABLE_ROW = "[data-test-table-row]";
 const EMAIL = "[data-test-person-email]";
+const DOCUMENT_LINK = "[data-test-document-link]";
 
 interface AuthenticatedMyDocumentsRouteTestContext extends MirageTestContext {}
 
@@ -79,5 +80,29 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
     assert
       .dom(document.querySelector(EMAIL))
       .hasText("Me", "Only my documents are shown");
+  });
+
+  test("document links have the correct query params", async function (this: AuthenticatedMyDocumentsRouteTestContext, assert) {
+    this.server.create("document");
+    this.server.create("document", {
+      isDraft: false,
+      status: "In review",
+    });
+
+    await visit("/drafts");
+
+    assert
+      .dom(DOCUMENT_LINK)
+      .hasAttribute(
+        "href",
+        "/document/doc-0?draft=true",
+        "correctly has the draft param",
+      );
+
+    const secondDocumentLink = document.querySelectorAll(DOCUMENT_LINK)[1];
+
+    assert
+      .dom(secondDocumentLink)
+      .hasAttribute("href", "/document/doc-1", "correctly has no params");
   });
 });
