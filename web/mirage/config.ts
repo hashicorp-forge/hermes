@@ -358,7 +358,9 @@ export default function (mirageConfig) {
             algolia_docs_index_name: config.algolia.docsIndexName,
             algolia_drafts_index_name: config.algolia.draftsIndexName,
             algolia_internal_index_name: config.algolia.internalIndexName,
-            feature_flags: null,
+            feature_flags: {
+              projects: true,
+            },
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
             skip_google_auth: false,

@@ -5,6 +5,6 @@ export default class FlagsService extends Service {
   @service("config") declare configSvc: ConfigService;
 
   get projects() {
-    return this.configSvc.config.feature_flags["projects"];
+    return this.configSvc.config.feature_flags?.["projects"];
   }
 }
