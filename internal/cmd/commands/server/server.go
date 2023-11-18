@@ -342,6 +342,8 @@ func (c *Command) Run(args []string) int {
 			api.MeSubscriptionsHandler(cfg, c.Log, goog, db)},
 		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},
 		{"/api/v1/products", api.ProductsHandler(cfg, algoSearch, c.Log)},
+		{"/api/v1/products", apiv2.ProductsHandler(srv)},
+		{"/api/v1/projects", apiv2.ProjectsHandler(srv)},
 		{"/api/v1/reviews/",
 			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
@@ -357,6 +359,8 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
 		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
 		{"/api/v2/products", apiv2.ProductsHandler(srv)},
+		{"/api/v2/projects", apiv2.ProjectsHandler(srv)},
+		{"/api/v2/projects/", apiv2.ProjectHandler(srv)},
 		{"/api/v2/reviews/", apiv2.ReviewsHandler(srv)},
 		{"/api/v2/web/analytics", apiv2.AnalyticsHandler(srv)},
 	}
