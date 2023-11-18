@@ -1,63 +1,48 @@
-<li class="doc-awaiting-review flex w-full">
+<li class="doc-awaiting-review w-full">
   <LinkTo
     data-test-doc-awaiting-review-link
     @route="authenticated.document"
     @model={{@doc.objectID}}
-    class="group w-full border-t border-color-border-faint py-3 pl-2 pr-8"
+    class="group block border-t border-color-border-primary py-3.5 pr-7"
   >
-    <div class="relative w-full">
-      <div
-        class="relative flex w-full flex-wrap items-center gap-3.5 md:flex-nowrap"
-      >
-        <div class="relative flex items-center gap-1">
-          <Person::Avatar
-            data-test-doc-awaiting-review-owner-avatar
-            @email={{or (get @doc.owners 0) "Unknown"}}
-            @imgURL={{get @doc.ownerPhotos 0}}
-            @size="large"
-          />
-        </div>
+    <div class="flex w-full flex-wrap items-center gap-3.5 md:flex-nowrap">
+      <Person::Avatar
+        data-test-doc-awaiting-review-owner-avatar
+        @email={{or (get @doc.owners 0) "Unknown"}}
+        @imgURL={{get @doc.ownerPhotos 0}}
+        @size="large"
+        class="shrink-0"
+      />
 
-        <div class="block w-full overflow-hidden">
-
-          {{! DocNumber & Title }}
-          <div class="w-full md:flex">
-            <div class="flex w-full justify-between gap-3">
-              {{! TODO: improve this  }}
-              {{! Title and docNumber }}
-              <div class="relative z-10 overflow-hidden">
-                <h4
-                  class="text-display-300 font-semibold text-color-foreground-strong"
-                >
-                  <span data-test-document-title class="mr-1.5">
-                    {{@doc.title}}
-                  </span>
-                  <span
-                    data-test-document-number
-                    class="shrink-0 font-regular text-color-foreground-faint"
-                  >
-                    <span class="whitespace-nowrap">
-                      {{@doc.docNumber}}
-                    </span>
-                  </span>
-                </h4>
-              </div>
-
-              {{! Product & DocType }}
-              <div class="flex shrink-0 items-center gap-1">
-                <Doc::State
-                  @state={{@doc.status}}
-                  @hideProgress={{true}}
-                  class="interactive"
-                />
-                <Hds::Badge @text={{@doc.docType}} />
-              </div>
-
-            </div>
+      {{! Title and docNumber }}
+      <div class="w-full overflow-hidden">
+        <div class="flex gap-2.5 text-display-300">
+          <h4
+            data-test-document-title
+            class="min-w-0 truncate font-semibold text-color-foreground-strong"
+          >
+            {{@doc.title}}
+            {{@doc.title}}
+          </h4>
+          <div
+            data-test-document-number
+            class="whitespace-nowrap font-regular text-color-foreground-faint"
+          >
+            {{@doc.docNumber}}
           </div>
         </div>
-
       </div>
+
+      {{! Tags }}
+      <div class="flex shrink-0 gap-1">
+        <Doc::State
+          @state={{@doc.status}}
+          @hideProgress={{true}}
+          class="interactive"
+        />
+        <Hds::Badge @text={{@doc.docType}} />
+      </div>
+
     </div>
   </LinkTo>
 </li>

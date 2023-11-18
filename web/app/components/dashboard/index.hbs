@@ -1,37 +1,40 @@
 <Dashboard::NewFeaturesBanner />
 
-<div class="mt-8 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
-  <div class="w-full pb-16">
+<div class="mt-6 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
+  <div class="w-full overflow-hidden pb-16">
+    {{! TODO: can overflow-hidden be more scoped? }}
+    {{!
+
+     }}
+    {{! <h4 class="hermes-h4">
+      Welcome back, Honus!
+    </h4> }}
 
     {{#if @docsAwaitingReview}}
       <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
     {{/if}}
 
     {{#if this.latestDocs}}
-      <div class="mb-2 flex h-12 items-center gap-3">
-        {{! <div class="w-12"></div> }}
-
-        <h4 class="text-[45px] text-color-foreground-strong">
-          Latest docs
-        </h4>
-      </div>
-      <ol>
+      <h4
+        class="bg-gradient-to-r from-color-foreground-strong to-color-foreground-primary bg-clip-text text-display-500 text-transparent"
+      >
+        Latest docs
+      </h4>
+      <ol class="mt-7">
         {{#each this.latestDocs as |doc|}}
-          <li class="border-b border-b-color-border-faint last:border-0">
+          <li class="border-t border-color-border-primary last:border-0">
             <LinkTo
               @route="authenticated.document"
               @model={{doc.objectID}}
               @query={{hash draft=doc.isDraft}}
-              class="block bg-red-50/0"
+              class=""
             >
-              <div
-                class="relative flex justify-between gap-4 pl-2 pr-9 pt-7 pb-9"
-              >
+              <div class="relative flex justify-between gap-4 pr-7 pt-7 pb-9">
                 <Person::Avatar
                   @size="large"
                   @email="{{get doc.owners 0}}"
                   @imgURL={{get doc.ownerPhotos 0}}
-                  class="-ml-px -mt-1.5 shrink-0"
+                  class="-mt-1.5 shrink-0"
                 />
                 <div class="w-full">
 
@@ -55,7 +58,11 @@
                   </div>
                   {{! Owner }}
                   <div class="mt-1.5 flex items-center gap-[5px]">
-                    {{get doc.owners 0}}
+                    <span
+                      class="text-color-foreground-faint underline underline-offset-[3px]"
+                    >
+                      {{get doc.owners 0}}
+                    </span>
                     <span class="opacity-30">
                       |
                     </span>
@@ -113,7 +120,7 @@
                   -->
 
                 </div>
-                <div class="relative shrink-0">
+                <div class="relative ml-2 shrink-0">
                   <Doc::Thumbnail
                     @status={{doc.status}}
                     @product={{doc.product}}
@@ -128,9 +135,10 @@
       </ol>
 
       {{#if this.linkToAllDocsIsShown}}
-        <div class="mt-5 pl-2 pr-10">
+        <div class="mt-5 pl-2 pr-16">
+          {{! TODO: padding }}
           <Hds::Button
-            @color="tertiary"
+            @color="secondary"
             @text="See older documents"
             @icon="arrow-right"
             @iconPosition="trailing"
@@ -165,29 +173,80 @@
       </div>
     {{/if}}
   </div>
-  <div class="relative w-96 shrink-0 pl-14">
+  <div class="relative w-80 shrink-0 pl-7">
     {{! Circle }}
     {{! <div
       class="absolute left-[0.5px] top-0 z-10 grid h-3 w-3 shrink-0 -translate-x-1/2 place-items-center rounded-full border-[1px] border-color-border-strong bg-color-page-primary"
     >
-      <div class="h-1.5 w-1.5 rounded-full bg-color-foreground-disabled">
+      <div class="h-1.5 w-1.5 rounded-full bg-color-foreground-primary">
       </div>
     </div> }}
 
     {{! Vertical line }}
-    <div class="absolute left-0 top-0 h-full w-px bg-color-border-faint" />
-    <div class="mt-6 flex items-center gap-3">
-      {{! <FlightIcon @name="history" /> }}
-      <h4 class="text-display-400 text-color-foreground-strong">
+    <div class="absolute left-0 top-0 h-full w-px bg-color-border-primary" />
+
+    {{! <FlightIcon @name="history" class="text-color-foreground-disabled" /> }}
+    <div class="mt-5 flex items-center gap-3">
+      <h4 class="hermes-h4">
         Recently viewed
       </h4>
     </div>
     {{#if true}}
-      <ul class="mt-1 flex flex-col">
+      <ul class="mt-5">
         {{! new versions of the recently viewed }}
         {{#each this.recentlyViewedDocs.all as |r|}}
-          <li>
-            {{r.doc.title}}
+          <li
+            class="border-b border-dashed border-color-border-faint last:border-0"
+          >
+            <LinkTo
+              @route="authenticated.document"
+              @model={{r.doc.objectID}}
+              @query={{hash draft=r.doc.isDraft}}
+              class="block pt-3 pb-3.5"
+            >
+              <div class="flex w-full gap-5">
+
+                <div class="w-full">
+
+                  <div class="flex items-center gap-[5px]">
+                    <Person::Avatar
+                      @email={{get r.doc.owners 0}}
+                      @imgURL={{get r.doc.ownerPhotos 0}}
+                    />
+                    <span class="opacity-30">
+                      |
+                    </span>
+                    <span class="text-body-100">
+
+                      {{r.doc.product}}
+                    </span>
+                  </div>
+                  <h5
+                    class="mt-1.5 text-body-200 font-semibold text-color-foreground-strong"
+                  >
+                    {{r.doc.title}}
+                  </h5>
+                  <p class="mt-0.5 text-body-100 text-color-foreground-faint">
+                    Modified
+                    {{time-ago r.doc.modifiedTime}}
+                  </p>
+                  {{!-- <div class="mt-2 flex items-center gap-1">
+                    <Doc::State
+                      @state={{r.doc.status}}
+                      @hideProgress={{true}}
+                      class="interactive"
+                    />
+                    <Hds::Badge @text={{r.doc.docType}} />
+                  </div> --}}
+                </div>
+                <Doc::Thumbnail
+                  @status={{r.doc.status}}
+                  @product={{r.doc.product}}
+                  @size="small"
+                  class="shrink-0 self-start"
+                />
+              </div>
+            </LinkTo>
           </li>
         {{/each}}
       </ul>

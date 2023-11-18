@@ -36,6 +36,9 @@ module.exports = {
         "var(--token-typography-body-100-line-height)",
       ],
     },
+    fontFamily: {
+      sans: "var(--token-typography-font-family-sans)",
+    },
     fontWeight: {
       regular: "var(--token-typography-font-weight-regular)",
       medium: "var(--token-typography-font-weight-medium)",

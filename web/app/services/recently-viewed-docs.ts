@@ -54,14 +54,6 @@ export default class RecentlyViewedDocsService extends Service {
       assert("fetchAll expects index", this.index);
 
       /**
-       * Ensure that the index is no more than 8 items.
-       * Applies to legacy users viewing the dashboard for the
-       * first time since drafts were added to the index.
-       */
-      console.log("the index length is", this.index.length);
-      this.index = this.index.slice(0, 8);
-
-      /**
        * Get the documents from the backend.
        */
       let docResponses = await Promise.allSettled(
