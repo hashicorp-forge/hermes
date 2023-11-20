@@ -15,7 +15,7 @@ export default class DashboardRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
 
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service declare session: SessionService;
@@ -61,10 +61,10 @@ export default class DashboardRoute extends Route {
       promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
     }
 
-    if (this.recentDocs.all) {
-      void this.recentDocs.fetchAll.perform();
+    if (this.viewedDocs.all) {
+      void this.viewedDocs.fetchAll.perform();
     } else {
-      promises.push(this.recentDocs.fetchAll.perform().then(() => {}));
+      promises.push(this.viewedDocs.fetchAll.perform().then(() => {}));
     }
 
     const [docsAwaitingReview] = await Promise.all(promises);

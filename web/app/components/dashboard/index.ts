@@ -18,7 +18,7 @@ interface DashboardIndexComponentSignature {
 export default class DashboardIndexComponent extends Component<DashboardIndexComponentSignature> {
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   protected get linkToAllDocsIsShown(): boolean {

@@ -163,9 +163,9 @@
           Recently viewed
         </h4>
       </div>
-      {{#if this.recentDocs.all}}
+      {{#if this.viewedDocs.all}}
         <ul class="mt-4">
-          {{#each this.recentDocs.all as |r|}}
+          {{#each this.viewedDocs.all as |r|}}
             <li class="border-b border-color-border-faint last:border-0">
               <LinkTo
                 @route="authenticated.document"
