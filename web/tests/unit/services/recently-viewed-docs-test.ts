@@ -3,7 +3,6 @@ import { setupTest } from "ember-qunit";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 interface RecentlyViewedDocsContext extends MirageTestContext {
   viewedDocs: RecentlyViewedDocsService;
@@ -14,7 +13,6 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: RecentlyViewedDocsContext) {
-    authenticateTestUser(this);
     this.set("viewedDocs", this.owner.lookup("service:recently-viewed-docs"));
   });
 
