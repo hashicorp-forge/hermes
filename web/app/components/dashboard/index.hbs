@@ -139,14 +139,18 @@
           />
         </div>
       {{else}}
-        <div class="mt-5 text-display-300 text-color-foreground-disabled">
+        <div
+          data-test-no-docs-published
+          class="mt-5 text-display-300 text-color-foreground-disabled"
+        >
           No documents have been published yet.
         </div>
         <Hds::Button
-          @text="Create a new document"
-          @iconPosition="leading"
+          data-test-new-document-button
           @route="authenticated.new"
-          class="mt-5"
+          @text="New document"
+          @icon="plus"
+          class="mt-6 pl-2.5 pr-4"
         />
       {{/if}}
     </div>
@@ -166,7 +170,10 @@
       {{#if this.viewedDocs.all}}
         <ul class="mt-4">
           {{#each this.viewedDocs.all as |r|}}
-            <li class="border-b border-color-border-faint last:border-0">
+            <li
+              data-test-recently-viewed-doc
+              class="border-b border-color-border-faint last:border-0"
+            >
               <LinkTo
                 @route="authenticated.document"
                 @model={{r.doc.objectID}}

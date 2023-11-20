@@ -552,7 +552,7 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index);
+        return new Response(200, {}, index.slice(0, 10));
       });
 
       /**

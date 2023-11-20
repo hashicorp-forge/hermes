@@ -4,7 +4,12 @@
       <h4 class="text-display-400 text-color-foreground-strong">
         Awaiting your review
       </h4>
-      <Hds::BadgeCount @text="{{@docs.length}}" @size="large" class="px-4" />
+      <Hds::BadgeCount
+        data-test-docs-awaiting-review-count
+        @text="{{@docs.length}}"
+        @size="large"
+        class="px-4"
+      />
     </div>
   </div>
 

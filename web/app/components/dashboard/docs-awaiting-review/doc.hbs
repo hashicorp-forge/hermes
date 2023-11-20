@@ -22,7 +22,6 @@
             class="min-w-0 truncate font-semibold text-color-foreground-strong"
           >
             {{@doc.title}}
-            {{@doc.title}}
           </h4>
           <div
             data-test-document-number
@@ -36,11 +35,12 @@
       {{! Tags }}
       <div class="flex shrink-0 gap-1">
         <Doc::State
+          data-test-document-state
           @state={{@doc.status}}
           @hideProgress={{true}}
           class="interactive"
         />
-        <Hds::Badge @text={{@doc.docType}} />
+        <Hds::Badge data-test-document-type @text={{@doc.docType}} />
       </div>
 
     </div>
