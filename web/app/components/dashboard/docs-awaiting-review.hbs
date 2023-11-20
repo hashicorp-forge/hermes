@@ -1,23 +1,25 @@
-<div class="mb-12 w-full">
+<div class="mb-10 w-full">
   <div class="flex items-center">
-    <div
-      class="flex items-center gap-4 text-display-500 text-color-foreground-strong"
-    >
-      <h4
-        class="bg-gradient-to-r from-color-foreground-strong to-color-foreground-primary bg-clip-text text-transparent"
-      >
+    <div class="flex items-center gap-3.5">
+      {{! <div class="flex rounded bg-color-palette-amber-100">
+        <div class="flex p-3.5">
+        </div>
+      </div> }}
+      {{! <FlightIcon @name="test" @size="24" class="text-color-foreground-faint" /> }}
+      <h4 class="text-display-400 text-color-foreground-strong">
         Awaiting your review
       </h4>
-      <span
+      {{!-- <span
         data-test-docs-awaiting-review-count
-        class="-mt-1.5 -mb-2 rounded-r-full rounded-l-full bg-gradient-to-tr from-color-foreground-faint to-color-foreground-disabled px-5 pt-1 pb-1.5 text-display-300 font-regular text-color-page-primary"
+        class="-mt-1.5 -mb-2 rounded-r-full rounded-l-full bg-gradient-to-tr from-color-palette-neutral-175 to-color-palette-neutral-100 px-5 pt-1 pb-1.5 text-display-300 font-regular"
       >
         {{@docs.length}}
-      </span>
+      </span> --}}
+      <Hds::BadgeCount @text="{{@docs.length}}" @size="medium" class="px-3" />
     </div>
   </div>
 
-  <ul class="mt-7">
+  <ul class="mt-5">
     {{#each this.docsToShow as |doc|}}
       <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
     {{/each}}

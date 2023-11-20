@@ -1,259 +1,224 @@
 <Dashboard::NewFeaturesBanner />
 
-<div class="mt-6 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
-  <div class="w-full overflow-hidden pb-16">
-    {{! TODO: can overflow-hidden be more scoped? }}
-    {{!
+<div class="mt-3 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
+  <div class="w-full overflow-hidden pb-20">
+    <div class="pr-4">
 
-     }}
-    {{! <h4 class="hermes-h4">
-      Welcome back, Honus!
-    </h4> }}
+      <div class="mb-6 flex items-center gap-3">
+        <h4 class="hermes-h4">
+          Welcome back,
+          {{this.authenticatedUser.info.given_name}}!
+        </h4>
+      </div>
 
-    {{#if @docsAwaitingReview}}
-      <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
-    {{/if}}
+      {{#if @docsAwaitingReview}}
+        <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
+      {{/if}}
 
-    {{#if this.latestDocs}}
-      <h4
-        class="bg-gradient-to-r from-color-foreground-strong to-color-foreground-primary bg-clip-text text-display-500 text-transparent"
-      >
-        Latest docs
-      </h4>
-      <ol class="mt-7">
-        {{#each this.latestDocs as |doc|}}
-          <li class="border-t border-color-border-primary last:border-0">
-            <LinkTo
-              @route="authenticated.document"
-              @model={{doc.objectID}}
-              @query={{hash draft=doc.isDraft}}
-              class=""
-            >
-              <div class="relative flex justify-between gap-4 pr-7 pt-7 pb-9">
-                <Person::Avatar
-                  @size="large"
-                  @email="{{get doc.owners 0}}"
-                  @imgURL={{get doc.ownerPhotos 0}}
-                  class="-mt-1.5 shrink-0"
-                />
-                <div class="w-full">
+      {{#if this.latestDocs}}
+        <div class="flex items-center gap-3.5">
+          <h4
+            class="flex gap-2.5 text-display-400 text-color-foreground-strong"
+          >
+            Latest docs
+            {{! <span
+              class="font-regular text-color-foreground-primary opacity-30"
+            >|</span>
+            <span class="font-regular text-color-foreground-faint">
+              Company-wide
+            </span> }}
+          </h4>
+        </div>
+        <ol class="mt-5">
+          {{#each this.latestDocs as |doc|}}
+            <li class="border-t border-color-border-faint">
+              <LinkTo
+                @route="authenticated.document"
+                @model={{doc.objectID}}
+                @query={{hash draft=doc.isDraft}}
+                class="block hover:bg-color-surface-faint"
+              >
+                <div
+                  class="relative flex justify-between gap-5 pl-3 pr-6 pt-5 pb-6"
+                >
+                  <Person::Avatar
+                    @size="large"
+                    @email="{{get doc.owners 0}}"
+                    @imgURL={{get doc.ownerPhotos 0}}
+                    class="-mt-1 shrink-0"
+                  />
+                  <div class="w-full">
 
-                  {{! Title and docNumber }}
-                  <div class="relative z-10 overflow-hidden">
-                    <h4
-                      class="text-display-300 font-semibold text-color-foreground-strong"
-                    >
-                      <span data-test-document-title class="mr-1.5">
-                        {{doc.title}}
-                      </span>
-                      <span
-                        data-test-document-number
-                        class="shrink-0 font-regular text-color-foreground-faint"
+                    {{! Title and docNumber }}
+                    <div class="relative z-10 overflow-hidden">
+                      <h4
+                        class="text-display-300 font-semibold text-color-foreground-strong"
                       >
-                        <span class="whitespace-nowrap">
-                          {{doc.docNumber}}
+                        <span data-test-document-title class="mr-1.5">
+                          {{doc.title}}
                         </span>
-                      </span>
-                    </h4>
-                  </div>
-                  {{! Owner }}
-                  <div class="mt-1.5 flex items-center gap-[5px]">
-                    <span
-                      class="text-color-foreground-faint underline underline-offset-[3px]"
+                        <span
+                          data-test-document-number
+                          class="shrink-0 font-regular text-color-foreground-faint"
+                        >
+                          <span class="whitespace-nowrap">
+                            {{doc.docNumber}}
+                          </span>
+                        </span>
+                      </h4>
+                    </div>
+                    {{! Owner }}
+                    <div
+                      class="mt-1.5 flex items-center gap-[5px] text-color-foreground-faint"
                     >
-                      {{get doc.owners 0}}
-                    </span>
-                    <span class="opacity-30">
-                      |
-                    </span>
-                    {{doc.product}}
-                    <span class="opacity-30">
-                      |
-                    </span>
-                    {{time-ago doc.createdTime}}
-                  </div>
-
-                  {{#if doc.summary}}
-                    <p class="mt-2.5 max-w-xl text-body-200">
-                      {{doc.summary}}
-                    </p>
-                  {{/if}}
-
-                  {{! <div class="my-2 h-px w-8 bg-color-border-primary" /> }}
-                  <div class="mt-3.5 flex items-center gap-1">
-                    <Doc::State
-                      @state={{doc.status}}
-                      @hideProgress={{true}}
-                      class="interactive"
-                    />
-                    <Hds::Badge @text={{doc.docType}} />
-                  </div>
-
-                  <!--
-                  {{! Type and Product }}
-                  <div
-                    class="mt-3.5 flex items-center gap-[5px] text-body-200 leading-none text-color-foreground-faint"
-                  >
-                    <span>
-                      {{doc.docType}}
-                    </span>
-                    <span class="opacity-50">
-                      |
-                    </span>
-                    <span>
-                      {{doc.status}}
-                    </span>
-                    <span class="opacity-50">
-                      |
-                    </span>
-                    <span>
+                      <span class="text-color-foreground-X">
+                        {{get doc.owners 0}}
+                      </span>
+                      <span class="opacity-50">
+                        |
+                      </span>
                       {{doc.product}}
-                    </span>
-                    <span class="opacity-50">
-                      |
-                    </span>
-                    {{! Created time }}
-                    <span>
-                      {{time-ago doc.createdTime limitTo24Hours=true}}
-                    </span>
-                  </div>
-                  -->
+                      <span class="opacity-50">
+                        |
+                      </span>
+                      {{time-ago doc.createdTime}}
+                    </div>
 
+                    {{#if doc.summary}}
+                      <p class="mt-2.5 max-w-xl text-body-300">
+                        {{doc.summary}}
+                      </p>
+                    {{/if}}
+
+                    <div class="mt-3.5 flex items-center gap-1">
+                      <Doc::State
+                        @state={{doc.status}}
+                        @hideProgress={{true}}
+                        class="interactive"
+                      />
+                      <Hds::Badge @text={{doc.docType}} />
+                    </div>
+
+                  </div>
+                  <div class="relative ml-2 shrink-0">
+                    <Doc::Thumbnail
+                      @status={{doc.status}}
+                      @product={{doc.product}}
+                      @size="medium"
+                      class="shrink-0 self-start"
+                    />
+                  </div>
                 </div>
-                <div class="relative ml-2 shrink-0">
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ol>
+
+        {{#if this.linkToAllDocsIsShown}}
+          <div class="mt-5 pl-3 pr-7">
+            <Hds::Button
+              @color="secondary"
+              @text="See older documents"
+              @icon="arrow-right"
+              @iconPosition="trailing"
+              @isFullWidth={{true}}
+              @route="authenticated.documents"
+              @query={{hash page=2}}
+              class="py-3"
+            />
+          </div>
+        {{/if}}
+      {{else if this.fetchLatestDocs.isRunning}}
+        {{log "fetching latest docs (template)"}}
+        <div class="h-[100px]">
+          <FlightIcon @name="loading" class="mt-1" />
+        </div>
+      {{else if (eq this.latestDocs null)}}
+        <div class="h-[100px]">
+          <p class="mb-7 text-body-300 text-color-foreground-faint">
+            Error fetching documents.
+          </p>
+          <Hds::Button
+            @text="Retry"
+            @color="secondary"
+            @size="small"
+            @icon="reload"
+            {{on "click" (perform this.fetchLatestDocs)}}
+          />
+        </div>
+      {{else}}
+        <div class="text-display-200">
+          No documents yet.
+        </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="flex w-72 shrink-0 pt-10">
+    <div class="relative h-full pl-4">
+
+      {{! Vertical line }}
+      <div class="absolute left-0 top-0 h-full w-px bg-color-border-primary" />
+
+      <div class="mt-2.5 flex items-center gap-3 pl-3">
+        <h4 class="text-display-300 text-color-foreground-strong">
+          Recently viewed
+        </h4>
+      </div>
+      {{#if this.recentlyViewedDocs.all}}
+        <ul class="mt-4">
+          {{#each this.recentlyViewedDocs.all as |r|}}
+            <li class="border-b border-color-border-faint last:border-0">
+              <LinkTo
+                @route="authenticated.document"
+                @model={{r.doc.objectID}}
+                @query={{hash draft=r.doc.isDraft}}
+                class="block px-3 pt-3 pb-3.5 hover:bg-color-surface-faint"
+              >
+                <div class="flex w-full gap-5">
+
+                  <div class="w-full">
+
+                    <div class="flex items-center gap-[5px]">
+                      <Person::Avatar
+                        @email={{get r.doc.owners 0}}
+                        @imgURL={{get r.doc.ownerPhotos 0}}
+                      />
+                      <span class="text-color-foreground-faint opacity-50">
+                        |
+                      </span>
+                      <span class="text-body-100 text-color-foreground-faint">
+
+                        {{r.doc.product}}
+                      </span>
+                    </div>
+                    <h5
+                      class="mt-1.5 text-body-200 font-semibold text-color-foreground-strong"
+                    >
+                      {{r.doc.title}}
+                    </h5>
+                    <p class="mt-0.5 text-body-100 text-color-foreground-faint">
+                      Modified
+                      {{time-ago r.doc.modifiedTime}}
+                    </p>
+                  </div>
                   <Doc::Thumbnail
-                    @status={{doc.status}}
-                    @product={{doc.product}}
-                    @size="medium"
+                    @status={{r.doc.status}}
+                    @product={{r.doc.product}}
+                    @size="small"
                     class="shrink-0 self-start"
                   />
                 </div>
-              </div>
-            </LinkTo>
-          </li>
-        {{/each}}
-      </ol>
-
-      {{#if this.linkToAllDocsIsShown}}
-        <div class="mt-5 pl-2 pr-16">
-          {{! TODO: padding }}
-          <Hds::Button
-            @color="secondary"
-            @text="See older documents"
-            @icon="arrow-right"
-            @iconPosition="trailing"
-            @isFullWidth={{true}}
-            @route="authenticated.documents"
-            @query={{hash page=2}}
-            class="py-3"
-          />
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <div class="mt-5 px-3 text-body-300 text-color-foreground-disabled">
+          You haven't viewed any documents yet.
         </div>
       {{/if}}
-    {{else if this.fetchLatestDocs.isRunning}}
-      {{log "fetching latest docs (template)"}}
-      <div class="h-[100px]">
-        <FlightIcon @name="loading" class="mt-1" />
-      </div>
-    {{else if (eq this.latestDocs null)}}
-      <div class="h-[100px]">
-        <p class="mb-7 text-body-300 text-color-foreground-faint">
-          Error fetching documents.
-        </p>
-        <Hds::Button
-          @text="Retry"
-          @color="secondary"
-          @size="small"
-          @icon="reload"
-          {{on "click" (perform this.fetchLatestDocs)}}
-        />
-      </div>
-    {{else}}
-      <div class="text-display-200">
-        No documents yet.
-      </div>
-    {{/if}}
-  </div>
-  <div class="relative w-80 shrink-0 pl-7">
-    {{! Circle }}
-    {{! <div
-      class="absolute left-[0.5px] top-0 z-10 grid h-3 w-3 shrink-0 -translate-x-1/2 place-items-center rounded-full border-[1px] border-color-border-strong bg-color-page-primary"
-    >
-      <div class="h-1.5 w-1.5 rounded-full bg-color-foreground-primary">
-      </div>
-    </div> }}
-
-    {{! Vertical line }}
-    <div class="absolute left-0 top-0 h-full w-px bg-color-border-primary" />
-
-    {{! <FlightIcon @name="history" class="text-color-foreground-disabled" /> }}
-    <div class="mt-5 flex items-center gap-3">
-      <h4 class="hermes-h4">
-        Recently viewed
-      </h4>
     </div>
-    {{#if true}}
-      <ul class="mt-5">
-        {{! new versions of the recently viewed }}
-        {{#each this.recentlyViewedDocs.all as |r|}}
-          <li
-            class="border-b border-dashed border-color-border-faint last:border-0"
-          >
-            <LinkTo
-              @route="authenticated.document"
-              @model={{r.doc.objectID}}
-              @query={{hash draft=r.doc.isDraft}}
-              class="block pt-3 pb-3.5"
-            >
-              <div class="flex w-full gap-5">
 
-                <div class="w-full">
-
-                  <div class="flex items-center gap-[5px]">
-                    <Person::Avatar
-                      @email={{get r.doc.owners 0}}
-                      @imgURL={{get r.doc.ownerPhotos 0}}
-                    />
-                    <span class="opacity-30">
-                      |
-                    </span>
-                    <span class="text-body-100">
-
-                      {{r.doc.product}}
-                    </span>
-                  </div>
-                  <h5
-                    class="mt-1.5 text-body-200 font-semibold text-color-foreground-strong"
-                  >
-                    {{r.doc.title}}
-                  </h5>
-                  <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-                    Modified
-                    {{time-ago r.doc.modifiedTime}}
-                  </p>
-                  {{!-- <div class="mt-2 flex items-center gap-1">
-                    <Doc::State
-                      @state={{r.doc.status}}
-                      @hideProgress={{true}}
-                      class="interactive"
-                    />
-                    <Hds::Badge @text={{r.doc.docType}} />
-                  </div> --}}
-                </div>
-                <Doc::Thumbnail
-                  @status={{r.doc.status}}
-                  @product={{r.doc.product}}
-                  @size="small"
-                  class="shrink-0 self-start"
-                />
-              </div>
-            </LinkTo>
-          </li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <div class="mt-3 mb-2 text-color-foreground-faint">
-        None yet
-      </div>
-    {{/if}}
   </div>
 </div>
