@@ -6,7 +6,6 @@
 export default function parseDate(
   time?: string | number | Date,
   monthFormat: "short" | "long" = "short",
-  hideYear?: boolean,
 ): string | null {
   if (!time) {
     return null;
@@ -18,12 +17,12 @@ export default function parseDate(
   }
 
   let day = date.getDate();
-  let year = hideYear ? "" : ` ${date.getFullYear()}`;
+  let year = date.getFullYear();
   let month = date.toLocaleString("default", { month: monthFormat });
 
-  if (monthFormat === "short" && !hideYear) {
+  if (monthFormat === "short") {
     month += ".";
   }
 
-  return `${day} ${month}${year}`;
+  return `${day} ${month} ${year}`;
 }

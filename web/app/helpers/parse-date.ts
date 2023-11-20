@@ -5,15 +5,14 @@ export interface ParseDateHelperSignature {
     Positional: [
       time: string | number | Date | undefined,
       monthFormat?: "short" | "long",
-      hideYear?: boolean,
     ];
     Return: Date | undefined;
   };
 }
 
 const parseDateHelper = helper<ParseDateHelperSignature>(
-  ([time, monthFormat = "short", hideYear]) => {
-    return parseDate(time, monthFormat, hideYear);
+  ([time, monthFormat = "short"]) => {
+    return parseDate(time, monthFormat);
   },
 );
 

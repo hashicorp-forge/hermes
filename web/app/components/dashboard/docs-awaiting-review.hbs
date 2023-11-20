@@ -1,21 +1,10 @@
 <div class="mb-10 w-full">
   <div class="flex items-center">
-    <div class="flex items-center gap-3.5">
-      {{! <div class="flex rounded bg-color-palette-amber-100">
-        <div class="flex p-3.5">
-        </div>
-      </div> }}
-      {{! <FlightIcon @name="test" @size="24" class="text-color-foreground-faint" /> }}
+    <div class="flex items-center gap-3">
       <h4 class="text-display-400 text-color-foreground-strong">
         Awaiting your review
       </h4>
-      {{!-- <span
-        data-test-docs-awaiting-review-count
-        class="-mt-1.5 -mb-2 rounded-r-full rounded-l-full bg-gradient-to-tr from-color-palette-neutral-175 to-color-palette-neutral-100 px-5 pt-1 pb-1.5 text-display-300 font-regular"
-      >
-        {{@docs.length}}
-      </span> --}}
-      <Hds::BadgeCount @text="{{@docs.length}}" @size="medium" class="px-3" />
+      <Hds::BadgeCount @text="{{@docs.length}}" @size="large" class="px-4" />
     </div>
   </div>
 
@@ -24,6 +13,7 @@
       <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
     {{/each}}
   </ul>
+
   {{#if this.toggleButtonIsShown}}
     <Action
       data-test-docs-awaiting-review-toggle
@@ -39,15 +29,3 @@
     </Action>
   {{/if}}
 </div>
-{{!
-<div class="mt-8 -mb-[15px] flex h-12 w-full" aria-hidden="true">
-  <div class="w-9/12 shrink-0 border-t border-t-color-border-primary"></div>
-  <div class="-mr-px h-full w-12 shrink-0 overflow-hidden">
-    <div
-      class="relative left-[-4px] top-[-4.5px] h-40 w-40 origin-top-left rotate-45 border-t border-t-color-border-primary"
-    ></div>
-  </div>
-  <div class="w-full border-b border-b-color-border-primary"></div>
-</div>
-
- }}

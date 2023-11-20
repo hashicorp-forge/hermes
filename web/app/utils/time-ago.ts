@@ -9,7 +9,6 @@ export default function timeAgo(
   timeInSeconds: number,
   options?: {
     limitTo24Hours?: boolean;
-    hideYear?: boolean;
   },
 ) {
   const now = Date.now();
@@ -46,7 +45,7 @@ export default function timeAgo(
   }
 
   if (options?.limitTo24Hours) {
-    return parseDate(timeInSeconds * 1000, "short", options?.hideYear);
+    return parseDate(timeInSeconds * 1000, "short");
   }
 
   const elapsedDays = elapsedHours / 24;

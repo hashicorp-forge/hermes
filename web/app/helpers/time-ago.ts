@@ -6,15 +6,14 @@ export interface TimeAgoHelperSignature {
     Positional: [time: number];
     Named: {
       limitTo24Hours?: boolean;
-      hideYear?: boolean;
     };
   };
   Return: string | null;
 }
 
 const timeAgoHelper = helper<TimeAgoHelperSignature>(
-  ([time], { limitTo24Hours, hideYear }) => {
-    return timeAgo(time, { limitTo24Hours, hideYear });
+  ([time], { limitTo24Hours }) => {
+    return timeAgo(time, { limitTo24Hours });
   },
 );
 
