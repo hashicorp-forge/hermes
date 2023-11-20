@@ -7,6 +7,8 @@ import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
+import { assert } from "@ember/debug";
+import LatestDocsService from "hermes/services/latest-docs";
 
 export default class DashboardRoute extends Route {
   @service declare algolia: AlgoliaService;
@@ -14,13 +16,15 @@ export default class DashboardRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
+
+  @service("latest-docs") declare latestDocs: LatestDocsService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
 
-    const docsAwaitingReview = await this.algolia.searchIndex
+    const docsAwaitingReviewPromise = this.algolia.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {
         filters:
           `approvers:'${userInfo.email}'` +
@@ -29,6 +33,10 @@ export default class DashboardRoute extends Route {
           " AND status:In-Review",
       })
       .then((result) => result.hits as HermesDocument[]);
+
+    let promises: Promise<HermesDocument[] | void>[] = [
+      docsAwaitingReviewPromise,
+    ];
 
     /**
      * If the user is loading the dashboard for the first time,
@@ -46,11 +54,22 @@ export default class DashboardRoute extends Route {
      * finished by the time the user returns to the dashboard.
      *
      */
+    if (this.latestDocs.index) {
+      console.log("void");
+      void this.latestDocs.fetchAll.perform();
+    } else {
+      promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
+    }
+
     if (this.recentDocs.all) {
       void this.recentDocs.fetchAll.perform();
     } else {
-      await this.recentDocs.fetchAll.perform();
+      promises.push(this.recentDocs.fetchAll.perform().then(() => {}));
     }
+
+    const [docsAwaitingReview] = await Promise.all(promises);
+
+    assert("docsAwaitingReview must exist", docsAwaitingReview);
 
     return docsAwaitingReview;
   }

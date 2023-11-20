@@ -1,6 +1,6 @@
 <Dashboard::NewFeaturesBanner />
 
-<div class="mt-3 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
+<div class="mt-3 flex w-full">
   <div class="min-h-[500px] w-full overflow-hidden pb-20">
     <div class="pr-4">
 
@@ -19,10 +19,15 @@
         <h4 class="flex gap-2.5 text-display-400 text-color-foreground-strong">
           Latest docs
         </h4>
+
+        {{#if this.latestDocs.fetchAll.isRunning}}
+          <FlightIcon @name="running" />
+        {{/if}}
       </div>
-      {{#if this.latestDocs}}
+
+      {{#if this.latestDocs.index.length}}
         <ol class="mt-5">
-          {{#each this.latestDocs as |doc|}}
+          {{#each this.latestDocs.index as |doc|}}
             <li class="border-t border-color-border-faint">
               <LinkTo
                 @route="authenticated.document"
@@ -120,11 +125,6 @@
             />
           </div>
         {{/if}}
-      {{else if this.fetchLatestDocs.isRunning}}
-        {{log "fetching latest docs (template)"}}
-        <div class="h-[100px]">
-          <FlightIcon @name="loading" class="mt-1" />
-        </div>
       {{else if (eq this.latestDocs null)}}
         <div class="h-[100px]">
           <p class="mb-7 text-body-300 text-color-foreground-faint">
@@ -135,7 +135,7 @@
             @color="secondary"
             @size="small"
             @icon="reload"
-            {{on "click" (perform this.fetchLatestDocs)}}
+            {{on "click" (perform this.latestDocs.fetchAll)}}
           />
         </div>
       {{else}}
@@ -158,14 +158,14 @@
       {{! Vertical line }}
       <div class="absolute left-0 top-0 h-full w-px bg-color-border-primary" />
 
-      <div class="mt-2.5 flex items-center gap-3 pl-3">
+      <div class="mt-2.5 flex w-full items-center justify-between pl-3">
         <h4 class="text-display-300 text-color-foreground-strong">
           Recently viewed
         </h4>
       </div>
-      {{#if this.recentlyViewedDocs.all}}
+      {{#if this.recentDocs.all}}
         <ul class="mt-4">
-          {{#each this.recentlyViewedDocs.all as |r|}}
+          {{#each this.recentDocs.all as |r|}}
             <li class="border-b border-color-border-faint last:border-0">
               <LinkTo
                 @route="authenticated.document"
