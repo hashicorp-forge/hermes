@@ -12,9 +12,6 @@ module.exports = function (defaults) {
         cacheInclude: [/.*\.hbs$/, /.*\.scss$/],
         plugins: [
           {
-            module: require("autoprefixer"),
-          },
-          {
             module: require("@csstools/postcss-sass"),
             options: {
               includePaths: [

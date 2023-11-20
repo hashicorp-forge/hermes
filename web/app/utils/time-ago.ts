@@ -45,7 +45,7 @@ export default function timeAgo(
   }
 
   if (options?.limitTo24Hours) {
-    return parseDate(timeInSeconds * 1000, "short");
+    return parseDate(timeInSeconds * 1000);
   }
 
   const elapsedDays = elapsedHours / 24;
