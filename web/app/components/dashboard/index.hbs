@@ -1,7 +1,7 @@
 <Dashboard::NewFeaturesBanner />
 
 <div class="mt-3 flex w-full" {{did-insert (perform this.fetchLatestDocs)}}>
-  <div class="w-full overflow-hidden pb-20">
+  <div class="min-h-[500px] w-full overflow-hidden pb-20">
     <div class="pr-4">
 
       <div class="mb-6 flex items-center gap-3">
@@ -15,14 +15,12 @@
         <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
       {{/if}}
 
+      <div class="flex items-center gap-3.5">
+        <h4 class="flex gap-2.5 text-display-400 text-color-foreground-strong">
+          Latest docs
+        </h4>
+      </div>
       {{#if this.latestDocs}}
-        <div class="flex items-center gap-3.5">
-          <h4
-            class="flex gap-2.5 text-display-400 text-color-foreground-strong"
-          >
-            Latest docs
-          </h4>
-        </div>
         <ol class="mt-5">
           {{#each this.latestDocs as |doc|}}
             <li class="border-t border-color-border-faint">
@@ -141,9 +139,15 @@
           />
         </div>
       {{else}}
-        <div class="text-display-200">
-          No documents yet.
+        <div class="mt-5 text-display-300 text-color-foreground-disabled">
+          No documents have been published yet.
         </div>
+        <Hds::Button
+          @text="Create a new document"
+          @iconPosition="leading"
+          @route="authenticated.new"
+          class="mt-5"
+        />
       {{/if}}
     </div>
   </div>
