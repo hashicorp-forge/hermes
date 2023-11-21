@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const DOCS_AWAITING_REVIEW_COUNT_SELECTOR =
   "[data-test-docs-awaiting-review-count]";
@@ -29,19 +30,19 @@ module(
       this.server.create("document", {
         title: "Foo",
         status: "In Review",
-        approvers: ["testuser@example.com"],
+        approvers: [TEST_USER_EMAIL],
       });
 
       this.server.create("document", {
         title: "Bar",
         status: "In Review",
-        approvers: ["testuser@example.com"],
+        approvers: [TEST_USER_EMAIL],
       });
 
       this.set("docs", this.server.schema.document.all().models);
 
       await render<DashboardDocsAwaitingReviewTestContext>(
-        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`
+        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`,
       );
 
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("2");
@@ -64,14 +65,14 @@ module(
         this.server.create("document", {
           title,
           status: "In Review",
-          approvers: ["testuser@example.com"],
+          approvers: [TEST_USER_EMAIL],
         });
       });
 
       this.set("docs", this.server.schema.document.all().models);
 
       await render<DashboardDocsAwaitingReviewTestContext>(
-        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`
+        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`,
       );
 
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("5");
@@ -100,5 +101,5 @@ module(
         .dom(TOGGLE_SELECTOR)
         .doesNotExist("toggle not shown when there's fewer than 4 docs");
     });
-  }
+  },
 );
