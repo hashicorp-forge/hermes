@@ -13298,6 +13298,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hash-value@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "hash-value@npm:2.0.2"
+  checksum: fcdebd2936e81a1dbca847637dfbddbcd683aa468d3ce7c16b9a66f16718153bc463dc1283f125d64b2622f300a27142f5786332bad16505b14febd508e92e95
+  languageName: node
+  linkType: hard
+
 "hash.js@npm:^1.0.0, hash.js@npm:^1.0.3":
   version: 1.1.7
   resolution: "hash.js@npm:1.1.7"
@@ -13452,6 +13459,7 @@ __metadata:
     eslint-plugin-node: ^11.1.0
     eslint-plugin-prettier: ^5.0.0
     eslint-plugin-qunit: ^6.2.0
+    hash-value: ^2.0.2
     instantsearch.js: ^4.40.2
     loader.js: ^4.7.0
     miragejs: ^0.1.47

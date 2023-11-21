@@ -143,6 +143,7 @@
     "ember-concurrency": "^2.2.1",
     "ember-power-select-with-create": "^1.0.0",
     "ember-simple-auth": "^5.0.0",
+    "hash-value": "^2.0.2",
     "instantsearch.js": "^4.40.2",
     "miragejs": "^0.1.47",
     "postcss-scss": "^4.0.3",
