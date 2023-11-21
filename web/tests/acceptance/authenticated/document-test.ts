@@ -190,7 +190,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: false,
+      status: "In-Review",
       product: "Test Product 0",
     });
 
@@ -202,7 +202,11 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("the shortLinkURL is loaded by the config service", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", { objectID: 500, title: "Test Document" });
+    this.server.create("document", {
+      objectID: 500,
+      title: "Test Document",
+      status: "In-Review",
+    });
 
     await visit("/document/500");
     const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
