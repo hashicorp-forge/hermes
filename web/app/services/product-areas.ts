@@ -61,7 +61,9 @@ export default class ProductAreasService extends Service {
    * the ProductSelect component.
    */
   getProductColor(product?: string) {
-    if (!product) return;
+    if (!product) {
+      return;
+    }
 
     return hashValue(product, COLORS);
   }
