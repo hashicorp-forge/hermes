@@ -13,6 +13,14 @@ interface TableRowComponentSignature {
 export default class TableRowComponent extends Component<TableRowComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
+  protected get isDraft() {
+    if (this.args.doc.isDraft) {
+      return true;
+    }
+
+    return this.args.doc.status === "WIP";
+  }
+
   protected get ownerIsAuthenticatedUser() {
     const docOwner = this.args.doc.owners?.[0];
 

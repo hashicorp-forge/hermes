@@ -16,8 +16,9 @@ import {
   projectStatusObjects,
 } from "hermes/types/project-status";
 import { assert } from "@ember/debug";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import ConfigService from "hermes/services/config";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -28,7 +29,7 @@ interface ProjectIndexComponentSignature {
 export default class ProjectIndexComponent extends Component<ProjectIndexComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   /**
    * The array of possible project statuses.
@@ -313,13 +314,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           method: "PATCH",
           body: JSON.stringify(valueToSave),
         });
-      } catch (e: unknown) {
-        this.flashMessages.add({
+      } catch (e) {
+        this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
-          message: (e as any).message,
-          type: "critical",
-          timeout: 10000,
-          extendedTimeout: 1000,
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       }
     },
@@ -351,16 +349,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             },
           },
         );
-      } catch (e: unknown) {
+      } catch (e) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;
 
-        this.flashMessages.add({
+        this.flashMessages.critical((e as any).message, {
           title: "Unable to save resource",
-          message: (e as any).message,
-          type: "critical",
-          sticky: true,
-          extendedTimeout: 1000,
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       }
     },
