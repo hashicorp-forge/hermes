@@ -7,6 +7,7 @@ import { getPageTitle } from "ember-page-title/test-support";
 
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
+const DOCUMENT_LINK = "[data-test-document-link]";
 
 interface AuthenticatedDraftRouteTestContext extends MirageTestContext {}
 

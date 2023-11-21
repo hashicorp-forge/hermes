@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -83,14 +84,14 @@ func MeRecentlyViewedDocsHandler(
 				if err := doc.Get(db); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
-					// TODO: change this log back to an error when this handles incomplete
-					// data in the database.
-					l.Warn("error getting document in database",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"document_db_id", d.DocumentID,
-					)
+					if !errors.Is(err, gorm.ErrRecordNotFound) {
+						l.Error("error getting document in database",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"document_db_id", d.DocumentID,
+						)
+					}
 					continue
 				}
 
