@@ -15,7 +15,7 @@ module("Unit | Utility | parse-date", function () {
     assert.equal(parseDate("1980/12/20"), "20 Dec. 1980");
     assert.equal(parseDate("November 21, 1963", "long"), "21 November 1963");
     assert.equal(parseDate("November 21, 1963 12:30"), "21 Nov. 1963");
-    assert.equal(parseDate("2000-01-01T06:00:00.000-07:00"), "1 Jan. 2000");
+    assert.equal(parseDate(DEFAULT_MOCK_DATE), "1 Jan. 2000");
 
     // Invalid
     assert.equal(parseDate(undefined), null);

@@ -8,6 +8,11 @@ import { setupMirage } from "ember-cli-mirage/test-support";
 import window from "ember-window-mock";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
+import {
+  TEST_USER_2_EMAIL,
+  TEST_USER_2_GIVEN_NAME,
+  TEST_USER_2_NAME,
+} from "hermes/utils/mirage-utils";
 
 const SUPPORT_URL = "https://example.com/support";
 const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";
@@ -24,9 +29,9 @@ module("Integration | Component | header/nav", function (hooks) {
     ) as AuthenticatedUserService;
 
     authenticatedUserSvc._info = {
-      email: "foo@example.com",
-      given_name: "Foo",
-      name: "Foo Bar",
+      email: TEST_USER_2_EMAIL,
+      given_name: TEST_USER_2_GIVEN_NAME,
+      name: TEST_USER_2_NAME,
       picture: "",
       subscriptions: [],
     };
@@ -50,8 +55,8 @@ module("Integration | Component | header/nav", function (hooks) {
 
     await click(USER_MENU_TOGGLE_SELECTOR);
 
-    assert.dom("[data-test-user-menu-title]").hasText("Foo Bar");
-    assert.dom("[data-test-user-menu-email]").hasText("foo@example.com");
+    assert.dom("[data-test-user-menu-title]").hasText(TEST_USER_2_NAME);
+    assert.dom("[data-test-user-menu-email]").hasText(TEST_USER_2_EMAIL);
     assert
       .dom("[data-test-user-menu-github]")
       .hasText("GitHub")

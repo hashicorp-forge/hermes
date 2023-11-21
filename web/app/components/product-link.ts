@@ -1,5 +1,3 @@
-import RouterService from "@ember/routing/router-service";
-import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import getProductLabel from "hermes/utils/get-product-label";
 
@@ -14,8 +12,6 @@ interface ProductLinkComponentSignature {
 }
 
 export default class ProductLinkComponent extends Component<ProductLinkComponentSignature> {
-  @service declare router: RouterService;
-
   protected get productAreaName(): string | undefined {
     return getProductLabel(this.args.product);
   }

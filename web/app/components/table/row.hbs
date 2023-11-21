@@ -1,6 +1,7 @@
 <tr data-test-table-row ...attributes>
   <td class="name">
     <LinkTo
+      data-test-document-link
       @route="authenticated.document"
       @model="{{@doc.objectID}}"
       @query={{hash draft=this.isDraft}}

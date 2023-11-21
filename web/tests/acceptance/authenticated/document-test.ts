@@ -25,6 +25,11 @@ import window from "ember-window-mock";
 import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
 import RouterService from "@ember/routing/router-service";
 import { wait } from "ember-animated/.";
+import {
+  TEST_USER_2_EMAIL,
+  TEST_USER_3_EMAIL,
+  TEST_USER_EMAIL,
+} from "hermes/utils/mirage-utils";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -190,7 +195,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: false,
+      status: "In-Review",
       product: "Test Product 0",
     });
 
@@ -202,7 +207,11 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("the shortLinkURL is loaded by the config service", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", { objectID: 500, title: "Test Document" });
+    this.server.create("document", {
+      objectID: 500,
+      title: "Test Document",
+      status: "In-Review",
+    });
 
     await visit("/document/500");
     const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
@@ -414,8 +423,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       isDraft: true,
-      owners: ["foo@example.com"],
-      collaborators: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      collaborators: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1?draft=true");
@@ -428,8 +437,8 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       isDraft: false,
       status: "In review",
-      owners: ["foo@example.com"],
-      collaborators: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      collaborators: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1");
@@ -442,8 +451,8 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       isDraft: false,
       status: "In review",
-      owners: ["foo@example.com"],
-      approvers: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1");
@@ -455,7 +464,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       isDraft: true,
-      owners: ["foo@example.com"],
+      owners: [TEST_USER_2_EMAIL],
       isShareable: true,
     });
 
@@ -628,7 +637,7 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("the contributors attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      contributors: ["foo@example.com"],
+      contributors: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -646,7 +655,7 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("the approvers attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      approvers: ["foo@example.com"],
+      approvers: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -727,7 +736,7 @@ module("Acceptance | authenticated/document", function (hooks) {
           type: "PEOPLE",
         },
       },
-      foo: ["foo@example.com"],
+      foo: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -745,8 +754,8 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      approvers: ["foo@example.com", "bar@example.com"],
-      approvedBy: ["foo@example.com"],
+      approvers: [TEST_USER_2_EMAIL, TEST_USER_3_EMAIL],
+      approvedBy: [TEST_USER_2_EMAIL],
     });
 
     await visit("/document/1");

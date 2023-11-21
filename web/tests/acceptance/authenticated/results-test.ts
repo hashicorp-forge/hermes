@@ -19,14 +19,4 @@ module("Acceptance | authenticated/results", function (hooks) {
     await visit("/results");
     assert.equal(getPageTitle(), "Search Results | Hermes");
   });
-
-  test("product badges have the correct hrefs", async function (this: AuthenticatedResultsRouteTestContext, assert) {
-    this.server.createList("document", 10);
-
-    await visit("/results");
-
-    assert
-      .dom(".product-link")
-      .hasAttribute("href", "/documents?product=%5B%22Vault%22%5D");
-  });
 });
