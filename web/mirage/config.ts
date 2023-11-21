@@ -359,6 +359,7 @@ export default function (mirageConfig) {
        * Used by the config service for environment variables.
        */
       this.get("/web/config", () => {
+        // TODO: allow this to be overwritten in the request
         return new Response(
           200,
           {},
