@@ -206,7 +206,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             contributors: this.getEmails(this.contributors),
             docType: this.args.docType,
             product: this.productArea,
-            status: "WIP",
             productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
