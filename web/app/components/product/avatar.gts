@@ -5,7 +5,6 @@ import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import ProductAreasService from "hermes/services/product-areas";
 import { assert } from "@ember/debug";
 import { HermesSize } from "hermes/types/sizes";
-import getProductColor from "hermes/utils/get-product-color";
 import fontColorContrast from "font-color-contrast";
 
 interface ProductAvatarComponentSignature {
@@ -33,7 +32,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   private get colorStyles() {
     if (this.productID) return;
 
-    const bgColor = getProductColor(this.args.product);
+    const bgColor = this.productAreas.getProductColor(this.args.product);
 
     assert("bgColor must exist", bgColor);
 
