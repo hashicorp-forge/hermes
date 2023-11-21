@@ -4,7 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const LINK = "[data-test-doc-awaiting-review-link]";
 
@@ -35,7 +35,7 @@ module(
         product: "Cloud Platform",
         status: "In Review",
         docType: "PRFAQ",
-        owners: ["foo@example.com"],
+        owners: [TEST_USER_2_EMAIL],
         approvers: [TEST_USER_EMAIL],
       });
 

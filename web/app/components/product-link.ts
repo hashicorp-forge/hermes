@@ -1,5 +1,3 @@
-import RouterService from "@ember/routing/router-service";
-import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import getProductLabel from "hermes/utils/get-product-label";
 
@@ -14,8 +12,6 @@ interface ProductLinkComponentSignature {
 }
 
 export default class ProductLinkComponent extends Component<ProductLinkComponentSignature> {
-  @service declare router: RouterService;
-
   protected get productAreaName(): string | undefined {
     return getProductLabel(this.args.product);
   }
@@ -32,23 +28,6 @@ export default class ProductLinkComponent extends Component<ProductLinkComponent
       };
     } else {
       return {};
-    }
-  }
-
-  /**
-   * The route the badge should link to.
-   * If on the /drafts or /my screen, stay there.
-   * In all other cases, link to the /all screen.
-   */
-  protected get route() {
-    const { currentRouteName } = this.router;
-
-    switch (currentRouteName) {
-      case "authenticated.drafts":
-      case "authenticated.my":
-        return currentRouteName;
-      default:
-        return "authenticated.documents";
     }
   }
 }

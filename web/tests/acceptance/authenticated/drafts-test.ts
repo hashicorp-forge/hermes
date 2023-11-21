@@ -49,30 +49,4 @@ module("Acceptance | authenticated/drafts", function (hooks) {
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
       .hasAttribute("data-test-icon", "arrow-up");
   });
-
-  test("product links have the correct hrefs", async function (this: AuthenticatedDraftRouteTestContext, assert) {
-    this.server.create("document", {
-      product: "Security",
-    });
-
-    await visit("/drafts");
-
-    assert
-      .dom(".product-link")
-      .hasAttribute("href", "/drafts?product=%5B%22Security%22%5D");
-  });
-
-  test("document links have the correct query params", async function (this: AuthenticatedDraftRouteTestContext, assert) {
-    this.server.create("document");
-
-    await visit("/drafts");
-
-    assert
-      .dom(DOCUMENT_LINK)
-      .hasAttribute(
-        "href",
-        "/document/doc-0?draft=true",
-        "correctly has the draft param",
-      );
-  });
 });

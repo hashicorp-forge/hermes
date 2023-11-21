@@ -49,16 +49,4 @@ module("Acceptance | authenticated/my", function (hooks) {
       .dom(`${TABLE_HEADER_CREATED_SELECTOR} .flight-icon`)
       .hasAttribute("data-test-icon", "arrow-up");
   });
-
-  test("product badges have the correct hrefs", async function (this: AuthenticatedMyRouteTestContext, assert) {
-    this.server.create("document", {
-      product: "Terraform",
-    });
-
-    await visit("/my");
-
-    assert
-      .dom(PRODUCT_LINK_SELECTOR)
-      .hasAttribute("href", "/my?product=%5B%22Terraform%22%5D");
-  });
 });
