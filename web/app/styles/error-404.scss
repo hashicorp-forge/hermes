@@ -2,11 +2,11 @@
   @apply bg-color-page-faint;
 
   .title {
-    @apply text-[3.5rem] mb-5 mr-20;
+    @apply mb-5 mr-20 text-[3.5rem];
   }
 
   .doc-page {
-    @apply mt-16 bg-white shadow-2xl border border-color-border-primary rounded-t-xl;
+    @apply mt-16 rounded-t-xl border border-color-border-primary bg-white shadow-2xl;
   }
 
   .meta-information {
@@ -18,7 +18,7 @@
   }
 
   .divider {
-    @apply h-[4px] bg-color-foreground-strong w-full;
+    @apply h-[4px] w-full bg-color-foreground-strong;
   }
 
   p {
@@ -26,10 +26,10 @@
   }
 
   .summary {
-    @apply mb-6 text-display-400 pr-20;
+    @apply mb-6 pr-20 text-display-400;
   }
 
   .gradient-overlay {
-    @apply fixed w-full h-56 bottom-0 pointer-events-none bg-gradient-to-t from-color-surface-strong to-transparent;
+    @apply pointer-events-none fixed left-0 bottom-0 h-56 w-full bg-gradient-to-t from-color-surface-strong to-transparent;
   }
 }
