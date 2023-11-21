@@ -4,7 +4,7 @@
   <div class="min-h-[500px] w-full overflow-hidden pb-20">
     <div class="pr-4">
 
-      <div class="mb-6 flex items-center gap-3">
+      <div data-test-welcome-message class="mb-6 flex items-center gap-3">
         <h4 class="hermes-h4">
           Welcome back,
           {{this.authenticatedUser.info.given_name}}!
@@ -28,7 +28,7 @@
       {{#if this.latestDocs.index.length}}
         <ol class="mt-5">
           {{#each this.latestDocs.index as |doc|}}
-            <li class="border-t border-color-border-faint">
+            <li data-test-latest-doc class="border-t border-color-border-faint">
               <LinkTo
                 @route="authenticated.document"
                 @model={{doc.objectID}}
