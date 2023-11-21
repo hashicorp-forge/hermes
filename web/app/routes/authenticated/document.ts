@@ -97,7 +97,6 @@ export default class AuthenticatedDocumentRoute extends Route {
             },
           )
           .then((r) => r?.json());
-        (doc as HermesDocument).isDraft = params.draft;
         draftFetched = true;
       } catch (err) {
         /**
@@ -127,8 +126,6 @@ export default class AuthenticatedDocumentRoute extends Route {
             },
           )
           .then((r) => r?.json());
-
-        (doc as HermesDocument).isDraft = false;
       } catch (err) {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
@@ -144,6 +141,8 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     const typedDoc = doc as HermesDocument;
+
+    typedDoc.isDraft = typedDoc.status === "WIP";
 
     // Preload avatars for all approvers in the Algolia index.
     if (typedDoc.contributors?.length) {
