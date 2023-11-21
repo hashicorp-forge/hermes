@@ -33,7 +33,9 @@
                 @model={{doc.objectID}}
                 @query={{hash draft=doc.isDraft}}
               >
-                <div class="main-inner flex justify-between gap-5 pt-5 pb-6">
+                <div
+                  class="main-inner flex justify-between gap-[18px] pt-5 pb-6"
+                >
                   <Person::Avatar
                     @size="large"
                     @email="{{get doc.owners 0}}"
@@ -41,7 +43,7 @@
                     class="-mt-1 shrink-0"
                   />
                   <div class="w-full">
-                    <div class="relative z-10 overflow-hidden">
+                    <div class="relative z-10 mt-0.5 overflow-hidden">
                       <h3>
                         {{! Title }}
                         <span data-test-document-title class="mr-1.5">
@@ -51,7 +53,7 @@
                         {{! Doc Number }}
                         <span
                           data-test-document-number
-                          class="shrink-0 font-regular text-color-foreground-faint"
+                          class="shrink-0 font-regular"
                         >
                           <span class="whitespace-nowrap">
                             {{doc.docNumber}}
@@ -94,12 +96,12 @@
                     </div>
 
                   </div>
-                  <div class="relative ml-2 shrink-0">
+                  <div class="relative ml-4 shrink-0">
                     <Doc::Thumbnail
                       @status={{doc.status}}
                       @product={{doc.product}}
                       @size="medium"
-                      class="shrink-0 self-start"
+                      class="self-start"
                     />
                   </div>
                 </div>
@@ -158,17 +160,17 @@
               >
                 <div class="flex w-full items-start gap-5">
                   <div class="w-full">
-                    <div class="flex items-center gap-[5px]">
+                    <div class="flex gap-[3px]">
+                      <Product::Avatar @product={{r.doc.product}} />
                       <Person::Avatar
                         @email="{{get r.doc.owners 0}}"
                         @imgURL={{get r.doc.ownerPhotos 0}}
+                        {{! class="overlapping-avatar" }}
                       />
-                      <span class="vertical-line">
-                        |
-                      </span>
-                      <span class="text-body-100 text-color-foreground-faint">
-                        {{r.doc.product}}
-                      </span>
+                      <Hds::Badge
+                        @text={{r.doc.docType}}
+                        class="h-5 px-1.5 py-0"
+                      />
                     </div>
                     <h5 class="mt-1.5">
                       {{r.doc.title}}

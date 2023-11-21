@@ -7,6 +7,10 @@
     @apply text-color-foreground-faint opacity-50;
   }
 
+  .vertical-line-divider {
+    @apply mx-0.5 h-3.5 w-[1.25px] bg-color-foreground-faint opacity-25;
+  }
+
   .tags {
     @apply flex shrink-0 gap-1;
   }

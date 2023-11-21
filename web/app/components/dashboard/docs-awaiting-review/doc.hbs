@@ -5,25 +5,25 @@
     @model={{@doc.objectID}}
     class="main-inner py-4"
   >
-    <div class="flex w-full flex-wrap items-center gap-5 md:flex-nowrap">
-      <Person::Avatar
-        data-test-doc-awaiting-review-owner-avatar
-        @email={{or (get @doc.owners 0) "Unknown"}}
-        @imgURL={{get @doc.ownerPhotos 0}}
-        @size="large"
-        class="shrink-0"
-      />
+    <div class="flex w-full flex-wrap items-center gap-[16px] md:flex-nowrap">
+      <div class="-ml-1 flex gap-[3px]">
+        <Product::Avatar @size="small" @product={{@doc.product}} />
+        <Person::Avatar
+          data-test-doc-awaiting-review-owner-avatar
+          @email={{or (get @doc.owners 0) "Unknown"}}
+          @imgURL={{get @doc.ownerPhotos 0}}
+          @size="small"
+          class="-ml-px shrink-0"
+        />
+      </div>
 
       {{! Title and docNumber }}
       <div class="w-full overflow-hidden">
-        <div class="flex gap-2.5 text-display-300">
+        <div class="flex gap-2 text-display-300">
           <h3 data-test-document-title class="truncate">
             {{@doc.title}}
           </h3>
-          <div
-            data-test-document-number
-            class="whitespace-nowrap font-regular text-color-foreground-faint"
-          >
+          <div data-test-document-number class="whitespace-nowrap font-regular">
             {{@doc.docNumber}}
           </div>
         </div>
