@@ -298,6 +298,8 @@ export default function (mirageConfig) {
         document.update({
           objectID: document.id,
           owners: [TEST_USER_EMAIL],
+          appCreated: true,
+          status: "WIP",
         });
 
         return new Response(200, {}, document.attrs);
