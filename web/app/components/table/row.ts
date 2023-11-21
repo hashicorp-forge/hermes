@@ -34,6 +34,14 @@ export default class TableRowComponent extends Component<TableRowComponentSignat
 
     return "Unknown";
   }
+
+  protected get isDraft() {
+    if (this.args.doc.isDraft) {
+      return true;
+    }
+
+    return this.args.doc.status === "WIP";
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

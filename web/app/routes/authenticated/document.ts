@@ -4,7 +4,6 @@ import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument, HermesUser } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
@@ -13,6 +12,8 @@ import AuthenticatedDocumentController from "hermes/controllers/authenticated/do
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { assert } from "@ember/debug";
 import { GoogleUser } from "hermes/components/inputs/people-select";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
 const serializePeople = (people: GoogleUser[]): HermesUser[] => {
   return people.map((p) => ({
@@ -36,7 +37,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
 
   declare controller: AuthenticatedDocumentController;
@@ -51,12 +52,9 @@ export default class AuthenticatedDocumentRoute extends Route {
   // };
 
   showErrorMessage(err: Error) {
-    this.flashMessages.add({
+    this.flashMessages.critical(err.message, {
       title: "Error fetching document",
-      message: err.message,
-      type: "critical",
-      sticky: true,
-      extendedTimeout: 1000,
+      timeout: FLASH_MESSAGES_LONG_TIMEOUT,
     });
   }
 
@@ -133,8 +131,12 @@ export default class AuthenticatedDocumentRoute extends Route {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
 
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
+        if (transition.from && transition.from.name !== transition.to.name) {
+          this.router.transitionTo(transition.from.name);
+        } else {
+          this.router.transitionTo("authenticated.dashboard");
+        }
+
         throw new Error(typedError.message);
       }
     }
