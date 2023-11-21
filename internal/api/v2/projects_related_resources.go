@@ -87,7 +87,7 @@ func projectsResourceRelatedResourcesHandler(
 					"error", err,
 				}, logArgs...)...)
 			http.Error(
-				w, "Error processing requst", http.StatusInternalServerError)
+				w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 
@@ -105,7 +105,7 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
 			}
 
@@ -146,7 +146,7 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
 			}
 
@@ -219,7 +219,7 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
 			}
 		}
@@ -258,7 +258,7 @@ func projectsResourceRelatedResourcesHandler(
 					"error", err,
 				}, logArgs...)...)
 			http.Error(
-				w, "Error processing requst", http.StatusInternalServerError)
+				w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 
