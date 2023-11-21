@@ -2,6 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 module("Integration | Helper | has-approved-doc", function (hooks) {
   setupRenderingTest(hooks);
@@ -11,7 +12,7 @@ module("Integration | Helper | has-approved-doc", function (hooks) {
       approvedBy: [],
     });
 
-    const email = "person@example.com";
+    const email = TEST_USER_EMAIL;
     this.set("email", email);
 
     await render(hbs`
