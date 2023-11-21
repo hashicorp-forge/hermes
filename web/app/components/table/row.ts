@@ -24,9 +24,7 @@ export default class TableRowComponent extends Component<TableRowComponentSignat
 
     if (modifiedTime && timeColumn === TimeColumn.Modified) {
       time = modifiedTime;
-    }
-
-    if (createdTime && timeColumn === TimeColumn.Created) {
+    } else if (createdTime && timeColumn === TimeColumn.Created) {
       time = createdTime;
     }
 
