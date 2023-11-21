@@ -11,7 +11,7 @@ module("Integration | Helper | has-approved-doc", function (hooks) {
       approvedBy: [],
     });
 
-    const email = "person@example.com";
+    const email = "foo@example.com";
     this.set("email", email);
 
     await render(hbs`

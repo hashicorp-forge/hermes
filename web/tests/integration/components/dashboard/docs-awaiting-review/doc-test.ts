@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const LINK = "[data-test-doc-awaiting-review-link]";
 
@@ -35,7 +36,7 @@ module(
         status: "In Review",
         docType: "PRFAQ",
         owners: ["foo@example.com"],
-        approvers: ["testuser@example.com"],
+        approvers: [TEST_USER_EMAIL],
       });
 
       this.set("doc", this.server.schema.document.first());
