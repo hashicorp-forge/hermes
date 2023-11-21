@@ -14,7 +14,7 @@ interface PersonComponentSignature {
 
 export default class PersonComponent extends Component<PersonComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
-  protected get isHidden() {
+  get isHidden() {
     return this.args.ignoreUnknown && !this.args.email;
   }
 
