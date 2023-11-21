@@ -5,13 +5,7 @@
     {{on "click" this.toggleChecked}}
   >
     <div class="flex items-center space-x-3">
-      {{#let (get-product-id @productArea) as |productID|}}
-        <Hds::IconTile
-          @size="small"
-          @logo={{productID}}
-          @icon={{unless productID "folder"}}
-        />
-      {{/let}}
+      <Product::Avatar @product={{@productArea}} @size="medium" />
       <div data-test-subscription-list-item-name>
         {{@productArea}}
       </div>

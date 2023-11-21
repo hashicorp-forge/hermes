@@ -9,8 +9,6 @@ import hashValue from "hash-value";
 const COLORS = [
   "#0c0c0e",
   "#3b3d45",
-  "#656a76",
-  "#8c909c",
   "#c2c5cb",
   "#f1f2f3",
 
