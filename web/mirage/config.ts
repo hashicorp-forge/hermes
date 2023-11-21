@@ -12,7 +12,11 @@ import {
   TEST_SHORT_LINK_BASE_URL,
 } from "hermes/utils/hermes-urls";
 
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_NAME,
+  TEST_USER_GIVEN_NAME,
+} from "hermes/utils/mirage-utils";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -372,7 +376,9 @@ export default function (mirageConfig) {
             algolia_docs_index_name: config.algolia.docsIndexName,
             algolia_drafts_index_name: config.algolia.draftsIndexName,
             algolia_internal_index_name: config.algolia.internalIndexName,
-            feature_flags: null,
+            feature_flags: {
+              projects: true,
+            },
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
             skip_google_auth: false,
@@ -428,9 +434,9 @@ export default function (mirageConfig) {
           // Otherwise, create and return a new user.
           return schema.mes.create({
             id: "1",
-            name: "Test User",
+            name: TEST_USER_NAME,
             email: TEST_USER_EMAIL,
-            given_name: "Test",
+            given_name: TEST_USER_GIVEN_NAME,
             picture: "",
             subscriptions: [],
             isLoggedIn: true,
