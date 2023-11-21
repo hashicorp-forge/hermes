@@ -12,6 +12,8 @@ import {
   TEST_SHORT_LINK_BASE_URL,
 } from "hermes/utils/hermes-urls";
 
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+
 export default function (mirageConfig) {
   let finalConfig = {
     ...mirageConfig,
@@ -70,6 +72,18 @@ export default function (mirageConfig) {
 
             const filters = requestBody.filters;
 
+            // Currently only used by the dashboard to fetch docs awaiting review.
+            if (filters?.includes("approvers")) {
+              const approvers = filters.split("approvers:'")[1].split("'")[0];
+              docMatches = schema.document.all().models.filter((doc) => {
+                return doc.attrs.approvers.some((approver) => {
+                  return approvers.includes(approver);
+                });
+              });
+
+              return new Response(200, {}, { hits: docMatches });
+            }
+
             if (filters?.includes("NOT objectID")) {
               // there can be a number of objectIDs in the format of
               // NOT objectID:"1234" AND NOT objectID:"5678"
@@ -99,12 +113,12 @@ export default function (mirageConfig) {
               return new Response(200, {}, { hits: docMatches });
             } else if (filters) {
               const requestIsForDocsAwaitingReview =
-                filters.includes("approvers:'testuser@example.com'") &&
+                filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
                 requestBody.filters.includes("AND status:In-Review");
               if (requestIsForDocsAwaitingReview) {
                 docMatches = schema.document.all().models.filter((doc) => {
                   return (
-                    doc.attrs.approvers.includes("testuser@example.com") &&
+                    doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
                   );
                 });
@@ -291,7 +305,7 @@ export default function (mirageConfig) {
 
         document.update({
           objectID: document.id,
-          owners: ["testuser@example.com"],
+          owners: [TEST_USER_EMAIL],
         });
 
         return new Response(200, {}, document.attrs);
@@ -415,7 +429,7 @@ export default function (mirageConfig) {
           return schema.mes.create({
             id: "1",
             name: "Test User",
-            email: "testuser@example.com",
+            email: TEST_USER_EMAIL,
             given_name: "Test",
             picture: "",
             subscriptions: [],
@@ -430,7 +444,7 @@ export default function (mirageConfig) {
        */
       this.get("/people", (schema, request) => {
         // This allows the test user to view docs they're an approver on.
-        if (request.queryParams.emails === "testuser@example.com") {
+        if (request.queryParams.emails === TEST_USER_EMAIL) {
           return new Response(200, {}, []);
         }
 

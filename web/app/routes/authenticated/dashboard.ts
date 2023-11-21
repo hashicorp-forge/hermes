@@ -55,7 +55,6 @@ export default class DashboardRoute extends Route {
      *
      */
     if (this.latestDocs.index) {
-      console.log("void");
       void this.latestDocs.fetchAll.perform();
     } else {
       promises.push(this.latestDocs.fetchAll.perform().then(() => {}));

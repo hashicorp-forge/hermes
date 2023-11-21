@@ -122,19 +122,6 @@
             />
           </div>
         {{/if}}
-      {{else if (eq this.latestDocs null)}}
-        <div data-test-error-fetching-documents class="h-[100px]">
-          <p class="mb-7 text-body-300 text-color-foreground-faint">
-            Error fetching documents.
-          </p>
-          <Hds::Button
-            @text="Retry"
-            @color="secondary"
-            @size="small"
-            @icon="reload"
-            {{on "click" (perform this.latestDocs.fetchAll)}}
-          />
-        </div>
       {{else}}
         <div data-test-no-docs-published class="empty-text">
           No documents have been published yet.

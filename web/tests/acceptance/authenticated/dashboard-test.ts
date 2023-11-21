@@ -8,6 +8,8 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_GIVEN_NAME,
 } from "hermes/utils/mirage-utils";
+import LatestDocsService from "hermes/services/latest-docs";
+import { keepLatestTask } from "ember-concurrency";
 
 const RECENTLY_VIEWED_DOC_SELECTOR = "[data-test-recently-viewed-doc]";
 const DOC_AWAITING_REVIEW = "[data-test-doc-awaiting-review]";
@@ -85,7 +87,7 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
     assert
       .dom(WELCOME_MESSAGE)
       .containsText(
-        `Welcome, ${TEST_USER_GIVEN_NAME}`,
+        `Welcome back, ${TEST_USER_GIVEN_NAME}!`,
         `displays the user's "given_name"`,
       );
   });
@@ -100,20 +102,5 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
     await visit("/dashboard");
 
     assert.dom(NO_VIEWED_DOCS).exists();
-  });
-
-  test("if fetching latest docs fails, it shows an error message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {
-    this.server.get("/documents", {}, 500);
-
-    await visit("/dashboard");
-
-    assert.dom(ERROR_FETCHING_DOCS).exists();
-
-    this.server.get("/documents", {}, 200);
-
-    await click(`${ERROR_FETCHING_DOCS} button`);
-
-    assert.dom(ERROR_FETCHING_DOCS).doesNotExist();
-    SVGFEDisplacementMapElement;
   });
 });
