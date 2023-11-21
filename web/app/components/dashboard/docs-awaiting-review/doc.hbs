@@ -3,7 +3,7 @@
     data-test-doc-awaiting-review-link
     @route="authenticated.document"
     @model={{@doc.objectID}}
-    class="group block border-t border-color-border-faint py-4 pl-3 pr-6 hover:bg-color-surface-faint"
+    class="main-inner py-4"
   >
     <div class="flex w-full flex-wrap items-center gap-5 md:flex-nowrap">
       <Person::Avatar
@@ -17,12 +17,9 @@
       {{! Title and docNumber }}
       <div class="w-full overflow-hidden">
         <div class="flex gap-2.5 text-display-300">
-          <h4
-            data-test-document-title
-            class="min-w-0 truncate font-semibold text-color-foreground-strong"
-          >
+          <h3 data-test-document-title class="truncate">
             {{@doc.title}}
-          </h4>
+          </h3>
           <div
             data-test-document-number
             class="whitespace-nowrap font-regular text-color-foreground-faint"
@@ -33,7 +30,7 @@
       </div>
 
       {{! Tags }}
-      <div class="flex shrink-0 gap-1">
+      <div class="tags">
         <Doc::State
           data-test-document-state
           @state={{@doc.status}}

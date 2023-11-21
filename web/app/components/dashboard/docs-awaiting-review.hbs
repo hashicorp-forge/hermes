@@ -1,14 +1,15 @@
 <div class="mb-10 w-full">
   <div class="flex items-center">
     <div class="flex items-center gap-3">
-      <h4 class="text-display-400 text-color-foreground-strong">
+      <h2>
         Awaiting your review
-      </h4>
+      </h2>
       <Hds::BadgeCount
         data-test-docs-awaiting-review-count
         @text="{{@docs.length}}"
+        @type="inverted"
         @size="large"
-        class="px-4"
+        class="px-[18px]"
       />
     </div>
   </div>

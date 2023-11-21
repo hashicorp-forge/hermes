@@ -1,24 +1,23 @@
 <Dashboard::NewFeaturesBanner />
 
 <div class="mt-3 flex w-full">
+  {{! TODO: this overflow shouldn't be this broad }}
   <div class="min-h-[500px] w-full overflow-hidden pb-20">
-    <div class="pr-4">
+    <div class="main pr-4">
 
-      <div data-test-welcome-message class="mb-6 flex items-center gap-3">
-        <h4 class="hermes-h4">
-          Welcome back,
-          {{this.authenticatedUser.info.given_name}}!
-        </h4>
-      </div>
+      <h4 data-test-welcome-message class="hermes-h4 mb-6">
+        Welcome back,
+        {{this.authenticatedUser.info.given_name}}!
+      </h4>
 
       {{#if @docsAwaitingReview}}
         <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
       {{/if}}
 
       <div class="flex items-center gap-3.5">
-        <h4 class="flex gap-2.5 text-display-400 text-color-foreground-strong">
+        <h2>
           Latest docs
-        </h4>
+        </h2>
 
         {{#if this.latestDocs.fetchAll.isRunning}}
           <FlightIcon @name="running" />
@@ -28,16 +27,13 @@
       {{#if this.latestDocs.index.length}}
         <ol class="mt-5">
           {{#each this.latestDocs.index as |doc|}}
-            <li data-test-latest-doc class="border-t border-color-border-faint">
+            <li data-test-latest-doc>
               <LinkTo
                 @route="authenticated.document"
                 @model={{doc.objectID}}
                 @query={{hash draft=doc.isDraft}}
-                class="block hover:bg-color-surface-faint"
               >
-                <div
-                  class="relative flex justify-between gap-5 pl-3 pr-6 pt-5 pb-6"
-                >
+                <div class="main-inner flex justify-between gap-5 pt-5 pb-6">
                   <Person::Avatar
                     @size="large"
                     @email="{{get doc.owners 0}}"
@@ -45,15 +41,14 @@
                     class="-mt-1 shrink-0"
                   />
                   <div class="w-full">
-
-                    {{! Title and docNumber }}
                     <div class="relative z-10 overflow-hidden">
-                      <h4
-                        class="text-display-300 font-semibold text-color-foreground-strong"
-                      >
+                      <h3>
+                        {{! Title }}
                         <span data-test-document-title class="mr-1.5">
                           {{doc.title}}
                         </span>
+
+                        {{! Doc Number }}
                         <span
                           data-test-document-number
                           class="shrink-0 font-regular text-color-foreground-faint"
@@ -62,22 +57,22 @@
                             {{doc.docNumber}}
                           </span>
                         </span>
-                      </h4>
+                      </h3>
                     </div>
-                    {{! Owner }}
                     <div
-                      class="mt-1.5 flex items-center gap-[5px] text-color-foreground-faint"
+                      class="mt-1.5 flex gap-[5px] text-color-foreground-faint"
                     >
-                      <span class="text-color-foreground-X">
-                        {{get doc.owners 0}}
-                      </span>
-                      <span class="opacity-50">
+                      {{! Owner }}
+                      {{get doc.owners 0}}
+                      <span class="vertical-line">
                         |
                       </span>
+                      {{! Product }}
                       {{doc.product}}
-                      <span class="opacity-50">
+                      <span class="vertical-line">
                         |
                       </span>
+                      {{! Created Time }}
                       {{time-ago doc.createdTime}}
                     </div>
 
@@ -87,12 +82,14 @@
                       </p>
                     {{/if}}
 
-                    <div class="mt-3.5 flex items-center gap-1">
+                    <div class="tags mt-3.5">
+                      {{! Status }}
                       <Doc::State
                         @state={{doc.status}}
                         @hideProgress={{true}}
                         class="interactive"
                       />
+                      {{! Doc Type }}
                       <Hds::Badge @text={{doc.docType}} />
                     </div>
 
@@ -112,7 +109,7 @@
         </ol>
 
         {{#if this.linkToAllDocsIsShown}}
-          <div class="mt-5 pl-3 pr-7">
+          <div class="main-inner mt-5">
             <Hds::Button
               @color="secondary"
               @text="See older documents"
@@ -126,7 +123,7 @@
           </div>
         {{/if}}
       {{else if (eq this.latestDocs null)}}
-        <div class="h-[100px]">
+        <div data-test-error-fetching-documents class="h-[100px]">
           <p class="mb-7 text-body-300 text-color-foreground-faint">
             Error fetching documents.
           </p>
@@ -139,10 +136,7 @@
           />
         </div>
       {{else}}
-        <div
-          data-test-no-docs-published
-          class="mt-5 text-display-300 text-color-foreground-disabled"
-        >
+        <div data-test-no-docs-published class="empty-text">
           No documents have been published yet.
         </div>
         <Hds::Button
@@ -156,50 +150,40 @@
     </div>
   </div>
 
-  <div class="flex w-72 shrink-0 pt-10">
-    <div class="relative h-full pl-4">
-
-      {{! Vertical line }}
-      <div class="absolute left-0 top-0 h-full w-px bg-color-border-primary" />
+  <div class="secondary flex w-72 shrink-0 pt-10">
+    <div class="relative h-full border-l border-l-color-border-primary pl-4">
 
       <div class="mt-2.5 flex w-full items-center justify-between pl-3">
         <h4 class="text-display-300 text-color-foreground-strong">
           Recently viewed
         </h4>
       </div>
+
       {{#if this.viewedDocs.all}}
         <ul class="mt-4">
           {{#each this.viewedDocs.all as |r|}}
-            <li
-              data-test-recently-viewed-doc
-              class="border-b border-color-border-faint last:border-0"
-            >
+            <li data-test-recently-viewed-doc>
               <LinkTo
                 @route="authenticated.document"
                 @model={{r.doc.objectID}}
                 @query={{hash draft=r.doc.isDraft}}
-                class="block px-3 pt-3 pb-3.5 hover:bg-color-surface-faint"
+                class="px-3 pt-3 pb-3.5"
               >
-                <div class="flex w-full gap-5">
-
+                <div class="flex w-full items-start gap-5">
                   <div class="w-full">
-
                     <div class="flex items-center gap-[5px]">
                       <Person::Avatar
-                        @email={{get r.doc.owners 0}}
+                        @email="{{get r.doc.owners 0}}"
                         @imgURL={{get r.doc.ownerPhotos 0}}
                       />
-                      <span class="text-color-foreground-faint opacity-50">
+                      <span class="vertical-line">
                         |
                       </span>
                       <span class="text-body-100 text-color-foreground-faint">
-
                         {{r.doc.product}}
                       </span>
                     </div>
-                    <h5
-                      class="mt-1.5 text-body-200 font-semibold text-color-foreground-strong"
-                    >
+                    <h5 class="mt-1.5">
                       {{r.doc.title}}
                     </h5>
                     <p class="mt-0.5 text-body-100 text-color-foreground-faint">
@@ -211,7 +195,7 @@
                     @status={{r.doc.status}}
                     @product={{r.doc.product}}
                     @size="small"
-                    class="shrink-0 self-start"
+                    class="shrink-0"
                   />
                 </div>
               </LinkTo>
@@ -219,11 +203,10 @@
           {{/each}}
         </ul>
       {{else}}
-        <div class="mt-5 px-3 text-body-300 text-color-foreground-disabled">
+        <div data-test-no-viewed-docs class="empty-text px-3">
           You haven't viewed any documents yet.
         </div>
       {{/if}}
     </div>
-
   </div>
 </div>

@@ -1,13 +1,20 @@
-import { visit } from "@ember/test-helpers";
+import { click, visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_GIVEN_NAME,
+} from "hermes/utils/mirage-utils";
 
 const RECENTLY_VIEWED_DOC_SELECTOR = "[data-test-recently-viewed-doc]";
 const DOC_AWAITING_REVIEW = "[data-test-doc-awaiting-review]";
 const WELCOME_MESSAGE = "[data-test-welcome-message]";
+const NO_DOCS_PUBLISHED = "[data-test-no-docs-published]";
+const NO_VIEWED_DOCS = "[data-test-no-viewed-docs]";
+const ERROR_FETCHING_DOCS = "[data-test-error-fetching-documents]";
 
 interface AuthenticatedDashboardRouteTestContext extends MirageTestContext {}
 
@@ -55,9 +62,7 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
 
     this.server.create("document", {
       title,
-      approvers: [
-        /** TODO: default logged in user */
-      ],
+      approvers: [TEST_USER_EMAIL],
       status: "In-Review",
     });
 
@@ -79,12 +84,36 @@ module("Acceptance | authenticated/dashboard", function (hooks) {
 
     assert
       .dom(WELCOME_MESSAGE)
-      .containsText("Welcome, Test User", `displays the user's "given_name"`);
+      .containsText(
+        `Welcome, ${TEST_USER_GIVEN_NAME}`,
+        `displays the user's "given_name"`,
+      );
   });
 
-  test("if the latest docs is empty, it shows a message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {});
+  test("if the latest docs is empty, it shows a message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {
+    await visit("/dashboard");
 
-  test("if the recently viewed docs is empty, it shows a message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {});
+    assert.dom(NO_DOCS_PUBLISHED).exists();
+  });
 
-  test("if fetching latest docs fails, it shows an error message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {});
+  test("if the recently viewed docs is empty, it shows a message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {
+    await visit("/dashboard");
+
+    assert.dom(NO_VIEWED_DOCS).exists();
+  });
+
+  test("if fetching latest docs fails, it shows an error message", async function (this: AuthenticatedDashboardRouteTestContext, assert) {
+    this.server.get("/documents", {}, 500);
+
+    await visit("/dashboard");
+
+    assert.dom(ERROR_FETCHING_DOCS).exists();
+
+    this.server.get("/documents", {}, 200);
+
+    await click(`${ERROR_FETCHING_DOCS} button`);
+
+    assert.dom(ERROR_FETCHING_DOCS).doesNotExist();
+    SVGFEDisplacementMapElement;
+  });
 });
