@@ -6,11 +6,10 @@ import FetchService from "./fetch";
 import { assert } from "@ember/debug";
 import hashValue from "hash-value";
 
-const COLORS = [
+const HDS_COLORS = [
   "#0c0c0e",
   "#3b3d45",
   "#c2c5cb",
-  "#f1f2f3",
 
   "#51130a",
   "#940004",
@@ -36,6 +35,25 @@ const COLORS = [
   "#0046d1",
   "#0c56e9",
   "#cce3fe",
+];
+
+const EXTENDED_COLORS = [
+  "#251333",
+
+  "#EEE6CC",
+
+  "#5B2152",
+  "#C4168A",
+
+  "#1E3337",
+  "#104650",
+  "#0DC8E9",
+  "#CCEFFE",
+
+  "#172504",
+  "#294207",
+  "#557800",
+  "#CCEECD",
 ];
 
 export type ProductArea = {
@@ -65,7 +83,7 @@ export default class ProductAreasService extends Service {
       return;
     }
 
-    return hashValue(product, COLORS);
+    return hashValue(product, [...HDS_COLORS, ...EXTENDED_COLORS]);
   }
 
   /**
