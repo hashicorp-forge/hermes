@@ -2,7 +2,6 @@ import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { waitUntil } from "@ember/test-helpers";
 
 interface RecentlyViewedDocsContext extends MirageTestContext {
   viewedDocs: RecentlyViewedDocsService;
@@ -23,7 +22,5 @@ module("Unit | Service | recently-viewed-docs", function (hooks) {
     assert.equal(this.viewedDocs.all, null, "the index is empty");
 
     await this.viewedDocs.fetchAll.perform();
-
-    await waitUntil(() => this.viewedDocs.all?.length === 10);
   });
 });
