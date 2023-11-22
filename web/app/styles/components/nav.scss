@@ -16,7 +16,13 @@
       }
 
       &.active {
-        @apply relative bg-gradient-to-b from-color-palette-neutral-175 to-color-palette-neutral-100;
+        @apply relative text-color-palette-blue-200;
+
+        /* Active indicator */
+        &::before {
+          content: "";
+          @apply absolute left-0 -bottom-px h-1 w-full bg-color-palette-blue-200;
+        }
       }
     }
   }

@@ -4,7 +4,7 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const SORTABLE_HEADER = "[data-test-attribute=modifiedTime]";
 const OWNER_FILTER = "[data-test-owner-filter]";
@@ -54,11 +54,9 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
   });
 
   test("you can filter out drafts shared with you", async function (this: AuthenticatedMyDocumentsRouteTestContext, assert) {
-    const teammateEmail = "teammate@hashicorp.com";
-
     this.server.create("document");
     this.server.create("document", {
-      owners: [teammateEmail],
+      owners: [TEST_USER_2_EMAIL],
       collaborators: [TEST_USER_EMAIL],
     });
 
@@ -66,12 +64,14 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
 
     assert.dom(TABLE_ROW).exists({ count: 2 }, "Both documents are shown");
 
-    const expectedOwners = [teammateEmail, "Me"];
+    const expectedOwners = [TEST_USER_2_EMAIL, "Me"];
     const actualOwners = Array.from(document.querySelectorAll(EMAIL)).map(
       (el) => el.textContent?.trim(),
     );
 
     assert.deepEqual(actualOwners, expectedOwners);
+
+    await this.pauseTest();
 
     await click(OWNER_FILTER);
 

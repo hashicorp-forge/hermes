@@ -36,8 +36,8 @@ export default function (mirageConfig) {
        * Reviews the request and determines how to respond.
        */
       const handleAlgoliaRequest = (schema, request) => {
+        console.log("alg");
         const requestBody = JSON.parse(request.requestBody);
-
         if (requestBody) {
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
@@ -52,8 +52,22 @@ export default function (mirageConfig) {
           }
 
           if (facetFilters) {
-            // What is here to tell me to filter to drafts
-            // Facet filters arrive like ["owners:testuser@example,com"]
+            if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+              // Facet filters arrive like ["owners:testuser@hashicorp,com"]
+              // Likely a request to exclude drafts I'm a collaborator on
+
+              const hits = schema.document.all().models.filter((doc) => {
+                return doc.attrs.owners.includes(TEST_USER_EMAIL);
+              });
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits,
+                },
+              );
+            }
           } else if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
@@ -551,10 +565,24 @@ export default function (mirageConfig) {
        * Used by the /drafts route's getDraftResults method to fetch
        * a list of facets and draft results.
        */
-      this.get("/drafts", () => {
+      this.get("/drafts", (schema, request) => {
+        console.log("drafts");
+
+        const params = request.queryParams;
+
+        console.log(params);
+
+        const { facetFilters } = params;
+
         const allDocs = this.schema.document.all().models;
         const drafts = allDocs.filter((doc) => {
-          return doc.attrs.isDraft;
+          if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+            return (
+              doc.attrs.isDraft && doc.attrs.owners.includes(TEST_USER_EMAIL)
+            );
+          } else {
+            return doc.attrs.isDraft;
+          }
         });
 
         return new Response(
