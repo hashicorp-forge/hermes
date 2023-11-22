@@ -88,15 +88,7 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     const sortIsAsc = this.args.sortDirection === SortDirection.Asc;
 
     if (sortIsAsc) {
-      // Return the whole array in reverse order, ungrouped.
-      return [
-        {
-          label: undefined,
-          docs: this.args.docs.reverse(),
-        },
-      ];
-    } else if (this.args.currentPage > 1) {
-      // Return the whole array, ungrouped.
+      // Return the whole list in one group
       return [
         {
           label: undefined,
@@ -105,9 +97,7 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
       ];
     } else {
       this.args.docs.filter((doc) => {
-        if (!doc.modifiedTime) {
-          docGroupFour.push(doc);
-        } else {
+        if (doc.modifiedTime) {
           const modifiedTime = new Date(doc.modifiedTime * 1000).getTime();
           const now = Date.now();
           const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
@@ -121,8 +111,10 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
           } else if (modifiedTime > oneYearAgo) {
             docGroupThree.push(doc);
           } else {
-            docGroupFour.unshift(doc);
+            docGroupFour.push(doc);
           }
+        } else {
+          docGroupFour.push(doc);
         }
       });
 

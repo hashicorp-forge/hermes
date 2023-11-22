@@ -72,24 +72,19 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
 
   async model(params: AuthenticatedMyDocumentsRouteParams) {
     const sortedBy = params.sortBy ?? SortByValue.DateDesc;
+
     const sortDirection =
       sortedBy === SortByValue.DateDesc
         ? SortDirection.Desc
         : SortDirection.Asc;
+
     const indexName = this.configSvc.config.algolia_docs_index_name;
     const { page } = params;
-
-    // TODO: need to create modifiedTime_asc indexes
-    // TODO: need to allow filtering on this index (maybe)
-
     const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
-
     const sortIsDesc = sortDirection === SortDirection.Desc;
 
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform({
-        // FIXME: when this was set to 10, the results were not being sorted correctly
-        // FIXME: this doesn't seem to work
         hitsPerPage: 100,
         page,
         facetFilters:
@@ -115,26 +110,18 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       draftResults?.nbPages ?? 1,
     );
 
-    let docs = [
-      ...(draftResults?.Hits ?? []),
-      ...(typedDocResults.hits ?? []),
-    ].sort((a, b) => {
-      if (a.modifiedTime && b.modifiedTime) {
-        if (sortIsDesc) {
-          return a.modifiedTime - b.modifiedTime;
-        } else {
-          return b.modifiedTime - a.modifiedTime;
-        }
+    let docs = [...(draftResults?.Hits ?? []), ...(typedDocResults.hits ?? [])];
+
+    docs = docs.sort((a, b) => {
+      const aTime = a.modifiedTime ?? 0;
+      const bTime = b.modifiedTime ?? 0;
+      // In our case we want the highest (more recent) number first
+      if (sortIsDesc) {
+        return bTime - aTime;
       } else {
-        if (sortIsDesc) {
-          return a.modifiedTime ? -1 : 1;
-        } else {
-          return a.modifiedTime ? 1 : -1;
-        }
+        return aTime - bTime;
       }
     });
-
-    // FIXME: for some reason when you sort Asc we dont get published docs
 
     return {
       docs,

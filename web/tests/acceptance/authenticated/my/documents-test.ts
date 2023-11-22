@@ -54,7 +54,11 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
   });
 
   test("you can filter out drafts shared with you", async function (this: AuthenticatedMyDocumentsRouteTestContext, assert) {
-    this.server.create("document");
+    this.server.create("document", {
+      // Set a higher (more recent) number than the
+      // factory assigns so it gets sorted first
+      modifiedTime: 2,
+    });
     this.server.create("document", {
       owners: [TEST_USER_2_EMAIL],
       collaborators: [TEST_USER_EMAIL],
@@ -64,7 +68,7 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
 
     assert.dom(TABLE_ROW).exists({ count: 2 }, "Both documents are shown");
 
-    const expectedOwners = [TEST_USER_2_EMAIL, "Me"];
+    const expectedOwners = ["Me", TEST_USER_2_EMAIL];
     const actualOwners = Array.from(document.querySelectorAll(EMAIL)).map(
       (el) => el.textContent?.trim(),
     );
@@ -81,26 +85,35 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
   });
 
   test("document links have the correct query params", async function (this: AuthenticatedMyDocumentsRouteTestContext, assert) {
-    this.server.create("document");
+    this.server.create("document", {
+      // Set a higher (more recent) number than the
+      // factory assigns so it gets sorted first
+      modifiedTime: 2,
+    });
+
     this.server.create("document", {
       isDraft: false,
       status: "In review",
     });
 
-    await visit("/drafts");
+    await visit("/my/documents");
 
     assert
       .dom(DOCUMENT_LINK)
       .hasAttribute(
         "href",
         "/document/doc-0?draft=true",
-        "correctly has the draft param",
+        "most recently modified doc correctly has the draft param",
       );
 
     const secondDocumentLink = document.querySelectorAll(DOCUMENT_LINK)[1];
 
     assert
       .dom(secondDocumentLink)
-      .hasAttribute("href", "/document/doc-1", "correctly has no params");
+      .hasAttribute(
+        "href",
+        "/document/doc-1",
+        "second most recently modified doc correctly has no params",
+      );
   });
 });

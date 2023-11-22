@@ -150,7 +150,7 @@ func New(cfg *Config) (*Client, error) {
 		return nil, err
 	}
 
-	// Configure the docs createdTime_asc, createdTime_desc, modifiedTime_desc replica.
+	// Configure the docs createdTime_asc, createdTime_desc, modifiedTime_desc, modifiedTime_asc replica.
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
@@ -160,6 +160,7 @@ func New(cfg *Config) (*Client, error) {
 		c.DocsCreatedTimeAsc,
 		c.DocsCreatedTimeDesc,
 		c.DocsModifiedTimeDesc,
+		c.DocsModifiedTimeAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -189,7 +190,7 @@ func New(cfg *Config) (*Client, error) {
 		return nil, err
 	}
 
-	// Configure the drafts createdTime_asc, createdTime_desc, modifiedTime_desc replica.
+	// Configure the drafts createdTime_asc, createdTime_desc, modifiedTime_desc, modifiedTime_asc replica.
 	c.DraftsCreatedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_asc")
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
 	c.DraftsModifiedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_desc")
@@ -199,6 +200,7 @@ func New(cfg *Config) (*Client, error) {
 		c.DraftsCreatedTimeAsc,
 		c.DraftsCreatedTimeDesc,
 		c.DraftsModifiedTimeDesc,
+		c.DraftsModifiedTimeAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -228,6 +230,7 @@ func configureReplicaIndexes(
 	createdTimeAscIndex *search.Index,
 	createdTimeDescIndex *search.Index,
 	modifiedTimeDescIndex *search.Index,
+	modifiedTimeAscIndex *search.Index,
 ) error {
 	// Configure the createdTime_asc replica for index.
 	_, err := createdTimeAscIndex.SetSettings(search.Settings{
@@ -283,6 +286,23 @@ func configureReplicaIndexes(
 	if err != nil {
 		return fmt.Errorf(
 			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the modifiedTime_asc replica for index.
+	_, err = modifiedTimeAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"status",
+			"owners",
+		),
+
+		Ranking: opt.Ranking(
+			"asc(modifiedTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_asc standard replica: %w",
 			indexName, err)
 	}
 

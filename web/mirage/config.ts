@@ -51,12 +51,16 @@ export default function (mirageConfig) {
           }
 
           if (facetFilters) {
+            /**
+             * Facet filters arrive like ["owners:foo@bar.com"]
+             */
             if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
-              // Facet filters arrive like ["owners:testuser@hashicorp,com"]
-              // Likely a request to exclude drafts I'm a collaborator on
-
+              // A request from the my/documents route for published docs
               const hits = schema.document.all().models.filter((doc) => {
-                return doc.attrs.owners.includes(TEST_USER_EMAIL);
+                return (
+                  doc.attrs.owners.includes(TEST_USER_EMAIL) &&
+                  doc.attrs.status !== "WIP"
+                );
               });
 
               return new Response(
