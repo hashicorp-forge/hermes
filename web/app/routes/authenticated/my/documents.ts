@@ -51,7 +51,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   private getDraftResults = task(
     async (options: SearchOptions): Promise<DraftResponseJSON | undefined> => {
       try {
-        console.log("options", options);
         return await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/drafts?` +
@@ -72,7 +71,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   );
 
   async model(params: AuthenticatedMyDocumentsRouteParams) {
-    console.log("model load");
     const sortedBy = params.sortBy ?? SortByValue.DateDesc;
     const sortDirection =
       sortedBy === SortByValue.DateDesc
@@ -80,8 +78,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         : SortDirection.Asc;
     const indexName = this.configSvc.config.algolia_docs_index_name;
     const { page } = params;
-
-    console.log("includeSharedDrafts", params.includeSharedDrafts);
 
     // TODO: need to create modifiedTime_asc indexes
     // TODO: need to allow filtering on this index (maybe)
@@ -96,8 +92,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         // FIXME: this doesn't seem to work
         hitsPerPage: 100,
         page,
-        // TODO: Need to make sure this works with the back end
-        // Whats the best way of expressing "include shared drafts"?
         facetFilters:
           params.includeSharedDrafts === false
             ? [`owners:${this.authenticatedUser.info.email}`]
@@ -113,8 +107,6 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         true,
       ),
     ]);
-
-    console.log("req");
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
 

@@ -71,8 +71,6 @@ module("Acceptance | authenticated/my/documents", function (hooks) {
 
     assert.deepEqual(actualOwners, expectedOwners);
 
-    await this.pauseTest();
-
     await click(OWNER_FILTER);
 
     assert.dom(TABLE_ROW).exists({ count: 1 });

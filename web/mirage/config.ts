@@ -36,7 +36,6 @@ export default function (mirageConfig) {
        * Reviews the request and determines how to respond.
        */
       const handleAlgoliaRequest = (schema, request) => {
-        console.log("alg");
         const requestBody = JSON.parse(request.requestBody);
         if (requestBody) {
           const { facetQuery, query } = requestBody;
@@ -566,14 +565,8 @@ export default function (mirageConfig) {
        * a list of facets and draft results.
        */
       this.get("/drafts", (schema, request) => {
-        console.log("drafts");
-
         const params = request.queryParams;
-
-        console.log(params);
-
         const { facetFilters } = params;
-
         const allDocs = this.schema.document.all().models;
         const drafts = allDocs.filter((doc) => {
           if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
