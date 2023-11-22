@@ -81,7 +81,10 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
           class={{if this.sizeIsSmall "h3 w-3" "h-4 w-4"}}
         />
       {{else if this.abbreviation}}
-        <span class="product-abbreviation letter-count-{{this.letterCount}}">
+        <span
+          data-test-product-abbreviation
+          class="product-abbreviation letter-count-{{this.letterCount}}"
+        >
           {{this.abbreviation}}
         </span>
       {{/if}}
