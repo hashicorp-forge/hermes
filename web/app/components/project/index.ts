@@ -96,10 +96,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
-        ...doc,
         googleFileID: doc.googleFileID,
         sortOrder: doc.sortOrder,
-        product: doc.product,
       };
     });
 
