@@ -10,11 +10,11 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
 import { HermesUser } from "hermes/types/document";
-import FlashService from "ember-cli-flash/services/flash-messages";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
 import { next } from "@ember/runloop";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface DocFormErrors {
   title: string | null;
@@ -34,7 +34,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  @service declare flashMessages: FlashService;
+  @service declare flashMessages: HermesFlashMessagesService;
   @service declare modalAlerts: ModalAlertsService;
   @service declare router: RouterService;
 
@@ -225,15 +225,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       this.router.transitionTo("authenticated.document", doc.id, {
         queryParams: { draft: true },
       });
-    } catch (err: unknown) {
+    } catch (e) {
       this.docIsBeingCreated = false;
 
-      this.flashMessages.add({
+      this.flashMessages.critical((e as any).message, {
         title: "Error creating document draft",
-        message: `${err}`,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
       });
     }
   });

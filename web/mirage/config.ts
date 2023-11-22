@@ -12,6 +12,12 @@ import {
   TEST_SHORT_LINK_BASE_URL,
 } from "hermes/utils/hermes-urls";
 
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_NAME,
+  TEST_USER_GIVEN_NAME,
+} from "hermes/utils/mirage-utils";
+
 export default function (mirageConfig) {
   let finalConfig = {
     ...mirageConfig,
@@ -100,12 +106,12 @@ export default function (mirageConfig) {
               return new Response(200, {}, { hits: docMatches });
             } else if (filters) {
               const requestIsForDocsAwaitingReview =
-                filters.includes("approvers:'testuser@example.com'") &&
+                filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
                 requestBody.filters.includes("AND status:In-Review");
               if (requestIsForDocsAwaitingReview) {
                 docMatches = schema.document.all().models.filter((doc) => {
                   return (
-                    doc.attrs.approvers.includes("testuser@example.com") &&
+                    doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
                   );
                 });
@@ -292,7 +298,9 @@ export default function (mirageConfig) {
 
         document.update({
           objectID: document.id,
-          owners: ["testuser@example.com"],
+          owners: [TEST_USER_EMAIL],
+          appCreated: true,
+          status: "WIP",
         });
 
         return new Response(200, {}, document.attrs);
@@ -352,6 +360,7 @@ export default function (mirageConfig) {
        * Used by the config service for environment variables.
        */
       this.get("/web/config", () => {
+        // TODO: allow this to be overwritten in the request
         return new Response(
           200,
           {},
@@ -360,7 +369,9 @@ export default function (mirageConfig) {
             algolia_drafts_index_name: config.algolia.draftsIndexName,
             algolia_internal_index_name: config.algolia.internalIndexName,
             api_version: "v1",
-            feature_flags: null,
+            feature_flags: {
+              projects: true,
+            },
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
             skip_google_auth: false,
@@ -416,9 +427,9 @@ export default function (mirageConfig) {
           // Otherwise, create and return a new user.
           return schema.mes.create({
             id: "1",
-            name: "Test User",
-            email: "testuser@example.com",
-            given_name: "Test",
+            name: TEST_USER_NAME,
+            email: TEST_USER_EMAIL,
+            given_name: TEST_USER_GIVEN_NAME,
             picture: "",
             subscriptions: [],
             isLoggedIn: true,
@@ -432,7 +443,7 @@ export default function (mirageConfig) {
        */
       this.get("/people", (schema, request) => {
         // This allows the test user to view docs they're an approver on.
-        if (request.queryParams.emails === "testuser@example.com") {
+        if (request.queryParams.emails === TEST_USER_EMAIL) {
           return new Response(200, {}, []);
         }
 

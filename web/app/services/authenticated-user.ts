@@ -36,7 +36,7 @@ export default class AuthenticatedUserService extends Service {
   @tracked _info: AuthenticatedUser | null = null;
 
   get info(): AuthenticatedUser {
-    assert("Authenticated must exist", this._info);
+    assert("user info must exist", this._info);
     return this._info;
   }
 

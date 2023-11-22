@@ -15,6 +15,10 @@ func ModelsToAutoMigrate() []interface{} {
 		&IndexerMetadata{},
 		&Product{},
 		&ProductLatestDocumentNumber{},
+		&Project{},
+		&ProjectRelatedResource{},
+		&ProjectRelatedResourceExternalLink{},
+		&ProjectRelatedResourceHermesDocument{},
 		&User{},
 	}
 }

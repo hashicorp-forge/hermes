@@ -1,5 +1,6 @@
 import {
   click,
+  currentURL,
   fillIn,
   find,
   findAll,
@@ -7,6 +8,7 @@ import {
   triggerKeyEvent,
   visit,
   waitFor,
+  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -21,6 +23,13 @@ import {
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
 import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
+import RouterService from "@ember/routing/router-service";
+import { wait } from "ember-animated/.";
+import {
+  TEST_USER_2_EMAIL,
+  TEST_USER_3_EMAIL,
+  TEST_USER_EMAIL,
+} from "hermes/utils/mirage-utils";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -92,6 +101,19 @@ module("Acceptance | authenticated/document", function (hooks) {
 
   hooks.beforeEach(async function () {
     await authenticateSession({});
+  });
+
+  test("it redirects to the dashboard by default if the document doesn't exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    await visit("/document/1");
+    assert.equal(currentURL(), "/dashboard");
+  });
+
+  test("it redirects to the previous page if the document doesn't exist", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    await visit("/documents");
+    assert.equal(currentURL(), "/documents");
+
+    await visit("/document/1");
+    assert.equal(currentURL(), "/documents");
   });
 
   test("the page title is correct (published doc)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -173,7 +195,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: false,
+      status: "In-Review",
       product: "Test Product 0",
     });
 
@@ -185,7 +207,11 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("the shortLinkURL is loaded by the config service", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", { objectID: 500, title: "Test Document" });
+    this.server.create("document", {
+      objectID: 500,
+      title: "Test Document",
+      status: "In-Review",
+    });
 
     await visit("/document/500");
     const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
@@ -237,9 +263,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
       .hasAttribute("data-test-icon", DraftVisibilityIcon.Restricted);
-    assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
-      .hasAttribute("data-test-chevron-direction", "down");
 
     assert.dom(TOOLTIP_SELECTOR).doesNotExist();
 
@@ -251,9 +274,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
 
-    assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
-      .hasAttribute("data-test-chevron-direction", "up");
     assert.dom(DRAFT_VISIBILITY_DROPDOWN_SELECTOR).exists("dropdown is open");
 
     assert.dom(DRAFT_VISIBILITY_OPTION_SELECTOR).exists({ count: 2 });
@@ -403,8 +423,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       isDraft: true,
-      owners: ["foo@example.com"],
-      collaborators: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      collaborators: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1?draft=true");
@@ -417,8 +437,8 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       isDraft: false,
       status: "In review",
-      owners: ["foo@example.com"],
-      collaborators: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      collaborators: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1");
@@ -431,8 +451,8 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       isDraft: false,
       status: "In review",
-      owners: ["foo@example.com"],
-      approvers: ["testuser@example.com"],
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
     });
 
     await visit("/document/1");
@@ -444,7 +464,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       isDraft: true,
-      owners: ["foo@example.com"],
+      owners: [TEST_USER_2_EMAIL],
       isShareable: true,
     });
 
@@ -617,7 +637,7 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("the contributors attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      contributors: ["foo@example.com"],
+      contributors: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -635,7 +655,7 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("the approvers attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      approvers: ["foo@example.com"],
+      approvers: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -716,7 +736,7 @@ module("Acceptance | authenticated/document", function (hooks) {
           type: "PEOPLE",
         },
       },
-      foo: ["foo@example.com"],
+      foo: [TEST_USER_2_EMAIL],
       isDraft: true,
     });
 
@@ -734,8 +754,8 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      approvers: ["foo@example.com", "bar@example.com"],
-      approvedBy: ["foo@example.com"],
+      approvers: [TEST_USER_2_EMAIL, TEST_USER_3_EMAIL],
+      approvedBy: [TEST_USER_2_EMAIL],
     });
 
     await visit("/document/1");

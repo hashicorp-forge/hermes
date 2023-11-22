@@ -14,7 +14,6 @@ import MetricsService from "hermes/services/_metrics";
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare flags: any;
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare metrics: MetricsService;
@@ -64,8 +63,6 @@ export default class ApplicationRoute extends Route {
     }
 
     await this.session.setup();
-
-    this.flags.initialize();
 
     await this.fetchSvc
       .fetch("/web/config")

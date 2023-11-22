@@ -716,15 +716,12 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
-					// TODO: change this log back to an error when this handles incomplete
-					// data in the database.
-					srv.Logger.Warn("error updating recently viewed docs",
+					srv.Logger.Error("error updating recently viewed docs",
 						"error", err,
 						"path", r.URL.Path,
 						"method", r.Method,
 						"doc_id", docID,
 					)
-					return
 				}
 			}
 

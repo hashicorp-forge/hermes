@@ -36,7 +36,7 @@
             @text={{if this.isDraft "Draft" @document.docNumber}}
             class="!rounded-[3px] uppercase
               {{if
-                @document.isDraft
+                this.isDraft
                 '!bg-color-palette-neutral-500 !text-white'
                 '!bg-transparent pl-0 !text-color-foreground-faint'
               }}
@@ -56,21 +56,14 @@
                 <dd.ToggleAction
                   data-test-draft-visibility-toggle
                   data-test-icon={{this.draftVisibilityIcon}}
-                  data-test-chevron-direction={{if
-                    dd.contentIsShown
-                    "up"
-                    "down"
-                  }}
                   class="sidebar-header-button draft-visibility-button flex items-center text-color-foreground-faint"
                   {{tooltip
                     this.toggleDraftVisibilityTooltipText
                     placement="bottom"
                   }}
+                  @hasChevron={{true}}
                 >
                   <FlightIcon @name={{this.draftVisibilityIcon}} />
-                  <FlightIcon
-                    @name={{if dd.contentIsShown "chevron-up" "chevron-down"}}
-                  />
                 </dd.ToggleAction>
               </:anchor>
               <:item as |dd|>

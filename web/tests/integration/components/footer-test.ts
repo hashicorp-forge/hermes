@@ -6,6 +6,7 @@ import { config, module, test } from "qunit";
 import MockDate from "mockdate";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 const SUPPORT_URL = "https://footer-component-support.com";
 
@@ -14,7 +15,7 @@ module("Integration | Component | footer", function (hooks) {
   setupMirage(hooks);
 
   test("it renders as expected (default setup)", async function (assert) {
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
 
     const configService = this.owner.lookup("service:config") as ConfigService;
 
@@ -31,7 +32,7 @@ module("Integration | Component | footer", function (hooks) {
       .dom("[data-test-footer-version]")
       .containsText(
         "Hermes v1.2.3 (abc123)",
-        "The version and revision are shown"
+        "The version and revision are shown",
       );
 
     assert

@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const DOC_AWAITING_REVIEW_LINK_SELECTOR =
   "[data-test-doc-awaiting-review-link]";
@@ -37,8 +38,8 @@ module(
         product: "Cloud Platform",
         status: "In Review",
         docType: "PRFAQ",
-        owners: ["foo@example.com"],
-        approvers: ["testuser@example.com"],
+        owners: [TEST_USER_2_EMAIL],
+        approvers: [TEST_USER_EMAIL],
       });
 
       this.set("doc", this.server.schema.document.first());
@@ -57,34 +58,34 @@ module(
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`,
+          ),
         )
         .hasText("HCP-001 Foo", "Shows the doc number and title");
 
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_OWNER_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_OWNER_SELECTOR}`,
+          ),
         )
-        .hasText("foo@example.com", "Shows the doc owner");
+        .hasText(TEST_USER_2_EMAIL, "Shows the doc owner");
 
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR}`,
+          ),
         )
         .hasText("Cloud Platform", "Shows the product name");
 
       assert
         .dom(
           find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR}`
-          )
+            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR}`,
+          ),
         )
         .hasText("PRFAQ", "Shows the doc type");
     });
-  }
+  },
 );
