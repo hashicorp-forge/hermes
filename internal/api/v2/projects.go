@@ -15,7 +15,7 @@ import (
 )
 
 type ProjectGetResponse struct {
-	*project
+	project
 }
 
 type ProjectPatchRequest struct {
@@ -233,6 +233,56 @@ func ProjectHandler(srv server.Server) http.Handler {
 			logArgs = append(logArgs, "project_id", projectID)
 
 			switch r.Method {
+			case "GET":
+				logArgs = append(logArgs, "method", r.Method)
+
+				// Get project.
+				proj := models.Project{}
+				if err := proj.Get(srv.DB, projectID); err != nil {
+					if errors.Is(err, gorm.ErrRecordNotFound) {
+						srv.Logger.Warn("project not found", logArgs...)
+						http.Error(w, "Project not found", http.StatusNotFound)
+						return
+					} else {
+						srv.Logger.Error("error getting project from database",
+							append([]interface{}{
+								"error", err,
+							}, logArgs...)...)
+						http.Error(
+							w, "Error processing request", http.StatusInternalServerError)
+						return
+					}
+				}
+
+				// Build response.
+				resp := ProjectGetResponse{
+					project: project{
+						CreatedTime:  proj.ProjectCreatedAt.Unix(),
+						Creator:      proj.Creator.EmailAddress,
+						Description:  proj.Description,
+						ID:           proj.ID,
+						JiraIssueID:  proj.JiraIssueID,
+						ModifiedTime: proj.ProjectModifiedAt.Unix(),
+						Status:       proj.Status.ToString(),
+						Title:        proj.Title,
+					},
+				}
+
+				// Write response.
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				enc := json.NewEncoder(w)
+				if err := enc.Encode(resp); err != nil {
+					srv.Logger.Error("error encoding response",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...,
+					)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+
 			case "PATCH":
 				logArgs = append(logArgs, "method", r.Method)
 
