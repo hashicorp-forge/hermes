@@ -64,6 +64,6 @@ module("Unit | Service | product-areas", function (hooks) {
     await this.productAreas.fetch.perform();
 
     assert.true(this.productAreas.getProductColor("Labs")?.startsWith("#"));
-    assert.equal(this.productAreas.getProductColor("foo"), undefined);
+    assert.equal(this.productAreas.getProductColor(), undefined);
   });
 });
