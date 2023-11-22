@@ -4,11 +4,10 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, render, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { task } from "ember-concurrency";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const ABBREVIATION = "[data-test-product-abbreviation]";
-const ICON = "[data-test-product-icon]";
+const ICON = "[data-test-product-avatar]";
 const NAME = "[data-test-subscription-list-item-name]";
 const CHECKBOX = '.hds-form-toggle input[type="checkbox"]';
 const POPOVER = ".subscription-list-popover";
