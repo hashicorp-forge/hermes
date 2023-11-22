@@ -15,14 +15,14 @@ import (
 )
 
 type ProjectGetResponse struct {
-	*project
+	project
 }
 
 type ProjectPatchRequest struct {
 	Description *string `json:"description"`
 	JiraIssueID *string `json:"jiraIssueID"`
-	Status      string  `json:"status"`
-	Title       string  `json:"title"`
+	Status      *string `json:"status"`
+	Title       *string `json:"title"`
 }
 
 type ProjectsPostRequest struct {
@@ -201,9 +201,9 @@ func ProjectHandler(srv server.Server) http.Handler {
 
 		// Parse project ID and subpath.
 		projectRegex := regexp.MustCompile(
-			`^\/api\/v2\/projects\/([0-9A-Za-z_\-]+)$`)
+			`^\/api\/v\d+\/projects\/([0-9A-Za-z_\-]+)$`)
 		projectRelatedResourcesRegex := regexp.MustCompile(
-			`^\/api\/v2\/projects\/([0-9A-Za-z_\-]+)\/related-resources$`)
+			`^\/api\/v\d+\/projects\/([0-9A-Za-z_\-]+)\/related-resources$`)
 		switch {
 		case projectRelatedResourcesRegex.MatchString(r.URL.Path):
 			projectID, err := getProjectIDFromPath(
@@ -233,6 +233,56 @@ func ProjectHandler(srv server.Server) http.Handler {
 			logArgs = append(logArgs, "project_id", projectID)
 
 			switch r.Method {
+			case "GET":
+				logArgs = append(logArgs, "method", r.Method)
+
+				// Get project.
+				proj := models.Project{}
+				if err := proj.Get(srv.DB, projectID); err != nil {
+					if errors.Is(err, gorm.ErrRecordNotFound) {
+						srv.Logger.Warn("project not found", logArgs...)
+						http.Error(w, "Project not found", http.StatusNotFound)
+						return
+					} else {
+						srv.Logger.Error("error getting project from database",
+							append([]interface{}{
+								"error", err,
+							}, logArgs...)...)
+						http.Error(
+							w, "Error processing request", http.StatusInternalServerError)
+						return
+					}
+				}
+
+				// Build response.
+				resp := ProjectGetResponse{
+					project: project{
+						CreatedTime:  proj.ProjectCreatedAt.Unix(),
+						Creator:      proj.Creator.EmailAddress,
+						Description:  proj.Description,
+						ID:           proj.ID,
+						JiraIssueID:  proj.JiraIssueID,
+						ModifiedTime: proj.ProjectModifiedAt.Unix(),
+						Status:       proj.Status.ToString(),
+						Title:        proj.Title,
+					},
+				}
+
+				// Write response.
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				enc := json.NewEncoder(w)
+				if err := enc.Encode(resp); err != nil {
+					srv.Logger.Error("error encoding response",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...,
+					)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+
 			case "PATCH":
 				logArgs = append(logArgs, "method", r.Method)
 
@@ -249,8 +299,8 @@ func ProjectHandler(srv server.Server) http.Handler {
 				}
 
 				// Validate request.
-				if req.Status != "" {
-					switch strings.ToLower(req.Status) {
+				if req.Status != nil {
+					switch strings.ToLower(*req.Status) {
 					case "active":
 					case "archived":
 					case "complete":
@@ -262,7 +312,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						return
 					}
 				}
-				if req.Title == "" {
+				if req.Title != nil && *req.Title == "" {
 					http.Error(
 						w, "Bad request: title cannot be empty", http.StatusBadRequest)
 					return
@@ -298,8 +348,8 @@ func ProjectHandler(srv server.Server) http.Handler {
 				if req.JiraIssueID != nil {
 					patch.JiraIssueID = *req.JiraIssueID
 				}
-				if req.Status != "" {
-					switch strings.ToLower(req.Status) {
+				if req.Status != nil {
+					switch strings.ToLower(*req.Status) {
 					case "active":
 						patch.Status = models.ActiveProjectStatus
 					case "archived":
@@ -308,7 +358,9 @@ func ProjectHandler(srv server.Server) http.Handler {
 						patch.Status = models.CompletedProjectStatus
 					}
 				}
-				patch.Title = req.Title
+				if req.Title != nil {
+					patch.Title = *req.Title
+				}
 
 				// Update project in the database.
 				if err := patch.Update(srv.DB); err != nil {
