@@ -197,6 +197,25 @@ func DocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Get projects associated with the document.
+			projs, err := model.GetProjects(srv.DB)
+			if err != nil {
+				srv.Logger.Error("error getting projects associated with document",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error processing request",
+					http.StatusInternalServerError)
+				return
+			}
+			projIDs := []int{}
+			for _, p := range projs {
+				projIDs = append(projIDs, int(p.ID))
+			}
+			docObj["projects"] = projIDs
+
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
