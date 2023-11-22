@@ -21,8 +21,8 @@ type ProjectGetResponse struct {
 type ProjectPatchRequest struct {
 	Description *string `json:"description"`
 	JiraIssueID *string `json:"jiraIssueID"`
-	Status      string  `json:"status"`
-	Title       string  `json:"title"`
+	Status      *string `json:"status"`
+	Title       *string `json:"title"`
 }
 
 type ProjectsPostRequest struct {
@@ -299,8 +299,8 @@ func ProjectHandler(srv server.Server) http.Handler {
 				}
 
 				// Validate request.
-				if req.Status != "" {
-					switch strings.ToLower(req.Status) {
+				if req.Status != nil {
+					switch strings.ToLower(*req.Status) {
 					case "active":
 					case "archived":
 					case "complete":
@@ -312,7 +312,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						return
 					}
 				}
-				if req.Title == "" {
+				if req.Title != nil && *req.Title == "" {
 					http.Error(
 						w, "Bad request: title cannot be empty", http.StatusBadRequest)
 					return
@@ -348,8 +348,8 @@ func ProjectHandler(srv server.Server) http.Handler {
 				if req.JiraIssueID != nil {
 					patch.JiraIssueID = *req.JiraIssueID
 				}
-				if req.Status != "" {
-					switch strings.ToLower(req.Status) {
+				if req.Status != nil {
+					switch strings.ToLower(*req.Status) {
 					case "active":
 						patch.Status = models.ActiveProjectStatus
 					case "archived":
@@ -358,7 +358,9 @@ func ProjectHandler(srv server.Server) http.Handler {
 						patch.Status = models.CompletedProjectStatus
 					}
 				}
-				patch.Title = req.Title
+				if req.Title != nil {
+					patch.Title = *req.Title
+				}
 
 				// Update project in the database.
 				if err := patch.Update(srv.DB); err != nil {
