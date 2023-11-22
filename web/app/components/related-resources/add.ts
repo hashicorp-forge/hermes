@@ -7,7 +7,6 @@ import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
@@ -19,6 +18,7 @@ import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
 import { RelatedResourcesScope } from "../related-resources";
 import { guidFor } from "@ember/object/internals";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface RelatedResourcesAddComponentSignature {
   Element: null;
@@ -79,7 +79,7 @@ enum FirstPartyURLFormat {
 export default class RelatedResourcesAddComponent extends Component<RelatedResourcesAddComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   private scopeIsExternalLinks =
     this.args.scope === RelatedResourcesScope.ExternalLinks;

@@ -184,6 +184,25 @@ func DocumentHandler(
 				return
 			}
 
+			// Get projects associated with the document.
+			projs, err := model.GetProjects(db)
+			if err != nil {
+				l.Error("error getting projects associated with document",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error processing request",
+					http.StatusInternalServerError)
+				return
+			}
+			projIDs := []int{}
+			for _, p := range projs {
+				projIDs = append(projIDs, int(p.ID))
+			}
+			docObj["projects"] = projIDs
+
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -211,15 +230,12 @@ func DocumentHandler(
 				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
 					// If we get an error, log it but don't return an error response
 					// because this would degrade UX.
-					// TODO: change this log back to an error when this handles incomplete
-					// data in the database.
-					l.Warn("error updating recently viewed docs",
+					l.Error("error updating recently viewed docs",
 						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
 					)
-					return
 				}
 			}
 
@@ -851,6 +867,9 @@ func updateRecentlyViewedDocs(
 			},
 		}
 		if err := dd.Get(db); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
 			return fmt.Errorf("error getting document: %w", err)
 		}
 		docs = append(docs, dd)

@@ -50,6 +50,13 @@ module.exports = function (environment) {
       apiKey: getEnv("ALGOLIA_SEARCH_API_KEY"),
     },
 
+    flashMessageDefaults: {
+      timeout: 5000,
+      extendedTimeout: 1000,
+      type: "success",
+      types: ["critical", "success"],
+    },
+
     google: {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },

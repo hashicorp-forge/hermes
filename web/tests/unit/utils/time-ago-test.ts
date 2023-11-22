@@ -1,10 +1,11 @@
 import timeAgo from "hermes/utils/time-ago";
 import { module, test } from "qunit";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 module("Unit | Utility | time-ago", function () {
   test('it returns a "time ago" value for a date', function (assert) {
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
 
     const now = Date.now() / 1000;
 

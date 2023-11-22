@@ -36,7 +36,7 @@
             @text={{if this.isDraft "Draft" @document.docNumber}}
             class="!rounded-[3px] uppercase
               {{if
-                @document.isDraft
+                this.isDraft
                 '!bg-color-palette-neutral-500 !text-white'
                 '!bg-transparent pl-0 !text-color-foreground-faint'
               }}

@@ -4,11 +4,11 @@ import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import { HermesDocument } from "hermes/types/document";
 import { restartableTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesDocument } from "hermes/types/document";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
 import { JiraIssue } from "hermes/types/project";
@@ -25,7 +25,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked protected jiraSearchIsShowing = false;
   @tracked protected jiraSearchQuery = "";
@@ -134,14 +134,9 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         .then((response) => response?.json());
 
       this.router.transitionTo("authenticated.projects.project", project.id);
-    } catch (error: unknown) {
-      const typedError = error as Error;
-      this.flashMessages.add({
+    } catch (e) {
+      this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
-        message: typedError.message,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
       });
       this.projectIsBeingCreated = false;
     }
