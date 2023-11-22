@@ -201,9 +201,9 @@ func ProjectHandler(srv server.Server) http.Handler {
 
 		// Parse project ID and subpath.
 		projectRegex := regexp.MustCompile(
-			`^\/api\/v2\/projects\/([0-9A-Za-z_\-]+)$`)
+			`^\/api\/v\d+\/projects\/([0-9A-Za-z_\-]+)$`)
 		projectRelatedResourcesRegex := regexp.MustCompile(
-			`^\/api\/v2\/projects\/([0-9A-Za-z_\-]+)\/related-resources$`)
+			`^\/api\/v\d+\/projects\/([0-9A-Za-z_\-]+)\/related-resources$`)
 		switch {
 		case projectRelatedResourcesRegex.MatchString(r.URL.Path):
 			projectID, err := getProjectIDFromPath(
