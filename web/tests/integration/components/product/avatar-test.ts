@@ -1,4 +1,4 @@
-import { render } from "@ember/test-helpers";
+import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
@@ -62,12 +62,13 @@ module("Integration | Component | product/avatar", function (hooks) {
     await setupProductIndex(this);
 
     await render<ProductAvatarTestContext>(hbs`
-      <Product::Avatar class="default" @product="Labs" />
+      <Product::Avatar @product="Labs" />
     `);
 
-    await this.pauseTest();
+    const inlineStyles = find(AVATAR)?.getAttribute("style");
 
-    // assert that there's inline background and text styles
+    assert.ok(inlineStyles?.includes("background-color"));
+    assert.ok(inlineStyles?.includes("color"));
   });
 
   test("it conditionally shows a product icon", async function (this: ProductAvatarTestContext, assert) {
@@ -75,12 +76,17 @@ module("Integration | Component | product/avatar", function (hooks) {
       name: "Vault",
     });
 
+    this.server.create("product", {
+      name: "Labs",
+      abbreviation: "LAB",
+    });
+
     this.set("product", "Vault");
 
     await setupProductIndex(this);
 
     await render<ProductAvatarTestContext>(hbs`
-      <Product::Avatar class="default" @product={{this.product}} />
+      <Product::Avatar @product={{this.product}} />
     `);
 
     assert.dom(ICON).exists();
@@ -104,7 +110,7 @@ module("Integration | Component | product/avatar", function (hooks) {
     await setupProductIndex(this);
 
     await render<ProductAvatarTestContext>(hbs`
-      <Product::Avatar class="default" @product={{this.product}} />
+      <Product::Avatar @product={{this.product}} />
     `);
 
     assert.dom(ABBREVIATION).exists();
@@ -114,12 +120,19 @@ module("Integration | Component | product/avatar", function (hooks) {
     assert.dom(ABBREVIATION).doesNotExist();
   });
 
-  test("it renders a fallback icon if the product is not found", async function (this: ProductAvatarTestContext, assert) {
+  test("it renders a fallback icon if the product has no ID nor abbreviation", async function (this: ProductAvatarTestContext, assert) {
+    this.server.create("product", {
+      name: "Foo",
+      abbreviation: null,
+    });
+
+    await setupProductIndex(this);
+
     await render<ProductAvatarTestContext>(hbs`
-      <Product::Avatar class="default" @product="foo" />
+      <Product::Avatar @product="Foo" />
     `);
 
-    assert.dom(ICON).hasAttribute("data-test-icon", "file-txt?");
+    assert.dom(ICON).hasAttribute("data-test-icon", "folder");
   });
 
   test("it renders an abbreviations up to 3 characters", async function (this: ProductAvatarTestContext, assert) {
@@ -148,7 +161,7 @@ module("Integration | Component | product/avatar", function (hooks) {
     await setupProductIndex(this);
 
     await render<ProductAvatarTestContext>(hbs`
-      <Product::Avatar class="default" @product={{this.product}} />
+      <Product::Avatar @product={{this.product}} />
     `);
 
     assert
