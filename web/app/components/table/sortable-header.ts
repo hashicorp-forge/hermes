@@ -11,6 +11,7 @@ export enum SortDirection {
 
 export enum SortAttribute {
   CreatedTime = "createdTime",
+  ModifiedTime = "modifiedTime",
   Owner = "owners",
   Product = "product",
   Status = "status",
@@ -24,10 +25,6 @@ interface TableSortableHeaderSignature {
     currentSort: `${SortAttribute}`;
     sortDirection: SortDirection;
     attribute: `${SortAttribute}`;
-    changeSort?: (
-      attribute: SortAttribute,
-      defaultSortDirection?: SortDirection
-    ) => void;
     defaultSortDirection?: `${SortDirection}`;
     queryParam?: Record<string, unknown>;
   };
@@ -55,32 +52,8 @@ export default class TableSortableHeader extends Component<TableSortableHeaderSi
     }
   }
 
-  private get sortDirection() {
-    if (!this.isActive) {
-      return (
-        (this.args.defaultSortDirection as SortDirection) ?? SortDirection.Asc
-      );
-    }
-  }
-
-  protected get isReadOnly() {
-    if (this.args.attribute === SortAttribute.CreatedTime) {
-      return false;
-    }
-
-    return true;
-  }
-
   protected get isActive() {
     return this.args.currentSort === this.args.attribute;
-  }
-
-  @action protected changeSort() {
-    assert("this.args.changeSort must exists", this.args.changeSort);
-    this.args.changeSort(
-      this.args.attribute as SortAttribute,
-      this.sortDirection
-    );
   }
 }
 

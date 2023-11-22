@@ -1,9 +1,10 @@
-<tr>
+<tr ...attributes>
   <td class="name">
     <LinkTo
+      data-test-document-link
       @route="authenticated.document"
       @model="{{@doc.objectID}}"
-      @query={{hash draft=(eq @doc.status "wip")}}
+      @query={{hash draft=this.isDraft}}
       class="inner flex h-full w-full items-start gap-3.5 focus:outline-none"
     >
       <Doc::Thumbnail @product={{@doc.product}} @status={{@doc.status}} />
@@ -54,6 +55,7 @@
   <td class="time">
     <div class="inner">
       <div
+        data-test-table-row-time-cell
         class={{if (eq this.time "Unknown") "text-color-foreground-disabled"}}
       >
         {{this.time}}

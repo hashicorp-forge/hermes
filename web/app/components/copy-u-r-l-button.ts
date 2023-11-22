@@ -1,12 +1,12 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import Ember from "ember";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import { restartableTask, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { Placement } from "@floating-ui/dom";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface CopyURLButtonComponentSignature {
   Element: HTMLButtonElement;
@@ -21,7 +21,7 @@ interface CopyURLButtonComponentSignature {
 }
 
 export default class CopyURLButtonComponent extends Component<CopyURLButtonComponentSignature> {
-  @service declare flashMessages: FlashMessageService;
+  @service declare flashMessages: HermesFlashMessagesService;
 
   /**
    * Whether the URL was recently copied to the clipboard.
@@ -119,12 +119,8 @@ export default class CopyURLButtonComponent extends Component<CopyURLButtonCompo
         }
       }
     } catch (e) {
-      this.flashMessages.add({
+      this.flashMessages.critical((e as any).message, {
         title: "Error copying link",
-        message: e as string,
-        type: "critical",
-        timeout: 5000,
-        extendedTimeout: 1000,
       });
     }
   });

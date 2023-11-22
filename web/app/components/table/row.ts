@@ -1,31 +1,46 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
-import { inject as service } from "@ember/service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import parseDate from "hermes/utils/parse-date";
+import timeAgo from "hermes/utils/time-ago";
+
+export enum TimeColumn {
+  Modified = "modifiedTime",
+  Created = "createdTime",
+}
 
 interface TableRowComponentSignature {
+  Element: HTMLTableRowElement;
   Args: {
     doc: HermesDocument;
+    timeColumn: `${TimeColumn}`;
   };
 }
 
 export default class TableRowComponent extends Component<TableRowComponentSignature> {
-  @service declare authenticatedUser: AuthenticatedUserService;
+  protected get time() {
+    const { modifiedTime, createdTime } = this.args.doc;
+    const { timeColumn } = this.args;
 
-  protected get ownerIsAuthenticatedUser() {
-    const docOwner = this.args.doc.owners?.[0];
+    let time = null;
 
-    if (!docOwner) {
-      return false;
+    if (modifiedTime && timeColumn === TimeColumn.Modified) {
+      time = modifiedTime;
+    } else if (createdTime && timeColumn === TimeColumn.Created) {
+      time = createdTime;
     }
 
-    return docOwner === this.authenticatedUser.info.email;
+    if (time) {
+      return timeAgo(time, { limitTo24Hours: true });
+    }
+
+    return "Unknown";
   }
 
-  protected get time() {
-    const { created } = this.args.doc;
-    return parseDate(created) as string;
+  protected get isDraft() {
+    if (this.args.doc.isDraft) {
+      return true;
+    }
+
+    return this.args.doc.status === "WIP";
   }
 }
 

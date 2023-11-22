@@ -3,12 +3,13 @@ import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 module("Integration | Helper | parse-date", function (hooks) {
   setupRenderingTest(hooks);
 
   // Make sure the date is always the same
-  MockDate.set("2000-01-01T06:00:00.000-07:00");
+  MockDate.set(DEFAULT_MOCK_DATE);
 
   test("", async function (assert) {
     await render(hbs`

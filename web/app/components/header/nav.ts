@@ -10,6 +10,7 @@ import AuthenticatedUserService, {
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
+import FlagsService from "hermes/services/flags";
 
 interface UserNavItem {
   label: string;
@@ -36,6 +37,7 @@ interface HeaderNavComponentSignature {
 
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+  @service declare flags: FlagsService;
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
