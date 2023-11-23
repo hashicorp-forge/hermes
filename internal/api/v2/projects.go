@@ -39,14 +39,14 @@ type ProjectsPostResponse struct {
 }
 
 type project struct {
-	CreatedTime  int64  `json:"createdTime,omitempty"`
-	Creator      string `json:"creator,omitempty"`
-	Description  string `json:"description,omitempty"`
-	ID           uint   `json:"id"`
-	JiraIssueID  string `json:"jiraIssueID,omitempty"`
-	ModifiedTime int64  `json:"modifiedTime,omitempty"`
-	Status       string `json:"status"`
-	Title        string `json:"title"`
+	CreatedTime  int64   `json:"createdTime,omitempty"`
+	Creator      string  `json:"creator,omitempty"`
+	Description  *string `json:"description,omitempty"`
+	ID           uint    `json:"id"`
+	JiraIssueID  *string `json:"jiraIssueID,omitempty"`
+	ModifiedTime int64   `json:"modifiedTime,omitempty"`
+	Status       string  `json:"status"`
+	Title        string  `json:"title"`
 }
 
 func ProjectsHandler(srv server.Server) http.Handler {
@@ -137,13 +137,9 @@ func ProjectsHandler(srv server.Server) http.Handler {
 				Creator: models.User{
 					EmailAddress: userEmail,
 				},
-				Title: req.Title,
-			}
-			if req.Description != nil {
-				proj.Description = *req.Description
-			}
-			if req.JiraIssueID != nil {
-				proj.JiraIssueID = *req.JiraIssueID
+				Description: req.Description,
+				JiraIssueID: req.JiraIssueID,
+				Title:       req.Title,
 			}
 
 			// Create project.
@@ -355,12 +351,8 @@ func ProjectHandler(srv server.Server) http.Handler {
 					Model: gorm.Model{
 						ID: uint(projectID),
 					},
-				}
-				if req.Description != nil {
-					patch.Description = *req.Description
-				}
-				if req.JiraIssueID != nil {
-					patch.JiraIssueID = *req.JiraIssueID
+					Description: req.Description,
+					JiraIssueID: req.JiraIssueID,
 				}
 				if req.Status != nil {
 					switch strings.ToLower(*req.Status) {
