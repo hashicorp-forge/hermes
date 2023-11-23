@@ -317,11 +317,11 @@ func ProjectHandler(srv server.Server) http.Handler {
 					switch strings.ToLower(*req.Status) {
 					case "active":
 					case "archived":
-					case "complete":
+					case "completed":
 					default:
 						http.Error(w,
 							"Bad request: invalid status"+
-								` (valid values are "active", "archived", "complete")`,
+								` (valid values are "active", "archived", "completed")`,
 							http.StatusBadRequest)
 						return
 					}
@@ -368,7 +368,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						patch.Status = models.ActiveProjectStatus
 					case "archived":
 						patch.Status = models.ArchivedProjectStatus
-					case "complete":
+					case "completed":
 						patch.Status = models.CompletedProjectStatus
 					}
 				}
