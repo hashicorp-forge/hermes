@@ -97,6 +97,11 @@ feature_flags {
   flag "api_v2" {
     enabled = false
   }
+
+  // projects enables the projects feature in the UI.
+  flag "projects" {
+    enabled = false
+  }
 }
 
 // google_workspace configures Hermes to work with Google Workspace.
