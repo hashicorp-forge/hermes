@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
+	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/gorm"
 )
@@ -176,6 +177,19 @@ func ProjectsHandler(srv server.Server) http.Handler {
 			}
 
 			srv.Logger.Info("created project", logArgs...)
+
+			// Request post-processing.
+			go func() {
+				// Save project in Algolia.
+				if err := saveProjectInAlgolia(proj, srv.AlgoWrite); err != nil {
+					srv.Logger.Error("error saving project in Algolia",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...,
+					)
+					return
+				}
+			}()
 
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
@@ -375,6 +389,19 @@ func ProjectHandler(srv server.Server) http.Handler {
 
 				srv.Logger.Info("updated project", logArgs...)
 
+				// Request post-processing.
+				go func() {
+					// Save project in Algolia.
+					if err := saveProjectInAlgolia(patch, srv.AlgoWrite); err != nil {
+						srv.Logger.Error("error saving project in Algolia",
+							append([]interface{}{
+								"error", err,
+							}, logArgs...)...,
+						)
+						return
+					}
+				}()
+
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
@@ -408,4 +435,34 @@ func getProjectIDFromPath(path string, re *regexp.Regexp) (uint, error) {
 	}
 
 	return uint(projectID), nil
+}
+
+// saveProjectInAlgolia saves a project in Algolia.
+func saveProjectInAlgolia(
+	proj models.Project,
+	algoClient *algolia.Client,
+) error {
+	// Convert project to Algolia object.
+	projObj := map[string]any{
+		"createdTime":  proj.ProjectCreatedAt.Unix(),
+		"creator":      proj.Creator.EmailAddress,
+		"description":  proj.Description,
+		"jiraIssueID":  proj.JiraIssueID,
+		"modifiedTime": proj.ProjectModifiedAt.Unix(),
+		"objectID":     fmt.Sprintf("%d", proj.ID),
+		"status":       proj.Status.ToString(),
+		"title":        proj.Title,
+	}
+
+	// Save project in Algolia.
+	res, err := algoClient.Projects.SaveObject(projObj)
+	if err != nil {
+		return fmt.Errorf("error saving object: %w", err)
+	}
+	err = res.Wait()
+	if err != nil {
+		return fmt.Errorf("error waiting for save: %w", err)
+	}
+
+	return nil
 }
