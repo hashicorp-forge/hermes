@@ -14,6 +14,7 @@ algolia {
   internal_index_name       = "internal"
   links_index_name          = "links"
   missing_fields_index_name = "missing_fields"
+  projects_index_name       = "projects"
   search_api_key            = ""
   write_api_key             = ""
 }
