@@ -59,6 +59,7 @@
 
     .overflow-button-container {
       @apply absolute right-1 top-1;
+      @apply from-color-page-faint;
     }
   }
 }
