@@ -57,6 +57,18 @@
       @apply text-color-foreground-faint;
     }
 
+    .overflow-button {
+      &:hover,
+      &:focus,
+      &:active,
+      &:focus-visible,
+      &.open {
+        .button-affordance {
+          @apply bg-color-page-primary;
+        }
+      }
+    }
+
     .overflow-button-container {
       @apply absolute right-1 top-1;
       @apply from-color-page-faint;
