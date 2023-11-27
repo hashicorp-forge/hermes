@@ -4,8 +4,8 @@ import { tracked } from "@glimmer/tracking";
 import {
   RelatedExternalLink,
   BackEndRelatedHermesDocument,
-  RelatedResource,
   FrontEndRelatedHermesDocument,
+  RelatedResource,
 } from "../related-resources";
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";

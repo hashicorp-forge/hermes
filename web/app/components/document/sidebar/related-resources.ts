@@ -12,9 +12,9 @@ import Ember from "ember";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import {
   RelatedExternalLink,
+  FrontEndRelatedHermesDocument,
   RelatedResource,
   RelatedResourceSelector,
-  FrontEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";

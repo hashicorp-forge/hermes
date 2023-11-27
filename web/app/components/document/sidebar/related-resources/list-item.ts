@@ -4,8 +4,8 @@ import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 import {
   RelatedExternalLink,
-  RelatedResource,
   FrontEndRelatedHermesDocument,
+  RelatedResource,
 } from "hermes/components/related-resources";
 import { OverflowItem } from "hermes/components/overflow-menu";
 
