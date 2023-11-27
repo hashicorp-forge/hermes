@@ -21,12 +21,10 @@ export interface BackEndHermesProject {
   title: string;
   status: ProjectStatus;
   description?: string;
-  jiraIssueId?: string;
-  creatorId: string;
-
-  // TODO: can we rename these?
-  projectCreatedAt: number;
-  projectModifiedAt: number;
+  jiraIssueID?: string;
+  creator: string;
+  createdTime: number;
+  modifiedTime: number;
 }
 
 export interface BackEndProjectResources {
