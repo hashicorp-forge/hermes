@@ -39,7 +39,6 @@ export interface HermesDocument {
   changesRequestedBy?: string[];
   approvedBy?: string[];
   summary?: string;
-  isDraft?: boolean;
   customEditableFields?: CustomEditableFields;
 
   _snippetResult?: {

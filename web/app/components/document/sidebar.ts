@@ -183,6 +183,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * otherwise use the current window location.s
    */
   protected get shareURL() {
+    console.log(this.args.document);
     // We only assign shortLinks to published documents
     if (this.isDraft) {
       return window.location.href;
@@ -239,6 +240,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   get docIsLocked() {
+    console.log("locked?");
+    console.log(this.args.document?.locked);
     return this.args.document?.locked;
   }
 
@@ -432,11 +435,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * If the doc is in an unknown state, editing is disabled.
    */
   protected get editingIsDisabled() {
+    debugger;
     if (this.docIsLocked) {
       return true;
     }
 
+    console.log("app created?");
+    console.log(this.args.document.appCreated);
+
     if (!this.args.document.appCreated) {
+      console.log("app created is false");
       return true;
     }
 

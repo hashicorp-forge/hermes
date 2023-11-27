@@ -209,6 +209,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
             productAbbreviation: this.productAbbreviation,
             summary: cleanString(this.summary),
             title: cleanString(this.title),
+            appCreated: true,
           }),
         })
         .then((response) => response?.json());

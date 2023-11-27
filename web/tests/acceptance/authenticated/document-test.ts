@@ -48,6 +48,9 @@ const APPROVERS_SELECTOR = "[data-test-document-approvers]";
 const APPROVED_BADGE_SELECTOR = "[data-test-person-approved-badge]";
 const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
 
+const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
+
+const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
 const READ_ONLY_PRODUCT_AREA_SELECTOR =
@@ -760,5 +763,72 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(`${APPROVERS_SELECTOR} li:nth-child(2) ${APPROVED_BADGE_SELECTOR}`)
       .doesNotExist("the second approver is not badged");
+  });
+
+  test("a locked doc can't be edited", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      locked: true,
+    });
+
+    await visit("/document/doc-0?draft=true");
+
+    assert
+      .dom(`${TITLE_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only title");
+    assert
+      .dom(`${SUMMARY_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only summary")
+      .hasText("None", 'correctly does not say "enter a summary"');
+
+    assert
+      .dom(`${CONTRIBUTORS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only contributors list");
+    assert
+      .dom(`${APPROVERS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only approvers list");
+    assert
+      .dom(ADD_RELATED_DOCUMENT_OPTION_SELECTOR)
+      .doesNotExist("no add related resource option");
+
+    assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+
+    assert
+      .dom(DISABLED_FOOTER_H5)
+      .hasText("Document is locked", "shows the locked-doc message");
+  });
+
+  test("the doc is locked if it's not app-created", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      appCreated: false,
+    });
+
+    await visit("/document/doc-0?draft=true");
+
+    assert
+      .dom(`${TITLE_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only title");
+    assert
+      .dom(`${SUMMARY_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only summary")
+      .hasText("None", 'correctly does not say "enter a summary"');
+
+    assert
+      .dom(`${CONTRIBUTORS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only contributors list");
+
+    assert
+      .dom(`${APPROVERS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .exists("read-only approvers list");
+    assert
+      .dom(ADD_RELATED_DOCUMENT_OPTION_SELECTOR)
+      .doesNotExist("no add related resource option");
+
+    assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+
+    assert
+      .dom(DISABLED_FOOTER_H5)
+      .hasText("Read-only headers", "shows the locked-doc message");
   });
 });

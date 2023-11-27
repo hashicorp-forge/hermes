@@ -39,6 +39,7 @@ module("Integration | Component | document/sidebar", function (hooks) {
     this.server.create("document", {
       owners: ["testuser@example.com"],
       isDraft: false,
+      status: "In-Review",
     });
 
     this.set("document", this.server.schema.document.first().attrs);
@@ -59,6 +60,8 @@ module("Integration | Component | document/sidebar", function (hooks) {
       />
     `);
 
+    await this.pauseTest();
+
     // By default the viewer is the doc owner
     assert.dom(SUMMARY_EMPTY_STATE).containsText("Enter a summary");
 
@@ -69,6 +72,7 @@ module("Integration | Component | document/sidebar", function (hooks) {
         owners: ["foo@bar.com"],
       }),
     );
+    await this.pauseTest();
 
     assert.dom(SUMMARY_EMPTY_STATE).containsText("None");
   });
