@@ -3,6 +3,7 @@
 import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
+import { ProjectStatus } from "hermes/types/project-status";
 
 // @ts-ignore - Mirage not detecting file
 import config from "../config/environment";
@@ -188,6 +189,9 @@ export default function (mirageConfig) {
       // Create a project
       this.post("/projects", (schema, request) => {
         let project = schema.projects.create(JSON.parse(request.requestBody));
+        project.update({
+          status: ProjectStatus.Active,
+        });
         return new Response(200, {}, project.attrs);
       });
 
@@ -298,6 +302,8 @@ export default function (mirageConfig) {
         document.update({
           objectID: document.id,
           owners: [TEST_USER_EMAIL],
+          appCreated: true,
+          status: "WIP",
         });
 
         return new Response(200, {}, document.attrs);
@@ -357,6 +363,7 @@ export default function (mirageConfig) {
        * Used by the config service for environment variables.
        */
       this.get("/web/config", () => {
+        // TODO: allow this to be overwritten in the request
         return new Response(
           200,
           {},

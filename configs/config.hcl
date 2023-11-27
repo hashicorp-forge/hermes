@@ -14,6 +14,7 @@ algolia {
   internal_index_name       = "internal"
   links_index_name          = "links"
   missing_fields_index_name = "missing_fields"
+  projects_index_name       = "projects"
   search_api_key            = ""
   write_api_key             = ""
 }
@@ -94,6 +95,11 @@ email {
 feature_flags {
   // api_v2 enables v2 of the API.
   flag "api_v2" {
+    enabled = false
+  }
+
+  // projects enables the projects feature in the UI.
+  flag "projects" {
     enabled = false
   }
 }

@@ -21,16 +21,12 @@ Router.map(function () {
     this.route("settings");
     this.route("new", function () {
       this.route("doc");
-      if (showProjectRoutes) {
-        this.route("project");
-      }
+      this.route("project");
     });
 
-    if (showProjectRoutes) {
-      this.route("projects", function () {
-        this.route("project", { path: "/:project_id" });
-      });
-    }
+    this.route("projects", function () {
+      this.route("project", { path: "/:project_id" });
+    });
   });
   this.route("authenticate");
   this.route("404", { path: "/*path" });

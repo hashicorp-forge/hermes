@@ -4,6 +4,7 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+import { Response } from "miragejs";
 
 const TEMPLATE_OPTION = "[data-test-template-option]";
 const ICON = `${TEMPLATE_OPTION} [data-test-icon]`;
@@ -11,6 +12,7 @@ const LONG_NAME = `${TEMPLATE_OPTION} [data-test-long-name]`;
 const NAME = `${TEMPLATE_OPTION} [data-test-name]`;
 const DESCRIPTION = `${TEMPLATE_OPTION} [data-test-description]`;
 const MORE_INFO_LINK = `[data-test-more-info-link]`;
+const START_A_PROJECT_BUTTON = "[data-test-start-a-project-button]";
 
 interface AuthenticatedNewRouteTestContext extends MirageTestContext {}
 
@@ -135,5 +137,30 @@ module("Acceptance | authenticated/new", function (hooks) {
     await visit("/new");
 
     assert.dom(MORE_INFO_LINK).doesNotExist();
+  });
+
+  test(`the "start a project" button is visible if the projects flag is true`, async function (this: AuthenticatedNewRouteTestContext, assert) {
+    await visit("/new");
+
+    // Projects are enabled by default
+    assert.dom(START_A_PROJECT_BUTTON).exists();
+  });
+
+  test(`the "start a project" button is hidden if the projects flag is false`, async function (this: AuthenticatedNewRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return new Response(
+        200,
+        {},
+        {
+          feature_flags: {
+            projects: false,
+          },
+        },
+      );
+    });
+
+    await visit("/new");
+
+    assert.dom(START_A_PROJECT_BUTTON).doesNotExist();
   });
 });

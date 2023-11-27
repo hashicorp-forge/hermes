@@ -11,6 +11,7 @@ export enum SortDirection {
 
 export enum SortAttribute {
   CreatedTime = "createdTime",
+  ModifiedTime = "modifiedTime",
   Owner = "owners",
   Product = "product",
   Status = "status",

@@ -1,5 +1,5 @@
 import RouterService from "@ember/routing/router-service";
-import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
+import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
@@ -28,6 +28,24 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
     this: AuthenticatedNewProjectRouteTestContext,
   ) {
     await authenticateSession({});
+  });
+
+  test("it redirects to the dashboard if the projects flag is not enabled", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return new Response(
+        200,
+        {},
+        {
+          feature_flags: {
+            projects: false,
+          },
+        },
+      );
+    });
+
+    await visit("/new/project");
+
+    assert.equal(currentURL(), "/dashboard");
   });
 
   test("the page title is correct", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
