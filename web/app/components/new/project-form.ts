@@ -9,7 +9,6 @@ import { restartableTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
-import { ProjectStatus } from "hermes/types/project-status";
 import cleanString from "hermes/utils/clean-string";
 import { JiraIssue } from "hermes/types/project";
 
@@ -128,7 +127,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           body: JSON.stringify({
             title: cleanString(this.title),
             description: cleanString(this.description),
-            status: ProjectStatus.Active,
           }),
         })
         .then((response) => response?.json());

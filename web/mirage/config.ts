@@ -3,6 +3,7 @@
 import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
+import { ProjectStatus } from "hermes/types/project-status";
 
 // @ts-ignore - Mirage not detecting file
 import config from "../config/environment";
@@ -218,6 +219,9 @@ export default function (mirageConfig) {
       // Create a project
       this.post("/projects", (schema, request) => {
         let project = schema.projects.create(JSON.parse(request.requestBody));
+        project.update({
+          status: ProjectStatus.Active,
+        });
         return new Response(200, {}, project.attrs);
       });
 

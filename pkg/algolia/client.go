@@ -55,6 +55,9 @@ type Client struct {
 	// MissingFields is an Algolia index for storing missing fields from indexed
 	// documents.
 	MissingFields *search.Index
+
+	// Projects is an Algolia index for storing projects.
+	Projects *search.Index
 }
 
 // Config is the configuration for interacting with the Algolia API.
@@ -83,6 +86,9 @@ type Config struct {
 	// MissingFieldsIndexName is the name of the Algolia index for storing missing
 	// fields from indexed documents.
 	MissingFieldsIndexName string `hcl:"missing_fields_index_name,optional"`
+
+	// ProjectsIndexName is the name of the Algolia index for storing projects.
+	ProjectsIndexName string `hcl:"projects_index_name,optional"`
 
 	// SearchAPIKey is the Algolia API Key for searching Hermes indices.
 	SearchAPIKey string `hcl:"search_api_key,optional"`
@@ -114,6 +120,7 @@ func New(cfg *Config) (*Client, error) {
 	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 	c.MissingFields = a.InitIndex(cfg.MissingFieldsIndexName)
+	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 
 	// Configure the docs index.
 	err := configureMainIndex(cfg.DocsIndexName, c.Docs, search.Settings{
@@ -305,6 +312,7 @@ func NewSearchClient(cfg *Config) (*Client, error) {
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
 	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
+	c.Projects = a.InitIndex(cfg.ProjectsIndexName)
 
 	return c, nil
 }
@@ -319,6 +327,7 @@ func validate(c *Config) error {
 		validation.Field(&c.ProjectsIndexName, validation.Required),
 		validation.Field(&c.LinksIndexName, validation.Required),
 		validation.Field(&c.MissingFieldsIndexName, validation.Required),
+		validation.Field(&c.ProjectsIndexName, validation.Required),
 		validation.Field(&c.SearchAPIKey, validation.Required),
 	)
 }
