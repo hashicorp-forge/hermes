@@ -1,4 +1,5 @@
 import { Factory } from "miragejs";
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 export function getTestDocNumber(product: string) {
   let abbreviation = "";
@@ -41,5 +42,5 @@ export default Factory.extend({
     },
   },
   approvers: [],
-  owners: ["testuser@example.com"],
+  owners: [TEST_USER_EMAIL],
 });

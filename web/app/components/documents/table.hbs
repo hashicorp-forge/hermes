@@ -25,7 +25,7 @@
     </thead>
     <tbody>
       {{#each @docs as |doc|}}
-        <Table::Row @doc={{doc}} />
+        <Table::Row @doc={{doc}} @timeColumn="createdTime" />
       {{/each}}
     </tbody>
   </table>

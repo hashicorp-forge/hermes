@@ -9,6 +9,7 @@ import AuthenticatedUserService, {
 } from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 import { HermesDocumentType } from "hermes/types/document-type";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 const SUMMARY_CONTAINER = "[data-test-document-summary]";
 const SUMMARY_EMPTY_STATE = `${SUMMARY_CONTAINER} .empty-state-text`;
@@ -37,7 +38,7 @@ module("Integration | Component | document/sidebar", function (hooks) {
 
     this.set("profile", authenticatedUser.info);
     this.server.create("document", {
-      owners: ["testuser@example.com"],
+      owners: [TEST_USER_EMAIL],
       isDraft: false,
       status: "In-Review",
     });
@@ -69,7 +70,7 @@ module("Integration | Component | document/sidebar", function (hooks) {
     this.set(
       "document",
       this.server.schema.document.first().update({
-        owners: ["foo@bar.com"],
+        owners: [TEST_USER_2_EMAIL],
       }),
     );
     await this.pauseTest();

@@ -63,8 +63,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				"method", r.Method,
 				"doc_id", docID,
 			)
-			http.Error(w, "Error requesting document draft",
-				http.StatusInternalServerError)
+			http.Error(w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 
@@ -81,6 +80,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				"path", r.URL.Path,
 				"doc_id", docID,
 			)
+			http.Error(w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 
@@ -94,8 +94,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				"path", r.URL.Path,
 				"doc_id", docID,
 			)
-			http.Error(w, "Error accessing draft document",
-				http.StatusInternalServerError)
+			http.Error(w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 
@@ -192,10 +191,29 @@ func DocumentHandler(srv server.Server) http.Handler {
 					"path", r.URL.Path,
 					"doc_id", docID,
 				)
-				http.Error(w, "Error getting document",
+				http.Error(w, "Error processing request",
 					http.StatusInternalServerError)
 				return
 			}
+
+			// Get projects associated with the document.
+			projs, err := model.GetProjects(srv.DB)
+			if err != nil {
+				srv.Logger.Error("error getting projects associated with document",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error processing request",
+					http.StatusInternalServerError)
+				return
+			}
+			projIDs := []int{}
+			for _, p := range projs {
+				projIDs = append(projIDs, int(p.ID))
+			}
+			docObj["projects"] = projIDs
 
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
@@ -208,7 +226,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					"error", err,
 					"doc_id", docID,
 				)
-				http.Error(w, "Error requesting document",
+				http.Error(w, "Error processing request",
 					http.StatusInternalServerError)
 				return
 			}

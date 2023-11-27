@@ -1,4 +1,4 @@
-<tr>
+<tr ...attributes>
   <td class="name">
     <LinkTo
       data-test-document-link
@@ -55,6 +55,7 @@
   <td class="time">
     <div class="inner">
       <div
+        data-test-table-row-time-cell
         class={{if (eq this.time "Unknown") "text-color-foreground-disabled"}}
       >
         {{this.time}}

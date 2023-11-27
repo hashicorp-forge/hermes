@@ -96,10 +96,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
-        ...doc,
         googleFileID: doc.googleFileID,
         sortOrder: doc.sortOrder,
-        product: doc.product,
       };
     });
 
@@ -310,10 +308,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         const valueToSave = key
           ? { [key]: newValue }
           : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        });
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(valueToSave),
+          },
+        );
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
