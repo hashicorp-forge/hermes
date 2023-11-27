@@ -135,8 +135,20 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const docOwner = "foo@bar.com";
     const docOwnerPhotoURL = "#foo";
     const docProduct = "Terraform";
+    const id = 250;
+
+    this.server.create("related-hermes-document", {
+      id,
+      googleFileID: id,
+      sortOrder: 1,
+      title: docTitle,
+      documentType: docType,
+      documentNumber: docNumber,
+    });
 
     this.server.create("document", {
+      id,
+      objectID: id,
       title: docTitle,
       summary: docSummary,
       status: docStatus,
@@ -147,10 +159,13 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       product: docProduct,
     });
 
-    const document = this.server.schema.document.first().attrs;
+    const relatedHermesDocument =
+      this.server.schema.relatedHermesDocument.find(id).attrs;
+
+    const document = this.server.schema.document.find(id).attrs;
 
     const relatedDocument = {
-      ...document,
+      ...relatedHermesDocument,
       googleFileID: document.objectID,
       documentType: document.docType,
       documentNumber: document.docNumber,
@@ -203,7 +218,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
-    assert.dom(DOCUMENT_LINK).hasAttribute("href", "/document/doc-0");
+    assert.dom(DOCUMENT_LINK).hasAttribute("href", `/document/${id}`);
 
     assert.dom(DOCUMENT_TITLE).containsText(docTitle);
 
@@ -286,12 +301,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    const docTitle = "Foo Bar";
-
-    this.server.create("document", {
-      title: docTitle,
-    });
-
     const project = this.server.schema.projects.first();
 
     project.update({

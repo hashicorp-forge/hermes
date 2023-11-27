@@ -9,8 +9,9 @@ import ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
+  BackEndRelatedHermesDocument,
   RelatedResource,
+  FrontEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
@@ -27,7 +28,7 @@ interface RelatedResourcesAddComponentSignature {
     addResource: (resource: RelatedResource) => void;
     algoliaResults: Record<string, HermesDocument>;
     objectID?: string;
-    relatedDocuments: RelatedHermesDocument[];
+    relatedDocuments: BackEndRelatedHermesDocument[];
     relatedLinks: RelatedExternalLink[];
     search: (
       dd: XDropdownListAnchorAPI | null,
@@ -334,8 +335,9 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       owners: attrs.owners,
       ownerPhotos: attrs.ownerPhotos,
       product: attrs.product,
+      status: attrs.status,
       sortOrder: 1,
-    } as RelatedHermesDocument;
+    } as FrontEndRelatedHermesDocument;
 
     this.args.addResource(relatedHermesDocument);
   }

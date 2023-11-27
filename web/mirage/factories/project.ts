@@ -12,7 +12,8 @@ export default Factory.extend({
 
   // @ts-ignore - Bug https://github.com/miragejs/miragejs/issues/1052
   afterCreate(project: ModelInstance<HermesProject>, server: any): void {
-    server.createList("related-hermes-document", 1);
+    server.create("related-hermes-document");
+    server.create("document");
     server.create("jira-issue");
 
     const relatedHermesDocuments = server.schema.relatedHermesDocument

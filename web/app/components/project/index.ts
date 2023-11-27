@@ -3,8 +3,9 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
+  BackEndRelatedHermesDocument,
   RelatedResource,
+  FrontEndRelatedHermesDocument,
 } from "../related-resources";
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
@@ -46,7 +47,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
   @tracked protected jiraIssue?: JiraIssue = this.args.project.jiraIssue;
-  @tracked protected hermesDocuments: RelatedHermesDocument[] =
+  @tracked protected hermesDocuments: FrontEndRelatedHermesDocument[] =
     this.args.project.hermesDocuments ?? [];
   @tracked protected externalLinks: RelatedExternalLink[] =
     this.args.project.externalLinks ?? [];
@@ -89,7 +90,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
-    hermesDocuments: Partial<RelatedHermesDocument>[];
+    hermesDocuments: Partial<BackEndRelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
     this.updateSortOrder();
@@ -245,7 +246,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to add a document to a project.
    * Adds a resource to the correct array, then saves the project.
    */
-  @action protected addDocument(resource: RelatedHermesDocument) {
+  @action protected addDocument(resource: FrontEndRelatedHermesDocument) {
     const cachedDocuments = this.hermesDocuments.slice();
 
     this.hermesDocuments.unshiftObject(resource);

@@ -4,15 +4,15 @@ import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
   RelatedResource,
+  FrontEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import { OverflowItem } from "hermes/components/overflow-menu";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
-    resource: RelatedHermesDocument | RelatedExternalLink;
+    resource: FrontEndRelatedHermesDocument | RelatedExternalLink;
     removeResource: (resource: RelatedResource) => void;
     editResource: (resource: RelatedExternalLink) => void;
     editingIsDisabled?: boolean;

@@ -12,9 +12,9 @@ import Ember from "ember";
 import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
   RelatedResource,
   RelatedResourceSelector,
+  FrontEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
@@ -45,14 +45,14 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
-  @tracked relatedDocuments: RelatedHermesDocument[] = [];
+  @tracked relatedDocuments: FrontEndRelatedHermesDocument[] = [];
   @tracked loadingHasFailed = false;
 
   /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
-    hermesDocuments: Partial<RelatedHermesDocument>[];
+    hermesDocuments: Partial<FrontEndRelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
     this.updateSortOrder();

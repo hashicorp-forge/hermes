@@ -5,7 +5,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
+  BackEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import htmlElement from "hermes/utils/html-element";
 
@@ -21,7 +21,7 @@ const RESOURCE_SECONDARY_TEXT_SELECTOR = "[data-test-resource-secondary-text]";
 
 interface DocumentSidebarRelatedResourcesListItemTestContext
   extends MirageTestContext {
-  document: RelatedHermesDocument;
+  document: BackEndRelatedHermesDocument;
   externalResource: RelatedExternalLink;
   removeResource: () => void;
   editResource: () => void;

@@ -1,8 +1,10 @@
 import {
   RelatedExternalLink,
-  RelatedHermesDocument,
+  BackEndRelatedHermesDocument,
+  FrontEndRelatedHermesDocument,
 } from "hermes/components/related-resources";
 import { ProjectStatus } from "./project-status";
+import { HermesDocument } from "./document";
 
 export interface JiraIssue {
   key: string;
@@ -14,16 +16,27 @@ export interface JiraIssue {
   summary: string;
 }
 
-export interface HermesProject {
+export interface BackEndHermesProject {
   id: string;
   title: string;
   status: ProjectStatus;
-  hermesDocuments?: RelatedHermesDocument[];
   description?: string;
-  jiraIssueID?: string;
+  jiraIssueId?: string;
+  creatorId: string;
+
+  // TODO: can we rename these?
+  projectCreatedAt: number;
+  projectModifiedAt: number;
+}
+
+export interface BackEndProjectResources {
+  hermesDocuments?: BackEndRelatedHermesDocument[];
+  externalLinks?: RelatedExternalLink[];
+}
+
+export interface HermesProject extends BackEndHermesProject {
+  hermesDocuments?: FrontEndRelatedHermesDocument[];
   jiraIssue?: JiraIssue;
   creator: string;
-  createdTime: number;
-  modifiedTime: number;
   externalLinks?: RelatedExternalLink[];
 }

@@ -43,6 +43,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
   test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/projects");
+
     assert.equal(getPageTitle(), "All Projects | Hermes");
   });
 
@@ -74,11 +75,18 @@ module("Acceptance | authenticated/projects", function (hooks) {
         }
 
         if (project.hermesDocuments) {
+          let docProducts: string[] = [];
           project.hermesDocuments.forEach((doc) => {
-            if (doc.product) {
-              expectedProducts.push(doc.product);
+            const product = this.server.schema.document.findBy({
+              objectID: doc.googleFileID,
+            }).attrs.product;
+
+            if (product) {
+              docProducts.push(product);
             }
           });
+
+          expectedProducts.push(...docProducts.uniq());
         }
       });
 
