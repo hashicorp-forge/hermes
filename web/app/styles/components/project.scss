@@ -1,6 +1,7 @@
 .project-screen {
   .editable-field {
     @apply -mx-2;
+
     &:not(.active) {
       @apply w-auto min-w-[30%];
     }
