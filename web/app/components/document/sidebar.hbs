@@ -42,8 +42,7 @@
               }}
               "
           />
-
-          {{#if (and this.isDraft this.isOwner)}}
+          {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
             <X::DropdownList
               data-test-draft-visibility-dropdown
               @items={{this.draftVisibilityOptions}}
@@ -96,7 +95,7 @@
             @value={{this.title}}
             @onSave={{this.saveTitle}}
             @isSaving={{this.saveIsRunning}}
-            @isReadOnly={{not this.isOwner}}
+            @isReadOnly={{this.editingIsDisabled}}
             @isRequired={{true}}
             @name="title"
             @tag="h1"
@@ -117,9 +116,12 @@
             @value={{this.summary}}
             @onSave={{this.saveSummary}}
             @isSaving={{this.saveIsRunning}}
-            @isReadOnly={{not this.isOwner}}
+            @isReadOnly={{this.editingIsDisabled}}
             @name="summary"
-            @placeholder={{if this.isOwner "Enter a summary"}}
+            @placeholder={{if
+              (and this.isOwner (not this.editingIsDisabled))
+              "Enter a summary"
+            }}
           />
         </div>
       </div>
@@ -136,7 +138,7 @@
       {{! Product/Area }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
-        {{#if (and this.isDraft this.isOwner)}}
+        {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
           <div class="relative w-full" data-test-document-product-area-editable>
             <Inputs::ProductSelect
               data-test-document-product-area-editable
@@ -191,7 +193,7 @@
             @onChange={{this.updateContributors}}
             @onSave={{perform this.save "contributors"}}
             @isSaving={{this.saveIsRunning}}
-            @isReadOnly={{not this.isOwner}}
+            @isReadOnly={{this.editingIsDisabled}}
           />
         </div>
       </div>
@@ -325,7 +327,7 @@
               @attributes={{attributes}}
               @onSave={{perform this.saveCustomField field attributes}}
               @isSaving={{this.saveIsRunning}}
-              @disabled={{not this.isOwner}}
+              @disabled={{this.editingIsDisabled}}
             />
           </div>
         {{/if}}
@@ -340,6 +342,7 @@
           <div class="w-full border-t border-color-border-primary pt-3.5">
             <div class="text-body-200 text-color-foreground-faint">
               <h5
+                data-test-disabled-footer-h5
                 class="mb-1 flex items-center text-body-200 font-semibold text-color-foreground-primary"
               >
                 {{if this.docIsLocked "Document is locked" "Read-only headers"}}

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -39,14 +40,15 @@ type ProjectsPostResponse struct {
 }
 
 type project struct {
-	CreatedTime  int64   `json:"createdTime,omitempty"`
-	Creator      string  `json:"creator,omitempty"`
-	Description  *string `json:"description,omitempty"`
-	ID           uint    `json:"id"`
-	JiraIssueID  *string `json:"jiraIssueID,omitempty"`
-	ModifiedTime int64   `json:"modifiedTime,omitempty"`
-	Status       string  `json:"status"`
-	Title        string  `json:"title"`
+	CreatedTime  int64    `json:"createdTime,omitempty"`
+	Creator      string   `json:"creator,omitempty"`
+	Description  *string  `json:"description,omitempty"`
+	ID           uint     `json:"id"`
+	JiraIssueID  *string  `json:"jiraIssueID,omitempty"`
+	ModifiedTime int64    `json:"modifiedTime,omitempty"`
+	Products     []string `json:"products,omitempty"`
+	Status       string   `json:"status"`
+	Title        string   `json:"title"`
 }
 
 func ProjectsHandler(srv server.Server) http.Handler {
@@ -84,6 +86,19 @@ func ProjectsHandler(srv server.Server) http.Handler {
 			// Build response.
 			resp := []project{}
 			for _, p := range projs {
+				// Get products for the project.
+				products, err := getProductsForProject(p, srv.DB)
+				if err != nil {
+					srv.Logger.Error("error getting products for project",
+						append([]interface{}{
+							"error", err,
+							"project_id", p.ID,
+						}, logArgs...)...)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+
 				resp = append(resp, project{
 					CreatedTime:  p.ProjectCreatedAt.Unix(),
 					Creator:      p.Creator.EmailAddress,
@@ -91,6 +106,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 					ID:           p.ID,
 					JiraIssueID:  p.JiraIssueID,
 					ModifiedTime: p.ProjectModifiedAt.Unix(),
+					Products:     products,
 					Status:       p.Status.ToString(),
 					Title:        p.Title,
 				})
@@ -264,6 +280,18 @@ func ProjectHandler(srv server.Server) http.Handler {
 					}
 				}
 
+				// Get products for the project.
+				products, err := getProductsForProject(proj, srv.DB)
+				if err != nil {
+					srv.Logger.Error("error getting products for project",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+
 				// Build response.
 				resp := ProjectGetResponse{
 					project: project{
@@ -273,6 +301,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						ID:           proj.ID,
 						JiraIssueID:  proj.JiraIssueID,
 						ModifiedTime: proj.ProjectModifiedAt.Unix(),
+						Products:     products,
 						Status:       proj.Status.ToString(),
 						Title:        proj.Title,
 					},
@@ -405,6 +434,36 @@ func ProjectHandler(srv server.Server) http.Handler {
 			return
 		}
 	})
+}
+
+// getProductsForProject returns a slice of unique products for all Hermes
+// document related resources associated with the project.
+func getProductsForProject(proj models.Project, db *gorm.DB) ([]string, error) {
+	// Get Hermes document related resources for project.
+	_, hdrrs, err := proj.GetRelatedResources(db)
+	if err != nil {
+		return nil, fmt.Errorf("error getting related resources: %w", err)
+	}
+
+	products := []string{}
+	for _, hdrr := range hdrrs {
+		// Get document from database.
+		doc := models.Document{
+			GoogleFileID: hdrr.Document.GoogleFileID,
+		}
+		if err := doc.Get(db); err != nil {
+			return nil, fmt.Errorf(
+				"error getting document from database: %w, document_id: %s",
+				err, hdrr.Document.GoogleFileID)
+		}
+		product := doc.Product.Name
+
+		if !helpers.StringSliceContains(products, product) {
+			products = append(products, product)
+		}
+	}
+
+	return products, nil
 }
 
 // getProjectIDFromPath returns the project ID from a request path and
