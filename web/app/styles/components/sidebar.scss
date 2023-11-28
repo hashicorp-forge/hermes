@@ -21,6 +21,16 @@
     @apply mt-[3px];
   }
 
+  .editable-field {
+    .edit-overlay-affordance {
+      @apply pb-[125px];
+
+      &::before {
+        @apply from-color-page-faint via-color-page-faint-90 to-transparent;
+      }
+    }
+  }
+
   .sidebar-header {
     @apply sticky top-0 z-10 flex justify-between bg-color-page-faint px-3.5 py-4;
 

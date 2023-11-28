@@ -40,6 +40,7 @@ module("Integration | Component | document/sidebar", function (hooks) {
     this.server.create("document", {
       owners: [TEST_USER_EMAIL],
       isDraft: false,
+      status: "In-Review",
     });
 
     this.set("document", this.server.schema.document.first().attrs);

@@ -7,6 +7,7 @@ import ProductAreasService from "hermes/services/product-areas";
 import { assert } from "@ember/debug";
 import { HermesSize } from "hermes/types/sizes";
 import fontColorContrast from "font-color-contrast";
+import FlagsService from "hermes/services/flags";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -21,6 +22,7 @@ interface ProductAvatarComponentSignature {
 
 export default class ProductAvatarComponent extends Component<ProductAvatarComponentSignature> {
   @service declare productAreas: ProductAreasService;
+  @service declare flags: FlagsService;
 
   private get productID(): string | undefined {
     return getProductID(this.args.product);
@@ -35,6 +37,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   }
 
   private get colorStyles() {
+    if (!this.flags.productColors) return;
     if (this.productID) return;
 
     const bgColor = this.productAreas.getProductColor(this.args.product);
@@ -64,6 +67,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get iconIsShown() {
     if (this.productID) return true;
+    if (!this.flags.productColors) return true;
     if (this.abbreviation) return false;
     return true;
   }
