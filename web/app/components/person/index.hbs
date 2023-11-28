@@ -1,6 +1,7 @@
 {{#unless this.isHidden}}
   <div class="flex w-full space-x-2" ...attributes>
     <div class="relative shrink-0">
+      <Person::Avatar @size="small" @email={{@email}} @imgURL={{@imgURL}} />
       {{#if (eq @badge "approved")}}
         <div
           data-test-person-approved-badge
@@ -12,7 +13,6 @@
           />
         </div>
       {{/if}}
-      <Person::Avatar @size="small" @email={{@email}} @imgURL={{@imgURL}} />
     </div>
     <div
       data-test-person-email
