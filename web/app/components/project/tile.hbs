@@ -24,11 +24,11 @@
     <div
       class="absolute bottom-0 left-0 flex w-full items-center justify-between"
     >
-      {{#if this.productAreas}}
+      {{#if @project.products}}
         <ul class="flex gap-px">
-          {{#each this.productAreas as |productArea|}}
+          {{#each @project.products as |product|}}
             <li class="flex items-center" data-test-product>
-              {{productArea}}
+              {{product}}
             </li>
           {{/each}}
         </ul>
