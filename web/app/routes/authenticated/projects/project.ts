@@ -9,17 +9,22 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
   @service("config") declare configSvc: ConfigService;
 
   async model(params: { project_id: string }): Promise<HermesProject> {
-    const project = await this.fetchSvc
+    const projectPromise = this.fetchSvc
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects/${params.project_id}`,
       )
       .then((response) => response?.json());
 
-    const projectResources = await this.fetchSvc
+    const projectResourcesPromise = this.fetchSvc
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects/${params.project_id}/related-resources`,
       )
       .then((response) => response?.json());
+
+    const [project, projectResources] = await Promise.all([
+      projectPromise,
+      projectResourcesPromise,
+    ]);
 
     const { hermesDocuments, externalLinks } = projectResources;
 

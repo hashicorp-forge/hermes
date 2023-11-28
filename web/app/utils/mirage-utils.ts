@@ -1,5 +1,6 @@
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
+import ConfigService from "hermes/services/config";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
@@ -23,4 +24,16 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     picture: "",
     subscriptions: [],
   };
+}
+
+export function setFeatureFlag(
+  mirageContext: MirageTestContext,
+  flag: string,
+  value: boolean,
+) {
+  const configSvc = mirageContext.owner.lookup(
+    "service:config",
+  ) as ConfigService;
+
+  configSvc.config.feature_flags[flag] = value;
 }

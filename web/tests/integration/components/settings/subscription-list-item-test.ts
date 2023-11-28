@@ -4,7 +4,13 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, render, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { task } from "ember-concurrency";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+
+const ABBREVIATION = "[data-test-product-abbreviation]";
+const ICON = "[data-test-product-avatar]";
+const NAME = "[data-test-subscription-list-item-name]";
+const CHECKBOX = '.hds-form-toggle input[type="checkbox"]';
+const POPOVER = ".subscription-list-popover";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   productArea: string;
@@ -16,11 +22,16 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    hooks.beforeEach(function () {
+    hooks.beforeEach(async function (this: SubscriptionListItemContext) {
       const authenticatedUser = this.owner.lookup(
-        "service:authenticated-user"
+        "service:authenticated-user",
       ) as AuthenticatedUserService;
       authenticatedUser.subscriptions = [];
+
+      this.server.create("product", { name: "Waypoint" });
+      this.server.create("product", { name: "Labs", abbreviation: "LAB" });
+
+      await setupProductIndex(this);
     });
 
     test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
@@ -34,25 +45,22 @@ module(
       `);
 
       assert.dom(".subscription-list-item").exists();
-      assert
-        .dom(".flight-icon-waypoint-color")
-        .exists("it shows the product logo if there is one");
-      assert.dom("[data-test-subscription-list-item-name]").hasText("Waypoint");
-      assert.dom(".hds-form-toggle").exists();
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isNotChecked();
+      assert.dom(ICON).exists("it shows the product icon if there is one");
+      assert.dom(NAME).hasText("Waypoint");
+      assert.dom(CHECKBOX).isNotChecked();
 
-      await click('.hds-form-toggle input[type="checkbox"]');
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
+      await click(CHECKBOX);
+      assert.dom(CHECKBOX).isChecked();
 
       this.set("productArea", "Labs");
       assert
-        .dom(".flight-icon-folder")
-        .exists("it shows a folder icon if there is no product logo");
-      assert.dom("[data-test-subscription-list-item-name]").hasText("Labs");
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isNotChecked();
+        .dom(ABBREVIATION)
+        .exists("it shows an abbreviation if there is no product logo");
+      assert.dom(NAME).hasText("Labs");
+      assert.dom(CHECKBOX).isNotChecked();
 
       this.set("productArea", "Waypoint");
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
+      assert.dom(CHECKBOX).isChecked();
     });
 
     test("it shows a temporary message when toggled", async function (assert) {
@@ -65,25 +73,23 @@ module(
         />
       `);
 
-      let promise = click('.hds-form-toggle input[type="checkbox"]');
+      let promise = click(CHECKBOX);
 
-      assert.dom(".subscription-list-popover").doesNotExist();
-      await waitFor(".subscription-list-popover");
+      assert.dom(POPOVER).doesNotExist();
+      await waitFor(POPOVER);
 
-      assert.dom(".subscription-list-popover").exists().hasText("Subscribed");
+      assert.dom(POPOVER).exists().hasText("Subscribed");
 
       await promise;
 
-      assert
-        .dom(".subscription-list-popover")
-        .doesNotExist("it hides the popover after a timeout");
+      assert.dom(POPOVER).doesNotExist("it hides the popover after a timeout");
 
-      promise = click('.hds-form-toggle input[type="checkbox"]');
+      promise = click(CHECKBOX);
 
-      await waitFor(".subscription-list-popover");
-      assert.dom(".subscription-list-popover").hasText("Unsubscribed");
+      await waitFor(POPOVER);
+      assert.dom(POPOVER).hasText("Unsubscribed");
 
       await promise;
     });
-  }
+  },
 );

@@ -6,6 +6,7 @@ import { HermesProject } from "hermes/types/project";
 import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
+import { RelatedHermesDocument } from "hermes/components/related-resources";
 
 const PROJECT_TITLE = "[data-test-title]";
 const PROJECT_DESCRIPTION = "[data-test-description]";
@@ -23,22 +24,44 @@ module("Integration | Component | project/tile", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(async function (this: ProjectTileComponentTestContext) {
-    this.project = this.server.create("project", {
+    this.server.create("project", {
       title: "Test Title",
       description: "Test Description",
-      hermesDocuments: [
-        {
-          product: "Foo",
-        },
-        {
-          product: "Bar",
-        },
-      ],
       jiraIssue: {
         key: "TEST-123",
         type: "Epic",
       },
     });
+
+    this.server.create("related-hermes-document");
+    this.server.create("related-hermes-document");
+
+    this.server.create("document", {
+      product: "Foo",
+    });
+
+    this.server.create("document", {
+      product: "Bar",
+    });
+
+    let hermesDocuments = this.server.schema.relatedHermesDocument
+      .all()
+      .models.map((doc: { attrs: RelatedHermesDocument }) => {
+        let d = doc.attrs;
+        return {
+          ...d,
+          product: this.server.schema.document.find(d.googleFileID)?.product,
+        };
+      });
+
+    // Ignore the factory-created document
+    hermesDocuments = hermesDocuments.slice(1);
+
+    this.server.schema.projects.first().update({
+      hermesDocuments,
+    });
+
+    this.project = this.server.schema.projects.first();
   });
 
   test("it renders as expected (complete model)", async function (this: ProjectTileComponentTestContext, assert) {
@@ -46,10 +69,8 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, hermesDocuments, jiraIssue } = this.project;
-    const documentProducts = hermesDocuments
-      ?.map((doc) => doc.product as string)
-      .uniq();
+    const { title, description, hermesDocuments, jiraIssue, products } =
+      this.project;
 
     assert.dom(PROJECT_TITLE).hasText(title);
 
@@ -59,7 +80,7 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.deepEqual(
       findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
-      documentProducts,
+      products,
     );
 
     emberAssert("jiraIssue must exist", jiraIssue);
@@ -79,6 +100,7 @@ module("Integration | Component | project/tile", function (hooks) {
       description: null,
       hermesDocuments: null,
       jiraIssue: null,
+      products: null,
     });
 
     this.set("project", project);
