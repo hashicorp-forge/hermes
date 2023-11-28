@@ -1,7 +1,7 @@
 <div
   class="editable-field
     {{if @isSaving 'saving'}}
-    {{if (and this.editingIsEnabled (not @isSaving)) 'z-10'}}"
+    {{if (and this.editingIsEnabled (not @isSaving)) 'active z-10'}}"
   ...attributes
 >
   {{#if (and this.editingIsEnabled (not @isSaving))}}
@@ -44,7 +44,7 @@
       {{/if}}
 
       {{! "Confirm" and "Cancel" buttons }}
-      <div class="edit-overlay-affordance page-faint pb-[125px] pl-[5px]">
+      <div class="edit-overlay-affordance">
         <Hds::Button
           data-test-save-button
           @size="small"
