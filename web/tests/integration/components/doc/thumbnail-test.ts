@@ -5,6 +5,9 @@ import { render } from "@ember/test-helpers";
 import ProductAreasService from "hermes/services/product-areas";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import ConfigService from "hermes/services/config";
+import { Response } from "miragejs";
+import { setFeatureFlag } from "hermes/utils/mirage-utils";
 
 const THUMBNAIL = "[data-test-doc-thumbnail]";
 const PRODUCT_BADGE = "[data-test-doc-thumbnail-product-badge]";
@@ -67,7 +70,7 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
     await render<DocThumbnailTestContext>(hbs`
       <Doc::Thumbnail
         @status={{this.status}}
-        @product="Labs"
+        @product="Terraform"
       />
     `);
 
@@ -110,12 +113,29 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
       .dom(PRODUCT_BADGE)
       .exists("badge is shown for a product with an icon");
 
+    setFeatureFlag(this, "product_colors", false);
+
+    // If product colors were enabled, this would render a badge
+    this.set("product", "Labs");
+
+    assert
+      .dom(PRODUCT_BADGE)
+      .doesNotExist(
+        "abbreviation not shown if the productColors flag is disabled",
+      );
+
+    setFeatureFlag(this, "product_colors", true);
+
+    // Config is not tracked by glimmer, so we force
+    // a re-compute on the "badgeIsShown" getter
+    this.set("product", undefined);
     this.set("product", "Labs");
 
     assert
       .dom(PRODUCT_BADGE)
       .exists("badge is shown for a product with an abbreviation");
 
+    // Set an unknown product
     this.set("product", "Fake Product");
 
     assert
