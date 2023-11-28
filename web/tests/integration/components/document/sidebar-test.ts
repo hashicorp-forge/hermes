@@ -61,8 +61,6 @@ module("Integration | Component | document/sidebar", function (hooks) {
       />
     `);
 
-    await this.pauseTest();
-
     // By default the viewer is the doc owner
     assert.dom(SUMMARY_EMPTY_STATE).containsText("Enter a summary");
 
@@ -73,7 +71,6 @@ module("Integration | Component | document/sidebar", function (hooks) {
         owners: [TEST_USER_2_EMAIL],
       }),
     );
-    await this.pauseTest();
 
     assert.dom(SUMMARY_EMPTY_STATE).containsText("None");
   });

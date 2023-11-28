@@ -167,7 +167,6 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     assert.dom("[data-test-document-title]").includesText("Foo");
     assert.dom("[data-test-document-summary]").includesText("Bar");
-
     assert.dom("[data-test-badge-dropdown-list]").includesText("Terraform");
   });
 
