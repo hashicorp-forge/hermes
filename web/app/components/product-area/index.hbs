@@ -1,8 +1,15 @@
 <div class="mx-auto mb-24 w-full max-w-2xl">
   {{! Header and subscribe }}
   <div class="relative flex gap-4">
-    {{!-- <Product::Avatar @product={{@productArea}} @size="large" /> --}}
-
+    {{#let (get-product-id @productArea) as |product|}}
+      {{#if (or product this.flags.productColors)}}
+        <Product::Avatar
+          @product={{@productArea}}
+          @size="large"
+          class="mt-0.5"
+        />
+      {{/if}}
+    {{/let}}
     <div class="w-full">
       <h1>
         <span class="mr-1.5">
