@@ -31,12 +31,6 @@
 
       {{! Tags }}
       <div class="tags">
-        <Doc::State
-          data-test-document-state
-          @state={{@doc.status}}
-          @hideProgress={{true}}
-          class="interactive"
-        />
         <Hds::Badge data-test-document-type @text={{@doc.docType}} />
       </div>
 
