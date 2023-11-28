@@ -25,6 +25,7 @@ export interface BackEndHermesProject {
   creator: string;
   createdTime: number;
   modifiedTime: number;
+  products?: string[];
 }
 
 export interface BackEndProjectResources {
