@@ -18,12 +18,10 @@ type Project struct {
 	CreatorID uint `gorm:"default:null;not null"`
 
 	// Description is a description of the project.
-	// Description *string
-	Description string
+	Description *string
 
 	// JiraIssueID is the ID of the Jira issue associated with the project.
-	// JiraIssueID *string
-	JiraIssueID string
+	JiraIssueID *string
 
 	// ProjectCreatedAt is the time of project creation.
 	ProjectCreatedAt time.Time `gorm:"default:null;not null"`
@@ -36,7 +34,6 @@ type Project struct {
 
 	// Status is the status of the document.
 	Status ProjectStatus `gorm:"default:null;not null"`
-	// Status *ProjectStatus
 
 	// Title is the title of the project.
 	Title string `gorm:"default:null;not null"`
@@ -254,6 +251,12 @@ func (p *Project) Update(db *gorm.DB) error {
 		"Creator",
 		"CreatorID",
 		"ProjectCreatedAt",
+	}
+	if p.Description == nil {
+		omitFields = append(omitFields, "Description")
+	}
+	if p.JiraIssueID == nil {
+		omitFields = append(omitFields, "JiraIssueID")
 	}
 	if p.Status == UnspecifiedProjectStatus {
 		omitFields = append(omitFields, "Status")

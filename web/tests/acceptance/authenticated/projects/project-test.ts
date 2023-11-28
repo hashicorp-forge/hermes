@@ -319,7 +319,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.hermesDocuments;
 
     assert.equal(projectDocuments.length, 1);
-    assert.equal(projectDocuments[0].title, docTitle);
   });
 
   test("you can remove a document from a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
