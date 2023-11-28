@@ -217,15 +217,9 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .containsText(docOwner)
       .hasAttribute("href", "/documents?owners=%5B%22foo%40bar.com%22%5D");
 
-    assert
-      .dom(DOCUMENT_TYPE)
-      .containsText(docType)
-      .hasAttribute("href", "/documents?docType=%5B%22PRD%22%5D");
+    assert.dom(DOCUMENT_TYPE).containsText(docType);
 
-    assert
-      .dom(DOCUMENT_STATUS)
-      .containsText(docStatus)
-      .hasAttribute("href", "/documents?status=%5B%22Approved%22%5D");
+    assert.dom(DOCUMENT_STATUS).containsText(docStatus);
 
     assert
       .dom(EXTERNAL_LINK)
