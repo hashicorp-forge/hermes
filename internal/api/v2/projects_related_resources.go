@@ -25,8 +25,10 @@ type ProjectRelatedResourcesGetResponseExternalLink struct {
 type ProjectRelatedResourcesGetResponseHermesDocument struct {
 	GoogleFileID   string   `json:"googleFileID"`
 	Title          string   `json:"title"`
+	CreatedTime    int64    `json:"createdTime"`
 	DocumentType   string   `json:"documentType"`
 	DocumentNumber string   `json:"documentNumber"`
+	ModifiedTime   int64    `json:"modifiedTime"`
 	Owners         []string `json:"owners"`
 	OwnerPhotos    []string `json:"ownerPhotos,omitempty"`
 	Product        string   `json:"product"`
@@ -191,8 +193,10 @@ func projectsResourceRelatedResourcesHandler(
 				ProjectRelatedResourcesGetResponseHermesDocument{
 					GoogleFileID:   hdrr.Document.GoogleFileID,
 					Title:          doc.Title,
+					CreatedTime:    doc.CreatedTime,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
+					ModifiedTime:   doc.ModifiedTime,
 					Owners:         doc.Owners,
 					OwnerPhotos:    doc.OwnerPhotos,
 					Product:        doc.Product,
