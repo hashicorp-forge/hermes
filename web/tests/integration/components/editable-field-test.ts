@@ -400,7 +400,7 @@ module("Integration | Component | editable-field", function (hooks) {
     assert.dom(`[data-test-two] ${PEOPLE_SELECT} input`).isFocused();
   });
 
-  test("it shows confirm and cancel buttons when in editing mode", async function (this: EditableFieldComponentTestContext, assert) {
+  test("it shows buttons and uses the correct classes when in editing mode", async function (this: EditableFieldComponentTestContext, assert) {
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         @value="foo"
@@ -408,11 +408,13 @@ module("Integration | Component | editable-field", function (hooks) {
       />
     `);
 
+    assert.dom(EDITABLE_FIELD).doesNotHaveClass("active");
     assert.dom(SAVE_BUTTON).doesNotExist();
     assert.dom(CANCEL_BUTTON).doesNotExist();
 
     await click(FIELD_TOGGLE);
 
+    assert.dom(EDITABLE_FIELD).hasClass("active");
     assert.dom(SAVE_BUTTON).exists();
     assert.dom(CANCEL_BUTTON).exists();
   });
