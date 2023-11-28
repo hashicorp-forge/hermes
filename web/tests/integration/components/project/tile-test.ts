@@ -69,8 +69,8 @@ module("Integration | Component | project/tile", function (hooks) {
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, hermesDocuments, jiraIssue } = this.project;
-    const documentProducts = hermesDocuments?.map((doc) => doc.product).uniq();
+    const { title, description, hermesDocuments, jiraIssue, products } =
+      this.project;
 
     assert.dom(PROJECT_TITLE).hasText(title);
 
@@ -80,7 +80,7 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.deepEqual(
       findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
-      documentProducts,
+      products,
     );
 
     emberAssert("jiraIssue must exist", jiraIssue);
@@ -100,6 +100,7 @@ module("Integration | Component | project/tile", function (hooks) {
       description: null,
       hermesDocuments: null,
       jiraIssue: null,
+      products: null,
     });
 
     this.set("project", project);

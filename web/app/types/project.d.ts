@@ -15,7 +15,7 @@ export interface JiraIssue {
   summary: string;
 }
 
-export interface BackEndHermesProject {
+export interface HermesProjectInfo {
   id: string;
   title: string;
   status: ProjectStatus;
@@ -27,14 +27,13 @@ export interface BackEndHermesProject {
   products?: string[];
 }
 
-export interface BackEndProjectResources {
+export interface HermesProjectResources {
   hermesDocuments?: RelatedHermesDocument[];
   externalLinks?: RelatedExternalLink[];
 }
 
-export interface HermesProject extends BackEndHermesProject {
-  hermesDocuments?: RelatedHermesDocument[];
+export interface HermesProject
+  extends HermesProjectInfo,
+    HermesProjectResources {
   jiraIssue?: JiraIssue;
-  creator: string;
-  externalLinks?: RelatedExternalLink[];
 }

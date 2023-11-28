@@ -1,4 +1,5 @@
 import { Factory } from "miragejs";
+import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
 export default Factory.extend({
   id: (i) => `doc-${i}`,
@@ -12,5 +13,12 @@ export default Factory.extend({
   documentType: "RFC",
   documentNumber() {
     return `LAB-00${this.id}`;
+  },
+  owners: [TEST_USER_EMAIL],
+  ownerPhotos: [],
+  product: "Vault",
+  status: "In-Review",
+  summary() {
+    return `Summary for ${this.title}`;
   },
 });

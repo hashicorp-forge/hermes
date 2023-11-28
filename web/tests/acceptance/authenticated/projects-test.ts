@@ -74,19 +74,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedJiraTypes.push(project.jiraIssue.type);
         }
 
-        if (project.hermesDocuments) {
-          let docProducts: string[] = [];
-          project.hermesDocuments.forEach((doc) => {
-            const product = this.server.schema.document.findBy({
-              objectID: doc.googleFileID,
-            }).attrs.product;
-
-            if (product) {
-              docProducts.push(product);
-            }
-          });
-
-          expectedProducts.push(...docProducts.uniq());
+        if (project.products) {
+          expectedProducts.push(...project.products);
         }
       });
 

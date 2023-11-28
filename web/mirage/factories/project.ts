@@ -9,21 +9,21 @@ export default Factory.extend({
   modifiedTime: 1,
   creator: TEST_USER_EMAIL,
   status: "active",
+  products: ["Vault"],
 
   // @ts-ignore - Bug https://github.com/miragejs/miragejs/issues/1052
   afterCreate(project: ModelInstance<HermesProject>, server: any): void {
     server.create("related-hermes-document");
-    server.create("document");
     server.create("jira-issue");
 
-    const relatedHermesDocuments = server.schema.relatedHermesDocument
+    const hermesDocuments = server.schema.relatedHermesDocument
       .all()
-      .models.map((doc: ModelInstance) => doc.attrs);
+      .models.map((doc: { attrs: any }) => doc.attrs);
 
     const jiraIssue = server.schema.jiraIssues.first()?.attrs;
 
     project.update({
-      hermesDocuments: relatedHermesDocuments,
+      hermesDocuments,
       jiraIssue,
     });
   },

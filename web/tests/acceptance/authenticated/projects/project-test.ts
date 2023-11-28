@@ -144,32 +144,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       title: docTitle,
       documentType: docType,
       documentNumber: docNumber,
-    });
-
-    this.server.create("document", {
-      id,
-      objectID: id,
-      title: docTitle,
+      products: [docProduct],
       summary: docSummary,
-      status: docStatus,
-      docType,
-      docNumber,
       owners: [docOwner],
       ownerPhotos: [docOwnerPhotoURL],
-      product: docProduct,
+      status: docStatus,
     });
 
-    const relatedHermesDocument =
+    const relatedDocument =
       this.server.schema.relatedHermesDocument.find(id).attrs;
-
-    const document = this.server.schema.document.find(id).attrs;
-
-    const relatedDocument = {
-      ...relatedHermesDocument,
-      googleFileID: document.objectID,
-      documentType: document.docType,
-      documentNumber: document.docNumber,
-    };
 
     const externalLinkName = "Foo";
     const externalLinkURL = "https://hashicorp.com";
@@ -301,6 +284,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.create("document");
+
     const project = this.server.schema.projects.first();
 
     project.update({
