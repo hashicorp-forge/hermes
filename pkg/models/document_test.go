@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func TestDocumentModel(t *testing.T) {
@@ -1068,6 +1069,275 @@ func TestGetLatestProductNumber(t *testing.T) {
 		num, err := GetLatestProductNumber(db, "DT2", "Product1")
 		require.NoError(err)
 		assert.Equal(2, num)
+	})
+}
+
+func TestDocumentGetProjects(t *testing.T) {
+	dsn := os.Getenv("HERMES_TEST_POSTGRESQL_DSN")
+	if dsn == "" {
+		t.Skip("HERMES_TEST_POSTGRESQL_DSN environment variable isn't set")
+	}
+
+	t.Run("Get and Replace", func(t *testing.T) {
+		db, tearDownTest := setupTest(t, dsn)
+		defer tearDownTest(t)
+
+		t.Run("Create a document type", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			dt := DocumentType{
+				Name:     "DT1",
+				LongName: "DocumentType1",
+			}
+			err := dt.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create a product", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Product{
+				Name:         "Product1",
+				Abbreviation: "P1",
+			}
+			err := p.FirstOrCreate(db)
+			require.NoError(err)
+		})
+
+		t.Run("Create documents", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID1",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err := d.Create(db)
+			require.NoError(err)
+			require.EqualValues(1, d.ID)
+
+			d = Document{
+				GoogleFileID: "GoogleFileID2",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err = d.Create(db)
+			require.NoError(err)
+			require.EqualValues(2, d.ID)
+
+			d = Document{
+				GoogleFileID: "GoogleFileID3",
+				DocumentType: DocumentType{
+					Name: "DT1",
+				},
+				Product: Product{
+					Name: "Product1",
+				},
+			}
+			err = d.Create(db)
+			require.NoError(err)
+			require.EqualValues(3, d.ID)
+		})
+
+		t.Run("Create projects", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Project{
+				Creator: User{
+					EmailAddress: "a@a.com",
+				},
+				Title: "Title1",
+			}
+			err := p.Create(db)
+			require.NoError(err)
+			require.EqualValues(1, p.ID)
+
+			p = Project{
+				Creator: User{
+					EmailAddress: "a@a.com",
+				},
+				Title: "Title2",
+			}
+			err = p.Create(db)
+			require.NoError(err)
+			require.EqualValues(2, p.ID)
+
+			p = Project{
+				Creator: User{
+					EmailAddress: "a@a.com",
+				},
+				Title: "Title3",
+			}
+			err = p.Create(db)
+			require.NoError(err)
+			require.EqualValues(3, p.ID)
+		})
+
+		t.Run("Replace related resources for project 1", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Project{
+				Model: gorm.Model{
+					ID: 1,
+				},
+			}
+			err := p.ReplaceRelatedResources(db,
+				[]ProjectRelatedResourceExternalLink{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 1,
+							SortOrder: 1,
+						},
+						Name: "Name1",
+						URL:  "URL1",
+					},
+				},
+				[]ProjectRelatedResourceHermesDocument{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 1,
+							SortOrder: 2,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID1",
+						},
+					},
+				},
+			)
+			require.NoError(err)
+		})
+
+		t.Run("Replace related resources for project 2", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Project{
+				Model: gorm.Model{
+					ID: 2,
+				},
+			}
+			err := p.ReplaceRelatedResources(db,
+				[]ProjectRelatedResourceExternalLink{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 2,
+							SortOrder: 1,
+						},
+						Name: "Name1",
+						URL:  "URL1",
+					},
+				},
+				[]ProjectRelatedResourceHermesDocument{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 2,
+							SortOrder: 2,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID1",
+						},
+					},
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 2,
+							SortOrder: 3,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID2",
+						},
+					},
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 2,
+							SortOrder: 4,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID3",
+						},
+					},
+				},
+			)
+			require.NoError(err)
+		})
+
+		t.Run("Replace related resources for project 3", func(t *testing.T) {
+			_, require := assert.New(t), require.New(t)
+			p := Project{
+				Model: gorm.Model{
+					ID: 3,
+				},
+			}
+			err := p.ReplaceRelatedResources(db,
+				[]ProjectRelatedResourceExternalLink{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 3,
+							SortOrder: 1,
+						},
+						Name: "Name1",
+						URL:  "URL1",
+					},
+				},
+				[]ProjectRelatedResourceHermesDocument{
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 3,
+							SortOrder: 2,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID1",
+						},
+					},
+					{
+						RelatedResource: ProjectRelatedResource{
+							ProjectID: 3,
+							SortOrder: 3,
+						},
+						Document: Document{
+							GoogleFileID: "GoogleFileID3",
+						},
+					},
+				},
+			)
+			require.NoError(err)
+		})
+
+		t.Run("Get projects for document 1", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID1",
+			}
+			projs, err := d.GetProjects(db)
+			require.NoError(err)
+			require.Len(projs, 3)
+			assert.Equal("Title1", projs[0].Title)
+			assert.Equal("Title2", projs[1].Title)
+			assert.Equal("Title3", projs[2].Title)
+		})
+
+		t.Run("Get projects for document 2", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID2",
+			}
+			projs, err := d.GetProjects(db)
+			require.NoError(err)
+			require.Len(projs, 1)
+			assert.Equal("Title2", projs[0].Title)
+		})
+
+		t.Run("Get projects for document 3", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "GoogleFileID3",
+			}
+			projs, err := d.GetProjects(db)
+			require.NoError(err)
+			require.Len(projs, 2)
+			assert.Equal("Title2", projs[0].Title)
+			assert.Equal("Title3", projs[1].Title)
+		})
 	})
 }
 

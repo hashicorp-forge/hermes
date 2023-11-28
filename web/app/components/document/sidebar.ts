@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
+  enqueueTask,
   keepLatestTask,
   restartableTask,
   task,
@@ -648,7 +649,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  patchDocument = task(async (fields) => {
+  patchDocument = enqueueTask(async (fields) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {

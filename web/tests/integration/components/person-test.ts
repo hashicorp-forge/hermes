@@ -8,6 +8,8 @@ import {
   authenticateTestUser,
 } from "hermes/utils/mirage-utils";
 
+const APPROVED_BADGE = "[data-test-person-approved-badge]";
+
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
   imgURL: string;
@@ -72,16 +74,16 @@ module("Integration | Component | person", function (hooks) {
       <Person @email="" @badge={{this.badge}} />
     `);
 
-    assert.dom("[data-test-person-approved-badge]").doesNotExist();
+    assert.dom(APPROVED_BADGE).doesNotExist();
 
     this.set("badge", "approved");
 
-    assert.dom("[data-test-person-approved-badge]").exists();
+    assert.dom(APPROVED_BADGE).exists();
 
     this.set("badge", "pending");
 
     assert
-      .dom("[data-test-person-approved-badge]")
+      .dom(APPROVED_BADGE)
       .doesNotExist("only shows a badge if the correct value is passed in");
   });
 

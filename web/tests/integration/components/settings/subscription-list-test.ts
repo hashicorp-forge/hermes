@@ -4,6 +4,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { fillIn, render } from "@ember/test-helpers";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   allProductAreas: string[];
@@ -15,11 +16,13 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    hooks.beforeEach(function () {
+    hooks.beforeEach(async function (this: SubscriptionListItemContext) {
       const authenticatedUser = this.owner.lookup(
-        "service:authenticated-user"
+        "service:authenticated-user",
       ) as AuthenticatedUserService;
       authenticatedUser.subscriptions = [];
+
+      await setupProductIndex(this);
     });
 
     test("it renders a filterable subscription list", async function (this: SubscriptionListItemContext, assert) {
@@ -45,5 +48,5 @@ module(
       assert.dom("li:nth-child(1)").hasText("two");
       assert.dom("li:nth-child(2)").hasText("three");
     });
-  }
+  },
 );

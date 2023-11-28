@@ -274,6 +274,69 @@ func GetLatestProductNumber(db *gorm.DB,
 	return d.DocumentNumber, nil
 }
 
+// GetProjects gets all projects associated with document d.
+func (d *Document) GetProjects(db *gorm.DB) ([]Project, error) {
+	if err := validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return nil, err
+	}
+
+	// Get document ID if not known.
+	if d.ID == 0 {
+		doc := &Document{
+			GoogleFileID: d.GoogleFileID,
+		}
+		if err := doc.Get(db); err != nil {
+			return nil, fmt.Errorf("error getting document: %w", err)
+		}
+		d.ID = doc.ID
+	}
+
+	// Find all Hermes document project related resources for the document.
+	var docRRs []ProjectRelatedResourceHermesDocument
+	if err := db.
+		Where("document_id = ?", d.ID).
+		Find(&docRRs).
+		Error; err != nil {
+		return nil, fmt.Errorf(
+			"error finding Hermes document project related resources: %w", err)
+	}
+
+	// Find all associated project related resources.
+	var rrs []ProjectRelatedResource
+	if err := db.
+		Model(&docRRs).
+		Association("RelatedResource").
+		Find(&rrs); err != nil {
+		return nil, fmt.Errorf(
+			"error finding project related resources: %w", err)
+	}
+
+	// Find all associated projects.
+	var projs []Project
+	if err := db.
+		Model(&rrs).
+		Association("Project").
+		Find(&projs); err != nil {
+		return nil, fmt.Errorf(
+			"error finding projects: %w", err)
+	}
+
+	return projs, nil
+}
+
 // ReplaceRelatedResources replaces related resources for document d.
 func (d *Document) ReplaceRelatedResources(
 	db *gorm.DB,
