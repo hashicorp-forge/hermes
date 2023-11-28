@@ -1,9 +1,6 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import {
-  BackEndRelatedHermesDocument,
-  FrontEndRelatedHermesDocument,
-} from "hermes/components/related-resources";
+import { RelatedHermesDocument } from "hermes/components/related-resources";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesDocument } from "hermes/types/document";
@@ -35,7 +32,7 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
 
     let documentPromises: Promise<HermesDocument>[] = [];
 
-    hermesDocuments?.forEach((doc: BackEndRelatedHermesDocument) => {
+    hermesDocuments?.forEach((doc: RelatedHermesDocument) => {
       documentPromises.push(
         this.fetchSvc
           .fetch(
@@ -47,21 +44,19 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
 
     const documents: HermesDocument[] = await Promise.all(documentPromises);
 
-    hermesDocuments = hermesDocuments?.map(
-      (doc: BackEndRelatedHermesDocument) => {
-        const document = documents.find((d) => d.objectID === doc.googleFileID);
+    hermesDocuments = hermesDocuments?.map((doc: RelatedHermesDocument) => {
+      const document = documents.find((d) => d.objectID === doc.googleFileID);
 
-        return {
-          ...doc,
-          summary: document?.summary,
-          product: document?.product,
-          status: document?.status,
-          owners: document?.owners,
-          docType: document?.docType,
-          ownerPhotos: document?.ownerPhotos,
-        };
-      },
-    ) as FrontEndRelatedHermesDocument[];
+      return {
+        ...doc,
+        summary: document?.summary,
+        product: document?.product,
+        status: document?.status,
+        owners: document?.owners,
+        docType: document?.docType,
+        ownerPhotos: document?.ownerPhotos,
+      };
+    }) as RelatedHermesDocument[];
 
     return {
       ...project,

@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import {
-  FrontEndRelatedHermesDocument,
+  RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
@@ -74,7 +74,7 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
    */
   private assertResourceIsDocument(
     document: RelatedResource,
-  ): asserts document is FrontEndRelatedHermesDocument {
+  ): asserts document is RelatedHermesDocument {
     if (!("googleFileID" in document)) {
       throw new Error("resource must be a document");
     }

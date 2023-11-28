@@ -6,8 +6,7 @@ import { HermesProject } from "hermes/types/project";
 import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
-import { Collection } from "miragejs";
-import { FrontEndRelatedHermesDocument } from "hermes/components/related-resources";
+import { RelatedHermesDocument } from "hermes/components/related-resources";
 
 const PROJECT_TITLE = "[data-test-title]";
 const PROJECT_DESCRIPTION = "[data-test-description]";
@@ -47,7 +46,7 @@ module("Integration | Component | project/tile", function (hooks) {
 
     let hermesDocuments = this.server.schema.relatedHermesDocument
       .all()
-      .models.map((doc: { attrs: FrontEndRelatedHermesDocument }) => {
+      .models.map((doc: { attrs: RelatedHermesDocument }) => {
         let d = doc.attrs;
         return {
           ...d,

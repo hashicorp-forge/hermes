@@ -1,7 +1,6 @@
 import {
   RelatedExternalLink,
-  BackEndRelatedHermesDocument,
-  FrontEndRelatedHermesDocument,
+  RelatedHermesDocument,
 } from "hermes/components/related-resources";
 import { ProjectStatus } from "./project-status";
 import { HermesDocument } from "./document";
@@ -29,12 +28,12 @@ export interface BackEndHermesProject {
 }
 
 export interface BackEndProjectResources {
-  hermesDocuments?: BackEndRelatedHermesDocument[];
+  hermesDocuments?: RelatedHermesDocument[];
   externalLinks?: RelatedExternalLink[];
 }
 
 export interface HermesProject extends BackEndHermesProject {
-  hermesDocuments?: FrontEndRelatedHermesDocument[];
+  hermesDocuments?: RelatedHermesDocument[];
   jiraIssue?: JiraIssue;
   creator: string;
   externalLinks?: RelatedExternalLink[];

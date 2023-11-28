@@ -11,9 +11,7 @@ import { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
 
-export type RelatedResource =
-  | RelatedExternalLink
-  | FrontEndRelatedHermesDocument;
+export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
 export enum RelatedResourceSelector {
   ExternalLink = ".external-resource",
@@ -26,21 +24,17 @@ export interface RelatedExternalLink {
   sortOrder: number;
 }
 
-export interface BackEndRelatedHermesDocument {
+export interface RelatedHermesDocument {
   googleFileID: string;
   title: string;
   documentType: string;
   documentNumber: string;
   sortOrder: number;
-}
-
-export interface FrontEndRelatedHermesDocument
-  extends BackEndRelatedHermesDocument {
-  summary: string;
   product: string;
   status: string;
   owners: string[];
   ownerPhotos: string[];
+  summary: string;
 }
 
 export enum RelatedResourcesScope {
@@ -157,7 +151,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
     return (
       (this.args.items?.filter((resource) => {
         return "googleFileID" in resource;
-      }) as BackEndRelatedHermesDocument[]) ?? []
+      }) as RelatedHermesDocument[]) ?? []
     );
   }
 
