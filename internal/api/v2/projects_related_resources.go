@@ -32,6 +32,7 @@ type ProjectRelatedResourcesGetResponseHermesDocument struct {
 	Product        string   `json:"product"`
 	SortOrder      int      `json:"sortOrder"`
 	Status         string   `json:"status"`
+	Summary        string   `json:"summary"`
 }
 
 type ProjectRelatedResourcesPutRequest struct {
@@ -197,6 +198,7 @@ func projectsResourceRelatedResourcesHandler(
 					Product:        doc.Product,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
 					Status:         doc.Status,
+					Summary:        doc.Summary,
 				})
 		}
 
