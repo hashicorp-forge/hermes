@@ -8,9 +8,9 @@
     {{yield}}
   {{else}}
     <Hds::Badge
-      @icon={{or this.productAreaName "folder"}}
-      @text={{or this.productAreaName @product}}
-      title={{or this.productAreaName @product}}
+      @icon={{or (get-product-id @product) "folder"}}
+      @text={{this.productAreaName}}
+      title={{this.productAreaName}}
     />
   {{/if}}
 </LinkTo>
