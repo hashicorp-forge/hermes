@@ -1,6 +1,6 @@
 <LinkTo
-  @route="authenticated.documents"
-  @query={{this.query}}
+  @route="authenticated.product-areas"
+  @model={{dasherize @product}}
   class="product-link"
   ...attributes
 >
@@ -8,9 +8,9 @@
     {{yield}}
   {{else}}
     <Hds::Badge
-      @icon={{or (get-product-id @product) "folder"}}
-      @text={{this.productAreaName}}
-      title={{this.productAreaName}}
+      @icon={{or this.productAreaName "folder"}}
+      @text={{or this.productAreaName @product}}
+      title={{or this.productAreaName @product}}
     />
   {{/if}}
 </LinkTo>

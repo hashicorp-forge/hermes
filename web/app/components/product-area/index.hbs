@@ -1,0 +1,125 @@
+<div class="mx-auto mb-24 w-full max-w-2xl">
+  {{! Header and subscribe }}
+  <div class="relative flex gap-4">
+    {{!-- <Product::Avatar @product={{@productArea}} @size="large" /> --}}
+
+    <div class="w-full">
+      <h1>
+        <span class="mr-1.5">
+          {{@productArea}}
+        </span>
+        <Hds::BadgeCount
+          @text="{{@nbHits}} Docs"
+          class="shrink-0 align-middle"
+        />
+      </h1>
+    </div>
+    <div class="relative mt-1.5 w-[125px] shrink-0 self-start justify-self-end">
+      <Hds::Button
+        @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
+        @icon={{if this.isSubscribed "check" "bell"}}
+        @color={{if this.isSubscribed "secondary" "secondary"}}
+        class="pl-2 pr-3.5"
+        @isFullWidth={{true}}
+        {{on "click" this.toggleSubscription}}
+      />
+      <TooltipIcon
+        @text="Get emailed when a document is published in this product/area."
+        class="absolute -right-3 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
+      />
+    </div>
+  </div>
+
+  <div class="relative mt-8 flex">
+    <div>
+      {{#if @docs.length}}
+        <ol>
+          {{#each @docs as |doc|}}
+            <li>
+              <div
+                class="feed-doc relative border-t border-color-border-faint pt-4 pb-7"
+              >
+                <div class="flex items-start gap-5">
+                  <Doc::Thumbnail
+                    @product={{doc.product}}
+                    @status={{doc.status}}
+                    @size="medium"
+                    class="shrink-0"
+                  />
+                  <div class="w-full">
+                    <div
+                      class="flex items-center justify-between gap-3 text-color-foreground-faint"
+                    >
+
+                      {{! Tags }}
+                      <div class="flex gap-[5px]">
+                        <span class={{dasherize doc.status}}>
+                          {{doc.status}}
+                        </span>
+                        <span class="opacity-25">|</span>
+                        {{doc.docType}}
+                        {{#if doc.docNumber}}
+                          <span class="opacity-25">|</span>
+                          {{doc.docNumber}}
+                        {{/if}}
+                      </div>
+                      <span>
+                        {{doc.created}}
+                      </span>
+
+                    </div>
+                    <div class="pr-10">
+                      <h4
+                        class="mt-2 text-display-300 text-color-foreground-strong"
+                      >
+                        {{doc.title}}
+                      </h4>
+                      {{! We should clamp this }}
+                      {{#if doc.summary}}
+                        <p class="mt-0.5 text-body-300">
+                          {{doc.summary}}
+                        </p>
+                      {{/if}}
+
+                      <div class="mt-3.5">
+                        <Person
+                          @email="{{get doc.owners 0}}"
+                          @imgURL={{get doc.ownerPhotos 0}}
+                        />
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          {{/each}}
+        </ol>
+      {{else}}
+        {{! TODO: improve this }}
+        No docs yet
+      {{/if}}
+    </div>
+  </div>
+
+  {{#if this.seeMoreButtonIsShown}}
+    <div class="mt-6">
+      <Hds::Button
+        @route="authenticated.all"
+        @icon="arrow-right"
+        @iconPosition="trailing"
+        @query={{hash
+          product=(array @productArea)
+          status=(array)
+          docType=(array)
+          owners=(array)
+          page=2
+        }}
+        @color="secondary"
+        @isFullWidth={{true}}
+        @text="See more {{@productArea}} documents"
+      />
+    </div>
+  {{/if}}
+
+</div>

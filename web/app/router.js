@@ -6,9 +6,6 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL;
 }
 
-const showProjectRoutes =
-  config.environment === "development" || config.environment === "test";
-
 Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
     this.route("dashboard");
@@ -27,6 +24,8 @@ Router.map(function () {
     this.route("projects", function () {
       this.route("project", { path: "/:project_id" });
     });
+
+    this.route("product-areas", { path: "/product-areas/:product_area_id" });
   });
   this.route("authenticate");
   this.route("404", { path: "/*path" });
