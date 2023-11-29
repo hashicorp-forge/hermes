@@ -28,8 +28,7 @@ module(
     });
 
     test("it renders a filterable subscription list", async function (this: SubscriptionListItemContext, assert) {
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionList
           @allProductAreas={{array 'one' 'two' 'three'}}
         />
@@ -47,8 +46,8 @@ module(
 
       await fillIn("[data-test-subscription-list-filter-input]", "t");
       assert.dom(LIST_ITEM).exists({ count: 2 });
-      assert.dom("li:nth-child(1)").hasText("two");
-      assert.dom("li:nth-child(2)").hasText("three");
+      assert.dom("li:nth-child(1)").containsText("two");
+      assert.dom("li:nth-child(2)").containsText("three");
     });
   },
 );

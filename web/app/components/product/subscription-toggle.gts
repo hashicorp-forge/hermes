@@ -32,12 +32,6 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     );
   }
 
-  private get buttonStyle() {
-    const paddingRight = this.isSubscribed ? 18 : 21;
-
-    return `padding-right: ${paddingRight}px;`;
-  }
-
   @action private toggleSubscription() {
     if (this.isSubscribed) {
       void this.authenticatedUser.removeSubscription.perform(this.args.product);
@@ -49,6 +43,8 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
   <template>
     <div class="relative inline-flex" ...attributes>
       <Action
+        data-test-product-subscription-toggle
+        data-test-subscribed={{this.isSubscribed}}
         class="hds-button pill-button justify-center
           {{if @size 'h-7 w-[118px] text-body-100' 'h-9 w-[128px]'}}
           {{if

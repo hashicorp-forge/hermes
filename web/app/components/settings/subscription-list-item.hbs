@@ -3,6 +3,7 @@
   class="flex w-full items-center justify-between py-2.5 px-2.5 hover:bg-color-page-faint"
 >
   <LinkTo
+    data-test-subscription-list-item-link
     @route="authenticated.product-areas"
     @model={{dasherize @productArea}}
     class="underline-on-hover flex items-center gap-3"

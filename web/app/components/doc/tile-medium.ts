@@ -6,11 +6,6 @@ interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
     doc: RelatedHermesDocument | HermesDocument;
-    route?: string;
-    model?: string;
-    query?: {
-      [key: string]: string | string[] | number;
-    };
     avatarIsLoading?: boolean;
   };
   Blocks: {

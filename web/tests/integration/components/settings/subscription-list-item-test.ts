@@ -6,10 +6,9 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
-const ABBREVIATION = "[data-test-product-abbreviation]";
 const ICON = "[data-test-product-avatar]";
-const NAME = "[data-test-subscription-list-item-name]";
-const CHECKBOX = '.hds-form-toggle input[type="checkbox"]';
+const NAME = "[data-test-subscription-list-item-link]";
+const BUTTON = "[data-test-product-subscription-toggle]";
 const LIST_ITEM = "[data-test-subscription-list-item]";
 
 interface SubscriptionListItemContext extends MirageTestContext {
@@ -37,8 +36,7 @@ module(
     test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
@@ -46,21 +44,26 @@ module(
 
       assert.dom(LIST_ITEM).exists();
       assert.dom(ICON).exists("it shows the product icon if there is one");
-      assert.dom(NAME).hasText("Waypoint");
-      assert.dom(CHECKBOX).isNotChecked();
-
-      await click(CHECKBOX);
-      assert.dom(CHECKBOX).isChecked();
-
-      this.set("productArea", "Labs");
       assert
-        .dom(ABBREVIATION)
-        .exists("it shows an abbreviation if there is no product logo");
-      assert.dom(NAME).hasText("Labs");
-      assert.dom(CHECKBOX).isNotChecked();
+        .dom(NAME)
+        .hasText("Waypoint")
+        .hasAttribute(
+          "href",
+          "/product-areas/waypoint",
+          "the name is clickable to the product-area screen",
+        );
 
-      this.set("productArea", "Waypoint");
-      assert.dom(CHECKBOX).isChecked();
+      assert
+        .dom(BUTTON)
+        .doesNotHaveAttribute("data-test-subscribed")
+        .hasText("Subscribe");
+
+      await click(BUTTON);
+
+      assert
+        .dom(BUTTON)
+        .hasAttribute("data-test-subscribed")
+        .hasText("Subscribed");
     });
   },
 );

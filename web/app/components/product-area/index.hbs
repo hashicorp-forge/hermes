@@ -8,16 +8,9 @@
   </div>
 
   <div class="text-center">
-    <h1
-      class="mt-5 text-[45px] font-bold leading-[55px] text-color-foreground-strong"
-    >
+    <h1 class="mt-5 text-display-600">
       {{@productArea}}
     </h1>
-    {{!--
-    <p class="mt-1.5 text-display-300">
-      {{@docs.length}}
-      Docs
-    </p> --}}
 
     <Product::SubscriptionToggle
       @product={{@productArea}}
@@ -30,7 +23,6 @@
         class="-translate-y-1.2 absolute left-0 top-1/2 h-px w-full bg-color-border-faint"
         aria-hidden="true"
       />
-      {{! Do the side hr thing }}
       <h3
         data-test-documents-header
         class="hermes-h4 relative inline-flex bg-color-page-primary px-6"
@@ -38,7 +30,6 @@
         {{@nbHits}}
         Documents
       </h3>
-      {{!-- <Hds::BadgeCount data-test-document-count @text="{{@nbHits}}" /> --}}
     </div>
 
   </div>

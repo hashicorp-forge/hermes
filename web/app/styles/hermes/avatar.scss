@@ -44,7 +44,7 @@
     @apply h-16 w-16;
 
     .product-abbreviation {
-      @apply tracking-tight;
+      @apply text-[32px] tracking-tight;
 
       &.letter-count-2 {
         @apply text-[24px];

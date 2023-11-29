@@ -13,7 +13,6 @@ interface ProductLinkComponentSignature {
 
 export default class ProductLinkComponent extends Component<ProductLinkComponentSignature> {
   protected get productAreaName(): string | undefined {
-    console.log(this.args.product);
     return getProductLabel(this.args.product);
   }
 
