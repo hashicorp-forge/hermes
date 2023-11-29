@@ -2,6 +2,9 @@ import Component from "@glimmer/component";
 import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
 import { HermesSize } from "hermes/types/sizes";
+import { inject as service } from "@ember/service";
+import ProductAreasService from "hermes/services/product-areas";
+import FlagsService from "hermes/services/flags";
 
 export type DocThumbnailSize = Exclude<HermesSize, HermesSize.XL>;
 
@@ -15,6 +18,9 @@ interface DocThumbnailComponentSignature {
 }
 
 export default class DocThumbnailComponent extends Component<DocThumbnailComponentSignature> {
+  @service declare productAreas: ProductAreasService;
+  @service declare flags: FlagsService;
+
   protected get status(): string | null {
     if (this.args.status) {
       return dasherize(this.args.status);
@@ -27,8 +33,20 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     return this.args.size ?? HermesSize.Small;
   }
 
-  protected get productShortName(): string | undefined {
-    return getProductId(this.args.product);
+  protected get badgeIsShown(): boolean {
+    if (getProductId(this.args.product)) {
+      return true;
+    }
+
+    if (!this.flags.productColors) {
+      return false;
+    }
+
+    if (this.productAreas.getAbbreviation(this.args.product)) {
+      return true;
+    }
+
+    return false;
   }
 
   protected get isApproved(): boolean {

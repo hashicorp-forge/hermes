@@ -1,6 +1,4 @@
 import Component from "@glimmer/component";
-import { action } from "@ember/object";
-import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 
@@ -23,7 +21,7 @@ interface TableSortableHeaderSignature {
   Element: HTMLButtonElement | HTMLAnchorElement;
   Args: {
     currentSort: `${SortAttribute}`;
-    sortDirection: SortDirection;
+    sortDirection: `${SortDirection}`;
     attribute: `${SortAttribute}`;
     defaultSortDirection?: `${SortDirection}`;
     queryParam?: Record<string, unknown>;
