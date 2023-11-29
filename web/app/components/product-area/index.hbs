@@ -19,39 +19,21 @@
       Docs
     </p> --}}
 
-    <div class="relative mt-6 inline-flex">
-      {{! <div class="text-color-foreground-faint">
-        Notifications:
-      </div> }}
-      <div class="w-[128px]">
-        <Hds::Button
-          {{on "click" this.toggleSubscription}}
-          class="pill-button {{if this.isSubscribed 'pr-[18px]' 'pr-[21px]'}}"
-          @icon={{if this.isSubscribed "check" "plus"}}
-          @color="secondary"
-          @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
-          @isFullWidth={{true}}
-        />
-      </div>
-      <TooltipIcon
-        @text={{if
-          this.isSubscribed
-          "You'll be emailed when a document is published in this product/area."
-          "Get emailed when a document is published in this product/area"
-        }}
-        class="absolute -right-2 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
-      />
-    </div>
+    <Product::SubscriptionToggle
+      @product={{@productArea}}
+      @hasTooltip={{true}}
+      class="mt-6"
+    />
 
     <div class="relative mt-12 text-center">
       <div
-        class="-translate-y-1.2 absolute left-0 top-1/2 h-px w-full bg-color-border-primary"
+        class="-translate-y-1.2 absolute left-0 top-1/2 h-px w-full bg-color-border-faint"
         aria-hidden="true"
       />
       {{! Do the side hr thing }}
       <h3
         data-test-documents-header
-        class="hermes-h4 relative inline-flex bg-color-page-primary px-4"
+        class="hermes-h4 relative inline-flex bg-color-page-primary px-6"
       >
         {{@nbHits}}
         Documents
@@ -69,30 +51,30 @@
           </li>
         {{/each}}
       </ol>
+      {{#if this.seeMoreButtonIsShown}}
+        <div class="mt-7">
+          <Hds::Button
+            @route="authenticated.all"
+            @icon="arrow-right"
+            @iconPosition="trailing"
+            @query={{hash
+              product=(array @productArea)
+              status=(array)
+              docType=(array)
+              owners=(array)
+              page=2
+            }}
+            @color="secondary"
+            @isFullWidth={{true}}
+            @text="See more {{@productArea}} documents"
+          />
+        </div>
+      {{/if}}
     {{else}}
       {{! TODO: improve this }}
       No docs yet
     {{/if}}
-  </div>
 
-  {{#if this.seeMoreButtonIsShown}}
-    <div class="mt-7">
-      <Hds::Button
-        @route="authenticated.all"
-        @icon="arrow-right"
-        @iconPosition="trailing"
-        @query={{hash
-          product=(array @productArea)
-          status=(array)
-          docType=(array)
-          owners=(array)
-          page=2
-        }}
-        @color="secondary"
-        @isFullWidth={{true}}
-        @text="See more {{@productArea}} documents"
-      />
-    </div>
-  {{/if}}
+  </div>
 
 </div>

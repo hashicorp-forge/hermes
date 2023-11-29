@@ -1,4 +1,3 @@
-import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
@@ -21,26 +20,8 @@ export default class ProductAreaIndexComponent extends Component<ProductAreaInde
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flags: FlagsService;
 
-  protected get isSubscribed() {
-    return this.authenticatedUser.subscriptions?.some(
-      (subscription) => subscription.productArea === this.args.productArea,
-    );
-  }
-
   protected get seeMoreButtonIsShown() {
     return this.args.nbHits > 12;
-  }
-
-  @action protected toggleSubscription() {
-    if (this.isSubscribed) {
-      void this.authenticatedUser.removeSubscription.perform(
-        this.args.productArea,
-      );
-    } else {
-      void this.authenticatedUser.addSubscription.perform(
-        this.args.productArea,
-      );
-    }
   }
 }
 
