@@ -29,7 +29,9 @@ Router.map(function () {
       this.route("project", { path: "/:project_id" });
     });
 
-    this.route("product-areas", { path: "/product-areas/:product_area_id" });
+    this.route("product-areas", function () {
+      this.route("product-area", { path: "/:product_area_id" });
+    });
   });
   this.route("authenticate");
   this.route("404", { path: "/*path" });

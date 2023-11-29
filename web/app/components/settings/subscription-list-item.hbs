@@ -4,12 +4,15 @@
 >
   <LinkTo
     data-test-subscription-list-item-link
-    @route="authenticated.product-areas"
+    @route="authenticated.product-areas.product-area"
     @model={{dasherize @productArea}}
-    class="underline-on-hover flex items-center gap-3"
+    class="flex items-center gap-3"
   >
     <Product::Avatar @product={{@productArea}} @size="small" />
-    <div data-test-subscription-list-item-name class="text-body-300">
+    <div
+      data-test-subscription-list-item-name
+      class="underline-on-hover text-body-300"
+    >
       {{@productArea}}
     </div>
   </LinkTo>
