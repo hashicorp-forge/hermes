@@ -7,6 +7,7 @@ import { HermesDocument } from "hermes/types/document";
 import { authenticateTestUser } from "hermes/utils/mirage-utils";
 import { module, test } from "qunit";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 const TIME_CELL = "[data-test-table-row-time-cell]";
 
@@ -21,7 +22,7 @@ module("Integration | Component | table/row", function (hooks) {
 
   hooks.beforeEach(function (this: TableRowComponentTestContext) {
     authenticateTestUser(this);
-    MockDate.set("2000-01-01T06:00:00.000-07:00");
+    MockDate.set(DEFAULT_MOCK_DATE);
 
     const tenMinutesAgoInSeconds = Date.now() / 1000 - 10 * 60;
     const tenSecondsAgoInSeconds = Date.now() / 1000 - 10;

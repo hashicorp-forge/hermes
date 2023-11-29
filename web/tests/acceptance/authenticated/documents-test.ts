@@ -5,7 +5,6 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
-const PRODUCT_LINK_SELECTOR = ".product-link";
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
 
@@ -26,7 +25,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
   test("documents can be sorted by created date", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
     this.server.createList("document", 2);
 
-    await visit("/all");
+    await visit("/documents");
 
     assert
       .dom(TABLE_HEADER_CREATED_SELECTOR)
