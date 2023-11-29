@@ -7,8 +7,6 @@
 }
 
 .tile {
-  @apply relative;
-
   .vertical-line {
     @apply text-color-foreground-faint opacity-50;
   }

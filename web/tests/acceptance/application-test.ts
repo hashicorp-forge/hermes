@@ -148,7 +148,7 @@ module("Acceptance | application", function (hooks) {
     await click("[data-test-user-menu-toggle]");
 
     assert
-      .dom("[data-test-user-menu-support")
+      .dom("[data-test-user-menu-item='support'] a")
       .hasAttribute("href", TEST_SUPPORT_URL);
   });
 });
