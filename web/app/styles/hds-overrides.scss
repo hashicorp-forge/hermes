@@ -46,3 +46,10 @@ a.hds-button {
     @apply no-underline;
   }
 }
+
+.hds-button {
+  &.pill-button,
+  &.pill-button::before {
+    @apply rounded-l-full rounded-r-full;
+  }
+}

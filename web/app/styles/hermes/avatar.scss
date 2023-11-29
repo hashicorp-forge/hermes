@@ -19,18 +19,6 @@
     }
   }
 
-  &.large,
-  &.xl {
-    .product-abbreviation {
-      &.letter-count-2 {
-        @apply text-[13px];
-      }
-      &.letter-count-3 {
-        @apply text-[11px] font-semibold;
-      }
-    }
-  }
-
   &.small {
     @apply h-5 w-5;
   }
@@ -41,10 +29,30 @@
 
   &.large {
     @apply h-9 w-9;
+
+    .product-abbreviation {
+      &.letter-count-2 {
+        @apply text-[13px];
+      }
+      &.letter-count-3 {
+        @apply text-[11px] font-semibold;
+      }
+    }
   }
 
   &.xl {
     @apply h-16 w-16;
+
+    .product-abbreviation {
+      @apply tracking-tight;
+
+      &.letter-count-2 {
+        @apply text-[24px];
+      }
+      &.letter-count-3 {
+        @apply text-[18px];
+      }
+    }
   }
 }
 

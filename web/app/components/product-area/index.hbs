@@ -1,57 +1,78 @@
 <div class="mx-auto mb-24 w-full max-w-3xl">
-  {{! Header and subscribe }}
-  <div class="relative flex gap-4">
+  <div class="flex justify-center">
     {{#let (get-product-id @productArea) as |product|}}
       {{#if (or product this.flags.productColors)}}
-        <Product::Avatar
-          @product={{@productArea}}
-          @size="large"
-          class="mt-0.5"
-        />
+        <Product::Avatar @product={{@productArea}} @size="xl" class="mt-0.5" />
       {{/if}}
     {{/let}}
-    <div class="w-full">
-      <h1>
-        <span class="mr-1.5">
-          {{@productArea}}
-        </span>
-        <Hds::BadgeCount
-          @text="{{@nbHits}} Docs"
-          class="shrink-0 align-middle"
-        />
-      </h1>
-    </div>
-    <div class="relative mt-1.5 w-[125px] shrink-0 self-start justify-self-end">
-      <Hds::Button
-        @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
-        @icon={{if this.isSubscribed "check" "bell"}}
-        @color={{if this.isSubscribed "secondary" "secondary"}}
-        class="pl-2 pr-3.5"
-        @isFullWidth={{true}}
-        {{on "click" this.toggleSubscription}}
-      />
-      <TooltipIcon
-        @text="Get emailed when a document is published in this product/area."
-        class="absolute -right-3 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
-      />
-    </div>
   </div>
 
-  <div class="relative mt-8 flex border-t border-t-color-border-faint">
-    <div>
-      {{#if @docs.length}}
-        <ol class="divided-list">
-          {{#each @docs as |doc|}}
-            <li class="group">
-              <Doc::TileMedium @doc={{doc}} />
-            </li>
-          {{/each}}
-        </ol>
-      {{else}}
-        {{! TODO: improve this }}
-        No docs yet
-      {{/if}}
+  <div class="text-center">
+    <h1
+      class="mt-5 text-[45px] font-bold leading-[55px] text-color-foreground-strong"
+    >
+      {{@productArea}}
+    </h1>
+    {{!--
+    <p class="mt-1.5 text-display-300">
+      {{@docs.length}}
+      Docs
+    </p> --}}
+
+    <div class="relative mt-6 inline-flex">
+      {{! <div class="text-color-foreground-faint">
+        Notifications:
+      </div> }}
+      <div class="w-[128px]">
+        <Hds::Button
+          {{on "click" this.toggleSubscription}}
+          class="pill-button {{if this.isSubscribed 'pr-[18px]' 'pr-[21px]'}}"
+          @icon={{if this.isSubscribed "check" "plus"}}
+          @color="secondary"
+          @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
+          @isFullWidth={{true}}
+        />
+      </div>
+      <TooltipIcon
+        @text={{if
+          this.isSubscribed
+          "You'll be emailed when a document is published in this product/area."
+          "Get emailed when a document is published in this product/area"
+        }}
+        class="absolute -right-2 top-1/2 translate-x-full -translate-y-1/2 text-color-foreground-disabled"
+      />
     </div>
+
+    <div class="relative mt-12 text-center">
+      <div
+        class="-translate-y-1.2 absolute left-0 top-1/2 h-px w-full bg-color-border-primary"
+        aria-hidden="true"
+      />
+      {{! Do the side hr thing }}
+      <h3
+        data-test-documents-header
+        class="hermes-h4 relative inline-flex bg-color-page-primary px-4"
+      >
+        {{@nbHits}}
+        Documents
+      </h3>
+      {{!-- <Hds::BadgeCount data-test-document-count @text="{{@nbHits}}" /> --}}
+    </div>
+
+  </div>
+  <div class="relative mt-6">
+    {{#if @docs.length}}
+      <ol class="divided-list">
+        {{#each @docs as |doc|}}
+          <li class="group relative">
+            <Doc::TileMedium @doc={{doc}} />
+          </li>
+        {{/each}}
+      </ol>
+    {{else}}
+      {{! TODO: improve this }}
+      No docs yet
+    {{/if}}
   </div>
 
   {{#if this.seeMoreButtonIsShown}}
