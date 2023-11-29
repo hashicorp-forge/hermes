@@ -1,19 +1,16 @@
 import Controller from "@ember/controller";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
-import AuthenticatedMyRoute from "hermes/routes/authenticated/my";
+import AuthenticatedMyDocumentsRoute from "hermes/routes/authenticated/my/documents";
 import { ModelFrom } from "hermes/types/route-models";
 
-export default class AuthenticatedMyController extends Controller {
-  queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
-  docType = [];
+export default class AuthenticatedMyDocumentsController extends Controller {
+  queryParams = ["includeSharedDrafts", "page", "sortBy"];
+  includeSharedDrafts = true;
   page = 1;
-  owners = [];
-  product = [];
-  sortBy = "dateDesc";
-  status = [];
+  sortBy = SortByValue.DateDesc;
 
-  declare model: ModelFrom<AuthenticatedMyRoute>;
+  declare model: ModelFrom<AuthenticatedMyDocumentsRoute>;
 
   get sortDirection() {
     switch (this.model.sortedBy) {

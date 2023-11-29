@@ -43,6 +43,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
   test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/projects");
+
     assert.equal(getPageTitle(), "All Projects | Hermes");
   });
 
@@ -73,12 +74,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedJiraTypes.push(project.jiraIssue.type);
         }
 
-        if (project.hermesDocuments) {
-          project.hermesDocuments.forEach((doc) => {
-            if (doc.product) {
-              expectedProducts.push(doc.product);
-            }
-          });
+        if (project.products) {
+          expectedProducts.push(...project.products);
         }
       });
 

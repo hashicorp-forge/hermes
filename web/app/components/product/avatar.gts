@@ -13,6 +13,7 @@ interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
     product?: string;
+    icon?: string;
     size?: `${Exclude<HermesSize, HermesSize.XL>}`;
   };
   Blocks: {
@@ -82,7 +83,7 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
       {{#if this.iconIsShown}}
         <FlightIcon
           @name={{or this.productID "folder"}}
-          class={{if this.sizeIsSmall "h3 w-3" "h-4 w-4"}}
+          class={{if this.sizeIsSmall "h-3 w-3" "h-4 w-4"}}
         />
       {{else if this.abbreviation}}
         <span

@@ -28,6 +28,10 @@ type Client struct {
 	// by descending modified time.
 	DocsModifiedTimeDesc *search.Index
 
+	// DocsModifiedTimeAsc is an Algolia replica of the docs index that is sorted
+	// by ascending modified time.
+	DocsModifiedTimeAsc *search.Index
+
 	// Drafts is an Algolia index for storing metadata for draft documents.
 	Drafts *search.Index
 
@@ -42,6 +46,10 @@ type Client struct {
 	// DraftsModifiedTimeDesc is an Algolia replica of the drafts index that is sorted
 	// by descending modified time.
 	DraftsModifiedTimeDesc *search.Index
+
+	// DraftsModifiedTimeAsc is an Algolia replica of the drafts index that is sorted
+	// by ascending modified time.
+	DraftsModifiedTimeAsc *search.Index
 
 	// Internal is an Algolia index for storing internal Hermes metadata.
 	Internal *search.Index
@@ -142,21 +150,24 @@ func New(cfg *Config) (*Client, error) {
 			cfg.DocsIndexName+"_createdTime_asc",
 			cfg.DocsIndexName+"_createdTime_desc",
 			cfg.DocsIndexName+"_modifiedTime_desc",
+			cfg.DocsIndexName+"_modifiedTime_asc",
 		),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Configure the docs createdTime_asc, createdTime_desc, modifiedTime_desc replica.
+	// Configure the docs createdTime_asc, createdTime_desc, modifiedTime_desc, modifiedTime_asc replica.
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
+	c.DocsModifiedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_asc")
 	err = configureReplicaIndexes(
 		cfg.DocsIndexName,
 		c.DocsCreatedTimeAsc,
 		c.DocsCreatedTimeDesc,
 		c.DocsModifiedTimeDesc,
+		c.DocsModifiedTimeAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -179,21 +190,24 @@ func New(cfg *Config) (*Client, error) {
 			cfg.DraftsIndexName+"_createdTime_asc",
 			cfg.DraftsIndexName+"_createdTime_desc",
 			cfg.DraftsIndexName+"_modifiedTime_desc",
+			cfg.DraftsIndexName+"_modifiedTime_asc",
 		),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Configure the drafts createdTime_asc, createdTime_desc, modifiedTime_desc replica.
+	// Configure the drafts createdTime_asc, createdTime_desc, modifiedTime_desc, modifiedTime_asc replica.
 	c.DraftsCreatedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_asc")
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
 	c.DraftsModifiedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_desc")
+	c.DraftsModifiedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_asc")
 	err = configureReplicaIndexes(
 		cfg.DraftsIndexName,
 		c.DraftsCreatedTimeAsc,
 		c.DraftsCreatedTimeDesc,
 		c.DraftsModifiedTimeDesc,
+		c.DraftsModifiedTimeAsc,
 	)
 	if err != nil {
 		return nil, err
@@ -223,6 +237,7 @@ func configureReplicaIndexes(
 	createdTimeAscIndex *search.Index,
 	createdTimeDescIndex *search.Index,
 	modifiedTimeDescIndex *search.Index,
+	modifiedTimeAscIndex *search.Index,
 ) error {
 	// Configure the createdTime_asc replica for index.
 	_, err := createdTimeAscIndex.SetSettings(search.Settings{
@@ -268,6 +283,7 @@ func configureReplicaIndexes(
 	_, err = modifiedTimeDescIndex.SetSettings(search.Settings{
 		AttributesForFaceting: opt.AttributesForFaceting(
 			"status",
+			"owners",
 		),
 
 		Ranking: opt.Ranking(
@@ -277,6 +293,23 @@ func configureReplicaIndexes(
 	if err != nil {
 		return fmt.Errorf(
 			"error setting settings for the %s modifiedTime_desc standard replica: %w",
+			indexName, err)
+	}
+
+	// Configure the modifiedTime_asc replica for index.
+	_, err = modifiedTimeAscIndex.SetSettings(search.Settings{
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"status",
+			"owners",
+		),
+
+		Ranking: opt.Ranking(
+			"asc(modifiedTime)",
+		),
+	})
+	if err != nil {
+		return fmt.Errorf(
+			"error setting settings for the %s modifiedTime_asc standard replica: %w",
 			indexName, err)
 	}
 
@@ -298,10 +331,12 @@ func NewSearchClient(cfg *Config) (*Client, error) {
 	c.DocsCreatedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_createdTime_asc")
 	c.DocsCreatedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_createdTime_desc")
 	c.DocsModifiedTimeDesc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_desc")
+	c.DocsModifiedTimeAsc = a.InitIndex(cfg.DocsIndexName + "_modifiedTime_asc")
 	c.Drafts = a.InitIndex(cfg.DraftsIndexName)
 	c.DraftsCreatedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_asc")
 	c.DraftsCreatedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_createdTime_desc")
 	c.DraftsModifiedTimeDesc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_desc")
+	c.DraftsModifiedTimeAsc = a.InitIndex(cfg.DraftsIndexName + "_modifiedTime_asc")
 	c.Internal = a.InitIndex(cfg.InternalIndexName)
 	c.Links = a.InitIndex(cfg.LinksIndexName)
 	c.Projects = a.InitIndex(cfg.ProjectsIndexName)

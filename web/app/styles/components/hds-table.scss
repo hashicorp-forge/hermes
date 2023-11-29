@@ -1,5 +1,5 @@
 .hds-table {
-  @apply mb-8 table-auto lg:table-fixed;
+  @apply mb-8 table-fixed;
   @apply border-0;
 
   thead {
@@ -21,7 +21,7 @@
     }
 
     &.name {
-      @apply w-auto;
+      @apply w-60 lg:w-auto;
       @apply pl-0;
     }
 
@@ -33,9 +33,12 @@
       @apply w-32;
     }
 
-    &.product,
-    &.owner {
+    &.product {
       @apply w-40;
+    }
+
+    &.owner {
+      @apply w-44;
     }
 
     &.time {
