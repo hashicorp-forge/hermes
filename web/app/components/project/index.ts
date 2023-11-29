@@ -86,6 +86,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * The URL of the project. Used by the CopyURLButton.
+   */
+  protected get url() {
+    return window.location.href;
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
