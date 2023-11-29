@@ -37,17 +37,17 @@
   }
 
   &.medium {
-    @apply w-16;
+    @apply w-[72px];
 
     .status-icon {
-      @apply top-[6px] h-[60px] w-[60px];
+      @apply h-[52px] w-[52px];
 
       &.approved {
-        @apply -right-2.5;
+        @apply -right-2 top-1;
       }
 
       &.obsolete {
-        @apply -left-3.5;
+        @apply top-[3px] -left-2.5;
       }
     }
   }
