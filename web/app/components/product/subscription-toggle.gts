@@ -7,6 +7,8 @@ import FlagsService from "hermes/services/flags";
 import TooltipIcon from "hermes/components/tooltip-icon";
 import HdsButton from "@hashicorp/design-system-components/components/hds/button";
 import { on } from "@ember/modifier";
+import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
+import Action from "hermes/components/action";
 
 interface ProductSubscriptionToggleComponentSignature {
   Element: HTMLDivElement;
@@ -30,7 +32,13 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     );
   }
 
-  @action protected toggleSubscription() {
+  private get buttonStyle() {
+    const paddingRight = this.isSubscribed ? 18 : 21;
+
+    return `padding-right: ${paddingRight}px;`;
+  }
+
+  @action private toggleSubscription() {
     if (this.isSubscribed) {
       void this.authenticatedUser.removeSubscription.perform(this.args.product);
     } else {
@@ -39,17 +47,25 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
   }
 
   <template>
-    <div class="relative mt-6 inline-flex">
-      <div class="w-[128px]">
-        <HdsButton
-          {{on "click" this.toggleSubscription}}
-          class="pill-button {{if this.isSubscribed 'pr-[18px]' 'pr-[21px]'}}"
-          @icon={{if this.isSubscribed "check" "plus"}}
-          @color="secondary"
-          @text={{if this.isSubscribed "Subscribed" "Subscribe"}}
-          @isFullWidth={{true}}
-        />
-      </div>
+    <div class="relative inline-flex" ...attributes>
+      <Action
+        class="hds-button pill-button justify-center
+          {{if @size 'h-7 w-[118px] text-body-100' 'h-9 w-[128px]'}}
+          {{if
+            this.isSubscribed
+            'hds-button--color-primary'
+            'hds-button--color-secondary'
+          }}"
+        {{on "click" this.toggleSubscription}}
+      >
+        <div class="flex items-center gap-[5px]">
+          <FlightIcon
+            @name={{if this.isSubscribed "check" "plus"}}
+            class={{if this.isSubscribed "-ml-1" "-ml-1"}}
+          />
+          {{if this.isSubscribed "Subscribed" "Subscribe"}}
+        </div>
+      </Action>
       {{#if @hasTooltip}}
         <TooltipIcon
           @text={{if

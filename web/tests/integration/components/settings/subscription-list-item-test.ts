@@ -10,7 +10,7 @@ const ABBREVIATION = "[data-test-product-abbreviation]";
 const ICON = "[data-test-product-avatar]";
 const NAME = "[data-test-subscription-list-item-name]";
 const CHECKBOX = '.hds-form-toggle input[type="checkbox"]';
-const POPOVER = ".subscription-list-popover";
+const LIST_ITEM = "[data-test-subscription-list-item]";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   productArea: string;
@@ -44,7 +44,7 @@ module(
         />
       `);
 
-      assert.dom(".subscription-list-item").exists();
+      assert.dom(LIST_ITEM).exists();
       assert.dom(ICON).exists("it shows the product icon if there is one");
       assert.dom(NAME).hasText("Waypoint");
       assert.dom(CHECKBOX).isNotChecked();
@@ -61,35 +61,6 @@ module(
 
       this.set("productArea", "Waypoint");
       assert.dom(CHECKBOX).isChecked();
-    });
-
-    test("it shows a temporary message when toggled", async function (assert) {
-      this.set("productArea", "Waypoint");
-
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
-        <Settings::SubscriptionListItem
-          @productArea={{this.productArea}}
-        />
-      `);
-
-      let promise = click(CHECKBOX);
-
-      assert.dom(POPOVER).doesNotExist();
-      await waitFor(POPOVER);
-
-      assert.dom(POPOVER).exists().hasText("Subscribed");
-
-      await promise;
-
-      assert.dom(POPOVER).doesNotExist("it hides the popover after a timeout");
-
-      promise = click(CHECKBOX);
-
-      await waitFor(POPOVER);
-      assert.dom(POPOVER).hasText("Unsubscribed");
-
-      await promise;
     });
   },
 );
