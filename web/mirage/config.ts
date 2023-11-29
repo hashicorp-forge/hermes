@@ -38,10 +38,41 @@ export default function (mirageConfig) {
        */
       const handleAlgoliaRequest = (schema, request) => {
         const requestBody = JSON.parse(request.requestBody);
-
         if (requestBody) {
           const { facetQuery, query } = requestBody;
-          if (facetQuery) {
+          let { facetFilters } = requestBody;
+
+          // Ignore the facetFilters if they're empty.
+          if (facetFilters) {
+            if (facetFilters.length === 0) {
+              facetFilters = undefined;
+            } else if (facetFilters[0] === "") {
+              facetFilters = undefined;
+            }
+          }
+
+          if (facetFilters) {
+            /**
+             * Facet filters arrive like ["owners:foo@bar.com"]
+             */
+            if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+              // A request from the my/documents route for published docs
+              const hits = schema.document.all().models.filter((doc) => {
+                return (
+                  doc.attrs.owners.includes(TEST_USER_EMAIL) &&
+                  doc.attrs.status !== "WIP"
+                );
+              });
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits,
+                },
+              );
+            }
+          } else if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()
@@ -543,10 +574,18 @@ export default function (mirageConfig) {
        * Used by the /drafts route's getDraftResults method to fetch
        * a list of facets and draft results.
        */
-      this.get("/drafts", () => {
+      this.get("/drafts", (schema, request) => {
+        const params = request.queryParams;
+        const { facetFilters } = params;
         const allDocs = this.schema.document.all().models;
         const drafts = allDocs.filter((doc) => {
-          return doc.attrs.isDraft;
+          if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+            return (
+              doc.attrs.isDraft && doc.attrs.owners.includes(TEST_USER_EMAIL)
+            );
+          } else {
+            return doc.attrs.isDraft;
+          }
         });
 
         return new Response(
