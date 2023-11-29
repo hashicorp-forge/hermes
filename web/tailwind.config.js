@@ -49,6 +49,7 @@ module.exports = {
       boxShadow: {
         "surface-low": "var(--token-surface-low-box-shadow)",
         "surface-mid": "var(--token-surface-mid-box-shadow)",
+        "focus-ring-action": "var(--token-focus-ring-action-box-shadow)",
       },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,
@@ -169,6 +170,7 @@ module.exports = {
 
         // Alpha
         "color-palette-alpha-100": "var(--token-color-palette-alpha-100)",
+        "color-palette-alpha-300": "var(--token-color-palette-alpha-300)",
 
         // Neutral
         "color-palette-neutral-50": "var(--token-color-palette-neutral-50)",

@@ -13,6 +13,25 @@ import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
 import FlagsService from "hermes/services/flags";
 
+interface UserNavItem {
+  label: string;
+  isNew?: boolean;
+}
+
+interface UserNavLinkTo extends UserNavItem {
+  route: string;
+}
+
+interface UserNavExternalLink extends UserNavItem {
+  href: string;
+}
+
+interface UserNavAction extends UserNavItem {
+  action: () => void;
+}
+
+type UserNavMenuItem = UserNavLinkTo | UserNavExternalLink | UserNavAction;
+
 interface HeaderNavComponentSignature {
   Args: {};
 }
@@ -42,6 +61,33 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
   protected get supportDocsURL() {
     return this.configSvc.config.support_link_url;
+  }
+
+  protected get dropdownListItems(): UserNavMenuItem[] {
+    const defaultItems = [
+      {
+        label: "Email notifications",
+        route: "authenticated.settings",
+        isNew: this.emailNotificationsHighlightIsShown,
+      },
+      {
+        label: "GitHub",
+        href: this.gitHubRepoURL,
+      },
+      {
+        label: "Support",
+        href: this.supportDocsURL,
+      },
+    ] as UserNavMenuItem[];
+
+    if (this.showSignOut) {
+      defaultItems.push({
+        label: "Sign out",
+        action: this.invalidateSession,
+      });
+    }
+
+    return defaultItems;
   }
 
   /**
@@ -88,14 +134,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @action protected onDropdownOpen(): void {
     this.userMenuHighlightIsShown = false;
     window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
-  }
-
-  /**
-   * The actions to take when the dropdown menu is closed.
-   * Force-hides the emailNotificationsHighlight if it's visible.
-   */
-  @action protected onDropdownClose(): void {
-    this.emailNotificationsHighlightIsShown = false;
   }
 
   @action protected invalidateSession(): void {

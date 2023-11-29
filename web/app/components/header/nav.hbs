@@ -41,70 +41,69 @@
       @icon="plus"
       class="pl-2.5 pr-4"
     />
-    <div class="relative">
-      {{#if this.userMenuHighlightIsShown}}
-        <Header::UserMenuHighlight />
-      {{/if}}
-      {{#if this.profile.picture}}
-        {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-        <img
-          src={{this.profile.picture}}
-          class="user-avatar"
-          role="presentation"
-          referrerpolicy="no-referrer"
-        />
-      {{/if}}
-      <Hds::Dropdown as |dd|>
-        <dd.ToggleIcon
-          data-test-user-menu-toggle
-          @text="User menu"
-          @icon="user"
-        />
-        <dd.Title
-          data-test-user-menu-title
-          {{did-insert this.onDropdownOpen}}
-          {{will-destroy this.onDropdownClose}}
-          @text={{this.profile.name}}
-          class="text-body-200"
-        />
-        <dd.Description
-          data-test-user-menu-email
-          @text={{this.profile.email}}
-          class="text-body-200"
-        />
-        <dd.Separator class="mt-2" />
-        <dd.Interactive
-          data-test-user-menu-item="email-notifications"
-          @route="authenticated.settings"
-          @text="Email notifications"
-          class={{if this.emailNotificationsHighlightIsShown "highlighted-new"}}
-        />
-        <dd.Interactive
-          data-test-user-menu-github
-          @href={{this.gitHubRepoURL}}
-          @isHrefExternal={{true}}
-          @text="GitHub"
-          @icon="external-link"
-          class="user-menu-external-link"
-        />
-        {{#if this.supportDocsURL}}
-          <dd.Interactive
-            data-test-user-menu-support
-            @href={{this.supportDocsURL}}
-            @isHrefExternal={{true}}
-            @text="Support"
-            @icon="external-link"
-            class="user-menu-external-link"
-          />
-        {{/if}}
-        {{#if this.showSignOut}}
-          <dd.Interactive
-            data-test-user-menu-item="sign-out"
-            {{on "click" this.invalidateSession}}
-            @text="Sign out"
-          />
-        {{/if}}
-      </Hds::Dropdown>
+    <div class="relative flex">
+      <X::DropdownList
+        @items={{this.dropdownListItems}}
+        @placement="bottom-end"
+        class="user-dropdown"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            @hasChevron={{true}}
+            aria-label="User menu"
+            class="user-menu-button -mr-1"
+          >
+            <Person::Avatar
+              @email={{this.profile.email}}
+              @imgURL={{this.profile.picture}}
+              @size="large"
+              data-test-user-menu-toggle
+            />
+          </dd.ToggleAction>
+          {{#if this.userMenuHighlightIsShown}}
+            <Header::UserMenuHighlight />
+          {{/if}}
+        </:anchor>
+        <:header>
+          <div
+            {{did-insert this.onDropdownOpen}}
+            class="mb-1 border-b border-b-color-border-primary py-3.5 px-5"
+          >
+            <div class="font-semibold" data-test-user-menu-title>
+              {{this.profile.name}}
+            </div>
+            <div class="text-color-foreground-faint" data-test-user-menu-email>
+              {{this.profile.email}}
+            </div>
+          </div>
+        </:header>
+        <:item as |dd|>
+          <div
+            data-test-user-menu-item={{dasherize dd.attrs.label}}
+            class="w-full"
+          >
+            {{#if dd.attrs.route}}
+              <dd.LinkTo @route={{dd.attrs.route}}>
+                {{dd.attrs.label}}
+                {{#if dd.attrs.isNew}}
+                  <Hds::Badge
+                    @text="New"
+                    class="highlighted-new-badge ml-1.5"
+                  />
+                {{/if}}
+              </dd.LinkTo>
+            {{else if dd.attrs.href}}
+              <dd.ExternalLink href={{dd.attrs.href}} @iconIsShown={{true}}>
+                {{dd.attrs.label}}
+              </dd.ExternalLink>
+            {{else if dd.attrs.action}}
+              <dd.Action {{on "click" dd.attrs.action}}>
+                {{dd.attrs.label}}
+              </dd.Action>
+            {{/if}}
+          </div>
+        </:item>
+      </X::DropdownList>
     </div>
   </div>
 </nav>
