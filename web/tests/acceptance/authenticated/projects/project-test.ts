@@ -209,6 +209,10 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
+    assert
+      .dom(COPY_URL_BUTTON)
+      .hasAttribute("data-test-url", window.location.href);
+
     assert.dom(DOCUMENT_LINK).hasAttribute("href", `/document/${id}`);
 
     assert.dom(DOCUMENT_TITLE).containsText(docTitle);
@@ -504,16 +508,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
   todo(
     "you can add a jira link",
-    async function (
-      this: AuthenticatedProjectsProjectRouteTestContext,
-      assert,
-    ) {
-      assert.true(false);
-    },
-  );
-
-  todo(
-    "you can copy a project's URL",
     async function (
       this: AuthenticatedProjectsProjectRouteTestContext,
       assert,
