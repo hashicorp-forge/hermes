@@ -22,6 +22,7 @@ export function getTestDocNumber(product: string) {
 }
 
 export default Factory.extend({
+  id: (i: number) => `doc-${i}`,
   objectID: (i: number) => `doc-${i}`,
   title: (i: number) => `Test Document ${i}`,
   status: "WIP",

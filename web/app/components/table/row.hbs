@@ -1,4 +1,4 @@
-<tr ...attributes>
+<tr data-test-table-row ...attributes>
   <td class="name">
     <LinkTo
       data-test-document-link
@@ -44,7 +44,7 @@
       </ProductLink>
     </div>
   </td>
-  <td class="owner">
+  <td data-test-table-row-owner-cell class="owner">
     <div class="inner">
       <Person
         @imgURL={{get @doc.ownerPhotos 0}}
