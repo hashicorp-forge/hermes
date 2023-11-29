@@ -242,7 +242,10 @@
                   )
                 }}
               >
-                <Doc::TileMedium @doc={{document}} />
+                <Doc::TileMedium
+                  @doc={{document}}
+                  @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
+                />
               </Project::Resource>
             </li>
           {{/each}}

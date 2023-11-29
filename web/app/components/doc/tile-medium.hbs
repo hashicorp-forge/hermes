@@ -18,6 +18,7 @@
         @size="large"
         @email="{{get @doc.owners 0}}"
         @imgURL={{get @doc.ownerPhotos 0}}
+        @isLoading={{@avatarIsLoading}}
         class="relative z-10 -mt-1 shrink-0"
       />
     </LinkTo>

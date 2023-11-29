@@ -5,6 +5,7 @@ interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
     doc: RelatedHermesDocument;
+    avatarIsLoading?: boolean;
   };
   Blocks: {
     default: [];
