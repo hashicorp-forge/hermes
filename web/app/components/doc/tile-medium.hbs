@@ -15,6 +15,7 @@
       tabindex="-1"
       @route="authenticated.documents"
       @query={{hash owners=(array (get @doc.owners 0))}}
+      disabled={{not (get @doc.owners 0)}}
     >
       <Person::Avatar
         @size="large"
@@ -63,6 +64,7 @@
             data-test-document-owner-name
             @route="authenticated.documents"
             @query={{hash owners=(array (get @doc.owners 0))}}
+            disabled={{not (get @doc.owners 0)}}
             class="underlined-link text-color-foreground-primary"
           >
             {{or (get @doc.owners 0) "Unknown"}}

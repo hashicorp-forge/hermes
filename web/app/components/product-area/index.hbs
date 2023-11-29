@@ -1,4 +1,4 @@
-<div class="mx-auto mb-24 w-full max-w-3xl">
+<div class="mb-24 w-full">
   <div class="flex justify-center">
     {{#let (get-product-id @productArea) as |product|}}
       {{#if (or product this.flags.productColors)}}
@@ -60,7 +60,7 @@
     </div>
 
   </div>
-  <div class="relative mt-6">
+  <div class="relative mx-auto mt-7 max-w-3xl">
     {{#if @docs.length}}
       <ol class="divided-list">
         {{#each @docs as |doc|}}
@@ -76,7 +76,7 @@
   </div>
 
   {{#if this.seeMoreButtonIsShown}}
-    <div class="mt-6">
+    <div class="mt-7">
       <Hds::Button
         @route="authenticated.all"
         @icon="arrow-right"
