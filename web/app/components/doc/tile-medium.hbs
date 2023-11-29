@@ -29,7 +29,7 @@
         <LinkTo
           data-test-document-link
           @route="authenticated.document"
-          @model={{@doc.googleFileID}}
+          @model={{this.docID}}
         >
           {{! Primary click area }}
           <div
@@ -46,7 +46,7 @@
             {{! Doc Number }}
             <span data-test-document-number class="shrink-0 font-regular">
               <span class="whitespace-nowrap">
-                {{@doc.documentNumber}}
+                {{this.docNumber}}
               </span>
             </span>
           </h3>
@@ -71,6 +71,7 @@
           </span>
           {{! Product }}
           <ProductLink
+            @product={{@doc.product}}
             tabindex="-1"
             class="underline underline-offset-[3px] hover:text-color-foreground-strong"
           >
@@ -101,7 +102,7 @@
             class="interactive"
           />
           {{! Doc type }}
-          <Hds::Badge data-test-document-type @text={{@doc.documentType}} />
+          <Hds::Badge data-test-document-type @text={{this.docType}} />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-<div class="mx-auto mb-24 w-full max-w-2xl">
+<div class="mx-auto mb-24 w-full max-w-3xl">
   {{! Header and subscribe }}
   <div class="relative flex gap-4">
     {{#let (get-product-id @productArea) as |product|}}
@@ -37,68 +37,13 @@
     </div>
   </div>
 
-  <div class="relative mt-8 flex">
+  <div class="relative mt-8 flex border-t border-t-color-border-faint">
     <div>
       {{#if @docs.length}}
-        <ol>
+        <ol class="divided-list">
           {{#each @docs as |doc|}}
-            <li>
-              <div
-                class="feed-doc relative border-t border-color-border-faint pt-4 pb-7"
-              >
-                <div class="flex items-start gap-5">
-                  <Doc::Thumbnail
-                    @product={{doc.product}}
-                    @status={{doc.status}}
-                    @size="medium"
-                    class="shrink-0"
-                  />
-                  <div class="w-full">
-                    <div
-                      class="flex items-center justify-between gap-3 text-color-foreground-faint"
-                    >
-
-                      {{! Tags }}
-                      <div class="flex gap-[5px]">
-                        <span class={{dasherize doc.status}}>
-                          {{doc.status}}
-                        </span>
-                        <span class="opacity-25">|</span>
-                        {{doc.docType}}
-                        {{#if doc.docNumber}}
-                          <span class="opacity-25">|</span>
-                          {{doc.docNumber}}
-                        {{/if}}
-                      </div>
-                      <span>
-                        {{doc.created}}
-                      </span>
-
-                    </div>
-                    <div class="pr-10">
-                      <h4
-                        class="mt-2 text-display-300 text-color-foreground-strong"
-                      >
-                        {{doc.title}}
-                      </h4>
-                      {{! We should clamp this }}
-                      {{#if doc.summary}}
-                        <p class="mt-0.5 text-body-300">
-                          {{doc.summary}}
-                        </p>
-                      {{/if}}
-
-                      <div class="mt-3.5">
-                        <Person
-                          @email="{{get doc.owners 0}}"
-                          @imgURL={{get doc.ownerPhotos 0}}
-                        />
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <li class="group">
+              <Doc::TileMedium @doc={{doc}} />
             </li>
           {{/each}}
         </ol>

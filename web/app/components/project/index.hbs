@@ -230,7 +230,7 @@
             @text="{{this.hermesDocuments.length}}"
           />
         </div>
-        <ol data-test-document-list class="project-resource-list mt-3">
+        <ol data-test-document-list class="divided-list mt-3">
           {{#each this.hermesDocuments as |document|}}
             <li class="group relative" data-test-document-list-item>
               <Project::Resource
@@ -263,7 +263,7 @@
             @text="{{this.externalLinks.length}}"
           />
         </div>
-        <ol data-test-external-link-list class="project-resource-list mt-5">
+        <ol data-test-external-link-list class="divided-list mt-5">
           {{#each this.externalLinks as |link i|}}
             <li class="group" data-test-document-list-item>
               <Project::Resource
