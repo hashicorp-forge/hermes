@@ -23,11 +23,18 @@ type ProjectRelatedResourcesGetResponseExternalLink struct {
 }
 
 type ProjectRelatedResourcesGetResponseHermesDocument struct {
-	GoogleFileID   string `json:"googleFileID"`
-	Title          string `json:"title"`
-	DocumentType   string `json:"documentType"`
-	DocumentNumber string `json:"documentNumber"`
-	SortOrder      int    `json:"sortOrder"`
+	GoogleFileID   string   `json:"googleFileID"`
+	Title          string   `json:"title"`
+	CreatedTime    int64    `json:"createdTime"`
+	DocumentType   string   `json:"documentType"`
+	DocumentNumber string   `json:"documentNumber"`
+	ModifiedTime   int64    `json:"modifiedTime"`
+	Owners         []string `json:"owners"`
+	OwnerPhotos    []string `json:"ownerPhotos,omitempty"`
+	Product        string   `json:"product"`
+	SortOrder      int      `json:"sortOrder"`
+	Status         string   `json:"status"`
+	Summary        string   `json:"summary"`
 }
 
 type ProjectRelatedResourcesPutRequest struct {
@@ -74,7 +81,7 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
 			}
 		}
@@ -130,7 +137,7 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
 			}
 
@@ -159,8 +166,26 @@ func projectsResourceRelatedResourcesHandler(
 						"error", err,
 					}, logArgs...)...)
 				http.Error(
-					w, "Error processing requst", http.StatusInternalServerError)
+					w, "Error processing request", http.StatusInternalServerError)
 				return
+			}
+
+			// Get owner photo by searching Google Workspace directory.
+			if len(doc.Owners) > 0 {
+				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
+				if err != nil {
+					// Log but don't return an error.
+					srv.Logger.Error("error searching directory for person",
+						append([]interface{}{
+							"error", err,
+							"person", doc.Owners[0],
+						}, logArgs...)...)
+				}
+				if len(ppl) > 0 {
+					if len(ppl[0].Photos) > 0 {
+						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
+					}
+				}
 			}
 
 			resp.HermesDocuments = append(
@@ -168,9 +193,16 @@ func projectsResourceRelatedResourcesHandler(
 				ProjectRelatedResourcesGetResponseHermesDocument{
 					GoogleFileID:   hdrr.Document.GoogleFileID,
 					Title:          doc.Title,
+					CreatedTime:    doc.CreatedTime,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
+					ModifiedTime:   doc.ModifiedTime,
+					Owners:         doc.Owners,
+					OwnerPhotos:    doc.OwnerPhotos,
+					Product:        doc.Product,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
+					Status:         doc.Status,
+					Summary:        doc.Summary,
 				})
 		}
 
@@ -185,7 +217,7 @@ func projectsResourceRelatedResourcesHandler(
 					"error", err,
 				}, logArgs...)...)
 			http.Error(
-				w, "Error processing requst", http.StatusInternalServerError)
+				w, "Error processing request", http.StatusInternalServerError)
 			return
 		}
 

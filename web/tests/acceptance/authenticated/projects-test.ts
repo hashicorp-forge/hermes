@@ -1,10 +1,11 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import { findAll, visit } from "@ember/test-helpers";
+import { currentURL, findAll, visit } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { HermesProject } from "hermes/types/project";
+import { Response } from "miragejs";
 
 const PROJECT_TILE = "[data-test-project-tile]";
 const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
@@ -22,8 +23,27 @@ module("Acceptance | authenticated/projects", function (hooks) {
     await authenticateSession({});
   });
 
+  test("it redirects to the dashboard if the flag is not enabled", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return new Response(
+        200,
+        {},
+        {
+          feature_flags: {
+            projects: false,
+          },
+        },
+      );
+    });
+
+    await visit("/projects");
+
+    assert.equal(currentURL(), "/dashboard");
+  });
+
   test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/projects");
+
     assert.equal(getPageTitle(), "All Projects | Hermes");
   });
 
@@ -54,12 +74,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedJiraTypes.push(project.jiraIssue.type);
         }
 
-        if (project.hermesDocuments) {
-          project.hermesDocuments.forEach((doc) => {
-            if (doc.product) {
-              expectedProducts.push(doc.product);
-            }
-          });
+        if (project.products) {
+          expectedProducts.push(...project.products);
         }
       });
 

@@ -59,7 +59,6 @@ func TestProject(t *testing.T) {
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
-			// assert.Equal(ActiveProjectStatus, *p.Status)
 			assert.Equal("Title1", p.Title)
 		})
 
@@ -76,7 +75,6 @@ func TestProject(t *testing.T) {
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
-			// assert.Equal(ActiveProjectStatus, *p.Status)
 			assert.Equal("Title1", p.Title)
 		})
 
@@ -137,8 +135,8 @@ func TestProject(t *testing.T) {
 				Creator: User{
 					EmailAddress: "b@b.com",
 				},
-				Description: "Description2",
-				JiraIssueID: "JiraIssueID2",
+				Description: &[]string{"Description2"}[0],
+				JiraIssueID: &[]string{"JiraIssueID2"}[0],
 				Title:       "Title2",
 			}
 			err := p.Create(db)
@@ -147,8 +145,10 @@ func TestProject(t *testing.T) {
 			assert.EqualValues(2, p.Creator.ID)
 			assert.EqualValues(2, p.CreatorID)
 			assert.EqualValues(2, p.ID)
-			assert.Equal("Description2", p.Description)
-			assert.Equal("JiraIssueID2", p.JiraIssueID)
+			require.NotNil(p.Description)
+			assert.Equal("Description2", *p.Description)
+			require.NotNil(p.JiraIssueID)
+			assert.Equal("JiraIssueID2", *p.JiraIssueID)
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
@@ -165,8 +165,10 @@ func TestProject(t *testing.T) {
 			assert.EqualValues(2, p.Creator.ID)
 			assert.EqualValues(2, p.CreatorID)
 			assert.EqualValues(2, p.ID)
-			assert.Equal("Description2", p.Description)
-			assert.Equal("JiraIssueID2", p.JiraIssueID)
+			require.NotNil(p.Description)
+			assert.Equal("Description2", *p.Description)
+			require.NotNil(p.JiraIssueID)
+			assert.Equal("JiraIssueID2", *p.JiraIssueID)
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
@@ -180,8 +182,8 @@ func TestProject(t *testing.T) {
 					Model: gorm.Model{
 						ID: 2,
 					},
-					Description: "",
-					JiraIssueID: "",
+					Description: &[]string{""}[0],
+					JiraIssueID: &[]string{""}[0],
 				}
 
 				err := p.Update(db)
@@ -190,8 +192,10 @@ func TestProject(t *testing.T) {
 				assert.EqualValues(2, p.Creator.ID)
 				assert.EqualValues(2, p.CreatorID)
 				assert.EqualValues(2, p.ID)
-				assert.Equal("", p.Description)
-				assert.Equal("", p.JiraIssueID)
+				require.NotNil(p.Description)
+				assert.Equal("", *p.Description)
+				require.NotNil(p.JiraIssueID)
+				assert.Equal("", *p.JiraIssueID)
 				assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 				assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 				assert.Equal(ActiveProjectStatus, p.Status)
@@ -208,8 +212,10 @@ func TestProject(t *testing.T) {
 			assert.EqualValues(2, p.Creator.ID)
 			assert.EqualValues(2, p.CreatorID)
 			assert.EqualValues(2, p.ID)
-			assert.Equal("", p.Description)
-			assert.Equal("", p.JiraIssueID)
+			require.NotNil(p.Description)
+			assert.Equal("", *p.Description)
+			require.NotNil(p.JiraIssueID)
+			assert.Equal("", *p.JiraIssueID)
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
@@ -222,8 +228,8 @@ func TestProject(t *testing.T) {
 				Model: gorm.Model{
 					ID: 2,
 				},
-				Description: "UpdatedDescription2",
-				JiraIssueID: "UpdatedJiraIssueID2",
+				Description: &[]string{"UpdatedDescription2"}[0],
+				JiraIssueID: &[]string{"UpdatedJiraIssueID2"}[0],
 				Title:       "UpdatedTitle2",
 			}
 
@@ -233,8 +239,10 @@ func TestProject(t *testing.T) {
 			assert.EqualValues(2, p.Creator.ID)
 			assert.EqualValues(2, p.CreatorID)
 			assert.EqualValues(2, p.ID)
-			assert.Equal("UpdatedDescription2", p.Description)
-			assert.Equal("UpdatedJiraIssueID2", p.JiraIssueID)
+			require.NotNil(p.Description)
+			assert.Equal("UpdatedDescription2", *p.Description)
+			require.NotNil(p.JiraIssueID)
+			assert.Equal("UpdatedJiraIssueID2", *p.JiraIssueID)
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)
@@ -251,8 +259,10 @@ func TestProject(t *testing.T) {
 			assert.EqualValues(2, p.Creator.ID)
 			assert.EqualValues(2, p.CreatorID)
 			assert.EqualValues(2, p.ID)
-			assert.Equal("UpdatedDescription2", p.Description)
-			assert.Equal("UpdatedJiraIssueID2", p.JiraIssueID)
+			require.NotNil(p.Description)
+			assert.Equal("UpdatedDescription2", *p.Description)
+			require.NotNil(p.JiraIssueID)
+			assert.Equal("UpdatedJiraIssueID2", *p.JiraIssueID)
 			assert.WithinDuration(time.Now(), p.ProjectCreatedAt, 1*time.Second)
 			assert.WithinDuration(time.Now(), p.ProjectModifiedAt, 1*time.Second)
 			assert.Equal(ActiveProjectStatus, p.Status)

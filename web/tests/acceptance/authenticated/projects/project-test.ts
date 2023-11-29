@@ -135,26 +135,24 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const docOwner = "foo@bar.com";
     const docOwnerPhotoURL = "#foo";
     const docProduct = "Terraform";
+    const id = 250;
 
-    this.server.create("document", {
+    this.server.create("related-hermes-document", {
+      id,
+      googleFileID: id,
+      sortOrder: 1,
       title: docTitle,
+      documentType: docType,
+      documentNumber: docNumber,
+      products: [docProduct],
       summary: docSummary,
-      status: docStatus,
-      docType,
-      docNumber,
       owners: [docOwner],
       ownerPhotos: [docOwnerPhotoURL],
-      product: docProduct,
+      status: docStatus,
     });
 
-    const document = this.server.schema.document.first().attrs;
-
-    const relatedDocument = {
-      ...document,
-      googleFileID: document.objectID,
-      documentType: document.docType,
-      documentNumber: document.docNumber,
-    };
+    const relatedDocument =
+      this.server.schema.relatedHermesDocument.find(id).attrs;
 
     const externalLinkName = "Foo";
     const externalLinkURL = "https://hashicorp.com";
@@ -203,7 +201,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
-    assert.dom(DOCUMENT_LINK).hasAttribute("href", "/document/doc-0");
+    assert.dom(DOCUMENT_LINK).hasAttribute("href", `/document/${id}`);
 
     assert.dom(DOCUMENT_TITLE).containsText(docTitle);
 
@@ -286,11 +284,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    const docTitle = "Foo Bar";
-
-    this.server.create("document", {
-      title: docTitle,
-    });
+    this.server.create("document");
 
     const project = this.server.schema.projects.first();
 
@@ -319,7 +313,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.hermesDocuments;
 
     assert.equal(projectDocuments.length, 1);
-    assert.equal(projectDocuments[0].title, docTitle);
   });
 
   test("you can remove a document from a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
