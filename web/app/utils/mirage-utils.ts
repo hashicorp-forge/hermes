@@ -4,6 +4,7 @@ import ConfigService from "hermes/services/config";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
+export const TEST_USER_PHOTO = "https://test-user-at-hashicorp.com/photo.jpg";
 export const TEST_USER_GIVEN_NAME = "Test";
 
 export const TEST_USER_2_NAME = "Foo Bar";
