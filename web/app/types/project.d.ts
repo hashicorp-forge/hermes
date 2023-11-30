@@ -37,3 +37,7 @@ export interface HermesProject
     HermesProjectResources {
   jiraIssue?: JiraIssue;
 }
+
+export interface AlgoliaObject<T> extends T {
+  objectID: string;
+}

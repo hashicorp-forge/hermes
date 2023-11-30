@@ -1,6 +1,10 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject } from "hermes/types/project";
+import {
+  AlgoliaObject,
+  HermesProject,
+  HermesProjectInfo,
+} from "hermes/types/project";
 import { action } from "@ember/object";
 import { HermesDocument } from "hermes/types/document";
 import { restartableTask, task } from "ember-concurrency";
@@ -10,6 +14,7 @@ import ConfigService from "hermes/services/config";
 import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import AlgoliaService from "hermes/services/algolia";
+import { RelatedHermesDocument } from "../related-resources";
 
 interface ProjectsAddOrCreateSignature {
   Args: {
@@ -56,12 +61,27 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     void this.searchProjects.perform();
   }
 
-  @action protected addDocumentToProject(project: HermesProject) {
-    console.log("addDocumentToProject", project);
-    void this.saveProjectRelatedResources.perform(project);
+  @action protected addDocumentToProject(
+    _index: number,
+    project: AlgoliaObject<HermesProjectInfo>,
+  ) {
+    console.log("adding document to project...", project);
+    // FIXME: id is the index not the ID, need to get the project id.
+    const projectWithID = {
+      ...project,
+      id: project.objectID,
+    } as AlgoliaObject<HermesProjectInfo>;
+
+    void this.saveProjectRelatedResources.perform(projectWithID);
+    // hide the modal?
+    this.args.onClose();
+
+    // this needs to update the sidebar array
   }
 
   protected loadInitialData = task(async () => {
+    // FIXME: hover/keyboard isn't working after modal closes once
+    // TODO: need to reset the itemIndex or something
     await this.searchProjects.perform();
   });
 
@@ -90,8 +110,16 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   });
 
   protected saveProjectRelatedResources = task(
-    async (project: HermesProject) => {
-      let hermesDocuments = project.hermesDocuments ?? [];
+    async (project: AlgoliaObject<HermesProjectInfo>) => {
+      const projectResources = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+        )
+        .then((response) => response?.json());
+
+      let hermesDocuments = projectResources.hermesDocuments ?? [];
+
+      const externalLinks = projectResources.externalLinks ?? [];
 
       const newRelatedHermesDocument = formatRelatedHermesDocument(
         this.args.document,
@@ -99,21 +127,21 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
 
       hermesDocuments.unshift(newRelatedHermesDocument);
 
-      let externalLinks = project.externalLinks ?? [];
-
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
       await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
         {
           method: "POST",
           body: JSON.stringify({
-            hermesDocuments: hermesDocuments.map((doc) => {
-              return {
-                googleFileID: doc.googleFileID,
-                sortOrder: doc.sortOrder,
-              };
-            }),
+            hermesDocuments: hermesDocuments.map(
+              (doc: RelatedHermesDocument) => {
+                return {
+                  googleFileID: doc.googleFileID,
+                  sortOrder: doc.sortOrder,
+                };
+              },
+            ),
             externalLinks,
           }),
         },

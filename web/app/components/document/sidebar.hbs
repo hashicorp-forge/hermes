@@ -240,12 +240,12 @@
             @badgeText="New"
             @buttonAction={{this.showProjectsModal}}
           />
+          {{! TODO: shouldn't work on drafts }}
           {{#if this.projects.length}}
             <ol class="related-resources-list mt-1 space-y-0.5">
-              {{#each (take 1 this.projects) as |project|}}
+              {{#each this.projects as |project|}}
                 <li class="related-resource">
                   <div class="related-resource-inner group relative">
-
                     <LinkTo
                       @route="authenticated.projects.project"
                       @model={{project.id}}
@@ -254,7 +254,6 @@
                       <div
                         class="flex w-[22px] shrink-0 justify-center py-[2px]"
                       >
-
                         <FlightIcon
                           @name={{get-project-status-icon project.status}}
                           class=""

@@ -131,6 +131,23 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         })
         .then((response) => response?.json());
 
+      if (this.args.document) {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              hermesDocuments: [
+                {
+                  googleFileID: this.args.document.objectID,
+                  sortOrder: 1,
+                },
+              ],
+            }),
+          },
+        );
+      }
+
       this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (e) {
       this.flashMessages.critical((e as any).message, {

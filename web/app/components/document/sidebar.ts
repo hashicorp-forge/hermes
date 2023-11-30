@@ -29,10 +29,9 @@ import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
-import { HermesProject } from "hermes/types/project";
-import { RelatedHermesDocument } from "../related-resources";
 import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { AlgoliaObject, HermesProject } from "hermes/types/project";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -119,16 +118,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Set by `loadRelatedProjects` and used to render a list
    * of projects or an empty state.
    */
-  @tracked protected projects: HermesProject[] = [
-    // {
-    //   id: "2",
-    //   title: "Adding Search to HDS Documentation",
-    //   creator: "test",
-    //   createdTime: 123,
-    //   modifiedTime: 123,
-    //   status: ProjectStatus.Active,
-    // },
-  ];
+  @tracked protected projects: HermesProject[] | null = null;
 
   /**
    * Whether a draft was published during the session.
@@ -547,17 +537,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   protected loadRelatedProjects = task(async () => {
-    // TODO: this is gonna change substantially
-    // fetch projects that include this doc
-    const allProjects = await this.fetchSvc
-      .fetch("/api/v1/projects")
-      .then((response) => response?.json());
-
-    this.projects = allProjects.filter((project: HermesProject) => {
-      return project.hermesDocuments?.some(
-        (doc: RelatedHermesDocument) => doc.googleFileID === this.docID,
-      );
+    const projectPromises = this.args.document.projects?.map((project) => {
+      return this.fetchSvc
+        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
+        .then((response) => response?.json());
     });
+
+    const projects = await Promise.all(projectPromises ?? []);
+
+    this.projects = projects;
   });
 
   /**
