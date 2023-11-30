@@ -1,18 +1,26 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, render } from "@ember/test-helpers";
+import { click, render, triggerEvent } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+import { HermesSize } from "hermes/types/sizes";
+import {
+  IS_SUBSCRIBED_TOOLTIP_TEXT,
+  NOT_SUBSCRIBED_TOOLTIP_TEXT,
+} from "hermes/utils/tooltip-text";
 
 const ICON = "[data-test-product-avatar]";
 const NAME = "[data-test-subscription-list-item-link]";
 const BUTTON = "[data-test-product-subscription-toggle]";
-const LIST_ITEM = "[data-test-subscription-list-item]";
+const TOOLTIP_ICON = "[data-test-subscription-toggle-tooltip-icon]";
+const TOOLTIP = ".hermes-tooltip";
 
 interface ProductSubscriptionToggleComponentContext extends MirageTestContext {
-  productArea: string;
+  product: string;
+  hasTooltip: boolean;
+  size: `${HermesSize.Small}`;
 }
 
 module(
@@ -36,29 +44,23 @@ module(
     });
 
     test("it renders and can be toggled", async function (this: ProductSubscriptionToggleComponentContext, assert) {
-      this.set("productArea", "Waypoint");
+      this.set("product", "Waypoint");
 
       await render<ProductSubscriptionToggleComponentContext>(hbs`
-        <Settings::SubscriptionListItem
-          @productArea={{this.productArea}}
+        <Product::SubscriptionToggle
+          @product={{this.product}}
         />
       `);
 
-      assert.dom(LIST_ITEM).exists();
-      assert.dom(ICON).exists("it shows the product icon if there is one");
-      assert
-        .dom(NAME)
-        .hasText("Waypoint")
-        .hasAttribute(
-          "href",
-          "/documents?product=%5B%22Waypoint%22%5D",
-          "the name is clickable to the product filter screen",
-        );
-
       assert
         .dom(BUTTON)
+        .hasClass("hds-button--color-secondary")
         .doesNotHaveAttribute("data-test-subscribed")
         .hasText("Subscribe");
+
+      assert
+        .dom(BUTTON + ` .flight-icon`)
+        .hasAttribute("data-test-icon", "plus");
 
       const authenticatedUser = this.owner.lookup(
         "service:authenticated-user",
@@ -87,6 +89,52 @@ module(
         .hasText("Subscribe");
 
       assert.equal(authenticatedUser.subscriptions?.length, 0);
+    });
+
+    test("it can render with a tooltip", async function (this: ProductSubscriptionToggleComponentContext, assert) {
+      this.set("product", "Waypoint");
+      this.set("hasTooltip", false);
+
+      await render<ProductSubscriptionToggleComponentContext>(hbs`
+        <Product::SubscriptionToggle
+          @product={{this.product}}
+          @hasTooltip={{this.hasTooltip}}
+        />
+      `);
+
+      assert.dom(TOOLTIP_ICON).doesNotExist();
+
+      this.set("hasTooltip", true);
+
+      assert.dom(TOOLTIP_ICON).exists();
+
+      await triggerEvent(TOOLTIP_ICON, "mouseenter");
+
+      assert.dom(TOOLTIP).hasText(NOT_SUBSCRIBED_TOOLTIP_TEXT);
+
+      await click(BUTTON);
+
+      await triggerEvent(TOOLTIP_ICON, "mouseenter");
+
+      assert.dom(TOOLTIP).hasText(IS_SUBSCRIBED_TOOLTIP_TEXT);
+    });
+
+    test("it can render at different sizes", async function (this: ProductSubscriptionToggleComponentContext, assert) {
+      this.set("productArea", "Waypoint");
+      this.set("size", undefined);
+
+      await render<ProductSubscriptionToggleComponentContext>(hbs`
+        <Product::SubscriptionToggle
+          @product={{this.product}}
+          @size={{this.size}}
+        />
+      `);
+
+      assert.dom(BUTTON).hasClass("h-9");
+
+      this.set("size", "small");
+
+      assert.dom(BUTTON).hasClass("h-7");
     });
   },
 );

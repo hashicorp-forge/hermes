@@ -1,7 +1,7 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, render, waitFor } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
@@ -28,7 +28,6 @@ module(
       authenticatedUser.subscriptions = [];
 
       this.server.create("product", { name: "Waypoint" });
-      this.server.create("product", { name: "Labs", abbreviation: "LAB" });
 
       await setupProductIndex(this);
     });
@@ -44,6 +43,7 @@ module(
 
       assert.dom(LIST_ITEM).exists();
       assert.dom(ICON).exists("it shows the product icon if there is one");
+
       assert
         .dom(NAME)
         .hasText("Waypoint")
@@ -53,17 +53,11 @@ module(
           "the name is clickable to the product filter screen",
         );
 
-      assert
-        .dom(BUTTON)
-        .doesNotHaveAttribute("data-test-subscribed")
-        .hasText("Subscribe");
+      assert.dom(BUTTON).hasText("Subscribe");
 
       await click(BUTTON);
 
-      assert
-        .dom(BUTTON)
-        .hasAttribute("data-test-subscribed")
-        .hasText("Subscribed");
+      assert.dom(BUTTON).hasText("Subscribed");
     });
   },
 );
