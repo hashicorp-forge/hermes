@@ -44,7 +44,6 @@ export default class AuthenticatedProductAreasProductAreaRoute extends Route {
       const searchResponse = (await this.algolia.getDocResults.perform(
         searchIndex,
         {
-          // product: [productArea],
           facetFilters: ["product:" + productArea],
         },
       )) as SearchResponse<unknown>;

@@ -1,5 +1,6 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import { HITS_PER_PAGE } from "hermes/services/algolia";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import FlagsService from "hermes/services/flags";
 import { HermesDocument } from "hermes/types/document";
@@ -17,7 +18,7 @@ export default class ProductAreaIndexComponent extends Component<ProductAreaInde
   @service declare flags: FlagsService;
 
   protected get seeMoreButtonIsShown() {
-    return this.args.nbHits > 12;
+    return this.args.nbHits > HITS_PER_PAGE;
   }
 }
 
