@@ -334,6 +334,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       owners: attrs.owners,
       ownerPhotos: attrs.ownerPhotos,
       product: attrs.product,
+      status: attrs.status,
       sortOrder: 1,
     } as RelatedHermesDocument;
 

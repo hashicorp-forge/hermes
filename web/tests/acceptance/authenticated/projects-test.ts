@@ -43,6 +43,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
   test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/projects");
+
     assert.equal(getPageTitle(), "All Projects | Hermes");
   });
 
@@ -73,18 +74,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedJiraTypes.push(project.jiraIssue.type);
         }
 
-        if (project.hermesDocuments) {
-          let uniqueProductAreas: string[] = [];
-
-          project.hermesDocuments.forEach((doc) => {
-            if (doc.product) {
-              if (!uniqueProductAreas.includes(doc.product)) {
-                uniqueProductAreas.push(doc.product);
-              }
-            }
-          });
-
-          expectedProducts.push(...uniqueProductAreas);
+        if (project.products) {
+          expectedProducts.push(...project.products);
         }
       });
 

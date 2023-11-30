@@ -1,5 +1,5 @@
 import { Factory } from "miragejs";
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
 
 export function getTestDocNumber(product: string) {
   let abbreviation = "";
@@ -22,6 +22,7 @@ export function getTestDocNumber(product: string) {
 }
 
 export default Factory.extend({
+  id: (i: number) => `doc-${i}`,
   objectID: (i: number) => `doc-${i}`,
   title: (i: number) => `Test Document ${i}`,
   status: "WIP",
@@ -43,4 +44,5 @@ export default Factory.extend({
   },
   approvers: [],
   owners: [TEST_USER_EMAIL],
+  ownerPhotos: [TEST_USER_PHOTO],
 });

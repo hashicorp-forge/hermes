@@ -55,10 +55,9 @@
       </X::DropdownList>
     </div>
 
-    {{! TODO }}
     <CopyURLButton
       @isIconOnly={{true}}
-      @url=""
+      @url={{this.url}}
       class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
     />
 
@@ -242,113 +241,10 @@
                   )
                 }}
               >
-                <div class="px-2 pt-5 pb-7">
-                  <div class="flex items-start gap-4">
-                    {{! Avatar }}
-                    <LinkTo
-                      data-test-document-owner-avatar
-                      @route="authenticated.documents"
-                      @query={{hash owners=(array (get document.owners 0))}}
-                    >
-                      <Person::Avatar
-                        @email="{{get document.owners 0}}"
-                        @imgURL={{get document.ownerPhotos 0}}
-                        @size="large"
-                        class="relative z-10 -mt-1 shrink-0"
-                      />
-                    </LinkTo>
-
-                    {{! Text }}
-                    <div class="w-full overflow-hidden">
-                      <LinkTo
-                        data-test-document-link
-                        @route="authenticated.document"
-                        @model={{document.googleFileID}}
-                      >
-                        {{! Primary click area }}
-                        <div
-                          aria-hidden="true"
-                          class="absolute top-0 left-0 -bottom-px w-full group-focus-within:bg-color-surface-faint group-hover:bg-color-surface-faint"
-                        ></div>
-
-                        {{! Title and docNumber }}
-                        <div class="relative z-10 overflow-hidden">
-                          <h4
-                            class="text-display-300 text-color-foreground-strong"
-                          >
-                            <span data-test-document-title class="mr-1.5">
-                              {{document.title}}
-                            </span>
-                            <span
-                              data-test-document-number
-                              class="shrink-0 font-regular text-color-foreground-faint"
-                            >
-                              <span class="whitespace-nowrap">
-                                {{document.documentNumber}}
-                              </span>
-                            </span>
-                          </h4>
-                        </div>
-                      </LinkTo>
-                      <div class="pointer-events-none relative z-10 mt-1.5">
-                        By
-                        <LinkTo
-                          data-test-document-owner-name
-                          @route="authenticated.documents"
-                          @query={{hash owners=(array (get document.owners 0))}}
-                          class="pointer-events-auto text-color-foreground-faint underline underline-offset-[3px] hover:text-color-foreground-strong"
-                        >
-                          {{get document.owners 0}}
-                        </LinkTo>
-                      </div>
-                      <div class="pointer-events-none relative z-10">
-                        {{#if document.summary}}
-                          <p
-                            data-test-document-summary
-                            class="relative z-10 mt-2.5 text-body-200"
-                          >
-                            {{document.summary}}
-                          </p>
-                        {{/if}}
-
-                        {{! Document tags }}
-                        <div class="mt-3.5 flex items-center gap-1">
-                          <LinkTo
-                            data-test-document-status
-                            @route="authenticated.documents"
-                            @query={{hash status=(array document.status)}}
-                            class="pointer-events-auto"
-                          >
-                            <Doc::State
-                              @state={{document.status}}
-                              @hideProgress={{true}}
-                              class="interactive"
-                            />
-                          </LinkTo>
-                          <LinkTo
-                            data-test-document-type
-                            @route="authenticated.documents"
-                            @query={{hash
-                              docType=(array document.documentType)
-                            }}
-                            class="pointer-events-auto"
-                          >
-                            <Hds::Badge
-                              @text={{document.documentType}}
-                              class="hover:bg-color-palette-neutral-200"
-                            />
-                          </LinkTo>
-                        </div>
-                      </div>
-                    </div>
-                    <Doc::Thumbnail
-                      @product={{document.product}}
-                      @status={{document.status}}
-                      @size="medium"
-                      class="pointer-events-none ml-6 mr-8 shrink-0"
-                    />
-                  </div>
-                </div>
+                <Doc::TileMedium
+                  @doc={{document}}
+                  @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
+                />
               </Project::Resource>
             </li>
           {{/each}}
