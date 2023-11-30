@@ -28,46 +28,31 @@ export default class AuthenticatedProductAreasProductAreaRoute extends Route {
       await this.authenticatedUser.fetchSubscriptions.perform();
     }
 
-    const product = params.product_area_id.replace(/-/g, " ");
+    let productArea = Object.keys(this.productAreas.index).find((product) => {
+      return dasherize(product) === params.product_area_id;
+    });
 
-    const searchResponse = (await this.algolia.getDocResults.perform(
-      searchIndex,
-      {
-        docType: [],
-        owners: [],
-        status: [],
-        product: [product],
-      },
-    )) as SearchResponse<unknown>;
-
-    const docs = searchResponse.hits as HermesDocument[];
-
-    if (docs.length === 0) {
-      const productAreasIndex = this.productAreas.index;
-      const productAreasKeys = Object.keys(productAreasIndex);
-
-      const productAreasDasherized = productAreasKeys.map((productArea) => {
-        return dasherize(productArea);
-      });
-
-      const productAreaIsValid = productAreasDasherized.includes(
-        params.product_area_id,
+    if (!productArea) {
+      this.flashMessages.critical(
+        `"${params.product_area_id}" is not a valid product area.`,
+        {
+          title: "Product area not found",
+        },
       );
+      this.router.transitionTo("authenticated.dashboard");
+    } else {
+      const searchResponse = (await this.algolia.getDocResults.perform(
+        searchIndex,
+        {
+          // product: [productArea],
+          facetFilters: ["product:" + productArea],
+        },
+      )) as SearchResponse<unknown>;
 
-      if (!productAreaIsValid) {
-        this.flashMessages.critical(
-          `"${params.product_area_id}" is not a valid product area.`,
-          {
-            title: "Product area not found",
-          },
-        );
-        this.router.transitionTo("authenticated.dashboard");
-      }
+      const docs = searchResponse.hits as HermesDocument[];
+      const { nbHits } = searchResponse;
+
+      return { docs, productArea, nbHits };
     }
-
-    const productArea = docs[0]?.product ?? params.product_area_id;
-    const { nbHits } = searchResponse;
-
-    return { docs, productArea, nbHits };
   }
 }

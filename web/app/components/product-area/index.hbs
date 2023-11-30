@@ -1,17 +1,22 @@
 <div class="mb-24 w-full">
-  <div class="flex justify-center">
-    {{#let (get-product-id @productArea) as |product|}}
-      {{#if (or product this.flags.productColors)}}
-        <Product::Avatar @product={{@productArea}} @size="xl" class="mt-0.5" />
-      {{/if}}
-    {{/let}}
-  </div>
+  {{! Avatar }}
+  {{#let (get-product-id @productArea) as |product|}}
+    {{#if (or product this.flags.productColors)}}
+      <Product::Avatar
+        @product={{@productArea}}
+        @size="xl"
+        class="mx-auto mt-0.5"
+      />
+    {{/if}}
+  {{/let}}
 
   <div class="text-center">
+    {{! Name }}
     <h1 class="mt-5 text-display-600">
       {{@productArea}}
     </h1>
 
+    {{! Subscription button }}
     <Product::SubscriptionToggle
       @product={{@productArea}}
       @hasTooltip={{true}}
@@ -19,25 +24,30 @@
     />
 
     <div class="relative mt-12 text-center">
+      {{! Horizontal line }}
       <div
         class="-translate-y-1.2 absolute left-0 top-1/2 h-px w-full bg-color-border-faint"
         aria-hidden="true"
       />
-      <h3
-        data-test-documents-header
-        class="hermes-h4 relative inline-flex bg-color-page-primary px-6"
-      >
-        {{@nbHits}}
-        Documents
-      </h3>
+      {{#if @docs.length}}
+        {{! Doc count }}
+        <h3
+          data-test-documents-header
+          class="hermes-h4 relative inline-flex bg-color-page-primary px-6"
+        >
+          {{@nbHits}}
+          Documents
+        </h3>
+      {{/if}}
     </div>
-
   </div>
+
   <div class="relative mx-auto mt-7 max-w-3xl">
     {{#if @docs.length}}
+      {{! Doc list }}
       <ol class="divided-list">
         {{#each @docs as |doc|}}
-          <li class="group relative">
+          <li data-test-product-area-document class="group relative">
             <Doc::TileMedium @doc={{doc}} />
           </li>
         {{/each}}
@@ -45,7 +55,8 @@
       {{#if this.seeMoreButtonIsShown}}
         <div class="mt-7">
           <Hds::Button
-            @route="authenticated.all"
+            data-test-see-more-button
+            @route="authenticated.documents"
             @icon="arrow-right"
             @iconPosition="trailing"
             @query={{hash
@@ -62,8 +73,12 @@
         </div>
       {{/if}}
     {{else}}
-      {{! TODO: improve this }}
-      No docs yet
+      <div
+        class="mt-24 grid h-56 place-items-center text-center text-display-300 text-color-foreground-disabled"
+        data-test-product-area-empty-state
+      >
+        No documents found
+      </div>
     {{/if}}
 
   </div>

@@ -218,11 +218,14 @@ export default class AlgoliaService extends Service {
   buildFacetFilters(params: AlgoliaSearchParams, userIsOwner = false) {
     let facets = FACET_NAMES;
 
-    let facetFilters = [];
+    let facetFilters: any = [];
 
-    // if params.facetFilters is an empty array, it means we're intentionally
-    // requesting no facet filters
-    if (!(params.facetFilters && params.facetFilters.length === 0)) {
+    if (params.facetFilters && params.facetFilters.length === 0) {
+      // request has specifically asked for no facet filters; ignore it.
+    } else if (params.facetFilters) {
+      // facet filters were explicitly requested; use them.
+      facetFilters = params.facetFilters;
+    } else {
       for (let facet of facets) {
         let facetValues = [];
 
@@ -241,6 +244,7 @@ export default class AlgoliaService extends Service {
     if (userIsOwner) {
       facetFilters.push(`owners:${this.userEmail}`);
     }
+
     return facetFilters;
   }
 
@@ -337,13 +341,16 @@ export default class AlgoliaService extends Service {
       let query = params["q"] || "";
 
       try {
-        return await this.searchIndex.perform(searchIndex, query, {
+        console.log("params", params);
+        const response = await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
           facets: FACET_NAMES,
           hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,
         });
+        console.log("getDocResults response", response);
+        return response;
       } catch (e: unknown) {
         console.error(e);
       }

@@ -5,14 +5,10 @@ import FlagsService from "hermes/services/flags";
 import { HermesDocument } from "hermes/types/document";
 
 interface ProductAreaIndexComponentSignature {
-  Element: null;
   Args: {
     productArea: string;
     docs: HermesDocument[];
     nbHits: number;
-  };
-  Blocks: {
-    default: [];
   };
 }
 

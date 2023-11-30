@@ -4,6 +4,7 @@ import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
+import { HITS_PER_PAGE } from "hermes/services/algolia";
 
 // @ts-ignore - Mirage not detecting file
 import config from "../config/environment";
@@ -52,6 +53,9 @@ export default function (mirageConfig) {
           }
 
           if (facetFilters) {
+            console.log('...facetFilters[0]", ', ...facetFilters[0]);
+            console.log("facetFilters[0]", facetFilters[0]);
+            console.log("facetFilters", facetFilters);
             /**
              * Facet filters arrive like ["owners:foo@bar.com"]
              */
@@ -69,6 +73,22 @@ export default function (mirageConfig) {
                 {},
                 {
                   hits,
+                },
+              );
+            } else if (
+              facetFilters.some((filter) => filter.startsWith("product:"))
+            ) {
+              // A request for products (`product-area` route)
+              const product = facetFilters[0].split(":")[1];
+              const hits = schema.document.all().models.filter((doc) => {
+                return doc.attrs.product === product;
+              });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: hits.slice(0, HITS_PER_PAGE),
+                  nbHits: hits.length,
                 },
               );
             }

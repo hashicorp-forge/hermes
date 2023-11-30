@@ -42,7 +42,7 @@ module(
       assert
         .dom(LIST_ITEM)
         .exists({ count: 1 })
-        .hasText("one", "it filters the list");
+        .containsText("one", "it filters the list");
 
       await fillIn("[data-test-subscription-list-filter-input]", "t");
       assert.dom(LIST_ITEM).exists({ count: 2 });

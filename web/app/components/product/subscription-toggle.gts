@@ -5,7 +5,6 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesSize } from "hermes/types/sizes";
 import FlagsService from "hermes/services/flags";
 import TooltipIcon from "hermes/components/tooltip-icon";
-import HdsButton from "@hashicorp/design-system-components/components/hds/button";
 import { on } from "@ember/modifier";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
 import Action from "hermes/components/action";
@@ -16,9 +15,6 @@ interface ProductSubscriptionToggleComponentSignature {
     product: string;
     hasTooltip?: boolean;
     size?: `${HermesSize.Small}`;
-  };
-  Blocks: {
-    default: [];
   };
 }
 
