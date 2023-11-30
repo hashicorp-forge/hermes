@@ -1,9 +1,11 @@
-{{! Notes:
-  - The hover effect requires a parent with the `group` class.
-  - Non-essential links have `tabindex="-1"` so they're not focusable
-    with the keyboard. This allows the user to tab through documents
-    without having to skip through the meta links that are otherwise
-    accessible on the document details screen.
+{{!
+
+  1.
+  The hover effect requires a parent with the `group` and `relative` classes. Normally, we'd include that wrapper within this template, but we want the flexibility to work with components whose absolutely positioned controls are unknown to us but that we nonetheless consider "within the click area," such that interacting with them maintains the tile's hover and focus states. For example, in the projects screen, we want to keep the tile's hover state when the user focuses the overflow menu.
+
+  2.
+  Non-essential links have `tabindex="-1"` so they're not focusable with the keyboard. This allows the user to tab through documents without having to skip through the meta links that are otherwise accessible on the document details screen.
+
 }}
 <div class="tile">
   <div class="flex justify-between gap-[18px] pl-3 pr-8 pt-5 pb-6">
@@ -13,6 +15,7 @@
       tabindex="-1"
       @route="authenticated.documents"
       @query={{hash owners=(array (get @doc.owners 0))}}
+      disabled={{not (get @doc.owners 0)}}
     >
       <Person::Avatar
         @size="large"
@@ -29,7 +32,7 @@
         <LinkTo
           data-test-document-link
           @route="authenticated.document"
-          @model={{@doc.googleFileID}}
+          @model={{this.docID}}
         >
           {{! Primary click area }}
           <div
@@ -46,7 +49,7 @@
             {{! Doc Number }}
             <span data-test-document-number class="shrink-0 font-regular">
               <span class="whitespace-nowrap">
-                {{@doc.documentNumber}}
+                {{this.docNumber}}
               </span>
             </span>
           </h3>
@@ -55,24 +58,25 @@
 
       <div class="pointer-events-none relative">
         <div class="mt-1.5 flex gap-[5px] text-color-foreground-faint">
-          By
           {{! Owner }}
           <LinkTo
             tabindex="-1"
             data-test-document-owner-name
             @route="authenticated.documents"
             @query={{hash owners=(array (get @doc.owners 0))}}
-            class="underline underline-offset-[3px] hover:text-color-foreground-strong"
+            disabled={{not (get @doc.owners 0)}}
+            class="underlined-link text-color-foreground-primary"
           >
-            {{get @doc.owners 0}}
+            {{or (get @doc.owners 0) "Unknown"}}
           </LinkTo>
           <span class="vertical-line">
             |
           </span>
           {{! Product }}
           <ProductLink
+            @product={{@doc.product}}
             tabindex="-1"
-            class="underline underline-offset-[3px] hover:text-color-foreground-strong"
+            class="underlined-link text-color-foreground-faint"
           >
             <:default>
               {{@doc.product}}
@@ -82,7 +86,9 @@
             |
           </span>
           {{! Created time }}
-          {{time-ago @doc.createdTime}}
+          <span class="text-color-foreground-disabled">
+            {{time-ago @doc.createdTime}}
+          </span>
         </div>
 
         {{! Summary }}
@@ -101,7 +107,7 @@
             class="interactive"
           />
           {{! Doc type }}
-          <Hds::Badge data-test-document-type @text={{@doc.documentType}} />
+          <Hds::Badge data-test-document-type @text={{this.docType}} />
         </div>
       </div>
     </div>
