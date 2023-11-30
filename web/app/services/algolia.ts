@@ -348,6 +348,7 @@ export default class AlgoliaService extends Service {
           hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,
+          filters: params.filters,
         });
         console.log("getDocResults response", response);
         return response;

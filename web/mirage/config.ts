@@ -53,9 +53,6 @@ export default function (mirageConfig) {
           }
 
           if (facetFilters) {
-            console.log('...facetFilters[0]", ', ...facetFilters[0]);
-            console.log("facetFilters[0]", facetFilters[0]);
-            console.log("facetFilters", facetFilters);
             /**
              * Facet filters arrive like ["owners:foo@bar.com"]
              */
@@ -73,22 +70,6 @@ export default function (mirageConfig) {
                 {},
                 {
                   hits,
-                },
-              );
-            } else if (
-              facetFilters.some((filter) => filter.startsWith("product:"))
-            ) {
-              // A request for products (`product-area` route)
-              const product = facetFilters[0].split(":")[1];
-              const hits = schema.document.all().models.filter((doc) => {
-                return doc.attrs.product === product;
-              });
-              return new Response(
-                200,
-                {},
-                {
-                  hits: hits.slice(0, HITS_PER_PAGE),
-                  nbHits: hits.length,
                 },
               );
             }
@@ -159,12 +140,19 @@ export default function (mirageConfig) {
               const requestIsForDocsAwaitingReview =
                 filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
                 requestBody.filters.includes("AND status:In-Review");
+              const requestIsForProductDocs = filters.includes(`product:`);
+
               if (requestIsForDocsAwaitingReview) {
                 docMatches = schema.document.all().models.filter((doc) => {
                   return (
                     doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
                   );
+                });
+              } else if (requestIsForProductDocs) {
+                const product = filters.split("product:")[1].split('"')[1];
+                docMatches = schema.document.all().models.filter((doc) => {
+                  return doc.attrs.product === product;
                 });
               } else {
                 // This
@@ -180,7 +168,14 @@ export default function (mirageConfig) {
               });
             }
 
-            return new Response(200, {}, { hits: docMatches });
+            return new Response(
+              200,
+              {},
+              {
+                hits: docMatches.slice(0, HITS_PER_PAGE),
+                nbHits: docMatches.length,
+              },
+            );
           } else {
             /**
              * A request we're not currently handling with any specificity.
@@ -189,7 +184,10 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models },
+              {
+                hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
+                nbHits: schema.document.all().models.length,
+              },
             );
           }
         } else {
