@@ -107,6 +107,12 @@ h1 {
   }
 }
 
+.divided-list {
+  > li:not(:first-child) {
+    @apply border-t border-t-color-border-faint;
+  }
+}
+
 // Prevent the Flight Icons shim from taking up space
 .flight-sprite-container {
   position: fixed;
