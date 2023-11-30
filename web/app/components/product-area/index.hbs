@@ -1,14 +1,10 @@
 <div class="mb-24 w-full">
   {{! Avatar }}
-  {{#let (get-product-id @productArea) as |product|}}
-    {{#if (or product this.flags.productColors)}}
-      <Product::Avatar
-        @product={{@productArea}}
-        @size="xl"
-        class="mx-auto mt-0.5"
-      />
-    {{/if}}
-  {{/let}}
+  <Product::Avatar
+    @product={{@productArea}}
+    @size="xl"
+    class="mx-auto mt-0.5"
+  />
 
   <div class="text-center">
     {{! Name }}
