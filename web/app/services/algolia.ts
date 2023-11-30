@@ -16,7 +16,6 @@ import {
 } from "hermes/types/facets";
 import SessionService from "./session";
 
-// FIXME: drafts endpoint breaks when you increase this number (to 100, e.g.)
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
@@ -217,12 +216,14 @@ export default class AlgoliaService extends Service {
    */
   buildFacetFilters(params: AlgoliaSearchParams, userIsOwner = false) {
     let facets = FACET_NAMES;
-
     let facetFilters = [];
 
-    // if params.facetFilters is an empty array, it means we're intentionally
-    // requesting no facet filters
-    if (!(params.facetFilters && params.facetFilters.length === 0)) {
+    if (params.facetFilters && params.facetFilters.length === 0) {
+      // request has specifically asked for no facet filters; ignore it.
+    } else if (params.facetFilters) {
+      // facet filters were explicitly requested; use them.
+      facetFilters = params.facetFilters as any[];
+    } else {
       for (let facet of facets) {
         let facetValues = [];
 
@@ -241,6 +242,7 @@ export default class AlgoliaService extends Service {
     if (userIsOwner) {
       facetFilters.push(`owners:${this.userEmail}`);
     }
+
     return facetFilters;
   }
 
