@@ -13,7 +13,7 @@ export const projectStatusObjects: Record<ProjectStatus, ProjectStatusObject> =
   {
     [ProjectStatus.Active]: {
       label: "Active",
-      icon: "check-circle",
+      icon: "zap",
     },
     [ProjectStatus.Completed]: {
       label: "Completed",
