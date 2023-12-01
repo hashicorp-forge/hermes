@@ -41,11 +41,9 @@
   @apply mb-2 text-display-300 font-semibold text-color-foreground-faint opacity-50;
 }
 
-.underlined-link:not([disabled]),
-.underline-on-hover:not([disabled]):hover,
-.underline-on-hover:not([disabled]):focus {
-  &:not(.product-abbreviation) {
-  }
+.underlined-link:not([disabled]):not(.underline-on-hover),
+.underline-on-hover:hover,
+.underline-on-hover:focus {
   @apply text-color-foreground-faint underline decoration-color-palette-neutral-300 underline-offset-[3px];
 
   &:hover,
