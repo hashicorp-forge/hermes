@@ -1,16 +1,15 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, render, waitFor } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
-const ABBREVIATION = "[data-test-product-abbreviation]";
 const ICON = "[data-test-product-avatar]";
-const NAME = "[data-test-subscription-list-item-name]";
-const CHECKBOX = '.hds-form-toggle input[type="checkbox"]';
-const POPOVER = ".subscription-list-popover";
+const NAME = "[data-test-subscription-list-item-link]";
+const BUTTON = "[data-test-product-subscription-toggle]";
+const LIST_ITEM = "[data-test-subscription-list-item]";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   productArea: string;
@@ -29,7 +28,6 @@ module(
       authenticatedUser.subscriptions = [];
 
       this.server.create("product", { name: "Waypoint" });
-      this.server.create("product", { name: "Labs", abbreviation: "LAB" });
 
       await setupProductIndex(this);
     });
@@ -37,59 +35,29 @@ module(
     test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
       `);
 
-      assert.dom(".subscription-list-item").exists();
+      assert.dom(LIST_ITEM).exists();
       assert.dom(ICON).exists("it shows the product icon if there is one");
-      assert.dom(NAME).hasText("Waypoint");
-      assert.dom(CHECKBOX).isNotChecked();
 
-      await click(CHECKBOX);
-      assert.dom(CHECKBOX).isChecked();
-
-      this.set("productArea", "Labs");
       assert
-        .dom(ABBREVIATION)
-        .exists("it shows an abbreviation if there is no product logo");
-      assert.dom(NAME).hasText("Labs");
-      assert.dom(CHECKBOX).isNotChecked();
+        .dom(NAME)
+        .hasText("Waypoint")
+        .hasAttribute(
+          "href",
+          "/documents?product=%5B%22Waypoint%22%5D",
+          "the name is clickable to the product filter screen",
+        );
 
-      this.set("productArea", "Waypoint");
-      assert.dom(CHECKBOX).isChecked();
-    });
+      assert.dom(BUTTON).hasText("Subscribe");
 
-    test("it shows a temporary message when toggled", async function (assert) {
-      this.set("productArea", "Waypoint");
+      await click(BUTTON);
 
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
-        <Settings::SubscriptionListItem
-          @productArea={{this.productArea}}
-        />
-      `);
-
-      let promise = click(CHECKBOX);
-
-      assert.dom(POPOVER).doesNotExist();
-      await waitFor(POPOVER);
-
-      assert.dom(POPOVER).exists().hasText("Subscribed");
-
-      await promise;
-
-      assert.dom(POPOVER).doesNotExist("it hides the popover after a timeout");
-
-      promise = click(CHECKBOX);
-
-      await waitFor(POPOVER);
-      assert.dom(POPOVER).hasText("Unsubscribed");
-
-      await promise;
+      assert.dom(BUTTON).hasText("Subscribed");
     });
   },
 );

@@ -1,31 +1,25 @@
-<li class="subscription-list-item">
-  <button
-    class="flex h-full w-full items-center justify-between space-x-6 border-0 bg-transparent py-3 px-3.5 text-body-300 text-color-foreground-primary transition-colors hover:cursor-pointer hover:bg-color-surface-action"
-    type="button"
-    {{on "click" this.toggleChecked}}
+<li
+  data-test-subscription-list-item
+  class="flex w-full items-center justify-between py-2.5 px-2.5 hover:bg-color-page-faint"
+>
+  <LinkTo
+    data-test-subscription-list-item-link
+    @route="authenticated.documents"
+    @query={{hash
+      product=(array @productArea)
+      status=(array)
+      docType=(array)
+      owners=(array)
+    }}
+    class="flex items-center gap-3"
   >
-    <div class="flex items-center space-x-3">
-      <Product::Avatar @product={{@productArea}} @size="small" />
-      <div data-test-subscription-list-item-name>
-        {{@productArea}}
-      </div>
+    <Product::Avatar @product={{@productArea}} @size="small" />
+    <div
+      data-test-subscription-list-item-name
+      class="underline-on-hover text-body-300"
+    >
+      {{@productArea}}
     </div>
-    <div class="relative flex shrink-0 items-center justify-end">
-      <Hds::Form::Toggle::Base
-        tabindex="-1"
-        name="toggle-subscription"
-        aria-label={{if this.isChecked "Unsubscribe" "Subscribe"}}
-        @value="enable"
-        checked={{this.isChecked}}
-      />
-      {{#if this.confirmationIsShown}}
-        <div
-          class="subscription-list-popover
-            {{if this.confirmationIsClosing 'out'}}"
-        >
-          {{if this.isChecked "Subscribed" "Unsubscribed"}}
-        </div>
-      {{/if}}
-    </div>
-  </button>
+  </LinkTo>
+  <Product::SubscriptionToggle @product={{@productArea}} @size="small" />
 </li>
