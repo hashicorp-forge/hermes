@@ -4,6 +4,15 @@
   </LinkTo>
 
   <div class="primary-links">
+    {{#if this.flags.projects}}
+      <LinkTo
+        data-test-nav-link="projects"
+        @route="authenticated.projects"
+        @current-when="authenticated.projects"
+      >
+        Projects
+      </LinkTo>
+    {{/if}}
     <LinkTo
       data-test-nav-link="all"
       @route="authenticated.documents"
@@ -20,15 +29,7 @@
     >
       My Docs
     </LinkTo>
-    {{#if this.flags.projects}}
-      <LinkTo
-        data-test-nav-link="projects"
-        @route="authenticated.projects"
-        @current-when="authenticated.projects"
-      >
-        Projects
-      </LinkTo>
-    {{/if}}
+
   </div>
 
   <Header::Search class="global-search" />
