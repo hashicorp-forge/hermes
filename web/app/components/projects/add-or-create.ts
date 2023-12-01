@@ -15,6 +15,7 @@ import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-docu
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import AlgoliaService from "hermes/services/algolia";
 import { RelatedHermesDocument } from "../related-resources";
+import { ProjectStatus } from "hermes/types/project-status";
 
 interface ProjectsAddOrCreateSignature {
   Args: {
@@ -88,12 +89,23 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   protected searchProjects = restartableTask(async () => {
     try {
       this.searchIsRunning = true;
+
+      let filters = `(NOT status:"${ProjectStatus.Archived.toLowerCase()}")`;
+
+      if (this.args.document.projects?.length) {
+        filters = filters.slice(0, -1) + " ";
+        filters += ` AND NOT objectID:"${this.args.document.projects.join(
+          '" AND NOT objectID:"',
+        )}")`;
+      }
+
       await this.algolia.searchIndex
         .perform(
           this.configSvc.config.algolia_projects_index_name,
           this.inputValue,
           {
-            // we may want to add some optionalFilters here
+            filters,
+            optionalFilters: `status:"${ProjectStatus.Active}"`,
           },
         )
         .then((response) => {
