@@ -44,7 +44,6 @@
 @use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
-@use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
 @use "hermes/avatar";
@@ -104,6 +103,12 @@ h1 {
 
   + p {
     @apply text-body-300;
+  }
+}
+
+.divided-list {
+  > li:not(:first-child) {
+    @apply border-t border-t-color-border-faint;
   }
 }
 

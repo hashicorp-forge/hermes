@@ -9,6 +9,7 @@ import XDropdownListActionComponent from "./action";
 import XDropdownListLinkToComponent from "./link-to";
 import { restartableTask, timeout } from "ember-concurrency";
 import { FocusDirection } from ".";
+import XDropdownListExternalLinkComponent from "./external-link";
 
 type XDropdownListInteractiveComponentBoundArgs =
   | "role"
@@ -25,6 +26,10 @@ export interface XDropdownListItemAPI {
   >;
   LinkTo: WithBoundArgs<
     typeof XDropdownListLinkToComponent,
+    XDropdownListInteractiveComponentBoundArgs
+  >;
+  ExternalLink: WithBoundArgs<
+    typeof XDropdownListExternalLinkComponent,
     XDropdownListInteractiveComponentBoundArgs
   >;
   contentID: string;

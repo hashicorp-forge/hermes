@@ -34,12 +34,6 @@
     @apply scale-105 transition-transform;
   }
 
-  .project-resource-list {
-    > li:not(:first-child) {
-      @apply border-t border-t-color-border-faint;
-    }
-  }
-
   .project-resource {
     @apply relative;
 
@@ -71,7 +65,7 @@
     }
 
     .overflow-button-container {
-      @apply absolute right-1 top-1;
+      @apply absolute right-1 top-1 z-10 h-[calc(100%-16px)] items-start;
       @apply from-color-page-faint;
     }
   }

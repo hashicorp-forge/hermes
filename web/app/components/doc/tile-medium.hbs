@@ -1,0 +1,125 @@
+{{!
+
+  1.
+  The hover effect requires a parent with the `group` and `relative` classes. Normally, we'd include that wrapper within this template, but we want the flexibility to work with components whose absolutely positioned controls are unknown to us but that we nonetheless consider "within the click area," such that interacting with them maintains the tile's hover and focus states. For example, in the projects screen, we want to keep the tile's hover state when the user focuses the overflow menu.
+
+  2.
+  Non-essential links have `tabindex="-1"` so they're not focusable with the keyboard. This allows the user to tab through documents without having to skip through the meta links that are otherwise accessible on the document details screen.
+
+}}
+<div class="tile">
+  <div class="flex justify-between gap-[18px] pl-3 pr-8 pt-5 pb-6">
+    {{! Avatar }}
+    <LinkTo
+      data-test-document-owner-avatar
+      tabindex="-1"
+      @route="authenticated.documents"
+      @query={{hash owners=(array (get @doc.owners 0))}}
+      disabled={{not (get @doc.owners 0)}}
+    >
+      <Person::Avatar
+        @size="large"
+        @email="{{get @doc.owners 0}}"
+        @imgURL={{get @doc.ownerPhotos 0}}
+        @isLoading={{@avatarIsLoading}}
+        class="relative z-10 -mt-1 shrink-0"
+      />
+    </LinkTo>
+
+    {{! Text }}
+    <div class="w-full">
+      <div class="mt-0.5 overflow-hidden">
+        <LinkTo
+          data-test-document-link
+          @route="authenticated.document"
+          @model={{this.docID}}
+        >
+          {{! Primary click area }}
+          <div
+            aria-hidden="true"
+            class="absolute top-0 left-0 -bottom-px w-full group-focus-within:bg-color-surface-faint group-hover:bg-color-surface-faint"
+          ></div>
+
+          <h3 class="relative">
+            {{! Title }}
+            <span data-test-document-title class="mr-1.5">
+              {{@doc.title}}
+            </span>
+
+            {{! Doc Number }}
+            <span data-test-document-number class="shrink-0 font-regular">
+              <span class="whitespace-nowrap">
+                {{this.docNumber}}
+              </span>
+            </span>
+          </h3>
+        </LinkTo>
+      </div>
+
+      <div class="pointer-events-none relative">
+        <div class="mt-1.5 flex gap-[5px] text-color-foreground-faint">
+          {{! Owner }}
+          <LinkTo
+            tabindex="-1"
+            data-test-document-owner-name
+            @route="authenticated.documents"
+            @query={{hash owners=(array (get @doc.owners 0))}}
+            disabled={{not (get @doc.owners 0)}}
+            class="underlined-link text-color-foreground-primary"
+          >
+            {{or (get @doc.owners 0) "Unknown"}}
+          </LinkTo>
+          <span class="vertical-line">
+            |
+          </span>
+          {{! Product }}
+          <ProductLink
+            @product={{@doc.product}}
+            tabindex="-1"
+            class="underlined-link text-color-foreground-faint"
+          >
+            <:default>
+              {{@doc.product}}
+            </:default>
+          </ProductLink>
+          <span class="vertical-line">
+            |
+          </span>
+          {{! Created time }}
+          <span class="text-color-foreground-disabled">
+            {{time-ago @doc.createdTime}}
+          </span>
+        </div>
+
+        {{! Summary }}
+        {{#if @doc.summary}}
+          <p data-test-document-summary class="mt-2.5 text-body-300">
+            {{@doc.summary}}
+          </p>
+        {{/if}}
+
+        <div class="tags mt-3.5">
+          {{! Status }}
+          <Doc::State
+            data-test-document-status
+            @state={{@doc.status}}
+            @hideProgress={{true}}
+            class="interactive"
+          />
+          {{! Doc type }}
+          <Hds::Badge data-test-document-type @text={{this.docType}} />
+        </div>
+      </div>
+    </div>
+
+    {{! Thumbnail }}
+    <div class="pointer-events-none relative ml-4 shrink-0">
+      <Doc::Thumbnail
+        @status={{@doc.status}}
+        @product={{@doc.product}}
+        @size="medium"
+        class="self-start"
+      />
+    </div>
+  </div>
+</div>

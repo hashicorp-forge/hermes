@@ -50,7 +50,7 @@
       @apply h-[52px] w-[52px];
 
       &.approved {
-        @apply top-1 -right-2;
+        @apply -right-2 top-1;
       }
 
       &.obsolete {

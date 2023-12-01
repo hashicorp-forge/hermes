@@ -32,11 +32,43 @@
   }
 
   .user-buttons {
-    @apply order-4 flex items-center justify-end space-x-1.5 sm:ml-6 md:ml-8;
+    @apply order-4 flex items-center justify-end gap-2.5 sm:ml-6 md:ml-8;
   }
 
-  .user-avatar {
-    @apply pointer-events-none absolute top-1/2 left-[3px] z-10 h-[30px] w-[30px] -translate-y-1/2 rounded-[3px];
+  .user-dropdown {
+    li {
+      a,
+      button {
+        @apply px-4;
+      }
+    }
+  }
+
+  .user-menu-button {
+    &:hover {
+      .avatar {
+        box-shadow: 0 0 0 3px var(--token-color-border-strong);
+      }
+    }
+
+    &:focus,
+    &.open {
+      .avatar {
+        @apply shadow-focus-ring-action;
+      }
+    }
+  }
+
+  .user-menu-button {
+    &:hover,
+    &:focus,
+    &.open {
+      @apply outline-none;
+
+      .avatar {
+        @apply outline outline-1 outline-color-page-faint;
+      }
+    }
   }
 
   .user-menu-external-link {
@@ -69,12 +101,11 @@
     }
   }
 
-  .highlighted-new {
-    .hds-dropdown-list-item__interactive-text {
-      &::after {
-        content: "New";
-        @apply ml-0.5 rounded bg-color-surface-highlight px-2 py-1 text-body-100 font-medium text-color-foreground-highlight;
-      }
+  .is-aria-selected .highlighted-new-badge {
+    @apply bg-color-palette-alpha-300 mix-blend-normal;
+
+    .hds-badge__text {
+      @apply text-color-page-primary;
     }
   }
 }

@@ -39,6 +39,7 @@ const FIRST_ITEM_ID = "x-dropdown-list-item-0";
 const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
 const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+const EXTERNAL_LINK = "[data-test-x-dropdown-list-item-external-link]";
 const FILTER_INPUT_SELECTOR = "[data-test-x-dropdown-list-input]";
 const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
 const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
@@ -631,6 +632,27 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     );
   });
 
+  test("the list can be rendered with ExternalLinks", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.ExternalLink href="authenticated.documents">
+            {{dd.value}}
+          </dd.ExternalLink>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    assert.dom(EXTERNAL_LINK).exists({ count: 3 });
+    assert.dom(EXTERNAL_LINK).hasAttribute("target", "_blank");
+  });
   test("the toggle action can render with a chevron", async function (assert) {
     this.set("hasChevron", false);
 
