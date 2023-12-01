@@ -38,6 +38,7 @@ export interface HermesProject
   jiraIssue?: JiraIssue;
 }
 
+// TODO: move this to algolia service
 export interface AlgoliaObject<T> extends T {
   objectID: string;
 }

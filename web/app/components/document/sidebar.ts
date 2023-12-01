@@ -31,7 +31,10 @@ import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
 import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
-import { AlgoliaObject, HermesProject } from "hermes/types/project";
+import { AlgoliaObject, HermesProjectInfo } from "hermes/types/project";
+import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
+import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
+import { RelatedHermesDocument } from "../related-resources";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -118,7 +121,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Set by `loadRelatedProjects` and used to render a list
    * of projects or an empty state.
    */
-  @tracked protected projects: HermesProject[] | null = null;
+  @tracked protected projects: Array<
+    HermesProjectInfo | AlgoliaObject<HermesProjectInfo>
+  > | null = null;
 
   /**
    * Whether a draft was published during the session.
@@ -494,6 +499,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action protected hideProjectsModal() {
     this.projectsModalIsShown = false;
+    // add any new projects to the local list
+  }
+
+  @action protected addDocumentToProject(
+    project: AlgoliaObject<HermesProjectInfo>,
+  ) {
+    this.projects?.unshift(project);
+    this.projects = this.projects;
   }
 
   @action refreshRoute() {
@@ -544,7 +557,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
 
     const projects = await Promise.all(projectPromises ?? []);
-
+    console.log(projects);
     this.projects = projects;
   });
 
@@ -902,6 +915,48 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
     this.refreshRoute();
   });
+
+  protected saveProjectRelatedResources = task(
+    async (project: AlgoliaObject<HermesProjectInfo>) => {
+      const projectResources = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+        )
+        .then((response) => response?.json());
+
+      let hermesDocuments = projectResources.hermesDocuments ?? [];
+
+      const externalLinks = projectResources.externalLinks ?? [];
+
+      const newRelatedHermesDocument = formatRelatedHermesDocument(
+        this.args.document,
+      );
+
+      hermesDocuments.unshift(newRelatedHermesDocument);
+
+      updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
+
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            hermesDocuments: hermesDocuments.map(
+              (doc: RelatedHermesDocument) => {
+                return {
+                  googleFileID: doc.googleFileID,
+                  sortOrder: doc.sortOrder,
+                };
+              },
+            ),
+            externalLinks,
+          }),
+        },
+      );
+
+      this.addDocumentToProject(project);
+    },
+  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {

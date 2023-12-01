@@ -16,10 +16,13 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import AlgoliaService from "hermes/services/algolia";
 import { RelatedHermesDocument } from "../related-resources";
 import { ProjectStatus } from "hermes/types/project-status";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import { next } from "@ember/runloop";
 
 interface ProjectsAddOrCreateSignature {
   Args: {
     onClose: () => void;
+    onSave: (project: AlgoliaObject<HermesProjectInfo>) => void;
     document: HermesDocument;
   };
 }
@@ -32,6 +35,8 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   @tracked protected searchIsRunning = false;
   @tracked protected inputValue = "";
 
+  @tracked private dd: XDropdownListAnchorAPI | null = null;
+
   @tracked protected newProjectFormIsShown = false;
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
@@ -43,6 +48,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   }
 
   @action protected maybeClose() {
+    // TODO: this should be explained
     if (!this.newProjectFormIsShown) {
       this.args.onClose();
     }
@@ -59,6 +65,8 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
       this.inputValue = (eventOrValue.target as HTMLInputElement).value;
     }
 
+    // TODO: this should be a parent function
+
     void this.searchProjects.perform();
   }
 
@@ -66,23 +74,17 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     _index: number,
     project: AlgoliaObject<HermesProjectInfo>,
   ) {
-    console.log("adding document to project...", project);
-    // FIXME: id is the index not the ID, need to get the project id.
     const projectWithID = {
       ...project,
       id: project.objectID,
     } as AlgoliaObject<HermesProjectInfo>;
 
-    void this.saveProjectRelatedResources.perform(projectWithID);
-    // hide the modal?
+    void this.args.onSave(projectWithID);
     this.args.onClose();
-
-    // this needs to update the sidebar array
   }
 
-  protected loadInitialData = task(async () => {
-    // FIXME: hover/keyboard isn't working after modal closes once
-    // TODO: need to reset the itemIndex or something
+  protected loadInitialData = task(async (dd: XDropdownListAnchorAPI) => {
+    this.dd = dd;
     await this.searchProjects.perform();
   });
 
@@ -114,52 +116,15 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
           this.shownProjects = response.hits as unknown as HermesProject[];
           this.searchIsRunning = false;
         });
+      next(() => {
+        this.dd?.scheduleAssignMenuItemIDs();
+      });
     } catch (e: unknown) {
       this.searchIsRunning = false;
       console.log(e);
       // TODO: handle
     }
   });
-
-  protected saveProjectRelatedResources = task(
-    async (project: AlgoliaObject<HermesProjectInfo>) => {
-      const projectResources = await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
-        )
-        .then((response) => response?.json());
-
-      let hermesDocuments = projectResources.hermesDocuments ?? [];
-
-      const externalLinks = projectResources.externalLinks ?? [];
-
-      const newRelatedHermesDocument = formatRelatedHermesDocument(
-        this.args.document,
-      );
-
-      hermesDocuments.unshift(newRelatedHermesDocument);
-
-      updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
-
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            hermesDocuments: hermesDocuments.map(
-              (doc: RelatedHermesDocument) => {
-                return {
-                  googleFileID: doc.googleFileID,
-                  sortOrder: doc.sortOrder,
-                };
-              },
-            ),
-            externalLinks,
-          }),
-        },
-      );
-    },
-  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {

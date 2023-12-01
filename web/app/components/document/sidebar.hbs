@@ -463,7 +463,6 @@
           {{/if}}
         {{/if}}
       {{/if}}
-
     </div>
   {{/if}}
 {{/unless}}
@@ -475,6 +474,7 @@
     <Projects::AddOrCreate
       @document={{@document}}
       @onClose={{this.hideProjectsModal}}
+      @onSave={{perform this.saveProjectRelatedResources}}
     />
   {{/if}}
 
