@@ -130,7 +130,11 @@
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
         <div class="flex space-x-1">
-          <Doc::State @state={{@document.status}} @hideProgress={{true}} />
+          <Doc::State
+            data-test-doc-status
+            @state={{@document.status}}
+            @hideProgress={{true}}
+          />
           <Hds::Badge @text={{@document.docType}} />
         </div>
       </div>
@@ -320,6 +324,7 @@
             <div class="flex items-start gap-2 px-3">
 
               <Hds::Button
+                data-test-change-doc-status-button
                 @text={{this.moveToStatusButtonText}}
                 @size="medium"
                 @color={{this.moveToStatusButtonColor}}

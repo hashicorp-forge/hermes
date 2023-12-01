@@ -805,7 +805,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {}
   });
 
-  approve = task(async () => {
+  approve = task(async (options?: { skipSuccessMessage: boolean }) => {
     try {
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
@@ -814,7 +814,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           headers: { "Content-Type": "application/json" },
         },
       );
-      this.showFlashSuccess("Done!", "Document approved");
+      if (!options?.skipSuccessMessage) {
+        this.showFlashSuccess("Done!", "Document approved");
+      }
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to approve");
       throw error;
@@ -846,12 +848,25 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 
-  changeDocumentStatus = task(async (status) => {
+  changeDocumentStatus = task(async (newStatus: string) => {
     try {
+      if (
+        newStatus === "Approved" &&
+        this.args.document.approvers?.includes(this.args.profile.email) &&
+        !this.args.document.approvedBy?.includes(this.args.profile.email)
+      ) {
+        // If the owner is an approver, process their approval first.
+        await this.approve.perform({ skipSuccessMessage: true });
+      }
+
       await this.patchDocument.perform({
-        status: status,
+        status: newStatus,
       });
-      this.showFlashSuccess("Done!", `Document status changed to "${status}"`);
+
+      this.showFlashSuccess(
+        "Done!",
+        `Document status changed to "${newStatus}"`,
+      );
     } catch (error: unknown) {
       this.maybeShowFlashError(
         error as Error,
