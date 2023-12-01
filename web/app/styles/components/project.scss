@@ -34,12 +34,6 @@
     @apply scale-105 transition-transform;
   }
 
-  .project-resource-list {
-    > li:not(:first-child) {
-      @apply border-t border-t-color-border-faint;
-    }
-  }
-
   .project-resource {
     @apply relative;
 
