@@ -11,15 +11,12 @@ import { restartableTask, task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
-import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
-import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import AlgoliaService from "hermes/services/algolia";
-import { RelatedHermesDocument } from "../related-resources";
 import { ProjectStatus } from "hermes/types/project-status";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
 
-interface ProjectsAddOrCreateSignature {
+interface ProjectsAddToOrCreateSignature {
   Args: {
     onClose: () => void;
     onSave: (project: AlgoliaObject<HermesProjectInfo>) => void;
@@ -27,13 +24,12 @@ interface ProjectsAddOrCreateSignature {
   };
 }
 
-export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSignature> {
+export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCreateSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
 
-  @tracked protected searchIsRunning = false;
-  @tracked protected inputValue = "";
+  @tracked protected query = "";
 
   @tracked private dd: XDropdownListAnchorAPI | null = null;
 
@@ -41,11 +37,8 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
-  @tracked protected shownProjects: HermesProject[] = [];
 
-  protected get inputValueIsEmpty(): boolean {
-    return this.inputValue.length === 0;
-  }
+  @tracked protected shownProjects: HermesProject[] = [];
 
   @action protected maybeClose() {
     // TODO: this should be explained
@@ -54,44 +47,56 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
     }
   }
 
+  /**
+   * The action to show the new project form.
+   * Replaces the search results with the new project form.
+   */
   @action protected showNewProjectForm() {
     this.newProjectFormIsShown = true;
   }
 
-  @action protected updateInputValue(eventOrValue: Event | string) {
-    if (typeof eventOrValue === "string") {
-      this.inputValue = eventOrValue;
-    } else {
-      this.inputValue = (eventOrValue.target as HTMLInputElement).value;
-    }
-
-    // TODO: this should be a parent function
+  /**
+   * The "input" action run on the search component.
+   * Sets the local query and runs the search.
+   */
+  @action protected updateInputValue(event: Event) {
+    // this may need to be eventOrValue?
+    this.query = (event.target as HTMLInputElement).value;
 
     void this.searchProjects.perform();
   }
 
-  @action protected addDocumentToProject(
+  /**
+   * The action to save a document to a project.
+   * Passed to X::DropdownList as `onClick`.
+   * Calls the passed-in `onSave` and `onClose` actions.
+   */
+  @action protected onSave(
     _index: number,
     project: AlgoliaObject<HermesProjectInfo>,
   ) {
-    const projectWithID = {
-      ...project,
-      id: project.objectID,
-    } as AlgoliaObject<HermesProjectInfo>;
-
-    void this.args.onSave(projectWithID);
+    void this.args.onSave(project);
     this.args.onClose();
   }
 
+  /**
+   * The action run when the component is inserted.
+   * Saves the dropdown API and runs the initial search.
+   */
   protected loadInitialData = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
     await this.searchProjects.perform();
   });
 
+  /**
+   * The task to search for projects.
+   * Formats and runs an Algolia query to exclude archived projects
+   * and projects already associated with the document.
+   * Sets the `shownProjects` property to the results
+   * and schedules the dropdown to assign menu item IDs.
+   */
   protected searchProjects = restartableTask(async () => {
     try {
-      this.searchIsRunning = true;
-
       let filters = `(NOT status:"${ProjectStatus.Archived.toLowerCase()}")`;
 
       if (this.args.document.projects?.length) {
@@ -104,7 +109,7 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
       await this.algolia.searchIndex
         .perform(
           this.configSvc.config.algolia_projects_index_name,
-          this.inputValue,
+          this.query,
           {
             filters,
             optionalFilters: `status:"${ProjectStatus.Active}"`,
@@ -112,15 +117,12 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
         )
         .then((response) => {
           // TODO: do we want to trim to 4 or let the user scroll?
-          // do we want to do it as a hitsPerPage param?
           this.shownProjects = response.hits as unknown as HermesProject[];
-          this.searchIsRunning = false;
         });
       next(() => {
         this.dd?.scheduleAssignMenuItemIDs();
       });
     } catch (e: unknown) {
-      this.searchIsRunning = false;
       console.log(e);
       // TODO: handle
     }
@@ -129,6 +131,6 @@ export default class ProjectsAddOrCreate extends Component<ProjectsAddOrCreateSi
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Projects::AddOrCreate": typeof ProjectsAddOrCreate;
+    "Projects::AddToOrCreate": typeof ProjectsAddToOrCreate;
   }
 }

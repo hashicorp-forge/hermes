@@ -14,7 +14,7 @@
         @inputIsShown={{false}}
         @items={{this.shownProjects}}
         @disableClose={{true}}
-        @onItemClick={{this.addDocumentToProject}}
+        @onItemClick={{this.onSave}}
         @placement={{null}}
         @isLoading={{this.loadInitialData.isRunning}}
         class="non-floating-list"
@@ -24,7 +24,7 @@
             <Hds::Form::TextInput::Base
               autofocus
               @type="search"
-              @value={{this.inputValue}}
+              @value={{this.query}}
               {{did-insert (perform this.loadInitialData dd)}}
               {{on "input" this.updateInputValue}}
               placeholder="Search projects"
@@ -33,7 +33,7 @@
               aria-expanded={{dd.contentIsShown}}
               aria-haspopup="listbox"
             />
-            {{#if this.searchIsRunning}}
+            {{#if this.searchProjects.isRunning}}
               <div
                 data-test-search-loading-icon
                 class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
@@ -84,7 +84,8 @@
         </:item>
         <:no-matches>
           <div class="grid h-48 place-items-center text-color-foreground-faint">
-            {{! should also include a "no projects state" }}
+            {{! TODO: "No projects" state }}
+            {{! TODO: error state }}
             No matches
           </div>
         </:no-matches>

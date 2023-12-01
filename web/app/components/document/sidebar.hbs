@@ -457,7 +457,7 @@
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
   {{#if this.projectsModalIsShown}}
-    <Projects::AddOrCreate
+    <Projects::AddToOrCreate
       @document={{@document}}
       @onClose={{this.hideProjectsModal}}
       @onSave={{perform this.saveProjectRelatedResources}}

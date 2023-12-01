@@ -840,4 +840,12 @@ module("Acceptance | authenticated/document", function (hooks) {
       .dom(DISABLED_FOOTER_H5)
       .hasText("Read-only headers", "shows the locked-doc message");
   });
+
+  test("it displays a list of projects the document is in", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("you can add a document to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("you can create a new project to add the document to", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("you can remove a document from a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 });
