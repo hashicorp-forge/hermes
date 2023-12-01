@@ -3,7 +3,6 @@ import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesSize } from "hermes/types/sizes";
-import FlagsService from "hermes/services/flags";
 import TooltipIcon from "hermes/components/tooltip-icon";
 import { on } from "@ember/modifier";
 import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
@@ -24,7 +23,6 @@ interface ProductSubscriptionToggleComponentSignature {
 
 export default class ProductSubscriptionToggleComponent extends Component<ProductSubscriptionToggleComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
-  @service declare flags: FlagsService;
 
   private get isSubscribed() {
     return this.authenticatedUser.subscriptions?.some(
