@@ -37,8 +37,7 @@ export interface HermesProject
     HermesProjectResources {
   jiraIssue?: JiraIssue;
 }
-
-// TODO: move this to algolia service
-export interface AlgoliaObject<T> extends T {
+// TODO: move elsewhere
+export type AlgoliaObject<T> = T & {
   objectID: string;
-}
+};

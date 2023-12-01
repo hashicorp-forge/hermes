@@ -31,7 +31,11 @@ import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
 import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
-import { AlgoliaObject, HermesProjectInfo } from "hermes/types/project";
+import {
+  AlgoliaObject,
+  HermesProjectInfo,
+  HermesProjectResources,
+} from "hermes/types/project";
 import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { RelatedHermesDocument } from "../related-resources";
@@ -630,15 +634,54 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  // removeProject = task(async (projectId: string) => {
-  //   try {
-  //     // TODO:
-  //   } catch (error: unknown) {
-  //     this.maybeShowFlashError(error as Error, "Unable to remove project");
-  //     throw error;
-  //   }
-  //   this.refreshRoute();
-  // });
+  removeProject = task(async (projectId: string) => {
+    try {
+      const projectIndex = this.projects?.findIndex(
+        (project) => project.id === projectId,
+      );
+
+      if (projectIndex !== undefined && projectIndex !== -1) {
+        this.projects?.splice(projectIndex, 1);
+        this.projects = this.projects;
+      }
+
+      // need to update the project to not have the document
+      const projectResources = (await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        )
+        .then((response) => response?.json())) as HermesProjectResources;
+
+      let { hermesDocuments, externalLinks } = projectResources;
+
+      const formattedHermesDocuments = hermesDocuments
+        ?.filter((doc) => doc.googleFileID !== this.docID)
+        .map((doc) => {
+          return {
+            googleFileID: doc.googleFileID,
+            sortOrder: doc.sortOrder,
+          };
+        });
+
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            hermesDocuments: formattedHermesDocuments,
+            externalLinks,
+          }),
+        },
+      );
+    } catch (error: unknown) {
+      // reload the projects to reset the local state
+      void this.loadRelatedProjects.perform();
+
+      this.maybeShowFlashError(error as Error, "Unable to remove project");
+      throw error;
+    }
+    this.refreshRoute();
+  });
 
   saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
@@ -918,9 +961,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   protected saveProjectRelatedResources = task(
     async (project: AlgoliaObject<HermesProjectInfo>) => {
+      this.addDocumentToProject(project);
+
       const projectResources = await this.fetchSvc
         .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
         )
         .then((response) => response?.json());
 
@@ -937,7 +982,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
       await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -953,8 +998,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           }),
         },
       );
-
-      this.addDocumentToProject(project);
     },
   );
 }

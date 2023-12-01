@@ -266,38 +266,24 @@
                         >
                           {{project.title}}
                         </TruncatedText>
-                        {{! what if thers no jira }}
-                        <div
-                          class="mt-px flex items-center gap-1 text-body-100 text-color-foreground-faint"
-                        >
-                          {{! <Person::Avatar @email="no" @imgURL="H" @size="small" />
-                        <Person::Avatar @email="no" @imgURL="H" @size="small" />
-                        <Person::Avatar @email="no" @imgURL="H" @size="small" /> }}
+                        {{#if project.products}}
+                          {{#each project.products as |product|}}
+                            {{product}}
+                          {{/each}}
 
-                          {{! <img
-                          src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
-                        />
-
-                        HDS-123 }}
-                          {{! <Person::Avatar @email="t" class="ml-0.5" /> }}
-                          {{! <FlightIcon
-                          @name="chevrons-up"
-                          class="text-color-foreground-critical"
-                        /> }}
-                        </div>
+                        {{/if}}
                       </div>
                     </LinkTo>
 
-                    {{! Don't think we need overflow control from this view }}
-                    {{!-- <OverflowMenu
-                    @items={{hash
-                      remove=(hash
-                        icon="trash"
-                        label="Remove from project"
-                        action=(perform this.removeProject project.id)
-                      )
-                    }}
-                  /> --}}
+                    <OverflowMenu
+                      @items={{hash
+                        remove=(hash
+                          icon="trash"
+                          label="Remove from project"
+                          action=(perform this.removeProject project.id)
+                        )
+                      }}
+                    />
                   </div>
                 </li>
               {{/each}}

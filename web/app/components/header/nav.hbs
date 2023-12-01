@@ -12,6 +12,14 @@
     >
       All Docs
     </LinkTo>
+    <LinkTo
+      data-test-nav-link="my"
+      @route="authenticated.my.documents"
+      @current-when="authenticated.my.documents"
+      @query={{this.defaultMyQueryParams}}
+    >
+      My Docs
+    </LinkTo>
     {{#if this.flags.projects}}
       <LinkTo
         data-test-nav-link="projects"
@@ -21,14 +29,6 @@
         Projects
       </LinkTo>
     {{/if}}
-    <LinkTo
-      data-test-nav-link="my"
-      @route="authenticated.my.documents"
-      @current-when="authenticated.my.documents"
-      @query={{this.defaultMyQueryParams}}
-    >
-      My Docs
-    </LinkTo>
   </div>
 
   <Header::Search class="global-search" />

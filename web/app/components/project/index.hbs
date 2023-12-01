@@ -224,10 +224,6 @@
           <h3 data-test-documents-header class="hermes-h4">
             Documents
           </h3>
-          <Hds::BadgeCount
-            data-test-document-count
-            @text="{{this.hermesDocuments.length}}"
-          />
         </div>
         <ol data-test-document-list class="divided-list mt-3">
           {{#each this.hermesDocuments as |document|}}
@@ -257,10 +253,6 @@
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
-          <Hds::BadgeCount
-            data-test-external-link-count
-            @text="{{this.externalLinks.length}}"
-          />
         </div>
         <ol data-test-external-link-list class="divided-list mt-5">
           {{#each this.externalLinks as |link i|}}
