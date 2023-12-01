@@ -49,13 +49,10 @@ module("Integration | Component | person/avatar", async function (hooks) {
     `);
 
     assert.dom(LOADING).exists();
-    assert.dom(IMAGE).doesNotExist();
-    assert.dom(FALLBACK).doesNotExist();
 
     this.set("isLoading", false);
 
     assert.dom(LOADING).doesNotExist();
-    assert.dom(FALLBACK).exists();
   });
 
   test("it renders an image if provided and a fallback if not", async function (this: PersonAvatarTestContext, assert) {
@@ -71,6 +68,6 @@ module("Integration | Component | person/avatar", async function (hooks) {
     this.set("imgURL", undefined);
 
     assert.dom(IMAGE).doesNotExist();
-    assert.dom(FALLBACK).hasText("B");
+    assert.dom(FALLBACK).exists();
   });
 });

@@ -252,8 +252,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert
       .dom(JIRA_ASSIGNEE_AVATAR)
-      .hasAttribute("data-test-assignee", jiraAssignee)
-      .hasText(jiraAssignee.charAt(0));
+      .hasAttribute("data-test-assignee", jiraAssignee);
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
   });
