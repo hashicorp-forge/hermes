@@ -213,6 +213,17 @@ func New(cfg *Config) (*Client, error) {
 		return nil, err
 	}
 
+	// Configure the projects index.
+	err = configureMainIndex(cfg.ProjectsIndexName, c.Projects, search.Settings{
+		// Attributes
+		AttributesForFaceting: opt.AttributesForFaceting(
+			"status",
+		),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return c, nil
 }
 
