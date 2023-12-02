@@ -25,16 +25,18 @@ export interface RelatedExternalLink {
 }
 
 export interface RelatedHermesDocument {
-  id: number;
   googleFileID: string;
   title: string;
   documentType: string;
   documentNumber: string;
+  createdTime: number;
+  modifiedTime: number;
   sortOrder: number;
+  product: string;
   status: string;
-  owners?: string[];
-  ownerPhotos?: string[];
-  product?: string;
+  owners: string[];
+  ownerPhotos: string[];
+  summary: string;
 }
 
 export enum RelatedResourcesScope {

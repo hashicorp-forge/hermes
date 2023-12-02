@@ -17,6 +17,7 @@ import {
 const SUPPORT_URL = "https://example.com/support";
 const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";
 const CREATE_NEW_BUTTON = "[data-test-create-new-button]";
+const HIGHLIGHT_BADGE = ".highlighted-new-badge";
 
 module("Integration | Component | header/nav", function (hooks) {
   setupRenderingTest(hooks);
@@ -44,8 +45,10 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert.dom(".header-nav").exists();
     assert.dom('[data-test-nav-link="all"]').hasAttribute("href", "/documents");
-    assert.dom('[data-test-nav-link="my"]').hasAttribute("href", "/my");
-    assert.dom('[data-test-nav-link="drafts"]').hasAttribute("href", "/drafts");
+
+    assert
+      .dom('[data-test-nav-link="my"]')
+      .hasAttribute("href", "/my/documents");
 
     assert.dom(CREATE_NEW_BUTTON).hasText("New").hasAttribute("href", "/new");
 
@@ -56,13 +59,13 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom("[data-test-user-menu-title]").hasText(TEST_USER_2_NAME);
     assert.dom("[data-test-user-menu-email]").hasText(TEST_USER_2_EMAIL);
     assert
-      .dom("[data-test-user-menu-github]")
+      .dom("[data-test-user-menu-item='git-hub'] a")
       .hasText("GitHub")
       .hasAttribute("href", HERMES_GITHUB_REPO_URL);
 
     assert
       .dom('[data-test-user-menu-item="email-notifications"]')
-      .hasText("Email notifications");
+      .containsText("Email notifications");
 
     assert.dom('[data-test-user-menu-item="sign-out"]').hasText("Sign out");
   });
@@ -85,13 +88,7 @@ module("Integration | Component | header/nav", function (hooks) {
       .dom("[data-test-user-menu-highlight]")
       .doesNotExist("highlight is hidden when the menu is open");
 
-    assert
-      .dom(".highlighted-new .hds-dropdown-list-item__interactive-text")
-      .hasPseudoElementStyle(
-        "after",
-        { content: '"New"' },
-        "highlighted link has the correct class and pseudoElement text",
-      );
+    assert.dom(HIGHLIGHT_BADGE).hasText("New");
 
     // close and reopen the menu
     await click(USER_MENU_TOGGLE_SELECTOR);
@@ -116,7 +113,7 @@ module("Integration | Component | header/nav", function (hooks) {
     await click(USER_MENU_TOGGLE_SELECTOR);
 
     assert
-      .dom("[data-test-user-menu-support]")
+      .dom("[data-test-user-menu-item='support'] a")
       .hasText("Support")
       .hasAttribute("href", SUPPORT_URL);
   });

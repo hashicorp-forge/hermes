@@ -1,0 +1,74 @@
+<My::Header>
+  <:controls>
+    <LinkTo
+      data-test-owner-filter
+      @route={{this.currentRoute}}
+      @query={{this.ownerFilterQueryParams}}
+      class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
+    >
+      <label tabindex="-1" for="owner-filter" class="text-body-200">
+        Include drafts I'm a contributor on
+      </label>
+      <Hds::Form::Toggle::Base
+        tabindex="-1"
+        id="owner-filter"
+        checked={{this.ownerToggleIsChecked}}
+      />
+    </LinkTo>
+  </:controls>
+</My::Header>
+
+{{#if @docs}}
+  <table class="hds-table mt-7">
+    <thead>
+      <tr>
+        <th class="name">Name</th>
+        <th class="type">Type</th>
+        <th class="status">Status</th>
+        <th class="product">Product/Area</th>
+        <th class="owner">Owner</th>
+        <th class="time">
+          <Table::SortableHeader
+            @queryParam={{this.sortParams}}
+            @attribute="modifiedTime"
+            @currentSort="modifiedTime"
+            @sortDirection={{@sortDirection}}
+            @defaultSortDirection="desc"
+          >
+            Last modified
+          </Table::SortableHeader>
+        </th>
+      </tr>
+    </thead>
+    {{#each this.docGroups as |docGroup|}}
+      {{#if docGroup.docs.length}}
+        <tbody>
+          {{#if docGroup.label}}
+            <tr>
+              <th
+                data-test-table-body-header
+                colspan="6"
+                class="hermes-h4 pt-28"
+              >
+                {{docGroup.label}}
+              </th>
+            </tr>
+          {{/if}}
+          {{#each docGroup.docs as |doc|}}
+            <Table::Row @doc={{doc}} @timeColumn="modifiedTime" />
+          {{/each}}
+        </tbody>
+      {{/if}}
+    {{/each}}
+  </table>
+  {{#if this.paginationIsShown}}
+    <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+  {{/if}}
+{{else}}
+  <div
+    data-test-my-docs-empty-state
+    class="mt-7 flex h-64 items-center justify-center text-display-300 text-color-foreground-faint"
+  >
+    You don't have any docs yet.
+  </div>
+{{/if}}

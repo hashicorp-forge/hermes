@@ -1,10 +1,18 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test, todo } from "qunit";
-import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  find,
+  visit,
+  waitFor,
+  waitUntil,
+} from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
+import { TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
 
 const TITLE = "[data-test-project-title]";
 const TITLE_BUTTON = `${TITLE} button`;
@@ -135,26 +143,24 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const docOwner = "foo@bar.com";
     const docOwnerPhotoURL = "#foo";
     const docProduct = "Terraform";
+    const id = 250;
 
-    this.server.create("document", {
+    this.server.create("related-hermes-document", {
+      id,
+      googleFileID: id,
+      sortOrder: 1,
       title: docTitle,
+      documentType: docType,
+      documentNumber: docNumber,
+      products: [docProduct],
       summary: docSummary,
-      status: docStatus,
-      docType,
-      docNumber,
       owners: [docOwner],
       ownerPhotos: [docOwnerPhotoURL],
-      product: docProduct,
+      status: docStatus,
     });
 
-    const document = this.server.schema.document.first().attrs;
-
-    const relatedDocument = {
-      ...document,
-      googleFileID: document.objectID,
-      documentType: document.docType,
-      documentNumber: document.docNumber,
-    };
+    const relatedDocument =
+      this.server.schema.relatedHermesDocument.find(id).attrs;
 
     const externalLinkName = "Foo";
     const externalLinkURL = "https://hashicorp.com";
@@ -203,7 +209,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
-    assert.dom(DOCUMENT_LINK).hasAttribute("href", "/document/doc-0");
+    assert
+      .dom(COPY_URL_BUTTON)
+      .hasAttribute("data-test-url", window.location.href);
+
+    assert.dom(DOCUMENT_LINK).hasAttribute("href", `/document/${id}`);
 
     assert.dom(DOCUMENT_TITLE).containsText(docTitle);
 
@@ -219,15 +229,9 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .containsText(docOwner)
       .hasAttribute("href", "/documents?owners=%5B%22foo%40bar.com%22%5D");
 
-    assert
-      .dom(DOCUMENT_TYPE)
-      .containsText(docType)
-      .hasAttribute("href", "/documents?docType=%5B%22PRD%22%5D");
+    assert.dom(DOCUMENT_TYPE).containsText(docType);
 
-    assert
-      .dom(DOCUMENT_STATUS)
-      .containsText(docStatus)
-      .hasAttribute("href", "/documents?status=%5B%22Approved%22%5D");
+    assert.dom(DOCUMENT_STATUS).containsText(docStatus);
 
     assert
       .dom(EXTERNAL_LINK)
@@ -286,11 +290,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
-    const docTitle = "Foo Bar";
-
-    this.server.create("document", {
-      title: docTitle,
-    });
+    this.server.create("document");
 
     const project = this.server.schema.projects.first();
 
@@ -307,7 +307,16 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await waitFor(ADD_PROJECT_RESOURCE_MODAL);
     assert.dom(ADD_PROJECT_RESOURCE_MODAL).exists();
 
-    await click(ADD_DOCUMENT_OPTION);
+    const clickPromise = click(ADD_DOCUMENT_OPTION);
+
+    await waitFor(`${DOCUMENT_OWNER_AVATAR} [data-test-is-loading]`);
+
+    await clickPromise;
+
+    assert.dom("[data-test-is-loading]").doesNotExist();
+    assert
+      .dom(`${DOCUMENT_OWNER_AVATAR} img`)
+      .hasAttribute("src", TEST_USER_PHOTO);
 
     assert.dom(ADD_PROJECT_RESOURCE_MODAL).doesNotExist();
 
@@ -319,7 +328,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.hermesDocuments;
 
     assert.equal(projectDocuments.length, 1);
-    assert.equal(projectDocuments[0].title, docTitle);
   });
 
   test("you can remove a document from a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -500,16 +508,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
   todo(
     "you can add a jira link",
-    async function (
-      this: AuthenticatedProjectsProjectRouteTestContext,
-      assert,
-    ) {
-      assert.true(false);
-    },
-  );
-
-  todo(
-    "you can copy a project's URL",
     async function (
       this: AuthenticatedProjectsProjectRouteTestContext,
       assert,

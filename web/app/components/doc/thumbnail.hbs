@@ -24,8 +24,9 @@
       </div>
     {{/if}}
 
-    {{#if this.productShortName}}
+    {{#if this.badgeIsShown}}
       <Product::Avatar
+        data-test-product={{@product}}
         data-test-doc-thumbnail-product-badge
         @product={{@product}}
         @size={{this.size}}

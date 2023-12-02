@@ -1,6 +1,36 @@
 .avatar {
   @apply relative flex shrink-0 items-center justify-center;
 
+  &.small,
+  &.medium {
+    .product-abbreviation {
+      &.letter-count-1 {
+        @apply text-[12px] font-semibold;
+        @apply mt-[1px];
+      }
+
+      &.letter-count-2 {
+        @apply text-[9.5px] font-semibold;
+      }
+
+      &.letter-count-3 {
+        @apply text-[7.5px] font-bold;
+      }
+    }
+  }
+
+  &.large,
+  &.xl {
+    .product-abbreviation {
+      &.letter-count-2 {
+        @apply text-[13px];
+      }
+      &.letter-count-3 {
+        @apply text-[11px] font-semibold;
+      }
+    }
+  }
+
   &.small {
     @apply h-5 w-5;
   }
@@ -16,4 +46,8 @@
   &.xl {
     @apply h-16 w-16;
   }
+}
+
+.product-abbreviation {
+  @apply flex font-medium leading-none tracking-tighter;
 }

@@ -1,6 +1,7 @@
 .project-screen {
   .editable-field {
     @apply -mx-2;
+
     &:not(.active) {
       @apply w-auto min-w-[30%];
     }
@@ -33,12 +34,6 @@
     @apply scale-105 transition-transform;
   }
 
-  .project-resource-list {
-    > li:not(:first-child) {
-      @apply border-t border-t-color-border-faint;
-    }
-  }
-
   .project-resource {
     @apply relative;
 
@@ -57,8 +52,21 @@
       @apply text-color-foreground-faint;
     }
 
+    .overflow-button {
+      &:hover,
+      &:focus,
+      &:active,
+      &:focus-visible,
+      &.open {
+        .button-affordance {
+          @apply bg-color-page-primary;
+        }
+      }
+    }
+
     .overflow-button-container {
-      @apply absolute right-1 top-1;
+      @apply absolute right-1 top-1 z-10 h-[calc(100%-16px)] items-start;
+      @apply from-color-page-faint;
     }
   }
 }

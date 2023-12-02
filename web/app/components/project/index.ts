@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { task } from "ember-concurrency";
+import { enqueueTask, task } from "ember-concurrency";
 import { HermesProject, JiraIssue } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -86,6 +86,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * The URL of the project. Used by the CopyURLButton.
+   */
+  protected get url() {
+    return window.location.href;
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
@@ -96,10 +103,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
-        ...doc,
         googleFileID: doc.googleFileID,
         sortOrder: doc.sortOrder,
-        product: doc.product,
       };
     });
 
@@ -248,6 +253,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Adds a resource to the correct array, then saves the project.
    */
   @action protected addDocument(resource: RelatedHermesDocument) {
+    void this.getOwnerPhoto.perform(resource.googleFileID);
+
     const cachedDocuments = this.hermesDocuments.slice();
 
     this.hermesDocuments.unshiftObject(resource);
@@ -301,6 +308,27 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * The task to get the owner photo for a document.
+   */
+  private getOwnerPhoto = enqueueTask(async (docID: string) => {
+    const doc = await this.fetchSvc
+      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
+      .then((response) => response?.json());
+
+    const ownerPhoto = doc.ownerPhotos[0];
+
+    if (ownerPhoto) {
+      const hermesDoc = this.hermesDocuments.find(
+        (doc) => doc.googleFileID === docID,
+      );
+
+      if (hermesDoc) {
+        hermesDoc.ownerPhotos = [ownerPhoto];
+      }
+    }
+  });
+
+  /**
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
@@ -310,10 +338,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         const valueToSave = key
           ? { [key]: newValue }
           : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(`/api/v1/projects/${this.args.project.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        });
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(valueToSave),
+          },
+        );
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",

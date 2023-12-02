@@ -3,6 +3,7 @@
 import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
+import { ProjectStatus } from "hermes/types/project-status";
 
 // @ts-ignore - Mirage not detecting file
 import config from "../config/environment";
@@ -38,10 +39,41 @@ export default function (mirageConfig) {
        */
       const handleAlgoliaRequest = (schema, request) => {
         const requestBody = JSON.parse(request.requestBody);
-
         if (requestBody) {
           const { facetQuery, query } = requestBody;
-          if (facetQuery) {
+          let { facetFilters } = requestBody;
+
+          // Ignore the facetFilters if they're empty.
+          if (facetFilters) {
+            if (facetFilters.length === 0) {
+              facetFilters = undefined;
+            } else if (facetFilters[0] === "") {
+              facetFilters = undefined;
+            }
+          }
+
+          if (facetFilters) {
+            /**
+             * Facet filters arrive like ["owners:foo@bar.com"]
+             */
+            if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+              // A request from the my/documents route for published docs
+              const hits = schema.document.all().models.filter((doc) => {
+                return (
+                  doc.attrs.owners.includes(TEST_USER_EMAIL) &&
+                  doc.attrs.status !== "WIP"
+                );
+              });
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits,
+                },
+              );
+            }
+          } else if (facetQuery) {
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()
@@ -189,6 +221,9 @@ export default function (mirageConfig) {
       // Create a project
       this.post("/projects", (schema, request) => {
         let project = schema.projects.create(JSON.parse(request.requestBody));
+        project.update({
+          status: ProjectStatus.Active,
+        });
         return new Response(200, {}, project.attrs);
       });
 
@@ -371,6 +406,7 @@ export default function (mirageConfig) {
             api_version: "v1",
             feature_flags: {
               projects: true,
+              product_colors: true,
             },
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
@@ -540,10 +576,18 @@ export default function (mirageConfig) {
        * Used by the /drafts route's getDraftResults method to fetch
        * a list of facets and draft results.
        */
-      this.get("/drafts", () => {
+      this.get("/drafts", (schema, request) => {
+        const params = request.queryParams;
+        const { facetFilters } = params;
         const allDocs = this.schema.document.all().models;
         const drafts = allDocs.filter((doc) => {
-          return doc.attrs.isDraft;
+          if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+            return (
+              doc.attrs.isDraft && doc.attrs.owners.includes(TEST_USER_EMAIL)
+            );
+          } else {
+            return doc.attrs.isDraft;
+          }
         });
 
         return new Response(

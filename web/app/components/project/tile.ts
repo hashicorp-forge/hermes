@@ -8,11 +8,7 @@ interface ProjectTileComponentSignature {
   };
 }
 
-export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
-  protected get productAreas() {
-    return this.args.project.hermesDocuments?.map((doc) => doc.product).uniq();
-  }
-}
+export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

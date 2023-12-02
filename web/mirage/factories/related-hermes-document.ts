@@ -1,12 +1,8 @@
 import { Factory } from "miragejs";
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
-
-// TODO: Improve how this generates IDs.
-// We should be able to use the `i` argument to generate IDs,
-// but that doesn't work when using `createList` in tests.
+import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
 
 export default Factory.extend({
-  id: 0,
+  id: (i) => `doc-${i}`,
   sortOrder: (i) => i,
   googleFileID() {
     return `${this.id}`;
@@ -18,8 +14,11 @@ export default Factory.extend({
   documentNumber() {
     return `LAB-00${this.id}`;
   },
-  status: "In review",
-  product: "Labs",
   owners: [TEST_USER_EMAIL],
-  ownerPhotos: ["https://placehold.co/100x100"],
+  ownerPhotos: [TEST_USER_PHOTO],
+  product: "Vault",
+  status: "In-Review",
+  summary() {
+    return `Summary for ${this.title}`;
+  },
 });
