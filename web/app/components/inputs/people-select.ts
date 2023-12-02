@@ -3,7 +3,6 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
@@ -28,7 +27,6 @@ const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
   /**

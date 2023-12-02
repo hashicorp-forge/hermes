@@ -5,7 +5,6 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
@@ -14,7 +13,6 @@ interface NewProjectFormComponentSignature {}
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
-  @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
 

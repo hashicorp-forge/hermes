@@ -3,7 +3,6 @@ import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
@@ -39,7 +38,6 @@ interface DocumentSidebarRelatedResourcesComponentSignature {
 }
 
 export default class DocumentSidebarRelatedResourcesComponent extends Component<DocumentSidebarRelatedResourcesComponentSignature> {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare flashMessages: HermesFlashMessagesService;

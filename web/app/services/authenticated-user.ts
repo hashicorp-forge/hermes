@@ -4,7 +4,6 @@ import { inject as service } from "@ember/service";
 import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 
@@ -27,7 +26,6 @@ enum SubscriptionType {
 }
 
 export default class AuthenticatedUserService extends Service {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare store: Store;

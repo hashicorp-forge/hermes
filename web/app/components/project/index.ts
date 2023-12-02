@@ -16,7 +16,6 @@ import {
   projectStatusObjects,
 } from "hermes/types/project-status";
 import { assert } from "@ember/debug";
-import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 
@@ -28,7 +27,6 @@ interface ProjectIndexComponentSignature {
 
 export default class ProjectIndexComponent extends Component<ProjectIndexComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
-  @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   /**

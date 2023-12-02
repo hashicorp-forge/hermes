@@ -2,7 +2,6 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import htmlElement from "hermes/utils/html-element";
 import { schedule } from "@ember/runloop";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument, HermesUser } from "hermes/types/document";
@@ -33,7 +32,6 @@ interface DocumentRouteModel {
 }
 
 export default class AuthenticatedDocumentRoute extends Route {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare recentDocs: RecentlyViewedDocsService;

@@ -3,7 +3,6 @@ import { inject as service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
-import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
@@ -21,7 +20,6 @@ export type RecentlyViewedDoc = {
 };
 
 export default class RecentlyViewedDocsService extends Service {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: any;
 
