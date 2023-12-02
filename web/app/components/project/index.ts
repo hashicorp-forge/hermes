@@ -312,7 +312,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   private getOwnerPhoto = enqueueTask(async (docID: string) => {
     const doc = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
+      .fetch(`/documents/${docID}`)
       .then((response) => response?.json());
 
     const ownerPhoto = doc.ownerPhotos[0];
@@ -338,13 +338,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         const valueToSave = key
           ? { [key]: newValue }
           : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify(valueToSave),
-          },
-        );
+        await this.fetchSvc.fetch(`/projects/${this.args.project.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        });
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
@@ -371,7 +368,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
       try {
         await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
+          `/projects/${this.args.project.id}/related-resources`,
           {
             method: "PUT",
             body: JSON.stringify(this.formattedRelatedResources),

@@ -53,7 +53,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       try {
         return await this.fetchSvc
           .fetch(
-            `/api/${this.configSvc.config.api_version}/drafts?` +
+            `/drafts?` +
               createDraftURLSearchParams({
                 ...options,
                 ownerEmail: this.authenticatedUser.info.email,
