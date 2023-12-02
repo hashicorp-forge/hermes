@@ -33,6 +33,10 @@
 
   &.small {
     @apply h-5 w-5;
+
+    .default-user-icon {
+      @apply scale-[85%];
+    }
   }
 
   &.medium {

@@ -23,13 +23,11 @@
       />
     {{else}}
       <div data-test-fallback class="flex text-body-100">
-        {{#if @email}}
-          <span class="capitalize">
-            {{get-first-letter @email}}
-          </span>
-        {{else}}
-          <FlightIcon @name="user" class="scale-90" />
-        {{/if}}
+        <FlightIcon
+          class="default-user-icon text-color-foreground-faint"
+          @size={{if this.iconIsLarge "24"}}
+          @name="user"
+        />
       </div>
     {{/if}}
   {{/if}}
