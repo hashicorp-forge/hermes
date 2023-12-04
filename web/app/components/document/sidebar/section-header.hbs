@@ -25,7 +25,7 @@
       aria-label={{or @buttonLabel "Add"}}
       disabled={{@buttonIsDisabled}}
       {{(if
-        @disabledButtonTooltipText
+        (and @buttonIsDisabled @disabledButtonTooltipText)
         (modifier "tooltip" @disabledButtonTooltipText class="max-w-[200px]")
       )}}
     >

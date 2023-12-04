@@ -18,6 +18,7 @@
         @items={{this.statuses}}
         @placement="bottom"
         @selected={{this.status}}
+        class="theme--neutral"
       >
         <:anchor as |dd|>
           <dd.ToggleAction
@@ -25,7 +26,8 @@
             class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
             @hasChevron={{true}}
           >
-            <FlightIcon @name={{this.statusIcon}} class="-mr-1" />
+            {{log "dd" dd}}
+            <Project::StatusIcon @status={{dd.selected}} class="-mr-1" />
             <span class="status ml-2">
               {{this.statusLabel}}
             </span>
@@ -43,7 +45,7 @@
             >
               <:default>
                 <div class="flex items-center gap-2 pl-1">
-                  <FlightIcon @name={{dd.attrs.icon}} class="" />
+                  <Project::StatusIcon @status={{dd.value}} />
                   <span class="status">
                     {{dd.attrs.label}}
                   </span>

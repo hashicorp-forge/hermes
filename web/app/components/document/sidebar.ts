@@ -39,6 +39,7 @@ import {
 import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { RelatedHermesDocument } from "../related-resources";
+import { ProjectStatus } from "hermes/types/project-status";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -125,7 +126,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Set by `loadRelatedProjects` and used to render a list
    * of projects or an empty state.
    */
-  @tracked protected projects: Array<
+  @tracked protected _projects: Array<
     HermesProjectInfo | AlgoliaObject<HermesProjectInfo>
   > | null = null;
 
@@ -159,6 +160,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  protected get projects() {
+    const activeProjects = this._projects?.filter((project) => {
+      return project.status === ProjectStatus.Active;
+    });
+
+    const completedProjects = this._projects?.filter((project) => {
+      return project.status === ProjectStatus.Completed;
+    });
+
+    return [...(activeProjects ?? []), ...(completedProjects ?? [])];
+  }
 
   /**
    * Whether the draft is shareable.
@@ -506,11 +519,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // add any new projects to the local list
   }
 
-  @action protected addDocumentToProject(
+  @action private addDocumentToProject(
     project: AlgoliaObject<HermesProjectInfo>,
   ) {
-    this.projects?.unshift(project);
-    this.projects = this.projects;
+    this._projects?.unshift(project);
+    this._projects = this._projects;
   }
 
   @action refreshRoute() {
@@ -562,7 +575,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
     const projects = await Promise.all(projectPromises ?? []);
     console.log(projects);
-    this.projects = projects;
+    this._projects = projects;
   });
 
   /**
@@ -636,13 +649,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   removeProject = task(async (projectId: string) => {
     try {
-      const projectIndex = this.projects?.findIndex(
+      const projectIndex = this._projects?.findIndex(
         (project) => project.id === projectId,
       );
 
       if (projectIndex !== undefined && projectIndex !== -1) {
-        this.projects?.splice(projectIndex, 1);
-        this.projects = this.projects;
+        this._projects?.splice(projectIndex, 1);
+        this._projects = this._projects;
       }
 
       // need to update the project to not have the document
@@ -963,9 +976,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (project: AlgoliaObject<HermesProjectInfo>) => {
       this.addDocumentToProject(project);
 
+      // FIXME: do algoliaObjects never have `id`?
       const projectResources = await this.fetchSvc
         .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
         )
         .then((response) => response?.json());
 
@@ -982,7 +996,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
       await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
         {
           method: "POST",
           body: JSON.stringify({

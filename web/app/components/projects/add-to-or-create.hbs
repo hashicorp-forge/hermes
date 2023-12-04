@@ -17,7 +17,7 @@
         @onItemClick={{this.onSave}}
         @placement={{null}}
         @isLoading={{this.loadInitialData.isRunning}}
-        class="non-floating-list"
+        class="non-floating-list theme-neutral"
       >
         <:anchor as |dd|>
           <div class="relative mb-4" {{did-insert dd.registerAnchor}}>
@@ -44,6 +44,7 @@
           </div>
         </:anchor>
         <:item as |dd|>
+          {{log "D D D" dd}}
           <dd.Action class="block">
             <div class="flex w-full gap-3.5">
               <FlightIcon

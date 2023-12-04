@@ -185,9 +185,14 @@ module.exports = {
 
         // Non-Semantic Color
         "color-palette-blue-200": "var(--token-color-palette-blue-200)",
+        "color-palette-green-100": "var(--token-color-palette-green-100)",
         "color-palette-green-200": "var(--token-color-palette-green-200)",
+        "color-palette-green-300": "var(--token-color-palette-green-300)",
         "color-palette-purple-100": "var(--token-color-palette-purple-100)",
         "color-palette-purple-200": "var(--token-color-palette-purple-200)",
+        "color-palette-amber-100": "var(--token-color-palette-amber-100)",
+        "color-palette-amber-200": "var(--token-color-palette-amber-200)",
+        "color-palette-amber-300": "var(--token-color-palette-amber-300)",
       },
     },
   },

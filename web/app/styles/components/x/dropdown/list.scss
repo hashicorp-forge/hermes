@@ -7,13 +7,20 @@
 
   &.non-floating-list {
     @apply relative w-full max-w-none;
+  }
 
+  &.theme--neutral {
     .x-dropdown-list-item-link {
       @apply text-inherit;
 
+      &:not(.is-aria-selected) {
+        .check {
+          @apply text-inherit;
+        }
+      }
+
       &.is-aria-selected {
         @apply bg-color-surface-interactive-hover;
-
         .flight-icon {
           @apply text-inherit;
         }

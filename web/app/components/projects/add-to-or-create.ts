@@ -105,13 +105,14 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
           '" AND NOT objectID:"',
         )}")`;
       }
-
+      // this doesn't return `products` in the payload
       await this.algolia.searchIndex
         .perform(
           this.configSvc.config.algolia_projects_index_name,
           this.query,
           {
             filters,
+            // FIXME: doesn't seem to be ranking these higher
             optionalFilters: `status:"${ProjectStatus.Active}"`,
           },
         )
