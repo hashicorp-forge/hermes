@@ -64,14 +64,11 @@
                     </span>
                   {{/if}}
                 </div>
-                {{#if dd.attrs.hermesDocuments}}
+                {{#if dd.attrs.products}}
                   <div
                     class="flex gap-2 text-body-100 text-color-foreground-faint"
                   >
-                    {{#each
-                      (get-products-from-docs dd.attrs.hermesDocuments)
-                      as |product|
-                    }}
+                    {{#each dd.attrs.products as |product|}}
                       <div>
                         {{product}}
                       </div>

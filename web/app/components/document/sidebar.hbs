@@ -19,7 +19,7 @@
       {{#if productIcon}}
         <Product::Avatar
           @product={{this.product}}
-          class="rounded-l-none {{if this.saveIsRunning 'opacity-50'}}"
+          class="product-icon-badge {{if this.saveIsRunning 'opacity-50'}}"
         />
       {{/if}}
     {{/let}}
@@ -239,8 +239,9 @@
             @title="Projects"
             @badgeText="New"
             @buttonAction={{this.showProjectsModal}}
+            @buttonIsDisabled={{this.isDraft}}
+            @disabledButtonTooltipText="Only published docs can be added to projects."
           />
-          {{! TODO: shouldn't work on drafts }}
           {{#if this.projects.length}}
             <ol class="related-resources-list mt-1 space-y-0.5">
               {{#each this.projects as |project|}}
@@ -256,7 +257,7 @@
                       >
                         <FlightIcon
                           @name={{get-project-status-icon project.status}}
-                          class=""
+                          class="text-color-foreground-faint"
                         />
                       </div>
                       <div class="overflow-hidden">
@@ -266,12 +267,20 @@
                         >
                           {{project.title}}
                         </TruncatedText>
-                        {{#if project.products}}
-                          {{#each project.products as |product|}}
-                            {{product}}
-                          {{/each}}
+                        {{!-- {{#if project.products}}
+                            <ol class="flex gap-px">
+                              {{#each project.products as |product|}}
+                                <li>
+                                  {{#if this.flags.productColors}}
+                                    <Product::Avatar @product={{product}} />
+                                  {{else}}
+                                    {{product}}
+                                  {{/if}}
+                                </li>
+                              {{/each}}
 
-                        {{/if}}
+                            </ol>
+                          {{/if}} --}}
                       </div>
                     </LinkTo>
 
@@ -290,12 +299,11 @@
             </ol>
           {{else}}
             <Document::Sidebar::EmptyStateAddButton
+              @isReadOnly={{this.isDraft}}
               @action={{this.showProjectsModal}}
             />
           {{/if}}
-
         </div>
-
       {{/if}}
 
       {{! Custom fields }}
