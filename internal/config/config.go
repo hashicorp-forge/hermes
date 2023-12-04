@@ -38,6 +38,9 @@ type Config struct {
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
 
+	// Jira is the configuration for Hermes to work with Jira.
+	Jira *Jira `hcl:"jira,block"`
+
 	// LogFormat configures the logging format. Supported values are "standard" or
 	// "json".
 	LogFormat string `hcl:"log_format,optional"`
@@ -230,6 +233,21 @@ type GoogleWorkspaceOAuth2 struct {
 	// RedirectURI is an authorized redirect URI for the given client_id as
 	// specified in the Google API Console Credentials page.
 	RedirectURI string `hcl:"redirect_uri,optional"`
+}
+
+// Jira is the configuration for Hermes to work with Jira.
+type Jira struct {
+	// APIToken is the API token for authenticating to Jira.
+	APIToken string `hcl:"api_token,optional"`
+
+	// Enabled enables integration with Jira.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// URL is the URL of the Jira instance (ex: https://your-domain.atlassian.net).
+	URL string `hcl:"url,optional"`
+
+	// User is the user for authenticating to Jira.
+	User string `hcl:"user,optional"`
 }
 
 // Postgres configures PostgreSQL as the app database.
