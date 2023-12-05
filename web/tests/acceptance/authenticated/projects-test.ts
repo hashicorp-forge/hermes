@@ -56,7 +56,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     let expectedTitles: string[] = [];
     let expectedDescriptions: string[] = [];
-    let expectedProducts: string[] = [];
+    let expectedProductCount = 0;
     let expectedKeys: string[] = [];
     let expectedJiraTypes: string[] = [];
 
@@ -75,7 +75,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
         }
 
         if (project.products) {
-          expectedProducts.push(...project.products);
+          expectedProductCount += project.products.length;
         }
       });
 
@@ -87,9 +87,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
       (e) => e.textContent?.trim(),
     );
 
-    const renderedProducts = findAll(PROJECT_PRODUCT).map(
-      (e) => e.textContent?.trim(),
-    );
+    const renderedProductsCount = findAll(PROJECT_PRODUCT).length;
 
     const renderedKeys = findAll(PROJECT_JIRA_KEY).map(
       (e) => e.textContent?.trim(),
@@ -101,7 +99,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     assert.deepEqual(renderedTitles, expectedTitles);
     assert.deepEqual(renderedDescriptions, expectedDescriptions);
-    assert.deepEqual(renderedProducts, expectedProducts);
+    assert.deepEqual(renderedProductsCount, expectedProductCount);
     assert.deepEqual(renderedKeys, expectedKeys);
     assert.deepEqual(renderedJiraTypes, expectedJiraTypes);
   });

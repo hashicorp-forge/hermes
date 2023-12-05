@@ -7,13 +7,15 @@ import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
+import { setFeatureFlag } from "hermes/utils/mirage-utils";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const PROJECT_TITLE = "[data-test-title]";
 const PROJECT_DESCRIPTION = "[data-test-description]";
-const PROJECT_PRODUCT = "[data-test-product]";
 const PROJECT_JIRA_TYPE = "[data-test-jira-type]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
-
+const PRODUCT = "[data-test-product]";
+const PRODUCT_AVATAR = "[data-test-product-avatar]";
 interface ProjectTileComponentTestContext extends MirageTestContext {
   project: HermesProject;
   jiraStatus: string;
@@ -62,15 +64,15 @@ module("Integration | Component | project/tile", function (hooks) {
     });
 
     this.project = this.server.schema.projects.first();
+    await setupProductIndex(this);
   });
 
-  test("it renders as expected (complete model)", async function (this: ProjectTileComponentTestContext, assert) {
+  test("it renders the title and description", async function (this: ProjectTileComponentTestContext, assert) {
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { title, description, hermesDocuments, jiraIssue, products } =
-      this.project;
+    const { title, description } = this.project;
 
     assert.dom(PROJECT_TITLE).hasText(title);
 
@@ -78,41 +80,52 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.dom(PROJECT_DESCRIPTION).hasText(description);
 
-    assert.deepEqual(
-      findAll(PROJECT_PRODUCT).map((el) => el.textContent?.trim()),
-      products,
-    );
+    this.set("project.description", null);
+
+    assert.dom(PROJECT_DESCRIPTION).doesNotExist();
+  });
+
+  test("it renders the jira issue if present", async function (this: ProjectTileComponentTestContext, assert) {
+    await render<ProjectTileComponentTestContext>(hbs`
+      <Project::Tile @project={{this.project}} />
+    `);
+
+    const { jiraIssue } = this.project;
 
     emberAssert("jiraIssue must exist", jiraIssue);
 
     const { key, type } = jiraIssue;
 
-    emberAssert("jiraIssue type must exist", type);
-
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
     assert.dom(PROJECT_JIRA_TYPE).hasText(type);
+
+    this.set("project.jiraIssue", null);
+
+    assert.dom(PROJECT_JIRA_KEY).doesNotExist();
+    assert.dom(PROJECT_JIRA_TYPE).doesNotExist();
   });
 
-  test("it renders as expected (incomplete model)", async function (this: ProjectTileComponentTestContext, assert) {
-    const project = this.server.schema.projects.first();
+  test("it renders product avatars if the project has documents", async function (this: ProjectTileComponentTestContext, assert) {
+    await render<ProjectTileComponentTestContext>(hbs`
+      <Project::Tile @project={{this.project}} />
+    `);
 
-    project.update({
-      description: null,
-      hermesDocuments: null,
-      jiraIssue: null,
-      products: null,
-    });
+    assert.dom(PRODUCT_AVATAR).exists({ count: 1 });
 
-    this.set("project", project);
+    this.set("project.products", ["Vault", "Hermes"]);
+
+    assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
+  });
+
+  test("it renders products in text if the productColors flag is disabled", async function (this: ProjectTileComponentTestContext, assert) {
+    setFeatureFlag(this, "product_colors", false);
 
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
 
-    assert.dom(PROJECT_DESCRIPTION).doesNotExist();
-    assert.dom(PROJECT_PRODUCT).doesNotExist();
-    assert.dom(PROJECT_JIRA_KEY).doesNotExist();
-    assert.dom(PROJECT_JIRA_TYPE).doesNotExist();
+    assert.dom(PRODUCT).exists({ count: 1 });
+    assert.dom(PRODUCT_AVATAR).doesNotExist();
   });
 
   test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
