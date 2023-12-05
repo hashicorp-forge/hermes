@@ -33,78 +33,7 @@
                 @model={{doc.objectID}}
                 @query={{hash draft=doc.isDraft}}
               >
-                <div
-                  class="main-inner flex justify-between gap-[18px] pt-5 pb-6"
-                >
-                  <Person::Avatar
-                    @size="large"
-                    @email="{{get doc.owners 0}}"
-                    @imgURL={{get doc.ownerPhotos 0}}
-                    class="-mt-1 shrink-0"
-                  />
-                  <div class="w-full">
-                    <div class="relative z-10 mt-0.5 overflow-hidden">
-                      <h3>
-                        {{! Title }}
-                        <span data-test-document-title class="mr-1.5">
-                          {{doc.title}}
-                        </span>
-
-                        {{! Doc Number }}
-                        <span
-                          data-test-document-number
-                          class="shrink-0 font-regular"
-                        >
-                          <span class="whitespace-nowrap">
-                            {{doc.docNumber}}
-                          </span>
-                        </span>
-                      </h3>
-                    </div>
-                    <div
-                      class="mt-1.5 flex gap-[5px] text-color-foreground-faint"
-                    >
-                      {{! Owner }}
-                      {{get doc.owners 0}}
-                      <span class="vertical-line">
-                        |
-                      </span>
-                      {{! Product }}
-                      {{doc.product}}
-                      <span class="vertical-line">
-                        |
-                      </span>
-                      {{! Created Time }}
-                      {{time-ago doc.createdTime}}
-                    </div>
-
-                    {{#if doc.summary}}
-                      <p class="mt-2.5 max-w-xl text-body-300">
-                        {{doc.summary}}
-                      </p>
-                    {{/if}}
-
-                    <div class="tags mt-3.5">
-                      {{! Status }}
-                      <Doc::State
-                        @state={{doc.status}}
-                        @hideProgress={{true}}
-                        class="interactive"
-                      />
-                      {{! Doc Type }}
-                      <Hds::Badge @text={{doc.docType}} />
-                    </div>
-
-                  </div>
-                  <div class="relative ml-4 shrink-0">
-                    <Doc::Thumbnail
-                      @status={{doc.status}}
-                      @product={{doc.product}}
-                      @size="medium"
-                      class="self-start"
-                    />
-                  </div>
-                </div>
+                <Doc::TileMedium @doc={{doc}} />
               </LinkTo>
             </li>
           {{/each}}
