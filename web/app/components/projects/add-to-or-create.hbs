@@ -16,7 +16,7 @@
         @disableClose={{true}}
         @onItemClick={{this.onSave}}
         @placement={{null}}
-        @isLoading={{this.loadInitialData.isRunning}}
+        @isLoading={{this.loadProjects.isRunning}}
         class="non-floating-list theme-neutral"
       >
         <:anchor as |dd|>
@@ -25,7 +25,7 @@
               autofocus
               @type="search"
               @value={{this.query}}
-              {{did-insert (perform this.loadInitialData dd)}}
+              {{did-insert (perform this.loadProjects dd)}}
               {{on "input" this.updateInputValue}}
               placeholder="Search projects"
               aria-label="Search projects"
@@ -33,7 +33,7 @@
               aria-expanded={{dd.contentIsShown}}
               aria-haspopup="listbox"
             />
-            {{#if this.searchProjects.isRunning}}
+            {{#if this.loadProjects.isRunning}}
               <div
                 data-test-search-loading-icon
                 class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"

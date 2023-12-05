@@ -35,10 +35,26 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
-  @tracked private projectResults: HermesProject[] = [];
+  @tracked private projectResults: HermesProject[] | null = null;
 
+  protected get shownProjects() {
+    if (!this.projectResults) {
+      return [];
+    }
+
+    return this.projectResults
+      .filter((project: HermesProject) => {
+        return (
+          project.status !== ProjectStatus.Archived &&
+          !this.args.document.projects?.includes(parseInt(project.id)) &&
+          project.title.toLowerCase().includes(this.query.toLowerCase())
+        );
+      })
+      .slice(0, 10);
+  }
+
+  // TODO: explain this
   @action protected maybeClose() {
-    // TODO: this should be explained
     if (!this.newProjectFormIsShown) {
       this.args.onClose();
     }
@@ -59,8 +75,6 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @action protected updateInputValue(event: Event) {
     // this may need to be eventOrValue?
     this.query = (event.target as HTMLInputElement).value;
-
-    void this.searchProjects.perform();
   }
 
   /**
@@ -77,35 +91,12 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   }
 
   /**
-   * The action run when the component is inserted.
-   * Saves the dropdown API and runs the initial search.
+   * TODO: explain this
    */
-  protected loadInitialData = task(async (dd: XDropdownListAnchorAPI) => {
+  protected loadProjects = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
-    await this.searchProjects.perform();
-  });
 
-  protected get shownProjects() {
-    return this.projectResults
-      .filter((project: HermesProject) => {
-        return (
-          project.status !== ProjectStatus.Archived &&
-          !this.args.document.projects?.includes(parseInt(project.id))
-        );
-      })
-      .slice(0, 10);
-  }
-
-  /**
-   * The task to search for projects.
-   * Formats and runs an Algolia query to exclude archived projects
-   * and projects already associated with the document.
-   * Sets the `shownProjects` property to the results
-   * and schedules the dropdown to assign menu item IDs.
-   */
-  protected searchProjects = restartableTask(async () => {
     try {
-      // TODO: Make sure this query works
       this.projectResults = await this.fetchSvc
         .fetch(
           `/api/${this.configSvc.config.api_version}/projects?query=${this.query}`,
