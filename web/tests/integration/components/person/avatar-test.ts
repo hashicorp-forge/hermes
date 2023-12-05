@@ -36,25 +36,17 @@ module("Integration | Component | person/avatar", async function (hooks) {
     assert.dom(".default").hasStyle({ height: "20px" });
     assertIconSize("default", "16");
 
-    // assert icon size
-
     assert.dom(".small").hasStyle({ width: "20px" });
     assert.dom(".small").hasStyle({ height: "20px" });
     assertIconSize("small", "16");
-
-    // assert icon size
 
     assert.dom(".medium").hasStyle({ width: "28px" });
     assert.dom(".medium").hasStyle({ height: "28px" });
     assertIconSize("medium", "16");
 
-    // assert icon size
-
     assert.dom(".large").hasStyle({ width: "36px" });
     assert.dom(".large").hasStyle({ height: "36px" });
     assertIconSize("large", "24");
-
-    // assert icon size
 
     assert.dom(".xl").hasStyle({ width: "64px" });
     assert.dom(".xl").hasStyle({ height: "64px" });
