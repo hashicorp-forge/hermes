@@ -26,6 +26,10 @@ type DocumentType struct {
 	// colleagues for their review and feedback."
 	Description string
 
+	// FlightIcon is the name of the Helios flight icon.
+	// From: https://helios.hashicorp.design/icons/library
+	FlightIcon string
+
 	// MoreInfoLinkText is the text for a "more info" link.
 	// Example: "When should I create an RFC?"
 	MoreInfoLinkText string
