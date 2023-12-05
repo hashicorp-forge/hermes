@@ -27,14 +27,8 @@
       {{#if this.latestDocs.index.length}}
         <ol class="mt-5">
           {{#each this.latestDocs.index as |doc|}}
-            <li data-test-latest-doc>
-              <LinkTo
-                @route="authenticated.document"
-                @model={{doc.objectID}}
-                @query={{hash draft=doc.isDraft}}
-              >
-                <Doc::TileMedium @doc={{doc}} />
-              </LinkTo>
+            <li class="group relative" data-test-latest-doc>
+              <Doc::TileMedium @doc={{doc}} />
             </li>
           {{/each}}
         </ol>
