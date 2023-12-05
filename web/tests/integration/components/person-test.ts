@@ -45,23 +45,15 @@ module("Integration | Component | person", function (hooks) {
       .dom(".person .person-email")
       .hasText(this.email)
       .hasAttribute("title", this.email);
-    assert.dom(".person span").doesNotExist();
     assert.dom(".person svg").doesNotExist();
 
     this.set("imgURL", null);
 
     assert.dom(".person img").doesNotExist();
     assert.dom(".person .person-email").hasText(this.email);
-    assert.dom(".person span").hasText("e");
-    assert.dom(".person svg").doesNotExist();
-
-    this.set("email", null);
-
-    assert.dom(".person img").doesNotExist();
-    assert.dom(".person .person-email").hasText("Unknown");
-    assert.dom(".person span").doesNotExist();
     assert.dom(".person svg").exists();
 
+    this.set("email", null);
     this.set("ignoreUnknown", true);
 
     assert.dom(".person").doesNotExist();

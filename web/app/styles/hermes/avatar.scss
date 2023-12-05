@@ -6,7 +6,6 @@
     .product-abbreviation {
       &.letter-count-1 {
         @apply text-[12px] font-semibold;
-        @apply mt-[1px];
       }
 
       &.letter-count-2 {
@@ -33,6 +32,10 @@
 
   &.small {
     @apply h-5 w-5;
+
+    .default-user-icon {
+      @apply scale-[85%];
+    }
   }
 
   &.medium {

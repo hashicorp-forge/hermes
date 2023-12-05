@@ -157,6 +157,21 @@ indexer {
   update_draft_headers = true
 }
 
+// jira is the configuration for Hermes to work with Jira.
+jira {
+  // api_token is the API token for authenticating to Jira.
+  api_token = ""
+
+  // enabled enables integration with Jira.
+  enabled = false
+
+  // url is the URL of the Jira instance (ex: https://your-domain.atlassian.net).
+  url = ""
+
+  // user is the user for authenticating to Jira.
+  user = ""
+}
+
 // okta configures Hermes to authenticate users using an AWS Application Load
 // Balancer and Okta instead of using Google OAuth.
 okta {
