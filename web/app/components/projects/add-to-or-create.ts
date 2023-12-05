@@ -30,15 +30,12 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @service declare algolia: AlgoliaService;
 
   @tracked protected query = "";
-
   @tracked private dd: XDropdownListAnchorAPI | null = null;
-
   @tracked protected newProjectFormIsShown = false;
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
-
-  @tracked protected shownProjects: HermesProject[] = [];
+  @tracked private projectResults: HermesProject[] = [];
 
   @action protected maybeClose() {
     // TODO: this should be explained
@@ -88,6 +85,17 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
     await this.searchProjects.perform();
   });
 
+  protected get shownProjects() {
+    return this.projectResults
+      .filter((project: HermesProject) => {
+        return (
+          project.status !== ProjectStatus.Archived &&
+          !this.args.document.projects?.includes(parseInt(project.id))
+        );
+      })
+      .slice(0, 10);
+  }
+
   /**
    * The task to search for projects.
    * Formats and runs an Algolia query to exclude archived projects
@@ -97,29 +105,13 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    */
   protected searchProjects = restartableTask(async () => {
     try {
-      let filters = `(NOT status:"${ProjectStatus.Archived.toLowerCase()}")`;
-
-      if (this.args.document.projects?.length) {
-        filters = filters.slice(0, -1) + " ";
-        filters += ` AND NOT objectID:"${this.args.document.projects.join(
-          '" AND NOT objectID:"',
-        )}")`;
-      }
-      // this doesn't return `products` in the payload
-      await this.algolia.searchIndex
-        .perform(
-          this.configSvc.config.algolia_projects_index_name,
-          this.query,
-          {
-            filters,
-            // FIXME: doesn't seem to be ranking these higher
-            optionalFilters: `status:"${ProjectStatus.Active}"`,
-          },
+      // TODO: Make sure this query works
+      this.projectResults = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects?query=${this.query}`,
         )
-        .then((response) => {
-          // TODO: do we want to trim to 4 or let the user scroll?
-          this.shownProjects = response.hits as unknown as HermesProject[];
-        });
+        .then((response) => response?.json());
+
       next(() => {
         this.dd?.scheduleAssignMenuItemIDs();
       });
