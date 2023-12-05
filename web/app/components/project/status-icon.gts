@@ -32,7 +32,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
       case ProjectStatus.Archived:
         return "text-color-palette-neutral-500";
       case ProjectStatus.Completed:
-        return "text-color-palette-green-300";
+        return "text-color-palette-green-400";
     }
   }
 

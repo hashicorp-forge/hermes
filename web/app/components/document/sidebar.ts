@@ -519,9 +519,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     // add any new projects to the local list
   }
 
-  @action private addDocumentToProject(
-    project: AlgoliaObject<HermesProjectInfo>,
-  ) {
+  @action private addDocumentToProject(project: HermesProjectInfo) {
     this._projects?.unshift(project);
     this._projects = this._projects;
   }
@@ -973,13 +971,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   protected saveProjectRelatedResources = task(
-    async (project: AlgoliaObject<HermesProjectInfo>) => {
+    async (project: HermesProjectInfo) => {
       this.addDocumentToProject(project);
 
       // FIXME: do algoliaObjects never have `id`?
       const projectResources = await this.fetchSvc
         .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
         )
         .then((response) => response?.json());
 
@@ -995,8 +993,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
+      debugger;
+
       await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.objectID}/related-resources`,
+        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
         {
           method: "POST",
           body: JSON.stringify({
