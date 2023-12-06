@@ -4,13 +4,8 @@
 >
   <LinkTo
     data-test-subscription-list-item-link
-    @route="authenticated.documents"
-    @query={{hash
-      product=(array @productArea)
-      status=(array)
-      docType=(array)
-      owners=(array)
-    }}
+    @route="authenticated.product-areas.product-area"
+    @model={{dasherize @productArea}}
     class="flex items-center gap-3"
   >
     <Product::Avatar @product={{@productArea}} @size="small" />
