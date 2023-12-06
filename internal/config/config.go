@@ -100,6 +100,10 @@ type DocumentType struct {
 	//   colleagues for their review and feedback."
 	Description string `hcl:"description,optional" json:"description"`
 
+	// FlightIcon is the name of the Helios flight icon.
+	// From: https://helios.hashicorp.design/icons/library
+	FlightIcon string `hcl:"flight_icon,optional" json:"flightIcon"`
+
 	// Template is the Google file ID for the document template used for this
 	// document type.
 	Template string `hcl:"template"`

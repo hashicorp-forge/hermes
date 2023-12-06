@@ -2,6 +2,7 @@ module.exports = {
   content: ["./app/**/*.{html,js,hbs,gts}"],
   theme: {
     fontSize: {
+      "display-600": ["45px", "55px"],
       "display-500": [
         "var(--token-typography-display-500-font-size)",
         "var(--token-typography-display-500-line-height)",

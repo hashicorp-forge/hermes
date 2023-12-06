@@ -188,7 +188,10 @@ func ProjectsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			srv.Logger.Info("created project", logArgs...)
+			srv.Logger.Info("created project",
+				append([]interface{}{
+					"user", userEmail,
+				}, logArgs...)...)
 
 			// Request post-processing.
 			go func() {
@@ -408,7 +411,19 @@ func ProjectHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				srv.Logger.Info("updated project", logArgs...)
+				// Log success.
+				reqJSON, err := json.Marshal(req)
+				if err != nil {
+					srv.Logger.Warn("error marshaling request to JSON",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...)
+				}
+				srv.Logger.Info("updated project",
+					append([]interface{}{
+						"request", string(reqJSON),
+						"user", userEmail,
+					}, logArgs...)...)
 
 				// Request post-processing.
 				go func() {
