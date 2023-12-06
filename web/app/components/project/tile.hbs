@@ -28,11 +28,7 @@
         <ul class="flex gap-px">
           {{#each @project.products as |product|}}
             <li class="flex items-center" data-test-product>
-              {{#if this.productColorsAreEnabled}}
-                <Product::Avatar @product={{product}} />
-              {{else}}
-                {{product}}
-              {{/if}}
+              <Product::Avatar @product={{product}} />
             </li>
           {{/each}}
         </ul>
