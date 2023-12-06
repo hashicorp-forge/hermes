@@ -1,15 +1,12 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import DocumentTypesService from "hermes/services/document-types";
 import FlagsService from "hermes/services/flags";
-import { HermesDocumentType } from "hermes/types/document-type";
 
-interface NewDocumentTemplateListComponentSignature {
-  Args: {
-    docTypes: HermesDocumentType[];
-  };
-}
+interface NewDocumentTemplateListComponentSignature {}
 
 export default class NewDocumentTemplateListComponent extends Component<NewDocumentTemplateListComponentSignature> {
+  @service declare documentTypes: DocumentTypesService;
   /**
    * Used in the template to decide whether to show
    * the "Start a project" button.
@@ -17,7 +14,11 @@ export default class NewDocumentTemplateListComponent extends Component<NewDocum
   @service declare flags: FlagsService;
 
   protected get moreInfoLinksAreShown(): boolean {
-    return this.args.docTypes.some((docType) => docType.moreInfoLink);
+    return !!this.documentTypes.index?.some((docType) => docType.moreInfoLink);
+  }
+
+  protected get docTypes() {
+    return this.documentTypes.index;
   }
 }
 

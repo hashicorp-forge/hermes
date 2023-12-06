@@ -450,6 +450,7 @@ export default function (mirageConfig) {
                 text: "More-info link",
                 url: "example.com",
               },
+              flightIcon: "discussion-circle",
             },
             {
               name: "PRD",
@@ -458,14 +459,15 @@ export default function (mirageConfig) {
                 "Summarize a problem statement and outline a phased approach to addressing it.",
             },
           ]);
+        } else {
+          return new Response(
+            200,
+            {},
+            this.schema.documentTypes
+              .all()
+              .models.map((docType) => docType.attrs),
+          );
         }
-        return new Response(
-          200,
-          {},
-          this.schema.documentTypes.all().models.map((docType) => {
-            return docType.attrs;
-          }),
-        );
       });
 
       /**
