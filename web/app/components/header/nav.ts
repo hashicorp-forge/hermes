@@ -12,6 +12,7 @@ import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
 import FlagsService from "hermes/services/flags";
+import { ProjectStatus } from "hermes/types/project-status";
 
 interface UserNavItem {
   label: string;
@@ -89,6 +90,10 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
     return defaultItems;
   }
+
+  protected defaultProjectsScreenQueryParams = {
+    status: ProjectStatus.Active,
+  };
 
   /**
    * The default query params for the browse screens.

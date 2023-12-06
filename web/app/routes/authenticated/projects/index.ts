@@ -1,6 +1,5 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AuthenticatedProjectsController from "hermes/controllers/authenticated/projects";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -8,8 +7,6 @@ import { ProjectStatus } from "hermes/types/project-status";
 export default class AuthenticatedProjectsIndexRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
-
-  declare controller: AuthenticatedProjectsController;
 
   // Have the model react to param changes
   queryParams = {
