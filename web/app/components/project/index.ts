@@ -78,14 +78,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * The icon for the status dropdown.
-   * Represents the current status of the project.
-   */
-  protected get statusIcon() {
-    return this.statuses[this.status].icon;
-  }
-
-  /**
    * The URL of the project. Used by the CopyURLButton.
    */
   protected get url() {
