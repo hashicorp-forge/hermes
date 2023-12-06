@@ -391,7 +391,7 @@ func (doc *Document) ReplaceHeader(
 
 	// Title cell.
 	pos = int(startIndex) + 3
-	titleText := fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title)
+	titleText := fmt.Sprintf("[%s] %s: %s", doc.DocType, doc.DocNumber, doc.Title)
 	reqs = append(reqs,
 		[]*docs.Request{
 			{

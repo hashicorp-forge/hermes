@@ -43,13 +43,12 @@ module(
 
       assert.dom(LIST_ITEM).exists();
       assert.dom(ICON).exists("it shows the product icon if there is one");
-
       assert
         .dom(NAME)
         .hasText("Waypoint")
         .hasAttribute(
           "href",
-          "/documents?product=%5B%22Waypoint%22%5D",
+          "/product-areas/waypoint",
           "the name is clickable to the product filter screen",
         );
 

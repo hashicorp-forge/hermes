@@ -69,7 +69,7 @@
 {{! Title }}
 <div class="mt-7 flex">
   <EditableField
-    class="project-title"
+    class="project-title text-display-600"
     data-test-project-title
     @value={{this.title}}
     @tag="h1"
@@ -186,7 +186,7 @@
     <Action
       data-test-add-jira-button
       {{on "click" this.addJiraIssue}}
-      class="text-body-100 text-color-foreground-disabled underline decoration-color-palette-neutral-200 underline-offset-[3px]"
+      class="underlined-link text-body-100 text-color-foreground-disabled decoration-color-palette-neutral-200"
     >
       + Add Jira issue...
     </Action>

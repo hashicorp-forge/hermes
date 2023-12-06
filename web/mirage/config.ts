@@ -4,6 +4,7 @@ import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
+import { HITS_PER_PAGE } from "hermes/services/algolia";
 
 // @ts-ignore - Mirage not detecting file
 import config from "../config/environment";
@@ -160,12 +161,19 @@ export default function (mirageConfig) {
               const requestIsForDocsAwaitingReview =
                 filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
                 requestBody.filters.includes("AND status:In-Review");
+              const requestIsForProductDocs = filters.includes(`product:`);
+
               if (requestIsForDocsAwaitingReview) {
                 docMatches = schema.document.all().models.filter((doc) => {
                   return (
                     doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
                   );
+                });
+              } else if (requestIsForProductDocs) {
+                const product = filters.split("product:")[1].split('"')[1];
+                docMatches = schema.document.all().models.filter((doc) => {
+                  return doc.attrs.product === product;
                 });
               } else {
                 setDefaultDocMatches();
@@ -180,7 +188,14 @@ export default function (mirageConfig) {
               });
             }
 
-            return new Response(200, {}, { hits: docMatches });
+            return new Response(
+              200,
+              {},
+              {
+                hits: docMatches.slice(0, HITS_PER_PAGE),
+                nbHits: docMatches.length,
+              },
+            );
           } else {
             /**
              * A request we're not currently handling with any specificity.
@@ -189,7 +204,10 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models },
+              {
+                hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
+                nbHits: schema.document.all().models.length,
+              },
             );
           }
         } else {
@@ -463,6 +481,7 @@ export default function (mirageConfig) {
                 text: "More-info link",
                 url: "example.com",
               },
+              flightIcon: "discussion-circle",
             },
             {
               name: "PRD",
@@ -471,14 +490,15 @@ export default function (mirageConfig) {
                 "Summarize a problem statement and outline a phased approach to addressing it.",
             },
           ]);
+        } else {
+          return new Response(
+            200,
+            {},
+            this.schema.documentTypes
+              .all()
+              .models.map((docType) => docType.attrs),
+          );
         }
-        return new Response(
-          200,
-          {},
-          this.schema.documentTypes.all().models.map((docType) => {
-            return docType.attrs;
-          }),
-        );
       });
 
       /**

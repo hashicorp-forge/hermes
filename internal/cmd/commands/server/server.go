@@ -495,6 +495,7 @@ func registerDocumentTypes(cfg config.Config, db *gorm.DB) error {
 			Name:         d.Name,
 			LongName:     d.LongName,
 			Description:  d.Description,
+			FlightIcon:   d.FlightIcon,
 			Checks:       checksJSON,
 			CustomFields: cfs,
 		}
