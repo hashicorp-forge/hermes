@@ -16,6 +16,10 @@ export default class NewDocumentTemplateListComponent extends Component<NewDocum
   protected get moreInfoLinksAreShown(): boolean {
     return !!this.documentTypes.index?.some((docType) => docType.moreInfoLink);
   }
+
+  protected get docTypes() {
+    return this.documentTypes.index;
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
