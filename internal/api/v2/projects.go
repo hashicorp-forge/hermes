@@ -70,9 +70,28 @@ func ProjectsHandler(srv server.Server) http.Handler {
 		case "GET":
 			logArgs = append(logArgs, "method", r.Method)
 
+			// Get query parameters.
+			q := r.URL.Query()
+			statusParam := q.Get("status")
+
+			// Build status condition for database query.
+			var cond models.Project
+			if statusParam != "" {
+				if statusFilter, ok := models.ParseProjectStatusString(
+					statusParam,
+				); ok {
+					cond = models.Project{
+						Status: statusFilter,
+					}
+				} else {
+					http.Error(w, "Invalid status", http.StatusUnprocessableEntity)
+					return
+				}
+			}
+
 			// Get all projects from database.
 			projs := []models.Project{}
-			if err := srv.DB.Find(&projs).Error; err != nil &&
+			if err := srv.DB.Find(&projs, cond).Error; err != nil &&
 				!errors.Is(err, gorm.ErrRecordNotFound) {
 				srv.Logger.Error("error getting projects",
 					append([]interface{}{
