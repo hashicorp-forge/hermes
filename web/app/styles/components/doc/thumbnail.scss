@@ -36,13 +36,6 @@
     }
   }
 
-  &.medium,
-  &.large {
-    .flight-icon {
-      @apply scale-100;
-    }
-  }
-
   &.medium {
     @apply w-[72px];
 

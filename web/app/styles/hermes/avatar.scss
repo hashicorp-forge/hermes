@@ -59,18 +59,6 @@
   }
 }
 
-.overlapping-avatar {
-  @apply outline outline-2 outline-color-page-primary;
-}
-a {
-  &:hover,
-  &:focus {
-    .overlapping-avatar {
-      @apply outline-color-page-primary;
-    }
-  }
-}
-
 .product-abbreviation {
   @apply flex font-medium leading-none tracking-tighter;
 }
