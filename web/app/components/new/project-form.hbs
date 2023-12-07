@@ -7,6 +7,7 @@
   @taskIsRunningDescription="This shouldn't take long."
   @buttonText="Create project"
   @buttonIsActive={{gt this.title.length 0}}
+  @isModal={{@isModal}}
   {{on "submit" this.maybeSubmitForm}}
 >
   <Hds::Form::Textarea::Field
@@ -42,5 +43,11 @@
   </Hds::Form::Textarea::Field>
 
   {{! TODO: Add Jira integration }}
+
+  {{#unless @isModal}}
+    <Action disabled>
+      + Add Jira link
+    </Action>
+  {{/unless}}
 
 </New::Form>
