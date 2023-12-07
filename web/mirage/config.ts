@@ -434,7 +434,6 @@ export default function (mirageConfig) {
             algolia_internal_index_name: config.algolia.internalIndexName,
             feature_flags: {
               projects: true,
-              product_colors: true,
             },
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,

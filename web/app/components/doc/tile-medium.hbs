@@ -32,6 +32,7 @@
         <LinkTo
           data-test-document-link
           @route="authenticated.document"
+          @query={{hash draft=this.docIsDraft}}
           @model={{this.docID}}
         >
           {{! Primary click area }}

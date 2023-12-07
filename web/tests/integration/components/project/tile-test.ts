@@ -117,17 +117,6 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
   });
 
-  test("it renders products in text if the productColors flag is disabled", async function (this: ProjectTileComponentTestContext, assert) {
-    setFeatureFlag(this, "product_colors", false);
-
-    await render<ProjectTileComponentTestContext>(hbs`
-      <Project::Tile @project={{this.project}} />
-    `);
-
-    assert.dom(PRODUCT).exists({ count: 1 });
-    assert.dom(PRODUCT_AVATAR).doesNotExist();
-  });
-
   test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
