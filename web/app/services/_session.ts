@@ -73,7 +73,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * Kicked off by the Authenticated route.
    */
   pollForExpiredAuth = keepLatestTask(async () => {
-    await simpleTimeout(Ember.testing ? 250 : 10000);
+    await simpleTimeout(Ember.testing ? 100 : 10000);
 
     // Make a HEAD request to the back end.
     // On 401, the fetch service will set `this.pollResponseIs401` true.
