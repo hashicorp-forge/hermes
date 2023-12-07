@@ -9,37 +9,12 @@
   @buttonIsActive={{gt this.title.length 0}}
   {{on "submit" this.maybeSubmitForm}}
 >
-  <Hds::Form::Textarea::Field
-    {{on "keydown" this.onKeydown}}
-    {{auto-height-textarea}}
-    {{autofocus}}
-    data-test-title
-    @value={{this.title}}
-    name="title"
-    placeholder="Enter a project title"
-    as |F|
-  >
-    <F.Label @isRequired={{true}}>
-      Title
-    </F.Label>
-    {{#if this.titleErrorIsShown}}
-      <F.Error data-test-title-error>
-        Title is required.
-      </F.Error>
-    {{/if}}
-  </Hds::Form::Textarea::Field>
-
-  <Hds::Form::Textarea::Field
-    data-test-description
-    {{on "keydown" this.onKeydown}}
-    @value={{this.description}}
-    rows="2"
-    placeholder="A short summary of your project"
-    name="description"
-    as |F|
-  >
-    <F.Label>Description</F.Label>
-  </Hds::Form::Textarea::Field>
+  <New::ProjectForm::TitleAndDescription
+    @title={{this.title}}
+    @titleErrorIsShown={{this.titleErrorIsShown}}
+    @description={{this.description}}
+    @onKeydown={{this.onKeydown}}
+  />
 
   {{! TODO: Add Jira integration }}
 
