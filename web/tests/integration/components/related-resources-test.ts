@@ -652,7 +652,7 @@ module("Integration | Component | related-resources", function (hooks) {
   });
 
   test("a non-404 getAlgoliaObject call is handled", async function (this: RelatedResourcesComponentTestContext, assert) {
-    algoliaHosts.documentHosts.forEach((host) => {
+    algoliaHosts.forEach((host) => {
       this.server.get(host, () => {
         return new Response(500, {}, {});
       });
@@ -693,7 +693,7 @@ module("Integration | Component | related-resources", function (hooks) {
   test("it shows an error when searching fails", async function (this: RelatedResourcesComponentTestContext, assert) {
     this.server.createList("document", 3);
 
-    algoliaHosts.documentHosts.forEach((host) => {
+    algoliaHosts.forEach((host) => {
       this.server.post(host, () => {
         return new Response(500, {}, {});
       });

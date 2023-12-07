@@ -32,27 +32,6 @@ export default function (mirageConfig) {
        * Algolia requests
        *
        *************************************************************************/
-      /**
-       *
-       */
-      const handleAlgoliaProjectsRequest = (schema, request) => {
-        const requestBody = JSON.parse(request.requestBody);
-        const { query } = requestBody;
-        const projects = schema.projects.all().models;
-
-        if (query === "") {
-          return new Response(200, {}, { hits: projects });
-        }
-
-        // Name filtering as a simplified Algolia simulation
-        let filteredProjects = projects.filter((project) => {
-          return project.attrs.title
-            .toLowerCase()
-            .includes(query.toLowerCase());
-        });
-
-        return new Response(200, {}, { hits: filteredProjects });
-      };
 
       /**
        * A triage function for all Algolia requests.
@@ -240,23 +219,13 @@ export default function (mirageConfig) {
        * Additionally, we support the remaining Algolia routes.
        */
 
-      algoliaHosts.documentHosts.forEach((host) => {
+      algoliaHosts.forEach((host) => {
         this.post(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
         });
 
         this.get(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
-        });
-      });
-
-      algoliaHosts.projectHosts.forEach((host) => {
-        this.post(host, (schema, request) => {
-          return handleAlgoliaProjectsRequest(schema, request);
-        });
-
-        this.get(host, (schema, request) => {
-          return handleAlgoliaProjectsRequest(schema, request);
         });
       });
 
@@ -450,7 +419,6 @@ export default function (mirageConfig) {
             algolia_docs_index_name: config.algolia.docsIndexName,
             algolia_drafts_index_name: config.algolia.draftsIndexName,
             algolia_internal_index_name: config.algolia.internalIndexName,
-            algolia_projects_index_name: config.algolia.projectsIndexName,
             feature_flags: {
               projects: true,
             },
