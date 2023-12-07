@@ -255,7 +255,10 @@
                       <div
                         class="flex w-[18px] shrink-0 justify-center py-[2px]"
                       >
-                        <Project::StatusIcon @status={{project.status}} />
+                        <FlightIcon
+                          @name={{get-project-status-icon project.status}}
+                        />
+
                       </div>
                       <div class="overflow-hidden">
                         <TruncatedText

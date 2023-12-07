@@ -44,10 +44,9 @@
           </div>
         </:anchor>
         <:item as |dd|>
-          {{log "D D D" dd}}
           <dd.Action class="block">
             <div class="flex w-full items-center gap-3.5">
-              <Project::StatusIcon @status={{dd.attrs.status}} />
+              <FlightIcon @name={{get-project-status-icon dd.attrs.status}} />
               <div class="flex w-full overflow-hidden">
                 <div class="flex w-full justify-between">
                   <div
@@ -63,7 +62,6 @@
                 </div>
                 {{#if dd.attrs.products}}
                   <div class="flex gap-px">
-                    {{! TODO: do we care about a productColors fallback? }}
                     {{#each dd.attrs.products as |product|}}
                       <div>
                         <Product::Avatar @product={{product}} />
