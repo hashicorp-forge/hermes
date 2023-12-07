@@ -9,6 +9,7 @@
         data-test-nav-link="projects"
         @route="authenticated.projects"
         @current-when="authenticated.projects"
+        @query={{this.defaultProjectsScreenQueryParams}}
       >
         Projects
       </LinkTo>
