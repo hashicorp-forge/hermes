@@ -516,7 +516,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action protected hideProjectsModal() {
     this.projectsModalIsShown = false;
-    // add any new projects to the local list
   }
 
   @action private addDocumentToProject(project: HermesProjectInfo) {
@@ -572,7 +571,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     });
 
     const projects = await Promise.all(projectPromises ?? []);
-    console.log(projects);
     this._projects = projects;
   });
 
@@ -992,8 +990,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       hermesDocuments.unshift(newRelatedHermesDocument);
 
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
-
-      debugger;
 
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
