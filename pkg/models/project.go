@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -49,17 +50,27 @@ const (
 	ArchivedProjectStatus
 )
 
-func (s *ProjectStatus) ToString() string {
-	switch *s {
-	case ActiveProjectStatus:
-		return "active"
-	case CompletedProjectStatus:
-		return "completed"
-	case ArchivedProjectStatus:
-		return "archived"
+var (
+	projectStatusStrings = map[ProjectStatus]string{
+		ActiveProjectStatus:    "active",
+		CompletedProjectStatus: "completed",
+		ArchivedProjectStatus:  "archived",
+	}
+)
+
+func (s ProjectStatus) String() string {
+	return projectStatusStrings[s]
+}
+
+func ParseProjectStatusString(s string) (ProjectStatus, bool) {
+	// Reverse keys and values of strings map.
+	m := make(map[string]ProjectStatus, len(projectStatusStrings))
+	for k, v := range projectStatusStrings {
+		m[v] = k
 	}
 
-	return ""
+	v, ok := m[strings.ToLower(s)]
+	return v, ok
 }
 
 // Create creates a new project. The resulting project is saved back to the

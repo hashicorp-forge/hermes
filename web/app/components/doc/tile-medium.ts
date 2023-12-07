@@ -37,6 +37,10 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
       return this.args.doc.docType;
     }
   }
+
+  protected get docIsDraft() {
+    return this.args.doc.status.toLowerCase() === "wip";
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

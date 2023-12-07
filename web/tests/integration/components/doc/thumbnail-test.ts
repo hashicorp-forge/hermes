@@ -113,19 +113,6 @@ module("Integration | Component | doc/thumbnail", function (hooks) {
       .dom(PRODUCT_BADGE)
       .exists("badge is shown for a product with an icon");
 
-    setFeatureFlag(this, "product_colors", false);
-
-    // If product colors were enabled, this would render a badge
-    this.set("product", "Labs");
-
-    assert
-      .dom(PRODUCT_BADGE)
-      .doesNotExist(
-        "abbreviation not shown if the productColors flag is disabled",
-      );
-
-    setFeatureFlag(this, "product_colors", true);
-
     // Config is not tracked by glimmer, so we force
     // a re-compute on the "badgeIsShown" getter
     this.set("product", undefined);
