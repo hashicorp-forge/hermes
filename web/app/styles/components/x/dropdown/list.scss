@@ -6,16 +6,14 @@
   }
 
   &.non-floating-list {
-    @apply relative w-full max-w-none;
+    @apply w-full relative max-w-none;
 
-    &.theme--neutral {
-      .x-dropdown-list-item-link {
-        &.is-aria-selected {
-          @apply bg-color-surface-interactive-hover;
+    .x-dropdown-list-item-link {
+      &.is-aria-selected {
+        @apply bg-color-surface-interactive-hover;
 
-          .flight-icon {
-            @apply text-inherit;
-          }
+        .flight-icon {
+          @apply text-inherit;
         }
       }
     }
@@ -27,15 +25,15 @@
 }
 
 .x-dropdown-list-default-loading-container {
-  @apply mt-2 mb-4 grid h-[20px] w-full place-items-center;
+  @apply w-full grid place-items-center h-[20px] mt-2 mb-4;
 }
 
 .x-dropdown-list-input-container {
-  @apply relative border-b border-b-color-border-faint p-1;
+  @apply relative p-1 border-b border-b-color-border-faint;
 }
 
 .x-dropdown-list-scroll-container {
-  @apply relative w-full overflow-auto rounded-b-md;
+  @apply overflow-auto w-full relative rounded-b-md;
 }
 
 .x-dropdown-list-default-empty-state {
