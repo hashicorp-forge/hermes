@@ -88,4 +88,24 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
 
     assertDocumentInfo(relatedHermesDocument);
   });
+
+  test("the doc link has the correct url depending on whether its a draft", async function (this: DocTileMediumComponentContext, assert) {
+    this.set("doc", this.server.schema.document.first().attrs);
+
+    await render<DocTileMediumComponentContext>(
+      hbs`<Doc::TileMedium @doc={{this.doc}} />`,
+    );
+
+    assert
+      .dom("[data-test-document-link]")
+      .hasAttribute("href", `/document/doc-0?draft=true`);
+
+    this.server.schema.document.first().update({ status: "In-Review" });
+
+    this.set("doc", this.server.schema.document.first().attrs);
+
+    assert
+      .dom("[data-test-document-link]")
+      .hasAttribute("href", `/document/doc-0`);
+  });
 });
