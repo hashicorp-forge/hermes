@@ -73,6 +73,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 			// Get query parameters.
 			q := r.URL.Query()
 			statusParam := q.Get("status")
+			titleParam := q.Get("title")
 
 			// Build status condition for database query.
 			var cond models.Project
@@ -89,9 +90,12 @@ func ProjectsHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// Get all projects from database.
+			// Get projects from database.
 			projs := []models.Project{}
-			if err := srv.DB.Find(&projs, cond).Error; err != nil &&
+			if err := srv.DB.
+				Where("title ILIKE ?", fmt.Sprintf("%%%s%%", titleParam)).
+				Find(&projs, cond).
+				Error; err != nil &&
 				!errors.Is(err, gorm.ErrRecordNotFound) {
 				srv.Logger.Error("error getting projects",
 					append([]interface{}{
