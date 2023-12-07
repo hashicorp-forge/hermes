@@ -107,7 +107,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 					JiraIssueID:  p.JiraIssueID,
 					ModifiedTime: p.ProjectModifiedAt.Unix(),
 					Products:     products,
-					Status:       p.Status.ToString(),
+					Status:       p.Status.String(),
 					Title:        p.Title,
 				})
 			}
@@ -305,7 +305,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						JiraIssueID:  proj.JiraIssueID,
 						ModifiedTime: proj.ProjectModifiedAt.Unix(),
 						Products:     products,
-						Status:       proj.Status.ToString(),
+						Status:       proj.Status.String(),
 						Title:        proj.Title,
 					},
 				}
@@ -516,7 +516,7 @@ func saveProjectInAlgolia(
 		"jiraIssueID":  proj.JiraIssueID,
 		"modifiedTime": proj.ProjectModifiedAt.Unix(),
 		"objectID":     fmt.Sprintf("%d", proj.ID),
-		"status":       proj.Status.ToString(),
+		"status":       proj.Status.String(),
 		"title":        proj.Title,
 	}
 
