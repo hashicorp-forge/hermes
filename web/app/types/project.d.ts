@@ -15,6 +15,13 @@ export interface JiraIssue {
   summary: string;
 }
 
+export interface JiraPickerResult {
+  key: string;
+  issueTypeImage: string;
+  summary: string;
+  url: string;
+}
+
 export interface HermesProjectInfo {
   id: string;
   title: string;

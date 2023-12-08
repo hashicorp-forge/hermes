@@ -41,6 +41,39 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
+  {{! Currently the Jira component will live in   }}
+  {{!  }}
+
   {{! TODO: Add Jira integration }}
+
+  <Hds::Form::TextInput::Base
+    {{on "input" this.onJiraInput}}
+    {{did-insert (perform this.searchJiraIssues)}}
+    @value={{this.jiraQuery}}
+  />
+
+  {{#if this.searchJiraIssues.isRunning}}
+    <FlightIcon @name="loading" />
+  {{/if}}
+
+  {{#if this.jiraIssues}}
+    <ol class="divided-list">
+      {{#each this.jiraIssues as |issue|}}
+        <li>
+          <ExternalLink href={{issue.url}}>
+
+            <img
+              src="https://hashicorp.atlassian.net/{{issue.issueTypeImage}}"
+            />
+
+            {{issue.key}}
+            -
+            {{issue.summary}}
+          </ExternalLink>
+        </li>
+      {{/each}}
+
+    </ol>
+  {{/if}}
 
 </New::Form>

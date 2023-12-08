@@ -4,7 +4,7 @@ import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { task } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
@@ -30,6 +30,19 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
+
+  @tracked protected jiraIssues = null;
+  @tracked protected jiraQuery = "";
+
+  searchJiraIssues = restartableTask(async () => {
+    const issues = await this.fetchSvc
+      .fetch(
+        `/api/${this.configSvc.config.api_version}/jira/issue/picker?currentJQL=""&query=${this.jiraQuery}`,
+      )
+      .then((response) => response?.json());
+
+    this.jiraIssues = issues;
+  });
 
   /**
    * The action to attempt a form submission.
@@ -64,6 +77,15 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         this.validate();
       });
     }
+  }
+
+  @action protected onJiraInput(event: KeyboardEvent) {
+    const value = (event.target as HTMLInputElement).value;
+
+    this.jiraQuery = value;
+    console.log("jiraQuery", this.jiraQuery);
+
+    void this.searchJiraIssues.perform();
   }
 
   /**
