@@ -32,6 +32,7 @@
             <div class="relative">
               <Hds::Form::TextInput::Base
                 data-test-related-resources-search-input
+                {{autofocus waitUntilNextRunloop=true}}
                 {{did-insert (fn this.didInsertInput dd)}}
                 {{on "input" this.onInput}}
                 {{on "keydown" this.onInputKeydown}}

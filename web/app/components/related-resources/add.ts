@@ -398,9 +398,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   }
 
   /**
-   * The action run when the search input is inserted.
-   * Saves the input locally, loads initial data, then
-   * focuses the search input.
+   * Saves the input locally and loads initial data.
    */
   @action protected didInsertInput(
     dd: XDropdownListAnchorAPI,
@@ -410,11 +408,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     this._dd = dd;
     this.dd.registerAnchor(this.searchInput);
     void this.loadInitialData.perform();
-
-    next(() => {
-      assert("searchInput expected", this.searchInput);
-      this.searchInput.focus();
-    });
   }
 
   /**
