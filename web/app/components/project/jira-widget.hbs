@@ -1,0 +1,153 @@
+<div class="relative flex h-8 max-w-2xl items-center gap-3.5" ...attributes>
+
+  {{#if this.issue}}
+    <div data-test-jira-object class="flex items-center gap-3.5">
+      <FlightIcon @name="jira" class="" />
+      <div class="h-4 w-px bg-color-border-strong"></div>
+    </div>
+    <ExternalLink
+      data-test-jira-link
+      href={{this.issue.url}}
+      class="inline-flex h-full items-center hover:underline"
+    >
+      <div class="flex items-center gap-2.5">
+
+        <img
+          width="16"
+          height="16"
+          src="https://hashicorp.atlassian.net/{{this.issue.issueTypeImage}}"
+        />
+
+        <div class="w-full text-color-foreground-faint">
+          <span
+            data-test-jira-key
+            class={{if (eq this.issueStatus "done") "line-through"}}
+          >
+            {{this.issue.key}}
+          </span>
+          <span>
+            ·
+          </span>
+          <span data-test-jira-summary>
+            {{this.issue.summary}}
+          </span>
+        </div>
+      </div>
+    </ExternalLink>
+
+    {{#if (or this.issue.priority this.issue.assignee this.issueStatus)}}
+      <div class="flex shrink-0 items-center gap-2">
+
+        {{! see if this attr exists in backend }}
+        {{#if this.issue.priority}}
+          <div class="flex">
+            <FlightIcon
+              data-test-jira-priority-icon
+              @name="chevrons-up"
+              class="text-color-foreground-critical"
+            />
+          </div>
+        {{/if}}
+
+        {{! see if this exists in backend }}
+        {{#if this.issue.assignee}}
+          <Person::Avatar
+            data-test-jira-assignee-avatar
+            data-test-assignee={{this.issue.assignee}}
+            @email={{this.issue.assignee}}
+            @size="small"
+          />
+        {{/if}}
+
+        {{#if this.issueStatus}}
+          <div
+            data-test-jira-status
+            class="rounded-sm bg-color-surface-strong px-1.5 py-px text-body-100 font-medium uppercase"
+          >
+            {{this.issueStatus}}
+          </div>
+        {{/if}}
+
+      </div>
+    {{/if}}
+    <X::DropdownList
+      @items={{hash
+        unlink=(hash
+          label="Remove Jira link" icon="x-circle" action=(fn this.removeIssue)
+        )
+      }}
+      @placement="bottom-end"
+    >
+      <:anchor as |dd|>
+        <dd.ToggleAction
+          data-test-jira-overflow-button
+          class="quarternary-button grid h-6 w-6 place-items-center items-center p-0"
+        >
+          <FlightIcon @name="more-vertical" />
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action
+          data-test-remove-jira-button
+          {{on "click" dd.attrs.action}}
+          class="flex items-center gap-2"
+        >
+          <FlightIcon @name={{dd.attrs.icon}} />
+          {{dd.attrs.label}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+  {{else}}
+    <X::DropdownList
+      @inputIsShown={{false}}
+      @onItemClick={{this.onIssueSelect}}
+      @items={{this.results}}
+      class="w-[450px]"
+      {{will-destroy this.onDropdownClose}}
+    >
+      <:anchor as |dd|>
+        <dd.ToggleAction {{did-insert (fn this.registerDropdown dd)}}>
+          + Add Jira issue
+        </dd.ToggleAction>
+      </:anchor>
+      <:header>
+        <div class="p-1">
+          <div class="relative">
+            <Hds::Form::TextInput::Base
+              {{on "input" this.onInput}}
+              {{did-insert (perform this.searchJiraIssues)}}
+              {{autofocus waitUntilNextRunloop=true}}
+              @value={{this.query}}
+            />
+            {{#if this.searchJiraIssues.isRunning}}
+              <div
+                data-test-related-resources-search-loading-icon
+                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+              >
+                <FlightIcon @name="loading" />
+              </div>
+            {{/if}}
+          </div>
+        </div>
+      </:header>
+      <:item as |dd|>
+        <dd.Action class="block py-1">
+          {{! TODO: Component-ize }}
+          <div class="flex items-center gap-1.5">
+            {{! TODO: replace hard-coded url with config variable }}
+            <img
+              width="16"
+              height="16"
+              src="https://hashicorp.atlassian.net/{{dd.attrs.issueTypeImage}}"
+            />
+            <div class="truncate">
+              {{dd.attrs.key}}
+              {{dd.attrs.summary}}
+            </div>
+          </div>
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+
+  {{/if}}
+</div>

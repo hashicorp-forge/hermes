@@ -34,22 +34,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
 
-  @tracked protected jiraIssues = [];
-  @tracked protected jiraQuery = "";
-
-  @tracked protected jiraIssue: JiraPickerResult | null = null;
-
-  @tracked protected dd: XDropdownListAnchorAPI | null = null;
+  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
   @action protected setJiraIssue(_index: number, attrs: JiraPickerResult) {
-    console.log("attrs", attrs);
     this.jiraIssue = attrs;
-  }
-
-  @action protected onJiraDropdownClose() {
-    this.jiraIssues = [];
-    this.jiraQuery = "";
-    this.dd = null;
   }
 
   /**
@@ -87,38 +75,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
-  @action protected registerDD(dd: XDropdownListAnchorAPI) {
-    this.dd = dd;
-  }
-
-  @action protected onJiraInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-
-    this.jiraQuery = value;
-
-    void this.searchJiraIssues.perform();
-  }
-
-  searchJiraIssues = restartableTask(async () => {
-    const issues = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issue/picker?currentJQL=""&query=${this.jiraQuery}`,
-      )
-      .then((response) => response?.json());
-
-    this.jiraIssues = issues;
-
-    const { dd } = this;
-
-    if (dd) {
-      dd.resetFocusedItemIndex();
-
-      next(() => {
-        dd.scheduleAssignMenuItemIDs();
-      });
-    }
-  });
-
   /**
    * The task that creates a project and, if successful,
    * transitions to it. On error, displays a FlashMessage
@@ -133,6 +89,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           body: JSON.stringify({
             title: cleanString(this.title),
             description: cleanString(this.description),
+            // TODO: double-check this
+            jiraIssueID: this.jiraIssue,
           }),
         })
         .then((response) => response?.json());

@@ -13,6 +13,8 @@ export interface JiraIssue {
   assignee?: string;
   type: string;
   summary: string;
+
+  // TODO: issueTypeImage
 }
 
 export interface JiraPickerResult {

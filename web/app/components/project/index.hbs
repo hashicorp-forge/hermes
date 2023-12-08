@@ -91,6 +91,9 @@
 {{! Jira }}
 {{! Currently placeholder }}
 <div class="relative mt-10 flex h-8 max-w-2xl items-center gap-3.5">
+
+  <Project::JiraWidget />
+
   {{#if this.jiraIssue}}
     <div data-test-jira-object class="flex items-center gap-3.5">
       <FlightIcon @name="jira" class="" />
