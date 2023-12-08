@@ -12,7 +12,11 @@ import {
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
-import { TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_NAME,
+  TEST_USER_PHOTO,
+} from "hermes/utils/mirage-utils";
 
 const TITLE = "[data-test-project-title]";
 const TITLE_BUTTON = `${TITLE} button`;
@@ -22,6 +26,9 @@ const TITLE_ERROR = `${TITLE} .hds-form-error`;
 const DESCRIPTION = "[data-test-project-description]";
 const DESCRIPTION_BUTTON = `${DESCRIPTION} button`;
 const DESCRIPTION_INPUT = `${DESCRIPTION} textarea`;
+
+const CREATED_TIME = "[data-test-created-time]";
+const MODIFIED_TIME = "[data-test-modified-time]";
 
 const SAVE_EDITABLE_FIELD_BUTTON = ".editable-field [data-test-save-button]";
 
@@ -255,6 +262,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .hasAttribute("data-test-assignee", jiraAssignee);
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
+
+    assert
+      .dom(CREATED_TIME)
+      .hasText(`Created 32 years ago by ${TEST_USER_EMAIL}`);
+    assert.dom(MODIFIED_TIME).hasText(`Last modified 32 years ago`);
   });
 
   test("you can edit a project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
