@@ -1,18 +1,13 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test, todo } from "qunit";
-import {
-  click,
-  fillIn,
-  find,
-  visit,
-  waitFor,
-  waitUntil,
-} from "@ember/test-helpers";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
-import { TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 const TITLE = "[data-test-project-title]";
 const TITLE_BUTTON = `${TITLE} button`;
@@ -22,6 +17,9 @@ const TITLE_ERROR = `${TITLE} .hds-form-error`;
 const DESCRIPTION = "[data-test-project-description]";
 const DESCRIPTION_BUTTON = `${DESCRIPTION} button`;
 const DESCRIPTION_INPUT = `${DESCRIPTION} textarea`;
+
+const CREATED_TIME = "[data-test-created-time]";
+const MODIFIED_TIME = "[data-test-modified-time]";
 
 const SAVE_EDITABLE_FIELD_BUTTON = ".editable-field [data-test-save-button]";
 
@@ -135,6 +133,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("it renders the correct filled-in state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    MockDate.set(DEFAULT_MOCK_DATE);
+
     const docTitle = "Foo bar";
     const docSummary = "Baz qux";
     const docStatus = "Approved";
@@ -255,6 +255,13 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .hasAttribute("data-test-assignee", jiraAssignee);
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
+
+    assert
+      .dom(CREATED_TIME)
+      .hasText(`Created 32 years ago by ${TEST_USER_EMAIL}`);
+    assert.dom(MODIFIED_TIME).hasText(`Last modified 32 years ago`);
+
+    MockDate.reset();
   });
 
   test("you can edit a project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
