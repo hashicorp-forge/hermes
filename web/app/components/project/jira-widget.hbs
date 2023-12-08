@@ -1,4 +1,4 @@
-<div class="relative flex h-8 max-w-2xl items-center gap-3.5" ...attributes>
+<div class="relative flex h-8 max-w-[700px] items-center gap-3.5" ...attributes>
 
   {{#if this.issue}}
     <div data-test-jira-object class="flex items-center gap-3.5">
@@ -98,38 +98,65 @@
       </:item>
     </X::DropdownList>
   {{else}}
+
+    {{! + Add Jira issue }}
+
     <X::DropdownList
       @inputIsShown={{false}}
       @onItemClick={{this.onIssueSelect}}
       @items={{this.results}}
-      class="w-[450px]"
+      @matchAnchorWidth={{true}}
       {{will-destroy this.onDropdownClose}}
     >
       <:anchor as |dd|>
-        <dd.ToggleAction {{did-insert (fn this.registerDropdown dd)}}>
+        {{!-- <dd.ToggleAction
+          class="hds-button hds-button--size-small hds-button--color-secondary text-body-100"
+          {{did-insert (fn this.registerDropdown dd)}}
+        >
           + Add Jira issue
-        </dd.ToggleAction>
-      </:anchor>
-      <:header>
-        <div class="p-1">
-          <div class="relative">
+        </dd.ToggleAction> --}}
+        <div
+          class="relative h-9 w-full"
+          {{did-insert (fn this.registerDropdown dd)}}
+          {{did-insert dd.registerAnchor}}
+        >
+          {{! need to remove this from the dom after the content is shown }}
+
+          {{! why is this closing after opening the first time and only the first time }}
+          {{#if this.inputIsShown}}
+            {{log "content is shown"}}
             <Hds::Form::TextInput::Base
               {{on "input" this.onInput}}
-              {{did-insert (perform this.searchJiraIssues)}}
-              {{autofocus waitUntilNextRunloop=true}}
+              {{autofocus}}
               @value={{this.query}}
+              placeholder="+ Add Jira issue"
+              class="relative"
             />
-            {{#if this.searchJiraIssues.isRunning}}
-              <div
-                data-test-related-resources-search-loading-icon
-                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-              >
-                <FlightIcon @name="loading" />
-              </div>
-            {{/if}}
-          </div>
+          {{else}}
+            <Action class="absolute h-full px-2" {{on "click" this.showInput}}>
+              + Add Jira issue
+            </Action>
+          {{/if}}
+
+          {{#if this.searchJiraIssues.isRunning}}
+            <div
+              data-test-related-resources-search-loading-icon
+              class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+            >
+              <FlightIcon @name="loading" />
+            </div>
+          {{/if}}
         </div>
-      </:header>
+      </:anchor>
+      <:no-matches>
+        {{#unless (lt this.query.length 1)}}
+          <div class="x-dropdown-list-default-empty-state">
+            {{#unless this.searchJiraIssues.isRunning}}
+              No matches
+            {{/unless}}
+          </div>
+        {{/unless}}
+      </:no-matches>
       <:item as |dd|>
         <dd.Action class="block py-1">
           {{! TODO: Component-ize }}

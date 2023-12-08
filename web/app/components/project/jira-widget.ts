@@ -39,6 +39,9 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected query = "";
   @tracked protected results: JiraPickerResult[] = [];
 
+  @tracked protected inputIsShown = false;
+  @tracked protected dropdownIsShown = false;
+
   protected get issue() {
     return this.args.issue || this._issue;
   }
@@ -57,15 +60,23 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @action onDropdownClose() {
     this.results = [];
     this.query = "";
-    this._dd = null;
   }
 
   @action registerDropdown(dd: XDropdownListAnchorAPI) {
     this._dd = dd;
   }
 
+  @action protected showInput() {
+    this.inputIsShown = true;
+  }
+
   @action onInput(event: Event) {
     this.query = (event.target as HTMLInputElement).value;
+    console.log("THE QUERY IS....", this.query);
+    if (this.query.length === 0) {
+      this._dd?.hideContent();
+      return;
+    }
     void this.searchJiraIssues.perform();
   }
 
@@ -82,6 +93,8 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
       .then((response) => response?.json());
 
     this.results = issues;
+
+    this._dd?.showContent();
 
     this._dd?.resetFocusedItemIndex();
 
