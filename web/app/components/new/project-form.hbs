@@ -57,19 +57,22 @@
   {{/if}}
 
   {{#if this.jiraIssues}}
-    <ol class="divided-list">
+    <ol class="divided-list overflow-hidden">
       {{#each this.jiraIssues as |issue|}}
-        <li>
-          <ExternalLink href={{issue.url}}>
-
-            <img
-              src="https://hashicorp.atlassian.net/{{issue.issueTypeImage}}"
-            />
-
-            {{issue.key}}
-            -
-            {{issue.summary}}
-          </ExternalLink>
+        <li class="">
+          <Action class="block py-1 px-1 hover:bg-color-page-faint">
+            <div class="flex items-center gap-1.5">
+              <img
+                width="16"
+                height="16"
+                src="https://hashicorp.atlassian.net/{{issue.issueTypeImage}}"
+              />
+              <div class="truncate">
+                {{issue.key}}
+                {{issue.summary}}
+              </div>
+            </div>
+          </Action>
         </li>
       {{/each}}
 
