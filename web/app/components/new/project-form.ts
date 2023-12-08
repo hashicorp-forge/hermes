@@ -9,6 +9,9 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import { assert } from "@ember/debug";
+import { JiraPickerResult } from "hermes/types/project";
 
 interface NewProjectFormComponentSignature {}
 
@@ -34,22 +37,20 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected jiraIssues = [];
   @tracked protected jiraQuery = "";
 
-  @tracked protected jiraIssue = null;
+  @tracked protected jiraIssue: JiraPickerResult | null = null;
 
-  @action protected setJiraIssue(issue: any) {
-    console.log("setJiraIssue", issue);
-    this.jiraIssue = issue;
+  @tracked protected dd: XDropdownListAnchorAPI | null = null;
+
+  @action protected setJiraIssue(_index: number, attrs: JiraPickerResult) {
+    console.log("attrs", attrs);
+    this.jiraIssue = attrs;
   }
 
-  searchJiraIssues = restartableTask(async () => {
-    const issues = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issue/picker?currentJQL=""&query=${this.jiraQuery}`,
-      )
-      .then((response) => response?.json());
-
-    this.jiraIssues = issues;
-  });
+  @action protected onJiraDropdownClose() {
+    this.jiraIssues = [];
+    this.jiraQuery = "";
+    this.dd = null;
+  }
 
   /**
    * The action to attempt a form submission.
@@ -86,14 +87,37 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
+  @action protected registerDD(dd: XDropdownListAnchorAPI) {
+    this.dd = dd;
+  }
+
   @action protected onJiraInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
 
     this.jiraQuery = value;
-    console.log("jiraQuery", this.jiraQuery);
 
     void this.searchJiraIssues.perform();
   }
+
+  searchJiraIssues = restartableTask(async () => {
+    const issues = await this.fetchSvc
+      .fetch(
+        `/api/${this.configSvc.config.api_version}/jira/issue/picker?currentJQL=""&query=${this.jiraQuery}`,
+      )
+      .then((response) => response?.json());
+
+    this.jiraIssues = issues;
+
+    const { dd } = this;
+
+    if (dd) {
+      dd.resetFocusedItemIndex();
+
+      next(() => {
+        dd.scheduleAssignMenuItemIDs();
+      });
+    }
+  });
 
   /**
    * The task that creates a project and, if successful,

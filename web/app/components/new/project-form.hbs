@@ -41,32 +41,66 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
+  {{! make sure this  }}
+
   {{#if this.jiraIssue}}
-    jirra issue attashed
+    {{! TODO: ability to remove }}
+    {{! TODO: Component-ize }}
+    <div class="flex">
+      <div class="flex items-center gap-3.5">
+        <FlightIcon @name="jira" class="" />
+        <div class="h-4 w-px bg-color-border-strong"></div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        {{! TODO: replace hard-coded url with config variable }}
+        <img
+          width="16"
+          height="16"
+          src="https://hashicorp.atlassian.net/{{this.jiraIssue.issueTypeImage}}"
+        />
+        <div class="truncate">
+          {{this.jiraIssue.key}}
+          {{this.jiraIssue.summary}}
+        </div>
+      </div>
+    </div>
   {{else}}
     <X::DropdownList
       @inputIsShown={{false}}
       @onItemClick={{this.setJiraIssue}}
       @items={{this.jiraIssues}}
-      class="w-[320px]"
+      class="w-[450px]"
+      {{will-destroy this.onJiraDropdownClose}}
     >
       <:anchor as |dd|>
-        <dd.ToggleAction>
+        <dd.ToggleAction {{did-insert (fn this.registerDD dd)}}>
           + Add Jira issue
         </dd.ToggleAction>
       </:anchor>
       <:header>
         <div class="p-1">
-
-          <Hds::Form::TextInput::Base
-            {{on "input" this.onJiraInput}}
-            {{did-insert (perform this.searchJiraIssues)}}
-            @value={{this.jiraQuery}}
-          />
+          <div class="relative">
+            <Hds::Form::TextInput::Base
+              {{on "input" this.onJiraInput}}
+              {{did-insert (perform this.searchJiraIssues)}}
+              {{autofocus waitUntilNextRunloop=true}}
+              @value={{this.jiraQuery}}
+            />
+            {{#if this.searchJiraIssues.isRunning}}
+              <div
+                data-test-related-resources-search-loading-icon
+                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+              >
+                <FlightIcon @name="loading" />
+              </div>
+            {{/if}}
+          </div>
         </div>
       </:header>
       <:item as |dd|>
         <dd.Action class="block py-1">
+          {{! TODO: Component-ize }}
           <div class="flex items-center gap-1.5">
             {{! TODO: replace hard-coded url with config variable }}
             <img
