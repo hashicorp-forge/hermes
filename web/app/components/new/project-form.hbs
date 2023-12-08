@@ -41,42 +41,47 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
-  {{! Currently the Jira component will live in   }}
-  {{!  }}
+  {{#if this.jiraIssue}}
+    jirra issue attashed
+  {{else}}
+    <X::DropdownList
+      @inputIsShown={{false}}
+      @onItemClick={{this.setJiraIssue}}
+      @items={{this.jiraIssues}}
+      class="w-[320px]"
+    >
+      <:anchor as |dd|>
+        <dd.ToggleAction>
+          + Add Jira issue
+        </dd.ToggleAction>
+      </:anchor>
+      <:header>
+        <div class="p-1">
 
-  {{! TODO: Add Jira integration }}
-
-  <Hds::Form::TextInput::Base
-    {{on "input" this.onJiraInput}}
-    {{did-insert (perform this.searchJiraIssues)}}
-    @value={{this.jiraQuery}}
-  />
-
-  {{#if this.searchJiraIssues.isRunning}}
-    <FlightIcon @name="loading" />
-  {{/if}}
-
-  {{#if this.jiraIssues}}
-    <ol class="divided-list overflow-hidden">
-      {{#each this.jiraIssues as |issue|}}
-        <li class="">
-          <Action class="block py-1 px-1 hover:bg-color-page-faint">
-            <div class="flex items-center gap-1.5">
-              <img
-                width="16"
-                height="16"
-                src="https://hashicorp.atlassian.net/{{issue.issueTypeImage}}"
-              />
-              <div class="truncate">
-                {{issue.key}}
-                {{issue.summary}}
-              </div>
+          <Hds::Form::TextInput::Base
+            {{on "input" this.onJiraInput}}
+            {{did-insert (perform this.searchJiraIssues)}}
+            @value={{this.jiraQuery}}
+          />
+        </div>
+      </:header>
+      <:item as |dd|>
+        <dd.Action class="block py-1">
+          <div class="flex items-center gap-1.5">
+            {{! TODO: replace hard-coded url with config variable }}
+            <img
+              width="16"
+              height="16"
+              src="https://hashicorp.atlassian.net/{{dd.attrs.issueTypeImage}}"
+            />
+            <div class="truncate">
+              {{dd.attrs.key}}
+              {{dd.attrs.summary}}
             </div>
-          </Action>
-        </li>
-      {{/each}}
-
-    </ol>
+          </div>
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
   {{/if}}
 
 </New::Form>

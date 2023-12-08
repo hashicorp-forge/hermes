@@ -31,8 +31,15 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
 
-  @tracked protected jiraIssues = null;
+  @tracked protected jiraIssues = [];
   @tracked protected jiraQuery = "";
+
+  @tracked protected jiraIssue = null;
+
+  @action protected setJiraIssue(issue: any) {
+    console.log("setJiraIssue", issue);
+    this.jiraIssue = issue;
+  }
 
   searchJiraIssues = restartableTask(async () => {
     const issues = await this.fetchSvc
@@ -79,7 +86,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
-  @action protected onJiraInput(event: KeyboardEvent) {
+  @action protected onJiraInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
 
     this.jiraQuery = value;
