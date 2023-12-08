@@ -82,7 +82,7 @@
               >
                 <div class="flex w-full items-start gap-5">
                   <div class="w-full">
-                    <div class="flex gap-[3px]">
+                    <div class="flex items-center gap-[3px]">
                       <Product::Avatar @product={{r.doc.product}} />
                       <Person::Avatar
                         @email="{{get r.doc.owners 0}}"
@@ -95,6 +95,10 @@
                     </div>
                     <h5 class="mt-1.5">
                       {{r.doc.title}}
+                      <span class="ml-0.5 text-body-100 font-regular">
+
+                        {{r.doc.docNumber}}
+                      </span>
                     </h5>
                     <p class="mt-0.5 text-body-100 text-color-foreground-faint">
                       Modified
