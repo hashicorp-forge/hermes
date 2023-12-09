@@ -1,14 +1,14 @@
-<div class="relative flex h-8 max-w-[700px] items-center gap-3.5" ...attributes>
-
+{{! TODO: check if jira is enabled }}
+<div
+  class="relative flex h-8 w-full max-w-3xl items-center gap-[13px]"
+  ...attributes
+>
   {{#if this.issue}}
-    <div data-test-jira-object class="flex items-center gap-3.5">
-      <FlightIcon @name="jira" class="" />
-      <div class="h-4 w-px bg-color-border-strong"></div>
-    </div>
+
     <ExternalLink
       data-test-jira-link
       href={{this.issue.url}}
-      class="inline-flex h-full items-center hover:underline"
+      class="ml-1.5 inline-flex h-full items-center hover:underline"
     >
       <div class="flex items-center gap-2.5">
 
@@ -73,7 +73,7 @@
     <X::DropdownList
       @items={{hash
         unlink=(hash
-          label="Remove Jira link" icon="x-circle" action=(fn this.removeIssue)
+          label="Remove Jira issue" icon="x-circle" action=(fn this.removeIssue)
         )
       }}
       @placement="bottom-end"
@@ -97,8 +97,9 @@
         </dd.Action>
       </:item>
     </X::DropdownList>
+  {{else if @isLoading}}
+    <FlightIcon @name="loading" />
   {{else}}
-
     {{! + Add Jira issue }}
 
     <X::DropdownList
@@ -109,32 +110,32 @@
       {{will-destroy this.onDropdownClose}}
     >
       <:anchor as |dd|>
-        {{!-- <dd.ToggleAction
-          class="hds-button hds-button--size-small hds-button--color-secondary text-body-100"
-          {{did-insert (fn this.registerDropdown dd)}}
-        >
-          + Add Jira issue
-        </dd.ToggleAction> --}}
         <div
           class="relative h-9 w-full"
           {{did-insert (fn this.registerDropdown dd)}}
           {{did-insert dd.registerAnchor}}
         >
-          {{! need to remove this from the dom after the content is shown }}
-
-          {{! why is this closing after opening the first time and only the first time }}
           {{#if this.inputIsShown}}
-            {{log "content is shown"}}
             <Hds::Form::TextInput::Base
               {{on "input" this.onInput}}
-              {{autofocus}}
+              {{on "focusout" this.hideInput}}
+              {{(unless @inputIsShown (modifier "autofocus"))}}
               @value={{this.query}}
-              placeholder="+ Add Jira issue"
-              class="relative"
+              placeholder={{if
+                @inputIsShown
+                "Search issues..."
+                "Add Jira issue"
+              }}
+              class="jira-input relative"
+              @type="search"
             />
           {{else}}
-            <Action class="absolute h-full px-2" {{on "click" this.showInput}}>
-              + Add Jira issue
+            <Action
+              class="absolute flex h-full w-full items-center gap-2 rounded-button-md px-2 text-color-foreground-faint hover:bg-color-surface-interactive-hover"
+              {{on "click" this.showInput}}
+            >
+              <FlightIcon @name="search" />
+              Add Jira issue...
             </Action>
           {{/if}}
 

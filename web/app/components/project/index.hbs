@@ -63,33 +63,53 @@
 
   </div>
 </div>
+<div class="max-w-3xl">
 
-{{! Title }}
-<div class="mt-7 flex">
-  <EditableField
-    class="project-title text-display-600"
-    data-test-project-title
-    @value={{this.title}}
-    @tag="h1"
-    @placeholder="Add project title"
-    @onSave={{this.saveTitle}}
-    @isRequired={{true}}
-  />
-</div>
+  {{! Title }}
+  <div class="mt-7 flex">
+    <EditableField
+      class="project-title text-display-600"
+      data-test-project-title
+      @value={{this.title}}
+      @tag="h1"
+      @placeholder="Add project title"
+      @onSave={{this.saveTitle}}
+      @isRequired={{true}}
+    />
+  </div>
 
-{{! Description }}
-<div class="flex">
-  <EditableField
-    class="project-description"
-    data-test-project-description
-    @value="{{this.description}}"
-    @onSave={{this.saveDescription}}
-    @placeholder="Add a description"
-  />
+  {{! Description }}
+  <div class="flex">
+    <EditableField
+      class="project-description"
+      data-test-project-description
+      @value="{{this.description}}"
+      @onSave={{this.saveDescription}}
+      @placeholder="Add a description"
+    />
+  </div>
 </div>
 
 {{! Jira }}
-<Project::JiraWidget class="mt-10" />
+<div class="mt-10 flex w-full max-w-3xl gap-2">
+  <div data-test-jira-object class="relative flex items-center">
+    <div class="mr-4 flex shrink-0 items-center gap-2">
+      <FlightIcon @name="jira" />
+    </div>
+    <div
+      class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
+    />
+  </div>
+
+  {{! this needs to load gracefully }}
+  <Project::JiraWidget
+    {{did-insert this.maybeLoadJiraInfo}}
+    @issue={{this.jiraIssue}}
+    @onIssueRemove={{this.removeJiraIssue}}
+    @onIssueSelect={{this.addJiraIssue}}
+    @isLoading={{this.loadJiraIssue.isRunning}}
+  />
+</div>
 
 <div class="relative mt-6 border-t border-t-color-border-primary">
 

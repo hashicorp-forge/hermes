@@ -10,7 +10,11 @@ import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task } from "ember-concurrency";
-import { HermesProject, JiraIssue } from "hermes/types/project";
+import {
+  HermesProject,
+  JiraIssue,
+  JiraPickerResult,
+} from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,
@@ -45,7 +49,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected title = this.args.project.title;
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
-  @tracked protected jiraIssue?: JiraIssue = this.args.project.jiraIssue;
+
+  @tracked protected jiraIssue?: JiraPickerResult;
   @tracked protected hermesDocuments: RelatedHermesDocument[] =
     this.args.project.hermesDocuments ?? [];
   @tracked protected externalLinks: RelatedExternalLink[] =
@@ -160,6 +165,25 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   }
 
+  @action maybeLoadJiraInfo() {
+    if (this.args.project.jiraIssueID) {
+      // kick off a task to load the jira issue
+      void this.loadJiraIssue.perform();
+    }
+  }
+
+  loadJiraIssue = task(async () => {
+    const issue = await this.fetchSvc
+      .fetch(
+        `/api/${
+          this.configSvc.config.api_version
+        }/jira/issue/${this.args.project.jiraIssueID?.toLowerCase()}`,
+      )
+      .then((response) => response?.json());
+
+    this.jiraIssue = issue;
+  });
+
   /**
    * The action to delete a resource from a project.
    * Accessible in the overflow menu of a project resource.
@@ -213,18 +237,11 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The placeholder action for adding a Jira object.
    * Updates the local Jira object, then saves the project.
    */
-  @action protected addJiraIssue(): void {
+  @action protected addJiraIssue(issue: JiraPickerResult): void {
     // TODO: implement this
-    this.jiraIssue = {
-      key: "HER-123",
-      url: "https://www.google.com",
-      priority: "High",
-      status: "Open",
-      type: "Bug",
-      summary: "Vault Data Gathering Initiative: Support",
-      assignee: "John Dobis",
-    };
-    void this.saveProjectInfo.perform("jiraIssue", this.jiraIssue);
+    this.jiraIssue = issue;
+    console.log("ADDING JIRA ISSUE", issue);
+    void this.saveProjectInfo.perform("jiraIssueID", issue.key);
   }
 
   /**
@@ -234,7 +251,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
-    void this.saveProjectInfo.perform("jiraIssue", undefined);
+    void this.saveProjectInfo.perform("jiraIssueID", "");
   }
 
   /**

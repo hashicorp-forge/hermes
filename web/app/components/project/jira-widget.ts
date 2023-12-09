@@ -13,7 +13,7 @@ interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
   Args: {
     // if this is passed in, we show the issue rather than the button
-    issue?: JiraPickerResult | JiraIssue;
+    issue?: JiraPickerResult | JiraIssue | string;
 
     // what to do when the issue is selected, e.g., call a save action.
     onIssueSelect?: (issue: any) => void;
@@ -24,6 +24,10 @@ interface ProjectJiraWidgetComponentSignature {
     isDisabled?: boolean;
 
     isSaving?: boolean;
+
+    inputIsShown?: boolean;
+
+    isLoading?: boolean;
 
     // maybe some saving/loading states?
   };
@@ -39,22 +43,36 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected query = "";
   @tracked protected results: JiraPickerResult[] = [];
 
-  @tracked protected inputIsShown = false;
+  @tracked protected _inputIsShown = false;
   @tracked protected dropdownIsShown = false;
 
+  protected get inputIsShown() {
+    return this.args.inputIsShown ?? this._inputIsShown;
+  }
+
   protected get issue() {
+    if (typeof this.args.issue === "string" && this.args.issue.length > 0) {
+      // FOR NOW....
+      return { key: this.args.issue };
+    }
     return this.args.issue || this._issue;
   }
 
   protected get issueStatus() {
-    if (this.issue && "status" in this.issue) {
+    if (
+      this.issue &&
+      typeof this.issue === "object" &&
+      "status" in this.issue
+    ) {
       return this.issue.status;
     }
   }
 
   @action onIssueSelect(_index: number, issue: JiraPickerResult) {
     this._issue = issue;
+    console.log("ISSUE SELECTED", issue);
     this.args.onIssueSelect?.(issue);
+    // start looking up the rest of the info
   }
 
   @action onDropdownClose() {
@@ -67,7 +85,11 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   }
 
   @action protected showInput() {
-    this.inputIsShown = true;
+    this._inputIsShown = true;
+  }
+
+  @action protected hideInput() {
+    this._inputIsShown = false;
   }
 
   @action onInput(event: Event) {

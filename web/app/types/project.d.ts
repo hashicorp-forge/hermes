@@ -29,7 +29,7 @@ export interface HermesProjectInfo {
   title: string;
   status: ProjectStatus;
   description?: string;
-  jiraIssueID?: string;
+  jiraIssueID?: string; // same as JiraPickerResult.key
   creator: string;
   createdTime: number;
   modifiedTime: number;

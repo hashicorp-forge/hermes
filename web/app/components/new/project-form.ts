@@ -75,6 +75,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
+  @action protected addJiraIssue(issue: JiraPickerResult) {
+    this.jiraIssue = issue;
+  }
+
   /**
    * The task that creates a project and, if successful,
    * transitions to it. On error, displays a FlashMessage
@@ -89,8 +93,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           body: JSON.stringify({
             title: cleanString(this.title),
             description: cleanString(this.description),
-            // TODO: double-check this
-            jiraIssueID: this.jiraIssue,
+            jiraIssueID: this.jiraIssue?.key,
           }),
         })
         .then((response) => response?.json());
