@@ -25,7 +25,7 @@ interface ProjectJiraWidgetComponentSignature {
 
     isSaving?: boolean;
 
-    inputIsShown?: boolean;
+    isCompact?: boolean;
 
     isLoading?: boolean;
 
@@ -47,7 +47,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected dropdownIsShown = false;
 
   protected get inputIsShown() {
-    return this.args.inputIsShown ?? this._inputIsShown;
+    return this.args.isCompact ?? this._inputIsShown;
   }
 
   protected get issue() {

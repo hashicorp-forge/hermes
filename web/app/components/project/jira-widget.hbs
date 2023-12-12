@@ -4,14 +4,19 @@
 >
   {{! TODO: this needs some focus-within styles to capture the correct focused state }}
   <div class="group relative flex w-full">
-    <div data-test-jira-object class="relative z-10 mr-3 flex h-6 items-center">
-      <div class="mr-3 flex shrink-0 gap-2">
-        <FlightIcon @name="jira" />
-      </div>
+    {{#unless @isCompact}}
       <div
-        class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
-      />
-    </div>
+        data-test-jira-object
+        class="relative z-10 mr-3 flex h-6 items-center"
+      >
+        <div class="mr-3 flex shrink-0 gap-2">
+          <FlightIcon @name="jira" />
+        </div>
+        <div
+          class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
+        />
+      </div>
+    {{/unless}}
 
     {{#if this.issue}}
       <ExternalLink
@@ -127,7 +132,7 @@
       >
         <:anchor as |dd|>
           <div
-            class="relative -mt-1.5 -ml-1.5 h-9 w-full"
+            class="relative h-9 w-full {{unless @isCompact '-mt-1.5 -ml-1.5'}}"
             {{did-insert (fn this.registerDropdown dd)}}
             {{did-insert dd.registerAnchor}}
           >
@@ -135,10 +140,10 @@
               <Hds::Form::TextInput::Base
                 {{on "input" this.onInput}}
                 {{on "focusout" this.hideInput}}
-                {{(unless @inputIsShown (modifier "autofocus"))}}
+                {{(unless @isCompact (modifier "autofocus"))}}
                 @value={{this.query}}
                 placeholder={{if
-                  @inputIsShown
+                  @isCompact
                   "Search issues..."
                   "Add Jira issue"
                 }}
