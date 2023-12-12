@@ -314,11 +314,20 @@
       </div>
     {{/if}}
 
-    <div class="mt-14 -mb-6 text-body-100 text-color-foreground-disabled">
-      Project created
-      {{time-ago @project.createdTime}}
-      by
-      {{@project.creator}}
+    <div
+      class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
+    >
+      <span data-test-created-time>
+        Created
+        {{time-ago @project.createdTime}}
+        by
+        {{@project.creator}}
+      </span>
+      <span class="opacity-50">|</span>
+      <span data-test-modified-time>
+        Last modified
+        {{time-ago @project.modifiedTime}}
+      </span>
     </div>
   </div>
 </div>

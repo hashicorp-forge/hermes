@@ -210,9 +210,16 @@ func refreshDocumentHeader(
 		os.Exit(1)
 	}
 
+	// If the document was created through Hermes and has a status of "WIP", it
+	// is a document draft.
+	isDraft := false
+	if doc.AppCreated && doc.Status == "WIP" {
+		isDraft = true
+	}
+
 	// Replace document header.
 	if err := doc.ReplaceHeader(
-		idx.BaseURL, true, idx.GoogleWorkspaceService); err != nil {
+		idx.BaseURL, isDraft, idx.GoogleWorkspaceService); err != nil {
 		log.Error("error replacing document header",
 			"error", err,
 			"google_file_id", file.Id,

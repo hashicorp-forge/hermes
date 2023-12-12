@@ -1,5 +1,5 @@
 {{#if @isModal}}
-  <form data-test-new-form class="create-new-form" ...attributes>
+  <form data-test-new-form-for-modal class="create-new-form" ...attributes>
     {{yield}}
   </form>
 {{else}}
@@ -11,9 +11,11 @@
       class={{unless @taskIsRunning "feature-icon"}}
     />
   </div>
+
   <h1 data-test-form-headline>
     {{if @taskIsRunning @taskIsRunningHeadline @headline}}
   </h1>
+
   <AnimatedContainer @motion={{this.motion}}>
     {{#animated-if @taskIsRunning use=this.transition}}
       <div

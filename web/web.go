@@ -62,6 +62,7 @@ type ConfigResponse struct {
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
+	JiraURL                  string          `json:"jira_url"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
 	SkipGoogleAuth           bool            `json:"skip_google_auth"`
 	SupportLinkURL           string          `json:"support_link_url"`
@@ -110,6 +111,12 @@ func ConfigHandler(
 			skipGoogleAuth = true
 		}
 
+		// Set JiraURL if enabled in the config.
+		jiraURL := ""
+		if cfg.Jira != nil && cfg.Jira.Enabled {
+			jiraURL = cfg.Jira.URL
+		}
+
 		response := &ConfigResponse{
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
@@ -118,6 +125,7 @@ func ConfigHandler(
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
+			JiraURL:                  jiraURL,
 			ShortLinkBaseURL:         shortLinkBaseURL,
 			SkipGoogleAuth:           skipGoogleAuth,
 			SupportLinkURL:           cfg.SupportLinkURL,
