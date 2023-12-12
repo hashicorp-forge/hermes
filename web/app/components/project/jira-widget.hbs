@@ -68,8 +68,7 @@
             {{! see if this exists in backend }}
             {{#if this.issue.assignee}}
               <Person::Avatar
-                data-test-jira-assignee-avatar
-                data-test-assignee={{this.issue.assignee}}
+                data-test-jira-assignee-avatar-wrapper
                 @email={{this.issue.assignee}}
                 @imgURL={{this.issue.assigneeAvatar}}
                 @size="small"

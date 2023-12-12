@@ -1,14 +1,7 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
-import { module, test, todo } from "qunit";
-import {
-  click,
-  fillIn,
-  pauseTest,
-  visit,
-  waitFor,
-  waitUntil,
-} from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -95,7 +88,7 @@ const JIRA_ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const JIRA_OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
 const JIRA_LINK = "[data-test-jira-link]";
 const JIRA_PRIORITY_ICON = "[data-test-jira-priority-icon]";
-const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar] img";
+const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
 const JIRA_STATUS = "[data-test-jira-status]";
 const JIRA_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const JIRA_KEY = "[data-test-jira-key]";
@@ -203,11 +196,10 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       projectStatus.charAt(0).toUpperCase() + projectStatus.slice(1);
 
     const jiraKey = "HER-123";
-    const jiraURL = "https://hashicorp.com";
-    const jiraPriority = "High";
-    const jiraStatus = "Open";
-    const jiraSummary = "Baz Foo";
-    const jiraAssignee = "foo@bar.com";
+
+    this.server.create("jira-issue", {
+      key: jiraKey,
+    });
 
     project.update({
       title: projectTitle,
@@ -215,15 +207,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       status: projectStatus,
       hermesDocuments: [relatedDocument],
       externalLinks: [externalLink],
-      jiraIssue: {
-        key: jiraKey,
-        url: jiraURL,
-        priority: jiraPriority,
-        status: jiraStatus,
-        type: "any",
-        summary: jiraSummary,
-        assignee: jiraAssignee,
-      },
+      jiraIssueID: jiraKey,
     });
 
     // Populate the related resources modal
@@ -265,16 +249,14 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(STATUS_TOGGLE).hasText(projectStatusLabel);
 
-    assert.dom(JIRA_LINK).hasAttribute("href", jiraURL);
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
     assert.dom(JIRA_KEY).hasText(jiraKey);
-    assert.dom(JIRA_SUMMARY).hasText(jiraSummary);
-    assert.dom(JIRA_STATUS).hasText(jiraStatus);
+    assert.dom(JIRA_SUMMARY).hasText(TEST_JIRA_ISSUE_SUMMARY);
+    assert.dom(JIRA_STATUS).hasText(TEST_JIRA_ISSUE_STATUS);
     assert.dom(JIRA_TYPE_ICON).exists();
     assert.dom(JIRA_PRIORITY_ICON).exists();
 
-    assert
-      .dom(JIRA_ASSIGNEE_AVATAR)
-      .hasAttribute("data-test-assignee", jiraAssignee);
+    assert.dom(JIRA_ASSIGNEE_AVATAR).hasAttribute("alt", TEST_JIRA_ASSIGNEE);
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
 
@@ -571,22 +553,12 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(ADD_JIRA_BUTTON);
     await fillIn(ADD_JIRA_INPUT, TEST_JIRA_ISSUE_SUMMARY);
-
     await click(JIRA_PICKER_RESULT);
 
     assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
     assert.dom(JIRA_ISSUE_TYPE_ICON).exists();
     assert.dom(JIRA_KEY).exists();
     assert.dom(JIRA_SUMMARY).exists();
-
-    // initially the full jira issue is not fetched
-    assert.dom(JIRA_ASSIGNEE_AVATAR).doesNotExist();
-    assert.dom(JIRA_PRIORITY_ICON).doesNotExist();
-    assert.dom(JIRA_STATUS).doesNotExist();
-
-    // but they are fetched after a short delay
-    await waitFor(JIRA_ASSIGNEE_AVATAR);
-
     assert.dom(JIRA_ASSIGNEE_AVATAR).exists();
     assert.dom(JIRA_PRIORITY_ICON).exists();
     assert.dom(JIRA_STATUS).exists();
@@ -597,11 +569,16 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       key: "HER-123",
     });
 
+    this.server.create("jira-picker-result", {
+      key: "HER-123",
+    });
+
     this.server.create("project", {
+      id: 2,
       jiraIssueID: "HER-123",
     });
 
-    await visit("/projects/1");
+    await visit("/projects/2");
 
     assert.dom(JIRA_LINK).exists();
 
@@ -609,6 +586,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await click(JIRA_REMOVE_BUTTON);
 
     assert.dom(JIRA_LINK).doesNotExist();
+
     assert.equal(
       this.server.schema.projects.first().attrs.jiraIssueID,
       undefined,

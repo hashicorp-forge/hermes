@@ -1,4 +1,5 @@
 import { MirageTestContext } from "ember-cli-mirage/test-support";
+import { HermesConfig } from "hermes/config/environment";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 
@@ -19,8 +20,7 @@ export const TEST_JIRA_ISSUE_STATUS = "Open";
 export const TEST_JIRA_ASSIGNEE = TEST_USER_EMAIL;
 export const TEST_JIRA_ASSIGNEE_AVATAR = TEST_USER_PHOTO;
 export const TEST_JIRA_ISSUE_TYPE = "Task";
-export const TEST_JIRA_ISSUE_TYPE_IMAGE =
-  "https://test-jira-issue-type-image.com";
+export const TEST_JIRA_ISSUE_TYPE_IMAGE = "test-jira-issue-type-image.com";
 export const TEST_JIRA_PRIORITY = "Medium";
 export const TEST_JIRA_PRIORITY_IMAGE = "https://test-jira-priority-image.com";
 
@@ -36,6 +36,20 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     picture: "",
     subscriptions: [],
   };
+}
+
+export function setWebConfig(
+  mirageContext: MirageTestContext,
+  key: string,
+  value: any,
+) {
+  const config = key ? { [key]: value } : mirageContext.get("/web/config");
+
+  const configSvc = mirageContext.owner.lookup(
+    "service:config",
+  ) as ConfigService;
+
+  configSvc.config = config as any;
 }
 
 export function setFeatureFlag(

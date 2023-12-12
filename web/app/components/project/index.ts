@@ -241,7 +241,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
-    void this.saveProjectInfo.perform("jiraIssueID", "");
+    void this.saveProjectInfo.perform("jiraIssueID", undefined);
   }
 
   /**
@@ -339,7 +339,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = task(async (key: string, newValue: string) => {
+  protected saveProjectInfo = task(async (key: string, newValue?: string) => {
     try {
       const valueToSave = { [key]: newValue };
 

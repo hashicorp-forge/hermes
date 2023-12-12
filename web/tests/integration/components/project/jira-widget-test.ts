@@ -5,6 +5,11 @@ import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { JiraIssue, JiraPickerResult } from "hermes/types/project";
 import ConfigService from "hermes/services/config";
+import {
+  TEST_JIRA_ISSUE_SUMMARY,
+  setWebConfig,
+} from "hermes/utils/mirage-utils";
+import { TEST_JIRA_WORKSPACE_URL } from "hermes/utils/hermes-urls";
 
 const JIRA_ICON = "[data-test-jira-icon]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";
@@ -16,7 +21,7 @@ const ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
 const REMOVE_JIRA_BUTTON = "[data-test-remove-button]";
 const PRIORITY_ICON = "[data-test-jira-priority-icon]";
-const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar] img";
+const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
 const STATUS = "[data-test-jira-status]";
 const LOADING_ICON = "[data-test-jira-loading]";
 const PICKER_DROPDOWN = "[data-test-jira-picker-dropdown]";
@@ -35,8 +40,6 @@ interface Context extends MirageTestContext {
 module("Integration | Component | project/jira-widget", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
-
-  hooks.beforeEach(async function (this: Context) {});
 
   test("it can render for a form context (no issue attached)", async function (this: Context, assert) {
     await render<Context>(hbs`
@@ -73,15 +76,16 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   });
 
   test("it can render for a form context (issue attached)", async function (this: Context, assert) {
+    setWebConfig(this, "jira_url", TEST_JIRA_WORKSPACE_URL);
+
     /**
-     * In the form context, we'll only ever have the truncated
+     * In the t, we'll only ever have the truncated
      * JiraPickerResult issue, never the full JiraIssue.
      */
-
     const key = "ABC-123";
     const summary = "This is a summary";
     const url = "https://hashicorp.com";
-    const issueTypeImage = "https://hashicorp.com/image.png";
+    const issueTypeImage = "hashicorp.com/image.png";
 
     this.server.create("jira-picker-result", {
       key,
@@ -318,19 +322,14 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   });
 
   test("you can remove a picked jira issue", async function (this: Context, assert) {
-    this.set(
-      "issue",
-      this.server.create("jira-picker-result", {
-        summary: "item",
-      }),
-    );
+    this.server.create("jira-picker-result");
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} @issue={{this.issue}} />
+      <Project::JiraWidget @contextIsForm={{true}}  />
       <div class="click-away"/>
     `);
 
-    await fillIn(ADD_JIRA_INPUT, "item");
+    await fillIn(ADD_JIRA_INPUT, TEST_JIRA_ISSUE_SUMMARY);
 
     await click(PICKER_RESULT);
 
