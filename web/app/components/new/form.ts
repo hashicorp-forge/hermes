@@ -19,13 +19,13 @@ class HermesFormResize extends Resize {
 interface NewFormComponentSignature {
   Element: HTMLFormElement;
   Args: {
-    taskIsRunning: boolean;
+    taskIsRunning?: boolean;
     icon?: string;
     headline?: string;
     taskIsRunningHeadline?: string;
     taskIsRunningDescription?: string;
     buttonText: string;
-    buttonIsActive: boolean;
+    buttonIsActive?: boolean;
     isModal?: boolean;
   };
   Blocks: {
