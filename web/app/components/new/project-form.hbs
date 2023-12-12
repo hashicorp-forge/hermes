@@ -43,8 +43,9 @@
 
   {{#if this.jiraIsEnabled}}
     <div>
-      {{! TODO: semantics }}
-      <div class="hermes-form-label mb-2">Add Jira issue</div>
+      <label for="jira-search-input" class="hermes-form-label mb-2">
+        Add Jira issue
+      </label>
       <Project::JiraWidget
         @issue={{this.jiraIssue}}
         @contextIsForm={{true}}

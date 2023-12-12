@@ -149,6 +149,7 @@
                 {{(unless @contextIsForm (modifier "autofocus"))}}
                 @value={{this.query}}
                 disabled={{@isDisabled}}
+                id="jira-search-input"
                 placeholder={{if
                   @contextIsForm
                   "Search issues..."
