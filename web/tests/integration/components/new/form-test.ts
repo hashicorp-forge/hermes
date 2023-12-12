@@ -1,7 +1,8 @@
-import { TestContext, render } from "@ember/test-helpers";
+import { TestContext, find, render, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
+import { animationsSettled } from "ember-animated/test-support";
 
 const DEFAULT_FORM = "[data-test-new-form]";
 const FORM_FOR_MODAL = "[data-test-new-form-for-modal]";
@@ -68,6 +69,8 @@ module("Integration | Component | new/form", function (hooks) {
       .dom(TASK_IS_RUNNING_DESCRIPTION)
       .exists()
       .hasText("This may take a while.");
+
+    await animationsSettled();
 
     assert.dom(DEFAULT_FORM).doesNotExist();
     assert.dom(SUBMIT_BUTTON).doesNotExist();
