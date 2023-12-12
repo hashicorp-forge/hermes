@@ -4,14 +4,6 @@
   </LinkTo>
 
   <div class="primary-links">
-    <LinkTo
-      data-test-nav-link="all"
-      @route="authenticated.documents"
-      @current-when="authenticated.documents"
-      @query={{this.defaultBrowseScreenQueryParams}}
-    >
-      All Docs
-    </LinkTo>
     {{#if this.flags.projects}}
       <LinkTo
         data-test-nav-link="projects"
@@ -22,6 +14,14 @@
         Projects
       </LinkTo>
     {{/if}}
+    <LinkTo
+      data-test-nav-link="all"
+      @route="authenticated.documents"
+      @current-when="authenticated.documents"
+      @query={{this.defaultBrowseScreenQueryParams}}
+    >
+      All Docs
+    </LinkTo>
     <LinkTo
       data-test-nav-link="my"
       @route="authenticated.my.documents"
