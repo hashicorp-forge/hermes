@@ -41,14 +41,16 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
-  <div>
-    {{! TODO: semantics }}
-    <div class="hermes-form-label mb-2">Add Jira issue</div>
-    <Project::JiraWidget
-      @issue={{this.jiraIssue}}
-      @inputIsShown={{true}}
-      @onIssueSelect={{this.addJiraIssue}}
-    />
-  </div>
+  {{#if this.jiraIsEnabled}}
+    <div>
+      {{! TODO: semantics }}
+      <div class="hermes-form-label mb-2">Add Jira issue</div>
+      <Project::JiraWidget
+        @issue={{this.jiraIssue}}
+        @inputIsShown={{true}}
+        @onIssueSelect={{this.addJiraIssue}}
+      />
+    </div>
+  {{/if}}
 
 </New::Form>

@@ -4,13 +4,11 @@ import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask, task } from "ember-concurrency";
+import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
-import { assert } from "@ember/debug";
 import { JiraPickerResult } from "hermes/types/project";
 
 interface NewProjectFormComponentSignature {}
@@ -35,6 +33,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected titleErrorIsShown = false;
 
   @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
+
+  protected get jiraIsEnabled() {
+    return this.configSvc.config.jira_url;
+  }
 
   @action protected setJiraIssue(_index: number, attrs: JiraPickerResult) {
     this.jiraIssue = attrs;

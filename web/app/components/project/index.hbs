@@ -90,26 +90,28 @@
   </div>
 </div>
 
-{{! Jira }}
-<div class="mt-10 flex w-full max-w-3xl gap-2">
-  <div data-test-jira-object class="relative flex items-center">
-    <div class="mr-4 flex shrink-0 items-center gap-2">
-      <FlightIcon @name="jira" />
+{{#if this.jiraIsEnabled}}
+  {{! Jira }}
+  <div class="mt-10 flex w-full max-w-3xl gap-2">
+    <div data-test-jira-object class="relative flex items-center">
+      <div class="mr-4 flex shrink-0 items-center gap-2">
+        <FlightIcon @name="jira" />
+      </div>
+      <div
+        class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
+      />
     </div>
-    <div
-      class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
+
+    {{! this needs to load gracefully }}
+    <Project::JiraWidget
+      {{did-insert this.maybeLoadJiraInfo}}
+      @issue={{this.jiraIssue}}
+      @onIssueRemove={{this.removeJiraIssue}}
+      @onIssueSelect={{this.addJiraIssue}}
+      @isLoading={{this.loadJiraIssue.isRunning}}
     />
   </div>
-
-  {{! this needs to load gracefully }}
-  <Project::JiraWidget
-    {{did-insert this.maybeLoadJiraInfo}}
-    @issue={{this.jiraIssue}}
-    @onIssueRemove={{this.removeJiraIssue}}
-    @onIssueSelect={{this.addJiraIssue}}
-    @isLoading={{this.loadJiraIssue.isRunning}}
-  />
-</div>
+{{/if}}
 
 <div class="relative mt-6 border-t border-t-color-border-primary">
 

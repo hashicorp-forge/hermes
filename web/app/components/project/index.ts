@@ -75,6 +75,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked private resourceToEditIndex?: number;
 
   /**
+   * Whether Jira is configured for the project.
+   * Determines whether to show the Jira-related UI.
+   */
+  protected get jiraIsEnabled() {
+    return this.configSvc.config.jira_url;
+  }
+
+  /**
    * The label for the status dropdown.
    * Represents the current status of the project.
    */
