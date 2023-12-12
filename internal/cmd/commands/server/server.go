@@ -341,6 +341,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/approvals/",
 			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
+		{"/api/v1/documents", apiv2.DocumentsHandler(srv)},
 		{"/api/v1/documents/",
 			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts",
@@ -365,6 +366,7 @@ func (c *Command) Run(args []string) int {
 		// API v2.
 		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
 		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
+		{"/api/v2/documents", apiv2.DocumentsHandler(srv)},
 		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
 		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
 		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},

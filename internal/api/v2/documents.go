@@ -7,8 +7,13 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strconv"
+	"strings"
+	"sync"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -36,6 +41,165 @@ const (
 	relatedResourcesDocumentSubcollectionRequestType
 	shareableDocumentSubcollectionRequestType
 )
+
+func DocumentsHandler(srv server.Server) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logArgs := []any{
+			"path", r.URL.Path,
+		}
+
+		// Authorize request.
+		userEmail := r.Context().Value("userEmail").(string)
+		if userEmail == "" {
+			srv.Logger.Error("user email not found in request context", logArgs...)
+			http.Error(
+				w, "No authorization information for request", http.StatusUnauthorized)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			logArgs = append(logArgs, "method", r.Method)
+
+			// Get query parameters.
+			q := r.URL.Query()
+			facetFiltersStr := q.Get("facetFilters")
+			facetsStr := q.Get("facets")
+			hitsPerPageStr := q.Get("hitsPerPage")
+			maxValuesPerFacetStr := q.Get("maxValuesPerFacet")
+			pageStr := q.Get("page")
+
+			// Build Algolia parameters.
+			params := []interface{}{}
+			if facetFiltersStr != "" {
+				facetFilters := strings.Split(facetFiltersStr, ",")
+				params = append(params, opt.FacetFilterAnd(facetFilters))
+			}
+			if facetsStr != "" {
+				facets := strings.Split(facetsStr, ",")
+				params = append(params, opt.Facets(facets...))
+			}
+			if hitsPerPageStr != "" {
+				hitsPerPage, err := strconv.Atoi(hitsPerPageStr)
+				if err != nil {
+					srv.Logger.Error("error converting hitsPerPage to int",
+						append([]interface{}{
+							"error", err,
+							"hits_per_page", hitsPerPageStr,
+						}, logArgs...)...)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+				params = append(params, opt.HitsPerPage(hitsPerPage))
+			}
+			if maxValuesPerFacetStr != "" {
+				maxValuesPerFacet, err := strconv.Atoi(maxValuesPerFacetStr)
+				if err != nil {
+					srv.Logger.Error("error converting maxValuesPerFacet to int",
+						append([]interface{}{
+							"error", err,
+							"max_values_per_facet", maxValuesPerFacetStr,
+						}, logArgs...)...)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+				params = append(params, opt.MaxValuesPerFacet(maxValuesPerFacet))
+			}
+			if pageStr != "" {
+				page, err := strconv.Atoi(pageStr)
+				if err != nil {
+					srv.Logger.Error("error converting page to int",
+						append([]interface{}{
+							"error", err,
+							"page", pageStr,
+						}, logArgs...)...)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+				params = append(params, opt.Page(page))
+			}
+
+			// Retrieve documents.
+			var (
+				err  error
+				resp search.QueryRes
+			)
+			sortBy := q.Get("sortBy")
+			if sortBy == "dateAsc" {
+				resp, err = srv.AlgoSearch.DocsCreatedTimeAsc.Search("", params...)
+			} else {
+				resp, err = srv.AlgoSearch.DocsCreatedTimeDesc.Search("", params...)
+			}
+			if err != nil {
+				srv.Logger.Error("error searching Algolia",
+					append([]interface{}{
+						"error", err,
+						"page", pageStr,
+					}, logArgs...)...)
+				http.Error(
+					w, "Error processing request", http.StatusInternalServerError)
+				return
+			}
+
+			// Add owner photos to response.
+			var wg sync.WaitGroup
+			for _, h := range resp.Hits {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+
+					// Convert Algolia object to a document.
+					doc, err := document.NewFromAlgoliaObject(
+						h, srv.Config.DocumentTypes.DocumentType)
+					if err == nil {
+						if len(doc.Owners) > 0 {
+							ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
+							if err != nil {
+								srv.Logger.Warn("error searching directory for owner",
+									append([]interface{}{
+										"error", err,
+										"doc_id", doc.ObjectID,
+										"person", doc.Owners[0],
+									}, logArgs...)...)
+							}
+							if len(ppl) > 0 {
+								if len(ppl[0].Photos) > 0 {
+									h["ownerPhotos"] = []string{ppl[0].Photos[0].Url}
+								}
+							}
+						}
+					}
+				}()
+				wg.Wait()
+			}
+
+			// Write response.
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			enc := json.NewEncoder(w)
+			err = enc.Encode(resp)
+			if err != nil {
+				srv.Logger.Error("error encoding response",
+					append([]interface{}{
+						"error", err,
+						"page", pageStr,
+					}, logArgs...)...)
+				http.Error(
+					w, "Error processing request", http.StatusInternalServerError)
+				return
+			}
+
+			srv.Logger.Info("retrieved documents", logArgs...)
+
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+}
 
 func DocumentHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
