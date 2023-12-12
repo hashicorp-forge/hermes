@@ -16,9 +16,12 @@ import (
 
 type JiraIssueGetResponse struct {
 	Assignee       string `json:"assignee,omitempty"`
+	AssigneeAvatar string `json:"assigneeAvatar,omitempty"`
+	IssueType      string `json:"issueType"`
 	IssueTypeImage string `json:"issueTypeImage"`
 	Key            string `json:"key"`
 	Priority       string `json:"priority"`
+	PriorityImage  string `json:"priorityImage"`
 	Project        string `json:"project"`
 	Reporter       string `json:"reporter"`
 	Status         string `json:"status"`
@@ -141,9 +144,12 @@ func JiraIssueHandler(srv server.Server) http.Handler {
 
 					resp := JiraIssueGetResponse{
 						Assignee:       jiraAPIResp.Fields.Assignee.DisplayName,
+						AssigneeAvatar: jiraAPIResp.Fields.Assignee.AvatarURLs.FourtyEightByFourtyEight,
+						IssueType:      jiraAPIResp.Fields.IssueType.Name,
 						IssueTypeImage: jiraAPIResp.Fields.IssueType.IconURL,
 						Key:            jiraAPIResp.Key,
 						Priority:       jiraAPIResp.Fields.Priority.Name,
+						PriorityImage:  jiraAPIResp.Fields.Priority.IconURL,
 						Project:        jiraAPIResp.Fields.Project.Name,
 						Reporter:       jiraAPIResp.Fields.Reporter.DisplayName,
 						Status:         jiraAPIResp.Fields.Status.Name,
