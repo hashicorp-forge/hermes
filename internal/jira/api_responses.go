@@ -20,10 +20,12 @@ type APIResponseIssueGetFieldsAssignee struct {
 	EmailAddress string                                      `json:"emailAddress"`
 }
 type APIResponseIssueGetFieldsIssueType struct {
-	Name string `json:"name"`
+	IconURL string `json:"iconUrl"`
+	Name    string `json:"name"`
 }
 type APIResponseIssueGetFieldsPriority struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	IconURL string `json:"iconUrl"`
 }
 type APIResponseIssueGetFieldsProject struct {
 	Name string `json:"name"`
