@@ -398,7 +398,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
   }
 
   /**
-   * The action run when the search input is inserted.
    * Saves the input locally and loads initial data.
    */
   @action protected didInsertInput(
