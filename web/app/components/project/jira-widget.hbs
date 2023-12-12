@@ -4,11 +4,8 @@
 >
   {{! TODO: this needs some focus-within styles to capture the correct focused state }}
   <div class="group relative flex w-full">
-    {{#unless @isCompact}}
-      <div
-        data-test-jira-object
-        class="relative z-10 mr-3 flex h-6 items-center"
-      >
+    {{#unless @contextIsForm}}
+      <div data-test-jira-icon class="relative z-10 mr-3 flex h-6 items-center">
         <div class="mr-3 flex shrink-0 gap-2">
           <FlightIcon @name="jira" />
         </div>
@@ -132,18 +129,20 @@
       >
         <:anchor as |dd|>
           <div
-            class="relative h-9 w-full {{unless @isCompact '-mt-1.5 -ml-1.5'}}"
+            class="relative h-9 w-full
+              {{unless @contextIsForm '-mt-1.5 -ml-1.5'}}"
             {{did-insert (fn this.registerDropdown dd)}}
             {{did-insert dd.registerAnchor}}
           >
             {{#if this.inputIsShown}}
               <Hds::Form::TextInput::Base
+                data-test-add-jira-input
                 {{on "input" this.onInput}}
                 {{on "focusout" this.hideInput}}
-                {{(unless @isCompact (modifier "autofocus"))}}
+                {{(unless @contextIsForm (modifier "autofocus"))}}
                 @value={{this.query}}
                 placeholder={{if
-                  @isCompact
+                  @contextIsForm
                   "Search issues..."
                   "Add Jira issue"
                 }}
@@ -152,6 +151,7 @@
               />
             {{else}}
               <Action
+                data-test-add-jira-button
                 class="absolute flex h-full w-full items-center gap-2 rounded-button-md px-2 text-color-foreground-faint hover:bg-color-surface-interactive-hover"
                 {{on "click" this.showInput}}
               >

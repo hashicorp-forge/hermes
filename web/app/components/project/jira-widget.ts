@@ -13,7 +13,7 @@ interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
   Args: {
     // if this is passed in, we show the issue rather than the button
-    issue?: JiraPickerResult | JiraIssue | string;
+    issue?: JiraPickerResult | string;
 
     // what to do when the issue is selected, e.g., call a save action.
     onIssueSelect?: (issue: any) => void;
@@ -25,11 +25,14 @@ interface ProjectJiraWidgetComponentSignature {
 
     isSaving?: boolean;
 
-    isCompact?: boolean;
+    /**
+     * Whether the component is being used in a form context.
+     * If true, removes the leading Jira icon and shows the input, autofocused,
+     * with specific placeholder text and styles.
+     */
+    contextIsForm?: boolean;
 
     isLoading?: boolean;
-
-    // maybe some saving/loading states?
   };
 }
 
@@ -47,12 +50,11 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected dropdownIsShown = false;
 
   protected get inputIsShown() {
-    return this.args.isCompact ?? this._inputIsShown;
+    return this.args.contextIsForm ?? this._inputIsShown;
   }
 
   protected get issue() {
     if (typeof this.args.issue === "string" && this.args.issue.length > 0) {
-      // FOR NOW....
       return { key: this.args.issue };
     }
     return this.args.issue || this._issue;
