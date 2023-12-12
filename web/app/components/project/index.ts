@@ -19,6 +19,7 @@ import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
+import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -99,7 +100,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     hermesDocuments: Partial<RelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
-    this.updateSortOrder();
+    updateRelatedResourcesSortOrder(this.hermesDocuments, this.externalLinks);
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
@@ -120,21 +121,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       externalLinks,
       hermesDocuments,
     };
-  }
-
-  /**
-   * The action to update the `sortOrder` attribute of
-   * the resources, based on their position in the array.
-   * Called when the resource list is saved.
-   */
-  private updateSortOrder() {
-    this.hermesDocuments.forEach((doc, index) => {
-      doc.sortOrder = index + 1;
-    });
-
-    this.externalLinks.forEach((link, index) => {
-      link.sortOrder = index + 1 + this.hermesDocuments.length;
-    });
   }
 
   /**
