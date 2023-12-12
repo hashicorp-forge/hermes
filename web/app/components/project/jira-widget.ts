@@ -70,9 +70,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
 
   @action onIssueSelect(_index: number, issue: JiraPickerResult) {
     this._issue = issue;
-    console.log("ISSUE SELECTED", issue);
     this.args.onIssueSelect?.(issue);
-    // start looking up the rest of the info
   }
 
   @action onDropdownClose() {

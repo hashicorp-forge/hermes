@@ -92,15 +92,7 @@
 
 {{#if this.jiraIsEnabled}}
   {{! Jira }}
-  <div class="mt-10 flex w-full max-w-3xl gap-2">
-    <div data-test-jira-object class="relative flex items-center">
-      <div class="mr-4 flex shrink-0 items-center gap-2">
-        <FlightIcon @name="jira" />
-      </div>
-      <div
-        class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
-      />
-    </div>
+  <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
 
     {{! this needs to load gracefully }}
     <Project::JiraWidget

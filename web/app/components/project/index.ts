@@ -10,11 +10,7 @@ import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task } from "ember-concurrency";
-import {
-  HermesProject,
-  JiraIssue,
-  JiraPickerResult,
-} from "hermes/types/project";
+import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,
@@ -180,18 +176,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   }
 
-  loadJiraIssue = task(async () => {
-    const issue = await this.fetchSvc
-      .fetch(
-        `/api/${
-          this.configSvc.config.api_version
-        }/jira/issue/${this.args.project.jiraIssueID?.toLowerCase()}`,
-      )
-      .then((response) => response?.json());
-
-    this.jiraIssue = issue;
-  });
-
   /**
    * The action to delete a resource from a project.
    * Accessible in the overflow menu of a project resource.
@@ -240,16 +224,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * TODO: Implement this.
-   * ---------------------
    * The placeholder action for adding a Jira object.
    * Updates the local Jira object, then saves the project.
    */
   @action protected addJiraIssue(issue: JiraPickerResult): void {
-    // TODO: implement this
     this.jiraIssue = issue;
     console.log("ADDING JIRA ISSUE", issue);
     void this.saveProjectInfo.perform("jiraIssueID", issue.key);
+    void this.loadJiraIssue.perform(issue.key);
   }
 
   /**
@@ -357,27 +339,36 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = task(
-    async (key?: string, newValue?: string | JiraIssue) => {
-      try {
-        const valueToSave = key
-          ? { [key]: newValue }
-          : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify(valueToSave),
-          },
-        );
-      } catch (e) {
-        this.flashMessages.critical((e as any).message, {
-          title: "Unable to save",
-          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
-        });
-      }
-    },
-  );
+  protected saveProjectInfo = task(async (key: string, newValue: string) => {
+    try {
+      const valueToSave = { [key]: newValue };
+
+      let promise = await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        },
+      );
+    } catch (e) {
+      this.flashMessages.critical((e as any).message, {
+        title: "Unable to save",
+        timeout: FLASH_MESSAGES_LONG_TIMEOUT,
+      });
+    }
+  });
+
+  /**
+   *
+   */
+  loadJiraIssue = task(async (jiraIssueID?: string) => {
+    const id = jiraIssueID ?? this.args.project.jiraIssueID;
+    const issue = await this.fetchSvc
+      .fetch(`/api/${this.configSvc.config.api_version}/jira/issues/${id}`)
+      .then((response) => response?.json());
+    this.jiraIssue = issue;
+    console.log("LOADED JIRA ISSUE", issue);
+  });
 
   /**
    * The task to save the document's related resources.
