@@ -8,7 +8,6 @@
   @buttonText="Create project"
   @isModal={{@isModal}}
   @buttonIsActive={{gt this.title.length 0}}
-  @isModal={{@isModal}}
   {{on "submit" this.maybeSubmitForm}}
 >
   <Hds::Form::Textarea::Field
@@ -40,57 +39,6 @@
     >
       Creating project...
     </div>
-  {{else if this.jiraSearchIsShowing}}
-    <X::DropdownList
-      @inputIsShown={{false}}
-      @items={{this.shownJiraIssues}}
-      @disableClose={{true}}
-      @onItemClick={{this.addJiraIssue}}
-      @placement={{null}}
-      @isLoading={{this.loadInitialJiraIssues.isRunning}}
-      class="non-floating-list theme-neutral"
-    >
-      <:anchor as |dd|>
-        <div class="relative mb-4" {{did-insert dd.registerAnchor}}>
-          <Hds::Form::TextInput::Base
-            {{autofocus}}
-            @type="search"
-            @value={{this.jiraSearchQuery}}
-            {{did-insert (perform this.loadInitialJiraIssues)}}
-            {{on "input" this.updateJiraSearchQuery}}
-            placeholder="Search Jira issues"
-            aria-label="Search Jira issues"
-            aria-haspopup="listbox"
-            aria-controls={{dd.ariaControls}}
-            aria-expanded={{dd.contentIsShown}}
-          />
-          {{#if this.searchJiraIssues.isRunning}}
-            <div
-              class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-            >
-              <FlightIcon @name="loading" />
-            </div>
-          {{/if}}
-        </div>
-      </:anchor>
-      <:item as |dd|>
-        <dd.Action>
-          {{!  }}
-          Actttion
-        </dd.Action>
-      </:item>
-      <:no-matches>
-        No matches TODO
-        <Action {{on "click" (fn this.addJiraIssue "not null")}}>
-          Fake selecting a Jira issue
-        </Action>
-      </:no-matches>
-      <:loading>
-        <div class="h-48">
-          <FlightIcon @name="loading" class="mt-4" />
-        </div>
-      </:loading>
-    </X::DropdownList>
   {{else}}
     <div class="grid gap-5 px-8 pt-2 pb-8">
       <New::ProjectForm />
