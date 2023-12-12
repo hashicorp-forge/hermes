@@ -13,7 +13,7 @@ interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
   Args: {
     // if this is passed in, we show the issue rather than the button
-    issue?: JiraPickerResult | string;
+    issue?: JiraPickerResult | JiraIssue;
 
     // what to do when the issue is selected, e.g., call a save action.
     onIssueSelect?: (issue: any) => void;
@@ -22,8 +22,6 @@ interface ProjectJiraWidgetComponentSignature {
     onIssueRemove?: () => void;
 
     isDisabled?: boolean;
-
-    isSaving?: boolean;
 
     /**
      * Whether the component is being used in a form context.
@@ -54,20 +52,17 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   }
 
   protected get issue() {
-    if (typeof this.args.issue === "string" && this.args.issue.length > 0) {
-      return { key: this.args.issue };
-    }
     return this.args.issue || this._issue;
   }
 
   protected get issueStatus() {
-    if (
-      this.issue &&
-      typeof this.issue === "object" &&
-      "status" in this.issue
-    ) {
+    if (this.issue && "status" in this.issue) {
       return this.issue.status;
     }
+  }
+
+  protected get jiraURL() {
+    return this.configSvc.config.jira_url;
   }
 
   @action onIssueSelect(_index: number, issue: JiraPickerResult) {
@@ -94,7 +89,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
 
   @action onInput(event: Event) {
     this.query = (event.target as HTMLInputElement).value;
-    console.log("THE QUERY IS....", this.query);
+
     if (this.query.length === 0) {
       this._dd?.hideContent();
       return;

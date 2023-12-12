@@ -75,7 +75,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Determines whether to show the Jira-related UI.
    */
   protected get jiraIsEnabled() {
-    return this.configSvc.config.jira_url;
+    return !!this.configSvc.config.jira_url;
   }
 
   /**

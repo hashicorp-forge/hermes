@@ -9,12 +9,13 @@ export interface JiraIssue {
   key: string;
   url: string;
   priority: string;
+  priorityImage: string;
   status: string;
   assignee?: string;
-  type: string;
+  assigneeAvatar?: string;
+  issueType: string;
+  issueTypeImage: string;
   summary: string;
-
-  // TODO: issueTypeImage
 }
 
 export interface JiraPickerResult {

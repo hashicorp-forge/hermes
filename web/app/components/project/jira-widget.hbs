@@ -30,9 +30,11 @@
         <div class="relative mt-0.5 mr-3.5 flex gap-2.5">
 
           <img
+            data-test-jira-issue-type-icon
             width="16"
             height="16"
-            src="https://hashicorp.atlassian.net/{{this.issue.issueTypeImage}}"
+            alt={{this.issue.issueType}}
+            src="{{this.jiraURL}}{{this.issue.issueTypeImage}}"
             class="mt-0.5 h-4 w-4"
           />
 
@@ -53,13 +55,14 @@
 
             {{! see if this attr exists in backend }}
             {{#if this.issue.priority}}
-              <div class="flex">
-                <FlightIcon
-                  data-test-jira-priority-icon
-                  @name="chevrons-up"
-                  class="text-color-foreground-critical"
-                />
-              </div>
+              <img
+                data-test-jira-priority-icon
+                width="16"
+                height="16"
+                alt={{this.issue.priority}}
+                src="{{this.jiraURL}}{{this.issue.priorityImage}}"
+                class="h-4 w-4"
+              />
             {{/if}}
 
             {{! see if this exists in backend }}
@@ -68,15 +71,19 @@
                 data-test-jira-assignee-avatar
                 data-test-assignee={{this.issue.assignee}}
                 @email={{this.issue.assignee}}
+                @imgURL={{this.issue.assigneeAvatar}}
                 @size="small"
               />
             {{/if}}
 
             {{#if this.issueStatus}}
               {{! TODO: max width? }}
+              {{! TODO: status-dependent }}
               <div
                 data-test-jira-status
-                class="rounded-sm bg-color-surface-strong px-1.5 py-px text-body-100 font-medium uppercase"
+                class="jira-status-badge
+                  {{dasherize this.issueStatus}}
+                  rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
               >
                 {{this.issueStatus}}
               </div>
@@ -106,7 +113,7 @@
         </:anchor>
         <:item as |dd|>
           <dd.Action
-            data-test-remove-jira-button
+            data-test-remove-button
             {{on "click" dd.attrs.action}}
             class="flex items-center gap-2"
           >
@@ -116,7 +123,7 @@
         </:item>
       </X::DropdownList>
     {{else if @isLoading}}
-      <FlightIcon @name="loading" class="mt-[3px]" />
+      <FlightIcon data-test-jira-loading @name="loading" class="mt-[3px]" />
     {{else}}
       {{! + Add Jira issue }}
 
@@ -126,6 +133,7 @@
         @items={{this.results}}
         @matchAnchorWidth={{true}}
         {{will-destroy this.onDropdownClose}}
+        data-test-jira-picker-dropdown
       >
         <:anchor as |dd|>
           <div
@@ -141,6 +149,7 @@
                 {{on "focusout" this.hideInput}}
                 {{(unless @contextIsForm (modifier "autofocus"))}}
                 @value={{this.query}}
+                disabled={{@isDisabled}}
                 placeholder={{if
                   @contextIsForm
                   "Search issues..."
@@ -152,6 +161,7 @@
             {{else}}
               <Action
                 data-test-add-jira-button
+                disabled={{@isDisabled}}
                 class="absolute flex h-full w-full items-center gap-2 rounded-button-md px-2 text-color-foreground-faint hover:bg-color-surface-interactive-hover"
                 {{on "click" this.showInput}}
               >
@@ -172,7 +182,10 @@
         </:anchor>
         <:no-matches>
           {{#unless (lt this.query.length 1)}}
-            <div class="x-dropdown-list-default-empty-state">
+            <div
+              data-test-no-matches
+              class="x-dropdown-list-default-empty-state"
+            >
               {{#unless this.searchJiraIssues.isRunning}}
                 No matches
               {{/unless}}
@@ -180,7 +193,7 @@
           {{/unless}}
         </:no-matches>
         <:item as |dd|>
-          <dd.Action class="block py-1">
+          <dd.Action data-test-jira-picker-result class="block py-1">
             {{! TODO: Component-ize }}
             <div class="flex items-center gap-1.5">
               {{! TODO: replace hard-coded url with config variable }}

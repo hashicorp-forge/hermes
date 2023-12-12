@@ -1,18 +1,10 @@
 import { module, test } from "qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { click, find, findAll, render } from "@ember/test-helpers";
+import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import {
-  HermesProject,
-  JiraIssue,
-  JiraPickerResult,
-} from "hermes/types/project";
-import { assert as emberAssert } from "@ember/debug";
-import htmlElement from "hermes/utils/html-element";
-import { RelatedHermesDocument } from "hermes/components/related-resources";
-import { setFeatureFlag } from "hermes/utils/mirage-utils";
-import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+import { JiraIssue, JiraPickerResult } from "hermes/types/project";
+import ConfigService from "hermes/services/config";
 
 const JIRA_ICON = "[data-test-jira-icon]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";
@@ -21,14 +13,23 @@ const KEY = "[data-test-jira-key]";
 const SUMMARY = "[data-test-jira-summary]";
 const LINK = "[data-test-jira-link]";
 const ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
-const OVERFLOW_BUTTON = "[data-test-overflow-button]";
+const OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
+const REMOVE_JIRA_BUTTON = "[data-test-remove-button]";
 const PRIORITY_ICON = "[data-test-jira-priority-icon]";
-const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar]";
+const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar] img";
 const STATUS = "[data-test-jira-status]";
+const LOADING_ICON = "[data-test-jira-loading]";
+const PICKER_DROPDOWN = "[data-test-jira-picker-dropdown]";
+const PICKER_RESULT = "[data-test-jira-picker-result]";
+const NO_MATCHES = "[data-test-no-matches]";
+const SEARCHING_ICON = "[data-test-related-resources-search-loading-icon]";
 
 interface Context extends MirageTestContext {
   contextIsForm: boolean;
-  issue: JiraPickerResult | string;
+  issue: JiraPickerResult | JiraIssue;
+  isLoading: boolean;
+  onIssueSelect: () => void;
+  onIssueRemove: () => void;
 }
 
 module("Integration | Component | project/jira-widget", function (hooks) {
@@ -103,8 +104,12 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
     assert.dom(LINK).hasAttribute("href", url);
-    assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
     assert.dom(OVERFLOW_BUTTON).exists();
+
+    const configSvc = this.owner.lookup("service:config") as ConfigService;
+    const jiraUrl = configSvc.config.jira_url;
+
+    assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", jiraUrl + issueTypeImage);
 
     // These are not shown in the form context
     assert.dom(PRIORITY_ICON).doesNotExist();
@@ -115,6 +120,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   test("it can render outside of a form context (no issue attached)", async function (this: Context, assert) {
     await render<Context>(hbs`
       <Project::JiraWidget />
+      <div class="click-away"/>
     `);
 
     assert.dom(JIRA_ICON).exists();
@@ -131,7 +137,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       .dom(ADD_JIRA_BUTTON)
       .doesNotExist("the button is hidden while the input is shown");
 
-    await click("body");
+    await click(".click-away");
 
     assert
       .dom(ADD_JIRA_INPUT)
@@ -143,34 +149,299 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   });
 
   test("it can render in a non-form context (issue attached)", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+    const key = "XYZ-123";
+    const summary = "Foo";
+    const url = "https://hashicorp.com/bar";
+    const status = "Closed";
+    const issueType = "Epic";
+    const issueTypeImage = "https://hashicorp.com/image.png";
+    const priority = "High";
+    const priorityImage = "https://hashicorp.com/priority.png";
+    const assignee = "Mishra";
+    const assigneeAvatar = "https://hashicorp.com/avatar.png";
+
+    this.server.create("jira-issue", {
+      key,
+      summary,
+      url,
+      status,
+      issueType,
+      issueTypeImage,
+      priority,
+      priorityImage,
+      assignee,
+      assigneeAvatar,
+    });
+
+    this.set("issue", this.server.schema.jiraIssues.first());
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @issue={{this.issue}}
+      />
+    `);
+
+    assert.dom(KEY).hasText(key);
+    assert.dom(SUMMARY).hasText(summary);
+    assert.dom(LINK).hasAttribute("href", url);
+    assert
+      .dom(ISSUE_TYPE_ICON)
+      .hasAttribute("src", issueTypeImage)
+      .hasAttribute("alt", issueType);
+
+    assert
+      .dom(PRIORITY_ICON)
+      .hasAttribute("src", priorityImage)
+      .hasAttribute("alt", priority);
+
+    assert
+      .dom(ASSIGNEE_AVATAR)
+      .hasAttribute("src", assigneeAvatar)
+      .hasAttribute("alt", assignee);
+
+    assert.dom(STATUS).hasText(status);
   });
 
   test("it can be disabled", async function (this: Context, assert) {
-    await render<Context>(hbs``);
-  });
+    this.set("contextIsForm", false);
 
-  test("it can be saving", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @isDisabled={{true}}
+        @contextIsForm={{this.contextIsForm}}
+      />
+    `);
+
+    assert.dom(ADD_JIRA_BUTTON).isDisabled();
+
+    this.set("contextIsForm", true);
+
+    assert.dom(ADD_JIRA_INPUT).isDisabled();
   });
 
   test("it can be loading", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+    this.set("isLoading", true);
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @isLoading={{this.isLoading}}
+      />
+    `);
+
+    assert.dom(LOADING_ICON).exists();
+
+    assert.dom(ADD_JIRA_BUTTON).doesNotExist();
+    assert.dom(ADD_JIRA_INPUT).doesNotExist();
+
+    this.set("isLoading", false);
+
+    assert.dom(LOADING_ICON).doesNotExist();
+
+    assert.dom(ADD_JIRA_BUTTON).exists();
+    assert.dom(ADD_JIRA_INPUT).doesNotExist();
   });
 
-  test("you can open and close the dropdown", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+  test("you can type to open the dropdown", async function (this: Context, assert) {
+    this.server.create("jira-picker-result", {
+      summary: "item",
+    });
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @contextIsForm={{true}} />
+    `);
+
+    assert.dom(PICKER_DROPDOWN).doesNotExist();
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    assert.dom(PICKER_DROPDOWN).exists();
+    assert
+      .dom(PICKER_RESULT)
+      .exists({ count: 1 }, "it shows results for the query");
+
+    await fillIn(ADD_JIRA_INPUT, "");
+
+    assert
+      .dom(PICKER_DROPDOWN)
+      .doesNotExist("the dropdown hides when the input is cleared");
+
+    await fillIn(ADD_JIRA_INPUT, "something else");
+
+    assert.dom(PICKER_RESULT).doesNotExist();
+
+    assert
+      .dom(NO_MATCHES)
+      .exists("it shows a no-matches message when there are no results");
+  });
+
+  test("it shows a search icon when searching", async function (this: Context, assert) {
+    await render<Context>(hbs`
+      <Project::JiraWidget @contextIsForm={{true}} />
+    `);
+
+    assert.dom(SEARCHING_ICON).doesNotExist();
+
+    let fillInPromise = fillIn(ADD_JIRA_INPUT, "item");
+
+    await waitFor(SEARCHING_ICON);
+
+    await fillInPromise;
+
+    assert.dom(SEARCHING_ICON).doesNotExist();
   });
 
   test("you can select a jira issue from the dropdown", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+    const key = "ABC-123";
+    const summary = "item";
+    const url = "https://hashicorp.com";
+    const issueTypeImage = "https://hashicorp.com/image.png";
+
+    this.server.create("jira-picker-result", {
+      key,
+      summary,
+      issueTypeImage,
+      url,
+    });
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @contextIsForm={{true}} />
+    `);
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    await click(PICKER_RESULT);
+
+    assert.dom(KEY).hasText(key);
+    assert.dom(SUMMARY).hasText(summary);
+    assert.dom(LINK).hasAttribute("href", url);
+    assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
   });
 
-  test("you can remove a jira issue", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+  test("you can remove a picked jira issue", async function (this: Context, assert) {
+    this.set(
+      "issue",
+      this.server.create("jira-picker-result", {
+        summary: "item",
+      }),
+    );
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @contextIsForm={{true}} @issue={{this.issue}} />
+      <div class="click-away"/>
+    `);
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    await click(PICKER_RESULT);
+
+    assert.dom(KEY).exists();
+
+    await click(OVERFLOW_BUTTON);
+
+    await click(REMOVE_JIRA_BUTTON);
+
+    assert.dom(KEY).doesNotExist();
+
+    assert.dom(ADD_JIRA_INPUT).exists();
   });
 
-  test("the query and results are reset when the dropdown is hidden", async function (this: Context, assert) {
-    await render<Context>(hbs``);
+  test("the query is reset when the dropdown is hidden (form context)", async function (this: Context, assert) {
+    this.server.createList("jira-picker-result", 6, {
+      summary: "item",
+    });
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @contextIsForm={{true}} />
+      <div class="click-away"/>
+    `);
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    assert.dom(PICKER_RESULT).exists({ count: 6 });
+
+    await click(".click-away");
+
+    assert.dom(PICKER_DROPDOWN).doesNotExist();
+
+    assert
+      .dom(ADD_JIRA_INPUT)
+      .hasValue("", "the input is cleared when the dropdown is closed");
+
+    await click(ADD_JIRA_INPUT);
+
+    assert.dom(PICKER_DROPDOWN).doesNotExist("the results are also cleared");
+  });
+
+  test("the query is reset when the dropdown is hidden (non-form context)", async function (this: Context, assert) {
+    this.server.createList("jira-picker-result", 6, {
+      summary: "item",
+    });
+
+    await render<Context>(hbs`
+      <Project::JiraWidget />
+      <div class="click-away"/>
+    `);
+
+    await click(ADD_JIRA_BUTTON);
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    assert.dom(PICKER_RESULT).exists({ count: 6 });
+
+    await click(".click-away");
+
+    assert.dom(PICKER_DROPDOWN).doesNotExist();
+
+    assert.dom(ADD_JIRA_INPUT).doesNotExist();
+
+    await click(ADD_JIRA_BUTTON);
+
+    assert.dom(ADD_JIRA_INPUT).hasValue("", "the input is cleared");
+
+    assert.dom(PICKER_DROPDOWN).doesNotExist("the results are also cleared");
+  });
+
+  test("it can run an onSave action", async function (this: Context, assert) {
+    let count = 0;
+    this.set("onIssueSelect", () => count++);
+
+    this.server.create("jira-picker-result", {
+      summary: "item",
+    });
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @contextIsForm={{true}}
+        @onIssueSelect={{this.onIssueSelect}}
+      />
+    `);
+
+    await fillIn(ADD_JIRA_INPUT, "item");
+
+    await click(PICKER_RESULT);
+
+    assert.equal(count, 1, "the onSave action was called");
+  });
+
+  test("it can run an onRemove action", async function (this: Context, assert) {
+    let count = 0;
+
+    this.set("onIssueRemove", () => count++);
+
+    this.set("issue", this.server.create("jira-picker-result"));
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @contextIsForm={{true}}
+        @issue={{this.issue}}
+        @onIssueRemove={{this.onIssueRemove}}
+      />
+    `);
+
+    await click(OVERFLOW_BUTTON);
+
+    await click(REMOVE_JIRA_BUTTON);
+
+    assert.equal(count, 1, "the onRemove action was called");
   });
 });

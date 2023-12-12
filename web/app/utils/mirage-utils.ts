@@ -13,6 +13,17 @@ export const TEST_USER_2_GIVEN_NAME = "Foo";
 
 export const TEST_USER_3_EMAIL = "bar@hashicorp.com";
 
+export const TEST_JIRA_ISSUE_URL = "https://test-jira-issue-url.com";
+export const TEST_JIRA_ISSUE_SUMMARY = "This is a Jira object";
+export const TEST_JIRA_ISSUE_STATUS = "Open";
+export const TEST_JIRA_ASSIGNEE = TEST_USER_EMAIL;
+export const TEST_JIRA_ASSIGNEE_AVATAR = TEST_USER_PHOTO;
+export const TEST_JIRA_ISSUE_TYPE = "Task";
+export const TEST_JIRA_ISSUE_TYPE_IMAGE =
+  "https://test-jira-issue-type-image.com";
+export const TEST_JIRA_PRIORITY = "Medium";
+export const TEST_JIRA_PRIORITY_IMAGE = "https://test-jira-priority-image.com";
+
 export function authenticateTestUser(mirageContext: MirageTestContext) {
   const authenticatedUserService = mirageContext.owner.lookup(
     "service:authenticated-user",

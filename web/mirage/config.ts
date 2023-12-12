@@ -12,6 +12,7 @@ import config from "../config/environment";
 import {
   TEST_SUPPORT_URL,
   TEST_SHORT_LINK_BASE_URL,
+  TEST_JIRA_WORKSPACE_URL,
 } from "hermes/utils/hermes-urls";
 
 import {
@@ -232,9 +233,33 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * Jira requests
+       *
+       *************************************************************************/
+      // Get issue
+      this.get("/jira/issues/:issue_id", (schema, request) => {
+        const issue = schema.jiraIssues.findBy({
+          key: request.params.issue_id,
+        });
+        return new Response(200, {}, issue.attrs);
+      });
+
+      // Issue picker
+      this.get("/jira/issue/picker", (schema, request) => {
+        const query = request.queryParams.query;
+        const issues = schema.jiraPickerResults.all().models.filter((issue) => {
+          return issue.attrs.summary.includes(query);
+        });
+
+        return new Response(200, {}, issues);
+      });
+
+      /*************************************************************************
+       *
        * Project requests
        *
        *************************************************************************/
+
       // Create a project
       this.post("/projects", (schema, request) => {
         let project = schema.projects.create(JSON.parse(request.requestBody));
@@ -423,6 +448,7 @@ export default function (mirageConfig) {
             feature_flags: {
               projects: true,
             },
+            jira_url: TEST_JIRA_WORKSPACE_URL,
             google_doc_folders: "",
             short_link_base_url: TEST_SHORT_LINK_BASE_URL,
             skip_google_auth: false,
