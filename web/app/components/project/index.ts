@@ -229,7 +229,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected addJiraIssue(issue: JiraPickerResult): void {
     this.jiraIssue = issue;
-    console.log("ADDING JIRA ISSUE", issue);
     void this.saveProjectInfo.perform("jiraIssueID", issue.key);
     void this.loadJiraIssue.perform(issue.key);
   }
@@ -367,7 +366,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       .fetch(`/api/${this.configSvc.config.api_version}/jira/issues/${id}`)
       .then((response) => response?.json());
     this.jiraIssue = issue;
-    console.log("LOADED JIRA ISSUE", issue);
   });
 
   /**

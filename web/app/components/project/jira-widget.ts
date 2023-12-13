@@ -61,7 +61,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
     }
   }
 
-  protected get jiraURL() {
+  protected get jiraWorkspaceURL() {
     return this.configSvc.config.jira_url;
   }
 

@@ -35,7 +35,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
   protected get jiraIsEnabled() {
-    return this.configSvc.config.jira_url;
+    return !!this.configSvc.config.jira_url;
   }
 
   @action protected setJiraIssue(_index: number, attrs: JiraPickerResult) {

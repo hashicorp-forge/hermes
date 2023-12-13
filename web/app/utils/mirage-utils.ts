@@ -2,6 +2,12 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { HermesConfig } from "hermes/config/environment";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
+import config from "../config/environment";
+import {
+  TEST_JIRA_WORKSPACE_URL,
+  TEST_SHORT_LINK_BASE_URL,
+  TEST_SUPPORT_URL,
+} from "./hermes-urls";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
@@ -24,6 +30,24 @@ export const TEST_JIRA_ISSUE_TYPE_IMAGE = "test-jira-issue-type-image.com";
 export const TEST_JIRA_PRIORITY = "Medium";
 export const TEST_JIRA_PRIORITY_IMAGE = "https://test-jira-priority-image.com";
 
+export const TEST_WEB_CONFIG = {
+  algolia_docs_index_name: config.algolia.docsIndexName,
+  algolia_drafts_index_name: config.algolia.draftsIndexName,
+  algolia_internal_index_name: config.algolia.internalIndexName,
+  api_version: "v1",
+  feature_flags: {
+    projects: true,
+  },
+  jira_url: TEST_JIRA_WORKSPACE_URL,
+  google_doc_folders: "",
+  short_link_base_url: TEST_SHORT_LINK_BASE_URL,
+  skip_google_auth: false,
+  google_analytics_tag_id: undefined,
+  support_link_url: TEST_SUPPORT_URL,
+  version: "1.2.3",
+  short_revision: "abc123",
+};
+
 export function authenticateTestUser(mirageContext: MirageTestContext) {
   const authenticatedUserService = mirageContext.owner.lookup(
     "service:authenticated-user",
@@ -38,18 +62,22 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
   };
 }
 
+// For integration tests
 export function setWebConfig(
   mirageContext: MirageTestContext,
   key: string,
   value: any,
 ) {
-  const config = key ? { [key]: value } : mirageContext.get("/web/config");
+  const updatedConfig = {
+    ...TEST_WEB_CONFIG,
+    [key]: value,
+  };
 
   const configSvc = mirageContext.owner.lookup(
     "service:config",
   ) as ConfigService;
 
-  configSvc.config = config as any;
+  configSvc.config = updatedConfig as any;
 }
 
 export function setFeatureFlag(

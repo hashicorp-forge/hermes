@@ -15,6 +15,7 @@ import {
   TEST_JIRA_PRIORITY_IMAGE,
   TEST_USER_EMAIL,
   TEST_USER_PHOTO,
+  TEST_WEB_CONFIG,
 } from "hermes/utils/mirage-utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
@@ -591,5 +592,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.jiraIssueID,
       undefined,
     );
+  });
+
+  test('the jira widget is hidden if the "jira_url" config is not set', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return { ...TEST_WEB_CONFIG, jira_url: null };
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(ADD_JIRA_BUTTON).doesNotExist();
   });
 });

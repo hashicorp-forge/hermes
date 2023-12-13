@@ -79,7 +79,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     setWebConfig(this, "jira_url", TEST_JIRA_WORKSPACE_URL);
 
     /**
-     * In the t, we'll only ever have the truncated
+     * In the form context, we'll only ever have the truncated
      * JiraPickerResult issue, never the full JiraIssue.
      */
     const key = "ABC-123";
@@ -110,10 +110,9 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     assert.dom(LINK).hasAttribute("href", url);
     assert.dom(OVERFLOW_BUTTON).exists();
 
-    const configSvc = this.owner.lookup("service:config") as ConfigService;
-    const jiraUrl = configSvc.config.jira_url;
-
-    assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", jiraUrl + issueTypeImage);
+    assert
+      .dom(ISSUE_TYPE_ICON)
+      .hasAttribute("src", TEST_JIRA_WORKSPACE_URL + issueTypeImage);
 
     // These are not shown in the form context
     assert.dom(PRIORITY_ICON).doesNotExist();

@@ -6,16 +6,8 @@ import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
 
-// @ts-ignore - Mirage not detecting file
-import config from "../config/environment";
-
 import {
-  TEST_SUPPORT_URL,
-  TEST_SHORT_LINK_BASE_URL,
-  TEST_JIRA_WORKSPACE_URL,
-} from "hermes/utils/hermes-urls";
-
-import {
+  TEST_WEB_CONFIG,
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
@@ -438,26 +430,7 @@ export default function (mirageConfig) {
        */
       this.get("/web/config", () => {
         // TODO: allow this to be overwritten in the request
-        return new Response(
-          200,
-          {},
-          {
-            algolia_docs_index_name: config.algolia.docsIndexName,
-            algolia_drafts_index_name: config.algolia.draftsIndexName,
-            algolia_internal_index_name: config.algolia.internalIndexName,
-            feature_flags: {
-              projects: true,
-            },
-            jira_url: TEST_JIRA_WORKSPACE_URL,
-            google_doc_folders: "",
-            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
-            skip_google_auth: false,
-            google_analytics_tag_id: undefined,
-            support_link_url: TEST_SUPPORT_URL,
-            version: "1.2.3",
-            short_revision: "abc123",
-          },
-        );
+        return new Response(200, {}, TEST_WEB_CONFIG);
       });
 
       /**
