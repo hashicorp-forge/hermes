@@ -11,7 +11,11 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 
-interface NewProjectFormComponentSignature {}
+interface NewProjectFormComponentSignature {
+  Args: {
+    isModal?: boolean;
+  };
+}
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;

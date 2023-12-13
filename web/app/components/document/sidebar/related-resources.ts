@@ -19,6 +19,7 @@ import {
 import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
+import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
@@ -122,13 +123,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * Called when the resource list is saved.
    */
   @action private updateSortOrder() {
-    this.relatedDocuments.forEach((doc, index) => {
-      doc.sortOrder = index + 1;
-    });
-
-    this.relatedLinks.forEach((link, index) => {
-      link.sortOrder = index + 1 + this.relatedDocuments.length;
-    });
+    updateRelatedResourcesSortOrder(this.relatedDocuments, this.relatedLinks);
   }
 
   /**

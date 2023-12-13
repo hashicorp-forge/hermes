@@ -7,11 +7,13 @@
   @taskIsRunningDescription="This shouldn't take long."
   @buttonText="Create project"
   @buttonIsActive={{gt this.title.length 0}}
+  @isModal={{@isModal}}
   {{on "submit" this.maybeSubmitForm}}
 >
   <Hds::Form::Textarea::Field
     {{on "keydown" this.onKeydown}}
     {{auto-height-textarea}}
+    autofocus
     {{autofocus}}
     data-test-title
     @value={{this.title}}
@@ -23,7 +25,7 @@
       Title
     </F.Label>
     {{#if this.titleErrorIsShown}}
-      <F.Error data-test-title-error>
+      <F.Error data-test-title-error class="mt-2">
         Title is required.
       </F.Error>
     {{/if}}
