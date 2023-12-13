@@ -47,7 +47,3 @@ export interface HermesProject
     HermesProjectResources {
   jiraIssue?: JiraIssue;
 }
-// TODO: move elsewhere
-export type AlgoliaObject<T> = T & {
-  objectID: string;
-};

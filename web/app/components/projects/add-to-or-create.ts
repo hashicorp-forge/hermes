@@ -20,7 +20,7 @@ import FormsService from "hermes/services/forms";
 interface ProjectsAddToOrCreateSignature {
   Args: {
     onClose: () => void;
-    onSave: (project: AlgoliaObject<HermesProjectInfo>) => void;
+    onSave: (project: HermesProjectInfo) => void;
     document: HermesDocument;
   };
 }
@@ -37,7 +37,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
-  @tracked private projectResults: HermesProject[] | null = null;
+  @tracked private allProjects: HermesProject[] | null = null;
 
   /**
    * The projects that are shown in the search modal.
@@ -45,11 +45,11 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    * associated with the document.
    */
   protected get shownProjects() {
-    if (!this.projectResults) {
+    if (!this.allProjects) {
       return [];
     }
 
-    return this.projectResults
+    return this.allProjects
       .filter((project: HermesProject) => {
         return (
           project.status !== ProjectStatus.Archived &&
@@ -97,10 +97,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    * Passed to X::DropdownList as `onClick`.
    * Calls the passed-in `onSave` and `onClose` actions.
    */
-  @action protected onSave(
-    _index: number,
-    project: AlgoliaObject<HermesProjectInfo>,
-  ) {
+  @action protected onSave(_index: number, project: HermesProjectInfo) {
     void this.args.onSave(project);
     this.args.onClose();
   }
@@ -108,16 +105,14 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   /**
    * The action to load the projects list.
    * Called when the search modal is rendered.
-   * Will trigger a loading state in the search modal.
+   * Triggers a blank query to the projects API.
    */
   protected loadProjects = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
 
     try {
-      this.projectResults = await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/projects?query=${this.query}`,
-        )
+      this.allProjects = await this.fetchSvc
+        .fetch(`/api/${this.configSvc.config.api_version}/projects`)
         .then((response) => response?.json());
 
       next(() => {

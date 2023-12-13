@@ -126,9 +126,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Set by `loadRelatedProjects` and used to render a list
    * of projects or an empty state.
    */
-  @tracked protected _projects: Array<
-    HermesProjectInfo | AlgoliaObject<HermesProjectInfo>
-  > | null = null;
+  @tracked protected _projects: Array<HermesProjectInfo> | null = null;
 
   /**
    * Whether a draft was published during the session.
