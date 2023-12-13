@@ -8,29 +8,22 @@ import { JiraIssue, JiraPickerResult } from "hermes/types/project";
 import ConfigService from "hermes/services/config";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
+import { assert } from "@ember/debug";
 
 interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    // if this is passed in, we show the issue rather than the button
     issue?: JiraPickerResult | JiraIssue;
-
-    // what to do when the issue is selected, e.g., call a save action.
     onIssueSelect?: (issue: any) => void;
-
-    // what to do when the user removes the issue
     onIssueRemove?: () => void;
-
     isDisabled?: boolean;
-
+    isLoading?: boolean;
     /**
      * Whether the component is being used in a form context.
      * If true, removes the leading Jira icon and shows the input, autofocused,
      * with specific placeholder text and styles.
      */
     contextIsForm?: boolean;
-
-    isLoading?: boolean;
   };
 }
 
@@ -47,61 +40,123 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected _inputIsShown = false;
   @tracked protected dropdownIsShown = false;
 
+  /**
+   * An assert-true getter for the dropdown interface.
+   * Asserts that the dropdown exists before returning it.
+   */
+  protected get dd(): XDropdownListAnchorAPI {
+    assert("dropdown must exist", this._dd);
+    return this._dd;
+  }
+
+  /**
+   * Whether the search input is shown.
+   * True if the context is a form, or if the
+   * "Add Jira issue" button has been clicked.
+   */
   protected get inputIsShown() {
     return this.args.contextIsForm ?? this._inputIsShown;
   }
 
+  /**
+   * The issue to display in the widget, if any.
+   * If the issue is passed as an argument, such as when
+   * a project with an issue is loaded, use that.
+   * Otherwise, use the picked issue.
+   */
   protected get issue() {
     return this.args.issue || this._issue;
   }
 
+  /**
+   * The status of the issue, if it exists.
+   * Will exist if the issue is a full Jira issue.
+   * Determines if the status is shown in the widget.
+   */
   protected get issueStatus() {
     if (this.issue && "status" in this.issue) {
       return this.issue.status;
     }
   }
 
+  /**
+   * The URL to the Jira workspace.
+   * Used to preface various image URLs.
+   */
   protected get jiraWorkspaceURL() {
     return this.configSvc.config.jira_url;
   }
 
+  /**
+   * The action to run when an issue is selected.
+   * Sets the local issue and runs the passed action.
+   */
   @action onIssueSelect(_index: number, issue: JiraPickerResult) {
     this._issue = issue;
     this.args.onIssueSelect?.(issue);
   }
 
+  /**
+   * The action to run when the dropdown is closed.
+   * Clears the query and results.
+   */
   @action onDropdownClose() {
     this.results = [];
     this.query = "";
   }
 
+  /**
+   * The action to register the dropdown interface locally
+   * for easy use in the component.
+   */
   @action registerDropdown(dd: XDropdownListAnchorAPI) {
     this._dd = dd;
   }
 
+  /**
+   * The action to show the search input.
+   * Runs when the "Add Jira issue" button is clicked.
+   */
   @action protected showInput() {
     this._inputIsShown = true;
   }
 
+  /**
+   * The action to hide the search input.
+   * Runs on `focusout` of the search input.
+   */
   @action protected hideInput() {
     this._inputIsShown = false;
   }
 
+  /**
+   * The action run when the search input is typed in.
+   * Updates the local query value and runs the search task.
+   * If the query is empty, hides the dropdown.
+   */
   @action onInput(event: Event) {
     this.query = (event.target as HTMLInputElement).value;
 
     if (this.query.length === 0) {
-      this._dd?.hideContent();
+      this.dd.hideContent();
       return;
     }
     void this.searchJiraIssues.perform();
   }
-
+  /**
+   * The action to remove the issue from the widget.
+   * Resets the local issue and runs `onIssueRemove` if it exists.
+   */
   @action removeIssue() {
     this._issue = null;
     this.args.onIssueRemove?.();
   }
-
+  /**
+   * The task to search the Jira picker. Restarts on every input change.
+   * Sends a request with the current query and sets the results to
+   * the response. Shows the dropdown and runs dropdown functions to
+   * assign menu item IDs and reset the focused item index.
+   */
   searchJiraIssues = restartableTask(async () => {
     const issues = await this.fetchSvc
       .fetch(
@@ -111,12 +166,12 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
 
     this.results = issues;
 
-    this._dd?.showContent();
+    this.dd.showContent();
 
-    this._dd?.resetFocusedItemIndex();
+    this.dd.resetFocusedItemIndex();
 
     next(() => {
-      this._dd?.scheduleAssignMenuItemIDs();
+      this.dd.scheduleAssignMenuItemIDs();
     });
   });
 }

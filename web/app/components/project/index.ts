@@ -169,6 +169,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   }
 
+  /**
+   * The action to kick off the Jira issue loading task.
+   * Runs when the component is inserted and the project has a Jira issue.
+   */
   @action maybeLoadJiraInfo() {
     if (this.args.project.jiraIssueID) {
       // kick off a task to load the jira issue
@@ -224,8 +228,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * The placeholder action for adding a Jira object.
-   * Updates the local Jira object, then saves the project.
+   * The action for adding a Jira object, passed to the JiraWidget
+   * as `onIssueSelect`. Updates the local Jira object,
+   * then saves the project.
    */
   @action protected addJiraIssue(issue: JiraPickerResult): void {
     this.jiraIssue = issue;
@@ -358,7 +363,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   });
 
   /**
-   *
+   * The task to load a Jira issue from an ID.
+   * Used to populate the JiraWidget when the component is inserted,
+   * or when a user adds a Jira issue to a project.
    */
   loadJiraIssue = task(async (jiraIssueID?: string) => {
     const id = jiraIssueID ?? this.args.project.jiraIssueID;

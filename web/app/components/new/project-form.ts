@@ -34,12 +34,20 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
 
   @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
+  /**
+   * Whether the Jira integration is enabled.
+   * Determines whether the Jira input is rendered.
+   */
   protected get jiraIsEnabled() {
     return !!this.configSvc.config.jira_url;
   }
 
-  @action protected setJiraIssue(_index: number, attrs: JiraPickerResult) {
-    this.jiraIssue = attrs;
+  /**
+   * The action run when a Jira issue is selected.
+   * Passed to the JiraWidget as `onIssueSelect`.
+   */
+  @action protected setJiraIssue(issue: JiraPickerResult) {
+    this.jiraIssue = issue;
   }
 
   /**
@@ -75,10 +83,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         this.validate();
       });
     }
-  }
-
-  @action protected addJiraIssue(issue: JiraPickerResult) {
-    this.jiraIssue = issue;
   }
 
   /**

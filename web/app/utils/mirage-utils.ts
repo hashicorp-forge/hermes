@@ -62,7 +62,23 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
   };
 }
 
-// For integration tests
+export function setFeatureFlag(
+  mirageContext: MirageTestContext,
+  flag: string,
+  value: boolean,
+) {
+  const configSvc = mirageContext.owner.lookup(
+    "service:config",
+  ) as ConfigService;
+
+  configSvc.config.feature_flags[flag] = value;
+}
+
+/**
+ * Sets a custom config for a specific key.
+ * Used in integration tests to mock different values.
+ * For acceptance tests, replace the getter for `/web/config`.
+ */
 export function setWebConfig(
   mirageContext: MirageTestContext,
   key: string,
@@ -78,16 +94,4 @@ export function setWebConfig(
   ) as ConfigService;
 
   configSvc.config = updatedConfig as any;
-}
-
-export function setFeatureFlag(
-  mirageContext: MirageTestContext,
-  flag: string,
-  value: boolean,
-) {
-  const configSvc = mirageContext.owner.lookup(
-    "service:config",
-  ) as ConfigService;
-
-  configSvc.config.feature_flags[flag] = value;
 }
