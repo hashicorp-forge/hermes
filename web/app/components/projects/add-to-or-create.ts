@@ -15,6 +15,7 @@ import AlgoliaService from "hermes/services/algolia";
 import { ProjectStatus } from "hermes/types/project-status";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
+import FormsService from "hermes/services/forms";
 
 interface ProjectsAddToOrCreateSignature {
   Args: {
@@ -28,6 +29,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
+  @service declare forms: FormsService;
 
   @tracked protected query = "";
   @tracked private dd: XDropdownListAnchorAPI | null = null;

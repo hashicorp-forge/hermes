@@ -237,7 +237,6 @@
           <Document::Sidebar::SectionHeader
             {{did-insert (perform this.loadRelatedProjects)}}
             @title="Projects"
-            @badgeText="New"
             @buttonAction={{this.showProjectsModal}}
             @buttonIsDisabled={{this.isDraft}}
             @disabledButtonTooltipText="Only published docs can be added to projects."

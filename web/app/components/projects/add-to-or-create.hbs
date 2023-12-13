@@ -1,9 +1,16 @@
 {{#if this.newProjectFormIsShown}}
-  <New::ProjectForm
-    @document={{@document}}
-    @isModal={{true}}
-    @onModalClose={{@onClose}}
-  />
+  <Hds::Modal @onClose={{@onClose}} as |M|>
+    <M.Header>
+      {{unless this.forms.projectIsBeingCreated "Start a project"}}
+    </M.Header>
+    <M.Body>
+      <New::ProjectForm
+        @document={{@document}}
+        @isModal={{true}}
+        @onModalClose={{@onClose}}
+      />
+    </M.Body>
+  </Hds::Modal>
 {{else}}
   <Hds::Modal @onClose={{this.maybeClose}} as |M|>
     <M.Header>

@@ -11,6 +11,8 @@ import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
+import { timeout } from "ember-animated/-private/ember-scheduler";
+import FormsService from "hermes/services/forms";
 
 interface NewProjectFormComponentSignature {
   Args: {
@@ -24,6 +26,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
+  @service declare forms: FormsService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked protected jiraSearchIsShowing = false;
@@ -32,18 +35,13 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
 
   @tracked protected shownJiraIssues = [];
 
-  /**
-   * Whether the project is being created, or in the process of
-   * transitioning to the project screen after successful creation.
-   * Used by the `New::Form` component for conditional rendering.
-   * Set true when the createProject task is running.
-   * Reverted only if an error occurs.
-   */
-  @tracked protected projectIsBeingCreated = false;
-
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
+
+  private validate() {
+    this.titleErrorIsShown = this.title.length === 0;
+  }
 
   /**
    * Whether the Jira integration is enabled.
@@ -59,6 +57,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   @action protected setJiraIssue(issue: JiraPickerResult) {
     this.jiraIssue = issue;
+  }
+
+  /**
+   * The action run when a Jira issue is removed.
+   * Passed to the JiraWidget as `onIssueRemove`.
+   */
+  @action protected removeJiraIssue() {
+    this.jiraIssue = undefined;
   }
 
   /**
@@ -130,8 +136,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   private createProject = task(async () => {
     try {
-      this.projectIsBeingCreated = true;
-      const project = await this.fetchSvc
+      this.forms.projectIsBeingCreated = true;
+      const projectPromise = this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
           body: JSON.stringify({
@@ -141,6 +147,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           }),
         })
         .then((response) => response?.json());
+
+      const [project] = await Promise.all([projectPromise, timeout(2500)]);
 
       if (this.args.document) {
         await this.fetchSvc.fetch(
@@ -164,7 +172,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
       this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
       });
-      this.projectIsBeingCreated = false;
+      this.forms.projectIsBeingCreated = false;
     }
   });
 }

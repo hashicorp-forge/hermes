@@ -1,6 +1,8 @@
 {{#if @isModal}}
   <form data-test-new-form-for-modal class="create-new-form" ...attributes>
-    {{yield}}
+    <div class="grid gap-5">
+      {{yield}}
+    </div>
   </form>
 {{else}}
   <div class="relative mt-2 mb-5 flex justify-center">

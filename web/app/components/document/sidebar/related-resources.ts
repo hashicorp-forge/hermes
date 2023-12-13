@@ -20,7 +20,6 @@ import { assert } from "@ember/debug";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
-import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
