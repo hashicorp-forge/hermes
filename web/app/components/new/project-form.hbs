@@ -11,10 +11,12 @@
   {{on "submit" this.maybeSubmitForm}}
 >
   {{#if (and this.forms.projectIsBeingCreated @isModal)}}
-    <div class="h-[250px] text-center">
-      <FlightIcon @name="running" @size="24" class="mb-5" />
-      <h2>Creating project...</h2>
-      <p class="mb-2 text-body-300">This shouldn't take long.</p>
+    <div class="grid h-full place-items-center pb-16 text-center">
+      <div>
+        <FlightIcon @name="running" @size="24" class="mb-5" />
+        <h2>Creating project...</h2>
+        <p class="mb-2 text-body-300">This shouldn't take long.</p>
+      </div>
     </div>
   {{else}}
     <Hds::Form::Textarea::Field
@@ -70,7 +72,7 @@
         @color="primary"
         @text="Create project"
         @isFullWidth={{true}}
-        class="mt-8"
+        class="mt-2"
       />
     {{/if}}
   {{/if}}

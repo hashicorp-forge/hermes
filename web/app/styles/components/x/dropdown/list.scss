@@ -7,6 +7,22 @@
 
   &.non-floating-list {
     @apply relative w-full max-w-none;
+
+    .x-dropdown-list-container {
+      @apply h-full rounded-none;
+    }
+
+    .x-dropdown-list-scroll-container {
+      @apply rounded-none;
+    }
+
+    .x-dropdown-list-items {
+      @apply pb-4;
+    }
+
+    .x-dropdown-list-item-link {
+      @apply px-6;
+    }
   }
 
   &.theme--neutral {

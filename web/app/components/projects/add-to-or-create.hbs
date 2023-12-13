@@ -1,9 +1,12 @@
 {{#if this.newProjectFormIsShown}}
   <Hds::Modal @onClose={{@onClose}} as |M|>
     <M.Header>
-      {{unless this.forms.projectIsBeingCreated "Start a project"}}
+      Start a project
     </M.Header>
-    <M.Body>
+    <M.Body
+      class="min-h-[419px]
+        {{if this.forms.projectIsBeingCreated 'flex flex-col justify-center'}}"
+    >
       <New::ProjectForm
         @document={{@document}}
         @isModal={{true}}
@@ -16,7 +19,8 @@
     <M.Header>
       Add doc to project
     </M.Header>
-    <M.Body>
+    {{! padding is 24px }}
+    <M.Body class="relative flex h-[350px] flex-col p-0">
       <X::DropdownList
         @inputIsShown={{false}}
         @items={{this.shownProjects}}
@@ -24,37 +28,39 @@
         @onItemClick={{this.onSave}}
         @placement={{null}}
         @isLoading={{this.loadProjects.isRunning}}
-        class="non-floating-list theme-neutral"
+        class="non-floating-list theme-neutral relative max-h-full overflow-y-scroll"
       >
         <:anchor as |dd|>
-          <div class="relative mb-4" {{did-insert dd.registerAnchor}}>
-            <Hds::Form::TextInput::Base
-              autofocus
-              @type="search"
-              @value={{this.query}}
-              {{did-insert (perform this.loadProjects dd)}}
-              {{on "input" this.updateInputValue}}
-              placeholder="Search projects"
-              aria-label="Search projects"
-              aria-controls={{dd.ariaControls}}
-              aria-expanded={{dd.contentIsShown}}
-              aria-haspopup="listbox"
-            />
-            {{#if this.loadProjects.isRunning}}
-              <div
-                data-test-search-loading-icon
-                class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-              >
-                <FlightIcon @name="loading" />
-              </div>
-            {{/if}}
+          <div class="mb-4 px-4 pt-4" {{did-insert dd.registerAnchor}}>
+            <div class="relative">
+              <Hds::Form::TextInput::Base
+                autofocus
+                @type="search"
+                @value={{this.query}}
+                {{did-insert (perform this.loadProjects dd)}}
+                {{on "input" this.updateInputValue}}
+                placeholder="Search projects"
+                aria-label="Search projects"
+                aria-controls={{dd.ariaControls}}
+                aria-expanded={{dd.contentIsShown}}
+                aria-haspopup="listbox"
+              />
+              {{#if this.loadProjects.isRunning}}
+                <div
+                  data-test-search-loading-icon
+                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+                >
+                  <FlightIcon @name="loading" />
+                </div>
+              {{/if}}
+            </div>
           </div>
         </:anchor>
         <:item as |dd|>
           <dd.Action class="block">
             <div class="flex w-full items-center gap-3.5">
               <FlightIcon @name={{get-project-status-icon dd.attrs.status}} />
-              <div class="flex w-full overflow-hidden">
+              <div class="flex w-full items-center overflow-hidden">
                 <div class="flex w-full justify-between">
                   <div
                     class="w-full max-w-[70%] truncate text-display-300 font-semibold"
@@ -88,11 +94,17 @@
           </div>
         </:no-matches>
         <:loading>
-          <div class="h-48">
-            <FlightIcon @name="loading" class="mt-4" />
+          <div class="h-48 px-5">
+            <FlightIcon @name="loading" class="mt-2" />
           </div>
         </:loading>
       </X::DropdownList>
+      {{#if (gt this.shownProjects.length 7)}}
+        {{! scroll affordance }}
+        <div
+          class="alpha-50 absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-t from-color-palette-alpha-100 to-transparent"
+        />
+      {{/if}}
     </M.Body>
     <M.Footer>
       <Hds::Button
