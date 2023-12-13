@@ -94,10 +94,10 @@ module("Integration | Component | project/tile", function (hooks) {
 
     emberAssert("jiraIssue must exist", jiraIssue);
 
-    const { key, type } = jiraIssue;
+    const { key, issueType } = jiraIssue;
 
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
-    assert.dom(PROJECT_JIRA_TYPE).hasText(type);
+    assert.dom(PROJECT_JIRA_TYPE).hasText(issueType);
 
     this.set("project.jiraIssue", null);
 

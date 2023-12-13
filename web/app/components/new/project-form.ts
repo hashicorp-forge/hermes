@@ -10,7 +10,7 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
-import { JiraIssue } from "hermes/types/project";
+import { JiraPickerResult } from "hermes/types/project";
 
 interface NewProjectFormComponentSignature {
   Args: {
@@ -28,7 +28,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
 
   @tracked protected jiraSearchIsShowing = false;
   @tracked protected jiraSearchQuery = "";
-  @tracked protected jiraIssue: JiraIssue | null = null;
+  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
   @tracked protected shownJiraIssues = [];
 
@@ -45,8 +45,20 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
 
-  private validate() {
-    this.titleErrorIsShown = this.title.length === 0;
+  /**
+   * Whether the Jira integration is enabled.
+   * Determines whether the Jira input is rendered.
+   */
+  protected get jiraIsEnabled() {
+    return !!this.configSvc.config.jira_url;
+  }
+
+  /**
+   * The action run when a Jira issue is selected.
+   * Passed to the JiraWidget as `onIssueSelect`.
+   */
+  @action protected setJiraIssue(issue: JiraPickerResult) {
+    this.jiraIssue = issue;
   }
 
   /**
@@ -70,10 +82,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     this.jiraSearchIsShowing = false;
   }
 
-  @action protected addJiraIssue(issue: JiraIssue) {
-    // TODO: Add to project
+  @action protected addJiraIssue(issue: JiraPickerResult) {
     this.jiraIssue = issue;
-
     this.hideJiraSearch();
   }
 
@@ -127,6 +137,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           body: JSON.stringify({
             title: cleanString(this.title),
             description: cleanString(this.description),
+            jiraIssueID: this.jiraIssue?.key,
           }),
         })
         .then((response) => response?.json());

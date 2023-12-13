@@ -31,24 +31,27 @@
     {{/if}}
   </Hds::Form::Textarea::Field>
 
-  {{#if this.projectIsBeingCreated}}
-    <FlightIcon data-test-feature-icon @name="running" @size="24" />
-    <div
-      data-test-task-is-running-description
-      class="mt-2 -mb-3 text-center text-body-300 text-color-foreground-faint"
-    >
-      Creating project...
-    </div>
-  {{else}}
-    <div class="grid gap-5 px-8 pt-2 pb-8">
-      <New::ProjectForm />
-      <Hds::Button
-        data-test-submit
-        @text="Create project"
-        @isFullWidth={{true}}
-        @color="primary"
-        type="submit"
-        class="mt-4"
+  <Hds::Form::Textarea::Field
+    data-test-description
+    {{on "keydown" this.onKeydown}}
+    @value={{this.description}}
+    rows="2"
+    placeholder="A short summary of your project"
+    name="description"
+    as |F|
+  >
+    <F.Label>Description</F.Label>
+  </Hds::Form::Textarea::Field>
+
+  {{#if this.jiraIsEnabled}}
+    <div>
+      <label for="jira-search-input" class="hermes-form-label mb-2">
+        Add Jira issue
+      </label>
+      <Project::JiraWidget
+        @issue={{this.jiraIssue}}
+        @contextIsForm={{true}}
+        @onIssueSelect={{this.setJiraIssue}}
       />
     </div>
   {{/if}}
