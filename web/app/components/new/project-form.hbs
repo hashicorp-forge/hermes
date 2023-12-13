@@ -43,9 +43,17 @@
     <F.Label>Description</F.Label>
   </Hds::Form::Textarea::Field>
 
-  {{! TODO: Add Jira integration }}
-  <Action disabled>
-    + Add Jira link
-  </Action>
+  {{#if this.jiraIsEnabled}}
+    <div>
+      <label for="jira-search-input" class="hermes-form-label mb-2">
+        Add Jira issue
+      </label>
+      <Project::JiraWidget
+        @issue={{this.jiraIssue}}
+        @contextIsForm={{true}}
+        @onIssueSelect={{this.setJiraIssue}}
+      />
+    </div>
+  {{/if}}
 
 </New::Form>

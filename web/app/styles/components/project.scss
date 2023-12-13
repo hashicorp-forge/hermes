@@ -2,8 +2,20 @@
   .editable-field {
     @apply -mx-2;
 
-    &:not(.active) {
-      @apply w-auto min-w-[30%];
+    .field-toggle:not(.read-only) {
+      &:hover,
+      &:focus-visible,
+      &:focus {
+        @apply bg-color-surface-interactive-hover;
+      }
+    }
+
+    .edit-affordance {
+      &.gray {
+        &::before {
+          @apply from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+        }
+      }
     }
   }
 

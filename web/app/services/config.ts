@@ -12,6 +12,7 @@ export default class ConfigService extends Service {
     short_link_base_url: config.shortLinkBaseURL,
     skip_google_auth: config.skipGoogleAuth,
     google_analytics_tag_id: undefined,
+    jira_url: config.jiraURL,
     support_link_url: config.supportLinkURL,
     version: config.version,
     short_revision: config.shortRevision,

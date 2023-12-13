@@ -74,7 +74,7 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
         if (project.jiraIssue) {
           expectedKeys.push(project.jiraIssue.key);
-          expectedJiraTypes.push(project.jiraIssue.type);
+          expectedJiraTypes.push(project.jiraIssue.issueType);
         }
 
         if (project.products) {

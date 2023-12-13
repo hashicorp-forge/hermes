@@ -63,133 +63,45 @@
 
   </div>
 </div>
+<div class="max-w-3xl">
 
-{{! Title }}
-<div class="mt-7 flex">
-  <EditableField
-    class="project-title text-display-600"
-    data-test-project-title
-    @value={{this.title}}
-    @tag="h1"
-    @placeholder="Add project title"
-    @onSave={{this.saveTitle}}
-    @isRequired={{true}}
-  />
+  {{! Title }}
+  <div class="mt-7 flex">
+    <EditableField
+      class="project-title text-display-600"
+      data-test-project-title
+      @value={{this.title}}
+      @tag="h1"
+      @placeholder="Add project title"
+      @onSave={{this.saveTitle}}
+      @isRequired={{true}}
+    />
+  </div>
+
+  {{! Description }}
+  <div class="flex">
+    <EditableField
+      class="project-description"
+      data-test-project-description
+      @value="{{this.description}}"
+      @onSave={{this.saveDescription}}
+      @placeholder="Add a description"
+    />
+  </div>
 </div>
 
-{{! Description }}
-<div class="flex">
-  <EditableField
-    class="project-description"
-    data-test-project-description
-    @value="{{this.description}}"
-    @onSave={{this.saveDescription}}
-    @placeholder="Add a description"
-  />
-</div>
-
-{{! Jira }}
-{{! Currently placeholder }}
-<div class="relative mt-10 flex h-8 max-w-2xl items-center gap-3.5">
-  {{#if this.jiraIssue}}
-    <div data-test-jira-object class="flex items-center gap-3.5">
-      <FlightIcon @name="jira" class="" />
-      <div class="h-4 w-px bg-color-border-strong"></div>
-    </div>
-    <ExternalLink
-      data-test-jira-link
-      href={{this.jiraIssue.url}}
-      class="inline-flex h-full items-center hover:underline"
-    >
-      <div class="flex items-center gap-2.5">
-        {{#if this.jiraIssue.type}}
-          <img
-            data-test-jira-type-icon
-            src="https://hashicorp.atlassian.net/images/icons/issuetypes/epic.svg"
-          />
-        {{/if}}
-        <div class="w-full text-color-foreground-faint">
-          <span
-            data-test-jira-key
-            class={{if (eq this.jiraIssue.status "done") "line-through"}}
-          >
-            {{this.jiraIssue.key}}
-          </span>
-          <span>
-            ·
-          </span>
-          <span data-test-jira-summary>
-            {{this.jiraIssue.summary}}
-          </span>
-        </div>
-      </div>
-    </ExternalLink>
-    <div class="flex shrink-0 items-center gap-2">
-      {{#if this.jiraIssue.priority}}
-        <div class="flex">
-          <FlightIcon
-            data-test-jira-priority-icon
-            @name="chevrons-up"
-            class="text-color-foreground-critical"
-          />
-        </div>
-      {{/if}}
-      {{#if this.jiraIssue.assignee}}
-        <Person::Avatar
-          data-test-jira-assignee-avatar
-          data-test-assignee={{this.jiraIssue.assignee}}
-          @email={{this.jiraIssue.assignee}}
-          @size="small"
-        />
-      {{/if}}
-      {{#if this.jiraIssue.status}}
-        <div
-          data-test-jira-status
-          class="rounded-sm bg-color-surface-strong px-1.5 py-px text-body-100 font-medium uppercase"
-        >
-          {{this.jiraIssue.status}}
-        </div>
-      {{/if}}
-    </div>
-    <X::DropdownList
-      @items={{hash
-        unlink=(hash
-          label="Remove Jira link"
-          icon="x-circle"
-          action=(fn this.removeJiraIssue)
-        )
-      }}
-      @placement="bottom-end"
-    >
-      <:anchor as |dd|>
-        <dd.ToggleAction
-          data-test-jira-overflow-button
-          class="quarternary-button grid h-6 w-6 place-items-center items-center p-0"
-        >
-          <FlightIcon @name="more-vertical" />
-        </dd.ToggleAction>
-      </:anchor>
-      <:item as |dd|>
-        <dd.Action
-          data-test-remove-jira-button
-          {{on "click" dd.attrs.action}}
-          class="flex items-center gap-2"
-        >
-          <FlightIcon @name={{dd.attrs.icon}} />
-          {{dd.attrs.label}}
-        </dd.Action>
-      </:item>
-    </X::DropdownList>
-  {{else}}
-    <Action
-      data-test-add-jira-button
-      {{on "click" this.addJiraIssue}}
-      class="underlined-link text-body-100 text-color-foreground-disabled decoration-color-palette-neutral-200"
-    >
-      + Add Jira link
-    </Action>
-  {{/if}}
-</div>
+{{#if this.jiraIsEnabled}}
+  {{! Jira }}
+  <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
+    <Project::JiraWidget
+      {{did-insert this.maybeLoadJiraInfo}}
+      @issue={{this.jiraIssue}}
+      @onIssueRemove={{this.removeJiraIssue}}
+      @onIssueSelect={{this.addJiraIssue}}
+      @isLoading={{this.loadJiraIssue.isRunning}}
+    />
+  </div>
+{{/if}}
 
 <div class="relative mt-6 border-t border-t-color-border-primary">
 
