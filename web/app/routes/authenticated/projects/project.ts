@@ -2,11 +2,13 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
+import FormsService from "hermes/services/forms";
 import { HermesProject } from "hermes/types/project";
 
 export default class AuthenticatedProjectsProjectRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare forms: FormsService;
 
   async model(params: { project_id: string }): Promise<HermesProject> {
     const projectPromise = this.fetchSvc
@@ -33,5 +35,9 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
       hermesDocuments,
       externalLinks,
     };
+  }
+
+  afterModel() {
+    this.forms.projectIsBeingCreated = false;
   }
 }

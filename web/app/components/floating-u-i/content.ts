@@ -45,6 +45,18 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     return this._content;
   }
 
+  protected get inElementTarget() {
+    // if there's a dialog, render into that,
+    // otherwise render into ".ember-application"
+    let dialog = document.querySelector("dialog");
+
+    if (dialog) {
+      return "dialog";
+    } else {
+      return ".ember-application";
+    }
+  }
+
   private offset: OffsetOptions = this.args.offset || 5;
 
   @action didInsert(e: HTMLElement) {

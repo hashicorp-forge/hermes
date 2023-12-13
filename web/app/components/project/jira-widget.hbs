@@ -5,9 +5,9 @@
   {{! TODO: this needs some focus-within styles to capture the correct focused state }}
   <div
     class="group relative flex w-full
-      {{if (and this.issue @contextIsForm) 'bg-red-500 p-2'}}"
+      {{if (and this.issue @contextIsForm) 'h-9 items-center bg-red-500'}}"
   >
-    <div class="w-full {{if @contextIsForm 'relative'}}">
+    <div class="w-full {{if @contextIsForm 'relative' 'flex'}}">
 
       {{#unless @contextIsForm}}
         <div
@@ -27,7 +27,8 @@
         <ExternalLink
           data-test-jira-link
           href={{if @contextIsForm "" this.issue.url}}
-          class="mr-8 inline-flex {{if @contextIsForm 'pointer-events-none'}}"
+          class="mr-8
+            {{if @contextIsForm 'pointer-events-none block' 'inline-flex'}}"
         >
           {{! if the border is shown, hide this? }}
 
@@ -50,7 +51,10 @@
               class="mt-0.5 h-4 w-4"
             />
 
-            <div class="line-clamp-2 w-full text-color-foreground-faint">
+            <div
+              class="{{if @contextIsForm 'truncate' 'line-clamp-2'}}
+                w-full text-color-foreground-faint"
+            >
               <span
                 data-test-jira-key
                 class={{if (eq this.issueStatus "done") "line-through"}}
@@ -113,6 +117,7 @@
             )
           }}
           @placement="bottom-end"
+          @renderOut={{true}}
         >
           <:anchor as |dd|>
             <dd.ToggleAction

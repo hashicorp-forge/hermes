@@ -51,7 +51,7 @@
     </Hds::Form::Textarea::Field>
 
     {{#if this.jiraIsEnabled}}
-      <div>
+      <div class={{if this.jiraIssue "overflow-hidden"}}>
         <label for="jira-search-input" class="hermes-form-label mb-2">
           Add Jira issue
         </label>
@@ -70,7 +70,7 @@
         @color="primary"
         @text="Create project"
         @isFullWidth={{true}}
-        class="mt-6"
+        class="mt-8"
       />
     {{/if}}
   {{/if}}
