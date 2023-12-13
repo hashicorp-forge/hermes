@@ -30,7 +30,6 @@ interface NewFormComponentSignature {
   };
   Blocks: {
     default: [];
-    submit: [];
   };
 }
 

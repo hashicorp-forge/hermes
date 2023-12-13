@@ -111,24 +111,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
-  @action protected updateJiraSearchQuery(eventOrValue: Event | string) {
-    if (typeof eventOrValue === "string") {
-      this.jiraSearchQuery = eventOrValue;
-    } else {
-      this.jiraSearchQuery = (eventOrValue.target as HTMLInputElement).value;
-    }
-
-    void this.searchJiraIssues.perform();
-  }
-
-  protected loadInitialJiraIssues = task(async () => {
-    // TODO: Load initial Jira issues
-  });
-
-  protected searchJiraIssues = restartableTask(async () => {
-    // TODO: Search Jira issues
-  });
-
   /**
    * The task that creates a project and, if successful,
    * transitions to it. On error, displays a FlashMessage
