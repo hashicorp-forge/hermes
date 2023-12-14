@@ -13,6 +13,9 @@ import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
 import FormsService from "hermes/services/forms";
+import Ember from "ember";
+
+const TIMEOUT = Ember.testing ? 0 : 2000;
 
 interface NewProjectFormComponentSignature {
   Args: {
@@ -117,7 +120,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         })
         .then((response) => response?.json());
 
-      const [project] = await Promise.all([projectPromise, timeout(2500)]);
+      const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
 
       if (this.args.document) {
         await this.fetchSvc.fetch(

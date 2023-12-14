@@ -11,11 +11,12 @@
   {{on "submit" this.maybeSubmitForm}}
 >
   {{#if (and this.forms.projectIsBeingCreated @isModal)}}
-    <div class="grid h-full place-items-center pb-16 text-center">
+    <div class="grid h-full place-items-center pb-12 text-center">
       <div>
-        <FlightIcon @name="running" @size="24" class="mb-5" />
-        <h2>Creating project...</h2>
-        <p class="mb-2 text-body-300">This shouldn't take long.</p>
+        <FlightIcon @name="running" @size="24" class="mb-3.5" />
+        <h3 class="text-display-300 font-semibold text-color-foreground-strong">
+          Creating project...
+        </h3>
       </div>
     </div>
   {{else}}
