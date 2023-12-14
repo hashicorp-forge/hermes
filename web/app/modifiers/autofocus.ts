@@ -45,6 +45,7 @@ export default class AutofocusModifier extends Modifier<AutofocusModifierSignatu
   ) {
     this._element = element;
     this.targetChildren = named.targetChildren ?? false;
+
     if (named.waitUntilNextRunloop) {
       next(this, this.maybeAutofocus);
     } else {

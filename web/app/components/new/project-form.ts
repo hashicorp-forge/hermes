@@ -80,19 +80,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     }
   }
 
-  @action protected showJiraSearch() {
-    this.jiraSearchIsShowing = true;
-  }
-
-  @action protected hideJiraSearch() {
-    this.jiraSearchIsShowing = false;
-  }
-
-  @action protected addJiraIssue(issue: JiraPickerResult) {
-    this.jiraIssue = issue;
-    this.hideJiraSearch();
-  }
-
   /**
    * The action run on title- and description-input keydown.
    * If the key is Enter, a form submission is attempted.
