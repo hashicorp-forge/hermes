@@ -5,7 +5,7 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
-import { restartableTask, task } from "ember-concurrency";
+import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
@@ -136,7 +136,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         );
       }
 
-      this.router.transitionTo("authenticated.projects.project", project.id);
+      this.router
+        .transitionTo("authenticated.projects.project", project.id)
+        .then(() => {
+          this.forms.projectIsBeingCreated = false;
+        });
     } catch (e) {
       this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
