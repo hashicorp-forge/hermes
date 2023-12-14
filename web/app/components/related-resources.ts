@@ -219,7 +219,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       try {
         let algoliaResponse = await this.algolia.searchIndex
           .perform(index, query, {
-            hitsPerPage: options?.hitsPerPage || 4,
+            hitsPerPage: options?.hitsPerPage || 12,
             filters: filterString,
             attributesToRetrieve: [
               "title",

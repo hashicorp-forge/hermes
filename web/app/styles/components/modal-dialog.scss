@@ -2,8 +2,12 @@
   .hds-modal {
     @apply overflow-visible;
 
+    .search-container {
+      @apply sticky top-0 z-10 bg-color-page-primary px-4 pb-4 pt-4;
+    }
+
     .ember-basic-dropdown {
-      @apply w-full mb-2 mt-1;
+      @apply mb-2 mt-1 w-full;
     }
 
     &__body {
@@ -14,6 +18,52 @@
     .hds-form-field--layout-vertical .hds-form-field__control:not(:last-child) {
       // Positions dropdown correctly
       @apply mb-0;
+    }
+
+    &.search-window {
+      @apply overflow-hidden;
+
+      // no gradient when there's a footer
+      &:has(.hds-modal__footer) {
+        .hds-modal__body::after {
+          @apply hidden;
+        }
+      }
+
+      .hds-modal__body {
+        // height must be set for scroll-into-view to work
+        @apply relative flex flex-col p-0;
+
+        // faint gradient at bottom
+        &::after {
+          content: "";
+          @apply absolute bottom-0 left-0 h-4 w-full bg-gradient-to-t from-white to-white/0 opacity-75;
+        }
+      }
+
+      .hds-modal__footer {
+        @apply relative;
+      }
+
+      .x-dropdown-list {
+        @apply max-h-full overflow-auto;
+      }
+
+      .x-dropdown-list-container {
+        @apply h-full rounded-none;
+      }
+
+      .x-dropdown-list-scroll-container {
+        @apply rounded-none;
+      }
+
+      .x-dropdown-list-items {
+        @apply pb-4;
+      }
+
+      .x-dropdown-list-item-link {
+        @apply px-6;
+      }
     }
   }
 }
