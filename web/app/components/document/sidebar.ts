@@ -35,7 +35,6 @@ import {
   HermesProjectInfo,
   HermesProjectResources,
 } from "hermes/types/project";
-import formatRelatedHermesDocument from "hermes/utils/format-related-hermes-document";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { RelatedHermesDocument } from "../related-resources";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -891,6 +890,42 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
+  private formatDocForProject(document: HermesDocument): RelatedHermesDocument {
+    const {
+      title,
+      status,
+      owners,
+      ownerPhotos,
+      product,
+      createdTime,
+      modifiedTime,
+      summary,
+    } = document;
+    const documentType = document.docType;
+    const documentNumber = document.docNumber;
+    const googleFileID = document.objectID;
+
+    assert("owners expected", owners);
+    assert("product expected", product);
+
+    const sortOrder = 1;
+
+    return {
+      title,
+      status,
+      summary,
+      owners,
+      ownerPhotos,
+      product,
+      documentType,
+      documentNumber,
+      googleFileID,
+      sortOrder,
+      createdTime,
+      modifiedTime: modifiedTime || createdTime,
+    };
+  }
+
   /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
    * Called when a document draft is rendered.
@@ -980,7 +1015,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       const externalLinks = projectResources.externalLinks ?? [];
 
-      const newRelatedHermesDocument = formatRelatedHermesDocument(
+      const newRelatedHermesDocument = this.formatDocForProject(
         this.args.document,
       );
 
