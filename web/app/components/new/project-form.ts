@@ -10,6 +10,7 @@ import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
+import FormsService from "hermes/services/forms";
 
 interface NewProjectFormComponentSignature {
   Args: {
@@ -20,17 +21,9 @@ interface NewProjectFormComponentSignature {
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare forms: FormsService;
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
-
-  /**
-   * Whether the project is being created, or in the process of
-   * transitioning to the project screen after successful creation.
-   * Used by the `New::Form` component for conditional rendering.
-   * Set true when the createProject task is running.
-   * Reverted only if an error occurs.
-   */
-  @tracked protected projectIsBeingCreated = false;
 
   @tracked protected title: string = "";
   @tracked protected description: string = "";
@@ -96,7 +89,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   private createProject = task(async () => {
     try {
-      this.projectIsBeingCreated = true;
+      this.forms.projectIsBeingCreated = true;
       const project = await this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
@@ -107,12 +100,16 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           }),
         })
         .then((response) => response?.json());
-      this.router.transitionTo("authenticated.projects.project", project.id);
+      this.router
+        .transitionTo("authenticated.projects.project", project.id)
+        .then(() => {
+          this.forms.projectIsBeingCreated = false;
+        });
     } catch (e) {
       this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
       });
-      this.projectIsBeingCreated = false;
+      this.forms.projectIsBeingCreated = false;
     }
   });
 }
