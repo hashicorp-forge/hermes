@@ -1,10 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import {
-  AlgoliaObject,
-  HermesProject,
-  HermesProjectInfo,
-} from "hermes/types/project";
+import { HermesProject, HermesProjectInfo } from "hermes/types/project";
 import { action } from "@ember/object";
 import { HermesDocument } from "hermes/types/document";
 import { restartableTask, task } from "ember-concurrency";

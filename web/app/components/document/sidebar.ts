@@ -32,7 +32,6 @@ import { HermesDocumentType } from "hermes/types/document-type";
 import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import {
-  AlgoliaObject,
   HermesProjectInfo,
   HermesProjectResources,
 } from "hermes/types/project";

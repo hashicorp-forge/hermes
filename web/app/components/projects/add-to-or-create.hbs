@@ -15,12 +15,12 @@
     </M.Body>
   </Hds::Modal>
 {{else}}
-  <Hds::Modal @onClose={{this.maybeClose}} as |M|>
+  <Hds::Modal @onClose={{this.maybeClose}} class="search-window" as |M|>
     <M.Header>
       Add doc to project
     </M.Header>
     {{! padding is 24px }}
-    <M.Body class="relative flex h-[350px] flex-col p-0">
+    <M.Body class="h-[350px]">
       <X::DropdownList
         @inputIsShown={{false}}
         @items={{this.shownProjects}}
@@ -28,10 +28,10 @@
         @onItemClick={{this.onSave}}
         @placement={{null}}
         @isLoading={{this.loadProjects.isRunning}}
-        class="non-floating-list theme-neutral relative max-h-full overflow-y-scroll"
+        class="non-floating-list theme-neutral"
       >
         <:anchor as |dd|>
-          <div class="mb-4 px-4 pt-4" {{did-insert dd.registerAnchor}}>
+          <div class="search-container" {{did-insert dd.registerAnchor}}>
             <div class="relative">
               <Hds::Form::TextInput::Base
                 autofocus
