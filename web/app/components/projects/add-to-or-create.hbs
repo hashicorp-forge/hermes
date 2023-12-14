@@ -28,7 +28,7 @@
         @onItemClick={{this.onSave}}
         @placement={{null}}
         @isLoading={{this.loadProjects.isRunning}}
-        class="non-floating-list theme-neutral"
+        class="non-floating-list theme--neutral"
       >
         <:anchor as |dd|>
           <div class="search-container" {{did-insert dd.registerAnchor}}>
@@ -45,21 +45,16 @@
                 aria-expanded={{dd.contentIsShown}}
                 aria-haspopup="listbox"
               />
-              {{#if this.loadProjects.isRunning}}
-                <div
-                  data-test-search-loading-icon
-                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
-                >
-                  <FlightIcon @name="loading" />
-                </div>
-              {{/if}}
             </div>
           </div>
         </:anchor>
         <:item as |dd|>
-          <dd.Action class="block">
+          <dd.Action class="block py-[6.5px]">
             <div class="flex w-full items-center gap-3.5">
-              <FlightIcon @name={{get-project-status-icon dd.attrs.status}} />
+              <FlightIcon
+                class="text-color-foreground-faint"
+                @name={{get-project-status-icon dd.attrs.status}}
+              />
               <div class="flex w-full items-center overflow-hidden">
                 <div class="flex w-full justify-between">
                   <div
@@ -99,12 +94,6 @@
           </div>
         </:loading>
       </X::DropdownList>
-      {{#if (gt this.shownProjects.length 7)}}
-        {{! scroll affordance }}
-        <div
-          class="alpha-50 absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-t from-color-palette-alpha-100 to-transparent"
-        />
-      {{/if}}
     </M.Body>
     <M.Footer>
       <Hds::Button

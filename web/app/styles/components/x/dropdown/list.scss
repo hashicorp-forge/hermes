@@ -19,6 +19,7 @@
     .x-dropdown-list-items {
       @apply pb-4;
     }
+  }
 
   &.theme--neutral {
     .x-dropdown-list-item-link {
@@ -32,6 +33,8 @@
 
       &.is-aria-selected {
         @apply bg-color-surface-interactive-hover;
+        @apply text-inherit;
+
         .flight-icon {
           @apply text-inherit;
         }

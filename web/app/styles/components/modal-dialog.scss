@@ -23,22 +23,9 @@
     &.search-window {
       @apply overflow-hidden;
 
-      // no gradient when there's a footer
-      &:has(.hds-modal__footer) {
-        .hds-modal__body::after {
-          @apply hidden;
-        }
-      }
-
       .hds-modal__body {
         // height must be set for scroll-into-view to work
         @apply relative flex flex-col p-0;
-
-        // faint gradient at bottom
-        &::after {
-          content: "";
-          @apply absolute bottom-0 left-0 h-4 w-full bg-gradient-to-t from-white to-white/0 opacity-75;
-        }
       }
 
       .hds-modal__footer {
