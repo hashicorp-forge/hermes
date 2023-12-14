@@ -52,7 +52,7 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
    */
   protected get inElementTarget() {
     const dialog = document.querySelector("dialog");
-    console.log("dialog", dialog);
+
     if (dialog) {
       return "dialog";
     } else {
