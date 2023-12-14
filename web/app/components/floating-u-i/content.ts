@@ -45,11 +45,14 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     return this._content;
   }
 
+  /**
+   * The target element to append the content to.
+   * If a dialog is open, append to it, since it's the
+   * topmost layer, otherwise append to the application body.
+   */
   protected get inElementTarget() {
-    // if there's a dialog, render into that,
-    // otherwise render into ".ember-application"
-    let dialog = document.querySelector("dialog");
-
+    const dialog = document.querySelector("dialog");
+    console.log("dialog", dialog);
     if (dialog) {
       return "dialog";
     } else {

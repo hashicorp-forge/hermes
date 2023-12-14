@@ -50,6 +50,37 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       .exists("content is rendered in the root element");
   });
 
+  test("it will render out to a dialog if one is present", async function (assert) {
+    await render<FloatingUIComponentTestContext>(hbs`
+
+      <dialog>
+        Dialog
+      </dialog>
+
+      <div class="anchor">
+        Attach here
+      </div>
+
+      <div class="container">
+        <FloatingUI::Content
+          @id="1"
+          @anchor={{html-element '.anchor'}}
+          @renderOut={{true}}
+        >
+          Content
+        </FloatingUI::Content>
+      </div>
+    `);
+
+    assert
+      .dom(`.container ${CONTENT_SELECTOR}`)
+      .doesNotExist("content is rendered outside its container");
+
+    assert
+      .dom(`dialog ${CONTENT_SELECTOR}`)
+      .exists("content is rendered in the dialog");
+  });
+
   test("it is positioned by floating-ui", async function (this: FloatingUIComponentTestContext, assert) {
     let contentWidth = 0;
     let anchorWidth = 0;
@@ -96,11 +127,11 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert.ok(content.getAttribute("data-floating-ui-placement") === "left");
     assert.ok(
       contentRight === anchorLeft - DEFAULT_CONTENT_OFFSET,
-      "content is offset to the left of the anchor"
+      "content is offset to the left of the anchor",
     );
     assert.ok(
       contentWidth === 100,
-      "the correct width was splatted to the content element"
+      "the correct width was splatted to the content element",
     );
 
     // Clear and set the placement to 'right'
@@ -133,7 +164,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert.ok(content.getAttribute("data-floating-ui-placement") === "right");
     assert.ok(
       contentLeft === anchorRight + DEFAULT_CONTENT_OFFSET,
-      "content is offset to the right of anchor"
+      "content is offset to the right of anchor",
     );
   });
 
@@ -165,7 +196,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert.equal(
       contentRight,
       anchorLeft - DEFAULT_CONTENT_OFFSET,
-      "content is offset to the left of the anchor"
+      "content is offset to the left of the anchor",
     );
 
     // Clear and set the offset to 10
@@ -200,7 +231,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert.equal(
       contentRight,
       anchorLeft - 10,
-      "content is offset by the passed-in value"
+      "content is offset by the passed-in value",
     );
   });
 
@@ -226,12 +257,12 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
     assert.true(
       content.classList.contains("non-floating-content"),
-      "content has the `non-floating-content` class"
+      "content has the `non-floating-content` class",
     );
 
     assert.true(
       getComputedStyle(content).position === "static",
-      "content is static"
+      "content is static",
     );
 
     const inlineStyle = content.getAttribute("style");
@@ -239,7 +270,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     assert.strictEqual(
       inlineStyle,
       null,
-      "content not positioned by floatingUI"
+      "content not positioned by floatingUI",
     );
   });
 
