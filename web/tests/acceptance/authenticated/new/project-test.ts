@@ -1,8 +1,16 @@
 import RouterService from "@ember/routing/router-service";
-import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  currentURL,
+  fillIn,
+  visit,
+  waitFor,
+  waitUntil,
+} from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
+import FormsService from "hermes/services/forms";
 import { TEST_WEB_CONFIG } from "hermes/utils/mirage-utils";
 import { Response } from "miragejs";
 import { module, test } from "qunit";
@@ -76,6 +84,10 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     const title = "The Foo Project";
     const description = "A project about foo";
 
+    const formsService = this.owner.lookup("service:forms") as FormsService;
+
+    assert.equal(formsService.projectIsBeingCreated, false);
+
     await visit("new/project");
 
     await fillIn(TITLE_INPUT, title);
@@ -83,7 +95,12 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     await fillIn(JIRA_INPUT, summary);
 
     await click(JIRA_PICKER_RESULT);
-    await click(SUBMIT_BUTTON);
+
+    const clickPromise = click(SUBMIT_BUTTON);
+
+    await waitUntil(() => formsService.projectIsBeingCreated);
+
+    await clickPromise;
 
     // Confirm that the project was created
 
@@ -101,6 +118,8 @@ module("Acceptance | authenticated/new/project", function (hooks) {
       routerService.currentRouteName,
       "authenticated.projects.project",
     );
+
+    assert.equal(formsService.projectIsBeingCreated, false);
 
     assert.equal(routerService.currentURL, "/projects/1");
     assert.equal(document.title, `${title} | Hermes`);
