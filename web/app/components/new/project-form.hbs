@@ -1,6 +1,6 @@
 <New::Form
   data-test-project-form
-  @taskIsRunning={{this.forms.projectIsBeingCreated}}
+  @taskIsRunning={{this.projectForm.projectIsBeingCreated}}
   @icon="grid"
   @headline="Start a project"
   @taskIsRunningHeadline="Creating project..."
@@ -10,7 +10,7 @@
   @buttonIsActive={{gt this.title.length 0}}
   {{on "submit" this.maybeSubmitForm}}
 >
-  {{#if (and this.forms.projectIsBeingCreated @isModal)}}
+  {{#if (and this.projectForm.projectIsBeingCreated @isModal)}}
     <div class="grid h-full place-items-center pb-12 text-center">
       <div>
         <FlightIcon @name="running" @size="24" class="mb-3.5" />

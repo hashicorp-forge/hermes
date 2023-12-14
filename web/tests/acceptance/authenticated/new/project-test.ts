@@ -10,7 +10,7 @@ import {
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
-import FormsService from "hermes/services/forms";
+import FormsService from "hermes/services/project-form";
 import { TEST_WEB_CONFIG } from "hermes/utils/mirage-utils";
 import { Response } from "miragejs";
 import { module, test } from "qunit";

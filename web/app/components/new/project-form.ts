@@ -12,7 +12,7 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
-import FormsService from "hermes/services/forms";
+import ProjectFormService from "hermes/services/project-form";
 import Ember from "ember";
 
 const TIMEOUT = Ember.testing ? 0 : 2000;
@@ -29,7 +29,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
-  @service declare forms: FormsService;
+  @service declare projectForm: ProjectFormService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked protected jiraSearchIsShowing = false;
@@ -108,7 +108,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   private createProject = task(async () => {
     try {
-      this.forms.projectIsBeingCreated = true;
+      this.projectForm.projectIsBeingCreated = true;
       const projectPromise = this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
@@ -142,13 +142,13 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
       this.router
         .transitionTo("authenticated.projects.project", project.id)
         .then(() => {
-          this.forms.projectIsBeingCreated = false;
+          this.projectForm.projectIsBeingCreated = false;
         });
     } catch (e) {
       this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
       });
-      this.forms.projectIsBeingCreated = false;
+      this.projectForm.projectIsBeingCreated = false;
     }
   });
 }

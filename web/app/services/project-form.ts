@@ -1,7 +1,7 @@
 import Service from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 
-export default class FormsService extends Service {
+export default class ProjectFormService extends Service {
   /**
    * Whether the project is being created, or in the process of
    * transitioning to the project screen after successful creation.
@@ -13,6 +13,6 @@ export default class FormsService extends Service {
 
 declare module "@ember/service" {
   interface Registry {
-    forms: FormsService;
+    projectForm: ProjectFormService;
   }
 }

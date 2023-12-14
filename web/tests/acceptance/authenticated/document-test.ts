@@ -8,7 +8,6 @@ import {
   triggerKeyEvent,
   visit,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -23,8 +22,6 @@ import {
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
 import { TEST_SHORT_LINK_BASE_URL } from "hermes/utils/hermes-urls";
-import RouterService from "@ember/routing/router-service";
-import { wait } from "ember-animated/.";
 import {
   TEST_USER_2_EMAIL,
   TEST_USER_3_EMAIL,
@@ -82,6 +79,12 @@ const EDITABLE_FIELD_SAVE_BUTTON_SELECTOR =
   ".editable-field [data-test-save-button]";
 const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
   ".ember-power-select-multiple-remove-btn";
+
+const PROJECT_LINK = "[data-test-project-link]";
+const ADD_TO_PROJECT_BUTTON = "[data-test-projects-section-header] button";
+const ADD_TO_PROJECT_MODAL = "[data-test-add-to-project-modal]";
+const ADD_TO_NEW_PROJECT_MODAL = "[data-test-add-to-new-project-modal]";
+const PROJECT_OPTION = "[data-test-project-option]";
 
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -841,11 +844,86 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasText("Read-only headers", "shows the locked-doc message");
   });
 
-  test("it displays a list of projects the document is in", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+  test("it displays a list of projects the document is in", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      projects: [1, 2],
+    });
 
-  test("you can add a document to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    this.server.create("project", {
+      id: 1,
+      title: "Project 1",
+    });
 
-  test("you can create a new project to add the document to", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    this.server.create("project", {
+      id: 2,
+      title: "Project 2",
+    });
+
+    await visit("/document/1");
+
+    assert.dom(PROJECT_LINK).exists({ count: 2 });
+
+    const firstProjectLink = find(PROJECT_LINK);
+    const secondProjectLink = findAll(PROJECT_LINK)[1];
+
+    assert.dom(firstProjectLink).hasText("Project 1");
+    assert.dom(firstProjectLink).hasAttribute("href", "/projects/1");
+
+    assert.dom(secondProjectLink).hasText("Project 2");
+    assert.dom(secondProjectLink).hasAttribute("href", "/projects/2");
+  });
+
+  test("you can't add a draft to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document");
+
+    await visit("/document/doc-0?draft=true");
+
+    assert.dom(ADD_TO_PROJECT_BUTTON).isDisabled();
+  });
+
+  test("you can add a published doc to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      isDraft: false,
+      status: "In-review",
+    });
+
+    this.server.create("project", {
+      id: 1,
+    });
+
+    await visit("/document/doc-0");
+
+    assert.dom(PROJECT_LINK).doesNotExist();
+
+    await click(ADD_TO_PROJECT_BUTTON);
+
+    assert.dom(ADD_TO_PROJECT_MODAL).exists();
+
+    await click(PROJECT_OPTION);
+
+    assert.dom(ADD_TO_PROJECT_MODAL).doesNotExist();
+
+    assert.dom(PROJECT_LINK).exists().hasAttribute("href", "/projects/1");
+
+    // Check back end
+    debugger;
+    const project = this.server.schema.projects.first();
+    const document = this.server.schema.document.first();
+
+    assert.true(document.projects.includes(project.id));
+
+    await click(PROJECT_LINK);
+
+    await this.pauseTest();
+  });
+
+  test("you can create a new project to add the document to", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      isDraft: false,
+      status: "In-review",
+    });
+  });
 
   test("you can remove a document from a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 });

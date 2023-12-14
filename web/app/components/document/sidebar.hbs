@@ -235,6 +235,7 @@
         {{! Projects }}
         <div>
           <Document::Sidebar::SectionHeader
+            data-test-projects-section-header
             {{did-insert (perform this.loadRelatedProjects)}}
             @title="Projects"
             @buttonAction={{this.showProjectsModal}}
@@ -247,6 +248,7 @@
                 <li class="related-resource">
                   <div class="related-resource-inner group relative">
                     <LinkTo
+                      data-test-project-link
                       @route="authenticated.projects.project"
                       @model={{project.id}}
                       class="related-resource-link peer flex h-[32px] items-center gap-2 px-[5px]"

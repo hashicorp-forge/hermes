@@ -270,6 +270,22 @@ export default function (mirageConfig) {
         );
       });
 
+      // Save a document to a project
+      this.post(
+        "/projects/:project_id/related-resources",
+        (schema, request) => {
+          let project = schema.projects.findBy({
+            id: request.params.project_id,
+          });
+
+          if (project) {
+            let attrs = JSON.parse(request.requestBody);
+            project.update(attrs);
+            return new Response(200, {}, project.attrs);
+          }
+        },
+      );
+
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
         const project = schema.projects.findBy({

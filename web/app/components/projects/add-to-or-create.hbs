@@ -1,11 +1,14 @@
 {{#if this.newProjectFormIsShown}}
-  <Hds::Modal @onClose={{@onClose}} as |M|>
+  <Hds::Modal data-test-add-to-new-project-modal @onClose={{@onClose}} as |M|>
     <M.Header>
       Start a project
     </M.Header>
     <M.Body
       class="min-h-[419px]
-        {{if this.forms.projectIsBeingCreated 'flex flex-col justify-center'}}"
+        {{if
+          this.projectForm.projectIsBeingCreated
+          'flex flex-col justify-center'
+        }}"
     >
       <New::ProjectForm
         @document={{@document}}
@@ -15,7 +18,12 @@
     </M.Body>
   </Hds::Modal>
 {{else}}
-  <Hds::Modal @onClose={{this.maybeClose}} class="search-window" as |M|>
+  <Hds::Modal
+    data-test-add-to-project-modal
+    @onClose={{this.maybeClose}}
+    class="search-window"
+    as |M|
+  >
     <M.Header>
       Add doc to project
     </M.Header>
@@ -49,7 +57,7 @@
           </div>
         </:anchor>
         <:item as |dd|>
-          <dd.Action class="block py-[6.5px]">
+          <dd.Action data-test-project-option class="block py-[6.5px]">
             <div class="flex w-full items-center gap-3.5">
               <FlightIcon
                 class="text-color-foreground-faint"
@@ -62,11 +70,6 @@
                   >
                     {{dd.attrs.title}}
                   </div>
-                  {{#if dd.attrs.jiraObject}}
-                    <span class="shrink-0 text-color-foreground-faint">
-                      {{dd.attrs.jiraObject.key}}
-                    </span>
-                  {{/if}}
                 </div>
                 {{#if dd.attrs.products}}
                   <div class="flex gap-px">
