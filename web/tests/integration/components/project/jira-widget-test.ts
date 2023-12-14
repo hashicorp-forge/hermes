@@ -110,9 +110,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     assert.dom(LINK).hasAttribute("href", url);
     assert.dom(OVERFLOW_BUTTON).exists();
 
-    assert
-      .dom(ISSUE_TYPE_ICON)
-      .hasAttribute("src", TEST_JIRA_WORKSPACE_URL + issueTypeImage);
+    assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
 
     // These are not shown in the form context
     assert.dom(PRIORITY_ICON).doesNotExist();

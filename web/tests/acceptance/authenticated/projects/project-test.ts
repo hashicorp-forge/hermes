@@ -542,7 +542,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .hasAttribute("src", TEST_JIRA_ASSIGNEE_AVATAR);
     assert
       .dom(JIRA_PRIORITY_ICON)
-      .hasAttribute("src", TEST_JIRA_WORKSPACE_URL + TEST_JIRA_PRIORITY_IMAGE)
+      .hasAttribute("src", TEST_JIRA_PRIORITY_IMAGE)
       .hasAttribute("alt", TEST_JIRA_PRIORITY);
   });
 

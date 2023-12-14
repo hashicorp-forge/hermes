@@ -231,7 +231,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
-    void this.saveProjectInfo.perform("jiraIssueID", undefined);
+    void this.saveProjectInfo.perform("jiraIssueID", "");
   }
 
   /**
@@ -333,7 +333,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     try {
       const valueToSave = { [key]: newValue };
 
-      let promise = await this.fetchSvc.fetch(
+      await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
         {
           method: "PATCH",

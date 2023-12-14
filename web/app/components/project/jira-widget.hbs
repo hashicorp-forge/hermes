@@ -47,7 +47,7 @@
               width="16"
               height="16"
               alt={{this.issue.issueType}}
-              src="{{this.jiraWorkspaceURL}}{{this.issue.issueTypeImage}}"
+              src={{this.issue.issueTypeImage}}
               class="mt-0.5 h-4 w-4"
             />
 
@@ -76,7 +76,7 @@
                   width="16"
                   height="16"
                   alt={{this.issue.priority}}
-                  src="{{this.jiraWorkspaceURL}}{{this.issue.priorityImage}}"
+                  src={{this.issue.priorityImage}}
                   class="h-4 w-4"
                 />
               {{/if}}
@@ -212,11 +212,7 @@
           <:item as |dd|>
             <dd.Action data-test-jira-picker-result class="block py-1">
               <div class="flex items-center gap-1.5">
-                <img
-                  width="16"
-                  height="16"
-                  src="{{this.jiraWorkspaceURL}}{{dd.attrs.issueTypeImage}}"
-                />
+                <img width="16" height="16" src={{dd.attrs.issueTypeImage}} />
                 <div class="truncate">
                   {{dd.attrs.key}}
                   {{dd.attrs.summary}}
