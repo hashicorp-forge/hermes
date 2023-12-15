@@ -99,6 +99,8 @@ const PROJECT_DOCUMENT_LINK = "[data-test-document-link]";
 const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";
 const REMOVE_FROM_PROJECT_BUTTON =
   "[data-test-overflow-menu-action='remove-from-project']";
+const DOCUMENT_PROJECT = "[data-test-document-project]";
+
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
   assert.dom(SUMMARY_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -990,7 +992,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(PROJECT_LINK).exists();
 
-    await click(`${PROJECT_LINK} + ${OVERFLOW_MENU_BUTTON}`);
+    await click(`${DOCUMENT_PROJECT} ${OVERFLOW_MENU_BUTTON}`);
 
     await click(REMOVE_FROM_PROJECT_BUTTON);
 

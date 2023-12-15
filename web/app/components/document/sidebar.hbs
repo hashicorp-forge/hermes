@@ -245,7 +245,7 @@
           {{#if this.projects.length}}
             <ol class="related-resources-list mt-1 space-y-0.5">
               {{#each this.projects as |project|}}
-                <li class="related-resource">
+                <li data-test-document-project class="related-resource">
                   <div class="related-resource-inner group relative">
                     <LinkTo
                       data-test-project-link

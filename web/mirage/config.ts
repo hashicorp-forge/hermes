@@ -359,7 +359,7 @@ export default function (mirageConfig) {
         return new Response(200, {}, { hermesDocuments, externalLinks });
       });
 
-      // Fetch a project's related resources
+      // Update a project's related resources
       this.put("/projects/:project_id/related-resources", (schema, request) => {
         let project = schema.projects.findBy({
           id: request.params.project_id,
@@ -368,7 +368,63 @@ export default function (mirageConfig) {
         if (project) {
           let attrs = JSON.parse(request.requestBody);
 
-          project.update(attrs);
+          const { hermesDocuments, externalLinks } = attrs;
+
+          // need to compare current hermesDocuments
+          // to the new ones being requested
+
+          // documents that are in the current project but not in the new request
+          // need to have their projects array updated to remove the project id
+
+          // documents that are in the new request but not in the current project
+          // need to have their projects array updated to add the project id
+
+          // documents that are in both the current project and the new request
+
+          console.log("1");
+          const currentHermesDocuments = project.attrs.hermesDocuments ?? [];
+          const incomingHermesDocuments = attrs.hermesDocuments ?? [];
+
+          const documentsToRemove = currentHermesDocuments.filter((doc) => {
+            return !incomingHermesDocuments.includes(doc);
+          });
+          console.log("2");
+          console.log("documentsToRemove", documentsToRemove);
+
+          const documentsToAdd = incomingHermesDocuments.filter((doc) => {
+            return !currentHermesDocuments.includes(doc);
+          });
+          console.log("3");
+          console.log("documentsToAdd", documentsToAdd);
+
+          documentsToRemove.forEach((doc) => {
+            const mirageDocument = this.schema.document.findBy({
+              objectID: doc.googleFileID,
+            });
+            console.log("4");
+            console.log("mirageDocument", mirageDocument);
+            mirageDocument?.update({
+              projects: mirageDocument.attrs.projects.filter(
+                (projectID) => projectID !== project.attrs.id,
+              ),
+            });
+          });
+
+          console.log("5");
+          documentsToAdd.forEach((doc) => {
+            console.log("6");
+            const mirageDocument = this.schema.document.findBy({
+              objectID: doc,
+            });
+            mirageDocument?.update({
+              projects: [...mirageDocument.attrs.projects, project.attrs.id],
+            });
+          });
+
+          project.update({
+            hermesDocuments,
+            externalLinks,
+          });
           return new Response(200, {}, project.attrs);
         }
       });
