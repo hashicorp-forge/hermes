@@ -148,7 +148,6 @@ export default function (mirageConfig) {
                   return doc.attrs.product === product;
                 });
               } else {
-                // This
                 setDefaultDocMatches();
               }
             } else {
