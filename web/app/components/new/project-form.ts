@@ -30,6 +30,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
 
+  /**
+   * Whether the project is being created, or in the process of
+   * transitioning to the project screen after successful creation.
+   * Used by the `New::Form` component for conditional rendering.
+   * Set true when the createProject task is running.
+   * Reverted only if an error occurs.
+   */
+  @tracked protected projectIsBeingCreated = false;
   @tracked protected jiraSearchIsShowing = false;
   @tracked protected jiraSearchQuery = "";
   @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
@@ -39,8 +47,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
-
-  @tracked protected projectIsBeingCreated = false;
 
   private validate() {
     this.titleErrorIsShown = this.title.length === 0;
