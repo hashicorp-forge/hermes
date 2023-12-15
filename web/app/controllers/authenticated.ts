@@ -7,6 +7,10 @@ export default class AuthenticatedController extends Controller {
 
   protected get standardTemplateIsShown() {
     const routeName = this.router.currentRouteName;
-    return routeName !== "authenticated.document" && routeName !== "404";
+    return (
+      routeName !== "authenticated.document" &&
+      routeName !== "404" &&
+      routeName !== "authenticated.chat"
+    );
   }
 }

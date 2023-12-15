@@ -8,6 +8,8 @@ export default class Router extends EmberRouter {
 
 Router.map(function () {
   this.route("authenticated", { path: "/" }, function () {
+    this.route("chat");
+
     this.route("dashboard");
     this.route("all"); // legacy route; redirects to /documents
     this.route("documents");
@@ -35,6 +37,5 @@ Router.map(function () {
   });
   this.route("authenticate");
 
-  this.route("ask-hermes");
   this.route("404", { path: "/*path" });
 });

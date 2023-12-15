@@ -1,0 +1,114 @@
+<div class="bg-gradient-to-t from-yellow-200 via-orange-300 to-pink-300">
+
+  <div
+    class="bgX-gray-200 relative mx-auto grid min-h-screen w-full max-w-3xl items-stretch pb-56"
+  >
+    <div class="flex h-full flex-col justify-end">
+
+      {{#if this.messages}}
+        <ol class="bgX-blue-300 relative z-10 grid gap-7">
+          {{#each this.messages as |message|}}
+            <li
+              class="bg-Xpink-400 flex {{if message.authorIsMe 'justify-end'}} "
+            >
+              <div
+                class="flex gap-4
+                  {{unless message.authorIsMe 'flex-row-reverse'}}"
+              >
+                {{!-- TODO thor w image in if {{if message.authorIsMe}} --}}
+                <div
+                  class="hds-elevation-higher inline-flex max-w-lg flex-col rounded-xl bg-white p-4"
+                >
+                  <div class="text-display-300">
+                    {{message.value}}
+                  </div>
+                  {{#if message.relatedDocs}}
+                    {{! 3 is arbitrary }}
+                    <ul class="grid grid-cols-3">
+                      {{#each (take 3 message.relatedDocs) as |document|}}
+                        <li>
+                          {{document.title}}
+                          <Doc::Tile
+                            @isDraft={{document.isDraft}}
+                            @avatar={{get document.ownerPhotos 0}}
+                            @docID={{document.objectID}}
+                            @docNumber={{document.docNumber}}
+                            @modifiedTime={{document.modifiedTime}}
+                            @owner={{get document.owners 0}}
+                            @productArea={{document.product}}
+                            @status={{lowercase document.status}}
+                            @title={{document.title}}
+                            class="min-w-[250px]"
+                          />
+                        </li>
+                      {{/each}}
+                    </ul>
+                  {{/if}}
+
+                </div>
+                <Person::Avatar
+                  @email={{this.authenticatedUser.info.email}}
+                  @imgURL={{if
+                    message.authorIsMe
+                    this.authenticatedUser.info.picture
+                  }}
+                  @size="large"
+                  class="{{if message.authorIsMe 'ml-auto'}} mt-2 shrink-0"
+                />
+              </div>
+            </li>
+          {{/each}}
+
+        </ol>
+      {{else}}
+        What do you want to know about HashiCorp?
+      {{/if}}
+      {{#if this.answerIsLoading}}
+        <div class="h-[34px] text-display-300">
+          ...
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  <div
+    class="fixed bottom-0 left-0 flex h-56 w-full items-center bg-gradient-to-t from-white to-white/0"
+  >
+    <div class="mx-auto w-full max-w-3xl">
+      <div
+        class="hds-elevation-higher mb-6 rounded-l-full rounded-r-full bg-gradient-to-b from-color-palette-neutral-700 to-color-palette-neutral-600 px-12 py-3 shadow-inner"
+      >
+
+        <Input
+          {{on "input" this.onInput}}
+          {{on "keydown" this.onKeydown}}
+          type="text"
+          @value={{this.query}}
+          placeholder="Shoot a question"
+          class="h-12 w-full bg-transparent text-display-300 text-white focus:outline-none"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+<FlightIcon
+  @name="hashicorp"
+  @size="24"
+  class="fixed right-40 top-32 h-24 w-24 text-white"
+/>
+
+<p class="fixed right-16 bottom-8 text-display-300">
+  Powered by "AI" we're told
+</p>
+
+<div
+  class="fixed top-4 left-8 mx-auto overflow-hidden text-[300px] font-bold leading-none tracking-tight mix-blend-multiply"
+>
+  <div>
+    Ask
+  </div>
+  <div class="-mt-16 ml-32">
+
+    Hermes
+  </div>
+</div>

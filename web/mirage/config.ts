@@ -222,6 +222,29 @@ export default function (mirageConfig) {
         });
       });
 
+      // Ask hermes
+      this.post("/chat", (schema, request) => {
+        const query = request.queryParams.query;
+
+        let relatedDocs = schema.document.all().models.filter((doc) => {
+          return doc.attrs.title.toLowerCase().includes(query.toLowerCase());
+        });
+
+        let message = "I have nothing to say to that.";
+
+        if (relatedDocs.length > 0) {
+          message = "I found some related documents.";
+        }
+        return new Response(
+          200,
+          {},
+          {
+            value: message,
+            relatedDocs: relatedDocs.map((doc) => doc.attrs),
+          },
+        );
+      });
+
       /*************************************************************************
        *
        * Jira requests
