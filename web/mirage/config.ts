@@ -280,7 +280,47 @@ export default function (mirageConfig) {
 
           if (project) {
             let attrs = JSON.parse(request.requestBody);
-            project.update(attrs);
+
+            // update the projects array on the hermesDocuments
+
+            const { hermesDocuments, externalLinks } = attrs;
+
+            let newHermesDocuments: any[] = [];
+
+            hermesDocuments.forEach((doc) => {
+              const mirageDocument = this.schema.document.findBy({
+                objectID: doc.googleFileID,
+              });
+
+              const existingDocuments = project.attrs.hermesDocuments ?? [];
+
+              newHermesDocuments.push(
+                ...existingDocuments,
+                mirageDocument.attrs,
+              );
+
+              //  ignore duplicates
+              if (existingDocuments.includes(doc.googleFileID)) {
+                return;
+              } else {
+                mirageDocument.update({
+                  projects: [
+                    ...mirageDocument.attrs.projects,
+                    project.attrs.id,
+                  ],
+                });
+              }
+
+              mirageDocument.update({
+                projects: [...mirageDocument.attrs.projects, project.attrs.id],
+              });
+            });
+
+            project.update({
+              hermesDocuments: newHermesDocuments,
+              externalLinks,
+            });
+
             return new Response(200, {}, project.attrs);
           }
         },
