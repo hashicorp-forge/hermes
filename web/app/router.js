@@ -34,5 +34,7 @@ Router.map(function () {
     });
   });
   this.route("authenticate");
+
+  this.route("ask-hermes");
   this.route("404", { path: "/*path" });
 });
