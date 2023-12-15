@@ -162,6 +162,10 @@ func (c *Command) Run(args []string) int {
 		idxOpts = append(idxOpts,
 			indexer.WithUpdateDraftHeaders(true))
 	}
+	if cfg.Indexer.UseDatabaseForDocumentData {
+		idxOpts = append(idxOpts,
+			indexer.WithUseDatabaseForDocumentData(true))
+	}
 	idx, err := indexer.NewIndexer(idxOpts...)
 	if err != nil {
 		ui.Error(fmt.Sprintf("error creating indexer: %v", err))
