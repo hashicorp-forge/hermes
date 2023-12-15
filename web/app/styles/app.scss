@@ -71,7 +71,8 @@
 }
 
 dialog {
-  margin: auto; // centers the dialog
+  @apply m-auto; // center the dialog
+  @apply -translate-y-5; // move it up a bit
 }
 
 body,

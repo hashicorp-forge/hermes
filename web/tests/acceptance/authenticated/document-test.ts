@@ -951,12 +951,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(START_NEW_PROJECT_BUTTON);
 
-    // TODO: this really doesn't need to be two modals
-
-    assert.dom(ADD_TO_PROJECT_MODAL).doesNotExist();
-
-    assert.dom(ADD_TO_NEW_PROJECT_MODAL).exists("a new modal is shown");
-
     await fillIn(PROJECT_TITLE_INPUT, "New Project");
 
     const clickPromise = click(CREATE_PROJECT_BUTTON);

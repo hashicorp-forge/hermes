@@ -1,31 +1,24 @@
-{{#if this.newProjectFormIsShown}}
-  <Hds::Modal data-test-add-to-new-project-modal @onClose={{@onClose}} as |M|>
-    <M.Header>
-      Start a project
-    </M.Header>
-    {{! this needs some handling for projectIsBeingCreated
-      "flex flex-col justify-center"
-     }}
-    <M.Body class="min-h-[419px]">
+<Hds::Modal
+  data-test-add-to-or-create-project-modal
+  @onClose={{@onClose}}
+  class={{unless this.newProjectFormIsShown "search-window"}}
+  as |M|
+>
+  <M.Header>
+    {{if this.newProjectFormIsShown "Start a project" "Add doc to project"}}
+  </M.Header>
+  {{! TODO: confirm this height decision }}
+  <M.Body
+    {{! 69px footer height }}
+    class={{if this.newProjectFormIsShown "h-[calc(350px+69px)]" "h-[350px]"}}
+  >
+    {{#if this.newProjectFormIsShown}}
       <New::ProjectForm
         @document={{@document}}
         @isModal={{true}}
         @onModalClose={{@onClose}}
       />
-    </M.Body>
-  </Hds::Modal>
-{{else}}
-  <Hds::Modal
-    data-test-add-to-project-modal
-    @onClose={{this.maybeClose}}
-    class="search-window"
-    as |M|
-  >
-    <M.Header>
-      Add doc to project
-    </M.Header>
-    {{! padding is 24px }}
-    <M.Body class="h-[350px]">
+    {{else}}
       <X::DropdownList
         @inputIsShown={{false}}
         @items={{this.shownProjects}}
@@ -94,7 +87,9 @@
           </div>
         </:loading>
       </X::DropdownList>
-    </M.Body>
+    {{/if}}
+  </M.Body>
+  {{#unless this.newProjectFormIsShown}}
     <M.Footer>
       <Hds::Button
         data-test-start-new-project-button
@@ -105,5 +100,5 @@
         class="-ml-1 pl-2.5"
       />
     </M.Footer>
-  </Hds::Modal>
-{{/if}}
+  {{/unless}}
+</Hds::Modal>
