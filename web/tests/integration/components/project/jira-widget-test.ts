@@ -107,8 +107,10 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
     assert.dom(OVERFLOW_BUTTON).exists();
+
+    // We don't assign the URL in the form context
+    assert.dom(LINK).hasAttribute("href", "");
 
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
 
@@ -314,7 +316,9 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
+    assert
+      .dom(LINK)
+      .hasAttribute("href", "", "link is placeholder while contextIsForm");
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
   });
 

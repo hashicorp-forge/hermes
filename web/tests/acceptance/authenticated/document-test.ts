@@ -85,8 +85,7 @@ const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
 
 const PROJECT_LINK = "[data-test-project-link]";
 const ADD_TO_PROJECT_BUTTON = "[data-test-projects-section-header] button";
-const ADD_TO_PROJECT_MODAL = "[data-test-add-to-project-modal]";
-const ADD_TO_NEW_PROJECT_MODAL = "[data-test-add-to-new-project-modal]";
+const ADD_TO_PROJECT_MODAL = "[data-test-add-to-or-create-project-modal]";
 const PROJECT_OPTION = "[data-test-project-option]";
 const PROJECT_DOCUMENT = "[data-test-document-list-item]";
 const START_NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
