@@ -5,7 +5,10 @@
   {{! TODO: this needs some focus-within styles to capture the correct focused state }}
   <div
     class="group relative flex w-full
-      {{if (and this.issue @contextIsForm) 'h-9 items-center bg-red-500'}}"
+      {{if
+        (and this.issue @contextIsForm)
+        'h-9 items-center rounded-button-md shadow-surface-low'
+      }}"
   >
     <div class="w-full {{if @contextIsForm 'relative' 'flex'}}">
 
@@ -40,7 +43,8 @@
           {{/unless}}
 
           {{! Content }}
-          <div class="relative mt-0.5 mr-3.5 flex gap-2.5">
+          <div class="attached-jira-issue relative">
+            {{! maybe this should be grid? }}
 
             <img
               data-test-jira-issue-type-icon

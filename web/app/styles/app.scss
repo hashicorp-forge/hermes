@@ -161,3 +161,8 @@ h1 {
   height: 0;
   visibility: hidden;
 }
+
+.attached-jira-issue {
+  @apply grid gap-2.5 pl-2.5;
+  grid-template-columns: 16px 1fr min-content;
+}
