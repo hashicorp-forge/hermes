@@ -28,9 +28,6 @@ module(
 
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks);
 
-      console.log("hermesDocuments", hermesDocuments);
-      console.log("externalLinks", externalLinks);
-
       assert.equal(hermesDocuments[0].sortOrder, 1);
       assert.equal(hermesDocuments[1].sortOrder, 2);
       assert.equal(externalLinks[0].sortOrder, 3);
