@@ -55,21 +55,6 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   }
 
   /**
-   * The action to conditionally close the modal.
-   * Passed as the `onClose` action of the search modal.
-   * Closes the modal if the new project form is not shown.
-   * We include this check because in the "start a new project" flow,
-   * we close the search modal and open a form modal. In that case, we
-   * don't want to trigger the passed-in `onClose` action, which is
-   * normally the case when destroying a modal.
-   */
-  @action protected maybeClose() {
-    if (!this.newProjectFormIsShown) {
-      this.args.onClose();
-    }
-  }
-
-  /**
    * The action to show the new project form.
    * Replaces the search results with the new project form.
    */
@@ -104,18 +89,13 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   protected loadProjects = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
 
-    try {
-      this.allProjects = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects`)
-        .then((response) => response?.json());
+    this.allProjects = await this.fetchSvc
+      .fetch(`/api/${this.configSvc.config.api_version}/projects`)
+      .then((response) => response?.json());
 
-      next(() => {
-        this.dd?.scheduleAssignMenuItemIDs();
-      });
-    } catch (e: unknown) {
-      console.log(e);
-      // TODO: handle
-    }
+    next(() => {
+      this.dd?.scheduleAssignMenuItemIDs();
+    });
   });
 }
 
