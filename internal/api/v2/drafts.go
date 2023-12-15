@@ -590,12 +590,18 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// Make sure document is a draft.
+		if doc.Status != "WIP" {
+			http.Error(w, "Draft not found", http.StatusNotFound)
+			return
+		}
+
 		// Authorize request (only allow owners or contributors to get past this
 		// point in the handler). We further authorize some methods later that
 		// require owner access only.
 		userEmail := r.Context().Value("userEmail").(string)
 		var isOwner, isContributor bool
-		if doc.Owners[0] == userEmail {
+		if len(doc.Owners) > 0 && doc.Owners[0] == userEmail {
 			isOwner = true
 		}
 		if contains(doc.Contributors, userEmail) {
