@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,6 +18,9 @@ import (
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/option"
 )
 
 type DraftsRequest struct {
@@ -118,8 +122,41 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
 
+			// If configured to create documents as the logged-in Hermes user, create
+			// a new Google Drive service to do this.
+			copyTemplateSvc := *srv.GWService
+			if srv.Config.GoogleWorkspace.Auth != nil &&
+				srv.Config.GoogleWorkspace.Auth.CreateDocsAsUser {
+
+				ctx := context.Background()
+				conf := &jwt.Config{
+					Email:      srv.Config.GoogleWorkspace.Auth.ClientEmail,
+					PrivateKey: []byte(srv.Config.GoogleWorkspace.Auth.PrivateKey),
+					Scopes: []string{
+						"https://www.googleapis.com/auth/drive",
+					},
+					Subject:  userEmail,
+					TokenURL: srv.Config.GoogleWorkspace.Auth.TokenURL,
+				}
+				client := conf.Client(ctx)
+
+				var err error
+				copyTemplateSvc.Drive, err = drive.NewService(
+					ctx, option.WithHTTPClient(client))
+				if err != nil {
+					srv.Logger.Error("error creating impersonated Google Drive service",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(
+						w, "Error processing request", http.StatusInternalServerError)
+					return
+				}
+			}
+
 			// Copy template to new draft file.
-			f, err := srv.GWService.CopyFile(
+			f, err := copyTemplateSvc.CopyFile(
 				template, title, srv.Config.GoogleWorkspace.DraftsFolder)
 			if err != nil {
 				srv.Logger.Error("error creating draft",
