@@ -12,7 +12,6 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
-import ProjectFormService from "hermes/services/project-form";
 import Ember from "ember";
 
 const TIMEOUT = Ember.testing ? 0 : 2000;
@@ -29,7 +28,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
-  @service declare projectForm: ProjectFormService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked protected jiraSearchIsShowing = false;
@@ -41,6 +39,8 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
+
+  @tracked protected projectIsBeingCreated = false;
 
   private validate() {
     this.titleErrorIsShown = this.title.length === 0;
@@ -108,7 +108,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   private createProject = task(async () => {
     try {
-      this.projectForm.projectIsBeingCreated = true;
+      this.projectIsBeingCreated = true;
       const projectPromise = this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
@@ -139,16 +139,12 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         );
       }
 
-      this.router
-        .transitionTo("authenticated.projects.project", project.id)
-        .then(() => {
-          this.projectForm.projectIsBeingCreated = false;
-        });
+      this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (e) {
       this.flashMessages.critical((e as any).message, {
         title: "Error creating project",
       });
-      this.projectForm.projectIsBeingCreated = false;
+      this.projectIsBeingCreated = false;
     }
   });
 }

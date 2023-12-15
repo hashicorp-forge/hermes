@@ -381,38 +381,30 @@ export default function (mirageConfig) {
 
           // documents that are in both the current project and the new request
 
-          console.log("1");
           const currentHermesDocuments = project.attrs.hermesDocuments ?? [];
           const incomingHermesDocuments = attrs.hermesDocuments ?? [];
 
           const documentsToRemove = currentHermesDocuments.filter((doc) => {
             return !incomingHermesDocuments.includes(doc);
           });
-          console.log("2");
-          console.log("documentsToRemove", documentsToRemove);
 
           const documentsToAdd = incomingHermesDocuments.filter((doc) => {
             return !currentHermesDocuments.includes(doc);
           });
-          console.log("3");
-          console.log("documentsToAdd", documentsToAdd);
 
           documentsToRemove.forEach((doc) => {
             const mirageDocument = this.schema.document.findBy({
               objectID: doc.googleFileID,
             });
-            console.log("4");
-            console.log("mirageDocument", mirageDocument);
+
             mirageDocument?.update({
               projects: mirageDocument.attrs.projects.filter(
-                (projectID) => projectID !== project.attrs.id,
+                (projectID) => projectID.toString() !== project.attrs.id,
               ),
             });
           });
 
-          console.log("5");
           documentsToAdd.forEach((doc) => {
-            console.log("6");
             const mirageDocument = this.schema.document.findBy({
               objectID: doc,
             });

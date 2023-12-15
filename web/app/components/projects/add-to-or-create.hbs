@@ -3,13 +3,10 @@
     <M.Header>
       Start a project
     </M.Header>
-    <M.Body
-      class="min-h-[419px]
-        {{if
-          this.projectForm.projectIsBeingCreated
-          'flex flex-col justify-center'
-        }}"
-    >
+    {{! this needs some handling for projectIsBeingCreated
+      "flex flex-col justify-center"
+     }}
+    <M.Body class="min-h-[419px]">
       <New::ProjectForm
         @document={{@document}}
         @isModal={{true}}

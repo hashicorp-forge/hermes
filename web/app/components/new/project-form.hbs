@@ -1,4 +1,4 @@
-{{#if (and this.projectForm.projectIsBeingCreated @isModal)}}
+{{#if (and this.projectIsBeingCreated @isModal)}}
   <div
     class="grid h-full place-items-center pb-12 text-center"
     data-test-creating-project-message
@@ -13,7 +13,7 @@
 {{else}}
   <New::Form
     data-test-project-form
-    @taskIsRunning={{this.projectForm.projectIsBeingCreated}}
+    @taskIsRunning={{this.projectIsBeingCreated}}
     @icon="grid"
     @headline="Start a project"
     @taskIsRunningHeadline="Creating project..."
