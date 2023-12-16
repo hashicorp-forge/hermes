@@ -195,6 +195,10 @@ type Indexer struct {
 	// UpdateDraftHeaders enables the indexer to automatically update document
 	// headers for draft documents with Hermes document metadata.
 	UpdateDraftHeaders bool `hcl:"update_draft_headers,optional"`
+
+	// UseDatabaseForDocumentData will use the database instead of Algolia as the
+	// source of truth for document data, if true.
+	UseDatabaseForDocumentData bool `hcl:"use_database_for_document_data,optional"`
 }
 
 // GoogleWorkspace is the configuration to work with Google Workspace.

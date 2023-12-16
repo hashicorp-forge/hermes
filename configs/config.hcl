@@ -158,6 +158,10 @@ indexer {
   // update_draft_headers enables the indexer to automatically update document
   // headers for draft documents based on Hermes metadata.
   update_draft_headers = true
+
+  // use_database_for_document_data will use the database instead of Algolia as
+  // the source of truth for document data, if true.
+  use_database_for_document_data = false
 }
 
 // jira is the configuration for Hermes to work with Jira.
