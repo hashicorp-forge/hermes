@@ -52,7 +52,7 @@
 .underlined-link:not([disabled]):not(.underline-on-hover),
 .underline-on-hover:hover,
 .underline-on-hover:focus {
-  @apply text-color-foreground-faint underline decoration-color-palette-neutral-300 underline-offset-[3px];
+  @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
 
   &:hover,
   &:focus {
