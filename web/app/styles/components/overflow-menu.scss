@@ -1,5 +1,5 @@
 .overflow-button {
-  @apply pointer-events-auto relative p-[3px];
+  @apply pointer-events-auto relative p-[2px];
 
   &:hover,
   &:focus,
@@ -26,9 +26,9 @@
 }
 
 .overflow-button-container {
-  @apply pointer-events-none absolute top-0 -right-1;
-  @apply flex w-16 justify-end rounded-tr;
-  @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+  @apply pointer-events-none absolute top-px -right-[3px];
+  @apply flex w-16 justify-end rounded-r;
+  @apply bg-gradient-to-l from-color-page-primary via-color-page-primary to-transparent;
   @apply group-focus-within:visible group-hover:visible;
 
   &:hover,

@@ -42,6 +42,7 @@ export default Factory.extend({
       value: "This is a test document",
     },
   },
+  projects: [],
   approvers: [],
   owners: [TEST_USER_EMAIL],
   ownerPhotos: [TEST_USER_PHOTO],

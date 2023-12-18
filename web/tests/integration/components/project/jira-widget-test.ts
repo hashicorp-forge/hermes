@@ -44,7 +44,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   test("it can render for a form context (no issue attached)", async function (this: Context, assert) {
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
        />
     `);
 
@@ -100,15 +100,17 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @issue={{this.issue}}
       />
     `);
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
     assert.dom(OVERFLOW_BUTTON).exists();
+
+    // We don't assign the URL in the form context
+    assert.dom(LINK).hasAttribute("href", "");
 
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
 
@@ -209,7 +211,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await render<Context>(hbs`
       <Project::JiraWidget
         @isDisabled={{true}}
-        @contextIsForm={{this.contextIsForm}}
+        @isNewProjectForm={{this.contextIsForm}}
       />
     `);
 
@@ -248,7 +250,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     assert.dom(PICKER_DROPDOWN).doesNotExist();
@@ -277,7 +279,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
   test("it shows a search icon when searching", async function (this: Context, assert) {
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     assert.dom(SEARCHING_ICON).doesNotExist();
@@ -305,7 +307,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     await fillIn(ADD_JIRA_INPUT, "item");
@@ -314,7 +316,9 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
+    assert
+      .dom(LINK)
+      .hasAttribute("href", "", "link is placeholder while contextIsForm");
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
   });
 
@@ -322,7 +326,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     this.server.create("jira-picker-result");
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}}  />
+      <Project::JiraWidget @isNewProjectForm={{true}}  />
       <div class="click-away"/>
     `);
 
@@ -347,7 +351,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
       <div class="click-away"/>
     `);
 
@@ -407,7 +411,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @onIssueSelect={{this.onIssueSelect}}
       />
     `);
@@ -428,7 +432,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @issue={{this.issue}}
         @onIssueRemove={{this.onIssueRemove}}
       />

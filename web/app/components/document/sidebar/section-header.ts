@@ -12,15 +12,22 @@ interface DocumentSidebarSectionHeaderComponentSignature {
     buttonAction?: () => void;
     buttonIcon?: string;
     buttonIsHidden?: boolean;
+    buttonIsDisabled?: boolean;
+    disabledButtonTooltipText?: string;
   };
 }
 
 export default class DocumentSidebarSectionHeaderComponent extends Component<DocumentSidebarSectionHeaderComponentSignature> {
   protected get buttonIsShown(): boolean {
+    if (this.args.buttonIsDisabled) {
+      return true;
+    }
     return !!this.args.buttonAction && !this.args.buttonIsHidden;
   }
 
   @action protected buttonAction(): void {
+    if (this.args.buttonIsDisabled) return;
+
     assert("buttonAction must be defined", this.args.buttonAction);
     this.args.buttonAction();
   }
