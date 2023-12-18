@@ -1,12 +1,5 @@
 import RouterService from "@ember/routing/router-service";
-import {
-  click,
-  currentURL,
-  fillIn,
-  visit,
-  waitFor,
-  waitUntil,
-} from "@ember/test-helpers";
+import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
@@ -90,7 +83,6 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     await fillIn(JIRA_INPUT, summary);
 
     await click(JIRA_PICKER_RESULT);
-
     await click(SUBMIT_BUTTON);
 
     // Confirm that the project was created
