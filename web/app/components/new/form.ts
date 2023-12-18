@@ -36,10 +36,6 @@ interface NewFormComponentSignature {
 export default class NewFormComponent extends Component<NewFormComponentSignature> {
   protected motion = HermesFormResize;
 
-  protected get headlineIsShown() {
-    return !this.args.isModal;
-  }
-
   protected get taskIsRunningMessageIsShown() {
     return this.args.taskIsRunning && !this.args.isModal;
   }

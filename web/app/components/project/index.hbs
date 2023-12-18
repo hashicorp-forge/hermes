@@ -26,7 +26,10 @@
             class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
             @hasChevron={{true}}
           >
-            <FlightIcon @name={{get-project-status-icon dd.selected}} />
+            <FlightIcon
+              @name={{get-project-status-icon dd.selected}}
+              class="-mr-1"
+            />
             <span class="status ml-2">
               {{this.statusLabel}}
             </span>

@@ -38,19 +38,12 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    * Reverted only if an error occurs.
    */
   @tracked protected projectIsBeingCreated = false;
-  @tracked protected jiraSearchIsShowing = false;
-  @tracked protected jiraSearchQuery = "";
-  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
-  @tracked protected shownJiraIssues = [];
+  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
-
-  private validate() {
-    this.titleErrorIsShown = this.title.length === 0;
-  }
 
   /**
    * Whether the Jira integration is enabled.
@@ -87,6 +80,10 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
     if (!this.titleErrorIsShown) {
       void this.createProject.perform();
     }
+  }
+
+  private validate() {
+    this.titleErrorIsShown = this.title.length === 0;
   }
 
   /**
