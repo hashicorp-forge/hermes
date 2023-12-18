@@ -1,3 +1,4 @@
+import { on } from "@ember/object/evented";
 import {
   click,
   fillIn,
@@ -21,7 +22,7 @@ const MODAL_BODY = "[data-test-modal-body]";
 const MODAL_FOOTER = "[data-test-modal-footer]";
 const FORM = "[data-test-project-form]";
 const NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
-const SUBMIT_BUTTON = "[data-test-start-new-project-button]";
+const SUBMIT_BUTTON = "[data-test-create-project-button]";
 
 interface Context extends MirageTestContext {
   onClose: () => void;
@@ -70,9 +71,6 @@ module("Integration | Component | projects/add-to-or-create", function (hooks) {
   });
 
   test("you can add a doc to a new project", async function (this: Context, assert) {
-    let count = 0;
-    this.set("onSave", () => count++);
-
     await render<Context>(hbs`
       <Projects::AddToOrCreate
         @onClose={{this.onClose}}
@@ -95,12 +93,17 @@ module("Integration | Component | projects/add-to-or-create", function (hooks) {
     assert.dom(MODAL_FOOTER).doesNotExist();
     assert.dom(FORM).exists();
 
-    await fillIn("[data-test-title]", "Foo");
+    const uniqueTitle = "1iodfanlkj";
+
+    await fillIn("[data-test-title]", uniqueTitle);
     await click(SUBMIT_BUTTON);
 
-    assert.equal(count, 1);
+    const project = this.server.schema.projects.findBy({ title: uniqueTitle });
+    const document = this.server.schema.document.first();
 
-    assert.dom(MODAL).doesNotExist();
+    assert.true(document.projects.includes(project.id.toString()));
+
+    assert.equal(project.hermesDocuments[0].id, document.id);
   });
 
   test("it runs the onClose action", async function (this: Context, assert) {

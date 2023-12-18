@@ -77,7 +77,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    * Calls the passed-in `onSave` and `onClose` actions.
    */
   @action protected onSave(_index: number, project: HermesProjectInfo) {
-    void this.args.onSave(project);
+    this.args.onSave(project);
     this.args.onClose();
   }
 
