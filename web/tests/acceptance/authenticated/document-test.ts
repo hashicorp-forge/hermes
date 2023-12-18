@@ -92,7 +92,7 @@ const START_NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
 
 const PROJECT_FORM = "[data-test-project-form]";
 const PROJECT_TITLE_INPUT = `${PROJECT_FORM} [data-test-title]`;
-const CREATE_PROJECT_BUTTON = "[data-test-create-project-button]";
+const CREATE_PROJECT_BUTTON = `${PROJECT_FORM} [data-test-submit]`;
 const CREATING_PROJECT_MESSAGE = "[data-test-creating-project-message]";
 const PROJECT_DOCUMENT_LINK = "[data-test-document-link]";
 const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";

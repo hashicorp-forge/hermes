@@ -1,4 +1,3 @@
-import { on } from "@ember/object/evented";
 import {
   click,
   fillIn,
@@ -22,7 +21,7 @@ const MODAL_BODY = "[data-test-modal-body]";
 const MODAL_FOOTER = "[data-test-modal-footer]";
 const FORM = "[data-test-project-form]";
 const NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
-const SUBMIT_BUTTON = "[data-test-create-project-button]";
+const SUBMIT_BUTTON = `${FORM} [data-test-submit]`;
 
 interface Context extends MirageTestContext {
   onClose: () => void;
