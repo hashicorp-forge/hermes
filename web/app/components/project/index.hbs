@@ -71,9 +71,9 @@
       class="- absolute -right-6 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-[52.5%]"
     >
       <FlightIcon
-        @name={{this.statusIcon}}
+        @name={{get-project-status-icon this.status}}
         @size="24"
-        class="h-full w-full text-color-palette-neutral-300 opacity-30"
+        class="h-full w-full text-color-palette-neutral-300 opacity-80"
       />
       <div
         class="absolute top-0 left-0 h-full w-full bg-gradient-to-tr from-white to-white/0"
@@ -139,7 +139,7 @@
           <Action
             data-test-add-project-resource-button
             {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+            class="hds-button hds-button--color-secondary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
           >
             <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
           </Action>
