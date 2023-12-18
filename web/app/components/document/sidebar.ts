@@ -157,16 +157,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
 
-  protected get projects() {
-    const activeProjects = this._projects?.filter((project) => {
+  /**
+   * All active projects. Used to render the list of
+   * options for the "add to project" modal.
+   */
+  protected get activeProjects() {
+    return this._projects?.filter((project) => {
       return project.status === ProjectStatus.Active;
     });
-
-    const completedProjects = this._projects?.filter((project) => {
-      return project.status === ProjectStatus.Completed;
-    });
-
-    return [...(activeProjects ?? []), ...(completedProjects ?? [])];
   }
 
   /**
@@ -506,17 +504,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return !this.editingIsDisabled;
   }
 
+  /**
+   * The action to show the Projects modal.
+   * Triggered by clicking the "+" button in the Projects section.
+   */
   @action protected showProjectsModal() {
     this.projectsModalIsShown = true;
   }
 
+  /**
+   * The action to hide the Projects modal.
+   * Passed to the Projects modal component and
+   * triggered on modal close.
+   */
   @action protected hideProjectsModal() {
     this.projectsModalIsShown = false;
-  }
-
-  @action private addDocumentToProject(project: HermesProjectInfo) {
-    this._projects?.unshift(project);
-    this._projects = this._projects;
   }
 
   @action refreshRoute() {
@@ -638,55 +640,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     },
   );
-
-  removeProject = task(async (projectId: string) => {
-    try {
-      const projectIndex = this._projects?.findIndex(
-        (project) => project.id === projectId,
-      );
-
-      if (projectIndex !== undefined && projectIndex !== -1) {
-        this._projects?.splice(projectIndex, 1);
-        this._projects = this._projects;
-      }
-
-      // need to update the project to not have the document
-      const projectResources = (await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
-        )
-        .then((response) => response?.json())) as HermesProjectResources;
-
-      let { hermesDocuments, externalLinks } = projectResources;
-
-      const formattedHermesDocuments = hermesDocuments
-        ?.filter((doc) => doc.googleFileID !== this.docID)
-        .map((doc) => {
-          return {
-            googleFileID: doc.googleFileID,
-            sortOrder: doc.sortOrder,
-          };
-        });
-
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            hermesDocuments: formattedHermesDocuments,
-            externalLinks,
-          }),
-        },
-      );
-    } catch (error: unknown) {
-      // reload the projects to reset the local state
-      void this.loadRelatedProjects.perform();
-
-      this.maybeShowFlashError(error as Error, "Unable to remove project");
-      throw error;
-    }
-    this.refreshRoute();
-  });
 
   saveProduct = keepLatestTask(async (product: string) => {
     this.product = product;
@@ -890,42 +843,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
-  private formatDocForProject(document: HermesDocument): RelatedHermesDocument {
-    const {
-      title,
-      status,
-      owners,
-      ownerPhotos,
-      product,
-      createdTime,
-      modifiedTime,
-      summary,
-    } = document;
-    const documentType = document.docType;
-    const documentNumber = document.docNumber;
-    const googleFileID = document.objectID;
-
-    assert("owners expected", owners);
-    assert("product expected", product);
-
-    const sortOrder = 1;
-
-    return {
-      title,
-      status,
-      summary,
-      owners,
-      ownerPhotos,
-      product,
-      documentType,
-      documentNumber,
-      googleFileID,
-      sortOrder,
-      createdTime,
-      modifiedTime: modifiedTime || createdTime,
-    };
-  }
-
   /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
    * Called when a document draft is rendered.
@@ -1000,11 +917,80 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 
-  protected saveProjectRelatedResources = task(
-    async (project: HermesProjectInfo) => {
-      this.addDocumentToProject(project);
+  /**
+   * The task to remove a document from a project (and vice versa).
+   * Called via the "remove" button in the Projects overflow menu.
+   */
+  removeDocFromProject = task(async (projectId: string) => {
+    const cachedProjects = this._projects;
 
-      // FIXME: do algoliaObjects never have `id`?
+    try {
+      const projectIndex = this._projects?.findIndex(
+        (project) => project.id === projectId,
+      );
+
+      if (projectIndex === undefined || projectIndex === -1) return;
+
+      // update the local state immediately
+      this._projects?.splice(projectIndex, 1);
+      this._projects = this._projects;
+
+      // fetch the existing resources
+      const projectResources = (await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        )
+        .then((response) => response?.json())) as HermesProjectResources;
+
+      let hermesDocuments = projectResources.hermesDocuments ?? [];
+      let externalLinks = projectResources.externalLinks ?? [];
+
+      // filter out the current document
+      hermesDocuments = hermesDocuments.filter(
+        (doc) => doc.googleFileID !== this.docID,
+      );
+
+      // update the sort order of all resources
+      updateRelatedResourcesSortOrder(hermesDocuments, externalLinks);
+
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            hermesDocuments: hermesDocuments.map((doc) => {
+              return {
+                googleFileID: doc.googleFileID,
+                sortOrder: doc.sortOrder,
+              };
+            }),
+            externalLinks,
+          }),
+        },
+      );
+    } catch (error: unknown) {
+      this._projects = cachedProjects;
+      this._projects = this._projects;
+      this.maybeShowFlashError(error as Error, "Unable to remove project");
+    }
+    this.refreshRoute();
+  });
+
+  /**
+   * The task to add a document to an existing project.
+   * Called when the user selects a project from the "add to project" modal.
+   * Adds the project to the local array and re-renders the list.
+   * Saves the project's related resources to the back end.
+   */
+  protected addDocToProject = task(async (project: HermesProjectInfo) => {
+    const cachedProjects = this._projects;
+
+    try {
+      // Update the local state immediately.
+      this._projects?.unshift(project);
+      this._projects = this._projects;
+
+      // Fetch the existing resources
       const projectResources = await this.fetchSvc
         .fetch(
           `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
@@ -1012,36 +998,34 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         .then((response) => response?.json());
 
       let hermesDocuments = projectResources.hermesDocuments ?? [];
+      let externalLinks = projectResources.externalLinks ?? [];
 
-      const externalLinks = projectResources.externalLinks ?? [];
+      // Add the formatted document to the start of the array
+      hermesDocuments.unshift({
+        googleFileID: this.args.document.objectID,
+        sortOrder: 1,
+      });
 
-      const newRelatedHermesDocument = this.formatDocForProject(
-        this.args.document,
-      );
-
-      hermesDocuments.unshift(newRelatedHermesDocument);
-
+      // Update the sort order of all resources
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
+      // Save the resources to the back end
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
         {
           method: "POST",
           body: JSON.stringify({
-            hermesDocuments: hermesDocuments.map(
-              (doc: RelatedHermesDocument) => {
-                return {
-                  googleFileID: doc.googleFileID,
-                  sortOrder: doc.sortOrder,
-                };
-              },
-            ),
+            hermesDocuments,
             externalLinks,
           }),
         },
       );
-    },
-  );
+    } catch (e: unknown) {
+      this._projects = cachedProjects;
+      this._projects = this._projects;
+      this.maybeShowFlashError(e as Error, "Unable to add document to project");
+    }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

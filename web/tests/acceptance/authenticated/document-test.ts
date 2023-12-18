@@ -893,7 +893,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/doc-0?draft=true");
 
-    assert.dom(ADD_TO_PROJECT_BUTTON).isDisabled();
+    assert.dom(ADD_TO_PROJECT_BUTTON).hasAttribute("aria-disabled");
   });
 
   test("you can add a published doc to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

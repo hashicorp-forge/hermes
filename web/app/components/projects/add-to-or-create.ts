@@ -76,7 +76,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    * Passed to X::DropdownList as `onClick`.
    * Calls the passed-in `onSave` and `onClose` actions.
    */
-  @action protected onSave(_index: number, project: HermesProjectInfo) {
+  @action protected onProjectClick(_index: number, project: HermesProjectInfo) {
     this.args.onSave(project);
     this.args.onClose();
   }

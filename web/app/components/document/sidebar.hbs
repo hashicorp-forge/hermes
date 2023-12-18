@@ -242,9 +242,9 @@
             @buttonIsDisabled={{this.isDraft}}
             @disabledButtonTooltipText="Only published docs can be added to projects."
           />
-          {{#if this.projects.length}}
+          {{#if this.activeProjects.length}}
             <ol class="related-resources-list mt-1 space-y-0.5">
-              {{#each this.projects as |project|}}
+              {{#each this.activeProjects as |project|}}
                 <li data-test-document-project class="related-resource">
                   <div class="related-resource-inner group relative">
                     <LinkTo
@@ -280,7 +280,7 @@
                         remove=(hash
                           icon="trash"
                           label="Remove from project"
-                          action=(perform this.removeProject project.id)
+                          action=(perform this.removeDocFromProject project.id)
                         )
                       }}
                     />
@@ -459,7 +459,7 @@
     <Projects::AddToOrCreate
       @document={{@document}}
       @onClose={{this.hideProjectsModal}}
-      @onSave={{perform this.saveProjectRelatedResources}}
+      @onSave={{perform this.addDocToProject}}
     />
   {{/if}}
 

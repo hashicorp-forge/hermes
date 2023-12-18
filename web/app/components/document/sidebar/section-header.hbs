@@ -23,7 +23,7 @@
       data-test-section-header-button-for={{@title}}
       class="sidebar-section-header-button {{if @buttonIsDisabled 'disabled'}}"
       aria-label={{or @buttonLabel "Add"}}
-      disabled={{@buttonIsDisabled}}
+      aria-disabled={{@buttonIsDisabled}}
       {{(if
         (and @buttonIsDisabled @disabledButtonTooltipText)
         (modifier "tooltip" @disabledButtonTooltipText class="max-w-[200px]")

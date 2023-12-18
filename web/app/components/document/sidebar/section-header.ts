@@ -26,6 +26,8 @@ export default class DocumentSidebarSectionHeaderComponent extends Component<Doc
   }
 
   @action protected buttonAction(): void {
+    if (this.args.buttonIsDisabled) return;
+
     assert("buttonAction must be defined", this.args.buttonAction);
     this.args.buttonAction();
   }
