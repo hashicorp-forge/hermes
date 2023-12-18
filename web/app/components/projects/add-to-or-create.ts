@@ -35,8 +35,8 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
 
   /**
    * The projects that are shown in the search modal.
-   * Filters out archived projects and projects that are already
-   * associated with the document.
+   * Filters out archived and completed projects, as well as projects
+   * that are already associated with the document.
    */
   protected get shownProjects() {
     if (!this.allProjects) {
@@ -46,7 +46,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
     return this.allProjects
       .filter((project: HermesProject) => {
         return (
-          project.status !== ProjectStatus.Archived &&
+          project.status === ProjectStatus.Active &&
           !this.args.document.projects?.includes(parseInt(project.id)) &&
           project.title.toLowerCase().includes(this.query.toLowerCase())
         );

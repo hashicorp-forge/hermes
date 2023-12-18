@@ -160,9 +160,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * All active projects. Used to render the list of
    * options for the "add to project" modal.
    */
-  protected get activeProjects() {
+  protected get projects() {
     return this._projects?.filter((project) => {
-      return project.status === ProjectStatus.Active;
+      return (
+        project.status === ProjectStatus.Active ||
+        project.status === ProjectStatus.Completed
+      );
     });
   }
 

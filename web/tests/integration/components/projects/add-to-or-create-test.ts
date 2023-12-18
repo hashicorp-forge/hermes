@@ -46,6 +46,10 @@ module("Integration | Component | projects/add-to-or-create", function (hooks) {
       title: "Baz",
       status: ProjectStatus.Archived,
     });
+    this.server.create("project", {
+      title: "Qux",
+      status: ProjectStatus.Completed,
+    });
 
     await render<Context>(hbs`
       <Projects::AddToOrCreate
@@ -55,7 +59,7 @@ module("Integration | Component | projects/add-to-or-create", function (hooks) {
       />
     `);
 
-    assert.dom(OPTION).exists({ count: 2 });
+    assert.dom(OPTION).exists({ count: 2 }, "only active projects are shown");
 
     const firstOption = find(OPTION);
     const secondOption = findAll(OPTION)[1];
