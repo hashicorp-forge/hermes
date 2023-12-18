@@ -85,8 +85,8 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    * Determines if the type is shown in the widget.
    */
   protected get issueType() {
-    if (this.issue && "type" in this.issue) {
-      return this.issue.type as string;
+    if (this.issue && "issueType" in this.issue) {
+      return this.issue.issueType;
     }
   }
 
@@ -96,8 +96,8 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    * Determines if the type image is shown in the widget.
    */
   protected get issueTypeImage() {
-    if (this.issue && "typeImage" in this.issue) {
-      return this.issue.typeImage as string;
+    if (this.issue && "issueTypeImage" in this.issue) {
+      return this.issue.issueTypeImage;
     }
   }
 
