@@ -123,6 +123,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
         })
         .then((response) => response?.json());
 
+      /**
+       * Create the project with a minimum duration.
+       * This allows us time to show a brief "creating..."
+       * message to orient the user.
+       */
       const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
 
       if (this.args.document) {

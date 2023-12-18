@@ -7,6 +7,7 @@
 @use "./body";
 @use "./animations";
 @use "./typography";
+@use "./buttons";
 
 @use "components/new";
 @use "components/toolbar";
@@ -41,6 +42,7 @@
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
+@use "components/jira-widget";
 @use "components/product-link";
 @use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
@@ -160,9 +162,4 @@ h1 {
   width: 0;
   height: 0;
   visibility: hidden;
-}
-
-.attached-jira-issue {
-  @apply grid gap-2.5 pl-2.5;
-  grid-template-columns: 16px 1fr min-content;
 }

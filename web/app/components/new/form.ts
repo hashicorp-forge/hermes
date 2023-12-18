@@ -36,6 +36,10 @@ interface NewFormComponentSignature {
 export default class NewFormComponent extends Component<NewFormComponentSignature> {
   protected motion = HermesFormResize;
 
+  /**
+   * Whether the "creating..." message is shown.
+   * True if `@taskIsRunning` and `@isModal` is false/undefined.
+   */
   protected get taskIsRunningMessageIsShown() {
     return this.args.taskIsRunning && !this.args.isModal;
   }

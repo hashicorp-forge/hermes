@@ -1,18 +1,20 @@
 <div
-  class="relative flex min-h-[36px] w-full max-w-3xl items-start"
+  class="jira-widget relative flex min-h-[36px] w-full max-w-3xl items-start"
   ...attributes
 >
-  {{! TODO: this needs some focus-within styles to capture the correct focused state }}
   <div
-    class="group relative flex w-full
+    class="inner relative flex w-full
       {{if
-        (and this.issue @contextIsForm)
-        'h-9 items-center rounded-button-md shadow-surface-low'
+        (and this.issue @isNewProjectForm)
+        'h-9 items-center rounded-button-md pr-2 shadow-surface-low'
       }}"
   >
-    <div class="w-full {{if @contextIsForm 'relative' 'flex'}}">
+    <div
+      class="flex w-full
+        {{if @isNewProjectForm 'relative min-h-[24px] items-center'}}"
+    >
 
-      {{#unless @contextIsForm}}
+      {{#unless @isNewProjectForm}}
         <div
           data-test-jira-icon
           class="relative z-10 mr-3 flex h-6 items-center"
@@ -29,34 +31,27 @@
       {{#if this.issue}}
         <ExternalLink
           data-test-jira-link
-          href={{if @contextIsForm "" this.issue.url}}
+          href={{if @isNewProjectForm "" this.issue.url}}
           class="mr-8
-            {{if @contextIsForm 'pointer-events-none block' 'inline-flex'}}"
+            {{if @isNewProjectForm 'pointer-events-none block' 'inline-flex'}}"
         >
-          {{! if the border is shown, hide this? }}
-
-          {{#unless @contextIsForm}}
-            {{! Click area }}
-            <div
-              class="absolute -top-1.5 -left-2.5 -bottom-2 -right-2 hidden rounded-button-md group-hover:block group-hover:shadow-surface-low group-focus:block group-focus:shadow-surface-low"
-            />
+          {{! Click area }}
+          {{#unless @isNewProjectForm}}
+            <div class="click-area" />
           {{/unless}}
 
           {{! Content }}
-          <div class="attached-jira-issue relative">
-            {{! maybe this should be grid? }}
-
+          <div class="attached-jira-issue {{if @isNewProjectForm 'pl-2.5'}}">
             <img
               data-test-jira-issue-type-icon
               width="16"
               height="16"
-              alt={{this.issue.issueType}}
-              src={{this.issue.issueTypeImage}}
+              alt={{this.issueType}}
+              src={{this.issueTypeImage}}
               class="mt-0.5 h-4 w-4"
             />
-
             <div
-              class="{{if @contextIsForm 'truncate' 'line-clamp-2'}}
+              class="{{if @isNewProjectForm 'truncate' 'line-clamp-2'}}
                 w-full text-color-foreground-faint"
             >
               <span
@@ -70,34 +65,28 @@
               </span>
             </div>
           </div>
-          {{#if (or this.issue.priority this.issue.assignee this.issueStatus)}}
-            <div class="relative flex h-6 shrink-0 items-center gap-2">
 
-              {{! see if this attr exists in backend }}
-              {{#if this.issue.priority}}
+          {{#if (or this.issuePriority this.issueAssignee this.issueStatus)}}
+            <div class="relative flex h-6 shrink-0 items-center gap-2">
+              {{#if this.issuePriority}}
                 <img
                   data-test-jira-priority-icon
                   width="16"
                   height="16"
-                  alt={{this.issue.priority}}
-                  src={{this.issue.priorityImage}}
+                  alt={{this.issuePriority}}
+                  src={{this.issuePriorityImage}}
                   class="h-4 w-4"
                 />
               {{/if}}
-
-              {{! see if this exists in backend }}
-              {{#if this.issue.assignee}}
+              {{#if this.issueAssignee}}
                 <Person::Avatar
                   data-test-jira-assignee-avatar-wrapper
-                  @email={{this.issue.assignee}}
-                  @imgURL={{this.issue.assigneeAvatar}}
+                  @email={{this.issueAssignee}}
+                  @imgURL={{this.assigneeAvatar}}
                   @size="small"
                 />
               {{/if}}
-
               {{#if this.issueStatus}}
-                {{! TODO: max width? }}
-                {{! TODO: status-dependent }}
                 <div
                   data-test-jira-status
                   class="jira-status-badge
@@ -107,7 +96,6 @@
                   {{this.issueStatus}}
                 </div>
               {{/if}}
-
             </div>
           {{/if}}
         </ExternalLink>
@@ -126,7 +114,8 @@
           <:anchor as |dd|>
             <dd.ToggleAction
               data-test-jira-overflow-button
-              class="quarternary-button absolute right-0 top-0 grid h-6 w-6 place-items-center items-center p-0"
+              class="quarternary-button absolute right-0 top-0 grid h-6 w-6 place-items-center items-center p-0
+                {{if dd.contentIsShown 'open'}}"
             >
               <FlightIcon @name="more-vertical" />
             </dd.ToggleAction>
@@ -146,7 +135,6 @@
         <FlightIcon data-test-jira-loading @name="loading" class="mt-[3px]" />
       {{else}}
         {{! + Add Jira issue }}
-
         <X::DropdownList
           @inputIsShown={{false}}
           @onItemClick={{this.onIssueSelect}}
@@ -158,7 +146,7 @@
           <:anchor as |dd|>
             <div
               class="relative h-9 w-full
-                {{unless @contextIsForm '-mt-1.5 -ml-1.5'}}"
+                {{unless @isNewProjectForm '-mt-1.5 -ml-1.5'}}"
               {{did-insert (fn this.registerDropdown dd)}}
               {{did-insert dd.registerAnchor}}
             >
@@ -167,12 +155,12 @@
                   data-test-add-jira-input
                   {{on "input" this.onInput}}
                   {{on "focusout" this.hideInput}}
-                  {{(unless @contextIsForm (modifier "autofocus"))}}
+                  {{(unless @isNewProjectForm (modifier "autofocus"))}}
                   @value={{this.query}}
                   disabled={{@isDisabled}}
                   id="jira-search-input"
                   placeholder={{if
-                    @contextIsForm
+                    @isNewProjectForm
                     "Search issues..."
                     "Add Jira issue"
                   }}
@@ -225,7 +213,6 @@
             </dd.Action>
           </:item>
         </X::DropdownList>
-
       {{/if}}
     </div>
   </div>

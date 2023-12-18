@@ -36,7 +36,6 @@ import {
   HermesProjectResources,
 } from "hermes/types/project";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
-import { RelatedHermesDocument } from "../related-resources";
 import { ProjectStatus } from "hermes/types/project-status";
 
 interface DocumentSidebarComponentSignature {
@@ -561,6 +560,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     await timeout(Ember.testing ? 0 : 1000);
   });
 
+  /**
+   * The task to load the projects associated with this document.
+   * Called when the Projects list is inserted and used to display
+   * rich information in the list.
+   */
   protected loadRelatedProjects = task(async () => {
     const projectPromises = this.args.document.projects?.map((project) => {
       return this.fetchSvc
