@@ -131,10 +131,11 @@ google_workspace {
   // auth is the configuration for interacting with Google Workspace using a
   // service account.
   // auth {
-  //   client_email = ""
-  //   private_key  = ""
-  //   subject      = ""
-  //   token_url    = "https://oauth2.googleapis.com/token"
+  //   client_email        = ""
+  //   create_docs_as_user = true
+  //   private_key         = ""
+  //   subject             = ""
+  //   token_url           = "https://oauth2.googleapis.com/token"
   // }
 
   // oauth2 is the configuration used to authenticate users via Google.
@@ -158,6 +159,10 @@ indexer {
   // update_draft_headers enables the indexer to automatically update document
   // headers for draft documents based on Hermes metadata.
   update_draft_headers = true
+
+  // use_database_for_document_data will use the database instead of Algolia as
+  // the source of truth for document data, if true.
+  use_database_for_document_data = false
 }
 
 // jira is the configuration for Hermes to work with Jira.

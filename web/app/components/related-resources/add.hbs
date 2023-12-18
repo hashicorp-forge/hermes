@@ -49,7 +49,7 @@
                   aria-expanded={{dd.contentIsShown}}
                   aria-haspopup="listbox"
                 />
-                {{#if @searchIsRunning}}
+                {{#if this.searchLoaderIsShown}}
                   <div
                     data-test-related-resources-search-loading-icon
                     class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
@@ -84,11 +84,12 @@
             {{/if}}
           </:header>
           <:loading>
-            <FlightIcon
-              data-test-add-related-resource-spinner
-              @name="loading"
-              class="ml-2 mt-4"
-            />
+            <div class="pl-6 pt-4">
+              <FlightIcon
+                data-test-add-related-resource-spinner
+                @name="loading"
+              />
+            </div>
           </:loading>
           <:no-matches>
             {{#unless this.noResultsMessageIsHidden}}

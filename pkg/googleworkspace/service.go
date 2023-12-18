@@ -40,6 +40,9 @@ type Config struct {
 	PrivateKey  string `hcl:"private_key,optional"`
 	Subject     string `hcl:"subject,optional"`
 	TokenURL    string `hcl:"token_url,optional"`
+
+	// CreateDocsAsUser creates Google Docs as the logged-in Hermes user, if true.
+	CreateDocsAsUser bool `hcl:"create_docs_as_user,optional"`
 }
 
 // New returns a service with the required Google Workspace access for
