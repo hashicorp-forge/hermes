@@ -7,6 +7,18 @@
 
   &.non-floating-list {
     @apply relative w-full max-w-none;
+
+    .x-dropdown-list-container {
+      @apply h-full rounded-none;
+    }
+
+    .x-dropdown-list-scroll-container {
+      @apply rounded-none;
+    }
+
+    .x-dropdown-list-items {
+      @apply pb-4;
+    }
   }
 
   &.theme--neutral {
@@ -21,6 +33,8 @@
 
       &.is-aria-selected {
         @apply bg-color-surface-interactive-hover;
+        @apply text-inherit;
+
         .flight-icon {
           @apply text-inherit;
         }

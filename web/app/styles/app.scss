@@ -7,6 +7,7 @@
 @use "./body";
 @use "./animations";
 @use "./typography";
+@use "./buttons";
 
 @use "components/new";
 @use "components/toolbar";
@@ -42,6 +43,7 @@
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
+@use "components/jira-widget";
 @use "components/product-link";
 @use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
@@ -72,7 +74,8 @@
 }
 
 dialog {
-  margin: auto; // centers the dialog
+  @apply m-auto; // center the dialog
+  @apply -translate-y-5; // move it up a bit
 }
 
 body,

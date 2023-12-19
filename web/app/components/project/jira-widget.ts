@@ -23,7 +23,7 @@ interface ProjectJiraWidgetComponentSignature {
      * If true, removes the leading Jira icon and shows the input, autofocused,
      * with specific placeholder text and styles.
      */
-    contextIsForm?: boolean;
+    isNewProjectForm?: boolean;
   };
 }
 
@@ -55,7 +55,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    * "Add Jira issue" button has been clicked.
    */
   protected get inputIsShown() {
-    return this.args.contextIsForm ?? this._inputIsShown;
+    return this.args.isNewProjectForm ?? this._inputIsShown;
   }
 
   /**
@@ -75,7 +75,72 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    */
   protected get issueStatus() {
     if (this.issue && "status" in this.issue) {
-      return this.issue.status;
+      return this.issue.status as string;
+    }
+  }
+
+  /**
+   * The type of the issue, if it exists.
+   * Will exist if the issue is a full Jira issue.
+   * Determines if the type is shown in the widget.
+   */
+  protected get issueType() {
+    if (this.issue && "issueType" in this.issue) {
+      return this.issue.issueType;
+    }
+  }
+
+  /**
+   * The URL to the issue type image, if it exists.
+   * Will exist if the issue is a full Jira issue.
+   * Determines if the type image is shown in the widget.
+   */
+  protected get issueTypeImage() {
+    if (this.issue && "issueTypeImage" in this.issue) {
+      return this.issue.issueTypeImage;
+    }
+  }
+
+  /**
+   * The priority of the issue, if it exists.
+   * May exist if the issue is a full Jira issue.
+   * Determines if the priority is shown in the widget.
+   */
+  protected get issuePriority() {
+    if (this.issue && "priority" in this.issue) {
+      return this.issue.priority as string;
+    }
+  }
+
+  /**
+   * The URL to the issue priority image, if it exists.
+   * May exist if the issue is a full Jira issue.
+   * Determines if the priority image is shown in the widget.
+   */
+  protected get issuePriorityImage() {
+    if (this.issue && "priorityImage" in this.issue) {
+      return this.issue.priorityImage as string;
+    }
+  }
+
+  /**
+   * The title of the issue, if it exists.
+   * May exist if the issue is a full Jira issue.
+   * Determines if an assignee is shown.
+   */
+  protected get issueAssignee() {
+    if (this.issue && "assignee" in this.issue) {
+      return this.issue.assignee as string;
+    }
+  }
+
+  /**
+   * The URL to the issue assignee's avatar, if it exists.
+   * May exist if the issue is a full Jira issue.
+   */
+  protected get assigneeAvatar() {
+    if (this.issue && "assigneeAvatar" in this.issue) {
+      return this.issue.assigneeAvatar as string;
     }
   }
 

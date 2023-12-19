@@ -1,5 +1,5 @@
 <div class="sidebar-section-header-container" ...attributes>
-  <div class="inline-flex items-center relative">
+  <div class="relative inline-flex items-center">
     <h5 class="sidebar-section-header">
       {{@title}}
     </h5>
@@ -21,8 +21,13 @@
     <Action
       {{on "click" this.buttonAction}}
       data-test-section-header-button-for={{@title}}
-      class="sidebar-section-header-button"
+      class="sidebar-section-header-button {{if @buttonIsDisabled 'disabled'}}"
       aria-label={{or @buttonLabel "Add"}}
+      aria-disabled={{@buttonIsDisabled}}
+      {{(if
+        (and @buttonIsDisabled @disabledButtonTooltipText)
+        (modifier "tooltip" @disabledButtonTooltipText class="max-w-[200px]")
+      )}}
     >
       <FlightIcon @name={{or @buttonIcon "plus"}} />
     </Action>
