@@ -28,11 +28,7 @@
         <ul class="flex gap-px">
           {{#each @project.products as |product|}}
             <li class="flex items-center" data-test-product>
-              {{#if this.productColorsAreEnabled}}
-                <Product::Avatar @product={{product}} />
-              {{else}}
-                {{product}}
-              {{/if}}
+              <Product::Avatar @product={{product}} />
             </li>
           {{/each}}
         </ul>
@@ -41,7 +37,7 @@
       {{#if @project.jiraIssue}}
         <div class="flex items-center gap-1.5">
           <span data-test-jira-type>
-            {{@project.jiraIssue.type}}
+            {{@project.jiraIssue.issueType}}
           </span>
           <span
             data-test-jira-key

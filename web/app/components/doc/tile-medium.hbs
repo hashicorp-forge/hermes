@@ -32,6 +32,7 @@
         <LinkTo
           data-test-document-link
           @route="authenticated.document"
+          @query={{hash draft=this.docIsDraft}}
           @model={{this.docID}}
         >
           {{! Primary click area }}
@@ -65,7 +66,7 @@
             @route="authenticated.documents"
             @query={{hash owners=(array (get @doc.owners 0))}}
             disabled={{not (get @doc.owners 0)}}
-            class="underlined-link text-color-foreground-primary"
+            class="underlined-link"
           >
             {{or (get @doc.owners 0) "Unknown"}}
           </LinkTo>
@@ -76,7 +77,7 @@
           <ProductLink
             @product={{@doc.product}}
             tabindex="-1"
-            class="underlined-link text-color-foreground-faint"
+            class="underlined-link"
           >
             <:default>
               {{@doc.product}}

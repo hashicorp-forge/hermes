@@ -173,46 +173,93 @@ func refreshDocumentHeader(
 		return
 	}
 
-	// Get document object from Algolia.
-	var algoObj map[string]any
-	switch ft {
-	case draftsFolderType:
-		if err = algo.Drafts.GetObject(file.Id, &algoObj); err != nil {
-			log.Error("error getting draft document object from Algolia",
+	var doc *document.Document
+	if idx.UseDatabaseForDocumentData {
+		// Get document from database.
+		model := models.Document{
+			GoogleFileID: file.Id,
+		}
+		if err := model.Get(idx.Database); err != nil {
+			log.Error("error getting document from database",
 				"error", err,
 				"google_file_id", file.Id,
 			)
 			os.Exit(1)
 		}
-	case documentsFolderType:
-		if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
-			log.Error("error getting document object from Algolia",
+
+		// Get reviews for the document from the database.
+		var reviews models.DocumentReviews
+		if err := reviews.Find(idx.Database, models.DocumentReview{
+			Document: models.Document{
+				GoogleFileID: file.Id,
+			},
+		}); err != nil {
+			log.Error("error getting reviews for document",
 				"error", err,
 				"google_file_id", file.Id,
 			)
 			os.Exit(1)
 		}
-	default:
-		log.Error("bad folder type",
-			"folder_type", ft,
-		)
-		os.Exit(1)
+
+		// Convert database record to a document.
+		doc, err = document.NewFromDatabaseModel(
+			model, reviews)
+		if err != nil {
+			log.Error("error converting database record to document",
+				"error", err,
+				"google_file_id", file.Id,
+			)
+			os.Exit(1)
+		}
+	} else {
+		// Get document object from Algolia.
+		var algoObj map[string]any
+		switch ft {
+		case draftsFolderType:
+			if err = algo.Drafts.GetObject(file.Id, &algoObj); err != nil {
+				log.Error("error getting draft document object from Algolia",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+		case documentsFolderType:
+			if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+				log.Error("error getting document object from Algolia",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+		default:
+			log.Error("bad folder type",
+				"folder_type", ft,
+			)
+			os.Exit(1)
+		}
+
+		// Convert Algolia object to a document.
+		doc, err = document.NewFromAlgoliaObject(
+			algoObj, idx.DocumentTypes)
+		if err != nil {
+			log.Error("error converting Algolia object to document",
+				"error", err,
+				"google_file_id", file.Id,
+			)
+			os.Exit(1)
+		}
 	}
 
-	// Convert Algolia object to a document.
-	doc, err := document.NewFromAlgoliaObject(
-		algoObj, idx.DocumentTypes)
-	if err != nil {
-		log.Error("error converting Algolia object to document",
-			"error", err,
-			"google_file_id", file.Id,
-		)
-		os.Exit(1)
+	// If the document was created through Hermes and has a status of "WIP", it
+	// is a document draft.
+	isDraft := false
+	if doc.AppCreated && doc.Status == "WIP" {
+		isDraft = true
 	}
 
 	// Replace document header.
 	if err := doc.ReplaceHeader(
-		idx.BaseURL, true, idx.GoogleWorkspaceService); err != nil {
+		idx.BaseURL, isDraft, idx.GoogleWorkspaceService); err != nil {
 		log.Error("error replacing document header",
 			"error", err,
 			"google_file_id", file.Id,

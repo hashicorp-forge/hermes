@@ -94,10 +94,10 @@ module("Integration | Component | project/tile", function (hooks) {
 
     emberAssert("jiraIssue must exist", jiraIssue);
 
-    const { key, type } = jiraIssue;
+    const { key, issueType } = jiraIssue;
 
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
-    assert.dom(PROJECT_JIRA_TYPE).hasText(type);
+    assert.dom(PROJECT_JIRA_TYPE).hasText(issueType);
 
     this.set("project.jiraIssue", null);
 
@@ -115,17 +115,6 @@ module("Integration | Component | project/tile", function (hooks) {
     this.set("project.products", ["Vault", "Hermes"]);
 
     assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
-  });
-
-  test("it renders products in text if the productColors flag is disabled", async function (this: ProjectTileComponentTestContext, assert) {
-    setFeatureFlag(this, "product_colors", false);
-
-    await render<ProjectTileComponentTestContext>(hbs`
-      <Project::Tile @project={{this.project}} />
-    `);
-
-    assert.dom(PRODUCT).exists({ count: 1 });
-    assert.dom(PRODUCT_AVATAR).doesNotExist();
   });
 
   test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {

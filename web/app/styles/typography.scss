@@ -1,5 +1,13 @@
 @use "variables" as v;
 
+.line-clamp-2 {
+  @apply overflow-hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 .hermes-form-label {
   @apply flex text-body-200 font-semibold text-color-foreground-strong;
 
@@ -44,7 +52,7 @@
 .underlined-link:not([disabled]):not(.underline-on-hover),
 .underline-on-hover:hover,
 .underline-on-hover:focus {
-  @apply text-color-foreground-faint underline decoration-color-palette-neutral-300 underline-offset-[3px];
+  @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
 
   &:hover,
   &:focus {

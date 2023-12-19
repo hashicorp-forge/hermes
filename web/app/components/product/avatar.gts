@@ -42,7 +42,6 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
   }
 
   private get colorStyles() {
-    if (!this.flags.productColors) return;
     if (this.productID) return;
 
     const bgColor = this.productAreas.getProductColor(this.args.product);
@@ -72,7 +71,6 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get iconIsShown() {
     if (this.productID) return true;
-    if (!this.flags.productColors) return true;
     if (this.abbreviation) return false;
     return true;
   }

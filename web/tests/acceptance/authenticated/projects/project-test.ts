@@ -1,18 +1,25 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
-import { module, test, todo } from "qunit";
-import {
-  click,
-  fillIn,
-  find,
-  visit,
-  waitFor,
-  waitUntil,
-} from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
-import { TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import {
+  TEST_JIRA_ASSIGNEE,
+  TEST_JIRA_ASSIGNEE_AVATAR,
+  TEST_JIRA_ISSUE_STATUS,
+  TEST_JIRA_ISSUE_SUMMARY,
+  TEST_JIRA_ISSUE_URL,
+  TEST_JIRA_PRIORITY,
+  TEST_JIRA_PRIORITY_IMAGE,
+  TEST_USER_EMAIL,
+  TEST_USER_PHOTO,
+  TEST_WEB_CONFIG,
+} from "hermes/utils/mirage-utils";
+import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
+import { TEST_JIRA_WORKSPACE_URL } from "hermes/utils/hermes-urls";
 
 const TITLE = "[data-test-project-title]";
 const TITLE_BUTTON = `${TITLE} button`;
@@ -22,6 +29,9 @@ const TITLE_ERROR = `${TITLE} .hds-form-error`;
 const DESCRIPTION = "[data-test-project-description]";
 const DESCRIPTION_BUTTON = `${DESCRIPTION} button`;
 const DESCRIPTION_INPUT = `${DESCRIPTION} textarea`;
+
+const CREATED_TIME = "[data-test-created-time]";
+const MODIFIED_TIME = "[data-test-modified-time]";
 
 const SAVE_EDITABLE_FIELD_BUTTON = ".editable-field [data-test-save-button]";
 
@@ -72,15 +82,19 @@ const STATUS_TOGGLE = "[data-test-project-status-toggle]";
 const COPY_URL_BUTTON = "[data-test-copy-url-button]";
 
 const ADD_JIRA_BUTTON = "[data-test-add-jira-button]";
+const ADD_JIRA_INPUT = "[data-test-add-jira-input]";
+const JIRA_PICKER_RESULT = "[data-test-jira-picker-result]";
+const JIRA_ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 
 const JIRA_OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
 const JIRA_LINK = "[data-test-jira-link]";
 const JIRA_PRIORITY_ICON = "[data-test-jira-priority-icon]";
-const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar]";
+const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
 const JIRA_STATUS = "[data-test-jira-status]";
-const JIRA_TYPE_ICON = "[data-test-jira-type-icon]";
+const JIRA_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const JIRA_KEY = "[data-test-jira-key]";
 const JIRA_SUMMARY = "[data-test-jira-summary]";
+const JIRA_REMOVE_BUTTON = "[data-test-remove-button]";
 
 const ACTIVE_STATUS_ACTION = "[data-test-status-action='active']";
 const COMPLETED_STATUS_ACTION = "[data-test-status-action='completed']";
@@ -135,6 +149,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("it renders the correct filled-in state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    MockDate.set(DEFAULT_MOCK_DATE);
+
     const docTitle = "Foo bar";
     const docSummary = "Baz qux";
     const docStatus = "Approved";
@@ -181,11 +197,10 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       projectStatus.charAt(0).toUpperCase() + projectStatus.slice(1);
 
     const jiraKey = "HER-123";
-    const jiraURL = "https://hashicorp.com";
-    const jiraPriority = "High";
-    const jiraStatus = "Open";
-    const jiraSummary = "Baz Foo";
-    const jiraAssignee = "foo@bar.com";
+
+    this.server.create("jira-issue", {
+      key: jiraKey,
+    });
 
     project.update({
       title: projectTitle,
@@ -193,15 +208,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       status: projectStatus,
       hermesDocuments: [relatedDocument],
       externalLinks: [externalLink],
-      jiraIssue: {
-        key: jiraKey,
-        url: jiraURL,
-        priority: jiraPriority,
-        status: jiraStatus,
-        type: "any",
-        summary: jiraSummary,
-        assignee: jiraAssignee,
-      },
+      jiraIssueID: jiraKey,
     });
 
     // Populate the related resources modal
@@ -243,18 +250,23 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(STATUS_TOGGLE).hasText(projectStatusLabel);
 
-    assert.dom(JIRA_LINK).hasAttribute("href", jiraURL);
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
     assert.dom(JIRA_KEY).hasText(jiraKey);
-    assert.dom(JIRA_SUMMARY).hasText(jiraSummary);
-    assert.dom(JIRA_STATUS).hasText(jiraStatus);
+    assert.dom(JIRA_SUMMARY).hasText(TEST_JIRA_ISSUE_SUMMARY);
+    assert.dom(JIRA_STATUS).hasText(TEST_JIRA_ISSUE_STATUS);
     assert.dom(JIRA_TYPE_ICON).exists();
     assert.dom(JIRA_PRIORITY_ICON).exists();
 
-    assert
-      .dom(JIRA_ASSIGNEE_AVATAR)
-      .hasAttribute("data-test-assignee", jiraAssignee);
+    assert.dom(JIRA_ASSIGNEE_AVATAR).hasAttribute("alt", TEST_JIRA_ASSIGNEE);
 
     assert.dom(JIRA_OVERFLOW_BUTTON).exists();
+
+    assert
+      .dom(CREATED_TIME)
+      .hasText(`Created 32 years ago by ${TEST_USER_EMAIL}`);
+    assert.dom(MODIFIED_TIME).hasText(`Last modified 32 years ago`);
+
+    MockDate.reset();
   });
 
   test("you can edit a project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -505,13 +517,90 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(project.status, ProjectStatus.Active);
   });
 
-  todo(
-    "you can add a jira link",
-    async function (
-      this: AuthenticatedProjectsProjectRouteTestContext,
-      assert,
-    ) {
-      assert.true(false);
-    },
-  );
+  test("a full jira issue will load if the project has a jiraIssueID", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const jiraIssueID = "HER-123";
+
+    this.server.create("project", {
+      jiraIssueID,
+      id: 2,
+    });
+
+    this.server.create("jira-issue", {
+      key: jiraIssueID,
+    });
+
+    await visit("/projects/2");
+
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
+
+    assert.dom(JIRA_KEY).hasText(jiraIssueID);
+    assert.dom(JIRA_SUMMARY).hasText(TEST_JIRA_ISSUE_SUMMARY);
+    assert.dom(JIRA_STATUS).hasText(TEST_JIRA_ISSUE_STATUS);
+    assert
+      .dom(JIRA_ASSIGNEE_AVATAR)
+      .hasAttribute("alt", TEST_JIRA_ASSIGNEE)
+      .hasAttribute("src", TEST_JIRA_ASSIGNEE_AVATAR);
+    assert
+      .dom(JIRA_PRIORITY_ICON)
+      .hasAttribute("src", TEST_JIRA_PRIORITY_IMAGE)
+      .hasAttribute("alt", TEST_JIRA_PRIORITY);
+  });
+
+  test("you can add a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.create("jira-issue");
+    this.server.create("jira-picker-result");
+
+    await visit("/projects/1");
+
+    await click(ADD_JIRA_BUTTON);
+    await fillIn(ADD_JIRA_INPUT, TEST_JIRA_ISSUE_SUMMARY);
+    await click(JIRA_PICKER_RESULT);
+
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
+    assert.dom(JIRA_ISSUE_TYPE_ICON).exists();
+    assert.dom(JIRA_KEY).exists();
+    assert.dom(JIRA_SUMMARY).exists();
+    assert.dom(JIRA_ASSIGNEE_AVATAR).exists();
+    assert.dom(JIRA_PRIORITY_ICON).exists();
+    assert.dom(JIRA_STATUS).exists();
+  });
+
+  test("you can remove a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.create("jira-issue", {
+      key: "HER-123",
+    });
+
+    this.server.create("jira-picker-result", {
+      key: "HER-123",
+    });
+
+    this.server.create("project", {
+      id: 2,
+      jiraIssueID: "HER-123",
+    });
+
+    await visit("/projects/2");
+
+    assert.dom(JIRA_LINK).exists();
+
+    await click(JIRA_OVERFLOW_BUTTON);
+    await click(JIRA_REMOVE_BUTTON);
+
+    assert.dom(JIRA_LINK).doesNotExist();
+
+    assert.equal(
+      this.server.schema.projects.first().attrs.jiraIssueID,
+      undefined,
+    );
+  });
+
+  test('the jira widget is hidden if the "jira_url" config is not set', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return { ...TEST_WEB_CONFIG, jira_url: null };
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(ADD_JIRA_BUTTON).doesNotExist();
+  });
 });

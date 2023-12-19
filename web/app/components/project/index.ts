@@ -10,7 +10,7 @@ import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task } from "ember-concurrency";
-import { HermesProject, JiraIssue } from "hermes/types/project";
+import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,
@@ -19,6 +19,7 @@ import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
+import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -45,7 +46,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected title = this.args.project.title;
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
-  @tracked protected jiraIssue?: JiraIssue = this.args.project.jiraIssue;
+
+  @tracked protected jiraIssue?: JiraPickerResult;
   @tracked protected hermesDocuments: RelatedHermesDocument[] =
     this.args.project.hermesDocuments ?? [];
   @tracked protected externalLinks: RelatedExternalLink[] =
@@ -70,6 +72,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked private resourceToEditIndex?: number;
 
   /**
+   * Whether Jira is configured for the project.
+   * Determines whether to show the Jira-related UI.
+   */
+  protected get jiraIsEnabled() {
+    return !!this.configSvc.config.jira_url;
+  }
+
+  /**
    * The label for the status dropdown.
    * Represents the current status of the project.
    */
@@ -91,7 +101,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     hermesDocuments: Partial<RelatedHermesDocument>[];
     externalLinks: Partial<RelatedExternalLink>[];
   } {
-    this.updateSortOrder();
+    updateRelatedResourcesSortOrder(this.hermesDocuments, this.externalLinks);
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
@@ -115,21 +125,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * The action to update the `sortOrder` attribute of
-   * the resources, based on their position in the array.
-   * Called when the resource list is saved.
-   */
-  private updateSortOrder() {
-    this.hermesDocuments.forEach((doc, index) => {
-      doc.sortOrder = index + 1;
-    });
-
-    this.externalLinks.forEach((link, index) => {
-      link.sortOrder = index + 1 + this.hermesDocuments.length;
-    });
-  }
-
-  /**
    * The action to run when the "edit external link" modal is dismissed.
    * Hides the modal and resets the local state.
    */
@@ -149,6 +144,17 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       this.addDocument(resource);
     } else {
       this.addLink(resource);
+    }
+  }
+
+  /**
+   * The action to kick off the Jira issue loading task.
+   * Runs when the component is inserted and the project has a Jira issue.
+   */
+  @action maybeLoadJiraInfo() {
+    if (this.args.project.jiraIssueID) {
+      // kick off a task to load the jira issue
+      void this.loadJiraIssue.perform();
     }
   }
 
@@ -200,23 +206,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * TODO: Implement this.
-   * ---------------------
-   * The placeholder action for adding a Jira object.
-   * Updates the local Jira object, then saves the project.
+   * The action for adding a Jira object, passed to the JiraWidget
+   * as `onIssueSelect`. Updates the local Jira object,
+   * then saves the project.
    */
-  @action protected addJiraIssue(): void {
-    // TODO: implement this
-    this.jiraIssue = {
-      key: "HER-123",
-      url: "https://www.google.com",
-      priority: "High",
-      status: "Open",
-      type: "Bug",
-      summary: "Vault Data Gathering Initiative: Support",
-      assignee: "John Dobis",
-    };
-    void this.saveProjectInfo.perform("jiraIssue", this.jiraIssue);
+  @action protected addJiraIssue(issue: JiraPickerResult): void {
+    this.jiraIssue = issue;
+    void this.saveProjectInfo.perform("jiraIssueID", issue.key);
+    void this.loadJiraIssue.perform(issue.key);
   }
 
   /**
@@ -226,7 +223,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected removeJiraIssue(): void {
     this.jiraIssue = undefined;
-    void this.saveProjectInfo.perform("jiraIssue", undefined);
+    void this.saveProjectInfo.perform("jiraIssueID", "");
   }
 
   /**
@@ -324,27 +321,37 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = task(
-    async (key?: string, newValue?: string | JiraIssue) => {
-      try {
-        const valueToSave = key
-          ? { [key]: newValue }
-          : this.formattedRelatedResources;
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify(valueToSave),
-          },
-        );
-      } catch (e) {
-        this.flashMessages.critical((e as any).message, {
-          title: "Unable to save",
-          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
-        });
-      }
-    },
-  );
+  protected saveProjectInfo = task(async (key: string, newValue?: string) => {
+    try {
+      const valueToSave = { [key]: newValue };
+
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(valueToSave),
+        },
+      );
+    } catch (e) {
+      this.flashMessages.critical((e as any).message, {
+        title: "Unable to save",
+        timeout: FLASH_MESSAGES_LONG_TIMEOUT,
+      });
+    }
+  });
+
+  /**
+   * The task to load a Jira issue from an ID.
+   * Used to populate the JiraWidget when the component is inserted,
+   * or when a user adds a Jira issue to a project.
+   */
+  loadJiraIssue = task(async (jiraIssueID?: string) => {
+    const id = jiraIssueID ?? this.args.project.jiraIssueID;
+    const issue = await this.fetchSvc
+      .fetch(`/api/${this.configSvc.config.api_version}/jira/issues/${id}`)
+      .then((response) => response?.json());
+    this.jiraIssue = issue;
+  });
 
   /**
    * The task to save the document's related resources.
