@@ -4,16 +4,10 @@ import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
-
-// @ts-ignore - Mirage not detecting file
-import config from "../config/environment";
+import { HITS_PER_PAGE } from "hermes/services/algolia";
 
 import {
-  TEST_SUPPORT_URL,
-  TEST_SHORT_LINK_BASE_URL,
-} from "hermes/utils/hermes-urls";
-
-import {
+  TEST_WEB_CONFIG,
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
@@ -139,6 +133,8 @@ export default function (mirageConfig) {
               const requestIsForDocsAwaitingReview =
                 filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
                 requestBody.filters.includes("AND status:In-Review");
+              const requestIsForProductDocs = filters.includes(`product:`);
+
               if (requestIsForDocsAwaitingReview) {
                 docMatches = schema.document.all().models.filter((doc) => {
                   return (
@@ -146,8 +142,12 @@ export default function (mirageConfig) {
                     doc.attrs.status.toLowerCase().includes("review")
                   );
                 });
+              } else if (requestIsForProductDocs) {
+                const product = filters.split("product:")[1].split('"')[1];
+                docMatches = schema.document.all().models.filter((doc) => {
+                  return doc.attrs.product === product;
+                });
               } else {
-                // This
                 setDefaultDocMatches();
               }
             } else {
@@ -160,7 +160,14 @@ export default function (mirageConfig) {
               });
             }
 
-            return new Response(200, {}, { hits: docMatches });
+            return new Response(
+              200,
+              {},
+              {
+                hits: docMatches.slice(0, HITS_PER_PAGE),
+                nbHits: docMatches.length,
+              },
+            );
           } else {
             /**
              * A request we're not currently handling with any specificity.
@@ -169,7 +176,10 @@ export default function (mirageConfig) {
             return new Response(
               200,
               {},
-              { hits: schema.document.all().models },
+              {
+                hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
+                nbHits: schema.document.all().models.length,
+              },
             );
           }
         } else {
@@ -214,9 +224,33 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * Jira requests
+       *
+       *************************************************************************/
+      // Get issue
+      this.get("/jira/issues/:issue_id", (schema, request) => {
+        const issue = schema.jiraIssues.findBy({
+          key: request.params.issue_id,
+        });
+        return new Response(200, {}, issue.attrs);
+      });
+
+      // Issue picker
+      this.get("/jira/issue/picker", (schema, request) => {
+        const query = request.queryParams.query;
+        const issues = schema.jiraPickerResults.all().models.filter((issue) => {
+          return issue.attrs.summary.includes(query);
+        });
+
+        return new Response(200, {}, issues);
+      });
+
+      /*************************************************************************
+       *
        * Project requests
        *
        *************************************************************************/
+
       // Create a project
       this.post("/projects", (schema, request) => {
         let project = schema.projects.create(JSON.parse(request.requestBody));
@@ -417,26 +451,7 @@ export default function (mirageConfig) {
        */
       this.get("/web/config", () => {
         // TODO: allow this to be overwritten in the request
-        return new Response(
-          200,
-          {},
-          {
-            algolia_docs_index_name: config.algolia.docsIndexName,
-            algolia_drafts_index_name: config.algolia.draftsIndexName,
-            algolia_internal_index_name: config.algolia.internalIndexName,
-            feature_flags: {
-              projects: true,
-              product_colors: true,
-            },
-            google_doc_folders: "",
-            short_link_base_url: TEST_SHORT_LINK_BASE_URL,
-            skip_google_auth: false,
-            google_analytics_tag_id: undefined,
-            support_link_url: TEST_SUPPORT_URL,
-            version: "1.2.3",
-            short_revision: "abc123",
-          },
-        );
+        return new Response(200, {}, TEST_WEB_CONFIG);
       });
 
       /**
@@ -454,6 +469,7 @@ export default function (mirageConfig) {
                 text: "More-info link",
                 url: "example.com",
               },
+              flightIcon: "discussion-circle",
             },
             {
               name: "PRD",
@@ -462,14 +478,15 @@ export default function (mirageConfig) {
                 "Summarize a problem statement and outline a phased approach to addressing it.",
             },
           ]);
+        } else {
+          return new Response(
+            200,
+            {},
+            this.schema.documentTypes
+              .all()
+              .models.map((docType) => docType.attrs),
+          );
         }
-        return new Response(
-          200,
-          {},
-          this.schema.documentTypes.all().models.map((docType) => {
-            return docType.attrs;
-          }),
-        );
       });
 
       /**

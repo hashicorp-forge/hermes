@@ -12,14 +12,6 @@
     &.global-search-popover-header-link {
       @apply items-center pt-2.5 pb-[10px];
     }
-
-    &.is-aria-selected {
-      @apply bg-color-surface-interactive-hover text-inherit;
-    }
-
-    .flight-icon {
-      @apply text-inherit;
-    }
   }
 }
 

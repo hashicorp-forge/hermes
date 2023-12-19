@@ -91,9 +91,8 @@ module("Acceptance | authenticated/new", function (hooks) {
 
     // `file-text` is the default icon
     // `square` is the icon we just set for RFC.
-    // `radio` is what's returned from `getDoctypeIcon` for "Memo"
 
-    const expectedIcons = ["file-text", "square", "radio"];
+    const expectedIcons = ["file-text", "square", "file-text"];
 
     assert.deepEqual(
       [...document.querySelectorAll(ICON)].map((el) =>

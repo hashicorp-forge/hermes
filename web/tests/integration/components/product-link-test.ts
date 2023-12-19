@@ -21,15 +21,15 @@ module("Integration | Component | product-link", function (hooks) {
 
     assert
       .dom(".foo")
-      .hasAttribute("href", "/documents?product=%5B%22Cloud%20Platform%22%5D")
+      .hasAttribute("href", "/product-areas/cloud-platform")
       .hasText("HCP");
 
     assert
       .dom(".bar")
-      .hasAttribute("href", "/documents?product=%5B%22Terraform%22%5D")
+      .hasAttribute("href", "/product-areas/terraform")
       .hasText("Terraform");
 
-    assert.dom(".baz").hasAttribute("href", "/documents").hasText("Unknown");
+    assert.dom(".baz").doesNotHaveAttribute("href").hasText("Unknown");
   });
 
   test("it can render a custom block", async function (this: ProductLinkComponentTestContext, assert) {

@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
+	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
 	"github.com/hashicorp-forge/hermes/internal/server"
@@ -257,6 +258,16 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
+	// Initialize Jira service.
+	var jiraSvc *jira.Service
+	if cfg.Jira != nil && cfg.Jira.Enabled {
+		jiraSvc, err = jira.NewService(*cfg.Jira)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing Jira service: %v", err))
+			return 1
+		}
+	}
+
 	// Initialize database.
 	if val, ok := os.LookupEnv("HERMES_SERVER_POSTGRES_PASSWORD"); ok {
 		cfg.Postgres.Password = val
@@ -316,6 +327,7 @@ func (c *Command) Run(args []string) int {
 		Config:     cfg,
 		DB:         db,
 		GWService:  goog,
+		Jira:       jiraSvc,
 		Logger:     c.Log,
 	}
 
@@ -335,6 +347,8 @@ func (c *Command) Run(args []string) int {
 			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts/",
 			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+		{"/api/v1/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
+		{"/api/v1/jira/issues/", apiv2.JiraIssueHandler(srv)},
 		{"/api/v1/me", api.MeHandler(c.Log, goog)},
 		{"/api/v1/me/recently-viewed-docs",
 			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
@@ -354,6 +368,8 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
 		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
 		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
+		{"/api/v2/jira/issues/", apiv2.JiraIssueHandler(srv)},
+		{"/api/v2/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
 		{"/api/v2/me", apiv2.MeHandler(srv)},
 		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
 		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
@@ -479,6 +495,7 @@ func registerDocumentTypes(cfg config.Config, db *gorm.DB) error {
 			Name:         d.Name,
 			LongName:     d.LongName,
 			Description:  d.Description,
+			FlightIcon:   d.FlightIcon,
 			Checks:       checksJSON,
 			CustomFields: cfs,
 		}

@@ -7,8 +7,4 @@ export default class FlagsService extends Service {
   get projects() {
     return this.configSvc.config.feature_flags?.["projects"];
   }
-
-  get productColors() {
-    return this.configSvc.config.feature_flags?.["product_colors"];
-  }
 }

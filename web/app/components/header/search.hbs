@@ -7,7 +7,7 @@
       @offset={{hash mainAxis=0 crossAxis=2}}
       @placement="bottom-end"
       @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
-      class="search-popover
+      class="search-popover theme--neutral
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
       <:anchor as |dd|>
@@ -53,8 +53,7 @@
            }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
-              (html-element "#global-search-popover-header")
-              insertBefore=null
+              (html-element "#global-search-popover-header") insertBefore=null
             }}
               {{#if (eq dd.value "viewAllResultsObject")}}
                 <dd.LinkTo

@@ -3,6 +3,7 @@ import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
+import { TEST_WEB_CONFIG } from "hermes/utils/mirage-utils";
 import { Response } from "miragejs";
 import { module, test } from "qunit";
 
@@ -17,10 +18,15 @@ const PRIMARY_CREATE_BUTTON = `${PROJECT_FORM} .hds-button--color-primary`;
 const TITLE_ERROR = `${PROJECT_FORM} [data-test-title-error]`;
 const FLASH_MESSAGE = "[data-test-flash-notification]";
 const TASK_IS_RUNNING_DESCRIPTION = "[data-test-task-is-running-description]";
+const JIRA_INPUT = "[data-test-add-jira-input]";
+const JIRA_PICKER_RESULT = "[data-test-jira-picker-result]";
+const PROJECT_TITLE = "[data-test-project-title]";
+const PROJECT_DESCRIPTION = "[data-test-project-description]";
+const JIRA_LINK = "[data-test-jira-link]";
 
 interface AuthenticatedNewProjectRouteTestContext extends MirageTestContext {}
 
-module("Acceptance | authenticated/new/project-form", function (hooks) {
+module("Acceptance | authenticated/new/project", function (hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
@@ -54,6 +60,19 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
   });
 
   test("you can create a new project", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    const key = "BAR-123";
+    const summary = "foo";
+
+    this.server.create("jira-picker-result", {
+      key,
+      summary,
+    });
+
+    this.server.create("jira-issue", {
+      key,
+      summary,
+    });
+
     const title = "The Foo Project";
     const description = "A project about foo";
 
@@ -61,7 +80,9 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
 
     await fillIn(TITLE_INPUT, title);
     await fillIn(DESCRIPTION_INPUT, description);
+    await fillIn(JIRA_INPUT, summary);
 
+    await click(JIRA_PICKER_RESULT);
     await click(SUBMIT_BUTTON);
 
     // Confirm that the project was created
@@ -70,6 +91,7 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
 
     assert.equal(project.title, title);
     assert.equal(project.description, description);
+    assert.equal(project.jiraIssueID, key);
 
     // Confirm we were routed to the project screen
 
@@ -81,8 +103,21 @@ module("Acceptance | authenticated/new/project-form", function (hooks) {
     );
 
     assert.equal(routerService.currentURL, "/projects/1");
-
     assert.equal(document.title, `${title} | Hermes`);
+
+    assert.dom(PROJECT_TITLE).hasText(title);
+    assert.dom(PROJECT_DESCRIPTION).hasText(description);
+    assert.dom(JIRA_LINK).containsText(key);
+  });
+
+  test("it doesn't show a jira input if the jira_url config is not set", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return { ...TEST_WEB_CONFIG, jira_url: undefined };
+    });
+
+    await visit("new/project");
+
+    assert.dom(JIRA_INPUT).doesNotExist();
   });
 
   test("it shows an error when the title is empty", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {

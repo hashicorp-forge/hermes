@@ -64,6 +64,15 @@ func projectsResourceRelatedResourcesHandler(
 		"project_id", projectID,
 	}
 
+	// Authorize request.
+	userEmail := r.Context().Value("userEmail").(string)
+	if userEmail == "" {
+		srv.Logger.Error("user email not found in request context", logArgs...)
+		http.Error(
+			w, "No authorization information for request", http.StatusUnauthorized)
+		return
+	}
+
 	switch r.Method {
 	case "GET":
 		logArgs = append(logArgs, "method", r.Method)
@@ -294,7 +303,19 @@ func projectsResourceRelatedResourcesHandler(
 			return
 		}
 
-		srv.Logger.Info("replaced related resources for project", logArgs...)
+		// Log success.
+		reqJSON, err := json.Marshal(req)
+		if err != nil {
+			srv.Logger.Warn("error marshaling request to JSON",
+				append([]interface{}{
+					"error", err,
+				}, logArgs...)...)
+		}
+		srv.Logger.Info("replaced related resources for project",
+			append([]interface{}{
+				"request", string(reqJSON),
+				"user", userEmail,
+			}, logArgs...)...)
 
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)

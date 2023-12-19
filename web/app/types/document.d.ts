@@ -40,6 +40,7 @@ export interface HermesDocument {
   approvedBy?: string[];
   summary?: string;
   isDraft?: boolean;
+  projects?: number[];
   customEditableFields?: CustomEditableFields;
 
   _snippetResult?: {

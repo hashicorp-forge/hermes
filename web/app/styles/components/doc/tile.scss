@@ -21,5 +21,9 @@
 
   a {
     @apply pointer-events-auto;
+
+    &[disabled] {
+      @apply pointer-events-none;
+    }
   }
 }

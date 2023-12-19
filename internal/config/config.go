@@ -38,6 +38,9 @@ type Config struct {
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
 
+	// Jira is the configuration for Hermes to work with Jira.
+	Jira *Jira `hcl:"jira,block"`
+
 	// LogFormat configures the logging format. Supported values are "standard" or
 	// "json".
 	LogFormat string `hcl:"log_format,optional"`
@@ -96,6 +99,10 @@ type DocumentType struct {
 	// Example: "Create a Request for Comments document to present a proposal to
 	//   colleagues for their review and feedback."
 	Description string `hcl:"description,optional" json:"description"`
+
+	// FlightIcon is the name of the Helios flight icon.
+	// From: https://helios.hashicorp.design/icons/library
+	FlightIcon string `hcl:"flight_icon,optional" json:"flightIcon"`
 
 	// Template is the Google file ID for the document template used for this
 	// document type.
@@ -188,6 +195,10 @@ type Indexer struct {
 	// UpdateDraftHeaders enables the indexer to automatically update document
 	// headers for draft documents with Hermes document metadata.
 	UpdateDraftHeaders bool `hcl:"update_draft_headers,optional"`
+
+	// UseDatabaseForDocumentData will use the database instead of Algolia as the
+	// source of truth for document data, if true.
+	UseDatabaseForDocumentData bool `hcl:"use_database_for_document_data,optional"`
 }
 
 // GoogleWorkspace is the configuration to work with Google Workspace.
@@ -230,6 +241,21 @@ type GoogleWorkspaceOAuth2 struct {
 	// RedirectURI is an authorized redirect URI for the given client_id as
 	// specified in the Google API Console Credentials page.
 	RedirectURI string `hcl:"redirect_uri,optional"`
+}
+
+// Jira is the configuration for Hermes to work with Jira.
+type Jira struct {
+	// APIToken is the API token for authenticating to Jira.
+	APIToken string `hcl:"api_token,optional"`
+
+	// Enabled enables integration with Jira.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// URL is the URL of the Jira instance (ex: https://your-domain.atlassian.net).
+	URL string `hcl:"url,optional"`
+
+	// User is the user for authenticating to Jira.
+	User string `hcl:"user,optional"`
 }
 
 // Postgres configures PostgreSQL as the app database.

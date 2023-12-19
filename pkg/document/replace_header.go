@@ -124,6 +124,12 @@ func (doc *Document) ReplaceHeader(
 		return fmt.Errorf("error inserting header table: %w", err)
 	}
 
+	// Get doc again after inserting the header table.
+	d, err = s.GetDoc(doc.ObjectID)
+	if err != nil {
+		return fmt.Errorf("error getting doc after inserting header table: %w", err)
+	}
+
 	// Find new table index.
 	elems = d.Body.Content
 	for _, e := range elems {
@@ -391,7 +397,7 @@ func (doc *Document) ReplaceHeader(
 
 	// Title cell.
 	pos = int(startIndex) + 3
-	titleText := fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title)
+	titleText := fmt.Sprintf("[%s] %s: %s", doc.DocType, doc.DocNumber, doc.Title)
 	reqs = append(reqs,
 		[]*docs.Request{
 			{

@@ -38,10 +38,6 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
       return true;
     }
 
-    if (!this.flags.productColors) {
-      return false;
-    }
-
     if (this.productAreas.getAbbreviation(this.args.product)) {
       return true;
     }
