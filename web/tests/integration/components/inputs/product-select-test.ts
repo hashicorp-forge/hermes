@@ -1,12 +1,10 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, find, render } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
-import { Response } from "miragejs";
-import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
@@ -14,11 +12,13 @@ const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
 const DROPDOWN_PRODUCT =
   "[data-test-x-dropdown-list-content] [data-test-product-select-item]";
+const PRODUCT_NAME = "[data-test-product-value]";
+const FOLDER_ICON = "[data-test-icon='folder']";
+const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
 
 interface InputsProductSelectContext extends MirageTestContext {
   selected?: any;
   onChange: (value: string) => void;
-  formatIsBadge?: boolean;
   placement?: Placement;
   isSaving?: boolean;
 }
@@ -42,30 +42,6 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await setupProductIndex(this);
   });
 
-  test("it can render in two formats", async function (this: InputsProductSelectContext, assert) {
-    const badgeDropdownSelector = "[data-test-badge-dropdown-list]";
-
-    this.set("formatIsBadge", true);
-
-    await render<InputsProductSelectContext>(hbs`
-      <Inputs::ProductSelect
-        @selected={{this.selected}}
-        @onChange={{this.onChange}}
-        @formatIsBadge={{this.formatIsBadge}}
-      />
-    `);
-
-    assert.dom(badgeDropdownSelector).exists("badge dropdown is rendered");
-    assert.dom(TOGGLE).doesNotExist("default dropdown is not rendered");
-
-    this.set("formatIsBadge", false);
-
-    assert
-      .dom(badgeDropdownSelector)
-      .doesNotExist("badge dropdown is not rendered");
-    assert.dom(TOGGLE).exists("default dropdown is rendered");
-  });
-
   test("it displays the products with abbreviations", async function (this: InputsProductSelectContext, assert) {
     await render<InputsProductSelectContext>(hbs`
       <Inputs::ProductSelect
@@ -80,7 +56,10 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     await click(TOGGLE);
 
     assert.dom(DROPDOWN_PRODUCT).exists({ count: 4 });
-    assert.dom(DROPDOWN_PRODUCT).hasText("Test Product 0 TP0");
+    assert
+      .dom(`${DROPDOWN_PRODUCT} ${PRODUCT_NAME}`)
+      .containsText("Test Product 0");
+    assert.dom(`${DROPDOWN_PRODUCT} ${ABBREVIATION}`).hasText("TP0");
   });
 
   test("it performs the passed-in action on click", async function (this: InputsProductSelectContext, assert) {
@@ -151,5 +130,29 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     assert.equal(toggleLeft + 100, popoverLeft);
     assert.equal(toggleBottom + 100, popoverTop);
+  });
+
+  test("a folder icon is shown when no product is selected", async function (this: InputsProductSelectContext, assert) {
+    await render<InputsProductSelectContext>(hbs`
+      <Inputs::ProductSelect
+        @onChange={{this.onChange}}
+      />
+    `);
+
+    assert.dom(TOGGLE).hasText("Select a product/area");
+    assert.dom(FOLDER_ICON).exists();
+  });
+
+  test("the abbreviation of the selected product can be hidden", async function (this: InputsProductSelectContext, assert) {
+    await render<InputsProductSelectContext>(hbs`
+      <Inputs::ProductSelect
+        @selected={{this.selected}}
+        @onChange={{this.onChange}}
+        @selectedAbbreviationIsHidden={{true}}
+      />
+    `);
+
+    assert.dom(`${TOGGLE} ${PRODUCT_NAME}`).hasText("Vault");
+    assert.dom(ABBREVIATION).doesNotExist();
   });
 });

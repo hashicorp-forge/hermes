@@ -15,14 +15,6 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <Product::Avatar
-          @product={{this.product}}
-          class="rounded-l-none {{if this.saveIsRunning 'opacity-50'}}"
-        />
-      {{/if}}
-    {{/let}}
 
     <div class="sidebar-body-container">
       <div>
@@ -139,15 +131,18 @@
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
-          <div class="relative w-full" data-test-document-product-area-editable>
+          <div
+            class="editable-field-container select-input"
+            data-test-document-product-area-editable
+          >
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
-              @formatIsBadge={{true}}
+              @selectedAbbreviationIsHidden={{true}}
               @renderOut={{true}}
-              class="w-[300px]"
+              class="max-h-[275px] w-[320px]"
             />
           </div>
         {{else}}
