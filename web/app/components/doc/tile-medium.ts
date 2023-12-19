@@ -39,7 +39,7 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
   }
 
   protected get docIsDraft() {
-    return this.args.doc.status.toLowerCase() === "wip";
+    return this.args.doc.status?.toLowerCase() === "wip";
   }
 }
 
