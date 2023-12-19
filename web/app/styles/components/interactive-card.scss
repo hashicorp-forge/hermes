@@ -2,7 +2,7 @@ a {
   &:hover,
   &:focus {
     .interactive-card {
-      @apply bg-gradient-to-t from-color-surface-action to-color-page-primary;
+      @apply bg-gradient-to-t from-color-page-faint to-color-page-primary;
     }
   }
 }
