@@ -62,6 +62,7 @@ module.exports = {
         "color-surface-critical": "var(--token-color-surface-critical)",
         "color-surface-faint": "var(--token-color-surface-faint)",
         "color-surface-highlight": "var(--token-color-surface-highlight)",
+        "color-surface-success": "var(--token-color-surface-success)",
         "color-surface-interactive": "var(--token-color-surface-interactive)",
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
@@ -75,6 +76,7 @@ module.exports = {
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",
+        "color-border-success": "var(--token-color-border-success)",
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",

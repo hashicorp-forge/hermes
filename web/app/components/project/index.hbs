@@ -21,11 +21,20 @@
               class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
               @hasChevron={{true}}
             >
-              <FlightIcon
-                @name={{get-project-status-icon dd.selected}}
-                class="-mr-1"
-              />
-              <span class="status ml-2">
+              {{!-- {{if
+                  (eq this.status 'active')
+                  'border-[#C1834D]/60 bg-color-surface-warning'
+                }}
+                {{if
+                  (eq this.status 'completed')
+                  'border-[#608D5F]/50 bg-color-surface-success'
+                }}
+                {{if
+                  (eq this.status 'archived')
+                  'bg-color-palette-neutral-100'
+                }} --}}
+              <Project::StatusIcon @status={{dd.selected}} class="-mr-1" />
+              <span class="status ml-2 mr-0.5">
                 {{this.statusLabel}}
               </span>
             </dd.ToggleAction>
@@ -48,7 +57,7 @@
               >
                 <:default>
                   <div class="flex items-center gap-2 pl-1">
-                    <FlightIcon @name={{get-project-status-icon dd.value}} />
+                    <Project::StatusIcon @status={{dd.value}} />
                     <span class="status">
                       {{dd.attrs.label}}
                     </span>
@@ -68,7 +77,7 @@
 
     </div>
     <div
-      class="- absolute -right-6 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-[52.5%]"
+      class="Xhidden absolute -right-6 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-[52.5%]"
     >
       <FlightIcon
         @name={{get-project-status-icon this.status}}
@@ -127,26 +136,28 @@
   class="relative mt-6 border-t border-t-color-border-primary bg-color-page-primary"
 >
 
-  {{! Plus button }}
-  <RelatedResources
-    @modalHeaderTitle="Add project resource"
-    @modalInputPlaceholder="Search docs or paste a URL..."
-    @addResource={{this.addResource}}
-  >
-    <:header as |rr|>
-      <div class="sticky top-24 -mb-20 pr-14">
-        <div class="pointer-events-none -translate-y-1/2">
-          <Action
-            data-test-add-project-resource-button
-            {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-secondary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
-          >
-            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-          </Action>
+  {{#if (eq this.status "active")}}
+    {{! Plus button }}
+    <RelatedResources
+      @modalHeaderTitle="Add project resource"
+      @modalInputPlaceholder="Search docs or paste a URL..."
+      @addResource={{this.addResource}}
+    >
+      <:header as |rr|>
+        <div class="sticky top-24 -mb-20 pr-14">
+          <div class="pointer-events-none -translate-y-1/2">
+            <Action
+              data-test-add-project-resource-button
+              {{on "click" rr.showModal}}
+              class="hds-button hds-button--color-secondary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+            >
+              <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+            </Action>
+          </div>
         </div>
-      </div>
-    </:header>
-  </RelatedResources>
+      </:header>
+    </RelatedResources>
+  {{/if}}
 
   {{! Resources }}
   <div class="max-w-3xl">
@@ -256,7 +267,7 @@
     {{/if}}
 
     <div
-      class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
+      class="mt-20 -mb-5 flex gap-[5px] text-body-100 text-color-foreground-faint"
     >
       <span data-test-created-time>
         Created

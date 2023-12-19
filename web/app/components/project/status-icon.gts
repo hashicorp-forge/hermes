@@ -31,7 +31,6 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      class="mix-blend-multiply"
       data-test-project-status-icon
       data-test-status={{this.args.status}}
       ...attributes
