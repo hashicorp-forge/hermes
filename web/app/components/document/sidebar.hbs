@@ -128,7 +128,7 @@
       </div>
 
       {{! Product/Area }}
-      <div class="space-y-2">
+      <div class="grid gap-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
           <div
@@ -149,8 +149,11 @@
           <ProductLink
             data-test-document-product-area-read-only
             @product={{@document.product}}
-            class="inline-block"
-          />
+            class="inline-flex gap-2"
+          >
+            <Product::Avatar @product={{@document.product}} />
+            <span class="underline-on-hover">{{@document.product}}</span>
+          </ProductLink>
         {{/if}}
       </div>
 

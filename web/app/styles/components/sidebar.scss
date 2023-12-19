@@ -19,6 +19,22 @@
 
   .editable-field-container {
     @apply mt-[3px];
+
+    &.select-input {
+      @apply -mx-[8px] mt-[-8px] -mb-[8px];
+
+      .x-dropdown-list-toggle-select {
+        @apply items-start border-color-border-strong bg-color-page-primary py-[7px] px-[6px] shadow-none;
+
+        &:not(:hover, :focus, :focus-visible, .open) {
+          @apply border-transparent bg-transparent;
+
+          .flight-icon-caret {
+            @apply hidden;
+          }
+        }
+      }
+    }
   }
 
   .editable-field {
