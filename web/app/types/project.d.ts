@@ -9,10 +9,20 @@ export interface JiraIssue {
   key: string;
   url: string;
   priority: string;
+  priorityImage: string;
   status: string;
   assignee?: string;
-  type: string;
+  assigneeAvatar?: string;
+  issueType: string;
+  issueTypeImage: string;
   summary: string;
+}
+
+export interface JiraPickerResult {
+  key: string;
+  issueTypeImage: string;
+  summary: string;
+  url: string;
 }
 
 export interface HermesProjectInfo {
@@ -20,7 +30,7 @@ export interface HermesProjectInfo {
   title: string;
   status: ProjectStatus;
   description?: string;
-  jiraIssueID?: string;
+  jiraIssueID?: string; // same as JiraPickerResult.key
   creator: string;
   createdTime: number;
   modifiedTime: number;

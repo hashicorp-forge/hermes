@@ -66,6 +66,10 @@ type Indexer struct {
 
 	// UpdateDraftHeaders updates draft document headers, if true.
 	UpdateDraftHeaders bool
+
+	// UseDatabaseForDocumentData will use the database instead of Algolia as the
+	// source of truth for document data, if true.
+	UseDatabaseForDocumentData bool
 }
 
 type IndexerOption func(*Indexer)
@@ -186,6 +190,14 @@ func WithUpdateDocumentHeaders(u bool) IndexerOption {
 func WithUpdateDraftHeaders(u bool) IndexerOption {
 	return func(i *Indexer) {
 		i.UpdateDraftHeaders = u
+	}
+}
+
+// WithUseDatabaseForDocumentData sets the boolean to use the database for
+// document data.
+func WithUseDatabaseForDocumentData(u bool) IndexerOption {
+	return func(i *Indexer) {
+		i.UseDatabaseForDocumentData = u
 	}
 }
 
@@ -406,6 +418,20 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
+			// Get reviews for the document from the database.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(idx.Database, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
 			// Parse document modified time.
 			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
 			if err != nil {
@@ -413,7 +439,7 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
-			// Set new modified for document record and update in database.
+			// Set new modified time for document record.
 			dbDoc.DocumentModifiedAt = modifiedTime
 
 			// Update document in database.
@@ -422,19 +448,31 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
-			// Get document object from Algolia.
-			var algoObj map[string]any
-			if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
-				logError("error retrieving document object from Algolia", err)
-				os.Exit(1)
-			}
+			var doc *document.Document
+			if idx.UseDatabaseForDocumentData {
+				// Convert database record to a document.
+				doc, err = document.NewFromDatabaseModel(dbDoc, reviews)
+				if err != nil {
+					log.Error("error converting database record to document",
+						"error", err,
+						"google_file_id", file.Id,
+					)
+					os.Exit(1)
+				}
+			} else {
+				// Get document object from Algolia.
+				var algoObj map[string]any
+				if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+					logError("error retrieving document object from Algolia", err)
+					os.Exit(1)
+				}
 
-			// Convert Algolia object to a document.
-			doc, err := document.NewFromAlgoliaObject(
-				algoObj, idx.DocumentTypes)
-			if err != nil {
-				logError("error converting Algolia object to document", err)
-				os.Exit(1)
+				// Convert Algolia object to a document.
+				doc, err = document.NewFromAlgoliaObject(algoObj, idx.DocumentTypes)
+				if err != nil {
+					logError("error converting Algolia object to document", err)
+					os.Exit(1)
+				}
 			}
 
 			// Get document content.
