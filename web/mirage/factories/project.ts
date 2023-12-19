@@ -14,17 +14,23 @@ export default Factory.extend({
   // @ts-ignore - Bug https://github.com/miragejs/miragejs/issues/1052
   afterCreate(project: ModelInstance<HermesProject>, server: any): void {
     server.create("related-hermes-document");
-    server.create("jira-issue");
 
     const hermesDocuments = server.schema.relatedHermesDocument
       .all()
       .models.map((doc: { attrs: any }) => doc.attrs);
 
-    const jiraIssue = server.schema.jiraIssues.first()?.attrs;
-
     project.update({
       hermesDocuments,
-      jiraIssue,
     });
+
+    if (!project.jiraIssueID) {
+      // if jiraIssue is not defined, create a jira issue
+      // and assign it to the project
+      const jiraIssue = server.create("jira-issue").attrs;
+
+      project.update({
+        jiraIssueID: jiraIssue?.key,
+      });
+    }
   },
 });

@@ -122,11 +122,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(getPageTitle(), "Test Project | Hermes");
   });
 
-  test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("it renders the correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     let project = this.server.schema.projects.first();
 
     project.update({
-      jiraIssue: undefined,
+      jiraIssueID: undefined,
       hermesDocuments: undefined,
     });
 
@@ -547,6 +547,12 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const project = this.server.schema.projects.first();
+
+    project.update({
+      jiraIssueID: undefined,
+    });
+
     this.server.create("jira-issue");
     this.server.create("jira-picker-result");
 
@@ -588,10 +594,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(JIRA_LINK).doesNotExist();
 
-    assert.equal(
-      this.server.schema.projects.first().attrs.jiraIssueID,
-      undefined,
-    );
+    assert.equal(this.server.schema.projects.find(2).attrs.jiraIssueID, "");
   });
 
   test('the jira widget is hidden if the "jira_url" config is not set', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
