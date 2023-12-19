@@ -1132,6 +1132,10 @@ func DraftsDocumentHandler(
 				doc.Product = *req.Product
 				model.Product = models.Product{Name: *req.Product}
 
+				// Remove product ID so it gets updated during upsert (or else it will
+				// override the product name).
+				model.ProductID = 0
+
 				// Update doc number in document.
 				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
 			}

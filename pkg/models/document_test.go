@@ -751,6 +751,20 @@ func TestDocumentModel(t *testing.T) {
 			assert.Equal("P2", d.Product.Abbreviation)
 			assert.EqualValues(2, d.Product.ID)
 		})
+
+		t.Run("Get the document", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			d := Document{
+				GoogleFileID: "fileID1",
+			}
+			err := d.Get(db)
+			require.NoError(err)
+			assert.EqualValues(1, d.ID)
+			assert.Equal("fileID1", d.GoogleFileID)
+			assert.Equal("Product2", d.Product.Name)
+			assert.Equal("P2", d.Product.Abbreviation)
+			assert.EqualValues(2, d.Product.ID)
+		})
 	})
 
 	t.Run("Upsert a document with custom fields", func(t *testing.T) {
