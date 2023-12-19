@@ -18,6 +18,7 @@
         @items={{this.statuses}}
         @placement="bottom"
         @selected={{this.status}}
+        class="theme--neutral"
       >
         <:anchor as |dd|>
           <dd.ToggleAction
@@ -117,7 +118,7 @@
           <Action
             data-test-add-project-resource-button
             {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+            class="hds-button hds-button--color-secondary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
           >
             <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
           </Action>
