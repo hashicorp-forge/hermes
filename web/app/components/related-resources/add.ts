@@ -287,6 +287,10 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     }
   }
 
+  protected get searchLoaderIsShown() {
+    return this.args.searchIsRunning && !this.loadInitialData.isRunning;
+  }
+
   /**
    * The action to disable keyboard navigation.
    * Called when the search input loses focus.
