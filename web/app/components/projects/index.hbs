@@ -1,10 +1,15 @@
-<nav data-test-projects-nav class="secondary-nav mb-7 flex gap-3">
+<nav
+  data-test-projects-nav
+  class="secondary-nav mx-auto mb-8 max-w-[430px] justify-center"
+>
   {{#each this.statuses as |status|}}
     <LinkTo
       data-test-tab={{status.value}}
       @route="authenticated.projects"
       @query={{hash status=status.value}}
+      class="hds-button hds-button--color-secondary"
     >
+      <FlightIcon @name={{get-project-status-icon status.value}} class="mr-1" />
       {{status.label}}
     </LinkTo>
   {{/each}}

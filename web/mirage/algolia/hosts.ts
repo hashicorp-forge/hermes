@@ -16,7 +16,9 @@ let algoliaHosts = [
 
 // Add wildcard routes.
 for (let i = 1; i <= 9; i++) {
-  algoliaHosts.push(`https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`);
+  algoliaHosts.push(
+    `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`,
+  );
 }
 
 export default algoliaHosts;

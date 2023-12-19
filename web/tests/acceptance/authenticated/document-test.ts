@@ -4,6 +4,7 @@ import {
   fillIn,
   find,
   findAll,
+  settled,
   triggerEvent,
   triggerKeyEvent,
   visit,
@@ -27,6 +28,7 @@ import {
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
 } from "hermes/utils/mirage-utils";
+import { current } from "ember-animated/.";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -83,6 +85,23 @@ const EDITABLE_FIELD_SAVE_BUTTON_SELECTOR =
   ".editable-field [data-test-save-button]";
 const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
   ".ember-power-select-multiple-remove-btn";
+
+const PROJECT_LINK = "[data-test-project-link]";
+const ADD_TO_PROJECT_BUTTON = "[data-test-projects-section-header] button";
+const ADD_TO_PROJECT_MODAL = "[data-test-add-to-or-create-project-modal]";
+const PROJECT_OPTION = "[data-test-project-option]";
+const PROJECT_DOCUMENT = "[data-test-document-list-item]";
+const START_NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
+
+const PROJECT_FORM = "[data-test-project-form]";
+const PROJECT_TITLE_INPUT = `${PROJECT_FORM} [data-test-title]`;
+const CREATE_PROJECT_BUTTON = `${PROJECT_FORM} [data-test-submit]`;
+const CREATING_PROJECT_MESSAGE = "[data-test-creating-project-message]";
+const PROJECT_DOCUMENT_LINK = "[data-test-document-link]";
+const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";
+const REMOVE_FROM_PROJECT_BUTTON =
+  "[data-test-overflow-menu-action='remove-from-project']";
+const DOCUMENT_PROJECT = "[data-test-document-project]";
 
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -838,5 +857,143 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(DISABLED_FOOTER_H5)
       .hasText("Read-only headers", "shows the locked-doc message");
+  });
+
+  test("it displays a list of projects the document is in", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      projects: [1, 2],
+    });
+
+    this.server.create("project", {
+      id: 1,
+      title: "Project 1",
+    });
+
+    this.server.create("project", {
+      id: 2,
+      title: "Project 2",
+    });
+
+    await visit("/document/1");
+
+    assert.dom(PROJECT_LINK).exists({ count: 2 });
+
+    const firstProjectLink = find(PROJECT_LINK);
+    const secondProjectLink = findAll(PROJECT_LINK)[1];
+
+    assert.dom(firstProjectLink).hasText("Project 1");
+    assert.dom(firstProjectLink).hasAttribute("href", "/projects/1");
+
+    assert.dom(secondProjectLink).hasText("Project 2");
+    assert.dom(secondProjectLink).hasAttribute("href", "/projects/2");
+  });
+
+  test("you can't add a draft to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document");
+
+    await visit("/document/doc-0?draft=true");
+
+    assert.dom(ADD_TO_PROJECT_BUTTON).hasAttribute("aria-disabled");
+  });
+
+  test("you can add a published doc to a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      isDraft: false,
+      status: "In-review",
+    });
+
+    this.server.create("project", {
+      id: 1,
+    });
+
+    // Remove the factory-created document
+    this.server.schema.projects.first().update({
+      hermesDocuments: [],
+    });
+
+    await visit("/document/doc-0");
+
+    assert.dom(PROJECT_LINK).doesNotExist();
+
+    await click(ADD_TO_PROJECT_BUTTON);
+
+    assert.dom(ADD_TO_PROJECT_MODAL).exists();
+
+    await click(PROJECT_OPTION);
+
+    assert.dom(ADD_TO_PROJECT_MODAL).doesNotExist();
+
+    assert.dom(PROJECT_LINK).exists().hasAttribute("href", "/projects/1");
+
+    const project = this.server.schema.projects.first();
+    const document = this.server.schema.document.first();
+
+    assert.true(document.projects.includes(project.id));
+  });
+
+  test("you can create a new project to add the document to", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    const title = "Foo";
+    const id = 500;
+
+    this.server.create("document", {
+      objectID: id,
+      title,
+      isDraft: false,
+      status: "In-review",
+    });
+
+    await visit(`/document/${id}`);
+
+    await click(ADD_TO_PROJECT_BUTTON);
+
+    assert.dom(ADD_TO_PROJECT_MODAL).exists();
+
+    await click(START_NEW_PROJECT_BUTTON);
+
+    await fillIn(PROJECT_TITLE_INPUT, "New Project");
+
+    const clickPromise = click(CREATE_PROJECT_BUTTON);
+
+    // Confirm the "creating..." state
+    await waitFor(CREATING_PROJECT_MESSAGE);
+
+    await clickPromise;
+
+    assert.equal(
+      currentURL(),
+      "/projects/1",
+      "you're redirected to the new project",
+    );
+
+    assert.dom(PROJECT_DOCUMENT).containsText(title);
+
+    assert.dom(PROJECT_DOCUMENT_LINK).hasAttribute("href", `/document/${id}`);
+  });
+
+  test("you can remove a document from a project", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      isDraft: false,
+      status: "In-review",
+      projects: [1],
+    });
+
+    this.server.create("project", {
+      id: 1,
+    });
+
+    await visit("/document/doc-0");
+
+    assert.dom(PROJECT_LINK).exists();
+
+    await click(`${DOCUMENT_PROJECT} ${OVERFLOW_MENU_BUTTON}`);
+
+    await click(REMOVE_FROM_PROJECT_BUTTON);
+
+    assert.dom(PROJECT_LINK).doesNotExist();
+
+    const document = this.server.schema.document.first();
+
+    assert.true(document.projects.length === 0);
   });
 });

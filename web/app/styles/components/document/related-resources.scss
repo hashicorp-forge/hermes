@@ -7,7 +7,7 @@
     &:hover,
     &:focus-within {
       .related-resource-link {
-        @apply bg-color-surface-interactive-hover;
+        @apply border border-color-border-primary bg-color-page-primary;
       }
     }
   }
