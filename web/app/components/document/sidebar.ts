@@ -37,6 +37,7 @@ import {
 } from "hermes/types/project";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { ProjectStatus } from "hermes/types/project-status";
+import { RelatedHermesDocument } from "../related-resources";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -1022,7 +1023,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         {
           method: "POST",
           body: JSON.stringify({
-            hermesDocuments,
+            hermesDocuments: hermesDocuments.map(
+              (
+                doc:
+                  | RelatedHermesDocument
+                  | { googleFileID: string; sortOrder: number },
+              ) => {
+                return {
+                  googleFileID: doc.googleFileID,
+                  sortOrder: doc.sortOrder,
+                };
+              },
+            ),
             externalLinks,
           }),
         },

@@ -15,14 +15,6 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <Product::Avatar
-          @product={{this.product}}
-          class="product-icon-badge {{if this.saveIsRunning 'opacity-50'}}"
-        />
-      {{/if}}
-    {{/let}}
 
     <div class="sidebar-body-container">
       <div>
@@ -136,26 +128,32 @@
       </div>
 
       {{! Product/Area }}
-      <div class="space-y-2">
+      <div class="grid gap-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
-          <div class="relative w-full" data-test-document-product-area-editable>
+          <div
+            class="editable-field-container select-input"
+            data-test-document-product-area-editable
+          >
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
-              @formatIsBadge={{true}}
+              @selectedAbbreviationIsHidden={{true}}
               @renderOut={{true}}
-              class="w-[300px]"
+              class="max-h-[275px] w-[320px]"
             />
           </div>
         {{else}}
           <ProductLink
             data-test-document-product-area-read-only
             @product={{@document.product}}
-            class="inline-block"
-          />
+            class="inline-flex gap-2"
+          >
+            <Product::Avatar @product={{@document.product}} />
+            <span class="underline-on-hover">{{@document.product}}</span>
+          </ProductLink>
         {{/if}}
       </div>
 

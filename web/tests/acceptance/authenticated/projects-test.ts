@@ -12,7 +12,7 @@ const PROJECT_TILE = "[data-test-project-tile]";
 const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
 const PROJECT_DESCRIPTION = `${PROJECT_TILE} [data-test-description]`;
 const PROJECT_PRODUCT = `${PROJECT_TILE} [data-test-product]`;
-const PROJECT_JIRA_TYPE = `${PROJECT_TILE} [data-test-jira-type]`;
+const PROJECT_JIRA_TYPE = `${PROJECT_TILE} [data-test-issue-type-image]`;
 const PROJECT_JIRA_KEY = `${PROJECT_TILE} [data-test-jira-key]`;
 
 const SECONDARY_NAV = "[data-test-projects-nav]";
@@ -72,9 +72,12 @@ module("Acceptance | authenticated/projects", function (hooks) {
           expectedDescriptions.push(project.description);
         }
 
-        if (project.jiraIssue) {
-          expectedKeys.push(project.jiraIssue.key);
-          expectedJiraTypes.push(project.jiraIssue.issueType);
+        if (project.jiraIssueID) {
+          const jiraIssue = this.server.schema.jiraIssues.findBy({
+            key: project.jiraIssueID,
+          });
+          expectedKeys.push(jiraIssue.key);
+          expectedJiraTypes.push(jiraIssue.issueType);
         }
 
         if (project.products) {
@@ -96,8 +99,8 @@ module("Acceptance | authenticated/projects", function (hooks) {
       (e) => e.textContent?.trim(),
     );
 
-    const renderedJiraTypes = findAll(PROJECT_JIRA_TYPE).map(
-      (e) => e.textContent?.trim(),
+    const renderedJiraTypes = findAll(PROJECT_JIRA_TYPE).map((e) =>
+      e.getAttribute("alt"),
     );
 
     assert.deepEqual(renderedTitles, expectedTitles);
