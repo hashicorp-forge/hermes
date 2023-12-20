@@ -149,6 +149,7 @@
           {{#each this.hermesDocuments as |document|}}
             <li class="group relative" data-test-document-list-item>
               <Project::Resource
+                @isReadOnly={{not this.projectIsActive}}
                 @overflowMenuItems={{hash
                   delete=(hash
                     label="Remove"
@@ -182,6 +183,7 @@
           {{#each this.externalLinks as |link i|}}
             <li class="group" data-test-document-list-item>
               <Project::Resource
+                @isReadOnly={{not this.projectIsActive}}
                 @overflowMenuItems={{hash
                   edit=(hash
                     label="Edit"

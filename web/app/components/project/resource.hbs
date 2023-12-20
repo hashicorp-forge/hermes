@@ -2,5 +2,7 @@
 
   {{yield}}
 
-  <OverflowMenu @items={{@overflowMenuItems}} />
+  {{#unless @isReadOnly}}
+    <OverflowMenu @items={{@overflowMenuItems}} />
+  {{/unless}}
 </div>
