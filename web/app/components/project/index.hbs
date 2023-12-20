@@ -119,16 +119,15 @@
     @addResource={{this.addResource}}
   >
     <:header as |rr|>
-      <div class="sticky top-24 -mb-20 pr-14">
-        <div class="pointer-events-none -translate-y-1/2">
-          <Action
-            data-test-add-project-resource-button
-            {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
-          >
-            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-          </Action>
-        </div>
+      <div class="absolute right-14 top-0 -translate-y-1/2">
+        <Action
+          disabled={{not this.projectIsActive}}
+          data-test-add-project-resource-button
+          {{on "click" rr.showModal}}
+          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+        >
+          <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+        </Action>
       </div>
     </:header>
   </RelatedResources>
