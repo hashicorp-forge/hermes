@@ -105,39 +105,40 @@
   </div>
   <div class="max-w-3xl">
 
-    {{! Title }}
-    <div class="mt-7 flex">
+  {{! Title }}
+  <div class="mt-7 flex">
+    <EditableField
+      class="project-title text-display-600"
+      data-test-project-title
+      @value={{this.title}}
+      @tag="h1"
+      @placeholder="Add project title"
+      @onSave={{this.saveTitle}}
+      @isReadOnly={{not this.projectIsActive}}
+      @isRequired={{true}}
+      @isSaving={{this.titleIsSaving}}
+    />
+  </div>
+  {{#if (or this.projectIsActive this.description)}}
+    {{! Description }}
+    <div class="flex">
       <EditableField
-        class="project-title text-display-600"
-        data-test-project-title
-        @value={{this.title}}
-        @tag="h1"
-        @placeholder="Add project title"
-        @buttonSize="medium"
-        @onSave={{this.saveTitle}}
+        class="project-description"
+        data-test-project-description
+        @value="{{this.description}}"
+        @onSave={{this.saveDescription}}
         @isReadOnly={{not this.projectIsActive}}
-        @isRequired={{true}}
+        @isSaving={{this.descriptionIsSaving}}
+        @placeholder="Add a description"
       />
     </div>
-    {{#if (or this.projectIsActive this.description)}}
-      {{! Description }}
-      <div class="flex">
-        <EditableField
-          class="project-description"
-          data-test-project-description
-          @value="{{this.description}}"
-          @onSave={{this.saveDescription}}
-          @isReadOnly={{not this.projectIsActive}}
-          @placeholder="Add a description"
-          @buttonSize="medium"
-        />
-      </div>
-    {{/if}}
-  </div>
+  {{/if}}
+</div>
 
-  {{#if this.jiraIsEnabled}}
-    <div
-      class="mt-10 flex w-full max-w-3xl gap-2 px-2"
+{{#if this.jiraIsEnabled}}
+  {{! Jira }}
+  <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
+    <Project::JiraWidget
       {{did-insert this.maybeLoadJiraInfo}}
     >
       {{! Jira }}
