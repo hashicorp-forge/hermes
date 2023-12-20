@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, task } from "ember-concurrency";
+import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -20,6 +20,7 @@ import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
+import Ember from "ember";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -52,6 +53,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.args.project.hermesDocuments ?? [];
   @tracked protected externalLinks: RelatedExternalLink[] =
     this.args.project.externalLinks ?? [];
+
+  @tracked titleIsSaving = false;
+  @tracked descriptionIsSaving = false;
 
   /**
    * Whether the "edit external link" modal is shown.
@@ -200,6 +204,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected saveTitle(newValue: string): void {
     this.title = newValue;
+    this.titleIsSaving = true;
     void this.saveProjectInfo.perform("title", newValue);
   }
 
@@ -210,6 +215,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected saveDescription(newValue: string): void {
     this.description = newValue;
+    this.descriptionIsSaving = true;
     void this.saveProjectInfo.perform("description", newValue);
   }
 
@@ -329,24 +335,36 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = task(async (key: string, newValue?: string) => {
-    try {
-      const valueToSave = { [key]: newValue };
+  protected saveProjectInfo = enqueueTask(
+    async (key: string, newValue?: string) => {
+      try {
+        const valueToSave = { [key]: newValue };
 
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        },
-      );
-    } catch (e) {
-      this.flashMessages.critical((e as any).message, {
-        title: "Unable to save",
-        timeout: FLASH_MESSAGES_LONG_TIMEOUT,
-      });
-    }
-  });
+        const savePromise = this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(valueToSave),
+          },
+        );
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
+      } catch (e) {
+        this.flashMessages.critical((e as any).message, {
+          title: "Unable to save",
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
+        });
+      } finally {
+        switch (key) {
+          case "title":
+            this.titleIsSaving = false;
+            break;
+          case "description":
+            this.descriptionIsSaving = false;
+            break;
+        }
+      }
+    },
+  );
 
   /**
    * The task to load a Jira issue from an ID.
