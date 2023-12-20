@@ -170,9 +170,12 @@
                     class="jira-input relative"
                     @type="search"
                   />
-                  {{! overlay the  }}
+                  {{! animate the search icon  }}
                   <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
-                    <FlightIcon @name="search" class="search-input-icon" />
+                    <FlightIcon
+                      @name="search"
+                      class={{unless @isNewProjectForm "search-input-icon"}}
+                    />
                   </div>
                 {{else}}
                   <Action
