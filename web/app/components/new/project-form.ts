@@ -12,6 +12,7 @@ import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
 import Ember from "ember";
+import ConfigService from "hermes/services/config";
 
 const TIMEOUT = Ember.testing ? 0 : 2000;
 
@@ -25,6 +26,7 @@ interface NewProjectFormComponentSignature {
 
 export default class NewProjectFormComponent extends Component<NewProjectFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
 
@@ -129,20 +131,17 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
       const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
 
       if (this.args.document) {
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              hermesDocuments: [
-                {
-                  googleFileID: this.args.document.objectID,
-                  sortOrder: 1,
-                },
-              ],
-            }),
-          },
-        );
+        await this.fetchSvc.fetch(`/projects/${project.id}/related-resources`, {
+          method: "POST",
+          body: JSON.stringify({
+            hermesDocuments: [
+              {
+                googleFileID: this.args.document.objectID,
+                sortOrder: 1,
+              },
+            ],
+          }),
+        });
       }
 
       this.router.transitionTo("authenticated.projects.project", project.id);
