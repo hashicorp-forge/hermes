@@ -109,7 +109,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
       `);
 
     assert.dom(MODAL_TITLE_SELECTOR).hasText("Test title");
-    assert.dom(LIST_HEADER_SELECTOR).hasText("Suggestions");
+    assert.dom(LIST_HEADER_SELECTOR).hasText("Latest docs");
     assert.dom(DOCUMENT_OPTION_SELECTOR).exists({ count: 4 });
     assert
       .dom(SEARCH_INPUT_SELECTOR)
@@ -133,7 +133,7 @@ module("Integration | Component | related-resources/add", function (hooks) {
         />
       `);
 
-    assert.dom(LIST_HEADER_SELECTOR).hasText("Suggestions");
+    assert.dom(LIST_HEADER_SELECTOR).hasText("Latest docs");
 
     // Create a search with results
     await fillIn(SEARCH_INPUT_SELECTOR, "3");

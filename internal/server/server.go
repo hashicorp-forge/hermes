@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp/go-hclog"
@@ -24,6 +25,9 @@ type Server struct {
 
 	// GWService is the Google Workspace service for the server.
 	GWService *gw.Service
+
+	// Jira is the Jira service for the server.
+	Jira *jira.Service
 
 	// Logger is the logger for the server.
 	Logger hclog.Logger

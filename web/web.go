@@ -58,10 +58,12 @@ type ConfigResponse struct {
 	AlgoliaDocsIndexName     string          `json:"algolia_docs_index_name"`
 	AlgoliaDraftsIndexName   string          `json:"algolia_drafts_index_name"`
 	AlgoliaInternalIndexName string          `json:"algolia_internal_index_name"`
+	CreateDocsAsUser         bool            `json:"create_docs_as_user"`
 	FeatureFlags             map[string]bool `json:"feature_flags"`
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
+	JiraURL                  string          `json:"jira_url"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
 	SkipGoogleAuth           bool            `json:"skip_google_auth"`
 	SupportLinkURL           string          `json:"support_link_url"`
@@ -110,14 +112,29 @@ func ConfigHandler(
 			skipGoogleAuth = true
 		}
 
+		// Set CreateDocsAsUser if enabled in the config.
+		createDocsAsUser := false
+		if cfg.GoogleWorkspace.Auth != nil &&
+			cfg.GoogleWorkspace.Auth.CreateDocsAsUser {
+			createDocsAsUser = true
+		}
+
+		// Set JiraURL if enabled in the config.
+		jiraURL := ""
+		if cfg.Jira != nil && cfg.Jira.Enabled {
+			jiraURL = cfg.Jira.URL
+		}
+
 		response := &ConfigResponse{
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
 			AlgoliaInternalIndexName: cfg.Algolia.InternalIndexName,
+			CreateDocsAsUser:         createDocsAsUser,
 			FeatureFlags:             featureFlags,
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
+			JiraURL:                  jiraURL,
 			ShortLinkBaseURL:         shortLinkBaseURL,
 			SkipGoogleAuth:           skipGoogleAuth,
 			SupportLinkURL:           cfg.SupportLinkURL,

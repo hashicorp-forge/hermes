@@ -7,7 +7,7 @@
     &:hover,
     &:focus-within {
       .related-resource-link {
-        @apply bg-color-surface-interactive-hover;
+        @apply border border-color-border-primary bg-color-page-primary;
       }
     }
   }
@@ -23,7 +23,7 @@
 }
 
 .related-resources-modal-container {
-  @apply relative w-full px-3;
+  @apply relative w-full px-6;
 }
 
 .add-external-resource-container {

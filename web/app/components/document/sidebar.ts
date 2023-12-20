@@ -29,7 +29,15 @@ import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
+import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import {
+  HermesProjectInfo,
+  HermesProjectResources,
+} from "hermes/types/project";
+import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
+import { ProjectStatus } from "hermes/types/project-status";
+import { RelatedHermesDocument } from "../related-resources";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -65,12 +73,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare session: SessionService;
+  @service declare flags: FlagsService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
+  @tracked protected projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
 
@@ -110,6 +120,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked product = this.args.document.product || "";
 
   /**
+   * Projects this document is associated with.
+   * Set by `loadRelatedProjects` and used to render a list
+   * of projects or an empty state.
+   */
+  @tracked protected _projects: Array<HermesProjectInfo> | null = null;
+
+  /**
    * Whether a draft was published during the session.
    * Set true when the user successfully requests a review.
    * Used in the `isDraft` getter to immediately update the UI
@@ -139,6 +156,19 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  /**
+   * All active projects. Used to render the list of
+   * options for the "add to project" modal.
+   */
+  protected get projects() {
+    return this._projects?.filter((project) => {
+      return (
+        project.status === ProjectStatus.Active ||
+        project.status === ProjectStatus.Completed
+      );
+    });
+  }
 
   /**
    * Whether the draft is shareable.
@@ -477,6 +507,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return !this.editingIsDisabled;
   }
 
+  /**
+   * The action to show the Projects modal.
+   * Triggered by clicking the "+" button in the Projects section.
+   */
+  @action protected showProjectsModal() {
+    this.projectsModalIsShown = true;
+  }
+
+  /**
+   * The action to hide the Projects modal.
+   * Passed to the Projects modal component and
+   * triggered on modal close.
+   */
+  @action protected hideProjectsModal() {
+    this.projectsModalIsShown = false;
+  }
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -515,6 +562,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   protected showCreateLinkSuccessMessage = restartableTask(async () => {
     await timeout(Ember.testing ? 0 : 1000);
+  });
+
+  /**
+   * The task to load the projects associated with this document.
+   * Called when the Projects list is inserted and used to display
+   * rich information in the list.
+   */
+  protected loadRelatedProjects = task(async () => {
+    const projectPromises = this.args.document.projects?.map((project) => {
+      return this.fetchSvc
+        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
+        .then((response) => response?.json());
+    });
+
+    const projects = await Promise.all(projectPromises ?? []);
+    this._projects = projects;
   });
 
   /**
@@ -840,6 +903,127 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       throw error;
     }
     this.refreshRoute();
+  });
+
+  /**
+   * The task to remove a document from a project (and vice versa).
+   * Called via the "remove" button in the Projects overflow menu.
+   */
+  removeDocFromProject = task(async (projectId: string) => {
+    const cachedProjects = this._projects;
+
+    try {
+      const projectIndex = this._projects?.findIndex(
+        (project) => project.id === projectId,
+      );
+
+      if (projectIndex === undefined || projectIndex === -1) return;
+
+      // update the local state immediately
+      this._projects?.splice(projectIndex, 1);
+      this._projects = this._projects;
+
+      // fetch the existing resources
+      const projectResources = (await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        )
+        .then((response) => response?.json())) as HermesProjectResources;
+
+      let hermesDocuments = projectResources.hermesDocuments ?? [];
+      let externalLinks = projectResources.externalLinks ?? [];
+
+      // filter out the current document
+      hermesDocuments = hermesDocuments.filter(
+        (doc) => doc.googleFileID !== this.docID,
+      );
+
+      // update the sort order of all resources
+      updateRelatedResourcesSortOrder(hermesDocuments, externalLinks);
+
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            hermesDocuments: hermesDocuments.map((doc) => {
+              return {
+                googleFileID: doc.googleFileID,
+                sortOrder: doc.sortOrder,
+              };
+            }),
+            externalLinks,
+          }),
+        },
+      );
+    } catch (error: unknown) {
+      this._projects = cachedProjects;
+      this._projects = this._projects;
+      this.maybeShowFlashError(error as Error, "Unable to remove project");
+    }
+    this.refreshRoute();
+  });
+
+  /**
+   * The task to add a document to an existing project.
+   * Called when the user selects a project from the "add to project" modal.
+   * Adds the project to the local array and re-renders the list.
+   * Saves the project's related resources to the back end.
+   */
+  protected addDocToProject = task(async (project: HermesProjectInfo) => {
+    const cachedProjects = this._projects;
+
+    try {
+      // Update the local state immediately.
+      this._projects?.unshift(project);
+      this._projects = this._projects;
+
+      // Fetch the existing resources
+      const projectResources = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+        )
+        .then((response) => response?.json());
+
+      let hermesDocuments = projectResources.hermesDocuments ?? [];
+      let externalLinks = projectResources.externalLinks ?? [];
+
+      // Add the formatted document to the start of the array
+      hermesDocuments.unshift({
+        googleFileID: this.args.document.objectID,
+        sortOrder: 1,
+      });
+
+      // Update the sort order of all resources
+      updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
+
+      // Save the resources to the back end
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            hermesDocuments: hermesDocuments.map(
+              (
+                doc:
+                  | RelatedHermesDocument
+                  | { googleFileID: string; sortOrder: number },
+              ) => {
+                return {
+                  googleFileID: doc.googleFileID,
+                  sortOrder: doc.sortOrder,
+                };
+              },
+            ),
+            externalLinks,
+          }),
+        },
+      );
+    } catch (e: unknown) {
+      this._projects = cachedProjects;
+      this._projects = this._projects;
+      this.maybeShowFlashError(e as Error, "Unable to add document to project");
+    }
   });
 }
 

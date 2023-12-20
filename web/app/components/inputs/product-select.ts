@@ -16,8 +16,8 @@ interface InputsProductSelectSignature {
   Args: {
     selected?: string;
     onChange: (value: string, attributes: ProductArea) => void;
-    formatIsBadge?: boolean;
     placement?: Placement;
+    selectedAbbreviationIsHidden?: boolean;
     isSaving?: boolean;
     renderOut?: boolean;
     offset?: OffsetOptions;
@@ -44,6 +44,7 @@ export default class InputsProductSelectComponent extends Component<InputsProduc
   }
 
   get selectedProductAbbreviation(): string | undefined {
+    if (this.args.selectedAbbreviationIsHidden) return;
     return this.productAreas.getAbbreviation(this.selected);
   }
 

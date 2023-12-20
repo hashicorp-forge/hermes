@@ -9,4 +9,6 @@ export const HERMES_GITHUB_REPO_URL =
  * mockConfigSvc.config.support_link_url = SUPPORT_URL;
  */
 export const TEST_SUPPORT_URL = "https://config-loaded-support-link.com";
-export const TEST_SHORT_LINK_BASE_URL = "https://config-loaded-short-link-base-url.com";
+export const TEST_SHORT_LINK_BASE_URL =
+  "https://config-loaded-short-link-base-url.com";
+export const TEST_JIRA_WORKSPACE_URL = "https://hashicorp.atlassian.net";

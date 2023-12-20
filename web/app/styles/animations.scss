@@ -7,6 +7,10 @@
   }
 }
 
+.fade-in-forwards {
+  animation: fadeIn 450ms forwards;
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;

@@ -1,5 +1,5 @@
 .product-badge {
-  @apply absolute bg-color-palette-neutral-200 bg-gradient-to-br;
+  @apply absolute bg-color-palette-neutral-200 bg-gradient-to-br from-transparent to-transparent;
 
   &.hcp {
     @apply from-color-palette-neutral-500 to-color-palette-neutral-600 text-color-foreground-high-contrast;

@@ -1,6 +1,6 @@
 <New::Form
   @taskIsRunning={{this.docIsBeingCreated}}
-  @icon={{get-doctype-icon @docType}}
+  @icon={{or this.docTypeIcon "file-text"}}
   @headline="Create your {{@docType}}"
   @buttonIsActive={{this.buttonIsActive}}
   @taskIsRunningHeadline="Creating draft in Google Drive..."

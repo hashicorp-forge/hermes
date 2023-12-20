@@ -7,9 +7,10 @@ import { assert } from "@ember/debug";
 import hashValue from "hash-value";
 
 const HDS_COLORS = [
-  "#0c0c0e",
   "#3b3d45",
+  "#656a76",
   "#c2c5cb",
+  "#dedfe3",
 
   "#51130a",
   "#940004",
@@ -19,6 +20,7 @@ const HDS_COLORS = [
   "#542800",
   "#803d00",
   "#9e4b00",
+  "#bb5a00",
   "#fbeabf",
 
   "#054220",
@@ -34,26 +36,26 @@ const HDS_COLORS = [
   "#1c345f",
   "#0046d1",
   "#0c56e9",
+  "#1060ff",
   "#cce3fe",
 ];
 
 const EXTENDED_COLORS = [
-  "#251333",
+  "#ffd814",
+  "#feec7b",
+  "#fff9cf",
 
-  "#EEE6CC",
+  "#d01c5b",
+  "#ffcede",
 
-  "#5B2152",
-  "#C4168A",
+  "#008196",
+  "#62d4dc",
 
-  "#1E3337",
-  "#104650",
-  "#0DC8E9",
-  "#CCEFFE",
+  "#63d0ff",
+  "#d4f2ff",
 
-  "#172504",
-  "#294207",
-  "#557800",
-  "#CCEECD",
+  "#60dea9",
+  "#d3fdeb",
 ];
 
 export type ProductArea = {

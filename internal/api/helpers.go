@@ -522,7 +522,7 @@ func compareAlgoliaAndDatabaseDocument(
 			result = multierror.Append(result,
 				fmt.Errorf(
 					"summary not equal, algolia=%v, db=%v",
-					algoSummary, dbSummary),
+					algoSummary, *dbSummary),
 			)
 		}
 	}

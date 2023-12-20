@@ -20,7 +20,7 @@ import { DRAFT_CREATED_LOCAL_STORAGE_KEY } from "hermes/components/modals/draft-
 const DOC_FORM = "[data-test-new-doc-form]";
 const HEADLINE = "[data-test-form-headline]";
 const ICON = "[data-test-feature-icon]";
-const PRODUCT_SELECT = `${DOC_FORM} [data-test-product-select]`;
+const PRODUCT_SELECT = `[data-test-product-select]`;
 const PRODUCT_SELECT_TOGGLE = `${PRODUCT_SELECT} [data-test-x-dropdown-list-toggle-select]`;
 const CREATE_BUTTON = `${DOC_FORM} [data-test-submit]`;
 const SECONDARY_CREATE_BUTTON = `${DOC_FORM} .hds-button--color-secondary`;
@@ -167,7 +167,7 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
 
     assert.dom("[data-test-document-title]").includesText("Foo");
     assert.dom("[data-test-document-summary]").includesText("Bar");
-    assert.dom("[data-test-badge-dropdown-list]").includesText("Terraform");
+    assert.dom(PRODUCT_SELECT_TOGGLE).includesText("Terraform");
   });
 
   test("it shows a confirmation modal when a draft is created", async function (this: AuthenticatedNewDocRouteTestContext, assert) {

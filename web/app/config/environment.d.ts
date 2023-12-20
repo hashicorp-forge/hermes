@@ -26,6 +26,7 @@ export interface HermesConfig {
   supportLinkURL: string;
   version: string;
   shortRevision: string;
+  jiraURL: string;
 }
 
 declare const config: HermesConfig;

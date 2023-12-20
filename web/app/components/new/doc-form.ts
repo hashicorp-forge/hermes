@@ -14,6 +14,9 @@ import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
 import { next } from "@ember/runloop";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { ModelFrom } from "hermes/types/route-models";
+import AuthenticatedNewRoute from "hermes/routes/authenticated/new";
+import DocumentTypesService from "hermes/services/document-types";
 
 interface DocFormErrors {
   title: string | null;
@@ -31,6 +34,7 @@ interface NewDocFormComponentSignature {
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare documentTypes: DocumentTypesService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare modalAlerts: ModalAlertsService;
@@ -75,6 +79,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   get form(): HTMLFormElement {
     assert("_form must exist", this._form);
     return this._form;
+  }
+
+  protected get docTypeIcon() {
+    return this.documentTypes.getFlightIcon(this.args.docType);
   }
 
   /**

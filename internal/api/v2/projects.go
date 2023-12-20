@@ -70,9 +70,32 @@ func ProjectsHandler(srv server.Server) http.Handler {
 		case "GET":
 			logArgs = append(logArgs, "method", r.Method)
 
-			// Get all projects from database.
+			// Get query parameters.
+			q := r.URL.Query()
+			statusParam := q.Get("status")
+			titleParam := q.Get("title")
+
+			// Build status condition for database query.
+			var cond models.Project
+			if statusParam != "" {
+				if statusFilter, ok := models.ParseProjectStatusString(
+					statusParam,
+				); ok {
+					cond = models.Project{
+						Status: statusFilter,
+					}
+				} else {
+					http.Error(w, "Invalid status", http.StatusUnprocessableEntity)
+					return
+				}
+			}
+
+			// Get projects from database.
 			projs := []models.Project{}
-			if err := srv.DB.Find(&projs).Error; err != nil &&
+			if err := srv.DB.
+				Where("title ILIKE ?", fmt.Sprintf("%%%s%%", titleParam)).
+				Find(&projs, cond).
+				Error; err != nil &&
 				!errors.Is(err, gorm.ErrRecordNotFound) {
 				srv.Logger.Error("error getting projects",
 					append([]interface{}{
@@ -107,7 +130,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 					JiraIssueID:  p.JiraIssueID,
 					ModifiedTime: p.ProjectModifiedAt.Unix(),
 					Products:     products,
-					Status:       p.Status.ToString(),
+					Status:       p.Status.String(),
 					Title:        p.Title,
 				})
 			}
@@ -188,7 +211,10 @@ func ProjectsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			srv.Logger.Info("created project", logArgs...)
+			srv.Logger.Info("created project",
+				append([]interface{}{
+					"user", userEmail,
+				}, logArgs...)...)
 
 			// Request post-processing.
 			go func() {
@@ -302,7 +328,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 						JiraIssueID:  proj.JiraIssueID,
 						ModifiedTime: proj.ProjectModifiedAt.Unix(),
 						Products:     products,
-						Status:       proj.Status.ToString(),
+						Status:       proj.Status.String(),
 						Title:        proj.Title,
 					},
 				}
@@ -408,7 +434,19 @@ func ProjectHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				srv.Logger.Info("updated project", logArgs...)
+				// Log success.
+				reqJSON, err := json.Marshal(req)
+				if err != nil {
+					srv.Logger.Warn("error marshaling request to JSON",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...)
+				}
+				srv.Logger.Info("updated project",
+					append([]interface{}{
+						"request", string(reqJSON),
+						"user", userEmail,
+					}, logArgs...)...)
 
 				// Request post-processing.
 				go func() {
@@ -501,7 +539,7 @@ func saveProjectInAlgolia(
 		"jiraIssueID":  proj.JiraIssueID,
 		"modifiedTime": proj.ProjectModifiedAt.Unix(),
 		"objectID":     fmt.Sprintf("%d", proj.ID),
-		"status":       proj.Status.ToString(),
+		"status":       proj.Status.String(),
 		"title":        proj.Title,
 	}
 

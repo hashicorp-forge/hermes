@@ -1,0 +1,20 @@
+.jira-widget {
+  > .inner {
+    &:hover,
+    &:focus,
+    &:focus-within {
+      .click-area {
+        @apply block shadow-surface-low;
+      }
+    }
+  }
+
+  .click-area {
+    @apply absolute -top-1.5 -left-2.5 -bottom-2 -right-2 hidden rounded-button-md;
+  }
+}
+
+.attached-jira-issue {
+  @apply relative grid gap-2.5;
+  grid-template-columns: 16px 1fr min-content;
+}

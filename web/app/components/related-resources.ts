@@ -35,8 +35,8 @@ export interface RelatedHermesDocument {
   product: string;
   status: string;
   owners: string[];
-  ownerPhotos: string[];
-  summary: string;
+  ownerPhotos?: string[];
+  summary?: string;
 }
 
 export enum RelatedResourcesScope {
@@ -178,7 +178,8 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       shouldIgnoreDelay?: boolean,
       options?: SearchOptions,
     ) => {
-      let index = this.configSvc.config.algolia_docs_index_name;
+      let index =
+        this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc";
 
       let filterString = "";
 
@@ -218,7 +219,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       try {
         let algoliaResponse = await this.algolia.searchIndex
           .perform(index, query, {
-            hitsPerPage: options?.hitsPerPage || 4,
+            hitsPerPage: options?.hitsPerPage || 12,
             filters: filterString,
             attributesToRetrieve: [
               "title",

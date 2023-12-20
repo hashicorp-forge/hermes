@@ -6,7 +6,6 @@
     .product-abbreviation {
       &.letter-count-1 {
         @apply text-[12px] font-semibold;
-        @apply mt-[1px];
       }
 
       &.letter-count-2 {
@@ -19,8 +18,21 @@
     }
   }
 
-  &.large,
-  &.xl {
+  &.small {
+    @apply h-5 w-5;
+
+    .default-user-icon {
+      @apply scale-[85%];
+    }
+  }
+
+  &.medium {
+    @apply h-7 w-7;
+  }
+
+  &.large {
+    @apply h-9 w-9;
+
     .product-abbreviation {
       &.letter-count-2 {
         @apply text-[13px];
@@ -31,20 +43,19 @@
     }
   }
 
-  &.small {
-    @apply h-5 w-5;
-  }
-
-  &.medium {
-    @apply h-7 w-7;
-  }
-
-  &.large {
-    @apply h-9 w-9;
-  }
-
   &.xl {
     @apply h-16 w-16;
+
+    .product-abbreviation {
+      @apply text-[32px] tracking-tight;
+
+      &.letter-count-2 {
+        @apply text-[24px];
+      }
+      &.letter-count-3 {
+        @apply text-[18px];
+      }
+    }
   }
 }
 

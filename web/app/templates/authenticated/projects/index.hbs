@@ -1,11 +1,3 @@
 {{page-title "All Projects"}}
 
-<ol class="relative grid grid-cols-3 gap-2">
-  {{#each this.model as |project|}}
-    <li data-test-project>
-      <LinkTo @route="authenticated.projects.project" @model={{project.id}}>
-        <Project::Tile @project={{project}} />
-      </LinkTo>
-    </li>
-  {{/each}}
-</ol>
+<Projects @projects={{this.model.projects}} @status={{this.model.status}} />

@@ -14,7 +14,7 @@ interface ProductAvatarComponentSignature {
   Args: {
     product?: string;
     icon?: string;
-    size?: `${Exclude<HermesSize, HermesSize.XL>}`;
+    size?: `${HermesSize}`;
   };
   Blocks: {
     default: [];
@@ -37,8 +37,11 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     return this.size === HermesSize.Small;
   }
 
+  private get sizeIsXL() {
+    return this.size === HermesSize.XL;
+  }
+
   private get colorStyles() {
-    if (!this.flags.productColors) return;
     if (this.productID) return;
 
     const bgColor = this.productAreas.getProductColor(this.args.product);
@@ -68,7 +71,6 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
 
   private get iconIsShown() {
     if (this.productID) return true;
-    if (!this.flags.productColors) return true;
     if (this.abbreviation) return false;
     return true;
   }
@@ -83,7 +85,11 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
       {{#if this.iconIsShown}}
         <FlightIcon
           @name={{or this.productID "folder"}}
-          class={{if this.sizeIsSmall "h-3 w-3" "h-4 w-4"}}
+          class={{if
+            this.sizeIsSmall
+            "h-3 w-3"
+            (if this.sizeIsXL "h-8 w-8" "h-4 w-4")
+          }}
         />
       {{else if this.abbreviation}}
         <span

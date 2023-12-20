@@ -1,0 +1,26 @@
+<nav
+  data-test-projects-nav
+  class="secondary-nav mx-auto mb-8 max-w-[430px] justify-center"
+>
+  {{#each this.statuses as |status|}}
+    <LinkTo
+      data-test-tab={{status.value}}
+      @route="authenticated.projects"
+      @query={{hash status=status.value}}
+      class="hds-button hds-button--color-secondary"
+    >
+      <FlightIcon @name={{get-project-status-icon status.value}} class="mr-1" />
+      {{status.label}}
+    </LinkTo>
+  {{/each}}
+</nav>
+
+<ol data-test-projects-list class="relative grid grid-cols-3 gap-2">
+  {{#each this.shownProjects as |project|}}
+    <li data-test-project>
+      <LinkTo @route="authenticated.projects.project" @model={{project.id}}>
+        <Project::Tile @project={{project}} />
+      </LinkTo>
+    </li>
+  {{/each}}
+</ol>

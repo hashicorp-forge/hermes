@@ -19,13 +19,14 @@ class HermesFormResize extends Resize {
 interface NewFormComponentSignature {
   Element: HTMLFormElement;
   Args: {
-    taskIsRunning: boolean;
-    icon: string;
-    headline: string;
-    taskIsRunningHeadline: string;
-    taskIsRunningDescription: string;
+    taskIsRunning?: boolean;
+    icon?: string;
+    headline?: string;
+    taskIsRunningHeadline?: string;
+    taskIsRunningDescription?: string;
     buttonText: string;
-    buttonIsActive: boolean;
+    buttonIsActive?: boolean;
+    isModal?: boolean;
   };
   Blocks: {
     default: [];
@@ -34,6 +35,14 @@ interface NewFormComponentSignature {
 
 export default class NewFormComponent extends Component<NewFormComponentSignature> {
   protected motion = HermesFormResize;
+
+  /**
+   * Whether the "creating..." message is shown.
+   * True if `@taskIsRunning` and `@isModal` is false/undefined.
+   */
+  protected get taskIsRunningMessageIsShown() {
+    return this.args.taskIsRunning && !this.args.isModal;
+  }
 
   *transition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of insertedSprites) {
