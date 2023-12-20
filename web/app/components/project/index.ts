@@ -327,7 +327,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = restartableTask(
+  protected saveProjectInfo = enqueueTask(
     async (key: string, newValue?: string) => {
       try {
         const valueToSave = { [key]: newValue };
@@ -346,8 +346,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
       } finally {
-        this.titleIsSaving = false;
-        this.descriptionIsSaving = false;
+        switch (key) {
+          case "title":
+            this.titleIsSaving = false;
+            break;
+          case "description":
+            this.descriptionIsSaving = false;
+            break;
+        }
       }
     },
   );
