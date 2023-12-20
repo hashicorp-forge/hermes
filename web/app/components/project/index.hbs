@@ -18,6 +18,7 @@
         @items={{this.statuses}}
         @placement="bottom"
         @selected={{this.status}}
+        class="theme--neutral"
       >
         <:anchor as |dd|>
           <dd.ToggleAction
@@ -25,7 +26,10 @@
             class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
             @hasChevron={{true}}
           >
-            <FlightIcon @name={{this.statusIcon}} class="-mr-1" />
+            <FlightIcon
+              @name={{get-project-status-icon dd.selected}}
+              class="-mr-1"
+            />
             <span class="status ml-2">
               {{this.statusLabel}}
             </span>
@@ -43,7 +47,7 @@
             >
               <:default>
                 <div class="flex items-center gap-2 pl-1">
-                  <FlightIcon @name={{dd.attrs.icon}} class="" />
+                  <FlightIcon @name={{get-project-status-icon dd.value}} />
                   <span class="status">
                     {{dd.attrs.label}}
                   </span>
@@ -74,20 +78,25 @@
       @tag="h1"
       @placeholder="Add project title"
       @onSave={{this.saveTitle}}
+      @isReadOnly={{not this.projectIsActive}}
       @isRequired={{true}}
+      @isSaving={{this.titleIsSaving}}
     />
   </div>
-
-  {{! Description }}
-  <div class="flex">
-    <EditableField
-      class="project-description"
-      data-test-project-description
-      @value="{{this.description}}"
-      @onSave={{this.saveDescription}}
-      @placeholder="Add a description"
-    />
-  </div>
+  {{#if (or this.projectIsActive this.description)}}
+    {{! Description }}
+    <div class="flex">
+      <EditableField
+        class="project-description"
+        data-test-project-description
+        @value="{{this.description}}"
+        @onSave={{this.saveDescription}}
+        @isReadOnly={{not this.projectIsActive}}
+        @isSaving={{this.descriptionIsSaving}}
+        @placeholder="Add a description"
+      />
+    </div>
+  {{/if}}
 </div>
 
 {{#if this.jiraIsEnabled}}

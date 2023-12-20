@@ -1,7 +1,14 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  rerender,
+  settled,
+  visit,
+  waitFor,
+} from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -19,14 +26,15 @@ import {
 } from "hermes/utils/mirage-utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
-import { TEST_JIRA_WORKSPACE_URL } from "hermes/utils/hermes-urls";
 
 const TITLE = "[data-test-project-title]";
+const READ_ONLY_TITLE = `${TITLE} .read-only`;
 const TITLE_BUTTON = `${TITLE} button`;
 const TITLE_INPUT = `${TITLE} textarea`;
 const TITLE_ERROR = `${TITLE} .hds-form-error`;
 
 const DESCRIPTION = "[data-test-project-description]";
+const READ_ONLY_DESCRIPTION = `${DESCRIPTION} .read-only`;
 const DESCRIPTION_BUTTON = `${DESCRIPTION} button`;
 const DESCRIPTION_INPUT = `${DESCRIPTION} textarea`;
 
@@ -100,6 +108,8 @@ const ACTIVE_STATUS_ACTION = "[data-test-status-action='active']";
 const COMPLETED_STATUS_ACTION = "[data-test-status-action='completed']";
 const ARCHIVED_STATUS_ACTION = "[data-test-status-action='archived']";
 
+const SAVING_SPINNER = "[data-test-saving-spinner]";
+
 interface AuthenticatedProjectsProjectRouteTestContext
   extends MirageTestContext {}
 
@@ -122,11 +132,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(getPageTitle(), "Test Project | Hermes");
   });
 
-  test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("it renders the correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     let project = this.server.schema.projects.first();
 
     project.update({
-      jiraIssue: undefined,
+      jiraIssueID: undefined,
       hermesDocuments: undefined,
     });
 
@@ -276,7 +286,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(TITLE_BUTTON);
     await fillIn(TITLE_INPUT, "New Project Title");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${TITLE} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(TITLE).hasText("New Project Title");
 
@@ -292,12 +310,61 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(DESCRIPTION_BUTTON);
     await fillIn(DESCRIPTION_INPUT, "Foo");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${DESCRIPTION} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(DESCRIPTION).hasText("Foo");
 
     const project = this.server.schema.projects.first().attrs;
     assert.equal(project.description, "Foo");
+  });
+
+  test("title and description are read-only unless the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.schema.find("project", 1).update({
+      description: "Foo",
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(TITLE_BUTTON).exists();
+    assert.dom(DESCRIPTION_BUTTON).exists();
+
+    assert.dom(READ_ONLY_TITLE).doesNotExist();
+    assert.dom(READ_ONLY_DESCRIPTION).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(TITLE_BUTTON).doesNotExist();
+    assert.dom(DESCRIPTION_BUTTON).doesNotExist();
+
+    assert.dom(READ_ONLY_TITLE).exists();
+    assert.dom(READ_ONLY_DESCRIPTION).exists();
+
+    // make the project active again
+    await click(STATUS_TOGGLE);
+    await click(ACTIVE_STATUS_ACTION);
+
+    // clear the description
+    await click(DESCRIPTION_BUTTON);
+    await fillIn(DESCRIPTION_INPUT, "");
+    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // set the project to completed
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(READ_ONLY_TITLE).exists();
+    assert
+      .dom(READ_ONLY_DESCRIPTION)
+      .doesNotExist("the read-only description is conditionally rendered");
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -547,6 +614,12 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   });
 
   test("you can add a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const project = this.server.schema.projects.first();
+
+    project.update({
+      jiraIssueID: undefined,
+    });
+
     this.server.create("jira-issue");
     this.server.create("jira-picker-result");
 
@@ -588,10 +661,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(JIRA_LINK).doesNotExist();
 
-    assert.equal(
-      this.server.schema.projects.first().attrs.jiraIssueID,
-      undefined,
-    );
+    assert.equal(this.server.schema.projects.find(2).attrs.jiraIssueID, "");
   });
 
   test('the jira widget is hidden if the "jira_url" config is not set', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

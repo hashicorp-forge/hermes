@@ -1,0 +1,9 @@
+.quarternary-button {
+  @apply flex items-center gap-1.5 rounded-button-md border border-transparent px-3 py-2;
+
+  &:hover,
+  &:focus-visible,
+  &.open {
+    @apply border-color-border-strong bg-color-foreground-high-contrast;
+  }
+}

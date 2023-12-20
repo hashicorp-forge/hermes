@@ -1272,6 +1272,10 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				doc.Product = *req.Product
 				model.Product = models.Product{Name: *req.Product}
 
+				// Remove product ID so it gets updated during upsert (or else it will
+				// override the product name).
+				model.ProductID = 0
+
 				// Update doc number in document.
 				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
 			}
@@ -1301,7 +1305,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
-			// }
 
 			// Replace the doc header.
 			if err := doc.ReplaceHeader(

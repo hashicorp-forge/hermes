@@ -282,6 +282,62 @@ export default function (mirageConfig) {
         );
       });
 
+      // Save a document to a project
+      this.post(
+        "/projects/:project_id/related-resources",
+        (schema, request) => {
+          let project = schema.projects.findBy({
+            id: request.params.project_id,
+          });
+
+          if (project) {
+            let attrs = JSON.parse(request.requestBody);
+
+            // update the projects array on the hermesDocuments
+
+            const { hermesDocuments, externalLinks } = attrs;
+
+            let newHermesDocuments: any[] = [];
+
+            hermesDocuments.forEach((doc) => {
+              const mirageDocument = this.schema.document.findBy({
+                objectID: doc.googleFileID,
+              });
+
+              const existingDocuments = project.attrs.hermesDocuments ?? [];
+
+              newHermesDocuments.push(
+                ...existingDocuments,
+                mirageDocument.attrs,
+              );
+
+              //  ignore duplicates
+              if (existingDocuments.includes(doc.googleFileID)) {
+                return;
+              } else {
+                mirageDocument.update({
+                  projects: [
+                    ...mirageDocument.attrs.projects,
+                    project.attrs.id,
+                  ],
+                });
+              }
+
+              mirageDocument.update({
+                projects: [...mirageDocument.attrs.projects, project.attrs.id],
+              });
+            });
+
+            project.update({
+              hermesDocuments: newHermesDocuments,
+              externalLinks,
+            });
+
+            return new Response(200, {}, project.attrs);
+          }
+        },
+      );
+
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
         const project = schema.projects.findBy({
@@ -315,7 +371,7 @@ export default function (mirageConfig) {
         return new Response(200, {}, { hermesDocuments, externalLinks });
       });
 
-      // Fetch a project's related resources
+      // Update a project's related resources
       this.put("/projects/:project_id/related-resources", (schema, request) => {
         let project = schema.projects.findBy({
           id: request.params.project_id,
@@ -324,7 +380,55 @@ export default function (mirageConfig) {
         if (project) {
           let attrs = JSON.parse(request.requestBody);
 
-          project.update(attrs);
+          const { hermesDocuments, externalLinks } = attrs;
+
+          // need to compare current hermesDocuments
+          // to the new ones being requested
+
+          // documents that are in the current project but not in the new request
+          // need to have their projects array updated to remove the project id
+
+          // documents that are in the new request but not in the current project
+          // need to have their projects array updated to add the project id
+
+          // documents that are in both the current project and the new request
+
+          const currentHermesDocuments = project.attrs.hermesDocuments ?? [];
+          const incomingHermesDocuments = attrs.hermesDocuments ?? [];
+
+          const documentsToRemove = currentHermesDocuments.filter((doc) => {
+            return !incomingHermesDocuments.includes(doc);
+          });
+
+          const documentsToAdd = incomingHermesDocuments.filter((doc) => {
+            return !currentHermesDocuments.includes(doc);
+          });
+
+          documentsToRemove.forEach((doc) => {
+            const mirageDocument = this.schema.document.findBy({
+              objectID: doc.googleFileID,
+            });
+
+            mirageDocument?.update({
+              projects: mirageDocument.attrs.projects.filter(
+                (projectID) => projectID.toString() !== project.attrs.id,
+              ),
+            });
+          });
+
+          documentsToAdd.forEach((doc) => {
+            const mirageDocument = this.schema.document.findBy({
+              objectID: doc,
+            });
+            mirageDocument?.update({
+              projects: [...mirageDocument.attrs.projects, project.attrs.id],
+            });
+          });
+
+          project.update({
+            hermesDocuments,
+            externalLinks,
+          });
           return new Response(200, {}, project.attrs);
         }
       });

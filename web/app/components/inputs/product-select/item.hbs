@@ -3,27 +3,30 @@
   class="relative flex w-full gap-2"
   ...attributes
 >
-  <FlightIcon
-    data-test-product-icon
-    data-test-icon={{or (get-product-id @product) "folder"}}
-    @name={{or (get-product-id @product) "folder"}}
-  />
+  {{#if @product}}
+    <Product::Avatar @product={{@product}} />
+  {{else}}
+    <FlightIcon @name="folder" class="text-color-foreground-faint" />
+  {{/if}}
 
   <div class="flex items-center gap-1.5">
 
     {{#if @product}}
-      <span data-test-selected-value>
+      <span data-test-product-value class="w-full pr-5 text-body-200">
         {{@product}}
+        {{#if this.abbreviationIsShown}}
+          <span
+            class="ml-0.5 opacity-60"
+            data-test-product-select-item-abbreviation
+          >
+            {{@abbreviation}}
+          </span>
+        {{/if}}
       </span>
     {{else}}
       <EmptyStateText data-test-empty-state @value="Select a product/area" />
     {{/if}}
 
-    {{#if this.abbreviationIsShown}}
-      <span data-test-product-select-item-abbreviation>
-        {{@abbreviation}}
-      </span>
-    {{/if}}
   </div>
 
   {{#if @isSelected}}

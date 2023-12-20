@@ -12,7 +12,7 @@ export type XDropdownListInteractiveComponentArgs = {
 };
 
 /**
- * Used by Index, Items and BadgeDropdownList
+ * Used by Index and Items
  */
 export interface XDropdownListSharedArgs {
   items?: any;
