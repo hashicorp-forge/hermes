@@ -1,4 +1,4 @@
-<div class="relative">
+<div class="relative min-h-[210px]">
 
   <div class="project-header mt-1 flex w-full justify-between">
 
@@ -133,19 +133,21 @@
     {{/if}}
   </div>
 
-  <div class="mt-10 flex min-h-[8px] w-full max-w-3xl gap-2 px-2">
-    {{#if this.jiraIsEnabled}}
+  {{#if this.jiraIsEnabled}}
+    <div
+      class="mt-10 flex w-full max-w-3xl gap-2 px-2"
+      {{did-insert this.maybeLoadJiraInfo}}
+    >
       {{! Jira }}
       <Project::JiraWidget
-        {{did-insert this.maybeLoadJiraInfo}}
         @issue={{this.jiraIssue}}
         @onIssueRemove={{this.removeJiraIssue}}
         @onIssueSelect={{this.addJiraIssue}}
         @isLoading={{this.loadJiraIssue.isRunning}}
         @isReadOnly={{not (eq this.status "active")}}
       />
-    {{/if}}
-  </div>
+    </div>
+  {{/if}}
 </div>
 
 <div

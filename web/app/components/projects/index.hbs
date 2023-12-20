@@ -9,7 +9,13 @@
       @query={{hash status=status.value}}
       class="hds-button hds-button--color-secondary"
     >
-      <FlightIcon @name={{get-project-status-icon status.value}} class="mr-1" />
+      <div class="mr-1 flex">
+        {{#if (eq status.value @status)}}
+          <FlightIcon @name={{get-project-status-icon status.value}} />
+        {{else}}
+          <Project::StatusIcon @status={{status.value}} />
+        {{/if}}
+      </div>
       {{status.label}}
     </LinkTo>
   {{/each}}

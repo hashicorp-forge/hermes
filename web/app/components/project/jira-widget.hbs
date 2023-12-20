@@ -1,4 +1,4 @@
-{{#unless (and (not this.issue) @isReadOnly)}}
+{{#unless (and (not this.issue) (not @isLoading) @isReadOnly)}}
   <div
     class="jira-widget relative flex min-h-[36px] w-full items-start"
     ...attributes
@@ -116,7 +116,7 @@
               <:anchor as |dd|>
                 <dd.ToggleAction
                   data-test-jira-overflow-button
-                  class="quarternary-button relative ml-1 grid h-6 w-6 shrink-0 place-items-center items-center p-0
+                  class="quarternary-button relative grid h-6 w-6 shrink-0 place-items-center items-center p-0
                     {{if dd.contentIsShown 'open'}}"
                 >
                   <FlightIcon @name="more-vertical" />
