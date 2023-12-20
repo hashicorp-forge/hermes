@@ -7,3 +7,10 @@
     @apply border-color-border-strong bg-color-foreground-high-contrast;
   }
 }
+
+.quarternary-input-button {
+  &:hover,
+  &:focus-visible {
+    @apply rounded-button-md shadow-surface-low;
+  }
+}

@@ -16,7 +16,7 @@
           {{if @isNewProjectForm 'min-h-[24px] items-center'}}"
       >
 
-        {{#unless @isNewProjectForm}}
+        {{#unless (or (not this.issue) @isNewProjectForm)}}
           <div
             data-test-jira-icon
             class="pointer-events-none relative z-10 mr-3 flex h-6 items-center"
@@ -165,7 +165,7 @@
                     placeholder={{if
                       @isNewProjectForm
                       "Search issues..."
-                      "Add Jira issue"
+                      "Add Jira issue..."
                     }}
                     class="jira-input relative"
                     @type="search"
@@ -174,7 +174,7 @@
                   <Action
                     data-test-add-jira-button
                     disabled={{@isDisabled}}
-                    class="absolute flex h-full w-full items-center gap-2 rounded-button-md px-2 text-color-foreground-faint hover:bg-color-surface-interactive-hover"
+                    class="quarternary-input-button absolute flex h-full w-auto items-center gap-2 text-color-foreground-faint"
                     {{on "click" this.showInput}}
                   >
                     <FlightIcon @name="search" />

@@ -12,6 +12,10 @@
   .click-area {
     @apply absolute -top-1.5 -left-2.5 -bottom-2 -right-2 hidden rounded-button-md bg-color-page-primary shadow-surface-low;
   }
+
+  .quarternary-input-button {
+    @apply py-0 pl-[8px] pr-[12px];
+  }
 }
 
 .attached-jira-issue {

@@ -6,16 +6,29 @@
       &:hover,
       &:focus-visible,
       &:focus {
-        @apply bg-color-surface-interactive-hover;
+        @apply bg-color-page-primary shadow-surface-low;
       }
     }
 
     .edit-affordance {
       &.gray {
         &::before {
-          @apply from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
+          @apply from-color-page-primary via-color-page-primary to-transparent;
         }
       }
+    }
+
+    .edit-overlay-affordance::before {
+      @apply hidden;
+    }
+
+    .edit-overlay-affordance {
+      @apply bg-red-200;
+    }
+
+    textarea:focus,
+    .edit-overlay-affordance {
+      @apply shadow-2xl shadow-color-page-primary;
     }
   }
 
