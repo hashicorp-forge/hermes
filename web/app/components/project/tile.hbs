@@ -21,9 +21,7 @@
       </p>
     {{/if}}
 
-    <div
-      class="absolute bottom-0 left-0 flex w-full items-center justify-between"
-    >
+    <div class="absolute bottom-0 left-0 flex w-full items-center gap-2.5">
       {{#if @project.products}}
         <ul class="flex gap-px">
           {{#each @project.products as |product|}}
@@ -34,18 +32,33 @@
         </ul>
       {{/if}}
 
-      {{#if @project.jiraIssue}}
-        <div class="flex items-center gap-1.5">
-          <span data-test-jira-type>
-            {{@project.jiraIssue.issueType}}
-          </span>
-          <span
-            data-test-jira-key
-            class="text-body-100 text-color-foreground-faint
-              {{if (eq @project.jiraIssue.status 'Done') 'line-through'}}"
-          >
-            {{@project.jiraIssue.key}}
-          </span>
+      {{#if (or this.jiraIssue this.fetchJiraIssue.isRunning)}}
+        <div
+          class="flex items-center gap-1.5
+            {{if this.jiraIssue 'fade-in-forwards'}}"
+        >
+          <div class="flex h-4 w-4">
+            {{#if this.jiraIssue}}
+              <img
+                data-test-issue-type-image
+                alt={{this.jiraIssue.issueType}}
+                src={{this.jiraIssue.issueTypeImage}}
+                height="16"
+                width="16"
+              />
+            {{else}}
+              <FlightIcon @name="loading" />
+            {{/if}}
+          </div>
+          {{#if this.jiraIssue}}
+            <span
+              data-test-jira-key
+              class="text-body-100 text-color-foreground-faint
+                {{if this.jiraIssueIsClosed 'line-through'}}"
+            >
+              {{this.jiraIssue.key}}
+            </span>
+          {{/if}}
         </div>
       {{/if}}
 
