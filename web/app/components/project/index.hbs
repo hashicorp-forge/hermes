@@ -79,6 +79,7 @@
       @placeholder="Add project title"
       @onSave={{this.saveTitle}}
       @isRequired={{true}}
+      @isSaving={{this.titleIsSaving}}
     />
   </div>
 
@@ -90,6 +91,7 @@
       @value="{{this.description}}"
       @onSave={{this.saveDescription}}
       @placeholder="Add a description"
+      @isSaving={{this.descriptionIsSaving}}
     />
   </div>
 </div>
