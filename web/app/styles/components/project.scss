@@ -78,7 +78,7 @@
 
     .overflow-button-container {
       @apply absolute right-1 top-1 z-10 h-[calc(100%-16px)] items-start;
-      @apply from-color-page-faint;
+      @apply bg-none;
     }
   }
 }
