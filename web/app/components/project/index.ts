@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -327,28 +327,30 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
-  protected saveProjectInfo = task(async (key: string, newValue?: string) => {
-    try {
-      const valueToSave = { [key]: newValue };
+  protected saveProjectInfo = restartableTask(
+    async (key: string, newValue?: string) => {
+      try {
+        const valueToSave = { [key]: newValue };
 
-      const savePromise = this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify(valueToSave),
-        },
-      );
-      await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
-    } catch (e) {
-      this.flashMessages.critical((e as any).message, {
-        title: "Unable to save",
-        timeout: FLASH_MESSAGES_LONG_TIMEOUT,
-      });
-    } finally {
-      this.titleIsSaving = false;
-      this.descriptionIsSaving = false;
-    }
-  });
+        const savePromise = this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(valueToSave),
+          },
+        );
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
+      } catch (e) {
+        this.flashMessages.critical((e as any).message, {
+          title: "Unable to save",
+          timeout: FLASH_MESSAGES_LONG_TIMEOUT,
+        });
+      } finally {
+        this.titleIsSaving = false;
+        this.descriptionIsSaving = false;
+      }
+    },
+  );
 
   /**
    * The task to load a Jira issue from an ID.
