@@ -40,6 +40,15 @@
   }
 }
 
+@keyframes slideRight {
+  from {
+    transform: translateX(var(--slideRightFrom, -1.5px));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @keyframes slideDownXs {
   from {
     transform: translateY(-1.5px);

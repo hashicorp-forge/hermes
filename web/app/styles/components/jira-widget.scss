@@ -14,7 +14,17 @@
   }
 
   .quarternary-input-button {
-    @apply py-0 pl-[8px] pr-[12px];
+    @apply py-0 pl-[8px] pr-[14px];
+  }
+
+  .jira-input {
+    // we use a custom search icon for this
+    @apply bg-none;
+  }
+
+  .search-input-icon {
+    --scaleInFrom: 0.75;
+    animation: scaleIn 600ms cubic-bezier(0, 1, 0.5, 1) forwards;
   }
 }
 
