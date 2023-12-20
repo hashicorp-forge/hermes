@@ -99,6 +99,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * Whether the project is in the "active" state.
+   * Determines if project metadata is editable.
+   */
+  protected get projectIsActive() {
+    return this.status === ProjectStatus.Active;
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
