@@ -108,6 +108,8 @@ const ACTIVE_STATUS_ACTION = "[data-test-status-action='active']";
 const COMPLETED_STATUS_ACTION = "[data-test-status-action='completed']";
 const ARCHIVED_STATUS_ACTION = "[data-test-status-action='archived']";
 
+const SAVING_SPINNER = "[data-test-saving-spinner]";
+
 interface AuthenticatedProjectsProjectRouteTestContext
   extends MirageTestContext {}
 
@@ -284,7 +286,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(TITLE_BUTTON);
     await fillIn(TITLE_INPUT, "New Project Title");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${TITLE} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(TITLE).hasText("New Project Title");
 
@@ -300,7 +310,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(DESCRIPTION_BUTTON);
     await fillIn(DESCRIPTION_INPUT, "Foo");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${DESCRIPTION} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(DESCRIPTION).hasText("Foo");
 

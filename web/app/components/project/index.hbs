@@ -80,6 +80,7 @@
       @onSave={{this.saveTitle}}
       @isReadOnly={{not this.projectIsActive}}
       @isRequired={{true}}
+      @isSaving={{this.titleIsSaving}}
     />
   </div>
   {{#if (or this.projectIsActive this.description)}}
