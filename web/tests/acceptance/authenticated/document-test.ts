@@ -9,7 +9,6 @@ import {
   triggerKeyEvent,
   visit,
   waitFor,
-  waitUntil,
 } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
@@ -52,6 +51,10 @@ const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
 const APPROVERS_SELECTOR = "[data-test-document-approvers]";
 const APPROVED_BADGE_SELECTOR = "[data-test-person-approved-badge]";
 const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
+const PRODUCT_SELECT_PRODUCT_NAME = "[data-test-product-value]";
+const POPOVER = "[data-test-x-dropdown-list-content]";
+const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]`;
+const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
 
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 
@@ -176,36 +179,34 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit(`/document/${docID}?draft=true`);
 
     const productSelectSelector = "[data-test-product-select]";
-    const productSelectTriggerSelector = "[data-test-badge-dropdown-trigger]";
-    const productSelectDropdownItemSelector =
-      "[data-test-product-select-badge-dropdown-item]";
 
     assert
       .dom(productSelectSelector)
-      .exists("drafts show a product select element")
+      .exists("drafts show a product select element");
+
+    assert
+      .dom(PRODUCT_SELECT_PRODUCT_NAME)
       .hasText(initialProductName, "The document product is selected");
 
-    await click(productSelectTriggerSelector);
-    const options = findAll(productSelectDropdownItemSelector);
+    await click(TOGGLE_SELECT);
+    const options = findAll(PRODUCT_SELECT_DROPDOWN_ITEM);
 
-    const expectedProducts = [
-      "Test Product 0",
-      "Test Product 1",
-      "Test Product 2",
-    ];
+    const expectedProducts = ["TP0", "TP1", "TP2"];
     options.forEach((option: Element, index: number) => {
       assert.equal(
-        option.querySelector("span")?.textContent?.trim(),
+        option
+          .querySelector("[data-test-product-select-item-abbreviation]")
+          ?.textContent?.trim(),
         expectedProducts[index],
         "the product list item is correct",
       );
     });
 
-    await click(productSelectDropdownItemSelector);
+    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
 
     assert
       .dom(productSelectSelector)
-      .hasText(
+      .containsText(
         "Test Product 0",
         "The document product is updated to the selected product",
       );
@@ -707,13 +708,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Bar");
+    assert.dom(PRODUCT_SELECT_SELECTOR).containsText("Bar");
 
     await click(`${PRODUCT_SELECT_SELECTOR} button`);
 
-    await click(`[data-test-product-select-badge-dropdown-item]`);
+    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).hasText("Foo");
+    assert.dom(PRODUCT_SELECT_SELECTOR).containsText("Foo");
 
     // confirm with the back end
 

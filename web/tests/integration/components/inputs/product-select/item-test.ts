@@ -5,10 +5,11 @@ import { render } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 
-const VALUE = "[data-test-selected-value]";
+const VALUE = "[data-test-product-value]";
 const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
-const PRODUCT_ICON = "[data-test-product-icon]";
+const PRODUCT_AVATAR = "[data-test-product-avatar]";
 const CHECK = "[data-test-check]";
+const FOLDER_ICON = "[data-test-icon='folder']";
 
 interface InputsProductSelectItemContext extends MirageTestContext {
   product: string;
@@ -33,28 +34,21 @@ module(
       />
     `);
 
-      assert
-        .dom(PRODUCT_ICON)
-        .hasAttribute(
-          "data-test-icon",
-          "vault",
-          "the correct product icon is shown",
-        );
+      assert.dom(PRODUCT_AVATAR).exists();
+      assert.dom(FOLDER_ICON).doesNotExist();
 
       assert.dom(VALUE).hasText("Vault", "the product name is rendered");
       assert.dom(ABBREVIATION).doesNotExist("no abbreviation specified");
       assert.dom(CHECK).doesNotExist("check icon only rendered when selected");
 
-      this.set("product", "Engineering");
       this.set("isSelected", true);
 
-      assert
-        .dom(PRODUCT_ICON)
-        .hasAttribute(
-          "data-test-icon",
-          "folder",
-          "the correct product icon is shown",
-        );
+      assert.dom(CHECK).exists();
+
+      this.set("product", undefined);
+
+      assert.dom(PRODUCT_AVATAR).doesNotExist();
+      assert.dom(FOLDER_ICON).exists();
     });
 
     test("it shows an empty state when no product is provided", async function (this: InputsProductSelectItemContext, assert) {

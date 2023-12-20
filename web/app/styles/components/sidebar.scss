@@ -19,6 +19,22 @@
 
   .editable-field-container {
     @apply mt-[3px];
+
+    &.select-input {
+      @apply -mx-[8px] mt-[-8px] -mb-[8px];
+
+      .x-dropdown-list-toggle-select {
+        @apply items-start border-color-border-strong bg-color-page-primary py-[7px] px-[6px] shadow-none;
+
+        &:not(:hover, :focus, :focus-visible, .open) {
+          @apply border-transparent bg-transparent;
+
+          .flight-icon-caret {
+            @apply hidden;
+          }
+        }
+      }
+    }
   }
 
   .editable-field {
@@ -78,10 +94,6 @@
 
   .sidebar-body {
     @apply relative h-full overflow-y-scroll;
-
-    .product-icon-badge {
-      @apply top-0 h-7 w-9 rounded-l-none;
-    }
 
     .sidebar-body-container {
       @apply space-y-8 pt-14 pb-10 pl-7 pr-3;
