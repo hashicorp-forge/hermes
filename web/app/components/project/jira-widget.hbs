@@ -11,8 +11,9 @@
         }}"
     >
       <div
-        class="flex w-full
-          {{if @isNewProjectForm 'relative min-h-[24px] items-center'}}"
+        class="relative flex
+          {{unless this.issue 'w-full'}}
+          {{if @isNewProjectForm 'min-h-[24px] items-center'}}"
       >
 
         {{#unless @isNewProjectForm}}

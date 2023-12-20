@@ -79,20 +79,19 @@
       />
 
     </div>
-    {{#if (eq this.status "completed")}}
+
+    <div
+      class="Xhidden absolute -right-6 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-[52.5%]"
+    >
+      <FlightIcon
+        @name={{get-project-status-icon this.status}}
+        @size="24"
+        class="h-full w-full text-color-palette-neutral-300 opacity-80"
+      />
       <div
-        class="Xhidden absolute -right-6 top-1/2 -z-10 h-[500px] w-[500px] -translate-y-[52.5%]"
-      >
-        <FlightIcon
-          @name={{get-project-status-icon this.status}}
-          @size="24"
-          class="h-full w-full text-color-palette-neutral-300 opacity-80"
-        />
-        <div
-          class="absolute top-0 left-0 h-full w-full bg-gradient-to-tr from-white to-white/0"
-        />
-      </div>
-    {{/if}}
+        class="absolute top-0 left-0 h-full w-full bg-gradient-to-tr from-white to-white/0"
+      />
+    </div>
   </div>
   <div class="max-w-3xl">
 
@@ -175,10 +174,10 @@
           <h3 data-test-documents-header class="hermes-h4">
             Documents
           </h3>
-          <Hds::BadgeCount
+          {{!-- <Hds::BadgeCount
             data-test-document-count
             @text="{{this.hermesDocuments.length}}"
-          />
+          /> --}}
         </div>
         <ol data-test-document-list class="divided-list mt-3">
           {{#each this.hermesDocuments as |document|}}
@@ -208,10 +207,10 @@
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
-          <Hds::BadgeCount
+          {{!-- <Hds::BadgeCount
             data-test-external-link-count
             @text="{{this.externalLinks.length}}"
-          />
+          /> --}}
         </div>
         <ol data-test-external-link-list class="divided-list mt-5">
           {{#each this.externalLinks as |link i|}}
