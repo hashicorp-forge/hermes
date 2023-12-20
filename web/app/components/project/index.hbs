@@ -2,7 +2,7 @@
 
   <div class="project-header mt-1 flex w-full justify-between">
 
-    <div class="flex h-9 gap-1.5">
+    <div class="flex h-9 items-center gap-1.5">
       <div class="flex gap-2.5">
 
         {{! <span class="self-center text-color-foreground-faint">
@@ -75,8 +75,18 @@
       <CopyURLButton
         @isIconOnly={{true}}
         @url={{this.url}}
-        class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+        class="hds-button hds-button--color-secondary h-9 w-9 justify-center rounded-full border-color-border-strong p-0"
       />
+
+      {{!-- <span
+        class="ml-2.5 text-body-100 text-color-foreground-disabled"
+        data-test-modified-time
+      >
+        {{! if this has a completedTime or archivedTime, show a different label }}
+        Modified
+        {{! this doesn't update in real time }}
+        {{time-ago @project.modifiedTime}}
+      </span> --}}
 
     </div>
 
@@ -86,7 +96,7 @@
       <FlightIcon
         @name={{get-project-status-icon this.status}}
         @size="24"
-        class="h-full w-full text-color-palette-neutral-300 opacity-80"
+        class="h-full w-full text-color-palette-neutral-300 opacity-40"
       />
       <div
         class="absolute top-0 left-0 h-full w-full bg-gradient-to-tr from-white to-white/0"
@@ -122,9 +132,9 @@
     </div>
   </div>
 
-  {{#if this.jiraIsEnabled}}
-    {{! Jira }}
-    <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
+  <div class="mt-10 flex min-h-[8px] w-full max-w-3xl gap-2 px-2">
+    {{#if this.jiraIsEnabled}}
+      {{! Jira }}
       <Project::JiraWidget
         {{did-insert this.maybeLoadJiraInfo}}
         @issue={{this.jiraIssue}}
@@ -133,12 +143,12 @@
         @isLoading={{this.loadJiraIssue.isRunning}}
         @isReadOnly={{not (eq this.status "active")}}
       />
-    </div>
-  {{/if}}
+    {{/if}}
+  </div>
 </div>
 
 <div
-  class="relative mt-6 border-t border-t-color-border-primary bg-color-page-primary"
+  class="relative mt-4 border-t border-t-color-border-primary bg-color-page-primary"
 >
 
   {{#if (eq this.status "active")}}
@@ -271,19 +281,12 @@
       </div>
     {{/if}}
 
-    <div
-      class="mt-20 -mb-5 flex gap-[5px] text-body-100 text-color-foreground-faint"
-    >
+    <div class="mt-20 -mb-5 text-body-100 text-color-foreground-faint">
       <span data-test-created-time>
         Created
         {{time-ago @project.createdTime}}
         by
         {{@project.creator}}
-      </span>
-      <span class="opacity-50">|</span>
-      <span data-test-modified-time>
-        Last modified
-        {{time-ago @project.modifiedTime}}
       </span>
     </div>
   </div>
