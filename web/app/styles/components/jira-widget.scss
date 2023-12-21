@@ -17,10 +17,10 @@
       }
     }
   }
+}
 
-  .overflow-button-container {
-    @apply relative top-auto right-auto mr-1.5 ml-2 w-auto bg-none;
-  }
+.overflow-button-container {
+  @apply relative top-auto right-auto mr-1.5 ml-2 w-auto bg-none;
 }
 
 .add-jira-issue-button {
