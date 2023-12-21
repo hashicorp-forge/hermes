@@ -4,7 +4,6 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { JiraIssue, JiraPickerResult } from "hermes/types/project";
-import ConfigService from "hermes/services/config";
 import {
   TEST_JIRA_ISSUE_SUMMARY,
   setWebConfig,
@@ -28,6 +27,8 @@ const PICKER_DROPDOWN = "[data-test-jira-picker-dropdown]";
 const PICKER_RESULT = "[data-test-jira-picker-result]";
 const NO_MATCHES = "[data-test-no-matches]";
 const SEARCHING_ICON = "[data-test-related-resources-search-loading-icon]";
+const SEARCH_ICON = "[data-test-search-icon]";
+const PLUS_ICON = "[data-test-add-jira-button-plus]";
 
 interface Context extends MirageTestContext {
   contextIsForm: boolean;
@@ -126,7 +127,6 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       <div class="click-away"/>
     `);
 
-    assert.dom(JIRA_ICON).exists();
     assert.dom(ADD_JIRA_INPUT).doesNotExist();
     assert.dom(ADD_JIRA_BUTTON).exists();
 
@@ -443,5 +443,48 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await click(REMOVE_JIRA_BUTTON);
 
     assert.equal(count, 1, "the onRemove action was called");
+  });
+
+  test("the input icons animate as expected", async function (this: Context, assert) {
+    this.set("contextIsForm", false);
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @isNewProjectForm={{this.contextIsForm}} />
+      <div class="click-away"/>
+    `);
+
+    assert
+      .dom(PLUS_ICON)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the plus icon does not initially have the animated class",
+      );
+
+    await click(ADD_JIRA_BUTTON);
+
+    assert
+      .dom(SEARCH_ICON)
+      .hasClass(
+        "animated-icon",
+        "the search icon animates in when the input is shown",
+      );
+
+    await click(".click-away");
+
+    assert
+      .dom(PLUS_ICON)
+      .hasClass(
+        "animated-icon",
+        "the plus icon animates in when the input is hidden",
+      );
+
+    this.set("contextIsForm", true);
+
+    assert
+      .dom(SEARCH_ICON)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the search icon does not animate in the form context",
+      );
   });
 });

@@ -19,7 +19,7 @@
         {{#unless (or (not this.issue) @isNewProjectForm)}}
           <div
             data-test-jira-icon
-            class="pointer-events-none relative z-10 mr-3 flex h-6 items-center"
+            class="relative z-10 mr-3 flex h-6 items-center"
           >
             <div class="mr-3 flex shrink-0 gap-2">
               <FlightIcon @name="jira" />
@@ -34,16 +34,13 @@
           <ExternalLink
             data-test-jira-link
             href={{if @isNewProjectForm "" this.issue.url}}
-            class="{{if
+            class="mr-8
+              {{if
                 @isNewProjectForm
-                'pointer-events-none block'
+                'disabled pointer-events-none block'
                 'inline-flex'
               }}"
           >
-            {{! Click area }}
-            {{#unless @isNewProjectForm}}
-              <div class="click-area" />
-            {{/unless}}
 
             {{! Content }}
             <div class="attached-jira-issue {{if @isNewProjectForm 'pl-2.5'}}">
@@ -55,14 +52,16 @@
                 src="{{this.issueTypeImage}}"
                 class="h-4 w-4"
               />
-              <div class="w-full truncate text-color-foreground-faint">
+              <div
+                class="primary-text w-full truncate text-color-foreground-faint"
+              >
                 <span
                   data-test-jira-key
                   class={{if (eq this.issueStatus "done") "line-through"}}
                 >
                   {{this.issue.key}}
                 </span>
-                <span class="ml-0.5" data-test-jira-summary>
+                <span data-test-jira-summary>
                   {{this.issue.summary}}
                 </span>
               </div>
@@ -91,9 +90,8 @@
                 {{#if this.issueStatus}}
                   <div
                     data-test-jira-status
-                    class="jira-status-badge
-                      {{dasherize this.issueStatus}}
-                      rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
+                    class="{{dasherize this.issueStatus}}
+                      ignore-underline rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
                   >
                     {{this.issueStatus}}
                   </div>
@@ -101,39 +99,38 @@
               </div>
             {{/if}}
           </ExternalLink>
-          {{#unless @isReadOnly}}
-            <X::DropdownList
-              @items={{hash
-                unlink=(hash
-                  label="Remove Jira issue"
-                  icon="x-circle"
-                  action=(fn this.removeIssue)
-                )
-              }}
-              @placement="bottom-end"
-              @renderOut={{true}}
-            >
-              <:anchor as |dd|>
-                <dd.ToggleAction
-                  data-test-jira-overflow-button
-                  class="quarternary-button relative grid h-6 w-6 shrink-0 place-items-center items-center p-0
-                    {{if dd.contentIsShown 'open'}}"
-                >
-                  <FlightIcon @name="more-vertical" />
-                </dd.ToggleAction>
-              </:anchor>
-              <:item as |dd|>
-                <dd.Action
-                  data-test-remove-button
-                  {{on "click" dd.attrs.action}}
-                  class="flex items-center gap-2"
-                >
-                  <FlightIcon @name={{dd.attrs.icon}} />
-                  {{dd.attrs.label}}
-                </dd.Action>
-              </:item>
-            </X::DropdownList>
-          {{/unless}}
+
+          <X::DropdownList
+            @items={{hash
+              unlink=(hash
+                label="Remove Jira issue"
+                icon="x-circle"
+                action=(fn this.removeIssue)
+              )
+            }}
+            @placement="bottom-end"
+            @renderOut={{true}}
+          >
+            <:anchor as |dd|>
+              <dd.ToggleAction
+                data-test-jira-overflow-button
+                class="quarternary-button absolute right-0 top-0 grid h-6 w-6 place-items-center items-center p-0
+                  {{if dd.contentIsShown 'open'}}"
+              >
+                <FlightIcon @name="more-vertical" />
+              </dd.ToggleAction>
+            </:anchor>
+            <:item as |dd|>
+              <dd.Action
+                data-test-remove-button
+                {{on "click" dd.attrs.action}}
+                class="flex items-center gap-2"
+              >
+                <FlightIcon @name={{dd.attrs.icon}} />
+                {{dd.attrs.label}}
+              </dd.Action>
+            </:item>
+          </X::DropdownList>
         {{else if @isLoading}}
           <FlightIcon data-test-jira-loading @name="loading" class="mt-[3px]" />
         {{else}}
@@ -144,12 +141,13 @@
             @items={{this.results}}
             @matchAnchorWidth={{true}}
             {{will-destroy this.onDropdownClose}}
+            class="theme--neutral"
             data-test-jira-picker-dropdown
           >
             <:anchor as |dd|>
               <div
                 class="relative h-9 w-full
-                  {{unless @isNewProjectForm '-mt-1.5 -ml-1.5'}}"
+                  {{unless @isNewProjectForm 'X-mt-1.5 -ml-1.5'}}"
                 {{did-insert (fn this.registerDropdown dd)}}
                 {{did-insert dd.registerAnchor}}
               >
@@ -165,32 +163,31 @@
                     placeholder={{if
                       @isNewProjectForm
                       "Search issues..."
-                      "Add Jira issue..."
+                      "Add Jira issue"
                     }}
                     class="jira-input relative"
                     @type="search"
                   />
-                  {{! animate the search icon  }}
+                  {{! search icon  }}
                   <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
                     <FlightIcon
+                      data-test-search-icon
                       @name="search"
                       class="text-color-foreground-faint
-                        {{unless @isNewProjectForm 'search-input-icon'}}"
+                        {{unless @isNewProjectForm 'animated-icon'}}"
                     />
                   </div>
                 {{else}}
                   <Action
                     data-test-add-jira-button
                     disabled={{@isDisabled}}
-                    class="quarternary-input-button absolute flex h-full w-auto items-center gap-2 text-body-200 text-color-foreground-faint"
+                    class="add-jira-issue-button absolute flex h-full w-auto items-center gap-2 text-body-200 text-color-foreground-faint"
                     {{on "click" this.showInput}}
                   >
                     <FlightIcon
+                      data-test-add-jira-button-plus
                       @name="plus"
-                      class={{if
-                        this.plusIconShouldAnimate
-                        "search-input-icon"
-                      }}
+                      class={{if this.plusIconShouldAnimate "animated-icon"}}
                     />
                     Add Jira issue...
                   </Action>

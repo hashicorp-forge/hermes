@@ -1,30 +1,30 @@
 .jira-widget {
-  > .inner {
-    &:hover,
-    &:focus,
-    &:focus-within {
-      .click-area {
-        @apply block;
-      }
-    }
-  }
-
-  .click-area {
-    @apply absolute -top-1.5 -left-2.5 -bottom-2 -right-2 hidden rounded-button-md bg-color-page-primary shadow-surface-low;
-  }
-
-  .quarternary-input-button {
-    @apply py-0 pl-[8px] pr-[14px];
-  }
-
   .jira-input {
     // we use a custom search icon for this
     @apply bg-none;
   }
 
-  .search-input-icon {
+  .animated-icon {
     --scaleInFrom: 0.5;
     animation: scaleIn 450ms cubic-bezier(0, 1, 0.5, 1) forwards;
+  }
+
+  a:not(.disabled) {
+    &:hover,
+    &:focus {
+      .primary-text {
+        @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
+      }
+    }
+  }
+}
+
+.add-jira-issue-button {
+  @apply py-0 pl-[8px] pr-[14px];
+
+  &:hover,
+  &:focus {
+    @apply rounded-button-md shadow-surface-low;
   }
 }
 
