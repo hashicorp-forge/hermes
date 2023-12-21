@@ -18,6 +18,7 @@ interface ProjectJiraWidgetComponentSignature {
     onIssueRemove?: () => void;
     isDisabled?: boolean;
     isLoading?: boolean;
+    isReadOnly?: boolean;
     /**
      * Whether the component is being used in a form context.
      * If true, removes the leading Jira icon and shows the input, autofocused,

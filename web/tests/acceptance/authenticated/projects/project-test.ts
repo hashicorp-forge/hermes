@@ -67,7 +67,7 @@ const EXTERNAL_LINK_COUNT = "[data-test-external-link-count]";
 const EXTERNAL_LINK_LIST = "[data-test-external-link-list]";
 
 const DOCUMENT_LIST_ITEM = "[data-test-document-list-item]";
-const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";
+const DOCUMENT_OVERFLOW_MENU_BUTTON = `${DOCUMENT_LIST_ITEM} [data-test-overflow-menu-button]`;
 const OVERFLOW_MENU_EDIT = "[data-test-overflow-menu-action='edit']";
 const OVERFLOW_MENU_REMOVE = "[data-test-overflow-menu-action='remove']";
 
@@ -89,12 +89,13 @@ const EXTERNAL_LINK = "[data-test-related-link]";
 const STATUS_TOGGLE = "[data-test-project-status-toggle]";
 const COPY_URL_BUTTON = "[data-test-copy-url-button]";
 
+const JIRA_WIDGET = "[data-test-jira-widget]";
 const ADD_JIRA_BUTTON = "[data-test-add-jira-button]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";
 const JIRA_PICKER_RESULT = "[data-test-jira-picker-result]";
 const JIRA_ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 
-const JIRA_OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
+const JIRA_OVERFLOW_BUTTON = `${JIRA_WIDGET} [data-test-overflow-menu-button]`;
 const JIRA_LINK = "[data-test-jira-link]";
 const JIRA_PRIORITY_ICON = "[data-test-jira-priority-icon]";
 const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
@@ -102,7 +103,7 @@ const JIRA_STATUS = "[data-test-jira-status]";
 const JIRA_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const JIRA_KEY = "[data-test-jira-key]";
 const JIRA_SUMMARY = "[data-test-jira-summary]";
-const JIRA_REMOVE_BUTTON = "[data-test-remove-button]";
+const JIRA_REMOVE_BUTTON = "[data-test-overflow-menu-action='remove']";
 
 const ACTIVE_STATUS_ACTION = "[data-test-status-action='active']";
 const COMPLETED_STATUS_ACTION = "[data-test-status-action='completed']";
@@ -413,7 +414,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(DOCUMENT_LIST_ITEM).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_REMOVE);
 
     assert.dom(DOCUMENT_LIST_ITEM).doesNotExist();
@@ -428,19 +429,19 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await visit("/projects/1");
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
 
     await click(STATUS_TOGGLE);
     await click(COMPLETED_STATUS_ACTION);
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ARCHIVED_STATUS_ACTION);
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
   });
 
   test("you can add external links to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -500,7 +501,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_EDIT);
 
     const linkTitle = "Bar";
@@ -545,7 +546,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_REMOVE);
 
     assert.dom(EXTERNAL_LINK).doesNotExist();
@@ -564,19 +565,19 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await visit("/projects/1");
 
     assert.dom(EXTERNAL_LINK).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
 
     await click(STATUS_TOGGLE);
     await click(COMPLETED_STATUS_ACTION);
 
     assert.dom(EXTERNAL_LINK).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ARCHIVED_STATUS_ACTION);
 
     assert.dom(EXTERNAL_LINK).exists();
-    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
   });
 
   test("you can't save an empty project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
