@@ -1,14 +1,7 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import {
-  click,
-  fillIn,
-  rerender,
-  settled,
-  visit,
-  waitFor,
-} from "@ember/test-helpers";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
