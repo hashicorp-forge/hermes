@@ -1,5 +1,5 @@
 <div
-  class="jira-widget relative flex min-h-[36px] w-full max-w-3xl items-start"
+  class="jira-widget relative flex h-[36px] w-full max-w-3xl items-center"
   ...attributes
 >
   <div
@@ -10,11 +10,12 @@
       }}"
   >
     <div
-      class="flex w-full
-        {{if @isNewProjectForm 'relative min-h-[24px] items-center'}}"
+      class="relative flex
+        {{unless this.issue 'w-full'}}
+        {{if @isNewProjectForm 'min-h-[24px] items-center'}}"
     >
 
-      {{#unless @isNewProjectForm}}
+      {{#unless (or (not this.issue) @isNewProjectForm)}}
         <div
           data-test-jira-icon
           class="relative z-10 mr-3 flex h-6 items-center"
@@ -33,12 +34,12 @@
           data-test-jira-link
           href={{if @isNewProjectForm "" this.issue.url}}
           class="mr-8
-            {{if @isNewProjectForm 'pointer-events-none block' 'inline-flex'}}"
+            {{if
+              @isNewProjectForm
+              'disabled pointer-events-none block'
+              'inline-flex'
+            }}"
         >
-          {{! Click area }}
-          {{#unless @isNewProjectForm}}
-            <div class="click-area" />
-          {{/unless}}
 
           {{! Content }}
           <div class="attached-jira-issue {{if @isNewProjectForm 'pl-2.5'}}">
@@ -48,11 +49,10 @@
               height="16"
               alt="{{this.issueType}}"
               src="{{this.issueTypeImage}}"
-              class="mt-0.5 h-4 w-4"
+              class="h-4 w-4"
             />
             <div
-              class="{{if @isNewProjectForm 'truncate' 'line-clamp-2'}}
-                w-full text-color-foreground-faint"
+              class="primary-text w-full truncate text-color-foreground-faint"
             >
               <span
                 data-test-jira-key
@@ -60,7 +60,7 @@
               >
                 {{this.issue.key}}
               </span>
-              <span class="ml-0.5" data-test-jira-summary>
+              <span data-test-jira-summary>
                 {{this.issue.summary}}
               </span>
             </div>
@@ -89,8 +89,7 @@
               {{#if this.issueStatus}}
                 <div
                   data-test-jira-status
-                  class="jira-status-badge
-                    {{dasherize this.issueStatus}}
+                  class="{{dasherize this.issueStatus}}
                     rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
                 >
                   {{this.issueStatus}}
@@ -141,12 +140,13 @@
           @items={{this.results}}
           @matchAnchorWidth={{true}}
           {{will-destroy this.onDropdownClose}}
+          class="theme--neutral"
           data-test-jira-picker-dropdown
         >
           <:anchor as |dd|>
             <div
               class="relative h-9 w-full
-                {{unless @isNewProjectForm '-mt-1.5 -ml-1.5'}}"
+                {{unless @isNewProjectForm 'X-mt-1.5 -ml-1.5'}}"
               {{did-insert (fn this.registerDropdown dd)}}
               {{did-insert dd.registerAnchor}}
             >
@@ -167,14 +167,27 @@
                   class="jira-input relative"
                   @type="search"
                 />
+                {{! search icon  }}
+                <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
+                  <FlightIcon
+                    data-test-search-icon
+                    @name="search"
+                    class="text-color-foreground-faint
+                      {{unless @isNewProjectForm 'animated-icon'}}"
+                  />
+                </div>
               {{else}}
                 <Action
                   data-test-add-jira-button
                   disabled={{@isDisabled}}
-                  class="absolute flex h-full w-full items-center gap-2 rounded-button-md px-2 text-color-foreground-faint hover:bg-color-surface-interactive-hover"
+                  class="add-jira-issue-button absolute flex h-full w-auto items-center gap-2 text-body-200 text-color-foreground-faint"
                   {{on "click" this.showInput}}
                 >
-                  <FlightIcon @name="search" />
+                  <FlightIcon
+                    data-test-add-jira-button-plus
+                    @name="plus"
+                    class={{if this.plusIconShouldAnimate "animated-icon"}}
+                  />
                   Add Jira issue...
                 </Action>
               {{/if}}
