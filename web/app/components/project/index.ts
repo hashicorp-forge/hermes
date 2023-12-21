@@ -21,6 +21,21 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
+import { TransitionContext, wait } from "ember-animated/.";
+import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
+import move from "ember-animated/motions/move";
+import { Resize } from "ember-animated/motions/resize";
+import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+
+class ResizeProject extends Resize {
+  *animate() {
+    this.opts.duration = Ember.testing ? 0 : 500;
+    this.opts.easing = easeOutExpo;
+    yield wait(100);
+    yield* super.animate();
+  }
+}
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -38,6 +53,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Used in the status dropdown.
    */
   protected statuses = projectStatusObjects;
+
+  protected motion = ResizeProject;
 
   /**
    * Locally tracked project attributes.
@@ -308,6 +325,33 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = false;
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
+  }
+
+  @action plusButtonTransitionRules({ firstTime }: { firstTime: boolean }) {
+    if (firstTime) {
+      return emptyTransition;
+    }
+    return this.plusButtonTransition;
+  }
+
+  *plusButtonTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(0, 100);
+      void move(sprite, { duration: 500 });
+      void fadeOut(sprite, { duration: 500 });
+    }
+
+    yield wait(500);
+
+    for (let sprite of insertedSprites) {
+      sprite.startTranslatedBy(0, 100);
+      void move(sprite, { duration: 500 });
+      void fadeIn(sprite, { duration: 250 });
+    }
   }
 
   /**

@@ -64,52 +64,55 @@
 
   </div>
 </div>
-<div class="relative z-20 max-w-3xl">
 
-  {{! Title }}
-  <div class="mt-7 flex">
-    <EditableField
-      class="project-title text-display-600"
-      data-test-project-title
-      @value={{this.title}}
-      @tag="h1"
-      @placeholder="Add project title"
-      @buttonSize="medium"
-      @onSave={{this.saveTitle}}
-      @isReadOnly={{not this.projectIsActive}}
-      @isRequired={{true}}
-      @isSaving={{this.titleIsSaving}}
-    />
-  </div>
-  {{#if (or this.projectIsActive this.description)}}
-    {{! Description }}
-    <div class="flex">
+<AnimatedContainer @motion={{this.motion}} class="">
+  <div class="relative z-20 max-w-3xl">
+
+    {{! Title }}
+    <div class="mt-7 flex">
       <EditableField
-        class="project-description"
-        data-test-project-description
-        @value="{{this.description}}"
-        @onSave={{this.saveDescription}}
-        @isReadOnly={{not this.projectIsActive}}
-        @isSaving={{this.descriptionIsSaving}}
-        @placeholder="Add a description"
+        class="project-title text-display-600"
+        data-test-project-title
+        @value={{this.title}}
+        @tag="h1"
+        @placeholder="Add project title"
         @buttonSize="medium"
+        @onSave={{this.saveTitle}}
+        @isReadOnly={{not this.projectIsActive}}
+        @isRequired={{true}}
+        @isSaving={{this.titleIsSaving}}
+      />
+    </div>
+    {{#animated-if (or this.projectIsActive this.description)}}
+      {{! Description }}
+      <div class="flex">
+        <EditableField
+          class="project-description"
+          data-test-project-description
+          @value="{{this.description}}"
+          @onSave={{this.saveDescription}}
+          @isReadOnly={{not this.projectIsActive}}
+          @isSaving={{this.descriptionIsSaving}}
+          @placeholder="Add a description"
+          @buttonSize="medium"
+        />
+      </div>
+    {{/animated-if}}
+  </div>
+
+  {{#if this.jiraIsEnabled}}
+    {{! Jira }}
+    <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
+      <Project::JiraWidget
+        {{did-insert this.maybeLoadJiraInfo}}
+        @issue={{this.jiraIssue}}
+        @onIssueRemove={{this.removeJiraIssue}}
+        @onIssueSelect={{this.addJiraIssue}}
+        @isLoading={{this.loadJiraIssue.isRunning}}
       />
     </div>
   {{/if}}
-</div>
-
-{{#if this.jiraIsEnabled}}
-  {{! Jira }}
-  <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
-    <Project::JiraWidget
-      {{did-insert this.maybeLoadJiraInfo}}
-      @issue={{this.jiraIssue}}
-      @onIssueRemove={{this.removeJiraIssue}}
-      @onIssueSelect={{this.addJiraIssue}}
-      @isLoading={{this.loadJiraIssue.isRunning}}
-    />
-  </div>
-{{/if}}
+</AnimatedContainer>
 
 <div class="relative mt-6 border-t border-t-color-border-primary">
 
@@ -120,16 +123,23 @@
     @addResource={{this.addResource}}
   >
     <:header as |rr|>
-      <div class="absolute right-14 top-0 -translate-y-1/2">
-        <Action
-          disabled={{not this.projectIsActive}}
-          data-test-add-project-resource-button
-          {{on "click" rr.showModal}}
-          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
-        >
-          <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-        </Action>
-      </div>
+      {{#animated-if
+        this.projectIsActive
+        rules=this.plusButtonTransitionRules
+        initialInsertion=true
+        finalRemoval=true
+      }}
+        <div class="absolute right-14 top-0 -translate-y-1/2">
+          <Action
+            disabled={{not this.projectIsActive}}
+            data-test-add-project-resource-button
+            {{on "click" rr.showModal}}
+            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+          >
+            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+          </Action>
+        </div>
+      {{/animated-if}}
     </:header>
   </RelatedResources>
 
