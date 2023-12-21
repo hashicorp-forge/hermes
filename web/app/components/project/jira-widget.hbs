@@ -34,12 +34,12 @@
           data-test-jira-link
           href={{if @isNewProjectForm "" this.issue.url}}
           class="mr-8
-            {{if @isNewProjectForm 'pointer-events-none block' 'inline-flex'}}"
+            {{if
+              @isNewProjectForm
+              'disabled pointer-events-none block'
+              'inline-flex'
+            }}"
         >
-          {{! Click area }}
-          {{#unless @isNewProjectForm}}
-            <div class="click-area" />
-          {{/unless}}
 
           {{! Content }}
           <div class="attached-jira-issue {{if @isNewProjectForm 'pl-2.5'}}">
@@ -51,14 +51,16 @@
               src="{{this.issueTypeImage}}"
               class="h-4 w-4"
             />
-            <div class="w-full truncate text-color-foreground-faint">
+            <div
+              class="primary-text w-full truncate text-color-foreground-faint"
+            >
               <span
                 data-test-jira-key
                 class={{if (eq this.issueStatus "done") "line-through"}}
               >
                 {{this.issue.key}}
               </span>
-              <span class="ml-0.5" data-test-jira-summary>
+              <span data-test-jira-summary>
                 {{this.issue.summary}}
               </span>
             </div>
@@ -87,9 +89,8 @@
               {{#if this.issueStatus}}
                 <div
                   data-test-jira-status
-                  class="jira-status-badge
-                    {{dasherize this.issueStatus}}
-                    rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
+                  class="{{dasherize this.issueStatus}}
+                    ignore-underline rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
                 >
                   {{this.issueStatus}}
                 </div>
@@ -171,7 +172,7 @@
                   <FlightIcon
                     @name="search"
                     class="text-color-foreground-faint
-                      {{unless @isNewProjectForm 'search-input-icon'}}"
+                      {{unless @isNewProjectForm 'animated-icon'}}"
                   />
                 </div>
               {{else}}
@@ -183,7 +184,7 @@
                 >
                   <FlightIcon
                     @name="plus"
-                    class={{if this.plusIconShouldAnimate "search-input-icon"}}
+                    class={{if this.plusIconShouldAnimate "animated-icon"}}
                   />
                   Add Jira issue...
                 </Action>

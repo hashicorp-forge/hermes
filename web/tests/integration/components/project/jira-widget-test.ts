@@ -4,7 +4,6 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { JiraIssue, JiraPickerResult } from "hermes/types/project";
-import ConfigService from "hermes/services/config";
 import {
   TEST_JIRA_ISSUE_SUMMARY,
   setWebConfig,
@@ -443,5 +442,48 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await click(REMOVE_JIRA_BUTTON);
 
     assert.equal(count, 1, "the onRemove action was called");
+  });
+
+  test("the input icons animate as expected", async function (this: Context, assert) {
+    this.set("contextIsForm", false);
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @isNewProjectForm={{this.contextIsForm}} />
+      <div class="click-away"/>
+    `);
+
+    assert
+      .dom(`${ADD_JIRA_BUTTON} .flight-icon`)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the plus icon does not initially have the animated class",
+      );
+
+    await click(ADD_JIRA_BUTTON);
+
+    assert
+      .dom(`${ADD_JIRA_INPUT} .flight-icon`)
+      .hasClass(
+        "animated-icon",
+        "the search icon animates in when the input is shown",
+      );
+
+    await click(".click-away");
+
+    assert
+      .dom(`${ADD_JIRA_BUTTON} .flight-icon`)
+      .hasClass(
+        "animated-icon",
+        "the plus icon animates in when the input is hidden",
+      );
+
+    this.set("contextIsForm", true);
+
+    assert
+      .dom(`${ADD_JIRA_INPUT} .flight-icon`)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the search icon does not animate in the form context",
+      );
   });
 });

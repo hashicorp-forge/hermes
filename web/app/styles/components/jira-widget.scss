@@ -1,26 +1,21 @@
 .jira-widget {
-  > .inner {
-    &:hover,
-    &:focus,
-    &:focus-within {
-      .click-area {
-        @apply block shadow-surface-low;
-      }
-    }
-  }
-
-  .click-area {
-    @apply absolute -top-1.5 -left-2.5 -bottom-[7px] -right-2 hidden rounded-button-md;
-  }
-
   .jira-input {
     // we use a custom search icon for this
     @apply bg-none;
   }
 
-  .search-input-icon {
+  .animated-icon {
     --scaleInFrom: 0.5;
     animation: scaleIn 450ms cubic-bezier(0, 1, 0.5, 1) forwards;
+  }
+
+  a:not(.disabled) {
+    &:hover,
+    &:focus {
+      .primary-text {
+        @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
+      }
+    }
   }
 }
 
