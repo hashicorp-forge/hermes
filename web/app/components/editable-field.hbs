@@ -47,7 +47,7 @@
       <div class="edit-overlay-affordance">
         <Hds::Button
           data-test-save-button
-          @size="small"
+          @size={{or @buttonSize "small"}}
           @text="Save"
           @icon="check"
           @isIconOnly={{true}}
@@ -58,7 +58,7 @@
           @text="Cancel"
           @icon="x"
           @isIconOnly={{true}}
-          @size="small"
+          @size={{or @buttonSize "small"}}
           @color="secondary"
           {{did-insert this.registerCancelButton}}
           {{on "click" this.disableAndRevertChanges}}
