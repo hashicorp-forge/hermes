@@ -2,14 +2,14 @@
   @items={{@items}}
   @renderOut={{true}}
   @placement="bottom-end"
-  @offset={{hash mainAxis=-3 crossAxis=-3}}
+  @offset={{or @offset (hash mainAxis=-3 crossAxis=-3)}}
   data-test-overflow-menu
   ...attributes
 >
   <:anchor as |dd|>
     <div
       class="overflow-button-container
-        {{if dd.contentIsShown 'visible' 'invisible'}}
+        {{if (or @isShown dd.contentIsShown) 'visible' 'invisible'}}
         "
     >
       <dd.ToggleAction
