@@ -174,17 +174,24 @@
                   <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
                     <FlightIcon
                       @name="search"
-                      class={{unless @isNewProjectForm "search-input-icon"}}
+                      class="text-color-foreground-faint
+                        {{unless @isNewProjectForm 'search-input-icon'}}"
                     />
                   </div>
                 {{else}}
                   <Action
                     data-test-add-jira-button
                     disabled={{@isDisabled}}
-                    class="quarternary-input-button absolute flex h-full w-auto items-center gap-2 text-color-foreground-faint"
+                    class="quarternary-input-button absolute flex h-full w-auto items-center gap-2 text-body-200 text-color-foreground-faint"
                     {{on "click" this.showInput}}
                   >
-                    <FlightIcon @name="plus" />
+                    <FlightIcon
+                      @name="plus"
+                      class={{if
+                        this.plusIconShouldAnimate
+                        "search-input-icon"
+                      }}
+                    />
                     Add Jira issue...
                   </Action>
                 {{/if}}

@@ -23,11 +23,11 @@
     }
 
     .edit-overlay-affordance {
-      @apply bg-red-200;
+      @apply pb-0;
+      filter: drop-shadow(0px 10px 15px rgba(255, 255, 255, 1));
     }
 
-    textarea:focus,
-    .edit-overlay-affordance {
+    textarea:focus {
       @apply shadow-2xl shadow-color-page-primary;
     }
   }
@@ -51,7 +51,7 @@
   .project-description {
     .field-toggle,
     textarea {
-      @apply py-1 text-display-400 text-color-foreground-primary;
+      @apply py-1.5 text-display-400 text-color-foreground-primary;
     }
   }
 

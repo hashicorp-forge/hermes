@@ -23,22 +23,8 @@
   }
 
   .search-input-icon {
-    --scaleInFrom: 0.75;
-    animation: scaleIn 600ms cubic-bezier(0, 1, 0.5, 1) forwards;
-  }
-
-  .animated-spacer {
-    @keyframes shrinkX {
-      from {
-        transform: scaleX(1);
-      }
-      to {
-        transform: scaleX(0);
-      }
-    }
-    @apply origin-right;
-
-    animation: shrinkX 60000ms cubic-bezier(0, 1, 0.5, 1) forwards;
+    --scaleInFrom: 0.5;
+    animation: scaleIn 450ms cubic-bezier(0, 1, 0.5, 1) forwards;
   }
 }
 
