@@ -122,12 +122,16 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
 
-			// If configured to create documents as the logged-in Hermes user, create
-			// a new Google Drive service to do this.
-			copyTemplateSvc := *srv.GWService
+			var (
+				err error
+				f   *drive.File
+			)
+
+			// Copy template to new draft file.
 			if srv.Config.GoogleWorkspace.Auth != nil &&
 				srv.Config.GoogleWorkspace.Auth.CreateDocsAsUser {
-
+				// If configured to create documents as the logged-in Hermes user,
+				// create a new Google Drive service to do this.
 				ctx := context.Background()
 				conf := &jwt.Config{
 					Email:      srv.Config.GoogleWorkspace.Auth.ClientEmail,
@@ -139,8 +143,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					TokenURL: srv.Config.GoogleWorkspace.Auth.TokenURL,
 				}
 				client := conf.Client(ctx)
-
-				var err error
+				copyTemplateSvc := *srv.GWService
 				copyTemplateSvc.Drive, err = drive.NewService(
 					ctx, option.WithHTTPClient(client))
 				if err != nil {
@@ -153,22 +156,60 @@ func DraftsHandler(srv server.Server) http.Handler {
 						w, "Error processing request", http.StatusInternalServerError)
 					return
 				}
-			}
 
-			// Copy template to new draft file.
-			f, err := copyTemplateSvc.CopyFile(
-				template, title, srv.Config.GoogleWorkspace.DraftsFolder)
-			if err != nil {
-				srv.Logger.Error("error creating draft",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"template", template,
-					"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-				)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
+				// Copy template as user to new draft file in temporary drafts folder.
+				f, err = copyTemplateSvc.CopyFile(
+					template, title, srv.Config.GoogleWorkspace.TemporaryDraftsFolder)
+				if err != nil {
+					srv.Logger.Error(
+						"error copying template as user to temporary drafts folder",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"template", template,
+						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
+							TemporaryDraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Move draft file to drafts folder using service user.
+				_, err = srv.GWService.MoveFile(
+					f.Id, srv.Config.GoogleWorkspace.DraftsFolder)
+				if err != nil {
+					srv.Logger.Error(
+						"error moving draft file to drafts folder",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", f.Id,
+						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
+							TemporaryDraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+			} else {
+				// Copy template to new draft file as service user.
+				f, err = srv.GWService.CopyFile(
+					template, title, srv.Config.GoogleWorkspace.DraftsFolder)
+				if err != nil {
+					srv.Logger.Error("error creating draft",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"template", template,
+						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
 			}
 
 			// Build created date.
