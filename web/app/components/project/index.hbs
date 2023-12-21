@@ -100,7 +100,7 @@
 
 {{#if this.jiraIsEnabled}}
   {{! Jira }}
-  <div class="mt-10 flex w-full max-w-3xl gap-2 px-2">
+  <div class="mt-10 flex w-full max-w-3xl">
     <Project::JiraWidget
       {{did-insert this.maybeLoadJiraInfo}}
       @issue={{this.jiraIssue}}
