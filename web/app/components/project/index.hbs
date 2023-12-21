@@ -67,7 +67,7 @@
 
   </div>
 </div>
-<div class="max-w-3xl">
+<div class="relative z-20 max-w-3xl">
 
   {{! Title }}
   <div class="mt-7 flex">
@@ -77,6 +77,7 @@
       @value={{this.title}}
       @tag="h1"
       @placeholder="Add project title"
+      @buttonSize="medium"
       @onSave={{this.saveTitle}}
       @isReadOnly={{not this.projectIsActive}}
       @isRequired={{true}}
@@ -94,6 +95,7 @@
         @isReadOnly={{not this.projectIsActive}}
         @isSaving={{this.descriptionIsSaving}}
         @placeholder="Add a description"
+        @buttonSize="medium"
       />
     </div>
   {{/if}}
