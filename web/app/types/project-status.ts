@@ -4,14 +4,23 @@ export enum ProjectStatus {
   Archived = "archived",
 }
 
-export const projectStatusObjects: Record<ProjectStatus, { label: string }> = {
-  [ProjectStatus.Active]: {
-    label: "Active",
-  },
-  [ProjectStatus.Completed]: {
-    label: "Completed",
-  },
-  [ProjectStatus.Archived]: {
-    label: "Archived",
-  },
+export type ProjectStatusObject = {
+  label: string;
+  icon: string;
 };
+
+export const projectStatusObjects: Record<ProjectStatus, ProjectStatusObject> =
+  {
+    [ProjectStatus.Active]: {
+      label: "Active",
+      icon: "zap",
+    },
+    [ProjectStatus.Completed]: {
+      label: "Completed",
+      icon: "check-circle",
+    },
+    [ProjectStatus.Archived]: {
+      label: "Archived",
+      icon: "archive",
+    },
+  };
