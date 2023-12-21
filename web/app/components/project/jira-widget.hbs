@@ -167,9 +167,10 @@
                   class="jira-input relative"
                   @type="search"
                 />
-                {{! animated search icon  }}
+                {{! search icon  }}
                 <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
                   <FlightIcon
+                    data-test-search-icon
                     @name="search"
                     class="text-color-foreground-faint
                       {{unless @isNewProjectForm 'animated-icon'}}"
@@ -183,6 +184,7 @@
                   {{on "click" this.showInput}}
                 >
                   <FlightIcon
+                    data-test-add-jira-button-plus
                     @name="plus"
                     class={{if this.plusIconShouldAnimate "animated-icon"}}
                   />

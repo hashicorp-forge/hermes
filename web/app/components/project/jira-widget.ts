@@ -63,7 +63,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    * "Add Jira issue" button has been clicked.
    */
   protected get inputIsShown() {
-    return this.args.isNewProjectForm ?? this._inputIsShown;
+    return this.args.isNewProjectForm || this._inputIsShown;
   }
 
   /**

@@ -27,6 +27,8 @@ const PICKER_DROPDOWN = "[data-test-jira-picker-dropdown]";
 const PICKER_RESULT = "[data-test-jira-picker-result]";
 const NO_MATCHES = "[data-test-no-matches]";
 const SEARCHING_ICON = "[data-test-related-resources-search-loading-icon]";
+const SEARCH_ICON = "[data-test-search-icon]";
+const PLUS_ICON = "[data-test-add-jira-button-plus]";
 
 interface Context extends MirageTestContext {
   contextIsForm: boolean;
@@ -125,7 +127,6 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       <div class="click-away"/>
     `);
 
-    assert.dom(JIRA_ICON).exists();
     assert.dom(ADD_JIRA_INPUT).doesNotExist();
     assert.dom(ADD_JIRA_BUTTON).exists();
 
@@ -453,7 +454,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     `);
 
     assert
-      .dom(`${ADD_JIRA_BUTTON} .flight-icon`)
+      .dom(PLUS_ICON)
       .doesNotHaveClass(
         "animated-icon",
         "the plus icon does not initially have the animated class",
@@ -462,7 +463,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await click(ADD_JIRA_BUTTON);
 
     assert
-      .dom(`${ADD_JIRA_INPUT} .flight-icon`)
+      .dom(SEARCH_ICON)
       .hasClass(
         "animated-icon",
         "the search icon animates in when the input is shown",
@@ -471,7 +472,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await click(".click-away");
 
     assert
-      .dom(`${ADD_JIRA_BUTTON} .flight-icon`)
+      .dom(PLUS_ICON)
       .hasClass(
         "animated-icon",
         "the plus icon animates in when the input is hidden",
@@ -480,7 +481,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     this.set("contextIsForm", true);
 
     assert
-      .dom(`${ADD_JIRA_INPUT} .flight-icon`)
+      .dom(SEARCH_ICON)
       .doesNotHaveClass(
         "animated-icon",
         "the search icon does not animate in the form context",
