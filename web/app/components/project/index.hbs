@@ -1,4 +1,4 @@
-<div class="relative min-h-[210px]">
+<div class="relative">
 
   <div class="project-header mt-1 flex w-full justify-between">
 
@@ -78,7 +78,7 @@
         class="hds-button hds-button--color-secondary h-9 w-9 justify-center rounded-full border-color-border-strong p-0"
       />
 
-      {{!-- <span
+      <span
         class="ml-2.5 text-body-100 text-color-foreground-disabled"
         data-test-modified-time
       >
@@ -86,17 +86,18 @@
         Modified
         {{! this doesn't update in real time }}
         {{time-ago @project.modifiedTime}}
-      </span> --}}
+      </span>
 
     </div>
 
+    {{! Big icon }}
     <div
-      class="absolute right-0 top-1/2 -z-10 aspect-square h-[200%] -translate-y-1/2"
+      class="absolute right-0 top-1/2 -z-10 h-[390px] w-[390px] -translate-y-[52.5%]"
     >
       <FlightIcon
         @name={{get-project-status-icon this.status}}
         @size="24"
-        class="h-full w-full text-color-palette-neutral-300 opacity-40"
+        class="text-color-palette-amber-200 h-full w-full opacity-20"
       />
       <div
         class="absolute top-0 left-0 h-full w-full bg-gradient-to-tr from-white to-white/0"
@@ -106,7 +107,7 @@
   <div class="relative z-20 max-w-3xl">
 
     {{! Title }}
-    <div class="mt-7 flex">
+    <div class="mt-9 flex">
       <EditableField
         class="project-title text-display-600"
         data-test-project-title
@@ -190,10 +191,10 @@
           <h3 data-test-documents-header class="hermes-h4">
             Documents
           </h3>
-          {{!-- <Hds::BadgeCount
+          <Hds::BadgeCount
             data-test-document-count
             @text="{{this.hermesDocuments.length}}"
-          /> --}}
+          />
         </div>
         <ol data-test-document-list class="divided-list mt-3">
           {{#each this.hermesDocuments as |document|}}
@@ -224,10 +225,10 @@
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
-          {{!-- <Hds::BadgeCount
+          <Hds::BadgeCount
             data-test-external-link-count
             @text="{{this.externalLinks.length}}"
-          /> --}}
+          />
         </div>
         <ol data-test-external-link-list class="divided-list mt-5">
           {{#each this.externalLinks as |link i|}}
