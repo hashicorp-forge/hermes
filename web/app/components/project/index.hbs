@@ -107,6 +107,7 @@
       @onIssueRemove={{this.removeJiraIssue}}
       @onIssueSelect={{this.addJiraIssue}}
       @isLoading={{this.loadJiraIssue.isRunning}}
+      @isReadOnly={{not this.projectIsActive}}
     />
   </div>
 {{/if}}

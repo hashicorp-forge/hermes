@@ -17,10 +17,15 @@
       }
     }
   }
+
+  .overflow-button-container {
+    @apply relative top-auto right-auto mr-1 ml-2 w-auto bg-none;
+  }
 }
 
 .add-jira-issue-button {
   @apply py-0 pl-[8px] pr-[14px];
+
   &:hover,
   &:focus {
     @apply rounded-button-md shadow-surface-low;

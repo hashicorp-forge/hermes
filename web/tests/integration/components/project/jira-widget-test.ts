@@ -17,8 +17,9 @@ const KEY = "[data-test-jira-key]";
 const SUMMARY = "[data-test-jira-summary]";
 const LINK = "[data-test-jira-link]";
 const ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
-const OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
-const REMOVE_JIRA_BUTTON = "[data-test-remove-button]";
+const JIRA_WIDGET = "[data-test-jira-widget]";
+const OVERFLOW_BUTTON = `${JIRA_WIDGET} [data-test-overflow-menu-button]`;
+const REMOVE_JIRA_BUTTON = "[data-test-overflow-menu-action='remove']";
 const PRIORITY_ICON = "[data-test-jira-priority-icon]";
 const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
 const STATUS = "[data-test-jira-status]";
@@ -485,6 +486,27 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       .doesNotHaveClass(
         "animated-icon",
         "the search icon does not animate in the form context",
+      );
+  });
+
+  test("it can be rendered read-only", async function (this: Context, assert) {
+    this.set("issue", this.server.create("jira-picker-result"));
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @issue={{this.issue}}
+        @isReadOnly={{true}}
+      />
+    `);
+    assert.dom(LINK).exists();
+    assert.dom(OVERFLOW_BUTTON).doesNotExist();
+
+    this.set("issue", undefined);
+
+    assert
+      .dom(LINK)
+      .doesNotExist(
+        "the link is not rendered if read-only with an undefined issue",
       );
   });
 });
