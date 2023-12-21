@@ -226,6 +226,12 @@ type GoogleWorkspace struct {
 	// ShortcutsFolder is the folder that contains document shortcuts organized
 	// into doc type and product subfolders.
 	ShortcutsFolder string `hcl:"shortcuts_folder"`
+
+	// TemporaryDraftsFolder is a folder that will brieflly contain document
+	// drafts before they are moved to the DraftsFolder. This is used when
+	// create_docs_as_user is true in the auth block, so document notification
+	// settings will be the same as when a user creates their own document.
+	TemporaryDraftsFolder string `hcl:"temporary_drafts_folder,optional"`
 }
 
 // GoogleWorkspaceOAuth2 is the configuration to use OAuth 2.0 to access Google
