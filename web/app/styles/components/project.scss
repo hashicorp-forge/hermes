@@ -32,6 +32,20 @@
     }
   }
 
+  .edit-overlay-affordance::before {
+    @apply hidden;
+  }
+
+  .edit-overlay-affordance {
+    @apply pb-0;
+    filter: drop-shadow(0px 20px 15px white);
+  }
+
+  textarea:focus,
+  .active textarea {
+    filter: drop-shadow(0px 30px 15px white);
+  }
+
   .project-title,
   .project-description {
     .field-toggle,

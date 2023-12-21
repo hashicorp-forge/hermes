@@ -590,6 +590,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.dom(ADD_RESOURCE_BUTTON).isDisabled();
 
     await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).isDisabled();
+
+    await click(STATUS_TOGGLE);
     await click(ACTIVE_STATUS_ACTION);
 
     assert.dom(ADD_RESOURCE_BUTTON).isNotDisabled();
