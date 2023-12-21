@@ -424,6 +424,25 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(projectDocuments.length, 0);
   });
 
+  test("documents can only be removed if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    await visit("/projects/1");
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+  });
+
   test("you can add external links to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     const project = this.server.schema.projects.first();
 
@@ -535,6 +554,29 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.externalLinks;
 
     assert.equal(projectLinks.length, 0);
+  });
+
+  test("external links can only be edited if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.schema.projects.first().update({
+      externalLinks: [this.server.create("related-external-link").attrs],
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(OVERFLOW_MENU_BUTTON).doesNotExist();
   });
 
   test("you can't save an empty project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

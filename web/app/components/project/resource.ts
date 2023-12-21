@@ -5,6 +5,7 @@ interface ProjectResourceComponentSignature {
   Element: HTMLDivElement;
   Args: {
     overflowMenuItems: Record<string, OverflowItem>;
+    isReadOnly?: boolean;
   };
   Blocks: {
     default: [];
