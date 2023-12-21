@@ -220,8 +220,16 @@ func (c *Command) Run(args []string) int {
 
 	// Initialize Google Workspace service.
 	var goog *gw.Service
+	// Use Google Workspace service user auth if it is defined in the config.
 	if cfg.GoogleWorkspace.Auth != nil {
-		// Use Google Workspace auth if it is defined in the config.
+		// Validate temporary drafts folder is configured if creating docs as user.
+		if cfg.GoogleWorkspace.Auth.CreateDocsAsUser &&
+			cfg.GoogleWorkspace.TemporaryDraftsFolder == "" {
+			c.UI.Error(
+				"error initializing server: Google Workspace temporary drafts folder is required if create_docs_as_user is true")
+			return 1
+		}
+
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
 	} else {
 		// Use OAuth if Google Workspace auth is not defined in the config.
