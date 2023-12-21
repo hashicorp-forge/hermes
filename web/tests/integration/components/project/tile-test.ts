@@ -1,4 +1,4 @@
-import { findAll, render } from "@ember/test-helpers";
+import { render, rerender, settled } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
@@ -7,18 +7,18 @@ import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
-import { setFeatureFlag } from "hermes/utils/mirage-utils";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const PROJECT_TITLE = "[data-test-title]";
 const PROJECT_DESCRIPTION = "[data-test-description]";
-const PROJECT_JIRA_TYPE = "[data-test-jira-type]";
+const PROJECT_JIRA_TYPE_IMAGE = "[data-test-issue-type-image]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
-const PRODUCT = "[data-test-product]";
 const PRODUCT_AVATAR = "[data-test-product-avatar]";
+
 interface ProjectTileComponentTestContext extends MirageTestContext {
   project: HermesProject;
   jiraStatus: string;
+  tileIsShown: boolean;
 }
 
 module("Integration | Component | project/tile", function (hooks) {
@@ -26,13 +26,16 @@ module("Integration | Component | project/tile", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(async function (this: ProjectTileComponentTestContext) {
+    const issueID = "TEST-123";
+
+    this.server.create("jira-issue", {
+      key: issueID,
+    });
+
     this.server.create("project", {
       title: "Test Title",
       description: "Test Description",
-      jiraIssue: {
-        key: "TEST-123",
-        type: "Epic",
-      },
+      jiraIssueID: issueID,
     });
 
     this.server.create("related-hermes-document");
@@ -68,6 +71,8 @@ module("Integration | Component | project/tile", function (hooks) {
   });
 
   test("it renders the title and description", async function (this: ProjectTileComponentTestContext, assert) {
+    this.set("project.jiraIssueID", null);
+
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
@@ -83,26 +88,22 @@ module("Integration | Component | project/tile", function (hooks) {
     this.set("project.description", null);
 
     assert.dom(PROJECT_DESCRIPTION).doesNotExist();
+    assert.dom(PROJECT_JIRA_KEY).doesNotExist();
   });
 
-  test("it renders the jira issue if present", async function (this: ProjectTileComponentTestContext, assert) {
+  test("it loads and renders the jira issue if present", async function (this: ProjectTileComponentTestContext, assert) {
     await render<ProjectTileComponentTestContext>(hbs`
       <Project::Tile @project={{this.project}} />
     `);
 
-    const { jiraIssue } = this.project;
+    const issue = this.server.schema.jiraIssues.findBy({
+      key: this.project.jiraIssueID,
+    });
 
-    emberAssert("jiraIssue must exist", jiraIssue);
-
-    const { key, issueType } = jiraIssue;
+    const { key, issueType } = issue.attrs;
 
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
-    assert.dom(PROJECT_JIRA_TYPE).hasText(issueType);
-
-    this.set("project.jiraIssue", null);
-
-    assert.dom(PROJECT_JIRA_KEY).doesNotExist();
-    assert.dom(PROJECT_JIRA_TYPE).doesNotExist();
+    assert.dom(PROJECT_JIRA_TYPE_IMAGE).hasAttribute("alt", issueType);
   });
 
   test("it renders product avatars if the project has documents", async function (this: ProjectTileComponentTestContext, assert) {
@@ -117,24 +118,51 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
   });
 
-  test('if the status of a jiraIssue is "Done," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
+  test('if the status of a jiraIssue includes "done" or "closed," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
+    this.set("tileIsShown", true);
+
+    // This will cause the tile to rerender and refetch the JiraIssue
+    const rerenderTile = async () => {
+      this.set("tileIsShown", false);
+      this.set("tileIsShown", true);
+      await settled();
+    };
+
     await render<ProjectTileComponentTestContext>(hbs`
-      <Project::Tile @project={{this.project}} />
+      {{#if this.tileIsShown}}
+        <Project::Tile @project={{this.project}} />
+      {{/if}}
     `);
 
     assert.dom(PROJECT_JIRA_KEY).doesNotHaveClass("line-through");
 
     const project = this.server.schema.projects.first();
 
-    project.update({
-      jiraIssue: {
-        key: "TEST-123",
-        type: "Epic",
-        status: "Done",
-      },
+    const jiraIssue = this.server.schema.jiraIssues.findBy({
+      key: project.jiraIssueID,
     });
 
-    this.set("project", project);
+    jiraIssue.update({
+      status: "It's Done",
+    });
+
+    await rerenderTile();
+
+    assert.dom(PROJECT_JIRA_KEY).hasClass("line-through");
+
+    jiraIssue.update({
+      status: "Open",
+    });
+
+    await rerenderTile();
+
+    assert.dom(PROJECT_JIRA_KEY).doesNotHaveClass("line-through");
+
+    jiraIssue.update({
+      status: "Closed",
+    });
+
+    await rerenderTile();
 
     assert.dom(PROJECT_JIRA_KEY).hasClass("line-through");
   });

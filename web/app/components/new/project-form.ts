@@ -4,16 +4,23 @@ import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { HermesDocument } from "hermes/types/document";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
+import { timeout } from "ember-animated/-private/ember-scheduler";
+import Ember from "ember";
+
+const TIMEOUT = Ember.testing ? 0 : 2000;
 
 interface NewProjectFormComponentSignature {
   Args: {
     isModal?: boolean;
+    document?: HermesDocument;
+    onModalClose?: () => void;
   };
 }
 
@@ -32,11 +39,11 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   @tracked protected projectIsBeingCreated = false;
 
+  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
+
   @tracked protected title: string = "";
   @tracked protected description: string = "";
   @tracked protected titleErrorIsShown = false;
-
-  @tracked protected jiraIssue: JiraPickerResult | undefined = undefined;
 
   /**
    * Whether the Jira integration is enabled.
@@ -52,6 +59,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
    */
   @action protected setJiraIssue(issue: JiraPickerResult) {
     this.jiraIssue = issue;
+  }
+
+  /**
+   * The action run when a Jira issue is removed.
+   * Passed to the JiraWidget as `onIssueRemove`.
+   */
+  @action protected removeJiraIssue() {
+    this.jiraIssue = undefined;
   }
 
   /**
@@ -97,7 +112,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   private createProject = task(async () => {
     try {
       this.projectIsBeingCreated = true;
-      const project = await this.fetchSvc
+      const projectPromise = this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
           method: "POST",
           body: JSON.stringify({
@@ -107,6 +122,31 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
           }),
         })
         .then((response) => response?.json());
+
+      /**
+       * Create the project with a minimum duration.
+       * This allows us time to show a brief "creating..."
+       * message to orient the user.
+       */
+      const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
+
+      if (this.args.document) {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              hermesDocuments: [
+                {
+                  googleFileID: this.args.document.objectID,
+                  sortOrder: 1,
+                },
+              ],
+            }),
+          },
+        );
+      }
+
       this.router.transitionTo("authenticated.projects.project", project.id);
     } catch (e) {
       this.flashMessages.critical((e as any).message, {

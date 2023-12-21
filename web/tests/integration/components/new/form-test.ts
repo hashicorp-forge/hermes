@@ -4,11 +4,8 @@ import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { animationsSettled } from "ember-animated/test-support";
 
-const DEFAULT_FORM = "[data-test-new-form]";
-const FORM_FOR_MODAL = "[data-test-new-form-for-modal]";
-
+const FORM = "[data-test-new-form]";
 const TASK_IS_RUNNING_DESCRIPTION = "[data-test-task-is-running-description]";
-
 const ICON = "[data-test-feature-icon]";
 const HEADLINE = "[data-test-form-headline]";
 const SUBMIT_BUTTON = "[data-test-submit]";
@@ -37,7 +34,7 @@ module("Integration | Component | new/form", function (hooks) {
       />
     `);
 
-    assert.dom(DEFAULT_FORM).exists();
+    assert.dom(FORM).exists();
     assert.dom(ICON).hasAttribute("data-test-icon", "plus");
     assert.dom(HEADLINE).exists().hasText("Create new");
 
@@ -58,7 +55,6 @@ module("Integration | Component | new/form", function (hooks) {
         "button style is primary when it's set active",
       );
 
-    assert.dom(FORM_FOR_MODAL).doesNotExist();
     assert.dom(TASK_IS_RUNNING_DESCRIPTION).doesNotExist();
 
     this.set("taskIsRunning", true);
@@ -72,23 +68,36 @@ module("Integration | Component | new/form", function (hooks) {
 
     await animationsSettled();
 
-    assert.dom(DEFAULT_FORM).doesNotExist();
+    assert.dom(FORM).doesNotExist();
     assert.dom(SUBMIT_BUTTON).doesNotExist();
   });
 
   test("it can be formatted for a modal without additional elements", async function (assert) {
-    await render(hbs`
+    this.set("taskIsRunning", false);
+
+    await render<Context>(hbs`
       <New::Form
         @buttonText="Create"
+        @taskIsRunning={{this.taskIsRunning}}
         @isModal={{true}}
       />
     `);
 
-    assert.dom(DEFAULT_FORM).doesNotExist();
     assert.dom(ICON).doesNotExist();
     assert.dom(HEADLINE).doesNotExist();
-    assert.dom(SUBMIT_BUTTON).doesNotExist();
+    assert.dom(SUBMIT_BUTTON).exists();
 
-    assert.dom(FORM_FOR_MODAL).exists();
+    assert.dom(FORM).exists();
+
+    this.set("taskIsRunning", true);
+
+    await animationsSettled();
+
+    assert
+      .dom(TASK_IS_RUNNING_DESCRIPTION)
+      .doesNotExist(
+        "task is running description is ignored in the modal context",
+      );
+    assert.dom(FORM).exists();
   });
 });
