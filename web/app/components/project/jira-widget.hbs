@@ -11,9 +11,9 @@
         }}"
     >
       <div
-        class="relative flex
+        class="relative flex items-center
           {{unless this.issue 'w-full'}}
-          {{if @isNewProjectForm 'min-h-[24px] items-center'}}"
+          {{if @isNewProjectForm 'min-h-[24px]'}}"
       >
 
         {{#unless (or (not this.issue) @isNewProjectForm)}}
@@ -34,8 +34,7 @@
           <ExternalLink
             data-test-jira-link
             href={{if @isNewProjectForm "" this.issue.url}}
-            class="mr-8
-              {{if
+            class="{{if
                 @isNewProjectForm
                 'disabled pointer-events-none block'
                 'inline-flex'
@@ -91,7 +90,7 @@
                   <div
                     data-test-jira-status
                     class="{{dasherize this.issueStatus}}
-                      ignore-underline rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
+                      rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
                   >
                     {{this.issueStatus}}
                   </div>
@@ -100,7 +99,19 @@
             {{/if}}
           </ExternalLink>
 
-          <X::DropdownList
+          <OverflowMenu
+            @items={{hash
+              unlink=(hash
+                label="Remove Jira issue"
+                icon="x-circle"
+                action=(fn this.removeIssue)
+              )
+            }}
+            @isShown={{true}}
+            @offset={{hash mainAxis=1 crossAxis=-3}}
+          />
+
+          {{!-- <X::DropdownList
             @items={{hash
               unlink=(hash
                 label="Remove Jira issue"
@@ -114,7 +125,7 @@
             <:anchor as |dd|>
               <dd.ToggleAction
                 data-test-jira-overflow-button
-                class="quarternary-button absolute right-0 top-0 grid h-6 w-6 place-items-center items-center p-0
+                class="quarternary-button grid h-[26px] w-[26px] shrink-0 place-items-center items-center p-0
                   {{if dd.contentIsShown 'open'}}"
               >
                 <FlightIcon @name="more-vertical" />
@@ -130,7 +141,7 @@
                 {{dd.attrs.label}}
               </dd.Action>
             </:item>
-          </X::DropdownList>
+          </X::DropdownList> --}}
         {{else if @isLoading}}
           <FlightIcon data-test-jira-loading @name="loading" class="mt-[3px]" />
         {{else}}
