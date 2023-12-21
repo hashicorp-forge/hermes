@@ -21,18 +21,19 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
-import { TransitionContext, wait } from "ember-animated/.";
+import { TransitionContext, parallel, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
+import adjustCSS from "ember-animated/motions/adjust-css";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 
 class ResizeProject extends Resize {
   *animate() {
     this.opts.duration = Ember.testing ? 0 : 500;
-    this.opts.easing = easeOutExpo;
-    yield wait(100);
+    // this.opts.easing = easeOutExpo;
     yield* super.animate();
   }
 }
@@ -121,6 +122,17 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   protected get projectIsActive() {
     return this.status === ProjectStatus.Active;
+  }
+
+  /**
+   * Whether the JiraWidget should be shown.
+   * True of the project is active, or if the project has a Jira issue
+   * (that may or may not be loading)
+   */
+  protected get jiraWidgetIsShown() {
+    return (
+      this.projectIsActive || this.jiraIssue || this.loadJiraIssue.isRunning
+    );
   }
 
   /**
@@ -334,22 +346,75 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     return this.plusButtonTransition;
   }
 
+  @action descriptionTransitionRules({ firstTime }: { firstTime: boolean }) {
+    if (firstTime) {
+      return emptyTransition;
+    }
+    return this.descriptionTransition;
+  }
+
+  @action jiraTransitionRules({ firstTime }: { firstTime: boolean }) {
+    if (firstTime) {
+      return emptyTransition;
+    }
+    return this.jiraTransition;
+  }
+
+  *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(0, -4);
+      void move(sprite, { duration: 100 });
+      void fadeOut(sprite, { duration: 100 });
+    }
+
+    for (let sprite of insertedSprites) {
+      void fadeIn(sprite, { duration: 250 });
+    }
+  }
+
+  *descriptionTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 120 });
+    }
+
+    for (let sprite of insertedSprites) {
+      void fadeIn(sprite, { duration: 250 });
+    }
+  }
+
   *plusButtonTransition({
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
     if (Ember.testing) return;
+
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, 100);
-      void move(sprite, { duration: 500 });
-      void fadeOut(sprite, { duration: 500 });
+      sprite.endTranslatedBy(0, 70);
+
+      parallel(
+        yield move(sprite),
+        yield animateRotation(sprite, {
+          from: 0,
+          to: 360,
+          duration: 200,
+        }),
+      );
+      yield wait(50);
+      void fadeOut(sprite, { duration: 150 });
     }
 
     yield wait(500);
 
     for (let sprite of insertedSprites) {
       sprite.startTranslatedBy(0, 100);
-      void move(sprite, { duration: 500 });
+      void move(sprite, { duration: 400 });
       void fadeIn(sprite, { duration: 250 });
     }
   }

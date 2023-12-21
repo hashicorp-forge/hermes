@@ -83,34 +83,43 @@
         @isSaving={{this.titleIsSaving}}
       />
     </div>
-    {{#animated-if (or this.projectIsActive this.description)}}
-      {{! Description }}
-      <div class="flex">
-        <EditableField
-          class="project-description"
-          data-test-project-description
-          @value="{{this.description}}"
-          @onSave={{this.saveDescription}}
-          @isReadOnly={{not this.projectIsActive}}
-          @isSaving={{this.descriptionIsSaving}}
-          @placeholder="Add a description"
-          @buttonSize="medium"
-        />
-      </div>
-    {{/animated-if}}
+    <AnimatedContainer>
+
+      {{#animated-if
+        (or this.projectIsActive this.description)
+        rules=this.descriptionTransitionRules
+      }}
+        {{! Description }}
+        <div class="flex">
+          <EditableField
+            class="project-description"
+            data-test-project-description
+            @value="{{this.description}}"
+            @onSave={{this.saveDescription}}
+            @isReadOnly={{not this.projectIsActive}}
+            @isSaving={{this.descriptionIsSaving}}
+            @placeholder="Add a description"
+            @buttonSize="medium"
+          />
+        </div>
+      {{/animated-if}}
+    </AnimatedContainer>
+
   </div>
 
   {{#if this.jiraIsEnabled}}
     {{! Jira }}
     <div class="mt-10 flex w-full max-w-3xl">
-      <Project::JiraWidget
-        {{did-insert this.maybeLoadJiraInfo}}
-        @issue={{this.jiraIssue}}
-        @onIssueRemove={{this.removeJiraIssue}}
-        @onIssueSelect={{this.addJiraIssue}}
-        @isLoading={{this.loadJiraIssue.isRunning}}
-        @isReadOnly={{not this.projectIsActive}}
-      />
+      {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
+        <Project::JiraWidget
+          {{did-insert this.maybeLoadJiraInfo}}
+          @issue={{this.jiraIssue}}
+          @onIssueRemove={{this.removeJiraIssue}}
+          @onIssueSelect={{this.addJiraIssue}}
+          @isLoading={{this.loadJiraIssue.isRunning}}
+          @isReadOnly={{not this.projectIsActive}}
+        />
+      {{/animated-if}}
     </div>
   {{/if}}
 </AnimatedContainer>
@@ -131,6 +140,7 @@
         finalRemoval=true
       }}
         <div class="absolute right-14 top-0 -translate-y-1/2">
+
           <Action
             disabled={{not this.projectIsActive}}
             data-test-add-project-resource-button
