@@ -107,6 +107,26 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * Whether the JiraWidget should be shown.
+   * True if the project is active, or if the project has a Jira issue
+   * (that may or may not be loading)
+   */
+  protected get jiraWidgetIsShown() {
+    /**
+     * This construction is weird, but it gives us
+     * the most accurate evaluations by `ember-animated`
+     * and prevents unnecessary re-renders.
+     */
+    if (
+      !!this.jiraIssue ||
+      this.projectIsActive ||
+      this.loadJiraIssue.isRunning
+    ) {
+      return true;
+    }
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
