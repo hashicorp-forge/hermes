@@ -52,7 +52,7 @@
 
   </div>
 </div>
-<AnimatedContainer @motion={{this.motion}}>
+<AnimatedContainer @motion={{this.motion}} class="pb-6">
 
   <div class="relative z-20 max-w-3xl">
 
@@ -113,9 +113,6 @@
       </AnimatedContainer>
     </div>
   {{/if}}
-</AnimatedContainer>
-
-<div class="relative mt-6 border-t border-t-color-border-primary">
 
   {{! Plus button }}
   <RelatedResources
@@ -133,7 +130,7 @@
         <Action
           data-test-add-project-resource-button
           {{on "click" rr.showModal}}
-          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 top-0 grid aspect-square h-20 w-20 -translate-y-1/2 place-items-center rounded-full"
+          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
         >
 
           <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
@@ -141,6 +138,9 @@
       {{/animated-if}}
     </:header>
   </RelatedResources>
+</AnimatedContainer>
+
+<div class="relative border-t border-t-color-border-primary">
 
   {{! Resources }}
   <div class="max-w-3xl">

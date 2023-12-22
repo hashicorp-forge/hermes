@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -21,15 +21,13 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
-import { TransitionContext, parallel, wait } from "ember-animated/.";
+import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
-import adjustCSS from "ember-animated/motions/adjust-css";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
-import { empty } from "@ember/object/computed";
 
 class ResizeProject extends Resize {
   *animate() {
@@ -437,7 +435,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     console.log("descriptionTransition");
 
     for (let sprite of insertedSprites) {
-      yield wait(100);
+      yield wait(200);
       void fadeIn(sprite, { duration: 100 });
     }
     for (let sprite of removedSprites) {
@@ -452,8 +450,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }: TransitionContext) {
     if (Ember.testing) return;
 
-    console.log("plusButtonTransition");
-
     for (let sprite of removedSprites) {
       // sprite.endTranslatedBy(0, 50);
       // void move(sprite, { duration: 250 });
@@ -461,11 +457,11 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     for (let sprite of insertedSprites) {
-      yield wait(300);
-      // sprite.startTranslatedBy(0, 50);
-      // void move(sprite, { duration: 400 });
+      sprite.startTranslatedBy(0, 20);
+      yield wait(400);
+      void move(sprite, { duration: 200 });
+      void fadeIn(sprite, { duration: 100 });
       // void animateRotation(sprite, { from: -45, to: 0, duration: 400 });
-      void fadeIn(sprite, { duration: 300 });
     }
   }
 
