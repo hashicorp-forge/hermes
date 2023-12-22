@@ -1,22 +1,10 @@
-<div class="project-header mt-1 flex w-full justify-between">
-
-  <div class="flex h-9 items-center gap-1">
-    <div class="flex w-9 justify-center">
-      {{! Placeholder until we have ProductAvatars  }}
-      <FlightIcon @name="grid" @size="24" />
-    </div>
-  </div>
-
+<div class="project-header mt-1 flex w-full">
   <div class="flex h-9 gap-1.5">
     <div class="flex gap-2.5">
 
-      <span class="self-center text-color-foreground-faint">
-        Status:
-      </span>
-
       <X::DropdownList
         @items={{this.statuses}}
-        @placement="bottom"
+        @placement="bottom-start"
         @selected={{this.status}}
         class="theme--neutral"
       >

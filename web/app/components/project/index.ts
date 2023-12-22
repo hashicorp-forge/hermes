@@ -29,11 +29,13 @@ import adjustCSS from "ember-animated/motions/adjust-css";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
+import { empty } from "@ember/object/computed";
 
 class ResizeProject extends Resize {
   *animate() {
+    console.log("resize");
     this.opts.duration = Ember.testing ? 0 : 600;
-    this.opts.easing = easeOutQuad;
+    // this.opts.easing = easeOutQuad;
     yield* super.animate();
   }
 }
@@ -130,9 +132,18 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * (that may or may not be loading)
    */
   protected get jiraWidgetIsShown() {
-    return (
-      this.projectIsActive || this.jiraIssue || this.loadJiraIssue.isRunning
-    );
+    /**
+     * This construction is weird, but it gives us
+     * the most accurate evaluations by `ember-animated`
+     * and prevents unnecessary re-renders.
+     */
+    if (
+      !!this.jiraIssue ||
+      this.projectIsActive ||
+      this.loadJiraIssue.isRunning
+    ) {
+      return true;
+    }
   }
 
   /**
@@ -339,10 +350,27 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.resourceToEditIndex = undefined;
   }
 
-  @action plusButtonTransitionRules({ firstTime }: { firstTime: boolean }) {
+  // TODO: these need some logic to determine if the route is changing
+
+  @action plusButtonTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }) {
+    // ignore animation on first render
     if (firstTime) {
       return emptyTransition;
     }
+    // ignore animation when leaving the project
+    if (oldItems[0] === true && newItems[0] === undefined) {
+      return emptyTransition;
+    }
+
+    // animate all other cases
     return this.plusButtonTransition;
   }
 
@@ -353,19 +381,35 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     return this.descriptionTransition;
   }
 
-  @action jiraTransitionRules({ firstTime }: { firstTime: boolean }) {
+  @action jiraTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }) {
+    console.log("jiraTransitionRules");
+    console.log("oldItems", oldItems);
+    console.log("newItems", newItems);
+
+    // ignore animation on first render
     if (firstTime) {
       return emptyTransition;
     }
+
+    // animate all other cases
     return this.jiraTransition;
   }
 
   *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
     if (Ember.testing) return;
 
+    console.log("jiraTransition");
     for (let sprite of removedSprites) {
       sprite.endTranslatedBy(0, -20);
-      void move(sprite, { duration: 250, easing: easeOutQuad });
+      void move(sprite, { duration: 250 });
       void fadeOut(sprite, { duration: 100 });
     }
 
@@ -390,6 +434,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }: TransitionContext) {
     if (Ember.testing) return;
 
+    console.log("descriptionTransition");
+
     for (let sprite of insertedSprites) {
       yield wait(100);
       void fadeIn(sprite, { duration: 100 });
@@ -405,6 +451,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     removedSprites,
   }: TransitionContext) {
     if (Ember.testing) return;
+
+    console.log("plusButtonTransition");
 
     for (let sprite of removedSprites) {
       // sprite.endTranslatedBy(0, 50);
