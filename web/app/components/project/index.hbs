@@ -55,7 +55,7 @@
 <AnimatedContainer @motion={{this.motion}}>
   <div class="pb-6">
     <div class="relative z-20 max-w-3xl">
-      <AnimatedContainer>
+      <AnimatedContainer @motion={{this.motion}}>
 
         {{! Title }}
         <div class="mt-7 flex">
@@ -95,7 +95,7 @@
 
     </div>
 
-    <AnimatedContainer class="mt-5">
+    <AnimatedContainer @motion={{this.motion}} class="mt-5">
       {{#if this.jiraIsEnabled}}
         {{! Jira }}
         {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}

@@ -29,10 +29,12 @@ import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 
+const animationDuration = Ember.testing ? 0 : 450;
+
 class ResizeProject extends Resize {
   *animate() {
     console.log("resize");
-    this.opts.duration = Ember.testing ? 0 : 1000;
+    this.opts.duration = animationDuration;
     this.opts.easing = easeOutExpo;
     yield* super.animate();
   }
@@ -348,8 +350,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.resourceToEditIndex = undefined;
   }
 
-  // TODO: these need some logic to determine if the route is changing
-
   @action plusButtonTransitionRules({
     firstTime,
     oldItems,
@@ -388,10 +388,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     oldItems: unknown[];
     newItems: unknown[];
   }) {
-    console.log("jiraTransitionRules");
-    console.log("oldItems", oldItems);
-    console.log("newItems", newItems);
-
     // ignore animation on first render
     if (firstTime) {
       return emptyTransition;
@@ -407,62 +403,58 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }: TransitionContext) {
     if (Ember.testing) return;
 
-    console.log("descriptionTransition");
-
     for (let sprite of insertedSprites) {
-      yield wait(200);
-      void fadeIn(sprite, { duration: 350 });
+      yield wait(animationDuration * 0.01);
+      void fadeIn(sprite, { duration: animationDuration * 0.25 });
     }
     for (let sprite of removedSprites) {
-      yield wait(100);
-      void fadeOut(sprite, { duration: 100 });
+      yield wait(animationDuration * 0.0025);
+      void fadeOut(sprite, { duration: animationDuration * 0.075 });
     }
   }
 
   *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
     if (Ember.testing) return;
 
-    console.log("jiraTransition");
-    for (let sprite of removedSprites) {
-      // sprite.endTranslatedBy(0, -20);
-      // void move(sprite, { duration: 250 });
-      void fadeOut(sprite, { duration: 100 });
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.1);
+      void fadeIn(sprite, { duration: animationDuration * 0.35 });
     }
 
-    for (let sprite of insertedSprites) {
-      yield wait(390);
-      // sprite.startTranslatedBy(0, -20);
-      // void move(sprite, { duration: 250 });
-      void fadeIn(sprite, { duration: 350 });
-      // need to create initial bounds
-      // yield fadeOut(sprite, { duration: 0 });
-      // void fadeIn(sprite, { duration: 400 });
-      // yield move(sprite, { duration: 0 });
-      // sprite.applyStyles({ opacity: "0" });
-      // yield wait(500);
-      // void move(sprite, { duration: 100 });
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(0, -30);
+      void move(sprite, {
+        duration: animationDuration,
+        easing: easeOutExpo,
+      });
+      void fadeOut(sprite, { duration: animationDuration * 0.05 });
     }
   }
+
   *plusButtonTransition({
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
     if (Ember.testing) return;
 
-    for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, 20);
-      void move(sprite, { duration: 500, easing: easeOutExpo });
-      void fadeOut(sprite, { duration: 100 });
+    for (let sprite of insertedSprites) {
+      sprite.startTranslatedBy(0, 20);
+      yield wait(animationDuration * 0.3);
+      void move(sprite, {
+        duration: animationDuration * 0.5,
+        easing: easeOutExpo,
+      });
+      void fadeIn(sprite, { duration: animationDuration * 0.1 });
     }
 
-    for (let sprite of insertedSprites) {
-      // sprite.applyStyles({ opacity: "0" });
-      // sprite.reveal();
-      sprite.startTranslatedBy(0, 20);
-      yield wait(300);
-      void move(sprite, { duration: 500, easing: easeOutExpo });
-      void fadeIn(sprite, { duration: 100 });
-      // void animateRotation(sprite, { from: -45, to: 0, duration: 400 });
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(0, 20);
+      void move(sprite, {
+        duration: animationDuration * 0.5,
+        easing: easeOutExpo,
+      });
+      yield wait(animationDuration * 0.15);
+      void fadeOut(sprite, { duration: animationDuration * 0.1 });
     }
   }
 
