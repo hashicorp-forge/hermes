@@ -64,8 +64,8 @@
 
   </div>
 </div>
+<AnimatedContainer @motion={{this.motion}}>
 
-<AnimatedContainer @motion={{this.motion}} class="">
   <div class="relative z-20 max-w-3xl">
 
     {{! Title }}
@@ -83,10 +83,10 @@
         @isSaving={{this.titleIsSaving}}
       />
     </div>
-    <AnimatedContainer>
 
+    <AnimatedContainer>
       {{#animated-if
-        (or this.projectIsActive this.description)
+        (or this.description this.projectIsActive)
         rules=this.descriptionTransitionRules
       }}
         {{! Description }}
@@ -109,17 +109,20 @@
 
   {{#if this.jiraIsEnabled}}
     {{! Jira }}
-    <div class="mt-10 flex w-full max-w-3xl">
-      {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
-        <Project::JiraWidget
-          {{did-insert this.maybeLoadJiraInfo}}
-          @issue={{this.jiraIssue}}
-          @onIssueRemove={{this.removeJiraIssue}}
-          @onIssueSelect={{this.addJiraIssue}}
-          @isLoading={{this.loadJiraIssue.isRunning}}
-          @isReadOnly={{not this.projectIsActive}}
-        />
-      {{/animated-if}}
+    {{! we like this padding whether the issue is shown... maybe find another approach }}
+
+    <div class="mt-10" {{did-insert this.maybeLoadJiraInfo}}>
+      <AnimatedContainer class="flex w-full max-w-3xl">
+        {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
+          <Project::JiraWidget
+            @issue={{this.jiraIssue}}
+            @onIssueRemove={{this.removeJiraIssue}}
+            @onIssueSelect={{this.addJiraIssue}}
+            @isLoading={{this.loadJiraIssue.isRunning}}
+            @isReadOnly={{not this.projectIsActive}}
+          />
+        {{/animated-if}}
+      </AnimatedContainer>
     </div>
   {{/if}}
 </AnimatedContainer>
@@ -139,17 +142,14 @@
         initialInsertion=true
         finalRemoval=true
       }}
-        <div class="absolute right-14 top-0 -translate-y-1/2">
+        <Action
+          data-test-add-project-resource-button
+          {{on "click" rr.showModal}}
+          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 top-0 grid aspect-square h-20 w-20 -translate-y-1/2 place-items-center rounded-full"
+        >
 
-          <Action
-            disabled={{not this.projectIsActive}}
-            data-test-add-project-resource-button
-            {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
-          >
-            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-          </Action>
-        </div>
+          <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+        </Action>
       {{/animated-if}}
     </:header>
   </RelatedResources>

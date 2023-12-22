@@ -27,13 +27,13 @@ import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
 import adjustCSS from "ember-animated/motions/adjust-css";
 import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 
 class ResizeProject extends Resize {
   *animate() {
-    this.opts.duration = Ember.testing ? 0 : 500;
-    // this.opts.easing = easeOutExpo;
+    this.opts.duration = Ember.testing ? 0 : 600;
+    this.opts.easing = easeOutQuad;
     yield* super.animate();
   }
 }
@@ -126,7 +126,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
   /**
    * Whether the JiraWidget should be shown.
-   * True of the project is active, or if the project has a Jira issue
+   * True if the project is active, or if the project has a Jira issue
    * (that may or may not be loading)
    */
   protected get jiraWidgetIsShown() {
@@ -364,13 +364,23 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     if (Ember.testing) return;
 
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, -4);
-      void move(sprite, { duration: 100 });
+      sprite.endTranslatedBy(0, -20);
+      void move(sprite, { duration: 250, easing: easeOutQuad });
       void fadeOut(sprite, { duration: 100 });
     }
 
     for (let sprite of insertedSprites) {
-      void fadeIn(sprite, { duration: 250 });
+      yield wait(200);
+      // sprite.startTranslatedBy(0, -8);
+      // void move(sprite, { duration: 250, easing: easeOutQuad });
+      void fadeIn(sprite, { duration: 500 });
+      // need to create initial bounds
+      // yield fadeOut(sprite, { duration: 0 });
+      // void fadeIn(sprite, { duration: 400 });
+      // yield move(sprite, { duration: 0 });
+      // sprite.applyStyles({ opacity: "0" });
+      // yield wait(500);
+      // void move(sprite, { duration: 100 });
     }
   }
 
@@ -380,12 +390,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }: TransitionContext) {
     if (Ember.testing) return;
 
-    for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 120 });
-    }
-
     for (let sprite of insertedSprites) {
-      void fadeIn(sprite, { duration: 250 });
+      yield wait(100);
+      void fadeIn(sprite, { duration: 100 });
+    }
+    for (let sprite of removedSprites) {
+      yield wait(200);
+      void fadeOut(sprite, { duration: 100 });
     }
   }
 
@@ -396,26 +407,17 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     if (Ember.testing) return;
 
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, 70);
-
-      parallel(
-        yield move(sprite),
-        yield animateRotation(sprite, {
-          from: 0,
-          to: 360,
-          duration: 200,
-        }),
-      );
-      yield wait(50);
-      void fadeOut(sprite, { duration: 150 });
+      // sprite.endTranslatedBy(0, 50);
+      // void move(sprite, { duration: 250 });
+      void fadeOut(sprite, { duration: 100 });
     }
 
-    yield wait(500);
-
     for (let sprite of insertedSprites) {
-      sprite.startTranslatedBy(0, 100);
-      void move(sprite, { duration: 400 });
-      void fadeIn(sprite, { duration: 250 });
+      yield wait(300);
+      // sprite.startTranslatedBy(0, 50);
+      // void move(sprite, { duration: 400 });
+      // void animateRotation(sprite, { from: -45, to: 0, duration: 400 });
+      void fadeIn(sprite, { duration: 300 });
     }
   }
 
