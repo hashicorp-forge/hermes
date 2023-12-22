@@ -573,25 +573,25 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
   });
 
-  test('the "add resource" button is disabled when the project is inactive', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test('the "add resource" button is hidden when the project is inactive', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     await visit("/projects/1");
 
-    assert.dom(ADD_RESOURCE_BUTTON).isNotDisabled();
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
 
     await click(STATUS_TOGGLE);
     await click(COMPLETED_STATUS_ACTION);
 
-    assert.dom(ADD_RESOURCE_BUTTON).isDisabled();
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ARCHIVED_STATUS_ACTION);
 
-    assert.dom(ADD_RESOURCE_BUTTON).isDisabled();
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ACTIVE_STATUS_ACTION);
 
-    assert.dom(ADD_RESOURCE_BUTTON).isNotDisabled();
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
   });
 
   test("you can't save an empty project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
