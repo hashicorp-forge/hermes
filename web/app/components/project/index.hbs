@@ -54,7 +54,7 @@
 </div>
 <AnimatedContainer @motion={{this.motion}}>
   <div class="pb-6">
-    <div class="relative z-20 max-w-3xl">
+    <div class="relative z-20 mb-5 max-w-3xl">
       <AnimatedContainer @motion={{this.motion}}>
 
         {{! Title }}
@@ -95,8 +95,8 @@
 
     </div>
 
-    <AnimatedContainer @motion={{this.motion}} class="mt-5">
-      {{#if this.jiraIsEnabled}}
+    {{#if this.jiraIsEnabled}}
+      <AnimatedContainer @motion={{this.motion}}>
         {{! Jira }}
         {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
           <div
@@ -112,8 +112,8 @@
             />
           </div>
         {{/animated-if}}
-      {{/if}}
-    </AnimatedContainer>
+      </AnimatedContainer>
+    {{/if}}
 
     {{! Plus button }}
     <RelatedResources
