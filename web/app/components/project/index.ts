@@ -32,8 +32,8 @@ import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 class ResizeProject extends Resize {
   *animate() {
     console.log("resize");
-    this.opts.duration = Ember.testing ? 0 : 600;
-    // this.opts.easing = easeOutQuad;
+    this.opts.duration = Ember.testing ? 0 : 1000;
+    this.opts.easing = easeOutExpo;
     yield* super.animate();
   }
 }
@@ -401,31 +401,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     return this.jiraTransition;
   }
 
-  *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
-    if (Ember.testing) return;
-
-    console.log("jiraTransition");
-    for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, -20);
-      void move(sprite, { duration: 250 });
-      void fadeOut(sprite, { duration: 100 });
-    }
-
-    for (let sprite of insertedSprites) {
-      yield wait(200);
-      // sprite.startTranslatedBy(0, -8);
-      // void move(sprite, { duration: 250, easing: easeOutQuad });
-      void fadeIn(sprite, { duration: 500 });
-      // need to create initial bounds
-      // yield fadeOut(sprite, { duration: 0 });
-      // void fadeIn(sprite, { duration: 400 });
-      // yield move(sprite, { duration: 0 });
-      // sprite.applyStyles({ opacity: "0" });
-      // yield wait(500);
-      // void move(sprite, { duration: 100 });
-    }
-  }
-
   *descriptionTransition({
     insertedSprites,
     removedSprites,
@@ -436,14 +411,38 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     for (let sprite of insertedSprites) {
       yield wait(200);
-      void fadeIn(sprite, { duration: 100 });
+      void fadeIn(sprite, { duration: 350 });
     }
     for (let sprite of removedSprites) {
-      yield wait(200);
+      yield wait(100);
       void fadeOut(sprite, { duration: 100 });
     }
   }
 
+  *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
+    if (Ember.testing) return;
+
+    console.log("jiraTransition");
+    for (let sprite of removedSprites) {
+      // sprite.endTranslatedBy(0, -20);
+      // void move(sprite, { duration: 250 });
+      void fadeOut(sprite, { duration: 100 });
+    }
+
+    for (let sprite of insertedSprites) {
+      yield wait(390);
+      // sprite.startTranslatedBy(0, -20);
+      // void move(sprite, { duration: 250 });
+      void fadeIn(sprite, { duration: 350 });
+      // need to create initial bounds
+      // yield fadeOut(sprite, { duration: 0 });
+      // void fadeIn(sprite, { duration: 400 });
+      // yield move(sprite, { duration: 0 });
+      // sprite.applyStyles({ opacity: "0" });
+      // yield wait(500);
+      // void move(sprite, { duration: 100 });
+    }
+  }
   *plusButtonTransition({
     insertedSprites,
     removedSprites,
@@ -451,15 +450,17 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     if (Ember.testing) return;
 
     for (let sprite of removedSprites) {
-      // sprite.endTranslatedBy(0, 50);
-      // void move(sprite, { duration: 250 });
+      sprite.endTranslatedBy(0, 20);
+      void move(sprite, { duration: 500, easing: easeOutExpo });
       void fadeOut(sprite, { duration: 100 });
     }
 
     for (let sprite of insertedSprites) {
+      // sprite.applyStyles({ opacity: "0" });
+      // sprite.reveal();
       sprite.startTranslatedBy(0, 20);
-      yield wait(400);
-      void move(sprite, { duration: 200 });
+      yield wait(300);
+      void move(sprite, { duration: 500, easing: easeOutExpo });
       void fadeIn(sprite, { duration: 100 });
       // void animateRotation(sprite, { from: -45, to: 0, duration: 400 });
     }

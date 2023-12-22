@@ -52,92 +52,94 @@
 
   </div>
 </div>
-<AnimatedContainer @motion={{this.motion}} class="pb-6">
+<AnimatedContainer @motion={{this.motion}}>
+  <div class="pb-6">
+    <div class="relative z-20 max-w-3xl">
+      <AnimatedContainer>
 
-  <div class="relative z-20 max-w-3xl">
-
-    {{! Title }}
-    <div class="mt-7 flex">
-      <EditableField
-        class="project-title text-display-600"
-        data-test-project-title
-        @value={{this.title}}
-        @tag="h1"
-        @placeholder="Add project title"
-        @buttonSize="medium"
-        @onSave={{this.saveTitle}}
-        @isReadOnly={{not this.projectIsActive}}
-        @isRequired={{true}}
-        @isSaving={{this.titleIsSaving}}
-      />
-    </div>
-
-    <AnimatedContainer>
-      {{#animated-if
-        (or this.description this.projectIsActive)
-        rules=this.descriptionTransitionRules
-      }}
-        {{! Description }}
-        <div class="flex">
+        {{! Title }}
+        <div class="mt-7 flex">
           <EditableField
-            class="project-description"
-            data-test-project-description
-            @value="{{this.description}}"
-            @onSave={{this.saveDescription}}
-            @isReadOnly={{not this.projectIsActive}}
-            @isSaving={{this.descriptionIsSaving}}
-            @placeholder="Add a description"
+            class="project-title text-display-600"
+            data-test-project-title
+            @value={{this.title}}
+            @tag="h1"
+            @placeholder="Add project title"
             @buttonSize="medium"
+            @onSave={{this.saveTitle}}
+            @isReadOnly={{not this.projectIsActive}}
+            @isRequired={{true}}
+            @isSaving={{this.titleIsSaving}}
           />
         </div>
-      {{/animated-if}}
-    </AnimatedContainer>
 
-  </div>
-
-  {{#if this.jiraIsEnabled}}
-    {{! Jira }}
-    {{! we like this padding whether the issue is shown... maybe find another approach }}
-
-    <div class="mt-10" {{did-insert this.maybeLoadJiraInfo}}>
-      <AnimatedContainer class="flex w-full max-w-3xl">
-        {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
-          <Project::JiraWidget
-            @issue={{this.jiraIssue}}
-            @onIssueRemove={{this.removeJiraIssue}}
-            @onIssueSelect={{this.addJiraIssue}}
-            @isLoading={{this.loadJiraIssue.isRunning}}
-            @isReadOnly={{not this.projectIsActive}}
-          />
+        {{#animated-if
+          (or this.description this.projectIsActive)
+          rules=this.descriptionTransitionRules
+        }}
+          {{! Description }}
+          <div class="flex">
+            <EditableField
+              class="project-description"
+              data-test-project-description
+              @value="{{this.description}}"
+              @onSave={{this.saveDescription}}
+              @isReadOnly={{not this.projectIsActive}}
+              @isSaving={{this.descriptionIsSaving}}
+              @placeholder="Add a description"
+              @buttonSize="medium"
+            />
+          </div>
         {{/animated-if}}
       </AnimatedContainer>
+
     </div>
-  {{/if}}
 
-  {{! Plus button }}
-  <RelatedResources
-    @modalHeaderTitle="Add project resource"
-    @modalInputPlaceholder="Search docs or paste a URL..."
-    @addResource={{this.addResource}}
-  >
-    <:header as |rr|>
-      {{#animated-if
-        this.projectIsActive
-        rules=this.plusButtonTransitionRules
-        initialInsertion=true
-        finalRemoval=true
-      }}
-        <Action
-          data-test-add-project-resource-button
-          {{on "click" rr.showModal}}
-          class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
-        >
+    <AnimatedContainer class="mt-5">
+      {{#if this.jiraIsEnabled}}
+        {{! Jira }}
+        {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
+          <div
+            class="mt-5 flex w-full max-w-3xl"
+            {{did-insert this.maybeLoadJiraInfo}}
+          >
+            <Project::JiraWidget
+              @issue={{this.jiraIssue}}
+              @onIssueRemove={{this.removeJiraIssue}}
+              @onIssueSelect={{this.addJiraIssue}}
+              @isLoading={{this.loadJiraIssue.isRunning}}
+              @isReadOnly={{not this.projectIsActive}}
+            />
+          </div>
+        {{/animated-if}}
+      {{/if}}
+    </AnimatedContainer>
 
-          <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-        </Action>
-      {{/animated-if}}
-    </:header>
-  </RelatedResources>
+    {{! Plus button }}
+    <RelatedResources
+      @modalHeaderTitle="Add project resource"
+      @modalInputPlaceholder="Search docs or paste a URL..."
+      @addResource={{this.addResource}}
+    >
+      <:header as |rr|>
+        {{#animated-if
+          this.projectIsActive
+          rules=this.plusButtonTransitionRules
+          initialInsertion=true
+          finalRemoval=true
+        }}
+          <Action
+            data-test-add-project-resource-button
+            {{on "click" rr.showModal}}
+            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
+          >
+
+            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+          </Action>
+        {{/animated-if}}
+      </:header>
+    </RelatedResources>
+  </div>
 </AnimatedContainer>
 
 <div class="relative border-t border-t-color-border-primary">
