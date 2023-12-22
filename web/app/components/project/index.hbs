@@ -96,13 +96,13 @@
     </div>
 
     {{#if this.jiraIsEnabled}}
-      <AnimatedContainer @motion={{this.motion}}>
+      <AnimatedContainer
+        @motion={{this.motion}}
+        {{did-insert this.maybeLoadJiraInfo}}
+      >
         {{! Jira }}
         {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
-          <div
-            class="mt-5 flex w-full max-w-3xl"
-            {{did-insert this.maybeLoadJiraInfo}}
-          >
+          <div class="mt-5 flex w-full max-w-3xl">
             <Project::JiraWidget
               @issue={{this.jiraIssue}}
               @onIssueRemove={{this.removeJiraIssue}}
