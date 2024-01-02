@@ -7,6 +7,7 @@ export default class ConfigService extends Service {
     algolia_drafts_index_name: config.algolia.draftsIndexName,
     algolia_internal_index_name: config.algolia.internalIndexName,
     api_version: "v1",
+    create_docs_as_user: config.createDocsAsUser,
     feature_flags: config.featureFlags,
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
