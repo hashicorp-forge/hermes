@@ -1,148 +1,164 @@
-<div class="project-header mt-1 flex w-full">
-  <div class="flex h-9 gap-1.5">
-    <div class="flex gap-2.5">
+<div class="relative">
 
-      <X::DropdownList
-        @items={{this.statuses}}
-        @placement="bottom-start"
-        @selected={{this.status}}
-        class="theme--neutral"
-      >
-        <:anchor as |dd|>
-          <dd.ToggleAction
-            data-test-project-status-toggle
-            class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
-            @hasChevron={{true}}
-          >
-            <Project::StatusIcon @status={{dd.selected}} />
-            <span class="ml-1 mr-0.5">
-              {{this.statusLabel}}
-            </span>
-          </dd.ToggleAction>
-        </:anchor>
-        <:item as |dd|>
-          <dd.Action
-            data-test-status-action={{dd.value}}
-            {{on "click" (fn this.changeStatus dd.value)}}
-          >
-            <X::DropdownList::CheckableItem
-              @isSelected={{dd.isSelected}}
-              @checkmarkPosition="trailing"
-              class=""
+  <div class="project-header mt-1 flex w-full">
+    <div class="flex h-9 gap-1.5">
+      <div class="flex gap-2.5">
+        <X::DropdownList
+          @items={{this.statuses}}
+          @placement="bottom-start"
+          @selected={{this.status}}
+          class="theme--neutral"
+        >
+          <:anchor as |dd|>
+            <dd.ToggleAction
+              data-test-project-status-toggle
+              class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
+              @hasChevron={{true}}
             >
-              <:default>
-                <div class="flex items-center gap-2 pl-1.5">
-                  <Project::StatusIcon @status={{dd.value}} />
-                  <span>
-                    {{dd.attrs.label}}
-                  </span>
-                </div>
-              </:default>
-            </X::DropdownList::CheckableItem>
-          </dd.Action>
-        </:item>
-      </X::DropdownList>
+              <Project::StatusIcon @status={{dd.selected}} />
+              <span class="ml-1 mr-0.5">
+                {{this.statusLabel}}
+              </span>
+            </dd.ToggleAction>
+          </:anchor>
+          <:item as |dd|>
+            <dd.Action
+              data-test-status-action={{dd.value}}
+              {{on "click" (fn this.changeStatus dd.value)}}
+            >
+              <X::DropdownList::CheckableItem
+                @isSelected={{dd.isSelected}}
+                @checkmarkPosition="trailing"
+                class=""
+              >
+                <:default>
+                  <div class="flex items-center gap-2 pl-1.5">
+                    <Project::StatusIcon @status={{dd.value}} />
+                    <span>
+                      {{dd.attrs.label}}
+                    </span>
+                  </div>
+                </:default>
+              </X::DropdownList::CheckableItem>
+            </dd.Action>
+          </:item>
+        </X::DropdownList>
+      </div>
+      <CopyURLButton
+        @isIconOnly={{true}}
+        @url={{this.url}}
+        class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+      />
     </div>
-
-    <CopyURLButton
-      @isIconOnly={{true}}
-      @url={{this.url}}
-      class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+  </div>
+  {{! Big icon }}
+  <div
+    class="absolute right-0 top-1/2 -z-10 h-[390px] w-[390px] -translate-y-[52.5%]"
+  >
+    <FlightIcon
+      @name={{get-project-status-icon this.status}}
+      @size="24"
+      class="h-full w-full text-color-palette-neutral-200 opacity-90"
     />
-
+    <div
+      class="absolute top-1/2 left-0 h-full w-full -translate-y-1/2 bg-gradient-to-tr from-white to-white/0"
+    />
   </div>
-</div>
-<AnimatedContainer @motion={{this.motion}}>
-  <div class="pb-6">
-    <div class="relative z-20 max-w-3xl pb-5">
-      <AnimatedContainer @motion={{this.motion}}>
 
-        {{! Title }}
-        <div class="mt-7 flex">
-          <EditableField
-            class="project-title text-display-600"
-            data-test-project-title
-            @value={{this.title}}
-            @tag="h1"
-            @placeholder="Add project title"
-            @buttonSize="medium"
-            @onSave={{this.saveTitle}}
-            @isReadOnly={{not this.projectIsActive}}
-            @isRequired={{true}}
-            @isSaving={{this.titleIsSaving}}
-          />
-        </div>
+  <AnimatedContainer @motion={{this.motion}}>
+    <div class="pb-6">
+      <div class="relative z-20 max-w-3xl pb-5">
+        <AnimatedContainer @motion={{this.motion}}>
 
-        {{#animated-if
-          (or this.description this.projectIsActive)
-          rules=this.descriptionTransitionRules
-        }}
-          {{! Description }}
-          <div class="flex">
+          {{! Title }}
+          <div class="mt-7 flex">
             <EditableField
-              class="project-description"
-              data-test-project-description
-              @value="{{this.description}}"
-              @onSave={{this.saveDescription}}
-              @isReadOnly={{not this.projectIsActive}}
-              @isSaving={{this.descriptionIsSaving}}
-              @placeholder="Add a description"
+              class="project-title text-display-600"
+              data-test-project-title
+              @value={{this.title}}
+              @tag="h1"
+              @placeholder="Add project title"
               @buttonSize="medium"
-            />
-          </div>
-        {{/animated-if}}
-      </AnimatedContainer>
-
-    </div>
-
-    {{#if this.jiraIsEnabled}}
-      <AnimatedContainer
-        @motion={{this.motion}}
-        {{did-insert this.maybeLoadJiraInfo}}
-      >
-        {{! Jira }}
-        {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
-          <div class="mt-5 flex w-full max-w-3xl">
-            <Project::JiraWidget
-              @issue={{this.jiraIssue}}
-              @onIssueRemove={{this.removeJiraIssue}}
-              @onIssueSelect={{this.addJiraIssue}}
-              @isLoading={{this.loadJiraIssue.isRunning}}
+              @onSave={{this.saveTitle}}
               @isReadOnly={{not this.projectIsActive}}
+              @isRequired={{true}}
+              @isSaving={{this.titleIsSaving}}
             />
           </div>
-        {{/animated-if}}
-      </AnimatedContainer>
-    {{/if}}
 
-    {{! Plus button }}
-    <RelatedResources
-      @modalHeaderTitle="Add project resource"
-      @modalInputPlaceholder="Search docs or paste a URL..."
-      @addResource={{this.addResource}}
-    >
-      <:header as |rr|>
-        {{#animated-if
-          this.projectIsActive
-          rules=this.plusButtonTransitionRules
-          initialInsertion=true
-          finalRemoval=true
-        }}
-          <Action
-            data-test-add-project-resource-button
-            {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
-          >
+          {{#animated-if
+            (or this.description this.projectIsActive)
+            rules=this.descriptionTransitionRules
+          }}
+            {{! Description }}
+            <div class="flex">
+              <EditableField
+                class="project-description"
+                data-test-project-description
+                @value="{{this.description}}"
+                @onSave={{this.saveDescription}}
+                @isReadOnly={{not this.projectIsActive}}
+                @isSaving={{this.descriptionIsSaving}}
+                @placeholder="Add a description"
+                @buttonSize="medium"
+              />
+            </div>
+          {{/animated-if}}
+        </AnimatedContainer>
 
-            <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
-          </Action>
-        {{/animated-if}}
-      </:header>
-    </RelatedResources>
-  </div>
-</AnimatedContainer>
+      </div>
 
-<div class="relative border-t border-t-color-border-primary">
+      {{#if this.jiraIsEnabled}}
+        <AnimatedContainer
+          @motion={{this.motion}}
+          {{did-insert this.maybeLoadJiraInfo}}
+        >
+          {{! Jira }}
+          {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
+            <div class="mt-5 flex w-full max-w-3xl">
+              <Project::JiraWidget
+                @issue={{this.jiraIssue}}
+                @onIssueRemove={{this.removeJiraIssue}}
+                @onIssueSelect={{this.addJiraIssue}}
+                @isLoading={{this.loadJiraIssue.isRunning}}
+                @isReadOnly={{not this.projectIsActive}}
+              />
+            </div>
+          {{/animated-if}}
+        </AnimatedContainer>
+      {{/if}}
+
+      {{! Plus button }}
+      <RelatedResources
+        @modalHeaderTitle="Add project resource"
+        @modalInputPlaceholder="Search docs or paste a URL..."
+        @addResource={{this.addResource}}
+      >
+        <:header as |rr|>
+          {{#animated-if
+            this.projectIsActive
+            rules=this.plusButtonTransitionRules
+            initialInsertion=true
+            finalRemoval=true
+          }}
+            <Action
+              data-test-add-project-resource-button
+              {{on "click" rr.showModal}}
+              class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 z-10 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
+            >
+
+              <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+            </Action>
+          {{/animated-if}}
+        </:header>
+      </RelatedResources>
+    </div>
+  </AnimatedContainer>
+</div>
+
+<div
+  class="relative border-t border-t-color-border-primary bg-color-page-primary"
+>
 
   {{! Resources }}
   <div class="max-w-3xl">
