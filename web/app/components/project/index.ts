@@ -79,13 +79,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked descriptionIsSaving = false;
 
   /**
-   * Whether the "Saved" message is shown.
-   * Set true when the save task begins; set false on error,
-   * or after a short delay when the task completes.
-   */
-  @tracked protected projectSavedMessageIsShown = false;
-
-  /**
    * The element that displays the "Saved" message.
    * Registered when inserted, used as a target for animation classes.
    */
@@ -507,27 +500,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   });
 
   /**
-   * The task to hide the "Saved" message after a delay.
-   * Called when the save task completes.
-   */
-  private hideSavedMessageAfterDelay = restartableTask(async () => {
-    await timeout(Ember.testing ? 0 : 2000);
-
-    assert(
-      "projectSavedMessageElement must exist",
-      this.projectSavedMessageElement,
-    );
-
-    this.projectSavedMessageElement.classList.add("fade-out-forwards");
-    this.projectSavedMessageElement
-      .querySelector(".saved-message")
-      ?.classList.add("slide-to-left-forwards");
-    await timeout(Ember.testing ? 0 : 500);
-
-    this.projectSavedMessageIsShown = false;
-  });
-
-  /**
    * The action to save basic project attributes,
    * such as title, description, and status.
    */
@@ -544,17 +516,12 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           },
         );
 
-        this.projectSavedMessageIsShown = true;
-
-        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 850)]);
-
-        void this.hideSavedMessageAfterDelay.perform();
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 500)]);
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
           timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
-        this.projectSavedMessageIsShown = false;
       } finally {
         switch (key) {
           case "title":
@@ -597,7 +564,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       }
 
       try {
-        await this.fetchSvc.fetch(
+        const savePromise = this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
           {
             method: "PUT",
@@ -608,7 +575,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           },
         );
 
-        this.hideSavedMessageAfterDelay.perform();
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 500)]);
       } catch (e) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;
