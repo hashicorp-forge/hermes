@@ -5,6 +5,7 @@
       <div class="flex items-center gap-1.5 text-color-foreground-faint">
         <LinkTo
           @route="authenticated.projects"
+          @query={{hash status="active"}}
           {{tooltip "View all projects"}}
           class="flex rounded-button-md p-1 hover:bg-color-surface-interactive-hover focus:bg-color-surface-interactive-hover"
         >
@@ -275,6 +276,11 @@
         {{time-ago @project.createdTime}}
         by
         {{@project.creator}}
+      </span>
+      <span class="opacity-50">|</span>
+      <span data-test-modified-time>
+        Last modified
+        {{time-ago @project.modifiedTime}}
       </span>
     </div>
   </div>

@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -26,11 +26,9 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
 import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
-import animateRotation from "hermes/utils/ember-animated/animate-rotation";
+import { easeOutExpo } from "hermes/utils/ember-animated/easings";
 
 const animationDuration = Ember.testing ? 0 : 450;
-const DEFAULT_REFETCH_DELAY = 1000;
 
 class ResizeProject extends Resize {
   *animate() {
