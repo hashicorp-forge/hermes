@@ -76,12 +76,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked descriptionIsSaving = false;
 
   /**
-   * The element that displays the "Saved" message.
-   * Registered when inserted, used as a target for animation classes.
-   */
-  @tracked private projectSavedMessageElement: HTMLElement | null = null;
-
-  /**
    * Whether the "edit external link" modal is shown.
    */
   @tracked protected editModalIsShown = false;
@@ -151,15 +145,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   *
-   */
-  protected get projectIsSaving() {
-    return (
-      this.saveProjectInfo.isRunning || this.saveProjectResources.isRunning
-    );
-  }
-
-  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
@@ -187,10 +172,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       externalLinks,
       hermesDocuments,
     };
-  }
-
-  @action protected registerProjectSavedMessage(e: HTMLElement) {
-    this.projectSavedMessageElement = e;
   }
 
   /**
@@ -504,7 +485,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             body: JSON.stringify(valueToSave),
           },
         );
-
         await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
