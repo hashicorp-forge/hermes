@@ -20,10 +20,6 @@
   }
 }
 
-.fade-out-forwards {
-  animation: fadeOut 450ms forwards;
-}
-
 // For a custom scaleIn, define `--scaleInFrom` in the element's style attribute.
 // For example: .classToAnimate { --scaleInFrom: 0.5; animation: scaleIn 50ms; }
 @keyframes scaleIn {
@@ -58,32 +54,6 @@
     transform: translateX(1px);
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
   }
-}
-
-@keyframes slideFromLeft {
-  from {
-    transform: translateX(var(--slideFromLeft, -1.5px));
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideToLeft {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(var(--slideToLeft, -1.5px));
-  }
-}
-
-.slide-from-left-forwards {
-  animation: slideFromLeft 450ms ease-out forwards;
-}
-
-.slide-to-left-forwards {
-  animation: slideToLeft 450ms ease-out forwards;
 }

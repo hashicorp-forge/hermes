@@ -32,7 +32,6 @@ const animationDuration = Ember.testing ? 0 : 450;
 
 class ResizeProject extends Resize {
   *animate() {
-    console.log("resize");
     this.opts.duration = animationDuration;
     this.opts.easing = easeOutExpo;
     yield* super.animate();
@@ -397,15 +396,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     return this.descriptionTransition;
   }
 
-  @action jiraTransitionRules({
-    firstTime,
-    oldItems,
-    newItems,
-  }: {
-    firstTime: boolean;
-    oldItems: unknown[];
-    newItems: unknown[];
-  }) {
+  @action jiraTransitionRules({ firstTime }: { firstTime: boolean }) {
     // ignore animation on first render
     if (firstTime) {
       return emptyTransition;
@@ -514,7 +505,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           },
         );
 
-        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 500)]);
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
@@ -562,7 +553,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       }
 
       try {
-        const savePromise = this.fetchSvc.fetch(
+        await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
           {
             method: "PUT",
@@ -572,8 +563,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             },
           },
         );
-
-        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 500)]);
       } catch (e) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;
