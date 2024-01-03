@@ -11,17 +11,35 @@
           <FlightIcon @name="grid" />
         </LinkTo>
         {{! <div class="h-6 w-px bg-color-border-primary"></div> }}
-        <span class="hermes-h4">Project</span>
-        {{#if this.modifiedTime}}
-          <span class="px-0.5 opacity-50">|</span>
-          <span class="text-color-foreground-faint" data-test-modified-time>
-            Saved
-            {{log "TEMPLATE" this.modifiedTime}}
-            {{time-ago this.modifiedTime}}
-          </span>
+        <span class="hermes-h4 mr-1.5">Project</span>
+        {{#if this.projectSavedMessageIsShown}}
+          <div
+            {{did-insert this.registerProjectSavedMessage}}
+            class="fade-in-forwards flex items-center gap-3"
+          >
+            <div class="mr-0.5 h-4 w-[1.5px] bg-color-border-primary" />
+            <div
+              class="saved-message slide-from-left-forwards flex items-center gap-2.5
+                {{if
+                  this.projectIsSaving
+                  'text-color-foreground-faint'
+                  'text-color-palette-green-200'
+                }}"
+              data-test-modified-time
+            >
+              <FlightIcon
+                @name={{if this.projectIsSaving "running" "check"}}
+                class={{unless
+                  this.projectIsSaving
+                  "text-color-palette-green-200"
+                }}
+              />
+              {{if this.projectIsSaving "Saving..." "Saved!"}}
+            </div>
+          </div>
         {{/if}}
       </div>
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2">
         <span class="font-bold">Status:</span>
         <X::DropdownList
           @items={{this.statuses}}

@@ -16,7 +16,7 @@ export default function timeAgo(
   const elapsed = now - before;
   const elapsedSeconds = elapsed / 1000;
 
-  if (elapsedSeconds < 5) {
+  if (elapsedSeconds < 2) {
     return "1 second ago";
   }
 

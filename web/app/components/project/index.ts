@@ -30,7 +30,7 @@ import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 
 const animationDuration = Ember.testing ? 0 : 450;
-const DEFAULT_REFETCH_DELAY = 1250;
+const DEFAULT_REFETCH_DELAY = 1000;
 
 class ResizeProject extends Resize {
   *animate() {
@@ -68,7 +68,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected title = this.args.project.title;
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
-  @tracked protected modifiedTime: number | null = null;
 
   @tracked protected jiraIssue?: JiraPickerResult;
   @tracked protected hermesDocuments: RelatedHermesDocument[] =
@@ -78,6 +77,19 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
   @tracked titleIsSaving = false;
   @tracked descriptionIsSaving = false;
+
+  /**
+   * Whether the "Saved" message is shown.
+   * Set true when the save task begins; set false on error,
+   * or after a short delay when the task completes.
+   */
+  @tracked protected projectSavedMessageIsShown = false;
+
+  /**
+   * The element that displays the "Saved" message.
+   * Registered when inserted, used as a target for animation classes.
+   */
+  @tracked private projectSavedMessageElement: HTMLElement | null = null;
 
   /**
    * Whether the "edit external link" modal is shown.
@@ -149,6 +161,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   *
+   */
+  protected get projectIsSaving() {
+    return (
+      this.saveProjectInfo.isRunning || this.saveProjectResources.isRunning
+    );
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
@@ -176,6 +197,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       externalLinks,
       hermesDocuments,
     };
+  }
+
+  @action protected registerProjectSavedMessage(e: HTMLElement) {
+    this.projectSavedMessageElement = e;
   }
 
   /**
@@ -481,28 +506,25 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   });
 
-  @tracked refetchModifiedTimeDelay = DEFAULT_REFETCH_DELAY;
-  @tracked timesFetched = 0;
+  /**
+   * The task to hide the "Saved" message after a delay.
+   * Called when the save task completes.
+   */
+  private hideSavedMessageAfterDelay = restartableTask(async () => {
+    await timeout(Ember.testing ? 0 : 2000);
 
-  private startUpdatingModifiedTime = task(async () => {
-    this.refetchModifiedTimeDelay = DEFAULT_REFETCH_DELAY;
-    this.modifiedTime = Date.now() / 1000;
-    void this.updateModifiedTime.perform();
-  });
+    assert(
+      "projectSavedMessageElement must exist",
+      this.projectSavedMessageElement,
+    );
 
-  private updateModifiedTime = restartableTask(async () => {
-    this.timesFetched += 1;
+    this.projectSavedMessageElement.classList.add("fade-out-forwards");
+    this.projectSavedMessageElement
+      .querySelector(".saved-message")
+      ?.classList.add("slide-to-left-forwards");
+    await timeout(Ember.testing ? 0 : 500);
 
-    this.modifiedTime =
-      this.modifiedTime - this.refetchModifiedTimeDelay / 10000;
-
-    if (this.timesFetched > 15) {
-      this.refetchModifiedTimeDelay += DEFAULT_REFETCH_DELAY * 4;
-    }
-
-    await timeout(this.refetchModifiedTimeDelay);
-
-    void this.updateModifiedTime.perform();
+    this.projectSavedMessageIsShown = false;
   });
 
   /**
@@ -522,14 +544,17 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           },
         );
 
-        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
+        this.projectSavedMessageIsShown = true;
 
-        void this.startUpdatingModifiedTime.perform();
+        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 850)]);
+
+        void this.hideSavedMessageAfterDelay.perform();
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
           timeout: FLASH_MESSAGES_LONG_TIMEOUT,
         });
+        this.projectSavedMessageIsShown = false;
       } finally {
         switch (key) {
           case "title":
@@ -582,6 +607,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             },
           },
         );
+
+        this.hideSavedMessageAfterDelay.perform();
       } catch (e) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;
