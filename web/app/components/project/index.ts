@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -30,6 +30,7 @@ import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateRotation from "hermes/utils/ember-animated/animate-rotation";
 
 const animationDuration = Ember.testing ? 0 : 450;
+const DEFAULT_REFETCH_DELAY = 1250;
 
 class ResizeProject extends Resize {
   *animate() {
@@ -67,6 +68,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @tracked protected title = this.args.project.title;
   @tracked protected description = this.args.project.description;
   @tracked protected status = this.args.project.status;
+  @tracked protected modifiedTime: number | null = null;
 
   @tracked protected jiraIssue?: JiraPickerResult;
   @tracked protected hermesDocuments: RelatedHermesDocument[] =
@@ -479,6 +481,30 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
   });
 
+  @tracked refetchModifiedTimeDelay = DEFAULT_REFETCH_DELAY;
+  @tracked timesFetched = 0;
+
+  private startUpdatingModifiedTime = task(async () => {
+    this.refetchModifiedTimeDelay = DEFAULT_REFETCH_DELAY;
+    this.modifiedTime = Date.now() / 1000;
+    void this.updateModifiedTime.perform();
+  });
+
+  private updateModifiedTime = restartableTask(async () => {
+    this.timesFetched += 1;
+
+    this.modifiedTime =
+      this.modifiedTime - this.refetchModifiedTimeDelay / 10000;
+
+    if (this.timesFetched > 15) {
+      this.refetchModifiedTimeDelay += DEFAULT_REFETCH_DELAY * 4;
+    }
+
+    await timeout(this.refetchModifiedTimeDelay);
+
+    void this.updateModifiedTime.perform();
+  });
+
   /**
    * The action to save basic project attributes,
    * such as title, description, and status.
@@ -495,7 +521,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             body: JSON.stringify(valueToSave),
           },
         );
+
         await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
+
+        void this.startUpdatingModifiedTime.perform();
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",
