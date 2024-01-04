@@ -26,7 +26,8 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
 import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
+import animateTransform from "hermes/utils/ember-animated/animate-transform";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -428,23 +429,46 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     if (Ember.testing) return;
 
     for (let sprite of insertedSprites) {
-      sprite.startTranslatedBy(0, 20);
       yield wait(animationDuration * 0.3);
-      void move(sprite, {
-        duration: animationDuration * 0.5,
+
+      void animateTransform(sprite, {
+        scale: {
+          from: 0.4,
+          duration: animationDuration * 0.2,
+        },
+        rotate: {
+          from: -10,
+        },
+        y: {
+          from: 25,
+        },
+        duration: animationDuration * 0.85,
         easing: easeOutExpo,
       });
       void fadeIn(sprite, { duration: animationDuration * 0.1 });
     }
 
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(0, 20);
-      void move(sprite, {
-        duration: animationDuration * 0.5,
-        easing: easeOutExpo,
+      const duration = animationDuration * 0.3;
+
+      void animateTransform(sprite, {
+        scale: {
+          to: 0.8,
+        },
+        rotate: {
+          to: -70,
+        },
+        y: {
+          to: 15,
+        },
+        duration,
+        easing: easeOutQuad,
       });
-      yield wait(animationDuration * 0.15);
-      void fadeOut(sprite, { duration: animationDuration * 0.1 });
+
+      void fadeOut(sprite, {
+        duration,
+        easing: easeOutQuad,
+      });
     }
   }
 

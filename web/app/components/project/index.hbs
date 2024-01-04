@@ -17,8 +17,9 @@
         <span class="font-bold">Status:</span>
         <X::DropdownList
           @items={{this.statuses}}
-          @placement="bottom-start"
+          @placement="bottom-end"
           @selected={{this.status}}
+          @onItemClick={{this.changeStatus}}
           class="theme--neutral"
         >
           <:anchor as |dd|>
@@ -34,10 +35,7 @@
             </dd.ToggleAction>
           </:anchor>
           <:item as |dd|>
-            <dd.Action
-              data-test-status-action={{dd.value}}
-              {{on "click" (fn this.changeStatus dd.value)}}
-            >
+            <dd.Action data-test-status-action={{dd.value}}>
               <X::DropdownList::CheckableItem
                 @isSelected={{dd.isSelected}}
                 @checkmarkPosition="trailing"
@@ -142,14 +140,14 @@
             <Action
               data-test-add-project-resource-button
               {{on "click" rr.showModal}}
-              class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 bottom-0 z-10 grid aspect-square h-20 w-20 translate-y-1/2 place-items-center rounded-full"
+              class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto absolute right-14 -bottom-10 z-10 grid h-20 w-20 place-items-center rounded-full"
             >
-
-              <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
+              <FlightIcon @name="plus" @size="24" class="relative h-9 w-9" />
             </Action>
           {{/animated-if}}
         </:header>
       </RelatedResources>
+
     </div>
   </AnimatedContainer>
 </div>
@@ -157,7 +155,6 @@
 <div
   class="relative border-t border-t-color-border-primary bg-color-page-primary"
 >
-
   {{! Resources }}
   <div class="max-w-3xl">
     {{#if (or this.hermesDocuments.length this.externalLinks.length)}}
@@ -258,6 +255,7 @@
         data-test-empty-body
         class="mt-7 flex h-48 flex-col items-start justify-center"
       >
+        {{! TODO: this doesn't make sense for completed/archived projects }}
         <div class="text-display-300 font-bold text-color-foreground-strong">
           Nothing here yet
         </div>

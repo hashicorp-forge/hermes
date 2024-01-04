@@ -138,15 +138,15 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
      *
      * TODO: Improve this.
      */
-    if (Ember.testing) {
-      schedule("afterRender", () => {
-        this.args.hideContent();
-      });
-    } else {
-      next(() => {
-        this.args.hideContent();
-      });
-    }
+    this.args.hideContent();
+    // if (Ember.testing) {
+    // } else {
+    //   // this is only helpful for linkTos.... we need to scope appropriately
+
+    //   next(() => {
+    //     this.args.hideContent();
+    //   });
+    // }
   }
 
   /**
