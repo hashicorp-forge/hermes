@@ -1,10 +1,9 @@
 /**
  * A transition to control all transform properties at once.
- * This is a work in progress and limited in functionality.
- * Modified from the `move` and `opacity` motions
+ * This is a work in progress and may be limited in functionality.
+ * Modified from the `move` and `opacity` motions.
  */
 
-import { assert } from "@ember/debug";
 import { Motion, rAF, Sprite, Tween } from "ember-animated";
 import { BaseOptions } from "ember-animated/-private/motion";
 import { TweenLike } from "ember-animated/-private/tween";
@@ -20,14 +19,11 @@ interface AnimateTransformOptions extends BaseOptions {
     to?: number;
     duration?: number;
   };
-  x?: {
-    from?: number;
-    to?: number;
-    duration?: number;
-  };
-  y?: {
-    from?: number;
-    to?: number;
+  translate?: {
+    xFrom?: number;
+    xTo?: number;
+    yFrom?: number;
+    yTo?: number;
     duration?: number;
   };
   easing?: (time: number) => number;
@@ -44,42 +40,41 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
   *animate(): Generator<Promise<unknown>, void> {
     let { sprite, duration, opts } = this;
 
-    let xTo = opts.x?.to;
-    let xFrom = opts.x?.from;
+    let { translate, rotate, scale, easing } = opts;
 
-    let yTo = opts.y?.to;
-    let yFrom = opts.y?.from;
+    let xTo = translate?.xTo;
+    let xFrom = translate?.xFrom;
 
-    let rotateTo = opts.rotate?.to;
-    let rotateFrom = opts.rotate?.from;
+    let yTo = translate?.yTo;
+    let yFrom = translate?.yFrom;
 
-    let scaleTo = opts.scale?.to;
-    let scaleFrom = opts.scale?.from;
+    let rotateTo = rotate?.to;
+    let rotateFrom = rotate?.from;
 
-    let xTween: TweenLike | null = null;
-    let yTween: TweenLike | null = null;
+    let scaleTo = scale?.to;
+    let scaleFrom = scale?.from;
+
+    let translateXTween: TweenLike | null = null;
+    let translateYTween: TweenLike | null = null;
     let rotateTween: TweenLike | null = null;
     let scaleTween: TweenLike | null = null;
 
-    if (opts.x) {
-      xTween = new Tween(
+    if (translate) {
+      translateXTween = new Tween(
         xFrom ?? 0,
         xTo ?? 0,
-        opts.x.duration ?? duration,
+        translate.duration ?? duration,
         opts.easing,
       );
-    }
-
-    if (opts.y) {
-      yTween = new Tween(
+      translateYTween = new Tween(
         yFrom ?? 0,
         yTo ?? 0,
-        opts.y.duration ?? duration,
+        translate.duration ?? duration,
         opts.easing,
       );
     }
 
-    if (opts.rotate) {
+    if (rotate) {
       rotateTween = new Tween(
         rotateFrom ??
           (sprite.initialComputedStyle != null
@@ -89,55 +84,50 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
           (sprite.finalComputedStyle != null
             ? parseFloat(sprite.finalComputedStyle.opacity)
             : 1),
-        opts.rotate.duration ?? duration,
-        opts.easing,
+        rotate.duration ?? duration,
+        easing,
       );
     }
 
-    if (opts.scale) {
+    if (scale) {
       scaleTween = new Tween(
         scaleFrom ?? 1,
         scaleTo ?? 1,
-        opts.scale?.duration ?? duration,
-        opts.easing,
+        scale?.duration ?? duration,
+        easing,
       );
     }
 
+    const shouldApplyTranslate =
+      (translateXTween != null && !translateXTween.done) ||
+      (translateYTween != null && !translateYTween.done);
+    const shouldApplyRotate = rotateTween != null && !rotateTween.done;
+    const shouldApplyScale = scaleTween != null && !scaleTween.done;
+
     let tweenIsDone = () => {
       return (
-        (xTween == null || xTween.done) &&
-        (yTween == null || yTween.done) &&
-        (rotateTween == null || rotateTween.done) &&
-        (scaleTween == null || scaleTween.done)
+        (!shouldApplyTranslate ||
+          (translateXTween?.done && translateYTween?.done)) &&
+        (!shouldApplyRotate || rotateTween?.done) &&
+        (!shouldApplyScale || scaleTween?.done)
       );
     };
 
     while (!tweenIsDone()) {
-      const shouldApplyX = xTween != null && !xTween.done;
-      const shouldApplyY = yTween != null && !yTween.done;
-      const shouldApplyRotate = rotateTween != null && !rotateTween.done;
-      const shouldApplyScale = scaleTween != null && !scaleTween.done;
-
       let transformString = "";
 
-      if (shouldApplyX) {
-        assert("xTween must exist", xTween);
-        transformString += `translateX(${xTween.currentValue}px) `;
-      }
-
-      if (shouldApplyY) {
-        assert("yTween must exist", yTween);
-        transformString += `translateY(${yTween.currentValue}px) `;
+      if (shouldApplyTranslate) {
+        transformString += `translate(${
+          translateXTween?.currentValue ?? 0
+        }px, ${translateYTween?.currentValue ?? 0}px) `;
       }
 
       if (shouldApplyRotate) {
-        assert("rotateTween must exist", rotateTween);
-        transformString += `rotate(${rotateTween.currentValue}deg) `;
+        transformString += `rotate(${rotateTween?.currentValue ?? 0}deg) `;
       }
 
       if (shouldApplyScale) {
-        assert("scaleTween must exist", scaleTween);
-        transformString += `scale(${scaleTween.currentValue}) `;
+        transformString += `scale(${scaleTween?.currentValue ?? 1}) `;
       }
 
       sprite.applyStyles({

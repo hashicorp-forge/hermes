@@ -398,6 +398,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       yield wait(animationDuration * 0.01);
       void fadeIn(sprite, { duration: animationDuration * 0.25 });
     }
+
     for (let sprite of removedSprites) {
       yield wait(animationDuration * 0.0025);
       void fadeOut(sprite, { duration: animationDuration * 0.075 });
@@ -414,10 +415,12 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     for (let sprite of removedSprites) {
       sprite.endTranslatedBy(0, -30);
+
       void move(sprite, {
         duration: animationDuration,
         easing: easeOutExpo,
       });
+
       void fadeOut(sprite, { duration: animationDuration * 0.05 });
     }
   }
@@ -439,8 +442,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         rotate: {
           from: -10,
         },
-        y: {
-          from: 25,
+        translate: {
+          yFrom: 25,
         },
         duration: animationDuration * 0.85,
         easing: easeOutExpo,
@@ -450,6 +453,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     for (let sprite of removedSprites) {
       const duration = animationDuration * 0.3;
+      const easing = easeOutQuad;
 
       void animateTransform(sprite, {
         scale: {
@@ -458,16 +462,16 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         rotate: {
           to: -70,
         },
-        y: {
-          to: 15,
+        translate: {
+          yTo: 15,
         },
         duration,
-        easing: easeOutQuad,
+        easing,
       });
 
       void fadeOut(sprite, {
         duration,
-        easing: easeOutQuad,
+        easing,
       });
     }
   }
