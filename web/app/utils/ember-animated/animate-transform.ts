@@ -39,14 +39,13 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
   *animate(): Generator<Promise<unknown>, void> {
     let { sprite, duration, opts } = this;
-
     let { translate, rotate, scale, easing } = opts;
 
-    let xTo = translate?.xTo;
-    let xFrom = translate?.xFrom;
+    let translateXTo = translate?.xTo;
+    let translateXFrom = translate?.xFrom;
 
-    let yTo = translate?.yTo;
-    let yFrom = translate?.yFrom;
+    let translateYTo = translate?.yTo;
+    let translateYFrom = translate?.yFrom;
 
     let rotateTo = rotate?.to;
     let rotateFrom = rotate?.from;
@@ -61,14 +60,14 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
     if (translate) {
       translateXTween = new Tween(
-        xFrom ?? 0,
-        xTo ?? 0,
+        translateXFrom ?? 0,
+        translateXTo ?? 0,
         translate.duration ?? duration,
         opts.easing,
       );
       translateYTween = new Tween(
-        yFrom ?? 0,
-        yTo ?? 0,
+        translateYFrom ?? 0,
+        translateYTo ?? 0,
         translate.duration ?? duration,
         opts.easing,
       );
@@ -101,6 +100,7 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
     const shouldApplyTranslate =
       (translateXTween != null && !translateXTween.done) ||
       (translateYTween != null && !translateYTween.done);
+
     const shouldApplyRotate = rotateTween != null && !rotateTween.done;
     const shouldApplyScale = scaleTween != null && !scaleTween.done;
 
