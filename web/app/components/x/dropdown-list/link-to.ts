@@ -11,7 +11,6 @@ interface XDropdownListLinkToComponentSignature {
     query?: Record<string, unknown>;
     model?: unknown;
     models?: unknown[];
-    hideContent: () => void;
   };
   Blocks: {
     default: [];
@@ -20,17 +19,17 @@ interface XDropdownListLinkToComponentSignature {
 
 export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {
   /**
-   * The action to close the dropdown. Called on click.
+   * The action to run when the item is clicked.
    * We wait until the next run loop so that we don't interfere with
    * Ember's <LinkTo> handling. Because this approach causes issues
    * when testing, we use `schedule` as an approximation.
    */
-  @action protected hideDropdown(): void {
+  @action protected onClick(): void {
     if (Ember.testing) {
-      schedule("afterRender", this.args.hideContent);
+      schedule("afterRender", this.args.onClick);
     } else {
       next(() => {
-        this.args.hideContent();
+        this.args.onClick();
       });
     }
   }

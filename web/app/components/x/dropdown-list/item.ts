@@ -124,6 +124,12 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     this._domElement = element;
   }
 
+  /**
+   * The action called on clicked. Runs the parent component's
+   * `onItemClick` action, if it exists, and hides the dropdown.
+   * The "link-to" sub-component runs this on the next run loop
+   * to avoid interfering with Ember's <LinkTo> handling.
+   */
   @action onClick() {
     if (this.args.onItemClick) {
       this.args.onItemClick(this.args.value, this.args.attributes);
