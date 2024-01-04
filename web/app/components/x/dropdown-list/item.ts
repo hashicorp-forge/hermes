@@ -129,24 +129,7 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
       this.args.onItemClick(this.args.value, this.args.attributes);
     }
 
-    /**
-     * In production, close the dropdown on the next run loop
-     * so that we don't interfere with Ember's <LinkTo> handling.
-     *
-     * This approach causes issues when testing, so we
-     * use `schedule` as an approximation.
-     *
-     * TODO: Improve this.
-     */
-    if (Ember.testing) {
-      schedule("afterRender", () => {
-        this.args.hideContent();
-      });
-    } else {
-      next(() => {
-        this.args.hideContent();
-      });
-    }
+    this.args.hideContent();
   }
 
   /**

@@ -2,7 +2,7 @@
   data-test-x-dropdown-list-item-link-to
   {{did-insert @registerElement}}
   {{on "mouseenter" @focusMouseTarget}}
-  {{on "click" @onClick}}
+  {{on "click" this.hideDropdown}}
   role={{@role}}
   aria-selected={{@isAriaSelected}}
   tabindex="-1"
