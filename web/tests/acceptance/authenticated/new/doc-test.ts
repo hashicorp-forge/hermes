@@ -15,6 +15,7 @@ import { Response } from "miragejs";
 import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { DRAFT_CREATED_LOCAL_STORAGE_KEY } from "hermes/components/modals/draft-created";
+import { TEST_WEB_CONFIG } from "hermes/utils/mirage-utils";
 
 // Selectors
 const DOC_FORM = "[data-test-new-doc-form]";
@@ -170,7 +171,31 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     assert.dom(PRODUCT_SELECT_TOGGLE).includesText("Terraform");
   });
 
-  test("it shows a confirmation modal when a draft is created", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
+  test("it shows a confirmation flash message when a draft is created (when creating draft as the user)", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
+    this.server.get("/web/config", () => {
+      return new Response(
+        200,
+        {},
+        JSON.stringify({ ...TEST_WEB_CONFIG, create_docs_as_user: true }),
+      );
+    });
+
+    this.server.createList("product", 1);
+
+    await visit("/new/doc?docType=RFC");
+
+    await fillIn(TITLE_INPUT, "Foo");
+    await click(PRODUCT_SELECT_TOGGLE);
+    await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
+
+    await click(CREATE_BUTTON);
+
+    await waitFor(FLASH_NOTIFICATION);
+
+    assert.dom(FLASH_NOTIFICATION).hasText("Draft created!");
+  });
+
+  test("it shows a confirmation modal when a draft is created (not creating doc as user)", async function (this: AuthenticatedNewDocRouteTestContext, assert) {
     // Reset the localStorage item
     window.localStorage.removeItem(DRAFT_CREATED_LOCAL_STORAGE_KEY);
 
