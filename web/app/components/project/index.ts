@@ -30,6 +30,7 @@ import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import { Transition } from "ember-animated/-private/transition";
 import animateScale from "hermes/utils/ember-animated/animate-scale";
+import RouterService from "@ember/routing/router-service";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -51,6 +52,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: HermesFlashMessagesService;
+  @service declare router: RouterService;
 
   /**
    * The array of possible project statuses.
@@ -555,6 +557,33 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     oldItems: unknown[];
     newItems: unknown[];
   }): Transition {
+    console.log("resourceTransitionRules", firstTime, oldItems, newItems);
+    if (firstTime) {
+      if (this.shouldAnimate === false) {
+        return emptyTransition;
+      }
+    }
+
+    // ignore animation when leaving the project
+    if (this.router.currentRouteName !== "projects.project") {
+      return emptyTransition;
+    }
+
+    return this.resourceTransition;
+  }
+
+  /**
+   *
+   */
+  @action protected resourceSectionTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }): Transition {
     if (firstTime) {
       if (this.shouldAnimate === false) {
         return emptyTransition;
@@ -566,7 +595,54 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       return emptyTransition;
     }
 
-    return this.resourceTransition;
+    // handle the case of the first item being added
+    if (newItems[0] === true && oldItems[0] === false) {
+      return this.addFirstResourceTransition;
+    }
+
+    // handle the case where the section is emptying
+    if (newItems[0] === false && oldItems[0] === true) {
+      return this.removeLastResourceTransition;
+    }
+
+    return emptyTransition;
+  }
+
+  *addFirstResourceTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
+    // Remove the empty state ("None")
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 200 });
+    }
+
+    // Insert the resource list right away;
+    // the `each` transition will handle fadeIns
+    for (let sprite of insertedSprites) {
+      sprite.reveal();
+    }
+  }
+
+  *removeLastResourceTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 1000 });
+    }
+
+    for (let sprite of insertedSprites) {
+      void fadeIn(sprite, { duration: 80 });
+    }
   }
 
   *resourceTransition({
@@ -594,12 +670,13 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       void fadeOut(sprite, { duration: 200 });
     }
 
-    yield wait(100);
-
     for (let sprite of insertedSprites) {
+      yield wait(100);
+
       sprite.applyStyles({
         opacity: "0",
       });
+
       void animateTransform(sprite, {
         scale: {
           from: 0.95,
@@ -607,6 +684,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         duration: 200,
         easing: easeOutQuad,
       });
+
       void fadeIn(sprite, { duration: 50 });
     }
   }

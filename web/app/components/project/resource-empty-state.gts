@@ -4,10 +4,12 @@ interface ProjectResourceEmptyStateComponentSignature {}
 
 export default class ProjectResourceEmptyStateComponent extends Component<ProjectResourceEmptyStateComponentSignature> {
   <template>
-    <div
-      class="py-4 text-display-300 text-color-foreground-disabled opacity-70"
-    >
-      None
+    <div>
+      <div
+        class="pb-4 text-display-300 text-color-foreground-disabled opacity-70"
+      >
+        None
+      </div>
     </div>
   </template>
 }

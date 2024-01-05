@@ -160,11 +160,12 @@
   <div class="max-w-3xl">
     <AnimatedContainer @motion={{this.motion}}>
       {{! Documents }}
-      <div class="mt-7 flex h-6 items-center gap-2">
+      <div class="mt-7 mb-3 flex h-6 items-center gap-2">
         <h3 data-test-documents-header class="hermes-h4">
           Documents
         </h3>
         {{#if (gt this.hermesDocuments.length 0)}}
+          {{! TODO: animate this }}
           <Hds::BadgeCount
             data-test-document-count
             @text="{{this.hermesDocuments.length}}"
@@ -173,13 +174,14 @@
       </div>
 
       <AnimatedContainer @motion={{this.motion}}>
-        {{#animated-if (gt this.hermesDocuments.length 0)}}
+        {{#animated-if
+          (gt this.hermesDocuments.length 0)
+          rules=this.resourceSectionTransitionRules
+          initialInsertion=true
+          finalRemoval=true
+        }}
           <div>
-            <ol
-              {{did-insert this.enableAnimation}}
-              data-test-document-list
-              class="divided-list mt-3"
-            >
+            <ol data-test-document-list class="divided-list">
               {{! ANIMATE! }}
               {{#animated-each
                 this.hermesDocuments
@@ -212,11 +214,12 @@
       <div class="mt-8">
 
         {{! External links }}
-        <div class="flex h-6 items-center gap-2">
+        <div class="mb-3 flex h-6 items-center gap-2">
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
           {{#if (gt this.externalLinks.length 0)}}
+            {{! TODO: animate this }}
             <Hds::BadgeCount
               data-test-external-link-count
               @text="{{this.externalLinks.length}}"
@@ -227,7 +230,7 @@
       <AnimatedContainer @motion={{this.motion}}>
         {{#if this.externalLinks.length}}
           <div>
-            <ol data-test-external-link-list class="divided-list mt-5">
+            <ol data-test-external-link-list class="divided-list">
               {{#animated-each
                 this.externalLinks
                 rules=this.resourceTransitionRules
@@ -288,6 +291,7 @@
 </AnimatedContainer>
 
 <div
+  {{did-insert this.enableAnimation}}
   class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
 >
   <span data-test-created-time>
