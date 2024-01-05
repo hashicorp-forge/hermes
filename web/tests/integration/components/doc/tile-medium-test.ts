@@ -1,4 +1,4 @@
-import { render } from "@ember/test-helpers";
+import { render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
@@ -8,6 +8,9 @@ import { HermesDocument } from "hermes/types/document";
 import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
 
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
+const AVATAR_IMAGE = `${AVATAR_LINK} img`;
+const AVATAR_LOADING = `${AVATAR_LINK} [data-test-is-loading]`;
+const AVATAR_FALLBACK = `${AVATAR_LINK} [data-test-fallback]`;
 const TITLE = "[data-test-document-title]";
 const DOC_NUMBER = "[data-test-document-number]";
 const USER_NAME = "[data-test-document-owner-name]";
@@ -63,7 +66,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
           )}%22%5D`,
         );
 
-      assert.dom(`${AVATAR_LINK} img`).hasAttribute("src", TEST_USER_PHOTO);
+      assert.dom(AVATAR_IMAGE).hasAttribute("src", TEST_USER_PHOTO);
 
       assert.dom(TITLE).hasText(doc.title);
       assert.dom(DOC_NUMBER).hasText(docNumber);
@@ -107,5 +110,64 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     assert
       .dom("[data-test-document-link]")
       .hasAttribute("href", `/document/doc-0`);
+  });
+
+  test("it will load the owner avatar if it is not initially provided", async function (this: DocTileMediumComponentContext, assert) {
+    const id = "123";
+    this.server.create("document", {
+      id: id,
+      objectID: id,
+      ownerPhotos: [TEST_USER_PHOTO],
+    });
+
+    this.server.create("related-hermes-document", {
+      id: id,
+      googleFileID: id,
+      ownerPhotos: [],
+    });
+
+    this.set("doc", this.server.schema.relatedHermesDocument.find(id).attrs);
+    console.log("this.doc", this.doc);
+    const renderPromise = render<DocTileMediumComponentContext>(
+      hbs`<Doc::TileMedium @doc={{this.doc}} />`,
+    );
+
+    await waitFor(AVATAR_LOADING);
+
+    await renderPromise;
+
+    assert.dom(AVATAR_LOADING).doesNotExist();
+
+    assert.dom(AVATAR_IMAGE).hasAttribute("src", TEST_USER_PHOTO);
+  });
+
+  test("it will fall back to the default avatar if the owner photo is not available", async function (this: DocTileMediumComponentContext, assert) {
+    const id = "123";
+    this.server.create("document", {
+      id: id,
+      objectID: id,
+      ownerPhotos: [],
+    });
+
+    this.server.create("related-hermes-document", {
+      id: id,
+      googleFileID: id,
+      ownerPhotos: [],
+    });
+
+    this.set("doc", this.server.schema.relatedHermesDocument.find(id).attrs);
+
+    const renderPromise = render<DocTileMediumComponentContext>(
+      hbs`<Doc::TileMedium @doc={{this.doc}} />`,
+    );
+
+    await waitFor(AVATAR_LOADING);
+
+    await renderPromise;
+
+    assert.dom(AVATAR_LOADING).doesNotExist();
+    assert.dom(AVATAR_IMAGE).doesNotExist();
+
+    assert.dom(AVATAR_FALLBACK).exists();
   });
 });
