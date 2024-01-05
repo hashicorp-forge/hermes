@@ -21,6 +21,13 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
+import { Transition } from "ember-animated/-private/transition";
+import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
+import { TransitionContext, wait } from "ember-animated/.";
+import move from "ember-animated/motions/move";
+import { easeOutQuad } from "hermes/utils/ember-animated/easings";
+import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import animateScale from "hermes/utils/ember-animated/animate-scale";
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -38,6 +45,12 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Used in the status dropdown.
    */
   protected statuses = projectStatusObjects;
+
+  /**
+   * Whether the list should animate.
+   * Used to disable the animation on first render.
+   */
+  @tracked private shouldAnimate = false;
 
   /**
    * Locally tracked project attributes.
@@ -308,6 +321,64 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = false;
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
+  }
+
+  /**
+   * The action to enable animations.
+   * Called when the list is rendered, just
+   * after the transitionRules have been set
+   */
+  @action protected enableAnimation() {
+    this.shouldAnimate = true;
+  }
+
+  /**
+   *
+   */
+  @action protected resourceTransitionRules({
+    firstTime,
+  }: {
+    firstTime: boolean;
+  }): Transition {
+    if (firstTime) {
+      if (this.shouldAnimate === false) {
+        return emptyTransition;
+      }
+    }
+    return this.resourceTransition;
+  }
+
+  *resourceTransition({
+    insertedSprites,
+    keptSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
+    for (let sprite of keptSprites) {
+      void move(sprite, { duration: 250, easing: easeOutQuad });
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 0 });
+    }
+
+    yield wait(100);
+
+    for (let sprite of insertedSprites) {
+      sprite.applyStyles({
+        opacity: "0",
+      });
+      void animateScale(sprite, {
+        from: 0.95,
+        to: 1,
+        duration: 200,
+        easing: easeOutQuad,
+      });
+      void fadeIn(sprite, { duration: 50 });
+    }
   }
 
   /**

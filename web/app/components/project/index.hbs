@@ -112,7 +112,7 @@
   </div>
 {{/if}}
 
-<div class="relative mt-6 border-t border-t-color-border-primary">
+<AnimatedContainer class="relative mt-6 border-t border-t-color-border-primary">
 
   {{! Plus button }}
   <RelatedResources
@@ -150,27 +150,41 @@
             @text="{{this.hermesDocuments.length}}"
           />
         </div>
-        <ol data-test-document-list class="divided-list mt-3">
-          {{#each this.hermesDocuments as |document|}}
-            <li class="group relative" data-test-document-list-item>
-              <Project::Resource
-                @isReadOnly={{not this.projectIsActive}}
-                @overflowMenuItems={{hash
-                  delete=(hash
-                    label="Remove"
-                    icon="trash"
-                    action=(fn this.deleteResource document)
-                  )
-                }}
-              >
-                <Doc::TileMedium
-                  @doc={{document}}
-                  @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
-                />
-              </Project::Resource>
-            </li>
-          {{/each}}
-        </ol>
+        <AnimatedContainer>
+
+          <ol
+            {{did-insert this.enableAnimation}}
+            data-test-document-list
+            class="divided-list mt-3"
+          >
+            {{! ANIMATE! }}
+            {{#animated-each
+              this.hermesDocuments
+              rules=this.resourceTransitionRules
+              initialInsertion=true
+              finalRemoval=true
+              as |document|
+            }}
+              <li class="group relative" data-test-document-list-item>
+                <Project::Resource
+                  @isReadOnly={{not this.projectIsActive}}
+                  @overflowMenuItems={{hash
+                    delete=(hash
+                      label="Remove"
+                      icon="trash"
+                      action=(fn this.deleteResource document)
+                    )
+                  }}
+                >
+                  <Doc::TileMedium
+                    @doc={{document}}
+                    @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
+                  />
+                </Project::Resource>
+              </li>
+            {{/animated-each}}
+          </ol>
+        </AnimatedContainer>
       {{/if}}
 
       {{#if this.externalLinks.length}}
@@ -260,7 +274,7 @@
       </span>
     </div>
   </div>
-</div>
+</AnimatedContainer>
 
 {{#if this.editModalIsShown}}
   <RelatedResources::AddOrEditExternalResourceModal
