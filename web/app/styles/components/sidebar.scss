@@ -24,11 +24,9 @@
       @apply -mx-[8px] mt-[-8px] -mb-[8px];
 
       .x-dropdown-list-toggle-select {
-        @apply items-start border-color-border-strong bg-color-page-primary py-[7px] px-[6px] shadow-none;
+        @apply items-start py-[7px] px-[6px] shadow-none;
 
         &:not(:hover, :focus, :focus-visible, .open) {
-          @apply border-transparent bg-transparent;
-
           .flight-icon-caret {
             @apply hidden;
           }
@@ -55,12 +53,8 @@
     }
   }
 
-  .sidebar-header-button {
-    @apply relative flex items-center rounded-button-md border border-transparent py-2 px-3 text-color-foreground-primary;
-
-    &:hover {
-      @apply border-color-border-strong bg-color-foreground-high-contrast;
-    }
+  .quarternary-button {
+    @apply relative;
 
     @keyframes slideDownAndRotateLeft {
       to {
@@ -75,6 +69,11 @@
     }
   }
 
+  .sidebar-header .quarternary-button,
+  .draft-visibility-button {
+    @apply px-3 py-2;
+  }
+
   .draft-visibility-button {
     // match the height of the header buttons
     @apply h-[38px];
@@ -84,12 +83,6 @@
 
   .sidebar-header-icon-controls {
     @apply flex;
-
-    .sidebar-header-button {
-      &::hover {
-        @apply border-transparent  bg-color-surface-interactive-hover;
-      }
-    }
   }
 
   .sidebar-body {
@@ -125,24 +118,20 @@
 
   .sidebar-section-header-container {
     @apply flex w-full items-center justify-between;
+
+    .quarternary-button {
+      @apply rounded;
+      @apply h-[26px] w-[26px];
+      @apply -mr-0.5;
+
+      &.disabled {
+        @apply cursor-not-allowed opacity-50;
+      }
+    }
   }
 
   .sidebar-section-header {
     @apply hds-foreground-faint text-body-100 font-regular;
-  }
-
-  .sidebar-section-header-button {
-    @apply grid place-items-center rounded border border-transparent;
-    @apply h-[26px] w-[26px];
-    @apply -mr-0.5;
-
-    &:hover:not(.disabled) {
-      @apply border-color-border-strong;
-    }
-
-    &.disabled {
-      @apply cursor-not-allowed opacity-50;
-    }
   }
 
   .primary-textarea {

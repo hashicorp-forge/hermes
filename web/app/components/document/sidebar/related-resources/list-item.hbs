@@ -10,7 +10,7 @@
         data-test-item-type="hermes-document"
         @model={{this.documentObjectID}}
         @route="authenticated.document"
-        class="related-resource-link peer"
+        class="related-resource-link quarternary-button peer"
       >
         <Document::Sidebar::RelatedResources::ListItem::Resource
           @resource={{@resource}}
@@ -21,7 +21,7 @@
       <ExternalLink
         data-test-item-type="external-resource"
         href={{this.externalResourceURL}}
-        class="related-resource-link peer"
+        class="related-resource-link quarternary-button peer"
       >
         <Document::Sidebar::RelatedResources::ListItem::Resource
           @resource={{@resource}}

@@ -4,7 +4,7 @@
   .related-resource-inner {
     @apply relative w-full;
 
-    &:hover,
+    &:hover:not(.disabled):not(:focus),
     &:focus-within {
       .related-resource-link {
         @apply border border-color-border-primary bg-color-page-primary;
@@ -18,6 +18,17 @@
     .highlight-affordance {
       @apply absolute top-0 left-0 z-[-1] h-full w-full rounded;
       @apply border border-color-border-highlight bg-color-surface-highlight;
+    }
+  }
+
+  .related-resource-link {
+    @apply relative grid items-start justify-start gap-2 rounded py-[5px];
+    @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;
+    @apply outline-offset-[3px];
+    grid-template-columns: 22px auto;
+
+    .hermes-document + .external-resource {
+      @apply mt-1.5;
     }
   }
 }
@@ -50,17 +61,6 @@
       fadeIn 400ms ease-out,
       scaleIn 500ms ease-out,
       fadeOut 500ms ease-out 600ms forwards;
-  }
-}
-
-.related-resource-link {
-  @apply relative grid items-start gap-2 rounded border border-transparent py-[5px];
-  @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;
-  @apply outline-offset-[3px];
-  grid-template-columns: 22px auto;
-
-  .hermes-document + .external-resource {
-    @apply mt-1.5;
   }
 }
 
