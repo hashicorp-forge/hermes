@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -21,13 +21,23 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
-import { Transition } from "ember-animated/-private/transition";
-import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import { TransitionContext, wait } from "ember-animated/.";
-import move from "ember-animated/motions/move";
-import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
-import animateScale from "hermes/utils/ember-animated/animate-scale";
+import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
+import move from "ember-animated/motions/move";
+import { Resize } from "ember-animated/motions/resize";
+import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
+import animateTransform from "hermes/utils/ember-animated/animate-transform";
+
+const animationDuration = Ember.testing ? 0 : 450;
+
+class ResizeProject extends Resize {
+  *animate() {
+    this.opts.duration = animationDuration;
+    this.opts.easing = easeOutExpo;
+    yield* super.animate();
+  }
+}
 
 interface ProjectIndexComponentSignature {
   Args: {
@@ -45,6 +55,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Used in the status dropdown.
    */
   protected statuses = projectStatusObjects;
+
+  protected motion = ResizeProject;
 
   /**
    * Whether the list should animate.
@@ -117,6 +129,26 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   protected get projectIsActive() {
     return this.status === ProjectStatus.Active;
+  }
+
+  /**
+   * Whether the JiraWidget should be shown.
+   * True if the project is active, or if the project has a Jira issue
+   * (that may or may not be loading)
+   */
+  protected get jiraWidgetIsShown() {
+    /**
+     * This construction is weird, but it gives us
+     * the most accurate evaluations by `ember-animated`
+     * and prevents unnecessary re-renders.
+     */
+    if (
+      !!this.jiraIssue ||
+      this.projectIsActive ||
+      this.loadJiraIssue.isRunning
+    ) {
+      return true;
+    }
   }
 
   /**
@@ -321,6 +353,133 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = false;
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
+  }
+
+  @action plusButtonTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }) {
+    // ignore animation on first render
+    if (firstTime) {
+      return emptyTransition;
+    }
+    // ignore animation when leaving the project
+    if (oldItems[0] === true && newItems[0] === undefined) {
+      return emptyTransition;
+    }
+
+    // animate all other cases
+    return this.plusButtonTransition;
+  }
+
+  @action descriptionTransitionRules({ firstTime }: { firstTime: boolean }) {
+    if (firstTime) {
+      return emptyTransition;
+    }
+    return this.descriptionTransition;
+  }
+
+  @action jiraTransitionRules({ firstTime }: { firstTime: boolean }) {
+    // ignore animation on first render
+    if (firstTime) {
+      return emptyTransition;
+    }
+
+    // animate all other cases
+    return this.jiraTransition;
+  }
+
+  *descriptionTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.01);
+      void fadeIn(sprite, { duration: animationDuration * 0.25 });
+    }
+
+    for (let sprite of removedSprites) {
+      yield wait(animationDuration * 0.0025);
+      void fadeOut(sprite, { duration: animationDuration * 0.075 });
+    }
+  }
+
+  *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.1);
+      void fadeIn(sprite, { duration: animationDuration * 0.35 });
+    }
+
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(0, -30);
+
+      void move(sprite, {
+        duration: animationDuration,
+        easing: easeOutExpo,
+      });
+
+      void fadeOut(sprite, { duration: animationDuration * 0.05 });
+    }
+  }
+
+  *plusButtonTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.3);
+
+      void animateTransform(sprite, {
+        scale: {
+          from: 0.4,
+          duration: animationDuration * 0.2,
+        },
+        rotate: {
+          from: -10,
+        },
+        translate: {
+          yFrom: 25,
+        },
+        duration: animationDuration * 0.85,
+        easing: easeOutExpo,
+      });
+      void fadeIn(sprite, { duration: animationDuration * 0.1 });
+    }
+
+    for (let sprite of removedSprites) {
+      const duration = animationDuration * 0.3;
+      const easing = easeOutQuad;
+
+      void animateTransform(sprite, {
+        scale: {
+          to: 0.8,
+        },
+        rotate: {
+          to: -70,
+        },
+        translate: {
+          yTo: 15,
+        },
+        duration,
+        easing,
+      });
+
+      void fadeOut(sprite, {
+        duration,
+        easing,
+      });
+    }
   }
 
   /**
