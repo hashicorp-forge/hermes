@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -256,8 +256,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Adds a resource to the correct array, then saves the project.
    */
   @action protected addDocument(resource: RelatedHermesDocument) {
-    void this.getOwnerPhoto.perform(resource.googleFileID);
-
     const cachedDocuments = this.hermesDocuments.slice();
 
     this.hermesDocuments.unshiftObject(resource);
@@ -309,27 +307,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
   }
-
-  /**
-   * The task to get the owner photo for a document.
-   */
-  private getOwnerPhoto = enqueueTask(async (docID: string) => {
-    const doc = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
-      .then((response) => response?.json());
-
-    const ownerPhoto = doc.ownerPhotos[0];
-
-    if (ownerPhoto) {
-      const hermesDoc = this.hermesDocuments.find(
-        (doc) => doc.googleFileID === docID,
-      );
-
-      if (hermesDoc) {
-        hermesDoc.ownerPhotos = [ownerPhoto];
-      }
-    }
-  });
 
   /**
    * The action to save basic project attributes,

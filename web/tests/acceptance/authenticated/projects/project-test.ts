@@ -386,13 +386,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await waitFor(ADD_PROJECT_RESOURCE_MODAL);
     assert.dom(ADD_PROJECT_RESOURCE_MODAL).exists();
 
-    const clickPromise = click(ADD_DOCUMENT_OPTION);
+    await click(ADD_DOCUMENT_OPTION);
 
-    await waitFor(`${DOCUMENT_OWNER_AVATAR} [data-test-is-loading]`);
-
-    await clickPromise;
-
-    assert.dom("[data-test-is-loading]").doesNotExist();
     assert
       .dom(`${DOCUMENT_OWNER_AVATAR} img`)
       .hasAttribute("src", TEST_USER_PHOTO);
