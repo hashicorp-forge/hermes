@@ -2,7 +2,6 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
-import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
@@ -330,17 +329,29 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
    * Adds the clicked document to the related-documents array in the correct format.
    */
   @action protected onItemClick(_item: any, attrs: any) {
+    const {
+      title,
+      owners,
+      ownerPhotos,
+      product,
+      status,
+      createdTime,
+      modifiedTime,
+    } = attrs;
+
     const relatedHermesDocument = {
       googleFileID: attrs.objectID,
-      title: attrs.title,
       documentType: attrs.docType,
       documentNumber: attrs.docNumber,
-      owners: attrs.owners,
-      ownerPhotos: attrs.ownerPhotos,
-      product: attrs.product,
-      status: attrs.status,
+      title,
+      owners,
+      ownerPhotos,
+      product,
+      status,
+      createdTime,
+      modifiedTime,
       sortOrder: 1,
-    } as RelatedHermesDocument;
+    };
 
     this.args.addResource(relatedHermesDocument);
   }
