@@ -335,6 +335,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       ownerPhotos,
       product,
       status,
+      summary,
       createdTime,
       modifiedTime,
     } = attrs;
@@ -344,6 +345,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       documentType: attrs.docType,
       documentNumber: attrs.docNumber,
       title,
+      summary,
       owners,
       ownerPhotos,
       product,

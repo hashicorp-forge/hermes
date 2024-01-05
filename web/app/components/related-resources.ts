@@ -228,6 +228,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
               "docType",
               "status",
               "owners",
+              "summary",
               "createdTime",
               "modifiedTime",
             ],
