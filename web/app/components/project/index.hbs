@@ -192,7 +192,10 @@
                     finalRemoval=true
                     as |document|
                   }}
-                    <li class="group relative" data-test-document-list-item>
+                    <li
+                      class="group relative block"
+                      data-test-document-list-item
+                    >
                       <Project::Resource
                         @isReadOnly={{not this.projectIsActive}}
                         @overflowMenuItems={{hash
@@ -233,7 +236,7 @@
                   finalRemoval=true
                   as |link i|
                 }}
-                  <li class="group" data-test-document-list-item>
+                  <li class="group block" data-test-document-list-item>
                     <Project::Resource
                       @isReadOnly={{not this.projectIsActive}}
                       @overflowMenuItems={{hash
