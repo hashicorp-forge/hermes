@@ -378,18 +378,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     oldItems: unknown[];
     newItems: unknown[];
   }) {
-    console.log("projectBodyTransitionRules", {
-      firstTime,
-      oldItems,
-      newItems,
-    });
-
     // ignore animation on first render
     if (firstTime) {
       return emptyTransition;
     }
 
-    // TODO: do we need other logic for this?
+    // ignore animation when leaving the project
+    if (oldItems[0] === true && newItems[0] === undefined) {
+      return emptyTransition;
+    }
 
     return this.projectBodyTransition;
   }
@@ -438,11 +435,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     removedSprites,
   }: TransitionContext) {
     if (Ember.testing) return;
-
-    console.log("projectBodyTransition", {
-      insertedSprites,
-      removedSprites,
-    });
 
     for (let sprite of insertedSprites) {
       yield wait(animationDuration * 0.1);
@@ -570,7 +562,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     // ignore animation when leaving the project
-    if (oldItems[0] === true && newItems[0] === undefined) {
+    if (!!oldItems[0] && newItems[0] === undefined) {
       return emptyTransition;
     }
 

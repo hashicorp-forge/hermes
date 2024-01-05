@@ -67,7 +67,6 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
    * The task to get the owner photo for a document.
    */
   private getOwnerPhoto = task(async (docID: string) => {
-    console.log("getOwnerPhoto");
     const doc = await this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
       .then((response) => response?.json());
