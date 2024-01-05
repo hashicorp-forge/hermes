@@ -198,51 +198,60 @@
             @text="{{this.externalLinks.length}}"
           />
         </div>
-        <ol data-test-external-link-list class="divided-list mt-5">
-          {{#each this.externalLinks as |link i|}}
-            <li class="group" data-test-document-list-item>
-              <Project::Resource
-                @isReadOnly={{not this.projectIsActive}}
-                @overflowMenuItems={{hash
-                  edit=(hash
-                    label="Edit"
-                    icon="edit"
-                    action=(fn this.showEditModal link i)
-                  )
-                  delete=(hash
-                    label="Remove"
-                    icon="trash"
-                    action=(fn this.deleteResource link)
-                  )
-                }}
-              >
-                <ExternalLink
-                  data-test-related-link
-                  href={{link.url}}
-                  class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
+        <AnimatedContainer>
+
+          <ol data-test-external-link-list class="divided-list mt-5">
+            {{#animated-each
+              this.externalLinks
+              rules=this.resourceTransitionRules
+              initialInsertion=true
+              finalRemoval=true
+              as |link i|
+            }}
+              <li class="group" data-test-document-list-item>
+                <Project::Resource
+                  @isReadOnly={{not this.projectIsActive}}
+                  @overflowMenuItems={{hash
+                    edit=(hash
+                      label="Edit"
+                      icon="edit"
+                      action=(fn this.showEditModal link i)
+                    )
+                    delete=(hash
+                      label="Remove"
+                      icon="trash"
+                      action=(fn this.deleteResource link)
+                    )
+                  }}
                 >
-                  <div class="flex items-center gap-4">
-                    <div class="flex w-9 justify-end">
-                      <Favicon @url={{link.url}} />
-                    </div>
-                    <div class="flex w-full gap-2">
-                      <h4
-                        class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
-                      >
-                        {{link.name}}
-                      </h4>
-                      <div
-                        class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
-                      >
-                        {{link.url}}
+                  <ExternalLink
+                    data-test-related-link
+                    href={{link.url}}
+                    class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
+                  >
+                    <div class="flex items-center gap-4">
+                      <div class="flex w-9 justify-end">
+                        <Favicon @url={{link.url}} />
+                      </div>
+                      <div class="flex w-full gap-2">
+                        <h4
+                          class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
+                        >
+                          {{link.name}}
+                        </h4>
+                        <div
+                          class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
+                        >
+                          {{link.url}}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ExternalLink>
-              </Project::Resource>
-            </li>
-          {{/each}}
-        </ol>
+                  </ExternalLink>
+                </Project::Resource>
+              </li>
+            {{/animated-each}}
+          </ol>
+        </AnimatedContainer>
       {{/if}}
     {{else}}
       <div
