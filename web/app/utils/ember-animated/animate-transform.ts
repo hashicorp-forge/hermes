@@ -13,6 +13,7 @@ interface AnimateTransformOptions extends BaseOptions {
     from?: number;
     to?: number;
     duration?: number;
+    origin?: string;
   };
   rotate?: {
     from?: number;
@@ -132,6 +133,7 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
       sprite.applyStyles({
         transform: transformString,
+        "transform-origin": scale?.origin ?? "center",
       });
 
       yield rAF();

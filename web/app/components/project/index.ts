@@ -557,7 +557,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     oldItems: unknown[];
     newItems: unknown[];
   }): Transition {
-    console.log("resourceTransitionRules", firstTime, oldItems, newItems);
     if (firstTime) {
       if (this.shouldAnimate === false) {
         return emptyTransition;
@@ -618,7 +617,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     // Remove the empty state ("None")
     for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 200 });
+      sprite.endTranslatedBy(0, 10);
+      void move(sprite, { duration: 120, easing: easeOutQuad });
+      void fadeOut(sprite, { duration: 120 });
     }
 
     // Insert the resource list right away;
@@ -637,11 +638,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 1000 });
+      // void fadeOut(sprite, { duration: 1000 });
     }
 
     for (let sprite of insertedSprites) {
-      void fadeIn(sprite, { duration: 80 });
+      yield wait(50);
+      sprite.startTranslatedBy(0, 10);
+      void move(sprite, { duration: 200, easing: easeOutQuad });
+      void fadeIn(sprite, { duration: 100 });
     }
   }
 
@@ -669,19 +673,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     for (let sprite of insertedSprites) {
       yield wait(100);
 
-      sprite.applyStyles({
-        opacity: "0",
-      });
-
-      void animateTransform(sprite, {
-        scale: {
-          from: 0.95,
-        },
-        duration: 200,
-        easing: easeOutQuad,
-      });
-
-      void fadeIn(sprite, { duration: 50 });
+      void fadeIn(sprite, { duration: 80 });
     }
   }
 
