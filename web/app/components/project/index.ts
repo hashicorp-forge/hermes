@@ -28,6 +28,8 @@ import move from "ember-animated/motions/move";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
+import { Transition } from "ember-animated/-private/transition";
+import animateScale from "hermes/utils/ember-animated/animate-scale";
 
 const animationDuration = Ember.testing ? 0 : 450;
 

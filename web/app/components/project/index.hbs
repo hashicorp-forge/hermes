@@ -152,7 +152,8 @@
   </AnimatedContainer>
 </div>
 
-<div
+<AnimatedContainer
+  @motion={{this.motion}}
   class="relative border-t border-t-color-border-primary bg-color-page-primary"
 >
   {{! Resources }}
@@ -170,8 +171,8 @@
             @text="{{this.hermesDocuments.length}}"
           />
         </div>
-        <AnimatedContainer>
 
+        <AnimatedContainer @motion={{this.motion}}>
           <ol
             {{did-insert this.enableAnimation}}
             data-test-document-list
@@ -218,7 +219,7 @@
             @text="{{this.externalLinks.length}}"
           />
         </div>
-        <AnimatedContainer>
+        <AnimatedContainer @motion={{this.motion}}>
 
           <ol data-test-external-link-list class="divided-list mt-5">
             {{#animated-each
