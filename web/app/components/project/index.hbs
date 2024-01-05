@@ -158,119 +158,128 @@
 >
   {{! Resources }}
   <div class="max-w-3xl">
-    {{#if (or this.hermesDocuments.length this.externalLinks.length)}}
-      {{#if this.hermesDocuments.length}}
-
-        {{! Documents }}
-        <div class="mt-7 flex h-6 items-center gap-2">
-          <h3 data-test-documents-header class="hermes-h4">
-            Documents
-          </h3>
-          <Hds::BadgeCount
-            data-test-document-count
-            @text="{{this.hermesDocuments.length}}"
-          />
-        </div>
-
+    {{! TODO: this needs its own ruleset }}
+    {{#animated-if
+      this.resourcesAreShown rules=this.projectBodyTransitionRules
+    }}
+      <div>
         <AnimatedContainer @motion={{this.motion}}>
-          <ol
-            {{did-insert this.enableAnimation}}
-            data-test-document-list
-            class="divided-list mt-3"
-          >
-            {{! ANIMATE! }}
-            {{#animated-each
-              this.hermesDocuments
-              rules=this.resourceTransitionRules
-              initialInsertion=true
-              finalRemoval=true
-              as |document|
-            }}
-              <li class="group relative" data-test-document-list-item>
-                <Project::Resource
-                  @isReadOnly={{not this.projectIsActive}}
-                  @overflowMenuItems={{hash
-                    delete=(hash
-                      label="Remove"
-                      icon="trash"
-                      action=(fn this.deleteResource document)
-                    )
-                  }}
-                >
-                  <Doc::TileMedium @doc={{document}} />
-                </Project::Resource>
-              </li>
-            {{/animated-each}}
-          </ol>
-        </AnimatedContainer>
-      {{/if}}
+          {{! TODO: this needs its own ruleset }}
+          {{#animated-if (gt this.hermesDocuments.length 0)}}
+            <div>
+              {{! Documents }}
+              <div class="mt-7 flex h-6 items-center gap-2">
+                <h3 data-test-documents-header class="hermes-h4">
+                  Documents
+                </h3>
+                <Hds::BadgeCount
+                  data-test-document-count
+                  @text="{{this.hermesDocuments.length}}"
+                />
+              </div>
 
-      {{#if this.externalLinks.length}}
-        {{! External links }}
-        <div class="mt-7 flex h-6 items-center gap-2">
-          <h3 data-test-external-links-header class="hermes-h4">
-            External links
-          </h3>
-          <Hds::BadgeCount
-            data-test-external-link-count
-            @text="{{this.externalLinks.length}}"
-          />
-        </div>
-        <AnimatedContainer @motion={{this.motion}}>
-
-          <ol data-test-external-link-list class="divided-list mt-5">
-            {{#animated-each
-              this.externalLinks
-              rules=this.resourceTransitionRules
-              initialInsertion=true
-              finalRemoval=true
-              as |link i|
-            }}
-              <li class="group" data-test-document-list-item>
-                <Project::Resource
-                  @isReadOnly={{not this.projectIsActive}}
-                  @overflowMenuItems={{hash
-                    edit=(hash
-                      label="Edit"
-                      icon="edit"
-                      action=(fn this.showEditModal link i)
-                    )
-                    delete=(hash
-                      label="Remove"
-                      icon="trash"
-                      action=(fn this.deleteResource link)
-                    )
-                  }}
+              <AnimatedContainer @motion={{this.motion}}>
+                <ol
+                  {{did-insert this.enableAnimation}}
+                  data-test-document-list
+                  class="divided-list mt-3"
                 >
-                  <ExternalLink
-                    data-test-related-link
-                    href={{link.url}}
-                    class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
-                  >
-                    <div class="flex items-center gap-4">
-                      <div class="flex w-9 justify-end">
-                        <Favicon @url={{link.url}} />
-                      </div>
-                      <div class="flex w-full gap-2">
-                        <h4
-                          class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
-                        >
-                          {{link.name}}
-                        </h4>
-                        <div
-                          class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
-                        >
-                          {{link.url}}
+                  {{! ANIMATE! }}
+                  {{#animated-each
+                    this.hermesDocuments
+                    rules=this.resourceTransitionRules
+                    initialInsertion=true
+                    finalRemoval=true
+                    as |document|
+                  }}
+                    <li class="group relative" data-test-document-list-item>
+                      <Project::Resource
+                        @isReadOnly={{not this.projectIsActive}}
+                        @overflowMenuItems={{hash
+                          delete=(hash
+                            label="Remove"
+                            icon="trash"
+                            action=(fn this.deleteResource document)
+                          )
+                        }}
+                      >
+                        <Doc::TileMedium @doc={{document}} />
+                      </Project::Resource>
+                    </li>
+                  {{/animated-each}}
+                </ol>
+              </AnimatedContainer>
+            </div>
+          {{/animated-if}}
+
+          {{#if this.externalLinks.length}}
+            {{! External links }}
+            <div class="mt-7 flex h-6 items-center gap-2">
+              <h3 data-test-external-links-header class="hermes-h4">
+                External links
+              </h3>
+              <Hds::BadgeCount
+                data-test-external-link-count
+                @text="{{this.externalLinks.length}}"
+              />
+            </div>
+            <AnimatedContainer @motion={{this.motion}}>
+
+              <ol data-test-external-link-list class="divided-list mt-5">
+                {{#animated-each
+                  this.externalLinks
+                  rules=this.resourceTransitionRules
+                  initialInsertion=true
+                  finalRemoval=true
+                  as |link i|
+                }}
+                  <li class="group" data-test-document-list-item>
+                    <Project::Resource
+                      @isReadOnly={{not this.projectIsActive}}
+                      @overflowMenuItems={{hash
+                        edit=(hash
+                          label="Edit"
+                          icon="edit"
+                          action=(fn this.showEditModal link i)
+                        )
+                        delete=(hash
+                          label="Remove"
+                          icon="trash"
+                          action=(fn this.deleteResource link)
+                        )
+                      }}
+                    >
+                      <ExternalLink
+                        data-test-related-link
+                        href={{link.url}}
+                        class="block px-2 pt-2.5 pb-2.5 group-hover:bg-color-surface-faint"
+                      >
+                        <div class="flex items-center gap-4">
+                          <div class="flex w-9 justify-end">
+                            <Favicon @url={{link.url}} />
+                          </div>
+                          <div class="flex w-full gap-2">
+                            <h4
+                              class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
+                            >
+                              {{link.name}}
+                            </h4>
+                            <div
+                              class="mt-1 max-w-[35%] truncate text-[11px] text-color-foreground-faint"
+                            >
+                              {{link.url}}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </ExternalLink>
-                </Project::Resource>
-              </li>
-            {{/animated-each}}
-          </ol>
+                      </ExternalLink>
+                    </Project::Resource>
+                  </li>
+                {{/animated-each}}
+              </ol>
+            </AnimatedContainer>
+          {{/if}}
         </AnimatedContainer>
-      {{/if}}
+      </div>
     {{else}}
       <div
         data-test-empty-body
@@ -284,25 +293,25 @@
           Add documents and links using the + button
         </div>
       </div>
-    {{/if}}
-
-    <div
-      class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
-    >
-      <span data-test-created-time>
-        Created
-        {{time-ago @project.createdTime}}
-        by
-        {{@project.creator}}
-      </span>
-      <span class="opacity-50">|</span>
-      <span data-test-modified-time>
-        Last modified
-        {{time-ago @project.modifiedTime}}
-      </span>
-    </div>
+    {{/animated-if}}
   </div>
 </AnimatedContainer>
+
+<div
+  class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
+>
+  <span data-test-created-time>
+    Created
+    {{time-ago @project.createdTime}}
+    by
+    {{@project.creator}}
+  </span>
+  <span class="opacity-50">|</span>
+  <span data-test-modified-time>
+    Last modified
+    {{time-ago @project.modifiedTime}}
+  </span>
+</div>
 
 {{#if this.editModalIsShown}}
   <RelatedResources::AddOrEditExternalResourceModal

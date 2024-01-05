@@ -150,6 +150,20 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       this.loadJiraIssue.isRunning
     ) {
       return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Whether the related resources should be shown.
+   * True if the project has any related resources.
+   */
+  protected get resourcesAreShown() {
+    if (this.externalLinks.length > 0 || this.hermesDocuments.length > 0) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -355,6 +369,31 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.resourceToEditIndex = undefined;
   }
 
+  @action projectBodyTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }) {
+    console.log("projectBodyTransitionRules", {
+      firstTime,
+      oldItems,
+      newItems,
+    });
+
+    // ignore animation on first render
+    if (firstTime) {
+      return emptyTransition;
+    }
+
+    // TODO: do we need other logic for this?
+
+    return this.projectBodyTransition;
+  }
+
   @action plusButtonTransitionRules({
     firstTime,
     oldItems,
@@ -392,6 +431,27 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     // animate all other cases
     return this.jiraTransition;
+  }
+
+  *projectBodyTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+
+    console.log("projectBodyTransition", {
+      insertedSprites,
+      removedSprites,
+    });
+
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.1);
+      void fadeIn(sprite, { duration: animationDuration * 0.35 });
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: animationDuration * 0.05 });
+    }
   }
 
   *descriptionTransition({
@@ -496,14 +556,24 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   @action protected resourceTransitionRules({
     firstTime,
+    oldItems,
+    newItems,
   }: {
     firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
   }): Transition {
     if (firstTime) {
       if (this.shouldAnimate === false) {
         return emptyTransition;
       }
     }
+
+    // ignore animation when leaving the project
+    if (oldItems[0] === true && newItems[0] === undefined) {
+      return emptyTransition;
+    }
+
     return this.resourceTransition;
   }
 
@@ -521,7 +591,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 0 });
+      // adjusting the transform breaks when removing final item
+      // void animateTransform(sprite, {
+      //   scale: {
+      //     to: 0.95,
+      //   },
+      //   duration: 200,
+      //   easing: easeOutQuad,
+      // });
+      void fadeOut(sprite, { duration: 200 });
     }
 
     yield wait(100);
@@ -530,9 +608,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       sprite.applyStyles({
         opacity: "0",
       });
-      void animateScale(sprite, {
-        from: 0.95,
-        to: 1,
+      void animateTransform(sprite, {
+        scale: {
+          from: 0.95,
+        },
         duration: 200,
         easing: easeOutQuad,
       });
