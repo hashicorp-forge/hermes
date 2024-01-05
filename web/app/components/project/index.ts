@@ -667,11 +667,11 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       sprite.applyStyles({
         "z-index": "1",
       });
-      void move(sprite, { duration: 250, easing: easeOutQuad });
+      void move(sprite, { duration: 300, easing: easeOutQuad });
     }
 
     for (let sprite of insertedSprites) {
-      yield wait(100);
+      yield wait(150);
 
       void fadeIn(sprite, { duration: 80 });
     }
