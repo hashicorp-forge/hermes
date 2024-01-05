@@ -565,7 +565,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     // ignore animation when leaving the project
-    if (this.router.currentRouteName !== "projects.project") {
+    if (!this.router.currentRouteName.includes("projects.project")) {
       return emptyTransition;
     }
 
@@ -654,20 +654,16 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       return;
     }
 
-    for (let sprite of keptSprites) {
-      void move(sprite, { duration: 250, easing: easeOutQuad });
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: 80 });
     }
 
-    for (let sprite of removedSprites) {
-      // adjusting the transform breaks when removing final item
-      // void animateTransform(sprite, {
-      //   scale: {
-      //     to: 0.95,
-      //   },
-      //   duration: 200,
-      //   easing: easeOutQuad,
-      // });
-      void fadeOut(sprite, { duration: 200 });
+    for (let sprite of keptSprites) {
+      // Ensure keptSprites overlay removedSprites for a cleaner animation
+      sprite.applyStyles({
+        "z-index": "1",
+      });
+      void move(sprite, { duration: 250, easing: easeOutQuad });
     }
 
     for (let sprite of insertedSprites) {
