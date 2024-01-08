@@ -1,6 +1,6 @@
 /**
  * A transition to control all transform properties at once.
- * Modified from the `move` and `opacity` motions.
+ * Modified from Ember Animated's `move` motion.
  */
 
 import { Motion, rAF, Sprite, Tween } from "ember-animated";
@@ -63,6 +63,11 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
     let scaleTween: TweenLike | null = null;
 
     if (translate) {
+      if (!rotate && !scale) {
+        console.warn(
+          `You should use Ember Animated's \`move\` motion for simple translations`,
+        );
+      }
       translateXTween = new Tween(
         translateXFrom ?? 0,
         translateXTo ?? 0,
