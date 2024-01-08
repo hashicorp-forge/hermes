@@ -105,8 +105,6 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
       return;
     }
 
-    // TODO: this should have some timing logic beyond the component
-
     // Animate in
     for (let sprite of insertedSprites) {
       sprite.startTranslatedBy(-3, 0);
@@ -117,10 +115,9 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
 
     // Animate out
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(-2, 0);
-      yield wait(180);
-      void move(sprite, { duration: 110, easing: easeOutQuad });
-      void fadeOut(sprite, { duration: 60 });
+      sprite.endTranslatedBy(-3, 0);
+      void move(sprite, { duration: 500, easing: easeOutExpo });
+      void fadeOut(sprite, { duration: 80 });
     }
   }
 
@@ -161,7 +158,6 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     insertedSprites,
     keptSprites,
     removedSprites,
-    duration,
   }: TransitionContext) {
     if (Ember.testing) {
       return;
@@ -170,8 +166,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     const insertedSprite = insertedSprites[0]?.element;
     const removedSprite = removedSprites[0]?.element;
 
-    // Ignore the edit transition, which manifests as
-    // a removal and insertion of the same element
+    // Edit transition
     if (insertedSprite && removedSprite) {
       for (let sprite of removedSprites) {
         sprite.hide();
@@ -181,12 +176,12 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
         sprite.reveal();
         void highlightElement(sprite.element);
       }
+
       return;
     }
 
     for (let sprite of removedSprites) {
       sprite.reveal();
-      sprite.endTranslatedBy(0, -10);
       sprite.applyStyles({
         "border-top-color": "transparent",
       });
@@ -204,8 +199,8 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     }
 
     for (let sprite of insertedSprites) {
-      yield wait(150);
-      void fadeIn(sprite, { duration: 80 });
+      yield wait(60);
+      void fadeIn(sprite, { duration: 150 });
       void highlightElement(sprite.element);
     }
   }

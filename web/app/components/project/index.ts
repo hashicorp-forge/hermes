@@ -32,9 +32,17 @@ import RouterService from "@ember/routing/router-service";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
-class ResizeProject extends Resize {
+class ResizeExpo extends Resize {
   *animate() {
     this.opts.duration = animationDuration;
+    this.opts.easing = easeOutExpo;
+    yield* super.animate();
+  }
+}
+
+class ResizeExpoSlow extends Resize {
+  *animate() {
+    this.opts.duration = animationDuration * 1.4;
     this.opts.easing = easeOutExpo;
     yield* super.animate();
   }
@@ -58,7 +66,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   protected statuses = projectStatusObjects;
 
-  protected motion = ResizeProject;
+  protected containerMotion = ResizeExpo;
+  protected resourceListContainerMotion = ResizeExpoSlow;
 
   /**
    * Whether the list should animate.
