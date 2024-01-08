@@ -31,6 +31,7 @@ import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import { Transition } from "ember-animated/-private/transition";
 import animateScale from "hermes/utils/ember-animated/animate-scale";
 import RouterService from "@ember/routing/router-service";
+import { TransitionRules } from "ember-animated/transition-rules";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -578,11 +579,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     firstTime,
     oldItems,
     newItems,
-  }: {
-    firstTime: boolean;
-    oldItems: unknown[];
-    newItems: unknown[];
-  }): Transition {
+  }: TransitionRules): Transition {
     if (firstTime) {
       if (this.shouldAnimate === false) {
         return emptyTransition;
@@ -605,6 +602,37 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     }
 
     return emptyTransition;
+  }
+
+  @action protected badgeCountTransitionRules() {
+    if (this.shouldAnimate) {
+      return this.badgeCountTransition;
+    } else {
+      return emptyTransition;
+    }
+  }
+
+  *badgeCountTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) {
+      return;
+    }
+
+    for (let sprite of insertedSprites) {
+      sprite.startTranslatedBy(-3, 0);
+      yield wait(300);
+      void move(sprite, { duration: 500, easing: easeOutExpo });
+      void fadeIn(sprite, { duration: 140 });
+    }
+
+    for (let sprite of removedSprites) {
+      sprite.endTranslatedBy(-2, 0);
+      void move(sprite, { duration: 110, easing: easeOutQuad });
+      yield wait(20);
+      void fadeOut(sprite, { duration: 60 });
+    }
   }
 
   *addFirstResourceTransition({

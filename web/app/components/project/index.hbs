@@ -164,13 +164,15 @@
         <h3 data-test-documents-header class="hermes-h4">
           Documents
         </h3>
-        {{#if (gt this.hermesDocuments.length 0)}}
-          {{! TODO: animate this }}
+        {{#animated-if
+          (gt this.hermesDocuments.length 0)
+          rules=this.badgeCountTransitionRules
+        }}
           <Hds::BadgeCount
             data-test-document-count
-            @text="{{this.hermesDocuments.length}}"
+            @text="{{or this.hermesDocuments.length '1'}}"
           />
-        {{/if}}
+        {{/animated-if}}
       </div>
 
       <AnimatedContainer @motion={{this.motion}}>
@@ -182,7 +184,6 @@
         }}
           <div>
             <ol data-test-document-list class="divided-list">
-              {{! ANIMATE! }}
               {{#animated-each
                 this.hermesDocuments
                 rules=this.resourceTransitionRules
@@ -222,13 +223,15 @@
           <h3 data-test-external-links-header class="hermes-h4">
             External links
           </h3>
-          {{#if (gt this.externalLinks.length 0)}}
-            {{! TODO: animate this }}
+          {{#animated-if
+            (gt this.externalLinks.length 0)
+            rules=this.badgeCountTransitionRules
+          }}
             <Hds::BadgeCount
               data-test-external-link-count
-              @text="{{this.externalLinks.length}}"
+              @text="{{or this.externalLinks.length 1}}"
             />
-          {{/if}}
+          {{/animated-if}}
         </div>
       </div>
       <AnimatedContainer @motion={{this.motion}}>
