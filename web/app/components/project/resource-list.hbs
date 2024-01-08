@@ -1,0 +1,38 @@
+<div class="mb-3 flex h-6 items-center gap-2" ...attributes>
+  <h3 data-test-resource-list-header class="hermes-h4">
+    {{yield to="header"}}
+  </h3>
+  {{#animated-if this.badgeIsShown rules=this.badgeTransitionRules}}
+    <Hds::BadgeCount
+      data-test-project-resource-list-count
+      @text={{this.badgeCount}}
+    />
+  {{/animated-if}}
+</div>
+
+<AnimatedContainer @motion={{@motion}}>
+  {{#animated-if
+    (gt @items.length 0)
+    rules=this.sectionTransitionRules
+    initialInsertion=true
+    finalRemoval=true
+  }}
+    <div>
+      <ol data-test-document-list class="divided-list">
+        {{#animated-each
+          @items
+          rules=this.listTransitionRules
+          initialInsertion=true
+          finalRemoval=true
+          as |item i|
+        }}
+          <li class="group relative block" data-test-document-list-item>
+            {{yield (hash item=item index=i) to="item"}}
+          </li>
+        {{/animated-each}}
+      </ol>
+    </div>
+  {{else}}
+    <Project::ResourceEmptyState />
+  {{/animated-if}}
+</AnimatedContainer>
