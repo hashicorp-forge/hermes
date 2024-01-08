@@ -79,14 +79,8 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
     if (rotate) {
       rotateTween = new Tween(
-        rotateFrom ??
-          (sprite.initialComputedStyle != null
-            ? parseFloat(sprite.initialComputedStyle.opacity)
-            : 0),
-        rotateTo ??
-          (sprite.finalComputedStyle != null
-            ? parseFloat(sprite.finalComputedStyle.opacity)
-            : 1),
+        rotateFrom ?? 0,
+        rotateTo ?? 0,
         rotate.duration ?? duration,
         easing,
       );
