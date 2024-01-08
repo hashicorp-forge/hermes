@@ -1,3 +1,4 @@
+import Ember from "ember";
 import { timeout } from "ember-concurrency";
 
 /**
@@ -14,23 +15,24 @@ export default async function highlightElement(target: Element) {
 
   target.appendChild(highlight);
 
-  let duration = 50;
-
-  highlight.animate([{ opacity: 0 }, { opacity: 1 }], {
-    duration,
+  const fadeInAnimation = highlight.animate([{ opacity: 0 }, { opacity: 1 }], {
+    duration: Ember.testing ? 0 : 50,
     fill: "forwards",
   });
 
-  await timeout(2000 + duration);
+  await timeout(Ember.testing ? 0 : 2000);
 
-  duration = 400;
-
-  highlight.animate([{ opacity: 1 }, { opacity: 0 }], {
-    duration,
+  const fadeOutAnimation = highlight.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: Ember.testing ? 0 : 400,
     fill: "forwards",
   });
 
-  await timeout(duration);
-
-  highlight.remove();
+  try {
+    await fadeInAnimation.finished;
+    await fadeOutAnimation.finished;
+  } finally {
+    fadeInAnimation.cancel();
+    fadeOutAnimation.cancel();
+    highlight.remove();
+  }
 }
