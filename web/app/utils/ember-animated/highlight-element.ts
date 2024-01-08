@@ -10,7 +10,6 @@ export default async function highlightElement(target: Element) {
   const highlight = document.createElement("div");
 
   highlight.setAttribute("aria-hidden", "true");
-  // highlight.style.zIndex = "100";
   highlight.classList.add("highlight-affordance");
 
   target.appendChild(highlight);
