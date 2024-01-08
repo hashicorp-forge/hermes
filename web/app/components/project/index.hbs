@@ -150,98 +150,97 @@
 </div>
 
 {{! Resources }}
-<AnimatedContainer
-  @motion={{this.motion}}
-  class="relative border-t border-t-color-border-primary bg-color-page-primary"
->
-  <div class="max-w-3xl">
-    <AnimatedContainer @motion={{this.motion}}>
-      {{! Documents }}
-      <Project::ResourceList
-        @items={{this.hermesDocuments}}
-        @shouldAnimate={{this.shouldAnimate}}
-        @motion={{this.motion}}
-        class="mt-7"
-      >
-        <:header>Documents</:header>
-        <:item as |i|>
-          <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
-            <Project::Resource
-              @isReadOnly={{not this.projectIsActive}}
-              @overflowMenuItems={{hash
-                delete=(hash
-                  label="Remove"
-                  icon="trash"
-                  action=(fn this.deleteResource doc)
-                )
-              }}
-            >
-              <Doc::TileMedium @doc={{doc}} />
-            </Project::Resource>
-          </RelatedResource::HermesDocument>
-        </:item>
-      </Project::ResourceList>
+<div class="relative border-t border-t-color-border-primary">
+  <AnimatedContainer @motion={{this.motion}}>
+    <div class="max-w-3xl">
+      <AnimatedContainer @motion={{this.motion}}>
+        {{! Documents }}
+        <Project::ResourceList
+          @items={{this.hermesDocuments}}
+          @shouldAnimate={{this.shouldAnimate}}
+          @motion={{this.motion}}
+          class="mt-7"
+        >
+          <:header>Documents</:header>
+          <:item as |i|>
+            <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
+              <Project::Resource
+                @isReadOnly={{not this.projectIsActive}}
+                @overflowMenuItems={{hash
+                  delete=(hash
+                    label="Remove"
+                    icon="trash"
+                    action=(fn this.deleteResource doc)
+                  )
+                }}
+              >
+                <Doc::TileMedium @doc={{doc}} />
+              </Project::Resource>
+            </RelatedResource::HermesDocument>
+          </:item>
+        </Project::ResourceList>
 
-      {{!
+        {{!
         We add a page background color to overlay any
         removed documents that are still animating out.
        }}
-      <div class="relative z-10 bg-color-page-primary pt-8">
-        {{! External links }}
-        <Project::ResourceList
-          @items={{this.externalLinks}}
-          @shouldAnimate={{this.shouldAnimate}}
-          @motion={{this.motion}}
-        >
-          <:header>External links</:header>
-          <:item as |i|>
-            <Project::Resource
-              @isReadOnly={{not this.projectIsActive}}
-              @overflowMenuItems={{hash
-                edit=(hash
-                  label="Edit"
-                  icon="edit"
-                  action=(fn this.showEditModal i.item i.index)
-                )
-                delete=(hash
-                  label="Remove"
-                  icon="trash"
-                  action=(fn this.deleteResource i.item)
-                )
-              }}
-            >
-              <RelatedResource::ExternalLink @resource={{i.item}} as |link|>
-                <ExternalLink
-                  data-test-related-link
-                  href={{link.url}}
-                  class="block px-2 py-2.5 group-hover:bg-color-surface-faint"
-                >
-                  <div class="flex items-center gap-3">
-                    <div class="ml-1 flex">
-                      <Favicon @url={{link.url}} />
-                    </div>
-                    <div class="flex w-full items-end gap-2">
-                      <h4
-                        class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
-                      >
-                        {{link.name}}
-                      </h4>
-                      <div
-                        class="mb-px max-w-[35%] truncate text-body-200 text-color-foreground-faint"
-                      >
-                        {{link.url}}
+        <div class="relative z-10 bg-color-page-primary pt-8">
+          {{! External links }}
+          <Project::ResourceList
+            @items={{this.externalLinks}}
+            @shouldAnimate={{this.shouldAnimate}}
+            @motion={{this.motion}}
+          >
+            <:header>External links</:header>
+            <:item as |i|>
+              <Project::Resource
+                @isReadOnly={{not this.projectIsActive}}
+                @overflowMenuItems={{hash
+                  edit=(hash
+                    label="Edit"
+                    icon="edit"
+                    action=(fn this.showEditModal i.item i.index)
+                  )
+                  delete=(hash
+                    label="Remove"
+                    icon="trash"
+                    action=(fn this.deleteResource i.item)
+                  )
+                }}
+              >
+                <RelatedResource::ExternalLink @resource={{i.item}} as |link|>
+                  <ExternalLink
+                    data-test-related-link
+                    href={{link.url}}
+                    class="block px-2 py-2.5 group-hover:bg-color-surface-faint"
+                  >
+                    <div class="flex items-center gap-3">
+                      <div class="ml-1 flex">
+                        <Favicon @url={{link.url}} />
+                      </div>
+                      <div class="flex w-full items-end gap-2">
+                        <h4
+                          class="max-w-[65%] truncate text-display-300 font-semibold text-color-foreground-strong"
+                        >
+                          {{link.name}}
+                        </h4>
+                        <div
+                          class="mb-px max-w-[35%] truncate text-body-200 text-color-foreground-faint"
+                        >
+                          {{link.url}}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ExternalLink>
-              </RelatedResource::ExternalLink>
-            </Project::Resource>
-          </:item>
-        </Project::ResourceList>
-      </div>
-    </AnimatedContainer>
-  </div>
-</AnimatedContainer>
+                  </ExternalLink>
+                </RelatedResource::ExternalLink>
+              </Project::Resource>
+            </:item>
+          </Project::ResourceList>
+        </div>
+      </AnimatedContainer>
+    </div>
+  </AnimatedContainer>
+</div>
 
 {{! Footer }}
 <div

@@ -13,7 +13,7 @@
 <AnimatedContainer @motion={{@motion}}>
   {{#animated-if
     (gt @items.length 0)
-    rules=this.sectionTransitionRules
+    rules=this.emptyStateTransitionRules
     initialInsertion=true
     finalRemoval=true
   }}

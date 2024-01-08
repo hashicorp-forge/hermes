@@ -356,7 +356,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     // Replacing an individual link doesn't cause the getter
     // to recompute, so we manually save the array.
-    this.externalLinks = this.externalLinks;
+    this.externalLinks = this.externalLinks.slice();
 
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),

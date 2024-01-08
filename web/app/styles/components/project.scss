@@ -98,4 +98,8 @@
       @apply bg-none;
     }
   }
+
+  .highlight-affordance {
+    @apply border-transparent;
+  }
 }

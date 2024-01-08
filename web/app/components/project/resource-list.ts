@@ -10,6 +10,7 @@ import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import Ember from "ember";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
+import highlightElement from "hermes/utils/ember-animated/highlight-element";
 
 interface ProjectResourceListComponentSignature {
   Element: HTMLDivElement;
@@ -63,7 +64,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     }
   }
 
-  @action protected sectionTransitionRules({
+  @action protected emptyStateTransitionRules({
     oldItems,
     newItems,
   }: TransitionRules) {
@@ -75,12 +76,12 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
 
       // handle the case of the first item being added
       if (newItems[0] === true && oldItems[0] === false) {
-        return this.addFirstResourceTransition;
+        return this.removeEmptyState;
       }
 
       // handle the case where the section is emptying
       if (newItems[0] === false && oldItems[0] === true) {
-        return this.removeLastResourceTransition;
+        return this.showEmptyState;
       }
     }
 
@@ -117,21 +118,17 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     // Animate out
     for (let sprite of removedSprites) {
       sprite.endTranslatedBy(-2, 0);
+      yield wait(180);
       void move(sprite, { duration: 110, easing: easeOutQuad });
-      yield wait(20);
       void fadeOut(sprite, { duration: 60 });
     }
   }
 
-  *addFirstResourceTransition({
-    insertedSprites,
-    removedSprites,
-  }: TransitionContext) {
+  *removeEmptyState({ insertedSprites, removedSprites }: TransitionContext) {
     if (Ember.testing) {
       return;
     }
 
-    // Remove the empty state ("None")
     for (let sprite of removedSprites) {
       sprite.endTranslatedBy(0, 10);
       void move(sprite, { duration: 120, easing: easeOutQuad });
@@ -145,16 +142,9 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     }
   }
 
-  *removeLastResourceTransition({
-    insertedSprites,
-    removedSprites,
-  }: TransitionContext) {
+  *showEmptyState({ insertedSprites }: TransitionContext) {
     if (Ember.testing) {
       return;
-    }
-
-    for (let sprite of removedSprites) {
-      // void fadeOut(sprite, { duration: 1000 });
     }
 
     for (let sprite of insertedSprites) {
@@ -163,33 +153,60 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
       void move(sprite, { duration: 200, easing: easeOutQuad });
       void fadeIn(sprite, { duration: 100 });
     }
+
+    // The `each` transition handles removedSprites
   }
 
   *listTransition({
     insertedSprites,
     keptSprites,
     removedSprites,
+    duration,
   }: TransitionContext) {
     if (Ember.testing) {
       return;
     }
 
+    const insertedSprite = insertedSprites[0]?.element;
+    const removedSprite = removedSprites[0]?.element;
+
+    // Ignore the edit transition, which manifests as
+    // a removal and insertion of the same element
+    if (insertedSprite && removedSprite) {
+      for (let sprite of removedSprites) {
+        sprite.hide();
+      }
+
+      for (let sprite of insertedSprites) {
+        sprite.reveal();
+        void highlightElement(sprite.element);
+      }
+      return;
+    }
+
     for (let sprite of removedSprites) {
-      void fadeOut(sprite, { duration: 80 });
+      sprite.reveal();
+      sprite.endTranslatedBy(0, -10);
+      sprite.applyStyles({
+        "border-top-color": "transparent",
+      });
+      void move(sprite, { duration: 200, easing: easeOutQuad });
+      void fadeOut(sprite, { duration: 120 });
     }
 
     for (let sprite of keptSprites) {
       // Ensure keptSprites overlay removedSprites for a cleaner animation
       sprite.applyStyles({
         "z-index": "1",
+        "background-color": "var(--token-color-page-primary)",
       });
       void move(sprite, { duration: 300, easing: easeOutQuad });
     }
 
     for (let sprite of insertedSprites) {
       yield wait(150);
-
       void fadeIn(sprite, { duration: 80 });
+      void highlightElement(sprite.element);
     }
   }
 }

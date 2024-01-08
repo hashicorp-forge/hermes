@@ -16,8 +16,7 @@
     @apply relative flex w-full;
 
     .highlight-affordance {
-      @apply absolute top-0 left-0 z-[-1] h-full w-full rounded;
-      @apply border border-color-border-highlight bg-color-surface-highlight;
+      @apply rounded;
     }
   }
 
@@ -88,4 +87,9 @@
 
 .related-document-option {
   @apply grid h-[74px] w-full place-items-center rounded py-1.5 px-3;
+}
+
+.highlight-affordance {
+  @apply absolute top-0 left-0 right-0 bottom-0 z-[-1];
+  @apply border border-color-border-highlight bg-color-surface-highlight;
 }
