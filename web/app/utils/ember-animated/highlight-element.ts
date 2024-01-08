@@ -3,8 +3,8 @@ import { timeout } from "ember-concurrency";
 
 /**
  * Adds a temporary highlight to a relatively positioned element.
- * Used to draw attention to an item, such as a project resource
- * that's been edited.
+ * Used to draw attention to an item, such as a related resource
+ * that's been added or modified.
  */
 
 export default async function highlightElement(target: Element) {
