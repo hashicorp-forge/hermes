@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import move from "ember-animated/motions/move";
-import animateScale from "hermes/utils/ember-animated/animate-scale";
+import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
@@ -94,12 +94,10 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     yield wait(100);
 
     for (let sprite of insertedSprites) {
-      sprite.applyStyles({
-        opacity: "0",
-      });
-      void animateScale(sprite, {
-        from: 0.95,
-        to: 1,
+      void animateTransform(sprite, {
+        scale: {
+          from: 0.95,
+        },
         duration: 200,
         easing: easeOutQuad,
       });
