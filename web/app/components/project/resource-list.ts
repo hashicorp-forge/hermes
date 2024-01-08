@@ -115,8 +115,6 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
 
     // Animate out
     for (let sprite of removedSprites) {
-      sprite.endTranslatedBy(-3, 0);
-      void move(sprite, { duration: 500, easing: easeOutExpo });
       void fadeOut(sprite, { duration: 80 });
     }
   }
