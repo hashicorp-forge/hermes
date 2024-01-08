@@ -1,6 +1,5 @@
 /**
  * A transition to control all transform properties at once.
- * This is a work in progress and may be limited in functionality.
  * Modified from the `move` and `opacity` motions.
  */
 
@@ -21,10 +20,14 @@ interface AnimateTransformOptions extends BaseOptions {
     duration?: number;
   };
   translate?: {
-    xFrom?: number;
-    xTo?: number;
-    yFrom?: number;
-    yTo?: number;
+    x?: {
+      from?: number;
+      to?: number;
+    };
+    y?: {
+      from?: number;
+      to?: number;
+    };
     duration?: number;
   };
   easing?: (time: number) => number;
@@ -42,11 +45,11 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
     let { sprite, duration, opts } = this;
     let { translate, rotate, scale, easing } = opts;
 
-    let translateXTo = translate?.xTo;
-    let translateXFrom = translate?.xFrom;
+    let translateXTo = translate?.x?.to;
+    let translateXFrom = translate?.x?.from;
 
-    let translateYTo = translate?.yTo;
-    let translateYFrom = translate?.yFrom;
+    let translateYTo = translate?.y?.to;
+    let translateYFrom = translate?.y?.from;
 
     let rotateTo = rotate?.to;
     let rotateFrom = rotate?.from;
