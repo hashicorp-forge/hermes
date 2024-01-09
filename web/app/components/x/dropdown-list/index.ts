@@ -18,7 +18,7 @@ import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
 import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 import XDropdownListToggleSelectComponent from "./toggle-select";
-import scrollIntoView from "scroll-into-view-if-needed";
+import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -390,7 +390,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
   private scrollIntoView() {
     const focusedItem = this._menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
-    scrollIntoView(focusedItem, {
+    scrollIntoViewIfNeeded(focusedItem, {
       block: "nearest",
     });
   }

@@ -20,7 +20,7 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
-import scrollIntoView from "scroll-into-view-if-needed";
+import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
@@ -255,7 +255,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         target = htmlElement(targetSelector);
 
         next(() => {
-          scrollIntoView(target as HTMLElement, {
+          scrollIntoViewIfNeeded(target as HTMLElement, {
             block: "nearest",
             behavior: "smooth",
           });
