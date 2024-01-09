@@ -1,7 +1,7 @@
 <div
   data-test-checkable-item
   class="checkable-item checkmark-position--{{or @checkmarkPosition 'leading'}}
-    flex w-full items-center gap-2.5"
+    w-full items-center gap-2.5"
   ...attributes
 >
 
@@ -12,22 +12,27 @@
     class="check {{if @isSelected 'visible' 'invisible'}}"
   />
 
-  <div data-test-checkable-item-content class="checkable-item-content w-full">
+  <div
+    data-test-checkable-item-content
+    class="checkable-item-content w-full overflow-hidden"
+  >
     {{#if (has-block "default")}}
       {{yield}}
     {{else}}
-      <div class="x-dropdown-list-item-value">
+      <div data-test-x-dropdown-list-item-value>
         {{@value}}
       </div>
     {{/if}}
   </div>
 
   {{#if @count}}
-    <Hds::BadgeCount
-      data-test-x-dropdown-list-checkable-item-count
-      @text="{{@count}}"
-      @size="small"
-      class="x-dropdown-list-item-count checkable-item-count"
-    />
+    <div class="grid">
+      <Hds::BadgeCount
+        data-test-x-dropdown-list-checkable-item-count
+        @text="{{@count}}"
+        @size="small"
+        class="checkable-item-count ml-auto"
+      />
+    </div>
   {{/if}}
 </div>
