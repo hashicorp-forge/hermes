@@ -90,7 +90,9 @@ const PROJECT_LINK = "[data-test-project-link]";
 const ADD_TO_PROJECT_BUTTON = "[data-test-projects-section-header] button";
 const ADD_TO_PROJECT_MODAL = "[data-test-add-to-or-create-project-modal]";
 const PROJECT_OPTION = "[data-test-project-option]";
-const PROJECT_DOCUMENT = "[data-test-document-list-item]";
+
+const PROJECT_DOCUMENT =
+  "[data-test-document-list] [data-test-resource-list-item]";
 const START_NEW_PROJECT_BUTTON = "[data-test-start-new-project-button]";
 
 const PROJECT_FORM = "[data-test-project-form]";
@@ -941,6 +943,11 @@ module("Acceptance | authenticated/document", function (hooks) {
       title,
       isDraft: false,
       status: "In-review",
+    });
+
+    this.server.create("related-hermes-document", {
+      id,
+      title,
     });
 
     await visit(`/document/${id}`);

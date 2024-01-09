@@ -4,7 +4,8 @@ interface ProjectResourceEmptyStateComponentSignature {}
 
 export default class ProjectResourceEmptyStateComponent extends Component<ProjectResourceEmptyStateComponentSignature> {
   <template>
-    <div>
+    {{! Extra div for animation purposes }}
+    <div data-test-resource-empty-state>
       <div
         class="pb-4 text-display-300 text-color-foreground-disabled opacity-70"
       >

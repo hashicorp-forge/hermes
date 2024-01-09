@@ -156,12 +156,17 @@
     <AnimatedContainer @motion={{this.containerMotion}}>
       {{! Documents }}
       <Project::ResourceList
+        data-test-document-list
         @items={{this.hermesDocuments}}
         @shouldAnimate={{this.shouldAnimate}}
         @motion={{this.resourceListContainerMotion}}
         class="mt-7"
       >
-        <:header>Documents</:header>
+        <:header>
+          <span data-test-documents-header>
+            Documents
+          </span>
+        </:header>
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
@@ -187,11 +192,16 @@
       <div class="relative z-10 bg-color-page-primary pt-8">
         {{! External links }}
         <Project::ResourceList
+          data-test-external-link-list
           @items={{this.externalLinks}}
           @shouldAnimate={{this.shouldAnimate}}
           @motion={{this.resourceListContainerMotion}}
         >
-          <:header>External links</:header>
+          <:header>
+            <span data-test-external-links-header>
+              External links
+            </span>
+          </:header>
           <:item as |i|>
             <Project::Resource
               @isReadOnly={{not this.projectIsActive}}

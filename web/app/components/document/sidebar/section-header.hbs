@@ -20,6 +20,7 @@
   {{#if this.buttonIsShown}}
     <Action
       {{on "click" this.buttonAction}}
+      data-test-sidebar-section-header-button
       data-test-section-header-button-for={{@title}}
       class="quarternary-button {{if @buttonIsDisabled 'disabled'}}"
       aria-label={{or @buttonLabel "Add"}}
