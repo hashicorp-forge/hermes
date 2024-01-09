@@ -32,10 +32,6 @@
   }
 }
 
-.x-dropdown-list-item-value {
-  @apply truncate;
-}
-
 .checkable-item {
   @apply grid;
   grid-template-columns: 16px auto 60px;
