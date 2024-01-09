@@ -107,6 +107,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * A single array of all resources. Used by the "Add..." modal
+   * to prevent duplicate resources from being added.
+   */
+  protected get relatedResources() {
+    return [...this.hermesDocuments, ...this.externalLinks];
+  }
+
+  /**
    * The related resources object, minimally formatted for a PUT request to the API.
    */
   private get formattedRelatedResources(): {
