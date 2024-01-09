@@ -256,6 +256,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         next(() => {
           scrollIntoView(target as HTMLElement, {
             block: "nearest",
+            behavior: "smooth",
           });
         });
 
