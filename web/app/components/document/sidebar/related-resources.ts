@@ -9,7 +9,6 @@ import { restartableTask, task, timeout } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
 import Ember from "ember";
-import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
@@ -20,6 +19,7 @@ import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
+import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
   productArea?: string;
@@ -254,12 +254,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         target = htmlElement(targetSelector);
 
         next(() => {
-          maybeScrollIntoView(
-            target as HTMLElement,
-            this.args.scrollContainer,
-            "getBoundingClientRect",
-            10,
-          );
+          scrollIntoViewIfNeeded(target as HTMLElement, {
+            block: "nearest",
+            behavior: "smooth",
+          });
         });
 
         const highlight = document.createElement("div");

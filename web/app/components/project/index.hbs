@@ -64,7 +64,7 @@
 
   </div>
 </div>
-<div class="relative z-20 max-w-3xl">
+<div class="relative z-20 max-w-3xl pb-5">
 
   {{! Title }}
   <div class="mt-7 flex">
@@ -99,16 +99,19 @@
 </div>
 
 {{#if this.jiraIsEnabled}}
-  {{! Jira }}
-  <div class="mt-10 flex w-full max-w-3xl">
-    <Project::JiraWidget
-      {{did-insert this.maybeLoadJiraInfo}}
-      @issue={{this.jiraIssue}}
-      @onIssueRemove={{this.removeJiraIssue}}
-      @onIssueSelect={{this.addJiraIssue}}
-      @isLoading={{this.loadJiraIssue.isRunning}}
-      @isReadOnly={{not this.projectIsActive}}
-    />
+  <div {{did-insert this.maybeLoadJiraInfo}}>
+    {{#if this.jiraWidgetIsShown}}
+      {{! Jira }}
+      <div class="mt-5 flex w-full max-w-3xl">
+        <Project::JiraWidget
+          @issue={{this.jiraIssue}}
+          @onIssueRemove={{this.removeJiraIssue}}
+          @onIssueSelect={{this.addJiraIssue}}
+          @isLoading={{this.loadJiraIssue.isRunning}}
+          @isReadOnly={{not this.projectIsActive}}
+        />
+      </div>
+    {{/if}}
   </div>
 {{/if}}
 
@@ -163,10 +166,7 @@
                   )
                 }}
               >
-                <Doc::TileMedium
-                  @doc={{document}}
-                  @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
-                />
+                <Doc::TileMedium @doc={{document}} />
               </Project::Resource>
             </li>
           {{/each}}
