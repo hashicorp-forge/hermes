@@ -251,6 +251,15 @@ func configureReplicaIndexes(
 
 		Ranking: opt.Ranking(
 			"asc(createdTime)",
+			// Default ranking
+			"typo",
+			"geo",
+			"words",
+			"filters",
+			"proximity",
+			"attribute",
+			"exact",
+			"custom",
 		),
 	})
 	if err != nil {
@@ -271,6 +280,15 @@ func configureReplicaIndexes(
 
 		Ranking: opt.Ranking(
 			"desc(createdTime)",
+			// Default ranking
+			"typo",
+			"geo",
+			"words",
+			"filters",
+			"proximity",
+			"attribute",
+			"exact",
+			"custom",
 		),
 	})
 	if err != nil {
@@ -288,6 +306,15 @@ func configureReplicaIndexes(
 
 		Ranking: opt.Ranking(
 			"desc(modifiedTime)",
+			// Default ranking
+			"typo",
+			"geo",
+			"words",
+			"filters",
+			"proximity",
+			"attribute",
+			"exact",
+			"custom",
 		),
 	})
 	if err != nil {
@@ -305,6 +332,15 @@ func configureReplicaIndexes(
 
 		Ranking: opt.Ranking(
 			"asc(modifiedTime)",
+			// Default ranking
+			"typo",
+			"geo",
+			"words",
+			"filters",
+			"proximity",
+			"attribute",
+			"exact",
+			"custom",
 		),
 	})
 	if err != nil {
