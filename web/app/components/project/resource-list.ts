@@ -11,6 +11,7 @@ import Ember from "ember";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
+import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 interface ProjectResourceListComponentSignature {
   Element: HTMLDivElement;
@@ -197,6 +198,9 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     }
 
     for (let sprite of insertedSprites) {
+      scrollIntoViewIfNeeded(sprite.element, {
+        behavior: "smooth",
+      });
       yield wait(60);
       void fadeIn(sprite, { duration: 150 });
       void highlightElement(sprite.element);
