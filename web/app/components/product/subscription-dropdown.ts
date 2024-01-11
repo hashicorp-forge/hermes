@@ -26,13 +26,25 @@ interface ProductSubscriptionDropdownComponentSignature {
 
 type SubscriptionOption = {
   type: SubscriptionType | undefined;
-  label: string;
-  description: string;
+  label: SubscriptionLabel;
+  description: SubscriptionDescription;
 };
 
-enum AnimationDirection {
-  UP = "up",
-  DOWN = "down",
+export enum SubscriptionLabel {
+  Instant = "All updates",
+  Digest = "Digest",
+  Unsubscribed = "Unsubscribed",
+}
+
+export enum SubscriptionDescription {
+  Instant = "Get notified when a doc is published",
+  Digest = "Get a weekly summary of new docs",
+  Unsubscribed = "Don't get emails about this product/area",
+}
+
+export enum AnimationDirection {
+  Up = "up",
+  Down = "down",
 }
 
 const ICON_MOVE_DISTANCE = 10;
@@ -48,7 +60,7 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
    * values before and after the change; used by `iconTransitionRules`
    * on initial render and when a subscription is changed.
    */
-  @tracked private animationDirection: AnimationDirection | null = null;
+  @tracked protected animationDirection: AnimationDirection | null = null;
 
   /**
    * The index of the selected item within the options array.
@@ -56,7 +68,7 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
    * If the new item is above the previous selection,
    * the animation should move up and vice versa.
    */
-  @tracked private selectionIndex = 0;
+  @tracked protected selectionIndex = 0;
 
   /**
    * The user's current subscription for the product.
@@ -116,18 +128,18 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
     return [
       {
         type: SubscriptionType.Instant,
-        label: "All updates",
-        description: "Get notified when a doc is published",
+        label: SubscriptionLabel.Instant,
+        description: SubscriptionDescription.Instant,
       },
       {
         type: SubscriptionType.Digest,
-        label: "Digest",
-        description: "Get a weekly summary of new docs",
+        label: SubscriptionLabel.Digest,
+        description: SubscriptionDescription.Digest,
       },
       {
         type: undefined,
-        label: "Unsubscribed",
-        description: "Don't get emails about this product/area",
+        label: SubscriptionLabel.Unsubscribed,
+        description: SubscriptionDescription.Unsubscribed,
       },
     ];
   }
@@ -153,9 +165,9 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
     if (this.selectionIndex === index) {
       return;
     } else if (this.selectionIndex > index) {
-      this.animationDirection = AnimationDirection.UP;
+      this.animationDirection = AnimationDirection.Up;
     } else {
-      this.animationDirection = AnimationDirection.DOWN;
+      this.animationDirection = AnimationDirection.Down;
     }
 
     this.selectionIndex = index;
@@ -176,7 +188,7 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
     if (!this.animationDirection) {
       return emptyTransition;
     } else {
-      if (this.animationDirection === AnimationDirection.UP) {
+      if (this.animationDirection === AnimationDirection.Up) {
         return this.upTransition;
       } else {
         return this.downTransition;

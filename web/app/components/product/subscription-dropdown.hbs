@@ -8,6 +8,11 @@
   >
     <:anchor as |dd|>
       <dd.ToggleAction
+        data-test-subscription-dropdown-toggle
+        data-test-subscription={{or
+          this.currentSubscription.subscriptionType
+          "none"
+        }}
         @hasChevron={{true}}
         class="hds-button pill-button
           {{if @size 'hds-button--size-small' 'hds-button--size-medium'}}
@@ -18,7 +23,12 @@
           }}
           transition-colors"
       >
-        <AnimatedContainer {{did-insert this.configureSelectionIndex}}>
+        <AnimatedContainer
+          data-test-container
+          data-test-animation-direction={{this.animationDirection}}
+          data-test-selection-index={{this.selectionIndex}}
+          {{did-insert this.configureSelectionIndex}}
+        >
           <AnimatedValue
             @value={{this.type}}
             @initialInsertion={{true}}
@@ -27,7 +37,10 @@
             as |icon|
           >
             <div class="flex">
-              <FlightIcon @name={{if icon "check" "plus"}} />
+              <FlightIcon
+                data-test-toggle-icon
+                @name={{if icon "check" "plus"}}
+              />
             </div>
           </AnimatedValue>
         </AnimatedContainer>
@@ -42,22 +55,28 @@
       </h4>
     </:header>
     <:item as |dd|>
-      <dd.Action class="flex items-start py-2 pl-4 pr-6">
-        <X::DropdownList::CheckableItem
-          @checkmarkPosition="trailing"
-          @isSelected={{eq dd.attrs.label this.label}}
-          class="items-start"
+      {{#let (eq dd.attrs.label this.label) as |isSelected|}}
+        <dd.Action
+          data-test-subscription-option
+          data-test-is-selected={{isSelected}}
+          class="flex items-start py-2 pl-4 pr-6"
         >
-          <div>
-            <h5 class="text-body-200">
-              {{dd.attrs.label}}
-            </h5>
+          <X::DropdownList::CheckableItem
+            @checkmarkPosition="trailing"
+            @isSelected={{isSelected}}
+            class="items-start"
+          >
             <div>
-              {{dd.attrs.description}}
+              <h5 data-test-label class="text-body-200">
+                {{dd.attrs.label}}
+              </h5>
+              <div data-test-description>
+                {{dd.attrs.description}}
+              </div>
             </div>
-          </div>
-        </X::DropdownList::CheckableItem>
-      </dd.Action>
+          </X::DropdownList::CheckableItem>
+        </dd.Action>
+      {{/let}}
     </:item>
   </X::DropdownList>
 </div>
