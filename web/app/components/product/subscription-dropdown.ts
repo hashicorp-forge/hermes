@@ -15,7 +15,7 @@ import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
 import { easeOutExpo } from "hermes/utils/ember-animated/easings";
 
-interface ProductSubscriptionToggleComponentSignature {
+interface ProductSubscriptionDropdownComponentSignature {
   Element: HTMLDivElement;
   Args: {
     product: string;
@@ -39,7 +39,7 @@ const ICON_MOVE_DISTANCE = 10;
 const ICON_MOVE_DURATION = 200;
 const ICON_FADE_DURATION = 60;
 
-export default class ProductSubscriptionToggleComponent extends Component<ProductSubscriptionToggleComponentSignature> {
+export default class ProductSubscriptionDropdownComponent extends Component<ProductSubscriptionDropdownComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
   /**
@@ -223,6 +223,6 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Product::SubscriptionToggle": typeof ProductSubscriptionToggleComponent;
+    "Product::SubscriptionDropdown": typeof ProductSubscriptionDropdownComponent;
   }
 }

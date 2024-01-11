@@ -10,20 +10,21 @@ import { HermesSize } from "hermes/types/sizes";
 const ICON = "[data-test-product-avatar]";
 const BUTTON = "[data-test-product-subscription-toggle]";
 
-interface ProductSubscriptionToggleComponentContext extends MirageTestContext {
+interface ProductSubscriptionDropdownComponentContext
+  extends MirageTestContext {
   product: string;
   hasTooltip: boolean;
   size: `${HermesSize.Small}`;
 }
 
 module(
-  "Integration | Component | product/subscription-toggle",
+  "Integration | Component | product/subscription-dropdown",
   function (hooks) {
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
     hooks.beforeEach(async function (
-      this: ProductSubscriptionToggleComponentContext,
+      this: ProductSubscriptionDropdownComponentContext,
     ) {
       const authenticatedUser = this.owner.lookup(
         "service:authenticated-user",
@@ -36,11 +37,11 @@ module(
       await setupProductIndex(this);
     });
 
-    test("it renders and can be toggled", async function (this: ProductSubscriptionToggleComponentContext, assert) {
+    test("it renders and can be toggled", async function (this: ProductSubscriptionDropdownComponentContext, assert) {
       this.set("product", "Waypoint");
 
-      await render<ProductSubscriptionToggleComponentContext>(hbs`
-        <Product::SubscriptionToggle
+      await render<ProductSubscriptionDropdownComponentContext>(hbs`
+        <Product::SubscriptionDropdown
           @product={{this.product}}
         />
       `);
@@ -84,12 +85,12 @@ module(
       assert.equal(authenticatedUser.subscriptions?.length, 0);
     });
 
-    test("it can render at different sizes", async function (this: ProductSubscriptionToggleComponentContext, assert) {
+    test("it can render at different sizes", async function (this: ProductSubscriptionDropdownComponentContext, assert) {
       this.set("productArea", "Waypoint");
       this.set("size", undefined);
 
-      await render<ProductSubscriptionToggleComponentContext>(hbs`
-        <Product::SubscriptionToggle
+      await render<ProductSubscriptionDropdownComponentContext>(hbs`
+        <Product::SubscriptionDropdown
           @product={{this.product}}
           @size={{this.size}}
         />
