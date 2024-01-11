@@ -9,7 +9,8 @@
     <:anchor as |dd|>
       <dd.ToggleAction
         @hasChevron={{true}}
-        class="hds-button hds-button--size-medium pill-button
+        class="hds-button pill-button
+          {{if @size 'hds-button--size-small' 'hds-button--size-medium'}}
           {{if
             dd.selected
             'hds-button--color-primary'
