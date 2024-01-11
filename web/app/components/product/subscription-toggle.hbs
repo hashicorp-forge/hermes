@@ -1,0 +1,75 @@
+<div class="relative inline-flex" ...attributes>
+  <X::DropdownList
+    @onItemClick={{this.setSubscription}}
+    @selected={{this.selectedSubscription}}
+    @items={{this.subscriptionTypes}}
+    @placement={{@popoverPlacement}}
+    class="w-[350px] pb-1.5"
+  >
+    <:anchor as |dd|>
+      <dd.ToggleAction
+        @hasChevron={{true}}
+        class="hds-button hds-button--size-medium pill-button
+          {{if
+            dd.selected
+            'hds-button--color-primary'
+            'hds-button--color-secondary'
+          }}
+          transition-colors"
+      >
+
+        <AnimatedContainer>
+          <AnimatedValue
+            {{! this is re-getting 59x for every change made in the subscription array }}
+            @value={{this.selectedSubscription}}
+            @initialInsertion={{true}}
+            @finalRemoval={{true}}
+            @rules={{this.iconTransitionRules}}
+            as |icon|
+          >
+            {{log "render"}}
+
+            <div class="flex">
+              <FlightIcon @name={{if icon.type "check" "plus"}} />
+            </div>
+          </AnimatedValue>
+        </AnimatedContainer>
+        <div class="w-20 text-center">
+          {{if
+            this.selectedSubscription.type
+            this.selectedSubscription.label
+            "Subscribe"
+          }}
+        </div>
+      </dd.ToggleAction>
+    </:anchor>
+    <:header>
+      <h4 class="hermes-h4 mt-3 px-4 text-left">
+        Choose subscription
+      </h4>
+    </:header>
+    <:item as |dd|>
+      <dd.Action class="flex items-start py-2 pl-4 pr-6">
+        <X::DropdownList::CheckableItem
+          @checkmarkPosition="trailing"
+          @isSelected={{eq dd.attrs.label this.selectedSubscription.label}}
+          class="items-start"
+        >
+          <div>
+            <h5 class="text-body-200">
+              {{dd.attrs.label}}
+            </h5>
+            <div>
+              {{dd.attrs.description}}
+            </div>
+          </div>
+        </X::DropdownList::CheckableItem>
+      </dd.Action>
+    </:item>
+  </X::DropdownList>
+</div>
+<div
+  {{did-insert this.enableAnimation}}
+  aria-hidden="true"
+  class="absolute"
+></div>

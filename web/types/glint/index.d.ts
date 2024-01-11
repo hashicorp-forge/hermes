@@ -43,9 +43,10 @@ import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import { HdsFormErrorComponent } from "hds/form/error";
 import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
 import { HdsFormLabelComponent } from "hds/form/label";
+import type RenderModifiersRegistry from "@ember/render-modifiers/template-registry";
 
 declare module "@glint/environment-ember-loose/registry" {
-  export default interface Registry {
+  export default interface Registry extends RenderModifiersRegistry {
     "page-title": typeof EmberPageTitleHelper;
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;

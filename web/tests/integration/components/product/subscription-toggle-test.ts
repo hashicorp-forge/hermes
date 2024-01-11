@@ -6,16 +6,9 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 import { HermesSize } from "hermes/types/sizes";
-import {
-  IS_SUBSCRIBED_TOOLTIP_TEXT,
-  NOT_SUBSCRIBED_TOOLTIP_TEXT,
-} from "hermes/utils/tooltip-text";
 
 const ICON = "[data-test-product-avatar]";
-const NAME = "[data-test-subscription-list-item-link]";
 const BUTTON = "[data-test-product-subscription-toggle]";
-const TOOLTIP_ICON = "[data-test-subscription-toggle-tooltip-icon]";
-const TOOLTIP = ".hermes-tooltip";
 
 interface ProductSubscriptionToggleComponentContext extends MirageTestContext {
   product: string;
@@ -89,34 +82,6 @@ module(
         .hasText("Subscribe");
 
       assert.equal(authenticatedUser.subscriptions?.length, 0);
-    });
-
-    test("it can render with a tooltip", async function (this: ProductSubscriptionToggleComponentContext, assert) {
-      this.set("product", "Waypoint");
-      this.set("hasTooltip", false);
-
-      await render<ProductSubscriptionToggleComponentContext>(hbs`
-        <Product::SubscriptionToggle
-          @product={{this.product}}
-          @hasTooltip={{this.hasTooltip}}
-        />
-      `);
-
-      assert.dom(TOOLTIP_ICON).doesNotExist();
-
-      this.set("hasTooltip", true);
-
-      assert.dom(TOOLTIP_ICON).exists();
-
-      await triggerEvent(TOOLTIP_ICON, "mouseenter");
-
-      assert.dom(TOOLTIP).hasText(NOT_SUBSCRIBED_TOOLTIP_TEXT);
-
-      await click(BUTTON);
-
-      await triggerEvent(TOOLTIP_ICON, "mouseenter");
-
-      assert.dom(TOOLTIP).hasText(IS_SUBSCRIBED_TOOLTIP_TEXT);
     });
 
     test("it can render at different sizes", async function (this: ProductSubscriptionToggleComponentContext, assert) {
