@@ -41,19 +41,6 @@ export default class AuthenticatedUserService extends Service {
   }
 
   /**
-   * Returns the user's subscriptions as a JSON string.
-   * E.g., '{"subscriptions":["Customer Success", "Terraform"]}'
-   * Used in POST requests to the subscriptions endpoint.
-   */
-  private get subscriptionsPostBody(): string {
-    assert("subscriptions must be defined", this.subscriptions);
-    let subscriptions = this.subscriptions.map(
-      (subscription: Subscription) => subscription.productArea,
-    );
-    return JSON.stringify({ subscriptions });
-  }
-
-  /**
    * Loads the user's info from the Google API.
    * Called by `session.handleAuthentication` and `authenticated.afterModel`.
    * Ensures `authenticatedUser.info` is always defined and up-to-date
@@ -75,35 +62,22 @@ export default class AuthenticatedUserService extends Service {
    * If the user has no subscriptions, returns an empty array.
    */
   fetchSubscriptions = task(async () => {
+    const cached = this.subscriptions;
     try {
-      let subscriptions = await this.fetchSvc
+      this.subscriptions = await this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
           method: "GET",
         })
         .then((response) => response?.json());
-
-      let newSubscriptions: Subscription[] = [];
-
-      if (subscriptions) {
-        newSubscriptions = subscriptions.map((subscription: string) => {
-          return {
-            productArea: subscription,
-            subscriptionType: SubscriptionType.Instant,
-          };
-        });
-      }
-      this.subscriptions = newSubscriptions;
     } catch (e: unknown) {
+      this.subscriptions = cached;
       console.error("Error loading subscriptions: ", e);
       throw e;
     }
   });
 
   setSubscription = restartableTask(
-    async (
-      productArea: string,
-      subscriptionType: SubscriptionType | undefined,
-    ) => {
+    async (productArea: string, subscriptionType?: SubscriptionType) => {
       assert("subscriptions must exist", this.subscriptions);
 
       const cached = this.subscriptions.slice();
@@ -142,7 +116,9 @@ export default class AuthenticatedUserService extends Service {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: this.subscriptionsPostBody,
+            body: JSON.stringify({
+              subscriptions: this.subscriptions,
+            }),
           },
         );
       } catch (e: unknown) {

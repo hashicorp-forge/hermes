@@ -5,7 +5,7 @@ import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
-
+import { assert, assert as emberAssert } from "@ember/debug";
 import {
   TEST_WEB_CONFIG,
   TEST_USER_EMAIL,
@@ -504,8 +504,15 @@ export default function (mirageConfig) {
       /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
-      this.post("/me/subscriptions", () => {
-        return new Response(200, {});
+      this.post("/me/subscriptions", (schema, request) => {
+        // need to update the subscriptions array on the user
+        let { subscriptions } = JSON.parse(request.requestBody);
+
+        const user = schema.mes.first() ?? schema.mes.create();
+
+        user.update({ subscriptions });
+
+        return new Response(200, {}, user.attrs.subscriptions);
       });
 
       /**
@@ -735,7 +742,9 @@ export default function (mirageConfig) {
        * Used by the AuthenticatedUserService to get the user's subscriptions.
        */
       this.get("/me/subscriptions", () => {
-        return new Response(200, {}, []);
+        const user = this.schema.mes.first() ?? this.schema.mes.create();
+
+        return new Response(200, {}, user.attrs.subscriptions);
       });
 
       /**
