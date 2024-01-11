@@ -48,8 +48,8 @@ export enum AnimationDirection {
 }
 
 const ICON_MOVE_DISTANCE = 10;
-const ICON_MOVE_DURATION = 200;
-const ICON_FADE_DURATION = 60;
+const ICON_MOVE_DURATION = 650;
+const ICON_FADE_DURATION = 80;
 
 export default class ProductSubscriptionDropdownComponent extends Component<ProductSubscriptionDropdownComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
@@ -209,8 +209,8 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
 
     for (const sprite of insertedSprites) {
       sprite.startTranslatedBy(0, -ICON_MOVE_DISTANCE);
-      void move(sprite, { duration: ICON_FADE_DURATION, easing: easeOutExpo });
-      void fadeIn(sprite, { duration: ICON_MOVE_DURATION });
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void fadeIn(sprite, { duration: ICON_FADE_DURATION });
     }
   }
 
