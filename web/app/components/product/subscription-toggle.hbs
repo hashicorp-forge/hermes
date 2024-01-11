@@ -1,8 +1,8 @@
 <div class="relative inline-flex" ...attributes>
   <X::DropdownList
     @onItemClick={{this.setSubscription}}
-    @selected={{this.selectedSubscription}}
-    @items={{this.subscriptionTypes}}
+    @selected={{this.currentSubscription}}
+    @items={{this.options}}
     @placement={{@popoverPlacement}}
     class="w-[350px] pb-1.5"
   >
@@ -17,7 +17,7 @@
           }}
           transition-colors"
       >
-        <AnimatedContainer>
+        <AnimatedContainer {{did-insert this.configureSelectionIndex}}>
           <AnimatedValue
             @value={{this.type}}
             @initialInsertion={{true}}
@@ -25,7 +25,6 @@
             @rules={{this.iconTransitionRules}}
             as |icon|
           >
-            {{log "animatedValue render"}}
             <div class="flex">
               <FlightIcon @name={{if icon "check" "plus"}} />
             </div>
@@ -61,8 +60,3 @@
     </:item>
   </X::DropdownList>
 </div>
-<div
-  {{did-insert this.enableAnimation}}
-  aria-hidden="true"
-  class="absolute"
-></div>

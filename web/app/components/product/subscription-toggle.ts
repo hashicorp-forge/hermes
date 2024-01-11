@@ -1,7 +1,9 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
+import AuthenticatedUserService, {
+  Subscription,
+} from "hermes/services/authenticated-user";
 import { HermesSize } from "hermes/types/sizes";
 import { SubscriptionType } from "hermes/services/authenticated-user";
 import { assert } from "@ember/debug";
@@ -12,7 +14,6 @@ import { TransitionContext } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
 import { easeOutExpo } from "hermes/utils/ember-animated/easings";
-import { TransitionRules } from "ember-animated/transition-rules";
 
 interface ProductSubscriptionToggleComponentSignature {
   Element: HTMLDivElement;
@@ -29,18 +30,48 @@ type SubscriptionOption = {
   description: string;
 };
 
+enum AnimationDirection {
+  UP = "up",
+  DOWN = "down",
+}
+
+const ICON_MOVE_DISTANCE = 10;
+const ICON_MOVE_DURATION = 200;
+const ICON_FADE_DURATION = 60;
+
 export default class ProductSubscriptionToggleComponent extends Component<ProductSubscriptionToggleComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  @tracked protected shouldAnimate = false;
+  /**
+   * The direction of the animation.
+   * Set by `setSubscription` according to the `selectionIndex`
+   * values before and after the change; used by `iconTransitionRules`
+   * on initial render and when a subscription is changed.
+   */
+  @tracked private animationDirection: AnimationDirection | null = null;
 
-  @tracked selectionIndex = 0;
+  /**
+   * The index of the selected item within the options array.
+   * Used to determine which animation direction to use.
+   * If the new item is above the previous selection,
+   * the animation should move up and vice versa.
+   */
+  @tracked private selectionIndex = 0;
 
-  protected get selectedSubscription() {
-    console.log("get selectedSubscription");
-
+  /**
+   * The user's current subscription for the product.
+   * Passed to the DropdownList as the `selected` property,
+   * which determines the toggle color.
+   */
+  protected get currentSubscription(): Subscription | undefined {
     const { subscriptions } = this.authenticatedUser;
 
+    /**
+     * We assert instead of using a `?.find()` construction not just because we
+     * expect subscriptions to exist, but to avoid confusion as to whether an
+     * `undefined` value is intentional (user is not subscribed) or not
+     * (the subscriptions array was erroneously null).
+     */
     assert("subscriptions must exist", subscriptions);
 
     return subscriptions.find(
@@ -48,23 +79,40 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     );
   }
 
-  protected get label() {
-    // find the label for the selected subscription
-    return this.subscriptionTypes.find(
+  /**
+   * The label of the dropdown toggle.
+   * Used to display the current subscription type
+   * and to determine which dropdown item is checked.
+   */
+  protected get label(): string {
+    const subscription = this.options.find(
       (subscriptionType) =>
-        subscriptionType.type === this.selectedSubscription?.subscriptionType,
-    )?.label;
+        subscriptionType.type === this.currentSubscription?.subscriptionType,
+    );
+
+    assert("subscription must exist", subscription);
+
+    return subscription.label;
   }
 
-  protected get type() {
-    // find the label for the selected subscription
-    return this.subscriptionTypes.find(
+  /**
+   * The subscription type of the current subscription, if one exists.
+   * Used as a trigger for `AnimatedValue` and to determine
+   * whether the toggle shows the SubscriptionType label or "Subscribe."
+   */
+  protected get type(): SubscriptionType | undefined {
+    return this.options.find(
       (subscriptionType) =>
-        subscriptionType.type === this.selectedSubscription?.subscriptionType,
+        subscriptionType.type === this.currentSubscription?.subscriptionType,
     )?.type;
   }
 
-  protected get subscriptionTypes() {
+  /**
+   * The list of available subscription types.
+   * Passed to the DropdownList as the `items` property
+   * and used as a reference for subscription metadata.
+   */
+  protected get options() {
     return [
       {
         type: SubscriptionType.Instant,
@@ -84,23 +132,30 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     ];
   }
 
-  @action protected enableAnimation() {
-    this.shouldAnimate = true;
-
-    this.selectionIndex = this.subscriptionTypes.findIndex(
+  /**
+   * The action to set the selectionIndex of the current subscription.
+   * Runs when the dropdown toggle is inserted. This essentially
+   * enables animation after the initial render.
+   */
+  @action protected configureSelectionIndex() {
+    this.selectionIndex = this.options.findIndex(
       (subscriptionType) => subscriptionType.type === this.type,
     );
   }
 
-  @tracked animationDirection = "static"; // needs to be set better
-
+  /**
+   * The action to set a new subscription for the product and update
+   * the current `selectionIndex`. Called by the DropdownList on itemClick.
+   * Uses the index values of the previous and new selections to determine
+   * the animation direction, then calls the AuthenticatedUser's save task.
+   */
   @action setSubscription(index: number, attrs: SubscriptionOption) {
-    if (this.selectionIndex > index) {
-      this.animationDirection = "up";
-    } else if (this.selectionIndex < index) {
-      this.animationDirection = "down";
+    if (this.selectionIndex === index) {
+      return;
+    } else if (this.selectionIndex > index) {
+      this.animationDirection = AnimationDirection.UP;
     } else {
-      this.animationDirection = "static";
+      this.animationDirection = AnimationDirection.DOWN;
     }
 
     this.selectionIndex = index;
@@ -111,54 +166,57 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     );
   }
 
-  @action protected iconTransitionRules({
-    oldItems,
-    newItems,
-  }: TransitionRules) {
-    if (!this.shouldAnimate) {
+  /**
+   * The rules by which the icon should animate. Called on initial render
+   * and when the subscription type changes. If an `animationDirection`
+   * is not set, such as on initial render, return an empty transition.
+   * Otherwise, return the UP or DOWN transition based on the `animationDirection`.
+   */
+  @action protected iconTransitionRules() {
+    if (!this.animationDirection) {
       return emptyTransition;
     } else {
-      console.log("iconTransitionRules", {
-        oldItems: oldItems[0],
-        newItems: newItems[0],
-      });
-
-      if (this.animationDirection === "up") {
-        return this.subscribeTransition;
+      if (this.animationDirection === AnimationDirection.UP) {
+        return this.upTransition;
       } else {
-        return this.unsubscribeTransition;
+        return this.downTransition;
       }
     }
   }
 
-  *unsubscribeTransition({
-    insertedSprites,
-    removedSprites,
-  }: TransitionContext) {
+  /**
+   * The "down" animation for the icon. Called when the user selects
+   * a subscription type that is below the previous selection in the list.
+   */
+  *downTransition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of removedSprites) {
-      sprite.endTranslatedBy(0, 10);
-      void move(sprite, { duration: 200, easing: easeOutExpo });
-      void fadeOut(sprite, { duration: 60 });
+      sprite.endTranslatedBy(0, ICON_MOVE_DISTANCE);
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void fadeOut(sprite, { duration: ICON_FADE_DURATION });
     }
 
     for (const sprite of insertedSprites) {
-      sprite.startTranslatedBy(0, -10);
-      void fadeIn(sprite, { duration: 60 });
-      void move(sprite, { duration: 200, easing: easeOutExpo });
+      sprite.startTranslatedBy(0, -ICON_MOVE_DISTANCE);
+      void move(sprite, { duration: ICON_FADE_DURATION, easing: easeOutExpo });
+      void fadeIn(sprite, { duration: ICON_MOVE_DURATION });
     }
   }
 
-  *subscribeTransition({ insertedSprites, removedSprites }: TransitionContext) {
+  /**
+   * The "up" animation for the icon. Called when the user selects
+   * a subscription type that is above the previous selection in the list.
+   */
+  *upTransition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of removedSprites) {
-      sprite.endTranslatedBy(0, -10);
-      void move(sprite, { duration: 200, easing: easeOutExpo });
-      void fadeOut(sprite, { duration: 60 });
+      sprite.endTranslatedBy(0, -ICON_MOVE_DISTANCE);
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void fadeOut(sprite, { duration: ICON_FADE_DURATION });
     }
 
     for (const sprite of insertedSprites) {
-      sprite.startTranslatedBy(0, 10);
-      void fadeIn(sprite, { duration: 60 });
-      void move(sprite, { duration: 200, easing: easeOutExpo });
+      sprite.startTranslatedBy(0, ICON_MOVE_DISTANCE);
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void fadeIn(sprite, { duration: ICON_FADE_DURATION });
     }
   }
 }
