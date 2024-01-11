@@ -17,29 +17,22 @@
           }}
           transition-colors"
       >
-
         <AnimatedContainer>
           <AnimatedValue
-            {{! this is re-getting 59x for every change made in the subscription array }}
-            @value={{this.selectedSubscription}}
+            @value={{this.type}}
             @initialInsertion={{true}}
             @finalRemoval={{true}}
             @rules={{this.iconTransitionRules}}
             as |icon|
           >
-            {{log "render"}}
-
+            {{log "animatedValue render"}}
             <div class="flex">
-              <FlightIcon @name={{if icon.type "check" "plus"}} />
+              <FlightIcon @name={{if icon "check" "plus"}} />
             </div>
           </AnimatedValue>
         </AnimatedContainer>
         <div class="w-20 text-center">
-          {{if
-            this.selectedSubscription.type
-            this.selectedSubscription.label
-            "Subscribe"
-          }}
+          {{if this.type this.label "Subscribe"}}
         </div>
       </dd.ToggleAction>
     </:anchor>
@@ -52,7 +45,7 @@
       <dd.Action class="flex items-start py-2 pl-4 pr-6">
         <X::DropdownList::CheckableItem
           @checkmarkPosition="trailing"
-          @isSelected={{eq dd.attrs.label this.selectedSubscription.label}}
+          @isSelected={{eq dd.attrs.label this.label}}
           class="items-start"
         >
           <div>

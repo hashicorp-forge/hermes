@@ -3,27 +3,16 @@ import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesSize } from "hermes/types/sizes";
-import FlightIcon from "@hashicorp/ember-flight-icons/components/flight-icon";
-import XDropdownList from "hermes/components/x/dropdown-list/index";
 import { SubscriptionType } from "hermes/services/authenticated-user";
-import CheckableItem from "hermes/components/x/dropdown-list/checkable-item";
 import { assert } from "@ember/debug";
-import eq from "ember-truth-helpers/helpers/eq";
-import or from "ember-truth-helpers/helpers/or";
 import { Placement } from "@floating-ui/dom";
-import AnimatedValue from "ember-animated/components/animated-value";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import { tracked } from "@glimmer/tracking";
-import { TransitionContext, wait } from "ember-animated/.";
+import { TransitionContext } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
-import {
-  easeOutBack,
-  easeOutExpo,
-  easeOutQuad,
-} from "hermes/utils/ember-animated/easings";
-import { restartableTask } from "ember-concurrency";
-import animateTransform from "hermes/utils/ember-animated/animate-transform";
+import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+import { TransitionRules } from "ember-animated/transition-rules";
 
 interface ProductSubscriptionToggleComponentSignature {
   Element: HTMLDivElement;
@@ -48,24 +37,31 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
   @tracked selectionIndex = 0;
 
   protected get selectedSubscription() {
-    console.log("getter computing");
-    const subscriptions = this.authenticatedUser.subscriptions;
+    console.log("get selectedSubscription");
+
+    const { subscriptions } = this.authenticatedUser;
+
     assert("subscriptions must exist", subscriptions);
-    // see if the user is subscribed to this product
-    const subscription = subscriptions.find(
+
+    return subscriptions.find(
       (subscription) => subscription.productArea === this.args.product,
     );
+  }
 
-    if (subscription) {
-      const subscriptionOption = this.subscriptionTypes.find(
-        (subscriptionType) =>
-          subscriptionType.type === subscription.subscriptionType,
-      );
+  protected get label() {
+    // find the label for the selected subscription
+    return this.subscriptionTypes.find(
+      (subscriptionType) =>
+        subscriptionType.type === this.selectedSubscription?.subscriptionType,
+    )?.label;
+  }
 
-      assert("subscriptionOption must exist", subscriptionOption);
-
-      return subscriptionOption;
-    }
+  protected get type() {
+    // find the label for the selected subscription
+    return this.subscriptionTypes.find(
+      (subscriptionType) =>
+        subscriptionType.type === this.selectedSubscription?.subscriptionType,
+    )?.type;
   }
 
   protected get subscriptionTypes() {
@@ -91,16 +87,9 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
   @action protected enableAnimation() {
     this.shouldAnimate = true;
 
-    // this should set the animation direction and selection index
-    // based on the current subscription
-
-    console.log("before", this.selectionIndex);
-
     this.selectionIndex = this.subscriptionTypes.findIndex(
-      (subscriptionType) =>
-        subscriptionType.type === this.selectedSubscription?.type,
+      (subscriptionType) => subscriptionType.type === this.type,
     );
-    console.log("after", this.selectionIndex);
   }
 
   @tracked animationDirection = "static"; // needs to be set better
@@ -123,41 +112,22 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
   }
 
   @action protected iconTransitionRules({
-    // @ts-ignore
     oldItems,
-    // @ts-ignore
     newItems,
-  }) {
+  }: TransitionRules) {
     if (!this.shouldAnimate) {
       return emptyTransition;
     } else {
+      console.log("iconTransitionRules", {
+        oldItems: oldItems[0],
+        newItems: newItems[0],
+      });
+
       if (this.animationDirection === "up") {
         return this.subscribeTransition;
-      } else if (this.animationDirection === "down") {
+      } else {
         return this.unsubscribeTransition;
       }
-
-      return this.wiggleIconTransition;
-    }
-  }
-
-  *wiggleIconTransition({
-    insertedSprites,
-    removedSprites,
-  }: TransitionContext) {
-    for (const sprite of removedSprites) {
-      sprite.hide();
-    }
-
-    for (const sprite of insertedSprites) {
-      sprite.reveal();
-      animateTransform(sprite, {
-        rotate: {
-          to: 360,
-        },
-        duration: 250,
-        easing: easeOutBack,
-      });
     }
   }
 
@@ -165,7 +135,6 @@ export default class ProductSubscriptionToggleComponent extends Component<Produc
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
-    // this will be the same as iconTransition, but in the opposite direction
     for (const sprite of removedSprites) {
       sprite.endTranslatedBy(0, 10);
       void move(sprite, { duration: 200, easing: easeOutExpo });

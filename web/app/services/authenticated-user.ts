@@ -105,7 +105,6 @@ export default class AuthenticatedUserService extends Service {
       subscriptionType: SubscriptionType | undefined,
     ) => {
       assert("subscriptions must exist", this.subscriptions);
-      console.log("subscriptionType", subscriptionType);
 
       const cached = this.subscriptions.slice();
 
@@ -114,22 +113,23 @@ export default class AuthenticatedUserService extends Service {
       );
 
       if (existingSubscription) {
-        // remove the subscription
         if (subscriptionType === undefined) {
+          // remove the existing subscription
           this.subscriptions.removeObject(existingSubscription);
         } else {
-          // update the subscription type
+          // update the existing subscription
           existingSubscription.subscriptionType = subscriptionType;
 
-          // updating an array element doesn't trigger a change
-          // so we need to replace the array
-          this.subscriptions = this.subscriptions.slice();
+          // updating an array object doesn't cause a re-render,
+          // so we save it manually to trigger one
+          this.subscriptions = this.subscriptions;
         }
       } else {
+        // already unsubscribed; ignore
         if (subscriptionType === undefined) {
           return;
         }
-        // add the subscription
+        // add the new subscription
         this.subscriptions.addObject({
           productArea,
           subscriptionType: subscriptionType ?? SubscriptionType.Instant,
