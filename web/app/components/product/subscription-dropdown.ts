@@ -196,8 +196,14 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
       allItems.length === 2 &&
       allItems.any((item) => item === SubscriptionType.Instant);
 
-    if (Ember.testing || !this.animationDirection || skipIconTransition) {
-      console.log("empty transition");
+    const isLeavingProject = !!oldItems[0] && newItems[0] === undefined;
+
+    if (
+      Ember.testing ||
+      !this.animationDirection ||
+      skipIconTransition ||
+      isLeavingProject
+    ) {
       return emptyTransition;
     } else {
       if (this.animationDirection === AnimationDirection.Up) {
