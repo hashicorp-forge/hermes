@@ -23,7 +23,7 @@
         <:anchor as |dd|>
           <dd.ToggleAction
             data-test-project-status-toggle
-            class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
+            class="hds-button hds-button--size-medium hds-button--color-secondary pill-button border-color-border-strong"
             @hasChevron={{true}}
           >
             <Project::StatusIcon @status={{dd.selected}} />
@@ -59,12 +59,12 @@
     <CopyURLButton
       @isIconOnly={{true}}
       @url={{this.url}}
-      class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+      class="hds-button hds-button--color-secondary pill-button w-9 justify-center border-color-border-strong p-0"
     />
 
   </div>
 </div>
-<div class="relative z-20 max-w-3xl">
+<div class="relative z-20 max-w-3xl pb-5">
 
   {{! Title }}
   <div class="mt-7 flex">
@@ -99,16 +99,19 @@
 </div>
 
 {{#if this.jiraIsEnabled}}
-  {{! Jira }}
-  <div class="mt-10 flex w-full max-w-3xl">
-    <Project::JiraWidget
-      {{did-insert this.maybeLoadJiraInfo}}
-      @issue={{this.jiraIssue}}
-      @onIssueRemove={{this.removeJiraIssue}}
-      @onIssueSelect={{this.addJiraIssue}}
-      @isLoading={{this.loadJiraIssue.isRunning}}
-      @isReadOnly={{not this.projectIsActive}}
-    />
+  <div {{did-insert this.maybeLoadJiraInfo}}>
+    {{#if this.jiraWidgetIsShown}}
+      {{! Jira }}
+      <div class="mt-5 flex w-full max-w-3xl">
+        <Project::JiraWidget
+          @issue={{this.jiraIssue}}
+          @onIssueRemove={{this.removeJiraIssue}}
+          @onIssueSelect={{this.addJiraIssue}}
+          @isLoading={{this.loadJiraIssue.isRunning}}
+          @isReadOnly={{not this.projectIsActive}}
+        />
+      </div>
+    {{/if}}
   </div>
 {{/if}}
 
@@ -126,7 +129,7 @@
           <Action
             data-test-add-project-resource-button
             {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+            class="hds-button hds-button--color-primary add-project-resource-button pill-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center"
           >
             <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
           </Action>
@@ -163,10 +166,7 @@
                   )
                 }}
               >
-                <Doc::TileMedium
-                  @doc={{document}}
-                  @avatarIsLoading={{this.getOwnerPhoto.isRunning}}
-                />
+                <Doc::TileMedium @doc={{document}} />
               </Project::Resource>
             </li>
           {{/each}}

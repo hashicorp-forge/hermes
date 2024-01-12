@@ -11,7 +11,9 @@
   @offset={{@offset}}
   @disableClose={{@disableClose}}
   @matchAnchorWidth={{@matchAnchorWidth}}
-  class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
+  class="x-dropdown-list
+    {{unless (eq @placement null) 'hermes-popover'}}
+    {{if this.inputIsShown 'has-input'}}"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -96,7 +98,7 @@
       {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
-      class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
+      class="x-dropdown-list-container"
       role={{if this.inputIsShown "combobox"}}
     >
       {{#if @isLoading}}

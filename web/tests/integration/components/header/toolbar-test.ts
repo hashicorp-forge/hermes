@@ -76,11 +76,11 @@ module("Integration | Component | header/toolbar", function (hooks) {
     await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(".x-dropdown-list-item-value")?.map((el) =>
-        el.textContent?.trim()
+      findAll("[data-test-x-dropdown-list-item-value]")?.map(
+        (el) => el.textContent?.trim(),
       ),
       ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
-      "Unsupported statuses are filtered out"
+      "Unsupported statuses are filtered out",
     );
   });
 

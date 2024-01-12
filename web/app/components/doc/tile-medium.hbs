@@ -18,10 +18,11 @@
       disabled={{not (get @doc.owners 0)}}
     >
       <Person::Avatar
+        {{did-insert this.maybeLoadAvatar}}
         @size="large"
         @email="{{get @doc.owners 0}}"
-        @imgURL={{get @doc.ownerPhotos 0}}
-        @isLoading={{@avatarIsLoading}}
+        @imgURL={{this.imgURL}}
+        @isLoading={{this.getOwnerPhoto.isRunning}}
         class="relative z-10 -mt-1 shrink-0"
       />
     </LinkTo>

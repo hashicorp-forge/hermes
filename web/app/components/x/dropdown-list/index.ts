@@ -16,9 +16,9 @@ import XDropdownListToggleActionComponent from "./toggle-action";
 import XDropdownListToggleButtonComponent from "./toggle-button";
 import { XDropdownListItemAPI } from "./item";
 import { restartableTask, timeout } from "ember-concurrency";
-import maybeScrollIntoView from "hermes/utils/maybe-scroll-into-view";
 import { MatchAnchorWidthOptions } from "hermes/components/floating-u-i/content";
 import XDropdownListToggleSelectComponent from "./toggle-select";
+import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 export type XDropdownListToggleComponentBoundArgs =
   | "contentIsShown"
@@ -326,7 +326,7 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    */
   @action protected setFocusedItemIndex(
     focusDirectionOrNumber: FocusDirection | number,
-    maybeScrollIntoView = true,
+    scrollIntoView = true,
   ) {
     let { _menuItems: menuItems, focusedItemIndex } = this;
 
@@ -377,8 +377,8 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
 
     this.focusedItemIndex = focusedItemIndex;
 
-    if (maybeScrollIntoView) {
-      this.maybeScrollIntoView();
+    if (scrollIntoView) {
+      this.scrollIntoView();
     }
   }
 
@@ -387,10 +387,12 @@ export default class XDropdownListComponent extends Component<XDropdownListCompo
    * and, if necessary, scrolls the dropdown to make it visible.
    * Used by the setFocusedItemIndex action on keydown.
    */
-  private maybeScrollIntoView() {
+  private scrollIntoView() {
     const focusedItem = this._menuItems?.item(this.focusedItemIndex);
     assert("focusedItem must exist", focusedItem instanceof HTMLElement);
-    maybeScrollIntoView(focusedItem, this.scrollContainer);
+    scrollIntoViewIfNeeded(focusedItem, {
+      block: "nearest",
+    });
   }
 
   /**
