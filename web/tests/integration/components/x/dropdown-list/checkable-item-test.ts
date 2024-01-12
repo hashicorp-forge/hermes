@@ -31,7 +31,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     `);
 
     assert.dom(CHECK).hasClass("invisible");
-    assert.dom(".x-dropdown-list-item-value").hasText("foo");
+    assert.dom("[data-test-x-dropdown-list-item-value]").hasText("foo");
     assert.dom(COUNT).doesNotExist();
 
     this.set("isSelected", true);
