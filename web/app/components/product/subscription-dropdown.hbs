@@ -23,30 +23,40 @@
           }}
           transition-colors"
       >
-        <AnimatedContainer
-          data-test-container
-          data-test-animation-direction={{this.animationDirection}}
-          data-test-selection-index={{this.selectionIndex}}
-          {{did-insert this.configureSelectionIndex}}
-        >
+        <AnimatedContainer {{did-insert this.configureSelectionIndex}}>
           <AnimatedValue
             @value={{this.type}}
             @initialInsertion={{true}}
             @finalRemoval={{true}}
-            @rules={{this.iconTransitionRules}}
+            @rules={{this.transitionRules}}
             as |icon|
           >
-            <div class="flex">
+            <div class="flex" data-animation-element="icon">
               <FlightIcon
                 data-test-toggle-icon
                 @name={{if icon "check" "plus"}}
+                class="transform-z-0"
               />
             </div>
           </AnimatedValue>
         </AnimatedContainer>
-        <div class="w-20 text-center">
-          {{if this.type this.label "Subscribe"}}
-        </div>
+        <AnimatedContainer
+          data-test-container
+          data-test-animation-direction={{this.animationDirection}}
+          data-test-selection-index={{this.selectionIndex}}
+        >
+          <AnimatedValue
+            @value={{this.label}}
+            @initialInsertion={{true}}
+            @finalRemoval={{true}}
+            @rules={{this.transitionRules}}
+            as |label|
+          >
+            <div class="w-20 text-center" data-animation-element="label">
+              {{if (eq label "Unsubscribed") "Subscribe" label}}
+            </div>
+          </AnimatedValue>
+        </AnimatedContainer>
       </dd.ToggleAction>
     </:anchor>
     <:header>

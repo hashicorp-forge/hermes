@@ -10,10 +10,12 @@ import { assert } from "@ember/debug";
 import { Placement } from "@floating-ui/dom";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import { tracked } from "@glimmer/tracking";
-import { TransitionContext } from "ember-animated/.";
+import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import move from "ember-animated/motions/move";
-import { easeOutExpo } from "hermes/utils/ember-animated/easings";
+import { easeOutCirc } from "hermes/utils/ember-animated/easings";
+import { TransitionRules } from "ember-animated/transition-rules";
+import Ember from "ember";
 
 interface ProductSubscriptionDropdownComponentSignature {
   Element: HTMLDivElement;
@@ -47,9 +49,10 @@ export enum AnimationDirection {
   Down = "down",
 }
 
-const ICON_MOVE_DISTANCE = 10;
-const ICON_MOVE_DURATION = 650;
-const ICON_FADE_DURATION = 80;
+const ICON_MOVE_DISTANCE = 8;
+const ICON_MOVE_DURATION = 300;
+const ICON_FADE_DURATION = ICON_MOVE_DURATION * 0.15;
+const LABEL_DELAY = ICON_MOVE_DURATION * 0.1;
 
 export default class ProductSubscriptionDropdownComponent extends Component<ProductSubscriptionDropdownComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
@@ -184,8 +187,17 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
    * is not set, such as on initial render, return an empty transition.
    * Otherwise, return the UP or DOWN transition based on the `animationDirection`.
    */
-  @action protected iconTransitionRules() {
-    if (!this.animationDirection) {
+  @action protected transitionRules({ oldItems, newItems }: TransitionRules) {
+    const allItems = [...oldItems, ...newItems].filter(
+      (item) => item !== undefined,
+    );
+
+    const skipIconTransition =
+      allItems.length === 2 &&
+      allItems.any((item) => item === SubscriptionType.Instant);
+
+    if (Ember.testing || !this.animationDirection || skipIconTransition) {
+      console.log("empty transition");
       return emptyTransition;
     } else {
       if (this.animationDirection === AnimationDirection.Up) {
@@ -197,19 +209,38 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
   }
 
   /**
+   * FIXME: Make sure these don't animate on routeChange
+   * FIXME: Confirm these look good on the settings screen with real back-end
+   */
+
+  /**
    * The "down" animation for the icon. Called when the user selects
    * a subscription type that is below the previous selection in the list.
    */
   *downTransition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of removedSprites) {
       sprite.endTranslatedBy(0, ICON_MOVE_DISTANCE);
-      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutCirc });
       void fadeOut(sprite, { duration: ICON_FADE_DURATION });
+    }
+
+    const allElements = [
+      ...insertedSprites.map((sprite) => sprite.element),
+      ...removedSprites.map((sprite) => sprite.element),
+    ];
+
+    if (
+      allElements.some(
+        (element) =>
+          (element as HTMLElement).dataset["animationElement"] === "label",
+      )
+    ) {
+      yield wait(LABEL_DELAY);
     }
 
     for (const sprite of insertedSprites) {
       sprite.startTranslatedBy(0, -ICON_MOVE_DISTANCE);
-      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutCirc });
       void fadeIn(sprite, { duration: ICON_FADE_DURATION });
     }
   }
@@ -221,13 +252,27 @@ export default class ProductSubscriptionDropdownComponent extends Component<Prod
   *upTransition({ insertedSprites, removedSprites }: TransitionContext) {
     for (const sprite of removedSprites) {
       sprite.endTranslatedBy(0, -ICON_MOVE_DISTANCE);
-      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutCirc });
       void fadeOut(sprite, { duration: ICON_FADE_DURATION });
+    }
+
+    const allElements = [
+      ...insertedSprites.map((sprite) => sprite.element),
+      ...removedSprites.map((sprite) => sprite.element),
+    ];
+
+    if (
+      allElements.some(
+        (element) =>
+          (element as HTMLElement).dataset["animationElement"] === "label",
+      )
+    ) {
+      yield wait(LABEL_DELAY);
     }
 
     for (const sprite of insertedSprites) {
       sprite.startTranslatedBy(0, ICON_MOVE_DISTANCE);
-      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutExpo });
+      void move(sprite, { duration: ICON_MOVE_DURATION, easing: easeOutCirc });
       void fadeIn(sprite, { duration: ICON_FADE_DURATION });
     }
   }

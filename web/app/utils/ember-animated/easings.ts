@@ -11,3 +11,7 @@ export function easeOutQuad(time: number): number {
 export function easeOutExpo(time: number) {
   return time == d ? b + c : c * (-Math.pow(2, (-10 * time) / d) + 1) + b;
 }
+
+export function easeOutCirc(time: number) {
+  return c * Math.sqrt(1 - (time = time / d - 1) * time) + b;
+}

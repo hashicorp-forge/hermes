@@ -63,18 +63,14 @@ export default class AuthenticatedUserService extends Service {
    * If the user has no subscriptions, returns an empty array.
    */
   fetchSubscriptions = task(async () => {
-    // TODO: remove
+    // TODO: remove when back-end is ready
     if (!Ember.testing) {
-      this.subscriptions = [
-        {
-          productArea: "Cloud Infrastructure",
-          subscriptionType: SubscriptionType.Instant,
-        },
-      ];
-      // this.subscriptions = [];
+      this.subscriptions = [];
       return;
     }
+
     const cached = this.subscriptions;
+
     try {
       this.subscriptions = await this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
@@ -90,26 +86,25 @@ export default class AuthenticatedUserService extends Service {
 
   setSubscription = restartableTask(
     async (productArea: string, subscriptionType?: SubscriptionType) => {
-      // TODO: remove
+      // TODO: remove when back-end is ready
       if (!Ember.testing) {
         if (!subscriptionType) {
           this.subscriptions = [];
           return;
+        } else {
+          this.subscriptions = [
+            {
+              productArea,
+              subscriptionType: subscriptionType ?? SubscriptionType.Instant,
+            },
+          ];
+          return;
         }
-        this.subscriptions = [
-          {
-            productArea,
-            subscriptionType: subscriptionType ?? SubscriptionType.Instant,
-          },
-        ];
-        // this.subscriptions = [];
-        return;
       }
 
       assert("subscriptions must exist", this.subscriptions);
 
       const cached = this.subscriptions.slice();
-      console.log(cached);
 
       const existingSubscription = this.subscriptions.find(
         (subscription) => subscription.productArea === productArea,
@@ -140,30 +135,13 @@ export default class AuthenticatedUserService extends Service {
       }
 
       try {
-        // await this.fetchSvc.fetch(
-        //   `/api/${this.configSvc.config.api_version}/me/subscriptions`,
-        //   {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({
-        //       subscriptions: this.subscriptions,
-        //     }),
-        //   },
-        // );
-
-        const newSubscriptions = this.subscriptions.map(
-          (subscription) => subscription.productArea,
-        );
-
-        console.log(newSubscriptions);
-
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/me/subscriptions`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              subscriptions: newSubscriptions,
+              subscriptions: this.subscriptions,
             }),
           },
         );

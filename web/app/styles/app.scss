@@ -99,6 +99,11 @@ ol {
   list-style: none;
 }
 
+// Apply to animated SVGs to improve performance
+.transform-z-0 {
+  transform: translateZ(0);
+}
+
 .x-container {
   @apply mx-auto w-full max-w-screen-lg px-8;
 }
