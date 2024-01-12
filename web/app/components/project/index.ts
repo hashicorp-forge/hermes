@@ -9,7 +9,7 @@ import {
 import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
-import { enqueueTask, restartableTask, task, timeout } from "ember-concurrency";
+import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
@@ -112,6 +112,26 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   protected get relatedResources() {
     return [...this.hermesDocuments, ...this.externalLinks];
+  }
+
+  /**
+   * Whether the JiraWidget should be shown.
+   * True if the project is active, or if the project has a Jira issue
+   * (that may or may not be loading)
+   */
+  protected get jiraWidgetIsShown() {
+    /**
+     * This construction is weird, but it gives us
+     * the most accurate evaluations by `ember-animated`
+     * and prevents unnecessary re-renders.
+     */
+    if (
+      !!this.jiraIssue ||
+      this.projectIsActive ||
+      this.loadJiraIssue.isRunning
+    ) {
+      return true;
+    }
   }
 
   /**
@@ -264,8 +284,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Adds a resource to the correct array, then saves the project.
    */
   @action protected addDocument(resource: RelatedHermesDocument) {
-    void this.getOwnerPhoto.perform(resource.googleFileID);
-
     const cachedDocuments = this.hermesDocuments.slice();
 
     this.hermesDocuments.unshiftObject(resource);
@@ -317,27 +335,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
   }
-
-  /**
-   * The task to get the owner photo for a document.
-   */
-  private getOwnerPhoto = enqueueTask(async (docID: string) => {
-    const doc = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
-      .then((response) => response?.json());
-
-    const ownerPhoto = doc.ownerPhotos[0];
-
-    if (ownerPhoto) {
-      const hermesDoc = this.hermesDocuments.find(
-        (doc) => doc.googleFileID === docID,
-      );
-
-      if (hermesDoc) {
-        hermesDoc.ownerPhotos = [ownerPhoto];
-      }
-    }
-  });
 
   /**
    * The action to save basic project attributes,

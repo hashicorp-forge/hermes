@@ -230,6 +230,9 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
               "docType",
               "status",
               "owners",
+              "summary",
+              "createdTime",
+              "modifiedTime",
             ],
 
             // https://www.algolia.com/doc/guides/managing-results/rules/merchandising-and-promoting/in-depth/optional-filters/
