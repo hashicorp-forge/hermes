@@ -23,7 +23,7 @@
         <:anchor as |dd|>
           <dd.ToggleAction
             data-test-project-status-toggle
-            class="hds-button hds-button--size-medium hds-button--color-secondary rounded-r-full rounded-l-full border-color-border-strong"
+            class="hds-button hds-button--size-medium hds-button--color-secondary pill-button border-color-border-strong"
             @hasChevron={{true}}
           >
             <Project::StatusIcon @status={{dd.selected}} />
@@ -59,7 +59,7 @@
     <CopyURLButton
       @isIconOnly={{true}}
       @url={{this.url}}
-      class="hds-button hds-button--color-secondary w-9 justify-center rounded-full border-color-border-strong p-0"
+      class="hds-button hds-button--color-secondary pill-button w-9 justify-center border-color-border-strong p-0"
     />
 
   </div>
@@ -129,7 +129,7 @@
           <Action
             data-test-add-project-resource-button
             {{on "click" rr.showModal}}
-            class="hds-button hds-button--color-primary add-project-resource-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center rounded-full"
+            class="hds-button hds-button--color-primary add-project-resource-button pill-button pointer-events-auto ml-auto grid h-20 w-20 place-items-center"
           >
             <FlightIcon @name="plus" @size="24" class="h-9 w-9" />
           </Action>
