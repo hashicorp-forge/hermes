@@ -441,7 +441,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           from: -10,
         },
         translate: {
-          yFrom: 25,
+          y: {
+            from: 25,
+          },
         },
         duration: animationDuration * 0.85,
         easing: easeOutExpo,
@@ -461,7 +463,9 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           to: -70,
         },
         translate: {
-          yTo: 15,
+          y: {
+            to: 15,
+          },
         },
         duration,
         easing,
