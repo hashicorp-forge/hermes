@@ -56,8 +56,11 @@
     }
   }
 
-  .add-project-resource-button:hover {
-    @apply scale-105 transition-transform;
+  .add-project-resource-button {
+    &:hover,
+    &:focus {
+      @apply scale-105 transition-transform;
+    }
   }
 
   .project-resource {

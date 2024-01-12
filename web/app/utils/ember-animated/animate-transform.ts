@@ -1,7 +1,6 @@
 /**
  * A transition to control all transform properties at once.
- * This is a work in progress and may be limited in functionality.
- * Modified from the `move` and `opacity` motions.
+ * Modified from Ember Animated's `move` motion.
  */
 
 import { Motion, rAF, Sprite, Tween } from "ember-animated";
@@ -13,6 +12,7 @@ interface AnimateTransformOptions extends BaseOptions {
     from?: number;
     to?: number;
     duration?: number;
+    origin?: string;
   };
   rotate?: {
     from?: number;
@@ -20,10 +20,14 @@ interface AnimateTransformOptions extends BaseOptions {
     duration?: number;
   };
   translate?: {
-    xFrom?: number;
-    xTo?: number;
-    yFrom?: number;
-    yTo?: number;
+    x?: {
+      from?: number;
+      to?: number;
+    };
+    y?: {
+      from?: number;
+      to?: number;
+    };
     duration?: number;
   };
   easing?: (time: number) => number;
@@ -41,11 +45,11 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
     let { sprite, duration, opts } = this;
     let { translate, rotate, scale, easing } = opts;
 
-    let translateXTo = translate?.xTo;
-    let translateXFrom = translate?.xFrom;
+    let translateXTo = translate?.x?.to;
+    let translateXFrom = translate?.x?.from;
 
-    let translateYTo = translate?.yTo;
-    let translateYFrom = translate?.yFrom;
+    let translateYTo = translate?.y?.to;
+    let translateYFrom = translate?.y?.from;
 
     let rotateTo = rotate?.to;
     let rotateFrom = rotate?.from;
@@ -59,6 +63,11 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
     let scaleTween: TweenLike | null = null;
 
     if (translate) {
+      if (!rotate && !scale) {
+        console.warn(
+          `You should use Ember Animated's \`move\` motion for simple translations`,
+        );
+      }
       translateXTween = new Tween(
         translateXFrom ?? 0,
         translateXTo ?? 0,
@@ -75,14 +84,8 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
     if (rotate) {
       rotateTween = new Tween(
-        rotateFrom ??
-          (sprite.initialComputedStyle != null
-            ? parseFloat(sprite.initialComputedStyle.opacity)
-            : 0),
-        rotateTo ??
-          (sprite.finalComputedStyle != null
-            ? parseFloat(sprite.finalComputedStyle.opacity)
-            : 1),
+        rotateFrom ?? 0,
+        rotateTo ?? 0,
         rotate.duration ?? duration,
         easing,
       );
@@ -132,6 +135,7 @@ export class AnimatedTransform extends Motion<AnimateTransformOptions> {
 
       sprite.applyStyles({
         transform: transformString,
+        "transform-origin": scale?.origin ?? "center",
       });
 
       yield rAF();

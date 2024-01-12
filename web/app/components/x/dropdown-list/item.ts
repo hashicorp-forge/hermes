@@ -48,7 +48,7 @@ export interface XDropdownListItemComponentArgs {
   onItemClick?: (value: any, attributes: any) => void;
   setFocusedItemIndex: (
     focusDirection: FocusDirection | number,
-    maybeScrollIntoView?: boolean,
+    scrollIntoView?: boolean,
   ) => void;
   hideContent: () => void;
 }
