@@ -107,6 +107,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
+   * A single array of all resources. Used by the "Add..." modal
+   * to prevent duplicate resources from being added.
+   */
+  protected get relatedResources() {
+    return [...this.hermesDocuments, ...this.externalLinks];
+  }
+
+  /**
    * Whether the JiraWidget should be shown.
    * True if the project is active, or if the project has a Jira issue
    * (that may or may not be loading)
