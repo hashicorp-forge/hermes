@@ -30,6 +30,17 @@
       @apply mt-1.5;
     }
   }
+
+  .related-resource-link {
+    @apply relative grid items-start justify-start gap-2 rounded py-[5px];
+    @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;
+    @apply outline-offset-[3px];
+    grid-template-columns: 22px auto;
+
+    .hermes-document + .external-resource {
+      @apply mt-1.5;
+    }
+  }
 }
 
 .related-resources-modal-container {

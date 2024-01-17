@@ -640,7 +640,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(project.status, ProjectStatus.Active);
   });
 
-  test("a full jira issue will load if the project has a jiraIssueID", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("a full jira issue will load if the project has a jiraIssueID (active project)", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     const jiraIssueID = "HER-123";
 
     this.server.create("project", {
@@ -667,6 +667,25 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .dom(JIRA_PRIORITY_ICON)
       .hasAttribute("src", TEST_JIRA_PRIORITY_IMAGE)
       .hasAttribute("alt", TEST_JIRA_PRIORITY);
+  });
+
+  test("a jira issue will load if the project has a jiraIssueID (inactive project)", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const jiraIssueID = "HER-123";
+
+    this.server.create("project", {
+      jiraIssueID,
+      id: 2,
+      status: ProjectStatus.Completed,
+    });
+
+    this.server.create("jira-issue", {
+      key: jiraIssueID,
+    });
+
+    await visit("/projects/2");
+
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
+    assert.dom(JIRA_KEY).hasText(jiraIssueID);
   });
 
   test("you can add a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
