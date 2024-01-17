@@ -19,6 +19,7 @@ import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
+import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 export interface DocumentSidebarRelatedResourcesComponentArgs {
@@ -260,30 +261,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
           });
         });
 
-        const highlight = document.createElement("div");
-        highlight.classList.add("highlight-affordance");
-        target.insertBefore(highlight, target.firstChild);
-
-        const fadeInAnimation = highlight.animate(
-          [{ opacity: 0 }, { opacity: 1 }],
-          { duration: 50 },
-        );
-
-        await timeout(Ember.testing ? 0 : 2000);
-
-        const fadeOutAnimation = highlight.animate(
-          [{ opacity: 1 }, { opacity: 0 }],
-          { duration: Ember.testing ? 50 : 400 },
-        );
-
-        try {
-          await fadeInAnimation.finished;
-          await fadeOutAnimation.finished;
-        } finally {
-          fadeInAnimation.cancel();
-          fadeOutAnimation.cancel();
-          highlight.remove();
-        }
+        highlightElement(target);
       });
     },
   );
