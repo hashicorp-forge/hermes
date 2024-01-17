@@ -19,7 +19,7 @@
   {{/each}}
 </nav>
 
-<ol data-test-projects-list class="relative grid grid-cols-3 gap-2">
+<ol data-test-projects-list class="divided-list relative">
   {{#each this.shownProjects as |project|}}
     <li data-test-project>
       <LinkTo @route="authenticated.projects.project" @model={{project.id}}>
@@ -28,3 +28,16 @@
     </li>
   {{/each}}
 </ol>
+
+<div
+  class="mt-8 inline-flex cursor-default items-center gap-2 text-color-foreground-faint"
+  {{tooltip
+    "A project is a public collection of documents and links organized around an effort."
+    class="w-[260px]"
+    placement="right"
+  }}
+>
+  <div class="border-b border-dotted border-b-color-border-strong">
+    Whatʼs a project?
+  </div>
+</div>

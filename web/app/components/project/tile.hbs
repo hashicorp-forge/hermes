@@ -1,67 +1,66 @@
-<Hds::Card::Container
-  data-test-project-tile
-  @hasBorder={{true}}
-  @levelHover="mid"
-  class="project-tile interactive-card h-48 p-4"
-  ...attributes
->
-  <div class="relative h-full pb-16">
-    <h3
-      data-test-title
-      class="title text-display-300 font-semibold text-color-foreground-strong"
-    >
-      {{@project.title}}
-    </h3>
-    {{#if @project.description}}
-      <p
-        data-test-description
-        class="description mt-1 text-body-300 text-color-foreground-faint"
+<div class="h-10" ...attributes>
+  <div class="project-tile-grid relative grid h-full w-full gap-2">
+    <div class="title-and-description grid w-full items-center gap-2.5">
+      <Project::StatusIcon @status={{@project.status}} class="status" />
+      <div class="overflow-hidden">
+        <h3
+          data-test-title
+          class="truncate text-display-300 font-semibold text-color-foreground-strong"
+        >
+          {{@project.title}}
+        </h3>
+      </div>
+    </div>
+
+    {{#if (or this.jiraIssue this.fetchJiraIssue.isRunning)}}
+      <div
+        class="jira inline-flex items-center gap-1.5
+          {{if this.jiraIssue 'fade-in-forwards'}}"
       >
-        {{@project.description}}
-      </p>
+        <div class="flex h-4 w-4">
+          {{#if this.jiraIssue}}
+            <img
+              data-test-issue-type-image
+              alt={{this.jiraIssue.issueType}}
+              src={{this.jiraIssue.issueTypeImage}}
+              height="16"
+              width="16"
+            />
+          {{else}}
+            <FlightIcon @name="loading" />
+          {{/if}}
+        </div>
+        {{#if this.jiraIssue}}
+          <span
+            data-test-jira-key
+            class="truncate text-body-100 text-color-foreground-faint
+              {{if this.jiraIssueIsClosed 'line-through'}}"
+          >
+            {{this.jiraIssue.key}}
+          </span>
+        {{/if}}
+      </div>
     {{/if}}
 
-    <div class="absolute bottom-0 left-0 flex w-full items-center gap-2.5">
-      {{#if @project.products}}
+    {{#if @project.products}}
+      <div
+        class="products bg-purple-50X flex flex-row-reverse items-center gap-2 text-body-100 text-color-foreground-faint"
+      >
         <ul class="flex gap-px">
-          {{#each @project.products as |product|}}
+          {{#each (take this.maxProducts @project.products) as |product|}}
             <li class="flex items-center" data-test-product>
               <Product::Avatar @product={{product}} />
             </li>
           {{/each}}
         </ul>
-      {{/if}}
+        {{#if this.additionalProductsLabelIsShown}}
+          <div class="shrink-0 text-color-foreground-faint">
 
-      {{#if (or this.jiraIssue this.fetchJiraIssue.isRunning)}}
-        <div
-          class="flex items-center gap-1.5
-            {{if this.jiraIssue 'fade-in-forwards'}}"
-        >
-          <div class="flex h-4 w-4">
-            {{#if this.jiraIssue}}
-              <img
-                data-test-issue-type-image
-                alt={{this.jiraIssue.issueType}}
-                src={{this.jiraIssue.issueTypeImage}}
-                height="16"
-                width="16"
-              />
-            {{else}}
-              <FlightIcon @name="loading" />
-            {{/if}}
+            +{{this.additionalProductsCount}}
           </div>
-          {{#if this.jiraIssue}}
-            <span
-              data-test-jira-key
-              class="text-body-100 text-color-foreground-faint
-                {{if this.jiraIssueIsClosed 'line-through'}}"
-            >
-              {{this.jiraIssue.key}}
-            </span>
-          {{/if}}
-        </div>
-      {{/if}}
+        {{/if}}
+      </div>
+    {{/if}}
 
-    </div>
   </div>
-</Hds::Card::Container>
+</div>

@@ -26,11 +26,33 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
   }
 
   /**
+   * The maximum number of product avatars to show before
+   * showing a "+N" label.
+   */
+  protected maxProducts = 3;
+
+  /**
    * The Jira issue associated with this project, if any.
    * Used in the template to determine whether to show Jira-related data.
    * Set by the `fetchJiraIssue` task if the project has a jiraIssueID.
    */
-  @tracked jiraIssue: JiraIssue | null = null;
+  @tracked protected jiraIssue: JiraIssue | null = null;
+
+  /**
+   *
+   */
+  protected get additionalProductsLabelIsShown() {
+    const { products } = this.args.project;
+    return (products?.length ?? 0) > this.maxProducts;
+  }
+
+  /**
+   *
+   */
+  protected get additionalProductsCount() {
+    const { products } = this.args.project;
+    return (products?.length ?? 0) - this.maxProducts;
+  }
 
   /**
    * Whether the Jira issue is marked "close" or "done."
