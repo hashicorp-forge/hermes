@@ -16,12 +16,6 @@
           @apply from-color-page-primary via-color-page-primary to-transparent;
         }
       }
-
-      &.light-gray {
-        &::before {
-          @apply from-color-page-primary via-color-page-primary to-transparent;
-        }
-      }
     }
   }
 

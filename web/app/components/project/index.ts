@@ -143,14 +143,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   /**
-   * A single array of all resources. Used by the "Add..." modal
-   * to prevent duplicate resources from being added.
-   */
-  protected get relatedResources() {
-    return [...this.hermesDocuments, ...this.externalLinks];
-  }
-
-  /**
    * Whether the JiraWidget should be shown.
    * True if the project is active, or if the project has a Jira issue
    * (that may or may not be loading)
@@ -182,6 +174,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     } else {
       return false;
     }
+  }
+
+  /**
+   * A single array of all resources. Used by the "Add..." modal
+   * to prevent duplicate resources from being added.
+   */
+  protected get relatedResources() {
+    return [...this.hermesDocuments, ...this.externalLinks];
   }
 
   /**
@@ -518,9 +518,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           from: -10,
         },
         translate: {
-          y: {
-            from: 25,
-          },
+          y: { from: 25 },
         },
         duration: animationDuration * 0.85,
         easing: easeOutExpo,
@@ -540,9 +538,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
           to: -70,
         },
         translate: {
-          y: {
-            to: 15,
-          },
+          y: { to: 15 },
         },
         duration,
         easing,

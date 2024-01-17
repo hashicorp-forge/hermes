@@ -13,7 +13,6 @@ import {
   shift,
   offset,
   platform,
-  OffsetOptions,
 } from "@floating-ui/dom";
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
@@ -50,7 +49,6 @@ enum TooltipState {
 
 interface TooltipModifierNamedArgs {
   placement?: Placement;
-  offset?: OffsetOptions;
   stayOpenOnClick?: boolean;
   isForcedOpen?: boolean;
   delay?: number;
@@ -79,11 +77,11 @@ function cleanup(instance: TooltipModifier) {
   instance.reference.removeEventListener("focusout", instance.maybeHideContent);
   instance.reference.removeEventListener(
     "mouseenter",
-    instance.showContent.perform,
+    instance.showContent.perform
   );
   instance.reference.removeEventListener(
     "mouseleave",
-    instance.maybeHideContent,
+    instance.maybeHideContent
   );
 
   if (instance.floatingUICleanup) {
@@ -143,11 +141,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
    * with a `placement` argument.
    */
   @tracked placement: Placement = "top";
-
-  /**
-   * The offset of the tooltip relative to the reference element.
-   */
-  @tracked offset: OffsetOptions | null = null;
 
   /**
    * The duration of the tooltip's open animation.
@@ -307,7 +300,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         platform: platform,
         placement: this.placement,
         middleware: [
-          offset(this.offset ?? 8),
+          offset(8),
           flip(),
           shift({ padding: 20 }),
           arrow({
@@ -380,7 +373,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this.floatingUICleanup = autoUpdate(
       this.reference,
       this.tooltip,
-      updatePosition,
+      updatePosition
     );
 
     if (!Ember.testing && this.openDuration) {
@@ -388,14 +381,14 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
         [{ opacity: 0 }, { opacity: 1 }],
         {
           duration: Ember.testing ? 0 : 50,
-        },
+        }
       );
       const transformAnimation = this.tooltip.animate(
         [{ transform: this.transform }, { transform: "none" }],
         {
           duration: this.openDuration,
           easing: "ease-in-out",
-        },
+        }
       );
       try {
         await Promise.all([
@@ -504,7 +497,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   modify(
     element: Element,
     positional: [string],
-    named: TooltipModifierNamedArgs,
+    named: TooltipModifierNamedArgs
   ) {
     this._reference = element;
     this._tooltipText = positional[0];
@@ -513,10 +506,6 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     if (named.placement) {
       this.placement = named.placement;
-    }
-
-    if (named.offset) {
-      this.offset = named.offset;
     }
 
     if (named.class) {

@@ -127,6 +127,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     });
 
     this.set("doc", this.server.schema.relatedHermesDocument.find(id).attrs);
+
     const renderPromise = render<DocTileMediumComponentContext>(
       hbs`<Doc::TileMedium @doc={{this.doc}} />`,
     );
