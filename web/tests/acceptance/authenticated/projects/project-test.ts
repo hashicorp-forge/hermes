@@ -1,14 +1,7 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import {
-  click,
-  fillIn,
-  rerender,
-  settled,
-  visit,
-  waitFor,
-} from "@ember/test-helpers";
+import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -573,6 +566,27 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+  });
+
+  test('the "add resource" button is hidden when the project is inactive', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    await visit("/projects/1");
+
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ACTIVE_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
   });
 
   test("you can't save an empty project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

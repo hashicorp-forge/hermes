@@ -67,7 +67,7 @@
             @route="authenticated.documents"
             @query={{hash owners=(array (get @doc.owners 0))}}
             disabled={{not (get @doc.owners 0)}}
-            class="underlined-link"
+            class="underline-on-hover"
           >
             {{or (get @doc.owners 0) "Unknown"}}
           </LinkTo>
@@ -78,7 +78,7 @@
           <ProductLink
             @product={{@doc.product}}
             tabindex="-1"
-            class="underlined-link"
+            class="underline-on-hover"
           >
             <:default>
               {{@doc.product}}
@@ -88,7 +88,7 @@
             |
           </span>
           {{! Created time }}
-          <span class="text-color-foreground-disabled">
+          <span>
             {{time-ago @doc.createdTime}}
           </span>
         </div>
