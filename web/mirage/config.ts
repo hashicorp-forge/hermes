@@ -18,8 +18,7 @@ export default function (mirageConfig) {
     ...mirageConfig,
 
     routes() {
-      // This needs to be synced with the configService in the web app.
-      this.namespace = "api/v1";
+      this.namespace = "/api/v1";
 
       /*************************************************************************
        *

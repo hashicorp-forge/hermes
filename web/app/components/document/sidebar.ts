@@ -572,7 +572,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   protected loadRelatedProjects = task(async () => {
     const projectPromises = this.args.document.projects?.map((project) => {
       return this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
+        .fetch(`/projects/${project}`)
         .then((response) => response?.json());
     });
 
@@ -925,9 +925,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       // fetch the existing resources
       const projectResources = (await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
-        )
+        .fetch(`/projects/${projectId}/related-resources`)
         .then((response) => response?.json())) as HermesProjectResources;
 
       let hermesDocuments = projectResources.hermesDocuments ?? [];
@@ -941,21 +939,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       // update the sort order of all resources
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks);
 
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${projectId}/related-resources`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            hermesDocuments: hermesDocuments.map((doc) => {
-              return {
-                googleFileID: doc.googleFileID,
-                sortOrder: doc.sortOrder,
-              };
-            }),
-            externalLinks,
+      await this.fetchSvc.fetch(`/projects/${projectId}/related-resources`, {
+        method: "PUT",
+        body: JSON.stringify({
+          hermesDocuments: hermesDocuments.map((doc) => {
+            return {
+              googleFileID: doc.googleFileID,
+              sortOrder: doc.sortOrder,
+            };
           }),
-        },
-      );
+          externalLinks,
+        }),
+      });
     } catch (error: unknown) {
       this._projects = cachedProjects;
       this._projects = this._projects;
@@ -980,9 +975,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       // Fetch the existing resources
       const projectResources = await this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
-        )
+        .fetch(`/projects/${project.id}/related-resources`)
         .then((response) => response?.json());
 
       let hermesDocuments = projectResources.hermesDocuments ?? [];
@@ -998,27 +991,24 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       updateRelatedResourcesSortOrder(hermesDocuments, externalLinks ?? []);
 
       // Save the resources to the back end
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            hermesDocuments: hermesDocuments.map(
-              (
-                doc:
-                  | RelatedHermesDocument
-                  | { googleFileID: string; sortOrder: number },
-              ) => {
-                return {
-                  googleFileID: doc.googleFileID,
-                  sortOrder: doc.sortOrder,
-                };
-              },
-            ),
-            externalLinks,
-          }),
-        },
-      );
+      await this.fetchSvc.fetch(`/projects/${project.id}/related-resources`, {
+        method: "POST",
+        body: JSON.stringify({
+          hermesDocuments: hermesDocuments.map(
+            (
+              doc:
+                | RelatedHermesDocument
+                | { googleFileID: string; sortOrder: number },
+            ) => {
+              return {
+                googleFileID: doc.googleFileID,
+                sortOrder: doc.sortOrder,
+              };
+            },
+          ),
+          externalLinks,
+        }),
+      });
     } catch (e: unknown) {
       this._projects = cachedProjects;
       this._projects = this._projects;

@@ -68,7 +68,7 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
    */
   private getOwnerPhoto = task(async (docID: string) => {
     const doc = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
+      .fetch(`/documents/${docID}`)
       .then((response) => response?.json());
 
     this.imgURL = doc.ownerPhotos[0];

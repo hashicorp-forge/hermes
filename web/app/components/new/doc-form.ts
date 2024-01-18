@@ -15,6 +15,7 @@ import { ProductArea } from "hermes/services/product-areas";
 import { next } from "@ember/runloop";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import DocumentTypesService from "hermes/services/document-types";
+import ConfigService from "hermes/services/config";
 
 interface DocFormErrors {
   title: string | null;
@@ -31,6 +32,7 @@ interface NewDocFormComponentSignature {
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
+  @service("config") declare configSvc: ConfigService;
   @service declare documentTypes: DocumentTypesService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: HermesFlashMessagesService;

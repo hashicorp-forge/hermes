@@ -49,9 +49,7 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    */
   protected fetchJiraIssue = task(async () => {
     const jiraIssue = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issues/${this.args.project.jiraIssueID}`,
-      )
+      .fetch(`/jira/issues/${this.args.project.jiraIssueID}`)
       .then((resp) => resp?.json());
 
     this.jiraIssue = jiraIssue as JiraIssue;

@@ -234,9 +234,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    */
   searchJiraIssues = restartableTask(async () => {
     const issues = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issue/picker?query=${this.query}`,
-      )
+      .fetch(`/jira/issue/picker?query=${this.query}`)
       .then((response) => response?.json());
 
     this.results = issues;

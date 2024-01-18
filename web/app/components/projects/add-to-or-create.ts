@@ -90,7 +90,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
     this.dd = dd;
 
     this.allProjects = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/projects`)
+      .fetch(`/projects`)
       .then((response) => response?.json());
 
     next(() => {

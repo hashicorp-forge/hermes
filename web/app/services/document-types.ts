@@ -13,7 +13,7 @@ export default class DocumentTypesService extends Service {
 
   fetch = task(async () => {
     this.index = (await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/document-types`)
+      .fetch(`/document-types`)
       .then((r) => r?.json())) as HermesDocumentType[];
   });
 
