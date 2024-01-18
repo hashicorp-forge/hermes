@@ -37,6 +37,7 @@ module("Integration | Component | projects/add-to-or-create", function (hooks) {
     this.set("onClose", () => {});
     this.set("onSave", () => {});
     this.set("document", this.server.create("document"));
+    this.server.create("related-hermes-document");
   });
 
   test("it shows a filterable list of available projects", async function (this: Context, assert) {

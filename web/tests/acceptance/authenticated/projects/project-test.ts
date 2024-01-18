@@ -49,18 +49,22 @@ const ADD_PROJECT_RESOURCE_MODAL = "[data-test-add-related-resource-modal]";
 const MODAL_SEARCH_INPUT = "[data-test-related-resources-search-input]";
 const ADD_DOCUMENT_OPTION = ".related-document-option";
 
-const EMPTY_BODY = "[data-test-empty-body]";
+const EMPTY_STATE = "[data-test-resource-empty-state]";
+const BADGE_COUNT = "[data-test-project-resource-list-count]";
 
 const DOCUMENTS_HEADER = "[data-test-documents-header]";
-const DOCUMENT_COUNT = "[data-test-document-count]";
-const DOCUMENT_LIST = "[data-test-document-list]";
+const DOCUMENT_SECTION = "[data-test-document-list]";
+const DOCUMENT_LIST = `${DOCUMENT_SECTION} [data-test-resource-list]`;
+const DOCUMENT_COUNT = `${DOCUMENT_SECTION} ${BADGE_COUNT}`;
 
 const EXTERNAL_LINKS_HEADER = "[data-test-external-links-header]";
-const EXTERNAL_LINK_COUNT = "[data-test-external-link-count]";
-const EXTERNAL_LINK_LIST = "[data-test-external-link-list]";
+const EXTERNAL_LINK_SECTION = "[data-test-external-link-list]";
+const EXTERNAL_LINK_LIST = `${EXTERNAL_LINK_SECTION} [data-test-resource-list]`;
+const EXTERNAL_LINK_COUNT = `${EXTERNAL_LINK_SECTION} ${BADGE_COUNT}`;
 
-const DOCUMENT_LIST_ITEM = "[data-test-document-list-item]";
+const DOCUMENT_LIST_ITEM = `${DOCUMENT_LIST} [data-test-resource-list-item]`;
 const DOCUMENT_OVERFLOW_MENU_BUTTON = `${DOCUMENT_LIST_ITEM} [data-test-overflow-menu-button]`;
+const EXTERNAL_LINK_OVERFLOW_MENU_BUTTON = `${EXTERNAL_LINK_LIST} [data-test-overflow-menu-button]`;
 const OVERFLOW_MENU_EDIT = "[data-test-overflow-menu-action='edit']";
 const OVERFLOW_MENU_REMOVE = "[data-test-overflow-menu-action='remove']";
 
@@ -143,13 +147,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(ADD_JIRA_BUTTON).exists();
 
-    assert.dom(DOCUMENTS_HEADER).doesNotExist();
+    assert.dom(DOCUMENTS_HEADER).exists();
     assert.dom(DOCUMENT_LIST).doesNotExist();
+    assert.dom(DOCUMENT_COUNT).doesNotExist();
 
-    assert.dom(EXTERNAL_LINKS_HEADER).doesNotExist();
+    assert.dom(EXTERNAL_LINKS_HEADER).exists();
     assert.dom(EXTERNAL_LINK_LIST).doesNotExist();
+    assert.dom(EXTERNAL_LINK_COUNT).doesNotExist();
 
-    assert.dom(EMPTY_BODY).exists();
+    assert.dom(EMPTY_STATE).exists({ count: 2 });
   });
 
   test("it renders the correct filled-in state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -372,8 +378,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
-    assert.dom(DOCUMENTS_HEADER).doesNotExist();
-
     await click(ADD_RESOURCE_BUTTON);
 
     await waitFor(ADD_PROJECT_RESOURCE_MODAL);
@@ -489,7 +493,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
+    await click(EXTERNAL_LINK_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_EDIT);
 
     const linkTitle = "Bar";
@@ -534,7 +538,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
+    await click(EXTERNAL_LINK_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_REMOVE);
 
     assert.dom(EXTERNAL_LINK).doesNotExist();
