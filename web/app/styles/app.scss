@@ -44,7 +44,7 @@
 @use "components/hds-badge";
 @use "components/jira-widget";
 @use "components/product-link";
-@use "components/project/tile" as project-tile;
+@use "components/projects/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
 @use "hashicorp/product-badge";
@@ -113,8 +113,12 @@ h1 {
 }
 
 .divided-list {
+  li {
+    @apply border-t border-t-transparent;
+  }
+
   > li:not(:first-child) {
-    @apply border-t border-t-color-border-faint;
+    @apply border-t-color-border-faint;
   }
 }
 

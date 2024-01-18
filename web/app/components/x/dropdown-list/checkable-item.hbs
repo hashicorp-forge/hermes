@@ -1,6 +1,8 @@
 <div
   data-test-checkable-item
-  class="checkable-item checkmark-position--{{or @checkmarkPosition 'leading'}}
+  class="checkable-item
+    {{if this.countIsShown 'has-count'}}
+    checkmark-position--{{or @checkmarkPosition 'leading'}}
     w-full items-center gap-2.5"
   ...attributes
 >
@@ -25,7 +27,7 @@
     {{/if}}
   </div>
 
-  {{#if @count}}
+  {{#if this.countIsShown}}
     <div class="grid">
       <Hds::BadgeCount
         data-test-x-dropdown-list-checkable-item-count

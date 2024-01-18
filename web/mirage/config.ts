@@ -300,7 +300,11 @@ export default function (mirageConfig) {
             let newHermesDocuments: any[] = [];
 
             hermesDocuments.forEach((doc) => {
-              const mirageDocument = this.schema.document.findBy({
+              const relatedDocument = this.schema.relatedHermesDocument.findBy({
+                googleFileID: doc.googleFileID,
+              });
+
+              const fullDocument = this.schema.document.findBy({
                 objectID: doc.googleFileID,
               });
 
@@ -308,23 +312,20 @@ export default function (mirageConfig) {
 
               newHermesDocuments.push(
                 ...existingDocuments,
-                mirageDocument.attrs,
+                relatedDocument.attrs,
               );
 
               //  ignore duplicates
               if (existingDocuments.includes(doc.googleFileID)) {
                 return;
               } else {
-                mirageDocument.update({
-                  projects: [
-                    ...mirageDocument.attrs.projects,
-                    project.attrs.id,
-                  ],
+                fullDocument.update({
+                  projects: [...fullDocument.attrs.projects, project.attrs.id],
                 });
               }
 
-              mirageDocument.update({
-                projects: [...mirageDocument.attrs.projects, project.attrs.id],
+              fullDocument.update({
+                projects: [...fullDocument.attrs.projects, project.attrs.id],
               });
             });
 

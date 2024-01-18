@@ -34,21 +34,33 @@
 
 .checkable-item {
   @apply grid;
-  grid-template-columns: 16px auto 60px;
+  grid-template-columns: 16px auto;
+  grid-template-areas: "check label";
 
   &.checkmark-position--trailing {
-    grid-template-columns: auto 60px 16px;
+    grid-template-columns: auto 16px;
+    grid-template-areas: "label check";
+  }
 
-    .checkable-item-content {
-      @apply order-1;
-    }
+  &.has-count {
+    grid-template-columns: 16px auto 60px;
+    grid-template-areas: "check label count";
 
-    .checkable-item-count {
-      @apply order-2;
+    &.checkmark-position--trailing {
+      grid-template-areas: "label count check";
+      grid-template-columns: auto 60px 16px;
     }
+  }
 
-    .check {
-      @apply order-3;
-    }
+  .checkable-item-content {
+    grid-area: label;
+  }
+
+  .checkable-item-count {
+    grid-area: count;
+  }
+
+  .check {
+    grid-area: check;
   }
 }
