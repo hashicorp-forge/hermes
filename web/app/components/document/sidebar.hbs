@@ -11,18 +11,10 @@
 
 {{#unless @isCollapsed}}
   <div
-    class="sidebar-body scrollable-container"
+    class="sidebar-body"
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-    {{#let (get-product-id this.product) as |productIcon|}}
-      {{#if productIcon}}
-        <Product::Avatar
-          @product={{this.product}}
-          class="rounded-l-none {{if this.saveIsRunning 'opacity-50'}}"
-        />
-      {{/if}}
-    {{/let}}
 
     <div class="sidebar-body-container">
       <div>
@@ -55,7 +47,7 @@
                 <dd.ToggleAction
                   data-test-draft-visibility-toggle
                   data-test-icon={{this.draftVisibilityIcon}}
-                  class="sidebar-header-button draft-visibility-button flex items-center text-color-foreground-faint"
+                  class="quarternary-button draft-visibility-button flex items-center"
                   {{tooltip
                     this.toggleDraftVisibilityTooltipText
                     placement="bottom"
@@ -140,26 +132,32 @@
       </div>
 
       {{! Product/Area }}
-      <div class="space-y-2">
+      <div class="grid gap-2">
         <Document::Sidebar::SectionHeader @title="Product/Area" />
         {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
-          <div class="relative w-full" data-test-document-product-area-editable>
+          <div
+            class="editable-field-container select-input"
+            data-test-document-product-area-editable
+          >
             <Inputs::ProductSelect
               data-test-document-product-area-editable
               @selected={{this.product}}
               @onChange={{this.saveProduct.perform}}
               @isSaving={{this.saveIsRunning}}
-              @formatIsBadge={{true}}
+              @selectedAbbreviationIsHidden={{true}}
               @renderOut={{true}}
-              class="w-[300px]"
+              class="max-h-[275px] w-[320px]"
             />
           </div>
         {{else}}
           <ProductLink
             data-test-document-product-area-read-only
             @product={{@document.product}}
-            class="inline-block"
-          />
+            class="inline-flex gap-2"
+          >
+            <Product::Avatar @product={{@document.product}} />
+            <span class="underline-on-hover">{{@document.product}}</span>
+          </ProductLink>
         {{/if}}
       </div>
 
@@ -234,6 +232,69 @@
           @optionalSearchFilters={{concat "product:" @document.product}}
         />
       </div>
+
+      {{#if this.flags.projects}}
+        {{! Projects }}
+        <div>
+          <Document::Sidebar::SectionHeader
+            data-test-projects-section-header
+            {{did-insert (perform this.loadRelatedProjects)}}
+            @title="Projects"
+            @buttonAction={{this.showProjectsModal}}
+            @buttonIsDisabled={{this.isDraft}}
+            @disabledButtonTooltipText="Only published docs can be added to projects."
+          />
+          {{#if this.projects.length}}
+            <ol class="related-resources-list mt-1 space-y-0.5">
+              {{#each this.projects as |project|}}
+                <li data-test-document-project class="related-resource">
+                  <div class="related-resource-inner group relative">
+                    <LinkTo
+                      data-test-project-link
+                      @route="authenticated.projects.project"
+                      @model={{project.id}}
+                      class="related-resource-link quarternary-button peer flex h-[32px] items-center gap-2 px-[5px]"
+                    >
+                      <div
+                        class="flex w-[18px] shrink-0 justify-center py-[2px]"
+                      >
+                        <Project::StatusIcon @status={{project.status}} />
+                      </div>
+                      <div class="overflow-hidden">
+                        <TruncatedText
+                          class="text-body-200
+                            {{if
+                              (eq project.status 'active')
+                              'font-medium text-color-foreground-strong'
+                              'line-through'
+                            }}"
+                        >
+                          {{project.title}}
+                        </TruncatedText>
+                      </div>
+                    </LinkTo>
+
+                    <OverflowMenu
+                      @items={{hash
+                        remove=(hash
+                          icon="trash"
+                          label="Remove from project"
+                          action=(perform this.removeDocFromProject project.id)
+                        )
+                      }}
+                    />
+                  </div>
+                </li>
+              {{/each}}
+            </ol>
+          {{else}}
+            <Document::Sidebar::EmptyStateAddButton
+              @isReadOnly={{this.isDraft}}
+              @action={{this.showProjectsModal}}
+            />
+          {{/if}}
+        </div>
+      {{/if}}
 
       {{! Custom fields }}
       {{#each-in this.customEditableFields as |field attributes|}}
@@ -387,7 +448,6 @@
           {{/if}}
         {{/if}}
       {{/if}}
-
     </div>
   {{/if}}
 {{/unless}}
@@ -395,6 +455,14 @@
 {{! Place modals at the end of the DOM so they don't inherit styles }}
 
 {{#in-element (html-element ".ember-application") insertBefore=null}}
+  {{#if this.projectsModalIsShown}}
+    <Projects::AddToOrCreate
+      @document={{@document}}
+      @onClose={{this.hideProjectsModal}}
+      @onSave={{perform this.addDocToProject}}
+    />
+  {{/if}}
+
   {{#if this.archiveModalIsShown}}
     <Document::Modal
       @color="critical"

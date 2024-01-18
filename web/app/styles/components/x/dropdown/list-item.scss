@@ -32,16 +32,13 @@
   }
 }
 
-.x-dropdown-list-item-value {
-  @apply w-full truncate whitespace-nowrap;
-}
-
-.x-dropdown-list-item-count {
-  @apply ml-8 shrink-0;
-}
-
 .checkable-item {
+  @apply grid;
+  grid-template-columns: 16px auto 60px;
+
   &.checkmark-position--trailing {
+    grid-template-columns: auto 60px 16px;
+
     .checkable-item-content {
       @apply order-1;
     }

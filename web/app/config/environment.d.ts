@@ -16,6 +16,7 @@ export interface HermesConfig {
     draftsIndexName: string;
     internalIndexName: string;
   };
+  createDocsAsUser: boolean;
   featureFlags: Record<string, boolean>;
   google: {
     docFolders: string;

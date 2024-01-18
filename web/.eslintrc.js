@@ -39,5 +39,6 @@ module.exports = {
     "no-self-assign": "off",
     "prefer-rest-params": "off",
     "no-empty": "off",
+    "require-yield": "off",
   },
 };

@@ -1,0 +1,38 @@
+.jira-widget {
+  .jira-input {
+    // we use a custom search icon for this
+    @apply bg-none;
+  }
+
+  .animated-icon {
+    --scaleInFrom: 0.5;
+    animation: scaleIn 450ms cubic-bezier(0, 1, 0.5, 1) forwards;
+  }
+
+  a:not(.disabled) {
+    &:hover,
+    &:focus {
+      .primary-text {
+        @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
+      }
+    }
+  }
+
+  .overflow-button-container {
+    @apply relative top-auto right-auto mr-1 ml-2 w-auto bg-none;
+  }
+}
+
+.add-jira-issue-button {
+  @apply py-0 pl-[8px] pr-[14px];
+
+  &:hover,
+  &:focus {
+    @apply rounded-button-md shadow-surface-low;
+  }
+}
+
+.attached-jira-issue {
+  @apply relative grid items-center gap-2.5;
+  grid-template-columns: 16px 1fr min-content;
+}

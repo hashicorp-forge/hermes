@@ -19,14 +19,15 @@ import {
 } from "hermes/utils/mirage-utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
-import { TEST_JIRA_WORKSPACE_URL } from "hermes/utils/hermes-urls";
 
 const TITLE = "[data-test-project-title]";
+const READ_ONLY_TITLE = `${TITLE} .read-only`;
 const TITLE_BUTTON = `${TITLE} button`;
 const TITLE_INPUT = `${TITLE} textarea`;
 const TITLE_ERROR = `${TITLE} .hds-form-error`;
 
 const DESCRIPTION = "[data-test-project-description]";
+const READ_ONLY_DESCRIPTION = `${DESCRIPTION} .read-only`;
 const DESCRIPTION_BUTTON = `${DESCRIPTION} button`;
 const DESCRIPTION_INPUT = `${DESCRIPTION} textarea`;
 
@@ -59,7 +60,7 @@ const EXTERNAL_LINK_COUNT = "[data-test-external-link-count]";
 const EXTERNAL_LINK_LIST = "[data-test-external-link-list]";
 
 const DOCUMENT_LIST_ITEM = "[data-test-document-list-item]";
-const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";
+const DOCUMENT_OVERFLOW_MENU_BUTTON = `${DOCUMENT_LIST_ITEM} [data-test-overflow-menu-button]`;
 const OVERFLOW_MENU_EDIT = "[data-test-overflow-menu-action='edit']";
 const OVERFLOW_MENU_REMOVE = "[data-test-overflow-menu-action='remove']";
 
@@ -81,12 +82,13 @@ const EXTERNAL_LINK = "[data-test-related-link]";
 const STATUS_TOGGLE = "[data-test-project-status-toggle]";
 const COPY_URL_BUTTON = "[data-test-copy-url-button]";
 
+const JIRA_WIDGET = "[data-test-jira-widget]";
 const ADD_JIRA_BUTTON = "[data-test-add-jira-button]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";
 const JIRA_PICKER_RESULT = "[data-test-jira-picker-result]";
 const JIRA_ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 
-const JIRA_OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
+const JIRA_OVERFLOW_BUTTON = `${JIRA_WIDGET} [data-test-overflow-menu-button]`;
 const JIRA_LINK = "[data-test-jira-link]";
 const JIRA_PRIORITY_ICON = "[data-test-jira-priority-icon]";
 const JIRA_ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
@@ -94,11 +96,13 @@ const JIRA_STATUS = "[data-test-jira-status]";
 const JIRA_TYPE_ICON = "[data-test-jira-issue-type-icon]";
 const JIRA_KEY = "[data-test-jira-key]";
 const JIRA_SUMMARY = "[data-test-jira-summary]";
-const JIRA_REMOVE_BUTTON = "[data-test-remove-button]";
+const JIRA_REMOVE_BUTTON = "[data-test-overflow-menu-action='remove']";
 
 const ACTIVE_STATUS_ACTION = "[data-test-status-action='active']";
 const COMPLETED_STATUS_ACTION = "[data-test-status-action='completed']";
 const ARCHIVED_STATUS_ACTION = "[data-test-status-action='archived']";
+
+const SAVING_SPINNER = "[data-test-saving-spinner]";
 
 interface AuthenticatedProjectsProjectRouteTestContext
   extends MirageTestContext {}
@@ -122,11 +126,11 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(getPageTitle(), "Test Project | Hermes");
   });
 
-  test("it renders correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("it renders the correct empty state", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     let project = this.server.schema.projects.first();
 
     project.update({
-      jiraIssue: undefined,
+      jiraIssueID: undefined,
       hermesDocuments: undefined,
     });
 
@@ -276,7 +280,15 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(TITLE_BUTTON);
     await fillIn(TITLE_INPUT, "New Project Title");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${TITLE} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(TITLE).hasText("New Project Title");
 
@@ -292,12 +304,61 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(DESCRIPTION_BUTTON);
     await fillIn(DESCRIPTION_INPUT, "Foo");
-    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    const clickPromise = click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // capture "saving" state
+    await waitFor(`${DESCRIPTION} ${SAVING_SPINNER}`);
+
+    await clickPromise;
+
+    assert.dom(SAVING_SPINNER).doesNotExist();
 
     assert.dom(DESCRIPTION).hasText("Foo");
 
     const project = this.server.schema.projects.first().attrs;
     assert.equal(project.description, "Foo");
+  });
+
+  test("title and description are read-only unless the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.schema.find("project", 1).update({
+      description: "Foo",
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(TITLE_BUTTON).exists();
+    assert.dom(DESCRIPTION_BUTTON).exists();
+
+    assert.dom(READ_ONLY_TITLE).doesNotExist();
+    assert.dom(READ_ONLY_DESCRIPTION).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(TITLE_BUTTON).doesNotExist();
+    assert.dom(DESCRIPTION_BUTTON).doesNotExist();
+
+    assert.dom(READ_ONLY_TITLE).exists();
+    assert.dom(READ_ONLY_DESCRIPTION).exists();
+
+    // make the project active again
+    await click(STATUS_TOGGLE);
+    await click(ACTIVE_STATUS_ACTION);
+
+    // clear the description
+    await click(DESCRIPTION_BUTTON);
+    await fillIn(DESCRIPTION_INPUT, "");
+    await click(SAVE_EDITABLE_FIELD_BUTTON);
+
+    // set the project to completed
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(READ_ONLY_TITLE).exists();
+    assert
+      .dom(READ_ONLY_DESCRIPTION)
+      .doesNotExist("the read-only description is conditionally rendered");
   });
 
   test("you can add a document to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -318,13 +379,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await waitFor(ADD_PROJECT_RESOURCE_MODAL);
     assert.dom(ADD_PROJECT_RESOURCE_MODAL).exists();
 
-    const clickPromise = click(ADD_DOCUMENT_OPTION);
+    await click(ADD_DOCUMENT_OPTION);
 
-    await waitFor(`${DOCUMENT_OWNER_AVATAR} [data-test-is-loading]`);
-
-    await clickPromise;
-
-    assert.dom("[data-test-is-loading]").doesNotExist();
     assert
       .dom(`${DOCUMENT_OWNER_AVATAR} img`)
       .hasAttribute("src", TEST_USER_PHOTO);
@@ -346,7 +402,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(DOCUMENT_LIST_ITEM).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_REMOVE);
 
     assert.dom(DOCUMENT_LIST_ITEM).doesNotExist();
@@ -355,6 +411,25 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.hermesDocuments;
 
     assert.equal(projectDocuments.length, 0);
+  });
+
+  test("documents can only be removed if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    await visit("/projects/1");
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
   });
 
   test("you can add external links to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -414,7 +489,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_EDIT);
 
     const linkTitle = "Bar";
@@ -459,7 +534,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists({ count: 1 });
 
-    await click(OVERFLOW_MENU_BUTTON);
+    await click(DOCUMENT_OVERFLOW_MENU_BUTTON);
     await click(OVERFLOW_MENU_REMOVE);
 
     assert.dom(EXTERNAL_LINK).doesNotExist();
@@ -468,6 +543,50 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.externalLinks;
 
     assert.equal(projectLinks.length, 0);
+  });
+
+  test("external links can only be edited if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.schema.projects.first().update({
+      externalLinks: [this.server.create("related-external-link").attrs],
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(EXTERNAL_LINK).exists();
+    assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+  });
+
+  test('the "add resource" button is hidden when the project is inactive', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    await visit("/projects/1");
+
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
+
+    await click(STATUS_TOGGLE);
+    await click(COMPLETED_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ARCHIVED_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).doesNotExist();
+
+    await click(STATUS_TOGGLE);
+    await click(ACTIVE_STATUS_ACTION);
+
+    assert.dom(ADD_RESOURCE_BUTTON).exists();
   });
 
   test("you can't save an empty project title", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -517,7 +636,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(project.status, ProjectStatus.Active);
   });
 
-  test("a full jira issue will load if the project has a jiraIssueID", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("a full jira issue will load if the project has a jiraIssueID (active project)", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     const jiraIssueID = "HER-123";
 
     this.server.create("project", {
@@ -546,7 +665,32 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       .hasAttribute("alt", TEST_JIRA_PRIORITY);
   });
 
+  test("a jira issue will load if the project has a jiraIssueID (inactive project)", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const jiraIssueID = "HER-123";
+
+    this.server.create("project", {
+      jiraIssueID,
+      id: 2,
+      status: ProjectStatus.Completed,
+    });
+
+    this.server.create("jira-issue", {
+      key: jiraIssueID,
+    });
+
+    await visit("/projects/2");
+
+    assert.dom(JIRA_LINK).hasAttribute("href", TEST_JIRA_ISSUE_URL);
+    assert.dom(JIRA_KEY).hasText(jiraIssueID);
+  });
+
   test("you can add a jira link", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const project = this.server.schema.projects.first();
+
+    project.update({
+      jiraIssueID: undefined,
+    });
+
     this.server.create("jira-issue");
     this.server.create("jira-picker-result");
 
@@ -588,10 +732,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(JIRA_LINK).doesNotExist();
 
-    assert.equal(
-      this.server.schema.projects.first().attrs.jiraIssueID,
-      undefined,
-    );
+    assert.equal(this.server.schema.projects.find(2).attrs.jiraIssueID, "");
   });
 
   test('the jira widget is hidden if the "jira_url" config is not set', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

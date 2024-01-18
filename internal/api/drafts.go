@@ -127,12 +127,16 @@ func DraftsHandler(
 			}
 			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
 
-			// If configured to create documents as the logged-in Hermes user, create
-			// a new Google Drive service to do this.
-			copyTemplateSvc := *s
+			var (
+				err error
+				f   *drive.File
+			)
+
+			// Copy template to new draft file.
 			if cfg.GoogleWorkspace.Auth != nil &&
 				cfg.GoogleWorkspace.Auth.CreateDocsAsUser {
-
+				// If configured to create documents as the logged-in Hermes user,
+				// create a new Google Drive service to do this.
 				ctx := context.Background()
 				conf := &jwt.Config{
 					Email:      cfg.GoogleWorkspace.Auth.ClientEmail,
@@ -144,8 +148,7 @@ func DraftsHandler(
 					TokenURL: cfg.GoogleWorkspace.Auth.TokenURL,
 				}
 				client := conf.Client(ctx)
-
-				var err error
+				copyTemplateSvc := *s
 				copyTemplateSvc.Drive, err = drive.NewService(
 					ctx, option.WithHTTPClient(client))
 				if err != nil {
@@ -158,17 +161,60 @@ func DraftsHandler(
 						w, "Error processing request", http.StatusInternalServerError)
 					return
 				}
-			}
 
-			// Copy template to new draft file.
-			f, err := copyTemplateSvc.CopyFile(
-				template, title, cfg.GoogleWorkspace.DraftsFolder)
-			if err != nil {
-				l.Error("error creating draft", "error", err, "template", template,
-					"drafts_folder", cfg.GoogleWorkspace.DraftsFolder)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
+				// Copy template as user to new draft file in temporary drafts folder.
+				f, err = copyTemplateSvc.CopyFile(
+					template, title, cfg.GoogleWorkspace.TemporaryDraftsFolder)
+				if err != nil {
+					l.Error(
+						"error copying template as user to temporary drafts folder",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"template", template,
+						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+						"temporary_drafts_folder", cfg.GoogleWorkspace.
+							TemporaryDraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Move draft file to drafts folder using service user.
+				_, err = s.MoveFile(
+					f.Id, cfg.GoogleWorkspace.DraftsFolder)
+				if err != nil {
+					l.Error(
+						"error moving draft file to drafts folder",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", f.Id,
+						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+						"temporary_drafts_folder", cfg.GoogleWorkspace.
+							TemporaryDraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+			} else {
+				// Copy template to new draft file as service user.
+				f, err = s.CopyFile(
+					template, title, cfg.GoogleWorkspace.DraftsFolder)
+				if err != nil {
+					l.Error("error creating draft",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"template", template,
+						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+					)
+					http.Error(w, "Error creating document draft",
+						http.StatusInternalServerError)
+					return
+				}
 			}
 
 			// Build created date.
@@ -1131,6 +1177,10 @@ func DraftsDocumentHandler(
 			if req.Product != nil {
 				doc.Product = *req.Product
 				model.Product = models.Product{Name: *req.Product}
+
+				// Remove product ID so it gets updated during upsert (or else it will
+				// override the product name).
+				model.ProductID = 0
 
 				// Update doc number in document.
 				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)

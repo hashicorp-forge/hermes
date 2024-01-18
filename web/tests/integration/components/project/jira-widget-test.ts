@@ -4,7 +4,6 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { JiraIssue, JiraPickerResult } from "hermes/types/project";
-import ConfigService from "hermes/services/config";
 import {
   TEST_JIRA_ISSUE_SUMMARY,
   setWebConfig,
@@ -18,8 +17,9 @@ const KEY = "[data-test-jira-key]";
 const SUMMARY = "[data-test-jira-summary]";
 const LINK = "[data-test-jira-link]";
 const ISSUE_TYPE_ICON = "[data-test-jira-issue-type-icon]";
-const OVERFLOW_BUTTON = "[data-test-jira-overflow-button]";
-const REMOVE_JIRA_BUTTON = "[data-test-remove-button]";
+const JIRA_WIDGET = "[data-test-jira-widget]";
+const OVERFLOW_BUTTON = `${JIRA_WIDGET} [data-test-overflow-menu-button]`;
+const REMOVE_JIRA_BUTTON = "[data-test-overflow-menu-action='remove']";
 const PRIORITY_ICON = "[data-test-jira-priority-icon]";
 const ASSIGNEE_AVATAR = "[data-test-jira-assignee-avatar-wrapper] img";
 const STATUS = "[data-test-jira-status]";
@@ -28,6 +28,8 @@ const PICKER_DROPDOWN = "[data-test-jira-picker-dropdown]";
 const PICKER_RESULT = "[data-test-jira-picker-result]";
 const NO_MATCHES = "[data-test-no-matches]";
 const SEARCHING_ICON = "[data-test-related-resources-search-loading-icon]";
+const SEARCH_ICON = "[data-test-search-icon]";
+const PLUS_ICON = "[data-test-add-jira-button-plus]";
 
 interface Context extends MirageTestContext {
   contextIsForm: boolean;
@@ -44,7 +46,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
   test("it can render for a form context (no issue attached)", async function (this: Context, assert) {
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
        />
     `);
 
@@ -100,15 +102,17 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @issue={{this.issue}}
       />
     `);
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
     assert.dom(OVERFLOW_BUTTON).exists();
+
+    // We don't assign the URL in the form context
+    assert.dom(LINK).hasAttribute("href", "");
 
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
 
@@ -124,7 +128,6 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       <div class="click-away"/>
     `);
 
-    assert.dom(JIRA_ICON).exists();
     assert.dom(ADD_JIRA_INPUT).doesNotExist();
     assert.dom(ADD_JIRA_BUTTON).exists();
 
@@ -209,7 +212,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await render<Context>(hbs`
       <Project::JiraWidget
         @isDisabled={{true}}
-        @contextIsForm={{this.contextIsForm}}
+        @isNewProjectForm={{this.contextIsForm}}
       />
     `);
 
@@ -248,7 +251,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     assert.dom(PICKER_DROPDOWN).doesNotExist();
@@ -277,7 +280,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
   test("it shows a search icon when searching", async function (this: Context, assert) {
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     assert.dom(SEARCHING_ICON).doesNotExist();
@@ -305,7 +308,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
     `);
 
     await fillIn(ADD_JIRA_INPUT, "item");
@@ -314,7 +317,9 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     assert.dom(KEY).hasText(key);
     assert.dom(SUMMARY).hasText(summary);
-    assert.dom(LINK).hasAttribute("href", url);
+    assert
+      .dom(LINK)
+      .hasAttribute("href", "", "link is placeholder while contextIsForm");
     assert.dom(ISSUE_TYPE_ICON).hasAttribute("src", issueTypeImage);
   });
 
@@ -322,7 +327,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     this.server.create("jira-picker-result");
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}}  />
+      <Project::JiraWidget @isNewProjectForm={{true}}  />
       <div class="click-away"/>
     `);
 
@@ -347,7 +352,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     });
 
     await render<Context>(hbs`
-      <Project::JiraWidget @contextIsForm={{true}} />
+      <Project::JiraWidget @isNewProjectForm={{true}} />
       <div class="click-away"/>
     `);
 
@@ -407,7 +412,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @onIssueSelect={{this.onIssueSelect}}
       />
     `);
@@ -428,7 +433,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
 
     await render<Context>(hbs`
       <Project::JiraWidget
-        @contextIsForm={{true}}
+        @isNewProjectForm={{true}}
         @issue={{this.issue}}
         @onIssueRemove={{this.onIssueRemove}}
       />
@@ -439,5 +444,69 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     await click(REMOVE_JIRA_BUTTON);
 
     assert.equal(count, 1, "the onRemove action was called");
+  });
+
+  test("the input icons animate as expected", async function (this: Context, assert) {
+    this.set("contextIsForm", false);
+
+    await render<Context>(hbs`
+      <Project::JiraWidget @isNewProjectForm={{this.contextIsForm}} />
+      <div class="click-away"/>
+    `);
+
+    assert
+      .dom(PLUS_ICON)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the plus icon does not initially have the animated class",
+      );
+
+    await click(ADD_JIRA_BUTTON);
+
+    assert
+      .dom(SEARCH_ICON)
+      .hasClass(
+        "animated-icon",
+        "the search icon animates in when the input is shown",
+      );
+
+    await click(".click-away");
+
+    assert
+      .dom(PLUS_ICON)
+      .hasClass(
+        "animated-icon",
+        "the plus icon animates in when the input is hidden",
+      );
+
+    this.set("contextIsForm", true);
+
+    assert
+      .dom(SEARCH_ICON)
+      .doesNotHaveClass(
+        "animated-icon",
+        "the search icon does not animate in the form context",
+      );
+  });
+
+  test("it can be rendered read-only", async function (this: Context, assert) {
+    this.set("issue", this.server.create("jira-picker-result"));
+
+    await render<Context>(hbs`
+      <Project::JiraWidget
+        @issue={{this.issue}}
+        @isReadOnly={{true}}
+      />
+    `);
+    assert.dom(LINK).exists();
+    assert.dom(OVERFLOW_BUTTON).doesNotExist();
+
+    this.set("issue", undefined);
+
+    assert
+      .dom(LINK)
+      .doesNotExist(
+        "the link is not rendered if read-only with an undefined issue",
+      );
   });
 });

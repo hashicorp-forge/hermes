@@ -37,10 +37,12 @@
 @use "components/table/sortable-header";
 @use "components/preview-card";
 @use "components/project";
+@use "components/interactive-card";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
+@use "components/jira-widget";
 @use "components/product-link";
 @use "components/project/tile" as project-tile;
 @use "components/header/facet-dropdown";
@@ -49,6 +51,8 @@
 @use "hashicorp/hermes-logo";
 @use "hermes/avatar";
 @use "routes/my";
+
+@use "./buttons";
 
 @use "./ember-power-select-theme";
 
@@ -71,7 +75,8 @@
 }
 
 dialog {
-  margin: auto; // centers the dialog
+  @apply m-auto; // center the dialog
+  @apply -translate-y-5; // move it up a bit
 }
 
 body,

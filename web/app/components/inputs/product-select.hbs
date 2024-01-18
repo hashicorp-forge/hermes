@@ -4,62 +4,40 @@
   {{! Fetch the most up-to-date product areas in the background }}
   {{did-insert (perform this.productAreas.fetch)}}
 >
-  {{#if @formatIsBadge}}
-    <Inputs::BadgeDropdownList
-      @items={{this.products}}
-      @listIsOrdered={{true}}
-      @onItemClick={{this.onChange}}
-      @selected={{@selected}}
-      @placement={{@placement}}
-      @isSaving={{@isSaving}}
-      @renderOut={{@renderOut}}
-      @secondaryFilterAttribute="abbreviation"
-      @icon={{this.icon}}
-      class="product-select-dropdown-list w-80"
-      ...attributes
-    >
-      <:item as |dd|>
-        <dd.Action data-test-product-select-badge-dropdown-item>
-          <Inputs::ProductSelect::Item
-            @product={{dd.value}}
-            @isSelected={{dd.isSelected}}
-            @abbreviation={{dd.attrs.abbreviation}}
-          />
-        </dd.Action>
-      </:item>
-    </Inputs::BadgeDropdownList>
-  {{else}}
-    <X::DropdownList
-      @items={{this.products}}
-      @listIsOrdered={{true}}
-      @onItemClick={{this.onChange}}
-      @selected={{@selected}}
-      @placement={{@placement}}
-      @isSaving={{@isSaving}}
-      @renderOut={{@renderOut}}
-      @offset={{@offset}}
-      @matchAnchorWidth={{@matchAnchorWidth}}
-      @secondaryFilterAttribute="abbreviation"
-      class="product-select-dropdown-list"
-      ...attributes
-    >
-      <:anchor as |dd|>
-        <dd.ToggleSelect class="gap-2" id="product-select">
-          <Inputs::ProductSelect::Item
-            @product={{dd.selected}}
-            @abbreviation={{this.selectedProductAbbreviation}}
-          />
-        </dd.ToggleSelect>
-      </:anchor>
-      <:item as |dd|>
-        <dd.Action data-test-product-select-item-button class="pr-5">
-          <Inputs::ProductSelect::Item
-            @product={{dd.value}}
-            @isSelected={{dd.isSelected}}
-            @abbreviation={{dd.attrs.abbreviation}}
-          />
-        </dd.Action>
-      </:item>
-    </X::DropdownList>
-  {{/if}}
+  <X::DropdownList
+    @items={{this.products}}
+    @listIsOrdered={{true}}
+    @onItemClick={{this.onChange}}
+    @selected={{@selected}}
+    @placement={{@placement}}
+    @isSaving={{@isSaving}}
+    @renderOut={{@renderOut}}
+    @offset={{@offset}}
+    @matchAnchorWidth={{@matchAnchorWidth}}
+    @secondaryFilterAttribute="abbreviation"
+    class="theme--neutral"
+    ...attributes
+  >
+    <:anchor as |dd|>
+      <dd.ToggleSelect
+        data-test-product-select-toggle
+        class="quarternary-button gap-2 {{if @isSaving 'opacity-50'}}"
+        id="product-select"
+      >
+        <Inputs::ProductSelect::Item
+          @product={{dd.selected}}
+          @abbreviation={{this.selectedProductAbbreviation}}
+        />
+      </dd.ToggleSelect>
+    </:anchor>
+    <:item as |dd|>
+      <dd.Action data-test-product-select-item-button class="pr-5">
+        <Inputs::ProductSelect::Item
+          @product={{dd.value}}
+          @isSelected={{dd.isSelected}}
+          @abbreviation={{dd.attrs.abbreviation}}
+        />
+      </dd.Action>
+    </:item>
+  </X::DropdownList>
 </div>
