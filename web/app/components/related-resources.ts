@@ -178,8 +178,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       shouldIgnoreDelay?: boolean,
       options?: SearchOptions,
     ) => {
-      let index =
-        this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc";
+      let index = this.configSvc.config.algolia_docs_index_name;
 
       let filterString = "";
 
