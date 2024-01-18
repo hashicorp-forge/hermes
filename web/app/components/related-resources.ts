@@ -178,8 +178,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       shouldIgnoreDelay?: boolean,
       options?: SearchOptions,
     ) => {
-      let index =
-        this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc";
+      let index = this.configSvc.config.algolia_docs_index_name;
 
       let filterString = "";
 
@@ -196,7 +195,9 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
 
         filterString = filterString.slice(0, -1) + " ";
 
-        filterString += `AND NOT objectID:"${relatedDocIDs.join(
+        const maybeAnd = this.args.documentObjectID ? "AND " : "(";
+
+        filterString += `${maybeAnd}NOT objectID:"${relatedDocIDs.join(
           '" AND NOT objectID:"',
         )}")`;
       }

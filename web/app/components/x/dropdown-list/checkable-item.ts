@@ -20,7 +20,15 @@ interface XDropdownListCheckableItemComponentSignature {
   };
 }
 
-export default class XDropdownListCheckableItemComponent extends Component<XDropdownListCheckableItemComponentSignature> {}
+export default class XDropdownListCheckableItemComponent extends Component<XDropdownListCheckableItemComponentSignature> {
+  /**
+   * Whether the item has a count to display.
+   * True if the count is defined, including if it's 0.
+   */
+  protected get countIsShown(): boolean {
+    return this.args.count !== undefined;
+  }
+}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

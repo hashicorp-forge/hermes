@@ -43,6 +43,7 @@ interface RelatedResourcesComponentTestContext extends MirageTestContext {
   isLoading?: boolean;
   loadingHasFailed?: boolean;
   scope: `${RelatedResourcesScope}`;
+  documentObjectID?: string;
 }
 
 module("Integration | Component | related-resources", function (hooks) {
@@ -348,6 +349,67 @@ module("Integration | Component | related-resources", function (hooks) {
     assert
       .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
       .doesNotExist("the error message is removed when the URL changes");
+  });
+
+  test('it excludes documents that are already related to the "parent" resource', async function (this: RelatedResourcesComponentTestContext, assert) {
+    this.server.createList("document", 5);
+    this.server.createList("related-hermes-document", 5);
+
+    const firstDocument =
+      this.server.schema.relatedHermesDocument.find("doc-0").attrs;
+    const secondDocument =
+      this.server.schema.relatedHermesDocument.find("doc-1").attrs;
+    const thirdDocument =
+      this.server.schema.relatedHermesDocument.find("doc-2").attrs;
+
+    this.set("documentObjectID", null);
+
+    await render<RelatedResourcesComponentTestContext>(hbs`
+      <RelatedResources
+        @items={{this.items}}
+        @scope="documents"
+        @modalHeaderTitle={{this.modalHeaderTitle}}
+        @modalInputPlaceholder={{this.modalInputPlaceholder}}
+        @addResource={{this.addResource}}
+        @documentObjectID={{this.documentObjectID}}
+      >
+        <:header as |rr|>
+        <button {{on "click" rr.showModal}}>Add</button>
+        </:header>
+      </RelatedResources>
+      <div class="click-away"/>
+    `);
+
+    const openModal = async () => {
+      await click("button");
+      await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    };
+
+    await openModal();
+
+    assert
+      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .exists({ count: 5 }, "all docs are shown");
+
+    await click(".click-away");
+
+    this.set("documentObjectID", firstDocument.id);
+
+    await openModal();
+
+    assert
+      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .exists({ count: 4 }, "the parent doc is excluded");
+
+    await click(".click-away");
+
+    this.set("items", [secondDocument, thirdDocument]);
+
+    await openModal();
+
+    assert
+      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .exists({ count: 2 }, "the related docs are excluded");
   });
 
   test("you can scope the component to document resource", async function (this: RelatedResourcesComponentTestContext, assert) {
