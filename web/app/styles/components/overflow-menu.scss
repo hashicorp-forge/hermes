@@ -1,19 +1,9 @@
 .overflow-button {
-  @apply pointer-events-auto relative p-[2px];
+  @apply pointer-events-auto relative z-10 h-[26px] w-[26px] rounded;
 
-  &:hover,
-  &:focus,
-  &:active,
-  &:focus-visible,
-  &.open {
-    .button-affordance {
-      @apply border-color-border-strong bg-color-surface-faint;
-    }
-  }
-
-  .button-affordance {
-    @apply top-[4px] right-0 flex rounded p-1;
-    @apply border border-transparent text-color-foreground-primary;
+  &:hover:not(.disabled):not(:focus),
+  &:focus {
+    @apply bg-color-surface-faint;
   }
 }
 
@@ -26,7 +16,7 @@
 }
 
 .overflow-button-container {
-  @apply pointer-events-none absolute top-px -right-[3px];
+  @apply pointer-events-none absolute top-[3px] -right-px;
   @apply flex w-16 justify-end rounded-r;
   @apply bg-gradient-to-l from-color-page-primary via-color-page-primary to-transparent;
   @apply group-focus-within:visible group-hover:visible;

@@ -128,6 +128,12 @@ google_workspace {
   //   {shortcut_folder}/{doc_type}/{product}/{document}
   shortcuts_folder = "my-shortcuts-folder-id"
 
+  // temporary_drafts_folder is a folder that will brieflly contain document
+  // drafts before they are moved to the drafts_folder. This is used when
+  // create_docs_as_user is true in the auth block, so document notification
+  // settings will be the same as when a user creates their own document.
+  // temporary_drafts_folder = "my-temporary-drafts-folder-id"
+
   // auth is the configuration for interacting with Google Workspace using a
   // service account.
   // auth {

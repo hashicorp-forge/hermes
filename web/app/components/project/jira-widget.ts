@@ -18,6 +18,7 @@ interface ProjectJiraWidgetComponentSignature {
     onIssueRemove?: () => void;
     isDisabled?: boolean;
     isLoading?: boolean;
+    isReadOnly?: boolean;
     /**
      * Whether the component is being used in a form context.
      * If true, removes the leading Jira icon and shows the input, autofocused,
@@ -41,6 +42,14 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   @tracked protected dropdownIsShown = false;
 
   /**
+   * Whether the plus icon should have an animated class.
+   * Initially false so it doesn't animate on first render.
+   * Set true once the input is shown, to be animated on
+   * subsequent renders.
+   */
+  @tracked protected plusIconShouldAnimate = false;
+
+  /**
    * An assert-true getter for the dropdown interface.
    * Asserts that the dropdown exists before returning it.
    */
@@ -55,7 +64,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    * "Add Jira issue" button has been clicked.
    */
   protected get inputIsShown() {
-    return this.args.isNewProjectForm ?? this._inputIsShown;
+    return this.args.isNewProjectForm || this._inputIsShown;
   }
 
   /**
@@ -184,6 +193,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    */
   @action protected showInput() {
     this._inputIsShown = true;
+    this.plusIconShouldAnimate = true;
   }
 
   /**

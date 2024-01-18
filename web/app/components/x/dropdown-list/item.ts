@@ -48,7 +48,7 @@ export interface XDropdownListItemComponentArgs {
   onItemClick?: (value: any, attributes: any) => void;
   setFocusedItemIndex: (
     focusDirection: FocusDirection | number,
-    maybeScrollIntoView?: boolean,
+    scrollIntoView?: boolean,
   ) => void;
   hideContent: () => void;
 }
@@ -124,29 +124,18 @@ export default class XDropdownListItemComponent extends Component<XDropdownListI
     this._domElement = element;
   }
 
+  /**
+   * The action called on clicked. Runs the parent component's
+   * `onItemClick` action, if it exists, and hides the dropdown.
+   * The "link-to" sub-component runs this on the next run loop
+   * to avoid interfering with Ember's <LinkTo> handling.
+   */
   @action onClick() {
     if (this.args.onItemClick) {
       this.args.onItemClick(this.args.value, this.args.attributes);
     }
 
-    /**
-     * In production, close the dropdown on the next run loop
-     * so that we don't interfere with Ember's <LinkTo> handling.
-     *
-     * This approach causes issues when testing, so we
-     * use `schedule` as an approximation.
-     *
-     * TODO: Improve this.
-     */
-    if (Ember.testing) {
-      schedule("afterRender", () => {
-        this.args.hideContent();
-      });
-    } else {
-      next(() => {
-        this.args.hideContent();
-      });
-    }
+    this.args.hideContent();
   }
 
   /**

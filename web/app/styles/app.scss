@@ -7,7 +7,6 @@
 @use "./body";
 @use "./animations";
 @use "./typography";
-@use "./buttons";
 
 @use "components/dashboard";
 @use "components/new";
@@ -52,6 +51,8 @@
 @use "hashicorp/hermes-logo";
 @use "hermes/avatar";
 @use "routes/my";
+
+@use "./buttons";
 
 @use "./ember-power-select-theme";
 

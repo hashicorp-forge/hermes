@@ -4,7 +4,7 @@ import { TestContext, click, render, triggerEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 
 const CONTAINER_SELECTOR = ".sidebar-section-header-container";
-const BUTTON_SELECTOR = ".sidebar-section-header-button";
+const BUTTON_SELECTOR = "[data-test-sidebar-section-header-button]";
 
 interface Context extends TestContext {
   title: string;

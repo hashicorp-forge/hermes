@@ -2,6 +2,7 @@ import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
 import { OverflowItem } from "hermes/components/overflow-menu";
+import htmlElement from "hermes/utils/html-element";
 import { module, test } from "qunit";
 
 const POPOVER = "[data-test-overflow-menu]";
@@ -12,6 +13,7 @@ const LABEL = `${POPOVER} [data-test-label]`;
 
 interface OverflowMenuTestContext extends TestContext {
   items: Record<string, OverflowItem>;
+  isShown?: boolean;
 }
 
 module("Integration | Component | related-resources/add", function (hooks) {
@@ -70,5 +72,28 @@ module("Integration | Component | related-resources/add", function (hooks) {
     await click(`${POPOVER} li:nth-child(2) button`);
 
     assert.equal(actionTwoCount, 1);
+  });
+
+  test("it can be force-shown", async function (this: OverflowMenuTestContext, assert) {
+    this.set("isShown", false);
+    this.set("items", {
+      item1: {
+        label: "Item 1",
+        icon: "square",
+        action: () => {},
+      },
+    });
+    await render<OverflowMenuTestContext>(hbs`
+      <OverflowMenu
+        @items={{this.items}}
+        @isShown={{this.isShown}}
+      />
+    `);
+
+    assert.dom(TOGGLE).hasStyle({ visibility: "hidden" });
+
+    this.set("isShown", true);
+
+    assert.dom(TOGGLE).hasStyle({ visibility: "visible" });
   });
 });

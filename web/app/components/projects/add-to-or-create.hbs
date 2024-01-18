@@ -49,7 +49,7 @@
         <:item as |dd|>
           <dd.Action data-test-project-option class="block py-[6.5px]">
             <div class="flex w-full items-center gap-3.5">
-              <FlightIcon @name={{get-project-status-icon dd.attrs.status}} />
+              <Project::StatusIcon @status={{dd.attrs.status}} />
               <div class="flex w-full items-center overflow-hidden">
                 <div class="flex w-full justify-between">
                   <div
