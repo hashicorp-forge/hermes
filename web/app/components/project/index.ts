@@ -28,12 +28,21 @@ import move from "ember-animated/motions/move";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
+import RouterService from "@ember/routing/router-service";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
-class ResizeProject extends Resize {
+class ResizeExpo extends Resize {
   *animate() {
     this.opts.duration = animationDuration;
+    this.opts.easing = easeOutExpo;
+    yield* super.animate();
+  }
+}
+
+class ResizeExpoSlow extends Resize {
+  *animate() {
+    this.opts.duration = animationDuration * 1.4;
     this.opts.easing = easeOutExpo;
     yield* super.animate();
   }
@@ -49,6 +58,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: HermesFlashMessagesService;
+  @service declare router: RouterService;
 
   /**
    * The array of possible project statuses.
@@ -56,7 +66,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   protected statuses = projectStatusObjects;
 
-  protected motion = ResizeProject;
+  protected containerMotion = ResizeExpo;
+  protected resourceListContainerMotion = ResizeExpoSlow;
+
+  /**
+   * Whether the list should animate.
+   * Used to disable the animation on first render.
+   */
+  @tracked private shouldAnimate = false;
 
   /**
    * Locally tracked project attributes.
@@ -150,6 +167,20 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
       this.loadJiraIssue.isRunning
     ) {
       return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Whether the related resources should be shown.
+   * True if the project has any related resources.
+   */
+  protected get resourcesAreShown() {
+    if (this.externalLinks.length > 0 || this.hermesDocuments.length > 0) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -342,7 +373,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     // Replacing an individual link doesn't cause the getter
     // to recompute, so we manually save the array.
-    this.externalLinks = this.externalLinks;
+    this.externalLinks = this.externalLinks.slice();
 
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
@@ -353,6 +384,28 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = false;
     this.resourceToEdit = undefined;
     this.resourceToEditIndex = undefined;
+  }
+
+  @action projectBodyTransitionRules({
+    firstTime,
+    oldItems,
+    newItems,
+  }: {
+    firstTime: boolean;
+    oldItems: unknown[];
+    newItems: unknown[];
+  }) {
+    // ignore animation on first render
+    if (firstTime) {
+      return emptyTransition;
+    }
+
+    // ignore animation when leaving the project
+    if (oldItems[0] === true && newItems[0] === undefined) {
+      return emptyTransition;
+    }
+
+    return this.projectBodyTransition;
   }
 
   @action plusButtonTransitionRules({
@@ -392,6 +445,22 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     // animate all other cases
     return this.jiraTransition;
+  }
+
+  *projectBodyTransition({
+    insertedSprites,
+    removedSprites,
+  }: TransitionContext) {
+    if (Ember.testing) return;
+
+    for (let sprite of insertedSprites) {
+      yield wait(animationDuration * 0.1);
+      void fadeIn(sprite, { duration: animationDuration * 0.35 });
+    }
+
+    for (let sprite of removedSprites) {
+      void fadeOut(sprite, { duration: animationDuration * 0.05 });
+    }
   }
 
   *descriptionTransition({
@@ -484,6 +553,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
         easing,
       });
     }
+  }
+
+  /**
+   * The action to enable animations.
+   * Called when the list is rendered, just
+   * after the transitionRules have been set
+   */
+  @action protected enableAnimation() {
+    this.shouldAnimate = true;
   }
 
   /**
