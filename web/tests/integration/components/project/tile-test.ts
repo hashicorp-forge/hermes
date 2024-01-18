@@ -1,4 +1,4 @@
-import { render, rerender, settled } from "@ember/test-helpers";
+import { render, settled } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
@@ -10,7 +10,6 @@ import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const PROJECT_TITLE = "[data-test-title]";
-const PROJECT_DESCRIPTION = "[data-test-description]";
 const PROJECT_JIRA_TYPE_IMAGE = "[data-test-issue-type-image]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
 const PRODUCT_AVATAR = "[data-test-product-avatar]";
@@ -83,11 +82,6 @@ module("Integration | Component | project/tile", function (hooks) {
 
     emberAssert("description must exist", description);
 
-    assert.dom(PROJECT_DESCRIPTION).hasText(description);
-
-    this.set("project.description", null);
-
-    assert.dom(PROJECT_DESCRIPTION).doesNotExist();
     assert.dom(PROJECT_JIRA_KEY).doesNotExist();
   });
 
@@ -167,13 +161,11 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PROJECT_JIRA_KEY).hasClass("line-through");
   });
 
-  test("it truncates long titles and descriptions", async function (this: ProjectTileComponentTestContext, assert) {
+  test("it truncates long titles", async function (this: ProjectTileComponentTestContext, assert) {
     this.set(
       "project",
       this.server.create("project", {
         title:
-          "This is a long text string that should be truncated. It goes on and on and on, and then, wouldn't you know it, it goes on some more.",
-        description:
           "This is a long text string that should be truncated. It goes on and on and on, and then, wouldn't you know it, it goes on some more.",
       }),
     );
@@ -185,7 +177,6 @@ module("Integration | Component | project/tile", function (hooks) {
     `);
 
     const titleHeight = htmlElement(PROJECT_TITLE).offsetHeight;
-    const descriptionHeight = htmlElement(PROJECT_DESCRIPTION).offsetHeight;
 
     const titleLineHeight = Math.ceil(
       parseFloat(
@@ -193,13 +184,10 @@ module("Integration | Component | project/tile", function (hooks) {
       ),
     );
 
-    const descriptionLineHeight = Math.ceil(
-      parseFloat(
-        window.getComputedStyle(htmlElement(PROJECT_DESCRIPTION)).lineHeight,
-      ),
+    assert.equal(
+      titleHeight,
+      titleLineHeight,
+      "long title remains only one line",
     );
-
-    assert.equal(titleHeight, titleLineHeight * 2);
-    assert.equal(descriptionHeight, descriptionLineHeight * 3);
   });
 });

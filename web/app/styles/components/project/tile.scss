@@ -3,7 +3,10 @@
 
   .title-and-description {
     grid-column: 1;
-    grid-template-columns: 16px 1fr;
+
+    .inner {
+      grid-template-columns: 16px 1fr;
+    }
   }
 
   .jira {

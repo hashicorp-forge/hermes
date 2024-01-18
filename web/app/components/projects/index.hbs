@@ -34,9 +34,7 @@
 <ol data-test-projects-list class="divided-list relative">
   {{#each this.shownProjects as |project|}}
     <li data-test-project>
-      <LinkTo @route="authenticated.projects.project" @model={{project.id}}>
-        <Project::Tile @project={{project}} />
-      </LinkTo>
+      <Project::Tile @project={{project}} />
     </li>
   {{/each}}
 </ol>

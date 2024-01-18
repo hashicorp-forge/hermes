@@ -56,6 +56,7 @@ interface TooltipModifierNamedArgs {
   delay?: number;
   openDuration?: number;
   class?: string;
+  focusable?: boolean;
   _useTestDelay?: boolean;
 }
 
@@ -561,7 +562,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
      * If the reference isn't inherently focusable, make it focusable.
      */
     if (!this._reference.matches(FOCUSABLE)) {
-      this._reference.setAttribute("tabindex", "0");
+      if (named.focusable === false) {
+        this._reference.setAttribute("tabindex", "-1");
+      } else {
+        this._reference.setAttribute("tabindex", "0");
+      }
     }
 
     document.addEventListener("keydown", this.handleKeydown);
