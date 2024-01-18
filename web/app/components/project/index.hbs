@@ -1,17 +1,19 @@
 <div class="relative">
 
   <div class="project-header mt-1 flex w-full">
-    <div class="flex h-9 w-full justify-between">
-      <div class="flex items-center gap-1.5 text-color-foreground-faint">
-        <LinkTo
+    <div class="flex h-9 w-full items-center justify-between">
+      <div
+        class="flex items-center gap-1.5 rounded bg-color-palette-neutral-100 px-2 pt-1 pb-0.5 text-color-foreground-faint"
+      >
+        {{!-- <LinkTo
           @route="authenticated.projects"
           @query={{hash status="active"}}
           {{tooltip "View all projects"}}
           class="flex rounded-button-md p-1 hover:bg-color-surface-interactive-hover focus:bg-color-surface-interactive-hover"
         >
-          <FlightIcon @name="grid" />
-        </LinkTo>
-        <h5 class="hermes-h4 mr-1.5">Project</h5>
+          <FlightIcon @name="folder" />
+        </LinkTo> --}}
+        <h5 class="hermes-h4">Project</h5>
       </div>
       <div class="flex items-center gap-2">
         <span class="font-bold">Status:</span>
