@@ -5,7 +5,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { CheckmarkPosition } from "hermes/components/x/dropdown-list/checkable-item";
 
 const ITEM = "[data-test-checkable-item]";
-const CONTENT = "[data-test-checkable-item-content]";
 const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
 const COUNT = "[data-test-x-dropdown-list-checkable-item-count]";
 
@@ -30,6 +29,11 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       />
     `);
 
+    assert
+      .dom(ITEM)
+      .doesNotHaveClass("has-count")
+      .hasStyle({ "grid-template-areas": '"check label"' });
+
     assert.dom(CHECK).hasClass("invisible");
     assert.dom("[data-test-x-dropdown-list-item-value]").hasText("foo");
     assert.dom(COUNT).doesNotExist();
@@ -38,8 +42,14 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom(CHECK).hasClass("visible");
 
-    this.set("count", 1);
-    assert.dom(COUNT).hasText("1");
+    this.set("count", 0);
+
+    assert
+      .dom(ITEM)
+      .hasClass("has-count")
+      .hasStyle({ "grid-template-areas": '"check label count"' });
+
+    assert.dom(COUNT).hasText("0");
   });
 
   test("it can render the checkmark in a leading or trailing position", async function (this: XDropdownListCheckableItemTestContext, assert) {
@@ -49,7 +59,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       <X::DropdownList::CheckableItem
         @checkmarkPosition={{this.checkmarkPosition}}
         @isSelected={{true}}
-        @count={{1}}
+        @count={{0}}
         @value="foo"
       />
     `);
@@ -59,7 +69,8 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .hasClass(
         "checkmark-position--leading",
         "default checkmark position is leading",
-      );
+      )
+      .hasStyle({ "grid-template-areas": '"check label count"' });
 
     this.set("checkmarkPosition", "trailing");
 
@@ -70,8 +81,6 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
         "can render checkmark in trailing position",
       );
 
-    assert.dom(CONTENT).hasStyle({ order: "1" });
-    assert.dom(COUNT).hasStyle({ order: "2" });
-    assert.dom(CHECK).hasStyle({ order: "3" });
+    assert.dom(ITEM).hasStyle({ "grid-template-areas": '"label count check"' });
   });
 });
