@@ -29,6 +29,8 @@ import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
+import { highlight } from "instantsearch.js/es/helpers";
+import highlightElement from "hermes/utils/ember-animated/highlight-element";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -73,7 +75,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Whether the list should animate.
    * Used to disable the animation on first render.
    */
-  @tracked private shouldAnimate = false;
+  @tracked protected shouldAnimate = false;
 
   /**
    * Locally tracked project attributes.
@@ -341,7 +343,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       cachedDocuments,
       this.externalLinks.slice(),
-      RelatedResourceSelector.HermesDocument,
     );
   }
 
@@ -357,7 +358,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
-      RelatedResourceSelector.ExternalLink,
     );
   }
 
@@ -378,7 +378,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
-      this.resourceToEditIndex,
     );
 
     this.editModalIsShown = false;
@@ -618,15 +617,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * the resource-highlight animation.
    */
   protected saveProjectResources = task(
-    async (
-      cachedDocuments,
-      cachedLinks,
-      elementSelectorToHighlight?: string | number,
-    ) => {
-      if (elementSelectorToHighlight) {
-        // void this.animateHighlight.perform(elementSelectorToHighlight);
-      }
-
+    async (cachedDocuments, cachedLinks) => {
       try {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
