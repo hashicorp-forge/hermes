@@ -56,6 +56,12 @@ interface TooltipModifierNamedArgs {
   delay?: number;
   openDuration?: number;
   class?: string;
+
+  /**
+   * Whether an element should be focusable. Inherently true of interactive elements;
+   * true by design for non-interactive elements which receive `tabindex="0"`
+   * unless `focusable` is explicitly set false.
+   */
   focusable?: boolean;
   _useTestDelay?: boolean;
 }
@@ -559,12 +565,16 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
     this._reference.setAttribute("data-tooltip-state", this.state);
 
     /**
-     * If the reference isn't inherently focusable, make it focusable.
+     * If the consumer has explicitly set `focusable` to false,
+     * set the `tabindex` to -1 so the reference can't be focused.
      */
-    if (!this._reference.matches(FOCUSABLE)) {
-      if (named.focusable === false) {
-        this._reference.setAttribute("tabindex", "-1");
-      } else {
+    if (named.focusable === false) {
+      this._reference.setAttribute("tabindex", "-1");
+    } else {
+      /**
+       * If the reference isn't inherently focusable, make it focusable.
+       */
+      if (!this._reference.matches(FOCUSABLE)) {
         this._reference.setAttribute("tabindex", "0");
       }
     }
