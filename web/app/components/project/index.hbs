@@ -16,7 +16,7 @@
 
       <X::DropdownList
         @items={{this.statuses}}
-        @placement="bottom"
+        @placement="bottom-end"
         @selected={{this.status}}
         class="theme--neutral"
       >
@@ -39,18 +39,10 @@
           >
             <X::DropdownList::CheckableItem
               @isSelected={{dd.isSelected}}
+              @value={{dd.attrs.label}}
               @checkmarkPosition="trailing"
-              class=""
-            >
-              <:default>
-                <div class="flex items-center gap-2 pl-1.5">
-                  <Project::StatusIcon @status={{dd.value}} />
-                  <span>
-                    {{dd.attrs.label}}
-                  </span>
-                </div>
-              </:default>
-            </X::DropdownList::CheckableItem>
+              class="pl-2.5"
+            />
           </dd.Action>
         </:item>
       </X::DropdownList>

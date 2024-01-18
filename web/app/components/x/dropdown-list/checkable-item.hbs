@@ -1,6 +1,8 @@
 <div
   data-test-checkable-item
-  class="checkable-item checkmark-position--{{or @checkmarkPosition 'leading'}}
+  class="checkable-item
+    {{if @count 'has-count'}}
+    checkmark-position--{{or @checkmarkPosition 'leading'}}
     w-full items-center gap-2.5"
   ...attributes
 >

@@ -20,7 +20,9 @@
 }
 /* Maintain contrast across hover and focus states */
 .hds-badge-count--color-neutral.hds-badge-count--type-filled {
-  @apply mix-blend-multiply;
+  &:not(.checkable-item-count) {
+    @apply mix-blend-multiply;
+  }
 }
 
 .x-dropdown-list-item-link {
