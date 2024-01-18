@@ -8,11 +8,14 @@ import { assert as emberAssert } from "@ember/debug";
 import htmlElement from "hermes/utils/html-element";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+import { PROJECT_TILE_MAX_PRODUCTS } from "hermes/components/project/tile";
 
 const PROJECT_TITLE = "[data-test-title]";
+const JIRA_LINK = "[data-test-jira-link]";
 const PROJECT_JIRA_TYPE_IMAGE = "[data-test-issue-type-image]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
 const PRODUCT_AVATAR = "[data-test-product-avatar]";
+const ADDITIONAL_PRODUCTS_LABEL = "[data-test-additional-products-label]";
 
 interface ProjectTileComponentTestContext extends MirageTestContext {
   project: HermesProject;
@@ -96,6 +99,7 @@ module("Integration | Component | project/tile", function (hooks) {
 
     const { key, issueType } = issue.attrs;
 
+    assert.dom(JIRA_LINK).hasAttribute("href", issue.url);
     assert.dom(PROJECT_JIRA_KEY).hasText(key);
     assert.dom(PROJECT_JIRA_TYPE_IMAGE).hasAttribute("alt", issueType);
   });
@@ -110,6 +114,14 @@ module("Integration | Component | project/tile", function (hooks) {
     this.set("project.products", ["Vault", "Hermes"]);
 
     assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
+
+    assert
+      .dom(PRODUCT_AVATAR)
+      .hasAttribute(
+        "href",
+        "/product-areas/vault",
+        "url is correctly dasherized",
+      );
   });
 
   test('if the status of a jiraIssue includes "done" or "closed," the key is rendered with a line through it', async function (this: ProjectTileComponentTestContext, assert) {
@@ -189,5 +201,22 @@ module("Integration | Component | project/tile", function (hooks) {
       titleLineHeight,
       "long title remains only one line",
     );
+  });
+
+  test("it truncates the number of project avatars", async function (this: ProjectTileComponentTestContext, assert) {
+    this.set("project.products", [
+      "Vault",
+      "Hermes",
+      "Terraform",
+      "Waypoint",
+      "Consul",
+    ]);
+
+    await render<ProjectTileComponentTestContext>(hbs`
+      <Project::Tile @project={{this.project}} />
+    `);
+
+    assert.dom(PRODUCT_AVATAR).exists({ count: PROJECT_TILE_MAX_PRODUCTS });
+    assert.dom(ADDITIONAL_PRODUCTS_LABEL).hasText("+2");
   });
 });

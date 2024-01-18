@@ -30,6 +30,7 @@
 
     {{#if (or this.jiraIssue this.fetchJiraIssue.isRunning)}}
       <ExternalLink
+        data-test-jira-link
         href={{this.jiraIssue.url}}
         class="jira inline-flex items-center gap-1.5
           {{if this.jiraIssue 'fade-in-forwards'}}"
@@ -79,7 +80,10 @@
           {{/each}}
         </ul>
         {{#if this.additionalProductsLabelIsShown}}
-          <div class="shrink-0 text-color-foreground-faint">
+          <div
+            data-test-additional-products-label
+            class="shrink-0 text-color-foreground-faint"
+          >
 
             +{{this.additionalProductsCount}}
           </div>
