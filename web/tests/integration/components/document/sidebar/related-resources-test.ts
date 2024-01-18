@@ -33,7 +33,8 @@ const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR = `${EDIT_MODAL_SELECTO
 const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
 const EDIT_RESOURCE_URL_INPUT_SELECTOR =
   "[data-test-external-resource-url-input]";
-const ADD_RESOURCE_BUTTON_SELECTOR = ".sidebar-section-header-button";
+const ADD_RESOURCE_BUTTON_SELECTOR =
+  "[data-test-sidebar-section-header-button]";
 const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
 
 const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =

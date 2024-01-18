@@ -2,5 +2,10 @@
 
   {{yield}}
 
-  <OverflowMenu @items={{@overflowMenuItems}} />
+  {{#unless @isReadOnly}}
+    <OverflowMenu
+      @items={{@overflowMenuItems}}
+      @offset={{hash mainAxis=1 crossAxis=-3}}
+    />
+  {{/unless}}
 </div>

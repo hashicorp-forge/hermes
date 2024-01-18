@@ -14,8 +14,6 @@ import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
 import { next } from "@ember/runloop";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
-import { ModelFrom } from "hermes/types/route-models";
-import AuthenticatedNewRoute from "hermes/routes/authenticated/new";
 import DocumentTypesService from "hermes/services/document-types";
 
 interface DocFormErrors {
@@ -24,7 +22,6 @@ interface DocFormErrors {
 }
 
 const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
-const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
   Args: {
@@ -222,15 +219,23 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
 
-      // Set modal on a delay so it appears after transition.
-      this.modalAlerts.setActive.perform(
-        "draftCreated",
-        AWAIT_DOC_CREATED_MODAL_DELAY,
-      );
-
-      this.router.transitionTo("authenticated.document", doc.id, {
-        queryParams: { draft: true },
-      });
+      this.router
+        .transitionTo("authenticated.document", doc.id, {
+          queryParams: { draft: true },
+        })
+        .then(() => {
+          if (this.configSvc.config.create_docs_as_user) {
+            this.flashMessages.success("", {
+              title: "Draft created!",
+            });
+          } else {
+            /**
+             * If `create_docs_as_user` is false, show a modal alert
+             * explaining the limitations on notifications.
+             */
+            this.modalAlerts.setActive.perform("draftCreated");
+          }
+        });
     } catch (e) {
       this.docIsBeingCreated = false;
 

@@ -1,3 +1,4 @@
+import { OffsetOptions } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 
 export interface OverflowItem {
@@ -10,6 +11,8 @@ interface OverflowMenuComponentSignature {
   Element: HTMLDivElement;
   Args: {
     items: Record<string, OverflowItem>;
+    offset?: OffsetOptions;
+    isShown?: boolean;
   };
 }
 

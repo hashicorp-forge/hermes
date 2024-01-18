@@ -26,6 +26,7 @@ interface EditableFieldComponentTestContext extends MirageTestContext {
   value: string;
   newArray: string[];
   disabled: boolean;
+  buttonSize?: "medium";
 }
 
 module("Integration | Component | editable-field", function (hooks) {
@@ -445,5 +446,25 @@ module("Integration | Component | editable-field", function (hooks) {
     await click(FIELD_TOGGLE);
 
     assert.dom("textarea").hasValue("bar");
+  });
+
+  test("it can render medium-sized buttons", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("buttonSize", undefined);
+
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value="foo"
+        @onSave={{this.onCommit}}
+        @buttonSize={{this.buttonSize}}
+      />
+    `);
+
+    await click(FIELD_TOGGLE);
+
+    assert.dom(SAVE_BUTTON).hasClass("hds-button--size-small");
+
+    this.set("buttonSize", "medium");
+
+    assert.dom(SAVE_BUTTON).hasClass("hds-button--size-medium");
   });
 });
