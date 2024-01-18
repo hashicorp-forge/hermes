@@ -6,7 +6,6 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "../related-resources";
-import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task, timeout } from "ember-concurrency";
@@ -29,8 +28,6 @@ import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
-import { highlight } from "instantsearch.js/es/helpers";
-import highlightElement from "hermes/utils/ember-animated/highlight-element";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
