@@ -77,6 +77,11 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
     }
   }
 
+  /***
+   * Note: we use `data-test-color` to test color attributes since `fill`
+   * and `stroke` are converted from CSS tokens to `rgb` by `getAttribute`.
+   * By using `data-test-color` we can confirm the original token.
+   */
   <template>
     <svg
       width="16"
@@ -91,6 +96,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
       {{! Background }}
       <path
         data-test-background
+        data-test-color={{this.bgColor}}
         fill={{this.bgColor}}
         fill-rule="evenodd"
         d="M2.25 1A2.25 2.25 0 0 0 0 3.25v9.5A2.25 2.25 0 0 0 2.25 15h11.5A2.25 2.25 0 0 0 16 12.75v-7.5A2.25 2.25 0 0 0 13.75 3H9.871a.75.75 0 0 1-.53-.22L8.22 1.66A2.25 2.25 0 0 0 6.629 1H2.25Z"
@@ -100,6 +106,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
       {{! Outline }}
       <path
         data-test-outline
+        data-test-color={{this.outlineColor}}
         fill={{this.outlineColor}}
         fill-rule="evenodd"
         d="M2.25 1A2.25 2.25 0 0 0 0 3.25v9.5A2.25 2.25 0 0 0 2.25 15h11.5A2.25 2.25 0 0 0 16 12.75v-7.5A2.25 2.25 0 0 0 13.75 3H9.871a.75.75 0 0 1-.53-.22L8.22 1.66A2.25 2.25 0 0 0 6.629 1H2.25ZM1.5 3.25a.75.75 0 0 1 .75-.75h4.379a.75.75 0 0 1 .53.22L8.28 3.84a2.25 2.25 0 0 0 1.591.659h3.879a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-.75.75H2.25a.75.75 0 0 1-.75-.75V7h6.13a.75.75 0 0 0 0-1.5H1.5V3.25Z"
@@ -111,6 +118,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         {{! Lightning bolt }}
         <path
           data-test-active-affordance
+          data-test-color={{this.iconColor}}
           stroke={{this.iconColor}}
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -122,6 +130,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         {{! Check }}
         <path
           data-test-completed-affordance
+          data-test-color={{this.iconColor}}
           stroke={{this.iconColor}}
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -132,6 +141,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         {{! Shadow lines }}
         <path
           data-test-archived-affordance
+          data-test-color={{this.outlineColor}}
           fill={{this.outlineColor}}
           d="M12.44 9.66a.75.75 0 0 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.44v-1.5ZM12.519 12.283a.75.75 0 1 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.52v-1.5Z"
         />

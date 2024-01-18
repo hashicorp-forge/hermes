@@ -37,24 +37,32 @@ module("Integration | Component | project/status-icon", function (hooks) {
 
     assert.dom(ICON).hasAttribute("data-test-status", ProjectStatus.Active);
 
-    assert.dom(BACKGROUND).hasStyle({ fill: COLOR_BG_ACTIVE });
-    assert.dom(OUTLINE).hasStyle({ fill: COLOR_OUTLINE_ACTIVE });
-    assert.dom(ACTIVE_AFFORDANCE).hasStyle({ fill: COLOR_ICON_ACTIVE });
+    assert.dom(BACKGROUND).hasAttribute("data-test-color", COLOR_BG_ACTIVE);
+    assert.dom(OUTLINE).hasAttribute("data-test-color", COLOR_OUTLINE_ACTIVE);
+    assert
+      .dom(ACTIVE_AFFORDANCE)
+      .hasAttribute("data-test-color", COLOR_ICON_ACTIVE);
 
     this.set("status", ProjectStatus.Completed);
 
     assert.dom(ICON).hasAttribute("data-test-status", ProjectStatus.Completed);
 
-    assert.dom(BACKGROUND).hasStyle({ fill: COLOR_BG_COMPLETED });
-    assert.dom(OUTLINE).hasStyle({ fill: COLOR_OUTLINE_COMPLETED });
-    assert.dom(COMPLETED_AFFORDANCE).hasStyle({ fill: COLOR_ICON_COMPLETED });
+    assert.dom(BACKGROUND).hasAttribute("data-test-color", COLOR_BG_COMPLETED);
+    assert
+      .dom(OUTLINE)
+      .hasAttribute("data-test-color", COLOR_OUTLINE_COMPLETED);
+    assert
+      .dom(COMPLETED_AFFORDANCE)
+      .hasAttribute("data-test-color", COLOR_ICON_COMPLETED);
 
     this.set("status", ProjectStatus.Archived);
 
     assert.dom(ICON).hasAttribute("data-test-status", ProjectStatus.Archived);
 
-    assert.dom(BACKGROUND).hasStyle({ fill: COLOR_BG_ARCHIVED });
-    assert.dom(OUTLINE).hasStyle({ fill: COLOR_OUTLINE_ARCHIVED });
-    assert.dom(ARCHIVED_AFFORDANCE).hasStyle({ fill: COLOR_OUTLINE_ARCHIVED });
+    assert.dom(BACKGROUND).hasAttribute("data-test-color", COLOR_BG_ARCHIVED);
+    assert.dom(OUTLINE).hasAttribute("data-test-color", COLOR_OUTLINE_ARCHIVED);
+    assert
+      .dom(ARCHIVED_AFFORDANCE)
+      .hasAttribute("data-test-color", COLOR_OUTLINE_ARCHIVED);
   });
 });

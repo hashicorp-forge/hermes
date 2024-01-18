@@ -14,6 +14,7 @@ const PROJECT_TITLE = "[data-test-title]";
 const JIRA_LINK = "[data-test-jira-link]";
 const PROJECT_JIRA_TYPE_IMAGE = "[data-test-issue-type-image]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
+const PRODUCT_LINK = "[data-test-product] a";
 const PRODUCT_AVATAR = "[data-test-product-avatar]";
 const ADDITIONAL_PRODUCTS_LABEL = "[data-test-additional-products-label]";
 
@@ -116,7 +117,7 @@ module("Integration | Component | project/tile", function (hooks) {
     assert.dom(PRODUCT_AVATAR).exists({ count: 2 });
 
     assert
-      .dom(PRODUCT_AVATAR)
+      .dom(PRODUCT_LINK)
       .hasAttribute(
         "href",
         "/product-areas/vault",
