@@ -15,20 +15,7 @@
       </LinkTo>
     {{/each}}
   </nav>
-
-  <div
-    class="absolute top-1/2 right-0 inline-flex -translate-y-1/2 cursor-default items-center gap-2 text-color-foreground-disabled"
-    {{tooltip
-      "A project is a public collection of documents and links organized around an effort."
-      class="w-[260px]"
-      placement="bottom-end"
-      offset=(hash mainAxis=8 crossAxis=10)
-    }}
-  >
-    <div class="border-b border-dotted border-b-color-border-strong">
-      Whatʼs a project?
-    </div>
-  </div>
+  <WhatsAProject class="absolute top-1/2 right-0 -translate-y-1/2" />
 </div>
 
 <ol data-test-projects-list class="divided-list relative">
