@@ -3,22 +3,28 @@
     data-test-new-features-banner
     @type="inline"
     @color="highlight"
-    @icon="gift"
+    @icon="folder-star"
     @onDismiss={{this.dismiss}}
     class="mb-10"
     as |A|
   >
-    <A.Title>Introducing Projects</A.Title>
+    <A.Title>Introducing Projects!</A.Title>
     <A.Description>
-      Organize documents and links around an effort.
-      <LinkTo
-        @route="authenticated.projects"
-        class="underlined-link"
-      >Browse</LinkTo>
-      or
-      <LinkTo @route="authenticated.new.project" class="underlined-link">start a
-        project</LinkTo>
-      of your own.
+      Projects are a new way to organize documents and links around an effort.
+      <div class="mt-2 mb-1 flex items-center gap-2">
+        <Hds::Button
+          @route="authenticated.projects"
+          @text="Browse projects"
+          @size="small"
+        />
+        <span class="hermes-h4">or</span>
+        <Hds::Button
+          @route="authenticated.new.project"
+          @text="Start a project"
+          @color="secondary"
+          @size="small"
+        />
+      </div>
     </A.Description>
   </Hds::Alert>
 {{/if}}
