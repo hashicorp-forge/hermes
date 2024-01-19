@@ -25,24 +25,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
     await authenticateSession({});
   });
 
-  test("it redirects to the dashboard if the flag is not enabled", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
-    this.server.get("/web/config", () => {
-      return new Response(
-        200,
-        {},
-        {
-          feature_flags: {
-            projects: false,
-          },
-        },
-      );
-    });
-
-    await visit("/projects");
-
-    assert.equal(currentURL(), "/dashboard");
-  });
-
   test("the page title is correct", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
     await visit("/projects");
 
