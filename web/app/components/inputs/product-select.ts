@@ -22,6 +22,7 @@ interface InputsProductSelectSignature {
     renderOut?: boolean;
     offset?: OffsetOptions;
     matchAnchorWidth?: MatchAnchorWidthOptions;
+    color?: "quarternary";
   };
 }
 
