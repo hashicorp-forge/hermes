@@ -43,7 +43,7 @@ func PeopleDataHandler(
 				// Only query for photos and email addresses
 				// This may be expanded based on use case
 				// in the future
-				ReadMask("photos,emailAddresses").
+				ReadMask("emailAddresses,names,photos").
 				Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 				Do()
 			if err != nil {
@@ -77,7 +77,7 @@ func PeopleDataHandler(
 				for _, email := range emails {
 					result, err := s.People.SearchDirectoryPeople().
 						Query(email).
-						ReadMask("photos,emailAddresses").
+						ReadMask("emailAddresses,names,photos").
 						Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 						Do()
 
