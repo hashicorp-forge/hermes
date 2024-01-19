@@ -1,18 +1,19 @@
-.project-tile {
-  .title,
-  .description {
-    @apply overflow-hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
+.project-tile-grid {
+  grid-template-columns: 1fr 120px 160px;
+
+  .title-and-description {
+    grid-column: 1;
+
+    .inner {
+      grid-template-columns: 16px 1fr;
+    }
   }
 
-  .title {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+  .jira {
+    grid-column: 2;
   }
 
-  .description {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+  .products {
+    grid-column: 3;
   }
 }

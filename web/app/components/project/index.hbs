@@ -1,62 +1,62 @@
 <div class="relative">
-  <div class="project-header mt-1 flex w-full">
-    <div class="flex h-9 w-full justify-between">
-      <div class="flex items-center gap-1.5 text-color-foreground-faint">
-        <LinkTo
-          @route="authenticated.projects"
-          @query={{hash status="active"}}
-          {{tooltip "View all projects"}}
-          class="flex rounded-button-md p-1 hover:bg-color-surface-interactive-hover focus:bg-color-surface-interactive-hover"
-        >
-          <FlightIcon @name="grid" />
-        </LinkTo>
-        <h5 class="hermes-h4 mr-1.5">Project</h5>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="font-bold">Status:</span>
-        <X::DropdownList
-          @items={{this.statuses}}
-          @placement="bottom-end"
-          @selected={{this.status}}
-          @onItemClick={{this.changeStatus}}
-          class="theme--neutral"
-        >
-          <:anchor as |dd|>
-            <dd.ToggleAction
-              data-test-project-status-toggle
-              class="hds-button hds-button--size-medium hds-button--color-secondary pill-button border-color-border-strong"
-              @hasChevron={{true}}
+
+  <div class="project-header flex h-9 w-full items-center justify-between">
+    {{! Project Badge }}
+    <div
+      class="flex items-center gap-1.5 rounded bg-color-palette-neutral-100 px-2 pt-1 pb-0.5 text-color-foreground-faint"
+    >
+      <h5 class="hermes-h4">
+        Project
+      </h5>
+    </div>
+
+    {{! Status and CopyURLButton }}
+    <div class="flex items-center gap-2">
+      <span class="font-bold">
+        Status:
+      </span>
+      <X::DropdownList
+        @items={{this.statuses}}
+        @placement="bottom-end"
+        @selected={{this.status}}
+        @onItemClick={{this.changeStatus}}
+        class="theme--neutral"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            data-test-project-status-toggle
+            class="hds-button hds-button--size-medium hds-button--color-secondary pill-button border-color-border-strong"
+            @hasChevron={{true}}
+          >
+            <Project::StatusIcon @status={{dd.selected}} />
+            <span class="ml-1 mr-0.5">
+              {{this.statusLabel}}
+            </span>
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-status-action={{dd.value}}>
+            <X::DropdownList::CheckableItem
+              @isSelected={{dd.isSelected}}
+              @checkmarkPosition="trailing"
             >
-              <Project::StatusIcon @status={{dd.selected}} />
-              <span class="ml-1 mr-0.5">
-                {{this.statusLabel}}
-              </span>
-            </dd.ToggleAction>
-          </:anchor>
-          <:item as |dd|>
-            <dd.Action data-test-status-action={{dd.value}}>
-              <X::DropdownList::CheckableItem
-                @isSelected={{dd.isSelected}}
-                @checkmarkPosition="trailing"
-              >
-                <:default>
-                  <div class="flex items-center gap-2 pl-1.5">
-                    <Project::StatusIcon @status={{dd.value}} />
-                    <span>
-                      {{dd.attrs.label}}
-                    </span>
-                  </div>
-                </:default>
-              </X::DropdownList::CheckableItem>
-            </dd.Action>
-          </:item>
-        </X::DropdownList>
-        <CopyURLButton
-          @isIconOnly={{true}}
-          @url={{this.url}}
-          class="hds-button hds-button--color-secondary pill-button h-9 w-9 justify-center border-color-border-strong p-0"
-        />
-      </div>
+              <:default>
+                <div class="flex items-center gap-2 pl-1.5">
+                  <Project::StatusIcon @status={{dd.value}} />
+                  <span>
+                    {{dd.attrs.label}}
+                  </span>
+                </div>
+              </:default>
+            </X::DropdownList::CheckableItem>
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+      <CopyURLButton
+        @isIconOnly={{true}}
+        @url={{this.url}}
+        class="hds-button hds-button--color-secondary pill-button h-9 w-9 justify-center border-color-border-strong p-0"
+      />
     </div>
   </div>
 
