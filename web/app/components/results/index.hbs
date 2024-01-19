@@ -30,7 +30,6 @@
   <div class="tile-list">
     {{#each @results.hits as |doc|}}
       <Doc::Tile
-        @avatar="{{get doc.ownerPhotos 0}}"
         @docID="{{doc.objectID}}"
         @isResult={{true}}
         @modifiedTime={{doc.modifiedTime}}

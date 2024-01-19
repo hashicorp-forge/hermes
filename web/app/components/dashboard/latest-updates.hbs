@@ -35,7 +35,6 @@
     <div class="tile-list mt-8">
       {{#each this.docsToShow as |doc|}}
         <Doc::Tile
-          @avatar={{get doc.ownerPhotos 0}}
           @docID={{doc.objectID}}
           @docNumber={{doc.docNumber}}
           @modifiedTime={{doc.modifiedTime}}

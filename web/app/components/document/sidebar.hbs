@@ -174,10 +174,7 @@
       {{! Owner }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person
-          @imgURL={{get @document.ownerPhotos 0}}
-          @email={{get @document.owners 0}}
-        />
+        <Person @email={{get @document.owners 0}} />
       </div>
 
       {{! Contributors }}

@@ -15,7 +15,6 @@ export default Factory.extend({
     return `LAB-00${this.id}`;
   },
   owners: [TEST_USER_EMAIL],
-  ownerPhotos: [TEST_USER_PHOTO],
   product: "Vault",
   status: "In-Review",
   summary() {

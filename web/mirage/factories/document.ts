@@ -45,5 +45,4 @@ export default Factory.extend({
   projects: [],
   approvers: [],
   owners: [TEST_USER_EMAIL],
-  ownerPhotos: [TEST_USER_PHOTO],
 });

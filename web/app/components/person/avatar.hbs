@@ -1,23 +1,24 @@
 <div
+  {{did-insert this.maybeLoadAvatar}}
   data-test-person-avatar
-  data-test-is-loading={{@isLoading}}
+  data-test-is-loading={{this.getOwnerPhoto.isRunning}}
   class="avatar overflow-hidden rounded-full
-    {{unless @isLoading 'bg-color-palette-alpha-100'}}
+    {{unless this.getOwnerPhoto.isRunning 'bg-color-palette-alpha-100'}}
     {{this.size}}
     "
   ...attributes
 >
-  {{#if @isLoading}}
+  {{#if this.getOwnerPhoto.isRunning}}
     {{! Avatar loading affordance }}
     <div
       data-test-loading
       class="h-full w-full animate-spin rounded-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200"
     ></div>
   {{else}}
-    {{#if @imgURL}}
+    {{#if this.imgURL}}
       <img
         data-test-image
-        src={{@imgURL}}
+        src={{this.imgURL}}
         alt={{@email}}
         referrerpolicy="no-referrer"
         class="w-full"
