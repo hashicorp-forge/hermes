@@ -8,35 +8,20 @@ export default class PersonSerializer extends JSONSerializer {
     id: any, // null
     requestType: any, // e.g., 'findAll'
   ) {
-    console.log("normalizeResponse", {
-      payload,
-    });
-
-    const firstObject = payload[0];
-
-    console.log("firstObject", firstObject);
-    console.log("firstObject.resourceName", firstObject.resourceName);
-    console.log("firstObject.photos[0]", firstObject.photos[0]);
-
+    console.log("originalPayload", payload);
     payload = {
-      data: [
-        {
-          id: payload[0].resourceName,
-          type: primaryModelClass.modelName,
-          attributes: {
-            // name: payload[0].names[0].displayName,
-            email: payload[0].emailAddresses[0].value,
-            picture: payload[0].photos[0].url,
-          },
+      data: {
+        id: payload[0].emailAddresses[0].value, // so it can be queried
+        type: primaryModelClass.modelName,
+        attributes: {
+          // name: payload[0].names[0].displayName,
+          email: payload[0].emailAddresses[0].value,
+          picture: payload[0].photos[0].url,
         },
-      ],
+      },
     };
-    console.log("dat new paylo", payload);
+    console.log("newPayload", payload);
 
     return payload;
   }
-
-  // findRecord(store: any, type: any, id: any, snapshot: any) {
-  //   console.log("findRecord", { store, type, id, snapshot });
-  // }
 }

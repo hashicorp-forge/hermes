@@ -2,7 +2,7 @@ import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { task } from "ember-concurrency";
+import { dropTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesSize } from "hermes/types/sizes";
@@ -35,7 +35,16 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
 
   @action protected maybeLoadAvatar() {
     if (!this.imgURL) {
-      this.getOwnerPhoto.perform();
+      // want to see if we can peek the record before we load it.
+
+      const cachedRecord = this.store.peekRecord("person", this.args.email);
+      console.log("recordIsLoaded", cachedRecord);
+
+      if (cachedRecord) {
+        this.imgURL = cachedRecord.picture;
+      } else {
+        this.getOwnerPhoto.perform();
+      }
     }
   }
   private getOwnerPhoto = task(async () => {
@@ -51,13 +60,15 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
 
     // can we peek the record?
 
-    const person = await this.store.query("person", {
+    // want to see if we can peek the record before we load it.
+
+    // why are these happening synchronously?
+    console.log("loading Sucneps");
+    const person = await this.store.queryRecord("person", {
       emails: this.args.email,
     });
 
-    console.log("person__", person);
-
-    this.imgURL = person.firstObject.picture;
+    this.imgURL = person.picture;
   });
 }
 
