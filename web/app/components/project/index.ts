@@ -6,7 +6,6 @@ import {
   RelatedHermesDocument,
   RelatedResource,
 } from "../related-resources";
-import { RelatedResourceSelector } from "hermes/components/related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task, timeout } from "ember-concurrency";
@@ -73,7 +72,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Whether the list should animate.
    * Used to disable the animation on first render.
    */
-  @tracked private shouldAnimate = false;
+  @tracked protected shouldAnimate = false;
 
   /**
    * Locally tracked project attributes.
@@ -341,7 +340,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       cachedDocuments,
       this.externalLinks.slice(),
-      RelatedResourceSelector.HermesDocument,
     );
   }
 
@@ -357,7 +355,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
-      RelatedResourceSelector.ExternalLink,
     );
   }
 
@@ -378,7 +375,6 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
       cachedLinks,
-      this.resourceToEditIndex,
     );
 
     this.editModalIsShown = false;
@@ -618,15 +614,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * the resource-highlight animation.
    */
   protected saveProjectResources = task(
-    async (
-      cachedDocuments,
-      cachedLinks,
-      elementSelectorToHighlight?: string | number,
-    ) => {
-      if (elementSelectorToHighlight) {
-        // void this.animateHighlight.perform(elementSelectorToHighlight);
-      }
-
+    async (cachedDocuments, cachedLinks) => {
       try {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,

@@ -21,6 +21,7 @@ interface InputsProductSelectContext extends MirageTestContext {
   onChange: (value: string) => void;
   placement?: Placement;
   isSaving?: boolean;
+  color?: "quarternary";
 }
 
 module("Integration | Component | inputs/product-select", function (hooks) {
@@ -154,5 +155,31 @@ module("Integration | Component | inputs/product-select", function (hooks) {
 
     assert.dom(`${TOGGLE} ${PRODUCT_NAME}`).hasText("Vault");
     assert.dom(ABBREVIATION).doesNotExist();
+  });
+
+  test("it can render in the quarternary button style", async function (this: InputsProductSelectContext, assert) {
+    this.set("color", undefined);
+
+    await render<InputsProductSelectContext>(hbs`
+      <Inputs::ProductSelect
+        @selected={{this.selected}}
+        @onChange={{this.onChange}}
+        @color={{this.color}}
+      />
+    `);
+
+    assert
+      .dom(TOGGLE)
+      .hasClass("shadow-elevation-low")
+      .hasClass("border-color-border-input")
+      .doesNotHaveClass("quarternary-button");
+
+    this.set("color", "quarternary");
+
+    assert
+      .dom(TOGGLE)
+      .doesNotHaveClass("shadow-elevation-low")
+      .doesNotHaveClass("border-color-border-input")
+      .hasClass("quarternary-button");
   });
 });

@@ -134,7 +134,7 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     await visit("new/project");
 
     assert.dom(HEADLINE).hasText("Start a project");
-    assert.dom(ICON).hasAttribute("data-test-icon", "grid");
+    assert.dom(ICON).hasAttribute("data-test-icon", "folder");
     assert.dom(TASK_IS_RUNNING_DESCRIPTION).doesNotExist();
 
     await fillIn(TITLE_INPUT, "The Foo Project");

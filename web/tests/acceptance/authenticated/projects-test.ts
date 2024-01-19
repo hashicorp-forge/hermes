@@ -10,7 +10,6 @@ import { ProjectStatus } from "hermes/types/project-status";
 
 const PROJECT_TILE = "[data-test-project-tile]";
 const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
-const PROJECT_DESCRIPTION = `${PROJECT_TILE} [data-test-description]`;
 const PROJECT_PRODUCT = `${PROJECT_TILE} [data-test-product]`;
 const PROJECT_JIRA_TYPE = `${PROJECT_TILE} [data-test-issue-type-image]`;
 const PROJECT_JIRA_KEY = `${PROJECT_TILE} [data-test-jira-key]`;
@@ -58,7 +57,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
     assert.dom("[data-test-project]").exists({ count: 3 });
 
     let expectedTitles: string[] = [];
-    let expectedDescriptions: string[] = [];
     let expectedProductCount = 0;
     let expectedKeys: string[] = [];
     let expectedJiraTypes: string[] = [];
@@ -67,10 +65,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
       .all()
       .models.forEach((project: HermesProject) => {
         expectedTitles.push(project.title);
-
-        if (project.description) {
-          expectedDescriptions.push(project.description);
-        }
 
         if (project.jiraIssueID) {
           const jiraIssue = this.server.schema.jiraIssues.findBy({
@@ -89,10 +83,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
       (e) => e.textContent?.trim(),
     );
 
-    const renderedDescriptions = findAll(PROJECT_DESCRIPTION).map(
-      (e) => e.textContent?.trim(),
-    );
-
     const renderedProductsCount = findAll(PROJECT_PRODUCT).length;
 
     const renderedKeys = findAll(PROJECT_JIRA_KEY).map(
@@ -104,7 +94,6 @@ module("Acceptance | authenticated/projects", function (hooks) {
     );
 
     assert.deepEqual(renderedTitles, expectedTitles);
-    assert.deepEqual(renderedDescriptions, expectedDescriptions);
     assert.deepEqual(renderedProductsCount, expectedProductCount);
     assert.deepEqual(renderedKeys, expectedKeys);
     assert.deepEqual(renderedJiraTypes, expectedJiraTypes);

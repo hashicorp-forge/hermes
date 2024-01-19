@@ -179,6 +179,12 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
     ) => {
       let index = this.configSvc.config.algolia_docs_index_name;
 
+      // Empty queries target the modifiedTime-sorted replica index
+      // to return a list of recently updated documents.
+      if (query === "") {
+        index += "_modifiedTime_desc";
+      }
+
       let filterString = "";
 
       // Make sure the current document is omitted from the results

@@ -37,7 +37,7 @@ func PeopleDataHandler(srv server.Server) http.Handler {
 				// Only query for photos and email addresses
 				// This may be expanded based on use case
 				// in the future
-				ReadMask("photos,emailAddresses").
+				ReadMask("emailAddresses,names,photos").
 				Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 				Do()
 			if err != nil {
@@ -74,7 +74,7 @@ func PeopleDataHandler(srv server.Server) http.Handler {
 				for _, email := range emails {
 					result, err := srv.GWService.People.SearchDirectoryPeople().
 						Query(email).
-						ReadMask("photos,emailAddresses").
+						ReadMask("emailAddresses,names,photos").
 						Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
 						Do()
 
