@@ -6,6 +6,7 @@ import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { HermesSize } from "hermes/types/sizes";
+import Store from "@ember-data/store";
 
 interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -22,6 +23,7 @@ interface PersonAvatarComponentSignature {
 export default class PersonAvatarComponent extends Component<PersonAvatarComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare store: Store;
 
   protected size = this.args.size ?? HermesSize.Small;
 
@@ -37,13 +39,25 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
     }
   }
   private getOwnerPhoto = task(async () => {
-    const person = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/people?emails=${this.args.email}`,
-      )
-      .then((response) => response?.json());
+    // const person = await this.fetchSvc
+    //   .fetch(
+    //     `/api/${this.configSvc.config.api_version}/people?emails=${this.args.email}`,
+    //   )
+    //   .then((response) => response?.json());
 
-    this.imgURL = person[0].photos[0].url;
+    // this.imgURL = person[0].photos[0].url;
+
+    // this should only load if it needs to.
+
+    // can we peek the record?
+
+    const person = await this.store.query("person", {
+      emails: this.args.email,
+    });
+
+    console.log("person__", person);
+
+    this.imgURL = person.firstObject.picture;
   });
 }
 
