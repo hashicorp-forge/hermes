@@ -4,6 +4,7 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
+import Store from "@ember-data/store";
 
 interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
@@ -19,6 +20,7 @@ interface DocTileMediumComponentSignature {
 export default class DocTileMediumComponent extends Component<DocTileMediumComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare store: Store;
 
   protected get docID() {
     if ("googleFileID" in this.args.doc) {
@@ -46,6 +48,17 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
 
   protected get docIsDraft() {
     return this.args.doc.status?.toLowerCase() === "wip";
+  }
+
+  protected get ownerName() {
+    const owner = this.args.doc.owners?.[0];
+
+    if (!owner) {
+      return "Unknown";
+    }
+
+    // we expect the route to have already loaded the person's record
+    return this.store.peekRecord("person", owner)?.name ?? owner;
   }
 }
 

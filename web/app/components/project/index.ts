@@ -28,6 +28,7 @@ import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
+import Store from "@ember-data/store";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -58,6 +59,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
+  @service declare store: Store;
 
   /**
    * The array of possible project statuses.
@@ -335,11 +337,23 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addDocument(resource: RelatedHermesDocument) {
     const cachedDocuments = this.hermesDocuments.slice();
 
+    const docOwner = resource.owners?.[0];
+    let cachedRecord = null;
+
+    if (docOwner) {
+      cachedRecord = this.store.peekRecord("person", docOwner);
+    }
+
+    // this happens before the avatar is loaded
+
     this.hermesDocuments.unshiftObject(resource);
 
     void this.saveProjectResources.perform(
       cachedDocuments,
       this.externalLinks.slice(),
+      {
+        personToLoad: cachedRecord ? undefined : docOwner,
+      },
     );
   }
 
@@ -614,18 +628,36 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * the resource-highlight animation.
    */
   protected saveProjectResources = task(
-    async (cachedDocuments, cachedLinks) => {
+    async (
+      cachedDocuments,
+      cachedLinks,
+      options?: {
+        personToLoad?: string;
+      },
+    ) => {
       try {
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
-          {
-            method: "PUT",
-            body: JSON.stringify(this.formattedRelatedResources),
-            headers: {
-              "Content-Type": "application/json",
+        let promises = [
+          this.fetchSvc.fetch(
+            `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,
+            {
+              method: "PUT",
+              body: JSON.stringify(this.formattedRelatedResources),
+              headers: {
+                "Content-Type": "application/json",
+              },
             },
-          },
-        );
+          ),
+        ];
+
+        if (options?.personToLoad) {
+          promises.push(
+            this.store.queryRecord("person", {
+              emails: options.personToLoad,
+            }),
+          );
+        }
+
+        await Promise.all(promises);
       } catch (e) {
         this.externalLinks = cachedLinks;
         this.hermesDocuments = cachedDocuments;

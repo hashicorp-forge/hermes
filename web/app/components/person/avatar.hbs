@@ -1,14 +1,13 @@
 <div
-  {{did-insert this.maybeLoadAvatar}}
   data-test-person-avatar
-  data-test-is-loading={{this.getOwnerPhoto.isRunning}}
+  data-test-is-loading={{@isLoading}}
   class="avatar overflow-hidden rounded-full
-    {{unless this.getOwnerPhoto.isRunning 'bg-color-palette-alpha-100'}}
+    {{unless @isLoading 'bg-color-palette-alpha-100'}}
     {{this.size}}
     "
   ...attributes
 >
-  {{#if this.getOwnerPhoto.isRunning}}
+  {{#if @isLoading}}
     {{! Avatar loading affordance }}
     <div
       data-test-loading

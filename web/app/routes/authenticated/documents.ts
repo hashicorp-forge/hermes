@@ -50,17 +50,27 @@ export default class AuthenticatedDocumentsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    // @ts-ignore
+    // @ts-ignore - TODO: add "hits" to type
     const resultsOwners = results?.hits
-      ?.map((doc: HermesDocument) => doc.owners)
-      .flat()
-      .uniq()
-      .join(",");
-    console.log("resultsOwners", resultsOwners);
+      ?.map((doc: HermesDocument) => doc.owners?.[0])
+      .uniq();
 
-    // load avatars
+    const avatarPromises = resultsOwners.map(async (owner: string) => {
+      if (!owner) {
+        return;
+      }
 
-    this.store.queryRecord("person", { emails: resultsOwners });
+      const cachedRecord = this.store.peekRecord("person", owner);
+
+      if (!cachedRecord) {
+        console.log("fetching avatar for", owner);
+        return this.store
+          .queryRecord("person", { emails: owner })
+          .catch(() => {});
+      }
+    });
+
+    await Promise.all(avatarPromises);
 
     return { facets, results, sortedBy };
   }

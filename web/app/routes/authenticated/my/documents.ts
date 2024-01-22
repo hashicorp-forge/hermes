@@ -11,6 +11,7 @@ import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
 import FlashMessageService from "ember-cli-flash/services/flash-messages";
+import Store from "@ember-data/store";
 
 export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -32,6 +33,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
   @service declare algolia: AlgoliaService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: FlashMessageService;
+  @service declare store: Store;
 
   queryParams = {
     includeSharedDrafts: {
@@ -122,6 +124,24 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         return aTime - bTime;
       }
     });
+
+    const docOwners = docs.map((doc) => doc.owners?.[0]).uniq();
+
+    const docOwnerPromises = docOwners.map((owner) => {
+      if (!owner) return;
+
+      const cachedRecord = this.store.peekRecord("person", owner);
+
+      if (!cachedRecord) {
+        return this.store
+          .queryRecord("person", {
+            emails: owner,
+          })
+          .catch(() => {});
+      }
+    });
+
+    await Promise.all(docOwnerPromises);
 
     return {
       docs,

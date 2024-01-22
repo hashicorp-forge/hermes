@@ -10,6 +10,7 @@ import { XDropdownListAnchorAPI } from "./x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
+import Store from "@ember-data/store";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -77,6 +78,7 @@ interface RelatedResourcesComponentSignature {
 export default class RelatedResourcesComponent extends Component<RelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
+  @service declare store: Store;
 
   @tracked private _algoliaResults: HermesDocument[] | null = null;
 
@@ -246,7 +248,31 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
           })
           .then((response) => response);
         if (algoliaResponse) {
-          this._algoliaResults = algoliaResponse.hits as HermesDocument[];
+          const hits = algoliaResponse.hits as HermesDocument[];
+
+          console.log("hits", hits);
+
+          const docOwners = hits.map((doc) => doc.owners?.[0]).uniq();
+
+          if (docOwners) {
+            await Promise.all(
+              docOwners.map(async (owner) => {
+                if (owner) {
+                  const cachedRecord = this.store.peekRecord("person", owner);
+
+                  if (!cachedRecord) {
+                    await this.store
+                      .queryRecord("person", {
+                        emails: owner,
+                      })
+                      .catch(() => {});
+                  }
+                }
+              }),
+            );
+          }
+
+          this._algoliaResults = hits;
           if (dd) {
             dd.resetFocusedItemIndex();
           }
@@ -278,11 +304,24 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
       try {
-        let algoliaResponse = await this.algolia.getObject.perform(objectID);
+        let algoliaResponse = (await this.algolia.getObject.perform(
+          objectID,
+        )) as HermesDocument;
+
+        const docOwner = algoliaResponse.owners?.[0];
+
+        if (docOwner) {
+          const cachedRecord = this.store.peekRecord("person", docOwner);
+
+          if (!cachedRecord) {
+            await this.store.queryRecord("person", {
+              emails: docOwner,
+            });
+          }
+        }
+
         if (algoliaResponse) {
-          this._algoliaResults = [
-            algoliaResponse,
-          ] as unknown as HermesDocument[];
+          this._algoliaResults = [algoliaResponse];
           if (dd) {
             dd.resetFocusedItemIndex();
           }

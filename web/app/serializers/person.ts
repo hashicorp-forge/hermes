@@ -8,7 +8,6 @@ export default class PersonSerializer extends JSONSerializer {
     id: any, // null
     requestType: any, // e.g., 'findAll'
   ) {
-    console.log("originalPayload", payload);
     payload = {
       data: {
         id: payload[0].emailAddresses[0].value, // so it can be queried
@@ -21,7 +20,6 @@ export default class PersonSerializer extends JSONSerializer {
         },
       },
     };
-    console.log("newPayload", payload);
 
     return payload;
   }
