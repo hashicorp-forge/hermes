@@ -8,6 +8,7 @@
 @use "./animations";
 @use "./typography";
 
+@use "components/dashboard";
 @use "components/new";
 @use "components/toolbar";
 @use "components/x-tooltip";
@@ -28,7 +29,6 @@
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
 @use "components/header/search";
-@use "components/dashboard/docs-awaiting-review/doc";
 @use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";

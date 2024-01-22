@@ -3,6 +3,7 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import LatestDocsService from "hermes/services/latest-docs";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -15,9 +16,14 @@ interface DashboardIndexComponentSignature {
 }
 
 export default class DashboardIndexComponent extends Component<DashboardIndexComponentSignature> {
+  @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
   @service declare authenticatedUser: AuthenticatedUserService;
+
+  protected get linkToAllDocsIsShown(): boolean {
+    return this.latestDocs.nbPages > 1;
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

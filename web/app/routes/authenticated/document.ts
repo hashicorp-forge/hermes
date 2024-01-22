@@ -36,7 +36,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
 
@@ -185,7 +185,7 @@ export default class AuthenticatedDocumentRoute extends Route {
      * Generally speaking, ensure an up-to-date list of recently viewed docs
      * by the time the user returns to the dashboard.
      */
-    void this.recentDocs.fetchAll.perform();
+    void this.viewedDocs.fetchAll.perform();
 
     /**
      * Record the document view with the analytics backend.

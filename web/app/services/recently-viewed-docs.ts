@@ -7,9 +7,6 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 
-// @ts-ignore - not yet typed
-import timeAgo from "hermes/utils/time-ago";
-
 type IndexedDoc = {
   id: string;
   isDraft: boolean;
@@ -55,13 +52,6 @@ export default class RecentlyViewedDocsService extends Service {
       this.index = (await fetchResponse?.json()) || [];
 
       assert("fetchAll expects index", this.index);
-
-      /**
-       * Ensure that the index is no more than 4 items.
-       * Applies to legacy users viewing the dashboard for the
-       * first time since drafts were added to the index.
-       */
-      this.index = this.index.slice(0, 4);
 
       /**
        * Get the documents from the backend.

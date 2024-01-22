@@ -48,14 +48,10 @@ module(
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("2");
       assert.dom(DOC_AWAITING_REVIEW_LINK_SELECTOR).exists({ count: 2 });
 
-      assert.dom("h2").containsText("documents awaiting your review");
-
       this.set("docs", [this.server.schema.document.first()]);
 
       assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("1");
       assert.dom(DOC_AWAITING_REVIEW_LINK_SELECTOR).exists({ count: 1 });
-
-      assert.dom("h2").containsText("document awaiting your review");
     });
 
     test("it shows a toggle button when there are more than 4 docs awaiting review", async function (this: DashboardDocsAwaitingReviewTestContext, assert) {

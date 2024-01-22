@@ -6,20 +6,17 @@ import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
 import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
 
-const DOC_AWAITING_REVIEW_LINK_SELECTOR =
-  "[data-test-doc-awaiting-review-link]";
+const LINK = "[data-test-doc-awaiting-review-link]";
 
-const DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR =
-  "[data-test-doc-awaiting-review-number-and-title]";
+const TITLE = "[data-test-document-title]";
 
-const DOC_AWAITING_REVIEW_OWNER_SELECTOR =
-  "[data-test-doc-awaiting-review-owner]";
+const DOC_NUMBER = "[data-test-document-number]";
 
-const DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR =
-  "[data-test-doc-awaiting-review-product-badge]";
+const AVATAR = "[data-test-doc-awaiting-review-owner-avatar]";
 
-const DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR =
-  "[data-test-doc-awaiting-review-doctype-badge]";
+const TYPE = "[data-test-document-type]";
+
+const STATE = "[data-test-document-state]";
 
 interface DashboardDocsAwaitingReviewDocTestContext extends MirageTestContext {
   doc: HermesDocument;
@@ -50,42 +47,16 @@ module(
         />
       `);
 
-      assert
-        .dom(DOC_AWAITING_REVIEW_LINK_SELECTOR)
-        .containsText("Foo")
-        .hasAttribute("href", "/document/10");
+      assert.dom(LINK).hasAttribute("href", "/document/10", "href is correct");
+      assert.dom(TITLE).hasText("Foo", "text is correct");
 
       assert
-        .dom(
-          find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_NUMBER_AND_TITLE_SELECTOR}`,
-          ),
-        )
-        .hasText("HCP-001 Foo", "Shows the doc number and title");
+        .dom(DOC_NUMBER)
+        .hasText("HCP-001", "Shows the doc number and title");
 
-      assert
-        .dom(
-          find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_OWNER_SELECTOR}`,
-          ),
-        )
-        .hasText(TEST_USER_2_EMAIL, "Shows the doc owner");
+      assert.dom(AVATAR).exists("avatar is shown");
 
-      assert
-        .dom(
-          find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_PRODUCT_BADGE_SELECTOR}`,
-          ),
-        )
-        .hasText("Cloud Platform", "Shows the product name");
-
-      assert
-        .dom(
-          find(
-            `${DOC_AWAITING_REVIEW_LINK_SELECTOR} ${DOC_AWAITING_REVIEW_DOCTYPE_BADGE_SELECTOR}`,
-          ),
-        )
-        .hasText("PRFAQ", "Shows the doc type");
+      assert.dom(TYPE).hasText("PRFAQ", "Shows the doc type");
     });
   },
 );

@@ -1,0 +1,74 @@
+.dashboard {
+  .empty-text {
+    @apply mt-5 text-body-300 text-color-foreground-disabled;
+  }
+
+  .vertical-line {
+    @apply text-color-foreground-faint opacity-50;
+  }
+
+  .vertical-line-divider {
+    @apply mx-0.5 h-3.5 w-[1.25px] bg-color-foreground-faint opacity-25;
+  }
+
+  .tags {
+    @apply flex shrink-0 gap-1;
+  }
+
+  .main,
+  .secondary {
+    h2,
+    h3,
+    h5 {
+      @apply text-color-foreground-strong;
+    }
+
+    h3,
+    h5 {
+      @apply font-semibold;
+    }
+
+    h2 {
+      @apply text-display-400;
+    }
+
+    h3 {
+      @apply text-display-300;
+    }
+
+    h5 {
+      @apply text-body-200;
+    }
+
+    li > a {
+      @apply block;
+
+      &:hover {
+        @apply bg-color-page-faint;
+      }
+    }
+  }
+
+  .main {
+    li {
+      @apply border-t border-t-color-border-faint;
+    }
+  }
+
+  .secondary {
+    li {
+      @apply border-b  border-color-border-faint;
+      &:last-child {
+        @apply border-0;
+      }
+    }
+  }
+
+  .main-inner {
+    @apply pr-8 pl-3;
+  }
+
+  .footer {
+    @apply mt-0;
+  }
+}
