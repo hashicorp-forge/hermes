@@ -63,6 +63,11 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
     // want to see if we can peek the record before we load it.
 
     // why are these happening synchronously?
+
+    // FIXME: this is happening at too low a level
+    // for avatars to be aware of one another, that's why
+    // we'll get weird loading the first time we load a page
+
     console.log("loading Sucneps");
     const person = await this.store.queryRecord("person", {
       emails: this.args.email,
