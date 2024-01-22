@@ -7,7 +7,6 @@ import ProductAreasService from "hermes/services/product-areas";
 import { assert } from "@ember/debug";
 import { HermesSize } from "hermes/types/sizes";
 import fontColorContrast from "font-color-contrast";
-import FlagsService from "hermes/services/flags";
 
 interface ProductAvatarComponentSignature {
   Element: HTMLDivElement;
@@ -23,7 +22,6 @@ interface ProductAvatarComponentSignature {
 
 export default class ProductAvatarComponent extends Component<ProductAvatarComponentSignature> {
   @service declare productAreas: ProductAreasService;
-  @service declare flags: FlagsService;
 
   private get productID(): string | undefined {
     return getProductID(this.args.product);

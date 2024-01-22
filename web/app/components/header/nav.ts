@@ -11,7 +11,6 @@ import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
-import FlagsService from "hermes/services/flags";
 import { ProjectStatus } from "hermes/types/project-status";
 
 interface UserNavItem {
@@ -39,7 +38,6 @@ interface HeaderNavComponentSignature {
 
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service declare flags: FlagsService;
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;

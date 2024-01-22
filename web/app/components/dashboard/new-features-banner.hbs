@@ -3,21 +3,28 @@
     data-test-new-features-banner
     @type="inline"
     @color="highlight"
-    @icon="gift"
+    @icon="folder-star"
     @onDismiss={{this.dismiss}}
-    class="mt-6 mb-10"
+    class="mb-10"
     as |A|
   >
-    <A.Title>New editor features.</A.Title>
+    <A.Title>Introducing Projects!</A.Title>
     <A.Description>
-      <ul>
-        <li><strong>Related resources:</strong>
-          Attach content to your document such as other Hermes documents or
-          external links.</li>
-        <li><strong>Shareable drafts:</strong>
-          You can now toggle your document draft visibility to “shareable” and
-          generate a sharable link.</li>
-      </ul>
+      Projects are a new way to organize documents and links around an effort.
+      <div class="mt-2 mb-1 flex items-center gap-2">
+        <Hds::Button
+          @route="authenticated.projects"
+          @text="Browse projects"
+          @size="small"
+        />
+        <span class="hermes-h4">or</span>
+        <Hds::Button
+          @route="authenticated.new.project"
+          @text="Start a project"
+          @color="secondary"
+          @size="small"
+        />
+      </div>
     </A.Description>
   </Hds::Alert>
 {{/if}}

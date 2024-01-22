@@ -122,6 +122,8 @@ module("Acceptance | authenticated/new", function (hooks) {
       ),
       expectedLinkText,
     );
+
+    assert.dom(START_A_PROJECT_BUTTON).exists();
   });
 
   test(`it doesn't render the "more info" links if they're not present`, async function (this: AuthenticatedNewRouteTestContext, assert) {
@@ -136,30 +138,5 @@ module("Acceptance | authenticated/new", function (hooks) {
     await visit("/new");
 
     assert.dom(MORE_INFO_LINK).doesNotExist();
-  });
-
-  test(`the "start a project" button is visible if the projects flag is true`, async function (this: AuthenticatedNewRouteTestContext, assert) {
-    await visit("/new");
-
-    // Projects are enabled by default
-    assert.dom(START_A_PROJECT_BUTTON).exists();
-  });
-
-  test(`the "start a project" button is hidden if the projects flag is false`, async function (this: AuthenticatedNewRouteTestContext, assert) {
-    this.server.get("/web/config", () => {
-      return new Response(
-        200,
-        {},
-        {
-          feature_flags: {
-            projects: false,
-          },
-        },
-      );
-    });
-
-    await visit("/new");
-
-    assert.dom(START_A_PROJECT_BUTTON).doesNotExist();
   });
 });
