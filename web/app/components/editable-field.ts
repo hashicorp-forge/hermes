@@ -4,7 +4,7 @@ import { action } from "@ember/object";
 import { schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 import blinkElement from "hermes/utils/blink-element";
 
 export const FOCUSABLE =
@@ -13,7 +13,7 @@ export const FOCUSABLE =
 interface EditableFieldComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    value: string | HermesUser[];
+    value: string | string[];
     onSave: any; // TODO: type this
     onChange?: (value: any) => void; // TODO: type this
     isSaving?: boolean;
@@ -100,7 +100,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * Updates the local and parent values when the user selects or deselects a person.
    *
    */
-  @action protected onChange(value: string | HermesUser[]) {
+  @action protected onChange(value: string | string[]) {
     this.value = value;
 
     if (this.args.onChange) {
@@ -200,7 +200,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
 
     schedule("afterRender", this, () => {
       this.value = this.cachedValue;
-      this.onChange(this.value as HermesUser[]);
+      this.onChange(this.value as string[]);
     });
   }
 
@@ -234,14 +234,14 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * triggers the empty-value error.
    */
   @action protected maybeUpdateValue(eventOrValue: Event | any) {
-    let newValue: string | HermesUser[] | undefined;
+    let newValue: string | string[] | undefined;
 
     if (eventOrValue instanceof Event) {
       const target = eventOrValue.target;
       assert("target must exist", target);
       if ("value" in target) {
         const value = target.value;
-        newValue = value as string | HermesUser[];
+        newValue = value as string | string[];
       } else {
         newValue = undefined;
       }

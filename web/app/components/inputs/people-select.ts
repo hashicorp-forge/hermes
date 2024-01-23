@@ -10,14 +10,15 @@ import Ember from "ember";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
+  names: { displayName: string }[];
   photos: { url: string }[];
 }
 
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected: HermesUser[];
-    onChange: (value: HermesUser[]) => void;
+    selected: string[];
+    onChange: (value: string[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
@@ -67,6 +68,9 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
+        // TODO: replace this with EmberData solution
+        // so that names and images are loaded into the store
+
         let response = await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/people`,
           {
@@ -86,12 +90,13 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               return {
                 email: p.emailAddresses[0]?.value,
                 imgURL: p.photos?.[0]?.url,
+                name: p.names?.[0]?.displayName,
               };
             })
-            .filter((person: HermesUser) => {
+            .filter((person: string) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedPerson) => selectedPerson.email === person.email,
+                (selectedPerson) => selectedPerson === person,
               );
             });
         } else {

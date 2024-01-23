@@ -113,10 +113,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
 
-  @tracked contributors: HermesUser[] =
-    this.args.document.contributorObjects || [];
+  @tracked contributors: string[] = this.args.document.contributors || [];
+  @tracked approvers: string[] = this.args.document.approvers || [];
 
-  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
   @tracked product = this.args.document.product || "";
 
   /**
@@ -670,7 +669,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       if (typeof val === "string") {
         serializedValue = cleanString(val);
       } else {
-        serializedValue = val.map((p: HermesUser) => p.email);
+        serializedValue = val.map((p) => p.email);
       }
 
       try {
@@ -687,7 +686,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | string[],
+      val: string | HermesUser[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -695,7 +694,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          serializedValue = val;
+          serializedValue = val.map((p) => p.email);
         }
 
         field.name = fieldName;
@@ -736,7 +735,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers?.compact().mapBy("email"),
+        approvers: this.approvers,
       });
 
       await this.fetchSvc.fetch(
@@ -791,11 +790,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
-  @action updateApprovers(approvers: HermesUser[]) {
+  @action updateApprovers(approvers: string[]) {
     this.approvers = approvers;
   }
 
-  @action updateContributors(contributors: HermesUser[]) {
+  @action updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }
 

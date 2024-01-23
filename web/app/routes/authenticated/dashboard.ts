@@ -10,6 +10,7 @@ import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import LatestDocsService from "hermes/services/latest-docs";
 import Store from "@ember-data/store";
+import StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
   @service declare algolia: AlgoliaService;
@@ -21,7 +22,7 @@ export default class DashboardRoute extends Route {
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  @service declare store: Store;
+  @service declare store: StoreService;
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
@@ -78,21 +79,7 @@ export default class DashboardRoute extends Route {
       })
       .uniq();
 
-    const ownersPromise = owners.map((owner) => {
-      if (!owner) return;
-
-      const cachedRecord = this.store.peekRecord("person", owner);
-
-      if (!cachedRecord) {
-        return this.store
-          .queryRecord("person", {
-            emails: owner,
-          })
-          .catch(() => {});
-      }
-    });
-
-    await Promise.all(ownersPromise);
+    await this.store.maybeFetchPeople.perform(owners);
 
     return docsAwaitingReview;
   }

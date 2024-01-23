@@ -5,7 +5,7 @@ import { HermesDocument, HermesUser } from "hermes/types/document";
 interface EditableFieldReadValueSignature {
   Args: {
     tag?: "h1";
-    value?: string | HermesUser[];
+    value?: string | string[];
     placeholder?: string;
     document?: HermesDocument; // Used to check an approver's approval status
   };
@@ -40,7 +40,7 @@ export default class EditableFieldReadValue extends Component<EditableFieldReadV
     return this.args.document;
   }
 
-  protected get people(): HermesUser[] {
+  protected get people(): string[] {
     assert("value must be an array", Array.isArray(this.args.value));
     return this.args.value;
   }

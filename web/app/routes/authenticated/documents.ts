@@ -7,12 +7,13 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { HermesDocument } from "hermes/types/document";
 import Store from "@ember-data/store";
+import StoreService from "hermes/services/store";
 
 export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
-  @service declare store: Store;
+  @service declare store: StoreService;
 
   queryParams = {
     docType: {
@@ -50,27 +51,15 @@ export default class AuthenticatedDocumentsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    // @ts-ignore - TODO: add "hits" to type
-    const resultsOwners = results?.hits
-      ?.map((doc: HermesDocument) => doc.owners?.[0])
-      .uniq();
+    if (results) {
+      const typedResults = results as { hits?: HermesDocument[] };
 
-    const avatarPromises = resultsOwners.map(async (owner: string) => {
-      if (!owner) {
-        return;
-      }
+      const resultsOwners = typedResults.hits?.map(
+        (doc: HermesDocument) => doc.owners?.[0],
+      );
 
-      const cachedRecord = this.store.peekRecord("person", owner);
-
-      if (!cachedRecord) {
-        console.log("fetching avatar for", owner);
-        return this.store
-          .queryRecord("person", { emails: owner })
-          .catch(() => {});
-      }
-    });
-
-    await Promise.all(avatarPromises);
+      await this.store.maybeFetchPeople.perform(resultsOwners);
+    }
 
     return { facets, results, sortedBy };
   }

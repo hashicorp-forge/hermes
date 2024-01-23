@@ -43,7 +43,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected summary: string = "";
   @tracked protected productArea?: string;
   @tracked protected productAbbreviation: string | null = null;
-  @tracked protected contributors: HermesUser[] = [];
+  @tracked protected contributors: string[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
 
@@ -119,8 +119,8 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Returns contributor emails as an array of strings.
    */
-  private getEmails(values: HermesUser[]) {
-    return values.map((person) => person.email);
+  private getEmails(values: string[]) {
+    return values.map((person) => person);
   }
 
   @action protected registerForm(form: HTMLFormElement) {
@@ -169,7 +169,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Updates the contributors property and conditionally validates the form.
    */
-  @action protected updateContributors(contributors: HermesUser[]) {
+  @action protected updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }
 
