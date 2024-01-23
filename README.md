@@ -84,6 +84,14 @@ The Application ID, Search API Key, and Write API Key in Algolia's [API Keys set
 
 Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` environment variables at build time.
 
+### Jira (optional)
+
+Jira can be optionally configured to enable linking Hermes projects with Jira issues.
+
+1. [Create an API token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token) for Jira.
+
+1. Enable Jira using the `jira` block in the Hermes config file.
+
 ## Development and Usage
 
 ### Requirements
@@ -141,6 +149,8 @@ NOTE: when not using a Google service account, this will automatically open a br
 - Add the following OAuth scopes (comma-delimited list):
   `https://www.googleapis.com/auth/directory.readonly,https://www.googleapis.com/auth/documents,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/gmail.send`
 
+1. Configure the service account in the `auth` block under the `google_workspace` config block.
+
 More to come here...
 
 ## Architecture
@@ -181,6 +191,5 @@ As the project becomes more stable over the next several releases, we think it w
 
 Here are some higher-level initiatives that we are currently working on:
 
-- Support custom document types.
 - Increase test coverage.
 - Finish migration of using Algolia as a NoSQL database to PostgreSQL as the source of truth for all non-search data.

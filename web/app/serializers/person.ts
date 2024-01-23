@@ -1,20 +1,25 @@
 import JSONSerializer from "@ember-data/serializer/json";
+import { assert } from "@ember/debug";
 import DS from "ember-data";
-import RSVP from "rsvp";
+import { GoogleUser } from "hermes/components/inputs/people-select";
 
 export default class PersonSerializer extends JSONSerializer {
+  /**
+   * The serializer for the `person` model.
+   * Handles `query` and `queryRecord` requests to the EmberData store.
+   * Formats the response to match the JSON spec.
+   */
   normalizeResponse(
-    store: any, // TODO: find Store class
-    primaryModelClass: any, // TODO: find Model class type
-    payload: any, // TODO: find payload type, maybe ModelFor?
-    id: any, // null
-    requestType: any, // e.g., 'findAll'
+    _store: DS.Store,
+    primaryModelClass: any,
+    payload: GoogleUser[] | { results: GoogleUser[] },
+    _id: string | number,
+    requestType: string,
   ) {
-    console.log("paylaow", payload);
-
     if (requestType === "query") {
-      payload = payload.results;
-      const dataObjects = payload.map((p: any) => {
+      assert("results are expected for query requests", "results" in payload);
+
+      const people = payload.results.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
           type: primaryModelClass.modelName,
@@ -27,26 +32,32 @@ export default class PersonSerializer extends JSONSerializer {
         };
       });
 
-      payload = {
-        data: dataObjects,
-      };
-
-      // results are an array of GoogleUsers
+      return { data: people };
     } else if (requestType === "queryRecord") {
-      payload = {
+      assert(
+        "payload should not be an array of results",
+        !("results" in payload),
+      );
+
+      const record = payload[0];
+
+      if (!record) return {};
+
+      return {
         data: {
-          id: payload[0].emailAddresses[0].value, // so it can be queried
+          id: record.emailAddresses?.[0]?.value,
           type: primaryModelClass.modelName,
           attributes: {
-            name: payload[0].names[0].displayName,
-            firstName: payload[0].names[0].givenName,
-            email: payload[0].emailAddresses[0].value,
-            picture: payload[0].photos[0].url,
+            name: record.names[0]?.displayName,
+            firstName: record.names[0]?.givenName,
+            email: record.emailAddresses[0]?.value,
+            picture: record.photos[0]?.url,
           },
         },
       };
+    } else {
+      // Currently only `query` and `queryRecord` requests are handled.
+      return {};
     }
-
-    return payload;
   }
 }

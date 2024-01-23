@@ -1,18 +1,19 @@
 import JSONSerializer from "@ember-data/serializer/json";
+import DS from "ember-data";
 
 export default class ApplicationSerializer extends JSONSerializer {
+  /**
+   * The default serializer for all models.
+   * Formats the response to match the JSON spec.
+   * Model-specific serializers should extend this class.
+   */
   normalizeResponse(
-    store: any, // TODO: find Store class
-    primaryModelClass: any, // TODO: find Model class type
-    payload: any, // TODO: find payload type, maybe ModelFor?
-    id: any, // null
-    requestType: any, // e.g., 'findAll'
+    _store: DS.Store,
+    primaryModelClass: any,
+    payload: any,
+    _id: string | number,
+    _requestType: string,
   ) {
-    console.log("I ))))D ", id);
-    console.log("QUEST TYPE", requestType);
-    console.log("stoe", store);
-    // TODO: investigate if the store should be used somewhere
-
     payload = {
       data: [
         {

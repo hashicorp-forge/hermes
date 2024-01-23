@@ -5,20 +5,20 @@ import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
+import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
-import StoreService from "hermes/services/store";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
-  names: { displayName: string }[];
+  names: { displayName: string; givenName: string }[];
   photos: { url: string }[];
 }
 
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected: string[];
-    onChange: (value: string[]) => void;
+    selected: HermesUser[];
+    onChange: (value: HermesUser[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
@@ -31,7 +31,6 @@ const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare store: StoreService;
 
   /**
    * The list of people to display in the dropdown.
@@ -69,50 +68,31 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        // TODO: replace this with EmberData solution
-        // so that names and images are loaded into the store
-
-        await this.store.query("person", {
-          query: query,
-        });
-
-        // OR
-        // push these into the store manually
-
-        let people = await this.fetchSvc
-          .fetch(`/api/${this.configSvc.config.api_version}/people`, {
+        let response = await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/people`,
+          {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: query,
             }),
-          })
-          .then((response) => response?.json());
+          },
+        );
 
-        if (people) {
-          this.people = people
+        const peopleJson = await response?.json();
+
+        if (peopleJson) {
+          this.people = peopleJson
             .map((p: GoogleUser) => {
-              // push the record into the store as a person
-              // this also updates existing records
-              console.log("pPpPp", p);
-              this.store.push({
-                data: {
-                  id: p.emailAddresses[0]?.value,
-                  type: "person",
-                  attributes: {
-                    name: p.names?.[0]?.displayName,
-                    email: p.emailAddresses[0]?.value,
-                    imgURL: p.photos?.[0]?.url,
-                  },
-                },
-              });
-
-              return p.emailAddresses[0]?.value;
+              return {
+                email: p.emailAddresses[0]?.value,
+                imgURL: p.photos?.[0]?.url,
+              };
             })
-            .filter((person: string) => {
+            .filter((person: HermesUser) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedPerson) => selectedPerson === person,
+                (selectedPerson) => selectedPerson.email === person.email,
               );
             });
         } else {

@@ -1,15 +1,14 @@
-import Adapter from "@ember-data/adapter";
-import { inject as service } from "@ember/service";
 import DS from "ember-data";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import SessionService from "hermes/services/session";
 import ApplicationAdapter from "./application";
 import RSVP from "rsvp";
 
 export default class PersonAdapter extends ApplicationAdapter {
-  query(store: DS.Store, type: DS.Model, query: any) {
-    console.log("query", query);
+  /**
+   * Queries using the `body` parameter instead of a queryParam.
+   * Default query:     `/people?query=foo`
+   * Our custom query:  `/people` with `{ query: "foo" }` in the request body.
+   */
+  query(_store: DS.Store, _type: DS.Model, query: { query: string }) {
     const results = this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/people`, {
         method: "POST",
@@ -19,10 +18,6 @@ export default class PersonAdapter extends ApplicationAdapter {
       })
       .then((r) => r?.json());
 
-    console.log("results", results);
-
-    return RSVP.hash({
-      results: results,
-    });
+    return RSVP.hash({ results });
   }
 }

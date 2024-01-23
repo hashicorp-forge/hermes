@@ -4,7 +4,7 @@ import window from "ember-window-mock";
 import { action } from "@ember/object";
 
 export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM =
-  "july-20-2023-newFeatureBannerIsShown";
+  "jan-18-2024-newFeatureBannerIsShown";
 
 interface DashboardNewFeaturesBannerSignature {
   Args: {};
@@ -28,13 +28,13 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
     }
 
     const storageItem = window.localStorage.getItem(
-      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM
+      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
     );
 
     if (storageItem === null) {
       window.localStorage.setItem(
         NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
-        "true"
+        "true",
       );
       return true;
     } else if (storageItem === "true") {
@@ -50,7 +50,7 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
   @action protected dismiss() {
     window.localStorage.setItem(
       NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
-      "false"
+      "false",
     );
     this.isDismissed = true;
   }

@@ -72,4 +72,14 @@
 
   </New::Form>
 
+  {{#unless this.projectIsBeingCreated}}
+    <div
+      class="mt-12 flex w-full justify-center gap-2 text-body-100 text-color-foreground-disabled"
+    >
+
+      <FlightIcon @name="enterprise" class="mr-1" />
+      Projects are visible to everyone in your organization.
+    </div>
+  {{/unless}}
+
 {{/if}}

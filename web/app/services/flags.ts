@@ -4,7 +4,7 @@ import ConfigService from "./config";
 export default class FlagsService extends Service {
   @service("config") declare configSvc: ConfigService;
 
-  get projects() {
-    return this.configSvc.config.feature_flags?.["projects"];
-  }
+  // get exampleFlag() {
+  //   return this.configSvc.config.feature_flags?.["example_feature"];
+  // }
 }
