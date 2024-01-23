@@ -10,6 +10,7 @@ import Ember from "ember";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
+  names: { displayName: string; givenName: string }[];
   photos: { url: string }[];
 }
 
