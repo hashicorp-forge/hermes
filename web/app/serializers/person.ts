@@ -4,6 +4,11 @@ import DS from "ember-data";
 import { GoogleUser } from "hermes/components/inputs/people-select";
 
 export default class PersonSerializer extends JSONSerializer {
+  /**
+   * The serializer for the `person` model.
+   * Handles `query` and `queryRecord` requests to the EmberData store.
+   * Formats the response to match the JSON spec.
+   */
   normalizeResponse(
     _store: DS.Store,
     primaryModelClass: any,
@@ -27,9 +32,7 @@ export default class PersonSerializer extends JSONSerializer {
         };
       });
 
-      return {
-        data: people,
-      };
+      return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
         "payload should not be an array of results",
@@ -52,8 +55,9 @@ export default class PersonSerializer extends JSONSerializer {
           },
         },
       };
+    } else {
+      // Currently only `query` and `queryRecord` requests are handled.
+      return {};
     }
-
-    return {};
   }
 }

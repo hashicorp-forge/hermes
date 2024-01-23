@@ -2,9 +2,14 @@ import JSONSerializer from "@ember-data/serializer/json";
 import DS from "ember-data";
 
 export default class ApplicationSerializer extends JSONSerializer {
+  /**
+   * The default serializer for all models.
+   * Formats the response to match the JSON spec.
+   * Model-specific serializers should extend this class.
+   */
   normalizeResponse(
     _store: DS.Store,
-    primaryModelClass: DS.Model,
+    primaryModelClass: any,
     payload: any,
     _id: string | number,
     _requestType: string,
@@ -13,7 +18,6 @@ export default class ApplicationSerializer extends JSONSerializer {
       data: [
         {
           id: payload.id,
-          // @ts-ignore - FIXME: what is the correct type
           type: primaryModelClass.modelName,
           attributes: payload,
         },
