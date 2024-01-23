@@ -29,7 +29,6 @@ import htmlElement from "hermes/utils/html-element";
 import ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { HermesDocumentType } from "hermes/types/document-type";
-import FlagsService from "hermes/services/flags";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import {
   HermesProjectInfo,
@@ -73,7 +72,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
   @service declare session: SessionService;
-  @service declare flags: FlagsService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked archiveModalIsShown = false;

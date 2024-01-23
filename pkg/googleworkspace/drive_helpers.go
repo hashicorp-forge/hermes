@@ -105,13 +105,28 @@ func (s *Service) GetDocs(folderID string) ([]*drive.File, error) {
 
 // GetFile returns a Google Drive file.
 func (s *Service) GetFile(fileID string) (*drive.File, error) {
-	resp, err := s.Drive.Files.Get(fileID).
-		Fields(fileFields).
-		SupportsAllDrives(true).
-		Do()
-	if err != nil {
-		return nil, fmt.Errorf("error getting file: %w", err)
+	var (
+		err  error
+		resp *drive.File
+	)
+
+	op := func() error {
+		resp, err = s.Drive.Files.Get(fileID).
+			Fields(fileFields).
+			SupportsAllDrives(true).
+			Do()
+		if err != nil {
+			return fmt.Errorf("error getting file: %w", err)
+		}
+
+		return nil
 	}
+
+	boErr := backoff.RetryNotify(op, defaultBackoff(), backoffNotify)
+	if boErr != nil {
+		return nil, boErr
+	}
+
 	return resp, nil
 }
 

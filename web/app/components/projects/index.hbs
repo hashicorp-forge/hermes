@@ -1,30 +1,26 @@
-<nav
-  data-test-projects-nav
-  class="secondary-nav mx-auto mb-8 max-w-[430px] justify-center"
->
-  {{#each this.statuses as |status|}}
-    <LinkTo
-      data-test-tab={{status.value}}
-      @route="authenticated.projects"
-      @query={{hash status=status.value}}
-      class="hds-button hds-button--color-secondary"
-    >
-      {{#if (eq status.value @status)}}
-        <FlightIcon @name={{get-project-status-icon status.value}} />
-      {{else}}
-        <Project::StatusIcon @status={{status.value}} />
-      {{/if}}
-      {{status.label}}
-    </LinkTo>
-  {{/each}}
-</nav>
+<div class="relative">
+  <nav
+    data-test-projects-nav
+    class="secondary-nav mx-auto mb-8 max-w-[430px] justify-center"
+  >
+    {{#each this.statuses as |status|}}
+      <LinkTo
+        data-test-tab={{status.value}}
+        @route="authenticated.projects"
+        @query={{hash status=status.value}}
+        class="hds-button hds-button--color-secondary"
+      >
+        {{status.label}}
+      </LinkTo>
+    {{/each}}
+  </nav>
+  <WhatsAProject class="absolute top-1/2 right-0 -translate-y-1/2" />
+</div>
 
-<ol data-test-projects-list class="relative grid grid-cols-3 gap-2">
+<ol data-test-projects-list class="divided-list relative">
   {{#each this.shownProjects as |project|}}
     <li data-test-project>
-      <LinkTo @route="authenticated.projects.project" @model={{project.id}}>
-        <Project::Tile @project={{project}} />
-      </LinkTo>
+      <Project::Tile @project={{project}} />
     </li>
   {{/each}}
 </ol>

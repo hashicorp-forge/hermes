@@ -4,7 +4,7 @@ import (
 	"runtime/debug"
 )
 
-const Version = "0.3.0"
+const Version = "0.4.0"
 
 // GetVersion returns
 // the version number

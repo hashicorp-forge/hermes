@@ -35,9 +35,7 @@ export const TEST_WEB_CONFIG = {
   algolia_drafts_index_name: config.algolia.draftsIndexName,
   algolia_internal_index_name: config.algolia.internalIndexName,
   api_version: "v1",
-  feature_flags: {
-    projects: true,
-  },
+  feature_flags: {},
   jira_url: TEST_JIRA_WORKSPACE_URL,
   google_doc_folders: "",
   short_link_base_url: TEST_SHORT_LINK_BASE_URL,

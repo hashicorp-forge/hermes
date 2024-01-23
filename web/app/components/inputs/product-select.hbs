@@ -21,7 +21,13 @@
     <:anchor as |dd|>
       <dd.ToggleSelect
         data-test-product-select-toggle
-        class="quarternary-button gap-2 {{if @isSaving 'opacity-50'}}"
+        class="gap-2
+          {{if @isSaving 'opacity-50'}}
+          {{if
+            (eq @color 'quarternary')
+            'quarternary-button'
+            'border-color-border-input shadow-elevation-low'
+          }}"
         id="product-select"
       >
         <Inputs::ProductSelect::Item

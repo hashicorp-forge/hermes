@@ -1,45 +1,30 @@
-<div class="flex items-center justify-between">
+<div class="flex h-12 items-center justify-between">
 
   <div class="flex items-center gap-3.5">
     <h1>Choose a template</h1>
-    {{#if this.flags.projects}}
-      <div class="hermes-h4 mt-[5px] mr-0.5">
-        or
-      </div>
-      <div class="relative mt-1">
-        <Hds::Button
-          data-test-start-a-project-button
-          @text="Start a project"
-          @icon="chevron-right"
-          @iconPosition="trailing"
-          @route="authenticated.new.project"
-          @color="secondary"
-          class="-ml-px pl-[18px]"
-        />
-        <Hds::Badge
-          @text="New"
-          @color="highlight"
-          @type="outlined"
-          @size="small"
-          class="border-color-foreground-highlight-on-surface pointer-events-none absolute top-0 right-0 translate-x-[55%] -translate-y-1/2 border !bg-color-page-primary mix-blend-normal"
-        />
-      </div>
-    {{/if}}
-  </div>
-  <div
-    class="mt-1 flex cursor-default items-center gap-2 text-color-foreground-faint"
-    {{tooltip
-      "A project is a public collection of documents and links organized around an effort."
-      class="w-[260px]"
-      placement="bottom-end"
-      offset=(hash mainAxis=8 crossAxis=10)
-    }}
-  >
-    <div class="underline decoration-dotted underline-offset-[5px]">
-      Whatʼs a project
+    <div class="hermes-h4 mt-[5px] mr-0.5">
+      or
     </div>
-    <FlightIcon @name="help" class="-ml-px" />
+    <div class="relative">
+      <Hds::Button
+        data-test-start-a-project-button
+        @text="Start a project"
+        @icon="chevron-right"
+        @iconPosition="trailing"
+        @route="authenticated.new.project"
+        @color="secondary"
+        class="-ml-px pl-[18px]"
+      />
+      <Hds::Badge
+        @text="New"
+        @color="highlight"
+        @type="outlined"
+        @size="small"
+        class="border-color-foreground-highlight-on-surface pointer-events-none absolute top-0 right-0 translate-x-[55%] -translate-y-1/2 border !bg-color-page-primary mix-blend-normal"
+      />
+    </div>
   </div>
+  <WhatsAProject />
 </div>
 <ol class="mt-8 grid auto-rows-min grid-cols-2 gap-2">
   {{#each this.docTypes as |docType|}}
