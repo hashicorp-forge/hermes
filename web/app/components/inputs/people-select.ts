@@ -6,6 +6,7 @@ import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import Ember from "ember";
+import StoreService from "hermes/services/store";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -30,6 +31,7 @@ const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare store: StoreService;
 
   /**
    * The list of people to display in the dropdown.
@@ -70,6 +72,10 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         // TODO: replace this with EmberData solution
         // so that names and images are loaded into the store
 
+        await this.store.query("person", {
+          query: query,
+        });
+
         // OR
         // push these into the store manually
 
@@ -86,12 +92,22 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         if (people) {
           this.people = people
             .map((p: GoogleUser) => {
+              // push the record into the store as a person
+              // this also updates existing records
+              console.log("pPpPp", p);
+              this.store.push({
+                data: {
+                  id: p.emailAddresses[0]?.value,
+                  type: "person",
+                  attributes: {
+                    name: p.names?.[0]?.displayName,
+                    email: p.emailAddresses[0]?.value,
+                    imgURL: p.photos?.[0]?.url,
+                  },
+                },
+              });
+
               return p.emailAddresses[0]?.value;
-              return {
-                email: p.emailAddresses[0]?.value,
-                imgURL: p.photos?.[0]?.url,
-                name: p.names?.[0]?.displayName,
-              };
             })
             .filter((person: string) => {
               // filter out any people already selected
