@@ -4,11 +4,14 @@ import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { HermesDocument } from "hermes/types/document";
+import StoreService from "hermes/services/store";
 
 export default class ResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
+  @service declare store: StoreService;
 
   queryParams = {
     docType: {
@@ -38,6 +41,15 @@ export default class ResultsRoute extends Route {
       this.algolia.getFacets.perform(searchIndex, params),
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
+
+    const docOwners = (
+      results as { hits: HermesDocument[] } | undefined
+    )?.hits.map((doc) => doc.owners?.[0]);
+
+    if (docOwners) {
+      // populate the store with doc owners
+      await this.store.maybeFetchPeople.perform(docOwners);
+    }
 
     this.activeFilters.update(params);
 

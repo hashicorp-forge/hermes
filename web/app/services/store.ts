@@ -5,6 +5,9 @@ export type ModalType = "draftCreated";
 
 export default class StoreService extends Store {
   maybeFetchPeople = task(async (people) => {
+    // do we also want to accept an array of documents?
+    // we're repeating a lot of `const docOwners = ...` logic
+
     let promises: Promise<void>[] = [];
 
     people = people.uniq();
