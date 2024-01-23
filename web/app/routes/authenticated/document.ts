@@ -137,6 +137,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     const typedDoc = doc as HermesDocument;
+    console.log("typedDoc", typedDoc);
 
     typedDoc.isDraft = typedDoc.status === "WIP";
 
@@ -149,8 +150,6 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     await this.store.maybeFetchPeople.perform(peopleToFetch);
-
-    console.log("typedDoc", typedDoc);
 
     return {
       doc: typedDoc,

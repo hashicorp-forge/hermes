@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 import Component from "@glimmer/component";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 
 interface EditableFieldReadValueSignature {
   Args: {

@@ -9,11 +9,10 @@
             <li>
               <Person
                 @badge={{if
-                  (and @document (has-approved-doc this.document person.email))
+                  (and @document (has-approved-doc this.document person))
                   "approved"
                 }}
-                @imgURL={{person.imgURL}}
-                @email={{person.email}}
+                @email={{person}}
               />
             </li>
           {{/each}}

@@ -2,13 +2,12 @@ import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { HermesUser } from "hermes/types/document";
 import { authenticateTestUser } from "hermes/utils/mirage-utils";
 import { module, test } from "qunit";
 
 interface EditableFieldReadValueComponentTestContext extends MirageTestContext {
   tag?: "h1";
-  value?: string | HermesUser[];
+  value?: string | string[];
   placeholder?: string;
 }
 

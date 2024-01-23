@@ -4,13 +4,12 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { HermesUser } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
 import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 interface PeopleSelectContext extends MirageTestContext {
-  people: HermesUser[];
-  onChange: (newValue: HermesUser[]) => void;
+  people: string[];
+  onChange: (newValue: string[]) => void;
   isFirstFetchAttempt: boolean;
 }
 

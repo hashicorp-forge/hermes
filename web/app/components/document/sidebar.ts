@@ -17,11 +17,7 @@ import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
-import {
-  CustomEditableField,
-  HermesDocument,
-  HermesUser,
-} from "hermes/types/document";
+import { CustomEditableField, HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
@@ -662,15 +658,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  save = task(async (field: string, val: string | HermesUser[]) => {
+  save = task(async (field: string, val: string | string[]) => {
+    console.log("da val", val);
     if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
         serializedValue = cleanString(val);
       } else {
-        serializedValue = val.map((p) => p.email);
+        serializedValue = val;
       }
+      console.log("saving val...", serializedValue);
 
       try {
         await this.patchDocument.perform({
@@ -686,7 +684,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     async (
       fieldName: string,
       field: CustomEditableField,
-      val: string | HermesUser[],
+      val: string | string[],
     ) => {
       if (field && val !== undefined) {
         let serializedValue;
@@ -694,7 +692,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         if (typeof val === "string") {
           serializedValue = cleanString(val);
         } else {
-          serializedValue = val.map((p) => p.email);
+          serializedValue = val.map((p) => p);
         }
 
         field.name = fieldName;
@@ -715,6 +713,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {
+      console.log("patch da doc", JSON.stringify(fields));
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/${endpoint}/${this.docID}`,
         {
@@ -727,6 +726,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.maybeShowFlashError(error as Error, "Unable to save document");
       throw error;
     } finally {
+      console.log("bout to refresh route");
       this.refreshRoute();
     }
   });
@@ -790,10 +790,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
+  // TODO: this may need to change to string[] once we're using emberdata
   @action updateApprovers(approvers: string[]) {
+    console.log("da approvers", approvers);
     this.approvers = approvers;
   }
 
+  // TODO: this may need to change to string[] once we're using emberdata
   @action updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }

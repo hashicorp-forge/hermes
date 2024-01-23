@@ -1,11 +1,7 @@
 import { action, get } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import {
-  CustomEditableField,
-  HermesDocument,
-  HermesUser,
-} from "hermes/types/document";
+import { CustomEditableField, HermesDocument } from "hermes/types/document";
 
 interface CustomEditableFieldComponentSignature {
   Element: HTMLDivElement;

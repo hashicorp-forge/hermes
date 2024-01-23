@@ -5,7 +5,6 @@ import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
 
 export interface GoogleUser {
@@ -71,22 +70,23 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         // TODO: replace this with EmberData solution
         // so that names and images are loaded into the store
 
-        let response = await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/people`,
-          {
+        // OR
+        // push these into the store manually
+
+        let people = await this.fetchSvc
+          .fetch(`/api/${this.configSvc.config.api_version}/people`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: query,
             }),
-          },
-        );
+          })
+          .then((response) => response?.json());
 
-        const peopleJson = await response?.json();
-
-        if (peopleJson) {
-          this.people = peopleJson
+        if (people) {
+          this.people = people
             .map((p: GoogleUser) => {
+              return p.emailAddresses[0]?.value;
               return {
                 email: p.emailAddresses[0]?.value,
                 imgURL: p.photos?.[0]?.url,

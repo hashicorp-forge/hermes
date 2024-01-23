@@ -9,7 +9,6 @@ import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
-import { HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";

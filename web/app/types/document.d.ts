@@ -33,8 +33,6 @@ export interface HermesDocument {
   appCreated?: boolean;
   contributors?: string[];
   approvers?: string[];
-  contributorObjects?: HermesUser[];
-  approverObjects?: HermesUser[];
   changesRequestedBy?: string[];
   approvedBy?: string[];
   summary?: string;
@@ -58,9 +56,4 @@ export interface CustomEditableField {
   displayName: string;
   type: "STRING" | "PEOPLE";
   value?: string | string[];
-}
-
-export interface HermesUser {
-  email: string;
-  imgURL?: string | null;
 }
