@@ -153,7 +153,7 @@ export default class AuthenticatedDocumentRoute extends Route {
       peopleToMaybeFetch.push(...typedDoc.approvers);
     }
 
-    // populate the store with doc-owner data
+    // Load people into the store.
     await this.store.maybeFetchPeople.perform(peopleToMaybeFetch.compact());
 
     return {

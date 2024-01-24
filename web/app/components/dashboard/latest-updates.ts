@@ -5,6 +5,7 @@ import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
+import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
 
@@ -14,7 +15,7 @@ interface DashboardLatestUpdatesComponentSignature {
 
 export default class DashboardLatestUpdatesComponent extends Component<DashboardLatestUpdatesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-
+  @service declare store: StoreService;
   @service declare algolia: AlgoliaService;
 
   @tracked currentTab = "new";
@@ -80,9 +81,12 @@ export default class DashboardLatestUpdatesComponent extends Component<Dashboard
         {
           facetFilters: [facetFilters],
           hitsPerPage: 4,
-        }
+        },
       )
       .then((result: SearchResponse<unknown>) => result.hits);
+
+    // Load owner information
+    await this.store.maybeFetchPeople.perform(newDocsToShow);
 
     // Update the docsToShow array with the new docs.
     this.docsToShow = newDocsToShow as HermesDocument[];
