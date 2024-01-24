@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -413,6 +414,20 @@ func DocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Compare approvers in request and the current document (before we patch
+			// the document) to find the approvers to email.
+			var approversToEmail []string
+			if len(doc.Approvers) == 0 && req.Approvers != nil &&
+				len(*req.Approvers) != 0 {
+				// If there are no approvers of the document email the approvers in the
+				// request.
+				approversToEmail = *req.Approvers
+			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
+				// Only compare when there are stored approvers and approvers in the
+				// request.
+				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
+			}
+
 			// Patch document (for Algolia).
 			// Approvers.
 			if req.Approvers != nil {
@@ -519,78 +534,18 @@ func DocumentHandler(srv server.Server) http.Handler {
 				doc.Title = *req.Title
 			}
 
-			// Compare approvers in request and stored object in Algolia before we
-			// save the patched object.
-			var approversToEmail []string
-			if len(doc.Approvers) == 0 && req.Approvers != nil &&
-				len(*req.Approvers) != 0 {
-				// If there are no approvers of the document email the approvers in the
-				// request.
-				approversToEmail = *req.Approvers
-			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
-				// Only compare when there are stored approvers and approvers in the
-				// request.
-				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
-			}
-
-			// Send emails to new approvers.
-			if srv.Config.Email != nil && srv.Config.Email.Enabled {
-				if len(approversToEmail) > 0 {
-					// TODO: use a template for email content.
-					rawBody := `
-<html>
-<body>
-<p>Hi!</p>
-<p>
-Your review has been requested for a new document, <a href="%s">[%s] %s</a>.
-</p>
-<p>
-Cheers,<br>
-Hermes
-</p>
-</body>
-</html>`
-
-					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
-					if err != nil {
-						srv.Logger.Error("error getting document URL",
-							"error", err,
-							"doc_id", docID,
-							"method", r.Method,
-							"path", r.URL.Path,
-						)
-						http.Error(w, "Error patching review",
-							http.StatusInternalServerError)
-						return
-					}
-					body := fmt.Sprintf(rawBody, docURL, doc.DocNumber, doc.Title)
-
-					// TODO: use an asynchronous method for sending emails because we
-					// can't currently recover gracefully on a failure here.
-					for _, approverEmail := range approversToEmail {
-						_, err = srv.GWService.SendEmail(
-							[]string{approverEmail},
-							srv.Config.Email.FromAddress,
-							fmt.Sprintf("Document review requested for %s", doc.DocNumber),
-							body,
-						)
-						if err != nil {
-							srv.Logger.Error("error sending email",
-								"error", err,
-								"doc_id", docID,
-								"method", r.Method,
-								"path", r.URL.Path,
-							)
-							http.Error(w, "Error patching review",
-								http.StatusInternalServerError)
-							return
-						}
-					}
-					srv.Logger.Info("approver emails sent",
+			// Give new document approvers edit access to the document.
+			for _, a := range approversToEmail {
+				if err := srv.GWService.ShareFile(docID, a, "writer"); err != nil {
+					srv.Logger.Error("error sharing file with approver",
+						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
-					)
+						"approver", a)
+					http.Error(w, "Error patching document",
+						http.StatusInternalServerError)
+					return
 				}
 			}
 
@@ -764,6 +719,58 @@ Hermes
 				// Title.
 				if req.Title != nil {
 					model.Title = *req.Title
+				}
+
+				// Send emails to new approvers.
+				if srv.Config.Email != nil && srv.Config.Email.Enabled {
+					if len(approversToEmail) > 0 {
+						// Get document URL.
+						docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+						if err != nil {
+							srv.Logger.Error("error getting document URL",
+								"error", err,
+								"doc_id", docID,
+								"method", r.Method,
+								"path", r.URL.Path,
+							)
+							http.Error(w, "Error patching document",
+								http.StatusInternalServerError)
+							return
+						}
+
+						// TODO: use an asynchronous method for sending emails because we
+						// can't currently recover gracefully on a failure here.
+						for _, approverEmail := range approversToEmail {
+							err := email.SendReviewRequestedEmail(
+								email.ReviewRequestedEmailData{
+									BaseURL:           srv.Config.BaseURL,
+									DocumentOwner:     doc.Owners[0],
+									DocumentShortName: doc.DocNumber,
+									DocumentTitle:     doc.Title,
+									DocumentURL:       docURL,
+								},
+								[]string{approverEmail},
+								srv.Config.Email.FromAddress,
+								srv.GWService,
+							)
+							if err != nil {
+								srv.Logger.Error("error sending approver email",
+									"error", err,
+									"doc_id", docID,
+									"method", r.Method,
+									"path", r.URL.Path,
+								)
+								http.Error(w, "Error patching document",
+									http.StatusInternalServerError)
+								return
+							}
+						}
+						srv.Logger.Info("approver emails sent",
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+					}
 				}
 
 				// Update document in the database.
