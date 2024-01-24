@@ -8,7 +8,7 @@ import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 
 const ICON = "[data-test-product-avatar]";
 const NAME = "[data-test-subscription-list-item-link]";
-const BUTTON = "[data-test-product-subscription-toggle]";
+const BUTTON = "[data-test-subscription-dropdown-toggle]";
 const LIST_ITEM = "[data-test-subscription-list-item]";
 
 interface SubscriptionListItemContext extends MirageTestContext {
@@ -32,7 +32,7 @@ module(
       await setupProductIndex(this);
     });
 
-    test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
+    test("it renders correctly", async function (this: SubscriptionListItemContext, assert) {
       this.set("productArea", "Waypoint");
 
       await render<SubscriptionListItemContext>(hbs`
@@ -52,11 +52,9 @@ module(
           "the name is clickable to the product filter screen",
         );
 
-      assert.dom(BUTTON).hasText("Subscribe");
-
-      await click(BUTTON);
-
-      assert.dom(BUTTON).hasText("Subscribed");
+      assert
+        .dom(BUTTON)
+        .hasClass("hds-button--size-small", "the dropdowns are rendered small");
     });
   },
 );

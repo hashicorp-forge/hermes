@@ -3,10 +3,11 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
-import { task } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
+import Ember from "ember";
 
 export interface AuthenticatedUser {
   name: string;
@@ -21,7 +22,7 @@ export interface Subscription {
   subscriptionType: SubscriptionType;
 }
 
-enum SubscriptionType {
+export enum SubscriptionType {
   Digest = "digest",
   Instant = "instant",
 }
@@ -38,28 +39,6 @@ export default class AuthenticatedUserService extends Service {
   get info(): AuthenticatedUser {
     assert("user info must exist", this._info);
     return this._info;
-  }
-
-  /**
-   * Returns the user's subscriptions as a JSON string.
-   * E.g., '{"subscriptions":["Customer Success", "Terraform"]}'
-   * Used in POST requests to the subscriptions endpoint.
-   */
-  private get subscriptionsPostBody(): string {
-    assert("subscriptions must be defined", this.subscriptions);
-    let subscriptions = this.subscriptions.map(
-      (subscription: Subscription) => subscription.productArea,
-    );
-    return JSON.stringify({ subscriptions });
-  }
-
-  /**
-   * The headers to use in POST requests to the subscriptions endpoint.
-   */
-  private get subscriptionsPostHeaders() {
-    return {
-      "Content-Type": "application/json",
-    };
   }
 
   /**
@@ -84,106 +63,92 @@ export default class AuthenticatedUserService extends Service {
    * If the user has no subscriptions, returns an empty array.
    */
   fetchSubscriptions = task(async () => {
+    // TODO: remove when back-end is ready
+    if (!Ember.testing) {
+      this.subscriptions = [];
+      return;
+    }
+
+    const cached = this.subscriptions;
+
     try {
-      let subscriptions = await this.fetchSvc
+      this.subscriptions = await this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
           method: "GET",
         })
         .then((response) => response?.json());
-
-      let newSubscriptions: Subscription[] = [];
-
-      if (subscriptions) {
-        newSubscriptions = subscriptions.map((subscription: string) => {
-          return {
-            productArea: subscription,
-            subscriptionType: SubscriptionType.Instant,
-          };
-        });
-      }
-      this.subscriptions = newSubscriptions;
     } catch (e: unknown) {
+      this.subscriptions = cached;
       console.error("Error loading subscriptions: ", e);
       throw e;
     }
   });
 
-  /**
-   * Adds a subscription and saves the subscription index.
-   * Subscriptions default to the "instant" subscription type.
-   */
-  addSubscription = task(
-    async (
-      productArea: string,
-      subscriptionType = SubscriptionType.Instant,
-    ) => {
-      assert(
-        "removeSubscription expects a valid subscriptions array",
-        this.subscriptions,
-      );
-
-      let cached = this.subscriptions;
-
-      this.subscriptions.addObject({
-        productArea,
-        subscriptionType,
-      });
-
-      try {
-        await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
-          {
-            method: "POST",
-            headers: this.subscriptionsPostHeaders,
-            body: this.subscriptionsPostBody,
-          },
-        );
-      } catch (e: unknown) {
-        console.error("Error updating subscriptions: ", e);
-        this.subscriptions = cached;
-        throw e;
+  setSubscription = restartableTask(
+    async (productArea: string, subscriptionType?: SubscriptionType) => {
+      // TODO: remove when back-end is ready
+      if (!Ember.testing) {
+        if (!subscriptionType) {
+          this.subscriptions = [];
+          return;
+        } else {
+          this.subscriptions = [
+            {
+              productArea,
+              subscriptionType: subscriptionType ?? SubscriptionType.Instant,
+            },
+          ];
+          return;
+        }
       }
-    },
-  );
 
-  /**
-   * Removes a subscription and saves the subscription index.
-   */
-  removeSubscription = task(
-    async (
-      productArea: string,
-      subscriptionType = SubscriptionType.Instant,
-    ) => {
-      assert(
-        "removeSubscription expects a subscriptions array",
-        this.subscriptions,
-      );
+      assert("subscriptions must exist", this.subscriptions);
 
-      let cached = this.subscriptions;
-      let subscriptionToRemove = this.subscriptions.find(
+      const cached = this.subscriptions.slice();
+
+      const existingSubscription = this.subscriptions.find(
         (subscription) => subscription.productArea === productArea,
       );
 
-      assert(
-        "removeSubscription expects a valid productArea",
-        subscriptionToRemove,
-      );
+      if (existingSubscription) {
+        if (subscriptionType === undefined) {
+          // remove the existing subscription
+          this.subscriptions.removeObject(existingSubscription);
+        } else {
+          // update the existing subscription
+          existingSubscription.subscriptionType = subscriptionType;
 
-      this.subscriptions.removeObject(subscriptionToRemove);
+          // updating an array object doesn't cause a re-render,
+          // so we save it manually to trigger one
+          this.subscriptions = this.subscriptions;
+        }
+      } else {
+        // already unsubscribed; ignore
+        if (subscriptionType === undefined) {
+          return;
+        }
+        // add the new subscription
+        this.subscriptions.addObject({
+          productArea,
+          subscriptionType: subscriptionType ?? SubscriptionType.Instant,
+        });
+      }
 
       try {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/me/subscriptions`,
           {
             method: "POST",
-            headers: this.subscriptionsPostHeaders,
-            body: this.subscriptionsPostBody,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subscriptions: this.subscriptions,
+            }),
           },
         );
       } catch (e: unknown) {
-        console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
-        throw e;
+        // TODO: flash message
+        console.error("Error updating subscriptions: ", e);
       }
     },
   );

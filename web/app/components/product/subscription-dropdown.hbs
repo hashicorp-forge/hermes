@@ -1,0 +1,92 @@
+<div class="relative inline-flex" ...attributes>
+  <X::DropdownList
+    @onItemClick={{this.setSubscription}}
+    @selected={{this.currentSubscription}}
+    @items={{this.options}}
+    @placement={{@popoverPlacement}}
+    class="w-[350px] pb-1.5"
+  >
+    <:anchor as |dd|>
+      <dd.ToggleAction
+        data-test-subscription-dropdown-toggle
+        data-test-subscription={{or
+          this.currentSubscription.subscriptionType
+          "none"
+        }}
+        @hasChevron={{true}}
+        class="hds-button pill-button
+          {{if @size 'hds-button--size-small' 'hds-button--size-medium'}}
+          {{if
+            dd.selected
+            'hds-button--color-primary'
+            'hds-button--color-secondary'
+          }}
+          transition-colors"
+      >
+        <AnimatedContainer {{did-insert this.configureSelectionIndex}}>
+          <AnimatedValue
+            @value={{this.type}}
+            @initialInsertion={{true}}
+            @finalRemoval={{true}}
+            @rules={{this.transitionRules}}
+            as |icon|
+          >
+            <div class="flex" data-animation-element="icon">
+              <FlightIcon
+                data-test-toggle-icon
+                @name={{if icon "check" "plus"}}
+                class="transform-z-0"
+              />
+            </div>
+          </AnimatedValue>
+        </AnimatedContainer>
+        <AnimatedContainer
+          data-test-container
+          data-test-animation-direction={{this.animationDirection}}
+          data-test-selection-index={{this.selectionIndex}}
+        >
+          <AnimatedValue
+            @value={{this.label}}
+            @initialInsertion={{true}}
+            @finalRemoval={{true}}
+            @rules={{this.transitionRules}}
+            as |label|
+          >
+            <div class="w-20 text-center" data-animation-element="label">
+              {{if (eq label "Unsubscribed") "Subscribe" label}}
+            </div>
+          </AnimatedValue>
+        </AnimatedContainer>
+      </dd.ToggleAction>
+    </:anchor>
+    <:header>
+      <h4 class="hermes-h4 mt-3 px-4 text-left">
+        Choose subscription
+      </h4>
+    </:header>
+    <:item as |dd|>
+      {{#let (eq dd.attrs.label this.label) as |isSelected|}}
+        <dd.Action
+          data-test-subscription-option
+          data-test-is-selected={{isSelected}}
+          class="flex items-start py-2 pl-4 pr-6"
+        >
+          <X::DropdownList::CheckableItem
+            @checkmarkPosition="trailing"
+            @isSelected={{isSelected}}
+            class="items-start"
+          >
+            <div>
+              <h5 data-test-label class="text-body-200">
+                {{dd.attrs.label}}
+              </h5>
+              <div data-test-description>
+                {{dd.attrs.description}}
+              </div>
+            </div>
+          </X::DropdownList::CheckableItem>
+        </dd.Action>
+      {{/let}}
+    </:item>
+  </X::DropdownList>
+</div>
