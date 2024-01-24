@@ -8,6 +8,7 @@ import {
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
 import { TEST_SUPPORT_URL } from "hermes/utils/hermes-urls";
+import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 module("Acceptance | application", function (hooks) {
   setupApplicationTest(hooks);
@@ -17,7 +18,8 @@ module("Acceptance | application", function (hooks) {
     session: SessionService;
   }
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: ApplicationTestContext) {
+    authenticateTestUser(this);
     this.set("session", this.owner.lookup("service:session"));
   });
 
@@ -32,7 +34,6 @@ module("Acceptance | application", function (hooks) {
 
     await this.session.invalidate();
 
-    await this.pauseTest();
     await waitFor("[data-test-flash-notification]");
 
     assert

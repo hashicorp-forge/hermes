@@ -9,7 +9,12 @@ export default Factory.extend({
   id: TEST_USER_EMAIL,
   email: TEST_USER_EMAIL,
   name: TEST_USER_NAME,
-  firstName: TEST_USER_GIVEN_NAME,
+
+  /**
+   * This gets serialized into `firstName`.
+   */
+  given_name: TEST_USER_GIVEN_NAME,
+
   picture: "",
   subscriptions: [],
   isLoggedIn: true,

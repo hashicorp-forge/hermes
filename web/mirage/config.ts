@@ -429,7 +429,7 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
-        let isLoggedIn = schema.db.mes[0].isLoggedIn;
+        let isLoggedIn = schema.db.me[0].isLoggedIn;
 
         if (isLoggedIn) {
           return new Response(200, {});
