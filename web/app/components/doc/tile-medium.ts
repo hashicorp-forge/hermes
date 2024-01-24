@@ -1,8 +1,6 @@
 import Component from "@glimmer/component";
 import { RelatedHermesDocument } from "../related-resources";
 import { HermesDocument } from "hermes/types/document";
-import { tracked } from "@glimmer/tracking";
-import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
@@ -22,12 +20,6 @@ interface DocTileMediumComponentSignature {
 export default class DocTileMediumComponent extends Component<DocTileMediumComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
-
-  /**
-   * The URL of the owner's avatar. If one isn't available,
-   * we'll attempt to fetch it.
-   */
-  @tracked protected imgURL = this.args.doc.ownerPhotos?.[0];
 
   protected get docID() {
     if ("googleFileID" in this.args.doc) {
@@ -57,12 +49,6 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
     return this.args.doc.status?.toLowerCase() === "wip";
   }
 
-  @action protected maybeLoadAvatar() {
-    if (!this.imgURL) {
-      this.getOwnerPhoto.perform(this.docID);
-    }
-  }
-
   /**
    * The task to get the owner photo for a document.
    */
@@ -70,8 +56,6 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
     const doc = await this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
       .then((response) => response?.json());
-
-    this.imgURL = doc.ownerPhotos[0];
   });
 }
 

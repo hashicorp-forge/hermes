@@ -35,7 +35,6 @@ export interface RelatedHermesDocument {
   product: string;
   status: string;
   owners: string[];
-  ownerPhotos?: string[];
   summary?: string;
 }
 

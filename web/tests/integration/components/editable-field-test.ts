@@ -389,7 +389,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
       <EditableField
         data-test-two
-        @value={{array (hash email="bar" imgURL="baz")}}
+        @value={{array (hash email="bar")}}
         @onSave={{this.onCommit}}
       />
     `);

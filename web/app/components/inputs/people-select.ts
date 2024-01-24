@@ -85,7 +85,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
             .map((p: GoogleUser) => {
               return {
                 email: p.emailAddresses[0]?.value,
-                imgURL: p.photos?.[0]?.url,
               };
             })
             .filter((email: string) => {

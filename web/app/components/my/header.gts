@@ -21,7 +21,6 @@ export default class MyHeaderComponent extends Component<MyHeaderComponentSignat
       <div class="relative flex items-center gap-5">
         <PersonAvatar
           data-test-avatar
-          @imgURL={{this.authenticatedUser.info.picture}}
           @email={{this.authenticatedUser.info.name}}
           @size="xl"
           class="-ml-0.5"

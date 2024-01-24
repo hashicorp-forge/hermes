@@ -117,13 +117,11 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     this.server.create("document", {
       id: id,
       objectID: id,
-      ownerPhotos: [TEST_USER_PHOTO],
     });
 
     this.server.create("related-hermes-document", {
       id: id,
       googleFileID: id,
-      ownerPhotos: [],
     });
 
     this.set("doc", this.server.schema.relatedHermesDocument.find(id).attrs);
@@ -145,13 +143,11 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     this.server.create("document", {
       id: id,
       objectID: id,
-      ownerPhotos: [],
     });
 
     this.server.create("related-hermes-document", {
       id: id,
       googleFileID: id,
-      ownerPhotos: [],
     });
 
     this.set("doc", this.server.schema.relatedHermesDocument.find(id).attrs);

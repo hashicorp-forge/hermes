@@ -12,7 +12,6 @@ const APPROVED_BADGE = "[data-test-person-approved-badge]";
 
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
-  imgURL: string;
   email: string;
   badge: string | undefined;
 }
@@ -27,13 +26,11 @@ module("Integration | Component | person", function (hooks) {
 
   test("it renders correctly", async function (this: PersonComponentTestContext, assert) {
     this.set("ignoreUnknown", false);
-    this.set("imgURL", "https://hashicorp-avatar-url.com");
     this.set("email", "engineering@hashicorp.com");
 
     await render<PersonComponentTestContext>(hbs`
         <Person
           @ignoreUnknown={{this.ignoreUnknown}}
-          @imgURL={{this.imgURL}}
           @email={{this.email}}
           class="person"
         />
@@ -46,8 +43,6 @@ module("Integration | Component | person", function (hooks) {
       .hasText(this.email)
       .hasAttribute("title", this.email);
     assert.dom(".person svg").doesNotExist();
-
-    this.set("imgURL", null);
 
     assert.dom(".person img").doesNotExist();
     assert.dom(".person .person-email").hasText(this.email);

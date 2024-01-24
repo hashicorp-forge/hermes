@@ -21,7 +21,6 @@
         {{did-insert this.maybeLoadAvatar}}
         @size="large"
         @email="{{get @doc.owners 0}}"
-        @imgURL={{this.imgURL}}
         @isLoading={{this.getOwnerPhoto.isRunning}}
         class="relative z-10 -mt-1 shrink-0"
       />

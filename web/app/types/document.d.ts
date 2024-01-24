@@ -30,7 +30,6 @@ export interface HermesDocument {
   title: string;
   locked?: boolean;
   owners?: string[];
-  ownerPhotos?: string[];
   appCreated?: boolean;
   contributors?: string[];
   approvers?: string[];

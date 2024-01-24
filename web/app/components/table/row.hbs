@@ -43,10 +43,7 @@
   </td>
   <td data-test-table-row-owner-cell class="owner">
     <div class="inner">
-      <Person
-        @imgURL={{get @doc.ownerPhotos 0}}
-        @email="{{get @doc.owners 0}}"
-      />
+      <Person @email="{{get @doc.owners 0}}" />
     </div>
   </td>
   <td class="time">

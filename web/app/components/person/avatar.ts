@@ -4,8 +4,11 @@ import { HermesSize } from "hermes/types/sizes";
 interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    imgURL?: string | null;
     isLoading?: boolean;
+    // ALlow components to pass in a URL to an image to use as the avatar
+    // Rather than fetching it from the store
+    // For example, jiraAssignees
+    imgURL?: string;
     email: string;
     size?: `${HermesSize}`;
   };
