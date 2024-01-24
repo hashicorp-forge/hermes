@@ -32,6 +32,7 @@ module("Acceptance | application", function (hooks) {
 
     await this.session.invalidate();
 
+    await this.pauseTest();
     await waitFor("[data-test-flash-notification]");
 
     assert
@@ -60,7 +61,7 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    this.server.schema.mes.first().update("isLoggedIn", false);
+    this.server.schema.me.first().update("isLoggedIn", false);
 
     await waitFor("[data-test-flash-notification]");
 

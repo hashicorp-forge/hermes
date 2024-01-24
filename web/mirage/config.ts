@@ -577,12 +577,12 @@ export default function (mirageConfig) {
        */
       this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
-        if (schema.mes.first()) {
-          return schema.mes.first().attrs;
+        if (schema.me.first()) {
+          return schema.me.first().attrs;
         } else {
           // Otherwise, create and return a new user.
-          return schema.mes.create({
-            id: "1",
+          return schema.me.create({
+            id: TEST_USER_EMAIL,
             name: TEST_USER_NAME,
             email: TEST_USER_EMAIL,
             firstName: TEST_USER_GIVEN_NAME,

@@ -4,7 +4,6 @@ import {
   fillIn,
   find,
   findAll,
-  settled,
   triggerEvent,
   triggerKeyEvent,
   visit,
@@ -28,7 +27,6 @@ import {
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
 } from "hermes/utils/mirage-utils";
-import { current } from "ember-animated/.";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";

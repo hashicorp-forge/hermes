@@ -30,6 +30,7 @@ module("Integration | Component | header/nav", function (hooks) {
     ) as AuthenticatedUserService;
 
     authenticatedUserSvc._info = this.server.create("me", {
+      id: TEST_USER_2_EMAIL,
       email: TEST_USER_2_EMAIL,
       firstName: TEST_USER_2_GIVEN_NAME,
       name: TEST_USER_2_NAME,
