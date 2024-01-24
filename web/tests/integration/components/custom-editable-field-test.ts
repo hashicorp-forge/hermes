@@ -19,7 +19,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
   hooks.beforeEach(function (this: CustomEditableFieldComponentTestContext) {
     authenticateTestUser(this);
-    this.server.createList("person", 10);
+    this.server.createList("google/person", 10);
     this.server.create("document");
 
     this.set("onChange", () => {});

@@ -22,13 +22,11 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   });
 
   test("it functions as expected", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("person", 10);
-
+    this.server.createList("google/person", 10);
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
@@ -81,7 +79,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   });
 
   test("it will retry if the server returns an error", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("person", 5);
+    this.server.createList("google/person", 5);
 
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);

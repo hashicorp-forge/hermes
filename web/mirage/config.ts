@@ -452,10 +452,14 @@ export default function (mirageConfig) {
         // Grab the query from the request body
         let query: string = JSON.parse(request.requestBody).query;
 
+        // FIXME: this should be searching a specific model, not `person`
+
         // Search everyone's first emailAddress for matches
-        let matches: Collection<unknown> = schema.people.where((person) => {
-          return person.emailAddresses[0].value.includes(query);
-        });
+        let matches: Collection<unknown> = schema.google.people.where(
+          (person) => {
+            return person.emailAddresses[0].value.includes(query);
+          },
+        );
 
         // Return the Collection models in Response format
         return new Response(200, {}, matches.models);

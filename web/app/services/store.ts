@@ -17,8 +17,11 @@ export default class StoreService extends Store {
       emailsOrDocs:
         | Array<string | undefined>
         | Array<HermesDocument | undefined>
-        | Array<RelatedHermesDocument | undefined>,
+        | Array<RelatedHermesDocument | undefined>
+        | undefined,
     ) => {
+      if (!emailsOrDocs) return;
+
       let promises: Promise<void>[] = [];
       let uniqueEmails: string[] = [];
 

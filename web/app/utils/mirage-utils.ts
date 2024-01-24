@@ -51,6 +51,8 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     "service:authenticated-user",
   ) as AuthenticatedUserService;
 
+  console.log("mirageContext");
+
   authenticatedUserService._info = mirageContext.server.create("me", {
     id: TEST_USER_EMAIL,
     email: TEST_USER_EMAIL,

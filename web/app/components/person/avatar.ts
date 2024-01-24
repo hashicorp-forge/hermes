@@ -37,13 +37,6 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
       return getModelAttr(this.store, ["person", "picture", this.args.email]);
     }
   }
-
-  protected get imgAlt(): string | undefined {
-    return (
-      getModelAttr(this.store, ["person", "name", this.args.email]) ??
-      this.args.email
-    );
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

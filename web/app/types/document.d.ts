@@ -1,5 +1,3 @@
-import { GoogleUser } from "hermes/components/inputs/people-select";
-
 export interface HermesDocument {
   readonly objectID: string;
 
