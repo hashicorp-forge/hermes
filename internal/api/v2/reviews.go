@@ -475,6 +475,29 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Give document approvers edit access to the document.
+			for _, a := range doc.Approvers {
+				if err := srv.GWService.ShareFile(docID, a, "writer"); err != nil {
+					srv.Logger.Error("error sharing file with approver",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"approver", a)
+					http.Error(w, "Error creating review",
+						http.StatusInternalServerError)
+
+					if err := revertReviewsPost(revertFuncs); err != nil {
+						srv.Logger.Error("error reverting review creation",
+							"error", err,
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path)
+					}
+					return
+				}
+			}
+
 			// Get document URL.
 			docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
 			if err != nil {
