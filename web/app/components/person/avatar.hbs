@@ -15,11 +15,11 @@
     ></div>
   {{else}}
     {{! TODO: add img handling here }}
-    {{#if @imgURL}}
+    {{#if this.imgURL}}
       <img
         data-test-image
-        src={{@imgURL}}
-        alt={{@email}}
+        src={{this.imgURL}}
+        alt={{this.imgAlt}}
         referrerpolicy="no-referrer"
         class="w-full"
       />

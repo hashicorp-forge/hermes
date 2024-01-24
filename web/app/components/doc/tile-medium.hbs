@@ -18,10 +18,9 @@
       disabled={{not (get @doc.owners 0)}}
     >
       <Person::Avatar
-        {{did-insert this.maybeLoadAvatar}}
         @size="large"
+        @imgURL={{get-model-attr "person" "picture" (get @doc.owners 0)}}
         @email="{{get @doc.owners 0}}"
-        @isLoading={{this.getOwnerPhoto.isRunning}}
         class="relative z-10 -mt-1 shrink-0"
       />
     </LinkTo>
@@ -68,7 +67,11 @@
             disabled={{not (get @doc.owners 0)}}
             class="underline-on-hover"
           >
-            {{or (get @doc.owners 0) "Unknown"}}
+            {{or
+              (get-model-attr "person" "name" (get @doc.owners 0))
+              (get @doc.owners 0)
+              "Unknown"
+            }}
           </LinkTo>
           <span class="vertical-line">
             |

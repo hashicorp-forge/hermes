@@ -4,14 +4,13 @@ import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
-import AuthenticatedUserService, {
-  AuthenticatedUser,
-} from "hermes/services/authenticated-user";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
 import { ProjectStatus } from "hermes/types/project-status";
+import MeModel from "hermes/models/me";
 
 interface UserNavItem {
   label: string;
@@ -42,7 +41,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  protected get profile(): AuthenticatedUser {
+  protected get profile(): MeModel {
     return this.authenticatedUser.info;
   }
 

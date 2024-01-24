@@ -1,10 +1,10 @@
-<div class="w-full flex space-x-3 overflow-hidden">
+<div class="flex w-full space-x-3 overflow-hidden">
   <Doc::Thumbnail
     @status={{@document.status}}
     @product={{@document.product}}
-    class="shrink-0 w-12 h-[62px]"
+    class="h-[62px] w-12 shrink-0"
   />
-  <div class="w-full flex items-center pr-8 overflow-hidden">
+  <div class="flex w-full items-center overflow-hidden pr-8">
     <div class="w-full">
       <TruncatedText
         @tagName="h5"
@@ -12,16 +12,18 @@
       >
         {{@document.title}}
       </TruncatedText>
-      <div class="text-color-foreground-faint text-body-200 mt-0.5">
+      <div class="mt-0.5 text-body-200 text-color-foreground-faint">
         {{@document.docType}}
         {{#if @document.docNumber}}
           ·
           {{@document.docNumber}}
         {{/if}}
-        {{#if (get @document.owners 0)}}
-          ·
-          {{get @document.owners 0}}
-        {{/if}}
+        {{#let (get @document.owners 0) as |ownerEmail|}}
+          {{#if ownerEmail}}
+            ·
+            {{or (get-model-attr "person" "name" ownerEmail) ownerEmail}}
+          {{/if}}
+        {{/let}}
       </div>
     </div>
   </div>

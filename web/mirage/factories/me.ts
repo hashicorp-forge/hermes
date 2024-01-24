@@ -9,7 +9,7 @@ export default Factory.extend({
   id: "123456789",
   email: TEST_USER_EMAIL,
   name: TEST_USER_NAME,
-  given_name: TEST_USER_GIVEN_NAME,
+  firstName: TEST_USER_GIVEN_NAME,
   picture: "",
   subscriptions: [],
   isLoggedIn: true,

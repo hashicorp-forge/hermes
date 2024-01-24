@@ -17,5 +17,16 @@
   ...attributes
   as |value|
 >
-  <Person @email={{value}} />
+  {{! Note: `value` is a string but Glint thinks it's a string[] }}
+  <div class="flex items-center gap-2 overflow-hidden py-1">
+    <Person::Avatar @email={{value}} @size="medium" class="shrink-0" />
+    <div class="w-full">
+      <div class="text-body-100 leading-tight">
+        {{get-model-attr "person" "name" value}}
+      </div>
+      <div class="text-body-100 leading-tight opacity-70">
+        {{get-model-attr "person" "email" value}}
+      </div>
+    </div>
+  </div>
 </PowerSelectMultiple>

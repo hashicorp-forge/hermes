@@ -4,7 +4,6 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
-import { task } from "ember-concurrency";
 
 interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
@@ -48,15 +47,6 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
   protected get docIsDraft() {
     return this.args.doc.status?.toLowerCase() === "wip";
   }
-
-  /**
-   * The task to get the owner photo for a document.
-   */
-  private getOwnerPhoto = task(async (docID: string) => {
-    const doc = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/documents/${docID}`)
-      .then((response) => response?.json());
-  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {

@@ -16,7 +16,6 @@ import { debounce } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
-import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import { CustomEditableField, HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
@@ -33,10 +32,11 @@ import {
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
+import MeModel from "hermes/models/me";
 
 interface DocumentSidebarComponentSignature {
   Args: {
-    profile: AuthenticatedUser;
+    profile: MeModel;
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;

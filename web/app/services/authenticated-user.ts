@@ -1,20 +1,13 @@
 import Service from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import Store from "@ember-data/store";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
-
-export interface AuthenticatedUser {
-  name: string;
-  email: string;
-  given_name: string;
-  picture: string;
-  subscriptions: Subscription[];
-}
+import StoreService from "./store";
+import MeModel from "hermes/models/me";
 
 export interface Subscription {
   productArea: string;
@@ -30,12 +23,12 @@ export default class AuthenticatedUserService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
-  @service declare store: Store;
+  @service declare store: StoreService;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked _info: AuthenticatedUser | null = null;
+  @tracked _info: MeModel | null = null;
 
-  get info(): AuthenticatedUser {
+  get info(): MeModel {
     assert("user info must exist", this._info);
     return this._info;
   }
@@ -70,9 +63,25 @@ export default class AuthenticatedUserService extends Service {
    */
   loadInfo = task(async () => {
     try {
-      this._info = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/me`)
-        .then((response) => response?.json());
+      // TODO: this needs to be serialized
+      const mes = await this.store.findAll("me"); // does this also create a "person"?
+      const me = mes.firstObject;
+
+      this._info = me;
+
+      console.log("me: ", me);
+
+      // Also create a "person" record if it doesn't exist
+
+      const { name, firstName, email, picture } = this.info;
+
+      this.store.createRecord("person", {
+        id: email,
+        name,
+        firstName,
+        email,
+        picture,
+      });
     } catch (e: unknown) {
       console.error("Error getting user information: ", e);
       throw e;

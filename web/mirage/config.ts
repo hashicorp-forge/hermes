@@ -585,7 +585,7 @@ export default function (mirageConfig) {
             id: "1",
             name: TEST_USER_NAME,
             email: TEST_USER_EMAIL,
-            given_name: TEST_USER_GIVEN_NAME,
+            firstName: TEST_USER_GIVEN_NAME,
             picture: "",
             subscriptions: [],
             isLoggedIn: true,

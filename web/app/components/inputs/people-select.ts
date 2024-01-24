@@ -6,6 +6,8 @@ import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import Ember from "ember";
+import StoreService from "hermes/services/store";
+import PersonModel from "hermes/models/person";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -30,12 +32,13 @@ const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare store: StoreService;
 
   /**
    * The list of people to display in the dropdown.
    * Instantiated empty and populated by the `searchDirectory` task.
    */
-  @tracked protected people = [];
+  @tracked protected people: string[] = [];
 
   /**
    * An action occurring on every keystroke.
@@ -67,26 +70,17 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        let response = await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/people`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              query: query,
-            }),
-          },
-        );
+        const people = await this.store.query("person", {
+          query,
+        });
 
-        const peopleJson = await response?.json();
-
-        if (peopleJson) {
-          this.people = peopleJson
-            .map((p: GoogleUser) => {
-              return {
-                email: p.emailAddresses[0]?.value,
-              };
-            })
+        if (people) {
+          console.log(
+            "people",
+            people.map((p: PersonModel) => p.email),
+          );
+          this.people = people
+            .map((p: PersonModel) => p.email)
             .filter((email: string) => {
               // filter out any people already selected
               return !this.args.selected.find(

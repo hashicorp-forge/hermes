@@ -51,13 +51,13 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     "service:authenticated-user",
   ) as AuthenticatedUserService;
 
-  authenticatedUserService._info = {
-    name: TEST_USER_NAME,
+  authenticatedUserService._info = mirageContext.server.create("me", {
     email: TEST_USER_EMAIL,
-    given_name: TEST_USER_GIVEN_NAME,
-    picture: "",
+    name: TEST_USER_NAME,
+    picture: TEST_USER_PHOTO,
+    givenName: TEST_USER_GIVEN_NAME,
     subscriptions: [],
-  };
+  }).attrs;
 }
 
 export function setFeatureFlag(

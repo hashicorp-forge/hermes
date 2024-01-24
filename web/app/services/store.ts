@@ -50,14 +50,9 @@ export default class StoreService extends Store {
         if (!email) return;
 
         /**
-         * Check if the record is already in the store.
-         */
-        const cachedRecord = this.peekRecord("person", email);
-
-        /**
          * Skip processing if the record is already in the store.
          */
-        if (cachedRecord) return;
+        if (this.peekRecord("person", email)) return;
 
         /**
          * Skip emails already queued for processing.
@@ -80,13 +75,19 @@ export default class StoreService extends Store {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in
-             * the directory. So we create a record for the email to prevent
-             * future requests for the same email.
+             * the directory. So we conditionally create a record for the email
+             * to prevent future requests for the same email.
              */
-            this.createRecord("person", {
-              id: email,
-              email,
-            });
+            if (!email) return;
+
+            const cachedRecord = this.peekRecord("person", email);
+
+            if (!cachedRecord) {
+              this.createRecord("person", {
+                id: email,
+                email,
+              });
+            }
           }),
         );
       });

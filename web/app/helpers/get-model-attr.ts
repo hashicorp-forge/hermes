@@ -1,8 +1,7 @@
 import Helper from "@ember/component/helper";
 import { inject as service } from "@ember/service";
 import StoreService from "hermes/services/store";
-
-type GetModelAttrArgs = [model: string, attribute: string, id?: string];
+import getModelAttr, { GetModelAttrArgs } from "hermes/utils/get-model-attr";
 
 export interface GetModelAttrSignature {
   Args: {
@@ -11,22 +10,11 @@ export interface GetModelAttrSignature {
   Return: any;
 }
 
-/**
- * Returns the attribute of a model record of a given id, if it exists.
- * This helper does not fetch the record from the server,
- * leaving that responsibility to the route or component.
- */
 export default class GetModelAttrHelper extends Helper<GetModelAttrSignature> {
   @service declare store: StoreService;
 
   compute(positional: GetModelAttrArgs) {
-    const [model, attribute, id] = positional;
-
-    if (!id) return;
-
-    const record = this.store.peekRecord(model, id);
-
-    return record?.get(attribute);
+    return getModelAttr(this.store, positional);
   }
 }
 
