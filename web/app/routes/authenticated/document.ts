@@ -5,22 +5,15 @@ import { schedule } from "@ember/runloop";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import { assert } from "@ember/debug";
-import { GoogleUser } from "hermes/components/inputs/people-select";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
-
-const serializePeople = (people: GoogleUser[]): HermesUser[] => {
-  return people.map((p) => ({
-    email: p.emailAddresses[0]?.value as string,
-    imgURL: p.photos?.[0]?.url,
-  }));
-};
+import StoreService from "hermes/services/store";
 
 interface AuthenticatedDocumentRouteParams {
   document_id: string;
@@ -39,6 +32,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   declare recentDocs: RecentlyViewedDocsService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
+  @service declare store: StoreService;
 
   declare controller: AuthenticatedDocumentController;
 
@@ -77,6 +71,7 @@ export default class AuthenticatedDocumentRoute extends Route {
   ) {
     let doc = {};
     let draftFetched = false;
+    let peopleToMaybeFetch: Array<string | undefined> = [];
 
     // Get doc data from the app backend.
     if (params.draft) {
@@ -96,6 +91,9 @@ export default class AuthenticatedDocumentRoute extends Route {
           )
           .then((r) => r?.json());
         draftFetched = true;
+
+        // Add the owner to the list of people to fetch.
+        peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
         /**
          * The doc may have been published since the user last viewed it
@@ -124,6 +122,9 @@ export default class AuthenticatedDocumentRoute extends Route {
             },
           )
           .then((r) => r?.json());
+
+        // Add the owner to the list of people to fetch.
+        peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
@@ -142,37 +143,18 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     typedDoc.isDraft = typedDoc.status === "WIP";
 
-    // Preload avatars for all approvers in the Algolia index.
     if (typedDoc.contributors?.length) {
-      const contributors = await this.fetchSvc
-        .fetch(
-          `/api/${
-            this.configSvc.config.api_version
-          }/people?emails=${typedDoc.contributors.join(",")}`,
-        )
-        .then((r) => r?.json());
-
-      if (contributors) {
-        typedDoc.contributorObjects = serializePeople(contributors);
-      } else {
-        typedDoc.contributorObjects = [];
-      }
+      // Add the contributors to the list of people to fetch.
+      peopleToMaybeFetch.push(...typedDoc.contributors);
     }
+
     if (typedDoc.approvers?.length) {
-      const approvers = await this.fetchSvc
-        .fetch(
-          `/api/${
-            this.configSvc.config.api_version
-          }/people?emails=${typedDoc.approvers.join(",")}`,
-        )
-        .then((r) => r?.json());
-
-      if (approvers) {
-        typedDoc.approverObjects = serializePeople(approvers);
-      } else {
-        typedDoc.approverObjects = [];
-      }
+      // Add the approvers to the list of people to fetch.
+      peopleToMaybeFetch.push(...typedDoc.approvers);
     }
+
+    // populate the store with doc-owner data
+    await this.store.maybeFetchPeople.perform(peopleToMaybeFetch.compact());
 
     return {
       doc: typedDoc,

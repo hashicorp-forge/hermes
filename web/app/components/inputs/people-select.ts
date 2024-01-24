@@ -5,7 +5,6 @@ import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
 
 export interface GoogleUser {
@@ -17,8 +16,8 @@ export interface GoogleUser {
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected: HermesUser[];
-    onChange: (value: HermesUser[]) => void;
+    selected: string[];
+    onChange: (value: string[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
@@ -89,10 +88,10 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
                 imgURL: p.photos?.[0]?.url,
               };
             })
-            .filter((person: HermesUser) => {
+            .filter((email: string) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedPerson) => selectedPerson.email === person.email,
+                (selectedEmail) => selectedEmail === email,
               );
             });
         } else {

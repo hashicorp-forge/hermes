@@ -17,11 +17,7 @@ import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
 import { AuthenticatedUser } from "hermes/services/authenticated-user";
-import {
-  CustomEditableField,
-  HermesDocument,
-  HermesUser,
-} from "hermes/types/document";
+import { CustomEditableField, HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import Route from "@ember/routing/route";
 import Ember from "ember";
@@ -111,10 +107,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
 
-  @tracked contributors: HermesUser[] =
-    this.args.document.contributorObjects || [];
+  @tracked contributors: string[] = this.args.document.contributors || [];
 
-  @tracked approvers: HermesUser[] = this.args.document.approverObjects || [];
+  @tracked approvers: string[] = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
 
   /**
@@ -661,14 +656,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  save = task(async (field: string, val: string | HermesUser[]) => {
+  save = task(async (field: string, val: string | string[]) => {
     if (field && val !== undefined) {
       let serializedValue;
 
       if (typeof val === "string") {
         serializedValue = cleanString(val);
       } else {
-        serializedValue = val.map((p: HermesUser) => p.email);
+        serializedValue = val;
       }
 
       try {
@@ -734,7 +729,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       await this.patchDocument.perform({
-        approvers: this.approvers?.compact().mapBy("email"),
+        approvers: this.approvers.compact(),
       });
 
       await this.fetchSvc.fetch(
@@ -789,11 +784,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
-  @action updateApprovers(approvers: HermesUser[]) {
+  @action updateApprovers(approvers: string[]) {
     this.approvers = approvers;
   }
 
-  @action updateContributors(contributors: HermesUser[]) {
+  @action updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }
 

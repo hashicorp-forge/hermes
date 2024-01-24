@@ -3,7 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 import { authenticateTestUser } from "hermes/utils/mirage-utils";
 
 interface CustomEditableFieldComponentTestContext extends MirageTestContext {
@@ -61,11 +61,8 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       value: this.people,
     });
 
-    this.set("onChange", (people: HermesUser[]) => {
-      this.set(
-        "people",
-        people.map((person) => person.email),
-      );
+    this.set("onChange", (people: string[]) => {
+      this.set("people", people);
     });
 
     await render<CustomEditableFieldComponentTestContext>(hbs`
