@@ -20,6 +20,7 @@ export default class StoreService extends Store {
         | Array<RelatedHermesDocument | undefined>,
     ) => {
       let promises: Promise<void>[] = [];
+      let uniqueEmails: string[] = [];
 
       emailsOrDocs = emailsOrDocs.uniq(); // Remove duplicates
 
@@ -29,12 +30,13 @@ export default class StoreService extends Store {
         }
 
         /**
-         * Create a variable to hold the email address.
+         * Create a placeholder variable for the email address.
          */
         let email: string | undefined;
 
         /**
-         * Determine if it's an email or a document.
+         * Assign the email address to the placeholder variable
+         * depending on whether the argument is a string or a document.
          */
         if (typeof emailOrDoc === "string") {
           email = emailOrDoc;
@@ -43,28 +45,50 @@ export default class StoreService extends Store {
         }
 
         /**
+         * If there's no email, skip it.
+         */
+        if (!email) return;
+
+        /**
          * Check if the record is already in the store.
          */
-        let cachedRecord = email ? this.peekRecord("person", email) : null;
+        const cachedRecord = this.peekRecord("person", email);
 
-        if (!cachedRecord) {
-          /**
-           * Queue a promise request to `/api/v2/person?emails=${email}`
-           * to return a GoogleUser object when resolved.
-           */
-          promises.push(
-            this.queryRecord("person", {
-              emails: email,
-            }).catch(() => {
-              /**
-               * Errors here are not necessarily indicative of a problem;
-               * for example, we get a 404 if a once-valid user is no longer in
-               * the directory. So we let the component to handle the undefined state.
-               */
-              console.warn(`No results for ${email}`);
-            }),
-          );
-        }
+        /**
+         * Skip processing if the record is already in the store.
+         */
+        if (cachedRecord) return;
+
+        /**
+         * Skip emails already queued for processing.
+         */
+        if (uniqueEmails.includes(email)) return;
+
+        /**
+         * Log the unique email so we don't try to fetch it again.
+         */
+        uniqueEmails.push(email);
+
+        /**
+         * Queue a promise request to `/api/v2/person?emails=${email}`
+         * to return a GoogleUser when resolved.
+         */
+        promises.push(
+          this.queryRecord("person", {
+            emails: email,
+          }).catch(() => {
+            /**
+             * Errors here are not necessarily indicative of a problem;
+             * for example, we get a 404 if a once-valid user is no longer in
+             * the directory. So we create a record for the email to prevent
+             * future requests for the same email.
+             */
+            this.createRecord("person", {
+              id: email,
+              email,
+            });
+          }),
+        );
       });
 
       await Promise.all(promises);
