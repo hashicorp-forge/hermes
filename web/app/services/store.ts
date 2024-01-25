@@ -52,6 +52,9 @@ export default class StoreService extends Store {
          */
         if (!email) return;
 
+        console.log("one");
+        console.log(this.peekRecord("person", email));
+
         /**
          * Skip processing if the record is already in the store.
          */
@@ -81,8 +84,8 @@ export default class StoreService extends Store {
              * the directory. So we conditionally create a record for the email
              * to prevent future requests for the same email.
              */
+            console.log("three");
             if (!email) return;
-
             const cachedRecord = this.peekRecord("person", email);
 
             if (!cachedRecord) {

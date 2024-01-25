@@ -156,7 +156,6 @@ export default class AuthenticatedDocumentRoute extends Route {
     const customFields = typedDoc.customEditableFields;
 
     if (customFields) {
-      console.log("customFields", customFields);
       const customPeopleFields = Object.entries(customFields)
         .filter(([_key, attrs]) => attrs.type === "PEOPLE")
         .map(([key, _attrs]) => key);
@@ -177,7 +176,6 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     if (customFields) {
-      console.log("customFields", customFields);
       // if the field value is an array, that means it's a PEOPLE field
       // and we can add all its values to the list of people to fetch.
       for (const [_key, value] of Object.entries(customFields)) {

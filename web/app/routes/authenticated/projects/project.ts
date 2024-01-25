@@ -31,7 +31,6 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
     const { hermesDocuments, externalLinks } = projectResources;
 
     // Load owner information
-    console.log("hermesDocuments", hermesDocuments);
     await this.store.maybeFetchPeople.perform(hermesDocuments);
 
     return {

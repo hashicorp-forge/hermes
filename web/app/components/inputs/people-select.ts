@@ -75,10 +75,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         });
 
         if (people) {
-          console.log(
-            "people",
-            people.map((p: PersonModel) => p.email),
-          );
           this.people = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {

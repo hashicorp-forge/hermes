@@ -20,7 +20,6 @@ export default class PersonSerializer extends JSONSerializer {
 
     if (requestType === "query") {
       assert("results are expected for query requests", "results" in payload);
-      console.log("payload", payload);
       const people = payload.results.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,

@@ -69,8 +69,6 @@ export default class AuthenticatedUserService extends Service {
 
       this._info = me;
 
-      console.log("me: ", me);
-
       // Also create a "person" record if it doesn't exist
 
       const { name, firstName, email, picture } = this.info;

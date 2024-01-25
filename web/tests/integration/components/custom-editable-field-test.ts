@@ -74,7 +74,6 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       />
       <div class="click-away-target"/>
     `);
-
     const textSelector = "[data-test-custom-field] li [data-test-person-email]";
 
     let listItemText = findAll(textSelector).map(
@@ -108,8 +107,16 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     assert.deepEqual(
       listItemText,
-      ["mishra@hashicorp.com", "user1@hashicorp.com"],
-      "the list updates via the onChange action",
+      ["mishra@hashicorp.com", "User 1"],
+      "the front-end list updates (using displayNames if they're in the store)",
+    );
+
+    const expectedPeople = ["mishra@hashicorp.com", "user1@hashicorp.com"];
+
+    assert.deepEqual(
+      this.people,
+      expectedPeople,
+      "the reference list updates (using email addresses)",
     );
   });
 

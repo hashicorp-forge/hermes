@@ -5,7 +5,11 @@ import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { HermesDocument } from "hermes/types/document";
-import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_PHOTO,
+  authenticateTestUser,
+} from "hermes/utils/mirage-utils";
 
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
 const AVATAR_IMAGE = `${AVATAR_LINK} img`;
@@ -27,6 +31,8 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(async function (this: DocTileMediumComponentContext) {
+    authenticateTestUser(this);
+
     this.server.create("document", {
       title: "Bar",
       summary: "Bar",

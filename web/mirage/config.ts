@@ -11,6 +11,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
+  TEST_USER_PHOTO,
 } from "hermes/utils/mirage-utils";
 
 export default function (mirageConfig) {
@@ -452,14 +453,17 @@ export default function (mirageConfig) {
         // Grab the query from the request body
         let query: string = JSON.parse(request.requestBody).query;
 
-        // FIXME: this should be searching a specific model, not `person`
-
         // Search everyone's first emailAddress for matches
-        let matches: Collection<unknown> = schema.google.people.where(
+        let matches: Collection<unknown> = schema["google/people"].where(
           (person) => {
-            return person.emailAddresses[0].value.includes(query);
+            return (
+              person.emailAddresses[0].value.includes(query) ||
+              person.names[0].displayName.includes(query)
+            );
           },
         );
+
+        console.log("matches are...", matches);
 
         // Return the Collection models in Response format
         return new Response(200, {}, matches.models);
@@ -589,8 +593,8 @@ export default function (mirageConfig) {
             id: TEST_USER_EMAIL,
             name: TEST_USER_NAME,
             email: TEST_USER_EMAIL,
-            firstName: TEST_USER_GIVEN_NAME,
-            picture: "",
+            given_name: TEST_USER_GIVEN_NAME,
+            picture: TEST_USER_PHOTO,
             subscriptions: [],
             isLoggedIn: true,
           }).attrs;
