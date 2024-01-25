@@ -7,6 +7,7 @@ import {
   TEST_USER_EMAIL,
   authenticateTestUser,
 } from "hermes/utils/mirage-utils";
+import pushMirageIntoStore from "hermes/tests/helpers/push-mirage-into-store";
 
 const APPROVED_BADGE = "[data-test-person-approved-badge]";
 
@@ -25,8 +26,19 @@ module("Integration | Component | person", function (hooks) {
   });
 
   test("it renders correctly", async function (this: PersonComponentTestContext, assert) {
+    const email = "engineering@hashicorp.com";
+    const name = "Engineering";
+
+    this.server.create("person", {
+      id: email,
+      email,
+      name,
+    });
+
+    pushMirageIntoStore();
+
+    this.set("email", email);
     this.set("ignoreUnknown", false);
-    this.set("email", "engineering@hashicorp.com");
 
     await render<PersonComponentTestContext>(hbs`
         <Person
@@ -40,13 +52,13 @@ module("Integration | Component | person", function (hooks) {
 
     assert
       .dom(".person .person-email")
-      .hasText(this.email)
-      .hasAttribute("title", this.email);
+      .hasText(name)
+      .hasAttribute("title", name);
     assert.dom(".person svg").doesNotExist();
 
-    assert.dom(".person img").doesNotExist();
-    assert.dom(".person .person-email").hasText(this.email);
-    assert.dom(".person svg").exists();
+    assert.dom(".person img").exists();
+    assert.dom(".person .person-email").hasText(name);
+    assert.dom(".person svg").doesNotExist();
 
     this.set("email", null);
     this.set("ignoreUnknown", true);

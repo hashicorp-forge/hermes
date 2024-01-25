@@ -473,8 +473,6 @@ export default function (mirageConfig) {
           },
         );
 
-        console.log("matches are...", matches);
-
         // Return the Collection models in Response format
         return new Response(200, {}, matches.models);
       });

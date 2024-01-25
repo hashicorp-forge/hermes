@@ -1,6 +1,12 @@
-import { TestContext, render } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_PHOTO,
+  authenticateTestUser,
+} from "hermes/utils/mirage-utils";
 import { module, test } from "qunit";
 
 const AVATAR = "[data-test-person-avatar]";
@@ -8,13 +14,19 @@ const LOADING = `${AVATAR} [data-test-loading]`;
 const IMAGE = `${AVATAR} [data-test-image]`;
 const FALLBACK = `${AVATAR} [data-test-fallback]`;
 
-interface PersonAvatarTestContext extends TestContext {
+interface PersonAvatarTestContext extends MirageTestContext {
   isLoading?: boolean;
   imgURL?: string;
+  email?: string;
 }
 
 module("Integration | Component | person/avatar", async function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
+
+  hooks.beforeEach(function (this: PersonAvatarTestContext) {
+    authenticateTestUser(this);
+  });
 
   test("it renders at different sizes", async function (this: PersonAvatarTestContext, assert) {
     await render<PersonAvatarTestContext>(hbs`
@@ -68,12 +80,16 @@ module("Integration | Component | person/avatar", async function (hooks) {
   });
 
   test("it renders an image if provided and a fallback if not", async function (this: PersonAvatarTestContext, assert) {
+    this.set("email", TEST_USER_EMAIL);
+
     await render<PersonAvatarTestContext>(hbs`
-      <Person::Avatar @email="Barbara" />
+      <Person::Avatar @email={{this.email}} />
     `);
 
-    assert.dom(IMAGE).hasAttribute("src", "#");
+    assert.dom(IMAGE).hasAttribute("src", TEST_USER_PHOTO);
     assert.dom(FALLBACK).doesNotExist();
+
+    this.set("email", "");
 
     assert.dom(IMAGE).doesNotExist();
     assert.dom(FALLBACK).exists();

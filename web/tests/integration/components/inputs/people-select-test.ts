@@ -6,6 +6,7 @@ import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import FetchService from "hermes/services/fetch";
 import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { Response } from "miragejs";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: string[];
@@ -55,7 +56,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     await click(".ember-power-select-option");
     assert
       .dom(".ember-power-select-multiple-option .person-email")
-      .hasText("user1@hashicorp.com", "User 1 was successfully selected");
+      .hasText("User 1", "User 1 was successfully selected");
 
     await fillIn(".ember-power-select-trigger-multiple-input", "2");
 
@@ -85,20 +86,31 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     this.onChange = (newValue) => this.set("people", newValue);
     this.set("isFirstFetchAttempt", true);
 
-    let fetchSvc = this.owner.lookup("service:fetch") as FetchService;
+    // let fetchSvc = this.owner.lookup("service:fetch") as FetchService;
 
-    fetchSvc.set("fetch", async () => {
+    // fetchSvc.set("fetch", async () => {
+    //   if (this.isFirstFetchAttempt) {
+    //     this.set("isFirstFetchAttempt", false);
+    //     return new Response(null, { status: 504 });
+    //   } else {
+    //     let people = JSON.stringify(this.server.schema.people.all().models);
+    //     return new Response(people, { status: 200 });
+    //   }
+    // });
+
+    this.server.post("/people", () => {
       if (this.isFirstFetchAttempt) {
         this.set("isFirstFetchAttempt", false);
-        return new Response(null, { status: 504 });
+        return new Response(504);
       } else {
-        let people = JSON.stringify(this.server.schema.people.all().models);
-        return new Response(people, { status: 200 });
+        let people = JSON.stringify(
+          this.server.schema["google/people"].all().models,
+        );
+        return new Response(200, {}, people);
       }
     });
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
