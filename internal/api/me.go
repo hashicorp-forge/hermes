@@ -2,13 +2,11 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp/go-hclog"
-	"google.golang.org/api/people/v1"
 )
 
 // MeGetResponse mimics the response from Google's `userinfo/me` API
@@ -113,22 +111,6 @@ func MeHandler(
 				return
 			}
 
-			// Replace the names in the People API result with data from the Admin
-			// Directory API.
-			// TODO: remove this when the bug in the People API is fixed:
-			// https://issuetracker.google.com/issues/196235775
-			if err := replaceNamesWithAdminAPIResponse(
-				p, s,
-			); err != nil {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					"error replacing names with Admin API response",
-					err,
-				)
-				return
-			}
-
 			// Verify other required values are set.
 			if len(p.Names) == 0 {
 				errResp(
@@ -171,30 +153,4 @@ func MeHandler(
 			return
 		}
 	})
-}
-
-// Replace the names in the People API result with data from the Admin Directory
-// API.
-// TODO: remove this when the bug in the People API is fixed:
-// https://issuetracker.google.com/issues/196235775
-func replaceNamesWithAdminAPIResponse(
-	p *people.Person, s *gw.Service,
-) error {
-	if len(p.EmailAddresses) == 0 {
-		return errors.New("email address not found")
-	}
-	u, err := s.GetUser(p.EmailAddresses[0].Value)
-	if err != nil {
-		return fmt.Errorf("error getting user: %w", err)
-	}
-
-	p.Names = []*people.Name{
-		{
-			DisplayName: u.Name.FullName,
-			FamilyName:  u.Name.FamilyName,
-			GivenName:   u.Name.GivenName,
-		},
-	}
-
-	return nil
 }
