@@ -7,123 +7,122 @@
   Non-essential links have `tabindex="-1"` so they're not focusable with the keyboard. This allows the user to tab through documents without having to skip through the meta links that are otherwise accessible on the document details screen.
 
 }}
-<div class="tile">
-  <div class="flex justify-between gap-[18px] pl-3 pr-9 pt-5 pb-6">
-    {{! Avatar }}
-    <LinkTo
-      data-test-document-owner-avatar
-      tabindex="-1"
-      @route="authenticated.documents"
-      @query={{hash owners=(array (get @doc.owners 0))}}
-      disabled={{not (get @doc.owners 0)}}
-    >
-      <Person::Avatar
-        @size="large"
-        @imgURL={{get-model-attr "person" "picture" (get @doc.owners 0)}}
-        @email="{{get @doc.owners 0}}"
-        class="relative z-10 -mt-1 shrink-0"
-      />
-    </LinkTo>
+{{#let (get @doc.owners 0) as |owner|}}
+  <div class="tile">
+    <div class="flex justify-between gap-[18px] pl-3 pr-9 pt-5 pb-6">
 
-    {{! Text }}
-    <div class="w-full">
-      <div class="mt-0.5 overflow-hidden">
-        <LinkTo
-          data-test-document-link
-          @route="authenticated.document"
-          @query={{hash draft=this.docIsDraft}}
-          @model={{this.docID}}
-        >
-          {{! Primary click area }}
-          <div
-            aria-hidden="true"
-            class="absolute -top-px left-0 -bottom-px w-full mix-blend-multiply group-focus-within:bg-color-page-faint group-hover:bg-color-page-faint"
-          ></div>
+      {{! Avatar }}
+      <LinkTo
+        data-test-document-owner-avatar
+        tabindex="-1"
+        @route="authenticated.documents"
+        @query={{hash owners=(array owner)}}
+        disabled={{not owner}}
+      >
+        <Person::Avatar
+          @size="large"
+          @imgURL={{get-model-attr "person" "picture" owner}}
+          @email="{{owner}}"
+          class="relative z-10 -mt-1 shrink-0"
+        />
+      </LinkTo>
 
-          <h3 class="relative">
-            {{! Title }}
-            <span data-test-document-title class="mr-1.5">
-              {{@doc.title}}
-            </span>
-
-            {{! Doc Number }}
-            <span data-test-document-number class="shrink-0 font-regular">
-              <span class="whitespace-nowrap">
-                {{this.docNumber}}
-              </span>
-            </span>
-          </h3>
-        </LinkTo>
-      </div>
-
-      <div class="pointer-events-none relative">
-        <div class="mt-1.5 flex gap-[5px] text-color-foreground-faint">
-          {{! Owner }}
+      {{! Text }}
+      <div class="w-full">
+        <div class="mt-0.5 overflow-hidden">
           <LinkTo
-            tabindex="-1"
-            data-test-document-owner-name
-            @route="authenticated.documents"
-            @query={{hash owners=(array (get @doc.owners 0))}}
-            disabled={{not (get @doc.owners 0)}}
-            class="underline-on-hover"
+            data-test-document-link
+            @route="authenticated.document"
+            @query={{hash draft=this.docIsDraft}}
+            @model={{this.docID}}
           >
-            {{or
-              (get-model-attr "person" "name" (get @doc.owners 0))
-              (get @doc.owners 0)
-              "Unknown"
-            }}
+            {{! Primary click area }}
+            <div
+              aria-hidden="true"
+              class="absolute -top-px left-0 -bottom-px w-full mix-blend-multiply group-focus-within:bg-color-page-faint group-hover:bg-color-page-faint"
+            ></div>
+
+            <h3 class="relative">
+              {{! Title }}
+              <span data-test-document-title class="mr-1.5">
+                {{@doc.title}}
+              </span>
+
+              {{! Doc Number }}
+              <span data-test-document-number class="shrink-0 font-regular">
+                <span class="whitespace-nowrap">
+                  {{this.docNumber}}
+                </span>
+              </span>
+            </h3>
           </LinkTo>
-          <span class="vertical-line">
-            |
-          </span>
-          {{! Product }}
-          <ProductLink
-            @product={{@doc.product}}
-            tabindex="-1"
-            class="underline-on-hover"
-          >
-            <:default>
-              {{@doc.product}}
-            </:default>
-          </ProductLink>
-          <span class="vertical-line">
-            |
-          </span>
-          {{! Created time }}
-          <span>
-            {{time-ago @doc.createdTime}}
-          </span>
         </div>
 
-        {{! Summary }}
-        {{#if @doc.summary}}
-          <p data-test-document-summary class="mt-2.5 text-body-300">
-            {{@doc.summary}}
-          </p>
-        {{/if}}
+        <div class="pointer-events-none relative">
+          <div class="mt-1.5 flex gap-[5px] text-color-foreground-faint">
+            {{! Owner }}
+            <LinkTo
+              tabindex="-1"
+              data-test-document-owner-name
+              @route="authenticated.documents"
+              @query={{hash owners=(array owner)}}
+              disabled={{not owner}}
+              class="underline-on-hover"
+            >
+              {{or (get-model-attr "person" "name" owner) owner "Unknown"}}
+            </LinkTo>
+            <span class="vertical-line">
+              |
+            </span>
+            {{! Product }}
+            <ProductLink
+              @product={{@doc.product}}
+              tabindex="-1"
+              class="underline-on-hover"
+            >
+              <:default>
+                {{@doc.product}}
+              </:default>
+            </ProductLink>
+            <span class="vertical-line">
+              |
+            </span>
+            {{! Created time }}
+            <span>
+              {{time-ago @doc.createdTime}}
+            </span>
+          </div>
 
-        <div class="tags mt-3.5">
-          {{! Status }}
-          <Doc::State
-            data-test-document-status
-            @state={{@doc.status}}
-            @hideProgress={{true}}
-            class="interactive"
-          />
-          {{! Doc type }}
-          <Hds::Badge data-test-document-type @text={{this.docType}} />
+          {{! Summary }}
+          {{#if @doc.summary}}
+            <p data-test-document-summary class="mt-2.5 text-body-300">
+              {{@doc.summary}}
+            </p>
+          {{/if}}
+
+          <div class="tags mt-3.5">
+            {{! Status }}
+            <Doc::State
+              data-test-document-status
+              @state={{@doc.status}}
+              @hideProgress={{true}}
+              class="interactive"
+            />
+            {{! Doc type }}
+            <Hds::Badge data-test-document-type @text={{this.docType}} />
+          </div>
         </div>
       </div>
-    </div>
 
-    {{! Thumbnail }}
-    <div class="pointer-events-none relative ml-4 shrink-0">
-      <Doc::Thumbnail
-        @status={{@doc.status}}
-        @product={{@doc.product}}
-        @size="medium"
-        class="self-start"
-      />
+      {{! Thumbnail }}
+      <div class="pointer-events-none relative ml-4 shrink-0">
+        <Doc::Thumbnail
+          @status={{@doc.status}}
+          @product={{@doc.product}}
+          @size="medium"
+          class="self-start"
+        />
+      </div>
     </div>
   </div>
-</div>
+{{/let}}

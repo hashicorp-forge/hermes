@@ -18,10 +18,10 @@
           ·
           {{@document.docNumber}}
         {{/if}}
-        {{#let (get @document.owners 0) as |ownerEmail|}}
-          {{#if ownerEmail}}
+        {{#let (get @document.owners 0) as |owner|}}
+          {{#if owner}}
             ·
-            {{or (get-model-attr "person" "name" ownerEmail) ownerEmail}}
+            {{or (get-model-attr "person" "name" owner) owner}}
           {{/if}}
         {{/let}}
       </div>
