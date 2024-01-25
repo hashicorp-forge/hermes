@@ -12,7 +12,6 @@ export interface JiraIssue {
   priorityImage: string;
   status: string;
   assignee?: string;
-  assigneeAvatar?: string;
   issueType: string;
   issueTypeImage: string;
   summary: string;
