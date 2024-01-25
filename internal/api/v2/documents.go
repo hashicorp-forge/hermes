@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/email"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -321,13 +322,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}()
 
 		case "PATCH":
-			// Authorize request (only the owner can PATCH the doc).
-			userEmail := r.Context().Value("userEmail").(string)
-			if doc.Owners[0] != userEmail {
-				http.Error(w, "Not a document owner", http.StatusUnauthorized)
-				return
-			}
-
 			// Decode request. The request struct validates that the request only
 			// contains fields that are allowed to be patched.
 			var req DocumentPatchRequest
@@ -335,6 +329,23 @@ func DocumentHandler(srv server.Server) http.Handler {
 				srv.Logger.Error("error decoding document patch request", "error", err)
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
+				return
+			}
+
+			// Authorize request.
+			userEmail := r.Context().Value("userEmail").(string)
+			if err := authorizeDocumentPatchRequest(
+				userEmail, *doc, req,
+			); err != nil {
+				srv.Logger.Warn("error authorizing request",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+					"user", userEmail,
+				)
+				http.Error(w,
+					fmt.Sprintf("Unauthorized: %v", err), http.StatusForbidden)
 				return
 			}
 
@@ -1028,4 +1039,57 @@ func parseDocumentsURLPath(path, collection string) (
 			unspecifiedDocumentSubcollectionRequestType,
 			fmt.Errorf("path did not match any URL strings")
 	}
+}
+
+// authorizeDocumentPatchRequest authorizes a PATCH request to a document.
+func authorizeDocumentPatchRequest(
+	userEmail string,
+	doc document.Document,
+	req DocumentPatchRequest,
+) error {
+	// The document owner can patch any field.
+	if doc.Owners[0] == userEmail {
+		return nil
+	}
+
+	// Approvers can only patch the Approvers field to remove themselves as an
+	// approver.
+	if helpers.StringSliceContains(doc.Approvers, userEmail) {
+		// Request should only have one non-nil field, Approvers.
+		numNonNilFields := 0
+		reqValue := reflect.ValueOf(req)
+		for i := 0; i < reqValue.NumField(); i++ {
+			fieldValue := reqValue.Field(i)
+			if fieldValue.Kind() == reflect.Ptr && !fieldValue.IsNil() {
+				numNonNilFields++
+			}
+		}
+		if numNonNilFields != 1 || req.Approvers == nil {
+			return errors.New(
+				"approvers can only patch the approvers field to remove themselves as an approver")
+		}
+
+		// Remove duplicates from request and document approvers to be safe.
+		reqApprovers := helpers.RemoveStringSliceDuplicates(*req.Approvers)
+		docApprovers := helpers.RemoveStringSliceDuplicates(doc.Approvers)
+
+		// Request approvers should be one less than document approvers.
+		if len(reqApprovers) != len(docApprovers)-1 {
+			return errors.New(
+				"approvers can only patch a document to remove themselves as an approver")
+		}
+
+		// Request approvers should be a subset of document approvers and not
+		// contain the requesting user.
+		for _, ra := range reqApprovers {
+			if ra == userEmail || !helpers.StringSliceContains(docApprovers, ra) {
+				return errors.New(
+					"approvers can only patch a document to remove themselves as an approver")
+			}
+		}
+
+		return nil
+	}
+
+	return errors.New("only owners or approvers can patch a document")
 }
