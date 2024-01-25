@@ -8,6 +8,7 @@ import {
   TEST_SHORT_LINK_BASE_URL,
   TEST_SUPPORT_URL,
 } from "./hermes-urls";
+import pushMirageIntoStore from "hermes/tests/helpers/push-mirage-into-store";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
@@ -59,6 +60,8 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     given_name: TEST_USER_GIVEN_NAME,
     subscriptions: [],
   }).attrs;
+
+  pushMirageIntoStore();
 }
 
 export function setFeatureFlag(

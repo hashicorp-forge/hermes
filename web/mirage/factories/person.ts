@@ -1,8 +1,14 @@
 import { Factory } from "miragejs";
-// FIXME:
-// This is the google person
-// EmberData model looks like `{ name, firstName, email, picture }`
+import {
+  TEST_USER_EMAIL,
+  TEST_USER_NAME,
+  TEST_USER_GIVEN_NAME,
+  TEST_USER_PHOTO,
+} from "hermes/utils/mirage-utils";
+
 export default Factory.extend({
-  emailAddresses: (i: number) => [{ value: `user${i + 1}@hashicorp.com` }],
-  photos: (i: number) => [{ url: "" }],
+  name: TEST_USER_NAME,
+  firstName: TEST_USER_GIVEN_NAME,
+  email: TEST_USER_EMAIL,
+  picture: TEST_USER_PHOTO,
 });
