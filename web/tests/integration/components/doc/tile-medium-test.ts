@@ -7,6 +7,7 @@ import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { HermesDocument } from "hermes/types/document";
 import {
   TEST_USER_EMAIL,
+  TEST_USER_NAME,
   TEST_USER_PHOTO,
   authenticateTestUser,
 } from "hermes/utils/mirage-utils";
@@ -77,7 +78,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
 
       assert.dom(TITLE).hasText(doc.title);
       assert.dom(DOC_NUMBER).hasText(docNumber);
-      assert.dom(USER_NAME).hasText(doc.owners?.[0] as string);
+      assert.dom(USER_NAME).hasText(TEST_USER_NAME);
       assert.dom(STATUS).hasText(doc.status);
       assert.dom(TYPE).hasText(docType);
 

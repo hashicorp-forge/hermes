@@ -18,6 +18,10 @@ export default Factory.extend({
     const name = names?.[0]?.displayName;
     const picture = photos?.[0]?.url;
 
+    const isDuplicate = server.schema.people.find({ id: email });
+
+    if (isDuplicate) return;
+
     server.create("person", {
       id: email,
       email,

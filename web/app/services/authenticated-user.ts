@@ -63,13 +63,16 @@ export default class AuthenticatedUserService extends Service {
    */
   loadInfo = task(async () => {
     try {
-      // TODO: this needs to be serialized
-      const mes = await this.store.findAll("me"); // does this also create a "person"?
+      const mes = await this.store.findAll("me");
       const me = mes.firstObject;
 
       this._info = me;
 
       // Also create a "person" record if it doesn't exist
+
+      const isDuplicate = this.store.peekRecord("person", me.id);
+
+      if (isDuplicate) return;
 
       const { name, firstName, email, picture } = this.info;
 
