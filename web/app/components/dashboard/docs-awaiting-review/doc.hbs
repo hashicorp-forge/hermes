@@ -1,70 +1,72 @@
-<li class="doc-awaiting-review flex w-full">
-  <LinkTo
-    data-test-doc-awaiting-review-link
-    @route="authenticated.document"
-    @model={{@doc.objectID}}
-    class="group w-full overflow-hidden border border-color-border-primary bg-white px-3.5 py-3 hover:bg-color-surface-faint"
-  >
-    <div class="w-full">
-      <div
-        class="relative flex w-full flex-wrap items-center gap-2.5 md:flex-nowrap"
-      >
+{{#let (get @doc.owners 0) as |owner|}}
+  <li class="doc-awaiting-review flex w-full">
+    <LinkTo
+      data-test-doc-awaiting-review-link
+      @route="authenticated.document"
+      @model={{@doc.objectID}}
+      class="group w-full overflow-hidden border border-color-border-primary bg-white px-3.5 py-3 hover:bg-color-surface-faint"
+    >
+      <div class="w-full">
+        <div
+          class="relative flex w-full flex-wrap items-center gap-2.5 md:flex-nowrap"
+        >
 
-        {{! Avatar }}
-        <Person::Avatar
-          data-test-doc-awaiting-review-owner-avatar
-          @email={{or (get @doc.owners 0) "Unknown"}}
-          @imgURL={{get @doc.ownerPhotos 0}}
-          @size="medium"
-          class="shrink-0"
-        />
+          {{! Avatar }}
+          <Person::Avatar
+            data-test-doc-awaiting-review-owner-avatar
+            @email={{or owner "Unknown"}}
+            @imgURL={{get @doc.ownerPhotos 0}}
+            @size="medium"
+            class="shrink-0"
+          />
 
-        <div class="block w-full overflow-hidden">
+          <div class="block w-full overflow-hidden">
 
-          {{! DocNumber & Title }}
-          <div class="w-full md:flex">
-            <TruncatedText
-              @tagName="h4"
-              @startingBreakpoint="md"
-              class="max-w-[60%] text-display-200 font-semibold text-color-foreground-strong"
-              data-test-doc-awaiting-review-number-and-title
-            >
-              <span class="mr-0.5">
-                {{@doc.docNumber}}
-              </span>
-              {{@doc.title}}
-            </TruncatedText>
-
-            {{! Email }}
-            <div
-              class="my-1 flex w-full space-x-2 self-center md:my-0 md:ml-2 md:w-auto md:max-w-[40%]"
-            >
+            {{! DocNumber & Title }}
+            <div class="w-full md:flex">
               <TruncatedText
+                @tagName="h4"
                 @startingBreakpoint="md"
-                class="w-full text-body-200"
-                data-test-doc-awaiting-review-owner
+                class="max-w-[60%] text-display-200 font-semibold text-color-foreground-strong"
+                data-test-doc-awaiting-review-number-and-title
               >
-                {{get @doc.owners 0}}
+                <span class="mr-0.5">
+                  {{@doc.docNumber}}
+                </span>
+                {{@doc.title}}
               </TruncatedText>
+
+              {{! Email }}
+              <div
+                class="my-1 flex w-full space-x-2 self-center md:my-0 md:ml-2 md:w-auto md:max-w-[40%]"
+              >
+                <TruncatedText
+                  @startingBreakpoint="md"
+                  class="w-full text-body-200"
+                  data-test-doc-awaiting-review-owner
+                >
+                  {{or owner "Unknown"}}
+                </TruncatedText>
+              </div>
             </div>
           </div>
-        </div>
 
-        {{! Product & DocType }}
-        <div
-          class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
-        >
-          <Hds::Badge
-            data-test-doc-awaiting-review-product-badge
-            @icon={{or (get-product-id @doc.product) "folder"}}
-            @text={{or @doc.product "Unknown"}}
-          />
-          <Hds::Badge
-            data-test-doc-awaiting-review-doctype-badge
-            @text={{@doc.docType}}
-          />
+          {{! Product & DocType }}
+          <div
+            class="absolute top-[3px] left-9 flex shrink-0 items-center space-x-1 md:relative md:top-0 md:left-0"
+          >
+            <Hds::Badge
+              data-test-doc-awaiting-review-product-badge
+              @icon={{or (get-product-id @doc.product) "folder"}}
+              @text={{or @doc.product "Unknown"}}
+            />
+            <Hds::Badge
+              data-test-doc-awaiting-review-doctype-badge
+              @text={{@doc.docType}}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </LinkTo>
-</li>
+    </LinkTo>
+  </li>
+{{/let}}
