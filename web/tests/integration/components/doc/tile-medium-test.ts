@@ -5,7 +5,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { HermesDocument } from "hermes/types/document";
-import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/mirage/mirage-utils";
 
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
 const AVATAR_IMAGE = `${AVATAR_LINK} img`;

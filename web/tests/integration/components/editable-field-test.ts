@@ -2,7 +2,7 @@ import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/mirage-utils";
 import { module, test } from "qunit";
 
 const EDITABLE_FIELD = ".editable-field";

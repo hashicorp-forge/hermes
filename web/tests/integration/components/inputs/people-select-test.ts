@@ -6,7 +6,7 @@ import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { HermesUser } from "hermes/types/document";
 import FetchService from "hermes/services/fetch";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/mirage-utils";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: HermesUser[];
