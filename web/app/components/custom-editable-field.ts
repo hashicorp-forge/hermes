@@ -20,10 +20,6 @@ interface CustomEditableFieldComponentSignature {
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  protected get typeIsString() {
-    return this.args.attributes.type === "STRING";
-  }
-
   protected get typeIsPeople() {
     return this.args.attributes.type === "PEOPLE";
   }
