@@ -80,16 +80,17 @@ module("Integration | Component | person/avatar", async function (hooks) {
   });
 
   test("it renders an image if provided and a fallback if not", async function (this: PersonAvatarTestContext, assert) {
-    this.set("email", TEST_USER_EMAIL);
+    this.set("imgURL", "#");
+    this.set("email", "aJiraAssigneeForExample@hashicorp.com");
 
     await render<PersonAvatarTestContext>(hbs`
-      <Person::Avatar @email={{this.email}} />
+      <Person::Avatar @email={{this.email}} @imgURL={{this.imgURL}} />
     `);
 
-    assert.dom(IMAGE).hasAttribute("src", TEST_USER_PHOTO);
+    assert.dom(IMAGE).hasAttribute("src", "#");
     assert.dom(FALLBACK).doesNotExist();
 
-    this.set("email", "");
+    this.set("imgURL", undefined);
 
     assert.dom(IMAGE).doesNotExist();
     assert.dom(FALLBACK).exists();
