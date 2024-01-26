@@ -92,7 +92,7 @@ export default class AuthenticatedDocumentRoute extends Route {
           .then((r) => r?.json());
         draftFetched = true;
 
-        // Add the owner to the list of people to fetch.
+        // Add the draft owner to the list of people to fetch.
         peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
         /**
@@ -123,7 +123,7 @@ export default class AuthenticatedDocumentRoute extends Route {
           )
           .then((r) => r?.json());
 
-        // Add the owner to the list of people to fetch.
+        // Add the doc owner to the list of people to fetch.
         peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
         const typedError = err as Error;
@@ -160,15 +160,15 @@ export default class AuthenticatedDocumentRoute extends Route {
         .filter(([_key, attrs]) => attrs.type === "PEOPLE")
         .map(([key, _attrs]) => key);
 
-      // these custom fields refer to attributes on the typedDoc.
-
-      // we need to fetch the people associated with these attributes.
-
-      // we can do this by getting the values of the attributes and adding them to the list of people to fetch.
-
+      /**
+       * These custom people fields are attributes on the document.
+       * E.g., a custom of "stakeholders" field would be `typedDoc.stakeholders`.
+       * We grab the these attributes and add them to the list of people to fetch.
+       */
       customPeopleFields.forEach((field) => {
-        // @ts-ignore - we know this is a valid field
+        // @ts-ignore - Valid but can't be re-cast
         const value = typedDoc[field];
+
         if (Array.isArray(value)) {
           peopleToMaybeFetch.push(...value);
         }
@@ -176,8 +176,10 @@ export default class AuthenticatedDocumentRoute extends Route {
     }
 
     if (customFields) {
-      // if the field value is an array, that means it's a PEOPLE field
-      // and we can add all its values to the list of people to fetch.
+      /**
+       * If the value is an array, that means it's a PEOPLE field
+       * and we can add its values to the list of people to fetch.
+       */
       for (const [_key, value] of Object.entries(customFields)) {
         if (Array.isArray(value)) {
           peopleToMaybeFetch.push(...value);

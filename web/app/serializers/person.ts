@@ -32,8 +32,6 @@ export default class PersonSerializer extends JSONSerializer {
           },
         };
       });
-      // does this add them to the store?
-
       return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
@@ -58,7 +56,7 @@ export default class PersonSerializer extends JSONSerializer {
         },
       };
     } else {
-      // Currently only `query` and `queryRecord` requests are handled.
+      // Currently only `query` and `queryRecord` requests are used.
       return {};
     }
   }
