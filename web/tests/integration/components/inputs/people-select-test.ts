@@ -85,18 +85,6 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     this.onChange = (newValue) => this.set("people", newValue);
     this.set("isFirstFetchAttempt", true);
 
-    // let fetchSvc = this.owner.lookup("service:fetch") as FetchService;
-
-    // fetchSvc.set("fetch", async () => {
-    //   if (this.isFirstFetchAttempt) {
-    //     this.set("isFirstFetchAttempt", false);
-    //     return new Response(null, { status: 504 });
-    //   } else {
-    //     let people = JSON.stringify(this.server.schema.people.all().models);
-    //     return new Response(people, { status: 200 });
-    //   }
-    // });
-
     this.server.post("/people", () => {
       if (this.isFirstFetchAttempt) {
         this.set("isFirstFetchAttempt", false);

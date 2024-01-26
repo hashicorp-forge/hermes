@@ -21,8 +21,7 @@ export default class MeSerializer extends JSONSerializer {
     _requestType: string,
   ) {
     const { email, given_name, name, picture } = payload;
-    console.log("payload to sift through", payload);
-    console.log("email to peek", email);
+
     // Also create a "person" record if it doesn't exist
     const isDuplicate = store.peekRecord("person", email);
 

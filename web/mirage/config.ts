@@ -5,10 +5,6 @@ import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
-import {
-  discoverEmberDataModels,
-  applyEmberDataSerializers,
-} from "ember-cli-mirage";
 
 import {
   TEST_WEB_CONFIG,
@@ -21,12 +17,6 @@ import {
 export default function (mirageConfig) {
   let finalConfig = {
     ...mirageConfig,
-
-    // models: {
-    //   ...discoverEmberDataModels(mirageConfig.store),
-    //   ...mirageConfig.models,
-    // },
-    // serializers: applyEmberDataSerializers(mirageConfig.serializers),
 
     routes() {
       this.namespace = "api/v1";
