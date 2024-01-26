@@ -1,6 +1,6 @@
 import { Factory, ModelInstance, Server } from "miragejs";
 import { HermesProject } from "hermes/types/project";
-import { TEST_USER_EMAIL } from "../mirage-utils";
+import { TEST_USER_EMAIL } from "../utils";
 
 export default Factory.extend({
   id: (i: number) => i,

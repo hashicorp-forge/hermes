@@ -1,7 +1,7 @@
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
-import config from "../app/config/environment";
+import config from "hermes/config/environment";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";

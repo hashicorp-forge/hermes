@@ -3,7 +3,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import { HermesUser } from "hermes/types/document";
-import { authenticateTestUser } from "hermes/mirage/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/utils";
 import { module, test } from "qunit";
 
 interface EditableFieldReadValueComponentTestContext extends MirageTestContext {

@@ -6,7 +6,7 @@ import { HermesDocument } from "hermes/types/document";
 import { module, test } from "qunit";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
-import { authenticateTestUser } from "hermes/mirage/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/utils";
 import { SortDirection } from "hermes/components/table/sortable-header";
 
 const PAGINATION = "[data-test-pagination]";

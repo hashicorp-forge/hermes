@@ -16,7 +16,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_PHOTO,
   TEST_WEB_CONFIG,
-} from "hermes/mirage/mirage-utils";
+} from "hermes/mirage/utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
