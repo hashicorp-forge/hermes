@@ -7,10 +7,10 @@
   Non-essential links have `tabindex="-1"` so they're not focusable with the keyboard. This allows the user to tab through documents without having to skip through the meta links that are otherwise accessible on the document details screen.
 
 }}
+
 {{#let (get @doc.owners 0) as |owner|}}
   <div class="tile">
     <div class="flex justify-between gap-[18px] pl-3 pr-9 pt-5 pb-6">
-
       {{! Avatar }}
       <LinkTo
         data-test-document-owner-avatar

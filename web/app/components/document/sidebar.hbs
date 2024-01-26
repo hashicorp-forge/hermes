@@ -414,7 +414,7 @@
                     this.requestChanges.isRunning
                     this.hasApproved
                   )}}
-                  {{on "click" (perform this.approve @profile.email)}}
+                  {{on "click" (perform this.approve)}}
                 />
                 {{#if (eq @document.docType "FRD")}}
                   <Hds::Button
@@ -428,7 +428,7 @@
                       this.requestChanges.isRunning
                       this.hasRequestedChanges
                     )}}
-                    {{on "click" (perform this.requestChanges @profile.email)}}
+                    {{on "click" (perform this.requestChanges)}}
                   />
                 {{/if}}
               </div>

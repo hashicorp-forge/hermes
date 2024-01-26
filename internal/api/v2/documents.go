@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp-forge/hermes/internal/email"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
@@ -320,13 +322,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}()
 
 		case "PATCH":
-			// Authorize request (only the owner can PATCH the doc).
-			userEmail := r.Context().Value("userEmail").(string)
-			if doc.Owners[0] != userEmail {
-				http.Error(w, "Not a document owner", http.StatusUnauthorized)
-				return
-			}
-
 			// Decode request. The request struct validates that the request only
 			// contains fields that are allowed to be patched.
 			var req DocumentPatchRequest
@@ -334,6 +329,23 @@ func DocumentHandler(srv server.Server) http.Handler {
 				srv.Logger.Error("error decoding document patch request", "error", err)
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
+				return
+			}
+
+			// Authorize request.
+			userEmail := r.Context().Value("userEmail").(string)
+			if err := authorizeDocumentPatchRequest(
+				userEmail, *doc, req,
+			); err != nil {
+				srv.Logger.Warn("error authorizing request",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+					"user", userEmail,
+				)
+				http.Error(w,
+					fmt.Sprintf("Unauthorized: %v", err), http.StatusForbidden)
 				return
 			}
 
@@ -411,6 +423,20 @@ func DocumentHandler(srv server.Server) http.Handler {
 			if locked {
 				http.Error(w, "Document is locked", http.StatusLocked)
 				return
+			}
+
+			// Compare approvers in request and the current document (before we patch
+			// the document) to find the approvers to email.
+			var approversToEmail []string
+			if len(doc.Approvers) == 0 && req.Approvers != nil &&
+				len(*req.Approvers) != 0 {
+				// If there are no approvers of the document email the approvers in the
+				// request.
+				approversToEmail = *req.Approvers
+			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
+				// Only compare when there are stored approvers and approvers in the
+				// request.
+				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
 			}
 
 			// Patch document (for Algolia).
@@ -519,78 +545,18 @@ func DocumentHandler(srv server.Server) http.Handler {
 				doc.Title = *req.Title
 			}
 
-			// Compare approvers in request and stored object in Algolia before we
-			// save the patched object.
-			var approversToEmail []string
-			if len(doc.Approvers) == 0 && req.Approvers != nil &&
-				len(*req.Approvers) != 0 {
-				// If there are no approvers of the document email the approvers in the
-				// request.
-				approversToEmail = *req.Approvers
-			} else if req.Approvers != nil && len(*req.Approvers) != 0 {
-				// Only compare when there are stored approvers and approvers in the
-				// request.
-				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
-			}
-
-			// Send emails to new approvers.
-			if srv.Config.Email != nil && srv.Config.Email.Enabled {
-				if len(approversToEmail) > 0 {
-					// TODO: use a template for email content.
-					rawBody := `
-<html>
-<body>
-<p>Hi!</p>
-<p>
-Your review has been requested for a new document, <a href="%s">[%s] %s</a>.
-</p>
-<p>
-Cheers,<br>
-Hermes
-</p>
-</body>
-</html>`
-
-					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
-					if err != nil {
-						srv.Logger.Error("error getting document URL",
-							"error", err,
-							"doc_id", docID,
-							"method", r.Method,
-							"path", r.URL.Path,
-						)
-						http.Error(w, "Error patching review",
-							http.StatusInternalServerError)
-						return
-					}
-					body := fmt.Sprintf(rawBody, docURL, doc.DocNumber, doc.Title)
-
-					// TODO: use an asynchronous method for sending emails because we
-					// can't currently recover gracefully on a failure here.
-					for _, approverEmail := range approversToEmail {
-						_, err = srv.GWService.SendEmail(
-							[]string{approverEmail},
-							srv.Config.Email.FromAddress,
-							fmt.Sprintf("Document review requested for %s", doc.DocNumber),
-							body,
-						)
-						if err != nil {
-							srv.Logger.Error("error sending email",
-								"error", err,
-								"doc_id", docID,
-								"method", r.Method,
-								"path", r.URL.Path,
-							)
-							http.Error(w, "Error patching review",
-								http.StatusInternalServerError)
-							return
-						}
-					}
-					srv.Logger.Info("approver emails sent",
+			// Give new document approvers edit access to the document.
+			for _, a := range approversToEmail {
+				if err := srv.GWService.ShareFile(docID, a, "writer"); err != nil {
+					srv.Logger.Error("error sharing file with approver",
+						"error", err,
 						"doc_id", docID,
 						"method", r.Method,
 						"path", r.URL.Path,
-					)
+						"approver", a)
+					http.Error(w, "Error patching document",
+						http.StatusInternalServerError)
+					return
 				}
 			}
 
@@ -764,6 +730,58 @@ Hermes
 				// Title.
 				if req.Title != nil {
 					model.Title = *req.Title
+				}
+
+				// Send emails to new approvers.
+				if srv.Config.Email != nil && srv.Config.Email.Enabled {
+					if len(approversToEmail) > 0 {
+						// Get document URL.
+						docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+						if err != nil {
+							srv.Logger.Error("error getting document URL",
+								"error", err,
+								"doc_id", docID,
+								"method", r.Method,
+								"path", r.URL.Path,
+							)
+							http.Error(w, "Error patching document",
+								http.StatusInternalServerError)
+							return
+						}
+
+						// TODO: use an asynchronous method for sending emails because we
+						// can't currently recover gracefully on a failure here.
+						for _, approverEmail := range approversToEmail {
+							err := email.SendReviewRequestedEmail(
+								email.ReviewRequestedEmailData{
+									BaseURL:           srv.Config.BaseURL,
+									DocumentOwner:     doc.Owners[0],
+									DocumentShortName: doc.DocNumber,
+									DocumentTitle:     doc.Title,
+									DocumentURL:       docURL,
+								},
+								[]string{approverEmail},
+								srv.Config.Email.FromAddress,
+								srv.GWService,
+							)
+							if err != nil {
+								srv.Logger.Error("error sending approver email",
+									"error", err,
+									"doc_id", docID,
+									"method", r.Method,
+									"path", r.URL.Path,
+								)
+								http.Error(w, "Error patching document",
+									http.StatusInternalServerError)
+								return
+							}
+						}
+						srv.Logger.Info("approver emails sent",
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+					}
 				}
 
 				// Update document in the database.
@@ -1021,4 +1039,57 @@ func parseDocumentsURLPath(path, collection string) (
 			unspecifiedDocumentSubcollectionRequestType,
 			fmt.Errorf("path did not match any URL strings")
 	}
+}
+
+// authorizeDocumentPatchRequest authorizes a PATCH request to a document.
+func authorizeDocumentPatchRequest(
+	userEmail string,
+	doc document.Document,
+	req DocumentPatchRequest,
+) error {
+	// The document owner can patch any field.
+	if doc.Owners[0] == userEmail {
+		return nil
+	}
+
+	// Approvers can only patch the Approvers field to remove themselves as an
+	// approver.
+	if helpers.StringSliceContains(doc.Approvers, userEmail) {
+		// Request should only have one non-nil field, Approvers.
+		numNonNilFields := 0
+		reqValue := reflect.ValueOf(req)
+		for i := 0; i < reqValue.NumField(); i++ {
+			fieldValue := reqValue.Field(i)
+			if fieldValue.Kind() == reflect.Ptr && !fieldValue.IsNil() {
+				numNonNilFields++
+			}
+		}
+		if numNonNilFields != 1 || req.Approvers == nil {
+			return errors.New(
+				"approvers can only patch the approvers field to remove themselves as an approver")
+		}
+
+		// Remove duplicates from request and document approvers to be safe.
+		reqApprovers := helpers.RemoveStringSliceDuplicates(*req.Approvers)
+		docApprovers := helpers.RemoveStringSliceDuplicates(doc.Approvers)
+
+		// Request approvers should be one less than document approvers.
+		if len(reqApprovers) != len(docApprovers)-1 {
+			return errors.New(
+				"approvers can only patch a document to remove themselves as an approver")
+		}
+
+		// Request approvers should be a subset of document approvers and not
+		// contain the requesting user.
+		for _, ra := range reqApprovers {
+			if ra == userEmail || !helpers.StringSliceContains(docApprovers, ra) {
+				return errors.New(
+					"approvers can only patch a document to remove themselves as an approver")
+			}
+		}
+
+		return nil
+	}
+
+	return errors.New("only owners or approvers can patch a document")
 }
