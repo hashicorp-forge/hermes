@@ -32,11 +32,11 @@ import {
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
-import MeModel from "hermes/models/me";
+import PersonModel from "hermes/models/person";
 
 interface DocumentSidebarComponentSignature {
   Args: {
-    profile: MeModel;
+    profile: PersonModel;
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
     deleteDraft: (docId: string) => void;

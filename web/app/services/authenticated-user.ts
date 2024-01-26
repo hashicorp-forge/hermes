@@ -7,7 +7,7 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 import StoreService from "./store";
-import MeModel from "hermes/models/me";
+import PersonModel from "hermes/models/person";
 
 export interface Subscription {
   productArea: string;
@@ -26,9 +26,9 @@ export default class AuthenticatedUserService extends Service {
   @service declare store: StoreService;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked _info: MeModel | null = null;
+  @tracked _info: PersonModel | null = null;
 
-  get info(): MeModel {
+  get info(): PersonModel {
     assert("user info must exist", this._info);
     return this._info;
   }
@@ -66,23 +66,11 @@ export default class AuthenticatedUserService extends Service {
       const mes = await this.store.findAll("me");
       const me = mes.firstObject;
 
-      this._info = me;
+      // Grab the person record created by the serializer
+      const person = this.store.peekRecord("person", me.id);
+      assert("person must exist", person);
 
-      // Also create a "person" record if it doesn't exist
-
-      const isDuplicate = this.store.peekRecord("person", me.id);
-
-      if (isDuplicate) return;
-
-      const { name, firstName, email, picture } = this.info;
-
-      this.store.createRecord("person", {
-        id: email,
-        name,
-        firstName,
-        email,
-        picture,
-      });
+      this._info = person;
     } catch (e: unknown) {
       console.error("Error getting user information: ", e);
       throw e;

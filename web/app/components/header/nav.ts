@@ -10,7 +10,7 @@ import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
 import { ProjectStatus } from "hermes/types/project-status";
-import MeModel from "hermes/models/me";
+import PersonModel from "hermes/models/person";
 
 interface UserNavItem {
   label: string;
@@ -41,7 +41,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  protected get profile(): MeModel {
+  protected get profile(): PersonModel {
     return this.authenticatedUser.info;
   }
 

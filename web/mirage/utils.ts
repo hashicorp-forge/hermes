@@ -104,19 +104,24 @@ export function pushMirageIntoStore(context: MirageTestContext) {
 }
 
 export function authenticateTestUser(mirageContext: MirageTestContext) {
+  mirageContext.server.create("me");
+
   const authenticatedUserService = mirageContext.owner.lookup(
     "service:authenticated-user",
   ) as AuthenticatedUserService;
 
-  authenticatedUserService._info = mirageContext.server.create("me", {
+  const personRecord = mirageContext.server.create("person", {
     id: TEST_USER_EMAIL,
     email: TEST_USER_EMAIL,
     name: TEST_USER_NAME,
+    firstName: TEST_USER_GIVEN_NAME,
     picture: TEST_USER_PHOTO,
-    given_name: TEST_USER_GIVEN_NAME,
-    subscriptions: [],
-  }).attrs;
+  });
 
+  // Populate `authenticatedUser.info` with the record attrs
+  authenticatedUserService._info = personRecord.attrs;
+
+  // Push models into the store to be peeked
   pushMirageIntoStore(mirageContext);
 }
 

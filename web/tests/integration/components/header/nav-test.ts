@@ -29,13 +29,12 @@ module("Integration | Component | header/nav", function (hooks) {
       "service:authenticated-user",
     ) as AuthenticatedUserService;
 
-    authenticatedUserSvc._info = this.server.create("me", {
+    authenticatedUserSvc._info = this.server.create("person", {
       id: TEST_USER_2_EMAIL,
       email: TEST_USER_2_EMAIL,
       firstName: TEST_USER_2_GIVEN_NAME,
       name: TEST_USER_2_NAME,
       picture: "",
-      subscriptions: [],
     }).attrs;
   });
 

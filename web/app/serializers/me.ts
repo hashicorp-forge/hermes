@@ -1,7 +1,7 @@
 import JSONSerializer from "@ember-data/serializer/json";
 import DS from "ember-data";
 
-interface Me {
+interface MeResponse {
   email: string;
   given_name: string;
   name: string;
@@ -14,25 +14,33 @@ export default class MeSerializer extends JSONSerializer {
    * Turns `given_name` into `firstName` to match the Person model.
    */
   normalizeResponse(
-    _store: DS.Store,
+    store: DS.Store,
     _primaryModelClass: any,
-    payload: Me,
+    payload: MeResponse,
     _id: string | number,
     _requestType: string,
   ) {
-    const type = "me";
     const { email, given_name, name, picture } = payload;
+    console.log("payload to sift through", payload);
+    console.log("email to peek", email);
+    // Also create a "person" record if it doesn't exist
+    const isDuplicate = store.peekRecord("person", email);
+
+    if (!isDuplicate) {
+      store.createRecord("person", {
+        id: email,
+        email,
+        name,
+        firstName: given_name,
+        picture,
+      });
+    }
 
     return {
       data: {
         id: email,
-        type,
-        attributes: {
-          email,
-          firstName: given_name,
-          name,
-          picture,
-        },
+        type: "me",
+        attributes: {},
       },
     };
   }
