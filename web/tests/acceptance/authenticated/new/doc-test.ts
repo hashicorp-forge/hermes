@@ -15,7 +15,7 @@ import { Response } from "miragejs";
 import RouterService from "@ember/routing/router-service";
 import window from "ember-window-mock";
 import { DRAFT_CREATED_LOCAL_STORAGE_KEY } from "hermes/components/modals/draft-created";
-import { TEST_WEB_CONFIG } from "hermes/mirage/mirage-utils";
+import { TEST_WEB_CONFIG } from "hermes/mirage/utils";
 
 // Selectors
 const DOC_FORM = "[data-test-new-doc-form]";

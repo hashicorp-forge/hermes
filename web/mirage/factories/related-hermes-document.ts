@@ -1,5 +1,5 @@
 import { Factory } from "miragejs";
-import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "../mirage-utils";
+import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "../utils";
 
 export default Factory.extend({
   id: (i) => `doc-${i}`,

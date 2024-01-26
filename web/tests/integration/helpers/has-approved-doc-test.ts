@@ -2,7 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { TEST_USER_EMAIL } from "hermes/mirage/mirage-utils";
+import { TEST_USER_EMAIL } from "hermes/mirage/utils";
 
 module("Integration | Helper | has-approved-doc", function (hooks) {
   setupRenderingTest(hooks);

@@ -8,7 +8,7 @@ import {
   TEST_JIRA_WORKSPACE_URL,
   TEST_JIRA_ISSUE_SUMMARY,
   setWebConfig,
-} from "hermes/mirage/mirage-utils";
+} from "hermes/mirage/utils";
 
 const JIRA_ICON = "[data-test-jira-icon]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";

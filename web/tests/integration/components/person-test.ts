@@ -7,7 +7,7 @@ import {
   TEST_USER_EMAIL,
   authenticateTestUser,
   pushMirageIntoStore,
-} from "hermes/mirage/mirage-utils";
+} from "hermes/mirage/utils";
 
 const APPROVED_BADGE = "[data-test-person-approved-badge]";
 

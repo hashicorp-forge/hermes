@@ -4,7 +4,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { authenticateTestUser } from "hermes/mirage/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
 interface PeopleSelectContext extends MirageTestContext {

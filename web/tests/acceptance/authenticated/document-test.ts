@@ -26,7 +26,7 @@ import {
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
-} from "hermes/mirage/mirage-utils";
+} from "hermes/mirage/utils";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";

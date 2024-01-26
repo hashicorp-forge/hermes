@@ -8,7 +8,7 @@ import {
   TEST_JIRA_ISSUE_STATUS,
   TEST_JIRA_ISSUE_URL,
   TEST_JIRA_ISSUE_SUMMARY,
-} from "../mirage-utils";
+} from "../utils";
 
 export default Factory.extend({
   id: (i) => i, // mirage only

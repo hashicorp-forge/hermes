@@ -16,7 +16,7 @@ import {
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
   TEST_USER_PHOTO,
-} from "../mirage/mirage-utils";
+} from "../mirage/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {

@@ -10,7 +10,7 @@ import {
   TEST_USER_NAME,
   TEST_USER_PHOTO,
   authenticateTestUser,
-} from "hermes/mirage/mirage-utils";
+} from "hermes/mirage/utils";
 
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
 const AVATAR_IMAGE = `${AVATAR_LINK} img`;
