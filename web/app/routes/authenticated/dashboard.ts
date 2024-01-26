@@ -34,7 +34,6 @@ export default class DashboardRoute extends Route {
 
     if (docsAwaitingReview.length > 0) {
       // load owner information
-      debugger;
       await this.store.maybeFetchPeople.perform(docsAwaitingReview);
     }
 
@@ -55,7 +54,6 @@ export default class DashboardRoute extends Route {
      *
      */
     if (this.recentDocs.all) {
-      // FIXME: will this also grab the avatars?
       void this.recentDocs.fetchAll.perform();
     } else {
       await this.recentDocs.fetchAll.perform();
