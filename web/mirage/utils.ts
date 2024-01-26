@@ -1,13 +1,7 @@
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { HermesConfig } from "hermes/config/environment";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
-import config from "../config/environment";
-import {
-  TEST_JIRA_WORKSPACE_URL,
-  TEST_SHORT_LINK_BASE_URL,
-  TEST_SUPPORT_URL,
-} from "./hermes-urls";
+import config from "hermes/config/environment";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
@@ -29,6 +23,18 @@ export const TEST_JIRA_ISSUE_TYPE = "Task";
 export const TEST_JIRA_ISSUE_TYPE_IMAGE = "test-jira-issue-type-image.com";
 export const TEST_JIRA_PRIORITY = "Medium";
 export const TEST_JIRA_PRIORITY_IMAGE = "https://test-jira-priority-image.com";
+
+/**
+ * These values are loaded by the Mirage in acceptance tests.
+ *
+ * To mock them in rendering tests, set them directly on the service, e.g.,
+ * let mockConfigSvc = this.owner.lookup("service:config") as ConfigService;
+ * mockConfigSvc.config.support_link_url = SUPPORT_URL;
+ */
+export const TEST_SUPPORT_URL = "https://config-loaded-support-link.com";
+export const TEST_SHORT_LINK_BASE_URL =
+  "https://config-loaded-short-link-base-url.com";
+export const TEST_JIRA_WORKSPACE_URL = "https://hashicorp.atlassian.net";
 
 export const TEST_WEB_CONFIG = {
   algolia_docs_index_name: config.algolia.docsIndexName,

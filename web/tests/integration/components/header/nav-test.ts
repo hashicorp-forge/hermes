@@ -12,7 +12,7 @@ import {
   TEST_USER_2_EMAIL,
   TEST_USER_2_GIVEN_NAME,
   TEST_USER_2_NAME,
-} from "hermes/utils/mirage-utils";
+} from "hermes/mirage/utils";
 
 const SUPPORT_URL = "https://example.com/support";
 const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";

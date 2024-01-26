@@ -11,7 +11,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
-} from "hermes/utils/mirage-utils";
+} from "../mirage/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {

@@ -3,7 +3,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
-} from "hermes/utils/mirage-utils";
+} from "../utils";
 
 export default Factory.extend({
   id: "123456789",
