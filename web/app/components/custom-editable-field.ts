@@ -16,10 +16,10 @@ interface CustomEditableFieldComponentSignature {
 }
 
 export default class CustomEditableFieldComponent extends Component<CustomEditableFieldComponentSignature> {
-  protected get typeIsString() {
-    return this.args.attributes.type === "STRING";
-  }
-
+  /**
+   * Whether type of the field is `PEOPLE`.
+   * Used in the template to determine what to pass to `EditableField`.
+   */
   protected get typeIsPeople() {
     return this.args.attributes.type === "PEOPLE";
   }
@@ -29,13 +29,6 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
    * Changes when the user updates or saves the PeopleSelect value.
    */
   @tracked protected emails = this.args.attributes.value || [];
-
-  /**
-   * The value of the field, serialized for the PeopleSelect.
-   */
-  protected get hermesUsers(): string[] {
-    return this.emails instanceof Array ? this.emails : [this.emails];
-  }
 
   protected get stringValue(): string {
     const value = get(this.args.document, this.args.field);
@@ -48,7 +41,7 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
 
   /**
    * The function to call when the user updates the PeopleSelect value.
-   * Deserializes the value and updates the local `emails` property.
+   * Saves the new value to the local `emails` property.
    */
   @action protected onPeopleSelectChange(emails: string[]) {
     this.emails = emails;

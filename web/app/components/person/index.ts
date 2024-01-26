@@ -7,7 +7,7 @@ import getModelAttr from "hermes/utils/get-model-attr";
 interface PersonComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    email: string;
+    email?: string;
     ignoreUnknown?: boolean;
     badge?: string;
   };

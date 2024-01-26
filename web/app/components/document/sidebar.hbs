@@ -15,7 +15,6 @@
     {{on "scroll" this.onScroll}}
     {{did-insert this.didInsertBody}}
   >
-
     <div class="sidebar-body-container">
       <div>
         {{! div to break the parent's space-y styles }}
@@ -175,7 +174,7 @@
       {{! Owner }}
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person @email="{{get @document.owners 0}}" />
+        <Person @email={{get @document.owners 0}} />
       </div>
 
       {{! Contributors }}
