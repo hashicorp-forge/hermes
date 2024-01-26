@@ -44,7 +44,7 @@
                   class="w-full text-body-200"
                   data-test-doc-awaiting-review-owner
                 >
-                  {{or (get-model-attr "person" "email" owner) owner "Unknown"}}
+                  {{or (get-model-attr "person.email" owner) owner "Unknown"}}
                 </TruncatedText>
               </div>
             </div>

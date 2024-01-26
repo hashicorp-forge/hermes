@@ -3,7 +3,7 @@
     <div class="relative shrink-0">
       <Person::Avatar
         @size="small"
-        @imgURL={{get-model-attr "person" "picture" @email}}
+        @imgURL={{get-model-attr "person.picture" @email}}
         @email={{@email}}
       />
       {{#if (eq @badge "approved")}}

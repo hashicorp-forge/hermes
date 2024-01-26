@@ -27,7 +27,7 @@ export default class PersonComponent extends Component<PersonComponentSignature>
     }
 
     return (
-      getModelAttr(this.store, ["person", "name", this.args.email]) ??
+      getModelAttr(this.store, ["person.name", this.args.email]) ??
       this.args.email ??
       "Unknown"
     );

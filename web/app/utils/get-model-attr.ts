@@ -1,6 +1,6 @@
 import StoreService from "hermes/services/store";
 
-export type GetModelAttrArgs = [model: string, attribute: string, id?: string];
+export type GetModelAttrArgs = [modelAndAttribute: string, id?: string];
 
 /**
  * Returns the attribute of a model record of a given id, if it exists.
@@ -11,9 +11,13 @@ export default function getModelAttr(
   store: StoreService,
   positional: GetModelAttrArgs,
 ) {
-  const [model, attribute, id] = positional;
+  const [modelAndAttribute, id] = positional;
 
   if (!id) return;
+
+  const [model, attribute] = modelAndAttribute.split(".");
+
+  if (!(model && attribute)) return;
 
   const record = store.peekRecord(model, id);
 

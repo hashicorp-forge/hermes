@@ -34,7 +34,7 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
     if (this.args.imgURL) {
       return this.args.imgURL;
     } else {
-      return getModelAttr(this.store, ["person", "picture", this.args.email]);
+      return getModelAttr(this.store, ["person.picture", this.args.email]);
     }
   }
 }

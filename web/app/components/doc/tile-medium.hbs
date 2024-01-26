@@ -21,7 +21,7 @@
       >
         <Person::Avatar
           @size="large"
-          @imgURL={{get-model-attr "person" "picture" owner}}
+          @imgURL={{get-model-attr "person.picture" owner}}
           @email={{owner}}
           class="relative z-10 -mt-1 shrink-0"
         />
@@ -69,7 +69,7 @@
               disabled={{not owner}}
               class="underline-on-hover"
             >
-              {{or (get-model-attr "person" "name" owner) owner "Unknown"}}
+              {{or (get-model-attr "person.name" owner) owner "Unknown"}}
             </LinkTo>
             <span class="vertical-line">
               |

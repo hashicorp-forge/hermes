@@ -22,7 +22,7 @@
         {{#let (get @document.owners 0) as |owner|}}
           {{#if owner}}
             ·
-            {{or (get-model-attr "person" "name" owner) owner}}
+            {{or (get-model-attr "person.name" owner) owner}}
           {{/if}}
         {{/let}}
       </div>
