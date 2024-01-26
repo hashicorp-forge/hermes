@@ -162,6 +162,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
     const priority = "High";
     const priorityImage = "https://hashicorp.com/priority.png";
     const assignee = "Mishra";
+    const assigneeAvatar = "https://hashicorp.com/avatar.png";
 
     this.server.create("jira-issue", {
       key,
@@ -173,6 +174,7 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       priority,
       priorityImage,
       assignee,
+      assigneeAvatar,
     });
 
     this.set("issue", this.server.schema.jiraIssues.first());
@@ -195,6 +197,11 @@ module("Integration | Component | project/jira-widget", function (hooks) {
       .dom(PRIORITY_ICON)
       .hasAttribute("src", priorityImage)
       .hasAttribute("alt", priority);
+
+    assert
+      .dom(ASSIGNEE_AVATAR)
+      .hasAttribute("src", assigneeAvatar)
+      .hasAttribute("alt", assignee);
 
     assert.dom(STATUS).hasText(status);
   });

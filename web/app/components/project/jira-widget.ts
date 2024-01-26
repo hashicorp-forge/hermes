@@ -144,6 +144,16 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
   }
 
   /**
+   * The URL to the issue assignee's avatar, if it exists.
+   * May exist if the issue is a full Jira issue.
+   */
+  protected get assigneeAvatar() {
+    if (this.issue && "assigneeAvatar" in this.issue) {
+      return this.issue.assigneeAvatar as string;
+    }
+  }
+
+  /**
    * The URL to the Jira workspace.
    * Used to preface various image URLs.
    */

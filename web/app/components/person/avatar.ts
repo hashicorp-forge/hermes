@@ -7,6 +7,7 @@ import getModelAttr from "hermes/utils/get-model-attr";
 interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
+    imgURL?: string;
     isLoading?: boolean;
     email?: string;
     size?: `${HermesSize}`;
@@ -26,7 +27,10 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
   }
 
   protected get imgURL(): string | undefined {
-    return getModelAttr(this.store, ["person.picture", this.args.email]);
+    return (
+      this.args.imgURL ??
+      getModelAttr(this.store, ["person.picture", this.args.email])
+    );
   }
 }
 
