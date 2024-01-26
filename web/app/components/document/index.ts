@@ -2,7 +2,6 @@ import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import { dropTask } from "ember-concurrency";
 import { HermesDocument } from "hermes/types/document";
-import { AuthenticatedUser } from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
@@ -11,6 +10,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { HermesDocumentType } from "hermes/types/document-type";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 interface DocumentIndexComponentSignature {
   Args: {
@@ -21,7 +21,7 @@ interface DocumentIndexComponentSignature {
 }
 
 export default class DocumentIndexComponent extends Component<DocumentIndexComponentSignature> {
-  @service declare authenticatedUser: AuthenticatedUser;
+  @service declare authenticatedUser: AuthenticatedUserService;
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare router: RouterService;
