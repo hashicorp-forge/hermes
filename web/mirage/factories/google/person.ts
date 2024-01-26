@@ -1,6 +1,6 @@
 import { Factory } from "miragejs";
 import { assert } from "@ember/debug";
-import { TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import { TEST_USER_PHOTO } from "../../mirage-utils";
 
 export default Factory.extend({
   names: (i: number) => [{ displayName: `User ${i + 1}`, givenName: `User` }],

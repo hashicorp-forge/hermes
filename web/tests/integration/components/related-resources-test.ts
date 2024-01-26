@@ -15,7 +15,7 @@ import config from "hermes/config/environment";
 import algoliaHosts from "hermes/mirage/algolia/hosts";
 import { RelatedResource } from "hermes/components/related-resources";
 import { RelatedResourcesScope } from "hermes/components/related-resources";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/mirage-utils";
 
 const RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =

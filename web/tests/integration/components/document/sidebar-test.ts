@@ -7,7 +7,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 import { HermesDocumentType } from "hermes/types/document-type";
-import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/mirage/mirage-utils";
 import MeModel from "hermes/models/me";
 
 const SUMMARY_CONTAINER = "[data-test-document-summary]";

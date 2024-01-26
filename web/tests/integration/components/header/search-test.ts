@@ -4,7 +4,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { authenticateTestUser } from "hermes/mirage/mirage-utils";
 
 const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";

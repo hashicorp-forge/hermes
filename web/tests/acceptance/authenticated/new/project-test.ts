@@ -6,7 +6,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import {
   TEST_WEB_CONFIG,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
+} from "hermes/mirage/mirage-utils";
 import { Response } from "miragejs";
 import { module, test } from "qunit";
 

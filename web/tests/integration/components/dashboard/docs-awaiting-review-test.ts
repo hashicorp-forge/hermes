@@ -4,7 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
-import { TEST_USER_EMAIL } from "hermes/utils/mirage-utils";
+import { TEST_USER_EMAIL } from "hermes/mirage/mirage-utils";
 
 const DOCS_AWAITING_REVIEW_COUNT_SELECTOR =
   "[data-test-docs-awaiting-review-count]";

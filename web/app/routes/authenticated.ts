@@ -41,7 +41,6 @@ export default class AuthenticatedRoute extends Route {
      * Wait for both promises to resolve.
      */
     await Promise.all([loadInfoPromise, loadProductAreasPromise]);
-
     /**
      * Kick off the task to poll for expired auth.
      */

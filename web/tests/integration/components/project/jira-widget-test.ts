@@ -5,10 +5,10 @@ import { click, fillIn, find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { JiraIssue, JiraPickerResult } from "hermes/types/project";
 import {
+  TEST_JIRA_WORKSPACE_URL,
   TEST_JIRA_ISSUE_SUMMARY,
   setWebConfig,
-} from "hermes/utils/mirage-utils";
-import { TEST_JIRA_WORKSPACE_URL } from "hermes/utils/hermes-urls";
+} from "hermes/mirage/mirage-utils";
 
 const JIRA_ICON = "[data-test-jira-icon]";
 const ADD_JIRA_INPUT = "[data-test-add-jira-input]";

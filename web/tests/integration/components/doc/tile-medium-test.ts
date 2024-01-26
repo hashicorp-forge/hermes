@@ -10,13 +10,10 @@ import {
   TEST_USER_NAME,
   TEST_USER_PHOTO,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
-import pushMirageIntoStore from "hermes/tests/helpers/push-mirage-into-store";
+} from "hermes/mirage/mirage-utils";
 
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
 const AVATAR_IMAGE = `${AVATAR_LINK} img`;
-const AVATAR_LOADING = `${AVATAR_LINK} [data-test-is-loading]`;
-const AVATAR_FALLBACK = `${AVATAR_LINK} [data-test-fallback]`;
 const TITLE = "[data-test-document-title]";
 const DOC_NUMBER = "[data-test-document-number]";
 const USER_NAME = "[data-test-document-owner-name]";

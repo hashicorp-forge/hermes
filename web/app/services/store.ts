@@ -20,6 +20,8 @@ export default class StoreService extends Store {
         | Array<RelatedHermesDocument | undefined>
         | undefined,
     ) => {
+      console.log("ssss");
+
       if (!emailsOrDocs) return;
 
       let promises: Promise<void>[] = [];
@@ -74,7 +76,8 @@ export default class StoreService extends Store {
         promises.push(
           this.queryRecord("person", {
             emails: email,
-          }).catch(() => {
+          }).catch((e) => {
+            console.log("e", e);
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in

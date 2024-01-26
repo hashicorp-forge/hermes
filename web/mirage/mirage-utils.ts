@@ -1,14 +1,10 @@
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { HermesConfig } from "hermes/config/environment";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
-import config from "../config/environment";
-import {
-  TEST_JIRA_WORKSPACE_URL,
-  TEST_SHORT_LINK_BASE_URL,
-  TEST_SUPPORT_URL,
-} from "./hermes-urls";
-import pushMirageIntoStore from "hermes/tests/helpers/push-mirage-into-store";
+import config from "hermes/config/environment";
+
+import { run } from "@ember/runloop";
+import StoreService from "hermes/services/store";
 
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
@@ -31,6 +27,18 @@ export const TEST_JIRA_ISSUE_TYPE_IMAGE = "test-jira-issue-type-image.com";
 export const TEST_JIRA_PRIORITY = "Medium";
 export const TEST_JIRA_PRIORITY_IMAGE = "https://test-jira-priority-image.com";
 
+/**
+ * These values are loaded by the Mirage in acceptance tests.
+ *
+ * To mock them in rendering tests, set them directly on the service, e.g.,
+ * let mockConfigSvc = this.owner.lookup("service:config") as ConfigService;
+ * mockConfigSvc.config.support_link_url = SUPPORT_URL;
+ */
+export const TEST_SUPPORT_URL = "https://config-loaded-support-link.com";
+export const TEST_SHORT_LINK_BASE_URL =
+  "https://config-loaded-short-link-base-url.com";
+export const TEST_JIRA_WORKSPACE_URL = "https://hashicorp.atlassian.net";
+
 export const TEST_WEB_CONFIG = {
   algolia_docs_index_name: config.algolia.docsIndexName,
   algolia_drafts_index_name: config.algolia.draftsIndexName,
@@ -47,6 +55,54 @@ export const TEST_WEB_CONFIG = {
   short_revision: "abc123",
 };
 
+// https://www.ember-cli-mirage.com/docs/testing/integration-and-unit-tests
+
+/**
+ * Pushes Mirage models into the store, allowing them
+ * to be found using `store.peekAll` and `store.peekRecord`.
+ * Called during the `authenticateTestUser` utility function
+ * to ensure that the default user can be found in the store.
+ */
+export function pushMirageIntoStore(context: MirageTestContext) {
+  let store = context.owner.lookup("service:store") as StoreService;
+
+  const { server } = context;
+  const { schema } = server;
+
+  const keys = Object.keys(schema).filter(
+    (key) => schema[key].all !== undefined,
+  );
+
+  keys.forEach((resource) => {
+    const model = schema[resource].all();
+
+    let { models = [] } = model;
+    let { modelName } = model;
+
+    // Ignore non-EmberData models
+    try {
+      store.modelFor(modelName);
+    } catch (e) {
+      return;
+    }
+
+    const records = models.map((model: any) => {
+      const { attrs } = model;
+      return {
+        id: attrs.id,
+        type: modelName,
+        attributes: attrs,
+      };
+    });
+
+    run(() => {
+      store.push({
+        data: records,
+      });
+    });
+  });
+}
+
 export function authenticateTestUser(mirageContext: MirageTestContext) {
   const authenticatedUserService = mirageContext.owner.lookup(
     "service:authenticated-user",
@@ -61,7 +117,7 @@ export function authenticateTestUser(mirageContext: MirageTestContext) {
     subscriptions: [],
   }).attrs;
 
-  pushMirageIntoStore();
+  pushMirageIntoStore(mirageContext);
 }
 
 export function setFeatureFlag(

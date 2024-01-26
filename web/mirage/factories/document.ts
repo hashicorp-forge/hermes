@@ -1,5 +1,5 @@
 import { Factory } from "miragejs";
-import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "hermes/utils/mirage-utils";
+import { TEST_USER_EMAIL } from "../mirage-utils";
 
 export function getTestDocNumber(product: string) {
   let abbreviation = "";

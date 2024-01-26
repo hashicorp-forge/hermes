@@ -6,8 +6,8 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import {
   TEST_USER_EMAIL,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
-import pushMirageIntoStore from "hermes/tests/helpers/push-mirage-into-store";
+  pushMirageIntoStore,
+} from "hermes/mirage/mirage-utils";
 
 const APPROVED_BADGE = "[data-test-person-approved-badge]";
 
@@ -35,7 +35,7 @@ module("Integration | Component | person", function (hooks) {
       name,
     });
 
-    pushMirageIntoStore();
+    pushMirageIntoStore(this);
 
     this.set("email", email);
     this.set("ignoreUnknown", false);

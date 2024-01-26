@@ -6,7 +6,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
+} from "hermes/mirage/mirage-utils";
 import { module, test } from "qunit";
 
 const AVATAR = "[data-test-avatar]";

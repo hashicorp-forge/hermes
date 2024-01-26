@@ -5,7 +5,7 @@ import { setupRenderingTest } from "ember-qunit";
 import {
   TEST_USER_EMAIL,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
+} from "hermes/mirage/mirage-utils";
 import { module, test } from "qunit";
 
 interface EditableFieldReadValueComponentTestContext extends MirageTestContext {
