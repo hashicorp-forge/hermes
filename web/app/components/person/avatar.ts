@@ -8,11 +8,6 @@ interface PersonAvatarComponentSignature {
   Element: HTMLDivElement;
   Args: {
     isLoading?: boolean;
-    // ALlow components to pass in a URL to an image to use as the avatar
-    // Rather than fetching it from the store
-    // For example, jiraAssignees
-    // Although we should reduce dependence on jiraAssignee avatars, since they're not always available
-    imgURL?: string;
     email?: string;
     size?: `${HermesSize}`;
   };
@@ -31,11 +26,7 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
   }
 
   protected get imgURL(): string | undefined {
-    if (this.args.imgURL) {
-      return this.args.imgURL;
-    } else {
-      return getModelAttr(this.store, ["person.picture", this.args.email]);
-    }
+    return getModelAttr(this.store, ["person.picture", this.args.email]);
   }
 }
 

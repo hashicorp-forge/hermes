@@ -1,11 +1,7 @@
 {{#unless this.isHidden}}
   <div class="flex w-full space-x-2" ...attributes>
     <div class="relative shrink-0">
-      <Person::Avatar
-        @size="small"
-        @imgURL={{get-model-attr "person.picture" @email}}
-        @email={{@email}}
-      />
+      <Person::Avatar @size="small" @email={{@email}} />
       {{#if (eq @badge "approved")}}
         <div
           data-test-person-approved-badge
