@@ -6,8 +6,8 @@ import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import StoreService from "./store";
-import SessionService from "./_session";
+import SessionService from "hermes/services/session";
+import StoreService from "hermes/services/store";
 
 type IndexedDoc = {
   id: string;
@@ -86,6 +86,8 @@ export default class RecentlyViewedDocsService extends Service {
           newAll.push(response.value);
         }
       });
+
+      // FIXME: for some reason `maybeFetchPeople` is undefined
 
       /**
        * Load the owner information for each document.

@@ -12,13 +12,13 @@ import LatestDocsService from "hermes/services/latest-docs";
 import StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
-  @service declare algolia: AlgoliaService;
+  @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
   declare viewedDocs: RecentlyViewedDocsService;
 
-  @service("latest-docs") declare latestDocs: LatestDocsService;
+  @service declare algolia: AlgoliaService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare store: StoreService;
@@ -65,7 +65,7 @@ export default class DashboardRoute extends Route {
     if (this.viewedDocs.all) {
       void this.viewedDocs.fetchAll.perform();
     } else {
-      promises.push(this.viewedDocs.fetchAll.perform().then(() => {}));
+      promises.push(this.viewedDocs.fetchAll.perform());
     }
 
     const [docsAwaitingReview] = await Promise.all(promises);

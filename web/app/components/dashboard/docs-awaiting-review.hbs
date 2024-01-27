@@ -3,13 +3,14 @@
     <div class="flex items-center gap-3">
       <h2>
         Awaiting your review
-        <span
+        {{!-- <span
           class="ml-2.5 inline-flex font-regular text-color-foreground-disabled"
           data-test-docs-awaiting-review-count
         >
           {{@docs.length}}
-        </span>
+        </span> --}}
       </h2>
+      <Hds::BadgeCount @text="{{@docs.length}}" class="" />
     </div>
   </div>
 

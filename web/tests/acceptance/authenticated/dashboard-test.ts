@@ -4,19 +4,13 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
-import {
-  TEST_USER_EMAIL,
-  TEST_USER_GIVEN_NAME,
-} from "hermes/utils/mirage-utils";
-import LatestDocsService from "hermes/services/latest-docs";
-import { keepLatestTask } from "ember-concurrency";
+import { TEST_USER_EMAIL, TEST_USER_GIVEN_NAME } from "hermes/mirage/utils";
 
 const RECENTLY_VIEWED_DOC_SELECTOR = "[data-test-recently-viewed-doc]";
 const DOC_AWAITING_REVIEW = "[data-test-doc-awaiting-review]";
 const WELCOME_MESSAGE = "[data-test-welcome-message]";
 const NO_DOCS_PUBLISHED = "[data-test-no-docs-published]";
 const NO_VIEWED_DOCS = "[data-test-no-viewed-docs]";
-const ERROR_FETCHING_DOCS = "[data-test-error-fetching-documents]";
 
 interface AuthenticatedDashboardRouteTestContext extends MirageTestContext {}
 
