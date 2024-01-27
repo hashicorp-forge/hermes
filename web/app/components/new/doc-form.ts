@@ -9,7 +9,6 @@ import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
 import ModalAlertsService from "hermes/services/modal-alerts";
-import { HermesUser } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
 import { ProductArea } from "hermes/services/product-areas";
@@ -43,7 +42,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   @tracked protected summary: string = "";
   @tracked protected productArea?: string;
   @tracked protected productAbbreviation: string | null = null;
-  @tracked protected contributors: HermesUser[] = [];
+  @tracked protected contributors: string[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
 
@@ -116,13 +115,6 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     };
   }
 
-  /**
-   * Returns contributor emails as an array of strings.
-   */
-  private getEmails(values: HermesUser[]) {
-    return values.map((person) => person.email);
-  }
-
   @action protected registerForm(form: HTMLFormElement) {
     this._form = form;
   }
@@ -169,7 +161,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Updates the contributors property and conditionally validates the form.
    */
-  @action protected updateContributors(contributors: HermesUser[]) {
+  @action protected updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }
 
@@ -208,7 +200,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contributors: this.getEmails(this.contributors),
+            contributors: this.contributors,
             docType: this.args.docType,
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,

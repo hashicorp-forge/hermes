@@ -7,6 +7,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import ProductAreasService from "hermes/services/product-areas";
+import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
 
@@ -17,6 +18,7 @@ export default class AuthenticatedProductAreasProductAreaRoute extends Route {
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare productAreas: ProductAreasService;
+  @service declare store: StoreService;
 
   async model(params: { product_area_id: string }) {
     const searchIndex =
@@ -50,6 +52,9 @@ export default class AuthenticatedProductAreasProductAreaRoute extends Route {
 
       const docs = searchResponse.hits as HermesDocument[];
       const { nbHits } = searchResponse;
+
+      // load owner information
+      await this.store.maybeFetchPeople.perform(docs);
 
       return { docs, productArea, nbHits };
     }

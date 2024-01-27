@@ -7,6 +7,7 @@ import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
+import StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
   @service declare algolia: AlgoliaService;
@@ -16,6 +17,7 @@ export default class DashboardRoute extends Route {
   declare recentDocs: RecentlyViewedDocsService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare store: StoreService;
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
@@ -29,6 +31,11 @@ export default class DashboardRoute extends Route {
           " AND status:In-Review",
       })
       .then((result) => result.hits as HermesDocument[]);
+
+    if (docsAwaitingReview.length > 0) {
+      // load owner information
+      await this.store.maybeFetchPeople.perform(docsAwaitingReview);
+    }
 
     /**
      * If the user is loading the dashboard for the first time,

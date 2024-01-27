@@ -14,8 +14,7 @@
           {{! Avatar }}
           <Person::Avatar
             data-test-doc-awaiting-review-owner-avatar
-            @email={{or owner "Unknown"}}
-            @imgURL={{get @doc.ownerPhotos 0}}
+            @email={{owner}}
             @size="medium"
             class="shrink-0"
           />
@@ -45,7 +44,7 @@
                   class="w-full text-body-200"
                   data-test-doc-awaiting-review-owner
                 >
-                  {{or owner "Unknown"}}
+                  {{or (get-model-attr "person.email" owner) owner "Unknown"}}
                 </TruncatedText>
               </div>
             </div>

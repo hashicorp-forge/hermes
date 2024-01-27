@@ -4,7 +4,7 @@ import { click, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupWindowMock } from "ember-window-mock/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { setupMirage } from "ember-cli-mirage/test-support";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import window from "ember-window-mock";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";
@@ -24,18 +24,18 @@ module("Integration | Component | header/nav", function (hooks) {
   setupWindowMock(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: MirageTestContext) {
     let authenticatedUserSvc = this.owner.lookup(
       "service:authenticated-user",
     ) as AuthenticatedUserService;
 
-    authenticatedUserSvc._info = {
+    authenticatedUserSvc._info = this.server.create("person", {
+      id: TEST_USER_2_EMAIL,
       email: TEST_USER_2_EMAIL,
-      given_name: TEST_USER_2_GIVEN_NAME,
+      firstName: TEST_USER_2_GIVEN_NAME,
       name: TEST_USER_2_NAME,
       picture: "",
-      subscriptions: [],
-    };
+    }).attrs;
   });
 
   test("it renders correctly", async function (assert) {

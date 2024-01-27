@@ -181,7 +181,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       products: [docProduct],
       summary: docSummary,
       owners: [docOwner],
-      ownerPhotos: [docOwnerPhotoURL],
       status: docStatus,
     });
 

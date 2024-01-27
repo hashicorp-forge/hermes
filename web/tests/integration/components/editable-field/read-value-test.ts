@@ -2,13 +2,12 @@ import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { HermesUser } from "hermes/types/document";
-import { authenticateTestUser } from "hermes/mirage/utils";
+import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
 import { module, test } from "qunit";
 
 interface EditableFieldReadValueComponentTestContext extends MirageTestContext {
   tag?: "h1";
-  value?: string | HermesUser[];
+  value?: string | string[];
   placeholder?: string;
 }
 
@@ -61,7 +60,7 @@ module("Integration | Component | editable-field/read-value", function (hooks) {
     assert.dom(".empty-state-text").hasText("None");
 
     // Test that a non-empty array value removes the empty state
-    this.set("value", [{ email: "foo" }]);
+    this.set("value", [TEST_USER_EMAIL]);
     assert.dom(".empty-state-text").doesNotExist();
 
     // Reset to empty and test the placeholder argument
@@ -81,7 +80,7 @@ module("Integration | Component | editable-field/read-value", function (hooks) {
 
     assert.dom("[data-test-string-value]").hasText("foo");
 
-    this.set("value", [{ email: "foo" }]);
+    this.set("value", [TEST_USER_EMAIL]);
 
     assert.dom("[data-test-person-list]").exists();
   });

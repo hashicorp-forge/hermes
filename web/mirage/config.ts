@@ -11,6 +11,7 @@ import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
   TEST_USER_GIVEN_NAME,
+  TEST_USER_PHOTO,
 } from "../mirage/utils";
 
 export default function (mirageConfig) {
@@ -429,7 +430,7 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
-        let isLoggedIn = schema.db.mes[0].isLoggedIn;
+        let isLoggedIn = schema.db.me[0].isLoggedIn;
 
         if (isLoggedIn) {
           return new Response(200, {});
@@ -453,9 +454,14 @@ export default function (mirageConfig) {
         let query: string = JSON.parse(request.requestBody).query;
 
         // Search everyone's first emailAddress for matches
-        let matches: Collection<unknown> = schema.people.where((person) => {
-          return person.emailAddresses[0].value.includes(query);
-        });
+        let matches: Collection<unknown> = schema["google/people"].where(
+          (person) => {
+            return (
+              person.emailAddresses[0].value.includes(query) ||
+              person.names[0].displayName.includes(query)
+            );
+          },
+        );
 
         // Return the Collection models in Response format
         return new Response(200, {}, matches.models);
@@ -577,16 +583,16 @@ export default function (mirageConfig) {
        */
       this.get("/me", (schema) => {
         // If the test has explicitly set a user, return it.
-        if (schema.mes.first()) {
-          return schema.mes.first().attrs;
+        if (schema.me.first()) {
+          return schema.me.first().attrs;
         } else {
           // Otherwise, create and return a new user.
-          return schema.mes.create({
-            id: "1",
+          return schema.me.create({
+            id: TEST_USER_EMAIL,
             name: TEST_USER_NAME,
             email: TEST_USER_EMAIL,
             given_name: TEST_USER_GIVEN_NAME,
-            picture: "",
+            picture: TEST_USER_PHOTO,
             subscriptions: [],
             isLoggedIn: true,
           }).attrs;

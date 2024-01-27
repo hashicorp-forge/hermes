@@ -11,18 +11,19 @@ export default class PersonSerializer extends JSONSerializer {
    */
   normalizeResponse(
     _store: DS.Store,
-    primaryModelClass: any,
+    _primaryModelClass: any,
     payload: GoogleUser[] | { results: GoogleUser[] },
     _id: string | number,
     requestType: string,
   ) {
+    const type = "person";
+
     if (requestType === "query") {
       assert("results are expected for query requests", "results" in payload);
-
       const people = payload.results.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
-          type: primaryModelClass.modelName,
+          type,
           attributes: {
             name: p.names[0].displayName,
             firstName: p.names[0].givenName,
@@ -31,7 +32,6 @@ export default class PersonSerializer extends JSONSerializer {
           },
         };
       });
-
       return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
@@ -46,7 +46,7 @@ export default class PersonSerializer extends JSONSerializer {
       return {
         data: {
           id: record.emailAddresses?.[0]?.value,
-          type: primaryModelClass.modelName,
+          type,
           attributes: {
             name: record.names[0]?.displayName,
             firstName: record.names[0]?.givenName,
@@ -56,7 +56,7 @@ export default class PersonSerializer extends JSONSerializer {
         },
       };
     } else {
-      // Currently only `query` and `queryRecord` requests are handled.
+      // Currently only `query` and `queryRecord` requests are used.
       return {};
     }
   }

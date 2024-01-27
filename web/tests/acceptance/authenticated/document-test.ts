@@ -4,7 +4,6 @@ import {
   fillIn,
   find,
   findAll,
-  settled,
   triggerEvent,
   triggerKeyEvent,
   visit,
@@ -22,13 +21,12 @@ import {
 } from "hermes/components/document/sidebar";
 import { capitalize } from "@ember/string";
 import window from "ember-window-mock";
-import { TEST_SHORT_LINK_BASE_URL } from "hermes/mirage/utils";
 import {
   TEST_USER_2_EMAIL,
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
+  TEST_SHORT_LINK_BASE_URL,
 } from "hermes/mirage/utils";
-import { current } from "ember-animated/.";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";

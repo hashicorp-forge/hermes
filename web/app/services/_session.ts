@@ -172,8 +172,8 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       this.flashMessages.add({
         title: "Login successful",
         message: `Welcome back${
-          this.authenticatedUser.info.given_name
-            ? `, ${this.authenticatedUser.info.given_name}`
+          this.authenticatedUser.info.firstName
+            ? `, ${this.authenticatedUser.info.firstName}`
             : ""
         }!`,
         destroyOnClick: true,

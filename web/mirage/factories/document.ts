@@ -1,5 +1,5 @@
 import { Factory } from "miragejs";
-import { TEST_USER_EMAIL, TEST_USER_PHOTO } from "../utils";
+import { TEST_USER_EMAIL } from "../utils";
 
 export function getTestDocNumber(product: string) {
   let abbreviation = "";
@@ -45,5 +45,4 @@ export default Factory.extend({
   projects: [],
   approvers: [],
   owners: [TEST_USER_EMAIL],
-  ownerPhotos: [TEST_USER_PHOTO],
 });

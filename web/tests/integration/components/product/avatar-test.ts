@@ -2,7 +2,6 @@ import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import ConfigService from "hermes/services/config";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 import { module, test } from "qunit";
 

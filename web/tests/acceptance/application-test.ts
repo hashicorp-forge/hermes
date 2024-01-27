@@ -7,7 +7,7 @@ import {
 } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
-import { TEST_SUPPORT_URL } from "hermes/mirage/utils";
+import { authenticateTestUser, TEST_SUPPORT_URL } from "hermes/mirage/utils";
 
 module("Acceptance | application", function (hooks) {
   setupApplicationTest(hooks);
@@ -17,7 +17,8 @@ module("Acceptance | application", function (hooks) {
     session: SessionService;
   }
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: ApplicationTestContext) {
+    authenticateTestUser(this);
     this.set("session", this.owner.lookup("service:session"));
   });
 
@@ -60,7 +61,7 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    this.server.schema.mes.first().update("isLoggedIn", false);
+    this.server.schema.me.first().update("isLoggedIn", false);
 
     await waitFor("[data-test-flash-notification]");
 

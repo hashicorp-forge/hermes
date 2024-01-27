@@ -2,7 +2,7 @@
 
 <h1 class="mb-7">
   Welcome back,
-  {{this.authenticatedUser.info.given_name}}!
+  {{this.authenticatedUser.info.firstName}}!
 </h1>
 
 {{#if @docsAwaitingReview}}
@@ -25,7 +25,6 @@
         <Doc::Tile
           data-test-recently-viewed-doc
           @isDraft={{r.doc.isDraft}}
-          @avatar={{get r.doc.ownerPhotos 0}}
           @docID={{r.doc.objectID}}
           @docNumber={{r.doc.docNumber}}
           @modifiedTime={{r.doc.modifiedTime}}

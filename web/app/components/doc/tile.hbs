@@ -35,11 +35,7 @@
         {{/if}}
       </div>
       <div class="mt-2 max-w-full space-y-1">
-        <Person
-          @ignoreUnknown={{true}}
-          @imgURL={{@avatar}}
-          @email="{{@owner}}"
-        />
+        <Person @ignoreUnknown={{true}} @email={{@owner}} />
         {{#if @modifiedTime}}
           <p class="text-body-100 text-color-foreground-faint">
             Modified

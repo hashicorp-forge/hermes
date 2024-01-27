@@ -3,6 +3,9 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 import config from "hermes/config/environment";
 
+import { run } from "@ember/runloop";
+import StoreService from "hermes/services/store";
+
 export const TEST_USER_NAME = "Test user";
 export const TEST_USER_EMAIL = "testuser@hashicorp.com";
 export const TEST_USER_PHOTO = "https://test-user-at-hashicorp.com/photo.jpg";
@@ -52,18 +55,74 @@ export const TEST_WEB_CONFIG = {
   short_revision: "abc123",
 };
 
+// https://www.ember-cli-mirage.com/docs/testing/integration-and-unit-tests
+
+/**
+ * Pushes Mirage models into the store, allowing them
+ * to be found using `store.peekAll` and `store.peekRecord`.
+ * Called during the `authenticateTestUser` utility function
+ * to ensure that the default user can be found in the store.
+ */
+export function pushMirageIntoStore(context: MirageTestContext) {
+  let store = context.owner.lookup("service:store") as StoreService;
+
+  const { server } = context;
+  const { schema } = server;
+
+  const keys = Object.keys(schema).filter(
+    (key) => schema[key].all !== undefined,
+  );
+
+  keys.forEach((resource) => {
+    const model = schema[resource].all();
+
+    let { models = [] } = model;
+    let { modelName } = model;
+
+    // Ignore non-EmberData models
+    try {
+      store.modelFor(modelName);
+    } catch (e) {
+      return;
+    }
+
+    const records = models.map((model: any) => {
+      const { attrs } = model;
+      return {
+        id: attrs.id,
+        type: modelName,
+        attributes: attrs,
+      };
+    });
+
+    run(() => {
+      store.push({
+        data: records,
+      });
+    });
+  });
+}
+
 export function authenticateTestUser(mirageContext: MirageTestContext) {
+  mirageContext.server.create("me");
+
   const authenticatedUserService = mirageContext.owner.lookup(
     "service:authenticated-user",
   ) as AuthenticatedUserService;
 
-  authenticatedUserService._info = {
-    name: TEST_USER_NAME,
+  const personRecord = mirageContext.server.create("person", {
+    id: TEST_USER_EMAIL,
     email: TEST_USER_EMAIL,
-    given_name: TEST_USER_GIVEN_NAME,
-    picture: "",
-    subscriptions: [],
-  };
+    name: TEST_USER_NAME,
+    firstName: TEST_USER_GIVEN_NAME,
+    picture: TEST_USER_PHOTO,
+  });
+
+  // Populate `authenticatedUser.info` with the record attrs
+  authenticatedUserService._info = personRecord.attrs;
+
+  // Push models into the store to be peeked
+  pushMirageIntoStore(mirageContext);
 }
 
 export function setFeatureFlag(

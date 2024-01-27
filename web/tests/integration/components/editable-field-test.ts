@@ -1,8 +1,8 @@
 import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { MirageTestContext } from "ember-cli-mirage/test-support";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { authenticateTestUser } from "hermes/mirage/utils";
+import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
 import { module, test } from "qunit";
 
 const EDITABLE_FIELD = ".editable-field";
@@ -31,6 +31,7 @@ interface EditableFieldComponentTestContext extends MirageTestContext {
 
 module("Integration | Component | editable-field", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
 
   hooks.beforeEach(function (this: EditableFieldComponentTestContext) {
     authenticateTestUser(this);
@@ -229,7 +230,7 @@ module("Integration | Component | editable-field", function (hooks) {
   test("onCommit only runs if the value has changed (PEOPLE)", async function (this: EditableFieldComponentTestContext, assert) {
     let count = 0;
 
-    this.set("value", [{ email: "foo" }]);
+    this.set("value", [TEST_USER_EMAIL]);
 
     this.set("onCommit", () => {
       count++;
@@ -237,7 +238,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
-        @value={{array (hash email="foo")}}
+        @value={{this.value}}
         @onSave={{this.onCommit}}
       />
     `);
@@ -288,14 +289,16 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("the value resets on cancel (PEOPLE)", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("value", [TEST_USER_EMAIL]);
+
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
-        @value={{array (hash email="foo")}}
+        @value={{this.value}}
         @onSave={{this.onCommit}}
       />
     `);
 
-    assert.dom(EDITABLE_FIELD).containsText("foo");
+    assert.dom(EDITABLE_FIELD).containsText("Me");
 
     // Cancel using Escape key
 
@@ -303,22 +306,22 @@ module("Integration | Component | editable-field", function (hooks) {
     await click(REMOVE_USER_BUTTON);
     await triggerKeyEvent("input", "keydown", "Escape");
 
-    assert.dom(EDITABLE_FIELD).containsText("foo");
+    assert.dom(EDITABLE_FIELD).containsText("Me");
 
     await click(FIELD_TOGGLE);
 
-    assert.dom(EDITABLE_PERSON).containsText("foo");
+    assert.dom(EDITABLE_PERSON).containsText("Me");
 
     // Cancel using the button
 
     await click(REMOVE_USER_BUTTON);
     await click(CANCEL_BUTTON);
 
-    assert.dom(EDITABLE_FIELD).containsText("foo");
+    assert.dom(EDITABLE_FIELD).containsText("Me");
 
     await click(FIELD_TOGGLE);
 
-    assert.dom(EDITABLE_PERSON).containsText("foo");
+    assert.dom(EDITABLE_PERSON).containsText("Me");
   });
 
   test("it trims a string value before evaluating it", async function (this: EditableFieldComponentTestContext, assert) {
@@ -344,6 +347,8 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("it shows a text input or people input depending on the value", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("value", [TEST_USER_EMAIL]);
+
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         data-test-one
@@ -353,7 +358,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
       <EditableField
         data-test-two
-        @value={{array (hash email="bar")}}
+        @value={{this.value}}
         @onSave={{this.onCommit}}
       />
     `);
@@ -380,6 +385,8 @@ module("Integration | Component | editable-field", function (hooks) {
   });
 
   test("it autofocuses the inputs when the editing functions are enabled", async function (this: EditableFieldComponentTestContext, assert) {
+    this.set("value", [TEST_USER_EMAIL]);
+
     await render<EditableFieldComponentTestContext>(hbs`
       <EditableField
         data-test-one
@@ -389,7 +396,7 @@ module("Integration | Component | editable-field", function (hooks) {
 
       <EditableField
         data-test-two
-        @value={{array (hash email="bar" imgURL="baz")}}
+        @value={{this.value}}
         @onSave={{this.onCommit}}
       />
     `);

@@ -10,6 +10,7 @@ import { XDropdownListAnchorAPI } from "./x/dropdown-list";
 import { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
+import StoreService from "hermes/services/store";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -35,7 +36,6 @@ export interface RelatedHermesDocument {
   product: string;
   status: string;
   owners: string[];
-  ownerPhotos?: string[];
   summary?: string;
 }
 
@@ -78,6 +78,7 @@ interface RelatedResourcesComponentSignature {
 export default class RelatedResourcesComponent extends Component<RelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
+  @service declare store: StoreService;
 
   @tracked private _algoliaResults: HermesDocument[] | null = null;
 
@@ -248,6 +249,9 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
           .then((response) => response);
         if (algoliaResponse) {
           this._algoliaResults = algoliaResponse.hits as HermesDocument[];
+
+          // Load the owner information
+          await this.store.maybeFetchPeople.perform(this._algoliaResults);
           if (dd) {
             dd.resetFocusedItemIndex();
           }

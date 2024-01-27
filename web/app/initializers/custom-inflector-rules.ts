@@ -3,8 +3,9 @@ import Inflector from "ember-inflector";
 export function initialize() {
   const inflector = Inflector.inflector;
 
-  // Don't pluralize the document route when using a dynamic segment.
+  // Turn off pluralization.
   inflector.uncountable("document");
+  inflector.uncountable("me");
 }
 
 export default {

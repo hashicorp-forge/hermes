@@ -11,6 +11,7 @@ import ConfigService from "hermes/services/config";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import StoreService from "hermes/services/store";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects;
@@ -29,6 +30,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
+  @service declare store: StoreService;
 
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
@@ -67,7 +69,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             productAreaName: this._productAreaMatch,
           },
         }),
-      } as SearchResultObjects
+      } as SearchResultObjects,
     );
   }
 
@@ -161,7 +163,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
       assert(
         "inputEvent.target must be an HTMLInputElement",
-        input instanceof HTMLInputElement
+        input instanceof HTMLInputElement,
       );
 
       this.query = input.value;
@@ -176,7 +178,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             this.query,
             {
               hitsPerPage: 1,
-            }
+            },
           );
 
           const docSearch = this.algolia.search.perform(this.query, {
@@ -189,6 +191,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           ]).then((values) => values);
 
           let [productAreas, docs] = algoliaResults;
+
+          const hits = (docs?.hits as HermesDocument[]) ?? [];
+
+          // Load the owner information
+          await this.store.maybeFetchPeople.perform(hits);
 
           this._bestMatches = docs
             ? (docs.hits.slice(0, 5) as HermesDocument[])
@@ -239,7 +246,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           dd.scheduleAssignMenuItemIDs();
         });
       }
-    }
+    },
   );
 }
 

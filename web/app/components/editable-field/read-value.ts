@@ -1,11 +1,11 @@
 import { assert } from "@ember/debug";
 import Component from "@glimmer/component";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
 
 interface EditableFieldReadValueSignature {
   Args: {
     tag?: "h1";
-    value?: string | HermesUser[];
+    value?: string | string[];
     placeholder?: string;
     document?: HermesDocument; // Used to check an approver's approval status
   };
@@ -26,7 +26,7 @@ export default class EditableFieldReadValue extends Component<EditableFieldReadV
     if (typeof this.args.value === "string") {
       return this.args.value === "";
     } else {
-      return this.people.length === 0;
+      return this.emails.length === 0;
     }
   }
 
@@ -40,7 +40,7 @@ export default class EditableFieldReadValue extends Component<EditableFieldReadV
     return this.args.document;
   }
 
-  protected get people(): HermesUser[] {
+  protected get emails(): string[] {
     assert("value must be an array", Array.isArray(this.args.value));
     return this.args.value;
   }
