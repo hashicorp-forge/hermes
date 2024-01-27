@@ -3,7 +3,7 @@ import {
   TEST_JIRA_ISSUE_SUMMARY,
   TEST_JIRA_ISSUE_URL,
   TEST_JIRA_ISSUE_TYPE_IMAGE,
-} from "hermes/utils/mirage-utils";
+} from "../utils";
 
 export default Factory.extend({
   id: (i) => i, // Mirage-only

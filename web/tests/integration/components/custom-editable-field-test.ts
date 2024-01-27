@@ -3,8 +3,8 @@ import { setupRenderingTest } from "ember-qunit";
 import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { HermesDocument, HermesUser } from "hermes/types/document";
-import { authenticateTestUser } from "hermes/utils/mirage-utils";
+import { HermesDocument } from "hermes/types/document";
+import { authenticateTestUser } from "hermes/mirage/utils";
 
 interface CustomEditableFieldComponentTestContext extends MirageTestContext {
   attributes: any;
@@ -19,7 +19,7 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
   hooks.beforeEach(function (this: CustomEditableFieldComponentTestContext) {
     authenticateTestUser(this);
-    this.server.createList("person", 10);
+    this.server.createList("google/person", 10);
     this.server.create("document");
 
     this.set("onChange", () => {});
@@ -61,11 +61,8 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       value: this.people,
     });
 
-    this.set("onChange", (people: HermesUser[]) => {
-      this.set(
-        "people",
-        people.map((person) => person.email),
-      );
+    this.set("onChange", (people: string[]) => {
+      this.set("people", people);
     });
 
     await render<CustomEditableFieldComponentTestContext>(hbs`
@@ -77,7 +74,6 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       />
       <div class="click-away-target"/>
     `);
-
     const textSelector = "[data-test-custom-field] li [data-test-person-email]";
 
     let listItemText = findAll(textSelector).map(
@@ -111,8 +107,16 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     assert.deepEqual(
       listItemText,
-      ["mishra@hashicorp.com", "user1@hashicorp.com"],
-      "the list updates via the onChange action",
+      ["mishra@hashicorp.com", "User 1"],
+      "the front-end list updates (using displayNames if they're in the store)",
+    );
+
+    const expectedPeople = ["mishra@hashicorp.com", "user1@hashicorp.com"];
+
+    assert.deepEqual(
+      this.people,
+      expectedPeople,
+      "the reference list updates (using email addresses)",
     );
   });
 

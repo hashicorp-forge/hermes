@@ -3,7 +3,7 @@ import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
-import { TEST_WEB_CONFIG } from "hermes/utils/mirage-utils";
+import { TEST_WEB_CONFIG, authenticateTestUser } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 import { module, test } from "qunit";
 
@@ -34,6 +34,7 @@ module("Acceptance | authenticated/new/project", function (hooks) {
     this: AuthenticatedNewProjectRouteTestContext,
   ) {
     await authenticateSession({});
+    authenticateTestUser(this);
   });
 
   test("the page title is correct", async function (this: AuthenticatedNewProjectRouteTestContext, assert) {

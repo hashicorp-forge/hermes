@@ -6,13 +6,13 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import {
   TEST_USER_EMAIL,
   authenticateTestUser,
-} from "hermes/utils/mirage-utils";
+  pushMirageIntoStore,
+} from "hermes/mirage/utils";
 
 const APPROVED_BADGE = "[data-test-person-approved-badge]";
 
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
-  imgURL: string;
   email: string;
   badge: string | undefined;
 }
@@ -26,14 +26,23 @@ module("Integration | Component | person", function (hooks) {
   });
 
   test("it renders correctly", async function (this: PersonComponentTestContext, assert) {
+    const email = "engineering@hashicorp.com";
+    const name = "Engineering";
+
+    this.server.create("person", {
+      id: email,
+      email,
+      name,
+    });
+
+    pushMirageIntoStore(this);
+
+    this.set("email", email);
     this.set("ignoreUnknown", false);
-    this.set("imgURL", "https://hashicorp-avatar-url.com");
-    this.set("email", "engineering@hashicorp.com");
 
     await render<PersonComponentTestContext>(hbs`
         <Person
           @ignoreUnknown={{this.ignoreUnknown}}
-          @imgURL={{this.imgURL}}
           @email={{this.email}}
           class="person"
         />
@@ -43,15 +52,13 @@ module("Integration | Component | person", function (hooks) {
 
     assert
       .dom(".person .person-email")
-      .hasText(this.email)
-      .hasAttribute("title", this.email);
+      .hasText(name)
+      .hasAttribute("title", name);
     assert.dom(".person svg").doesNotExist();
 
-    this.set("imgURL", null);
-
-    assert.dom(".person img").doesNotExist();
-    assert.dom(".person .person-email").hasText(this.email);
-    assert.dom(".person svg").exists();
+    assert.dom(".person img").exists();
+    assert.dom(".person .person-email").hasText(name);
+    assert.dom(".person svg").doesNotExist();
 
     this.set("email", null);
     this.set("ignoreUnknown", true);

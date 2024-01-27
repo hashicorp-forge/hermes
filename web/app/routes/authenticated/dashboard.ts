@@ -9,6 +9,7 @@ import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import LatestDocsService from "hermes/services/latest-docs";
+import StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
   @service declare algolia: AlgoliaService;
@@ -20,6 +21,7 @@ export default class DashboardRoute extends Route {
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare store: StoreService;
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
@@ -69,6 +71,11 @@ export default class DashboardRoute extends Route {
     const [docsAwaitingReview] = await Promise.all(promises);
 
     assert("docsAwaitingReview must exist", docsAwaitingReview);
+
+    if (docsAwaitingReview.length > 0) {
+      // load owner information
+      await this.store.maybeFetchPeople.perform(docsAwaitingReview);
+    }
 
     return docsAwaitingReview;
   }

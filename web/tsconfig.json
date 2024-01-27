@@ -29,6 +29,7 @@
     "node_modules/@gavant/glint-template-types/types/ember-on-helper/on-document.d.ts",
     "node_modules/@gavant/glint-template-types/types/ember-render-modifiers/*",
     "node_modules/@gavant/glint-template-types/types/ember-truth-helpers/*",
-    "node_modules/@gavant/glint-template-types/types/ember-power-select/**/*"
+    "node_modules/@gavant/glint-template-types/types/ember-power-select/**/*",
+    "mirage/utils.ts"
   ]
 }

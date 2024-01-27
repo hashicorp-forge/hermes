@@ -1,12 +1,13 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
+import StoreService from "hermes/services/store";
+import getModelAttr from "hermes/utils/get-model-attr";
 
 interface PersonComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    email: string;
-    imgURL?: string | null;
+    email?: string;
     ignoreUnknown?: boolean;
     badge?: string;
   };
@@ -14,6 +15,8 @@ interface PersonComponentSignature {
 
 export default class PersonComponent extends Component<PersonComponentSignature> {
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare store: StoreService;
+
   get isHidden() {
     return this.args.ignoreUnknown && !this.args.email;
   }
@@ -23,7 +26,11 @@ export default class PersonComponent extends Component<PersonComponentSignature>
       return "Me";
     }
 
-    return this.args.email ?? "Unknown";
+    return (
+      getModelAttr(this.store, ["person.name", this.args.email]) ??
+      this.args.email ??
+      "Unknown"
+    );
   }
 }
 

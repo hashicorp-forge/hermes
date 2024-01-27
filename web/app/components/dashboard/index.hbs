@@ -6,7 +6,7 @@
 
       <h4 data-test-welcome-message class="hermes-h4 mb-6">
         Welcome back,
-        {{this.authenticatedUser.info.given_name}}!
+        {{this.authenticatedUser.info.firstName}}!
       </h4>
 
       {{#if @docsAwaitingReview}}
@@ -84,10 +84,7 @@
                   <div class="w-full">
                     <div class="flex items-center gap-[3px]">
                       <Product::Avatar @product={{r.doc.product}} />
-                      <Person::Avatar
-                        @email="{{get r.doc.owners 0}}"
-                        @imgURL={{get r.doc.ownerPhotos 0}}
-                      />
+                      <Person::Avatar @email={{get r.doc.owners 0}} />
                       <Hds::Badge
                         @text={{r.doc.docType}}
                         class="h-5 px-1.5 py-0"

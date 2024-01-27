@@ -332,7 +332,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     const {
       title,
       owners,
-      ownerPhotos,
       product,
       status,
       summary,
@@ -347,7 +346,6 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
       title,
       summary,
       owners,
-      ownerPhotos,
       product,
       status,
       createdTime,

@@ -1,11 +1,7 @@
 import { action, get } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import {
-  CustomEditableField,
-  HermesDocument,
-  HermesUser,
-} from "hermes/types/document";
+import { CustomEditableField, HermesDocument } from "hermes/types/document";
 
 interface CustomEditableFieldComponentSignature {
   Element: HTMLDivElement;
@@ -34,16 +30,6 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
    */
   @tracked protected emails = this.args.attributes.value || [];
 
-  /**
-   * The value of the field, serialized for the PeopleSelect.
-   */
-  protected get hermesUsers(): HermesUser[] {
-    let emails = this.emails instanceof Array ? this.emails : [this.emails];
-    return emails.map((email: string) => {
-      return { email, imgURL: null };
-    });
-  }
-
   protected get stringValue(): string {
     const value = get(this.args.document, this.args.field);
     if (typeof value === "string") {
@@ -55,12 +41,10 @@ export default class CustomEditableFieldComponent extends Component<CustomEditab
 
   /**
    * The function to call when the user updates the PeopleSelect value.
-   * Deserializes the value and updates the local `emails` property.
+   * Saves the new value to the local `emails` property.
    */
-  @action protected onPeopleSelectChange(people: HermesUser[]) {
-    this.emails = people.map((person: HermesUser) => {
-      return person.email;
-    });
+  @action protected onPeopleSelectChange(emails: string[]) {
+    this.emails = emails;
   }
 
   /**

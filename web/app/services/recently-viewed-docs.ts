@@ -6,6 +6,8 @@ import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
+import StoreService from "./store";
+import SessionService from "./_session";
 
 type IndexedDoc = {
   id: string;
@@ -20,7 +22,8 @@ export type RecentlyViewedDoc = {
 export default class RecentlyViewedDocsService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare session: any;
+  @service declare session: SessionService;
+  @service declare store: StoreService;
 
   /**
    * The index of the recently viewed docs.
@@ -83,6 +86,11 @@ export default class RecentlyViewedDocsService extends Service {
           newAll.push(response.value);
         }
       });
+
+      /**
+       * Load the owner information for each document.
+       */
+      await this.store.maybeFetchPeople.perform(newAll.map((d) => d.doc));
 
       /**
        * Update the tracked property to new array of documents.

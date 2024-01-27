@@ -3,7 +3,6 @@ import Component from "@glimmer/component";
 interface DocTileComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    avatar?: string;
     docID?: string;
     docNumber?: string;
     isResult?: boolean;

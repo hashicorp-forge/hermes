@@ -20,11 +20,8 @@
         disabled={{not owner}}
       >
         <Person::Avatar
-          {{did-insert this.maybeLoadAvatar}}
           @size="large"
-          @email="{{owner}}"
-          @imgURL={{this.imgURL}}
-          @isLoading={{this.getOwnerPhoto.isRunning}}
+          @email={{owner}}
           class="relative z-10 -mt-1 shrink-0"
         />
       </LinkTo>
@@ -71,7 +68,7 @@
               disabled={{not owner}}
               class="underline-on-hover"
             >
-              {{or owner "Unknown"}}
+              {{or (get-model-attr "person.name" owner) owner "Unknown"}}
             </LinkTo>
             <span class="vertical-line">
               |
