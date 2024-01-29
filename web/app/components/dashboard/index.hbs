@@ -1,167 +1,20 @@
-{{on-window "resize" this.updateAffordances}}
-
 <Dashboard::NewFeaturesBanner />
 
 <h4 data-test-welcome-message class="hermes-h4 mt-2.5 mb-6 hidden lg:block">
   Welcome back,
-  {{this.authenticatedUser.info.firstName}}!
+  {{this.firstName}}!
 </h4>
 
 <div class="flex w-full flex-col-reverse gap-5 lg:flex-row lg:gap-0">
-  {{! Main content }}
+  {{! Main }}
   <div class="min-h-[500px] w-full overflow-hidden pb-20">
     <div class="main pr-4">
       {{#if @docsAwaitingReview}}
         <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
       {{/if}}
-      <div class="flex items-center gap-3.5">
-        <h2>
-          Latest docs
-        </h2>
-
-        {{#if this.latestDocs.fetchAll.isRunning}}
-          <FlightIcon @name="running" />
-        {{/if}}
-      </div>
-
-      {{#if this.latestDocs.index.length}}
-        <ol class="divided-list mt-5">
-          {{#each this.latestDocs.index as |doc|}}
-            <li class="group relative" data-test-latest-doc>
-              <Doc::TileMedium @doc={{doc}} />
-            </li>
-          {{/each}}
-        </ol>
-
-        {{#if this.linkToAllDocsIsShown}}
-          <div class="main-inner mt-5">
-            <Hds::Button
-              @color="secondary"
-              @text="See older documents"
-              @icon="arrow-right"
-              @iconPosition="trailing"
-              @isFullWidth={{true}}
-              @route="authenticated.documents"
-              @query={{hash page=2}}
-              class="py-3"
-            />
-          </div>
-        {{/if}}
-      {{else}}
-        <div data-test-no-docs-published class="empty-text">
-          No documents have been published yet.
-        </div>
-        <Hds::Button
-          data-test-new-document-button
-          @route="authenticated.new"
-          @text="New document"
-          @icon="plus"
-          class="mt-6 pl-2.5 pr-4"
-        />
-      {{/if}}
+      <Dashboard::LatestDocs />
     </div>
   </div>
-
-  {{! Recently viewed }}
-  <div class="secondary flex shrink-0 lg:w-72">
-    <div
-      class="relative h-full w-full border-l-color-border-primary lg:border-l lg:pl-4"
-    >
-      <div class="mt-2.5 flex w-full items-center justify-between lg:pl-3">
-        <h4 class="max-lg:hermes-h4">
-          Recently viewed
-        </h4>
-        <div class="flex gap-1 lg:hidden">
-          <Hds::Button
-            {{on "click" this.scrollBack}}
-            @color="secondary"
-            @icon="arrow-left"
-            class="pill-button"
-            @text="Scroll left"
-            @isIconOnly={{true}}
-            @size="small"
-            disabled={{not this.canScrollBack}}
-          />
-          <Hds::Button
-            {{on "click" this.scrollForward}}
-            @color="secondary"
-            @icon="arrow-right"
-            class="pill-button"
-            @text="Scroll right"
-            @isIconOnly={{true}}
-            @size="small"
-            disabled={{not this.canScrollForward}}
-          />
-        </div>
-      </div>
-      {{#if this.viewedDocs.all}}
-        <div class="relative mt-4">
-          <ul
-            {{did-insert this.registerScrollBody}}
-            {{on "scroll" this.updateAffordances}}
-            class="{{if
-                this.screenIsSmall
-                'horizontally-divided-list flex snap-x snap-proximity overflow-auto rounded-md pb-4'
-                'divided-list'
-              }}"
-          >
-            {{#each this.viewedDocs.all as |r|}}
-              <li
-                data-test-recently-viewed-doc
-                class="w-56 shrink-0 snap-start lg:w-full"
-              >
-                <LinkTo
-                  @route="authenticated.document"
-                  @model={{r.doc.objectID}}
-                  @query={{hash draft=r.doc.isDraft}}
-                  class="px-3 pt-3 pb-3.5"
-                >
-                  <div class="flex w-full items-start gap-5">
-                    <div class="w-full">
-                      <div class="flex items-center gap-[3px]">
-                        <Product::Avatar @product={{r.doc.product}} />
-                        <Person::Avatar @email={{get r.doc.owners 0}} />
-                        <Hds::Badge
-                          @text={{r.doc.docType}}
-                          class="h-5 px-1.5 py-0"
-                        />
-                      </div>
-                      <h5 class="mt-1.5 max-lg:truncate">
-                        {{r.doc.title}}
-                        <span class="ml-0.5 text-body-100 font-regular">
-
-                          {{r.doc.docNumber}}
-                        </span>
-                      </h5>
-                      <p
-                        class="mt-0.5 text-body-100 text-color-foreground-faint"
-                      >
-                        Modified
-                        {{time-ago r.doc.modifiedTime}}
-                      </p>
-                    </div>
-                  </div>
-                </LinkTo>
-              </li>
-            {{/each}}
-          </ul>
-          {{! Scroll affordances }}
-          <div
-            class="scroll-affordance left-0 rounded-l-md bg-gradient-to-r
-              {{unless this.canScrollBack 'opacity-0'}}"
-            aria-hidden="true"
-          />
-          <div
-            class="scroll-affordance right-0 rounded-r-md bg-gradient-to-l
-              {{unless this.canScrollForward 'opacity-0'}}"
-            aria-hidden="true"
-          />
-        </div>
-      {{else}}
-        <div data-test-no-viewed-docs class="empty-text px-3">
-          You haven't viewed any documents yet.
-        </div>
-      {{/if}}
-    </div>
-  </div>
+  {{! Secondary }}
+  <Dashboard::RecentlyViewedDocs />
 </div>
