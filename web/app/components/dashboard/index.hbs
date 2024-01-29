@@ -75,24 +75,24 @@
         </h4>
         <div class="flex gap-1 lg:hidden">
           <Hds::Button
-            {{on "click" this.scrollLeft}}
+            {{on "click" this.scrollBack}}
             @color="secondary"
             @icon="arrow-left"
             class="pill-button"
             @text="Scroll left"
             @isIconOnly={{true}}
             @size="small"
-            disabled={{not this.scrollLeftAffordanceIsShown}}
+            disabled={{not this.canScrollBack}}
           />
           <Hds::Button
-            {{on "click" this.scrollRight}}
+            {{on "click" this.scrollForward}}
             @color="secondary"
             @icon="arrow-right"
             class="pill-button"
             @text="Scroll right"
             @isIconOnly={{true}}
             @size="small"
-            disabled={{not this.scrollRightAffordanceIsShown}}
+            disabled={{not this.canScrollForward}}
           />
         </div>
       </div>
@@ -113,7 +113,7 @@
             {{#each this.viewedDocs.all as |r|}}
               <li
                 data-test-recently-viewed-doc
-                class="w-56 shrink-0 snap-start last:mr-auto lg:w-full"
+                class="w-56 shrink-0 snap-start lg:w-full"
               >
                 <LinkTo
                   @route="authenticated.document"
@@ -155,13 +155,13 @@
 
           <div
             class="scroll-affordance left-0 rounded-l-md bg-gradient-to-r
-              {{unless this.scrollLeftAffordanceIsShown 'opacity-0'}}"
+              {{unless this.canScrollBack 'opacity-0'}}"
             aria-hidden="true"
           />
 
           <div
             class="scroll-affordance right-0 rounded-r-md bg-gradient-to-l
-              {{unless this.scrollRightAffordanceIsShown 'opacity-0'}}"
+              {{unless this.canScrollForward 'opacity-0'}}"
             aria-hidden="true"
           />
 

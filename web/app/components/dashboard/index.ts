@@ -32,11 +32,11 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
   @tracked _scrollLeftAffordanceIsShown = false;
   @tracked _scrollRightAffordanceIsShown = false;
 
-  protected get scrollLeftAffordanceIsShown(): boolean {
+  protected get canScrollBack(): boolean {
     return this._scrollLeftAffordanceIsShown && this.screenIsSmall;
   }
 
-  protected get scrollRightAffordanceIsShown(): boolean {
+  protected get canScrollForward(): boolean {
     return this._scrollRightAffordanceIsShown && this.screenIsSmall;
   }
 
@@ -81,13 +81,13 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
     }, 10);
   }
 
-  @action scrollRight(): void {
+  @action scrollForward(): void {
     assert("scroll body must be defined", this._scrollBody);
 
     this._scrollBody.scrollBy({ left: 300, behavior: "smooth" });
   }
 
-  @action scrollLeft(): void {
+  @action scrollBack(): void {
     assert("scroll body must be defined", this._scrollBody);
 
     this._scrollBody.scrollBy({ left: -300, behavior: "smooth" });
