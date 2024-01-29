@@ -36,6 +36,10 @@
       @apply text-display-300;
     }
 
+    h4 {
+      @apply lg:text-display-300 lg:font-semibold lg:text-color-foreground-strong;
+    }
+
     h5 {
       @apply text-body-200;
     }
@@ -51,6 +55,13 @@
 
   .main-inner {
     @apply pr-8 pl-3;
+  }
+
+  .secondary {
+    .scroll-affordance {
+      @apply pointer-events-none absolute top-0 bottom-4 w-10 from-black/5 to-black/0;
+      @apply transition-opacity;
+    }
   }
 
   .footer {

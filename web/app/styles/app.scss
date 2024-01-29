@@ -63,6 +63,12 @@
 @use "tailwindcss/components";
 @use "tailwindcss/utilities";
 
+@layer utilities {
+  .hermes-h4 {
+    @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -119,6 +125,16 @@ h1 {
 
   > li:not(:first-child) {
     @apply border-t-color-border-faint;
+  }
+}
+
+.horizontally-divided-list {
+  li {
+    @apply border-l border-l-transparent;
+  }
+
+  > li:not(:first-child) {
+    @apply border-l-color-border-faint;
   }
 }
 
