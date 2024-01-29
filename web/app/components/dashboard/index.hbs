@@ -1,14 +1,13 @@
 <Dashboard::NewFeaturesBanner />
 
-<div class="mt-3 flex w-full">
+<h4 data-test-welcome-message class="hermes-h4 mt-3 mb-6">
+  Welcome back,
+  {{this.authenticatedUser.info.firstName}}!
+</h4>
+
+<div class="flex w-full flex-col-reverse bg-red-50 lg:flex-row lg:bg-white">
   <div class="min-h-[500px] w-full overflow-hidden pb-20">
     <div class="main pr-4">
-
-      <h4 data-test-welcome-message class="hermes-h4 mb-6">
-        Welcome back,
-        {{this.authenticatedUser.info.firstName}}!
-      </h4>
-
       {{#if @docsAwaitingReview}}
         <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
       {{/if}}
@@ -24,7 +23,7 @@
       </div>
 
       {{#if this.latestDocs.index.length}}
-        <ol class="mt-5">
+        <ol class="divided-list mt-5">
           {{#each this.latestDocs.index as |doc|}}
             <li class="group relative" data-test-latest-doc>
               <Doc::TileMedium @doc={{doc}} />
@@ -61,9 +60,10 @@
     </div>
   </div>
 
-  <div class="secondary flex w-72 shrink-0 pt-10">
+  {{! Recently Viewed }}
+  <div class="secondary flex w-72 shrink-0">
     <div
-      class="relative h-full w-full border-l border-l-color-border-primary pl-4"
+      class="relative h-full w-full border-l-color-border-primary lg:border-l lg:pl-4"
     >
 
       <div class="mt-2.5 flex w-full items-center justify-between pl-3">
@@ -73,7 +73,7 @@
       </div>
 
       {{#if this.viewedDocs.all}}
-        <ul class="mt-4">
+        <ul class="divided-list mt-4">
           {{#each this.viewedDocs.all as |r|}}
             <li data-test-recently-viewed-doc>
               <LinkTo

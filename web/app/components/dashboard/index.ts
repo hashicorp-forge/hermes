@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import LatestDocsService from "hermes/services/latest-docs";
+import ViewportService from "hermes/services/viewport";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -20,6 +21,12 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
   @service("recently-viewed-docs")
   declare viewedDocs: RecentlyViewedDocsService;
   @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare viewport: ViewportService;
+
+  protected get screenIsSmall(): boolean {
+    console.log(this.viewport.width);
+    return this.viewport.width < 1024;
+  }
 
   protected get linkToAllDocsIsShown(): boolean {
     return this.latestDocs.nbPages > 1;

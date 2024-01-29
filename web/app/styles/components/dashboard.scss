@@ -49,21 +49,6 @@
     }
   }
 
-  .main {
-    li {
-      @apply border-t border-t-color-border-faint;
-    }
-  }
-
-  .secondary {
-    li {
-      @apply border-b  border-color-border-faint;
-      &:last-child {
-        @apply border-0;
-      }
-    }
-  }
-
   .main-inner {
     @apply pr-8 pl-3;
   }
