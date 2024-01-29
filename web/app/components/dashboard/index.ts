@@ -9,6 +9,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
 import { debounce } from "@ember/runloop";
+import theme from "tailwindcss/defaultTheme";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -27,22 +28,21 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare viewport: ViewportService;
 
-  @tracked _scrollBody: HTMLElement | null = null;
+  @tracked scrollBody: HTMLElement | null = null;
 
-  @tracked _scrollLeftAffordanceIsShown = false;
-  @tracked _scrollRightAffordanceIsShown = false;
+  @tracked _canScrollBack = false;
+  @tracked _canScrollForward = false;
 
   protected get canScrollBack(): boolean {
-    return this._scrollLeftAffordanceIsShown && this.screenIsSmall;
+    return this._canScrollBack && this.screenIsSmall;
   }
 
   protected get canScrollForward(): boolean {
-    return this._scrollRightAffordanceIsShown && this.screenIsSmall;
+    return this._canScrollForward && this.screenIsSmall;
   }
 
   protected get screenIsSmall(): boolean {
-    // TODO: unify this with tailwind
-    return this.viewport.width < 1024;
+    return this.viewport.width < parseInt(theme.screens.lg);
   }
 
   protected get linkToAllDocsIsShown(): boolean {
@@ -50,47 +50,43 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
   }
 
   @action registerScrollBody(element: HTMLElement): void {
-    this._scrollBody = element;
+    this.scrollBody = element;
     this.updateAffordances();
   }
 
-  // the problem is that this is called on scroll but not on resize
-  // so we need to find a way to call this on resize
   @action updateAffordances(): void {
     debounce(() => {
-      if (!this._scrollBody) return;
+      if (!this.scrollBody) return;
       if (!this.screenIsSmall) {
-        this._scrollLeftAffordanceIsShown = false;
-        this._scrollRightAffordanceIsShown = false;
+        this._canScrollBack = false;
+        this._canScrollForward = false;
         return;
       } else {
-        const { scrollWidth, clientWidth, scrollLeft } = this._scrollBody;
+        const { scrollWidth, clientWidth, scrollLeft } = this.scrollBody;
 
         if (scrollLeft === 0) {
-          this._scrollLeftAffordanceIsShown = false;
+          this._canScrollBack = false;
         } else {
-          this._scrollLeftAffordanceIsShown = true;
+          this._canScrollBack = true;
         }
 
         if (scrollWidth - scrollLeft === clientWidth) {
-          this._scrollRightAffordanceIsShown = false;
+          this._canScrollForward = false;
         } else {
-          this._scrollRightAffordanceIsShown = true;
+          this._canScrollForward = true;
         }
       }
     }, 10);
   }
 
   @action scrollForward(): void {
-    assert("scroll body must be defined", this._scrollBody);
-
-    this._scrollBody.scrollBy({ left: 300, behavior: "smooth" });
+    assert("scroll body must be defined", this.scrollBody);
+    this.scrollBody.scrollBy({ left: 300, behavior: "smooth" });
   }
 
   @action scrollBack(): void {
-    assert("scroll body must be defined", this._scrollBody);
-
-    this._scrollBody.scrollBy({ left: -300, behavior: "smooth" });
+    assert("scroll body must be defined", this.scrollBody);
+    this.scrollBody.scrollBy({ left: -300, behavior: "smooth" });
   }
 }
 

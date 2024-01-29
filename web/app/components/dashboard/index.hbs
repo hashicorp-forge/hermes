@@ -14,7 +14,6 @@
       {{#if @docsAwaitingReview}}
         <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
       {{/if}}
-
       <div class="flex items-center gap-3.5">
         <h2>
           Latest docs
@@ -68,7 +67,6 @@
     <div
       class="relative h-full w-full border-l-color-border-primary lg:border-l lg:pl-4"
     >
-
       <div class="mt-2.5 flex w-full items-center justify-between lg:pl-3">
         <h4 class="max-lg:hermes-h4">
           Recently viewed
@@ -96,10 +94,8 @@
           />
         </div>
       </div>
-
       {{#if this.viewedDocs.all}}
         <div class="relative mt-4">
-
           <ul
             {{did-insert this.registerScrollBody}}
             {{on "scroll" this.updateAffordances}}
@@ -108,7 +104,6 @@
                 'horizontally-divided-list flex snap-x snap-proximity overflow-auto rounded-md pb-4'
                 'divided-list'
               }}"
-            {{! TODO: this needs some scrollbar bottom padding }}
           >
             {{#each this.viewedDocs.all as |r|}}
               <li
@@ -121,7 +116,6 @@
                   @query={{hash draft=r.doc.isDraft}}
                   class="px-3 pt-3 pb-3.5"
                 >
-                  {{! TODO: componentize? }}
                   <div class="flex w-full items-start gap-5">
                     <div class="w-full">
                       <div class="flex items-center gap-[3px]">
@@ -152,21 +146,17 @@
             {{/each}}
           </ul>
           {{! Scroll affordances }}
-
           <div
             class="scroll-affordance left-0 rounded-l-md bg-gradient-to-r
               {{unless this.canScrollBack 'opacity-0'}}"
             aria-hidden="true"
           />
-
           <div
             class="scroll-affordance right-0 rounded-r-md bg-gradient-to-l
               {{unless this.canScrollForward 'opacity-0'}}"
             aria-hidden="true"
           />
-
         </div>
-
       {{else}}
         <div data-test-no-viewed-docs class="empty-text px-3">
           You haven't viewed any documents yet.
