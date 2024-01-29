@@ -103,7 +103,7 @@ export default function (mirageConfig) {
 
             const filters = requestBody.filters;
 
-            // Currently only used by the dashboard to fetch docs awaiting review.
+            // Used by the dashboard to fetch docs awaiting review.
             if (filters?.includes("approvers")) {
               const approvers = filters.split("approvers:'")[1].split("'")[0];
               docMatches = schema.document.all().models.filter((doc) => {

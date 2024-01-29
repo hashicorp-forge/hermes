@@ -87,8 +87,6 @@ export default class RecentlyViewedDocsService extends Service {
         }
       });
 
-      // FIXME: for some reason `maybeFetchPeople` is undefined
-
       /**
        * Load the owner information for each document.
        */

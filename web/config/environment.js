@@ -78,9 +78,6 @@ module.exports = function (environment) {
     showEmberAnimatedTools: getEnv("SHOW_EMBER_ANIMATED_TOOLS", false),
 
     featureFlags: {},
-    tailwind: {
-      breakpointLg: 1024,
-    },
   };
 
   if (environment === "development") {

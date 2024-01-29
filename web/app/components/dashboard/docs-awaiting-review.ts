@@ -1,5 +1,5 @@
-import Component from "@glimmer/component";
 import { action } from "@ember/object";
+import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
 
