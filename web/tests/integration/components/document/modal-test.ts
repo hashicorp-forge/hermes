@@ -12,7 +12,6 @@ import { hbs } from "ember-cli-htmlbars";
 import { assert as emberAssert } from "@ember/debug";
 
 interface DocumentModalTestContext extends TestContext {
-  color?: string;
   headerText: string;
   errorTitle: string;
   bodyText?: string;
@@ -45,7 +44,6 @@ module("Integration | Component | document/modal", function (hooks) {
   test("it renders correctly", async function (this: DocumentModalTestContext, assert) {
     await render<DocumentModalTestContext>(hbs`
       <Document::Modal
-        @color="critical"
         @headerText={{this.headerText}}
         @bodyText="Are you sure you want to archive this document?"
         @errorTitle={{this.errorTitle}}
@@ -58,9 +56,6 @@ module("Integration | Component | document/modal", function (hooks) {
     `);
 
     assert
-      .dom(".hds-modal")
-      .hasClass("hds-modal--color-critical", "can take a @color argument");
-    assert
       .dom(".hds-modal__header")
       .hasText("Archive document?", "can take a @headerText argument");
 
@@ -68,7 +63,7 @@ module("Integration | Component | document/modal", function (hooks) {
       .dom(".hds-modal__body")
       .hasText(
         "Are you sure you want to archive this document?",
-        "can take a @bodyText argument"
+        "can take a @bodyText argument",
       );
 
     const primaryButton = find("[data-test-document-modal-primary-button]");
@@ -86,7 +81,7 @@ module("Integration | Component | document/modal", function (hooks) {
       .hasAttribute(
         "data-test-icon",
         "archive",
-        "can take a @taskButtonIcon argument"
+        "can take a @taskButtonIcon argument",
       );
 
     assert.dom(".hds-alert").doesNotExist("error is not shown by default");
@@ -108,7 +103,7 @@ module("Integration | Component | document/modal", function (hooks) {
   test("it yields a body block with a taskIsRunning property", async function (assert) {
     await render<DocumentModalTestContext>(hbs`
       <Document::Modal
-        @color="critical"
+
         @headerText={{this.headerText}}
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
@@ -148,7 +143,6 @@ module("Integration | Component | document/modal", function (hooks) {
   test("it shows a loading state when the primary task is running", async function (assert) {
     await render<DocumentModalTestContext>(hbs`
       <Document::Modal
-        @color="critical"
         @headerText={{this.headerText}}
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
@@ -179,12 +173,10 @@ module("Integration | Component | document/modal", function (hooks) {
   test("the task button can be disabled by the parent component", async function (assert) {
     await render<DocumentModalTestContext>(hbs`
       <Document::Modal
-        @color="critical"
         @headerText={{this.headerText}}
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-
         @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
@@ -203,12 +195,10 @@ module("Integration | Component | document/modal", function (hooks) {
 
     await render<DocumentModalTestContext>(hbs`
       <Document::Modal
-        @color="critical"
         @headerText={{this.headerText}}
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-
         @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}

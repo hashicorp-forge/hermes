@@ -655,7 +655,7 @@ export default function (mirageConfig) {
       /**
        * Used by the document sidebar to determine if a draft `isShareable`.
        */
-      this.get("/documents/:document_id/shareable", () => {
+      this.get("/drafts/:document_id/shareable", () => {
         return new Response(200, {}, { isShareable: false });
       });
 

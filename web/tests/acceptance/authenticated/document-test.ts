@@ -62,8 +62,8 @@ const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
 const READ_ONLY_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-read-only]";
-const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
-  "[data-test-sidebar-publish-for-review-button";
+const SIDEBAR_FOOTER_PRIMARY_BUTTON =
+  "[data-test-sidebar-footer-primary-button]";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
 const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
@@ -534,7 +534,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
 
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
 
@@ -574,7 +574,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
 
     await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
