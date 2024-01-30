@@ -58,7 +58,7 @@
         </div>
 
         <div class="pointer-events-none relative">
-          <div class="mt-1.5 flex gap-[5px] text-color-foreground-faint">
+          <div class="mt-1.5 text-color-foreground-faint">
             {{! Owner }}
             <LinkTo
               tabindex="-1"
@@ -66,28 +66,28 @@
               @route="authenticated.documents"
               @query={{hash owners=(array owner)}}
               disabled={{not owner}}
-              class="underline-on-hover"
+              class="underline-on-hover inline-block"
             >
               {{or (get-model-attr "person.name" owner) owner "Unknown"}}
             </LinkTo>
-            <span class="vertical-line">
-              |
+            <span class="vertical-line mx-0.5 inline-block">
+              /
             </span>
             {{! Product }}
             <ProductLink
               @product={{@doc.product}}
               tabindex="-1"
-              class="underline-on-hover"
+              class="underline-on-hover inline-block"
             >
               <:default>
                 {{@doc.product}}
               </:default>
             </ProductLink>
-            <span class="vertical-line">
-              |
+            <span class="vertical-line mx-0.5 inline-block">
+              /
             </span>
             {{! Created time }}
-            <span>
+            <span class="inline-block">
               {{time-ago @doc.createdTime}}
             </span>
           </div>

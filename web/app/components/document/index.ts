@@ -27,7 +27,7 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
 
   @tracked sidebarIsCollapsed = false;
 
@@ -48,7 +48,7 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
       if (!fetchResponse?.ok) {
         this.showError(fetchResponse?.statusText);
       } else {
-        void this.recentDocs.fetchAll.perform();
+        void this.viewedDocs.fetchAll.perform();
 
         this.flashMessages.add({
           message: "Document draft deleted",

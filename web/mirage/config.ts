@@ -103,6 +103,18 @@ export default function (mirageConfig) {
 
             const filters = requestBody.filters;
 
+            // Used by the dashboard to fetch docs awaiting review.
+            if (filters?.includes("approvers")) {
+              const approvers = filters.split("approvers:'")[1].split("'")[0];
+              docMatches = schema.document.all().models.filter((doc) => {
+                return doc.attrs.approvers.some((approver) => {
+                  return approvers.includes(approver);
+                });
+              });
+
+              return new Response(200, {}, { hits: docMatches });
+            }
+
             if (filters?.includes("NOT objectID")) {
               // there can be a number of objectIDs in the format of
               // NOT objectID:"1234" AND NOT objectID:"5678"
@@ -735,7 +747,7 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index);
+        return new Response(200, {}, index.slice(0, 10));
       });
 
       /**

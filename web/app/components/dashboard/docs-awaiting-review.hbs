@@ -1,24 +1,22 @@
-<div class="mb-12 w-full">
-  <div class="relative flex justify-between">
-    <h2 class="items-center self-center text-body-300 font-regular md:flex">
-      You have
+<div class="mb-10 w-full">
+  <div class="flex items-center">
+    <div class="flex items-center gap-3">
+      <h2>
+        Awaiting your review
+      </h2>
       <Hds::BadgeCount
         data-test-docs-awaiting-review-count
         @text="{{@docs.length}}"
-        @type="inverted"
-        class="mx-0.5 !bg-color-foreground-critical md:mx-1.5"
       />
-      document{{if (gt @docs.length 1) "s"}}
-      awaiting your review:
-    </h2>
-
+    </div>
   </div>
 
-  <ul class="mt-4">
+  <ul class="divided-list mt-5">
     {{#each this.docsToShow as |doc|}}
       <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
     {{/each}}
   </ul>
+
   {{#if this.toggleButtonIsShown}}
     <Action
       data-test-docs-awaiting-review-toggle
