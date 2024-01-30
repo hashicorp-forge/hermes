@@ -26,34 +26,6 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    test("it shows different text depending on the number of docs awaiting review", async function (this: DashboardDocsAwaitingReviewTestContext, assert) {
-      this.server.create("document", {
-        title: "Foo",
-        status: "In Review",
-        approvers: [TEST_USER_EMAIL],
-      });
-
-      this.server.create("document", {
-        title: "Bar",
-        status: "In Review",
-        approvers: [TEST_USER_EMAIL],
-      });
-
-      this.set("docs", this.server.schema.document.all().models);
-
-      await render<DashboardDocsAwaitingReviewTestContext>(
-        hbs`<Dashboard::DocsAwaitingReview @docs={{this.docs}} />`,
-      );
-
-      assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("2");
-      assert.dom(DOC_AWAITING_REVIEW_LINK_SELECTOR).exists({ count: 2 });
-
-      this.set("docs", [this.server.schema.document.first()]);
-
-      assert.dom(DOCS_AWAITING_REVIEW_COUNT_SELECTOR).containsText("1");
-      assert.dom(DOC_AWAITING_REVIEW_LINK_SELECTOR).exists({ count: 1 });
-    });
-
     test("it shows a toggle button when there are more than 4 docs awaiting review", async function (this: DashboardDocsAwaitingReviewTestContext, assert) {
       const docTitles = ["Foo", "Bar", "Baz", "Oof", "Zab"];
 

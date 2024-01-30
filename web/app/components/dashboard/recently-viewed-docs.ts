@@ -10,6 +10,8 @@ import RecentlyViewedDocsService, {
   RecentlyViewedDoc,
 } from "hermes/services/recently-viewed-docs";
 
+export const RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT = 300;
+
 interface DashboardRecentlyViewedDocsComponentSignature {}
 
 export default class DashboardRecentlyViewedDocsComponent extends Component<DashboardRecentlyViewedDocsComponentSignature> {
@@ -70,14 +72,18 @@ export default class DashboardRecentlyViewedDocsComponent extends Component<Dash
 
   @action scrollForward(): void {
     assert("scroll body must be defined", this.scrollBody);
-    // TODO: make this number based on something
-    this.scrollBody.scrollBy({ left: 300, behavior: "smooth" });
+    this.scrollBody.scrollBy({
+      left: RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      behavior: "smooth",
+    });
   }
 
   @action scrollBack(): void {
     assert("scroll body must be defined", this.scrollBody);
-    // TODO: make this number based on something
-    this.scrollBody.scrollBy({ left: -300, behavior: "smooth" });
+    this.scrollBody.scrollBy({
+      left: -RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      behavior: "smooth",
+    });
   }
 }
 

@@ -1,10 +1,7 @@
 <div class="flex items-center gap-3.5">
-  <h2>
-    Latest docs
-  </h2>
-
+  <h2>Latest docs</h2>
   {{#if this.fetchIsRunning}}
-    <FlightIcon @name="running" />
+    <FlightIcon data-test-running-icon @name="running" />
   {{/if}}
 </div>
 
@@ -16,10 +13,10 @@
       </li>
     {{/each}}
   </ol>
-
   {{#if this.linkToAllDocsIsShown}}
     <div class="main-inner mt-5">
       <Hds::Button
+        data-test-link-to-all-docs
         @color="secondary"
         @text="See older documents"
         @icon="arrow-right"

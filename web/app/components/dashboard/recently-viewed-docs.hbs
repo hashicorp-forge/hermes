@@ -10,6 +10,7 @@
       </h4>
       <div class="flex gap-1 lg:hidden">
         <Hds::Button
+          data-test-scroll-back
           {{on "click" this.scrollBack}}
           @color="secondary"
           @icon="arrow-left"
@@ -20,6 +21,7 @@
           disabled={{not this.canScrollBack}}
         />
         <Hds::Button
+          data-test-scroll-forward
           {{on "click" this.scrollForward}}
           @color="secondary"
           @icon="arrow-right"
@@ -33,7 +35,8 @@
     </div>
     {{#if this.viewedDocs.all}}
       <div class="relative mt-4">
-        <ul
+        <ol
+          data-test-recently-viewed-docs
           {{did-insert this.registerScrollBody}}
           {{on "scroll" this.updateAffordances}}
           class="{{if
@@ -79,7 +82,7 @@
               </LinkTo>
             </li>
           {{/each}}
-        </ul>
+        </ol>
         {{! Scroll affordances }}
         <div
           class="scroll-affordance left-0 rounded-l-md bg-gradient-to-r
@@ -93,7 +96,7 @@
         />
       </div>
     {{else}}
-      <div data-test-no-viewed-docs class="empty-text px-3">
+      <div data-test-no-viewed-docs class="empty-text lg:px-3">
         You haven't viewed any documents yet.
       </div>
     {{/if}}
