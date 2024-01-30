@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -477,31 +476,20 @@ func ProjectHandler(srv server.Server) http.Handler {
 // getProductsForProject returns a slice of unique products for all Hermes
 // document related resources associated with the project.
 func getProductsForProject(proj models.Project, db *gorm.DB) ([]string, error) {
-	// Get Hermes document related resources for project.
-	_, hdrrs, err := proj.GetRelatedResources(db)
+	var productNames []string
+	err := db.Raw(`
+		SELECT DISTINCT p.name
+		FROM products p
+		INNER JOIN documents d ON p.id = d.product_id
+		INNER JOIN project_related_resource_hermes_documents prrhd ON d.id = prrhd.document_id
+		INNER JOIN project_related_resources prr ON prrhd.id = prr.related_resource_id
+		WHERE prr.project_id = ? AND prr.related_resource_type = 'project_related_resource_hermes_documents'
+		`, proj.ID).Scan(&productNames).Error
 	if err != nil {
-		return nil, fmt.Errorf("error getting related resources: %w", err)
+		return nil, fmt.Errorf("error getting products for project: %w", err)
 	}
 
-	products := []string{}
-	for _, hdrr := range hdrrs {
-		// Get document from database.
-		doc := models.Document{
-			GoogleFileID: hdrr.Document.GoogleFileID,
-		}
-		if err := doc.Get(db); err != nil {
-			return nil, fmt.Errorf(
-				"error getting document from database: %w, document_id: %s",
-				err, hdrr.Document.GoogleFileID)
-		}
-		product := doc.Product.Name
-
-		if !helpers.StringSliceContains(products, product) {
-			products = append(products, product)
-		}
-	}
-
-	return products, nil
+	return productNames, nil
 }
 
 // getProjectIDFromPath returns the project ID from a request path and
