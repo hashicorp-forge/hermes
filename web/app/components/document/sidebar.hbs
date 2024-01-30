@@ -308,135 +308,14 @@
   </div>
 
   {{#if this.footerIsShown}}
-    <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
-      {{#if this.footerControlsAreDisabled}}
-        <div class="-mb-1 px-3">
-          <div class="w-full border-t border-color-border-primary pt-3.5">
-            <div class="text-body-200 text-color-foreground-faint">
-              <h5
-                data-test-disabled-footer-h5
-                class="mb-1 flex items-center text-body-200 font-semibold text-color-foreground-primary"
-              >
-                {{if this.docIsLocked "Document is locked" "Read-only headers"}}
-                <FlightIcon
-                  @name="lock"
-                  class="-mt-px ml-1.5 shrink-0 text-color-foreground-faint"
-                />
-              </h5>
-              <p class="mb-1.5">
-                {{if
-                  this.docIsLocked
-                  "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
-                  "Weʼre unable to edit the metadata of files created offsite."
-                }}
-              </p>
-            </div>
-            {{#if this.docIsLocked}}
-              <Hds::Link::Standalone
-                @icon="arrow-right"
-                @iconPosition="trailing"
-                @text="See the issue on GitHub"
-                @size="small"
-                @href="https://github.com/hashicorp-forge/hermes/issues/181"
-              />
-            {{else}}
-              <div class="text-body-100 text-color-foreground-faint">
-                Create docs in-app for best results.
-              </div>
-            {{/if}}
-          </div>
-        </div>
-      {{else}}
-        {{#if this.isDraft}}
-          {{#if this.isOwner}}
-            <div class="flex items-start gap-2 px-3">
-              <Hds::Button
-                data-test-sidebar-publish-for-review-button
-                @text="Publish for review..."
-                @size="medium"
-                @color="primary"
-                class="w-full"
-                {{on "click" (set this "requestReviewModalIsShown" true)}}
-              />
-              <Hds::Button
-                @text="Delete"
-                @size="medium"
-                @color="critical"
-                @icon="trash"
-                @isIconOnly={{true}}
-                class="basis-0"
-                {{on "click" (fn (set this "deleteModalIsShown" true))}}
-              />
-            </div>
-          {{/if}}
-        {{else}}
-          {{#if this.isOwner}}
-            <div class="flex items-start gap-2 px-3">
-
-              <Hds::Button
-                @text={{this.moveToStatusButtonText}}
-                @size="medium"
-                @color={{this.moveToStatusButtonColor}}
-                class="w-full"
-                @icon={{if this.changeDocumentStatus.isRunning "loading"}}
-                disabled={{this.changeDocumentStatus.isRunning}}
-                {{on
-                  "click"
-                  (perform
-                    this.changeDocumentStatus
-                    this.moveToStatusButtonTargetStatus
-                  )
-                }}
-              />
-              <Hds::Button
-                @text="Archive"
-                @size="medium"
-                @color="critical"
-                @icon="archive"
-                @isIconOnly={{true}}
-                class="basis-0"
-                disabled={{(eq @document.status "Obsolete")}}
-                {{on "click" (fn (set this "archiveModalIsShown" true))}}
-              />
-            </div>
-
-          {{else}}
-            {{#if this.isApprover}}
-              <div class="gap-2 px-3">
-                <Hds::Button
-                  @text={{this.approveButtonText}}
-                  @size="medium"
-                  @color="primary"
-                  class="w-full"
-                  @icon={{if this.approve.isRunning "loading"}}
-                  disabled={{(or
-                    this.approve.isRunning
-                    this.requestChanges.isRunning
-                    this.hasApproved
-                  )}}
-                  {{on "click" (perform this.approve)}}
-                />
-                {{#if (eq @document.docType "FRD")}}
-                  <Hds::Button
-                    @text={{this.requestChangesButtonText}}
-                    @size="medium"
-                    @color="secondary"
-                    class="w-full"
-                    @icon={{if this.requestChanges.isRunning "loading"}}
-                    disabled={{(or
-                      this.approve.isRunning
-                      this.requestChanges.isRunning
-                      this.hasRequestedChanges
-                    )}}
-                    {{on "click" (perform this.requestChanges)}}
-                  />
-                {{/if}}
-              </div>
-            {{/if}}
-          {{/if}}
-        {{/if}}
-      {{/if}}
-    </div>
+    <Document::Sidebar::Footer
+      @controlsAreDisabled={{this.footerControlsAreDisabled}}
+      @primaryButtonAttrs={{this.primaryFooterButtonAttrs}}
+      @secondaryButtonAttrs={{this.secondaryFooterButtonAttrs}}
+      @secondaryButtonIsShown={{or this.isOwner (eq @document.docType "FRD")}}
+      @docIsLocked={{this.docIsLocked}}
+      class={{if this.editingIsDisabled "locked"}}
+    />
   {{/if}}
 {{/unless}}
 
@@ -467,15 +346,14 @@
 
   {{#if this.deleteModalIsShown}}
     <Document::Modal
-      @color="critical"
       @headerText="Delete draft?"
-      @bodyText="Are you sure you want to delete this draft?"
+      @bodyText="This action can't be undone."
       @errorTitle="Error deleting draft"
       @close={{this.closeDeleteModal}}
       @task={{perform this.deleteDraft}}
       @taskButtonText="Yes, delete"
+      @taskButtonColor="critical"
       @taskButtonLoadingText="Deleting..."
-      @taskButtonIcon="trash"
     />
   {{/if}}
 

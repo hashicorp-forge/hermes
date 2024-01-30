@@ -1,0 +1,62 @@
+<div data-test-sidebar-footer class="sidebar-footer" ...attributes>
+  {{#if @controlsAreDisabled}}
+    <div class="-mb-1 w-full border-t border-color-border-primary px-3 pt-3.5">
+      <h5
+        data-test-disabled-footer-h5
+        class="mb-1 flex items-center gap-1.5 text-body-200 font-semibold"
+      >
+        {{if @docIsLocked "Document is locked" "Read-only headers"}}
+        <FlightIcon
+          @name="lock"
+          class="-mt-px shrink-0 text-color-foreground-faint"
+        />
+      </h5>
+      <p class="mb-1.5 text-color-foreground-faint">
+        {{if
+          @docIsLocked
+          "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
+          "Weʼre unable to edit the metadata of files created offsite."
+        }}
+      </p>
+      {{#if @docIsLocked}}
+        <Hds::Link::Standalone
+          @icon="arrow-right"
+          @iconPosition="trailing"
+          @text="See the issue on GitHub"
+          @size="small"
+          @href="https://github.com/hashicorp-forge/hermes/issues/181"
+        />
+      {{else}}
+        <div class="text-body-100 text-color-foreground-faint">
+          Create docs in-app for best results.
+        </div>
+      {{/if}}
+    </div>
+  {{else}}
+    <div data-test-footer-controls class="flex items-start gap-2 px-3">
+      {{#let @primaryButtonAttrs as |p|}}
+        <Hds::Button
+          data-test-sidebar-footer-primary-button
+          {{on "click" p.action}}
+          @text={{p.text}}
+          @color={{p.color}}
+          disabled={{p.isDisabled}}
+          class="w-full"
+        />
+      {{/let}}
+      {{#if @secondaryButtonIsShown}}
+        {{#let @secondaryButtonAttrs as |s|}}
+          <Hds::Button
+            data-test-sidebar-footer-secondary-button
+            {{on "click" this.secondaryAction}}
+            @text={{s.text}}
+            @color={{s.color}}
+            disabled={{s.isDisabled}}
+            class="w-full"
+          />
+        {{/let}}
+
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

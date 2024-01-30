@@ -33,6 +33,7 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
+import { DocumentSidebarFooterButton } from "./sidebar/footer";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -489,7 +490,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * as well as approvers and owners who need doc-management controls.
    */
   protected get footerIsShown() {
-    return this.isApprover || this.isOwner || this.isContributor;
+    return this.isApprover || this.isOwner;
   }
 
   /**
@@ -802,6 +803,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     void this.save.perform("summary", this.summary);
   }
 
+  @action protected showRequestReviewModal(): void {
+    this.requestReviewModalIsShown = true;
+  }
+
+  @action protected showDeleteModal(): void {
+    this.deleteModalIsShown = true;
+  }
+
+  @action protected showArchiveModal(): void {
+    this.archiveModalIsShown = true;
+  }
+
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;
   }
@@ -842,6 +855,61 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         this.docType = docType;
       });
     }
+  }
+
+  /**
+   *
+   */
+  protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
+    const color =
+      this.isDraft || this.isApprover
+        ? "primary"
+        : this.moveToStatusButtonColor;
+
+    const text = this.isDraft
+      ? "Publish for review"
+      : this.isApprover
+      ? this.approveButtonText
+      : this.moveToStatusButtonText;
+
+    const action = this.isDraft
+      ? this.showRequestReviewModal
+      : this.isApprover
+      ? () => this.approve.perform()
+      : () =>
+          this.changeDocumentStatus.perform(
+            this.moveToStatusButtonTargetStatus,
+          );
+
+    const isDisabled =
+      this.approve.isRunning ||
+      this.requestChanges.isRunning ||
+      this.changeDocumentStatus.isRunning ||
+      this.hasApproved;
+
+    return { color, text, action, isDisabled };
+  }
+
+  protected get secondaryFooterButtonAttrs() {
+    const text = this.isDraft
+      ? "Delete"
+      : this.isOwner
+      ? "Archive"
+      : this.requestChangesButtonText;
+
+    const action = this.isDraft
+      ? this.showDeleteModal
+      : this.isOwner
+      ? this.showArchiveModal
+      : () => this.requestChanges.perform();
+
+    const isDisabled = this.isOwner
+      ? this.args.document.status === "Obsolete"
+      : this.approve.isRunning ||
+        this.requestChanges.isRunning ||
+        this.hasRequestedChanges;
+
+    return { text, action, isDisabled };
   }
 
   /**

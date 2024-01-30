@@ -53,6 +53,7 @@ const PRODUCT_SELECT_PRODUCT_NAME = "[data-test-product-value]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
 const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]`;
 const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
+const SIDEBAR_FOOTER = "[data-test-sidebar-footer]";
 
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 
@@ -145,10 +146,40 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.equal(getPageTitle(), "Test Document | Hermes");
   });
 
-  test("the footer is not shown", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test("the application footer is not shown", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", { objectID: 1, title: "Test Document" });
     await visit("/document/1");
     assert.dom(".footer").doesNotExist();
+  });
+
+  test("the sidebar footer is conditionally shown (published doc)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    }); // User is owner by default
+
+    await visit("/document/1");
+
+    assert.dom(SIDEBAR_FOOTER).exists("owners will always see a footer");
+
+    this.server.create("document", {
+      objectID: 2,
+      owners: [TEST_USER_2_EMAIL],
+      collaborators: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/2");
+
+    assert.dom(SIDEBAR_FOOTER).doesNotExist("collaborators don't see a footer");
+
+    this.server.create("document", {
+      objectID: 3,
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/3");
+
+    assert.dom(SIDEBAR_FOOTER).exists("approvers see a footer");
   });
 
   test("the page title is correct (draft)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

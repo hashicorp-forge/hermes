@@ -1,7 +1,6 @@
 <Hds::Modal
   ...attributes
   @onClose={{@close}}
-  @color={{@color}}
   @isDismissDisabled={{this.taskIsRunning}}
   as |M|
 >
@@ -29,7 +28,7 @@
         <Hds::Button
           data-test-document-modal-primary-button
           @text={{this.primaryButtonText}}
-          @color="primary"
+          @color={{or @taskButtonColor "primary"}}
           @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
           disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
           {{on "click" (perform this.task)}}
