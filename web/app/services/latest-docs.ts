@@ -6,10 +6,12 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import AlgoliaService from "./algolia";
+import StoreService from "./store";
 
 export default class LatestDocsService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
+  @service declare store: StoreService;
 
   /**
    * The index of the most recent documents.
@@ -42,6 +44,9 @@ export default class LatestDocsService extends Service {
     assert("response must exist", response);
 
     this.index = response.hits as HermesDocument[];
+
+    await this.store.maybeFetchPeople.perform(this.index);
+
     this.nbPages = response.nbPages;
   });
 }
