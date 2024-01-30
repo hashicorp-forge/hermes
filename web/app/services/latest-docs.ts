@@ -6,7 +6,7 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import AlgoliaService from "./algolia";
-import StoreService from "./store";
+import StoreService from "hermes/services/store";
 
 export default class LatestDocsService extends Service {
   @service("config") declare configSvc: ConfigService;
