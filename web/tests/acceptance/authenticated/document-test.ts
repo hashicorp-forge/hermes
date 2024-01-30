@@ -55,7 +55,7 @@ const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]
 const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
 const SIDEBAR_FOOTER = "[data-test-sidebar-footer]";
 
-const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
+const DISABLED_FOOTER_H5 = "[data-test-read-only-footer-headline]";
 
 const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
 const EDITABLE_PRODUCT_AREA_SELECTOR =

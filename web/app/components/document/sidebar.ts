@@ -826,13 +826,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * depending on the user's role and the document's status.
    */
   protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
-    const color =
-      this.isDraft ||
-      this.isApprover ||
-      (this.isOwner && this.args.document.status === "In-Review")
-        ? "primary"
-        : "secondary";
-
     const text = this.isDraft
       ? "Publish for review"
       : this.isApprover
@@ -856,7 +849,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.changeDocumentStatus.isRunning ||
       this.hasApproved;
 
-    return { color, text, action, isDisabled };
+    return { text, action, isDisabled };
   }
 
   /**

@@ -309,7 +309,7 @@
 
   {{#if this.footerIsShown}}
     <Document::Sidebar::Footer
-      @controlsAreDisabled={{this.footerControlsAreDisabled}}
+      @isReadOnly={{this.footerControlsAreDisabled}}
       @primaryButtonAttrs={{this.primaryFooterButtonAttrs}}
       @secondaryButtonAttrs={{this.secondaryFooterButtonAttrs}}
       @secondaryButtonIsShown={{or this.isOwner (eq @document.docType "FRD")}}

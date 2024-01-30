@@ -1,8 +1,11 @@
 <div data-test-sidebar-footer class="sidebar-footer" ...attributes>
-  {{#if @controlsAreDisabled}}
-    <div class="-mb-1 w-full border-t border-color-border-primary px-3 pt-3.5">
+  {{#if @isReadOnly}}
+    <div
+      data-test-read-only
+      class="-mb-1 w-full border-t border-color-border-primary px-3 pt-3.5"
+    >
       <h5
-        data-test-disabled-footer-h5
+        data-test-read-only-footer-headline
         class="mb-1 flex items-center gap-1.5 text-body-200 font-semibold"
       >
         {{if @docIsLocked "Document is locked" "Read-only headers"}}
@@ -11,7 +14,10 @@
           class="-mt-px shrink-0 text-color-foreground-faint"
         />
       </h5>
-      <p class="mb-1.5 text-color-foreground-faint">
+      <p
+        data-test-read-only-footer-paragraph
+        class="mb-1.5 text-color-foreground-faint"
+      >
         {{if
           @docIsLocked
           "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
@@ -20,6 +26,7 @@
       </p>
       {{#if @docIsLocked}}
         <Hds::Link::Standalone
+          data-test-locked-doc-link
           @icon="arrow-right"
           @iconPosition="trailing"
           @text="See the issue on GitHub"
@@ -27,33 +34,36 @@
           @href="https://github.com/hashicorp-forge/hermes/issues/181"
         />
       {{else}}
-        <div class="text-body-100 text-color-foreground-faint">
+        <div
+          data-test-read-only-doc-note
+          class="text-body-100 text-color-foreground-faint"
+        >
           Create docs in-app for best results.
         </div>
       {{/if}}
     </div>
   {{else}}
     <div data-test-footer-controls class="flex items-start gap-2 px-3">
-      {{#let @primaryButtonAttrs as |p|}}
+      {{#let @primaryButtonAttrs as |b|}}
         <Hds::Button
           data-test-sidebar-footer-primary-button
-          {{on "click" p.action}}
-          @text={{p.text}}
-          @color={{p.color}}
-          disabled={{p.isDisabled}}
+          {{on "click" b.action}}
+          @text={{b.text}}
+          disabled={{b.isDisabled}}
+          @color="primary"
           class="w-full"
         />
       {{/let}}
       {{#if @secondaryButtonIsShown}}
-        {{#let @secondaryButtonAttrs as |s|}}
+        {{#let @secondaryButtonAttrs as |b|}}
           <Hds::Button
             data-test-sidebar-footer-secondary-button
             {{on "click" this.secondaryAction}}
-            @text={{s.text}}
+            @text={{b.text}}
+            @icon={{b.icon}}
+            @isIconOnly={{b.isIconOnly}}
+            disabled={{b.isDisabled}}
             @color="secondary"
-            @icon={{s.icon}}
-            @isIconOnly={{s.isIconOnly}}
-            disabled={{s.isDisabled}}
             class="shrink-0"
           />
         {{/let}}

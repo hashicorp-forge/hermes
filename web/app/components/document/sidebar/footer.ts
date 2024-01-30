@@ -6,11 +6,10 @@ import { HermesDocument } from "hermes/types/document";
 
 export interface DocumentSidebarFooterButton {
   text: string;
-  color?: HdsButtonColor;
   action: () => void;
-  isDisabled?: boolean;
-  icon?: string;
-  isIconOnly?: boolean;
+  isDisabled?: boolean; // primary only
+  icon?: string; // secondary only
+  isIconOnly?: boolean; // secondary only
 }
 
 interface DocumentSidebarFooterComponentSignature {
@@ -18,7 +17,7 @@ interface DocumentSidebarFooterComponentSignature {
   Args: {
     primaryButtonAttrs: DocumentSidebarFooterButton;
     secondaryButtonAttrs?: DocumentSidebarFooterButton;
-    controlsAreDisabled?: boolean;
+    isReadOnly?: boolean;
     secondaryButtonIsShown?: boolean;
     docIsLocked?: boolean;
     icon?: string;
