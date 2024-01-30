@@ -45,6 +45,7 @@ export default class LatestDocsService extends Service {
 
     this.index = response.hits as HermesDocument[];
 
+    // Load the owner information
     await this.store.maybeFetchPeople.perform(this.index);
 
     this.nbPages = response.nbPages;
