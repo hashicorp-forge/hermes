@@ -17,7 +17,6 @@ interface DocumentModalTestContext extends TestContext {
   bodyText?: string;
   taskButtonText: string;
   taskButtonLoadingText: string;
-  taskButtonIcon?: string;
   taskButtonIsDisabled?: boolean;
   hideFooterWhileSaving?: boolean;
   close: () => void;
@@ -35,7 +34,6 @@ module("Integration | Component | document/modal", function (hooks) {
     this.set("errorTitle", "Error title");
     this.set("taskButtonText", "Yes, archive");
     this.set("taskButtonLoadingText", "Archiving...");
-    this.set("taskButtonIcon", "archive");
     this.set("task", async () => {
       return new Promise((resolve) => setTimeout(resolve, 10));
     });
@@ -49,7 +47,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-        @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
       />
@@ -73,16 +70,6 @@ module("Integration | Component | document/modal", function (hooks) {
     assert
       .dom(primaryButton)
       .hasText("Yes, archive", "can take a @taskButtonText argument");
-
-    const primaryButtonIcon = primaryButton.querySelector(".flight-icon");
-
-    assert
-      .dom(primaryButtonIcon)
-      .hasAttribute(
-        "data-test-icon",
-        "archive",
-        "can take a @taskButtonIcon argument",
-      );
 
     assert.dom(".hds-alert").doesNotExist("error is not shown by default");
 
@@ -109,7 +96,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
 
-        @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
       >
@@ -147,7 +133,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-        @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
       />
@@ -157,7 +142,7 @@ module("Integration | Component | document/modal", function (hooks) {
     const iconSelector = buttonSelector + " .flight-icon";
 
     assert.dom(buttonSelector).hasText("Yes, archive");
-    assert.dom(iconSelector).hasAttribute("data-test-icon", "archive");
+    assert.dom(iconSelector).doesNotExist();
 
     const clickPromise = click(buttonSelector);
 
@@ -177,7 +162,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-        @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
         @taskButtonIsDisabled={{true}}
@@ -199,7 +183,6 @@ module("Integration | Component | document/modal", function (hooks) {
         @errorTitle={{this.errorTitle}}
         @taskButtonLoadingText={{this.taskButtonLoadingText}}
         @taskButtonText={{this.taskButtonText}}
-        @taskButtonIcon={{this.taskButtonIcon}}
         @close={{this.close}}
         @task={{this.task}}
       />

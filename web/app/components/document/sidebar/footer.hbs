@@ -50,9 +50,11 @@
             data-test-sidebar-footer-secondary-button
             {{on "click" this.secondaryAction}}
             @text={{s.text}}
-            @color={{s.color}}
+            @color="secondary"
+            @icon={{s.icon}}
+            @isIconOnly={{s.isIconOnly}}
             disabled={{s.isDisabled}}
-            class="w-full"
+            class="shrink-0"
           />
         {{/let}}
 

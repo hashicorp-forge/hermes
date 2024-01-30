@@ -276,31 +276,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return customEditableFields;
   }
 
-  get approveButtonText() {
-    if (!this.hasApproved) {
-      return "Approve";
-    } else {
-      return "Already approved";
-    }
-  }
-
-  get requestChangesButtonText() {
-    // FRDs are a special case that can be approved or not approved.
-    if (this.args.document.docType === "FRD") {
-      if (!this.hasRequestedChanges) {
-        return "Not approved";
-      } else {
-        return "Already not approved";
-      }
-    }
-
-    if (!this.hasRequestedChanges) {
-      return "Request changes";
-    } else {
-      return "Already requested changes";
-    }
-  }
-
   @action onDocTypeCheckboxChange(event: Event) {
     const eventTarget = event.target;
     assert(
@@ -310,17 +285,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docTypeCheckboxValue = eventTarget.checked;
   }
 
-  get moveToStatusButtonColor() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "primary";
-      default:
-        return "secondary";
-    }
-  }
-
-  // moveToStatusButtonTargetStatus returns the target status that the button
-  // will move a document to.
+  /**
+   * The status that clicking the footer button will move a document to.
+   */
   get moveToStatusButtonTargetStatus() {
     switch (this.args.document.status) {
       case "In-Review":
@@ -386,10 +353,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     if (this.showCreateLinkSuccessMessage.isRunning) {
       return "smile";
     }
-  }
-
-  get moveToStatusButtonText() {
-    return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
   // isApprover returns true if the logged in user is a document approver.
@@ -858,19 +821,25 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
-   *
+   * The attributes for the primary footer button.
+   * Returns an object with the color, text and action for the button.
+   * depending on the user's role and the document's status.
    */
   protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
     const color =
-      this.isDraft || this.isApprover
+      this.isDraft ||
+      this.isApprover ||
+      (this.isOwner && this.args.document.status === "In-Review")
         ? "primary"
-        : this.moveToStatusButtonColor;
+        : "secondary";
 
     const text = this.isDraft
       ? "Publish for review"
       : this.isApprover
-      ? this.approveButtonText
-      : this.moveToStatusButtonText;
+      ? this.hasApproved
+        ? "Already approved"
+        : "Approve"
+      : `Move to ${this.moveToStatusButtonTargetStatus}`;
 
     const action = this.isDraft
       ? this.showRequestReviewModal
@@ -890,12 +859,26 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return { color, text, action, isDisabled };
   }
 
+  /**
+   * The attributes for the secondary footer button,
+   * when it is shown. Returns an object with the text and action for the button
+   * determined by the user's role and the document's status.
+   */
   protected get secondaryFooterButtonAttrs() {
+    const requestChangesText =
+      this.args.document.docType === "FRD"
+        ? this.hasRequestedChanges
+          ? "Rejected"
+          : "Reject"
+        : this.hasRequestedChanges
+        ? "Changes requested"
+        : "Request changes";
+
     const text = this.isDraft
       ? "Delete"
       : this.isOwner
       ? "Archive"
-      : this.requestChangesButtonText;
+      : requestChangesText;
 
     const action = this.isDraft
       ? this.showDeleteModal
@@ -909,7 +892,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         this.requestChanges.isRunning ||
         this.hasRequestedChanges;
 
-    return { text, action, isDisabled };
+    const icon = this.isDraft ? "trash" : "archive";
+    const isIconOnly = this.isOwner;
+
+    return { text, action, isDisabled, icon, isIconOnly };
   }
 
   /**

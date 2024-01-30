@@ -10,6 +10,7 @@ export interface DocumentSidebarFooterButton {
   action: () => void;
   isDisabled?: boolean;
   icon?: string;
+  isIconOnly?: boolean;
 }
 
 interface DocumentSidebarFooterComponentSignature {
@@ -20,6 +21,7 @@ interface DocumentSidebarFooterComponentSignature {
     controlsAreDisabled?: boolean;
     secondaryButtonIsShown?: boolean;
     docIsLocked?: boolean;
+    icon?: string;
   };
   Blocks: {
     default: [];

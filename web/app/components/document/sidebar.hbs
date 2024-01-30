@@ -333,14 +333,13 @@
   {{#if this.archiveModalIsShown}}
     <Document::Modal
       @headerText="Archive document?"
-      @bodyText="Are you sure you want to archive this document?"
+      @bodyText="This will label your document as obsolete."
       @errorTitle="Error archiving document"
       @close={{this.closeArchiveModal}}
       @task={{perform this.changeDocumentStatus "Obsolete"}}
       @taskButtonText="Yes, archive"
       @taskButtonLoadingText="Archiving..."
       @taskButtonColor="critical"
-      @taskButtonIcon="archive"
     />
   {{/if}}
 

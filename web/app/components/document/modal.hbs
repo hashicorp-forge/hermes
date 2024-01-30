@@ -29,7 +29,7 @@
           data-test-document-modal-primary-button
           @text={{this.primaryButtonText}}
           @color={{or @taskButtonColor "primary"}}
-          @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
+          @icon={{if this.taskIsRunning "loading"}}
           disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
           {{on "click" (perform this.task)}}
         />

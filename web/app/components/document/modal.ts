@@ -13,7 +13,6 @@ interface DocumentModalComponentSignature {
     errorTitle?: string;
     taskButtonText?: string;
     taskButtonLoadingText?: string;
-    taskButtonIcon?: string;
     taskButtonIsDisabled?: boolean;
     taskButtonColor?: HdsModalColor;
     hideFooterWhileSaving?: boolean;
