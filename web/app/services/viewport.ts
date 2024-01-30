@@ -29,7 +29,6 @@ export default class ViewportService extends Service {
     debounce(
       this,
       (): void => {
-        console.log("onResize");
         this.width = window.innerWidth;
       },
       10,

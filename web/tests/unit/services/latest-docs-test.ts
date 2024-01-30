@@ -4,7 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
 import LatestDocsService from "hermes/services/latest-docs";
 
-interface LatestDocsServiceContext extends MirageTestContext {
+interface Context extends MirageTestContext {
   latestDocs: LatestDocsService;
 }
 
@@ -12,11 +12,11 @@ module("Unit | Service | latest", function (hooks) {
   setupTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function (this: LatestDocsServiceContext) {
+  hooks.beforeEach(function (this: Context) {
     this.set("latestDocs", this.owner.lookup("service:latest-docs"));
   });
 
-  test("it fetches latest docs", async function (this: LatestDocsServiceContext, assert) {
+  test("it fetches latest docs", async function (this: Context, assert) {
     this.server.createList("document", 10);
 
     assert.equal(this.latestDocs.index, null, "the index is empty");
