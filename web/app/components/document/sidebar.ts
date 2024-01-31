@@ -827,10 +827,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
     const text = this.isDraft
-      ? "Publish for review"
+      ? "Publish for review..."
       : this.isApprover
       ? this.hasApproved
-        ? "Already approved"
+        ? "Approved"
         : "Approve"
       : `Move to ${this.moveToStatusButtonTargetStatus}`;
 
@@ -879,11 +879,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       ? this.showArchiveModal
       : () => this.requestChanges.perform();
 
-    const isDisabled = this.isOwner
-      ? this.args.document.status === "Obsolete"
-      : this.approve.isRunning ||
-        this.requestChanges.isRunning ||
-        this.hasRequestedChanges;
+    const isDisabled =
+      this.approve.isRunning ||
+      this.requestChanges.isRunning ||
+      this.hasRequestedChanges;
 
     const icon = this.isDraft ? "trash" : "archive";
     const isIconOnly = this.isOwner;

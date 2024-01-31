@@ -312,7 +312,10 @@
       @isReadOnly={{this.footerControlsAreDisabled}}
       @primaryButtonAttrs={{this.primaryFooterButtonAttrs}}
       @secondaryButtonAttrs={{this.secondaryFooterButtonAttrs}}
-      @secondaryButtonIsShown={{or this.isOwner (eq @document.docType "FRD")}}
+      @secondaryButtonIsShown={{or
+        (and this.isOwner (not (eq @document.status "Obsolete")))
+        (eq @document.docType "FRD")
+      }}
       @docIsLocked={{this.docIsLocked}}
       class={{if this.editingIsDisabled "locked"}}
     />

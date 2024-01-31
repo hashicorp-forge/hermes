@@ -512,6 +512,10 @@ module("Acceptance | authenticated/document", function (hooks) {
     assertEditingIsDisabled(assert);
   });
 
+  test("approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("approvers can reject an FRD", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
@@ -533,6 +537,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1?draft=true");
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Publish for review...");
 
     await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
 
@@ -855,6 +861,24 @@ module("Acceptance | authenticated/document", function (hooks) {
       .dom(DISABLED_FOOTER_H5)
       .hasText("Document is locked", "shows the locked-doc message");
   });
+
+  test("the doc owner can move an in-review doc to approved", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // test that the buttons get disabled onChangeDocumentStatus
+  });
+
+  test("the doc owner can move an approved doc to in-review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // test that the buttons get disabled onChangeDocumentStatus
+  });
+
+  test("drafts can be deleted", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("published docs can be archived", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("changes can be requested on FRDs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // test that buttons get disabled onRequestChanges
+  });
+
+  test("archived documents do not render a secondary footer button", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 
   test("the doc is locked if it's not app-created", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
