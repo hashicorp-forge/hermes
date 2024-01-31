@@ -521,6 +521,28 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used when approving a document.
+       * Adds the user's email to the `approvedBy` array.
+       */
+      this.post("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
+            const approvedBy = document.attrs.approvedBy || [];
+            document.update({
+              approvedBy: [...approvedBy, TEST_USER_EMAIL],
+            });
+          }
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
       this.post("/me/subscriptions", () => {
@@ -616,11 +638,6 @@ export default function (mirageConfig) {
        * Used to confirm that an approver has access to a document.
        */
       this.get("/people", (schema, request) => {
-        // This allows the test user to view docs they're an approver on.
-        if (request.queryParams.emails === TEST_USER_EMAIL) {
-          return new Response(200, {}, []);
-        }
-
         if (request.queryParams.emails !== "") {
           const emails = request.queryParams.emails.split(",");
 
@@ -866,6 +883,21 @@ export default function (mirageConfig) {
 
           document.update(attrs);
 
+          return new Response(200, {}, document.attrs);
+        }
+      });
+
+      /**
+       * Used by the sidebar to update a document,
+       * e.g., to change a its status.
+       */
+      this.patch("/documents/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+          document.update(attrs);
           return new Response(200, {}, document.attrs);
         }
       });
