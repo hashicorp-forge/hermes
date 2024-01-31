@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -21,6 +22,7 @@ import (
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
+	"gorm.io/gorm"
 )
 
 type DraftsRequest struct {
@@ -626,15 +628,25 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			GoogleFileID: docID,
 		}
 		if err := model.Get(srv.DB); err != nil {
-			srv.Logger.Error("error getting document draft from database",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w, "Error requesting document draft",
-				http.StatusInternalServerError)
-			return
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				srv.Logger.Warn("document draft record not found",
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Draft not found", http.StatusNotFound)
+				return
+			} else {
+				srv.Logger.Error("error getting document draft from database",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error requesting document draft",
+					http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Get reviews for the document.

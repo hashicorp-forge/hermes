@@ -59,14 +59,25 @@ func DocumentHandler(srv server.Server) http.Handler {
 			GoogleFileID: docID,
 		}
 		if err := model.Get(srv.DB); err != nil {
-			srv.Logger.Error("error getting document draft from database",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w, "Error processing request", http.StatusInternalServerError)
-			return
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				srv.Logger.Warn("document record not found",
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Document not found", http.StatusNotFound)
+				return
+			} else {
+				srv.Logger.Error("error getting document from database",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error requesting document",
+					http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Get reviews for the document.
