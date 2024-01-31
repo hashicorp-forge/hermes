@@ -1,8 +1,7 @@
 import Component from "@glimmer/component";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -15,9 +14,11 @@ interface DashboardIndexComponentSignature {
 }
 
 export default class DashboardIndexComponent extends Component<DashboardIndexComponentSignature> {
-  @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
   @service declare authenticatedUser: AuthenticatedUserService;
+
+  protected get firstName(): string {
+    return this.authenticatedUser.info.firstName;
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

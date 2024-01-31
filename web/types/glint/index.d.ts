@@ -3,6 +3,7 @@ import "@glint/environment-ember-template-imports";
 import EmberPageTitleHelper from "ember-page-title";
 import PerformHelper from "ember-concurrency/helpers/perform";
 import OnDocumentHelper from "ember-on-helper/helpers/on-document";
+import OnWindowHelper from "ember-on-helper/helpers/on-window";
 import DidInsertModifier from "ember-render-modifiers/modifiers/did-insert";
 import WillDestroyModifier from "ember-render-modifiers/modifiers/will-destroy";
 import AndHelper from "ember-truth-helpers/helpers/and";
@@ -50,6 +51,7 @@ declare module "@glint/environment-ember-loose/registry" {
     "did-insert": typeof DidInsertModifier;
     "will-destroy": typeof WillDestroyModifier;
     "on-document": typeof OnDocumentHelper;
+    "on-window": typeof OnWindowHelper;
     "set-body-class": typeof EmberSetBodyClassHelper;
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;

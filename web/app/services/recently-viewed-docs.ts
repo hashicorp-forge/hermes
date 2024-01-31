@@ -6,8 +6,8 @@ import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import StoreService from "./store";
-import SessionService from "./_session";
+import SessionService from "hermes/services/session";
+import StoreService from "hermes/services/store";
 
 type IndexedDoc = {
   id: string;
@@ -55,13 +55,6 @@ export default class RecentlyViewedDocsService extends Service {
       this.index = (await fetchResponse?.json()) || [];
 
       assert("fetchAll expects index", this.index);
-
-      /**
-       * Ensure that the index is no more than 4 items.
-       * Applies to legacy users viewing the dashboard for the
-       * first time since drafts were added to the index.
-       */
-      this.index = this.index.slice(0, 4);
 
       /**
        * Get the documents from the backend.

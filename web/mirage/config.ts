@@ -103,6 +103,18 @@ export default function (mirageConfig) {
 
             const filters = requestBody.filters;
 
+            // Used by the dashboard to fetch docs awaiting review.
+            if (filters?.includes("approvers")) {
+              const approvers = filters.split("approvers:'")[1].split("'")[0];
+              docMatches = schema.document.all().models.filter((doc) => {
+                return doc.attrs.approvers.some((approver) => {
+                  return approvers.includes(approver);
+                });
+              });
+
+              return new Response(200, {}, { hits: docMatches });
+            }
+
             if (filters?.includes("NOT objectID")) {
               // there can be a number of objectIDs in the format of
               // NOT objectID:"1234" AND NOT objectID:"5678"
@@ -509,6 +521,28 @@ export default function (mirageConfig) {
       });
 
       /**
+       * Used when approving a document.
+       * Adds the user's email to the `approvedBy` array.
+       */
+      this.post("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
+            const approvedBy = document.attrs.approvedBy || [];
+            document.update({
+              approvedBy: [...approvedBy, TEST_USER_EMAIL],
+            });
+          }
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
       this.post("/me/subscriptions", () => {
@@ -604,11 +638,6 @@ export default function (mirageConfig) {
        * Used to confirm that an approver has access to a document.
        */
       this.get("/people", (schema, request) => {
-        // This allows the test user to view docs they're an approver on.
-        if (request.queryParams.emails === TEST_USER_EMAIL) {
-          return new Response(200, {}, []);
-        }
-
         if (request.queryParams.emails !== "") {
           const emails = request.queryParams.emails.split(",");
 
@@ -735,7 +764,7 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index);
+        return new Response(200, {}, index.slice(0, 10));
       });
 
       /**
@@ -854,6 +883,21 @@ export default function (mirageConfig) {
 
           document.update(attrs);
 
+          return new Response(200, {}, document.attrs);
+        }
+      });
+
+      /**
+       * Used by the sidebar to update a document,
+       * e.g., to change a its status.
+       */
+      this.patch("/documents/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+          document.update(attrs);
           return new Response(200, {}, document.attrs);
         }
       });

@@ -7,14 +7,18 @@ import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
+import { assert } from "@ember/debug";
+import LatestDocsService from "hermes/services/latest-docs";
 import StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
-  @service declare algolia: AlgoliaService;
+  @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service("recently-viewed-docs")
-  declare recentDocs: RecentlyViewedDocsService;
+  declare viewedDocs: RecentlyViewedDocsService;
+
+  @service declare algolia: AlgoliaService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare store: StoreService;
@@ -22,7 +26,7 @@ export default class DashboardRoute extends Route {
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
 
-    const docsAwaitingReview = await this.algolia.searchIndex
+    const docsAwaitingReviewPromise = this.algolia.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {
         filters:
           `approvers:'${userInfo.email}'` +
@@ -32,10 +36,9 @@ export default class DashboardRoute extends Route {
       })
       .then((result) => result.hits as HermesDocument[]);
 
-    if (docsAwaitingReview.length > 0) {
-      // load owner information
-      await this.store.maybeFetchPeople.perform(docsAwaitingReview);
-    }
+    let promises: Promise<HermesDocument[] | void>[] = [
+      docsAwaitingReviewPromise,
+    ];
 
     /**
      * If the user is loading the dashboard for the first time,
@@ -53,10 +56,25 @@ export default class DashboardRoute extends Route {
      * finished by the time the user returns to the dashboard.
      *
      */
-    if (this.recentDocs.all) {
-      void this.recentDocs.fetchAll.perform();
+    if (this.latestDocs.index) {
+      void this.latestDocs.fetchAll.perform();
     } else {
-      await this.recentDocs.fetchAll.perform();
+      promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
+    }
+
+    if (this.viewedDocs.all) {
+      void this.viewedDocs.fetchAll.perform();
+    } else {
+      promises.push(this.viewedDocs.fetchAll.perform());
+    }
+
+    const [docsAwaitingReview] = await Promise.all(promises);
+
+    assert("docsAwaitingReview must exist", docsAwaitingReview);
+
+    if (docsAwaitingReview.length > 0) {
+      // load owner information
+      await this.store.maybeFetchPeople.perform(docsAwaitingReview);
     }
 
     return docsAwaitingReview;

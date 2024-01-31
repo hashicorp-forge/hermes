@@ -8,6 +8,7 @@
 @use "./animations";
 @use "./typography";
 
+@use "components/dashboard";
 @use "components/new";
 @use "components/toolbar";
 @use "components/x-tooltip";
@@ -28,7 +29,6 @@
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
 @use "components/header/search";
-@use "components/dashboard/docs-awaiting-review/doc";
 @use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
@@ -62,6 +62,12 @@
 @use "tailwindcss/base";
 @use "tailwindcss/components";
 @use "tailwindcss/utilities";
+
+@layer utilities {
+  .hermes-h4 {
+    @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
+  }
+}
 
 *,
 *::before,
@@ -119,6 +125,16 @@ h1 {
 
   > li:not(:first-child) {
     @apply border-t-color-border-faint;
+  }
+}
+
+.horizontally-divided-list {
+  li {
+    @apply border-l border-l-transparent;
+  }
+
+  > li:not(:first-child) {
+    @apply border-l-color-border-faint;
   }
 }
 
