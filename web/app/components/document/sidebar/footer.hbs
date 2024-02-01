@@ -59,6 +59,7 @@
           />
         {{else}}
           <div
+            data-test-sidebar-footer-primary-button-read-only
             class="hds-button mock-disabled hds-button--primary hds-button--size-medium w-full leading-none"
           >
             {{p.text}}
@@ -67,10 +68,15 @@
         {{#let @secondaryButtonAttrs as |s|}}
           {{#if s}}
             {{#if s.actions}}
-              <X::DropdownList @items={{s.actions}} @placement="top-end">
+              <X::DropdownList
+                data-test-sidebar-footer-overflow-menu
+                @items={{s.actions}}
+                @placement="top-end"
+              >
                 <:anchor as |dd|>
                   <dd.ToggleAction>
                     <Hds::Button
+                      data-test-sidebar-footer-secondary-dropdown-button
                       @text="More actions"
                       @color="secondary"
                       @icon={{if s.isRunning "running" "more-vertical"}}

@@ -12,12 +12,13 @@ const READ_ONLY_DOC_NOTE = "[data-test-read-only-doc-note]";
 const CONTROLS = "[data-test-footer-controls]";
 const LOCKED_DOC_LINK = "[data-test-locked-doc-link]";
 const SECONDARY_BUTTON = "[data-test-sidebar-footer-secondary-button]";
+const SECONDARY_OVERFLOW_BUTTON =
+  "[data-test-sidebar-footer-secondary-dropdown-button]";
 const PRIMARY_BUTTON = "[data-test-sidebar-footer-primary-button]";
 
 interface Context extends MirageTestContext {
   primaryButtonAttrs: DocumentSidebarFooterButton;
   secondaryButtonAttrs: DocumentSidebarFooterButton;
-  secondaryButtonIsShown: boolean;
   isReadOnly: boolean;
   docIsLocked: boolean;
 }
@@ -104,24 +105,40 @@ module("Integration | Component | document/sidebar/footer", function (hooks) {
   });
 
   test("it conditionally renders a secondary button", async function (this: Context, assert) {
-    this.set("secondaryButtonIsShown", false);
+    this.set("secondaryButtonAttrs", undefined);
 
     await render<Context>(hbs`
       <Document::Sidebar::Footer
         @primaryButtonAttrs={{this.primaryButtonAttrs}}
         @secondaryButtonAttrs={{this.secondaryButtonAttrs}}
-        @secondaryButtonIsShown={{this.secondaryButtonIsShown}}
       />
     `);
 
     assert.dom(SECONDARY_BUTTON).doesNotExist();
 
-    this.set("secondaryButtonIsShown", true);
+    this.set("secondaryButtonAttrs", {
+      text: "Cancel",
+      action: () => {},
+    });
 
-    assert.dom(SECONDARY_BUTTON).exists();
+    assert
+      .dom(SECONDARY_BUTTON)
+      .exists(
+        'it renders the secondary button when "secondaryButtonAttrs" is defined',
+      );
+
+    this.set("secondaryButtonAttrs", {
+      actions: [{ text: "Cancel", action: () => {}, icon: "cancel" }],
+    });
+
+    assert
+      .dom(SECONDARY_OVERFLOW_BUTTON)
+      .exists(
+        'it renders an overflow button when "secondaryButtonAttrs" contains an actions array',
+      );
   });
 
-  test("the secondary button renders as expected", async function (this: Context, assert) {
+  test("the secondary button functions as expected", async function (this: Context, assert) {
     let count = 0;
 
     const text = "Archive";
@@ -138,7 +155,6 @@ module("Integration | Component | document/sidebar/footer", function (hooks) {
       <Document::Sidebar::Footer
         @primaryButtonAttrs={{this.primaryButtonAttrs}}
         @secondaryButtonAttrs={{this.secondaryButtonAttrs}}
-        @secondaryButtonIsShown={{true}}
       />
     `);
 
@@ -150,10 +166,6 @@ module("Integration | Component | document/sidebar/footer", function (hooks) {
     await click(SECONDARY_BUTTON);
 
     assert.equal(count, 1, "it runs the passed-in action");
-
-    this.set("secondaryButtonAttrs.isDisabled", true);
-
-    assert.dom(SECONDARY_BUTTON).isDisabled();
 
     this.set("secondaryButtonAttrs.isIconOnly", true);
 

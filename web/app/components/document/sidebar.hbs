@@ -335,6 +335,7 @@
 
   {{#if this.archiveModalIsShown}}
     <Document::Modal
+      data-test-archive-modal
       @headerText="Archive document?"
       @bodyText="This will label your document as obsolete."
       @errorTitle="Error archiving document"
@@ -348,6 +349,7 @@
 
   {{#if this.deleteModalIsShown}}
     <Document::Modal
+      data-test-delete-modal
       @headerText="Delete draft?"
       @bodyText="This action can't be undone."
       @errorTitle="Error deleting draft"

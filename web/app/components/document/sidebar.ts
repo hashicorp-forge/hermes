@@ -871,7 +871,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
          */
       } else {
         return {
-          text: `Mark approved`,
+          text: `Move to Approved`,
           action: () => this.changeDocumentStatus.perform("Approved"),
           isRunning: this.changeDocumentStatus.isRunning,
         };
@@ -929,12 +929,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return {
           actions: [
             {
-              text: "Undo approval",
+              text: "Move to In Review",
               action: () => this.changeDocumentStatus.perform("In-Review"),
               icon: "history",
             },
             {
-              text: "Mark obsolete...",
+              text: "Move to Obsolete...",
               action: this.showArchiveModal,
               icon: "archive",
             },
@@ -942,8 +942,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           icon: "more-vertical",
           isIconOnly: true,
           // this is wrong;
-          // docIsApproved is meaningless
-          // need to see the intend of the action
+          // docIsApproved is a meaningless heuristic;
+          // need to determine the intent of the action
           isRunning: this.docIsApproved && this.changeDocumentStatus.isRunning,
         };
       } else if (this.docIsInReview) {
@@ -955,24 +955,43 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         };
       }
     } else if (this.isApprover) {
-      // always need a dropdown for (remove me)
+      let firstAction:
+        | { text: string; action: () => void; icon: string }
+        | undefined;
+
+      if (this.hasApproved) {
+        firstAction = {
+          text: "Undo approval",
+          // TODO
+          action: () => {},
+          icon: "history",
+        };
+      } else if (this.hasRejectedFRD) {
+        firstAction = {
+          text: "Undo rejection",
+          // todo: undo rejection
+          action: () => {},
+          icon: "history",
+        };
+      } else if (docIsFRD) {
+        firstAction = {
+          text: "Reject",
+          action: this.requestChanges.perform,
+          icon: "thumbs-down",
+        };
+      }
+
       if (docIsFRD) {
-        if (!this.hasRejectedFRD) {
-          return {
-            actions: [
-              {
-                text: "Request changes",
-                action: this.requestChanges.perform,
-                icon: "edit",
-              },
-              {
-                text: "Archive",
-                action: this.showArchiveModal,
-                icon: "archive",
-              },
-            ],
-          };
-        }
+        return {
+          actions: [
+            firstAction,
+            {
+              text: "Leave approver role",
+              action: () => {},
+              icon: "user-minus",
+            },
+          ].compact(),
+        };
       }
     }
   }
