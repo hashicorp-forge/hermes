@@ -281,18 +281,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
-   * The status that clicking the footer button will move a document to.
-   */
-  get moveToStatusButtonTargetStatus() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "Approved";
-      default:
-        return "In-Review";
-    }
-  }
-
-  /**
    * The items passed to the draft-visibility dropdown.
    * Used to render the dropdown items and react to item selection.
    */
@@ -460,7 +448,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * as well as approvers and owners who need doc-management controls.
    */
   protected get footerIsShown() {
-    return this.isApprover || this.isOwner;
+    return (
+      (this.isApprover || this.isOwner) &&
+      (this.footerControlsAreDisabled || this.primaryFooterButtonAttrs)
+    );
   }
 
   /**

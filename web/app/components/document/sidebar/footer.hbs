@@ -65,40 +65,38 @@
           </div>
         {{/if}}
         {{#let @secondaryButtonAttrs as |s|}}
-          {{#if s}}
-            {{#if s.actions}}
-              <X::DropdownList
-                data-test-sidebar-footer-overflow-menu
-                @items={{s.actions}}
-                @placement="top-end"
-              >
-                <:anchor as |dd|>
-                  <dd.ToggleAction>
-                    <Hds::Button
-                      data-test-sidebar-footer-secondary-dropdown-button
-                      @text="More actions"
-                      @color="secondary"
-                      @icon={{if s.isRunning "running" "more-horizontal"}}
-                      @isIconOnly={{true}}
-                      disabled={{p.isRunning}}
-                    />
-                  </dd.ToggleAction>
-                </:anchor>
-                <:item as |dd|>
-                  <dd.Action
+          {{#if s.actions}}
+            <X::DropdownList
+              data-test-sidebar-footer-overflow-menu
+              @items={{s.actions}}
+              @placement="top-end"
+            >
+              <:anchor as |dd|>
+                <dd.ToggleAction>
+                  <Hds::Button
+                    data-test-sidebar-footer-secondary-dropdown-button
+                    @text="More actions"
+                    @color="secondary"
+                    @icon={{if s.isRunning "running" "more-horizontal"}}
+                    @isIconOnly={{true}}
                     disabled={{p.isRunning}}
-                    class="flex gap-2.5"
-                    {{on "click" dd.attrs.action}}
-                  >
-                    <FlightIcon
-                      @name={{dd.attrs.icon}}
-                      class="shrink-0 opacity-60"
-                    />
-                    {{dd.attrs.text}}
-                  </dd.Action>
-                </:item>
-              </X::DropdownList>
-            {{/if}}
+                  />
+                </dd.ToggleAction>
+              </:anchor>
+              <:item as |dd|>
+                <dd.Action
+                  disabled={{p.isRunning}}
+                  class="flex gap-2.5"
+                  {{on "click" dd.attrs.action}}
+                >
+                  <FlightIcon
+                    @name={{dd.attrs.icon}}
+                    class="shrink-0 opacity-60"
+                  />
+                  {{dd.attrs.text}}
+                </dd.Action>
+              </:item>
+            </X::DropdownList>
           {{/if}}
         {{/let}}
       </div>
