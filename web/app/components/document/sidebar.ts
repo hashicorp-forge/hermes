@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
+  dropTask,
   enqueueTask,
   keepLatestTask,
   restartableTask,
@@ -71,7 +72,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
-  @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -82,11 +82,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected docType: HermesDocumentType | null = null;
 
   get modalIsShown() {
-    return (
-      this.archiveModalIsShown ||
-      this.deleteModalIsShown ||
-      this.requestReviewModalIsShown
-    );
+    return this.deleteModalIsShown || this.requestReviewModalIsShown;
   }
 
   /**
@@ -400,6 +396,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   private get docIsInReview() {
     return dasherize(this.args.document.status) === "in-review";
+  }
+
+  /**
+   * Whether the doc is obsolete. Determines footer button functionality..
+   */
+  private get docIsObsolete() {
+    return dasherize(this.args.document.status) === "obsolete";
   }
 
   /**
@@ -779,20 +782,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.deleteModalIsShown = true;
   }
 
-  @action protected showArchiveModal(): void {
-    this.archiveModalIsShown = true;
-  }
-
   @action closeDeleteModal() {
     this.deleteModalIsShown = false;
   }
 
   @action closeRequestReviewModal() {
     this.requestReviewModalIsShown = false;
-  }
-
-  @action closeArchiveModal() {
-    this.archiveModalIsShown = false;
   }
 
   @action protected closeRequestReviewSuccessModal() {
@@ -826,6 +821,51 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * Used to conditionally trigger the `isRunning` state of the footer buttons.
+   */
+  private moveToApproved = task(async () => {
+    await this.changeDocumentStatus.perform("Approved");
+  });
+
+  /**
+   * Used to conditionally trigger the `isRunning` state of the footer buttons.
+   */
+  private moveToInReview = task(async () => {
+    await this.changeDocumentStatus.perform("In-Review");
+  });
+
+  /**
+   * Used
+   */
+  private moveToObsolete = task(async () => {
+    await this.changeDocumentStatus.perform("Obsolete");
+  });
+
+  private leaveApproverRole = task(async () => {
+    const cachedApprovers = this.approvers;
+
+    try {
+      this.approvers = this.approvers.filter(
+        (e) => e !== this.args.profile.email,
+      );
+
+      await this.save.perform("approvers", this.approvers);
+
+      this.flashMessages.add({
+        message: "You've left the approver role",
+        title: "Done!",
+      });
+
+      // do we care/does it matter if they're also in the approvedBy array?
+    } catch (e: unknown) {
+      this.approvers = cachedApprovers;
+      this.flashMessages.critical((e as any).message, {
+        title: "Error leaving approver role",
+      });
+    }
+  });
+
+  /**
    * The attributes for the primary footer button.
    * Returns an object with the color, text and action for the button.
    * depending on the user's role and the document's status.
@@ -842,9 +882,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
      * If the doc is obsolete, return a label with no action.
      * They already double-confirmed.
      */
-    if (this.args.document.status === "Obsolete") {
+    if (this.docIsObsolete) {
       return {
-        text: "Document is obsolete",
+        text: "Obsolete",
       };
       /**
        * If the doc is a draft, that means only the owner will
@@ -865,15 +905,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       if (this.docIsApproved) {
         return {
           text: "Approved",
+          isRunning: this.moveToInReview.isRunning,
         };
         /**
          * If the doc is not approved, the owner will see a label.
          */
       } else {
         return {
-          text: `Move to Approved`,
-          action: () => this.changeDocumentStatus.perform("Approved"),
-          isRunning: this.changeDocumentStatus.isRunning,
+          text: `In review`,
         };
       }
       /**
@@ -901,7 +940,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return {
           text: "Approve",
           action: this.approve.perform,
-          isRunning: this.approve.isRunning,
+          isRunning: this.approve.isRunning || this.leaveApproverRole.isRunning,
         };
       }
     }
@@ -917,82 +956,86 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     | undefined {
     const docIsFRD = this.args.document.docType === "FRD";
 
+    const moveToApprovedAction = {
+      text: "Move to Approved",
+      action: this.moveToApproved.perform,
+      icon: "check-circle",
+    };
+
+    const moveToInReviewAction = {
+      text: "Move to In Review",
+      action: this.moveToInReview.perform,
+      icon: "history",
+    };
+
+    const moveToObsoleteAction = {
+      text: "Move to Obsolete",
+      action: this.moveToObsolete.perform,
+      icon: "archive",
+    };
+
     if (this.isOwner) {
       if (this.isDraft) {
         return {
-          text: "Delete",
-          action: this.showDeleteModal,
-          icon: "trash",
-          isIconOnly: true,
+          actions: [
+            {
+              text: "Delete...",
+              action: this.showDeleteModal,
+              icon: "trash",
+            },
+          ],
         };
       } else if (this.docIsApproved) {
         return {
-          actions: [
-            {
-              text: "Move to In Review",
-              action: () => this.changeDocumentStatus.perform("In-Review"),
-              icon: "history",
-            },
-            {
-              text: "Move to Obsolete...",
-              action: this.showArchiveModal,
-              icon: "archive",
-            },
-          ],
-          icon: "more-vertical",
-          isIconOnly: true,
-          // this is wrong;
-          // docIsApproved is a meaningless heuristic;
-          // need to determine the intent of the action
-          isRunning: this.docIsApproved && this.changeDocumentStatus.isRunning,
+          actions: [moveToInReviewAction, moveToObsoleteAction],
+          isRunning:
+            this.moveToInReview.isRunning || this.moveToObsolete.isRunning,
         };
       } else if (this.docIsInReview) {
         return {
-          text: "Archive",
-          action: this.showArchiveModal,
-          icon: "archive",
-          isIconOnly: true,
+          actions: [moveToApprovedAction, moveToObsoleteAction],
+          isRunning:
+            this.moveToApproved.isRunning || this.moveToObsolete.isRunning,
+        };
+      } else if (this.docIsObsolete) {
+        return {
+          actions: [moveToInReviewAction, moveToApprovedAction],
+          isRunning:
+            this.moveToInReview.isRunning || this.moveToApproved.isRunning,
         };
       }
     } else if (this.isApprover) {
-      let firstAction:
-        | { text: string; action: () => void; icon: string }
-        | undefined;
+      interface DropdownAction {
+        text: string;
+        action: () => void;
+        icon: string;
+      }
 
-      if (this.hasApproved) {
-        firstAction = {
-          text: "Undo approval",
-          // TODO
-          action: () => {},
-          icon: "history",
-        };
-      } else if (this.hasRejectedFRD) {
-        firstAction = {
-          text: "Undo rejection",
-          // todo: undo rejection
-          action: () => {},
-          icon: "history",
-        };
-      } else if (docIsFRD) {
-        firstAction = {
+      let maybeReject: DropdownAction | undefined;
+
+      let leaveAction: DropdownAction = {
+        text: "Leave approver role",
+        action: this.leaveApproverRole.perform,
+        icon: "user-minus",
+      };
+
+      if (docIsFRD) {
+        maybeReject = {
           text: "Reject",
           action: this.requestChanges.perform,
           icon: "thumbs-down",
         };
       }
 
-      if (docIsFRD) {
-        return {
-          actions: [
-            firstAction,
-            {
-              text: "Leave approver role",
-              action: () => {},
-              icon: "user-minus",
-            },
-          ].compact(),
-        };
+      if (this.hasApproved) {
+        // At some point we may allow approvers to un-approve a doc.
+        // Until then, we don't show a secondary button.
+        return;
       }
+
+      return {
+        actions: [maybeReject, leaveAction].compact(),
+      };
     }
   }
 

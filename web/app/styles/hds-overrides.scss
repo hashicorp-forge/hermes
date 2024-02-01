@@ -54,4 +54,8 @@ a.hds-button {
   &.pill-button::before {
     @apply rounded-l-full rounded-r-full;
   }
+
+  &.mock-disabled:hover {
+    @apply cursor-default;
+  }
 }

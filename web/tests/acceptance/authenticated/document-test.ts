@@ -26,6 +26,7 @@ import {
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
+  TEST_USER_NAME,
 } from "hermes/mirage/utils";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
@@ -929,9 +930,32 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DOC_STATUS).hasText("In review");
 
-    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Move to Approved");
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("In review");
+    assert.dom(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON).exists();
 
-    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 2 });
+
+    const firstItem = find(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+    const secondItem = findAll(SIDEBAR_FOOTER_OVERFLOW_ITEM)[1];
+
+    const overflowMenuFlightIcons = findAll(
+      `${SIDEBAR_FOOTER_OVERFLOW_ITEM} .flight-icon`,
+    );
+
+    const firstIcon = overflowMenuFlightIcons[0];
+    const secondIcon = overflowMenuFlightIcons[1];
+
+    assert.dom(firstItem).hasText("Move to Approved");
+    assert.dom(firstIcon).hasAttribute("data-test-icon", "check-circle");
+
+    assert.dom(secondItem).hasText("Move to Obsolete");
+    assert.dom(secondIcon).hasAttribute("data-test-icon", "archive");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
     assert.dom(DOC_STATUS).hasText("Approved");
 
@@ -940,7 +964,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.equal(doc.attrs.status, "Approved");
   });
 
-  test("you can approve your own doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test("doc owner/approver: when you move your doc to approved, it also processes the approvedBy attribute", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
       status: "In-Review",
@@ -950,7 +974,31 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("In review");
+
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 2 });
+
+    const firstItem = find(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+    const secondItem = findAll(SIDEBAR_FOOTER_OVERFLOW_ITEM)[1];
+
+    const overflowMenuFlightIcons = findAll(
+      `${SIDEBAR_FOOTER_OVERFLOW_ITEM} .flight-icon`,
+    );
+
+    const firstIcon = overflowMenuFlightIcons[0];
+    const secondIcon = overflowMenuFlightIcons[1];
+
+    assert.dom(firstItem).hasText("Move to Approved");
+    assert.dom(firstIcon).hasAttribute("data-test-icon", "check-circle");
+
+    assert.dom(secondItem).hasText("Move to Obsolete");
+    assert.dom(secondIcon).hasAttribute("data-test-icon", "archive");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
     const doc = this.server.schema.document.first();
 
@@ -991,7 +1039,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(firstItem).hasText("Move to In Review");
     assert.dom(firstIcon).hasAttribute("data-test-icon", "history");
 
-    assert.dom(secondItem).hasText("Move to Obsolete...");
+    assert.dom(secondItem).hasText("Move to Obsolete");
     assert.dom(secondIcon).hasAttribute("data-test-icon", "archive");
 
     await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
@@ -1070,15 +1118,15 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Move to Approved");
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("In review");
 
-    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
 
-    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).doesNotExist();
-    assert
-      .dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY)
-      .exists()
-      .hasText("Approved");
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).hasText("Move to Approved");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
     assert
       .dom(FLASH_MESSAGE_SELECTOR)
@@ -1099,11 +1147,14 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert
-      .dom(`${SIDEBAR_FOOTER_SECONDARY_BUTTON} .flight-icon`)
-      .hasAttribute("data-test-icon", "trash");
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
 
-    await click(SIDEBAR_FOOTER_SECONDARY_BUTTON);
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).exists();
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 1 });
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).hasText("Delete...");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
 
     assert.dom(DELETE_MODAL).exists("the user is shown a confirmation screen");
 
@@ -1122,6 +1173,44 @@ module("Acceptance | authenticated/document", function (hooks) {
     );
   });
 
+  test("an approver can remove themselves from the approver role", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      status: "In-review",
+      isDraft: false,
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    const approversList = find(APPROVERS_SELECTOR);
+
+    assert.dom(approversList).containsText("Me");
+
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).exists();
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 1 });
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).hasText("Leave approver role");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).doesNotExist();
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("You've left the approver role");
+
+    assert.dom(approversList).doesNotContainText(TEST_USER_NAME);
+
+    const doc = this.server.schema.document.first();
+
+    assert.false(doc.attrs.approvers.includes(TEST_USER_EMAIL));
+  });
+
   test("in-review docs can be archived", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
@@ -1131,31 +1220,16 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Move to Approved");
-    assert
-      .dom(`${SIDEBAR_FOOTER_SECONDARY_BUTTON} .flight-icon`)
-      .hasAttribute(
-        "data-test-icon",
-        "archive",
-        "the icon-only button is shown",
-      );
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
 
-    await click(SIDEBAR_FOOTER_SECONDARY_BUTTON);
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).exists();
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 2 });
 
-    assert.dom(ARCHIVE_MODAL).exists("the user is shown a confirmation screen");
+    const secondItemSelector = `${SIDEBAR_FOOTER_OVERFLOW_MENU} li:nth-child(2) button`;
 
-    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR).hasText("Yes, archive");
+    assert.dom(secondItemSelector).hasText("Move to Obsolete");
 
-    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
-
-    assert.dom(ARCHIVE_MODAL).doesNotExist("the modal is dismissed");
-
-    assert
-      .dom(SIDEBAR_FOOTER_PRIMARY_BUTTON)
-      .doesNotExist("the primary button is removed");
-    assert
-      .dom(SIDEBAR_FOOTER_SECONDARY_BUTTON)
-      .doesNotExist("the secondary button is removed");
+    await click(secondItemSelector);
 
     assert
       .dom(FLASH_MESSAGE_SELECTOR)
@@ -1166,7 +1240,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY)
       .hasText(
-        "Document is obsolete",
+        "Obsolete",
         "A read-only message is shown in place of the buttons",
       );
 

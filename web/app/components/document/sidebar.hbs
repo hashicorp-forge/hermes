@@ -237,7 +237,7 @@
           {{did-insert (perform this.loadRelatedProjects)}}
           @title="Projects"
           @buttonAction={{this.showProjectsModal}}
-          @buttonIsDisabled={{this.isDraft}}
+          @buttonIsDisabled={{or this.isDraft this.docIsObsolete}}
           @disabledButtonTooltipText="Only published docs can be added to projects."
         />
         {{#if this.projects.length}}
@@ -330,20 +330,6 @@
       @document={{@document}}
       @onClose={{this.hideProjectsModal}}
       @onSave={{perform this.addDocToProject}}
-    />
-  {{/if}}
-
-  {{#if this.archiveModalIsShown}}
-    <Document::Modal
-      data-test-archive-modal
-      @headerText="Archive document?"
-      @bodyText="This will label your document as obsolete."
-      @errorTitle="Error archiving document"
-      @close={{this.closeArchiveModal}}
-      @task={{perform this.changeDocumentStatus "Obsolete"}}
-      @taskButtonText="Yes, archive"
-      @taskButtonLoadingText="Archiving..."
-      @taskButtonColor="critical"
     />
   {{/if}}
 
