@@ -11,7 +11,6 @@ const READ_ONLY_PARAGRAPH = "[data-test-read-only-footer-paragraph]";
 const READ_ONLY_DOC_NOTE = "[data-test-read-only-doc-note]";
 const CONTROLS = "[data-test-footer-controls]";
 const LOCKED_DOC_LINK = "[data-test-locked-doc-link]";
-const SECONDARY_BUTTON = "[data-test-sidebar-footer-secondary-button]";
 const SECONDARY_OVERFLOW_BUTTON =
   "[data-test-sidebar-footer-secondary-dropdown-button]";
 const PRIMARY_BUTTON = "[data-test-sidebar-footer-primary-button]";
@@ -114,18 +113,7 @@ module("Integration | Component | document/sidebar/footer", function (hooks) {
       />
     `);
 
-    assert.dom(SECONDARY_BUTTON).doesNotExist();
-
-    this.set("secondaryButtonAttrs", {
-      text: "Cancel",
-      action: () => {},
-    });
-
-    assert
-      .dom(SECONDARY_BUTTON)
-      .exists(
-        'it renders the secondary button when "secondaryButtonAttrs" is defined',
-      );
+    assert.dom(SECONDARY_OVERFLOW_BUTTON).doesNotExist();
 
     this.set("secondaryButtonAttrs", {
       actions: [{ text: "Cancel", action: () => {}, icon: "cancel" }],
@@ -136,39 +124,5 @@ module("Integration | Component | document/sidebar/footer", function (hooks) {
       .exists(
         'it renders an overflow button when "secondaryButtonAttrs" contains an actions array',
       );
-  });
-
-  test("the secondary button functions as expected", async function (this: Context, assert) {
-    let count = 0;
-
-    const text = "Archive";
-    const action = () => count++;
-    const icon = "archive";
-
-    this.set("secondaryButtonAttrs", {
-      text,
-      action,
-      icon,
-    });
-
-    await render<Context>(hbs`
-      <Document::Sidebar::Footer
-        @primaryButtonAttrs={{this.primaryButtonAttrs}}
-        @secondaryButtonAttrs={{this.secondaryButtonAttrs}}
-      />
-    `);
-
-    assert.dom(SECONDARY_BUTTON).hasText(text).isNotDisabled();
-    assert
-      .dom(SECONDARY_BUTTON + " .flight-icon")
-      .hasAttribute("data-test-icon", icon, "it renders the passed-in icon");
-
-    await click(SECONDARY_BUTTON);
-
-    assert.equal(count, 1, "it runs the passed-in action");
-
-    this.set("secondaryButtonAttrs.isIconOnly", true);
-
-    assert.dom(SECONDARY_BUTTON).hasText("");
   });
 });
