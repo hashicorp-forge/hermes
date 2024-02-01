@@ -64,6 +64,8 @@ const READ_ONLY_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-read-only]";
 const SIDEBAR_FOOTER_PRIMARY_BUTTON =
   "[data-test-sidebar-footer-primary-button]";
+const SIDEBAR_FOOTER_SECONDARY_BUTTON =
+  "[data-test-sidebar-footer-secondary-button]";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
 const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
@@ -515,9 +517,78 @@ module("Acceptance | authenticated/document", function (hooks) {
     assertEditingIsDisabled(assert);
   });
 
-  test("approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+  test("approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
 
-  test("approvers can reject an FRD", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await visit("/document/1");
+
+    assert.dom(DOC_STATUS).hasText("In review");
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Approve");
+
+    await click(SIDEBAR_FOOTER_PRIMARY_BUTTON);
+
+    assert.dom(DOC_STATUS).hasText("Approved");
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).isDisabled().hasText("Approved");
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .exists({ count: 1 })
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("Document approved");
+
+    const doc = this.server.schema.document.first();
+
+    assert.equal(doc.attrs.status, "Approved");
+  });
+
+  test("approvers can reject an FRD", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      docType: "FRD",
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Approve");
+    assert.dom(SIDEBAR_FOOTER_SECONDARY_BUTTON).hasText("Reject");
+
+    await click(SIDEBAR_FOOTER_SECONDARY_BUTTON);
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .exists({ count: 1 })
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("rejected");
+
+    assert
+      .dom(SIDEBAR_FOOTER_SECONDARY_BUTTON)
+      .doesNotExist('once rejected, the "reject" button is removed');
+
+    assert
+      .dom(SIDEBAR_FOOTER_PRIMARY_BUTTON)
+      .isDisabled()
+      .hasText(
+        "Rejected",
+        'the "rejected" message appears in the disabled primary button',
+      );
+
+    const doc = this.server.schema.document.first();
+    const { changesRequestedBy } = doc.attrs;
+
+    assert.true(changesRequestedBy?.includes(TEST_USER_EMAIL));
+
+    // TODO: Josh - does this also change the status?
+  });
 
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
@@ -941,8 +1012,28 @@ module("Acceptance | authenticated/document", function (hooks) {
 
   test("published docs can be archived", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 
-  test("changes can be requested on FRDs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    // test that buttons get disabled onRequestChanges
+  test("approvers can request changes on non-FRD documents", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      status: "In-Review",
+      isDraft: false,
+      approvers: [TEST_USER_EMAIL],
+      owners: [TEST_USER_2_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON).hasText("Approve");
+    assert.dom(SIDEBAR_FOOTER_SECONDARY_BUTTON).hasText("Request changes");
+
+    await this.pauseTest();
+    await click(SIDEBAR_FOOTER_SECONDARY_BUTTON);
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .exists({ count: 1 })
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("requested changes");
   });
 
   test("archived documents do not render a secondary footer button", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});

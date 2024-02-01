@@ -381,6 +381,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  private get hasRejectedFRD() {
+    const docTypeIsFRD = this.args.document.docType === "FRD";
+    return docTypeIsFRD && this.hasRequestedChanges;
+  }
+
   /**
    * Whether the doc status is approved. Used to determine editing privileges.
    * If the doc is approved, editing is exclusive to the doc owner.
@@ -825,31 +830,81 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Returns an object with the color, text and action for the button.
    * depending on the user's role and the document's status.
    */
-  protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
-    const text = this.isDraft
-      ? "Publish for review..."
-      : this.isApprover
-      ? this.hasApproved
-        ? "Approved"
-        : "Approve"
-      : `Move to ${this.moveToStatusButtonTargetStatus}`;
-
-    const action = this.isDraft
-      ? this.showRequestReviewModal
-      : this.isApprover
-      ? () => this.approve.perform()
-      : () =>
-          this.changeDocumentStatus.perform(
-            this.moveToStatusButtonTargetStatus,
-          );
-
-    const isDisabled =
-      this.approve.isRunning ||
-      this.requestChanges.isRunning ||
-      this.changeDocumentStatus.isRunning ||
-      this.hasApproved;
-
-    return { text, action, isDisabled };
+  protected get primaryFooterButtonAttrs():
+    | DocumentSidebarFooterButton
+    | undefined {
+    // FIXME
+    // the "is running" stuff is pretty crummy;
+    // there's always a flash between states;
+    // need to toggle a local property on/off
+    // depending on the task
+    /**
+     * If the doc is obsolete, return a label with no action.
+     * They already double-confirmed.
+     */
+    if (this.args.document.status === "Obsolete") {
+      return {
+        text: "Document is obsolete",
+      };
+      /**
+       * If the doc is a draft, that means only the owner will
+       * see the footer and their primary action is to publish for review.
+       */
+    } else if (this.isDraft) {
+      return {
+        text: "Publish for review...",
+        action: this.showRequestReviewModal,
+      };
+      /**
+       * If the doc is published, the owner will see one of two buttons.
+       */
+    } else if (this.isOwner) {
+      /**
+       * If the doc is approved, the owner will see a label.
+       */
+      if (this.docIsApproved) {
+        return {
+          text: "Approved",
+        };
+        /**
+         * If the doc is not approved, the owner will see a label.
+         */
+      } else {
+        return {
+          text: `Mark approved`,
+          action: () => this.changeDocumentStatus.perform("Approved"),
+          isRunning: this.changeDocumentStatus.isRunning,
+        };
+      }
+      /**
+       * If the owner is an approver, they will see one of three cases:
+       */
+    } else if (this.isApprover) {
+      /**
+       * If they're rejected an FRD, they'll see a read-only label.
+       */
+      if (this.hasRejectedFRD) {
+        return {
+          text: "Rejected",
+        };
+        /**
+         * If they've approved the doc, they'll see a read-only label.
+         */
+      } else if (this.hasApproved) {
+        return {
+          text: "Approved",
+        };
+        /**
+         * If they haven't taken an action, they'll see a button to approve.
+         */
+      } else {
+        return {
+          text: "Approve",
+          action: this.approve.perform,
+          isRunning: this.approve.isRunning,
+        };
+      }
+    }
   }
 
   /**
@@ -857,37 +912,69 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * when it is shown. Returns an object with the text and action for the button
    * determined by the user's role and the document's status.
    */
-  protected get secondaryFooterButtonAttrs() {
-    const requestChangesText =
-      this.args.document.docType === "FRD"
-        ? this.hasRequestedChanges
-          ? "Rejected"
-          : "Reject"
-        : this.hasRequestedChanges
-        ? "Changes requested"
-        : "Request changes";
+  protected get secondaryFooterButtonAttrs():
+    | DocumentSidebarFooterButton
+    | undefined {
+    const docIsFRD = this.args.document.docType === "FRD";
 
-    const text = this.isDraft
-      ? "Delete"
-      : this.isOwner
-      ? "Archive"
-      : requestChangesText;
-
-    const action = this.isDraft
-      ? this.showDeleteModal
-      : this.isOwner
-      ? this.showArchiveModal
-      : () => this.requestChanges.perform();
-
-    const isDisabled =
-      this.approve.isRunning ||
-      this.requestChanges.isRunning ||
-      this.hasRequestedChanges;
-
-    const icon = this.isDraft ? "trash" : "archive";
-    const isIconOnly = this.isOwner;
-
-    return { text, action, isDisabled, icon, isIconOnly };
+    if (this.isOwner) {
+      if (this.isDraft) {
+        return {
+          text: "Delete",
+          action: this.showDeleteModal,
+          icon: "trash",
+          isIconOnly: true,
+        };
+      } else if (this.docIsApproved) {
+        return {
+          actions: [
+            {
+              text: "Undo approval",
+              action: () => this.changeDocumentStatus.perform("In-Review"),
+              icon: "history",
+            },
+            {
+              text: "Mark obsolete...",
+              action: this.showArchiveModal,
+              icon: "archive",
+            },
+          ],
+          icon: "more-vertical",
+          isIconOnly: true,
+          // this is wrong;
+          // docIsApproved is meaningless
+          // need to see the intend of the action
+          isRunning: this.docIsApproved && this.changeDocumentStatus.isRunning,
+        };
+      } else if (this.docIsInReview) {
+        return {
+          text: "Archive",
+          action: this.showArchiveModal,
+          icon: "archive",
+          isIconOnly: true,
+        };
+      }
+    } else if (this.isApprover) {
+      // always need a dropdown for (remove me)
+      if (docIsFRD) {
+        if (!this.hasRejectedFRD) {
+          return {
+            actions: [
+              {
+                text: "Request changes",
+                action: this.requestChanges.perform,
+                icon: "edit",
+              },
+              {
+                text: "Archive",
+                action: this.showArchiveModal,
+                icon: "archive",
+              },
+            ],
+          };
+        }
+      }
+    }
   }
 
   /**
@@ -937,11 +1024,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
       // Add a notification for the user
-      let msg = "Requested changes for document";
-      // FRDs are a special case that can be approved or not approved.
+      let msg = "You've requested changes to this document";
+
+      // FRDs are a special case that can be approved or rejected.
       if (this.args.document.docType === "FRD") {
-        msg = "Document marked as not approved";
+        msg = "You've rejected this funding request";
       }
+
       this.showFlashSuccess("Done!", msg);
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Change request failed");
@@ -960,6 +1049,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         // If the owner is an approver, process their approval first.
         await this.approve.perform({ skipSuccessMessage: true });
       }
+
+      // TODO: need to differentiate between marking something
+      // obsolete and moving something back to in review
 
       await this.patchDocument.perform({
         status: newStatus,

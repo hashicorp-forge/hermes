@@ -1,3 +1,4 @@
+{{! should we move the is-shown logic in here? }}
 <div data-test-sidebar-footer class="sidebar-footer" ...attributes>
   {{#if @isReadOnly}}
     <div
@@ -42,33 +43,71 @@
         </div>
       {{/if}}
     </div>
-  {{else}}
-    <div data-test-footer-controls class="flex items-start gap-2 px-3">
-      {{#let @primaryButtonAttrs as |b|}}
-        <Hds::Button
-          data-test-sidebar-footer-primary-button
-          {{on "click" b.action}}
-          @text={{b.text}}
-          disabled={{b.isDisabled}}
-          @color="primary"
-          class="w-full"
-        />
-      {{/let}}
-      {{#if @secondaryButtonIsShown}}
-        {{#let @secondaryButtonAttrs as |b|}}
+  {{else if @primaryButtonAttrs}}
+    {{#let @primaryButtonAttrs as |p|}}
+      <div data-test-footer-controls class="flex items-start gap-2 px-2">
+        {{#if p.action}}
           <Hds::Button
-            data-test-sidebar-footer-secondary-button
-            {{on "click" this.secondaryAction}}
-            @text={{b.text}}
-            @icon={{b.icon}}
-            @isIconOnly={{b.isIconOnly}}
-            disabled={{b.isDisabled}}
-            @color="secondary"
-            class="shrink-0"
+            data-test-sidebar-footer-primary-button
+            {{on "click" p.action}}
+            @icon={{if p.isRunning "running"}}
+            @isIconOnly={{p.isRunning}}
+            @text={{p.text}}
+            disabled={{p.isRunning}}
+            @color="primary"
+            class="w-full"
           />
+        {{else}}
+          <div
+            class="hds-button mock-disabled hds-button--primary hds-button--size-medium w-full leading-none"
+          >
+            {{p.text}}
+          </div>
+        {{/if}}
+        {{#let @secondaryButtonAttrs as |s|}}
+          {{#if s}}
+            {{#if s.actions}}
+              <X::DropdownList @items={{s.actions}} @placement="top-end">
+                <:anchor as |dd|>
+                  <dd.ToggleAction>
+                    <Hds::Button
+                      @text="More actions"
+                      @color="secondary"
+                      @icon={{if s.isRunning "running" "more-vertical"}}
+                      @isIconOnly={{true}}
+                      disabled={{p.isRunning}}
+                    />
+                  </dd.ToggleAction>
+                </:anchor>
+                <:item as |dd|>
+                  <dd.Action
+                    disabled={{p.isRunning}}
+                    class="flex gap-2.5"
+                    {{on "click" dd.attrs.action}}
+                  >
+                    <FlightIcon
+                      @name={{dd.attrs.icon}}
+                      class="shrink-0 opacity-60"
+                    />
+                    {{dd.attrs.text}}
+                  </dd.Action>
+                </:item>
+              </X::DropdownList>
+            {{else if s.action}}
+              <Hds::Button
+                data-test-sidebar-footer-secondary-button
+                {{on "click" this.secondaryAction}}
+                @text={{s.text}}
+                @icon={{s.icon}}
+                @isIconOnly={{s.isIconOnly}}
+                disabled={{or s.isRunning p.isRunning}}
+                @color="secondary"
+                class="{{if s.isIconOnly 'shrink-0' 'w-full'}}"
+              />
+            {{/if}}
+          {{/if}}
         {{/let}}
-
-      {{/if}}
-    </div>
+      </div>
+    {{/let}}
   {{/if}}
 </div>
