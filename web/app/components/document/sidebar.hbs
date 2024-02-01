@@ -311,7 +311,12 @@
     </div>
   </div>
 
-  {{#if this.footerIsShown}}
+  {{#if
+    (and
+      (or this.isOwner this.isApprover)
+      (or this.footerControlsAreDisabled this.primaryFooterButtonAttrs)
+    )
+  }}
     <Document::Sidebar::Footer
       @isReadOnly={{this.footerControlsAreDisabled}}
       @primaryButtonAttrs={{this.primaryFooterButtonAttrs}}

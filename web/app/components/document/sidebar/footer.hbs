@@ -1,4 +1,3 @@
-{{! should we move the is-shown logic in here? }}
 <div data-test-sidebar-footer class="sidebar-footer" ...attributes>
   {{#if @isReadOnly}}
     <div
@@ -43,7 +42,7 @@
         </div>
       {{/if}}
     </div>
-  {{else if @primaryButtonAttrs}}
+  {{else}}
     {{#let @primaryButtonAttrs as |p|}}
       <div data-test-footer-controls class="flex items-start gap-2 px-2">
         {{#if p.action}}
@@ -99,17 +98,6 @@
                   </dd.Action>
                 </:item>
               </X::DropdownList>
-            {{else if s.action}}
-              <Hds::Button
-                data-test-sidebar-footer-secondary-button
-                {{on "click" this.secondaryAction}}
-                @text={{s.text}}
-                @icon={{s.icon}}
-                @isIconOnly={{s.isIconOnly}}
-                disabled={{or s.isRunning p.isRunning}}
-                @color="secondary"
-                class="{{if s.isIconOnly 'shrink-0' 'w-full'}}"
-              />
             {{/if}}
           {{/if}}
         {{/let}}

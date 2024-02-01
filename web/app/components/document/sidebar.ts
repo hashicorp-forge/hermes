@@ -4,7 +4,6 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
-  dropTask,
   enqueueTask,
   keepLatestTask,
   restartableTask,
@@ -369,17 +368,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.args.document.approvedBy?.includes(this.args.profile.email);
   }
 
-  // hasRequestedChanges returns true if the logged in user has requested
-  // changes of the document.
-  get hasRequestedChanges() {
-    return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email,
-    );
-  }
-
+  /**
+   * Whether the user has rejected an FRD.
+   * True if the doc is an FRD and the user is in the `changesRequestedBy` array.
+   * Used in footer button logic.
+   */
   private get hasRejectedFRD() {
     const docTypeIsFRD = this.args.document.docType === "FRD";
-    return docTypeIsFRD && this.hasRequestedChanges;
+    return (
+      docTypeIsFRD &&
+      this.args.document.changesRequestedBy?.includes(this.args.profile.email)
+    );
   }
 
   /**
@@ -399,7 +398,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
-   * Whether the doc is obsolete. Determines footer button functionality..
+   * Whether the doc is obsolete. Determines footer button functionality.
    */
   private get docIsObsolete() {
     return dasherize(this.args.document.status) === "obsolete";
@@ -821,26 +820,35 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
-   * Used to conditionally trigger the `isRunning` state of the footer buttons.
+   * The action to move a document to the "Approved" status.
+   * The `isRunning` state determines the footer button's appearance.
    */
   private moveToApproved = task(async () => {
     await this.changeDocumentStatus.perform("Approved");
   });
 
   /**
-   * Used to conditionally trigger the `isRunning` state of the footer buttons.
+   * The action to move a document to the "In-Review" status.
+   * The `isRunning` state determines the footer button's appearance.
    */
   private moveToInReview = task(async () => {
     await this.changeDocumentStatus.perform("In-Review");
   });
 
   /**
-   * Used
+   * The action to move a document to the "Obsolete" status.
+   * The `isRunning` state determines the footer button's appearance.
    */
   private moveToObsolete = task(async () => {
     await this.changeDocumentStatus.perform("Obsolete");
   });
 
+  /**
+   * The action to leave the approver role.
+   * Updates the local approvers array and saves it to the back end.
+   * On success, shows a success message. On failure, shows an error message
+   * and reverts the local approvers array.
+   */
   private leaveApproverRole = task(async () => {
     const cachedApprovers = this.approvers;
 
@@ -855,8 +863,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         message: "You've left the approver role",
         title: "Done!",
       });
-
-      // do we care/does it matter if they're also in the approvedBy array?
     } catch (e: unknown) {
       this.approvers = cachedApprovers;
       this.flashMessages.critical((e as any).message, {
@@ -870,14 +876,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Returns an object with the color, text and action for the button.
    * depending on the user's role and the document's status.
    */
-  protected get primaryFooterButtonAttrs():
-    | DocumentSidebarFooterButton
-    | undefined {
-    // FIXME
-    // the "is running" stuff is pretty crummy;
-    // there's always a flash between states;
-    // need to toggle a local property on/off
-    // depending on the task
+  protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
     /**
      * If the doc is obsolete, return a label with no action.
      * They already double-confirmed.
@@ -944,6 +943,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         };
       }
     }
+
+    throw new Error(
+      "The template should not have rendered the primary footer button.",
+    );
   }
 
   /**
@@ -974,7 +977,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       icon: "archive",
     };
 
+    /**
+     * Being the owner supersedes being an approver, so we start there.
+     */
     if (this.isOwner) {
+      /**
+       * If the doc is a draft, allow the owner to open the
+       * modal that deletes the draft.
+       */
       if (this.isDraft) {
         return {
           actions: [
@@ -985,18 +995,27 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             },
           ],
         };
+        /**
+         * If the doc is approved, the menu items are to move to in review or obsolete.
+         */
       } else if (this.docIsApproved) {
         return {
           actions: [moveToInReviewAction, moveToObsoleteAction],
           isRunning:
             this.moveToInReview.isRunning || this.moveToObsolete.isRunning,
         };
+        /**
+         * If the doc is in review, the menu items are to move to approved or obsolete.
+         */
       } else if (this.docIsInReview) {
         return {
           actions: [moveToApprovedAction, moveToObsoleteAction],
           isRunning:
             this.moveToApproved.isRunning || this.moveToObsolete.isRunning,
         };
+        /**
+         * If the doc is obsolete, the menu items are to move to in review or approved.
+         */
       } else if (this.docIsObsolete) {
         return {
           actions: [moveToInReviewAction, moveToApprovedAction],
@@ -1010,31 +1029,48 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         action: () => void;
         icon: string;
       }
+      /**
+       * Placeholder for the "reject" action for FRDs.
+       * If the doc is an FRD, this will be set to a reject action.
+       * Otherwise, it will be undefined and filtered out using `compact`.
+       */
+      let maybeRejectAction: DropdownAction | undefined;
 
-      let maybeReject: DropdownAction | undefined;
-
+      /**
+       * The action to leave the approver role.
+       * Available to all approvers except those who have approved the doc.
+       */
       let leaveAction: DropdownAction = {
         text: "Leave approver role",
         action: this.leaveApproverRole.perform,
         icon: "user-minus",
       };
 
+      /**
+       * Set the reject action for FRDs.
+       */
       if (docIsFRD) {
-        maybeReject = {
+        maybeRejectAction = {
           text: "Reject",
-          action: this.requestChanges.perform,
+          action: this.rejectFRD.perform,
           icon: "thumbs-down",
         };
       }
 
+      /**
+       * If the user has already approved the doc, don't return a secondary button.
+       * If we support "undo approval"-like functionality, it will be added here.
+       */
       if (this.hasApproved) {
-        // At some point we may allow approvers to un-approve a doc.
-        // Until then, we don't show a secondary button.
         return;
       }
 
+      /**
+       * Return the actions for the overflow menu.
+       * If `maybeRejectAction` is undefined, it will be filtered out.
+       */
       return {
-        actions: [maybeReject, leaveAction].compact(),
+        actions: [maybeRejectAction, leaveAction].compact(),
       };
     }
   }
@@ -1076,7 +1112,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.refreshRoute();
   });
 
-  requestChanges = task(async () => {
+  /**
+   * The task to reject an FRD.
+   * Available to approvers via the footer overflow menu.
+   * On success, shows a success message. On failure, shows an error.
+   * Refreshes the route either way to update the UI.
+   */
+  private rejectFRD = task(async () => {
     try {
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
@@ -1085,15 +1127,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           headers: { "Content-Type": "application/json" },
         },
       );
-      // Add a notification for the user
-      let msg = "You've requested changes to this document";
-
-      // FRDs are a special case that can be approved or rejected.
-      if (this.args.document.docType === "FRD") {
-        msg = "You've rejected this funding request";
-      }
-
-      this.showFlashSuccess("Done!", msg);
+      this.showFlashSuccess("Done!", "Funding request rejected");
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Change request failed");
       throw error;
@@ -1111,9 +1145,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         // If the owner is an approver, process their approval first.
         await this.approve.perform({ skipSuccessMessage: true });
       }
-
-      // TODO: need to differentiate between marking something
-      // obsolete and moving something back to in review
 
       await this.patchDocument.perform({
         status: newStatus,

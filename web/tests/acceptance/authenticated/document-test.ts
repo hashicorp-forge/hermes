@@ -67,13 +67,10 @@ const SIDEBAR_FOOTER_PRIMARY_BUTTON =
   "[data-test-sidebar-footer-primary-button]";
 const SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY =
   "[data-test-sidebar-footer-primary-button-read-only]";
-const SIDEBAR_FOOTER_SECONDARY_BUTTON =
-  "[data-test-sidebar-footer-secondary-button]";
 const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON =
   "[data-test-sidebar-footer-secondary-dropdown-button]";
 const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
 const SIDEBAR_FOOTER_OVERFLOW_ITEM = `${SIDEBAR_FOOTER_OVERFLOW_MENU} button`;
-const ARCHIVE_MODAL = "[data-test-archive-modal]";
 const DELETE_MODAL = "[data-test-delete-modal]";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
@@ -89,7 +86,6 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
 
-const CHANGE_DOC_STATUS_BUTTON = "[data-test-change-doc-status-button]";
 const DOC_STATUS = "[data-test-doc-status]";
 
 const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";

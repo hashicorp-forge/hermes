@@ -1,22 +1,19 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import { HdsButtonColor } from "hds/_shared";
-import { HermesDocument } from "hermes/types/document";
 
 export interface DocumentSidebarFooterButton {
   text?: string;
   action?: () => void;
   actions?: { text: string; action: () => void; icon: string }[];
-  isRunning?: boolean; // primary only
-  icon?: string; // secondary only
-  isIconOnly?: boolean; // secondary only
+  isRunning?: boolean;
+  icon?: string;
 }
 
 interface DocumentSidebarFooterComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    primaryButtonAttrs?: DocumentSidebarFooterButton;
+    primaryButtonAttrs: DocumentSidebarFooterButton;
     secondaryButtonAttrs?: DocumentSidebarFooterButton;
     isReadOnly?: boolean;
     docIsLocked?: boolean;
