@@ -1,13 +1,17 @@
-import { assert } from "@ember/debug";
-import { action } from "@ember/object";
 import Component from "@glimmer/component";
 
 export interface DocumentSidebarFooterButton {
   text?: string;
   action?: () => void;
-  actions?: { text: string; action: () => void; icon: string }[];
+  actions?: DocumentSidebarFooterOverflowItem[];
   isRunning?: boolean;
   icon?: string;
+}
+
+export interface DocumentSidebarFooterOverflowItem {
+  text: string;
+  action: () => void;
+  icon: string;
 }
 
 interface DocumentSidebarFooterComponentSignature {
@@ -24,13 +28,7 @@ interface DocumentSidebarFooterComponentSignature {
   };
 }
 
-export default class DocumentSidebarFooterComponent extends Component<DocumentSidebarFooterComponentSignature> {
-  @action protected secondaryAction() {
-    const { secondaryButtonAttrs } = this.args;
-    assert("secondary action must be defined", secondaryButtonAttrs);
-    secondaryButtonAttrs.action?.();
-  }
-}
+export default class DocumentSidebarFooterComponent extends Component<DocumentSidebarFooterComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {

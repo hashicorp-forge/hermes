@@ -33,7 +33,10 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
-import { DocumentSidebarFooterButton } from "./sidebar/footer";
+import {
+  DocumentSidebarFooterButton,
+  DocumentSidebarFooterOverflowItem,
+} from "./sidebar/footer";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -1015,23 +1018,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         };
       }
     } else if (this.isApprover) {
-      interface DropdownAction {
-        text: string;
-        action: () => void;
-        icon: string;
-      }
       /**
        * Placeholder for the "reject" action for FRDs.
        * If the doc is an FRD, this will be set to a reject action.
        * Otherwise, it will be undefined and filtered out using `compact`.
        */
-      let maybeRejectAction: DropdownAction | undefined;
+      let maybeRejectAction: DocumentSidebarFooterOverflowItem | undefined;
 
       /**
        * The action to leave the approver role.
        * Available to all approvers except those who have approved the doc.
        */
-      let leaveAction: DropdownAction = {
+      let leaveAction: DocumentSidebarFooterOverflowItem = {
         text: "Leave approver role",
         action: this.leaveApproverRole.perform,
         icon: "user-minus",
