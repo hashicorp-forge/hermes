@@ -484,10 +484,142 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
-       * DELETE requests
+       * Draft requests
        *
        *************************************************************************/
 
+      // Create a new draft
+      this.post("/drafts", (schema, request) => {
+        const document = schema.document.create({
+          ...JSON.parse(request.requestBody),
+        });
+
+        document.update({
+          objectID: document.id,
+          owners: [TEST_USER_EMAIL],
+          appCreated: true,
+          status: "WIP",
+        });
+
+        return new Response(200, {}, document.attrs);
+      });
+
+      // Return all the user's drafts
+      this.get("/drafts", (schema, request) => {
+        const params = request.queryParams;
+        const { facetFilters } = params;
+        const allDocs = this.schema.document.all().models;
+        const drafts = allDocs.filter((doc) => {
+          if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
+            return (
+              doc.attrs.isDraft && doc.attrs.owners.includes(TEST_USER_EMAIL)
+            );
+          } else {
+            return doc.attrs.isDraft;
+          }
+        });
+
+        return new Response(
+          200,
+          {},
+          {
+            facets: [],
+            Hits: drafts,
+            params: "",
+            page: 0,
+          },
+        );
+      });
+
+      // Return a draft by ID
+      this.get("/drafts/:document_id", (schema, request) => {
+        return new Response(
+          200,
+          {},
+          schema.document.findBy({
+            objectID: request.params.document_id,
+          }).attrs,
+        );
+      });
+
+      // Determine if a draft is shareable
+      this.get("/drafts/:document_id/shareable", () => {
+        return new Response(200, {}, { isShareable: false });
+      });
+
+      // Update whether a draft is shareable.
+      this.put("/drafts/:document_id/shareable", (schema, request) => {
+        const isShareable = JSON.parse(request.requestBody).isShareable;
+
+        let doc = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (doc) {
+          doc.update({ isShareable });
+          return new Response(200, {}, doc.attrs);
+        }
+      });
+
+      // Fetch a draft's related resources
+      this.get("drafts/:document_id/related-resources", (schema, request) => {
+        let hermesDocuments = schema.relatedHermesDocument
+          .all()
+          .models.map((doc) => {
+            return doc.attrs;
+          });
+        let externalLinks = schema.relatedExternalLinks
+          .all()
+          .models.map((link) => {
+            return link.attrs;
+          });
+
+        return new Response(200, {}, { hermesDocuments, externalLinks });
+      });
+
+      // Save a draft's related resources
+      this.put("/drafts/:document_id/related-resources", (schema, request) => {
+        let requestBody = JSON.parse(request.requestBody);
+        let { hermesDocuments, externalLinks } = requestBody;
+
+        let doc = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (doc) {
+          doc.update({
+            hermesDocuments,
+            externalLinks,
+          });
+          return new Response(200, {}, doc.attrs);
+        }
+      });
+
+      // Save a draft
+      this.patch("/drafts/:document_id", (schema, request) => {
+        let document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        if (document) {
+          let attrs = JSON.parse(request.requestBody);
+
+          if ("customFields" in attrs) {
+            attrs.customFields.forEach((field) => {
+              document.attrs[field.name] = field.value;
+            });
+          }
+
+          if ("product" in attrs) {
+            attrs.docNumber = getTestDocNumber(attrs.product);
+          }
+
+          document.update(attrs);
+
+          return new Response(200, {}, document.attrs);
+        }
+      });
+
+      // Delete a draft
       this.delete("/drafts/:document_id", (schema, request) => {
         const document = schema.document.findBy({
           objectID: request.params.document_id,
@@ -543,24 +675,6 @@ export default function (mirageConfig) {
 
         // Return the Collection models in Response format
         return new Response(200, {}, matches.models);
-      });
-
-      /**
-       * Called when a user creates a new document.
-       */
-      this.post("/drafts", (schema, request) => {
-        const document = schema.document.create({
-          ...JSON.parse(request.requestBody),
-        });
-
-        document.update({
-          objectID: document.id,
-          owners: [TEST_USER_EMAIL],
-          appCreated: true,
-          status: "WIP",
-        });
-
-        return new Response(200, {}, document.attrs);
       });
 
       /**
@@ -719,44 +833,6 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used by the Document route to get a document's draft.
-       */
-      this.get("/drafts/:document_id", (schema, request) => {
-        return new Response(
-          200,
-          {},
-          schema.document.findBy({
-            objectID: request.params.document_id,
-          }).attrs,
-        );
-      });
-
-      /**
-       * Used by the document sidebar to determine if a draft `isShareable`.
-       */
-      this.get("/drafts/:document_id/shareable", () => {
-        return new Response(200, {}, { isShareable: false });
-      });
-
-      /**
-       * Used by the RelatedResources component when the doc is a draft.
-       */
-      this.get("drafts/:document_id/related-resources", (schema, request) => {
-        let hermesDocuments = schema.relatedHermesDocument
-          .all()
-          .models.map((doc) => {
-            return doc.attrs;
-          });
-        let externalLinks = schema.relatedExternalLinks
-          .all()
-          .models.map((link) => {
-            return link.attrs;
-          });
-
-        return new Response(200, {}, { hermesDocuments, externalLinks });
-      });
-
-      /**
        * Used by the RelatedResources component when the doc is published.
        */
       this.get(
@@ -776,36 +852,6 @@ export default function (mirageConfig) {
           return new Response(200, {}, { hermesDocuments, externalLinks });
         },
       );
-
-      /**
-       * Used by the /drafts route's getDraftResults method to fetch
-       * a list of facets and draft results.
-       */
-      this.get("/drafts", (schema, request) => {
-        const params = request.queryParams;
-        const { facetFilters } = params;
-        const allDocs = this.schema.document.all().models;
-        const drafts = allDocs.filter((doc) => {
-          if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
-            return (
-              doc.attrs.isDraft && doc.attrs.owners.includes(TEST_USER_EMAIL)
-            );
-          } else {
-            return doc.attrs.isDraft;
-          }
-        });
-
-        return new Response(
-          200,
-          {},
-          {
-            facets: [],
-            Hits: drafts,
-            params: "",
-            page: 0,
-          },
-        );
-      });
 
       /**
        * Used by the Dashboard route to get a user's recently viewed documents.
@@ -912,32 +958,6 @@ export default function (mirageConfig) {
       );
 
       /**
-       * Used by the sidebar to save document properties, e.g., productArea.
-       */
-      this.patch("/drafts/:document_id", (schema, request) => {
-        let document = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-        if (document) {
-          let attrs = JSON.parse(request.requestBody);
-
-          if ("customFields" in attrs) {
-            attrs.customFields.forEach((field) => {
-              document.attrs[field.name] = field.value;
-            });
-          }
-
-          if ("product" in attrs) {
-            attrs.docNumber = getTestDocNumber(attrs.product);
-          }
-
-          document.update(attrs);
-
-          return new Response(200, {}, document.attrs);
-        }
-      });
-
-      /**
        * Used by the sidebar to update a document,
        * e.g., to change a its status.
        */
@@ -957,25 +977,6 @@ export default function (mirageConfig) {
        * PUT requests
        *
        *************************************************************************/
-
-      // Related resources (drafts)
-
-      this.put("/drafts/:document_id/related-resources", (schema, request) => {
-        let requestBody = JSON.parse(request.requestBody);
-        let { hermesDocuments, externalLinks } = requestBody;
-
-        let doc = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-
-        if (doc) {
-          doc.update({
-            hermesDocuments,
-            externalLinks,
-          });
-          return new Response(200, {}, doc.attrs);
-        }
-      });
 
       // Related resources (published docs)
 
@@ -1031,20 +1032,6 @@ export default function (mirageConfig) {
 
           project.update(attrs);
           return new Response(200, {}, project.attrs);
-        }
-      });
-
-      // Update whether a draft is shareable.
-      this.put("/drafts/:document_id/shareable", (schema, request) => {
-        const isShareable = JSON.parse(request.requestBody).isShareable;
-
-        let doc = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-
-        if (doc) {
-          doc.update({ isShareable });
-          return new Response(200, {}, doc.attrs);
         }
       });
     },

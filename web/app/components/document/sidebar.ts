@@ -33,10 +33,6 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
-import {
-  DocumentSidebarFooterButton,
-  DocumentSidebarFooterOverflowItem,
-} from "./sidebar/footer";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -47,6 +43,20 @@ interface DocumentSidebarComponentSignature {
     isCollapsed: boolean;
     toggleCollapsed: () => void;
   };
+}
+
+export interface DocFooterButton {
+  text?: string;
+  action?: () => void;
+  actions?: DocFooterOverflowItem[];
+  isRunning?: boolean;
+  icon?: string;
+}
+
+export interface DocFooterOverflowItem {
+  text: string;
+  action: () => void;
+  icon: string;
 }
 
 export enum DraftVisibility {
@@ -870,7 +880,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Returns an object with the color, text and action for the button.
    * depending on the user's role and the document's status.
    */
-  protected get primaryFooterButtonAttrs(): DocumentSidebarFooterButton {
+  protected get primaryFooterButtonAttrs(): DocFooterButton {
     /**
      * If the doc is obsolete, return a label with no action.
      * They already double-confirmed.
@@ -948,9 +958,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * when it is shown. Returns an object with the text and action for the button
    * determined by the user's role and the document's status.
    */
-  protected get secondaryFooterButtonAttrs():
-    | DocumentSidebarFooterButton
-    | undefined {
+  protected get secondaryFooterButtonAttrs(): DocFooterButton | undefined {
     const docIsFRD = this.args.document.docType === "FRD";
 
     const moveToApprovedAction = {
@@ -1023,13 +1031,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
        * If the doc is an FRD, this will be set to a reject action.
        * Otherwise, it will be undefined and filtered out using `compact`.
        */
-      let maybeRejectAction: DocumentSidebarFooterOverflowItem | undefined;
+      let maybeRejectAction: DocFooterOverflowItem | undefined;
 
       /**
        * The action to leave the approver role.
        * Available to all approvers except those who have approved the doc.
        */
-      let leaveAction: DocumentSidebarFooterOverflowItem = {
+      let leaveAction: DocFooterOverflowItem = {
         text: "Leave approver role",
         action: this.leaveApproverRole.perform,
         icon: "user-minus",

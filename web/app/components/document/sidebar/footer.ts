@@ -1,24 +1,11 @@
 import Component from "@glimmer/component";
-
-export interface DocumentSidebarFooterButton {
-  text?: string;
-  action?: () => void;
-  actions?: DocumentSidebarFooterOverflowItem[];
-  isRunning?: boolean;
-  icon?: string;
-}
-
-export interface DocumentSidebarFooterOverflowItem {
-  text: string;
-  action: () => void;
-  icon: string;
-}
+import { DocFooterButton } from "../sidebar";
 
 interface DocumentSidebarFooterComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    primaryButtonAttrs: DocumentSidebarFooterButton;
-    secondaryButtonAttrs?: DocumentSidebarFooterButton;
+    primaryButtonAttrs: DocFooterButton;
+    secondaryButtonAttrs?: DocFooterButton;
     isReadOnly?: boolean;
     docIsLocked?: boolean;
     icon?: string;
