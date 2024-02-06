@@ -33,14 +33,18 @@ export default class PersonComponent extends Component<PersonComponentSignature>
     );
   }
 
+  /**
+   * Whether the badge should be shown.
+   * True if the badge is either "approved" or "rejected".
+   */
   protected get badgeIsShown() {
     const { badge } = this.args;
     return badge === "approved" || badge === "rejected";
   }
 
   /**
-   * The icon to use in the badge, if one is shown.
-   * Will reflect either the "approved" or "rejected" state.
+   * The icon to use in the badge, when shown.
+   * Reflects either the "approved" or "rejected" state.
    */
   protected get badgeIcon() {
     switch (this.args.badge) {
@@ -52,8 +56,8 @@ export default class PersonComponent extends Component<PersonComponentSignature>
   }
 
   /**
-   * The color to use for the badge icon.
-   * Will reflect either the "approved" or "rejected" state.
+   * The color to use for the badge icon, when shown.
+   * Reflects either the "approved" or "rejected" state.
    */
   protected get badgeIconColor() {
     switch (this.badgeIcon) {

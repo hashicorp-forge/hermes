@@ -1,18 +1,20 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import Person from "hermes/components/person";
+
 interface EditableFieldReadValuePersonSignature {
-  Element: null;
   Args: {
     email: string;
     document?: HermesDocument;
   };
-  Blocks: {
-    default: [];
-  };
 }
 
 export default class EditableFieldReadValuePerson extends Component<EditableFieldReadValuePersonSignature> {
+  /**
+   * Whether the document has been approved by the user.
+   * True if the email is in the approvedBy list.
+   * Dictates the badge on the Person component.
+   */
   protected get hasApprovedDoc(): boolean {
     const { document, email } = this.args;
 
@@ -23,6 +25,11 @@ export default class EditableFieldReadValuePerson extends Component<EditableFiel
     }
   }
 
+  /**
+   * Whether the document has been rejected by the user.
+   * True if the email is in the changesRequestedBy list.
+   * Dictates the badge on the Person component.
+   */
   protected get hasRejectedDoc(): boolean {
     const { document, email } = this.args;
 
@@ -33,6 +40,10 @@ export default class EditableFieldReadValuePerson extends Component<EditableFiel
     }
   }
 
+  /**
+   * The conditional badge value to pass to the Person component.
+   * Return badges for "approved" and "rejected" scenarios.
+   */
   protected get maybeBadgeValue(): string | undefined {
     if (this.hasApprovedDoc) return "approved";
     if (this.hasRejectedDoc) return "rejected";
