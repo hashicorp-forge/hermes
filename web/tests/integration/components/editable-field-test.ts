@@ -3,6 +3,7 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
+import { HermesDocument } from "hermes/types/document";
 import { module, test } from "qunit";
 
 const EDITABLE_FIELD = ".editable-field";
@@ -27,6 +28,8 @@ interface EditableFieldComponentTestContext extends MirageTestContext {
   newArray: string[];
   disabled: boolean;
   buttonSize?: "medium";
+  document?: HermesDocument;
+  name?: string;
 }
 
 module("Integration | Component | editable-field", function (hooks) {
@@ -473,5 +476,63 @@ module("Integration | Component | editable-field", function (hooks) {
     this.set("buttonSize", "medium");
 
     assert.dom(SAVE_BUTTON).hasClass("hds-button--size-medium");
+  });
+
+  test("it conditionally renders a docNumber", async function (this: EditableFieldComponentTestContext, assert) {
+    const title = "foo";
+    const docNumber = "123";
+    const name = "title";
+
+    const document = this.server.create("document", {
+      title,
+      docNumber,
+    });
+
+    this.set("document", document);
+
+    this.set("name", name);
+
+    await render<EditableFieldComponentTestContext>(hbs`
+      <EditableField
+        @value="foo"
+        @onSave={{this.onCommit}}
+        @name={{this.name}}
+        @document={{this.document}}
+      />
+    `);
+
+    assert
+      .dom(EDITABLE_FIELD)
+      .containsText(
+        docNumber,
+        'the docNumber is rendered when a document is passed in and the name is "title"',
+      )
+      .hasClass("!mb-12", "the container has extra padding");
+
+    this.set("name", "notTitle");
+
+    assert
+      .dom(EDITABLE_FIELD)
+      .doesNotContainText(
+        docNumber,
+        "the docNumber is not rendered when the name is not 'title'",
+      )
+      .doesNotHaveClass("!mb-12", "the container does not have extra padding");
+
+    this.set("name", "title");
+
+    assert
+      .dom(EDITABLE_FIELD)
+      .containsText(docNumber, "the docNumber is rendered again");
+
+    this.set("document", undefined);
+
+    assert
+      .dom(EDITABLE_FIELD)
+      .doesNotContainText(
+        docNumber,
+        "the docNumber is not rendered when the document is not passed in",
+      )
+      .doesNotHaveClass("!mb-12", "the container does not have extra padding");
   });
 });
