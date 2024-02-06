@@ -8,10 +8,10 @@ interface Context extends TestContext {
   status: string;
 }
 
-module("Integration | Component | doc/state", function (hooks) {
+module("Integration | Component | doc/status", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it renders correctly for every state", async function (assert) {
+  test("it renders correctly for every status", async function (assert) {
     this.set("hideProgress", false);
     this.set("status", "In review");
 
@@ -37,7 +37,7 @@ module("Integration | Component | doc/state", function (hooks) {
     assert.dom(".doc-status--obsolete").exists();
     assert.dom(".hds-badge--color-neutral").hasText("Obsolete");
 
-    // Draft
+    // WIP
     this.set("status", "any text");
     assert.dom(".doc-status--wip").exists();
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
