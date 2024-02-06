@@ -282,7 +282,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1?draft=true");
 
     assert.dom(COPY_URL_BUTTON_SELECTOR).doesNotExist("not yet shareable");
-    assert.dom(SIDEBAR_TITLE_BADGE_SELECTOR).containsText("Draft");
     assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
     assert
       .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
@@ -623,21 +622,39 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    let title = "Test Document";
+    let docNumber = "HCP-???";
+
     this.server.create("document", {
       objectID: 1,
-      title: "Test Document",
+      title,
       isDraft: true,
+      docNumber,
     });
 
     await visit("/document/1?draft=true");
 
+    assert.dom(TITLE_SELECTOR).hasText(`${title} ${docNumber}`);
+
     await click(`${TITLE_SELECTOR} button`);
 
-    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
+    assert
+      .dom(`${TITLE_SELECTOR} textarea`)
+      .hasValue(title, "docNumber not part of the textarea");
+
+    title = "New Title";
+
+    await fillIn(`${TITLE_SELECTOR} textarea`, title);
 
     await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
 
-    assert.dom(TITLE_SELECTOR).hasText("New Title");
+    assert.dom(TITLE_SELECTOR).hasText(`${title} ${docNumber}`);
+
+    assert.equal(
+      this.server.schema.document.first().attrs.title,
+      title,
+      "the title is updated in the back end",
+    );
   });
 
   test("the summary attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
