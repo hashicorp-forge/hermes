@@ -85,6 +85,8 @@
             data-test-editable={{this.isOwner}}
             @value={{this.title}}
             @onSave={{this.saveTitle}}
+            {{! provide for the docNumber }}
+            @document={{@document}}
             @isSaving={{this.saveIsRunning}}
             @isReadOnly={{this.editingIsDisabled}}
             @isRequired={{true}}
