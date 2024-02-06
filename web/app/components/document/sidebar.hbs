@@ -121,9 +121,9 @@
       <div class="space-y-2">
         <Document::Sidebar::SectionHeader @title="Status" />
         <div class="flex space-x-1">
-          <Doc::State
+          <Doc::Status
             data-test-doc-status
-            @state={{@document.status}}
+            @status={{@document.status}}
             @hideProgress={{true}}
           />
           <Hds::Badge @text={{@document.docType}} />
