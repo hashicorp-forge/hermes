@@ -1,6 +1,5 @@
 <div
   class="editable-field
-    {{unless this.editingIsEnabled 'group'}}
     {{if @isSaving 'saving'}}
     {{if this.docNumberIsShown '!mb-12'}}
     {{if (and this.editingIsEnabled (not @isSaving)) 'active z-10'}}"
@@ -39,8 +38,6 @@
           name={{@name}}
           as |F|
         >
-          {{! FIXME: }}
-          {{! need the height o;f this }}
           {{#if this.emptyValueErrorIsShown}}
             <F.Error data-test-empty-value-error>This field is required</F.Error>
           {{/if}}
@@ -107,7 +104,7 @@
 
   {{#if this.docNumberIsShown}}
     <div
-      class="absolute bottom-1 left-[5px] -z-10 h-6 translate-y-full text-display-300
+      class="absolute bottom-1 left-[5px] h-6 translate-y-full text-display-300
         {{if this.editingIsEnabled 'opacity-0'}}"
     >
       {{@document.docNumber}}
