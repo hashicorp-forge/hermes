@@ -1,6 +1,6 @@
 {{#unless @hideProgress}}
   <ol
-    class="doc-state doc-state--{{this.dasherizedName}}
+    class="doc-status doc-status--{{this.dasherizedName}}
       grid w-full list-none grid-cols-3 items-center gap-0.5"
   >
     <li class="progress-bar"></li>
@@ -10,8 +10,8 @@
 {{/unless}}
 
 <Hds::Badge
-  @text={{this.state.label}}
-  @color={{this.state.color}}
+  @text={{this.status.label}}
+  @color={{this.status.color}}
   class="whitespace-nowrap"
   ...attributes
 />

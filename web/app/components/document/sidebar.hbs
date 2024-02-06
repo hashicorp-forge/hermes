@@ -20,9 +20,9 @@
       <div>
         {{! Add bgColor to make badge `multiply` work }}
         <div class="mb-4 flex items-center space-x-1.5 bg-color-page-faint">
-          <Doc::State
+          <Doc::Status
             data-test-doc-status
-            @state={{@document.status}}
+            @status={{@document.status}}
             @hideProgress={{true}}
             class={{if
               this.isDraft

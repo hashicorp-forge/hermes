@@ -1,49 +1,54 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { render } from "@ember/test-helpers";
+import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+
+interface Context extends TestContext {
+  hideProgress: boolean;
+  status: string;
+}
 
 module("Integration | Component | doc/state", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it renders correctly for every state", async function (assert) {
     this.set("hideProgress", false);
-    this.set("state", "In review");
+    this.set("status", "In review");
 
-    await render(hbs`
-      <Doc::State
+    await render<Context>(hbs`
+      <Doc::Status
         @hideProgress={{this.hideProgress}}
-        @state={{this.state}}
+        @status={{this.status}}
       />
     `);
 
     // In Review
-    assert.dom(".doc-state--in-review").exists();
+    assert.dom(".doc-status--in-review").exists();
     assert.dom(".hds-badge--color-highlight").hasText("In review");
 
     // Approved
-    this.set("state", "Approved");
+    this.set("status", "Approved");
 
-    assert.dom(".doc-state--approved").exists();
+    assert.dom(".doc-status--approved").exists();
     assert.dom(".hds-badge--color-success").hasText("Approved");
 
     // Obsolete
-    this.set("state", "Obsolete");
-    assert.dom(".doc-state--obsolete").exists();
+    this.set("status", "Obsolete");
+    assert.dom(".doc-status--obsolete").exists();
     assert.dom(".hds-badge--color-neutral").hasText("Obsolete");
 
-    // WIP
-    this.set("state", "any text");
-    assert.dom(".doc-state--wip").exists();
+    // Draft
+    this.set("status", "any text");
+    assert.dom(".doc-status--wip").exists();
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
 
-    this.set("state", undefined);
+    this.set("status", undefined);
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
 
-    this.set("state", null);
+    this.set("status", null);
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
 
-    this.set("state", true);
+    this.set("status", true);
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
   });
 });

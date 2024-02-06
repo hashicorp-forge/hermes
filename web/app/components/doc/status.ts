@@ -1,19 +1,19 @@
 import { dasherize } from "@ember/string";
 import Component from "@glimmer/component";
 
-interface DocStateComponentSignature {
+interface DocStatusComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    state?: string;
+    status?: string;
     hideProgress?: boolean;
   };
 }
 
-export default class DocStateComponent extends Component<DocStateComponentSignature> {
+export default class DocStatusComponent extends Component<DocStatusComponentSignature> {
   protected get dasherizedName() {
     let name = "";
-    if (typeof this.args.state === "string") {
-      name = dasherize(this.args.state);
+    if (typeof this.args.status === "string") {
+      name = dasherize(this.args.status);
     }
     switch (name) {
       case "in-review":
@@ -25,7 +25,7 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
     }
   }
 
-  protected get state() {
+  protected get status() {
     switch (this.dasherizedName) {
       case "in-review":
         return {
@@ -44,7 +44,7 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
 
       default:
         return {
-          label: "Draft",
+          label: "WIP",
           color: "neutral",
         };
     }
@@ -53,6 +53,6 @@ export default class DocStateComponent extends Component<DocStateComponentSignat
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Doc::State": typeof DocStateComponent;
+    "Doc::Status": typeof DocStatusComponent;
   }
 }
