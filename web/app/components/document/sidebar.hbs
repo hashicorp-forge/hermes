@@ -25,10 +25,7 @@
               data-test-doc-status
               @status={{@document.status}}
               @hideProgress={{true}}
-              class={{if
-                this.isDraft
-                "!bg-color-palette-neutral-500  !text-white"
-              }}
+              @type="inverted"
             />
           {{else}}
             {{! Status dropdown }}
@@ -167,6 +164,9 @@
             class="mb-1.5"
           />
         </div>
+
+        {{! Doctype }}
+        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       <hr class="hds-border-faint border-0 border-b" />
@@ -189,13 +189,6 @@
             }}
           />
         </div>
-      </div>
-
-      {{! Doctype }}
-      {{! Add bgColor to make badge `multiply` work }}
-      <div class="space-y-2 bg-color-page-faint">
-        <Document::Sidebar::SectionHeader @title="Doctype" />
-        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       {{! Product/Area }}
