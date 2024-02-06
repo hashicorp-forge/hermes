@@ -2,14 +2,16 @@
   <div class="flex w-full space-x-2" ...attributes>
     <div class="relative shrink-0">
       <Person::Avatar @size="small" @email={{@email}} />
-      {{#if (eq @badge "approved")}}
+      {{#if this.badgeIsShown}}
         <div
-          data-test-person-approved-badge
+          data-test-person-badge
+          data-test-person-badge-type={{@badge}}
           class="absolute -bottom-1.5 -right-1.5 flex origin-bottom-right scale-[70%] rounded-full bg-color-page-faint p-0.5"
         >
           <FlightIcon
-            @name="check-circle-fill"
-            class="text-color-palette-green-200"
+            data-test-person-badge-icon
+            @name={{this.badgeIcon}}
+            class={{this.badgeIconColor}}
           />
         </div>
       {{/if}}
