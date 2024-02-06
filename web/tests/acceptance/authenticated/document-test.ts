@@ -77,8 +77,14 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
 
-const CHANGE_DOC_STATUS_BUTTON = "[data-test-change-doc-status-button]";
 const DOC_STATUS = "[data-test-doc-status]";
+const DOC_STATUS_TOGGLE = "[data-test-doc-status-toggle]";
+const DOC_STATUS_DROPDOWN = "[data-test-doc-status-dropdown]";
+
+const DOC_STATUS_OPTION = "[data-test-doc-status-option]";
+const DOC_STATUS_OPTION_IN_REVIEW = "[data-test-status='In review']";
+const DOC_STATUS_OPTION_APPROVED = "[data-test-status='Approved']";
+const DOC_STATUS_OPTION_OBSOLETE = "[data-test-status='Obsolete']";
 
 const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";
 const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-field-type='people']";
@@ -802,7 +808,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DOC_STATUS).hasText("In review");
 
-    await click(CHANGE_DOC_STATUS_BUTTON);
+    await click(DOC_STATUS_TOGGLE);
+    await click(DOC_STATUS_OPTION_APPROVED);
 
     assert.dom(DOC_STATUS).hasText("Approved");
 
@@ -820,7 +827,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    await click(CHANGE_DOC_STATUS_BUTTON);
+    await click(DOC_STATUS_TOGGLE);
+    await click(DOC_STATUS_OPTION_APPROVED);
 
     const doc = this.server.schema.document.first();
 
@@ -831,29 +839,6 @@ module("Acceptance | authenticated/document", function (hooks) {
       .exists("the approver is badged with a check");
 
     assert.equal(doc.attrs.status, "Approved");
-  });
-
-  test("owners can move a doc they previously approved from in-review to approved", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", {
-      objectID: 1,
-      status: "In-Review",
-      approvers: [TEST_USER_EMAIL],
-      owners: [TEST_USER_EMAIL],
-      approvedBy: [TEST_USER_EMAIL],
-    });
-
-    await visit("/document/1");
-
-    await click(CHANGE_DOC_STATUS_BUTTON);
-
-    const doc = this.server.schema.document.first();
-
-    assert.equal(doc.attrs.status, "Approved");
-
-    assert
-      .dom(FLASH_MESSAGE_SELECTOR)
-      .exists({ count: 1 })
-      .hasAttribute("data-test-flash-notification-type", "success");
   });
 
   test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

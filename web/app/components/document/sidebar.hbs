@@ -40,11 +40,6 @@
               <:anchor as |dd|>
                 <div class="flex w-full items-center gap-1.5">
                   <div class="flex items-center gap-2">
-                    {{!
-                      if this is not the owner
-                      and the doc is not in some messed-up state
-                      this should be interactive with a little chevron
-                     }}
                     <dd.ToggleAction
                       disabled={{or this.editingIsDisabled this.saveIsRunning}}
                       data-test-doc-status-toggle
@@ -53,13 +48,13 @@
                           this.isOwner
                           'hds-button hds-button--color-secondary'
                         }}
-                        status-dropdown-toggleX
                         {{dasherize this.status}}"
                     >
                       <Doc::Status
+                        data-test-doc-status
                         @hideProgress={{true}}
                         @status={{this.status}}
-                        {{! make room for the chevron/running icon}}
+                        {{! Make room for the chevron/running icon}}
                         class="{{if this.isOwner 'pr-7'}}"
                       />
 
@@ -70,8 +65,7 @@
                             "running"
                             "chevron-down"
                           }}
-                          {{! TODO: this should inherit color }}
-                          class="chevron absolute right-1.5"
+                          class="absolute right-1.5"
                         />
                       {{/if}}
                     </dd.ToggleAction>
@@ -82,7 +76,7 @@
                 <dd.Action
                   data-test-doc-status-option
                   data-test-is-checked={{eq dd.attrs this.status}}
-                  data-test-value={{dd.attrs}}
+                  data-test-status={{dd.attrs}}
                   class="flex items-start gap-3 py-[5px] pl-2.5 pr-6"
                   {{on "click" (perform this.changeDocumentStatus dd.attrs)}}
                 >
