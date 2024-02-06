@@ -20,15 +20,90 @@
       <div>
         {{! Add bgColor to make badge `multiply` work }}
         <div class="mb-4 flex items-center space-x-1.5 bg-color-page-faint">
-          <Doc::Status
-            data-test-doc-status
-            @status={{@document.status}}
-            @hideProgress={{true}}
-            class={{if
-              this.isDraft
-              "!bg-color-palette-neutral-500  !text-white"
-            }}
-          />
+          {{#if this.isDraft}}
+            <Doc::Status
+              data-test-doc-status
+              @status={{@document.status}}
+              @hideProgress={{true}}
+              class={{if
+                this.isDraft
+                "!bg-color-palette-neutral-500  !text-white"
+              }}
+            />
+          {{else}}
+            {{! Status dropdown }}
+            <X::DropdownList
+              data-test-doc-status-dropdown
+              @items={{array "In review" "Approved" "Obsolete"}}
+              @selected={{this.status}}
+              @renderOut={{true}}
+              @offset={{hash mainAxis=3 crossAxis=-10}}
+              class="theme--neutral"
+            >
+              <:anchor as |dd|>
+                <div class="flex w-full items-center gap-1.5">
+                  <div class="flex items-center gap-2">
+                    {{!
+                      if this is not the owner
+                      and the doc is not in some messed-up state
+                      this should be interactive with a little chevron
+                     }}
+                    <dd.ToggleAction
+                      disabled={{or this.editingIsDisabled this.saveIsRunning}}
+                      data-test-doc-status-toggle
+                      data-test-icon={{this.draftVisibilityIcon}}
+                      class="{{if
+                          this.isOwner
+                          'hds-button hds-button--color-secondary'
+                        }}
+                        status-dropdown-toggleX
+                        {{dasherize this.status}}"
+                    >
+                      <Doc::Status
+                        @hideProgress={{true}}
+                        @status={{this.status}}
+                        {{! make room for the chevron/running icon}}
+                        class="{{if this.isOwner 'pr-7'}}"
+                      />
+
+                      {{#if this.isOwner}}
+                        <FlightIcon
+                          @name={{if
+                            this.changeDocumentStatus.isRunning
+                            "running"
+                            "chevron-down"
+                          }}
+                          {{! TODO: this should inherit color }}
+                          class="chevron absolute right-1.5"
+                        />
+                      {{/if}}
+                    </dd.ToggleAction>
+                  </div>
+                </div>
+              </:anchor>
+              <:item as |dd|>
+                <dd.Action
+                  data-test-doc-status-option
+                  data-test-is-checked={{eq dd.attrs this.status}}
+                  data-test-value={{dd.attrs}}
+                  class="flex items-start gap-3 py-[5px] pl-2.5 pr-6"
+                  {{on "click" (perform this.changeDocumentStatus dd.attrs)}}
+                >
+                  <X::DropdownList::CheckableItem
+                    @isSelected={{eq dd.attrs this.status}}
+                    @checkmarkPosition="trailing"
+                    class="w-full"
+                  >
+                    <Doc::Status
+                      @status={{dd.attrs}}
+                      @hideProgress={{true}}
+                      class="w-20 text-center"
+                    />
+                  </X::DropdownList::CheckableItem>
+                </dd.Action>
+              </:item>
+            </X::DropdownList>
+          {{/if}}
           {{! visibility toggle }}
           {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
             <X::DropdownList
@@ -367,70 +442,37 @@
             </div>
           {{/if}}
         {{else}}
-          {{#if this.isOwner}}
-            <div class="flex items-start gap-2 px-3">
-
+          {{#if this.isApprover}}
+            <div class="gap-2 px-3">
               <Hds::Button
-                data-test-change-doc-status-button
-                @text={{this.moveToStatusButtonText}}
+                @text={{this.approveButtonText}}
                 @size="medium"
-                @color={{this.moveToStatusButtonColor}}
+                @color="primary"
                 class="w-full"
-                @icon={{if this.changeDocumentStatus.isRunning "loading"}}
-                disabled={{this.changeDocumentStatus.isRunning}}
-                {{on
-                  "click"
-                  (perform
-                    this.changeDocumentStatus
-                    this.moveToStatusButtonTargetStatus
-                  )
-                }}
+                @icon={{if this.approve.isRunning "loading"}}
+                disabled={{(or
+                  this.approve.isRunning
+                  this.requestChanges.isRunning
+                  this.hasApproved
+                )}}
+                {{on "click" (perform this.approve)}}
               />
-              <Hds::Button
-                @text="Archive"
-                @size="medium"
-                @color="critical"
-                @icon="archive"
-                @isIconOnly={{true}}
-                class="basis-0"
-                disabled={{(eq @document.status "Obsolete")}}
-                {{on "click" (fn (set this "archiveModalIsShown" true))}}
-              />
-            </div>
-
-          {{else}}
-            {{#if this.isApprover}}
-              <div class="gap-2 px-3">
+              {{#if (eq @document.docType "FRD")}}
                 <Hds::Button
-                  @text={{this.approveButtonText}}
+                  @text={{this.requestChangesButtonText}}
                   @size="medium"
-                  @color="primary"
+                  @color="secondary"
                   class="w-full"
-                  @icon={{if this.approve.isRunning "loading"}}
+                  @icon={{if this.requestChanges.isRunning "loading"}}
                   disabled={{(or
                     this.approve.isRunning
                     this.requestChanges.isRunning
-                    this.hasApproved
+                    this.hasRequestedChanges
                   )}}
-                  {{on "click" (perform this.approve)}}
+                  {{on "click" (perform this.requestChanges)}}
                 />
-                {{#if (eq @document.docType "FRD")}}
-                  <Hds::Button
-                    @text={{this.requestChangesButtonText}}
-                    @size="medium"
-                    @color="secondary"
-                    class="w-full"
-                    @icon={{if this.requestChanges.isRunning "loading"}}
-                    disabled={{(or
-                      this.approve.isRunning
-                      this.requestChanges.isRunning
-                      this.hasRequestedChanges
-                    )}}
-                    {{on "click" (perform this.requestChanges)}}
-                  />
-                {{/if}}
-              </div>
-            {{/if}}
+              {{/if}}
+            </div>
           {{/if}}
         {{/if}}
       {{/if}}

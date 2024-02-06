@@ -112,6 +112,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked approvers: string[] = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
 
+  @tracked status = this.args.document.status;
+
   /**
    * Projects this document is associated with.
    * Set by `loadRelatedProjects` and used to render a list
@@ -309,24 +311,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docTypeCheckboxValue = eventTarget.checked;
   }
 
-  get moveToStatusButtonColor() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "primary";
-      default:
-        return "secondary";
-    }
-  }
-
-  // moveToStatusButtonTargetStatus returns the target status that the button
-  // will move a document to.
-  get moveToStatusButtonTargetStatus() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "Approved";
-      default:
-        return "In-Review";
-    }
+  /**
+   * These become status badges
+   */
+  protected get statusDropdownItems() {
+    return ["In-Review", "Approved", "Obsolete"];
   }
 
   /**
@@ -385,10 +374,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     if (this.showCreateLinkSuccessMessage.isRunning) {
       return "smile";
     }
-  }
-
-  get moveToStatusButtonText() {
-    return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
   // isApprover returns true if the logged in user is a document approver.
@@ -464,11 +449,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       return true;
     }
 
-    if (this.isDraft || this.docIsInReview || this.docIsApproved) {
-      return !this.isOwner;
-    } else {
-      return true;
-    }
+    return !this.isOwner;
   }
 
   /**
@@ -905,6 +886,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   changeDocumentStatus = task(async (newStatus: string) => {
+    const cachedStatus = this.status;
+
+    // Instantly update the UI
+    this.status = newStatus;
+
+    if (newStatus === "In review") {
+      newStatus = "In-Review";
+    }
+
     try {
       if (
         newStatus === "Approved" &&
@@ -924,6 +914,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         `Document status changed to "${newStatus}"`,
       );
     } catch (error: unknown) {
+      this.status = cachedStatus;
       this.maybeShowFlashError(
         error as Error,
         "Unable to change document status",

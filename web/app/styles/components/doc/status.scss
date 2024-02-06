@@ -1,4 +1,4 @@
-.doc-status {
+.doc-status-progress {
   .progress-bar {
     @apply h-0.5 rounded-full bg-color-palette-neutral-200;
   }
@@ -25,5 +25,18 @@
     li:nth-child(3) {
       @apply h-1 opacity-100;
     }
+  }
+}
+
+.status-dropdown-toggle {
+  // Style the chevron and border
+  // Label color is set by the Badge component
+
+  &.in-review {
+    @apply text-red-500;
+  }
+
+  &.approved {
+    @apply text-red-500;
   }
 }
