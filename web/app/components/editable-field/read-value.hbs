@@ -7,17 +7,11 @@
         <ol data-test-person-list class="person-list">
           {{#each this.emails as |email|}}
             <li>
-              <Person
-                @badge={{if
-                  (and @document (has-approved-doc this.document email))
-                  "approved"
-                  (if
-                    (and @document (has-rejected-doc this.document email))
-                    "rejected"
-                  )
-                }}
+              <EditableField::ReadValue::Person
                 @email={{email}}
+                @document={{@document}}
               />
+
             </li>
           {{/each}}
         </ol>
