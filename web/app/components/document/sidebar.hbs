@@ -94,10 +94,7 @@
         </div>
 
         {{! Doctype }}
-        {{! Add bgColor to make badge `multiply` work }}
-        <div class="bg-color-page-faint">
-          <Hds::Badge @text={{@document.docType}} />
-        </div>
+        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       <hr class="hds-border-faint border-0 border-b" />
