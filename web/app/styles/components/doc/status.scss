@@ -1,4 +1,4 @@
-.doc-state {
+.doc-status {
   .progress-bar {
     @apply h-0.5 rounded-full bg-color-palette-neutral-200;
   }
@@ -14,7 +14,7 @@
       @apply bg-color-palette-purple-200 opacity-75;
     }
     li:nth-child(2) {
-      @apply bg-color-palette-purple-200 h-1;
+      @apply h-1 bg-color-palette-purple-200;
     }
   }
 
@@ -23,7 +23,7 @@
       @apply bg-color-palette-green-200 opacity-75;
     }
     li:nth-child(3) {
-      @apply opacity-100 h-1;
+      @apply h-1 opacity-100;
     }
   }
 }
