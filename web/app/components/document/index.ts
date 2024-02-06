@@ -55,7 +55,7 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
           title: "Done!",
         });
 
-        this.router.transitionTo("authenticated.drafts");
+        this.router.transitionTo("authenticated.my.documents");
       }
     } catch (e) {
       this.showError(e);
