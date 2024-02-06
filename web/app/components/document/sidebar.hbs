@@ -16,23 +16,19 @@
     {{did-insert this.didInsertBody}}
   >
     <div class="sidebar-body-container">
+      {{! div to break the parent's space-y styles }}
       <div>
-        {{! div to break the parent's space-y styles }}
-        <div
-          class="flex items-center space-x-1.5
-            {{if this.isDraft 'mb-4 -mt-2' 'mb-2'}}"
-        >
-          <Hds::Badge
-            data-test-sidebar-title-badge
-            @text={{if this.isDraft "Draft" @document.docNumber}}
-            class="!rounded-[3px] uppercase
-              {{if
-                this.isDraft
-                '!bg-color-palette-neutral-500 !text-white'
-                '!bg-transparent pl-0 !text-color-foreground-faint'
-              }}
-              "
+        {{! Add bgColor to make badge `multiply` work }}
+        <div class="mb-4 flex items-center space-x-1.5 bg-color-page-faint">
+          <Doc::State
+            @state={{@document.status}}
+            @hideProgress={{true}}
+            class={{if
+              this.isDraft
+              "!bg-color-palette-neutral-500  !text-white"
+            }}
           />
+          {{! visibility toggle }}
           {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
             <X::DropdownList
               data-test-draft-visibility-dropdown
@@ -119,17 +115,11 @@
         </div>
       </div>
 
-      {{! Status }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Status" />
-        <div class="flex space-x-1">
-          <Doc::State
-            data-test-doc-status
-            @state={{@document.status}}
-            @hideProgress={{true}}
-          />
-          <Hds::Badge @text={{@document.docType}} />
-        </div>
+      {{! Doctype }}
+      {{! Add bgColor to make badge `multiply` work }}
+      <div class="space-y-2 bg-color-page-faint">
+        <Document::Sidebar::SectionHeader @title="Doctype" />
+        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       {{! Product/Area }}
