@@ -92,6 +92,12 @@
             class="mb-1.5"
           />
         </div>
+
+        {{! Doctype }}
+        {{! Add bgColor to make badge `multiply` work }}
+        <div class="bg-color-page-faint">
+          <Hds::Badge @text={{@document.docType}} />
+        </div>
       </div>
 
       <hr class="hds-border-faint border-0 border-b" />
@@ -114,13 +120,6 @@
             }}
           />
         </div>
-      </div>
-
-      {{! Doctype }}
-      {{! Add bgColor to make badge `multiply` work }}
-      <div class="space-y-2 bg-color-page-faint">
-        <Document::Sidebar::SectionHeader @title="Doctype" />
-        <Hds::Badge @text={{@document.docType}} />
       </div>
 
       {{! Product/Area }}
