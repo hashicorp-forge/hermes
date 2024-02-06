@@ -1,6 +1,7 @@
 <div
   class="editable-field
     {{if @isSaving 'saving'}}
+    {{if this.docNumberIsShown '!mb-12'}}
     {{if (and this.editingIsEnabled (not @isSaving)) 'active z-10'}}"
   ...attributes
 >
@@ -99,5 +100,14 @@
         {{/unless}}
       </Action>
     {{/if}}
+  {{/if}}
+
+  {{#if this.docNumberIsShown}}
+    <div
+      class="absolute bottom-1 left-[5px] h-6 translate-y-full text-display-300
+        {{if this.editingIsEnabled 'opacity-0'}}"
+    >
+      {{@document.docNumber}}
+    </div>
   {{/if}}
 </div>

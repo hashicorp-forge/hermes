@@ -96,6 +96,14 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
   }
 
   /**
+   * Whether the docNumber is shown.
+   * True if it's the title field and the document has a docNumber.
+   */
+  protected get docNumberIsShown() {
+    return this.args.name === "title" && this.args.document?.docNumber;
+  }
+
+  /**
    * The action passed to the `PowerSelectMultiple` component by way of `PeopleSelect`.
    * Updates the local and parent values when the user selects or deselects a person.
    *
