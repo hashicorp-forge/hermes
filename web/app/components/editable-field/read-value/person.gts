@@ -17,12 +17,7 @@ export default class EditableFieldReadValuePerson extends Component<EditableFiel
    */
   protected get hasApprovedDoc(): boolean {
     const { document, email } = this.args;
-
-    if (document?.approvedBy) {
-      return document.approvedBy.some((e) => e === email);
-    } else {
-      return false;
-    }
+    return !!document?.approvedBy?.some((e) => e === email);
   }
 
   /**
@@ -32,12 +27,7 @@ export default class EditableFieldReadValuePerson extends Component<EditableFiel
    */
   protected get hasRejectedDoc(): boolean {
     const { document, email } = this.args;
-
-    if (document?.changesRequestedBy) {
-      return document.changesRequestedBy.some((e) => e === email);
-    } else {
-      return false;
-    }
+    return !!document?.changesRequestedBy?.some((e) => e === email);
   }
 
   /**
