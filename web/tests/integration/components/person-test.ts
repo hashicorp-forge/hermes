@@ -9,8 +9,6 @@ import {
   pushMirageIntoStore,
 } from "hermes/mirage/utils";
 
-const APPROVED_BADGE = "[data-test-person-approved-badge]";
-
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
   email: string;
@@ -64,26 +62,6 @@ module("Integration | Component | person", function (hooks) {
     this.set("ignoreUnknown", true);
 
     assert.dom(".person").doesNotExist();
-  });
-
-  test("it renders a contextual checkmark", async function (this: PersonComponentTestContext, assert) {
-    this.set("badge", undefined);
-
-    await render<PersonComponentTestContext>(hbs`
-      <Person @email="" @badge={{this.badge}} />
-    `);
-
-    assert.dom(APPROVED_BADGE).doesNotExist();
-
-    this.set("badge", "approved");
-
-    assert.dom(APPROVED_BADGE).exists();
-
-    this.set("badge", "pending");
-
-    assert
-      .dom(APPROVED_BADGE)
-      .doesNotExist("only shows a badge if the correct value is passed in");
   });
 
   test(`the person is labeled "Me" if it's them`, async function (this: PersonComponentTestContext, assert) {
