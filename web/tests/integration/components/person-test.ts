@@ -9,7 +9,10 @@ import {
   pushMirageIntoStore,
 } from "hermes/mirage/utils";
 
-const APPROVED_BADGE = "[data-test-person-approved-badge]";
+const BADGE = "[data-test-person-badge]";
+const APPROVED_BADGE = '[data-test-person-badge-type="approved"]';
+const REJECTED_BADGE = '[data-test-person-badge-type="rejected"]';
+const ICON = "[data-test-person-badge-icon]";
 
 interface PersonComponentTestContext extends MirageTestContext {
   ignoreUnknown: boolean;
@@ -66,24 +69,38 @@ module("Integration | Component | person", function (hooks) {
     assert.dom(".person").doesNotExist();
   });
 
-  test("it renders a contextual checkmark", async function (this: PersonComponentTestContext, assert) {
+  test("it renders a contextual badge", async function (this: PersonComponentTestContext, assert) {
     this.set("badge", undefined);
 
     await render<PersonComponentTestContext>(hbs`
       <Person @email="" @badge={{this.badge}} />
     `);
 
-    assert.dom(APPROVED_BADGE).doesNotExist();
+    assert.dom(BADGE).doesNotExist();
 
     this.set("badge", "approved");
 
     assert.dom(APPROVED_BADGE).exists();
 
+    assert
+      .dom(ICON)
+      .hasClass("text-color-palette-green-200")
+      .hasAttribute("data-test-icon", "check-circle-fill");
+
+    this.set("badge", "rejected");
+
+    assert.dom(REJECTED_BADGE).exists();
+
+    assert
+      .dom(ICON)
+      .hasClass("text-color-foreground-faint")
+      .hasAttribute("data-test-icon", "x-circle-fill");
+
     this.set("badge", "pending");
 
     assert
-      .dom(APPROVED_BADGE)
-      .doesNotExist("only shows a badge if the correct value is passed in");
+      .dom(BADGE)
+      .doesNotExist("only shows a badge if a valid value is passed in");
   });
 
   test(`the person is labeled "Me" if it's them`, async function (this: PersonComponentTestContext, assert) {

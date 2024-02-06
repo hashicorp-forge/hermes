@@ -47,7 +47,7 @@ const TITLE_SELECTOR = "[data-test-document-title]";
 const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
 const APPROVERS_SELECTOR = "[data-test-document-approvers]";
-const APPROVED_BADGE_SELECTOR = "[data-test-person-approved-badge]";
+const APPROVED_BADGE_SELECTOR = "[data-test-person-badge-type='approved']";
 const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
 const PRODUCT_SELECT_PRODUCT_NAME = "[data-test-product-value]";
 const POPOVER = "[data-test-x-dropdown-list-content]";

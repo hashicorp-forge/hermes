@@ -32,6 +32,37 @@ export default class PersonComponent extends Component<PersonComponentSignature>
       "Unknown"
     );
   }
+
+  protected get badgeIsShown() {
+    const { badge } = this.args;
+    return badge === "approved" || badge === "rejected";
+  }
+
+  /**
+   * The icon to use in the badge, if one is shown.
+   * Will reflect either the "approved" or "rejected" state.
+   */
+  protected get badgeIcon() {
+    switch (this.args.badge) {
+      case "approved":
+        return "check-circle-fill";
+      case "rejected":
+        return "x-circle-fill";
+    }
+  }
+
+  /**
+   * The color to use for the badge icon.
+   * Will reflect either the "approved" or "rejected" state.
+   */
+  protected get badgeIconColor() {
+    switch (this.badgeIcon) {
+      case "check-circle-fill":
+        return "text-color-palette-green-200";
+      case "x-circle-fill":
+        return "text-color-foreground-faint";
+    }
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
