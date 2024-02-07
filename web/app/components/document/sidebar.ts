@@ -312,13 +312,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
-   * These become status badges
-   */
-  protected get statusDropdownItems() {
-    return ["In-Review", "Approved", "Obsolete"];
-  }
-
-  /**
    * The items passed to the draft-visibility dropdown.
    * Used to render the dropdown items and react to item selection.
    */
@@ -890,10 +883,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
     // Instantly update the UI
     this.status = newStatus;
-
-    if (newStatus === "In review") {
-      newStatus = "In-Review";
-    }
 
     try {
       await this.patchDocument.perform({

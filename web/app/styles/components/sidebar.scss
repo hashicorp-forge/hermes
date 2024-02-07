@@ -17,6 +17,7 @@
     }
   }
 
+  // Status dropdown
   .hds-button {
     &.in-review {
       // palette-purple-500 @ 40%
@@ -25,6 +26,7 @@
       // palette-purple-500 @ 60%
       color: #43205a99;
     }
+
     &.approved {
       // palette-green-500 @ 40%
       border-color: #05422066;

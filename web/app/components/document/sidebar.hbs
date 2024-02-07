@@ -31,17 +31,19 @@
             {{! Status dropdown }}
             <X::DropdownList
               data-test-doc-status-dropdown
-              @items={{array "In review" "Approved" "Obsolete"}}
-              @selected={{this.status}}
+              @items={{array "In-Review" "Approved" "Obsolete"}}
               @renderOut={{true}}
-              @offset={{hash mainAxis=3 crossAxis=-10}}
+              @offset={{hash mainAxis=3 crossAxis=-5}}
               class="theme--neutral"
             >
               <:anchor as |dd|>
                 <div class="flex w-full items-center gap-1.5">
                   <div class="flex items-center gap-2">
                     <dd.ToggleAction
-                      disabled={{or this.editingIsDisabled this.saveIsRunning}}
+                      disabled={{or
+                        this.editingIsDisabled
+                        this.changeDocumentStatus.isRunning
+                      }}
                       data-test-doc-status-toggle
                       data-test-icon={{this.draftVisibilityIcon}}
                       class="{{if
@@ -77,7 +79,7 @@
                   data-test-doc-status-option
                   data-test-is-checked={{eq dd.attrs this.status}}
                   data-test-status={{dd.attrs}}
-                  class="flex items-start gap-3 py-[5px] pl-2.5 pr-6"
+                  class="flex items-start gap-3 py-[1px] pl-1 pr-6"
                   {{on "click" (perform this.changeDocumentStatus dd.attrs)}}
                 >
                   <X::DropdownList::CheckableItem
@@ -85,11 +87,17 @@
                     @checkmarkPosition="trailing"
                     class="w-full"
                   >
-                    <Doc::Status
-                      @status={{dd.attrs}}
-                      @hideProgress={{true}}
-                      class="w-20 text-center"
-                    />
+                    <div class="relative">
+
+                      <Doc::Status
+                        @status={{dd.attrs}}
+                        @hideProgress={{true}}
+                        class="w-full py-[5px] pl-2"
+                      />
+                      <div
+                        class="doc-status-fade pointer-events-none absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-color-page-primary to-transparent"
+                      ></div>
+                    </div>
                   </X::DropdownList::CheckableItem>
                 </dd.Action>
               </:item>
