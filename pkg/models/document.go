@@ -667,6 +667,7 @@ func (d *Document) replaceAssocations(db *gorm.DB) error {
 	if err := db.
 		Session(&gorm.Session{SkipHooks: true}).
 		Model(&d).
+		Unscoped().
 		Association("Approvers").
 		Replace(d.Approvers); err != nil {
 		return err
