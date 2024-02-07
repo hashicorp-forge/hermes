@@ -716,6 +716,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       await this.waitForDocNumber.perform();
       this.draftWasPublished = true;
+      this.status = this.args.document.status;
       this.requestReviewModalIsShown = false;
       this.docPublishedModalIsShown = true;
     } catch (error: unknown) {

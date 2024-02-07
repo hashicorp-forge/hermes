@@ -539,6 +539,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
+    assert.dom(DOC_STATUS).hasText("WIP");
+
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
@@ -552,6 +554,10 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
     assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+
+    assert
+      .dom(DOC_STATUS)
+      .hasText("In review", "the status is updated when published");
 
     assert
       .dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR)
