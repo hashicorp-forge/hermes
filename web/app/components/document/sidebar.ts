@@ -896,15 +896,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
 
     try {
-      if (
-        newStatus === "Approved" &&
-        this.args.document.approvers?.includes(this.args.profile.email) &&
-        !this.args.document.approvedBy?.includes(this.args.profile.email)
-      ) {
-        // If the owner is an approver, process their approval first.
-        await this.approve.perform({ skipSuccessMessage: true });
-      }
-
       await this.patchDocument.perform({
         status: newStatus,
       });

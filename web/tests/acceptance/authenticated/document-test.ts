@@ -798,10 +798,12 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(CUSTOM_PEOPLE_FIELD_SELECTOR).hasText("None");
   });
 
-  test(`you can move a doc into the "approved" status`, async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test(`you can move between statuses`, async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
       status: "In-Review",
+      approvers: [],
+      approvedBy: [],
     });
 
     await visit("/document/1");
@@ -809,36 +811,69 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(DOC_STATUS).hasText("In review");
 
     await click(DOC_STATUS_TOGGLE);
-    await click(DOC_STATUS_OPTION_APPROVED);
+
+    assert.dom(DOC_STATUS_DROPDOWN).exists();
+
+    const inReview = `${DOC_STATUS_DROPDOWN} li:nth-child(1) button`;
+    const approved = `${DOC_STATUS_DROPDOWN} li:nth-child(2) button`;
+    const obsolete = `${DOC_STATUS_DROPDOWN} li:nth-child(3) button`;
+
+    assert
+      .dom(inReview)
+      .hasText("In review")
+      .hasAttribute("data-test-is-checked");
+
+    assert
+      .dom(approved)
+      .hasText("Approved")
+      .doesNotHaveAttribute("data-test-is-checked");
+
+    assert
+      .dom(obsolete)
+      .hasText("Obsolete")
+      .doesNotHaveAttribute("data-test-is-checked");
+
+    await click(approved);
 
     assert.dom(DOC_STATUS).hasText("Approved");
 
-    const doc = this.server.schema.document.first();
-
-    assert.equal(doc.attrs.status, "Approved");
-  });
-
-  test("you can approve your own doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", {
-      objectID: 1,
-      status: "In-Review",
-      approvers: [TEST_USER_EMAIL],
-    });
-
-    await visit("/document/1");
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "Approved",
+      "the status is updated in the back end",
+    );
 
     await click(DOC_STATUS_TOGGLE);
-    await click(DOC_STATUS_OPTION_APPROVED);
 
-    const doc = this.server.schema.document.first();
+    assert.dom(inReview).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(approved).hasAttribute("data-test-is-checked");
+    assert.dom(obsolete).doesNotHaveAttribute("data-test-is-checked");
 
-    assert.true(doc.attrs.approvedBy?.includes(TEST_USER_EMAIL));
+    await click(obsolete);
 
-    assert
-      .dom(`${APPROVERS_SELECTOR} li ${APPROVED_BADGE_SELECTOR}`)
-      .exists("the approver is badged with a check");
+    assert.dom(DOC_STATUS).hasText("Obsolete");
 
-    assert.equal(doc.attrs.status, "Approved");
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "Obsolete",
+      "the status is updated in the back end",
+    );
+
+    await click(DOC_STATUS_TOGGLE);
+
+    assert.dom(inReview).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(approved).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(obsolete).hasAttribute("data-test-is-checked");
+
+    await click(inReview);
+
+    assert.dom(DOC_STATUS).hasText("In review");
+
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "In-Review",
+      "the status is updated in the back end",
+    );
   });
 
   test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
