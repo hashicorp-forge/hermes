@@ -77,8 +77,14 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
 
-const CHANGE_DOC_STATUS_BUTTON = "[data-test-change-doc-status-button]";
 const DOC_STATUS = "[data-test-doc-status]";
+const DOC_STATUS_TOGGLE = "[data-test-doc-status-toggle]";
+const DOC_STATUS_DROPDOWN = "[data-test-doc-status-dropdown]";
+
+const DOC_STATUS_OPTION = "[data-test-doc-status-option]";
+const DOC_STATUS_OPTION_IN_REVIEW = "[data-test-status='In review']";
+const DOC_STATUS_OPTION_APPROVED = "[data-test-status='Approved']";
+const DOC_STATUS_OPTION_OBSOLETE = "[data-test-status='Obsolete']";
 
 const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";
 const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-field-type='people']";
@@ -158,10 +164,22 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      status: "Draft",
+      status: "WIP",
     });
     await visit("/document/1?draft=true");
     assert.equal(getPageTitle(), "Test Document | Hermes");
+  });
+
+  test("the status label of a draft is not interactive", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      status: "WIP",
+    });
+    await visit("/document/1?draft=true");
+
+    assert.dom(DOC_STATUS_TOGGLE).doesNotExist();
+    assert.dom(DOC_STATUS).hasText("WIP", "label exists but isn't clickable");
   });
 
   test("you can change a draft's product area", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -496,6 +514,22 @@ module("Acceptance | authenticated/document", function (hooks) {
     assertEditingIsDisabled(assert);
   });
 
+  test("non-owners can't edit the status of a doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(DOC_STATUS_TOGGLE).doesNotExist("the toggle is not shown");
+    assert
+      .dom(DOC_STATUS)
+      .hasText("In review", "the status is shown but not as a toggle");
+  });
+
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
@@ -504,6 +538,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1?draft=true");
+
+    assert.dom(DOC_STATUS).hasText("WIP");
 
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
@@ -518,6 +554,10 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
     assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+
+    assert
+      .dom(DOC_STATUS)
+      .hasText("In review", "the status is updated when published");
 
     assert
       .dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR)
@@ -792,68 +832,82 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(CUSTOM_PEOPLE_FIELD_SELECTOR).hasText("None");
   });
 
-  test(`you can move a doc into the "approved" status`, async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test(`you can move between statuses`, async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
       status: "In-Review",
+      approvers: [],
+      approvedBy: [],
     });
 
     await visit("/document/1");
 
     assert.dom(DOC_STATUS).hasText("In review");
 
-    await click(CHANGE_DOC_STATUS_BUTTON);
+    await click(DOC_STATUS_TOGGLE);
+
+    assert.dom(DOC_STATUS_DROPDOWN).exists();
+
+    const inReview = `${DOC_STATUS_DROPDOWN} li:nth-child(1) button`;
+    const approved = `${DOC_STATUS_DROPDOWN} li:nth-child(2) button`;
+    const obsolete = `${DOC_STATUS_DROPDOWN} li:nth-child(3) button`;
+
+    assert
+      .dom(inReview)
+      .hasText("In review")
+      .hasAttribute("data-test-is-checked");
+
+    assert
+      .dom(approved)
+      .hasText("Approved")
+      .doesNotHaveAttribute("data-test-is-checked");
+
+    assert
+      .dom(obsolete)
+      .hasText("Obsolete")
+      .doesNotHaveAttribute("data-test-is-checked");
+
+    await click(approved);
 
     assert.dom(DOC_STATUS).hasText("Approved");
 
-    const doc = this.server.schema.document.first();
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "Approved",
+      "the status is updated in the back end",
+    );
 
-    assert.equal(doc.attrs.status, "Approved");
-  });
+    await click(DOC_STATUS_TOGGLE);
 
-  test("you can approve your own doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", {
-      objectID: 1,
-      status: "In-Review",
-      approvers: [TEST_USER_EMAIL],
-    });
+    assert.dom(inReview).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(approved).hasAttribute("data-test-is-checked");
+    assert.dom(obsolete).doesNotHaveAttribute("data-test-is-checked");
 
-    await visit("/document/1");
+    await click(obsolete);
 
-    await click(CHANGE_DOC_STATUS_BUTTON);
+    assert.dom(DOC_STATUS).hasText("Obsolete");
 
-    const doc = this.server.schema.document.first();
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "Obsolete",
+      "the status is updated in the back end",
+    );
 
-    assert.true(doc.attrs.approvedBy?.includes(TEST_USER_EMAIL));
+    await click(DOC_STATUS_TOGGLE);
 
-    assert
-      .dom(`${APPROVERS_SELECTOR} li ${APPROVED_BADGE_SELECTOR}`)
-      .exists("the approver is badged with a check");
+    assert.dom(inReview).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(approved).doesNotHaveAttribute("data-test-is-checked");
+    assert.dom(obsolete).hasAttribute("data-test-is-checked");
 
-    assert.equal(doc.attrs.status, "Approved");
-  });
+    await click(inReview);
 
-  test("owners can move a doc they previously approved from in-review to approved", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    this.server.create("document", {
-      objectID: 1,
-      status: "In-Review",
-      approvers: [TEST_USER_EMAIL],
-      owners: [TEST_USER_EMAIL],
-      approvedBy: [TEST_USER_EMAIL],
-    });
+    assert.dom(DOC_STATUS).hasText("In review");
 
-    await visit("/document/1");
-
-    await click(CHANGE_DOC_STATUS_BUTTON);
-
-    const doc = this.server.schema.document.first();
-
-    assert.equal(doc.attrs.status, "Approved");
-
-    assert
-      .dom(FLASH_MESSAGE_SELECTOR)
-      .exists({ count: 1 })
-      .hasAttribute("data-test-flash-notification-type", "success");
+    assert.equal(
+      this.server.schema.document.first().attrs.status,
+      "In-Review",
+      "the status is updated in the back end",
+    );
   });
 
   test("approvers who have approved a document are badged with a checkmark", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

@@ -70,7 +70,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
-  @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -81,11 +80,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected docType: HermesDocumentType | null = null;
 
   get modalIsShown() {
-    return (
-      this.archiveModalIsShown ||
-      this.deleteModalIsShown ||
-      this.requestReviewModalIsShown
-    );
+    return this.deleteModalIsShown || this.requestReviewModalIsShown;
   }
 
   /**
@@ -111,6 +106,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked approvers: string[] = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
+
+  @tracked status = this.args.document.status;
 
   /**
    * Projects this document is associated with.
@@ -309,26 +306,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docTypeCheckboxValue = eventTarget.checked;
   }
 
-  get moveToStatusButtonColor() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "primary";
-      default:
-        return "secondary";
-    }
-  }
-
-  // moveToStatusButtonTargetStatus returns the target status that the button
-  // will move a document to.
-  get moveToStatusButtonTargetStatus() {
-    switch (this.args.document.status) {
-      case "In-Review":
-        return "Approved";
-      default:
-        return "In-Review";
-    }
-  }
-
   /**
    * The items passed to the draft-visibility dropdown.
    * Used to render the dropdown items and react to item selection.
@@ -385,10 +362,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     if (this.showCreateLinkSuccessMessage.isRunning) {
       return "smile";
     }
-  }
-
-  get moveToStatusButtonText() {
-    return `Move to ${this.moveToStatusButtonTargetStatus}`;
   }
 
   // isApprover returns true if the logged in user is a document approver.
@@ -464,11 +437,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       return true;
     }
 
-    if (this.isDraft || this.docIsInReview || this.docIsApproved) {
-      return !this.isOwner;
-    } else {
-      return true;
-    }
+    return !this.isOwner;
   }
 
   /**
@@ -745,6 +714,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.refreshRoute();
 
+      this.status = "In-Review";
+
       await this.waitForDocNumber.perform();
       this.draftWasPublished = true;
       this.requestReviewModalIsShown = false;
@@ -808,10 +779,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action closeRequestReviewModal() {
     this.requestReviewModalIsShown = false;
-  }
-
-  @action closeArchiveModal() {
-    this.archiveModalIsShown = false;
   }
 
   @action protected closeRequestReviewSuccessModal() {
@@ -905,16 +872,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   changeDocumentStatus = task(async (newStatus: string) => {
-    try {
-      if (
-        newStatus === "Approved" &&
-        this.args.document.approvers?.includes(this.args.profile.email) &&
-        !this.args.document.approvedBy?.includes(this.args.profile.email)
-      ) {
-        // If the owner is an approver, process their approval first.
-        await this.approve.perform({ skipSuccessMessage: true });
-      }
+    const cachedStatus = this.status;
 
+    // Instantly update the UI
+    this.status = newStatus;
+
+    try {
       await this.patchDocument.perform({
         status: newStatus,
       });
@@ -924,6 +887,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         `Document status changed to "${newStatus}"`,
       );
     } catch (error: unknown) {
+      this.status = cachedStatus;
       this.maybeShowFlashError(
         error as Error,
         "Unable to change document status",

@@ -17,6 +17,25 @@
     }
   }
 
+  // Status dropdown
+  .hds-button {
+    &.in-review {
+      // palette-purple-500 @ 40%
+      border-color: #42215b66;
+
+      // palette-purple-500 @ 60%
+      color: #43205a99;
+    }
+
+    &.approved {
+      // palette-green-500 @ 40%
+      border-color: #05422066;
+
+      // palette-green-500 @ 60%
+      color: #05422199;
+    }
+  }
+
   .editable-field-container {
     @apply mt-[3px];
 

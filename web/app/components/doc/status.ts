@@ -1,11 +1,13 @@
 import { dasherize } from "@ember/string";
 import Component from "@glimmer/component";
+import { HdsBadgeType } from "hds/_shared";
 
 interface DocStatusComponentSignature {
   Element: HTMLDivElement;
   Args: {
     status?: string;
     hideProgress?: boolean;
+    type?: HdsBadgeType;
   };
 }
 
