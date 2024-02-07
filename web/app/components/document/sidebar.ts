@@ -70,7 +70,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
-  @tracked archiveModalIsShown = false;
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -81,11 +80,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected docType: HermesDocumentType | null = null;
 
   get modalIsShown() {
-    return (
-      this.archiveModalIsShown ||
-      this.deleteModalIsShown ||
-      this.requestReviewModalIsShown
-    );
+    return this.deleteModalIsShown || this.requestReviewModalIsShown;
   }
 
   /**
@@ -782,10 +777,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @action closeRequestReviewModal() {
     this.requestReviewModalIsShown = false;
-  }
-
-  @action closeArchiveModal() {
-    this.archiveModalIsShown = false;
   }
 
   @action protected closeRequestReviewSuccessModal() {
