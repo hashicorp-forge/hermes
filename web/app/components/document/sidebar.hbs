@@ -39,28 +39,25 @@
               <:anchor as |dd|>
                 <div class="flex w-full items-center gap-1.5">
                   <div class="flex items-center gap-2">
-                    <dd.ToggleAction
-                      disabled={{or
-                        this.editingIsDisabled
-                        this.changeDocumentStatus.isRunning
-                      }}
-                      data-test-doc-status-toggle
-                      data-test-icon={{this.draftVisibilityIcon}}
-                      class="{{if
-                          this.isOwner
-                          'hds-button hds-button--color-secondary'
+                    {{#if this.isOwner}}
+                      <dd.ToggleAction
+                        disabled={{or
+                          this.editingIsDisabled
+                          this.changeDocumentStatus.isRunning
                         }}
-                        {{dasherize this.status}}"
-                    >
-                      <Doc::Status
-                        data-test-doc-status
-                        @hideProgress={{true}}
-                        @status={{this.status}}
-                        {{! Make room for the chevron/running icon}}
-                        class="{{if this.isOwner 'pr-7'}}"
-                      />
+                        data-test-doc-status-toggle
+                        data-test-icon={{this.draftVisibilityIcon}}
+                        class="hds-button hds-button--color-secondary
+                          {{dasherize this.status}}"
+                      >
+                        <Doc::Status
+                          data-test-doc-status
+                          @hideProgress={{true}}
+                          @status={{this.status}}
+                          {{! Make room for the chevron/running icon}}
+                          class="pr-7"
+                        />
 
-                      {{#if this.isOwner}}
                         <FlightIcon
                           @name={{if
                             this.changeDocumentStatus.isRunning
@@ -69,8 +66,17 @@
                           }}
                           class="absolute right-1.5"
                         />
-                      {{/if}}
-                    </dd.ToggleAction>
+                      </dd.ToggleAction>
+
+                    {{else}}
+
+                      <Doc::Status
+                        data-test-doc-status
+                        @hideProgress={{true}}
+                        @status={{this.status}}
+                      />
+
+                    {{/if}}
                   </div>
                 </div>
               </:anchor>

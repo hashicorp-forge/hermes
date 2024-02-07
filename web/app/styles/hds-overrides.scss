@@ -55,3 +55,20 @@ a.hds-button {
     @apply rounded-l-full rounded-r-full;
   }
 }
+
+.hds-alert--type-inline {
+  &.hds-alert--color-success {
+    // hds-green-500/a20
+    border-color: #05422133;
+  }
+
+  &.hds-alert--color-warning {
+    // hds-amber-500/a20
+    border-color: #52270033;
+  }
+
+  &.hds-alert--color-critical {
+    // hds-red-500/a20
+    border-color: #52140a33;
+  }
+}

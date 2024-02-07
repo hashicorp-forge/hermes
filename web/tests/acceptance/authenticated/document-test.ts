@@ -502,6 +502,22 @@ module("Acceptance | authenticated/document", function (hooks) {
     assertEditingIsDisabled(assert);
   });
 
+  test("non-owners can't edit the status of a doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(DOC_STATUS_TOGGLE).doesNotExist("the toggle is not shown");
+    assert
+      .dom(DOC_STATUS)
+      .hasText("In review", "the status is shown but not as a toggle");
+  });
+
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
