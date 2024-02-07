@@ -30,7 +30,7 @@
             class="theme--neutral"
           >
             <:anchor as |dd|>
-              {{#if this.isOwner}}
+              {{#if (and this.isOwner (not this.isDraft))}}
                 {{! Status dropdown (doc owner) }}
                 <div class="flex w-full items-center gap-1.5">
                   <div class="flex items-center gap-2">

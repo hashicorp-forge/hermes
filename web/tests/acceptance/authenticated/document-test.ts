@@ -170,6 +170,18 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.equal(getPageTitle(), "Test Document | Hermes");
   });
 
+  test("the status label of a draft is not interactive", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      status: "Draft",
+    });
+    await visit("/document/1?draft=true");
+
+    assert.dom(DOC_STATUS_TOGGLE).doesNotExist();
+    assert.dom(DOC_STATUS).hasText("WIP", "label exists but isn't clickable");
+  });
+
   test("you can change a draft's product area", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     const docID = "test-doc-0";
 
