@@ -629,7 +629,7 @@ export default function (mirageConfig) {
 
         if (document) {
           document.update({
-            status: "In Review",
+            status: "In-Review",
             isDraft: false,
           });
 
