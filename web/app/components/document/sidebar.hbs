@@ -375,6 +375,7 @@
   {{#if this.footerIsShown}}
     <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
       {{#if this.footerControlsAreDisabled}}
+        {{! Disabled controls }}
         <div class="-mb-1 px-3">
           <div class="w-full border-t border-color-border-primary pt-3.5">
             <div class="text-body-200 text-color-foreground-faint">
@@ -412,58 +413,97 @@
           </div>
         </div>
       {{else}}
-        {{#if this.isDraft}}
-          {{#if this.isOwner}}
-            <div class="flex items-start gap-2 px-3">
-              <Hds::Button
-                data-test-sidebar-publish-for-review-button
-                @text="Publish for review..."
-                @size="medium"
-                @color="primary"
-                class="w-full"
-                {{on "click" (set this "requestReviewModalIsShown" true)}}
-              />
-              <Hds::Button
-                @text="Delete"
-                @size="medium"
-                @color="critical"
-                @icon="trash"
-                @isIconOnly={{true}}
-                class="basis-0"
-                {{on "click" (fn (set this "deleteModalIsShown" true))}}
-              />
-            </div>
-          {{/if}}
+
+        {{#if (and this.isDraft this.isOwner)}}
+          <div class="flex gap-2 px-3">
+            {{! Publish for review... }}
+            <Hds::Button
+              data-test-sidebar-publish-for-review-button
+              @text="Publish for review..."
+              @size="medium"
+              @color="primary"
+              class="w-full"
+              {{on "click" (set this "requestReviewModalIsShown" true)}}
+            />
+            {{! Delete... }}
+            <Hds::Button
+              @text="Delete..."
+              @size="medium"
+              @color="critical"
+              @icon="trash"
+              @isIconOnly={{true}}
+              class="basis-0"
+              {{on "click" (fn (set this "deleteModalIsShown" true))}}
+            />
+          </div>
         {{else}}
           {{#if this.isApprover}}
-            <div class="gap-2 px-3">
-              <Hds::Button
-                @text={{this.approveButtonText}}
-                @size="medium"
-                @color="primary"
-                class="w-full"
-                @icon={{if this.approve.isRunning "loading"}}
-                disabled={{(or
-                  this.approve.isRunning
-                  this.requestChanges.isRunning
-                  this.hasApproved
-                )}}
-                {{on "click" (perform this.approve)}}
-              />
-              {{#if (eq @document.docType "FRD")}}
+            {{! TODO: share div with other state }}
+            <div class="flex gap-2 px-3">
+              {{#if (or this.hasApproved this.hasRequestedChanges)}}
+                <div
+                  data-test-sidebar-footer-primary-button-read-only
+                  class="hds-button mock-disabled hds-button--primary hds-button--size-medium w-full leading-none"
+                >
+                  {{if this.hasApproved "Approved" "Rejected"}}
+                </div>
+              {{else}}
                 <Hds::Button
-                  @text={{this.requestChangesButtonText}}
+                  @text="Approve"
                   @size="medium"
-                  @color="secondary"
+                  @color="primary"
                   class="w-full"
-                  @icon={{if this.requestChanges.isRunning "loading"}}
+                  @icon={{if this.approve.isRunning "loading"}}
                   disabled={{(or
-                    this.approve.isRunning
-                    this.requestChanges.isRunning
-                    this.hasRequestedChanges
+                    this.approve.isRunning this.requestChanges.isRunning
                   )}}
-                  {{on "click" (perform this.requestChanges)}}
+                  {{on "click" (perform this.approve)}}
                 />
+
+                {{#if (eq @document.docType "FRD")}}
+                  <Hds::Button
+                    @text="Reject"
+                    @size="medium"
+                    @color="secondary"
+                    class="w-full"
+                    @icon="thumbs-down"
+                    @isIconOnly={{true}}
+                    disabled={{(or
+                      this.approve.isRunning this.requestChanges.isRunning
+                    )}}
+                    {{on "click" (perform this.requestChanges)}}
+                  />
+                {{/if}}
+
+                <X::DropdownList
+                  data-test-sidebar-footer-overflow-menu
+                  @items={{array
+                    (hash icon="user-minus" label="Leave approver role")
+                  }}
+                  @placement="top-start"
+                >
+                  <:anchor as |dd|>
+                    <dd.ToggleAction>
+                      <Hds::Button
+                        data-test-sidebar-footer-secondary-dropdown-button
+                        @text="More actions"
+                        @icon="more-horizontal"
+                        @color="secondary"
+                        @isIconOnly={{true}}
+                      />
+                    </dd.ToggleAction>
+                  </:anchor>
+                  <:item as |dd|>
+                    {{! TODO: need `action` }}
+                    <dd.Action class="flex gap-2.5">
+                      <FlightIcon
+                        @name={{dd.attrs.icon}}
+                        class="shrink-0 opacity-60"
+                      />
+                      {{dd.attrs.label}}
+                    </dd.Action>
+                  </:item>
+                </X::DropdownList>
               {{/if}}
             </div>
           {{/if}}
