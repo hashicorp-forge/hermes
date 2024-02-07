@@ -105,9 +105,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors: string[] = this.args.document.contributors || [];
 
   @tracked approvers: string[] = this.args.document.approvers || [];
+
   @tracked product = this.args.document.product || "";
 
   @tracked status = this.args.document.status;
+
+  /**
+   * Whether the user has left the approver role since page load.
+   * Dictates the "leaving..." state of the footer.
+   */
+  @tracked protected hasJustLeftApproverRole = false;
 
   /**
    * Projects this document is associated with.
@@ -377,18 +384,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  // hasApproved returns true if the logged in user has approved the document.
-  get hasApproved() {
-    return this.args.document.approvedBy?.includes(this.args.profile.email);
-  }
+  /**
+   * Whether the viewer has approved the document.
+   * True if their email is in the document's `approvedBy` array,
+   * and immediately when their approval completes.
+   */
+  @tracked protected hasApproved = this.args.document.approvedBy?.includes(
+    this.args.profile.email,
+  );
 
-  // hasRequestedChanges returns true if the logged in user has requested
-  // changes of the document.
-  get hasRequestedChanges() {
-    return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email,
-    );
-  }
+  /**
+   * Whether the viewer has requested changes to the document.
+   * True if their email is in the document's `changesRequestedBy` array,
+   * and immediately when their request completes.
+   */
+  @tracked protected hasRequestedChanges =
+    this.args.document.changesRequestedBy?.includes(this.args.profile.email);
 
   /**
    * Whether the doc status is approved. Used to determine editing privileges.
@@ -458,7 +469,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * as well as approvers and owners who need doc-management controls.
    */
   protected get footerIsShown() {
-    return this.isApprover || this.isOwner || this.isContributor;
+    return (
+      !this.hasJustLeftApproverRole &&
+      (this.isApprover || this.isOwner || this.isContributor)
+    );
   }
 
   /**
@@ -645,6 +659,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
+  saveApprovers = task(async (newApprovers) => {
+    this.approvers = newApprovers;
+    await this.save.perform("approvers", this.approvers);
+  });
+
   saveCustomField = task(
     async (
       fieldName: string,
@@ -714,8 +733,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.refreshRoute();
 
-      await this.waitForDocNumber.perform();
+      this.status = "In-Review";
       this.draftWasPublished = true;
+
+      await this.waitForDocNumber.perform();
+
       this.requestReviewModalIsShown = false;
       this.docPublishedModalIsShown = true;
     } catch (error: unknown) {
@@ -810,6 +832,43 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * The action to leave the approver role.
+   * Updates the local approvers array and saves it to the back end.
+   * On success, shows a success message. On failure, shows an error message
+   * and reverts the local approvers array.
+   */
+  protected leaveApproverRole = task(async () => {
+    const cachedApprovers = this.approvers;
+
+    try {
+      this.approvers = this.approvers.filter(
+        (e) => e !== this.args.profile.email,
+      );
+
+      this.approvers = this.approvers;
+
+      await this.save.perform("approvers", this.approvers);
+
+      this.hasJustLeftApproverRole = true;
+
+      this.flashMessages.add({
+        message: "You've left the approver role",
+        title: "Done!",
+      });
+    } catch (e: unknown) {
+      this.approvers = cachedApprovers;
+      this.flashMessages.critical((e as any).message, {
+        title: "Error leaving approver role",
+      });
+    } finally {
+      setTimeout(() => {
+        // reset state after a short delay
+        this.hasJustLeftApproverRole = false;
+      }, 5000);
+    }
+  });
+
+  /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
    * Called when a document draft is rendered.
    */
@@ -826,25 +885,32 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {}
   });
 
-  approve = task(async (options?: { skipSuccessMessage: boolean }) => {
-    try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-      if (!options?.skipSuccessMessage) {
-        this.showFlashSuccess("Done!", "Document approved");
-      }
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to approve");
-      throw error;
-    }
+  approve = task(
+    async (options?: { skipSuccessMessage: boolean } | MouseEvent) => {
+      try {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
 
-    this.refreshRoute();
-  });
+        this.hasApproved = true;
+
+        if (options instanceof MouseEvent) return;
+
+        if (!options?.skipSuccessMessage) {
+          this.showFlashSuccess("Done!", "Document approved");
+        }
+      } catch (error: unknown) {
+        this.maybeShowFlashError(error as Error, "Unable to approve");
+        throw error;
+      }
+
+      this.refreshRoute();
+    },
+  );
 
   requestChanges = task(async () => {
     try {
@@ -855,6 +921,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           headers: { "Content-Type": "application/json" },
         },
       );
+
+      this.hasRequestedChanges = true;
+
       // Add a notification for the user
       let msg = "Requested changes for document";
       // FRDs are a special case that can be approved or not approved.

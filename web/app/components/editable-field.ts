@@ -6,6 +6,7 @@ import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
 import { HermesDocument } from "hermes/types/document";
 import blinkElement from "hermes/utils/blink-element";
+import { task } from "ember-concurrency";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -39,11 +40,20 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    */
   private cachedValue = this.args.value;
 
+  protected get value() {
+    console.log("value getter", {
+      name: this.args.name,
+      cachedValue: this.cachedValue,
+      newValue: this.newValue,
+    });
+    return this.newValue || this.cachedValue;
+  }
+
   /**
    * The value of the field. Initially set to the value passed in.
    * Updated when the user commits their changes.
    */
-  @tracked protected value = this.cachedValue;
+  @tracked protected newValue: string[] | string | null = null;
 
   /**
    * Whether the editing is enabled.
@@ -109,10 +119,10 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    *
    */
   @action protected onChange(value: string | string[]) {
-    this.value = value;
+    this.newValue = value;
 
     if (this.args.onChange) {
-      this.args.onChange(this.value);
+      this.args.onChange(this.newValue);
     }
   }
 
@@ -207,8 +217,8 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
     this.disableEditing();
 
     schedule("afterRender", this, () => {
-      this.value = this.cachedValue;
-      this.onChange(this.value as string[]);
+      this.newValue = this.cachedValue;
+      this.onChange(this.newValue as string[]);
     });
   }
 
@@ -226,7 +236,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
           break;
         }
         ev.preventDefault();
-        this.maybeUpdateValue(this.value);
+        this.maybeUpdateValue(this.newValue);
         break;
       case "Escape":
         ev.preventDefault();
@@ -291,18 +301,26 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
       if (typeof newValue === "string") {
         newValue = newValue.trim();
       }
-      this.cachedValue = this.value;
+
+      assert("newValue must exist", this.newValue);
+
+      this.cachedValue = this.newValue;
 
       assert("newValue must be defined", newValue !== undefined);
-      this.value = newValue;
+      this.newValue = newValue;
 
-      this.args.onSave(this.value);
+      void this.updateValue.perform();
     }
 
     scheduleOnce("actions", this, () => {
       this.disableEditing();
     });
   }
+
+  protected updateValue = task(async () => {
+    await this.args.onSave(this.newValue);
+    this.newValue = null;
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {
