@@ -695,7 +695,11 @@
   {{/if}}
 
   {{#if this.docPublishedModalIsShown}}
-    <Hds::Modal data-test-doc-published-modal as |M|>
+    <Hds::Modal
+      @onClose={{this.closeRequestReviewSuccessModal}}
+      data-test-doc-published-modal
+      as |M|
+    >
       <M.Header>
         <div class="flex items-center">
           <FlightIcon
