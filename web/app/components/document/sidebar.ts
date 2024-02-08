@@ -258,10 +258,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("_body must exist", this._body);
     return this._body;
   }
-
-  get docIsLocked() {
-    return this.args.document?.locked;
-  }
+  /**
+   * Whether the document is locked to editing.
+   * True when a document is corrupt or has suggestions in the header.
+   * Initially set to the passed-in property; set true when a 423 is thrown.
+   */
+  @tracked protected docIsLocked = this.args.document?.locked;
 
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
@@ -499,6 +501,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   @action maybeShowFlashError(error: Error, title: string) {
+    /**
+     * When the FetchService receives a non-401 error response,
+     * it returns a message starting with "Bad response ([ErrorCode])".
+     * We check for 423 responses and set `docIsLocked` accordingly.
+     */
+    if (error.message.startsWith("Bad response (423)")) {
+      this.docIsLocked = true;
+    }
+
     if (!this.modalIsShown) {
       this.showFlashError(error, title);
     }
@@ -688,7 +699,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       );
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to save document");
-      throw error;
     } finally {
       this.refreshRoute();
     }
@@ -723,7 +733,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch (error: unknown) {
       this.draftWasPublished = null;
       this.maybeShowFlashError(error as Error, "Unable to request review");
-      throw error;
     }
   });
 
@@ -751,7 +760,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       await this.args.deleteDraft(this.docID);
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to delete draft");
-      throw error;
     }
   });
 
@@ -842,7 +850,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Unable to approve");
-      throw error;
     }
 
     this.refreshRoute();
@@ -866,7 +873,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.showFlashSuccess("Done!", msg);
     } catch (error: unknown) {
       this.maybeShowFlashError(error as Error, "Change request failed");
-      throw error;
     }
     this.refreshRoute();
   });
@@ -892,7 +898,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         error as Error,
         "Unable to change document status",
       );
-      throw error;
     }
     this.refreshRoute();
   });

@@ -27,6 +27,7 @@ import {
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
 } from "hermes/mirage/utils";
+import { Response } from "miragejs";
 
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
@@ -43,6 +44,7 @@ const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
 
+const APPROVE_BUTTON = "[data-test-approve-button]";
 const TITLE_SELECTOR = "[data-test-document-title]";
 const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
@@ -1138,5 +1140,42 @@ module("Acceptance | authenticated/document", function (hooks) {
     const document = this.server.schema.document.first();
 
     assert.true(document.projects.length === 0);
+  });
+
+  test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    /**
+     * 423s are caught anytime the document shows an error flash message,
+     * which is the case for all important actions. This test demonstrates
+     * the "failed to approve" case, but the behavior is the same for
+     * all other actions.
+     */
+
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    // Set ourselves up for failure
+    this.server.post("/approvals/:document_id", () => {
+      return new Response(423, {}, "Locked");
+    });
+
+    await visit("/document/1");
+
+    assert.dom(DISABLED_FOOTER_H5).doesNotExist("the document is not locked");
+
+    await click(APPROVE_BUTTON);
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .containsText("Bad response (423): Locked")
+      .hasAttribute("data-test-flash-notification-type", "critical");
+
+    assert.dom(APPROVE_BUTTON).doesNotExist("the approve button is removed");
+
+    assert.dom(DISABLED_FOOTER_H5).hasText("Document is locked");
   });
 });

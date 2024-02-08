@@ -39,7 +39,6 @@ export default class FetchService extends Service {
 
     try {
       const resp = await fetch(url, options);
-
       // if it's a poll call, tell the SessionService if the response was a 401
       if (isPollCall) {
         this.session.pollResponseIs401 = resp.status === 401;
@@ -50,8 +49,11 @@ export default class FetchService extends Service {
           // handle poll-call failures via the session service
           return;
         }
+
         const errText = await resp.text();
-        throw new Error(`Bad response: ${errText}`);
+
+        // Include status so the caller can triage it.
+        throw new Error(`Bad response (${resp.status}): ${errText}`);
       }
 
       return resp;
