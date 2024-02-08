@@ -380,6 +380,8 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
 		{"/api/v2/me", apiv2.MeHandler(srv)},
 		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
+		{"/api/v2/me/recently-viewed-projects",
+			apiv2.MeRecentlyViewedProjectsHandler(srv)},
 		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
 		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
 		{"/api/v2/products", apiv2.ProductsHandler(srv)},

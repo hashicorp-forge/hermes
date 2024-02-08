@@ -22,12 +22,21 @@ type User struct {
 
 	// RecentlyViewedDocs are the documents recently viewed by the user.
 	RecentlyViewedDocs []Document `gorm:"many2many:recently_viewed_docs;"`
+
+	// RecentlyViewedProjects are the projects recently viewed by the user.
+	RecentlyViewedProjects []Project `gorm:"many2many:recently_viewed_projects;"`
 }
 
 type RecentlyViewedDoc struct {
 	UserID     int `gorm:"primaryKey"`
 	DocumentID int `gorm:"primaryKey"`
 	ViewedAt   time.Time
+}
+
+type RecentlyViewedProject struct {
+	UserID    int `gorm:"primaryKey"`
+	ProjectID int `gorm:"primaryKey"`
+	ViewedAt  time.Time
 }
 
 // BeforeSave is a hook to find or create associations before saving.
@@ -103,6 +112,12 @@ func (u *User) Upsert(db *gorm.DB) error {
 			Replace(u.RecentlyViewedDocs); err != nil {
 			return err
 		}
+		if err := tx.
+			Model(&u).
+			Association("RecentlyViewedProjects").
+			Replace(u.RecentlyViewedProjects); err != nil {
+			return err
+		}
 
 		if err := u.Get(tx); err != nil {
 			return fmt.Errorf("error getting the user after upsert")
@@ -133,6 +148,16 @@ func (u *User) getAssociations(tx *gorm.DB) error {
 		rvd = append(rvd, d)
 	}
 	u.RecentlyViewedDocs = rvd
+
+	// Get recently viewed projects.
+	var rvp []Project
+	for _, p := range u.RecentlyViewedProjects {
+		if err := p.Get(tx, p.ID); err != nil {
+			return fmt.Errorf("error getting project: %w", err)
+		}
+		rvp = append(rvp, p)
+	}
+	u.RecentlyViewedProjects = rvp
 
 	return nil
 }

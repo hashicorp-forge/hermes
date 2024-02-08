@@ -968,9 +968,9 @@ func updateRecentlyViewedDocs(
 		docs = append(docs, dd)
 	}
 
-	// Trim recently viewed documents to a length of 5.
-	if len(docs) > 10 {
-		docs = docs[:10]
+	// Trim recently viewed documents to a length of 11.
+	if len(docs) > 11 {
+		docs = docs[:11]
 	}
 
 	// Update user.

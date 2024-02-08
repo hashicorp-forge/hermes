@@ -26,6 +26,7 @@ import {
   TEST_USER_3_EMAIL,
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
+  TEST_USER_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
@@ -35,7 +36,6 @@ const ADD_RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
 const ADD_RELATED_RESOURCE_MODAL_SELECTOR =
   "[data-test-add-related-resource-modal]";
 const FLASH_MESSAGE_SELECTOR = "[data-test-flash-notification]";
-const SIDEBAR_TITLE_BADGE_SELECTOR = "[data-test-sidebar-title-badge]";
 const TOOLTIP_SELECTOR = ".hermes-tooltip";
 const DRAFT_VISIBILITY_DROPDOWN_SELECTOR =
   "[data-test-draft-visibility-dropdown]";
@@ -43,9 +43,15 @@ const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
 const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
-
 const APPROVE_BUTTON = "[data-test-approve-button]";
+const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON =
+  "[data-test-sidebar-footer-secondary-dropdown-button]";
+const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
+const SIDEBAR_FOOTER_OVERFLOW_ITEM = `${SIDEBAR_FOOTER_OVERFLOW_MENU} button`;
 const REJECT_FRD_BUTTON = "[data-test-reject-frd-button]";
+const SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY =
+  "[data-test-sidebar-footer-primary-button-read-only]";
+("[data-test-sidebar-footer-secondary-button]");
 const TITLE_SELECTOR = "[data-test-document-title]";
 const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
@@ -69,6 +75,7 @@ const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
 const DELETE_BUTTON = "[data-test-delete-draft-button]";
+const DELETE_MODAL = "[data-test-delete-draft-modal]";
 const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
   "[data-test-document-modal-primary-button]";
 const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
@@ -84,11 +91,6 @@ const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
 const DOC_STATUS = "[data-test-doc-status]";
 const DOC_STATUS_TOGGLE = "[data-test-doc-status-toggle]";
 const DOC_STATUS_DROPDOWN = "[data-test-doc-status-dropdown]";
-
-const DOC_STATUS_OPTION = "[data-test-doc-status-option]";
-const DOC_STATUS_OPTION_IN_REVIEW = "[data-test-status='In review']";
-const DOC_STATUS_OPTION_APPROVED = "[data-test-status='Approved']";
-const DOC_STATUS_OPTION_OBSOLETE = "[data-test-status='Obsolete']";
 
 const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";
 const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-field-type='people']";
@@ -505,6 +507,138 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1");
 
     assertEditingIsDisabled(assert);
+  });
+
+  test("you can delete a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await triggerEvent(DELETE_BUTTON, "mouseenter");
+
+    assert.dom(TOOLTIP_SELECTOR).hasText("Delete...");
+
+    await click(DELETE_BUTTON);
+
+    assert.dom(DELETE_MODAL).exists("the user is shown a confirmation screen");
+
+    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR).hasText("Yes, delete");
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    assert.dom(DELETE_MODAL).doesNotExist("the modal is dismissed");
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Document draft deleted");
+
+    assert.equal(
+      currentURL(),
+      "/my/documents",
+      'the user is redirected to the "my documents" page',
+    );
+  });
+
+  test("an approver can remove themselves from the approver role", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      status: "In review",
+      isDraft: false,
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    const approversList = find(APPROVERS_SELECTOR);
+
+    assert.dom(approversList).containsText("Me");
+
+    await click(SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).exists();
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).exists({ count: 1 });
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_ITEM).hasText("Leave approver role");
+
+    await click(SIDEBAR_FOOTER_OVERFLOW_ITEM);
+
+    assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).doesNotExist();
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("You've left the approver role");
+
+    assert.dom(approversList).doesNotContainText(TEST_USER_NAME);
+
+    const doc = this.server.schema.document.first();
+
+    assert.false(doc.attrs.approvers.includes(TEST_USER_EMAIL));
+  });
+
+  test("approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+      approvedBy: [],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(DOC_STATUS).hasText("In review");
+
+    await click(APPROVE_BUTTON);
+
+    assert.dom(APPROVE_BUTTON).doesNotExist("footer controls are removed");
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("Document approved");
+
+    const doc = this.server.schema.document.first();
+    const { approvedBy } = doc.attrs;
+
+    assert.true(approvedBy?.includes(TEST_USER_EMAIL));
+  });
+
+  test("approvers can reject an FRD", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In review",
+      docType: "FRD",
+      owners: [TEST_USER_2_EMAIL],
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    await triggerEvent(REJECT_FRD_BUTTON, "mouseenter");
+
+    assert.dom(TOOLTIP_SELECTOR).hasText("Reject");
+
+    await click(REJECT_FRD_BUTTON);
+
+    assert.dom(REJECT_FRD_BUTTON).doesNotExist("footer controls are removed");
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Rejected");
+
+    assert
+      .dom(FLASH_MESSAGE_SELECTOR)
+      .exists({ count: 1 })
+      .hasAttribute("data-test-flash-notification-type", "success")
+      .containsText("rejected");
+
+    const doc = this.server.schema.document.first();
+    const { changesRequestedBy } = doc.attrs;
+
+    assert.true(changesRequestedBy?.includes(TEST_USER_EMAIL));
   });
 
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

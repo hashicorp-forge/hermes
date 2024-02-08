@@ -486,8 +486,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
   @action hideContent() {
     if (this.tooltip) {
       this.tooltip.remove();
-      this.tooltip = null;
       this.updateState(TooltipState.Closed);
+
+      schedule("afterRender", () => {
+        this.tooltip = null;
+      });
     }
   }
 
