@@ -12,7 +12,7 @@ import {
 } from "ember-concurrency";
 import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce } from "@ember/runloop";
+import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -150,6 +150,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * request finally completes. Used to reactively update the UI.
    */
   @tracked private newDraftVisibilityIcon: DraftVisibilityIcon | null = null;
+
+  /**
+   * Whether the Approvers list is shown.
+   * True except immediately after the user leaves the approver role.
+   * See note in `leaveApproverRole` for more information.
+   */
+  @tracked protected approversAreShown = true;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -847,6 +854,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.approvers = this.approvers;
 
       await this.save.perform("approvers", this.approvers);
+
+      /**
+       * This is an unfortunate hack to re-render the approvers list
+       * after the user leaves the approver role. Because the EditableField
+       * component has its own caching logic, it doesn't inherit changes
+       * from external components. This can be changed in the future, but will
+       * require a refactor of the EditableField and sidebar components.
+       *
+       * TODO: Improve this
+       */
+      this.approversAreShown = false;
+      schedule("afterRender", () => {
+        this.approversAreShown = true;
+      });
 
       this.hasJustLeftApproverRole = true;
 

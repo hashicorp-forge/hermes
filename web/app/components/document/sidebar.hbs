@@ -258,23 +258,25 @@
         </div>
       </div>
 
-      {{! Approvers }}
-      <div>
-        <Document::Sidebar::SectionHeader @title="Approvers" />
-        <div class="editable-field-container mt-[3px]">
-          <EditableField
-            data-test-document-approvers
-            data-test-editable={{this.isOwner}}
-            @value={{this.approvers}}
-            @onChange={{this.updateApprovers}}
-            @onSave={{perform this.save "approvers"}}
-            @isSaving={{this.saveIsRunning}}
-            @isReadOnly={{this.editingIsDisabled}}
-            {{! Provide the document to the `has-approved-doc` helper }}
-            @document={{@document}}
-          />
+      {{#if this.approversAreShown}}
+        {{! Approvers }}
+        <div>
+          <Document::Sidebar::SectionHeader @title="Approvers" />
+          <div class="editable-field-container mt-[3px]">
+            <EditableField
+              data-test-document-approvers
+              data-test-editable={{this.isOwner}}
+              @value={{this.approvers}}
+              @onChange={{this.updateApprovers}}
+              @onSave={{perform this.save "approvers"}}
+              @isSaving={{this.saveIsRunning}}
+              @isReadOnly={{this.editingIsDisabled}}
+              {{! Provide the document to the `has-approved-doc` helper }}
+              @document={{@document}}
+            />
+          </div>
         </div>
-      </div>
+      {{/if}}
 
       {{! Related resources }}
       <div>
