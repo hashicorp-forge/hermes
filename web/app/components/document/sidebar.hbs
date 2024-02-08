@@ -424,6 +424,7 @@
                 {{on "click" (set this "requestReviewModalIsShown" true)}}
               />
               <Hds::Button
+                data-test-delete-draft-button
                 @text="Delete"
                 @size="medium"
                 @color="critical"
@@ -453,6 +454,7 @@
               />
               {{#if (eq @document.docType "FRD")}}
                 <Hds::Button
+                  data-test-reject-frd-button
                   @text={{this.requestChangesButtonText}}
                   @size="medium"
                   @color="secondary"

@@ -70,8 +70,10 @@ export default class DocumentModalComponent extends Component<DocumentModalCompo
     try {
       this.taskIsRunning = true;
       await this.args.task();
+      console.log("one");
       this.args.close();
     } catch (error: unknown) {
+      console.log("two");
       this.taskIsRunning = false;
       if (this.args.errorTitle) {
         this.showError(this.args.errorTitle, error);

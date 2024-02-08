@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
+  dropTask,
   enqueueTask,
   keepLatestTask,
   restartableTask,
@@ -33,13 +34,13 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: PersonModel;
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
-    deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
   };
@@ -69,6 +70,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
+  declare viewedDocs: RecentlyViewedDocsService;
 
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
@@ -727,7 +729,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.docPublishedModalIsShown = true;
     } catch (error: unknown) {
       this.draftWasPublished = null;
-      this.maybeShowFlashError(error as Error, "Unable to request review");
+      // trigger the modal error
+      throw error;
     }
   });
 
@@ -750,12 +753,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docNumberLookupHasFailed = true;
   });
 
-  deleteDraft = task(async () => {
-    try {
-      await this.args.deleteDraft(this.docID);
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to delete draft");
-    }
+  protected deleteDraft = dropTask(async () => {
+    await this.fetchSvc.fetch(
+      `/api/${this.configSvc.config.api_version}/drafts/` + this.docID,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+
+    void this.viewedDocs.fetchAll.perform();
+
+    this.flashMessages.add({
+      message: "Document draft deleted",
+      title: "Done!",
+    });
+
+    this.router.transitionTo("authenticated.my.documents");
   });
 
   @action updateApprovers(approvers: string[]) {

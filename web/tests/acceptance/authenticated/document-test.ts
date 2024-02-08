@@ -45,6 +45,7 @@ const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
 
 const APPROVE_BUTTON = "[data-test-approve-button]";
+const REJECT_FRD_BUTTON = "[data-test-reject-frd-button]";
 const TITLE_SELECTOR = "[data-test-document-title]";
 const SUMMARY_SELECTOR = "[data-test-document-summary]";
 const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
@@ -67,6 +68,7 @@ const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
   "[data-test-sidebar-publish-for-review-button";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
+const DELETE_BUTTON = "[data-test-delete-draft-button]";
 const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
   "[data-test-document-modal-primary-button]";
 const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
@@ -113,6 +115,8 @@ const OVERFLOW_MENU_BUTTON = "[data-test-overflow-menu-button]";
 const REMOVE_FROM_PROJECT_BUTTON =
   "[data-test-overflow-menu-action='remove-from-project']";
 const DOCUMENT_PROJECT = "[data-test-document-project]";
+
+const MODAL_ERROR = "[data-test-modal-error]";
 
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -1143,11 +1147,47 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("it shows an error when patching a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    // Set ourselves up for failure
-    this.server.patch("/documents/:document_id", () => {
-      return new Response(500, {}, "Internal Server Error");
+    this.server.create("document", {
+      objectID: 1,
     });
 
+    await visit("/document/1?draft=true");
+
+    const errorMessage = "Internal Server Error";
+
+    this.server.patch("/drafts/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
+
+    // Try changing the title
+    await click(`${TITLE_SELECTOR} button`);
+    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
+    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+  });
+
+  test("it shows an error when requesting a review fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1?draft=true");
+
+    const errorMessage = "Internal Server Error";
+
+    this.server.post("/reviews/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
+
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    assert.dom(MODAL_ERROR).containsText(errorMessage);
+  });
+
+  test("it shows an error when deleting a draft fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
@@ -1156,23 +1196,85 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    // Try changing the title
-    await click(`${TITLE_SELECTOR} button`);
-    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
-    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+    const errorMessage = "Internal Server Error";
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Internal Server Error");
+    this.server.delete("/drafts/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
+
+    await click(DELETE_BUTTON);
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    assert.dom(MODAL_ERROR).containsText(errorMessage);
   });
 
-  test("it shows an error when requesting a review fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+  test("it shows an error when approving a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: false,
+      status: "In-Review",
+      approvers: [TEST_USER_EMAIL],
+    });
 
-  test("it shows an error when deleting a draft fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await visit("/document/1");
 
-  test("it shows an error when approving a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    const errorMessage = "Internal Server Error";
 
-  test("it shows an error when rejecting an FRD fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    this.server.post("/approvals/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
 
-  test("it shows an error when changing the status of a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await click(APPROVE_BUTTON);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+  });
+
+  test("it shows an error when rejecting an FRD fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      docType: "FRD",
+      isDraft: false,
+      status: "In-Review",
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    const errorMessage = "Internal Server Error";
+
+    this.server.delete("/approvals/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
+
+    await click(REJECT_FRD_BUTTON);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+  });
+
+  test("it shows an error when changing the status of a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      status: "In-Review",
+      approvers: [TEST_USER_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    const errorMessage = "Internal Server Error";
+
+    this.server.patch("/documents/:document_id", () => {
+      return new Response(500, {}, errorMessage);
+    });
+
+    await click(DOC_STATUS_TOGGLE);
+
+    await click(`${DOC_STATUS_DROPDOWN} li:nth-child(2) button`);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+  });
 
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     /**
@@ -1203,7 +1305,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(FLASH_MESSAGE_SELECTOR)
-      .containsText("Bad response (423): Locked")
+      .containsText("423")
       .hasAttribute("data-test-flash-notification-type", "critical");
 
     assert.dom(APPROVE_BUTTON).doesNotExist("the approve button is removed");

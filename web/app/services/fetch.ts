@@ -12,7 +12,7 @@ interface FetchOptions {
   body?: string;
 }
 
-const BAD_RESPONSE_LABEL = "Bad response - ";
+export const BAD_RESPONSE_LABEL = "Bad response - ";
 
 export default class FetchService extends Service {
   @service("config") declare configSvc: ConfigService;

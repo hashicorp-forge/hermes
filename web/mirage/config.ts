@@ -719,6 +719,12 @@ export default function (mirageConfig) {
               description:
                 "Summarize a problem statement and outline a phased approach to addressing it.",
             },
+            {
+              name: "FRD",
+              longName: "Funding Request",
+              description:
+                "Capture a budget request, along with the business justification and expected returns.",
+            },
           ]);
         } else {
           return new Response(
