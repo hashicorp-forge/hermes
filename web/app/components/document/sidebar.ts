@@ -12,7 +12,7 @@ import {
 } from "ember-concurrency";
 import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce } from "@ember/runloop";
+import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -105,9 +105,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors: string[] = this.args.document.contributors || [];
 
   @tracked approvers: string[] = this.args.document.approvers || [];
+
   @tracked product = this.args.document.product || "";
 
   @tracked status = this.args.document.status;
+
+  /**
+   * Whether the user has left the approver role since page load.
+   * Dictates the "leaving..." state of the footer.
+   */
+  @tracked protected hasJustLeftApproverRole = false;
 
   /**
    * Projects this document is associated with.
@@ -143,6 +150,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * request finally completes. Used to reactively update the UI.
    */
   @tracked private newDraftVisibilityIcon: DraftVisibilityIcon | null = null;
+
+  /**
+   * Whether the Approvers list is shown.
+   * True except immediately after the user leaves the approver role.
+   * See note in `leaveApproverRole` for more information.
+   */
+  @tracked protected approversAreShown = true;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -272,31 +286,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return customEditableFields;
   }
 
-  get approveButtonText() {
-    if (!this.hasApproved) {
-      return "Approve";
-    } else {
-      return "Already approved";
-    }
-  }
-
-  get requestChangesButtonText() {
-    // FRDs are a special case that can be approved or not approved.
-    if (this.args.document.docType === "FRD") {
-      if (!this.hasRequestedChanges) {
-        return "Not approved";
-      } else {
-        return "Already not approved";
-      }
-    }
-
-    if (!this.hasRequestedChanges) {
-      return "Request changes";
-    } else {
-      return "Already requested changes";
-    }
-  }
-
   @action onDocTypeCheckboxChange(event: Event) {
     const eventTarget = event.target;
     assert(
@@ -377,18 +366,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  // hasApproved returns true if the logged in user has approved the document.
-  get hasApproved() {
-    return this.args.document.approvedBy?.includes(this.args.profile.email);
-  }
+  /**
+   * Whether the viewer has approved the document.
+   * True if their email is in the document's `approvedBy` array,
+   * and immediately when their approval completes.
+   */
+  @tracked protected hasApproved = this.args.document.approvedBy?.includes(
+    this.args.profile.email,
+  );
 
-  // hasRequestedChanges returns true if the logged in user has requested
-  // changes of the document.
-  get hasRequestedChanges() {
-    return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email,
-    );
-  }
+  /**
+   * Whether the viewer has requested changes to the document.
+   * True if their email is in the document's `changesRequestedBy` array,
+   * and immediately when their request completes.
+   */
+  @tracked protected hasRejectedFRD =
+    this.args.document.changesRequestedBy?.includes(this.args.profile.email);
 
   /**
    * Whether the doc status is approved. Used to determine editing privileges.
@@ -454,11 +447,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   /**
    * Whether the footer is shown.
-   * True for editors who may need to see the "doc is locked" message,
-   * as well as approvers and owners who need doc-management controls.
+   * True for owners and approvers who may need to see either the
+   * "doc is locked" message or the doc-management controls, except
+   * immediately after the user leaves the approver role.
    */
   protected get footerIsShown() {
-    return this.isApprover || this.isOwner || this.isContributor;
+    return !this.hasJustLeftApproverRole && (this.isApprover || this.isOwner);
   }
 
   /**
@@ -812,6 +806,59 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * The action to leave the approver role.
+   * Updates the local approvers array and saves it to the back end.
+   * On success, shows a success message. On failure, shows an error message
+   * and reverts the local approvers array.
+   */
+  protected leaveApproverRole = task(async () => {
+    const cachedApprovers = this.approvers;
+
+    try {
+      this.approvers = this.approvers.filter(
+        (e) => e !== this.args.profile.email,
+      );
+
+      this.approvers = this.approvers;
+
+      await this.save.perform("approvers", this.approvers);
+
+      /**
+       * This is an unfortunate hack to re-render the approvers list
+       * after the user leaves the approver role. Because the EditableField
+       * component has its own caching logic, it doesn't inherit changes
+       * from external components. This can be changed in the future, but will
+       * require a refactor of the EditableField and sidebar components.
+       *
+       * TODO: Improve this
+       */
+      this.approversAreShown = false;
+      schedule("afterRender", () => {
+        this.approversAreShown = true;
+      });
+
+      // We set this so that the "Leaving..." state
+      // is shown until the UI updates.
+      this.hasJustLeftApproverRole = true;
+
+      this.flashMessages.add({
+        message: "You've left the approver role",
+        title: "Done!",
+      });
+    } catch (e: unknown) {
+      this.approvers = cachedApprovers;
+      this.flashMessages.critical((e as any).message, {
+        title: "Error leaving approver role",
+      });
+    } finally {
+      setTimeout(() => {
+        // reset state after a short delay
+        this.hasJustLeftApproverRole = false;
+      }, 5000);
+    }
+  });
+
+  /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
    * Called when a document draft is rendered.
    */
@@ -828,27 +875,45 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {}
   });
 
-  approve = task(async (options?: { skipSuccessMessage: boolean }) => {
-    try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-      if (!options?.skipSuccessMessage) {
-        this.showFlashSuccess("Done!", "Document approved");
+  /**
+   * The action to approve a document. Triggered by clicking the "Approve"
+   * button in the footer. Saves the document's `approvedBy` array, which
+   * adds an approval badge to the approver's avatar. On success, shows
+   * the read-only "Approved" mock-button state.
+   */
+  approve = task(
+    async (options?: { skipSuccessMessage: boolean } | MouseEvent) => {
+      try {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+
+        this.hasApproved = true;
+
+        if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
+          this.showFlashSuccess("Done!", "Document approved");
+        }
+      } catch (error: unknown) {
+        this.maybeShowFlashError(error as Error, "Unable to approve");
+        throw error;
       }
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to approve");
-      throw error;
-    }
 
-    this.refreshRoute();
-  });
+      this.refreshRoute();
+    },
+  );
 
-  requestChanges = task(async () => {
+  /**
+   * The action to reject an FRD, a doc-specific type of approval.
+   * Triggered by approvers clicking the thumbs-down button.
+   * Saves the document's `changesRequestedBy` array, which adds a
+   * rejection badge to the approver's avatar. On success, shows
+   * the read-only "Rejected" mock-button state.
+   */
+  rejectFRD = task(async () => {
     try {
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
@@ -857,18 +922,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           headers: { "Content-Type": "application/json" },
         },
       );
-      // Add a notification for the user
-      let msg = "Requested changes for document";
-      // FRDs are a special case that can be approved or not approved.
-      if (this.args.document.docType === "FRD") {
-        msg = "Document marked as not approved";
-      }
-      this.showFlashSuccess("Done!", msg);
+
+      this.hasRejectedFRD = true;
+
+      this.showFlashSuccess("Done!", "FRD rejected");
     } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Change request failed");
+      this.maybeShowFlashError(error as Error, "Couldn't process your request");
       throw error;
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   changeDocumentStatus = task(async (newStatus: string) => {

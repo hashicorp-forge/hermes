@@ -572,6 +572,67 @@ export default function (mirageConfig) {
         }
       });
 
+      // Delete a draft
+      this.delete("/drafts/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.destroy();
+          return new Response(200, {}, {});
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /*************************************************************************
+       *
+       * Document approvals
+       *
+       *************************************************************************/
+
+      /**
+       * Used when approving a document.
+       * Adds the user's email to the `approvedBy` array.
+       */
+      this.post("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
+            const approvedBy = document.attrs.approvedBy || [];
+            document.update({
+              approvedBy: [...approvedBy, TEST_USER_EMAIL],
+            });
+          }
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
+       * Used when rejecting an FRD.
+       */
+      this.delete("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.update({
+            changesRequestedBy: [TEST_USER_EMAIL],
+          });
+
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
       /*************************************************************************
        *
        * HEAD requests
@@ -640,28 +701,6 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used when approving a document.
-       * Adds the user's email to the `approvedBy` array.
-       */
-      this.post("/approvals/:document_id", (schema, request) => {
-        const document = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-
-        if (document) {
-          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
-            const approvedBy = document.attrs.approvedBy || [];
-            document.update({
-              approvedBy: [...approvedBy, TEST_USER_EMAIL],
-            });
-          }
-          return new Response(200, {}, document.attrs);
-        }
-
-        return new Response(404, {}, {});
-      });
-
-      /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
       this.post("/me/subscriptions", () => {
@@ -718,6 +757,12 @@ export default function (mirageConfig) {
               longName: "Product Requirements",
               description:
                 "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+            {
+              name: "FRD",
+              longName: "Funding Request",
+              description:
+                "Capture a budget request, along with the business justification and expected returns.",
             },
           ]);
         } else {
