@@ -108,20 +108,9 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     if (!draftFetched) {
       try {
-        doc = await this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/documents/` +
-              params.document_id,
-            {
-              method: "GET",
-              headers: {
-                // We set this header to differentiate between document views and
-                // requests to only retrieve document metadata.
-                "Add-To-Recently-Viewed": "true",
-              },
-            },
-          )
-          .then((r) => r?.json());
+        doc = await this.store.findRecord("document", params.document_id);
+
+        console.log("doc", doc);
 
         // Add the doc owner to the list of people to fetch.
         peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);

@@ -10,7 +10,7 @@ export default class PersonAdapter extends ApplicationAdapter {
    */
   query(_store: DS.Store, _type: DS.Model, query: { query: string }) {
     const results = this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/people`, {
+      .fetch(`${this.namespace}/people`, {
         method: "POST",
         body: JSON.stringify({
           query: query.query,

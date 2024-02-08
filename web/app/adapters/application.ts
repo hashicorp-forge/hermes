@@ -10,7 +10,7 @@ export default class ApplicationAdapter extends JSONAdapter {
   @service declare session: SessionService;
 
   get namespace() {
-    return `api/${this.configSvc.config.api_version}`;
+    return `/api/${this.configSvc.config.api_version}`;
   }
 
   get headers() {
