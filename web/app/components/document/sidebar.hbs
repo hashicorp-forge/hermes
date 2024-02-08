@@ -418,11 +418,11 @@
           </div>
         </div>
       {{else}}
-        {{#let (and this.isDraft this.isOwner) as |publishScenario|}}
-          {{#if (or publishScenario this.isApprover)}}
+        {{#let (and this.isDraft this.isOwner) as |canPublish|}}
+          {{#if (or canPublish this.isApprover)}}
             <div class="flex gap-2 px-3">
 
-              {{#if publishScenario}}
+              {{#if canPublish}}
                 {{! Publish for review... }}
                 <Hds::Button
                   data-test-sidebar-publish-for-review-button
@@ -440,7 +440,8 @@
                   {{on "click" (fn (set this "deleteModalIsShown" true))}}
                 />
               {{else}}
-                {{! Approver scenario }}
+                {{! isApprover }}
+
                 {{! Read-only / isRunning state }}
                 {{#if
                   (or
