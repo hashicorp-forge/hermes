@@ -53,6 +53,15 @@ func NewDB(cfg config.Postgres) (*gorm.DB, error) {
 			"error setting up RecentlyViewedDocs join table: %w", err)
 	}
 
+	if err := db.SetupJoinTable(
+		models.User{},
+		"RecentlyViewedProjects",
+		&models.RecentlyViewedProject{},
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error setting up RecentlyViewedProjects join table: %w", err)
+	}
+
 	// Automatically migrate models.
 	// TODO: move to manually migrating models with a separate command.
 	if err := db.AutoMigrate(

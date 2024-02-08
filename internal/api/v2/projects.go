@@ -8,11 +8,16 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/gorm"
+)
+
+const (
+	MaxRecentlyViewedProjects = 10
 )
 
 type ProjectGetResponse struct {
@@ -286,6 +291,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 			switch r.Method {
 			case "GET":
 				logArgs = append(logArgs, "method", r.Method)
+				now := time.Now()
 
 				// Get project.
 				proj := models.Project{}
@@ -346,6 +352,25 @@ func ProjectHandler(srv server.Server) http.Handler {
 						w, "Error processing request", http.StatusInternalServerError)
 					return
 				}
+
+				// Request post-processing.
+				go func() {
+					// Update recently viewed projects if this is a frontend view event.
+					// The Add-To-Recently-Viewed header is set in the request from the
+					// frontend to differentiate between project views and requests to
+					// only retrieve project metadata.
+					if r.Header.Get("Add-To-Recently-Viewed") != "" {
+						if err := updateRecentlyViewedProjects(
+							userEmail, proj, srv.DB, now,
+						); err != nil {
+							srv.Logger.Error("error updating recently viewed projects",
+								append([]interface{}{
+									"error", err,
+								}, logArgs...)...,
+							)
+						}
+					}
+				}()
 
 			case "PATCH":
 				logArgs = append(logArgs, "method", r.Method)
@@ -539,6 +564,69 @@ func saveProjectInAlgolia(
 	err = res.Wait()
 	if err != nil {
 		return fmt.Errorf("error waiting for save: %w", err)
+	}
+
+	return nil
+}
+
+// updateRecentlyViewedProjects updates the recently viewed projects for a user
+// with the provided email address, using the project ID and viewed-at time for
+// a project view event.
+func updateRecentlyViewedProjects(
+	userEmail string, proj models.Project, db *gorm.DB, viewedAt time.Time) error {
+	// Find or create user.
+	u := models.User{
+		EmailAddress: userEmail,
+	}
+	if err := u.FirstOrCreate(db); err != nil {
+		return fmt.Errorf("error finding or creating user: %w", err)
+	}
+
+	// Find recently viewed projects for user.
+	var projs []models.Project
+	if err := db.
+		Joins("JOIN recently_viewed_projects ON recently_viewed_projects.project_id = projects.id").
+		Where("recently_viewed_projects.user_id = ?", u.ID).
+		Order("recently_viewed_projects.viewed_at DESC").
+		Limit(MaxRecentlyViewedProjects).
+		Find(&projs).Error; err != nil {
+		return fmt.Errorf("error getting recently viewed projects: %w", err)
+	}
+
+	// If recently viewed projects doesn't already contain this project, add it to
+	// recently viewed projects and update the user.
+	found := false
+	for _, p := range projs {
+		if p.ID == proj.ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		// Prepend project to recently viewed projects.
+		projs = append([]models.Project{proj}, projs...)
+
+		// Limit to MaxRecentlyViewedProjects.
+		if len(projs) > MaxRecentlyViewedProjects {
+			projs = projs[:MaxRecentlyViewedProjects]
+		}
+
+		// Update user.
+		u.RecentlyViewedProjects = projs
+		if err := u.Upsert(db); err != nil {
+			return fmt.Errorf("error upserting user: %w", err)
+		}
+	}
+
+	// Update ViewedAt time for this project.
+	viewedProj := models.RecentlyViewedProject{
+		UserID:    int(u.ID),
+		ProjectID: int(proj.ID),
+		ViewedAt:  viewedAt,
+	}
+	if err := db.Updates(&viewedProj).Error; err != nil {
+		return fmt.Errorf(
+			"error updating recently viewed project in database: %w", err)
 	}
 
 	return nil
