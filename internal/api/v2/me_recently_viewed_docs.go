@@ -11,8 +11,9 @@ import (
 )
 
 type recentlyViewedDoc struct {
-	ID      string `json:"id"`
-	IsDraft bool   `json:"isDraft"`
+	ID         string `json:"id"`
+	IsDraft    bool   `json:"isDraft"`
+	ViewedTime int64  `json:"viewedTime"`
 }
 
 func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
@@ -45,7 +46,7 @@ func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
 			if err := u.FirstOrCreate(srv.DB); err != nil {
 				errResp(
 					http.StatusInternalServerError,
-					"Error authorizing the request",
+					"Error finding recently viewed documents",
 					"error finding or creating user",
 					err,
 				)
@@ -97,8 +98,9 @@ func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
 				}
 
 				res = append(res, recentlyViewedDoc{
-					ID:      doc.GoogleFileID,
-					IsDraft: isDraft,
+					ID:         doc.GoogleFileID,
+					IsDraft:    isDraft,
+					ViewedTime: d.ViewedAt.Unix(),
 				})
 			}
 
