@@ -161,6 +161,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @tracked protected approversAreShown = true;
 
+  /**
+   * Whether an error is shown in the projects section.
+   * True when the `loadRelatedProjects` task fails.
+   * Reset when the user retries the request.
+   */
+  @tracked protected projectsErrorIsShown = false;
+
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
 
@@ -535,17 +542,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * rich information in the list.
    */
   protected loadRelatedProjects = task(async () => {
-    const projectPromises = this.args.document.projects?.map((project) => {
-      return this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
-        .then((response) => response?.json());
-    });
+    this.projectsErrorIsShown = false;
 
     try {
+      const projectPromises = this.args.document.projects?.map((project) => {
+        return this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/projects/${project}`,
+          )
+          .then((response) => response?.json());
+      });
       const projects = await Promise.all(projectPromises ?? []);
       this._projects = projects;
     } catch (error) {
-      // TODO: Trigger a UI state with retry button
+      this.projectsErrorIsShown = true;
     }
   });
 

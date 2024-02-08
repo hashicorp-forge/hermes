@@ -87,7 +87,7 @@ const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
   "[data-test-continue-to-document-button]";
 const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
   "[data-test-doc-published-copy-url-button]";
-
+const PROJECTS_ERROR_BUTTON = "[data-test-document-projects-error-button]";
 const DOC_STATUS = "[data-test-doc-status]";
 const DOC_STATUS_TOGGLE = "[data-test-doc-status-toggle]";
 const DOC_STATUS_DROPDOWN = "[data-test-doc-status-dropdown]";
@@ -1476,6 +1476,39 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(PROJECT_OPTION);
 
     assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+  });
+
+  test("an error is shown when fetching document projects fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      projects: [1],
+    });
+
+    this.server.create("project", {
+      id: 1,
+    });
+
+    this.server.get("/projects/:project_id", () => {
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
+    });
+
+    await visit("/document/1");
+
+    assert.dom(PROJECT_LINK).doesNotExist();
+    assert.dom(PROJECTS_ERROR_BUTTON).exists();
+
+    // retry the request (successfully)
+    this.server.get("/projects/:project_id", () => {
+      const project = this.server.schema.projects.findBy({ id: 1 });
+      return new Response(200, {}, project.attrs);
+    });
+
+    await click(PROJECTS_ERROR_BUTTON);
+
+    assert.dom(PROJECT_LINK).exists();
+    assert.dom(PROJECTS_ERROR_BUTTON).doesNotExist();
   });
 
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
