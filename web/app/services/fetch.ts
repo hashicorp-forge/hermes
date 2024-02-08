@@ -12,9 +12,29 @@ interface FetchOptions {
   body?: string;
 }
 
+const BAD_RESPONSE_LABEL = "Bad response - ";
+
 export default class FetchService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
+
+  /**
+   * Returns the error code from a message that starts with `BAD_RESPONSE_LABEL`.
+   * Used to by consuming components to triage errors.
+   */
+  getErrorCode(error: Error): number | undefined {
+    const message = error.message;
+
+    if (!message.startsWith(BAD_RESPONSE_LABEL)) return;
+
+    const messageWithoutLabel = message.slice(BAD_RESPONSE_LABEL.length);
+    const [errorCode] = messageWithoutLabel.split(":");
+
+    if (errorCode === undefined) return;
+    if (isNaN(parseInt(errorCode))) return;
+
+    return parseInt(errorCode);
+  }
 
   async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
     // If using Google auth, add the Google access token in a header if the URL
@@ -53,7 +73,7 @@ export default class FetchService extends Service {
         const errText = await resp.text();
 
         // Include status so the caller can triage it.
-        throw new Error(`Bad response (${resp.status}): ${errText}`);
+        throw new Error(`${BAD_RESPONSE_LABEL}${resp.status}: ${errText}`);
       }
 
       return resp;

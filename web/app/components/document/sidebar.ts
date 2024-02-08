@@ -501,12 +501,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   @action maybeShowFlashError(error: Error, title: string) {
-    /**
-     * When the FetchService receives a non-401 error response,
-     * it returns a message starting with "Bad response ([ErrorCode])".
-     * We check for 423 responses and set `docIsLocked` accordingly.
-     */
-    if (error.message.startsWith("Bad response (423)")) {
+    if (this.fetchSvc.getErrorCode(error) === 423) {
       this.docIsLocked = true;
     }
 

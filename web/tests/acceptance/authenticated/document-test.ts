@@ -1142,6 +1142,38 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.true(document.projects.length === 0);
   });
 
+  test("it shows an error when patching a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // Set ourselves up for failure
+    this.server.patch("/documents/:document_id", () => {
+      return new Response(500, {}, "Internal Server Error");
+    });
+
+    this.server.create("document", {
+      objectID: 1,
+      title: "Test Document",
+      isDraft: true,
+    });
+
+    await visit("/document/1?draft=true");
+
+    // Try changing the title
+    await click(`${TITLE_SELECTOR} button`);
+    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
+    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Internal Server Error");
+  });
+
+  test("it shows an error when requesting a review fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when deleting a draft fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when approving a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when rejecting an FRD fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when changing the status of a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     /**
      * 423s are caught anytime the document shows an error flash message,
