@@ -447,14 +447,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   /**
    * Whether the footer is shown.
-   * True for editors who may need to see the "doc is locked" message,
-   * as well as approvers and owners who need doc-management controls.
+   * True for owners and approvers who may need to see either the
+   * "doc is locked" message or the doc-management controls, except
+   * immediately after the user leaves the approver role.
    */
   protected get footerIsShown() {
-    return (
-      !this.hasJustLeftApproverRole &&
-      (this.isApprover || this.isOwner || this.isContributor)
-    );
+    return !this.hasJustLeftApproverRole && (this.isApprover || this.isOwner);
   }
 
   /**
@@ -639,11 +637,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         this.showFlashError(err as Error, "Unable to save document");
       }
     }
-  });
-
-  saveApprovers = task(async (newApprovers) => {
-    this.approvers = newApprovers;
-    await this.save.perform("approvers", this.approvers);
   });
 
   saveCustomField = task(
@@ -882,6 +875,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {}
   });
 
+  /**
+   * The action to approve a document. Triggered by clicking the "Approve"
+   * button in the footer. Saves the document's `approvedBy` array, which
+   * adds an approval badge to the approver's avatar. On success, shows
+   * the read-only "Approved" mock-button state.
+   */
   approve = task(
     async (options?: { skipSuccessMessage: boolean } | MouseEvent) => {
       try {
@@ -907,6 +906,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
+  /**
+   * The action to reject an FRD, a doc-specific type of approval.
+   * Triggered by approvers clicking the thumbs-down button.
+   * Saves the document's `changesRequestedBy` array, which adds a
+   * rejection badge to the approver's avatar. On success, shows
+   * the read-only "Rejected" mock-button state.
+   */
   rejectFRD = task(async () => {
     try {
       await this.fetchSvc.fetch(

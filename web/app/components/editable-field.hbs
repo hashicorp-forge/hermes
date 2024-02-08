@@ -17,7 +17,7 @@
           @onChange={{this.onChange}}
           @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
           {{dismissible
-            dismiss=(fn this.maybeUpdateValue this.newValue)
+            dismiss=(fn this.maybeUpdateValue this.value)
             related=this.relatedButtons
             shouldIgnoreEscape=true
           }}
@@ -52,7 +52,7 @@
           @text="Save"
           @icon="check"
           @isIconOnly={{true}}
-          {{on "click" (fn this.maybeUpdateValue this.newValue)}}
+          {{on "click" (fn this.maybeUpdateValue this.value)}}
         />
         <Hds::Button
           data-test-cancel-button
