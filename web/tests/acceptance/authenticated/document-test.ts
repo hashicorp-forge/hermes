@@ -120,6 +120,8 @@ const DOCUMENT_PROJECT = "[data-test-document-project]";
 
 const MODAL_ERROR = "[data-test-modal-error]";
 
+const ERROR_MESSAGE_TEXT = "Internal Server Error";
+
 const assertEditingIsDisabled = (assert: Assert) => {
   assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
   assert.dom(SUMMARY_SELECTOR).doesNotHaveAttribute("data-test-editable");
@@ -172,7 +174,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      status: "WIP",
     });
     await visit("/document/1?draft=true");
     assert.equal(getPageTitle(), "Test Document | Hermes");
@@ -201,16 +202,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     this.server.create("document", {
       objectID: docID,
-      isDraft: true,
       product: initialProductName,
     });
 
     await visit(`/document/${docID}?draft=true`);
 
-    const productSelectSelector = "[data-test-product-select]";
-
     assert
-      .dom(productSelectSelector)
+      .dom(PRODUCT_SELECT_SELECTOR)
       .exists("drafts show a product select element");
 
     assert
@@ -234,13 +232,15 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(PRODUCT_SELECT_DROPDOWN_ITEM);
 
     assert
-      .dom(productSelectSelector)
+      .dom(PRODUCT_SELECT_SELECTOR)
       .containsText(
         "Test Product 0",
         "The document product is updated to the selected product",
       );
 
-    const doc = this.server.schema.document.find(docID);
+    const doc = this.server.schema.document.findBy({
+      objectID: docID,
+    });
 
     assert.equal(
       doc.attrs.product,
@@ -286,7 +286,6 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       title: "Test Document",
       product: "Test Product 0",
-      appCreated: true,
       status: "In review",
     });
 
@@ -308,9 +307,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       objectID: 1,
       title: "Test Document",
       product: "Test Product 0",
-      appCreated: true,
       status: "WIP",
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -437,7 +434,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("owners can edit a draft's document metadata", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -479,7 +475,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("collaborators cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      isDraft: true,
       owners: [TEST_USER_2_EMAIL],
       collaborators: [TEST_USER_EMAIL],
     });
@@ -652,7 +647,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      isDraft: true,
       owners: [TEST_USER_2_EMAIL],
       isShareable: true,
     });
@@ -681,7 +675,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      isDraft: true,
       docType: "PRD",
     });
 
@@ -726,7 +719,6 @@ module("Acceptance | authenticated/document", function (hooks) {
   test('the "document published" modal hides the share elements if the docNumber fails to load', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
-      isDraft: true,
       docType: "PRD",
       docNumber: "LAB-???",
     });
@@ -772,7 +764,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: true,
       customEditableFields: {
         Stakeholders: {
           displayName: "Stakeholders",
@@ -798,7 +789,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -816,7 +806,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       title,
-      isDraft: true,
       docNumber,
     });
 
@@ -849,7 +838,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       summary: "foo bar baz",
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -867,7 +855,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       contributors: [TEST_USER_2_EMAIL],
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -885,7 +872,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       approvers: [TEST_USER_2_EMAIL],
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -911,7 +897,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       product: "Bar",
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -942,7 +927,6 @@ module("Acceptance | authenticated/document", function (hooks) {
           type: "STRING",
         },
       },
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -966,7 +950,6 @@ module("Acceptance | authenticated/document", function (hooks) {
         },
       },
       foo: [TEST_USER_2_EMAIL],
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
@@ -1295,10 +1278,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.patch("/drafts/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     // Try changing the title
@@ -1306,7 +1287,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
     await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when requesting a review fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1316,39 +1297,34 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.post("/reviews/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
 
-    assert.dom(MODAL_ERROR).containsText(errorMessage);
+    assert.dom(MODAL_ERROR).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when deleting a draft fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
       title: "Test Document",
-      isDraft: true,
     });
 
     await visit("/document/1?draft=true");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.delete("/drafts/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     await click(DELETE_BUTTON);
 
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
 
-    assert.dom(MODAL_ERROR).containsText(errorMessage);
+    assert.dom(MODAL_ERROR).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when approving a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1362,15 +1338,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.post("/approvals/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     await click(APPROVE_BUTTON);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when rejecting an FRD fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1385,15 +1359,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.delete("/approvals/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     await click(REJECT_FRD_BUTTON);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when changing the status of a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1405,28 +1377,106 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    const errorMessage = "Internal Server Error";
-
     this.server.patch("/documents/:document_id", () => {
-      return new Response(500, {}, errorMessage);
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
     await click(DOC_STATUS_TOGGLE);
 
     await click(`${DOC_STATUS_DROPDOWN} li:nth-child(2) button`);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
   });
 
-  test("it shows an error when changing draft visibility fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+  test("it shows an error when changing draft visibility fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isShareable: true,
+    });
 
-  test("it shows an error when changing a draft's product area fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await visit("/document/1?draft=true");
 
-  test("it shows an error when changing a document's status fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    this.server.put("/drafts/:document_id/shareable", () => {
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
+    });
 
-  test("it shows an error when removing a document from a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
 
-  test("it shows an error when adding a document to a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+    await click(DRAFT_VISIBILITY_OPTION_SELECTOR);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+  });
+
+  test("it shows an error when changing a draft's product area fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.createList("product", 3);
+
+    const initialProduct = this.server.schema.products.find(2).attrs;
+    const initialProductName = initialProduct.name;
+
+    this.server.create("document", {
+      objectID: 1,
+      product: initialProductName,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(TOGGLE_SELECT);
+
+    this.server.patch("/drafts/:document_id", () => {
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
+    });
+
+    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+  });
+
+  test("it shows an error when removing a document from a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      projects: [1],
+    });
+
+    this.server.create("project", {
+      id: 1,
+    });
+
+    await visit("/document/1");
+
+    this.server.put("/projects/:project_id/related-resources", () => {
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
+    });
+
+    await click(`${DOCUMENT_PROJECT} ${OVERFLOW_MENU_BUTTON}`);
+
+    await click(REMOVE_FROM_PROJECT_BUTTON);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+  });
+
+  test("it shows an error when adding a document to a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+    });
+
+    this.server.create("project");
+
+    await visit("/document/1");
+
+    this.server.post("/projects/:project_id/related-resources", () => {
+      return new Response(500, {}, ERROR_MESSAGE_TEXT);
+    });
+
+    await click(ADD_TO_PROJECT_BUTTON);
+
+    await click(PROJECT_OPTION);
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+  });
 
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     /**

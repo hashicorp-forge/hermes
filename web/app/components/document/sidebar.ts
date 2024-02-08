@@ -570,7 +570,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
           shareButton.classList.add("out");
 
-          void this.fetchSvc.fetch(
+          const fetchPromise = this.fetchSvc.fetch(
             `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
             {
               method: "PUT",
@@ -581,8 +581,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             },
           );
 
-          // Give time for the link icon to animate out
-          await timeout(Ember.testing ? 0 : 300);
+          await Promise.all([fetchPromise, timeout(Ember.testing ? 0 : 300)]);
 
           // With the animation done, we can now remove the button.
           this._docIsShareable = false;

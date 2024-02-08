@@ -496,8 +496,15 @@ export default function (mirageConfig) {
       });
 
       // Determine if a draft is shareable
-      this.get("/drafts/:document_id/shareable", () => {
-        return new Response(200, {}, { isShareable: false });
+      this.get("/drafts/:document_id/shareable", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        return new Response(
+          200,
+          {},
+          { isShareable: document.attrs.isShareable },
+        );
       });
 
       // Update whether a draft is shareable.
