@@ -506,12 +506,16 @@ module("Acceptance | authenticated/document", function (hooks) {
     assertEditingIsDisabled(assert);
   });
 
-  test("drafts can be deleted", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test("you can delete a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
     });
 
     await visit("/document/1?draft=true");
+
+    await triggerEvent(DELETE_BUTTON, "mouseenter");
+
+    assert.dom(TOOLTIP_SELECTOR).hasText("Delete...");
 
     await click(DELETE_BUTTON);
 
@@ -611,6 +615,10 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1");
+
+    await triggerEvent(REJECT_FRD_BUTTON, "mouseenter");
+
+    assert.dom(TOOLTIP_SELECTOR).hasText("Reject");
 
     await click(REJECT_FRD_BUTTON);
 

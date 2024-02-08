@@ -434,10 +434,10 @@
                 <Hds::Button
                   data-test-delete-draft-button
                   @text="Delete..."
-                  @color="critical"
                   @icon="trash"
                   @isIconOnly={{true}}
                   class="basis-0"
+                  {{tooltip "Delete..."}}
                   {{on "click" (fn (set this "deleteModalIsShown" true))}}
                 />
               {{else}}
@@ -491,6 +491,7 @@
                       @color="critical"
                       @icon="thumbs-down"
                       @isIconOnly={{true}}
+                      {{tooltip "Reject"}}
                       {{on "click" (perform this.rejectFRD)}}
                     />
                   {{/if}}
