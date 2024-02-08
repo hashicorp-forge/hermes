@@ -574,6 +574,53 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * Document approvals
+       *
+       *************************************************************************/
+
+      /**
+       * Used when approving a document.
+       * Adds the user's email to the `approvedBy` array.
+       */
+      this.post("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
+            const approvedBy = document.attrs.approvedBy || [];
+            document.update({
+              approvedBy: [...approvedBy, TEST_USER_EMAIL],
+            });
+          }
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
+       * Used when rejecting an FRD or requesting changes to any other document.
+       */
+      this.delete("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.update({
+            changesRequestedBy: [TEST_USER_EMAIL],
+          });
+
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /*************************************************************************
+       *
        * HEAD requests
        *
        *************************************************************************/
@@ -633,28 +680,6 @@ export default function (mirageConfig) {
             isDraft: false,
           });
 
-          return new Response(200, {}, document.attrs);
-        }
-
-        return new Response(404, {}, {});
-      });
-
-      /**
-       * Used when approving a document.
-       * Adds the user's email to the `approvedBy` array.
-       */
-      this.post("/approvals/:document_id", (schema, request) => {
-        const document = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-
-        if (document) {
-          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
-            const approvedBy = document.attrs.approvedBy || [];
-            document.update({
-              approvedBy: [...approvedBy, TEST_USER_EMAIL],
-            });
-          }
           return new Response(200, {}, document.attrs);
         }
 

@@ -375,7 +375,10 @@
   </div>
 
   {{#if this.footerIsShown}}
-    <div class="sidebar-footer {{if this.editingIsDisabled 'locked'}}">
+    <div
+      data-test-sidebar-footer
+      class="sidebar-footer {{if this.editingIsDisabled 'locked'}}"
+    >
       {{#if this.footerControlsAreDisabled}}
         {{! Disabled controls }}
         <div class="-mb-1 px-3">
@@ -442,9 +445,9 @@
                 {{#if
                   (or
                     this.hasApproved
-                    this.hasRequestedChanges
+                    this.hasRejectedFRD
                     this.approve.isRunning
-                    this.requestChanges.isRunning
+                    this.rejectFRD.isRunning
                     this.leaveApproverRole.isRunning
                   )
                 }}
@@ -453,7 +456,7 @@
                     class="hds-button mock-disabled hds-button--primary hds-button--size-medium w-full leading-none"
                   >
                     {{if
-                      this.requestChanges.isRunning
+                      this.rejectFRD.isRunning
                       "Saving..."
                       (if
                         this.approve.isRunning
@@ -464,7 +467,7 @@
                           (if
                             this.hasApproved
                             "Approved"
-                            (if this.requestChanges "Rejected")
+                            (if this.rejectFRD "Rejected")
                           )
                         )
                       )
@@ -473,6 +476,7 @@
                 {{else}}
                   {{! Approve }}
                   <Hds::Button
+                    data-test-approve-button
                     @text="Approve"
                     class="w-full"
                     {{on "click" (perform this.approve)}}
@@ -480,11 +484,12 @@
                   {{#if (eq @document.docType "FRD")}}
                     {{! Reject FRD }}
                     <Hds::Button
+                      data-test-reject-frd-button
                       @text="Reject"
                       @color="critical"
                       @icon="thumbs-down"
                       @isIconOnly={{true}}
-                      {{on "click" (perform this.requestChanges)}}
+                      {{on "click" (perform this.rejectFRD)}}
                     />
                   {{/if}}
                   {{! Overflow menu (Leave approver role) }}

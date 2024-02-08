@@ -286,31 +286,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return customEditableFields;
   }
 
-  get approveButtonText() {
-    if (!this.hasApproved) {
-      return "Approve";
-    } else {
-      return "Already approved";
-    }
-  }
-
-  get requestChangesButtonText() {
-    // FRDs are a special case that can be approved or not approved.
-    if (this.args.document.docType === "FRD") {
-      if (!this.hasRequestedChanges) {
-        return "Not approved";
-      } else {
-        return "Already not approved";
-      }
-    }
-
-    if (!this.hasRequestedChanges) {
-      return "Request changes";
-    } else {
-      return "Already requested changes";
-    }
-  }
-
   @action onDocTypeCheckboxChange(event: Event) {
     const eventTarget = event.target;
     assert(
@@ -405,7 +380,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * True if their email is in the document's `changesRequestedBy` array,
    * and immediately when their request completes.
    */
-  @tracked protected hasRequestedChanges =
+  @tracked protected hasRejectedFRD =
     this.args.document.changesRequestedBy?.includes(this.args.profile.email);
 
   /**
@@ -869,6 +844,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         this.approversAreShown = true;
       });
 
+      // We set this so that the "Leaving..." state
+      // is shown until the UI updates.
       this.hasJustLeftApproverRole = true;
 
       this.flashMessages.add({
@@ -918,9 +895,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
         this.hasApproved = true;
 
-        if (options instanceof MouseEvent) return;
-
-        if (!options?.skipSuccessMessage) {
+        if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
           this.showFlashSuccess("Done!", "Document approved");
         }
       } catch (error: unknown) {
@@ -932,7 +907,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  requestChanges = task(async () => {
+  rejectFRD = task(async () => {
     try {
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
@@ -942,20 +917,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
 
-      this.hasRequestedChanges = true;
+      this.hasRejectedFRD = true;
 
-      // Add a notification for the user
-      let msg = "Requested changes for document";
-      // FRDs are a special case that can be approved or not approved.
-      if (this.args.document.docType === "FRD") {
-        msg = "Document marked as not approved";
-      }
-      this.showFlashSuccess("Done!", msg);
+      this.showFlashSuccess("Done!", "FRD rejected");
     } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Change request failed");
+      this.maybeShowFlashError(error as Error, "Couldn't process your request");
       throw error;
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   changeDocumentStatus = task(async (newStatus: string) => {
