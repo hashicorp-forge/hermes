@@ -9,7 +9,8 @@ import (
 )
 
 type recentlyViewedProject struct {
-	ID int `json:"id"`
+	ID         int   `json:"id"`
+	ViewedTime int64 `json:"viewedTime"`
 }
 
 func MeRecentlyViewedProjectsHandler(srv server.Server) http.Handler {
@@ -68,7 +69,8 @@ func MeRecentlyViewedProjectsHandler(srv server.Server) http.Handler {
 			var res []recentlyViewedProject
 			for _, p := range rvps {
 				res = append(res, recentlyViewedProject{
-					ID: p.ProjectID,
+					ID:         p.ProjectID,
+					ViewedTime: p.ViewedAt.Unix(),
 				})
 			}
 

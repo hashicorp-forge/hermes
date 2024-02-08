@@ -11,8 +11,9 @@ import (
 )
 
 type recentlyViewedDoc struct {
-	ID      string `json:"id"`
-	IsDraft bool   `json:"isDraft"`
+	ID         string `json:"id"`
+	IsDraft    bool   `json:"isDraft"`
+	ViewedTime int64  `json:"viewedTime"`
 }
 
 func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
@@ -97,8 +98,9 @@ func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
 				}
 
 				res = append(res, recentlyViewedDoc{
-					ID:      doc.GoogleFileID,
-					IsDraft: isDraft,
+					ID:         doc.GoogleFileID,
+					IsDraft:    isDraft,
+					ViewedTime: d.ViewedAt.Unix(),
 				})
 			}
 
