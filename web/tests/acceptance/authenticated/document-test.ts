@@ -239,6 +239,14 @@ module("Acceptance | authenticated/document", function (hooks) {
         "Test Product 0",
         "The document product is updated to the selected product",
       );
+
+    const doc = this.server.schema.document.find(docID);
+
+    assert.equal(
+      doc.attrs.product,
+      "Test Product 0",
+      "the product is updated in the back end",
+    );
   });
 
   test("a published doc's productArea can't be changed ", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1409,6 +1417,16 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(FLASH_MESSAGE_SELECTOR).containsText(errorMessage);
   });
+
+  test("it shows an error when changing draft visibility fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when changing a draft's product area fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when changing a document's status fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when removing a document from a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
+
+  test("it shows an error when adding a document to a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {});
 
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     /**
