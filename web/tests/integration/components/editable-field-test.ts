@@ -158,10 +158,6 @@ module("Integration | Component | editable-field", function (hooks) {
       .exists("the element is rendered as a div when editing is disabled");
   });
 
-  test("the value will update when the passed-in value changes (STRING)", async function (this: EditableFieldComponentTestContext, assert) {
-    // TODO:
-  });
-
   test("it cancels when the escape key is pressed", async function (this: EditableFieldComponentTestContext, assert) {
     const defaultText = "foo";
 
