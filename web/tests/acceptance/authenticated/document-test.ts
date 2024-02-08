@@ -1480,12 +1480,10 @@ module("Acceptance | authenticated/document", function (hooks) {
 
   test("the document locks when a 423 error is returned", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     /**
-     * 423s are caught anytime the document shows an error flash message,
-     * which is the case for all important actions. This test demonstrates
-     * the "failed to approve" case, but the behavior is the same for
-     * all other actions.
+     * 423s are caught anytime the document handles an important error.
+     * This test demonstrates the "failed to approve" case, but the behavior
+     * is the same for all other actions.
      */
-
     this.server.create("document", {
       objectID: 1,
       isDraft: false,
@@ -1494,7 +1492,6 @@ module("Acceptance | authenticated/document", function (hooks) {
       approvers: [TEST_USER_EMAIL],
     });
 
-    // Set ourselves up for failure
     this.server.post("/approvals/:document_id", () => {
       return new Response(423, {}, "Locked");
     });

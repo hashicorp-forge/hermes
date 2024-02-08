@@ -1001,8 +1001,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.maybeLockDoc(e);
       this.showFlashError(e, "Unable to change document status");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
@@ -1063,8 +1064,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       const e = error as Error;
       this.maybeLockDoc(e);
       this.showFlashError(e, "Unable to remove project");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
