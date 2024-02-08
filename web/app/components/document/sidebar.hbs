@@ -432,6 +432,7 @@
                 />
                 {{! Delete... }}
                 <Hds::Button
+                  data-test-delete-draft-button
                   @text="Delete..."
                   @color="critical"
                   @icon="trash"
@@ -552,6 +553,7 @@
 
   {{#if this.deleteModalIsShown}}
     <Document::Modal
+      data-test-delete-draft-modal
       @color="critical"
       @headerText="Delete draft?"
       @bodyText="Are you sure you want to delete this draft?"

@@ -73,6 +73,8 @@ const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
   "[data-test-sidebar-publish-for-review-button";
 const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
+const DELETE_BUTTON = "[data-test-delete-draft-button]";
+const DELETE_MODAL = "[data-test-delete-draft-modal]";
 const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
   "[data-test-document-modal-primary-button]";
 const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
@@ -502,6 +504,32 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1");
 
     assertEditingIsDisabled(assert);
+  });
+
+  test("drafts can be deleted", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(DELETE_BUTTON);
+
+    assert.dom(DELETE_MODAL).exists("the user is shown a confirmation screen");
+
+    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR).hasText("Yes, delete");
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+
+    assert.dom(DELETE_MODAL).doesNotExist("the modal is dismissed");
+
+    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Document draft deleted");
+
+    assert.equal(
+      currentURL(),
+      "/my/documents",
+      'the user is redirected to the "my documents" page',
+    );
   });
 
   test("an approver can remove themselves from the approver role", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

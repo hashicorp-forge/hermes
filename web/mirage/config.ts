@@ -572,6 +572,20 @@ export default function (mirageConfig) {
         }
       });
 
+      // Delete a draft
+      this.delete("/drafts/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.destroy();
+          return new Response(200, {}, {});
+        }
+
+        return new Response(404, {}, {});
+      });
+
       /*************************************************************************
        *
        * Document approvals
@@ -601,7 +615,7 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used when rejecting an FRD or requesting changes to any other document.
+       * Used when rejecting an FRD.
        */
       this.delete("/approvals/:document_id", (schema, request) => {
         const document = schema.document.findBy({
@@ -743,6 +757,12 @@ export default function (mirageConfig) {
               longName: "Product Requirements",
               description:
                 "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+            {
+              name: "FRD",
+              longName: "Funding Request",
+              description:
+                "Capture a budget request, along with the business justification and expected returns.",
             },
           ]);
         } else {
