@@ -9,7 +9,7 @@
       @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
       @inputIsShown={{false}}
       class="search-popover theme--neutral
-        {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
+        {{unless this.docMatches 'no-best-matches'}}"
     >
       <:anchor as |dd|>
         {{log "this.items" this.items}}
@@ -38,9 +38,6 @@
         {{/unless}}
       </:anchor>
       <:header>
-        {{! content is placed here by the in-element helper below }}
-        <div id={{this.headerID}}>
-        </div>
 
         {{#if this.productAreaMatch}}
           <div class="global-search-best-matches-header">
@@ -61,11 +58,16 @@
         {{/if}}
 
         {{! Rethink this.. }}
-        {{#if this.bestMatchesHeaderIsShown}}
+        {{#if this.docMatches}}
           <div class="global-search-best-matches-header">
             <h5>Documents</h5>
           </div>
         {{/if}}
+
+        {{! content is placed here by the in-element helper below }}
+        <div id={{this.headerID}}>
+          {{! this now wants to move to the footer }}
+        </div>
       </:header>
       <:item as |dd|>
 
@@ -96,10 +98,9 @@
                     @route="authenticated.projects.project"
                     @model={{dd.attrs.hit.objectID}}
                   >
-                    <Project::StatusIcon
-                      @status={{dd.attrs.hit.status}}
-                      class="mt-px"
-                    />
+                    <div class="mt-px shrink-0 px-0.5">
+                      <Project::StatusIcon @status={{dd.attrs.hit.status}} />
+                    </div>
                     <div class="overflow-hidden">
                       <div
                         class="truncate font-semibold text-color-foreground-strong"
@@ -122,15 +123,14 @@
               {{else if dd.attrs.productAreaName}}
                 <dd.LinkTo
                   data-test-product-match-link
-                  @route="authenticated.documents"
-                  @query={{hash
-                    product=(array dd.attrs.productAreaName)
-                    page=1
-                  }}
-                  class="flex items-center gap-2 px-3"
+                  @route="authenticated.product-areas.product-area"
+                  @model={{dasherize dd.attrs.productAreaName}}
+                  class="flex items-center gap-2 px-3 font-semibold"
                 >
                   <Product::Avatar @product={{dd.attrs.productAreaName}} />
-                  {{dd.attrs.productAreaName}}
+                  <span class="text-color-foreground-strong">
+                    {{dd.attrs.productAreaName}}
+                  </span>
                 </dd.LinkTo>
               {{/if}}
             {{/in-element}}
@@ -140,21 +140,35 @@
             data-test-search-result
             @route="authenticated.document"
             @model={{dd.value}}
-            class="global-search-result"
+            class="flex h-20 w-full gap-2 py-2 px-3"
           >
-            <Doc::Thumbnail
-              @status={{dd.attrs.status}}
-              @product={{dd.attrs.product}}
-            />
-            <div class="global-search-result-text-content">
+            <Product::Avatar @product={{dd.attrs.product}} />
+            <div class="grid w-full gap-px overflow-hidden">
               <h4 class="global-search-result-title">
                 {{dd.attrs.title}}
               </h4>
-              <Person
-                data-test-search-result-owner
-                @ignoreUnknown={{true}}
-                @email={{get dd.attrs.owners 0}}
-              />
+              <div class="truncate text-body-100 text-color-foreground-faint">
+                <span>
+                  {{dd.attrs.status}}
+                </span>
+                <span class="text-color-foreground-disabled">·</span>
+                <span>
+                  {{dd.attrs.docType}}
+                </span>
+                <span class="text-color-foreground-disabled">·</span>
+                <span>
+                  {{dd.attrs.product}}
+                </span>
+                {{#let (get dd.attrs.owners 0) as |owner|}}
+                  {{#if owner}}
+                    <span class="text-color-foreground-disabled">·</span>
+                    <span>
+                      {{or (get-model-attr "person.name" owner) owner}}
+                    </span>
+                  {{/if}}
+
+                {{/let}}
+              </div>
               {{#if dd.attrs._snippetResult.content.value}}
                 <Doc::Snippet
                   data-test-search-result-snippet
@@ -163,6 +177,11 @@
                 />
               {{/if}}
             </div>
+            {{!-- <Doc::Thumbnail
+              @status={{dd.attrs.status}}
+              @product={{dd.attrs.product}}
+              class="shrink-0"
+            /> --}}
           </dd.LinkTo>
         {{/if}}
       </:item>

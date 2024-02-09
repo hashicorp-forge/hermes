@@ -27,14 +27,6 @@
   }
 }
 
-.global-search-result {
-  @apply flex h-20 items-center space-x-3 py-2 px-3;
-}
-
-.global-search-result-text-content {
-  @apply flex flex-col space-y-1 overflow-hidden;
-}
-
 .global-search-result-title {
   @apply truncate text-body-200 font-semibold text-color-foreground-strong;
 }

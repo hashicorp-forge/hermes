@@ -57,14 +57,6 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = "";
 
-  /**
-   * Whether to show the "Best Matches" header.
-   * True if there's at least one match.
-   */
-  get bestMatchesHeaderIsShown(): boolean {
-    return Object.keys(this.itemsToShow).length > 1;
-  }
-
   protected get items() {
     // going to create an array of items to show in the search dropdown.
     // always first will be the "view all results" link.
@@ -90,60 +82,10 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
     return [
       ...this.docMatches,
-      viewAllResults,
       productAreaMatch,
       ...projectItems,
+      viewAllResults,
     ].compact();
-  }
-
-  /**
-   * The items to show in the dropdown.
-   * Always shows the "View All Results" link.
-   * Conditionally shows the "View all [productArea]" link
-   * and any document matches.
-   */
-  get itemsToShow(): SearchResultObjects {
-    // to add projects here, they need to be the same format as the docs above
-    // so instead of being an array, the objects need to be
-    // flattened to a comma-separated list of objects
-    // with some additional properties like "shouldRenderOut"
-    // and maybe something else to categorize them
-
-    const projectItems = this.projectMatches.reduce((acc, hit) => {
-      acc[hit.objectID] = {
-        itemShouldRenderOut: true,
-        hit,
-      };
-      return acc;
-    }, {} as HermesProjectHitObjects);
-
-    // we can't just use _bestMatches because it's only docs
-    // we need some way of including the projects array as well
-
-    const viewAllResults = {
-      itemShouldRenderOut: true,
-    };
-
-    const productAreaMatch = this.productAreaMatch && {
-      itemShouldRenderOut: true,
-      productAreaName: this.productAreaMatch,
-    };
-
-    console.log("hug", {
-      ...this.docMatches,
-      viewAllResults,
-      productAreaMatch,
-      crap: projectItems,
-    });
-
-    // desired order: { bestMatches, view all, product, projectItems, }
-
-    return {
-      ...this.docMatches,
-      viewAllResults,
-      productAreaMatch,
-      ...projectItems,
-    };
   }
 
   /**
