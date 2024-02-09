@@ -58,6 +58,7 @@ type ConfigResponse struct {
 	AlgoliaDocsIndexName     string          `json:"algolia_docs_index_name"`
 	AlgoliaDraftsIndexName   string          `json:"algolia_drafts_index_name"`
 	AlgoliaInternalIndexName string          `json:"algolia_internal_index_name"`
+	AlgoliaProjectsIndexName string          `json:"algolia_projects_index_name"`
 	CreateDocsAsUser         bool            `json:"create_docs_as_user"`
 	FeatureFlags             map[string]bool `json:"feature_flags"`
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
@@ -129,6 +130,7 @@ func ConfigHandler(
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
 			AlgoliaInternalIndexName: cfg.Algolia.InternalIndexName,
+			AlgoliaProjectsIndexName: cfg.Algolia.ProjectsIndexName,
 			CreateDocsAsUser:         createDocsAsUser,
 			FeatureFlags:             featureFlags,
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,

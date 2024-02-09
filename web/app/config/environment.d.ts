@@ -15,6 +15,7 @@ export interface HermesConfig {
     docsIndexName: string;
     draftsIndexName: string;
     internalIndexName: string;
+    projectsIndexName: string;
   };
   createDocsAsUser: boolean;
   featureFlags: Record<string, boolean>;
