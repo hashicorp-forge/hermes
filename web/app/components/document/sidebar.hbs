@@ -345,10 +345,26 @@
             {{/each}}
           </ol>
         {{else}}
-          <Document::Sidebar::EmptyStateAddButton
-            @isReadOnly={{this.isDraft}}
-            @action={{this.showProjectsModal}}
-          />
+          {{#if this.projectsErrorIsShown}}
+            <div class="h-16">
+              <div class="failed-to-load-text">
+                Failed to load
+              </div>
+              <Hds::Button
+                data-test-document-projects-error-button
+                @color="secondary"
+                @size="small"
+                @text="Retry"
+                @icon="reload"
+                {{on "click" (perform this.loadRelatedProjects)}}
+              />
+            </div>
+          {{else}}
+            <Document::Sidebar::EmptyStateAddButton
+              @isReadOnly={{this.isDraft}}
+              @action={{this.showProjectsModal}}
+            />
+          {{/if}}
         {{/if}}
       </div>
 

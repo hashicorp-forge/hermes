@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
+  dropTask,
   enqueueTask,
   keepLatestTask,
   restartableTask,
@@ -33,13 +34,13 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
+import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: PersonModel;
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
-    deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
   };
@@ -66,6 +67,8 @@ const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service("recently-viewed-docs")
+  declare viewedDocs: RecentlyViewedDocsService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
@@ -157,6 +160,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * See note in `leaveApproverRole` for more information.
    */
   @tracked protected approversAreShown = true;
+
+  /**
+   * Whether an error is shown in the projects section.
+   * True when the `loadRelatedProjects` task fails.
+   * Reset when the user retries the request.
+   */
+  @tracked protected projectsErrorIsShown = false;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -272,10 +282,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("_body must exist", this._body);
     return this._body;
   }
-
-  get docIsLocked() {
-    return this.args.document?.locked;
-  }
+  /**
+   * Whether the document is locked to editing.
+   * True when a document is corrupt or has suggestions in the header.
+   * Initially set to the passed-in property; set true when a 423 is thrown.
+   */
+  @tracked protected docIsLocked = this.args.document?.locked;
 
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
@@ -491,14 +503,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("route must exist", route);
     route.refresh();
   }
-
-  @action maybeShowFlashError(error: Error, title: string) {
-    if (!this.modalIsShown) {
-      this.showFlashError(error, title);
+  /**
+   * The action to lock a document when a 423 error is thrown.
+   * Called by the `maybeShowFlashError` method as well as
+   * right before any errors are thrown.
+   */
+  @action private maybeLockDoc(error: Error) {
+    if (this.fetchSvc.getErrorCode(error) === 423) {
+      this.docIsLocked = true;
     }
   }
 
-  showFlashError(error: Error, title: string) {
+  private showFlashError(error: Error, title: string) {
     this.flashMessages.critical(error.message, {
       title,
       preventDuplicates: true,
@@ -526,14 +542,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * rich information in the list.
    */
   protected loadRelatedProjects = task(async () => {
-    const projectPromises = this.args.document.projects?.map((project) => {
-      return this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
-        .then((response) => response?.json());
-    });
+    this.projectsErrorIsShown = false;
 
-    const projects = await Promise.all(projectPromises ?? []);
-    this._projects = projects;
+    try {
+      const projectPromises = this.args.document.projects?.map((project) => {
+        return this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/projects/${project}`,
+          )
+          .then((response) => response?.json());
+      });
+      const projects = await Promise.all(projectPromises ?? []);
+      this._projects = projects;
+    } catch (error) {
+      this.projectsErrorIsShown = true;
+    }
   });
 
   /**
@@ -557,7 +580,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
           shareButton.classList.add("out");
 
-          void this.fetchSvc.fetch(
+          const fetchPromise = this.fetchSvc.fetch(
             `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
             {
               method: "PUT",
@@ -568,8 +591,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             },
           );
 
-          // Give time for the link icon to animate out
-          await timeout(Ember.testing ? 0 : 300);
+          await Promise.all([fetchPromise, timeout(Ember.testing ? 0 : 300)]);
 
           // With the animation done, we can now remove the button.
           this._docIsShareable = false;
@@ -593,11 +615,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           // Kick off the timer for the "link created" state.
           void this.showCreateLinkSuccessMessage.perform();
         }
-      } catch (error: unknown) {
-        this.showFlashError(
-          error as Error,
-          "Unable to update draft visibility",
-        );
+      } catch (error) {
+        const e = error as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to update draft visibility");
       } finally {
         // reset the new-visibility-intent icon
         this.newDraftVisibilityIcon = null;
@@ -606,9 +627,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   );
 
   saveProduct = keepLatestTask(async (product: string) => {
-    this.product = product;
-    await this.save.perform("product", this.product);
-    // productAbbreviation is computed by the back end
+    try {
+      this.product = product;
+      await this.save.perform("product", this.product);
+      // productAbbreviation is computed by the back end
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to save product");
+    }
   });
 
   get saveIsRunning() {
@@ -634,7 +661,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           [field]: serializedValue,
         });
       } catch (err) {
-        this.showFlashError(err as Error, "Unable to save document");
+        const e = err as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to save document");
       }
     }
   });
@@ -662,7 +691,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             customFields: [field],
           });
         } catch (err) {
-          this.showFlashError(err as Error, "Unable to save document");
+          const e = err as Error;
+          this.maybeLockDoc(e);
+          this.showFlashError(e, "Unable to save document");
         }
       }
     },
@@ -680,9 +711,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           body: JSON.stringify(fields),
         },
       );
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to save document");
-      throw error;
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to save document");
     } finally {
       this.refreshRoute();
     }
@@ -714,9 +746,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       await this.waitForDocNumber.perform();
       this.requestReviewModalIsShown = false;
       this.docPublishedModalIsShown = true;
-    } catch (error: unknown) {
+    } catch (error) {
+      this.maybeLockDoc(error as Error);
       this.draftWasPublished = null;
-      this.maybeShowFlashError(error as Error, "Unable to request review");
+      // trigger the modal error
       throw error;
     }
   });
@@ -740,12 +773,30 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docNumberLookupHasFailed = true;
   });
 
-  deleteDraft = task(async () => {
+  protected deleteDraft = dropTask(async () => {
     try {
-      await this.args.deleteDraft(this.docID);
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to delete draft");
-      throw error;
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/drafts/` + this.docID,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      void this.viewedDocs.fetchAll.perform();
+
+      this.flashMessages.add({
+        message: "Document draft deleted",
+        title: "Done!",
+      });
+
+      this.router.transitionTo("authenticated.my.documents");
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+
+      // trigger the modal error
+      throw e;
     }
   });
 
@@ -845,11 +896,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         message: "You've left the approver role",
         title: "Done!",
       });
-    } catch (e: unknown) {
+    } catch (error) {
       this.approvers = cachedApprovers;
-      this.flashMessages.critical((e as any).message, {
-        title: "Error leaving approver role",
-      });
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Error leaving approver role");
     } finally {
       setTimeout(() => {
         // reset state after a short delay
@@ -897,12 +950,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
           this.showFlashSuccess("Done!", "Document approved");
         }
-      } catch (error: unknown) {
-        this.maybeShowFlashError(error as Error, "Unable to approve");
-        throw error;
+      } catch (error) {
+        const e = error as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to approve");
+      } finally {
+        this.refreshRoute();
       }
-
-      this.refreshRoute();
     },
   );
 
@@ -926,9 +980,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       this.hasRejectedFRD = true;
 
       this.showFlashSuccess("Done!", "FRD rejected");
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Couldn't process your request");
-      throw error;
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Couldn't process your request");
     } finally {
       this.refreshRoute();
     }
@@ -949,15 +1004,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         "Done!",
         `Document status changed to "${newStatus}"`,
       );
-    } catch (error: unknown) {
+    } catch (error) {
       this.status = cachedStatus;
-      this.maybeShowFlashError(
-        error as Error,
-        "Unable to change document status",
-      );
-      throw error;
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to change document status");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
@@ -1011,12 +1067,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           }),
         },
       );
-    } catch (error: unknown) {
+    } catch (error) {
       this._projects = cachedProjects;
       this._projects = this._projects;
-      this.maybeShowFlashError(error as Error, "Unable to remove project");
+
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to remove project");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
@@ -1074,10 +1134,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           }),
         },
       );
-    } catch (e: unknown) {
+    } catch (error) {
       this._projects = cachedProjects;
       this._projects = this._projects;
-      this.maybeShowFlashError(e as Error, "Unable to add document to project");
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to add document to project");
     }
   });
 }
