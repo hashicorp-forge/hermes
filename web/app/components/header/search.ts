@@ -42,10 +42,17 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @service declare router: RouterService;
   @service declare store: StoreService;
 
+  protected headerID = "global-search-popover-header";
+  protected projectsID = "global-search-popover-projects";
+  protected productAreaID = "global-search-popover-product-area";
+  protected headerSelector = `#${this.headerID}`;
+  protected projectsSelector = `#${this.projectsID}`;
+  protected productAreaSelector = `#${this.productAreaID}`;
+
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
-  @tracked protected _bestMatches: HermesDocument[] = [];
-  @tracked protected _productAreaMatch: string | null = null;
+  @tracked protected docMatches: HermesDocument[] = [];
+  @tracked protected productAreaMatch: string | null = null;
   @tracked protected projectMatches: HermesProjectHit[] = [];
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = "";
@@ -56,6 +63,37 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    */
   get bestMatchesHeaderIsShown(): boolean {
     return Object.keys(this.itemsToShow).length > 1;
+  }
+
+  protected get items() {
+    // going to create an array of items to show in the search dropdown.
+    // always first will be the "view all results" link.
+    // conditionally below that is the "view all [productArea]" link
+    // then we want to show the projects followed by the documents
+
+    const viewAllResults = {
+      id: "view-all-results",
+      itemShouldRenderOut: true,
+    };
+
+    const productAreaMatch = this.productAreaMatch && {
+      itemShouldRenderOut: true,
+      productAreaName: this.productAreaMatch,
+    };
+
+    const projectItems = this.projectMatches.map((hit) => {
+      return {
+        itemShouldRenderOut: true,
+        hit,
+      };
+    });
+
+    return [
+      ...this.docMatches,
+      viewAllResults,
+      productAreaMatch,
+      ...projectItems,
+    ].compact();
   }
 
   /**
@@ -86,13 +124,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       itemShouldRenderOut: true,
     };
 
-    const productAreaMatch = this._productAreaMatch && {
+    const productAreaMatch = this.productAreaMatch && {
       itemShouldRenderOut: true,
-      productAreaName: this._productAreaMatch,
+      productAreaName: this.productAreaMatch,
     };
 
     console.log("hug", {
-      ...this._bestMatches,
+      ...this.docMatches,
       viewAllResults,
       productAreaMatch,
       crap: projectItems,
@@ -101,7 +139,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
     // desired order: { bestMatches, view all, product, projectItems, }
 
     return {
-      ...this._bestMatches,
+      ...this.docMatches,
       viewAllResults,
       productAreaMatch,
       ...projectItems,
@@ -241,13 +279,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           // Load the owner information
           await this.store.maybeFetchPeople.perform(hits);
 
-          this._bestMatches = docs ? hits : [];
+          this.docMatches = docs ? hits : [];
           if (productAreas) {
             const firstHit = productAreas.facetHits[0];
             if (firstHit) {
-              this._productAreaMatch = firstHit.value;
+              this.productAreaMatch = firstHit.value;
             } else {
-              this._productAreaMatch = null;
+              this.productAreaMatch = null;
             }
           }
           if (projects) {
@@ -258,11 +296,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         }
       } else {
         this.query = "";
-        this._productAreaMatch = null;
+        this.productAreaMatch = null;
         this.searchInputIsEmpty = true;
 
         dd.hideContent();
-        this._bestMatches = [];
+        this.docMatches = [];
       }
 
       // Reopen the dropdown if it was closed on mousedown and there's a query

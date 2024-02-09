@@ -3,14 +3,16 @@
 <div ...attributes>
   <form class="relative w-full" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
-      @items={{this.itemsToShow}}
+      @items={{this.items}}
       @offset={{hash mainAxis=0 crossAxis=2}}
       @placement="bottom-end"
       @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
+      @inputIsShown={{false}}
       class="search-popover theme--neutral
         {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
     >
       <:anchor as |dd|>
+        {{log "this.items" this.items}}
         <Hds::Form::TextInput::Base
           data-test-global-search-input
           {{did-insert dd.registerAnchor}}
@@ -36,13 +38,32 @@
         {{/unless}}
       </:anchor>
       <:header>
-        <div id="global-search-popover-header">
-          {{! content is placed here by the in-element helper below }}
-          {{! need to figure out how they're ordered }}
+        {{! content is placed here by the in-element helper below }}
+        <div id={{this.headerID}}>
         </div>
+
+        {{#if this.productAreaMatch}}
+          <div class="global-search-best-matches-header">
+            <h5>Product/Area</h5>
+          </div>
+          <div id={{this.productAreaID}} class="pb-1">
+            {{! Content placed }}
+          </div>
+        {{/if}}
+
+        {{#if this.projectMatches.length}}
+          <div class="global-search-best-matches-header">
+            <h5>Projects</h5>
+          </div>
+          <ul id={{this.projectsID}} class="pb-1">
+            {{! content placed here }}
+          </ul>
+        {{/if}}
+
+        {{! Rethink this.. }}
         {{#if this.bestMatchesHeaderIsShown}}
           <div class="global-search-best-matches-header">
-            <h5>Best matches</h5>
+            <h5>Documents</h5>
           </div>
         {{/if}}
       </:header>
@@ -54,19 +75,51 @@
            }}
           {{#unless this.searchInputIsEmpty}}
             {{#in-element
-              (html-element "#global-search-popover-header") insertBefore=null
+              (html-element
+                (if
+                  dd.attrs.hit
+                  this.projectsSelector
+                  (if
+                    dd.attrs.productAreaName
+                    this.productAreaSelector
+                    this.headerSelector
+                  )
+                )
+              )
+              insertBefore=null
             }}
-              {{#if (eq dd.value "viewAllResults")}}
+              {{#if dd.attrs.hit}}
+                <li class="">
+                  <dd.LinkTo
+                    data-test-project-match-link
+                    class="flex items-center gap-2 px-3"
+                    @route="authenticated.projects.project"
+                    @model={{dd.attrs.hit.objectID}}
+                  >
+                    <Project::StatusIcon
+                      @status={{dd.attrs.hit.status}}
+                      class="mt-px"
+                    />
+                    <div class="overflow-hidden">
+                      <div
+                        class="truncate font-semibold text-color-foreground-strong"
+                      >
+                        {{dd.attrs.hit.title}}
+                      </div>
+                    </div>
+                  </dd.LinkTo>
+                </li>
+              {{else if (eq dd.attrs.id "view-all-results")}}
                 <dd.LinkTo
                   {{did-insert this.registerViewAllResultsLink}}
                   @route="authenticated.results"
                   @query={{hash q=this.query page=1}}
-                  class="global-search-popover-header-link"
+                  class="flex gap-2 px-3 py-2.5"
                 >
-                  <FlightIcon @name="search" class="mr-1.5" />
-                  <span>View all results for “{{this.query}}”</span>
+                  <FlightIcon @name="search" class="mt-0.5" />
+                  <span>View document results for “{{this.query}}”</span>
                 </dd.LinkTo>
-              {{else if (eq dd.value "productAreaMatch")}}
+              {{else if dd.attrs.productAreaName}}
                 <dd.LinkTo
                   data-test-product-match-link
                   @route="authenticated.documents"
@@ -74,26 +127,10 @@
                     product=(array dd.attrs.productAreaName)
                     page=1
                   }}
-                  class="global-search-popover-header-link border-t border-t-color-border-primary"
+                  class="flex items-center gap-2 px-3"
                 >
-                  <FlightIcon @name="folder" class="mr-1.5" />
-                  <span class="flex items-center">
-                    View all
-                    <Hds::Badge
-                      @text={{dd.attrs.productAreaName}}
-                      @icon={{or (get-product-id dd.attrs.productAreaName) ""}}
-                      class="mx-2 mix-blend-multiply"
-                    />
-                    documents
-                  </span>
-                </dd.LinkTo>
-              {{else if dd.attrs.hit}}
-                <dd.LinkTo
-                  data-test-project-match-link
-                  @route="authenticated.projects.project"
-                  @model={{dd.attrs.hit.objectID}}
-                >
-                  {{dd.attrs.hit.title}}
+                  <Product::Avatar @product={{dd.attrs.productAreaName}} />
+                  {{dd.attrs.productAreaName}}
                 </dd.LinkTo>
               {{/if}}
             {{/in-element}}
