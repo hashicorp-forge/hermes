@@ -12,13 +12,22 @@ import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
+import FetchService from "hermes/services/fetch";
+import { HermesProjectHit } from "hermes/types/project";
 
 export interface SearchResultObjects {
-  [key: string]: unknown | HermesDocumentObjects;
+  [key: string]: unknown | HermesDocumentObjects | HermesProjectHitObjects;
 }
 
 export interface HermesDocumentObjects {
   [key: string]: HermesDocument;
+}
+
+export interface HermesProjectHitObjects {
+  [key: string]: {
+    itemShouldRenderOut: boolean;
+    hit: HermesProjectHit;
+  };
 }
 
 interface HeaderSearchComponentSignature {
@@ -28,6 +37,7 @@ interface HeaderSearchComponentSignature {
 
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
   @service declare store: StoreService;
@@ -36,6 +46,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected searchInputIsEmpty = true;
   @tracked protected _bestMatches: HermesDocument[] = [];
   @tracked protected _productAreaMatch: string | null = null;
+  @tracked protected projectMatches: HermesProjectHit[] = [];
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = "";
 
@@ -54,23 +65,47 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * and any document matches.
    */
   get itemsToShow(): SearchResultObjects {
-    return this._bestMatches.reduce(
-      (acc, doc) => {
-        acc[doc.objectID] = doc;
-        return acc;
-      },
-      {
-        viewAllResultsObject: {
-          itemShouldRenderOut: true,
-        },
-        ...(this._productAreaMatch && {
-          productAreaMatch: {
-            itemShouldRenderOut: true,
-            productAreaName: this._productAreaMatch,
-          },
-        }),
-      } as SearchResultObjects,
-    );
+    // to add projects here, they need to be the same format as the docs above
+    // so instead of being an array, the objects need to be
+    // flattened to a comma-separated list of objects
+    // with some additional properties like "shouldRenderOut"
+    // and maybe something else to categorize them
+
+    const projectItems = this.projectMatches.reduce((acc, hit) => {
+      acc[hit.objectID] = {
+        itemShouldRenderOut: true,
+        hit,
+      };
+      return acc;
+    }, {} as HermesProjectHitObjects);
+
+    // we can't just use _bestMatches because it's only docs
+    // we need some way of including the projects array as well
+
+    const viewAllResults = {
+      itemShouldRenderOut: true,
+    };
+
+    const productAreaMatch = this._productAreaMatch && {
+      itemShouldRenderOut: true,
+      productAreaName: this._productAreaMatch,
+    };
+
+    console.log("hug", {
+      ...this._bestMatches,
+      viewAllResults,
+      productAreaMatch,
+      crap: projectItems,
+    });
+
+    // desired order: { bestMatches, view all, product, projectItems, }
+
+    return {
+      ...this._bestMatches,
+      viewAllResults,
+      productAreaMatch,
+      ...projectItems,
+    };
   }
 
   /**
@@ -185,21 +220,28 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             hitsPerPage: 5,
           });
 
+          const projectSearch = this.algolia.searchIndex.perform(
+            this.configSvc.config.algolia_projects_index_name,
+            this.query,
+            {
+              hitsPerPage: 5,
+            },
+          );
+
           let algoliaResults = await Promise.all([
             productSearch,
             docSearch,
+            projectSearch,
           ]).then((values) => values);
 
-          let [productAreas, docs] = algoliaResults;
+          let [productAreas, docs, projects] = algoliaResults;
 
           const hits = (docs?.hits as HermesDocument[]) ?? [];
 
           // Load the owner information
           await this.store.maybeFetchPeople.perform(hits);
 
-          this._bestMatches = docs
-            ? (docs.hits.slice(0, 5) as HermesDocument[])
-            : [];
+          this._bestMatches = docs ? hits : [];
           if (productAreas) {
             const firstHit = productAreas.facetHits[0];
             if (firstHit) {
@@ -207,6 +249,9 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             } else {
               this._productAreaMatch = null;
             }
+          }
+          if (projects) {
+            this.projectMatches = projects.hits as HermesProjectHit[];
           }
         } catch (e: unknown) {
           console.error(e);

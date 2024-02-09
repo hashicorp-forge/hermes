@@ -4,6 +4,7 @@ import {
 } from "hermes/components/related-resources";
 import { ProjectStatus } from "./project-status";
 import { HermesDocument } from "./document";
+import { AlgoliaHit } from "hermes/services/algolia";
 
 export interface JiraIssue {
   key: string;
@@ -35,6 +36,8 @@ export interface HermesProjectInfo {
   modifiedTime: number;
   products?: string[];
 }
+
+export type HermesProjectHit = HermesProjectInfo & AlgoliaHit;
 
 export interface HermesProjectResources {
   hermesDocuments?: RelatedHermesDocument[];
