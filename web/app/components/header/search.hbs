@@ -9,7 +9,7 @@
       @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
       @inputIsShown={{false}}
       class="search-popover theme--neutral
-        {{unless this.docMatches 'no-best-matches'}}"
+        {{unless (or this.docMatches this.projectMatches) 'no-matches'}}"
     >
       <:anchor as |dd|>
         {{log "this.items" this.items}}
@@ -40,150 +40,156 @@
       <:header>
 
         {{#if this.productAreaMatch}}
-          <div class="global-search-best-matches-header">
-            <h5>Product/Area</h5>
-          </div>
-          <div id={{this.productAreaID}} class="pb-1">
+          <h5>Product/Area</h5>
+          <div id={{this.productAreaID}} class="global-search-section">
             {{! Content placed }}
           </div>
         {{/if}}
 
         {{#if this.projectMatches.length}}
-          <div class="global-search-best-matches-header">
-            <h5>Projects</h5>
-          </div>
-          <ul id={{this.projectsID}} class="pb-1">
+          <h5>Projects</h5>
+          <ul id={{this.projectsID}} class="global-search-section">
             {{! content placed here }}
           </ul>
         {{/if}}
 
         {{! Rethink this.. }}
         {{#if this.docMatches}}
-          <div class="global-search-best-matches-header">
-            <h5>Documents</h5>
-          </div>
-        {{/if}}
+          <h5>Documents</h5>
+          <ul id={{this.documentsID}} class="">
+            {{! content placed here }}
+          </ul>
 
-        {{! content is placed here by the in-element helper below }}
-        <div id={{this.headerID}}>
-          {{! this now wants to move to the footer }}
-        </div>
+        {{/if}}
+        <div id={{this.viewAllID}}></div>
+
       </:header>
       <:item as |dd|>
 
-        {{#if dd.attrs.itemShouldRenderOut}}
-          {{!
+        {{!
             We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
            }}
-          {{#unless this.searchInputIsEmpty}}
-            {{#in-element
-              (html-element
+        {{#unless this.searchInputIsEmpty}}
+          {{#in-element
+            (html-element
+              (if
+                dd.attrs.hit
+                this.projectsSelector
                 (if
-                  dd.attrs.hit
-                  this.projectsSelector
+                  dd.attrs.productAreaName
+                  this.productAreaSelector
                   (if
-                    dd.attrs.productAreaName
-                    this.productAreaSelector
-                    this.headerSelector
+                    dd.attrs.viewAllResults
+                    this.viewAllSelector
+                    this.documentsSelector
                   )
                 )
               )
-              insertBefore=null
-            }}
-              {{#if dd.attrs.hit}}
-                <li class="">
-                  <dd.LinkTo
-                    data-test-project-match-link
-                    class="flex items-center gap-2 px-3"
-                    @route="authenticated.projects.project"
-                    @model={{dd.attrs.hit.objectID}}
-                  >
-                    <div class="mt-px shrink-0 px-0.5">
-                      <Project::StatusIcon @status={{dd.attrs.hit.status}} />
-                    </div>
-                    <div class="overflow-hidden">
-                      <div
-                        class="truncate font-semibold text-color-foreground-strong"
-                      >
-                        {{dd.attrs.hit.title}}
-                      </div>
-                    </div>
-                  </dd.LinkTo>
-                </li>
-              {{else if (eq dd.attrs.id "view-all-results")}}
+            )
+            insertBefore=null
+          }}
+            {{#if dd.attrs.hit}}
+              {{! Project }}
+              <li>
                 <dd.LinkTo
-                  {{did-insert this.registerViewAllResultsLink}}
-                  @route="authenticated.results"
-                  @query={{hash q=this.query page=1}}
-                  class="flex gap-2 px-3 py-2.5"
+                  data-test-project-match-link
+                  class="flex items-center gap-2 px-3"
+                  @route="authenticated.projects.project"
+                  @model={{dd.attrs.hit.objectID}}
                 >
-                  <FlightIcon @name="search" class="mt-0.5" />
-                  <span>View document results for “{{this.query}}”</span>
+                  <div class="mt-px flex shrink-0 px-0.5">
+                    <Project::StatusIcon @status={{dd.attrs.hit.status}} />
+                  </div>
+                  <div class="overflow-hidden">
+                    <div
+                      class="truncate font-semibold text-color-foreground-strong"
+                    >
+                      {{dd.attrs.hit.title}}
+                    </div>
+                  </div>
                 </dd.LinkTo>
-              {{else if dd.attrs.productAreaName}}
+              </li>
+            {{else if dd.attrs.viewAllResults}}
+              {{! if there's a link, show it, otherwise show a "no results" }}
+              <dd.LinkTo
+                {{did-insert this.registerViewAllResultsLink}}
+                @route="authenticated.results"
+                @query={{hash q=this.query page=1}}
+              >
+                <div
+                  class="flex items-center gap-1.5 px-1 py-0.5 text-body-100 text-color-foreground-faint"
+                >
+                  <span>View all document results</span>
+                  <FlightIcon
+                    @name="arrow-right"
+                    class="text-color-foreground-disabled"
+                  />
+                </div>
+              </dd.LinkTo>
+            {{else if dd.attrs.productAreaName}}
+              {{! Product area  }}
+              <dd.LinkTo
+                data-test-product-match-link
+                @route="authenticated.product-areas.product-area"
+                @model={{dasherize dd.attrs.productAreaName}}
+                class="flex items-center gap-2 px-3 font-semibold"
+              >
+                <Product::Avatar @product={{dd.attrs.productAreaName}} />
+                <span class="text-color-foreground-strong">
+                  {{dd.attrs.productAreaName}}
+                </span>
+              </dd.LinkTo>
+            {{else}}
+              {{! Document }}
+              <li>
                 <dd.LinkTo
-                  data-test-product-match-link
-                  @route="authenticated.product-areas.product-area"
-                  @model={{dasherize dd.attrs.productAreaName}}
-                  class="flex items-center gap-2 px-3 font-semibold"
+                  data-test-search-result
+                  @route="authenticated.document"
+                  @model={{dd.value}}
+                  class="flex h-[74px] w-full gap-2 py-2 px-3"
                 >
-                  <Product::Avatar @product={{dd.attrs.productAreaName}} />
-                  <span class="text-color-foreground-strong">
-                    {{dd.attrs.productAreaName}}
-                  </span>
-                </dd.LinkTo>
-              {{/if}}
-            {{/in-element}}
-          {{/unless}}
-        {{else}}
-          <dd.LinkTo
-            data-test-search-result
-            @route="authenticated.document"
-            @model={{dd.value}}
-            class="flex h-20 w-full gap-2 py-2 px-3"
-          >
-            <Product::Avatar @product={{dd.attrs.product}} />
-            <div class="grid w-full gap-px overflow-hidden">
-              <h4 class="global-search-result-title">
-                {{dd.attrs.title}}
-              </h4>
-              <div class="truncate text-body-100 text-color-foreground-faint">
-                <span>
-                  {{dd.attrs.status}}
-                </span>
-                <span class="text-color-foreground-disabled">·</span>
-                <span>
-                  {{dd.attrs.docType}}
-                </span>
-                <span class="text-color-foreground-disabled">·</span>
-                <span>
-                  {{dd.attrs.product}}
-                </span>
-                {{#let (get dd.attrs.owners 0) as |owner|}}
-                  {{#if owner}}
-                    <span class="text-color-foreground-disabled">·</span>
-                    <span>
-                      {{or (get-model-attr "person.name" owner) owner}}
-                    </span>
-                  {{/if}}
+                  <Product::Avatar @product={{dd.attrs.product}} />
+                  <div class="grid w-full gap-px overflow-hidden">
+                    <h4 class="global-search-result-title">
+                      {{dd.attrs.title}}
+                    </h4>
+                    <div
+                      class="truncate text-body-100 text-color-foreground-faint"
+                    >
+                      <span>
+                        {{dd.attrs.status}}
+                      </span>
+                      <span class="text-color-foreground-disabled">·</span>
+                      <span>
+                        {{dd.attrs.docType}}
+                      </span>
+                      <span class="text-color-foreground-disabled">·</span>
+                      <span>
+                        {{dd.attrs.product}}
+                      </span>
+                      {{#let (get dd.attrs.owners 0) as |owner|}}
+                        {{#if owner}}
+                          <span class="text-color-foreground-disabled">·</span>
+                          <span>
+                            {{or (get-model-attr "person.name" owner) owner}}
+                          </span>
+                        {{/if}}
 
-                {{/let}}
-              </div>
-              {{#if dd.attrs._snippetResult.content.value}}
-                <Doc::Snippet
-                  data-test-search-result-snippet
-                  @snippet={{dd.attrs._snippetResult.content.value}}
-                  class="truncate"
-                />
-              {{/if}}
-            </div>
-            {{!-- <Doc::Thumbnail
-              @status={{dd.attrs.status}}
-              @product={{dd.attrs.product}}
-              class="shrink-0"
-            /> --}}
-          </dd.LinkTo>
-        {{/if}}
+                      {{/let}}
+                    </div>
+                    {{#if dd.attrs._snippetResult.content.value}}
+                      <Doc::Snippet
+                        data-test-search-result-snippet
+                        @snippet={{dd.attrs._snippetResult.content.value}}
+                        class="truncate"
+                      />
+                    {{/if}}
+                  </div>
+                </dd.LinkTo>
+              </li>
+            {{/if}}
+          {{/in-element}}
+        {{/unless}}
       </:item>
     </X::DropdownList>
   </form>

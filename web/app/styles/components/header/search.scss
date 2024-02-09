@@ -1,11 +1,12 @@
 .x-dropdown-list.search-popover {
-  @apply max-h-[none] min-w-[420px];
+  @apply max-h-[none] min-w-[420px] pb-2;
 
-  &.no-best-matches {
+  &.no-matches {
     .x-dropdown-list-items {
       @apply hidden;
     }
   }
+
   .x-dropdown-list-item-link {
     @apply items-start;
 
@@ -19,11 +20,17 @@
   @apply absolute right-[13px] top-1/2 -translate-y-1/2 text-color-foreground-faint;
 }
 
-.global-search-best-matches-header {
-  @apply border-t border-t-color-border-primary px-3 pt-2;
+.global-search-section {
+  @apply border-b border-b-color-border-primary pb-1.5;
+}
+
+.search-popover {
+  .x-dropdown-list-items {
+    @apply absolute;
+  }
 
   h5 {
-    @apply text-display-100 font-medium text-color-foreground-faint;
+    @apply mb-1.5 px-3 pt-2.5 text-display-100 font-medium text-color-foreground-faint;
   }
 }
 

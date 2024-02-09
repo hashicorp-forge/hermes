@@ -25,7 +25,6 @@ export interface HermesDocumentObjects {
 
 export interface HermesProjectHitObjects {
   [key: string]: {
-    itemShouldRenderOut: boolean;
     hit: HermesProjectHit;
   };
 }
@@ -42,12 +41,14 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @service declare router: RouterService;
   @service declare store: StoreService;
 
-  protected headerID = "global-search-popover-header";
-  protected projectsID = "global-search-popover-projects";
-  protected productAreaID = "global-search-popover-product-area";
-  protected headerSelector = `#${this.headerID}`;
+  protected viewAllID = "global-search-view-all";
+  protected projectsID = "global-search-projects";
+  protected productAreaID = "global-search-product-area";
+  protected documentsID = "global-search-documents";
+  protected viewAllSelector = `#${this.viewAllID}`;
   protected projectsSelector = `#${this.projectsID}`;
   protected productAreaSelector = `#${this.productAreaID}`;
+  protected documentsSelector = `#${this.documentsID}`;
 
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
@@ -64,18 +65,15 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
     // then we want to show the projects followed by the documents
 
     const viewAllResults = {
-      id: "view-all-results",
-      itemShouldRenderOut: true,
+      viewAllResults: true,
     };
 
     const productAreaMatch = this.productAreaMatch && {
-      itemShouldRenderOut: true,
       productAreaName: this.productAreaMatch,
     };
 
     const projectItems = this.projectMatches.map((hit) => {
       return {
-        itemShouldRenderOut: true,
         hit,
       };
     });
