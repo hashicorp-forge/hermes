@@ -12,7 +12,6 @@
         {{unless (or this.docMatches this.projectMatches) 'no-matches'}}"
     >
       <:anchor as |dd|>
-        {{log "this.items" this.items}}
         <Hds::Form::TextInput::Base
           data-test-global-search-input
           {{did-insert dd.registerAnchor}}
@@ -37,39 +36,42 @@
           </span>
         {{/unless}}
       </:anchor>
+
       <:header>
 
         {{#if this.productAreaMatch}}
           <h5>Product/Area</h5>
           <div id={{this.productAreaID}} class="global-search-section">
-            {{! Content placed }}
+            {{! placed by in-element}}
           </div>
         {{/if}}
-
         {{#if this.projectMatches.length}}
           <h5>Projects</h5>
           <ul id={{this.projectsID}} class="global-search-section">
-            {{! content placed here }}
+            {{! placed by in-element}}
           </ul>
         {{/if}}
-
-        {{! Rethink this.. }}
         {{#if this.docMatches}}
           <h5>Documents</h5>
           <ul id={{this.documentsID}} class="">
-            {{! content placed here }}
+            {{! placed by in-element}}
           </ul>
-
         {{/if}}
-        <div id={{this.viewAllID}}></div>
+
+        {{#if this.docMatches}}
+          <div id={{this.viewAllID}}>
+            {{! placed by in-element}}
+          </div>
+        {{/if}}
 
       </:header>
+
       <:item as |dd|>
 
         {{!
             We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
            }}
-        {{#unless this.searchInputIsEmpty}}
+        {{#unless (or this.searchInputIsEmpty this.emptyStateIsShown)}}
           {{#in-element
             (html-element
               (if
@@ -89,7 +91,7 @@
             insertBefore=null
           }}
             {{#if dd.attrs.hit}}
-              {{! Project }}
+              {{! Project result }}
               <li>
                 <dd.LinkTo
                   data-test-project-match-link
@@ -110,7 +112,7 @@
                 </dd.LinkTo>
               </li>
             {{else if dd.attrs.viewAllResults}}
-              {{! if there's a link, show it, otherwise show a "no results" }}
+              {{! View all docs link }}
               <dd.LinkTo
                 {{did-insert this.registerViewAllResultsLink}}
                 @route="authenticated.results"

@@ -59,12 +59,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected query: string = "";
 
   protected get items() {
-    // going to create an array of items to show in the search dropdown.
-    // always first will be the "view all results" link.
-    // conditionally below that is the "view all [productArea]" link
-    // then we want to show the projects followed by the documents
-
-    const viewAllResults = {
+    const viewAllDocResults = !!this.docMatches && {
       viewAllResults: true,
     };
 
@@ -79,11 +74,15 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
     });
 
     return [
-      ...this.docMatches,
       productAreaMatch,
       ...projectItems,
-      viewAllResults,
+      ...this.docMatches,
+      viewAllDocResults,
     ].compact();
+  }
+
+  protected get emptyStateIsShown() {
+    return this.docMatches.length === 0 && this.projectMatches.length === 0;
   }
 
   /**
