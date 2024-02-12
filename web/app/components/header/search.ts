@@ -205,7 +205,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             this.configSvc.config.algolia_projects_index_name,
             this.query,
             {
-              hitsPerPage: 5,
+              hitsPerPage: 3,
             },
           );
 

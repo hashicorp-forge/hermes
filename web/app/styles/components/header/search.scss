@@ -4,11 +4,7 @@
   // Bottom scroll affordance
   &::before {
     content: "";
-    @apply absolute bottom-0 left-0 z-10 h-3 w-full bg-gradient-to-t from-color-page-primary to-transparent;
-  }
-
-  .x-dropdown-list-scroll-container {
-    @apply pb-3;
+    @apply pointer-events-none absolute bottom-0 left-0 z-10 h-5 w-full bg-gradient-to-t from-color-page-primary to-transparent;
   }
 
   &.no-matches {

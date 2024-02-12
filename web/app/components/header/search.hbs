@@ -45,25 +45,27 @@
             {{! placed by in-element}}
           </div>
         {{/if}}
+
         {{#if this.projectMatches.length}}
           <h5>Projects</h5>
           <ul id={{this.projectsID}} class="global-search-section">
             {{! placed by in-element}}
           </ul>
         {{/if}}
+
         {{#if this.docMatches}}
           <h5>Documents</h5>
-          <ul id={{this.documentsID}} class="">
+          <ul id={{this.documentsID}} class="global-search-section">
             {{! placed by in-element}}
           </ul>
+
         {{/if}}
 
         {{#if this.docMatches}}
-          <div id={{this.viewAllID}}>
+          <div id={{this.viewAllID}} class="global-search-sectionX">
             {{! placed by in-element}}
           </div>
         {{/if}}
-
       </:header>
 
       <:item as |dd|>
@@ -119,9 +121,9 @@
                 @query={{hash q=this.query page=1}}
               >
                 <div
-                  class="flex items-center gap-1.5 px-1 py-0.5 text-body-100 text-color-foreground-faint"
+                  class="flex items-center gap-1.5 px-1 pt-2 pb-2.5 text-body-100 text-color-foreground-faint"
                 >
-                  <span>View all document results</span>
+                  <span>View all results</span>
                   <FlightIcon
                     @name="arrow-right"
                     class="text-color-foreground-disabled"
