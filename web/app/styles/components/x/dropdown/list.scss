@@ -35,6 +35,10 @@
         @apply bg-color-surface-interactive-hover;
         @apply text-inherit;
 
+        .doc-status-fade {
+          @apply from-color-surface-interactive-hover;
+        }
+
         .flight-icon {
           @apply text-inherit;
         }

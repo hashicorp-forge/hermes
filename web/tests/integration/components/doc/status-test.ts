@@ -2,10 +2,12 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { HdsBadgeType } from "hds/_shared";
 
 interface Context extends TestContext {
   hideProgress: boolean;
   status: string;
+  type: HdsBadgeType;
 }
 
 module("Integration | Component | doc/status", function (hooks) {
@@ -50,5 +52,25 @@ module("Integration | Component | doc/status", function (hooks) {
 
     this.set("status", true);
     assert.dom(".hds-badge--color-neutral").hasText("WIP");
+  });
+
+  test('it takes a "type" argument', async function (assert) {
+    this.set("type", undefined);
+
+    const filled = ".hds-badge--type-filled";
+    const inverted = ".hds-badge--type-inverted";
+
+    await render<Context>(hbs`
+      <Doc::Status @type={{this.type}} />
+    `);
+
+    // By default, the badge type is "filled"
+    assert.dom(filled).exists();
+    assert.dom(inverted).doesNotExist();
+
+    this.set("type", "inverted");
+
+    assert.dom(filled).doesNotExist();
+    assert.dom(inverted).exists();
   });
 });

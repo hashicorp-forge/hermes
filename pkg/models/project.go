@@ -139,43 +139,35 @@ func (p *Project) GetRelatedResources(db *gorm.DB) (
 		return nil, nil, err
 	}
 
-	// Get the project.
-	if err := p.Get(db, p.ID); err != nil {
-		return nil, nil, fmt.Errorf("error getting project: %w", err)
+	// Find external link related resources.
+	if err := db.
+		Model(&ProjectRelatedResourceExternalLink{}).
+		Joins("JOIN project_related_resources ON project_related_resources.related_resource_id = project_related_resource_external_links.id").
+		Where("project_related_resources.project_id = ? AND project_related_resources.related_resource_type = ?",
+			p.ID, "project_related_resource_external_links").
+		Preload(clause.Associations).
+		Find(&elrrs).
+		Error; err != nil {
+		return nil,
+			nil,
+			fmt.Errorf("error getting external link related resources: %w", err)
 	}
 
-	// Get related resources.
-	for _, rr := range p.RelatedResources {
-		switch rr.RelatedResourceType {
-		case "project_related_resource_external_links":
-			elrr := ProjectRelatedResourceExternalLink{}
-			if err := db.
-				Where("id = ?", rr.RelatedResourceID).
-				Preload(clause.Associations).
-				First(&elrr).Error; err != nil {
-				return nil,
-					nil,
-					fmt.Errorf("error getting external link related resource: %w", err)
-			}
-			elrrs = append(elrrs, elrr)
-		case "project_related_resource_hermes_documents":
-			hdrr := ProjectRelatedResourceHermesDocument{}
-			if err := db.
-				Where("id = ?", rr.RelatedResourceID).
-				Preload(clause.Associations).
-				First(&hdrr).Error; err != nil {
-				return nil,
-					nil,
-					fmt.Errorf(
-						"error getting document for Hermes document related resource: %w",
-						err)
-			}
-			hdrrs = append(hdrrs, hdrr)
-		default:
-			return nil,
-				nil,
-				fmt.Errorf("unknown related resource type: %s", rr.RelatedResourceType)
-		}
+	// Find Hermes document related resources.
+	if err := db.
+		Model(&ProjectRelatedResourceHermesDocument{}).
+		Joins("JOIN project_related_resources ON project_related_resources.related_resource_id = project_related_resource_hermes_documents.id").
+		Where("project_related_resources.project_id = ? AND project_related_resources.related_resource_type = ?",
+			p.ID, "project_related_resource_hermes_documents").
+		Preload(clause.Associations).
+		Preload("Document.DocumentType").
+		Preload("Document.Owner").
+		Preload("Document.Product").
+		Find(&hdrrs).
+		Error; err != nil {
+		return nil,
+			nil,
+			fmt.Errorf("error getting Hermes document related resources: %w", err)
 	}
 
 	return

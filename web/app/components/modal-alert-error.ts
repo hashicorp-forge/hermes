@@ -1,6 +1,7 @@
 import Component from "@glimmer/component";
 
 interface ModalAlertErrorComponentSignature {
+  Element: HTMLDivElement;
   Args: {
     onDismiss: () => void;
     title: string;

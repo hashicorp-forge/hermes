@@ -30,7 +30,6 @@ type ProjectRelatedResourcesGetResponseHermesDocument struct {
 	DocumentNumber string   `json:"documentNumber"`
 	ModifiedTime   int64    `json:"modifiedTime"`
 	Owners         []string `json:"owners"`
-	OwnerPhotos    []string `json:"ownerPhotos,omitempty"`
 	Product        string   `json:"product"`
 	SortOrder      int      `json:"sortOrder"`
 	Status         string   `json:"status"`
@@ -77,25 +76,12 @@ func projectsResourceRelatedResourcesHandler(
 	case "GET":
 		logArgs = append(logArgs, "method", r.Method)
 
-		// Get project.
-		proj := models.Project{}
-		if err := proj.Get(srv.DB, projectID); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				srv.Logger.Warn("project not found", logArgs...)
-				http.Error(w, "Project not found", http.StatusNotFound)
-				return
-			} else {
-				srv.Logger.Error("error getting project from database",
-					append([]interface{}{
-						"error", err,
-					}, logArgs...)...)
-				http.Error(
-					w, "Error processing request", http.StatusInternalServerError)
-				return
-			}
+		// Get project's typed related resources.
+		proj := models.Project{
+			Model: gorm.Model{
+				ID: projectID,
+			},
 		}
-
-		// Get typed related resources.
 		elrrs, hdrrs, err := proj.GetRelatedResources(srv.DB)
 		if err != nil {
 			srv.Logger.Error("error getting related resources",
@@ -114,17 +100,6 @@ func projectsResourceRelatedResourcesHandler(
 		}
 		// Add external link related resources.
 		for _, elrr := range elrrs {
-			if err := elrr.Get(srv.DB); err != nil {
-				srv.Logger.Error(
-					"error getting external link related resource from database",
-					append([]interface{}{
-						"error", err,
-					}, logArgs...)...)
-				http.Error(
-					w, "Error processing request", http.StatusInternalServerError)
-				return
-			}
-
 			resp.ExternalLinks = append(resp.ExternalLinks,
 				ProjectRelatedResourcesGetResponseExternalLink{
 					Name:      elrr.Name,
@@ -135,40 +110,10 @@ func projectsResourceRelatedResourcesHandler(
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
 			logArgs = append(logArgs, "document_id", hdrr.Document.GoogleFileID)
-
-			// Get document from database.
-			model := models.Document{
-				GoogleFileID: hdrr.Document.GoogleFileID,
-			}
-			if err := model.Get(srv.DB); err != nil {
-				srv.Logger.Error("error getting document from database",
-					append([]interface{}{
-						"error", err,
-					}, logArgs...)...)
-				http.Error(
-					w, "Error processing request", http.StatusInternalServerError)
-				return
-			}
-
-			// Get reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(srv.DB, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: hdrr.Document.GoogleFileID,
-				},
-			}); err != nil {
-				srv.Logger.Error("error getting reviews for document",
-					append([]interface{}{
-						"error", err,
-					}, logArgs...)...)
-				http.Error(
-					w, "Error processing request", http.StatusInternalServerError)
-				return
-			}
-
-			// Convert database model to a document.
+			// Convert database model to a document. We don't need document review
+			// data for this endpoint.
 			doc, err := document.NewFromDatabaseModel(
-				model, reviews)
+				hdrr.Document, models.DocumentReviews{})
 			if err != nil {
 				srv.Logger.Error("error converting database model to document type",
 					append([]interface{}{
@@ -179,35 +124,16 @@ func projectsResourceRelatedResourcesHandler(
 				return
 			}
 
-			// Get owner photo by searching Google Workspace directory.
-			if len(doc.Owners) > 0 {
-				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
-				if err != nil {
-					// Log but don't return an error.
-					srv.Logger.Error("error searching directory for person",
-						append([]interface{}{
-							"error", err,
-							"person", doc.Owners[0],
-						}, logArgs...)...)
-				}
-				if len(ppl) > 0 {
-					if len(ppl[0].Photos) > 0 {
-						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
-					}
-				}
-			}
-
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				ProjectRelatedResourcesGetResponseHermesDocument{
-					GoogleFileID:   hdrr.Document.GoogleFileID,
+					GoogleFileID:   doc.ObjectID,
 					Title:          doc.Title,
 					CreatedTime:    doc.CreatedTime,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
 					ModifiedTime:   doc.ModifiedTime,
 					Owners:         doc.Owners,
-					OwnerPhotos:    doc.OwnerPhotos,
 					Product:        doc.Product,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
 					Status:         doc.Status,
