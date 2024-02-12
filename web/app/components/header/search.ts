@@ -14,6 +14,7 @@ import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
 import FetchService from "hermes/services/fetch";
 import { HermesProjectHit } from "hermes/types/project";
+import { LibraryTemplatePlugin } from "webpack";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects | HermesProjectHitObjects;
@@ -59,9 +60,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected query: string = "";
 
   protected get items() {
-    const viewAllDocResults = !!this.docMatches && {
-      viewAllResults: true,
-    };
+    const viewAllDocResults =
+      (this.docMatches.length > 0 && {
+        viewAllResults: true,
+      }) ||
+      undefined;
 
     const productAreaMatch = this.productAreaMatch && {
       productAreaName: this.productAreaMatch,
@@ -73,16 +76,14 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       };
     });
 
-    return [
+    const items = [
       productAreaMatch,
       ...projectItems,
       ...this.docMatches,
       viewAllDocResults,
     ].compact();
-  }
 
-  protected get emptyStateIsShown() {
-    return this.docMatches.length === 0 && this.projectMatches.length === 0;
+    return items ?? [];
   }
 
   /**
@@ -96,8 +97,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
       // if there's a search and no focused item, view all results
       if (dd.focusedItemIndex === -1 && this.query.length) {
-        this.viewAllResults();
-        dd.hideContent();
+        // only submit if there are results
+        if (this.items.length > 0) {
+          this.viewAllResults();
+          dd.hideContent();
+        }
       }
     }
   }

@@ -71,7 +71,7 @@
         {{!
             We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
            }}
-        {{#unless (or this.searchInputIsEmpty this.emptyStateIsShown)}}
+        {{#unless this.searchInputIsEmpty}}
           {{#in-element
             (html-element
               (if
@@ -193,6 +193,11 @@
           {{/in-element}}
         {{/unless}}
       </:item>
+      <:no-matches>
+        <div data-test-no-matches class="x-dropdown-list-default-empty-state">
+          No matches
+        </div>
+      </:no-matches>
     </X::DropdownList>
   </form>
 </div>
