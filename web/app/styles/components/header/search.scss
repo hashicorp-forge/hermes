@@ -1,5 +1,15 @@
 .x-dropdown-list.search-popover {
-  @apply max-h-[none] min-w-[420px] pb-2;
+  @apply max-h-[80vh];
+
+  // Bottom scroll affordance
+  &::before {
+    content: "";
+    @apply absolute bottom-0 left-0 z-10 h-3 w-full bg-gradient-to-t from-color-page-primary to-transparent;
+  }
+
+  .x-dropdown-list-scroll-container {
+    @apply pb-3;
+  }
 
   &.no-matches {
     .x-dropdown-list-items {
