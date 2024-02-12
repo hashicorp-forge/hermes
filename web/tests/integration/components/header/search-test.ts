@@ -14,16 +14,12 @@ const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 const PRODUCT_AREA_HITS = "[data-test-product-area-hits]";
 const PROJECT_HITS = "[data-test-project-hits]";
 const DOCUMENT_HITS = "[data-test-document-hits]";
-const VIEW_ALL_HITS_CONTAINER = "[data-test-view-all-container]";
+const NO_MATCHES = "[data-test-no-matches]";
 const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
 
 const PRODUCT_AREA_HIT = "[data-test-product-area-hit]";
 const PROJECT_HIT = "[data-test-project-hit]";
 const DOCUMENT_HIT = "[data-test-document-hit]";
-
-const SEARCH_RESULT_TITLE_SELECTOR = ".global-search-result-title";
-const SEARCH_RESULT_OWNER_SELECTOR = "[data-test-search-result-owner]";
-const SEARCH_RESULT_SNIPPET_SELECTOR = "[data-test-search-result-snippet]";
 
 interface HeaderSearchTestContext extends MirageTestContext {}
 
@@ -182,5 +178,15 @@ module("Integration | Component | header/search", function (hooks) {
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
       .containsText("Test Document 0");
+  });
+
+  test("it conditionally shows a no-matches message", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
+
+    assert.dom(NO_MATCHES).exists();
   });
 });
