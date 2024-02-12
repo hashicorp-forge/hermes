@@ -104,7 +104,7 @@ export default function (mirageConfig) {
                       .toLowerCase()
                       .includes(query.toLowerCase()) ||
                     project.attrs.description
-                      .toLowerCase()
+                      ?.toLowerCase()
                       .includes(query.toLowerCase())
                   );
                 });

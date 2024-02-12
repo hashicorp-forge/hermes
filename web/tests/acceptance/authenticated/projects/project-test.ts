@@ -21,7 +21,7 @@ import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
-const GLOBAL_SEARCH_DOC_HIT = "[data-test-document-hit]";
+const GLOBAL_SEARCH_PROJECT_HIT = "[data-test-project-hit]";
 
 const TITLE = "[data-test-project-title]";
 const READ_ONLY_TITLE = `${TITLE} .read-only`;
@@ -170,7 +170,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const docType = "PRD";
     const docNumber = "LAB-023";
     const docOwner = "foo@bar.com";
-    const docOwnerPhotoURL = "#foo";
     const docProduct = "Terraform";
     const id = 250;
 
@@ -758,6 +757,10 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     this.server.create("project", {
       id: 2,
       title,
+    });
+
+    // Override any factory `afterCreate` functions
+    this.server.schema.projects.find(2).update({
       hermesDocuments: [],
       externalLinks: [externalLink],
     });
@@ -772,7 +775,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await fillIn(GLOBAL_SEARCH_INPUT, "Food");
 
-    await click(GLOBAL_SEARCH_DOC_HIT);
+    await click(GLOBAL_SEARCH_PROJECT_HIT);
 
     assert.equal(currentURL(), "/projects/2");
 
