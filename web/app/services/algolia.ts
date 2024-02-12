@@ -207,7 +207,14 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
     ): Promise<SearchResponse<unknown>> => {
       let index: SearchIndex = this.client.initIndex(indexName);
-      return await index.search(query, params);
+
+      let newParams = { ...params };
+
+      newParams.data = {
+        indexName,
+      };
+
+      return await index.search(query, newParams);
     },
   );
 

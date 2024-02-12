@@ -24,8 +24,8 @@
           @value={{this.query}}
           name="query"
           size="25"
-          placeholder="Find a document..."
-          aria-label="Find a document..."
+          placeholder="Search Hermes..."
+          aria-label="Search Hermes..."
           aria-controls={{dd.ariaControls}}
           aria-expanded={{dd.contentIsShown}}
           aria-haspopup="listbox"
@@ -41,28 +41,44 @@
 
         {{#if this.productAreaMatch}}
           <h5>Product/Area</h5>
-          <div id={{this.productAreaID}} class="global-search-section">
+          <div
+            data-test-product-area-hits
+            id={{this.productAreaID}}
+            class="global-search-section"
+          >
             {{! placed by in-element}}
           </div>
         {{/if}}
 
         {{#if this.projectMatches.length}}
           <h5>Projects</h5>
-          <ul id={{this.projectsID}} class="global-search-section">
+          <ul
+            data-test-project-hits
+            id={{this.projectsID}}
+            class="global-search-section"
+          >
             {{! placed by in-element}}
           </ul>
         {{/if}}
 
         {{#if this.docMatches}}
           <h5>Documents</h5>
-          <ul id={{this.documentsID}} class="global-search-section">
+          <ul
+            data-test-document-hits
+            id={{this.documentsID}}
+            class="global-search-section"
+          >
             {{! placed by in-element}}
           </ul>
 
         {{/if}}
 
         {{#if this.docMatches}}
-          <div id={{this.viewAllID}} class="global-search-sectionX">
+          <div
+            data-test-view-all-hits-container
+            id={{this.viewAllID}}
+            class="global-search-sectionX"
+          >
             {{! placed by in-element}}
           </div>
         {{/if}}
@@ -94,12 +110,13 @@
           }}
             {{#if dd.attrs.hit}}
               {{! Project result }}
+              {{log "hit" dd.attrs.hit}}
               <li>
                 <dd.LinkTo
-                  data-test-project-match-link
+                  data-test-project-hit
                   class="flex items-center gap-2 px-3"
                   @route="authenticated.projects.project"
-                  @model={{dd.attrs.hit.objectID}}
+                  @model={{dd.attrs.hit.id}}
                 >
                   <div class="mt-px flex shrink-0 px-0.5">
                     <Project::StatusIcon @status={{dd.attrs.hit.status}} />
@@ -116,6 +133,7 @@
             {{else if dd.attrs.viewAllResults}}
               {{! View all docs link }}
               <dd.LinkTo
+                data-test-view-all-docs-link
                 {{did-insert this.registerViewAllResultsLink}}
                 @route="authenticated.results"
                 @query={{hash q=this.query page=1}}
@@ -133,7 +151,7 @@
             {{else if dd.attrs.productAreaName}}
               {{! Product area  }}
               <dd.LinkTo
-                data-test-product-match-link
+                data-test-product-area-hit
                 @route="authenticated.product-areas.product-area"
                 @model={{dasherize dd.attrs.productAreaName}}
                 class="flex items-center gap-2 px-3 font-semibold"
@@ -147,9 +165,9 @@
               {{! Document }}
               <li>
                 <dd.LinkTo
-                  data-test-search-result
+                  data-test-document-hit
                   @route="authenticated.document"
-                  @model={{dd.value}}
+                  @model={{dd.attrs.objectID}}
                   class="flex h-[74px] w-full gap-2 py-2 px-3"
                 >
                   <Product::Avatar @product={{dd.attrs.product}} />
