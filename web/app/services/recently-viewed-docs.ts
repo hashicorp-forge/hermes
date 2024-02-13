@@ -5,18 +5,19 @@ import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
-import { assert } from "@ember/debug";
 import SessionService from "hermes/services/session";
 import StoreService from "hermes/services/store";
 
 type IndexedDoc = {
   id: string;
   isDraft: boolean;
+  viewedTime: number;
 };
 
 export type RecentlyViewedDoc = {
   doc: HermesDocument;
   isDraft: boolean;
+  viewedTime: number;
 };
 
 export default class RecentlyViewedDocsService extends Service {
@@ -48,31 +49,35 @@ export default class RecentlyViewedDocsService extends Service {
       /**
        * Fetch the file IDs from the backend.
        */
-      let fetchResponse = await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
-      );
-
-      this.index = (await fetchResponse?.json()) || [];
-
-      assert("fetchAll expects index", this.index);
+      this.index =
+        (await this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
+          )
+          .then((resp) => resp?.json())) || [];
 
       /**
        * Get the documents from the backend.
        */
       let docResponses = await Promise.allSettled(
-        (this.index as IndexedDoc[]).map(async ({ id, isDraft }) => {
-          let endpoint = isDraft ? "drafts" : "documents";
+        (this.index as IndexedDoc[]).map(async (d: IndexedDoc) => {
+          let endpoint = d.isDraft ? "drafts" : "documents";
           let doc = await this.fetchSvc
             .fetch(
-              `/api/${this.configSvc.config.api_version}/${endpoint}/${id}`,
+              `/api/${this.configSvc.config.api_version}/${endpoint}/${d.id}`,
             )
             .then((resp) => resp?.json());
 
-          doc.isDraft = isDraft;
+          doc.isDraft = d.isDraft;
 
-          return { doc, isDraft };
+          return {
+            doc,
+            isDraft: d.isDraft,
+            viewedTime: d.viewedTime,
+          };
         }),
       );
+
       /**
        * Set up an empty array to hold the documents.
        */
