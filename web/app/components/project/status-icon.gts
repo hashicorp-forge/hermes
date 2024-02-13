@@ -84,9 +84,9 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
    */
   <template>
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       data-test-project-status-icon
@@ -99,7 +99,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         data-test-color={{this.bgColor}}
         fill={{this.bgColor}}
         fill-rule="evenodd"
-        d="M2.25 1A2.25 2.25 0 0 0 0 3.25v9.5A2.25 2.25 0 0 0 2.25 15h11.5A2.25 2.25 0 0 0 16 12.75v-7.5A2.25 2.25 0 0 0 13.75 3H9.871a.75.75 0 0 1-.53-.22L8.22 1.66A2.25 2.25 0 0 0 6.629 1H2.25Z"
+        d="M2.25 2A2.25 2.25 0 0 0 0 4.25v11.5A2.25 2.25 0 0 0 2.25 18h15.5A2.25 2.25 0 0 0 20 15.75v-9.5A2.25 2.25 0 0 0 17.75 4H9.871a.75.75 0 0 1-.53-.22L8.22 2.66A2.25 2.25 0 0 0 6.629 2H2.25Z"
         clip-rule="evenodd"
       />
 
@@ -109,7 +109,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         data-test-color={{this.outlineColor}}
         fill={{this.outlineColor}}
         fill-rule="evenodd"
-        d="M2.25 1A2.25 2.25 0 0 0 0 3.25v9.5A2.25 2.25 0 0 0 2.25 15h11.5A2.25 2.25 0 0 0 16 12.75v-7.5A2.25 2.25 0 0 0 13.75 3H9.871a.75.75 0 0 1-.53-.22L8.22 1.66A2.25 2.25 0 0 0 6.629 1H2.25ZM1.5 3.25a.75.75 0 0 1 .75-.75h4.379a.75.75 0 0 1 .53.22L8.28 3.84a2.25 2.25 0 0 0 1.591.659h3.879a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-.75.75H2.25a.75.75 0 0 1-.75-.75V7h6.13a.75.75 0 0 0 0-1.5H1.5V3.25Z"
+        d="M2.25 2A2.25 2.25 0 0 0 0 4.25v11.5A2.25 2.25 0 0 0 2.25 18h15.5A2.25 2.25 0 0 0 20 15.75v-9.5A2.25 2.25 0 0 0 17.75 4H9.871a.75.75 0 0 1-.53-.22L8.22 2.66A2.25 2.25 0 0 0 6.629 2H2.25ZM1.5 4.25a.75.75 0 0 1 .75-.75h4.379a.75.75 0 0 1 .53.22L8.28 4.84a2.25 2.25 0 0 0 1.591.659h7.879a.75.75 0 0 1 .75.75v9.5a.75.75 0 0 1-.75.75H2.25a.75.75 0 0 1-.75-.75V8h5.81a.75.75 0 1 0 0-1.5H1.5V4.25Z"
         clip-rule="evenodd"
         opacity=".6"
       />
@@ -123,7 +123,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="1.5"
-          d="M11.221 6.717 9.168 9.536l3.393-.596-2.183 2.775"
+          d="m14.518 7.501-2.75 3.776 4.544-.798-2.924 3.716"
           opacity=".75"
         />
       {{else if this.isCompleted}}
@@ -135,7 +135,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="1.5"
-          d="m8.116 9.289 1.411 2.018 2.759-4.425"
+          d="m10 11.04 1.982 2.835 3.875-6.215"
         />
       {{else}}
         {{! Shadow lines }}
@@ -143,7 +143,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
           data-test-archived-affordance
           data-test-color={{this.outlineColor}}
           fill={{this.outlineColor}}
-          d="M12.44 9.66a.75.75 0 0 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.44v-1.5ZM12.519 12.283a.75.75 0 1 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.52v-1.5Z"
+          d="M12.44 11.412a.75.75 0 0 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.44v-1.5ZM12.519 14.775a.75.75 0 1 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.52v-1.5Z"
           opacity=".6"
         />
       {{/if}}

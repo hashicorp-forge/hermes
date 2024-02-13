@@ -46,8 +46,11 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
   }
 
   protected get product() {
-    assert("docType must exist", "doc" in this.item);
-    return this.item.doc.product;
+    if ("doc" in this.item) {
+      return this.item.doc.product;
+    } else {
+      return this.item.project.products?.[0];
+    }
   }
 
   protected get title() {
@@ -69,6 +72,15 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
     }
   }
 
+  protected get projectStatusLabel() {
+    if ("project" in this.item) {
+      return (
+        this.item.project.status.charAt(0).toUpperCase() +
+        this.item.project.status.slice(1)
+      );
+    }
+  }
+
   protected get docNumber() {
     assert("item must be a document", "doc" in this.item);
     return this.item.doc.docNumber;
@@ -83,6 +95,11 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
     assert("item must be a document", "doc" in this.item);
     console.log(this.item.doc);
     return this.item.doc.modifiedTime;
+  }
+
+  protected get docStatus() {
+    assert("item must be a document", "doc" in this.item);
+    return this.item.doc.status;
   }
 }
 
