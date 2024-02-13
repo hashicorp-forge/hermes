@@ -34,6 +34,7 @@ export default function (mirageConfig) {
       const handleAlgoliaRequest = (schema, request) => {
         const requestBody = JSON.parse(request.requestBody);
         if (requestBody) {
+          console.log("requestBody", requestBody);
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
 
@@ -68,6 +69,7 @@ export default function (mirageConfig) {
               );
             }
           } else if (facetQuery) {
+            // Product/area search
             let facetMatch = schema.document.all().models.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()
@@ -85,9 +87,30 @@ export default function (mirageConfig) {
           } else if (query !== undefined) {
             /**
              * A query exists, but may be empty.
-             * Typically, this is a query for a document title or product,
+             * Typically, this is a query for a document, project or product,
              * but sometimes it's a query by some optionalFilters.
              */
+
+            // The algolia `searchIndex` method includes an indexName.
+            const { indexName } = requestBody;
+
+            if (indexName?.includes("projects")) {
+              const projects = schema.projects
+                .all()
+                .models.filter((project) => {
+                  console.log("project", project);
+                  return (
+                    project.attrs.title
+                      .toLowerCase()
+                      .includes(query.toLowerCase()) ||
+                    project.attrs.description
+                      ?.toLowerCase()
+                      .includes(query.toLowerCase())
+                  );
+                });
+
+              return new Response(200, {}, { hits: projects });
+            }
 
             let docMatches = [];
             let idsToExclude: string[] = [];

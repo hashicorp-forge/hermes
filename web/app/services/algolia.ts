@@ -21,6 +21,14 @@ export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
 
+export interface AlgoliaHit {
+  objectID: string;
+  _highlightResult?: {};
+  _snippetResult?: {};
+  _rankingInfo?: {};
+  _distinctSeqID?: number;
+}
+
 export type AlgoliaSearchParams = RequestOptions & SearchOptions;
 export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 
@@ -199,7 +207,14 @@ export default class AlgoliaService extends Service {
       params: AlgoliaSearchParams,
     ): Promise<SearchResponse<unknown>> => {
       let index: SearchIndex = this.client.initIndex(indexName);
-      return await index.search(query, params);
+
+      let newParams = { ...params };
+
+      newParams.data = {
+        indexName,
+      };
+
+      return await index.search(query, newParams);
     },
   );
 

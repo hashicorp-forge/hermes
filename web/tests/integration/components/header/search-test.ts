@@ -9,14 +9,17 @@ import { authenticateTestUser } from "hermes/mirage/utils";
 const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
 const POPOVER_SELECTOR = ".search-popover";
-const BEST_MATCHES_HEADER_SELECTOR = ".global-search-best-matches-header";
-const SEARCH_RESULT_SELECTOR = "[data-test-search-result]";
-const SEARCH_RESULT_TITLE_SELECTOR = ".global-search-result-title";
-const SEARCH_RESULT_OWNER_SELECTOR = "[data-test-search-result-owner]";
-const SEARCH_RESULT_SNIPPET_SELECTOR = "[data-test-search-result-snippet]";
-const VIEW_ALL_RESULTS_LINK_SELECTOR = ".global-search-popover-header-link";
-const PRODUCT_MATCH_LINK_SELECTOR = "[data-test-product-match-link]";
 const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+
+const PRODUCT_AREA_HITS = "[data-test-product-area-hits]";
+const PROJECT_HITS = "[data-test-project-hits]";
+const DOCUMENT_HITS = "[data-test-document-hits]";
+const NO_MATCHES = "[data-test-no-matches]";
+const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
+
+const PRODUCT_AREA_HIT = "[data-test-product-area-hit]";
+const PROJECT_HIT = "[data-test-project-hit]";
+const DOCUMENT_HIT = "[data-test-document-hit]";
 
 interface HeaderSearchTestContext extends MirageTestContext {}
 
@@ -26,7 +29,7 @@ module("Integration | Component | header/search", function (hooks) {
 
   hooks.beforeEach(function (this: HeaderSearchTestContext) {
     authenticateTestUser(this);
-    this.server.createList("document", 10);
+    this.server.createList("document", 5);
   });
 
   test("it renders correctly", async function (this: HeaderSearchTestContext, assert) {
@@ -35,6 +38,10 @@ module("Integration | Component | header/search", function (hooks) {
     `);
 
     assert.dom(".test-search").exists("renders with the splatted className");
+
+    assert
+      .dom(SEARCH_INPUT_SELECTOR)
+      .hasAttribute("placeholder", "Search Hermes...");
   });
 
   test("it conditionally shows a keyboard shortcut icon", async function (this: HeaderSearchTestContext, assert) {
@@ -80,68 +87,57 @@ module("Integration | Component | header/search", function (hooks) {
       .exists("the popover is shown when a query is entered");
   });
 
-  test('it conditionally shows a "best matches" header', async function (this: HeaderSearchTestContext, assert) {
+  test("it conditionally shows documents", async function (this: HeaderSearchTestContext, assert) {
     await render<HeaderSearchTestContext>(hbs`
       <Header::Search />
     `);
 
     await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
 
-    assert.dom(BEST_MATCHES_HEADER_SELECTOR).doesNotExist();
+    assert.dom(DOCUMENT_HITS).doesNotExist("no documents are shown");
 
     await fillIn(SEARCH_INPUT_SELECTOR, "vault");
 
+    assert.dom(DOCUMENT_HITS).exists();
+    assert.dom(DOCUMENT_HIT).exists({ count: 5 });
+    assert.dom(DOCUMENT_HIT).hasAttribute("href", "/document/doc-0");
+
     assert
-      .dom(BEST_MATCHES_HEADER_SELECTOR)
-      .exists('the "best matches" header is shown when matches are found');
+      .dom(VIEW_ALL_DOCS_LINK)
+      .exists()
+      .hasText(`View all document results`)
+      .hasAttribute("href", `/results?q=vault`);
   });
 
-  test("it renders filterable results in a popover", async function (this: HeaderSearchTestContext, assert) {
+  test("it conditionally shows project results", async function (this: HeaderSearchTestContext, assert) {
+    this.server.create("project", { title: "Dog house" });
+    this.server.create("project", { title: "Cat house" });
+
     await render<HeaderSearchTestContext>(hbs`
       <Header::Search />
     `);
-    await fillIn(SEARCH_INPUT_SELECTOR, "test");
 
-    assert.dom(SEARCH_RESULT_SELECTOR).exists({ count: 5 });
+    await fillIn(SEARCH_INPUT_SELECTOR, "house");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "3");
+    assert.dom(PROJECT_HITS).exists();
+    assert.dom(PROJECT_HIT).exists({ count: 2 });
+    assert.dom(PROJECT_HIT).hasAttribute("href", "/projects/0");
+  });
+
+  test("it conditionally shows a product/area match", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "vault");
+
+    assert.dom(PRODUCT_AREA_HITS).exists();
+
     assert
-      .dom(SEARCH_RESULT_SELECTOR)
+      .dom(PRODUCT_AREA_HIT)
       .exists({ count: 1 })
-      .hasAttribute("href", "/document/doc-3");
-    assert.dom(SEARCH_RESULT_TITLE_SELECTOR).hasText("Test Document 3");
-    assert.dom(SEARCH_RESULT_OWNER_SELECTOR).exists();
-    assert.dom(SEARCH_RESULT_SNIPPET_SELECTOR).exists();
-  });
-
-  test('a "view all results for..." link is shown', async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
-      <Header::Search />
-    `);
-
-    const query = "hashicorp";
-
-    await fillIn(SEARCH_INPUT_SELECTOR, query);
-
-    assert
-      .dom(VIEW_ALL_RESULTS_LINK_SELECTOR)
-      .exists()
-      .hasText(`View all results for “${query}”`)
-      .hasAttribute("href", `/results?q=${query}`);
-  });
-
-  test("a product/area link is conditionally shown", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
-      <Header::Search />
-    `);
-
-    await fillIn(SEARCH_INPUT_SELECTOR, "vault");
-
-    assert
-      .dom(PRODUCT_MATCH_LINK_SELECTOR)
-      .exists()
-      .hasText("View all Vault documents")
-      .hasAttribute("href", "/documents?product=%5B%22Vault%22%5D");
+      .hasText("Vault")
+      .hasAttribute("href", "/product-areas/vault");
   });
 
   test("the input can be focused with a keyboard shortcut", async function (this: HeaderSearchTestContext, assert) {
@@ -161,25 +157,36 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "test");
+    await fillIn(SEARCH_INPUT_SELECTOR, "test document");
 
     assert.dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]").doesNotExist();
 
     await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
-    assert
-      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText("View all results for “test”");
-
-    await fillIn(SEARCH_INPUT_SELECTOR, "test 3");
 
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .doesNotExist("aria selection is updated");
+      .containsText("Test Document 0");
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "te");
+
+    assert
+      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .doesNotExist("aria selection is updated when the query changes");
 
     await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
 
     assert
       .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
-      .hasText("View all results for “test 3”");
+      .containsText("Test Document 0");
+  });
+
+  test("it conditionally shows a no-matches message", async function (this: HeaderSearchTestContext, assert) {
+    await render<HeaderSearchTestContext>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
+
+    assert.dom(NO_MATCHES).exists();
   });
 });

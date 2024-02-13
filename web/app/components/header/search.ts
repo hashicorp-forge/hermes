@@ -12,13 +12,22 @@ import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
+import FetchService from "hermes/services/fetch";
+import { HermesProjectHit } from "hermes/types/project";
+import { LibraryTemplatePlugin } from "webpack";
 
 export interface SearchResultObjects {
-  [key: string]: unknown | HermesDocumentObjects;
+  [key: string]: unknown | HermesDocumentObjects | HermesProjectHitObjects;
 }
 
 export interface HermesDocumentObjects {
   [key: string]: HermesDocument;
+}
+
+export interface HermesProjectHitObjects {
+  [key: string]: {
+    hit: HermesProjectHit;
+  };
 }
 
 interface HeaderSearchComponentSignature {
@@ -28,49 +37,53 @@ interface HeaderSearchComponentSignature {
 
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare router: RouterService;
   @service declare store: StoreService;
 
+  protected viewAllID = "global-search-view-all";
+  protected projectsID = "global-search-projects";
+  protected productAreaID = "global-search-product-area";
+  protected documentsID = "global-search-documents";
+  protected viewAllSelector = `#${this.viewAllID}`;
+  protected projectsSelector = `#${this.projectsID}`;
+  protected productAreaSelector = `#${this.productAreaID}`;
+  protected documentsSelector = `#${this.documentsID}`;
+
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
-  @tracked protected _bestMatches: HermesDocument[] = [];
-  @tracked protected _productAreaMatch: string | null = null;
+  @tracked protected docMatches: HermesDocument[] = [];
+  @tracked protected productAreaMatch: string | null = null;
+  @tracked protected projectMatches: HermesProjectHit[] = [];
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = "";
 
-  /**
-   * Whether to show the "Best Matches" header.
-   * True if there's at least one match.
-   */
-  get bestMatchesHeaderIsShown(): boolean {
-    return Object.keys(this.itemsToShow).length > 1;
-  }
+  protected get items() {
+    const viewAllDocResults =
+      (this.docMatches.length > 0 && {
+        viewAllResults: true,
+      }) ||
+      undefined;
 
-  /**
-   * The items to show in the dropdown.
-   * Always shows the "View All Results" link.
-   * Conditionally shows the "View all [productArea]" link
-   * and any document matches.
-   */
-  get itemsToShow(): SearchResultObjects {
-    return this._bestMatches.reduce(
-      (acc, doc) => {
-        acc[doc.objectID] = doc;
-        return acc;
-      },
-      {
-        viewAllResultsObject: {
-          itemShouldRenderOut: true,
-        },
-        ...(this._productAreaMatch && {
-          productAreaMatch: {
-            itemShouldRenderOut: true,
-            productAreaName: this._productAreaMatch,
-          },
-        }),
-      } as SearchResultObjects,
-    );
+    const productAreaMatch = this.productAreaMatch && {
+      productAreaName: this.productAreaMatch,
+    };
+
+    const projectItems = this.projectMatches.map((hit) => {
+      return {
+        hit,
+      };
+    });
+
+    const items = [
+      productAreaMatch,
+      ...projectItems,
+      ...this.docMatches,
+      viewAllDocResults,
+    ].compact();
+
+    return items ?? [];
   }
 
   /**
@@ -84,8 +97,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
       // if there's a search and no focused item, view all results
       if (dd.focusedItemIndex === -1 && this.query.length) {
-        this.viewAllResults();
-        dd.hideContent();
+        // only submit if there are results
+        if (this.items.length > 0) {
+          this.viewAllResults();
+          dd.hideContent();
+        }
       }
     }
   }
@@ -185,39 +201,49 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             hitsPerPage: 5,
           });
 
+          const projectSearch = this.algolia.searchIndex.perform(
+            this.configSvc.config.algolia_projects_index_name,
+            this.query,
+            {
+              hitsPerPage: 3,
+            },
+          );
+
           let algoliaResults = await Promise.all([
             productSearch,
             docSearch,
+            projectSearch,
           ]).then((values) => values);
 
-          let [productAreas, docs] = algoliaResults;
+          let [productAreas, docs, projects] = algoliaResults;
 
           const hits = (docs?.hits as HermesDocument[]) ?? [];
 
           // Load the owner information
           await this.store.maybeFetchPeople.perform(hits);
 
-          this._bestMatches = docs
-            ? (docs.hits.slice(0, 5) as HermesDocument[])
-            : [];
+          this.docMatches = docs ? hits : [];
           if (productAreas) {
             const firstHit = productAreas.facetHits[0];
             if (firstHit) {
-              this._productAreaMatch = firstHit.value;
+              this.productAreaMatch = firstHit.value;
             } else {
-              this._productAreaMatch = null;
+              this.productAreaMatch = null;
             }
+          }
+          if (projects) {
+            this.projectMatches = projects.hits as HermesProjectHit[];
           }
         } catch (e: unknown) {
           console.error(e);
         }
       } else {
         this.query = "";
-        this._productAreaMatch = null;
+        this.productAreaMatch = null;
         this.searchInputIsEmpty = true;
 
         dd.hideContent();
-        this._bestMatches = [];
+        this.docMatches = [];
       }
 
       // Reopen the dropdown if it was closed on mousedown and there's a query

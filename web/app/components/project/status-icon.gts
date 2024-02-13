@@ -144,6 +144,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
           data-test-color={{this.outlineColor}}
           fill={{this.outlineColor}}
           d="M12.44 9.66a.75.75 0 0 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.44v-1.5ZM12.519 12.283a.75.75 0 1 0 0-1.5v1.5Zm0-1.5H1.494v1.5H12.52v-1.5Z"
+          opacity=".6"
         />
       {{/if}}
     </svg>
