@@ -59,17 +59,7 @@ export default class RecentlyViewedService extends Service {
       ?.filter((object) => {
         return object.viewedTime > ninetyDaysAgo;
       })
-      .slice(0, 8);
-
-    // need to normalize the data for both types
-    // docs:
-    // - id
-    // - title
-    // - isDraft
-    // - owner
-    // - product
-    // - docType
-    // - docNumber
+      .slice(0, 10);
   }
 
   /**
