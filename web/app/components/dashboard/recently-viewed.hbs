@@ -36,18 +36,21 @@
     {{#if this.recentlyViewed.index}}
       <div class="relative mt-4">
         <ol
-          data-test-recently-viewed-docs
+          data-test-recently-viewed
           {{did-insert this.registerScrollBody}}
           {{on "scroll" this.updateAffordances}}
           class="{{if
               this.screenIsSmall
               'horizontally-divided-list flex snap-x snap-proximity overflow-auto rounded-md pb-4'
-              'divided-listX'
+              'divided-list'
             }}"
         >
           {{#each this.recentlyViewed.index as |r|}}
             <li>
-              <Dashboard::RecentlyViewedItem @item={{r}} />
+              <Dashboard::RecentlyViewedItem
+                data-test-recently-viewed-item
+                @item={{r}}
+              />
             </li>
           {{/each}}
         </ol>
@@ -64,8 +67,8 @@
         />
       </div>
     {{else}}
-      <div data-test-no-viewed-docs class="empty-text lg:px-3">
-        You haven't viewed any documents yet.
+      <div data-test-no-recently-viewed class="empty-text lg:px-3">
+        You haven't viewed any projects or documents.
       </div>
     {{/if}}
   </div>

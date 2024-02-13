@@ -58,7 +58,7 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
     }
   }
 
-  protected get badgeText() {
+  protected get docType() {
     assert("item must be a document", "doc" in this.item);
     return this.item.doc.docType;
   }

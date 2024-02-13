@@ -2,47 +2,52 @@
   @route={{this.targetRoute}}
   @model={{this.modelID}}
   @query={{this.query}}
-  class="px-3 pt-2 pb-2.5"
+  class="px-3 pt-3 pb-3.5"
 >
   <div class="flex w-full items-start gap-5">
     <div class="w-full">
       {{#if this.projectStatus}}
-        <div class="flex gap-2.5">
-          {{! should be grid }}
-          <Project::StatusIcon
-            @status={{this.projectStatus}}
-            class="mt-px shrink-0"
-          />
-          <h5>
+        {{! PROJECT }}
+        <div class="flex items-start gap-3">
+          <div class="w-5">
+            <Project::StatusIcon
+              @status={{this.projectStatus}}
+              class="mix-blend-multiply"
+            />
+          </div>
+          {{! TODO: padding right ? }}
+          <h5 class="pr-0">
             {{this.title}}
           </h5>
         </div>
       {{else}}
-        <div class="flex gap-2.5">
-          {{! should be grid }}
-          <FlightIcon
+        {{! DOC }}
+        <div class="flex gap-3">
+          {{! <FlightIcon
             @name="file-text"
-            class="mt-0.5 shrink-0 text-color-foreground-disabled"
-          />
-          <div>
-
+            class="shrink-0 text-color-foreground-disabled"
+          /> }}
+          <Product::Avatar @product={{this.product}} class="shrink-0" />
+          <div class="w-full">
+            <Hds::Badge
+              @text={{this.docType}}
+              class="float-right ml-1.5 h-5 min-h-0 px-[5px] py-0"
+            />
             <h5 class="max-lg:truncate">
               {{this.title}}
-              <span class="ml-0.5 text-body-100 font-regular">
+              <span class="font-regular">
                 {{this.docNumber}}
               </span>
             </h5>
-            {{!-- <div class="mt-0.5 flex items-center gap-[3px]">
-              <Product::Avatar @product={{this.product}} />
-              <Person::Avatar @email={{this.owner}} />
-              <Hds::Badge @text={{this.badgeText}} class="h-5 px-1.5 py-0" />
-            </div> --}}
+            <div
+              class="mt-0.5 flex justify-between text-body-100 text-color-foreground-faint"
+            >
+
+              {{!-- <Person @email={{this.owner}} /> --}}
+              {{get-model-attr "person.name" this.owner}}
+            </div>
           </div>
         </div>
-        {{!-- <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-          Modified
-          {{this.modifiedTime}}
-        </p> --}}
       {{/if}}
 
     </div>

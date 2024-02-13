@@ -897,7 +897,19 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index.slice(0, 10));
+        return new Response(200, {}, index);
+      });
+
+      /**
+       * Used in the dashboard to show recently viewed projects
+       */
+      this.get("/me/recently-viewed-projects", (schema) => {
+        let index = schema.recentlyViewedProjects
+          .all()
+          .models.map((project) => {
+            return project.attrs;
+          });
+        return new Response(200, {}, index);
       });
 
       /**
