@@ -32,7 +32,9 @@ export default function (mirageConfig) {
        * Reviews the request and determines how to respond.
        */
       const handleAlgoliaRequest = (schema, request) => {
+        const indexName = request.url.split("indexes/")[1].split("/")[0];
         const requestBody = JSON.parse(request.requestBody);
+
         if (requestBody) {
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
@@ -89,10 +91,6 @@ export default function (mirageConfig) {
              * Typically, this is a query for a document, project or product,
              * but sometimes it's a query by some optionalFilters.
              */
-
-            // The algolia `searchIndex` method includes an indexName.
-            const { indexName } = requestBody;
-
             if (indexName?.includes("projects")) {
               const projects = schema.projects
                 .all()
