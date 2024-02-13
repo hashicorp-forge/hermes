@@ -51,15 +51,7 @@ export default class RecentlyViewedService extends Service {
   @tracked all: Array<RecentlyViewedDoc | RecentlyViewedProject> | null = null;
 
   get index() {
-    const now = new Date().getTime() / 1000;
-    const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
-    const sortedArray = this.all?.sortBy("viewedTime").reverse();
-
-    return sortedArray
-      ?.filter((object) => {
-        return object.viewedTime > ninetyDaysAgo;
-      })
-      .slice(0, 10);
+    return this.all?.sortBy("viewedTime").reverse().slice(0, 10);
   }
 
   /**
@@ -154,8 +146,6 @@ export default class RecentlyViewedService extends Service {
           if ("doc" in d) return d.doc;
         }),
       );
-
-      console.log("newAll", newAll);
 
       /**
        * Update the tracked property to new array of documents.
