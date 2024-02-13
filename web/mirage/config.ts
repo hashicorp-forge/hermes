@@ -106,7 +106,18 @@ export default function (mirageConfig) {
                   );
                 });
 
-              return new Response(200, {}, { hits: projects });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: projects.map((project) => {
+                    return {
+                      ...project.attrs,
+                      objectID: project.attrs.id,
+                    };
+                  }),
+                },
+              );
             }
 
             let docMatches = [];
