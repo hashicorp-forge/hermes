@@ -33,8 +33,8 @@ export default function (mirageConfig) {
        */
       const handleAlgoliaRequest = (schema, request) => {
         const indexName = request.url.split("indexes/")[1].split("/")[0];
-
         const requestBody = JSON.parse(request.requestBody);
+
         if (requestBody) {
           console.log("requestBody", requestBody);
           const { facetQuery, query } = requestBody;
@@ -96,7 +96,6 @@ export default function (mirageConfig) {
               const projects = schema.projects
                 .all()
                 .models.filter((project) => {
-                  console.log("project", project);
                   return (
                     project.attrs.title
                       .toLowerCase()
