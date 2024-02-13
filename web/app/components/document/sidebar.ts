@@ -34,7 +34,7 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -67,8 +67,8 @@ const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed-docs")
-  declare viewedDocs: RecentlyViewedDocsService;
+  @service("recently-viewed")
+  declare recentlyViewed: RecentlyViewedService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
@@ -783,7 +783,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
 
-      void this.viewedDocs.fetchAll.perform();
+      void this.recentlyViewed.fetchAll.perform();
 
       this.flashMessages.add({
         message: "Document draft deleted",

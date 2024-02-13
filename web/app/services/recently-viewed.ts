@@ -7,38 +7,70 @@ import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import SessionService from "hermes/services/session";
 import StoreService from "hermes/services/store";
+import { HermesProject } from "hermes/types/project";
 
+/**
+ * The document format returned by /me/recently-viewed-docs
+ */
 type IndexedDoc = {
   id: string;
   isDraft: boolean;
-  viewedTime: number;
+  viewedTime: number; // 10-digit Unix timestamp
+};
+
+/**
+ * The project format returned by /me/recently-viewed-projects
+ */
+type IndexedProject = {
+  id: number;
+  viewedTime: number; // 10-digit Unix timestamp
 };
 
 export type RecentlyViewedDoc = {
   doc: HermesDocument;
   isDraft: boolean;
-  viewedTime: number;
+  viewedTime: number; // 10-digit Unix timestamp
 };
 
-export default class RecentlyViewedDocsService extends Service {
+export type RecentlyViewedProject = {
+  project: HermesProject;
+  viewedTime: number; // 10-digit Unix timestamp
+};
+
+export default class RecentlyViewedService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare store: StoreService;
 
   /**
-   * The index of the recently viewed docs.
-   * May include strings (IDs) to support legacy users who
-   * have not viewed a file since drafts were added to the index.
-   */
-  @tracked private index: (IndexedDoc | string)[] | null = null;
-
-  /**
    * All RecentlyViewedDocs. Each object contains a HermesDocument
    * and a boolean indicating whether it is a draft.
    * Rendered by the dashboard template.
    */
-  @tracked all: RecentlyViewedDoc[] | null = null;
+  @tracked all: Array<RecentlyViewedDoc | RecentlyViewedProject> | null = null;
+
+  get index() {
+    const now = new Date().getTime() / 1000;
+    const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
+    const sortedArray = this.all?.sortBy("viewedTime").reverse();
+
+    return sortedArray
+      ?.filter((object) => {
+        return object.viewedTime > ninetyDaysAgo;
+      })
+      .slice(0, 8);
+
+    // need to normalize the data for both types
+    // docs:
+    // - id
+    // - title
+    // - isDraft
+    // - owner
+    // - product
+    // - docType
+    // - docNumber
+  }
 
   /**
    * Fetches an array of recently viewed docs.
@@ -49,10 +81,17 @@ export default class RecentlyViewedDocsService extends Service {
       /**
        * Fetch the file IDs from the backend.
        */
-      this.index =
+      const recentlyViewedDocs =
         (await this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
+          )
+          .then((resp) => resp?.json())) || [];
+
+      const recentlyViewedProjects =
+        (await this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
           )
           .then((resp) => resp?.json())) || [];
 
@@ -60,7 +99,7 @@ export default class RecentlyViewedDocsService extends Service {
        * Get the documents from the backend.
        */
       let docResponses = await Promise.allSettled(
-        (this.index as IndexedDoc[]).map(async (d: IndexedDoc) => {
+        recentlyViewedDocs.map(async (d: IndexedDoc) => {
           let endpoint = d.isDraft ? "drafts" : "documents";
           let doc = await this.fetchSvc
             .fetch(
@@ -79,9 +118,25 @@ export default class RecentlyViewedDocsService extends Service {
       );
 
       /**
-       * Set up an empty array to hold the documents.
+       * Get the projects from the backend.
        */
-      let newAll: RecentlyViewedDoc[] = [];
+      let projectResponses = await Promise.allSettled(
+        recentlyViewedProjects.map(async (p: IndexedProject) => {
+          const project = await this.fetchSvc
+            .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)
+            .then((resp) => resp?.json());
+
+          return {
+            project,
+            viewedTime: p.viewedTime,
+          };
+        }),
+      );
+
+      /**
+       * Set up an empty array to hold the objects.
+       */
+      let newAll: Array<RecentlyViewedDoc | RecentlyViewedProject> = [];
 
       /**
        * For each fulfilled response, push the document to the array
@@ -93,9 +148,24 @@ export default class RecentlyViewedDocsService extends Service {
       });
 
       /**
+       * For each fulfilled response, push the project to the array
+       */
+      projectResponses.forEach((response) => {
+        if (response.status == "fulfilled") {
+          newAll.push(response.value);
+        }
+      });
+
+      /**
        * Load the owner information for each document.
        */
-      await this.store.maybeFetchPeople.perform(newAll.map((d) => d.doc));
+      await this.store.maybeFetchPeople.perform(
+        newAll.map((d) => {
+          if ("doc" in d) return d.doc;
+        }),
+      );
+
+      console.log("newAll", newAll);
 
       /**
        * Update the tracked property to new array of documents.
@@ -111,6 +181,6 @@ export default class RecentlyViewedDocsService extends Service {
 
 declare module "@ember/service" {
   interface Registry {
-    "recently-viewed-docs": RecentlyViewedDocsService;
+    "recently-viewed": RecentlyViewedService;
   }
 }
