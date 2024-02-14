@@ -6,7 +6,7 @@
 >
   <div class="flex w-full justify-between">
     {{! Status and Type }}
-    <div class="flex items-center gap-1 text-body-100">
+    <div class="flex items-center gap-1.5 text-body-100">
       {{#if this.projectStatus}}
         <Project::StatusIcon @status={{this.projectStatus}} />
       {{else if this.docStatus}}
@@ -42,7 +42,7 @@
         </span>
       {{/if}}
     </h5>
-    <p class="mt-0.5 text-body-100 text-color-foreground-faint">
+    <p class="mt-1 text-body-100 text-color-foreground-faint">
       Modified
       {{time-ago this.modifiedTime}}
     </p>
