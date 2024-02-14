@@ -12,7 +12,7 @@
       {{else if this.docStatus}}
         <Document::StatusIcon @status={{this.docStatus}} />
       {{/if}}
-      <span class="ml-px">
+      <span class="ml-px font-medium">
         {{or this.docType "Project"}}
       </span>
     </div>
@@ -31,7 +31,7 @@
   </div>
 
   {{! Text }}
-  <div class="mt-1 pr-7">
+  <div class="mt-1 pr-8">
     <h5>
       {{this.title}}
       {{#if this.docNumber}}
