@@ -21,9 +21,9 @@ export const projectStatusObjects: Record<ProjectStatus, ProjectStatusObject> =
     },
   };
 
-export const COLOR_BG_ACTIVE = "var(--token-color-palette-purple-100)";
-export const COLOR_OUTLINE_ACTIVE = "var(--token-color-palette-purple-200)";
-export const COLOR_ICON_ACTIVE = "var(--token-color-palette-purple-400)";
+export const COLOR_BG_ACTIVE = "var(--token-color-palette-blue-100)";
+export const COLOR_OUTLINE_ACTIVE = "var(--token-color-palette-blue-200)";
+export const COLOR_ICON_ACTIVE = "var(--token-color-palette-blue-400)";
 
 export const COLOR_BG_COMPLETED = "var(--token-color-palette-green-100)";
 export const COLOR_OUTLINE_COMPLETED = "var(--token-color-palette-green-200)";

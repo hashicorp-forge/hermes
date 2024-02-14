@@ -9,14 +9,27 @@
       {{#if this.projectStatus}}
         {{! PROJECT }}
         <div class="grid gap-2">
-          <div class="flex shrink-0 gap-1.5">
-            {{!-- <Product::Avatar @product={{this.product}} class="shrink-0" /> --}}
-            <Project::StatusIcon @status={{this.projectStatus}} class="flex" />
+          <div class="flex shrink-0 justify-between gap-1">
+            <div class="flex gap-1">
+              <Project::StatusIcon
+                @status={{this.projectStatus}}
+                class="mr-px flex"
+              />
+              <Hds::Badge @text="PROJECT" class="h-5 min-h-0 rounded px-1" />
+            </div>
+            {{!-- <FlightIcon
+              @name="folder"
+              {{! @size="24" }}
+              class="shrink-0 text-color-foreground-disabled"
+            /> --}}
             {{! <span>
               Project
             </span> }}
-            <Hds::Badge @text="PROJECT" class="h-5 min-h-0 px-1" />
 
+            <div class="flex gap-1">
+              {{! need multi-avatar and overflow solution }}
+              <Product::Avatar @product={{this.product}} class="shrink-0" />
+            </div>
           </div>
           {{! TODO: padding right ? }}
           <div class="w-full">
@@ -40,21 +53,33 @@
 
       {{else}}
         {{! DOC }}
-        <div class="grid gap-2">
-          {{! <FlightIcon
-            @name="file-text"
-            class="shrink-0 text-color-foreground-faint"
-          /> }}
-          <div class="flex gap-1.5">
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between gap-1">
+            <div class="flex items-center gap-1">
+              {{log "da status" this.docStatus}}
+              <Document::StatusIcon @status={{this.docStatus}} />
+              <Hds::Badge
+                @text={{this.docType}}
+                class="h-5 min-h-0 rounded px-1"
+              />
+            </div>
 
-            <Product::Avatar @product={{this.product}} class="shrink-0" />
-            <Person::Avatar @email={{this.owner}} />
-            <Hds::Badge @text={{this.docType}} class="h-5 min-h-0 px-1" />
+            {{!-- <FlightIcon
+              @name="file-text"
+              {{! @size="24" }}
+              class="shrink-0 text-color-foreground-disabled"
+            /> --}}
+
             {{!-- <Doc::Status
               @status={{this.docStatus}}
               class=""
               @hideProgress={{true}}
             /> --}}
+            <div class="flex items-center gap-1">
+              <Person::Avatar @email={{this.owner}} />
+
+              <Product::Avatar @product={{this.product}} class="shrink-0" />
+            </div>
           </div>
 
           <div class="w-full">
