@@ -2,115 +2,50 @@
   @route={{this.targetRoute}}
   @model={{this.modelID}}
   @query={{this.query}}
-  class="px-3 pt-3 pb-3.5"
+  class="px-3 pt-3 pb-4"
 >
-  <div class="flex w-full items-start gap-5">
-    <div class="w-full">
+  <div class="flex w-full justify-between">
+    {{! Status and Type }}
+    <div class="flex items-center gap-1 text-body-100">
       {{#if this.projectStatus}}
-        {{! PROJECT }}
-        <div class="grid gap-2">
-          <div class="flex shrink-0 justify-between gap-1">
-            <div class="flex gap-1">
-              <Project::StatusIcon
-                @status={{this.projectStatus}}
-                class="mr-px flex"
-              />
-              <Hds::Badge @text="PROJECT" class="h-5 min-h-0 rounded px-1" />
-            </div>
-            {{!-- <FlightIcon
-              @name="folder"
-              {{! @size="24" }}
-              class="shrink-0 text-color-foreground-disabled"
-            /> --}}
-            {{! <span>
-              Project
-            </span> }}
-
-            <div class="flex gap-1">
-              {{! need multi-avatar and overflow solution }}
-              <Product::Avatar @product={{this.product}} class="shrink-0" />
-            </div>
-          </div>
-          {{! TODO: padding right ? }}
-          <div class="w-full">
-
-            <h5>
-              {{this.title}}
-            </h5>
-            <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-              Modified
-              {{time-ago @item.project.modifiedTime}}
-            </p>
-            <div class="text-color-foreground-faint">
-              {{!-- <span class={{this.projectStatus}}>
-                {{this.projectStatusLabel}}
-              </span> --}}
-              {{! Project }}
-            </div>
-          </div>
-          {{!-- <Product::Avatar @product={{this.product}} class="shrink-0" /> --}}
-        </div>
-
-      {{else}}
-        {{! DOC }}
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center justify-between gap-1">
-            <div class="flex items-center gap-1">
-              {{log "da status" this.docStatus}}
-              <Document::StatusIcon @status={{this.docStatus}} />
-              <Hds::Badge
-                @text={{this.docType}}
-                class="h-5 min-h-0 rounded px-1"
-              />
-            </div>
-
-            {{!-- <FlightIcon
-              @name="file-text"
-              {{! @size="24" }}
-              class="shrink-0 text-color-foreground-disabled"
-            /> --}}
-
-            {{!-- <Doc::Status
-              @status={{this.docStatus}}
-              class=""
-              @hideProgress={{true}}
-            /> --}}
-            <div class="flex items-center gap-1">
-              <Person::Avatar @email={{this.owner}} />
-
-              <Product::Avatar @product={{this.product}} class="shrink-0" />
-            </div>
-          </div>
-
-          <div class="w-full">
-            <h5 class="max-lg:truncate">
-              {{this.title}}
-              <span
-                class="whitespace-nowrap font-regular text-color-foreground-primary"
-              >
-                {{this.docNumber}}
-              </span>
-            </h5>
-            <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-              Modified
-              {{time-ago @item.doc.modifiedTime}}
-            </p>
-            <div class="Xmt-1.5 Xhidden w-full text-color-foreground-faint">
-              {{!-- {{this.docStatus}} --}}
-              {{!-- {{this.docType}} --}}
-              {{!-- {{get-model-attr "person.name" this.owner}} --}}
-              {{!-- <Doc::Status
-                @status={{this.docStatus}}
-                class=""
-                @hideProgress={{true}}
-              /> --}}
-              {{!-- <Hds::Badge @text={{this.docType}} class="min-h-X0" /> --}}
-            </div>
-          </div>
-          {{!-- <Product::Avatar @product={{this.product}} class="shrink-0" /> --}}
-        </div>
+        <Project::StatusIcon @status={{this.projectStatus}} />
+      {{else if this.docStatus}}
+        <Document::StatusIcon @status={{this.docStatus}} />
       {{/if}}
+      <span class="ml-px">
+        {{or this.docType "Project"}}
+      </span>
+    </div>
 
+    {{! Products and Owner }}
+    <div class="flex items-center gap-1 text-body-100">
+      {{#if this.products}}
+        {{#each this.products as |product|}}
+          <Product::Avatar @product={{product}} />
+        {{/each}}
+      {{/if}}
+      {{#if this.owner}}
+        <Person::Avatar @email={{this.owner}} />
+      {{/if}}
     </div>
   </div>
+
+  {{! Text }}
+  <div class="mt-1 pr-7">
+    <h5>
+      {{this.title}}
+      {{#if this.docNumber}}
+        <span
+          class="whitespace-nowrap font-regular text-color-foreground-primary"
+        >
+          {{this.docNumber}}
+        </span>
+      {{/if}}
+    </h5>
+    <p class="mt-0.5 text-body-100 text-color-foreground-faint">
+      Modified
+      {{time-ago this.modifiedTime}}
+    </p>
+  </div>
+
 </LinkTo>

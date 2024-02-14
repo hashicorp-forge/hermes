@@ -101,6 +101,7 @@ export default class ProjectStatusIconComponent extends Component<ProjectStatusI
         fill-rule="evenodd"
         d="M2.25 2A2.25 2.25 0 0 0 0 4.25v11.5A2.25 2.25 0 0 0 2.25 18h15.5A2.25 2.25 0 0 0 20 15.75v-9.5A2.25 2.25 0 0 0 17.75 4H9.871a.75.75 0 0 1-.53-.22L8.22 2.66A2.25 2.25 0 0 0 6.629 2H2.25Z"
         clip-rule="evenodd"
+        {{! opacity=".2" }}
       />
 
       {{! Outline }}

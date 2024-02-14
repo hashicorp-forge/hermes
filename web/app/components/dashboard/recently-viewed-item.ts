@@ -45,11 +45,11 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
     }
   }
 
-  protected get product() {
+  protected get products() {
     if ("doc" in this.item) {
-      return this.item.doc.product;
+      return [this.item.doc.product];
     } else {
-      return this.item.project.products?.[0];
+      return this.item.project.products;
     }
   }
 
@@ -62,8 +62,9 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
   }
 
   protected get docType() {
-    assert("item must be a document", "doc" in this.item);
-    return this.item.doc.docType;
+    if ("doc" in this.item) {
+      return this.item.doc.docType;
+    }
   }
 
   protected get projectStatus() {
@@ -81,20 +82,24 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
     }
   }
 
+  protected get modifiedTime() {
+    if ("doc" in this.item) {
+      return this.item.doc.modifiedTime;
+    } else {
+      return this.item.project.modifiedTime;
+    }
+  }
+
   protected get docNumber() {
-    assert("item must be a document", "doc" in this.item);
-    return this.item.doc.docNumber;
+    if ("doc" in this.item) {
+      return this.item.doc.docNumber;
+    }
   }
 
   protected get owner() {
-    assert("item must be a document", "doc" in this.item);
-    return this.item.doc.owners?.[0];
-  }
-
-  protected get modifiedTime() {
-    assert("item must be a document", "doc" in this.item);
-    console.log(this.item.doc);
-    return this.item.doc.modifiedTime;
+    if ("doc" in this.item) {
+      return this.item.doc.owners?.[0];
+    }
   }
 
   protected get docStatus() {
