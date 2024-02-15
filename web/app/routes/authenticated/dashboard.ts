@@ -3,7 +3,7 @@ import { inject as service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 import SessionService from "hermes/services/session";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
@@ -15,9 +15,7 @@ export default class DashboardRoute extends Route {
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed-docs")
-  declare viewedDocs: RecentlyViewedDocsService;
-
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare algolia: AlgoliaService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
@@ -62,10 +60,10 @@ export default class DashboardRoute extends Route {
       promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
     }
 
-    if (this.viewedDocs.all) {
-      void this.viewedDocs.fetchAll.perform();
+    if (this.recentlyViewed.index) {
+      void this.recentlyViewed.fetchAll.perform();
     } else {
-      promises.push(this.viewedDocs.fetchAll.perform());
+      promises.push(this.recentlyViewed.fetchAll.perform());
     }
 
     const [docsAwaitingReview] = await Promise.all(promises);

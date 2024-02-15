@@ -1,0 +1,28 @@
+<LinkTo
+  data-test-recently-viewed-doc
+  @route="authenticated.document"
+  @model={{@item.doc.objectID}}
+  @query={{hash draft=@item.doc.isDraft}}
+  class="px-3 pt-3 pb-3.5"
+>
+  <div class="flex w-full items-start gap-5">
+    <div class="w-full">
+      <div class="flex items-center gap-[3px]">
+        <Product::Avatar @product={{@item.doc.product}} />
+        <Person::Avatar @email={{get @item.doc.owners 0}} />
+        <Hds::Badge @text={{@item.doc.docType}} class="h-5 px-1.5 py-0" />
+      </div>
+      <h5 class="mt-1.5 max-lg:truncate">
+        {{@item.doc.title}}
+        <span class="ml-0.5 text-body-100 font-regular">
+
+          {{@item.doc.docNumber}}
+        </span>
+      </h5>
+      <p class="mt-0.5 text-body-100 text-color-foreground-faint">
+        Modified
+        {{time-ago @item.doc.modifiedTime}}
+      </p>
+    </div>
+  </div>
+</LinkTo>
