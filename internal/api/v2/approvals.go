@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
@@ -512,6 +513,64 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
+				// Send email to document owner, if enabled.
+				if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+					len(doc.Owners) > 0 {
+					// Get name of document approver.
+					approver := email.User{
+						EmailAddress: userEmail,
+					}
+					ppl, err := srv.GWService.SearchPeople(
+						userEmail, "emailAddresses,names")
+					if err != nil {
+						srv.Logger.Warn("error searching directory for approver",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", doc.Owners[0],
+						)
+					}
+					if len(ppl) == 1 {
+						approver.Name = ppl[0].Names[0].DisplayName
+					}
+
+					// Get document URL.
+					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+					if err != nil {
+						srv.Logger.Error("error getting document URL",
+							"error", err,
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+						return
+					}
+
+					// Send email.
+					if err := email.SendDocumentApprovedEmail(
+						email.DocumentApprovedEmailData{
+							DocumentApprover: approver,
+							DocumentNonApproverCount: len(doc.Approvers) -
+								len(doc.ApprovedBy),
+							DocumentShortName: doc.DocNumber,
+							DocumentTitle:     doc.Title,
+							DocumentType:      doc.DocType,
+							DocumentURL:       docURL,
+						},
+						[]string{doc.Owners[0]},
+						srv.Config.Email.FromAddress,
+						srv.GWService,
+					); err != nil {
+						srv.Logger.Error("error sending document approved email",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+					}
+				}
+
 				// Convert document to Algolia object.
 				docObj, err := doc.ToAlgoliaObject(true)
 				if err != nil {
