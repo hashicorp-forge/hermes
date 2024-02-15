@@ -15,10 +15,12 @@
       >.
     </p>
     <p>
-      {{if .DocumentNonApproverCount}}{{.DocumentNonApproverCount}} other
-      approver{{if ne .DocumentNonApproverCount 1}}s{{end}} have not yet
-      approved the document.{{else}}All approvers have now approved the
-      document. Please remember to move the document status to <b>Approved</b>
+      {{if .DocumentNonApproverCount}}There {{if eq .DocumentNonApproverCount
+      1}}is{{else}}are{{end}} {{.DocumentNonApproverCount}} more pending
+      approval{{if ne .DocumentNonApproverCount 1}}s{{end}} for the the
+      document.{{else}}All approvers have now signed off on the
+      {{.DocumentType}}. Please remember to move the document status to
+      <b>Approved</b>
       in Hermes!{{end}}
     </p>
     <p>
