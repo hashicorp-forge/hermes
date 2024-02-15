@@ -11,13 +11,12 @@ import RecentlyViewedService, {
   RecentlyViewedProject,
 } from "hermes/services/recently-viewed";
 
-export const RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT = 300;
+export const RECENTLY_VIEWED_SCROLL_AMOUNT = 300;
 
 interface DashboardRecentlyViewedComponentSignature {}
 
 export default class DashboardRecentlyViewedComponent extends Component<DashboardRecentlyViewedComponentSignature> {
-  @service("recently-viewed")
-  declare recentlyViewed: RecentlyViewedService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare viewport: ViewportService;
 
   @tracked scrollBody: HTMLElement | null = null;
@@ -37,6 +36,10 @@ export default class DashboardRecentlyViewedComponent extends Component<Dashboar
     return this._canScrollForward && this.screenIsSmall;
   }
 
+  /**
+   * Aliased name for the recently viewed index.
+   * Used in the template to loop through the array if it exists.
+   */
   protected get index():
     | Array<RecentlyViewedDoc | RecentlyViewedProject>
     | undefined {
@@ -76,7 +79,7 @@ export default class DashboardRecentlyViewedComponent extends Component<Dashboar
   @action scrollForward(): void {
     assert("scroll body must be defined", this.scrollBody);
     this.scrollBody.scrollBy({
-      left: RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      left: RECENTLY_VIEWED_SCROLL_AMOUNT,
       behavior: "smooth",
     });
   }
@@ -84,7 +87,7 @@ export default class DashboardRecentlyViewedComponent extends Component<Dashboar
   @action scrollBack(): void {
     assert("scroll body must be defined", this.scrollBody);
     this.scrollBody.scrollBy({
-      left: -RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      left: -RECENTLY_VIEWED_SCROLL_AMOUNT,
       behavior: "smooth",
     });
   }

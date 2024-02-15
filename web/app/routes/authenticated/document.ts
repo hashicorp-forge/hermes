@@ -28,8 +28,7 @@ interface DocumentRouteModel {
 export default class AuthenticatedDocumentRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed")
-  declare recentlyViewed: RecentlyViewedService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
   @service declare store: StoreService;

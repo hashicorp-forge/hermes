@@ -67,8 +67,7 @@ const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed")
-  declare recentlyViewed: RecentlyViewedService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;

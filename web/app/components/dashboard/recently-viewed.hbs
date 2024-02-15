@@ -33,7 +33,7 @@
         />
       </div>
     </div>
-    {{#if this.recentlyViewed.index}}
+    {{#if this.index}}
       <div class="relative mt-4">
         <ol
           data-test-recently-viewed
@@ -45,7 +45,7 @@
               'divided-list'
             }}"
         >
-          {{#each this.recentlyViewed.index as |r|}}
+          {{#each this.index as |r|}}
             <li>
               <Dashboard::RecentlyViewed::Item
                 data-test-recently-viewed-item

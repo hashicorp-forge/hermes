@@ -15,9 +15,7 @@ export default class DashboardRoute extends Route {
   @service("latest-docs") declare latestDocs: LatestDocsService;
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed")
-  declare recentlyViewed: RecentlyViewedService;
-
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare algolia: AlgoliaService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
@@ -62,7 +60,7 @@ export default class DashboardRoute extends Route {
       promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
     }
 
-    if (this.recentlyViewed.all) {
+    if (this.recentlyViewed.index) {
       void this.recentlyViewed.fetchAll.perform();
     } else {
       promises.push(this.recentlyViewed.fetchAll.perform());

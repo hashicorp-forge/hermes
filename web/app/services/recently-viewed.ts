@@ -26,15 +26,19 @@ type IndexedProject = {
   viewedTime: number; // 10-digit Unix timestamp
 };
 
+/*
+ * The mutated document format used by to the front-end
+ */
 export type RecentlyViewedDoc = {
+  // maybe include id to keep type simple
   doc: HermesDocument;
   isDraft: boolean;
-  viewedTime: number; // 10-digit Unix timestamp
+  viewedTime: number;
 };
 
 export type RecentlyViewedProject = {
   project: HermesProject;
-  viewedTime: number; // 10-digit Unix timestamp
+  viewedTime: number;
 };
 
 export default class RecentlyViewedService extends Service {
@@ -44,14 +48,18 @@ export default class RecentlyViewedService extends Service {
   @service declare store: StoreService;
 
   /**
-   * All RecentlyViewedDocs. Each object contains a HermesDocument
-   * and a boolean indicating whether it is a draft.
-   * Rendered by the dashboard template.
+   * An unsorted array of RecentlyViewedDocs. Assigned during the `fetchAll` task.
+   * Used as the basis for the sorted `index` getter.
    */
-  @tracked all: Array<RecentlyViewedDoc | RecentlyViewedProject> | null = null;
+  @tracked private _index: Array<
+    RecentlyViewedDoc | RecentlyViewedProject
+  > | null = null;
 
-  get index() {
-    return this.all?.sortBy("viewedTime").reverse().slice(0, 10);
+  /**
+   * The top 10 recently viewed items, sorted by viewedTime.
+   */
+  get index(): RecentlyViewedDoc[] | undefined {
+    return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
   }
 
   /**
@@ -63,96 +71,80 @@ export default class RecentlyViewedService extends Service {
       /**
        * Fetch the file IDs from the backend.
        */
-      const recentlyViewedDocs =
-        (await this.fetchSvc
+      const recentlyViewedDocsPromise =
+        this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
           )
-          .then((resp) => resp?.json())) || [];
+          .then((resp) => resp?.json()) || [];
 
-      const recentlyViewedProjects =
-        (await this.fetchSvc
+      const recentlyViewedProjectsPromise =
+        this.fetchSvc
           .fetch(
             `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
           )
-          .then((resp) => resp?.json())) || [];
+          .then((resp) => resp?.json()) || [];
 
-      /**
-       * Get the documents from the backend.
-       */
-      let docResponses = await Promise.allSettled(
-        recentlyViewedDocs.map(async (d: IndexedDoc) => {
-          let endpoint = d.isDraft ? "drafts" : "documents";
-          let doc = await this.fetchSvc
+      const [recentlyViewedDocs, recentlyViewedProjects] = await Promise.all([
+        recentlyViewedDocsPromise,
+        recentlyViewedDocsPromise,
+      ]);
+
+      let formattingPromises: Promise<
+        RecentlyViewedDoc | RecentlyViewedProject
+      >[] = [];
+
+      recentlyViewedDocs.forEach((d: IndexedDoc) => {
+        const endpoint = d.isDraft ? "drafts" : "documents";
+
+        formattingPromises.push(
+          this.fetchSvc
             .fetch(
               `/api/${this.configSvc.config.api_version}/${endpoint}/${d.id}`,
             )
-            .then((resp) => resp?.json());
+            .then((resp) => resp?.json())
+            .then((doc) => {
+              return {
+                doc,
+                ...d,
+              };
+            }),
+        );
+      });
 
-          doc.isDraft = d.isDraft;
-
-          return {
-            doc,
-            isDraft: d.isDraft,
-            viewedTime: d.viewedTime,
-          };
-        }),
-      );
-
-      /**
-       * Get the projects from the backend.
-       */
-      let projectResponses = await Promise.allSettled(
-        recentlyViewedProjects.map(async (p: IndexedProject) => {
-          const project = await this.fetchSvc
+      recentlyViewedProjects.forEach((p: IndexedProject) => {
+        formattingPromises.push(
+          this.fetchSvc
             .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)
-            .then((resp) => resp?.json());
-
-          return {
-            project,
-            viewedTime: p.viewedTime,
-          };
-        }),
-      );
-
-      /**
-       * Set up an empty array to hold the objects.
-       */
-      let newAll: Array<RecentlyViewedDoc | RecentlyViewedProject> = [];
-
-      /**
-       * For each fulfilled response, push the document to the array
-       */
-      docResponses.forEach((response) => {
-        if (response.status == "fulfilled") {
-          newAll.push(response.value);
-        }
+            .then((resp) => resp?.json())
+            .then((project) => {
+              return {
+                project,
+                viewedTime: p.viewedTime,
+              };
+            }),
+        );
       });
 
-      /**
-       * For each fulfilled response, push the project to the array
-       */
-      projectResponses.forEach((response) => {
-        if (response.status == "fulfilled") {
-          newAll.push(response.value);
-        }
-      });
+      const formattedItems = await Promise.all(formattingPromises);
 
       /**
        * Load the owner information for each document.
        */
       await this.store.maybeFetchPeople.perform(
-        newAll.map((d) => {
-          if ("doc" in d) return d.doc;
+        formattedItems.map((d) => {
+          if ("doc" in d) {
+            return d.doc;
+          }
         }),
       );
 
       /**
-       * Update the tracked property to new array of documents.
+       * Update the tracked property to new array of items.
        */
-      this.all = newAll;
+      this._index = formattedItems;
     } catch (e: unknown) {
-      this.all = null; // Causes the dashboard to show an error message.
+      this._index = null; // Causes the dashboard to show an error message.
       console.error("Error fetching recently viewed docs", e);
       throw e;
     }

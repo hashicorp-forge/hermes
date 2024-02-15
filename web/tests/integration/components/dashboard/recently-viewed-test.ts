@@ -1,12 +1,9 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { click, render, rerender } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import window from "ember-window-mock";
-import { RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT } from "hermes/components/dashboard/recently-viewed";
 import RecentlyViewedService from "hermes/services/recently-viewed";
-import ViewportService from "hermes/services/viewport";
 
 const NO_RECENTLY_VIEWED = "[data-test-no-recently-viewed]";
 const ITEM = "[data-test-recently-viewed-item]";
@@ -29,23 +26,25 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
   });
 
   test("it lists recently viewed projects and docs", async function (this: Context, assert) {
-    const oldestTitle = "Foo";
-    const middleTitle = "Bar";
-    const newestTitle = "Baz";
+    const oldestViewedTitle = "Foo";
+    const middleViewedTitle = "Bar";
+    const newestViewedTitle = "Baz";
 
     this.server.create("document", {
       id: "1",
       objectID: "1",
-      title: oldestTitle,
+      isDraft: false,
+      title: oldestViewedTitle,
     });
+
     this.server.create("recently-viewed-doc", {
       id: "1",
       isDraft: false,
-      status: "In-Review",
       viewedTime: 1, // oldest
     });
 
-    this.server.create("project", { id: "2", title: middleTitle });
+    this.server.create("project", { id: "2", title: middleViewedTitle });
+
     this.server.create("recently-viewed-project", {
       id: "2",
       viewedTime: 2, // middle
@@ -54,7 +53,7 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
     this.server.create("document", {
       id: "3",
       objectID: "3",
-      title: newestTitle,
+      title: newestViewedTitle,
     });
     this.server.create("recently-viewed-doc", {
       id: "3",
@@ -80,17 +79,17 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
 
     assert
       .dom(first)
-      .containsText(newestTitle)
+      .containsText(newestViewedTitle)
       .hasAttribute("href", "/document/3?draft=true");
 
     assert
       .dom(second)
-      .containsText(middleTitle)
+      .containsText(middleViewedTitle)
       .hasAttribute("href", "/project/2");
 
     assert
       .dom(third)
-      .containsText(oldestTitle)
+      .containsText(oldestViewedTitle)
       .hasAttribute("href", "/document/1");
   });
 
