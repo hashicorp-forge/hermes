@@ -58,7 +58,7 @@ export default class RecentlyViewedService extends Service {
   /**
    * The top 10 recently viewed items, sorted by viewedTime.
    */
-  get index(): RecentlyViewedDoc[] | undefined {
+  get index(): Array<RecentlyViewedDoc | RecentlyViewedProject> | undefined {
     return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
   }
 
@@ -87,7 +87,7 @@ export default class RecentlyViewedService extends Service {
 
       const [recentlyViewedDocs, recentlyViewedProjects] = await Promise.all([
         recentlyViewedDocsPromise,
-        recentlyViewedDocsPromise,
+        recentlyViewedProjectsPromise,
       ]);
 
       let formattingPromises: Promise<
