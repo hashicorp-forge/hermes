@@ -29,16 +29,15 @@ type IndexedProject = {
 /*
  * The mutated document format used by to the front-end
  */
-export type RecentlyViewedDoc = {
-  // maybe include id to keep type simple
+export type RecentlyViewedDoc = IndexedDoc & {
   doc: HermesDocument;
-  isDraft: boolean;
-  viewedTime: number;
 };
 
-export type RecentlyViewedProject = {
+/**
+ * The mutated project format used by to the front-end
+ */
+export type RecentlyViewedProject = IndexedProject & {
   project: HermesProject;
-  viewedTime: number;
 };
 
 export default class RecentlyViewedService extends Service {
@@ -120,7 +119,7 @@ export default class RecentlyViewedService extends Service {
             .then((project) => {
               return {
                 project,
-                viewedTime: p.viewedTime,
+                ...p,
               };
             }),
         );

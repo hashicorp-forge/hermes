@@ -4,10 +4,6 @@ import {
   RecentlyViewedDoc,
   RecentlyViewedProject,
 } from "hermes/services/recently-viewed";
-import {
-  ProjectStatus,
-  ProjectStatusObject,
-} from "hermes/types/project-status";
 
 interface DashboardRecentlyViewedItemComponentSignature {
   Element: HTMLAnchorElement;
@@ -17,16 +13,54 @@ interface DashboardRecentlyViewedItemComponentSignature {
 }
 
 export default class DashboardRecentlyViewedItemComponent extends Component<DashboardRecentlyViewedItemComponentSignature> {
-  private item = this.args.item;
-
-  maxAvatars = 2;
+  /**
+   * The maximum number of avatars to show for a project.
+   * If a project has more than this number of products, the
+   * avatars will be truncated and a "+N" label will be shown.
+   */
+  private maxAvatars = 2;
 
   /**
-   * The route to pass to the LinkTo component, depending
-   * on whether the item is a document or a project.
+   * Shorthand for the passed-in item.
+   */
+  private item = this.args.item;
+
+  /**
+   * The maybe-nested document. Used to determine if the item is a document.
+   */
+  private _doc = "doc" in this.item ? this.item.doc : undefined;
+
+  /**
+   * The document, when it's known to exist.
+   * Used as a reference when passing the `itemIsDoc` check.
+   */
+  protected get doc() {
+    assert("doc must exist", this._doc);
+    return this._doc;
+  }
+
+  /**
+   * The project, when it's known to exist, such as when
+   * the item fails the `itemIsDoc` check.
+   */
+  protected get project() {
+    assert("project must exist", "project" in this.item);
+    return this.item.project;
+  }
+
+  /**
+   * Whether the passed-in item is a document.
+   * Used in logic checks. True if the item contains a nested doc.
+   */
+  protected get itemIsDoc() {
+    return !!this._doc;
+  }
+
+  /**
+   * The item-type-dependent LinkTo route.
    */
   protected get targetRoute(): string {
-    if ("doc" in this.item) {
+    if (this.itemIsDoc) {
       return "authenticated.document";
     } else {
       return "authenticated.projects.project";
@@ -34,25 +68,23 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
   }
 
   /**
-   * The model ID to pass to the LinkTo component, depending
-   * on whether the item is a document or a project.
+   * The item-type-dependent LinkTo model.
    */
   protected get modelID(): string {
-    if ("doc" in this.item) {
-      return this.item.doc.objectID;
+    if (this.itemIsDoc) {
+      return this.doc.objectID;
     } else {
-      return this.item.project.id.toString();
+      return this.project.id.toString();
     }
   }
 
   /**
-   * The query to pass to the LinkTo component, depending
-   * on whether the item is a document or a project.
+   * The item-type-dependent LinkTo query.
    */
   protected get query(): Record<string, unknown> {
-    if ("doc" in this.item) {
+    if (this.itemIsDoc) {
       return {
-        draft: this.item.isDraft,
+        draft: this.doc.isDraft,
       };
     } else {
       return {};
@@ -63,92 +95,36 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
    * The title of the item, whether it's a document or a project.
    */
   protected get title(): string {
-    if ("doc" in this.item) {
-      return this.item.doc.title;
+    if (this.itemIsDoc) {
+      return this.doc.title;
     } else {
-      return this.item.project.title;
-    }
-  }
-
-  /**
-   * The product(s) related to the item. For documents, this is
-   * a single product. For projects, this is an array of products
-   * ordered to show first-added products first.
-   */
-  protected get products(): string[] | undefined {
-    if ("doc" in this.item) {
-      return [this.item.doc.product];
-    } else {
-      const products = this.item.project.products?.slice();
-      return products?.reverse().slice(0, this.maxAvatars);
+      return this.project.title;
     }
   }
 
   /**
    * The modified time of the item, whether it's a document or a project.
    */
-  protected get modifiedTime(): number | undefined {
-    if ("doc" in this.item) {
-      return this.item.doc.modifiedTime;
+  protected get modifiedTime(): number {
+    if (this.itemIsDoc) {
+      return this.doc.modifiedTime || this.doc.createdTime;
     } else {
-      return this.item.project.modifiedTime;
+      return this.project.modifiedTime;
     }
   }
 
   /**
-   * The status of the item, if it's a document.
+   * An array of products related to the item.
+   * If it's a document, it's a single product.
+   * If it's a project, it's a list of N products
+   * sorted to show the oldest-added first.
    */
-  protected get docStatus(): string | undefined {
-    if ("doc" in this.item) {
-      return this.item.doc.status;
-    }
-  }
-
-  /**
-   * The docType of the item, if it's a document.
-   */
-  protected get docType(): string | undefined {
-    if ("doc" in this.item) {
-      return this.item.doc.docType;
-    }
-  }
-
-  /**
-   * The document number of the item, if it's a document.
-   */
-  protected get docNumber(): string | undefined {
-    if ("doc" in this.item) {
-      return this.item.doc.docNumber;
-    }
-  }
-
-  /**
-   * The owner of the item, if it's a document.
-   */
-  protected get owner(): string | undefined {
-    if ("doc" in this.item) {
-      return this.item.doc.owners?.[0];
-    }
-  }
-
-  /**
-   * The status of the project, if it's a project.
-   */
-  protected get projectStatus(): ProjectStatus | undefined {
-    if ("project" in this.item) {
-      return this.item.project.status;
-    }
-  }
-
-  /**
-   * The status of the project, if it's a project.
-   */
-  protected get projectStatusLabel(): ProjectStatusObject["label"] | undefined {
-    if ("project" in this.item) {
-      return (
-        this.item.project.status.charAt(0).toUpperCase() +
-        this.item.project.status.slice(1)
-      );
+  protected get products(): string[] | undefined {
+    if (this.itemIsDoc) {
+      return [this.doc.product];
+    } else {
+      const products = this.project.products?.slice();
+      return products?.reverse().slice(0, this.maxAvatars);
     }
   }
 
@@ -157,7 +133,7 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
    * Used to add a "+N" label next to the avatars. Applies to projects
    * with more than the maximum number of avatars.
    */
-  protected get additionalProductsCount(): number {
+  protected get additionalProductCount(): number {
     const productCount = this.products?.length || 0;
 
     if (productCount <= this.maxAvatars) {
