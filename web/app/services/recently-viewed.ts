@@ -33,17 +33,16 @@ export default class RecentlyViewedService extends Service {
   @service declare store: StoreService;
 
   /**
-   * All recently viewed docs. Each object contains a HermesDocument
-   * and a boolean indicating whether it is a draft.
-   * Rendered by the dashboard template.
+   * An unsorted array of RecentlyViewedDocs. Assigned during the `fetchAll` task.
+   * Used as the basis for the sorted `index` getter.
    */
-  @tracked all: RecentlyViewedDoc[] | null = null;
+  @tracked private _index: RecentlyViewedDoc[] | null = null;
 
   /**
-   * The top 10 recently viewed docs.
+   * The top 10 recently viewed items, sorted by viewedTime.
    */
   get index(): RecentlyViewedDoc[] | undefined {
-    return this.all?.sortBy("viewedTime").reverse().slice(0, 10);
+    return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
   }
 
   /**
@@ -88,7 +87,6 @@ export default class RecentlyViewedService extends Service {
       });
 
       const formattedDocs = await Promise.all(formattingPromises);
-      console.log("fullDocs", formattedDocs);
 
       /**
        * Load the owner information for each document.
@@ -100,9 +98,9 @@ export default class RecentlyViewedService extends Service {
       /**
        * Update the tracked property to new array of documents.
        */
-      this.all = formattedDocs;
+      this._index = formattedDocs;
     } catch (e: unknown) {
-      this.all = null; // Causes the dashboard to show an error message.
+      this._index = null; // Causes the dashboard to show an error message.
       console.error("Error fetching recently viewed docs", e);
       throw e;
     }

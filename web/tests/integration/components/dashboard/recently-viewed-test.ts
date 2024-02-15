@@ -7,9 +7,6 @@ import RecentlyViewedService from "hermes/services/recently-viewed";
 
 const NO_VIEWED_DOCS = "[data-test-no-viewed-docs]";
 const DOC = "[data-test-recently-viewed-doc]";
-const SCROLL_BACK_BUTTON = "[data-test-scroll-back]";
-const SCROLL_FORWARD_BUTTON = "[data-test-scroll-forward]";
-const LIST = "[data-test-recently-viewed-docs]";
 
 interface Context extends MirageTestContext {}
 

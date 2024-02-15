@@ -60,7 +60,7 @@ export default class DashboardRoute extends Route {
       promises.push(this.latestDocs.fetchAll.perform().then(() => {}));
     }
 
-    if (this.recentlyViewed.all) {
+    if (this.recentlyViewed._index) {
       void this.recentlyViewed.fetchAll.perform();
     } else {
       promises.push(this.recentlyViewed.fetchAll.perform());
