@@ -47,7 +47,7 @@
         >
           {{#each this.recentlyViewed.index as |r|}}
             <li>
-              <Dashboard::RecentlyViewedItem
+              <Dashboard::RecentlyViewed::Item
                 data-test-recently-viewed-item
                 @item={{r}}
               />
