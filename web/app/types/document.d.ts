@@ -2,7 +2,7 @@ export interface HermesDocument {
   readonly objectID: string;
 
   status: string;
-  product?: string;
+  product: string;
 
   /**
    * A human-readable date string, e.g., "Aug 16, 2028".

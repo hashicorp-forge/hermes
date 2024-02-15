@@ -25,10 +25,22 @@
         <Person::Avatar @email={{this.owner}} />
       {{/if}}
       {{! TODO there should be a max }}
+      {{!  }}
       {{#if this.products}}
-        {{#each this.products as |product|}}
-          <Product::Avatar @product={{product}} />
-        {{/each}}
+        {{#if this.additionalProductsCount}}
+          <span class="mr-1 text-color-foreground-faint">
+            +{{this.additionalProductsCount}}
+          </span>
+        {{/if}}
+
+        <ol class="flex flex-row-reverse gap-1">
+
+          {{#each this.products as |product|}}
+            <li>
+              <Product::Avatar @product={{product}} />
+            </li>
+          {{/each}}
+        </ol>
       {{/if}}
     </div>
   </div>
