@@ -13,57 +13,71 @@ const LIST = "[data-test-recently-viewed-docs]";
 
 interface Context extends MirageTestContext {}
 
-module(
-  "Integration | Component | dashboard/recently-viewed-docs",
-  function (hooks) {
-    setupRenderingTest(hooks);
-    setupMirage(hooks);
+module("Integration | Component | dashboard/recently-viewed", function (hooks) {
+  setupRenderingTest(hooks);
+  setupMirage(hooks);
 
-    test("if the recently viewed docs is empty, it shows a message", async function (this: Context, assert) {
-      await render<Context>(hbs`
-        <Dashboard::RecentlyViewedDocs />
+  test("if the recently viewed docs is empty, it shows a message", async function (this: Context, assert) {
+    await render<Context>(hbs`
+        <Dashboard::RecentlyViewed />
       `);
 
-      assert.dom(NO_VIEWED_DOCS).exists();
-      assert.dom(DOC).doesNotExist();
+    assert.dom(NO_VIEWED_DOCS).exists();
+    assert.dom(DOC).doesNotExist();
+  });
+
+  test("it lists recently viewed docs", async function (this: Context, assert) {
+    const oldestViewedTitle = "Foo";
+    const newestViewedTitle = "Baz";
+
+    this.server.create("document", {
+      id: "1",
+      objectID: "1",
+      isDraft: false,
+      title: oldestViewedTitle,
     });
 
-    test("it lists recently viewed docs", async function (this: Context, assert) {
-      this.server.create("recently-viewed-doc", { id: "1", isDraft: false });
-      this.server.create("recently-viewed-doc", { id: "2", isDraft: true });
+    this.server.create("recently-viewed-doc", {
+      id: "1",
+      isDraft: false,
+      viewedTime: 1, // oldest
+    });
 
-      this.server.create("document", { objectID: "1", title: "Foo" });
-      this.server.create("document", { objectID: "2", title: "Bar" });
+    this.server.create("document", {
+      id: "3",
+      objectID: "3",
+      title: newestViewedTitle,
+    });
 
-      const recentlyViewedDocs = this.owner.lookup(
-        "service:recently-viewed-docs",
-      ) as RecentlyViewedService;
+    this.server.create("recently-viewed-doc", {
+      id: "3",
+      isDraft: true,
+      viewedTime: 3, // newest
+    });
 
-      await recentlyViewedDocs.fetchAll.perform();
+    const recentlyViewedDocs = this.owner.lookup(
+      "service:recently-viewed",
+    ) as RecentlyViewedService;
 
-      await render<Context>(hbs`
-        <Dashboard::RecentlyViewedDocs />
+    await recentlyViewedDocs.fetchAll.perform();
+
+    await render<Context>(hbs`
+        <Dashboard::RecentlyViewed />
       `);
 
-      assert.dom(DOC).exists({ count: 2 });
+    assert.dom(DOC).exists({ count: 2 });
 
-      assert
-        .dom(`${DOC} a`)
-        .containsText("Foo")
-        .hasAttribute(
-          "href",
-          "/document/1",
-          "correct href for a published doc",
-        );
+    const allItems = document.querySelectorAll(DOC);
+    const [firstItem, secondItem] = allItems;
 
-      assert
-        .dom(`${DOC}:nth-child(2) a`)
-        .containsText("Bar")
-        .hasAttribute(
-          "href",
-          "/document/2?draft=true",
-          "correct href for a draft",
-        );
-    });
-  },
-);
+    assert
+      .dom(firstItem)
+      .containsText(newestViewedTitle)
+      .hasAttribute("href", "/document/3?draft=true");
+
+    assert
+      .dom(secondItem)
+      .containsText(oldestViewedTitle)
+      .hasAttribute("href", "/document/1");
+  });
+});

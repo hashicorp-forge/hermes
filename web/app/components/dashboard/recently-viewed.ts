@@ -92,6 +92,6 @@ export default class DashboardRecentlyViewedComponent extends Component<Dashboar
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Dashboard::RecentlyViewedDocs": typeof DashboardRecentlyViewedComponent;
+    "Dashboard::RecentlyViewed": typeof DashboardRecentlyViewedComponent;
   }
 }
