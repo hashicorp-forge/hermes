@@ -19,13 +19,14 @@
 
     {{! Products and Owner }}
     <div class="flex items-center gap-1 text-body-100">
+      {{#if this.owner}}
+        <Person::Avatar @email={{this.owner}} />
+      {{/if}}
+      {{! TODO there should be a max }}
       {{#if this.products}}
         {{#each this.products as |product|}}
           <Product::Avatar @product={{product}} />
         {{/each}}
-      {{/if}}
-      {{#if this.owner}}
-        <Person::Avatar @email={{this.owner}} />
       {{/if}}
     </div>
   </div>
