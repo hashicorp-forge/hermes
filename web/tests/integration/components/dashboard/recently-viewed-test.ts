@@ -1,14 +1,9 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { click, render, rerender } from "@ember/test-helpers";
+import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import window from "ember-window-mock";
-import theme from "tailwindcss/defaultTheme";
-import htmlElement from "hermes/utils/html-element";
-import { RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT } from "hermes/components/dashboard/recently-viewed-docs";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
-import ViewportService from "hermes/services/viewport";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 
 const NO_VIEWED_DOCS = "[data-test-no-viewed-docs]";
 const DOC = "[data-test-recently-viewed-doc]";
@@ -42,7 +37,7 @@ module(
 
       const recentlyViewedDocs = this.owner.lookup(
         "service:recently-viewed-docs",
-      ) as RecentlyViewedDocsService;
+      ) as RecentlyViewedService;
 
       await recentlyViewedDocs.fetchAll.perform();
 

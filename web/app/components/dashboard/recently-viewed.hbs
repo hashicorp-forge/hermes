@@ -33,7 +33,7 @@
         />
       </div>
     </div>
-    {{#if this.viewedDocs.all}}
+    {{#if this.index}}
       <div class="relative mt-4">
         <ol
           data-test-recently-viewed-docs
@@ -45,41 +45,12 @@
               'divided-list'
             }}"
         >
-          {{#each this.docs as |r|}}
+          {{#each this.index as |r|}}
             <li
               data-test-recently-viewed-doc
               class="w-56 shrink-0 snap-start lg:w-full"
             >
-              <LinkTo
-                @route="authenticated.document"
-                @model={{r.doc.objectID}}
-                @query={{hash draft=r.doc.isDraft}}
-                class="px-3 pt-3 pb-3.5"
-              >
-                <div class="flex w-full items-start gap-5">
-                  <div class="w-full">
-                    <div class="flex items-center gap-[3px]">
-                      <Product::Avatar @product={{r.doc.product}} />
-                      <Person::Avatar @email={{get r.doc.owners 0}} />
-                      <Hds::Badge
-                        @text={{r.doc.docType}}
-                        class="h-5 px-1.5 py-0"
-                      />
-                    </div>
-                    <h5 class="mt-1.5 max-lg:truncate">
-                      {{r.doc.title}}
-                      <span class="ml-0.5 text-body-100 font-regular">
-
-                        {{r.doc.docNumber}}
-                      </span>
-                    </h5>
-                    <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-                      Modified
-                      {{time-ago r.doc.modifiedTime}}
-                    </p>
-                  </div>
-                </div>
-              </LinkTo>
+              <Dashboard::RecentlyViewed::Item @item={{r}} />
             </li>
           {{/each}}
         </ol>
