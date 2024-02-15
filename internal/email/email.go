@@ -14,6 +14,20 @@ import (
 //go:embed templates/*
 var tmplFS embed.FS
 
+type User struct {
+	EmailAddress string
+	Name         string
+}
+
+type DocumentApprovedEmailData struct {
+	DocumentApprover         User
+	DocumentNonApproverCount int
+	DocumentShortName        string
+	DocumentTitle            string
+	DocumentType             string
+	DocumentURL              string
+}
+
 type ReviewRequestedEmailData struct {
 	BaseURL           string
 	CurrentYear       int
@@ -32,6 +46,57 @@ type SubscriberDocumentPublishedEmailData struct {
 	DocumentType      string
 	DocumentURL       string
 	Product           string
+}
+
+func SendDocumentApprovedEmail(
+	data DocumentApprovedEmailData,
+	to []string,
+	from string,
+	svc *gw.Service,
+) error {
+	// Validate data.
+	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.DocumentApprover, validation.Required),
+		validation.Field(&data.DocumentShortName, validation.Required),
+		validation.Field(&data.DocumentTitle, validation.Required),
+		validation.Field(&data.DocumentURL, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data: %w", err)
+	}
+	if err := validation.ValidateStruct(&data.DocumentApprover,
+		validation.Field(&data.DocumentApprover.EmailAddress, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data user: %w", err)
+	}
+
+	// Apply template.
+	var body bytes.Buffer
+	tmpl, err := template.ParseFS(tmplFS, "templates/document-approved.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	// Build email subject (name is preferred over email address).
+	approver := data.DocumentApprover.EmailAddress
+	if data.DocumentApprover.Name != "" {
+		approver = data.DocumentApprover.Name
+	}
+	subject := fmt.Sprintf("%s approved by %s",
+		data.DocumentShortName,
+		approver,
+	)
+
+	// Send email.
+	_, err = svc.SendEmail(
+		to,
+		from,
+		subject,
+		body.String(),
+	)
+	return err
 }
 
 func SendReviewRequestedEmail(

@@ -1,0 +1,29 @@
+<html>
+  <body>
+    <p>Hi!</p>
+    <p>
+      Just letting you know that
+      <a href="mailto:{{.DocumentApprover.EmailAddress}}"
+        >{{if
+        .DocumentApprover.Name}}{{.DocumentApprover.Name}}{{else}}{{.DocumentApprover.EmailAddress}}{{end}}</a
+      >
+      has approved your {{.DocumentType}} document,
+      <b
+        ><a href="{{.DocumentURL}}"
+          >[{{.DocumentShortName}}] {{.DocumentTitle}}</a
+        ></b
+      >.
+    </p>
+    <p>
+      {{if .DocumentNonApproverCount}}{{.DocumentNonApproverCount}} other
+      approver{{if ne .DocumentNonApproverCount 1}}s{{end}} have not yet
+      approved the document.{{else}}All approvers have now approved the
+      document. Please remember to move the document status to <b>Approved</b>
+      in Hermes!{{end}}
+    </p>
+    <p>
+      Cheers,<br />
+      Hermes
+    </p>
+  </body>
+</html>
