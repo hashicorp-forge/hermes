@@ -46,11 +46,8 @@
             }}"
         >
           {{#each this.index as |r|}}
-            <li>
-              <Dashboard::RecentlyViewed::Item
-                data-test-recently-viewed-item
-                @item={{r}}
-              />
+            <li class="w-72 shrink-0 snap-start lg:w-full">
+              <Dashboard::RecentlyViewed::Item @item={{r}} />
             </li>
           {{/each}}
         </ol>

@@ -55,6 +55,7 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
       objectID: "3",
       title: newestViewedTitle,
     });
+
     this.server.create("recently-viewed-doc", {
       id: "3",
       isDraft: true,
@@ -85,7 +86,7 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
     assert
       .dom(second)
       .containsText(middleViewedTitle)
-      .hasAttribute("href", "/project/2");
+      .hasAttribute("href", "/projects/2");
 
     assert
       .dom(third)

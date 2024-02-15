@@ -1,8 +1,10 @@
 <LinkTo
+  data-test-recently-viewed-item
   @route={{this.targetRoute}}
   @model={{this.modelID}}
   @query={{this.query}}
-  class="px-3 pt-3 pb-4"
+  class="h-full px-3 pt-3 pb-4"
+  ...attributes
 >
   <div class="flex w-full justify-between">
     {{! Status and Type }}
