@@ -19,12 +19,12 @@ module("Unit | Service | recently-viewed", function (hooks) {
     this.server.createList("recently-viewed-doc", 10);
     this.server.createList("document", 10);
 
-    assert.equal(this.recentlyViewed._index, null, "the index is empty");
+    assert.equal(this.recentlyViewed.index, undefined, "the index is empty");
 
     await this.recentlyViewed.fetchAll.perform();
 
     assert.equal(
-      this.recentlyViewed._index?.length,
+      this.recentlyViewed.index?.length,
       10,
       "the index is populated",
     );
