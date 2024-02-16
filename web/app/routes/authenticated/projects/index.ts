@@ -20,6 +20,8 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
       .fetch(`/api/${this.configSvc.config.api_version}/projects`)
       .then((response) => response?.json());
 
+    console.log("projects", projects);
+
     // We'll eventually use the status param in the query;
     // for now, we pass it to the component for local filtering
 
