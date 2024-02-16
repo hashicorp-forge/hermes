@@ -6,4 +6,9 @@ export default Factory.extend({
   viewedTime: 1,
   isDraft: false,
   isLegacy: false,
+
+  afterCreate(recentlyViewedDoc, server) {
+    const doc = server.schema.document.find(recentlyViewedDoc.id);
+    recentlyViewedDoc.update({ doc: doc.attrs });
+  },
 });

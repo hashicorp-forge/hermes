@@ -134,7 +134,9 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
    * with more than the maximum number of avatars.
    */
   protected get additionalProductCount(): number {
-    const productCount = this.products?.length || 0;
+    if (this.itemIsDoc) return 0;
+
+    const productCount = this.project.products?.length || 0;
 
     if (productCount <= this.maxAvatars) {
       return 0;

@@ -14,7 +14,7 @@
       {{else}}
         <Project::StatusIcon @status={{this.project.status}} />
       {{/if}}
-      <span class="ml-px">
+      <span data-test-recently-viewed-item-type class="ml-px">
         {{if this.itemIsDoc this.doc.docType "Project"}}
       </span>
     </div>
@@ -27,7 +27,10 @@
 
       {{#if this.products.length}}
         {{#if this.additionalProductCount}}
-          <span class="mr-1 text-color-foreground-faint">
+          <span
+            data-test-additional-product-count
+            class="mr-1 text-color-foreground-faint"
+          >
             +{{this.additionalProductCount}}
           </span>
         {{/if}}
@@ -45,17 +48,21 @@
 
   {{! Text }}
   <div class="mt-1 pr-8">
-    <h5>
+    <h5 data-test-recently-viewed-item-title>
       {{this.title}}
       {{#if this.itemIsDoc}}
         <span
+          data-test-recently-viewed-doc-number
           class="whitespace-nowrap font-regular text-color-foreground-primary"
         >
           {{this.doc.docNumber}}
         </span>
       {{/if}}
     </h5>
-    <p class="mt-1 text-body-100 text-color-foreground-faint">
+    <p
+      data-test-recently-viewed-item-modified-time
+      class="mt-1 text-body-100 text-color-foreground-faint"
+    >
       Modified
       {{time-ago this.modifiedTime}}
     </p>

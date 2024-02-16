@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 interface DocumentStatusIconComponentSignature {
   Element: null;
   Args: {
-    status: string; // TODO: ENUM
+    status: string;
   };
   Blocks: {
     default: [];
