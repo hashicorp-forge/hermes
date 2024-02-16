@@ -31,16 +31,5 @@
     class="flex h-64 flex-col items-center justify-center text-display-300"
   >
     <EmptyStateText @value="No {{@status}} projects" />
-
-    {{!-- {{#if (eq @status "active")}}
-      <Hds::Button
-        @color="secondary"
-        @route="authenticated.new.project"
-        @text="Start a project"
-        @icon="chevron-right"
-        @iconPosition="trailing"
-        @size="small"
-      />
-    {{/if}} --}}
   </div>
 {{/if}}
