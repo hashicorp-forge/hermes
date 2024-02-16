@@ -84,7 +84,7 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
   protected get query(): Record<string, unknown> {
     if (this.itemIsDoc) {
       return {
-        draft: this.doc.isDraft,
+        draft: this.doc.status === "WIP",
       };
     } else {
       return {};

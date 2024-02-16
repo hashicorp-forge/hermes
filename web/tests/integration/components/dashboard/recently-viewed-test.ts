@@ -41,12 +41,12 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
       id: "1",
       objectID: "1",
       isDraft: false,
+      status: "In-Review",
       title: oldestViewedTitle,
     });
 
     this.server.create("recently-viewed-doc", {
       id: "1",
-      isDraft: false,
       viewedTime: 1, // oldest
     });
 
@@ -65,7 +65,6 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
 
     this.server.create("recently-viewed-doc", {
       id: "3",
-      isDraft: true,
       viewedTime: 3, // newest
     });
 
