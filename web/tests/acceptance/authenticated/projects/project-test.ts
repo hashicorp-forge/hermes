@@ -783,4 +783,8 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.dom(DOCUMENT_LINK).doesNotExist("project has no documents");
     assert.dom(EXTERNAL_LINK).exists({ count: 1 }, "external link is shown");
   });
+
+  test("the project is logged with the recently viewed service", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    assert.true(false);
+  });
 });
