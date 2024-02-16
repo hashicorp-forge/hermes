@@ -1,10 +1,6 @@
 <LinkTo
   data-test-recently-viewed-item
-  @route={{if
-    this.itemIsDoc
-    "authenticated.document"
-    "authenticated.projects.project"
-  }}
+  @route={{this.targetRoute}}
   @model={{this.modelID}}
   @query={{this.query}}
   class="h-full px-3 pt-3 pb-4"

@@ -27,14 +27,14 @@ type IndexedProject = {
 };
 
 /*
- * The mutated document format used by to the front-end
+ * The mutated document format used by the front-end
  */
 export type RecentlyViewedDoc = IndexedDoc & {
   doc: HermesDocument;
 };
 
 /**
- * The mutated project format used by to the front-end
+ * The mutated project format used by the front-end
  */
 export type RecentlyViewedProject = IndexedProject & {
   project: HermesProject;
@@ -47,7 +47,9 @@ export default class RecentlyViewedService extends Service {
   @service declare store: StoreService;
 
   /**
-   * An unsorted array of RecentlyViewedDocs. Assigned during the `fetchAll` task.
+   * An unsorted array of recently viewed docs and projects.
+   * Set by the `fetchAll` task which is awaited on the dashboard route
+   * and called in the background when viewing docs and projects.
    * Used as the basis for the sorted `index` getter.
    */
   @tracked private _index: Array<
@@ -55,21 +57,20 @@ export default class RecentlyViewedService extends Service {
   > | null = null;
 
   /**
-   * The top 10 recently viewed items, sorted by viewedTime.
+   * A potentially combined array of the ten most recently viewed docs and projects.
    */
   get index(): Array<RecentlyViewedDoc | RecentlyViewedProject> | undefined {
     return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
   }
 
   /**
-   * Fetches an array of recently viewed docs.
-   * Called in the dashboard route if the docs are not already loaded.
+   * Fetches an array of recently viewed docs and projects.
+   * Called in the dashboard route if the docs are not already loaded
+   * and called in the background when viewing docs and projects.
    */
   fetchAll = keepLatestTask(async () => {
     try {
-      /**
-       * Fetch the file IDs from the backend.
-       */
+      // Set a promise to fetch the recently viewed docs
       const recentlyViewedDocsPromise =
         this.fetchSvc
           .fetch(
@@ -77,6 +78,7 @@ export default class RecentlyViewedService extends Service {
           )
           .then((resp) => resp?.json()) || [];
 
+      // Set a promise to fetch the recently viewed projects
       const recentlyViewedProjectsPromise =
         this.fetchSvc
           .fetch(
@@ -84,19 +86,22 @@ export default class RecentlyViewedService extends Service {
           )
           .then((resp) => resp?.json()) || [];
 
+      // Await both promises
       const [recentlyViewedDocs, recentlyViewedProjects] = await Promise.all([
         recentlyViewedDocsPromise,
         recentlyViewedProjectsPromise,
       ]);
 
-      let formattingPromises: Promise<
+      // Create a placeholder array for the full item promises
+      let fullItemPromises: Promise<
         RecentlyViewedDoc | RecentlyViewedProject
       >[] = [];
 
+      // Promise to get each doc and return it in the RecentlyViewedDoc format
       recentlyViewedDocs.forEach((d: IndexedDoc) => {
         const endpoint = d.isDraft ? "drafts" : "documents";
 
-        formattingPromises.push(
+        fullItemPromises.push(
           this.fetchSvc
             .fetch(
               `/api/${this.configSvc.config.api_version}/${endpoint}/${d.id}`,
@@ -111,8 +116,9 @@ export default class RecentlyViewedService extends Service {
         );
       });
 
+      // Promise to get each project and return it in the RecentlyViewedProject format
       recentlyViewedProjects.forEach((p: IndexedProject) => {
-        formattingPromises.push(
+        fullItemPromises.push(
           this.fetchSvc
             .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)
             .then((resp) => resp?.json())
@@ -125,11 +131,10 @@ export default class RecentlyViewedService extends Service {
         );
       });
 
-      const formattedItems = await Promise.all(formattingPromises);
+      // Await the full item promises
+      const formattedItems = await Promise.all(fullItemPromises);
 
-      /**
-       * Load the owner information for each document.
-       */
+      // Load doc owners into the store
       await this.store.maybeFetchPeople.perform(
         formattedItems.map((d) => {
           if ("doc" in d) {
@@ -138,14 +143,14 @@ export default class RecentlyViewedService extends Service {
         }),
       );
 
-      /**
-       * Update the tracked property to new array of items.
-       */
+      // Update the local array to recompute the getter
       this._index = formattedItems;
-    } catch (e: unknown) {
-      this._index = null; // Causes the dashboard to show an error message.
+    } catch (e) {
+      // Log an error if the fetch fails
       console.error("Error fetching recently viewed docs", e);
-      throw e;
+
+      // Cause the dashboard to show an error message.
+      this._index = null;
     }
   });
 }
