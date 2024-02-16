@@ -1,28 +1,71 @@
 <LinkTo
-  data-test-recently-viewed-doc
-  @route="authenticated.document"
-  @model={{@item.doc.objectID}}
-  @query={{hash draft=@item.doc.isDraft}}
-  class="px-3 pt-3 pb-3.5"
+  data-test-recently-viewed-item
+  @route={{this.targetRoute}}
+  @model={{this.modelID}}
+  @query={{this.query}}
+  class="h-full px-3 pt-3 pb-4"
+  ...attributes
 >
-  <div class="flex w-full items-start gap-5">
-    <div class="w-full">
-      <div class="flex items-center gap-[3px]">
-        <Product::Avatar @product={{@item.doc.product}} />
-        <Person::Avatar @email={{get @item.doc.owners 0}} />
-        <Hds::Badge @text={{@item.doc.docType}} class="h-5 px-1.5 py-0" />
-      </div>
-      <h5 class="mt-1.5 max-lg:truncate">
-        {{@item.doc.title}}
-        <span class="ml-0.5 text-body-100 font-regular">
+  <div class="flex w-full justify-between">
+    {{! Status and Type }}
+    <div class="flex items-center gap-1.5 text-body-100">
+      {{#if this.itemIsDoc}}
+        <Document::StatusIcon @status={{this.doc.status}} />
+      {{else}}
+        <Project::StatusIcon @status={{this.project.status}} />
+      {{/if}}
+      <span data-test-recently-viewed-item-type class="ml-px">
+        {{if this.itemIsDoc this.doc.docType "Project"}}
+      </span>
+    </div>
 
-          {{@item.doc.docNumber}}
-        </span>
-      </h5>
-      <p class="mt-0.5 text-body-100 text-color-foreground-faint">
-        Modified
-        {{time-ago @item.doc.modifiedTime}}
-      </p>
+    {{! Avatars }}
+    <div class="flex items-center gap-1 text-body-100">
+      {{#if this.itemIsDoc}}
+        <Person::Avatar @email={{get this.doc.owners 0}} />
+      {{/if}}
+
+      {{#if this.products.length}}
+        {{#if this.additionalProductCount}}
+          <span
+            data-test-additional-product-count
+            class="mr-1 text-color-foreground-faint"
+          >
+            +{{this.additionalProductCount}}
+          </span>
+        {{/if}}
+
+        <ol class="flex flex-row-reverse gap-1">
+          {{#each this.products as |product|}}
+            <li>
+              <Product::Avatar @product={{product}} />
+            </li>
+          {{/each}}
+        </ol>
+      {{/if}}
     </div>
   </div>
+
+  {{! Text }}
+  <div class="mt-1 pr-8">
+    <h5 data-test-recently-viewed-item-title>
+      {{this.title}}
+      {{#if this.itemIsDoc}}
+        <span
+          data-test-recently-viewed-doc-number
+          class="whitespace-nowrap font-regular text-color-foreground-primary"
+        >
+          {{this.doc.docNumber}}
+        </span>
+      {{/if}}
+    </h5>
+    <p
+      data-test-recently-viewed-item-modified-time
+      class="mt-1 text-body-100 text-color-foreground-faint"
+    >
+      Modified
+      {{time-ago this.modifiedTime}}
+    </p>
+  </div>
+
 </LinkTo>

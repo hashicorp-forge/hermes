@@ -36,7 +36,7 @@
     {{#if this.index}}
       <div class="relative mt-4">
         <ol
-          data-test-recently-viewed-docs
+          data-test-recently-viewed
           {{did-insert this.registerScrollBody}}
           {{on "scroll" this.updateAffordances}}
           class="{{if
@@ -46,7 +46,7 @@
             }}"
         >
           {{#each this.index as |r|}}
-            <li class="w-56 shrink-0 snap-start lg:w-full">
+            <li class="w-72 shrink-0 snap-start lg:w-full">
               <Dashboard::RecentlyViewed::Item @item={{r}} />
             </li>
           {{/each}}
@@ -64,8 +64,8 @@
         />
       </div>
     {{else}}
-      <div data-test-no-viewed-docs class="empty-text lg:px-3">
-        You haven't viewed any documents yet.
+      <div data-test-no-recently-viewed class="empty-text lg:px-3">
+        You haven't viewed any projects or documents.
       </div>
     {{/if}}
   </div>

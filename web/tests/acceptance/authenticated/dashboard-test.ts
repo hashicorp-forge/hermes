@@ -6,10 +6,8 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 import { TEST_USER_EMAIL, TEST_USER_GIVEN_NAME } from "hermes/mirage/utils";
 
-const RECENTLY_VIEWED_DOC_SELECTOR = "[data-test-recently-viewed-doc]";
 const DOC_AWAITING_REVIEW = "[data-test-doc-awaiting-review]";
 const WELCOME_MESSAGE = "[data-test-welcome-message]";
-const NO_VIEWED_DOCS = "[data-test-no-viewed-docs]";
 
 interface AuthenticatedDashboardRouteTestContext extends MirageTestContext {}
 

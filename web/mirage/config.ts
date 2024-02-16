@@ -36,7 +36,6 @@ export default function (mirageConfig) {
         const requestBody = JSON.parse(request.requestBody);
 
         if (requestBody) {
-          console.log("requestBody", requestBody);
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
 
@@ -373,9 +372,20 @@ export default function (mirageConfig) {
 
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
+        const shouldAddToRecentlyViewed =
+          request.requestHeaders["Add-To-Recently-Viewed"];
+
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
+
+        if (shouldAddToRecentlyViewed) {
+          schema.recentlyViewedProjects.create({
+            id: project.attrs.id,
+            viewedTime: Date.now(),
+          });
+        }
+
         return new Response(200, {}, project.attrs);
       });
 
@@ -898,7 +908,19 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index.slice(0, 10));
+        return new Response(200, {}, index);
+      });
+
+      /**
+       * Used in the dashboard to show recently viewed projects
+       */
+      this.get("/me/recently-viewed-projects", (schema) => {
+        let index = schema.recentlyViewedProjects
+          .all()
+          .models.map((project) => {
+            return project.attrs;
+          });
+        return new Response(200, {}, index);
       });
 
       /**

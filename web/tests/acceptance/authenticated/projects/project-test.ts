@@ -19,6 +19,7 @@ import {
 } from "hermes/mirage/utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
 const GLOBAL_SEARCH_PROJECT_HIT = "[data-test-project-hit]";
@@ -782,5 +783,21 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.dom(TITLE).hasText(title, "the correct title is shown");
     assert.dom(DOCUMENT_LINK).doesNotExist("project has no documents");
     assert.dom(EXTERNAL_LINK).exists({ count: 1 }, "external link is shown");
+  });
+
+  test("the project is logged with the recently viewed service", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const recentlyViewed = this.owner.lookup(
+      "service:recently-viewed",
+    ) as RecentlyViewedService;
+
+    assert.equal(recentlyViewed.index, undefined);
+
+    await visit("/projects/1");
+
+    assert.equal(recentlyViewed.index?.length, 1);
+
+    const project = recentlyViewed.index?.[0];
+
+    assert.equal(project?.id, "1");
   });
 });

@@ -4,12 +4,14 @@ import { inject as service } from "@ember/service";
 import AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 import StoreService from "hermes/services/store";
 import { HermesProject } from "hermes/types/project";
 
 export default class AuthenticatedProjectsProjectRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare store: StoreService;
 
   declare controller: AuthenticatedProjectsProjectController;
@@ -19,7 +21,6 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects/${params.project_id}`,
         {
-          method: "GET",
           headers: {
             // We set this header to differentiate between project views and
             // requests to only retrieve project metadata.
@@ -62,6 +63,11 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
   }
 
   afterModel() {
+    /**
+     * Update the recently viewed index in the background.
+     */
+    void this.recentlyViewed.fetchAll.perform();
+
     /**
      * Set `newModelHasLoaded` false in case it was set true in the model hook.
      */

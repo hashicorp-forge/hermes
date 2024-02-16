@@ -8,6 +8,7 @@ import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import RecentlyViewedService, {
   RecentlyViewedDoc,
+  RecentlyViewedProject,
 } from "hermes/services/recently-viewed";
 
 export const RECENTLY_VIEWED_SCROLL_AMOUNT = 300;
@@ -39,7 +40,9 @@ export default class DashboardRecentlyViewedComponent extends Component<Dashboar
    * Aliased name for the recently viewed index.
    * Used in the template to loop through the array if it exists.
    */
-  protected get index(): RecentlyViewedDoc[] | undefined {
+  protected get index():
+    | Array<RecentlyViewedDoc | RecentlyViewedProject>
+    | undefined {
     return this.recentlyViewed.index;
   }
 
