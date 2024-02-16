@@ -372,7 +372,6 @@ export default function (mirageConfig) {
 
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
-        console.log("request", request);
         const shouldAddToRecentlyViewed =
           request.requestHeaders["Add-To-Recently-Viewed"];
 
