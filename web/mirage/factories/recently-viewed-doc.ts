@@ -7,8 +7,23 @@ export default Factory.extend({
   isDraft: false,
   isLegacy: false,
 
+  /**
+   * Associate the record with a document from the database.
+   * Create one if it doesn't already exist.
+   */
   afterCreate(recentlyViewedDoc, server) {
-    const doc = server.schema.document.find(recentlyViewedDoc.id);
-    recentlyViewedDoc.update({ doc: doc.attrs });
+    const { id } = recentlyViewedDoc;
+    const doc = server.schema.document.find(id);
+
+    if (doc) {
+      recentlyViewedDoc.update({ doc: doc.attrs });
+    } else {
+      recentlyViewedDoc.update({
+        doc: server.create("document", {
+          id,
+          objectID: id,
+        }).attrs,
+      });
+    }
   },
 });

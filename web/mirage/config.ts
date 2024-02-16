@@ -372,9 +372,21 @@ export default function (mirageConfig) {
 
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
+        console.log("request", request);
+        const shouldAddToRecentlyViewed =
+          request.requestHeaders["Add-To-Recently-Viewed"];
+
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
+
+        if (shouldAddToRecentlyViewed) {
+          schema.recentlyViewedProjects.create({
+            id: project.attrs.id,
+            viewedTime: Date.now(),
+          });
+        }
+
         return new Response(200, {}, project.attrs);
       });
 

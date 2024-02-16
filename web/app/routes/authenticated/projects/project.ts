@@ -21,7 +21,6 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects/${params.project_id}`,
         {
-          method: "GET",
           headers: {
             // We set this header to differentiate between project views and
             // requests to only retrieve project metadata.
