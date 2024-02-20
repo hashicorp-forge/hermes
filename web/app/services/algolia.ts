@@ -289,47 +289,22 @@ export default class AlgoliaService extends Service {
    * Returns FacetRecords for a given index and params.
    * If the user is the owner, the facets will be filtered by the owner's email.
    */
-  getFacets = task(
-    async (
-      searchIndex: string,
-      params: AlgoliaSearchParams,
-      userIsOwner = false,
-    ): Promise<FacetRecords | undefined> => {
-      let query = params["q"] || "";
-      try {
-        let facetFilters = userIsOwner ? [`owners:${this.userEmail}`] : [];
-        let algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
-          facetFilters: facetFilters,
-          facets: FACET_NAMES,
-          hitsPerPage: HITS_PER_PAGE,
-          maxValuesPerFacet: MAX_VALUES_PER_FACET,
-          page: params.page ? params.page - 1 : 0,
-        });
+  getFacets = (results: SearchResponse, routeParams: Record<string, any>) => {
+    const facets = this.mapStatefulFacetKeys(
+      results.facets as AlgoliaFacetsObject,
+    );
 
-        assert("getFacets expects facets to exist", algoliaFacets.facets);
+    // Mark facets as selected based on query parameters
+    Object.entries(facets).forEach(([name, facet]) => {
+      /**
+       * e.g., name === "owner"
+       * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
+       */
+      this.markSelected(facet, routeParams[name]);
+    });
 
-        /**
-         * Map the facets to a new object with additional nested properties
-         */
-        let facets: FacetRecords = this.mapStatefulFacetKeys(
-          algoliaFacets.facets,
-        );
-
-        // Mark facets as selected based on query parameters
-        Object.entries(facets).forEach(([name, facet]) => {
-          /**
-           * e.g., name === "owner"
-           * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
-           */
-          this.markSelected(facet, params[name]);
-        });
-
-        return facets;
-      } catch (e: unknown) {
-        console.error(e);
-      }
-    },
-  );
+    return facets;
+  };
 
   /**
    * Returns a SearchResponse for a given index and params.
