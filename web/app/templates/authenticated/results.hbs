@@ -1,5 +1,5 @@
 {{page-title "Search Results"}}
 
-<Header::Toolbar @facets={{@facets}} />
+<Header::Toolbar @facets={{this.model.facets}} />
 
-<Results @results={{@model.results}} @query={{this.q}} />
+<Results @results={{this.model.results}} @query={{this.q}} />

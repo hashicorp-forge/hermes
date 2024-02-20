@@ -7,7 +7,7 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 
-export default class ResultsRoute extends Route {
+export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -52,5 +52,13 @@ export default class ResultsRoute extends Route {
     this.activeFilters.update(params);
 
     return { facets, results };
+  }
+
+  /**
+   * The actions to run when the route is deactivated.
+   * Resets the active filters for the next time the route is activated.
+   */
+  deactivate() {
+    this.activeFilters.reset();
   }
 }
