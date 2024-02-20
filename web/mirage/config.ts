@@ -66,6 +66,7 @@ export default function (mirageConfig) {
                 {},
                 {
                   hits,
+                  facets: [],
                 },
               );
             }
@@ -209,6 +210,7 @@ export default function (mirageConfig) {
               {
                 hits: docMatches.slice(0, HITS_PER_PAGE),
                 nbHits: docMatches.length,
+                facets: [],
               },
             );
           } else {
@@ -222,6 +224,7 @@ export default function (mirageConfig) {
               {
                 hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
                 nbHits: schema.document.all().models.length,
+                facets: [],
               },
             );
           }
