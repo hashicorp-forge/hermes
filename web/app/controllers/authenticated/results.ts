@@ -1,12 +1,10 @@
 import Controller from "@ember/controller";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 export default class AuthenticatedResultsController extends Controller {
-  queryParams = ["docType", "owners", "page", "product", "q", "status"];
+  queryParams = ["page", "q", "scope"];
 
-  docType = [];
   page = 1;
   q = null;
-  owners = [];
-  product = [];
-  status = [];
+  scope = SearchScope.All;
 }

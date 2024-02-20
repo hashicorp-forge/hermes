@@ -7,6 +7,12 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 
+export enum SearchScope {
+  All = "all",
+  Docs = "docs",
+  Projects = "projects",
+}
+
 export default class ResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
@@ -14,22 +20,13 @@ export default class ResultsRoute extends Route {
   @service declare store: StoreService;
 
   queryParams = {
-    docType: {
-      refreshModel: true,
-    },
-    owners: {
-      refreshModel: true,
-    },
     page: {
       refreshModel: true,
     },
-    product: {
-      refreshModel: true,
-    },
-    status: {
-      refreshModel: true,
-    },
     q: {
+      refreshModel: true,
+    },
+    scope: {
       refreshModel: true,
     },
   };
