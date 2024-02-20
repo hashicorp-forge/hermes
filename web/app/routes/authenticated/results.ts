@@ -44,7 +44,6 @@ export default class AuthenticatedResultsRoute extends Route {
     )) as SearchResponse<HermesDocument>;
 
     const facets = this.algolia.getFacets(results, params);
-
     const hits = (results as { hits?: HermesDocument[] }).hits;
 
     if (hits) {

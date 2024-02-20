@@ -24,12 +24,25 @@
   </div>
 {{/if}}
 
-<h1 class="text-display-300 font-semibold">{{@results.nbHits}}
-  documents matching “{{@query}}”</h1>
+<h1
+  data-test-results-header-text
+  class="text-display-300 font-semibold"
+>{{@results.nbHits}}
+  {{if (eq 1 @results.nbHits) "document" "documents"}}
+  {{#if @query}}
+    matching
+    <span
+      class="bg-color-surface-warning text-color-foreground-warning-on-surface"
+    >
+      {{@query}}
+    </span>
+  {{/if}}
+</h1>
 <div class="flex w-full flex-col space-y-12 py-10">
   <div class="tile-list">
     {{#each @results.hits as |doc|}}
       <Doc::Tile
+        data-test-doc-search-result
         @docID="{{doc.objectID}}"
         @isResult={{true}}
         @modifiedTime={{doc.modifiedTime}}

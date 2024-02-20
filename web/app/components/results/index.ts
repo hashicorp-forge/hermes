@@ -16,7 +16,7 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
   }
 
   get lowercasedQuery(): string {
-    return this.args.query.toLowerCase();
+    return this.args.query?.toLowerCase();
   }
 
   get capitalizedQuery(): string {
@@ -27,7 +27,7 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     let hits = this.args.results?.hits as HermesDocument[];
     // Assume at least one of the first 12 hits is a product match for the query.
     return hits.some(
-      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery
+      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery,
     );
   }
 }

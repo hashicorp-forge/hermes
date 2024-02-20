@@ -13,6 +13,7 @@ import {
   TEST_USER_GIVEN_NAME,
   TEST_USER_PHOTO,
 } from "../mirage/utils";
+import { getFacetsFromHits } from "./algolia/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -35,6 +36,13 @@ export default function (mirageConfig) {
         const indexName = request.url.split("indexes/")[1].split("/")[0];
         const requestBody = JSON.parse(request.requestBody);
 
+        const page = requestBody?.page ?? 0;
+        const docModels = schema.document.all().models;
+        const nbHits = docModels.length;
+        const nbPages = Math.ceil(nbHits / HITS_PER_PAGE);
+
+        let facets = requestBody?.facets ?? [];
+
         if (requestBody) {
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
@@ -50,11 +58,12 @@ export default function (mirageConfig) {
 
           if (facetFilters) {
             /**
-             * Facet filters arrive like ["owners:foo@bar.com"]
+             * Handle requests to the /my/documents route.
+             * These arrive like ["owners:foo@bar.com"]
              */
             if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
               // A request from the my/documents route for published docs
-              const hits = schema.document.all().models.filter((doc) => {
+              const hits = docModels.filter((doc) => {
                 return (
                   doc.attrs.owners.includes(TEST_USER_EMAIL) &&
                   doc.attrs.status !== "WIP"
@@ -66,13 +75,46 @@ export default function (mirageConfig) {
                 {},
                 {
                   hits,
-                  facets: [],
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, hits),
+                },
+              );
+            } else {
+              // facetsFilters in this case will be a nested array
+              // TODO: figure out why
+              const facetFilter = facetFilters[0][0];
+
+              console.log("facetFilter", facetFilter);
+
+              // for how we're just enabling one filter at a time;
+              // eventually we'll need to handle multiple filters
+
+              const filterType = facetFilter.split(":")[0];
+              const filterValue = facetFilter.split(":")[1];
+
+              console.log("i'm solid", filterType, filterValue);
+
+              const filteredDocs = docModels.filter((doc) => {
+                return doc.attrs[filterType] === filterValue;
+              });
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits: filteredDocs,
+                  nbHits: filteredDocs.length,
+                  nbPages: Math.ceil(filteredDocs.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, filteredDocs),
                 },
               );
             }
           } else if (facetQuery) {
             // Product/area search
-            let facetMatch = schema.document.all().models.filter((doc) => {
+            let facetMatch = docModels.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()
                 .includes(facetQuery.toLowerCase());
@@ -106,16 +148,22 @@ export default function (mirageConfig) {
                   );
                 });
 
+              const hits = projects.map((project) => {
+                return {
+                  ...project.attrs,
+                  objectID: project.attrs.id,
+                };
+              });
+
               return new Response(
                 200,
                 {},
                 {
-                  hits: projects.map((project) => {
-                    return {
-                      ...project.attrs,
-                      objectID: project.attrs.id,
-                    };
-                  }),
+                  hits,
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, hits),
                 },
               );
             }
@@ -124,7 +172,7 @@ export default function (mirageConfig) {
             let idsToExclude: string[] = [];
 
             const setDefaultDocMatches = () => {
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return (
                   doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
                   doc.attrs.product.toLowerCase().includes(query.toLowerCase())
@@ -137,13 +185,23 @@ export default function (mirageConfig) {
             // Used by the dashboard to fetch docs awaiting review.
             if (filters?.includes("approvers")) {
               const approvers = filters.split("approvers:'")[1].split("'")[0];
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return doc.attrs.approvers.some((approver) => {
                   return approvers.includes(approver);
                 });
               });
 
-              return new Response(200, {}, { hits: docMatches });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: docMatches,
+                  nbHits: docMatches.length,
+                  nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, docMatches),
+                },
+              );
             }
 
             if (filters?.includes("NOT objectID")) {
@@ -167,12 +225,22 @@ export default function (mirageConfig) {
                 .split('docNumber:"')[1]
                 .split('"')[0];
 
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return doc.attrs.docNumber === docNumber;
               });
 
               // Duplicates are detected in the front end
-              return new Response(200, {}, { hits: docMatches });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: docMatches,
+                  nbHits: docMatches.length,
+                  nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, docMatches),
+                },
+              );
             } else if (filters) {
               const requestIsForDocsAwaitingReview =
                 filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
@@ -180,7 +248,7 @@ export default function (mirageConfig) {
               const requestIsForProductDocs = filters.includes(`product:`);
 
               if (requestIsForDocsAwaitingReview) {
-                docMatches = schema.document.all().models.filter((doc) => {
+                docMatches = docModels.filter((doc) => {
                   return (
                     doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
@@ -188,7 +256,7 @@ export default function (mirageConfig) {
                 });
               } else if (requestIsForProductDocs) {
                 const product = filters.split("product:")[1].split('"')[1];
-                docMatches = schema.document.all().models.filter((doc) => {
+                docMatches = docModels.filter((doc) => {
                   return doc.attrs.product === product;
                 });
               } else {
@@ -210,7 +278,9 @@ export default function (mirageConfig) {
               {
                 hits: docMatches.slice(0, HITS_PER_PAGE),
                 nbHits: docMatches.length,
-                facets: [],
+                nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                page,
+                facets: getFacetsFromHits(facets, docMatches),
               },
             );
           } else {
@@ -222,9 +292,11 @@ export default function (mirageConfig) {
               200,
               {},
               {
-                hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
-                nbHits: schema.document.all().models.length,
-                facets: [],
+                hits: docModels.slice(0, HITS_PER_PAGE),
+                nbHits,
+                nbPages,
+                page,
+                facets: getFacetsFromHits(facets, docModels),
               },
             );
           }
@@ -260,6 +332,7 @@ export default function (mirageConfig) {
 
       algoliaHosts.forEach((host) => {
         this.post(host, (schema, request) => {
+          console.log("post up", schema, request);
           return handleAlgoliaRequest(schema, request);
         });
 
@@ -520,7 +593,7 @@ export default function (mirageConfig) {
           200,
           {},
           {
-            facets: [],
+            facets,
             Hits: drafts,
             params: "",
             page: 0,
