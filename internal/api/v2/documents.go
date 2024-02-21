@@ -914,9 +914,11 @@ func updateRecentlyViewedDocs(
 		return fmt.Errorf("error getting viewed document: %w", err)
 	}
 
-	// Find recently viewed documents.
+	// Find recently viewed documents (excluding the current viewed document).
 	var rvd []models.RecentlyViewedDoc
 	if err := db.Where(&models.RecentlyViewedDoc{UserID: int(u.ID)}).
+		Not("document_id = ?", doc.ID).
+		Limit(9).
 		Order("viewed_at desc").
 		Find(&rvd).Error; err != nil {
 		return fmt.Errorf("error finding recently viewed docs for user: %w", err)
@@ -930,26 +932,16 @@ func updateRecentlyViewedDocs(
 		}},
 		rvd...)
 
-	// Get document records for recently viewed docs.
-	docs := []models.Document{}
-	for _, d := range rvd {
-		dd := models.Document{
-			Model: gorm.Model{
-				ID: uint(d.DocumentID),
-			},
-		}
-		if err := dd.Get(db); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				continue
-			}
-			return fmt.Errorf("error getting document: %w", err)
-		}
-		docs = append(docs, dd)
+	// Make slice of recently viewed document IDs.
+	docIDs := make([]int, len(rvd))
+	for i, d := range rvd {
+		docIDs[i] = d.DocumentID
 	}
 
-	// Trim recently viewed documents to a length of 11.
-	if len(docs) > 11 {
-		docs = docs[:11]
+	// Get document records for recently viewed documents.
+	var docs []models.Document
+	if err := db.Where("id IN ?", docIDs).Find(&docs).Error; err != nil {
+		return fmt.Errorf("error getting documents: %w", err)
 	}
 
 	// Update user.
@@ -958,7 +950,7 @@ func updateRecentlyViewedDocs(
 		return fmt.Errorf("error upserting user: %w", err)
 	}
 
-	// Update ViewedAt time for this document.
+	// Update ViewedAt time for the viewed document.
 	viewedDoc := models.RecentlyViewedDoc{
 		UserID:     int(u.ID),
 		DocumentID: int(doc.ID),
