@@ -1,7 +1,7 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { render } from "@ember/test-helpers";
+import { render, rerender } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import RecentlyViewedService from "hermes/services/recently-viewed";
 
@@ -34,6 +34,8 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
     this.server.create("recently-viewed-doc");
 
     await this.recentlyViewed.fetchAll.perform();
+
+    await rerender();
 
     assert.dom(NO_RECENTLY_VIEWED).doesNotExist();
     assert.dom(ITEM).exists({ count: 1 });
