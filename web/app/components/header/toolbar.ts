@@ -53,6 +53,50 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
+   * Function to return whether a dropdown should be disabled.
+   * If the facet is not available, it should be disabled, otherwise
+   * it should be enabled unless there are active filters for that facet.
+   */
+  private isDropdownDisabled(facet: FacetName): boolean {
+    if (!this.args.facets?.[facet]) {
+      return true;
+    }
+    return this.activeFilters.index[facet].length !== 0;
+  }
+
+  /**
+   * Whether the docType dropdown should be disabled.
+   * True if the docType facet is available and not active.
+   */
+  protected get docTypeDropdownIsDisabled(): boolean {
+    return this.isDropdownDisabled(FacetName.DocType);
+  }
+
+  /**
+   * Whether the status dropdown should be disabled.
+   * True if the status facet is available and not active.
+   */
+  protected get statusDropdownIsDisabled(): boolean {
+    return this.isDropdownDisabled(FacetName.Status);
+  }
+
+  /**
+   * Whether the product dropdown should be disabled.
+   * True if the product facet is available and not active.
+   */
+  protected get productDropdownIsDisabled(): boolean {
+    return this.isDropdownDisabled(FacetName.Product);
+  }
+
+  /**
+   * Whether the owners dropdown should be disabled.
+   * True if the owners facet is available and not active.
+   */
+  protected get ownersDropdownIsDisabled(): boolean {
+    return this.isDropdownDisabled(FacetName.Owners);
+  }
+
+  /**
    * The statuses available as filters.
    */
   protected get statuses(): FacetDropdownObjects | null {
@@ -71,12 +115,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       }
     }
 
-    if (Object.keys(statuses).length === 0) {
-      // This will disable the status dropdown
-      return null;
-    } else {
-      return statuses;
-    }
+    return statuses;
   }
 
   /**

@@ -1,8 +1,22 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, click, findAll, render } from "@ember/test-helpers";
+import {
+  TestContext,
+  click,
+  findAll,
+  render,
+  rerender,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
+import ActiveFiltersService from "hermes/services/active-filters";
+
+// Filter buttons
+const FACET_DROPDOWN_TOGGLE = "[data-test-facet-dropdown-toggle]";
+const DOC_TYPE_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="type"]`;
+const STATUS_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="status"]`;
+const PRODUCT_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="product/area"]`;
+const OWNER_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="owner"]`;
 
 const FACETS = {
   docType: {
@@ -84,13 +98,44 @@ module("Integration | Component | header/toolbar", function (hooks) {
     );
   });
 
-  test("it conditionally renders the status facet disabled", async function (assert) {
-    this.set("facets", { status: {} });
+  test("it conditionally renders the facet toggles disabled", async function (assert) {
+    // Test that undefined facets are disabled
+
+    this.set("facets", { ...FACETS, status: undefined });
+
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
+
+    assert.dom("[data-test-facet-dropdown-trigger='Status']").isDisabled;
+
+    assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
+    assert.dom(PRODUCT_TOGGLE).isNotDisabled();
+    assert.dom(OWNER_TOGGLE).isNotDisabled();
+
     assert
-      .dom("[data-test-facet-dropdown-trigger='Status']")
-      .hasAttribute("disabled");
+      .dom(STATUS_TOGGLE)
+      .isDisabled("the undefined status facet is disabled");
+
+    // Test that facets with active filters are disabled
+
+    const activeFilters = this.owner.lookup(
+      "service:active-filters",
+    ) as ActiveFiltersService;
+
+    activeFilters.update({
+      docType: ["RFC"],
+      status: [],
+      product: [],
+      owners: [],
+      page: 0,
+      sortBy: "",
+    });
+
+    await rerender();
+
+    assert
+      .dom(DOC_TYPE_TOGGLE)
+      .isDisabled("the dropdown with an active filter is disabled");
   });
 });
