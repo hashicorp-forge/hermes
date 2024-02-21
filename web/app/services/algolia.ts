@@ -287,31 +287,36 @@ export default class AlgoliaService extends Service {
 
   /**
    * Returns FacetRecords for a given index and params.
-   * Sends a blank query to Algolia to get the facets of the entire index.
+   * Sends a filter-less query to Algolia to get the facets of the entire index.
    * (We don't yet scope facets to the current facetFilters.)
    */
   getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
-    const algoliaFacets = await this.searchIndex.perform(searchIndex, "", {
-      facets: FACET_NAMES,
-      hitsPerPage: HITS_PER_PAGE,
-      maxValuesPerFacet: MAX_VALUES_PER_FACET,
-      page: 0,
-    });
+    try {
+      const query = params["q"] || "";
 
-    const facets = this.mapStatefulFacetKeys(
-      algoliaFacets.facets as AlgoliaFacetsObject,
-    );
+      const algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
+        hitsPerPage: HITS_PER_PAGE,
+        maxValuesPerFacet: MAX_VALUES_PER_FACET,
+        page: 0,
+      });
 
-    // Mark facets as selected based on query parameters
-    Object.entries(facets).forEach(([name, facet]) => {
-      /**
-       * e.g., name === "owner"
-       * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
-       */
-      this.markSelected(facet, params[name]);
-    });
+      const facets = this.mapStatefulFacetKeys(
+        algoliaFacets.facets as AlgoliaFacetsObject,
+      );
 
-    return facets;
+      // Mark facets as selected based on query parameters
+      Object.entries(facets).forEach(([name, facet]) => {
+        /**
+         * e.g., name === "owner"
+         * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
+         */
+        this.markSelected(facet, params[name]);
+      });
+
+      return facets;
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   /**
