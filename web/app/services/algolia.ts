@@ -287,14 +287,15 @@ export default class AlgoliaService extends Service {
 
   /**
    * Returns FacetRecords for a given index and params.
-   * Sends a filter-less query to Algolia to get the facets of the entire index.
+   * Sends a non-faceted query to Algolia to get the facets of the entire index.
    * (We don't yet scope facets to the current facetFilters.)
    */
   getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
-    try {
-      const query = params["q"] || "";
+    const query = params["q"] || "";
 
+    try {
       const algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
+        facets: FACET_NAMES,
         hitsPerPage: HITS_PER_PAGE,
         maxValuesPerFacet: MAX_VALUES_PER_FACET,
         page: 0,
