@@ -175,25 +175,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}
 			doc.ModifiedTime = modifiedTime.Unix()
 
-			// Get owner photo by searching Google Workspace directory.
-			if len(doc.Owners) > 0 {
-				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
-				if err != nil {
-					srv.Logger.Error("error searching directory for owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) > 0 {
-					if len(ppl[0].Photos) > 0 {
-						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
-					}
-				}
-			}
-
 			// Convert document to Algolia object because this is how it is expected
 			// by the frontend.
 			docObj, err := doc.ToAlgoliaObject(false)
@@ -222,9 +203,9 @@ func DocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
-			projIDs := []int{}
-			for _, p := range projs {
-				projIDs = append(projIDs, int(p.ID))
+			projIDs := make([]int, len(projs))
+			for i, p := range projs {
+				projIDs[i] = int(p.ID)
 			}
 			docObj["projects"] = projIDs
 
@@ -244,28 +225,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Update recently viewed documents if this is a document view event. The
-			// Add-To-Recently-Viewed header is set in the request from the frontend
-			// to differentiate between document views and requests to only retrieve
-			// document metadata.
-			if r.Header.Get("Add-To-Recently-Viewed") != "" {
-				// Get authenticated user's email address.
-				email := r.Context().Value("userEmail").(string)
-
-				if err := updateRecentlyViewedDocs(
-					email, docID, srv.DB, now,
-				); err != nil {
-					// If we get an error, log it but don't return an error response
-					// because this would degrade UX.
-					srv.Logger.Error("error updating recently viewed docs",
-						"error", err,
-						"doc_id", docID,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-				}
-			}
-
 			srv.Logger.Info("retrieved document",
 				"doc_id", docID,
 				"method", r.Method,
@@ -274,6 +233,26 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
+				// Update recently viewed documents if this is a document view event. The
+				// Add-To-Recently-Viewed header is set in the request from the frontend
+				// to differentiate between document views and requests to only retrieve
+				// document metadata.
+				if r.Header.Get("Add-To-Recently-Viewed") != "" {
+					// Get authenticated user's email address.
+					email := r.Context().Value("userEmail").(string)
+
+					if err := updateRecentlyViewedDocs(
+						email, docID, srv.DB, now,
+					); err != nil {
+						srv.Logger.Error("error updating recently viewed docs",
+							"error", err,
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+					}
+				}
+
 				// Compare Algolia and database documents to find data inconsistencies.
 				// Get document object from Algolia.
 				var algoDoc map[string]any
@@ -935,9 +914,11 @@ func updateRecentlyViewedDocs(
 		return fmt.Errorf("error getting viewed document: %w", err)
 	}
 
-	// Find recently viewed documents.
+	// Find recently viewed documents (excluding the current viewed document).
 	var rvd []models.RecentlyViewedDoc
 	if err := db.Where(&models.RecentlyViewedDoc{UserID: int(u.ID)}).
+		Not("document_id = ?", doc.ID).
+		Limit(9).
 		Order("viewed_at desc").
 		Find(&rvd).Error; err != nil {
 		return fmt.Errorf("error finding recently viewed docs for user: %w", err)
@@ -951,26 +932,16 @@ func updateRecentlyViewedDocs(
 		}},
 		rvd...)
 
-	// Get document records for recently viewed docs.
-	docs := []models.Document{}
-	for _, d := range rvd {
-		dd := models.Document{
-			Model: gorm.Model{
-				ID: uint(d.DocumentID),
-			},
-		}
-		if err := dd.Get(db); err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				continue
-			}
-			return fmt.Errorf("error getting document: %w", err)
-		}
-		docs = append(docs, dd)
+	// Make slice of recently viewed document IDs.
+	docIDs := make([]int, len(rvd))
+	for i, d := range rvd {
+		docIDs[i] = d.DocumentID
 	}
 
-	// Trim recently viewed documents to a length of 11.
-	if len(docs) > 11 {
-		docs = docs[:11]
+	// Get document records for recently viewed documents.
+	var docs []models.Document
+	if err := db.Where("id IN ?", docIDs).Find(&docs).Error; err != nil {
+		return fmt.Errorf("error getting documents: %w", err)
 	}
 
 	// Update user.
@@ -979,7 +950,7 @@ func updateRecentlyViewedDocs(
 		return fmt.Errorf("error upserting user: %w", err)
 	}
 
-	// Update ViewedAt time for this document.
+	// Update ViewedAt time for the viewed document.
 	viewedDoc := models.RecentlyViewedDoc{
 		UserID:     int(u.ID),
 		DocumentID: int(doc.ID),
