@@ -750,25 +750,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 			doc.ModifiedTime = modifiedTime.Unix()
 
-			// Get owner photo by searching Google Workspace directory.
-			if len(doc.Owners) > 0 {
-				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
-				if err != nil {
-					srv.Logger.Error("error searching directory for owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) > 0 {
-					if len(ppl[0].Photos) > 0 {
-						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
-					}
-				}
-			}
-
 			// Convert document to Algolia object because this is how it is expected
 			// by the frontend.
 			docObj, err := doc.ToAlgoliaObject(false)
