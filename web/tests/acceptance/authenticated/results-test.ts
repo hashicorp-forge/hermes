@@ -76,7 +76,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     // Create 3 RFCs
     // 2 for Vault; 1 for Terraform
 
-    this.server.createList("document", 2, {
+    this.server.createList("document", 4, {
       docType: "RFC",
       product: "Vault",
     });
@@ -88,7 +88,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     // Create 5 FRDs
     // 4 for Vault; 1 for Terraform
 
-    this.server.createList("document", 4, {
+    this.server.createList("document", 2, {
       docType: "FRD",
       product: "Vault",
     });
@@ -198,7 +198,7 @@ module("Acceptance | authenticated/results", function (hooks) {
       .containsText("FRD")
       .hasAttribute(
         "href",
-        "/results?product=Terraform",
+        "/results?product=%5B%22Terraform%22%5D",
         "correct href to remove the filter",
       );
 
@@ -209,7 +209,7 @@ module("Acceptance | authenticated/results", function (hooks) {
       .containsText("Terraform")
       .hasAttribute(
         "href",
-        "/results?docType=FRD",
+        "/results?docType=%5B%22FRD%22%5D",
         "correct href to remove the filter",
       );
 

@@ -1,3 +1,5 @@
+import { assert } from "@ember/debug";
+
 /**
  * The function to return facet objects from an array of hits.
  * Takes an array of hits and array of facet names and returns
@@ -18,24 +20,17 @@
 export function getFacetsFromHits(facetNames: string[], hits: any[]) {
   let facets: Record<string, Record<string, number>> = {};
 
-  // Initialize the facets object
-  facetNames.forEach((facet) => {
-    // facet, e.g., "owners"
-    // now need to get the unique values for this facet
-    // and count how many times they appear in the hits
-    facets[facet] = {};
+  facetNames.forEach((facetName) => {
+    facets[facetName] = {};
 
-    // now we have a facet object like this:
-    // { owners: {}, product: {} }
+    let uniqueValues = new Set(hits.map((hit) => hit[facetName]));
 
-    // Get the unique values for this facet
-    let uniqueValues = new Set(hits.map((hit) => hit[facet]));
+    // Calculate count
 
-    // Count how many times each unique value appears in the hits
     uniqueValues.forEach((value) => {
-      let count = hits.filter((hit) => hit[facet] === value).length;
+      let count = hits.filter((hit) => hit[facetName] === value).length;
 
-      const obj = facets[facet];
+      const obj = facets[facetName];
 
       if (!obj) {
         throw new Error("facet not found");
@@ -43,6 +38,17 @@ export function getFacetsFromHits(facetNames: string[], hits: any[]) {
 
       obj[value] = count;
     });
+
+    // Sort by highest count
+
+    const facet = facets[facetName];
+    assert("facet must exist", facet);
+
+    const sorted = Object.fromEntries(
+      Object.entries(facet).sort(([, a], [, b]) => b - a),
+    );
+
+    facets[facetName] = sorted;
   });
 
   return facets;

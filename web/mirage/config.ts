@@ -5,6 +5,7 @@ import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { assert as emberAssert } from "@ember/debug";
 
 import {
   TEST_WEB_CONFIG,
@@ -82,33 +83,41 @@ export default function (mirageConfig) {
                 },
               );
             } else {
-              // facetsFilters in this case will be a nested array
-              // TODO: figure out why
-              const facetFilter = facetFilters[0][0];
+              // FacetFilters come nested like this:
+              // [["product:Vault", "docType:RFC"]]
+              // so we need to flatten them
 
-              console.log("facetFilter", facetFilter);
+              facetFilters = facetFilters.flat();
 
-              // for how we're just enabling one filter at a time;
-              // eventually we'll need to handle multiple filters
+              // Create a placeholder object to hold the search params
 
-              const filterType = facetFilter.split(":")[0];
-              const filterValue = facetFilter.split(":")[1];
+              let searchParams: Record<string, any> = {};
 
-              console.log("i'm solid", filterType, filterValue);
+              // Loop through facetFilters and add them to the params
 
-              const filteredDocs = docModels.filter((doc) => {
-                return doc.attrs[filterType] === filterValue;
+              facetFilters.forEach((filter: string) => {
+                const filterType = filter.split(":")[0];
+                const filterValue = filter.split(":")[1];
+
+                emberAssert("filterType must exist", filterType);
+
+                searchParams[filterType] = filterValue;
               });
+
+              // Query Mirage using the search params
+
+              const docResults = this.schema.document.where(searchParams);
+              const hits = docResults.models.map((doc) => doc.attrs);
 
               return new Response(
                 200,
                 {},
                 {
-                  hits: filteredDocs,
-                  nbHits: filteredDocs.length,
-                  nbPages: Math.ceil(filteredDocs.length / HITS_PER_PAGE),
+                  hits,
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
                   page,
-                  facets: getFacetsFromHits(facets, filteredDocs),
+                  facets: getFacetsFromHits(facets, hits),
                 },
               );
             }
@@ -332,7 +341,6 @@ export default function (mirageConfig) {
 
       algoliaHosts.forEach((host) => {
         this.post(host, (schema, request) => {
-          console.log("post up", schema, request);
           return handleAlgoliaRequest(schema, request);
         });
 
@@ -593,7 +601,6 @@ export default function (mirageConfig) {
           200,
           {},
           {
-            facets,
             Hits: drafts,
             params: "",
             page: 0,
