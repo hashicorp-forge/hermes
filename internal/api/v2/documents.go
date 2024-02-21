@@ -203,9 +203,9 @@ func DocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
-			projIDs := []int{}
-			for _, p := range projs {
-				projIDs = append(projIDs, int(p.ID))
+			projIDs := make([]int, len(projs))
+			for i, p := range projs {
+				projIDs[i] = int(p.ID)
 			}
 			docObj["projects"] = projIDs
 
