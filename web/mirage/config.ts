@@ -908,7 +908,8 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index);
+
+        return new Response(200, {}, index.length === 0 ? undefined : index);
       });
 
       /**
@@ -920,7 +921,8 @@ export default function (mirageConfig) {
           .models.map((project) => {
             return project.attrs;
           });
-        return new Response(200, {}, index);
+
+        return new Response(200, {}, index.length === 0 ? undefined : index);
       });
 
       /**
