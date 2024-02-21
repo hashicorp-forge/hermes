@@ -783,25 +783,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Update recently viewed documents if this is a document view event. The
-			// Add-To-Recently-Viewed header is set in the request from the frontend
-			// to differentiate between document views and requests to only retrieve
-			// document metadata.
-			if r.Header.Get("Add-To-Recently-Viewed") != "" {
-				if err := updateRecentlyViewedDocs(
-					userEmail, docID, srv.DB, now,
-				); err != nil {
-					// If we get an error, log it but don't return an error response
-					// because this would degrade UX.
-					srv.Logger.Error("error updating recently viewed docs",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-				}
-			}
-
 			srv.Logger.Info("retrieved document draft",
 				"method", r.Method,
 				"path", r.URL.Path,
@@ -810,6 +791,23 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
+				// Update recently viewed documents if this is a document view event. The
+				// Add-To-Recently-Viewed header is set in the request from the frontend
+				// to differentiate between document views and requests to only retrieve
+				// document metadata.
+				if r.Header.Get("Add-To-Recently-Viewed") != "" {
+					if err := updateRecentlyViewedDocs(
+						userEmail, docID, srv.DB, now,
+					); err != nil {
+						srv.Logger.Error("error updating recently viewed docs",
+							"error", err,
+							"path", r.URL.Path,
+							"method", r.Method,
+							"doc_id", docID,
+						)
+					}
+				}
+
 				// Compare Algolia and database documents to find data inconsistencies.
 				// Get document object from Algolia.
 				var algoDoc map[string]any
