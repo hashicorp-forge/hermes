@@ -71,7 +71,12 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       }
     }
 
-    return statuses;
+    if (Object.keys(statuses).length === 0) {
+      // This will disable the status dropdown
+      return null;
+    } else {
+      return statuses;
+    }
   }
 
   /**

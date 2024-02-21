@@ -17,7 +17,7 @@
             data-test-status-facet-dropdown
             @label="Status"
             @facets={{this.statuses}}
-            @disabled={{not @facets.status}}
+            @disabled={{not this.statuses}}
             @position="center"
             class="medium"
           />
