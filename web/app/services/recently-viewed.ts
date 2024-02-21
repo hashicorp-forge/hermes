@@ -76,7 +76,6 @@ export default class RecentlyViewedService extends Service {
           `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
         )
         .then((resp) => resp?.json());
-
       // Set a promise to fetch the recently viewed projects
       const recentlyViewedProjectsPromise = this.fetchSvc
         .fetch(
@@ -128,8 +127,6 @@ export default class RecentlyViewedService extends Service {
             }),
         );
       });
-
-      console.log("fullItemPromises", fullItemPromises);
 
       // Await the full item promises
       const formattedItems = await Promise.all(fullItemPromises);

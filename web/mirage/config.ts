@@ -909,7 +909,7 @@ export default function (mirageConfig) {
           return doc.attrs;
         });
 
-        return new Response(200, {}, index.length === 0 ? undefined : index);
+        return new Response(200, {}, index.length === 0 ? null : index);
       });
 
       /**
@@ -922,7 +922,7 @@ export default function (mirageConfig) {
             return project.attrs;
           });
 
-        return new Response(200, {}, index.length === 0 ? undefined : index);
+        return new Response(200, {}, index.length === 0 ? null : index);
       });
 
       /**

@@ -30,6 +30,13 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
 
     assert.dom(NO_RECENTLY_VIEWED).exists();
     assert.dom(ITEM).doesNotExist();
+
+    this.server.create("recently-viewed-doc");
+
+    await this.recentlyViewed.fetchAll.perform();
+
+    assert.dom(NO_RECENTLY_VIEWED).doesNotExist();
+    assert.dom(ITEM).exists({ count: 1 });
   });
 
   test("it lists recently viewed projects and docs", async function (this: Context, assert) {
