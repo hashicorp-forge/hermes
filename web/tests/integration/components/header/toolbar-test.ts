@@ -98,44 +98,17 @@ module("Integration | Component | header/toolbar", function (hooks) {
     );
   });
 
-  test("it conditionally renders the facet toggles disabled", async function (assert) {
-    // Test that undefined facets are disabled
-
+  test("it renders undefined facets disabled", async function (assert) {
     this.set("facets", { ...FACETS, status: undefined });
 
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert.dom("[data-test-facet-dropdown-trigger='Status']").isDisabled;
-
     assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
     assert.dom(PRODUCT_TOGGLE).isNotDisabled();
     assert.dom(OWNER_TOGGLE).isNotDisabled();
 
-    assert
-      .dom(STATUS_TOGGLE)
-      .isDisabled("the undefined status facet is disabled");
-
-    // Test that facets with active filters are disabled
-
-    const activeFilters = this.owner.lookup(
-      "service:active-filters",
-    ) as ActiveFiltersService;
-
-    activeFilters.update({
-      docType: ["RFC"],
-      status: [],
-      product: [],
-      owners: [],
-      page: 0,
-      sortBy: "",
-    });
-
-    await rerender();
-
-    assert
-      .dom(DOC_TYPE_TOGGLE)
-      .isDisabled("the dropdown with an active filter is disabled");
+    assert.dom(STATUS_TOGGLE).isDisabled("the empty status facet is disabled");
   });
 });

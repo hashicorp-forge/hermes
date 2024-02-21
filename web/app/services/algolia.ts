@@ -287,11 +287,19 @@ export default class AlgoliaService extends Service {
 
   /**
    * Returns FacetRecords for a given index and params.
-   * If the user is the owner, the facets will be filtered by the owner's email.
+   * Sends a blank query to Algolia to get the facets of the entire index.
+   * (We don't yet scope facets to the current facetFilters.)
    */
-  getFacets = (results: SearchResponse, routeParams: Record<string, any>) => {
+  getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
+    const algoliaFacets = await this.searchIndex.perform(searchIndex, "", {
+      facets: FACET_NAMES,
+      hitsPerPage: HITS_PER_PAGE,
+      maxValuesPerFacet: MAX_VALUES_PER_FACET,
+      page: 0,
+    });
+
     const facets = this.mapStatefulFacetKeys(
-      results.facets as AlgoliaFacetsObject,
+      algoliaFacets.facets as AlgoliaFacetsObject,
     );
 
     // Mark facets as selected based on query parameters
@@ -300,11 +308,11 @@ export default class AlgoliaService extends Service {
        * e.g., name === "owner"
        * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
        */
-      this.markSelected(facet, routeParams[name]);
+      this.markSelected(facet, params[name]);
     });
 
     return facets;
-  };
+  });
 
   /**
    * Returns a SearchResponse for a given index and params.

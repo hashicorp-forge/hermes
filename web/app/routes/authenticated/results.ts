@@ -38,12 +38,11 @@ export default class AuthenticatedResultsRoute extends Route {
   async model(params: ResultsRouteParams) {
     const searchIndex = this.configSvc.config.algolia_docs_index_name;
 
-    const results = (await this.algolia.getDocResults.perform(
-      searchIndex,
-      params,
-    )) as SearchResponse<HermesDocument>;
+    const [results, facets] = await Promise.all([
+      this.algolia.getDocResults.perform(searchIndex, params),
+      this.algolia.getFacets.perform(searchIndex, params),
+    ]);
 
-    const facets = this.algolia.getFacets(results, params);
     const hits = (results as { hits?: HermesDocument[] }).hits;
 
     if (hits) {

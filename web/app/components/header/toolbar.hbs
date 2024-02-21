@@ -10,14 +10,14 @@
             data-test-doc-type-facet-dropdown
             @label="Type"
             @facets={{@facets.docType}}
-            @disabled={{this.docTypeDropdownIsDisabled}}
+            @disabled={{not @facets.docType}}
             @position="left"
           />
           <Header::FacetDropdown
             data-test-status-facet-dropdown
             @label="Status"
             @facets={{this.statuses}}
-            @disabled={{this.statusDropdownIsDisabled}}
+            @disabled={{not @facets.status}}
             @position="center"
             class="medium"
           />
@@ -25,14 +25,14 @@
             data-test-product-facet-dropdown
             @label="Product/Area"
             @facets={{@facets.product}}
-            @disabled={{this.productDropdownIsDisabled}}
+            @disabled={{not @facets.product}}
             @position="center"
           />
           <Header::FacetDropdown
             data-test-owner-facet-dropdown
             @label="Owner"
             @facets={{@facets.owners}}
-            @disabled={{this.ownersDropdownIsDisabled}}
+            @disabled={{not @facets.owners}}
             @position="right"
           />
         </div>
