@@ -11,10 +11,6 @@ interface ResultsIndexComponentSignature {
 }
 
 export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
-  get firstPageIsShown(): boolean {
-    return this.args.results.page === 0;
-  }
-
   get lowercasedQuery(): string {
     return this.args.query?.toLowerCase();
   }

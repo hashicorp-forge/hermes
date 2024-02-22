@@ -1,29 +1,3 @@
-{{#if (and this.firstPageIsShown this.queryIsProductName)}}
-  <div
-    class="flex w-full flex-col items-start pb-10"
-    data-test-results-product-link
-  >
-    <Hds::Card::Container
-      @level="mid"
-      @hasBorder="true"
-      @overflow="hidden"
-      class="flex flex-col items-start space-y-3 px-4 pt-4 pb-3"
-    >
-      <Hds::Badge
-        @text={{this.capitalizedQuery}}
-        @icon={{or (get-product-id @query) "folder"}}
-      />
-      <Hds::Link::Standalone
-        @text="View all {{this.capitalizedQuery}} documents"
-        @icon="arrow-right-circle"
-        @iconPosition="trailing"
-        @route="authenticated.documents"
-        @query={{hash product=(array this.capitalizedQuery)}}
-      />
-    </Hds::Card::Container>
-  </div>
-{{/if}}
-
 <h1
   data-test-results-header-text
   class="mb-4 text-display-300 font-semibold"

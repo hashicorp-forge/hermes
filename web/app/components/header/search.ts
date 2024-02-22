@@ -112,7 +112,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         } else {
           // Cancel real-time search and kick off a transition to `/results`
           this.search.cancelAll();
-          this.viewAllResults();
+          this.viewAllResults(dd);
         }
       }
     }
@@ -189,17 +189,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * route and query information.
    */
   @action protected viewAllResults(dd?: XDropdownListAnchorAPI): void {
-    if (!dd?.contentIsShown) {
-      /**
-       * When the user hits enter before the dropdown is shown,
-       * we transition to the results page using the router.
-       */
-      this.router.transitionTo("authenticated.results", {
-        queryParams: {
-          q: this.query,
-        },
-      });
-    } else {
+    if (dd?.contentIsShown) {
       /**
        * When possible, we trigger the transition with a click
        * to avoid any potential drift from the LinkTo handler.
@@ -207,6 +197,17 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       assert("viewAllResultsLink is expected", this.viewAllResultsLink);
       this.viewAllResultsLink.click();
       dd.hideContent();
+    } else {
+      /**
+       * When the user hits enter before the dropdown is shown,
+       * we transition to the results page using the router.
+       */
+      this.router.transitionTo("authenticated.results", {
+        queryParams: {
+          q: this.query,
+          page: 1,
+        },
+      });
     }
   }
 
