@@ -21,7 +21,7 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
   }
 
   get lowercasedQuery(): string {
-    return this.args.query.toLowerCase();
+    return this.args.query?.toLowerCase();
   }
 
   get capitalizedQuery(): string {

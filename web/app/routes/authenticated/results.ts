@@ -9,7 +9,6 @@ import { HermesDocument } from "hermes/types/document";
 import { FacetRecords } from "hermes/types/facets";
 import { SearchResponse } from "instantsearch.js";
 import { HermesProject } from "hermes/types/project";
-import { TaskInstance } from "ember-concurrency";
 
 export enum SearchScope {
   All = "all",
@@ -17,7 +16,7 @@ export enum SearchScope {
   Projects = "projects",
 }
 
-export default class ResultsRoute extends Route {
+export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -108,5 +107,13 @@ export default class ResultsRoute extends Route {
     });
 
     return { docFacets, docResults, projectFacets, projectResults };
+  }
+
+  /**
+   * The actions to run when the route is deactivated.
+   * Resets the active filters for the next time the route is activated.
+   */
+  deactivate() {
+    this.activeFilters.reset();
   }
 }

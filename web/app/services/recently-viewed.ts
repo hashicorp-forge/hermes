@@ -71,20 +71,17 @@ export default class RecentlyViewedService extends Service {
   fetchAll = keepLatestTask(async () => {
     try {
       // Set a promise to fetch the recently viewed docs
-      const recentlyViewedDocsPromise =
-        this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
-          )
-          .then((resp) => resp?.json()) || [];
-
+      const recentlyViewedDocsPromise = this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
+        )
+        .then((resp) => resp?.json());
       // Set a promise to fetch the recently viewed projects
-      const recentlyViewedProjectsPromise =
-        this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
-          )
-          .then((resp) => resp?.json()) || [];
+      const recentlyViewedProjectsPromise = this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
+        )
+        .then((resp) => resp?.json());
 
       // Await both promises
       const [recentlyViewedDocs, recentlyViewedProjects] = await Promise.all([
@@ -98,7 +95,7 @@ export default class RecentlyViewedService extends Service {
       >[] = [];
 
       // Promise to get each doc and return it in the RecentlyViewedDoc format
-      recentlyViewedDocs.forEach((d: IndexedDoc) => {
+      recentlyViewedDocs?.forEach((d: IndexedDoc) => {
         const endpoint = d.isDraft ? "drafts" : "documents";
 
         fullItemPromises.push(
@@ -117,7 +114,7 @@ export default class RecentlyViewedService extends Service {
       });
 
       // Promise to get each project and return it in the RecentlyViewedProject format
-      recentlyViewedProjects.forEach((p: IndexedProject) => {
+      recentlyViewedProjects?.forEach((p: IndexedProject) => {
         fullItemPromises.push(
           this.fetchSvc
             .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)

@@ -7,12 +7,14 @@
         </h4>
         <div class="facets flex items-center">
           <Header::FacetDropdown
+            data-test-doc-type-facet-dropdown
             @label="Type"
             @facets={{@docFacets.docType}}
             @disabled={{not @docFacets.docType}}
             @position="left"
           />
           <Header::FacetDropdown
+            data-test-status-facet-dropdown
             @label="Status"
             @facets={{this.statuses}}
             @disabled={{not this.statuses}}
@@ -20,12 +22,14 @@
             class="medium"
           />
           <Header::FacetDropdown
+            data-test-product-facet-dropdown
             @label="Product/Area"
             @facets={{@docFacets.product}}
             @disabled={{not @docFacets.product}}
             @position="center"
           />
           <Header::FacetDropdown
+            data-test-owner-facet-dropdown
             @label="Owner"
             @facets={{@docFacets.owners}}
             @disabled={{not @docFacets.owners}}

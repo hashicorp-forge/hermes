@@ -8,6 +8,8 @@
 >
   <:anchor as |dd|>
     <dd.ToggleButton
+      data-test-facet-dropdown-toggle
+      data-test-facet={{dasherize @label}}
       class="focus:z-10 focus-visible:z-10 active:z-10
         {{if this.positionIsLeft 'rounded-r-none'}}
         {{if this.positionIsCenter 'rounded-none border-l-0'}}
@@ -19,6 +21,7 @@
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
+      data-test-facet-dropdown-link
       @route={{this.currentRouteName}}
       @query={{get-facet-query-hash @label dd.value dd.attrs.isSelected}}
     >
