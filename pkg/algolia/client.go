@@ -142,7 +142,7 @@ func New(cfg *Config) (*Client, error) {
 			"content:30",
 		),
 		HighlightPostTag:    opt.HighlightPostTag("</mark>"),
-		HighlightPreTag:     opt.HighlightPreTag(`<mark class="hds-surface-warning hds-foreground-warning-on-surface">`),
+		HighlightPreTag:     opt.HighlightPreTag(`<mark>`),
 		SnippetEllipsisText: opt.SnippetEllipsisText("..."),
 
 		// Ranking

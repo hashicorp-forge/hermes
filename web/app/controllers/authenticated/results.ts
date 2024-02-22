@@ -13,4 +13,19 @@ export default class AuthenticatedResultsController extends Controller {
   status = [];
 
   declare model: ModelFrom<AuthenticatedResultsRoute>;
+
+  /**
+   * The value to use for the page title.
+   * If a query is present, which it usually is,
+   * it's prepended to the title.
+   */
+  protected get pageTitle() {
+    let title = "Search";
+
+    if (this.q) {
+      title = `${this.q} • ${title}`;
+    }
+
+    return title;
+  }
 }

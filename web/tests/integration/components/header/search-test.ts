@@ -1,7 +1,14 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render, triggerKeyEvent } from "@ember/test-helpers";
+import {
+  click,
+  fillIn,
+  render,
+  triggerKeyEvent,
+  focus,
+  waitFor,
+} from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { authenticateTestUser } from "hermes/mirage/utils";
@@ -10,6 +17,8 @@ const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
 const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
 const POPOVER_SELECTOR = ".search-popover";
 const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+
+const POPOVER_LOADING_ICON = "[data-test-x-dropdown-list-loading-block]";
 
 const PRODUCT_AREA_HITS = "[data-test-product-area-hits]";
 const PROJECT_HITS = "[data-test-project-hits]";
@@ -21,19 +30,21 @@ const PRODUCT_AREA_HIT = "[data-test-product-area-hit]";
 const PROJECT_HIT = "[data-test-project-hit]";
 const DOCUMENT_HIT = "[data-test-document-hit]";
 
-interface HeaderSearchTestContext extends MirageTestContext {}
+interface Context extends MirageTestContext {
+  query: string;
+}
 
 module("Integration | Component | header/search", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(function (this: HeaderSearchTestContext) {
+  hooks.beforeEach(function (this: Context) {
     authenticateTestUser(this);
     this.server.createList("document", 5);
   });
 
-  test("it renders correctly", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it renders correctly", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search class="test-search" />
     `);
 
@@ -44,8 +55,8 @@ module("Integration | Component | header/search", function (hooks) {
       .hasAttribute("placeholder", "Search Hermes...");
   });
 
-  test("it conditionally shows a keyboard shortcut icon", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it conditionally shows a keyboard shortcut icon", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -62,8 +73,8 @@ module("Integration | Component | header/search", function (hooks) {
       );
   });
 
-  test("it conditionally shows a popover", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it conditionally shows a popover", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
       <div class="clickaway-target"></div>
     `);
@@ -87,8 +98,8 @@ module("Integration | Component | header/search", function (hooks) {
       .exists("the popover is shown when a query is entered");
   });
 
-  test("it conditionally shows documents", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it conditionally shows documents", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -109,11 +120,11 @@ module("Integration | Component | header/search", function (hooks) {
       .hasAttribute("href", `/results?q=vault`);
   });
 
-  test("it conditionally shows project results", async function (this: HeaderSearchTestContext, assert) {
+  test("it conditionally shows project results", async function (this: Context, assert) {
     this.server.create("project", { title: "Dog house" });
     this.server.create("project", { title: "Cat house" });
 
-    await render<HeaderSearchTestContext>(hbs`
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -124,8 +135,8 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(PROJECT_HIT).hasAttribute("href", "/projects/0");
   });
 
-  test("it conditionally shows a product/area match", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it conditionally shows a product/area match", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -140,8 +151,8 @@ module("Integration | Component | header/search", function (hooks) {
       .hasAttribute("href", "/product-areas/vault");
   });
 
-  test("the input can be focused with a keyboard shortcut", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("the input can be focused with a keyboard shortcut", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -152,8 +163,8 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(SEARCH_INPUT_SELECTOR).isFocused();
   });
 
-  test("the arrow keys work as expected", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("the arrow keys work as expected", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
@@ -180,13 +191,65 @@ module("Integration | Component | header/search", function (hooks) {
       .containsText("Test Document 0");
   });
 
-  test("it conditionally shows a no-matches message", async function (this: HeaderSearchTestContext, assert) {
-    await render<HeaderSearchTestContext>(hbs`
+  test("it conditionally shows a no-matches message", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <Header::Search />
     `);
 
     await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
 
     assert.dom(NO_MATCHES).exists();
+  });
+
+  test("it searches the pre-populated query on focusin", async function (this: Context, assert) {
+    const query = "foo";
+
+    this.server.create("document", { title: query });
+
+    this.query = query;
+
+    await render<Context>(hbs`
+      <Header::Search @query={{this.query}} />
+    `);
+
+    assert.dom(SEARCH_INPUT_SELECTOR).hasValue(query);
+
+    // Capture the loading state
+
+    const focusPromise = focus(SEARCH_INPUT_SELECTOR);
+
+    await waitFor(POPOVER_LOADING_ICON);
+
+    await focusPromise;
+
+    assert.dom(POPOVER_LOADING_ICON).doesNotExist();
+    assert.dom(DOCUMENT_HIT).exists({ count: 1 });
+  });
+
+  test("it applies highlights to all title matches", async function (this: Context, assert) {
+    const query = "Terra";
+    const title = "Terraform";
+
+    this.server.create("product-area", { title });
+    this.server.create("document", { title });
+    this.server.create("project", { title });
+
+    await render<Context>(hbs`
+      <Header::Search />
+    `);
+
+    await fillIn(SEARCH_INPUT_SELECTOR, query);
+
+    assert.dom(PRODUCT_AREA_HIT).exists();
+    assert.dom(PRODUCT_AREA_HIT).hasText(title);
+    assert.dom(`${PRODUCT_AREA_HIT} mark`).hasText(query);
+
+    assert.dom(DOCUMENT_HIT).exists();
+    assert.dom(DOCUMENT_HIT).hasText(title);
+    assert.dom(`${DOCUMENT_HIT} mark`).hasText(query);
+
+    assert.dom(PROJECT_HIT).exists();
+    assert.dom(PROJECT_HIT).hasText(title);
+    assert.dom(`${PROJECT_HIT} mark`).hasText(query);
   });
 });

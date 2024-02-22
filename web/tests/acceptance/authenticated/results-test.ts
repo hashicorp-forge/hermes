@@ -5,6 +5,9 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 
+// Global
+const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
+
 // Header
 const DOC_SEARCH_RESULT = "[data-test-doc-search-result]";
 const RESULTS_HEADER_TEXT = "[data-test-results-header-text]";
@@ -31,8 +34,12 @@ module("Acceptance | authenticated/results", function (hooks) {
   });
 
   test("the page title is correct", async function (this: Context, assert) {
+    await visit("/results?q=foo");
+    assert.equal(getPageTitle(), "foo • Search | Hermes");
+
     await visit("/results");
-    assert.equal(getPageTitle(), "Search Results | Hermes");
+
+    assert.equal(getPageTitle(), "Search | Hermes");
   });
 
   test("it shows document results", async function (this: Context, assert) {
@@ -236,5 +243,13 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
+  });
+
+  test("the search input displays the route query on load", async function (this: Context, assert) {
+    const query = "foo";
+
+    await visit(`/results?q=${query}`);
+
+    assert.dom(GLOBAL_SEARCH_INPUT).hasValue(query);
   });
 });
