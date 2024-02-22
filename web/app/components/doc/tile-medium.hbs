@@ -93,9 +93,14 @@
           </div>
 
           {{! Summary }}
-          {{#if @doc.summary}}
+          {{#if (or @doc._snippetResult.content.value @doc.summary)}}
             <p data-test-document-summary class="mt-2.5 text-body-300">
-              {{@doc.summary}}
+              {{#if @doc._snippetResult.content.value}}
+                {{! Triple-stashed to escape the HTML }}
+                {{{@doc._snippetResult.content.value}}}
+              {{else}}
+                {{@doc.summary}}
+              {{/if}}
             </p>
           {{/if}}
 

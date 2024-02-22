@@ -25,16 +25,4 @@ export default class AuthenticatedResultsController extends Controller {
   status = [];
 
   declare model: ModelFrom<AuthenticatedResultsRoute>;
-
-  protected get allScope() {
-    return SearchScope.All;
-  }
-
-  protected get docsScope() {
-    return SearchScope.Docs;
-  }
-
-  protected get projectsScope() {
-    return SearchScope.Projects;
-  }
 }

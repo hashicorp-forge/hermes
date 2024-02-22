@@ -26,12 +26,6 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
     let translatedFacetName;
     let [facetName, clickedFilter, isSelected] = positional;
 
-    console.log("gcqh", {
-      facetName,
-      clickedFilter,
-      isSelected,
-    });
-
     switch (facetName) {
       case "Type":
         translatedFacetName = FacetName.DocType;

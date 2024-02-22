@@ -1,33 +1,18 @@
 {{page-title "Search Results"}}
 
-{{! TODO: need a toggle to go between Projects/Docs/All }}
-
-<LinkTo
-  @route="authenticated.results"
-  @query={{hash scope=this.allScope q=this.q page=1}}
->
-  All
-</LinkTo>
-<LinkTo
-  @route="authenticated.results"
-  @query={{hash scope=this.projectsScope q=this.q page=1}}
->
-  Projects
-</LinkTo>
-<LinkTo
-  @route="authenticated.results"
-  @query={{hash scope=this.docsScope q=this.q page=1}}
->
-  Docs
-</LinkTo>
-
-{{log "this model" this.model}}
 {{! TODO: fix these types }}
 {{! no facets on the "all screen" }}
-<Header::Toolbar @facets={{this.model.docFacets}} />
+
+{{log "tghis frekin model" this.model}}
+<Header::Toolbar
+  @docFacets={{this.model.docFacets}}
+  @projectFacets={{this.model.projectFacets}}
+  @scope={{this.scope}}
+/>
 
 <Results
   @docResults={{this.model.docResults}}
   @projectResults={{this.model.projectResults}}
+  @productResults={{this.model.productResults}}
   @query={{this.q}}
 />

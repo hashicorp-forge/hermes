@@ -40,7 +40,8 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    facets?: FacetDropdownGroups;
+    docFacets?: FacetDropdownGroups;
+    projectFacets?: FacetDropdownGroups;
   };
 }
 
@@ -52,12 +53,20 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     return this.router.currentRouteName;
   }
 
+  protected get secondaryNavIsShown(): boolean {
+    return this.currentRouteName === "authenticated.results";
+  }
+
+  protected get facetsAreShown() {
+    return this.args.docFacets || this.args.projectFacets;
+  }
+
   /**
    * The statuses available as filters.
    */
   protected get statuses(): FacetDropdownObjects | null {
     let statuses: FacetDropdownObjects = {};
-    for (let status in this.args.facets?.status) {
+    for (let status in this.args.docFacets?.status) {
       if (
         status === "Approved" ||
         status === "In-Review" ||
@@ -65,7 +74,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        statuses[status] = this.args.facets?.status[
+        statuses[status] = this.args.docFacets?.status[
           status
         ] as FacetDropdownObjectDetails;
       }

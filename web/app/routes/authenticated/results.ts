@@ -6,9 +6,6 @@ import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
-import { FacetRecords } from "hermes/types/facets";
-import { SearchResponse } from "instantsearch.js";
-import { HermesProject } from "hermes/types/project";
 
 export enum SearchScope {
   All = "all",
@@ -52,41 +49,50 @@ export default class AuthenticatedResultsRoute extends Route {
     const docsIndex = this.configSvc.config.algolia_docs_index_name;
     const projectsIndex = this.configSvc.config.algolia_projects_index_name;
 
-    let docFacetsPromise: Promise<FacetRecords | undefined> | undefined =
-      this.algolia.getFacets.perform(docsIndex, params);
+    const scopeIsAll = scope === SearchScope.All;
+    const scopeIsProjects = scope === SearchScope.Projects;
+    const scopeIsDocs = scope === SearchScope.Docs;
 
-    let docResultsPromise:
-      | Promise<SearchResponse<HermesDocument | undefined>>
-      | undefined = this.algolia.getDocResults.perform(docsIndex, params);
+    const productResultsPromise = scopeIsAll
+      ? this.algolia.searchForFacetValues.perform(
+          this.configSvc.config.algolia_docs_index_name,
+          "product",
+          params.q,
+          {
+            hitsPerPage: 1,
+          },
+        )
+      : undefined;
 
-    let projectFacetsPromise: Promise<FacetRecords | undefined> | undefined =
-      this.algolia.getFacets.perform(projectsIndex, params);
+    let docFacetsPromise = scopeIsProjects
+      ? undefined
+      : this.algolia.getFacets.perform(docsIndex, params);
 
-    let projectResultsPromise:
-      | Promise<SearchResponse<HermesProject | undefined>>
-      | undefined = this.algolia.getProjectResults.perform(params);
+    let docResultsPromise = scopeIsProjects
+      ? undefined
+      : this.algolia.getDocResults.perform(docsIndex, params);
 
-    switch (scope) {
-      case SearchScope.Docs:
-        console.log("settings projects undefined");
-        projectFacetsPromise = undefined;
-        projectResultsPromise = undefined;
-        break;
-      case SearchScope.Projects:
-        docFacetsPromise = undefined;
-        docResultsPromise = undefined;
-        break;
-    }
+    let projectFacetsPromise = scopeIsDocs
+      ? undefined
+      : this.algolia.getFacets.perform(projectsIndex, params);
 
-    console.log("bout to fetch");
+    let projectResultsPromise = scopeIsDocs
+      ? undefined
+      : this.algolia.getProjectResults.perform(params);
 
-    const [docFacets, docResults, projectFacets, projectResults] =
-      await Promise.all([
-        docFacetsPromise,
-        docResultsPromise,
-        projectFacetsPromise,
-        projectResultsPromise,
-      ]);
+    const [
+      docFacets,
+      docResults,
+      projectFacets,
+      projectResults,
+      productResults,
+    ] = await Promise.all([
+      docFacetsPromise,
+      docResultsPromise,
+      projectFacetsPromise,
+      projectResultsPromise,
+      productResultsPromise,
+    ]);
 
     if (docResults) {
       const docHits = (docResults as { hits?: HermesDocument[] }).hits;
@@ -99,14 +105,13 @@ export default class AuthenticatedResultsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    console.log("third dollar", {
+    return {
       docFacets,
       docResults,
       projectFacets,
       projectResults,
-    });
-
-    return { docFacets, docResults, projectFacets, projectResults };
+      productResults,
+    };
   }
 
   /**

@@ -177,7 +177,6 @@ export default class AlgoliaService extends Service {
    * Iterates over the filter selection and marks corresponding facets "selected"
    */
   markSelected = (facet: FacetRecord, selection?: string[]): void => {
-    console.log("ms", facet, selection);
     /**
      * e.g., facet === {
      *  Obsolete: { count: 4, isSelected: false },
@@ -189,7 +188,6 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        console.log("mark selected", param);
         (facet[param] as FacetDropdownObjectDetails).isSelected = true;
       }
       /**
