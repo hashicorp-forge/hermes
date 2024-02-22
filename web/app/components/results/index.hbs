@@ -38,7 +38,7 @@
 </h1>
 <ol class="divided-list">
   {{#each @results.hits as |doc|}}
-    <li class="group relative">
+    <li data-test-doc-search-result class="group relative">
       <Doc::TileMedium @doc={{doc}} @query={{@query}} />
     </li>
   {{/each}}

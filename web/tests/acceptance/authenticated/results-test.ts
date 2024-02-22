@@ -33,12 +33,13 @@ module("Acceptance | authenticated/results", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: Context, assert) {
+  test("the page title is correct (query)", async function (this: Context, assert) {
     await visit("/results?q=foo");
     assert.equal(getPageTitle(), "foo • Search | Hermes");
+  });
 
+  test("the page title is correct (no query)", async function (this: Context, assert) {
     await visit("/results");
-
     assert.equal(getPageTitle(), "Search | Hermes");
   });
 

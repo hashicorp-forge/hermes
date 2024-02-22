@@ -43,6 +43,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
       docType: "Bar",
       status: "WIP",
       owners: [TEST_USER_EMAIL],
+      _snippetResult: undefined,
     });
 
     this.server.create("related-hermes-document", {
@@ -102,6 +103,8 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
 
   test("it renders a snippet instead of a summary when possible", async function (this: Context, assert) {
     this.server.create("document", {
+      id: "qwerty",
+      objectID: "qwerty",
       title: "Bar",
       summary: "Bar",
       product: "Terraform",
@@ -116,7 +119,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
       },
     });
 
-    const doc = this.server.schema.document.first().attrs;
+    const doc = this.server.schema.document.find("qwerty").attrs;
 
     this.set("doc", doc);
 
@@ -147,11 +150,11 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
   test("it takes a query argument for title highlighting", async function (this: Context, assert) {
     const query = "Foo";
     const title = `The ${query} document`;
-    const doc = this.server.schema.relatedHermesDocument.first().attrs;
+    const doc = this.server.schema.relatedHermesDocument.first();
 
     doc.update({ title });
 
-    this.set("doc", doc);
+    this.set("doc", doc.attrs);
     this.set("query", query);
 
     await render<Context>(

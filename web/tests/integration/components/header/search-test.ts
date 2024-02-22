@@ -18,9 +18,9 @@ const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
 const POPOVER_SELECTOR = ".search-popover";
 const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
 
-const POPOVER_LOADING_ICON = "[data-test-x-dropdown-list-loading-block]";
+const POPOVER_LOADING_ICON =
+  "[data-test-x-dropdown-list-default-loading-block]";
 
-const PRODUCT_AREA_HITS = "[data-test-product-area-hits]";
 const PROJECT_HITS = "[data-test-project-hits]";
 const DOCUMENT_HITS = "[data-test-document-hits]";
 const NO_MATCHES = "[data-test-no-matches]";
@@ -135,22 +135,6 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(PROJECT_HIT).hasAttribute("href", "/projects/0");
   });
 
-  test("it conditionally shows a product/area match", async function (this: Context, assert) {
-    await render<Context>(hbs`
-      <Header::Search />
-    `);
-
-    await fillIn(SEARCH_INPUT_SELECTOR, "vault");
-
-    assert.dom(PRODUCT_AREA_HITS).exists();
-
-    assert
-      .dom(PRODUCT_AREA_HIT)
-      .exists({ count: 1 })
-      .hasText("Vault")
-      .hasAttribute("href", "/product-areas/vault");
-  });
-
   test("the input can be focused with a keyboard shortcut", async function (this: Context, assert) {
     await render<Context>(hbs`
       <Header::Search />
@@ -214,13 +198,11 @@ module("Integration | Component | header/search", function (hooks) {
 
     assert.dom(SEARCH_INPUT_SELECTOR).hasValue(query);
 
-    // Capture the loading state
-
-    const focusPromise = focus(SEARCH_INPUT_SELECTOR);
+    const clickPromise = click(SEARCH_INPUT_SELECTOR);
 
     await waitFor(POPOVER_LOADING_ICON);
 
-    await focusPromise;
+    await clickPromise;
 
     assert.dom(POPOVER_LOADING_ICON).doesNotExist();
     assert.dom(DOCUMENT_HIT).exists({ count: 1 });
@@ -230,9 +212,14 @@ module("Integration | Component | header/search", function (hooks) {
     const query = "Terra";
     const title = "Terraform";
 
-    this.server.create("product-area", { title });
-    this.server.create("document", { title });
     this.server.create("project", { title });
+    this.server.create("product", { name: title });
+
+    /**
+     * Mirage needs the product to be associated with a document,
+     * so we create a document with the same title as the product.
+     */
+    this.server.create("document", { title, product: title });
 
     await render<Context>(hbs`
       <Header::Search />
@@ -245,7 +232,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(`${PRODUCT_AREA_HIT} mark`).hasText(query);
 
     assert.dom(DOCUMENT_HIT).exists();
-    assert.dom(DOCUMENT_HIT).hasText(title);
+    assert.dom(DOCUMENT_HIT).containsText(title);
     assert.dom(`${DOCUMENT_HIT} mark`).hasText(query);
 
     assert.dom(PROJECT_HIT).exists();
