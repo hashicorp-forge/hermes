@@ -6,6 +6,10 @@ import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
+import { FacetRecords } from "hermes/types/facets";
+import { SearchResponse } from "instantsearch.js";
+import { HermesProject } from "hermes/types/project";
+import { TaskInstance } from "ember-concurrency";
 
 export enum SearchScope {
   All = "all",
@@ -29,25 +33,80 @@ export default class ResultsRoute extends Route {
     scope: {
       refreshModel: true,
     },
+    docType: {
+      refreshModel: true,
+    },
+    owners: {
+      refreshModel: true,
+    },
+    product: {
+      refreshModel: true,
+    },
+    status: {
+      refreshModel: true,
+    },
   };
 
   async model(params: ResultsRouteParams) {
-    const searchIndex = this.configSvc.config.algolia_docs_index_name;
+    const { scope } = params;
 
-    let [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
-    ]);
+    const docsIndex = this.configSvc.config.algolia_docs_index_name;
+    const projectsIndex = this.configSvc.config.algolia_projects_index_name;
 
-    const hits = (results as { hits?: HermesDocument[] }).hits;
+    let docFacetsPromise: Promise<FacetRecords | undefined> | undefined =
+      this.algolia.getFacets.perform(docsIndex, params);
 
-    if (hits) {
-      // Load owner information
-      await this.store.maybeFetchPeople.perform(hits);
+    let docResultsPromise:
+      | Promise<SearchResponse<HermesDocument | undefined>>
+      | undefined = this.algolia.getDocResults.perform(docsIndex, params);
+
+    let projectFacetsPromise: Promise<FacetRecords | undefined> | undefined =
+      this.algolia.getFacets.perform(projectsIndex, params);
+
+    let projectResultsPromise:
+      | Promise<SearchResponse<HermesProject | undefined>>
+      | undefined = this.algolia.getProjectResults.perform(params);
+
+    switch (scope) {
+      case SearchScope.Docs:
+        console.log("settings projects undefined");
+        projectFacetsPromise = undefined;
+        projectResultsPromise = undefined;
+        break;
+      case SearchScope.Projects:
+        docFacetsPromise = undefined;
+        docResultsPromise = undefined;
+        break;
+    }
+
+    console.log("bout to fetch");
+
+    const [docFacets, docResults, projectFacets, projectResults] =
+      await Promise.all([
+        docFacetsPromise,
+        docResultsPromise,
+        projectFacetsPromise,
+        projectResultsPromise,
+      ]);
+
+    if (docResults) {
+      const docHits = (docResults as { hits?: HermesDocument[] }).hits;
+
+      if (docHits) {
+        // Load owner information
+        await this.store.maybeFetchPeople.perform(docHits);
+      }
     }
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    console.log("third dollar", {
+      docFacets,
+      docResults,
+      projectFacets,
+      projectResults,
+    });
+
+    return { docFacets, docResults, projectFacets, projectResults };
   }
 }

@@ -177,6 +177,7 @@ export default class AlgoliaService extends Service {
    * Iterates over the filter selection and marks corresponding facets "selected"
    */
   markSelected = (facet: FacetRecord, selection?: string[]): void => {
+    console.log("ms", facet, selection);
     /**
      * e.g., facet === {
      *  Obsolete: { count: 4, isSelected: false },
@@ -188,6 +189,7 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
+        console.log("mark selected", param);
         (facet[param] as FacetDropdownObjectDetails).isSelected = true;
       }
       /**
@@ -317,6 +319,11 @@ export default class AlgoliaService extends Service {
 
         // Mark facets as selected based on query parameters
         Object.entries(facets).forEach(([name, facet]) => {
+          console.log("gf", {
+            name,
+            facet,
+            params,
+          });
           /**
            * e.g., name === "owner"
            * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
@@ -353,6 +360,28 @@ export default class AlgoliaService extends Service {
           page: params.page ? params.page - 1 : 0,
           filters: params.filters,
         });
+      } catch (e: unknown) {
+        console.error(e);
+      }
+    },
+  );
+
+  /**
+   *
+   */
+  getProjectResults = task(
+    async (params: AlgoliaSearchParams): Promise<SearchResponse | unknown> => {
+      let query = params["q"] || "";
+
+      try {
+        return await this.searchIndex.perform(
+          this.configSvc.config.algolia_projects_index_name,
+          query,
+          {
+            hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
+            page: params.page ? params.page - 1 : 0,
+          },
+        );
       } catch (e: unknown) {
         console.error(e);
       }

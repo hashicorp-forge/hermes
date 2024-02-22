@@ -1,3 +1,5 @@
+import { SearchScope } from "hermes/routes/authenticated/results";
+
 export interface DocumentsRouteParams {
   docType: string[];
   owners: string[];
@@ -9,4 +11,6 @@ export interface DocumentsRouteParams {
 
 export interface ResultsRouteParams extends DocumentsRouteParams {
   q: string;
+  page: number;
+  scope: SearchScope;
 }

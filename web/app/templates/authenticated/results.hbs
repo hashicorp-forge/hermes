@@ -1,5 +1,33 @@
 {{page-title "Search Results"}}
 
-<Header::Toolbar @facets={{@facets}} />
+{{! TODO: need a toggle to go between Projects/Docs/All }}
 
-<Results @results={{@model.results}} @query={{this.q}} />
+<LinkTo
+  @route="authenticated.results"
+  @query={{hash scope=this.allScope q=this.q page=1}}
+>
+  All
+</LinkTo>
+<LinkTo
+  @route="authenticated.results"
+  @query={{hash scope=this.projectsScope q=this.q page=1}}
+>
+  Projects
+</LinkTo>
+<LinkTo
+  @route="authenticated.results"
+  @query={{hash scope=this.docsScope q=this.q page=1}}
+>
+  Docs
+</LinkTo>
+
+{{log "this model" this.model}}
+{{! TODO: fix these types }}
+{{! no facets on the "all screen" }}
+<Header::Toolbar @facets={{this.model.docFacets}} />
+
+<Results
+  @docResults={{this.model.docResults}}
+  @projectResults={{this.model.projectResults}}
+  @query={{this.q}}
+/>

@@ -1,3 +1,5 @@
+{{! TODO }}
+{{! Do we need this ? If so, can it be integrated better? }}
 {{#if (and this.firstPageIsShown this.queryIsProductName)}}
   <div
     class="flex w-full flex-col items-start pb-10"
@@ -24,11 +26,14 @@
   </div>
 {{/if}}
 
-<h1 class="text-display-300 font-semibold">{{@results.nbHits}}
+{{! TODO: this needs scope logic }}
+{{! if both are passed in, it's the "all" scenario }}
+
+<h1 class="text-display-300 font-semibold">{{@docResults.nbHits}}
   documents matching “{{@query}}”</h1>
 <div class="flex w-full flex-col space-y-12 py-10">
   <div class="tile-list">
-    {{#each @results.hits as |doc|}}
+    {{#each @docResults.hits as |doc|}}
       <Doc::Tile
         @docID="{{doc.objectID}}"
         @isResult={{true}}
@@ -45,6 +50,6 @@
 </div>
 
 <Pagination
-  @currentPage={{(add @results.page 1)}}
-  @nbPages={{@results.nbPages}}
+  @currentPage={{(add @docResults.page 1)}}
+  @nbPages={{@docResults.nbPages}}
 />

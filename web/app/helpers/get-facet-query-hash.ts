@@ -2,6 +2,7 @@ import Helper from "@ember/component/helper";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import { FacetName } from "hermes/components/header/toolbar";
+import { SearchScope } from "hermes/routes/authenticated/results";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface GetFacetQueryHashHelperSignature {
@@ -19,11 +20,17 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
   @service declare activeFilters: ActiveFiltersService;
 
   compute(
-    positional: [facetName: string, clickedFilter: string, isSelected: boolean]
+    positional: [facetName: string, clickedFilter: string, isSelected: boolean],
   ) {
     // Translate the UI facetName to the one used in the query hash.
     let translatedFacetName;
     let [facetName, clickedFilter, isSelected] = positional;
+
+    console.log("gcqh", {
+      facetName,
+      clickedFilter,
+      isSelected,
+    });
 
     switch (facetName) {
       case "Type":
@@ -45,7 +52,7 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
         Object.entries(this.activeFilters.index).map(([key, value]) => [
           key,
           value.filter((filter) => filter !== clickedFilter),
-        ])
+        ]),
       );
     } else {
       assert("translatedFacetName must be defined", translatedFacetName);

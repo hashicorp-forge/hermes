@@ -37,7 +37,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar
-        @facets={{this.facets}}
+        @docFacets={{this.facets}}
       />
     `);
 
@@ -70,7 +70,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     this.set("facets", { status: statusFacets });
 
     await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar @facets={{this.facets}} />
+      <Header::Toolbar @docFacets={{this.facets}} />
     `);
 
     await click("[data-test-facet-dropdown-trigger='Status']");
@@ -87,7 +87,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
   test("it conditionally renders the status facet disabled", async function (assert) {
     this.set("facets", { status: {} });
     await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar @facets={{this.facets}} />
+      <Header::Toolbar @docFacets={{this.facets}} />
     `);
     assert
       .dom("[data-test-facet-dropdown-trigger='Status']")

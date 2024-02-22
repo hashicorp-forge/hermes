@@ -2,17 +2,22 @@ import Component from "@glimmer/component";
 import { SearchResponse } from "@algolia/client-search";
 import { HermesDocument } from "hermes/types/document";
 import { capitalize } from "@ember/string";
+import { HermesProject } from "hermes/types/project";
 
 interface ResultsIndexComponentSignature {
   Args: {
-    results: SearchResponse<HermesDocument>;
+    docResults?: SearchResponse<HermesDocument>;
+    projectResults?: SearchResponse<HermesProject>;
     query: string;
   };
 }
 
 export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
+  /**
+   * TODO: Explain this
+   */
   get firstPageIsShown(): boolean {
-    return this.args.results.page === 0;
+    return this.args.docResults?.page === 0;
   }
 
   get lowercasedQuery(): string {
@@ -24,10 +29,16 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
   }
 
   get queryIsProductName(): boolean {
-    let hits = this.args.results?.hits as HermesDocument[];
+    let hits = this.args.docResults?.hits as HermesDocument[];
     // Assume at least one of the first 12 hits is a product match for the query.
     return hits.some(
-      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery
+      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery,
     );
+  }
+}
+
+declare module "@glint/environment-ember-loose/registry" {
+  export default interface Registry {
+    Results: typeof ResultsIndexComponent;
   }
 }
