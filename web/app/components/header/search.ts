@@ -68,6 +68,17 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
   @tracked protected query: string = this.args.query ?? "";
 
+  protected get viewAllResultsQuery() {
+    return {
+      q: this.query,
+      page: 1,
+      docType: [],
+      product: [],
+      owners: [],
+      status: [],
+    };
+  }
+
   protected get items() {
     const viewAllDocResults =
       (this.docMatches.length > 0 && {
@@ -203,10 +214,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
        * we transition to the results page using the router.
        */
       this.router.transitionTo("authenticated.results", {
-        queryParams: {
-          q: this.query,
-          page: 1,
-        },
+        queryParams: this.viewAllResultsQuery,
       });
     }
   }

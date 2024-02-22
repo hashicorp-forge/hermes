@@ -5,9 +5,9 @@ import { ModelFrom } from "hermes/types/route-models";
 export default class AuthenticatedResultsController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "q", "status"];
 
-  docType = [];
-  page = 1;
   q = null;
+  page = 1;
+  docType = [];
   owners = [];
   product = [];
   status = [];

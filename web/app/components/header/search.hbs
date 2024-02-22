@@ -137,7 +137,7 @@
                 data-test-view-all-docs-link
                 {{did-insert this.registerViewAllResultsLink}}
                 @route="authenticated.results"
-                @query={{hash q=this.query page=1}}
+                @query={{this.viewAllResultsQuery}}
               >
                 <div
                   class="flex items-center gap-1.5 px-1 pt-2 pb-2.5 text-body-100 text-color-foreground-faint"
