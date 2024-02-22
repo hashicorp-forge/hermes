@@ -8,6 +8,7 @@
       @placement="bottom-end"
       @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
       @inputIsShown={{false}}
+      @isLoading={{this.maybeSearch.isRunning}}
       class="search-popover theme--neutral
         {{unless (or this.docMatches this.projectMatches) 'no-matches'}}"
     >
@@ -20,6 +21,7 @@
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
           {{on "keydown" (fn this.maybeSubmitForm dd)}}
           {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+          {{on "focusin" (perform this.maybeSearch)}}
           @type="search"
           @value={{this.query}}
           name="query"
@@ -121,11 +123,11 @@
                     <Project::StatusIcon @status={{dd.attrs.hit.status}} />
                   </div>
                   <div class="overflow-hidden">
-                    <div
+                    <h4
                       class="truncate font-semibold text-color-foreground-strong"
                     >
-                      {{dd.attrs.hit.title}}
-                    </div>
+                      {{highlight-text dd.attrs.hit.title this.query}}
+                    </h4>
                   </div>
                 </dd.LinkTo>
               </li>
@@ -156,9 +158,9 @@
                 class="flex items-center gap-2 px-3 font-semibold"
               >
                 <Product::Avatar @product={{dd.attrs.productAreaName}} />
-                <span class="text-color-foreground-strong">
-                  {{dd.attrs.productAreaName}}
-                </span>
+                <h4 class="text-color-foreground-strong">
+                  {{highlight-text dd.attrs.productAreaName this.query}}
+                </h4>
               </dd.LinkTo>
             {{else}}
               {{! Document }}
@@ -172,7 +174,7 @@
                   <Product::Avatar @product={{dd.attrs.product}} />
                   <div class="grid w-full gap-px overflow-hidden">
                     <h4 class="global-search-result-title">
-                      {{dd.attrs.title}}
+                      {{highlight-text dd.attrs.title this.query}}
                     </h4>
                     <div
                       class="truncate text-body-100 text-color-foreground-faint"

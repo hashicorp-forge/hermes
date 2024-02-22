@@ -1,9 +1,16 @@
 @use "variables" as v;
 
-.line-clamp-2 {
+mark {
+  @apply bg-color-surface-warning text-color-foreground-warning-on-surface;
+}
+
+.line-clamp {
   @apply overflow-hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+}
+
+.line-clamp-2 {
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
