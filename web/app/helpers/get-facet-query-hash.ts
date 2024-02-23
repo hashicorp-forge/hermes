@@ -26,6 +26,7 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
     let translatedFacetName;
     let [facetName, clickedFilter, isSelected] = positional;
 
+    console.log("facetName", facetName);
     switch (facetName) {
       case "Type":
         translatedFacetName = FacetName.DocType;
@@ -43,10 +44,14 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
 
     if (isSelected) {
       return Object.fromEntries(
-        Object.entries(this.activeFilters.index).map(([key, value]) => [
-          key,
-          value.filter((filter) => filter !== clickedFilter),
-        ]),
+        Object.entries(this.activeFilters.index).map(([key, value]) => {
+          if (typeof value === "string") {
+            alert("it happened");
+            return [key, value];
+          } else {
+            return [key, value?.filter((filter) => filter !== clickedFilter)];
+          }
+        }),
       );
     } else {
       assert("translatedFacetName must be defined", translatedFacetName);

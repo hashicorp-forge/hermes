@@ -1,16 +1,8 @@
 <h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
-  {{#if (eq this.currentScope "all")}}
-    Results
-  {{else}}
+  {{#unless (and (eq this.currentScope "all") this.hitCount)}}
     {{this.hitCount}}
     {{if (eq this.hitCount 1) "match" "matches"}}
-  {{/if}}
-  {{#if @query}}
-    for
-    <mark>
-      {{@query}}
-    </mark>
-  {{/if}}
+  {{/unless}}
 </h1>
 
 {{#if this.hitCount}}
@@ -45,58 +37,64 @@
 
         </div>
       {{/if}}
+      {{#if @projectResults.hits}}
 
-      <div>
-        <LinkTo
-          @route="authenticated.results"
-          @query={{hash q=@query scope="projects"}}
-          class="mb-3 flex items-center gap-2"
-        >
-          <h4 class="hermes-h4">
-            Projects
-          </h4>
-          <Hds::BadgeCount @text="{{@projectResults.nbHits}}" class="-mt-px" />
-          <FlightIcon
-            @name="chevron-right"
-            class="-ml-0.5 text-color-foreground-disabled"
-          />
-        </LinkTo>
-        <ol class="">
-          {{#each @projectResults.hits as |p|}}
-            {{! Products unavailable via Algolia }}
-            {{! jiraIssueID is available }}
-            {{! creator is available }}
-            {{! description is available }}
-            <li class="group relative">
-              <Project::Tile @project={{p}} />
-            </li>
-          {{/each}}
-        </ol>
-      </div>
-
-      <div>
-        <LinkTo
-          @route="authenticated.results"
-          @query={{hash q=@query scope="docs"}}
-          class="mb-3 flex items-center gap-2"
-        >
-          <h4 class="hermes-h4">
-            Docs
-          </h4>
-          <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" />
-          <FlightIcon
-            @name="chevron-right"
-            class="-ml-0.5 text-color-foreground-disabled"
-          />
-        </LinkTo>
-        <ol class="divided-list">
-          {{#each @docResults.hits as |doc|}}
-            <li data-test-doc-search-result class="group relative">
-              <Doc::TileMedium @doc={{doc}} @query={{@query}} />
-            </li>
-          {{/each}}
-        </ol>
-      </div>
+        <div>
+          <LinkTo
+            @route="authenticated.results"
+            @query={{hash q=@query scope="projects"}}
+            class="mb-3 flex items-center gap-2"
+          >
+            <h4 class="hermes-h4">
+              Projects
+            </h4>
+            <Hds::BadgeCount
+              @text="{{@projectResults.nbHits}}"
+              class="-mt-px"
+            />
+            <FlightIcon
+              @name="chevron-right"
+              class="-ml-0.5 text-color-foreground-disabled"
+            />
+          </LinkTo>
+          <ol class="">
+            {{#each @projectResults.hits as |p|}}
+              {{! Products unavailable via Algolia }}
+              {{! jiraIssueID is available }}
+              {{! creator is available }}
+              {{! description is available }}
+              <li class="group relative">
+                <Project::Tile @project={{p}} />
+              </li>
+            {{/each}}
+          </ol>
+        </div>
+      {{/if}}
+      {{#if @docResults.hits}}
+        <div>
+          <LinkTo
+            @route="authenticated.results"
+            @query={{hash q=@query scope="docs"}}
+            class="mb-3 flex items-center gap-2"
+          >
+            <h4 class="hermes-h4">
+              Docs
+            </h4>
+            <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" />
+            <FlightIcon
+              @name="chevron-right"
+              class="-ml-0.5 text-color-foreground-disabled"
+            />
+          </LinkTo>
+          <ol class="divided-list">
+            {{#each @docResults.hits as |doc|}}
+              <li data-test-doc-search-result class="group relative">
+                <Doc::TileMedium @doc={{doc}} @query={{@query}} />
+              </li>
+            {{/each}}
+          </ol>
+        </div>
+      {{/if}}
     </div>
   {{else if (eq this.currentScope "projects")}}
     TODO: Projekts
@@ -115,7 +113,8 @@
     />
   {{/if}}
 {{else}}
-  No results
+  {{! FIXME: On the docs and projects tabs, there's already a "0 matches" }}
+  Broaden your search you big dummy
 {{/if}}
 
 {{! If we're showing "all" results, we need some UI to show both results }}

@@ -1,14 +1,22 @@
 {{page-title this.pageTitle}}
 
-<Results::Nav @scope={{this.scope}} @q={{this.q}} />
+<div class="mb-6 flex w-full">
+  <h1 class="w-full text-display-600">
+    Results for
+    <mark>{{this.q}}</mark>
+  </h1>
+  <Results::Nav @scope={{this.scope}} @q={{this.q}} />
+</div>
 
-{{#unless (eq this.scope "all")}}
+{{#if (eq this.scope "docs")}}
   <Header::Toolbar
     @docFacets={{this.model.docFacets}}
     @projectFacets={{this.model.projectFacets}}
     @scope={{this.scope}}
   />
-{{/unless}}
+{{/if}}
+
+<Header::ActiveFilterList />
 
 <Results
   @docResults={{this.model.docResults}}

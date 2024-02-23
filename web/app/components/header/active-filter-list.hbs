@@ -1,7 +1,8 @@
 {{#if this.shownFilters.length}}
-  <div data-test-active-filter-list class="active-filter-list">
+  <div data-test-active-filter-list class="active-filter-list mb-7">
     <h3>Showing</h3>
     <div class="active-filter-list-container">
+      {{log "this.shownFilters" this.shownFilters}}
       {{#each this.shownFilters as |filter|}}
         <Header::ActiveFilterListItem @filter={{filter}} />
       {{/each}}

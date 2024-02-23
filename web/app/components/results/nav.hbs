@@ -1,12 +1,10 @@
-<div
-  class="search-nav mb-9 items-center text-display-600 font-bold text-color-foreground-strong"
->
+<div class="secondary-nav w-72 shrink-0">
   <LinkTo
     @route="authenticated.results"
     @query={{hash scope="all" q=@q page=1}}
     class={{if (eq @scope "all") "active"}}
   >
-    All
+    Top
   </LinkTo>
   <LinkTo
     @route="authenticated.results"
@@ -14,13 +12,8 @@
     class={{if (eq @scope "projects") "active"}}
   >
     Projects
-    {{#unless (eq @scope "projects")}}
-
-      <Hds::BadgeCount
-        @text={{or this.model.projectResults.nbHits "0"}}
-        @type="inverted"
-      />
-    {{/unless}}
+    {{! TODO: count should be an unfiltered count }}
+    {{!-- <Hds::BadgeCount @text={{or this.model.projectResults.nbHits "0"}} /> --}}
   </LinkTo>
   <LinkTo
     @route="authenticated.results"
@@ -28,11 +21,6 @@
     class={{if (eq @scope "docs") "active"}}
   >
     Docs
-    {{#unless (eq @scope "docs")}}
-      <Hds::BadgeCount
-        @text={{or this.model.docResults.nbHits "1234"}}
-        @type="inverted"
-      />
-    {{/unless}}
+    {{!-- <Hds::BadgeCount @text={{or this.model.docResults.nbHits "1234"}} /> --}}
   </LinkTo>
 </div>

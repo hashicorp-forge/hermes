@@ -9,6 +9,7 @@ import {
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -25,6 +26,7 @@ export enum FacetName {
   Owners = "owners",
   Status = "status",
   Product = "product",
+  Scope = "scope",
 }
 
 export interface SortByFacets {
@@ -35,7 +37,7 @@ export interface SortByFacets {
 }
 
 export type ActiveFilters = {
-  [name in FacetName]: string[];
+  [name in FacetName]: string[] | string | undefined;
 };
 
 interface ToolbarComponentSignature {

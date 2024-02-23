@@ -1,14 +1,19 @@
 import RouterService from "@ember/routing/router-service";
 import Service, { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import { DocumentsRouteParams } from "hermes/types/document-routes";
-import { ActiveFilters } from "hermes/components/header/toolbar";
+import {
+  DocumentsRouteParams,
+  ResultsRouteParams,
+} from "hermes/types/document-routes";
+import { ActiveFilters, FacetName } from "hermes/components/header/toolbar";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 const DEFAULT_FILTERS = {
-  docType: [],
-  status: [],
-  product: [],
-  owners: [],
+  [FacetName.DocType]: [],
+  [FacetName.Status]: [],
+  [FacetName.Product]: [],
+  [FacetName.Owners]: [],
+  [FacetName.Scope]: SearchScope.All,
 };
 
 export default class ActiveFiltersService extends Service {
@@ -16,12 +21,21 @@ export default class ActiveFiltersService extends Service {
 
   @tracked index: ActiveFilters = DEFAULT_FILTERS;
 
-  update(params: DocumentsRouteParams) {
+  update(params: DocumentsRouteParams | ResultsRouteParams) {
+    let scope = undefined;
+
+    if ("scope" in params) {
+      if (params.scope !== SearchScope.All) {
+        scope = params.scope.charAt(0).toUpperCase() + params.scope.slice(1);
+      }
+    }
+
     this.index = {
       docType: params.docType || [],
       status: params.status || [],
       product: params.product || [],
       owners: params.owners || [],
+      scope: scope,
     };
   }
 

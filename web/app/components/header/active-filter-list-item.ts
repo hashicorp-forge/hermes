@@ -1,6 +1,8 @@
+import { assert } from "@ember/debug";
 import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import { SearchScope } from "hermes/routes/authenticated/results";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface HeaderActiveFilterListItemComponentSignature {
@@ -20,10 +22,16 @@ export default class HeaderActiveFilterListItemComponent extends Component<Heade
   get query() {
     return {
       ...Object.fromEntries(
-        Object.entries(this.activeFilters.index).map(([key, value]) => [
-          key,
-          value.filter((filter) => filter !== this.args.filter),
-        ])
+        Object.entries(this.activeFilters.index).map(([key, value]) => {
+          if (typeof value === "string") {
+            return ["scope", SearchScope.All];
+          } else {
+            return [
+              key,
+              value?.filter((filter) => filter !== this.args.filter),
+            ];
+          }
+        }),
       ),
       page: 1,
     };

@@ -1,15 +1,8 @@
 .search-nav {
-  @apply flex;
+  @apply flex items-center text-display-100;
 
   a {
-    @apply relative flex items-start px-2;
-
-    .hds-badge-count {
-      @apply bg-color-foreground-strong;
-      @apply absolute;
-      @apply top-1 -right-2;
-      @apply outline outline-[2.5px] outline-color-page-primary;
-    }
+    @apply relative flex items-center px-2;
   }
 
   .active {
