@@ -44,7 +44,7 @@
             <h3 class="relative">
               {{! Title }}
               <span data-test-document-title class="mr-1.5">
-                {{@doc.title}}
+                {{highlight-text @doc.title @query}}
               </span>
 
               {{! Doc Number }}
@@ -93,11 +93,15 @@
           </div>
 
           {{! Summary }}
-          {{#if (or @doc._snippetResult.content.value @doc.summary)}}
-            <p data-test-document-summary class="mt-2.5 text-body-300">
-              {{#if @doc._snippetResult.content.value}}
-                {{! Triple-stashed to escape the HTML }}
-                {{{@doc._snippetResult.content.value}}}
+          {{#if (or this.snippet @doc.summary)}}
+            <p
+              data-test-document-summary
+              class="mt-2.5 text-body-300
+                {{if this.snippet 'line-clamp line-clamp-2'}}"
+            >
+              {{#if this.snippet}}
+                {{! Triple-stashed to escape HTML }}
+                {{{this.snippet}}}
               {{else}}
                 {{@doc.summary}}
               {{/if}}

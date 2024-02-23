@@ -139,11 +139,10 @@ func New(cfg *Config) (*Client, error) {
 
 		// Highlighting/snippeting
 		AttributesToSnippet: opt.AttributesToSnippet(
-			// TODO: this should vary based on context
 			"content:30",
 		),
 		HighlightPostTag:    opt.HighlightPostTag("</mark>"),
-		HighlightPreTag:     opt.HighlightPreTag(`<mark class="hds-surface-warning hds-foreground-warning-on-surface">`),
+		HighlightPreTag:     opt.HighlightPreTag(`<mark>`),
 		SnippetEllipsisText: opt.SnippetEllipsisText("..."),
 
 		// Ranking

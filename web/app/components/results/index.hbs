@@ -7,11 +7,9 @@
   {{#if @query}}
     {{if (eq this.hitCount 1) "match" "matches"}}
     for
-    <span
-      class="bg-color-surface-warning text-color-foreground-warning-on-surface"
-    >
+    <mark>
       {{@query}}
-    </span>
+    </mark>
   {{/if}}
 </h1>
 
@@ -70,10 +68,10 @@
           View all
         </LinkTo>
       </div>
-      <ol>
-        {{#each @docResults.hits as |d|}}
-          <li class="group relative">
-            <Doc::TileMedium @doc={{d}} />
+      <ol class="divided-list">
+        {{#each @results.hits as |doc|}}
+          <li data-test-doc-search-result class="group relative">
+            <Doc::TileMedium @doc={{doc}} @query={{@query}} />
           </li>
         {{/each}}
       </ol>

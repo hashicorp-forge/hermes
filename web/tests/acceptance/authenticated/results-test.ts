@@ -1,9 +1,20 @@
-import { click, find, findAll, visit } from "@ember/test-helpers";
+import {
+  click,
+  currentURL,
+  fillIn,
+  find,
+  findAll,
+  visit,
+} from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+
+// Global
+const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
+const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
 
 // Header
 const DOC_SEARCH_RESULT = "[data-test-doc-search-result]";
@@ -30,9 +41,14 @@ module("Acceptance | authenticated/results", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: Context, assert) {
+  test("the page title is correct (query)", async function (this: Context, assert) {
+    await visit("/results?q=foo");
+    assert.equal(getPageTitle(), "foo • Search | Hermes");
+  });
+
+  test("the page title is correct (no query)", async function (this: Context, assert) {
     await visit("/results");
-    assert.equal(getPageTitle(), "Search Results | Hermes");
+    assert.equal(getPageTitle(), "Search | Hermes");
   });
 
   test("it shows document results", async function (this: Context, assert) {
@@ -236,5 +252,36 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
+  });
+
+  test("the search input displays the route query on load", async function (this: Context, assert) {
+    const query = "foo";
+
+    await visit(`/results?q=${query}`);
+
+    assert.dom(GLOBAL_SEARCH_INPUT).hasValue(query);
+  });
+
+  test("search filters reset when the query changes", async function (this: Context, assert) {
+    const title = "baz";
+
+    this.server.create("document", {
+      title,
+    });
+
+    const initialURL = "/results?q=bar&page=2&status=%5B%22Approved%22%5D";
+
+    await visit(initialURL);
+
+    assert.equal(currentURL(), initialURL);
+
+    await fillIn(GLOBAL_SEARCH_INPUT, title);
+    await click(VIEW_ALL_DOCS_LINK);
+
+    assert.equal(
+      currentURL(),
+      `/results?q=${title}`,
+      "the query is updated and the non-query filters are removed",
+    );
   });
 });
