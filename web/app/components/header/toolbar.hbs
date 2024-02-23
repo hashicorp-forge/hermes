@@ -1,37 +1,6 @@
 {{#if this.facetsAreShown}}
   <div class="toolbar mb-7">
     <div class="flex w-full items-center justify-between">
-
-      {{! TODO: move this out of here }}
-      {{#if this.secondaryNavIsShown}}
-        <div class="flex gap-4 text-display-400 font-bold">
-          <LinkTo
-            @route="authenticated.results"
-            @query={{hash scope="all" q="dough" page=1}}
-            class="relative"
-          >
-            Everything
-            <div
-              class="absolute -bottom-2 left-0 h-0.5 w-full bg-color-foreground-action"
-            ></div>
-          </LinkTo>
-          <LinkTo
-            @route="authenticated.results"
-            @query={{hash scope="projects" q="dough" page=1}}
-            class=""
-          >
-            Projects
-          </LinkTo>
-          <LinkTo
-            @route="authenticated.results"
-            @query={{hash scope="docs" q="dough" page=1}}
-            class=""
-          >
-            Docs
-          </LinkTo>
-        </div>
-      {{/if}}
-
       <div class="flex items-center">
         <h4 class="hermes-h4 mr-4">
           Filter by:

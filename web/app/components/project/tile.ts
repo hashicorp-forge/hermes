@@ -41,6 +41,19 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
   @tracked protected jiraIssue: JiraIssue | null = null;
 
   /**
+   * The project ID used as our LinkTo model.
+   * If the project is an Algolia result, it has an `objectID`.
+   * If the project is retrieved from the back-end, it has an `id`.
+   */
+  protected get projectID() {
+    if ("objectID" in this.args.project) {
+      return this.args.project.objectID;
+    } else {
+      return this.args.project.id;
+    }
+  }
+
+  /**
    * Whether the "+N" label is shown next to the product avatars.
    * True if the number of unique products is greater than the max.
    */

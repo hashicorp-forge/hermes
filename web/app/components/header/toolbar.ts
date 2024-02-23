@@ -42,6 +42,7 @@ interface ToolbarComponentSignature {
   Args: {
     docFacets?: FacetDropdownGroups;
     projectFacets?: FacetDropdownGroups;
+    query?: string;
   };
 }
 
@@ -51,10 +52,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
   get currentRouteName(): string {
     return this.router.currentRouteName;
-  }
-
-  protected get secondaryNavIsShown(): boolean {
-    return this.currentRouteName === "authenticated.results";
   }
 
   protected get facetsAreShown() {

@@ -1,14 +1,14 @@
 {{page-title this.pageTitle}}
 
-{{! TODO: fix these types }}
-{{! no facets on the "all screen" }}
+<Results::Nav @scope={{this.scope}} @q={{this.q}} />
 
-{{log "tghis frekin model" this.model}}
-<Header::Toolbar
-  @docFacets={{this.model.docFacets}}
-  @projectFacets={{this.model.projectFacets}}
-  @scope={{this.scope}}
-/>
+{{#unless (eq this.scope "all")}}
+  <Header::Toolbar
+    @docFacets={{this.model.docFacets}}
+    @projectFacets={{this.model.projectFacets}}
+    @scope={{this.scope}}
+  />
+{{/unless}}
 
 <Results
   @docResults={{this.model.docResults}}

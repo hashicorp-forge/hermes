@@ -1,11 +1,11 @@
-{{! TODO: this needs scope logic }}
-{{! if both are passed in, it's the "all" scenario }}
-<h1
-  data-test-results-header-text
-  class="text-display-300 font-semibold"
->{{this.hitCount}}
-  {{#if @query}}
+<h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
+  {{#if (eq this.currentScope "all")}}
+    Results
+  {{else}}
+    {{this.hitCount}}
     {{if (eq this.hitCount 1) "match" "matches"}}
+  {{/if}}
+  {{#if @query}}
     for
     <mark>
       {{@query}}
@@ -16,68 +16,90 @@
 {{#if this.hitCount}}
 
   {{#if (eq this.currentScope "all")}}
-    {{#if @productResults.facetHits}}
-      <div class="mb-7">
-        <h4 class="hermes-h4">Products</h4>
-        <ol>
-          {{#each @productResults.facetHits as |p|}}
-            <li class="group relative">
-              <LinkTo
-                @route="authenticated.product-areas.product-area"
-                @model={{dasherize p.value}}
-              >
-                {{p.value}}
-              </LinkTo>
-            </li>
-          {{/each}}
-        </ol>
+    <div class="grid gap-9">
+      {{#if @productResults.facetHits}}
+        <div>
+          <h4 class="hermes-h4 mb-3">
+            Product/Areas
+          </h4>
+          <ol class="flex flex-wrap gap-5">
+            {{#each @productResults.facetHits as |p|}}
+              <li class="group relative">
+                <LinkTo
+                  @route="authenticated.product-areas.product-area"
+                  @model={{dasherize p.value}}
+                  class="flex h-10 items-center gap-3 text-display-300 font-semibold text-color-foreground-strong"
+                >
+                  <Product::Avatar @product={{p.value}} />
+                  <span>
+                    {{p.value}}
+                  </span>
+                  {{! <FlightIcon
+                  @name="chevron-right"
+                  class="-ml-0.5 text-color-foreground-disabled"
+                /> }}
+                </LinkTo>
+              </li>
+            {{/each}}
+          </ol>
 
-      </div>
-    {{/if}}
+        </div>
+      {{/if}}
 
-    <div class="mb-7">
-      <div class="flex gap-4">
-        <h4 class="hermes-h4">
-          Projects
-        </h4>
+      <div>
         <LinkTo
           @route="authenticated.results"
           @query={{hash q=@query scope="projects"}}
+          class="mb-3 flex items-center gap-2"
         >
-          View all
+          <h4 class="hermes-h4">
+            Projects
+          </h4>
+          <Hds::BadgeCount @text="{{@projectResults.nbHits}}" class="-mt-px" />
+          <FlightIcon
+            @name="chevron-right"
+            class="-ml-0.5 text-color-foreground-disabled"
+          />
         </LinkTo>
+        <ol class="">
+          {{#each @projectResults.hits as |p|}}
+            {{! Products unavailable via Algolia }}
+            {{! jiraIssueID is available }}
+            {{! creator is available }}
+            {{! description is available }}
+            <li class="group relative">
+              <Project::Tile @project={{p}} />
+            </li>
+          {{/each}}
+        </ol>
       </div>
-      <ol>
-        {{#each @projectResults.hits as |p|}}
-          <li class="group relative">
-            <Project::Tile @project={{p}} />
-          </li>
-        {{/each}}
-      </ol>
-    </div>
 
-    <div>
-      <div class="flex gap-4">
-        <h4 class="hermes-h4">
-          Docs
-        </h4>
+      <div>
         <LinkTo
           @route="authenticated.results"
           @query={{hash q=@query scope="docs"}}
+          class="mb-3 flex items-center gap-2"
         >
-          View all
+          <h4 class="hermes-h4">
+            Docs
+          </h4>
+          <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" />
+          <FlightIcon
+            @name="chevron-right"
+            class="-ml-0.5 text-color-foreground-disabled"
+          />
         </LinkTo>
+        <ol class="divided-list">
+          {{#each @docResults.hits as |doc|}}
+            <li data-test-doc-search-result class="group relative">
+              <Doc::TileMedium @doc={{doc}} @query={{@query}} />
+            </li>
+          {{/each}}
+        </ol>
       </div>
-      <ol class="divided-list">
-        {{#each @results.hits as |doc|}}
-          <li data-test-doc-search-result class="group relative">
-            <Doc::TileMedium @doc={{doc}} @query={{@query}} />
-          </li>
-        {{/each}}
-      </ol>
     </div>
   {{else if (eq this.currentScope "projects")}}
-    TODO: brojeks
+    TODO: Projekts
   {{else}}
     <ol>
       {{#each @docResults.hits as |d|}}
