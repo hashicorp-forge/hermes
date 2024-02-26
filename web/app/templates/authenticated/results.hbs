@@ -1,11 +1,19 @@
 {{page-title this.pageTitle}}
 
-<div class="mb-6 w-full">
+<div class="mb-6 flex w-full items-start">
   <h1 class="w-full text-display-600">
     Results for
     <mark>{{this.q}}</mark>
   </h1>
-  <Results::Nav @scope={{this.scope}} @q={{this.q}} />
+  {{#if (eq this.scope "All")}}
+    <Results::Nav
+      @scope={{this.scope}}
+      @q={{this.q}}
+      @docCount={{this.model.docResults.nbHits}}
+      @projectCount={{this.model.projectResults.nbHits}}
+      class="shrink-0"
+    />
+  {{/if}}
 </div>
 
 <Header::Toolbar

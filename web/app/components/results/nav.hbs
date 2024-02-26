@@ -1,23 +1,29 @@
-<div class="" ...attributes>
-  <LinkTo
-    @route="authenticated.results"
-    @query={{hash scope=this.allScope q=@q page=1}}
-    class={{if (eq @scope this.allScope) "active underline"}}
-  >
-    Top
-  </LinkTo>
+{{! TODO: this should take up space even if not there }}
+<div
+  class="active-filter-list mt-4 flex w-80 items-center justify-end"
+  ...attributes
+>
   <LinkTo
     @route="authenticated.results"
     @query={{hash scope=this.projectsScope q=@q page=1}}
-    class={{if (eq @scope this.projectsScope) "active"}}
+    class="active-filter-list-item gap-1.5
+      {{unless @projectCount 'mock-disabled'}}"
   >
     Projects
+    <span class="font-medium text-color-foreground-faint">
+      {{or @projectCount 0}}
+    </span>
+
   </LinkTo>
+
   <LinkTo
     @route="authenticated.results"
     @query={{hash scope=this.docsScope q=@q page=1}}
-    class={{if (eq @scope this.docsScope) "active"}}
+    class="active-filter-list-item gap-1.5 {{unless @docCount 'mock-disabled'}}"
   >
     Docs
+    <span class="font-medium text-color-foreground-faint">
+      {{or @docCount 0}}
+    </span>
   </LinkTo>
 </div>

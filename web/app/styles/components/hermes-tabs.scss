@@ -1,0 +1,11 @@
+.hermes-tabs {
+  @apply flex;
+
+  a {
+    // @apply px-1 text-body-300;
+  }
+
+  .active {
+    @apply text-color-foreground-action;
+  }
+}

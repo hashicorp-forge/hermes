@@ -3,7 +3,9 @@ import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { SearchScope } from "hermes/routes/authenticated/results";
-import ActiveFiltersService from "hermes/services/active-filters";
+import ActiveFiltersService, {
+  DEFAULT_FILTERS,
+} from "hermes/services/active-filters";
 
 interface HeaderActiveFilterListItemComponentSignature {
   Args: {
@@ -20,6 +22,19 @@ export default class HeaderActiveFilterListItemComponent extends Component<Heade
    * I.e., the ActiveFiltersService index minus the current filter.
    */
   get query() {
+    /**
+     * If the item is a scope filter, we want to remove all filters except for
+     * the query. If the item is not a scope filter, we want to remove the
+     * filter from the query.
+     */
+
+    if (this.args.filter === "scope") {
+      return {
+        ...DEFAULT_FILTERS,
+        q: this.router.currentRoute.queryParams["q"],
+      };
+    }
+
     return {
       ...Object.fromEntries(
         Object.entries(this.activeFilters.index).map(([key, value]) => {

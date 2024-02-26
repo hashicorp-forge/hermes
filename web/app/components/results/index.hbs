@@ -14,10 +14,10 @@
             <h4 class="hermes-h4">
               Product/Areas
             </h4>
-            <Hds::BadgeCount
+            {{!-- <Hds::BadgeCount
               @text="{{@productResults.facetHits.length}}"
               class="-mt-px"
-            />
+            /> --}}
           </div>
           <ol class="flex flex-wrap gap-5">
             {{#each @productResults.facetHits as |p|}}
@@ -53,10 +53,10 @@
             <h4 class="hermes-h4">
               Projects
             </h4>
-            <Hds::BadgeCount
+            {{!-- <Hds::BadgeCount
               @text="{{@projectResults.nbHits}}"
               class="-mt-px"
-            />
+            /> --}}
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"
@@ -85,7 +85,7 @@
             <h4 class="hermes-h4">
               Docs
             </h4>
-            <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" />
+            {{!-- <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" /> --}}
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"
@@ -102,7 +102,9 @@
       {{/if}}
     </div>
   {{else if (eq this.currentScope this.projectsScope)}}
-    TODO: Projekts
+    {{#each @projectResults.hits as |p|}}
+      <Project::Tile @project={{p}} />
+    {{/each}}
   {{else}}
     <ol>
       {{#each @docResults.hits as |d|}}

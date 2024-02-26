@@ -8,7 +8,7 @@ import {
 import { ActiveFilters, FacetName } from "hermes/components/header/toolbar";
 import { SearchScope } from "hermes/routes/authenticated/results";
 
-const DEFAULT_FILTERS = {
+export const DEFAULT_FILTERS = {
   [FacetName.DocType]: [],
   [FacetName.Status]: [],
   [FacetName.Product]: [],

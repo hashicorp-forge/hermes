@@ -6,6 +6,8 @@ interface ResultsNavComponentSignature {
   Args: {
     scope: SearchScope;
     q: string | null;
+    docCount?: number;
+    projectCount?: number;
   };
   Blocks: {
     default: [];
