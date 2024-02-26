@@ -1,26 +1,23 @@
-<div class="secondary-nav w-72 shrink-0">
+<div class="" ...attributes>
   <LinkTo
     @route="authenticated.results"
-    @query={{hash scope="all" q=@q page=1}}
-    class={{if (eq @scope "all") "active"}}
+    @query={{hash scope=this.allScope q=@q page=1}}
+    class={{if (eq @scope this.allScope) "active underline"}}
   >
     Top
   </LinkTo>
   <LinkTo
     @route="authenticated.results"
-    @query={{hash scope="projects" q=@q page=1}}
-    class={{if (eq @scope "projects") "active"}}
+    @query={{hash scope=this.projectsScope q=@q page=1}}
+    class={{if (eq @scope this.projectsScope) "active"}}
   >
     Projects
-    {{! TODO: count should be an unfiltered count }}
-    {{!-- <Hds::BadgeCount @text={{or this.model.projectResults.nbHits "0"}} /> --}}
   </LinkTo>
   <LinkTo
     @route="authenticated.results"
-    @query={{hash scope="docs" q=@q page=1}}
-    class={{if (eq @scope "docs") "active"}}
+    @query={{hash scope=this.docsScope q=@q page=1}}
+    class={{if (eq @scope this.docsScope) "active"}}
   >
     Docs
-    {{!-- <Hds::BadgeCount @text={{or this.model.docResults.nbHits "1234"}} /> --}}
   </LinkTo>
 </div>

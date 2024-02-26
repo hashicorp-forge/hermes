@@ -1,19 +1,24 @@
-<h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
-  {{#unless (and (eq this.currentScope "all") this.hitCount)}}
+{{#unless (and (eq this.currentScope this.allScope) this.hitCount)}}
+  <h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
     {{this.hitCount}}
     {{if (eq this.hitCount 1) "match" "matches"}}
-  {{/unless}}
-</h1>
+  </h1>
+{{/unless}}
 
 {{#if this.hitCount}}
-
-  {{#if (eq this.currentScope "all")}}
+  {{#if (eq this.currentScope this.allScope)}}
     <div class="grid gap-9">
       {{#if @productResults.facetHits}}
         <div>
-          <h4 class="hermes-h4 mb-3">
-            Product/Areas
-          </h4>
+          <div class="mb-3 flex items-center gap-2">
+            <h4 class="hermes-h4">
+              Product/Areas
+            </h4>
+            <Hds::BadgeCount
+              @text="{{@productResults.facetHits.length}}"
+              class="-mt-px"
+            />
+          </div>
           <ol class="flex flex-wrap gap-5">
             {{#each @productResults.facetHits as |p|}}
               <li class="group relative">
@@ -42,7 +47,7 @@
         <div>
           <LinkTo
             @route="authenticated.results"
-            @query={{hash q=@query scope="projects"}}
+            @query={{hash q=@query scope=this.projectsScope}}
             class="mb-3 flex items-center gap-2"
           >
             <h4 class="hermes-h4">
@@ -74,7 +79,7 @@
         <div>
           <LinkTo
             @route="authenticated.results"
-            @query={{hash q=@query scope="docs"}}
+            @query={{hash q=@query scope=this.docsScope}}
             class="mb-3 flex items-center gap-2"
           >
             <h4 class="hermes-h4">
@@ -96,7 +101,7 @@
         </div>
       {{/if}}
     </div>
-  {{else if (eq this.currentScope "projects")}}
+  {{else if (eq this.currentScope this.projectsScope)}}
     TODO: Projekts
   {{else}}
     <ol>

@@ -26,7 +26,7 @@ export default class ActiveFiltersService extends Service {
 
     if ("scope" in params) {
       if (params.scope !== SearchScope.All) {
-        scope = params.scope.charAt(0).toUpperCase() + params.scope.slice(1);
+        scope = params.scope;
       }
     }
 

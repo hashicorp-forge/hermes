@@ -44,6 +44,7 @@ interface ToolbarComponentSignature {
   Args: {
     docFacets?: FacetDropdownGroups;
     projectFacets?: FacetDropdownGroups;
+    scope: SearchScope;
     query?: string;
   };
 }
@@ -57,7 +58,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facetsAreShown() {
-    return this.args.docFacets || this.args.projectFacets;
+    return this.args.scope === SearchScope.Docs;
   }
 
   /**

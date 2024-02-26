@@ -1,6 +1,6 @@
 {{page-title this.pageTitle}}
 
-<div class="mb-6 flex w-full">
+<div class="mb-6 w-full">
   <h1 class="w-full text-display-600">
     Results for
     <mark>{{this.q}}</mark>
@@ -8,13 +8,11 @@
   <Results::Nav @scope={{this.scope}} @q={{this.q}} />
 </div>
 
-{{#if (eq this.scope "docs")}}
-  <Header::Toolbar
-    @docFacets={{this.model.docFacets}}
-    @projectFacets={{this.model.projectFacets}}
-    @scope={{this.scope}}
-  />
-{{/if}}
+<Header::Toolbar
+  @scope={{this.scope}}
+  @docFacets={{this.model.docFacets}}
+  @projectFacets={{this.model.projectFacets}}
+/>
 
 <Header::ActiveFilterList />
 

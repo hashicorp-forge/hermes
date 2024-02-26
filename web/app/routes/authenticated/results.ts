@@ -8,9 +8,9 @@ import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 
 export enum SearchScope {
-  All = "all",
-  Docs = "docs",
-  Projects = "projects",
+  All = "All",
+  Docs = "Docs",
+  Projects = "Projects",
 }
 
 export default class AuthenticatedResultsRoute extends Route {

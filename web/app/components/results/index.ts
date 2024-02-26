@@ -16,6 +16,10 @@ interface ResultsIndexComponentSignature {
 }
 
 export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
+  allScope = SearchScope.All;
+  projectsScope = SearchScope.Projects;
+  docsScope = SearchScope.Docs;
+
   protected get hitCount(): number {
     return (
       (this.args.docResults?.nbHits || 0) +
