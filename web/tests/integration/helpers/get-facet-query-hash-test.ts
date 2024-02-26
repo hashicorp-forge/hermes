@@ -1,14 +1,22 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { render } from "@ember/test-helpers";
+import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import ActiveFiltersService from "hermes/services/active-filters";
+import { FacetName } from "hermes/components/header/toolbar";
 import { SearchScope } from "hermes/routes/authenticated/results";
+
+interface Context extends TestContext {
+  type: FacetName;
+  status: FacetName;
+  product: FacetName;
+  ownerFacet: FacetName;
+}
 
 module("Integration | Helper | get-facet-query-hash", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("", async function (assert) {
+  test("it generates the correct href", async function (this: Context, assert) {
     const activeFiltersService = this.owner.lookup(
       "service:active-filters",
     ) as ActiveFiltersService;
@@ -21,31 +29,35 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       scope: SearchScope.All,
     };
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    this.set("type", FacetName.DocType);
+    this.set("status", FacetName.Status);
+    this.set("product", FacetName.Product);
+    this.set("ownerFacet", FacetName.Owners);
+
+    await render<Context>(hbs`
       <LinkTo
         @route="authenticated.documents"
-        @query={{get-facet-query-hash "Type" "foo" false}}
+        @query={{get-facet-query-hash this.type "foo" false}}
       />
 
       <LinkTo
         @route="authenticated.documents"
-        @query={{get-facet-query-hash "Type" "bar" true}}
+        @query={{get-facet-query-hash this.type "bar" true}}
       />
 
       <LinkTo
         @route="authenticated.documents"
-        @query={{get-facet-query-hash "Status" "foo" false}}
+        @query={{get-facet-query-hash this.status "foo" false}}
       />
 
       <LinkTo
         @route="authenticated.documents"
-        @query={{get-facet-query-hash "Product/Area" "foo" false}}
+        @query={{get-facet-query-hash this.product "foo" false}}
       />
 
       <LinkTo
         @route="authenticated.documents"
-        @query={{get-facet-query-hash "Owner" "foo" false}}
+        @query={{get-facet-query-hash this.ownerFacet "foo" false}}
       />
     `);
 
@@ -53,7 +65,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(1)")
       .hasAttribute(
         "href",
-        "/documents?docType=%5B%22bar%22%2C%22foo%22%5D",
+        `/documents?${FacetName.DocType}=%5B%22bar%22%2C%22foo%22%5D`,
         "Link would add a filter to the query hash; Type facetName is properly translated",
       );
 
@@ -69,7 +81,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(3)")
       .hasAttribute(
         "href",
-        "/documents?docType=%5B%22bar%22%5D&status=%5B%22foo%22%5D",
+        `/documents?${FacetName.DocType}=%5B%22bar%22%5D&${FacetName.Status}=%5B%22foo%22%5D`,
         "Status facetName is properly translated",
       );
 
@@ -77,7 +89,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(4)")
       .hasAttribute(
         "href",
-        "/documents?docType=%5B%22bar%22%5D&product=%5B%22foo%22%5D",
+        `/documents?${FacetName.DocType}=%5B%22bar%22%5D&${FacetName.Product}=%5B%22foo%22%5D`,
         "Product/Area facetName is properly translated",
       );
 
@@ -85,7 +97,7 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       .dom("a:nth-of-type(5)")
       .hasAttribute(
         "href",
-        "/documents?docType=%5B%22bar%22%5D&owners=%5B%22foo%22%5D",
+        `/documents?${FacetName.DocType}=%5B%22bar%22%5D&${FacetName.Owners}=%5B%22foo%22%5D`,
         "Owner facetName is properly translated",
       );
   });
