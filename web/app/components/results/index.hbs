@@ -102,9 +102,17 @@
       {{/if}}
     </div>
   {{else if (eq this.currentScope this.projectsScope)}}
-    {{#each @projectResults.hits as |p|}}
-      <Project::Tile @project={{p}} />
-    {{/each}}
+    <ol>
+      {{#each @projectResults.hits as |p|}}
+        <li class="group relative">
+          <Project::Tile @project={{p}} />
+        </li>
+      {{/each}}
+    </ol>
+    <Pagination
+      @currentPage={{(add @projectResults.page 1)}}
+      @nbPages={{@projectResults.nbPages}}
+    />
   {{else}}
     <ol>
       {{#each @docResults.hits as |d|}}
@@ -113,7 +121,6 @@
         </li>
       {{/each}}
     </ol>
-
     <Pagination
       @currentPage={{(add @docResults.page 1)}}
       @nbPages={{@docResults.nbPages}}
