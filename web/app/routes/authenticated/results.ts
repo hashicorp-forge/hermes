@@ -6,6 +6,7 @@ import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
+import { HermesProject } from "hermes/types/project";
 
 export enum SearchScope {
   All = "All",
@@ -100,6 +101,16 @@ export default class AuthenticatedResultsRoute extends Route {
       if (docHits) {
         // Load owner information
         await this.store.maybeFetchPeople.perform(docHits);
+      }
+    }
+
+    if (projectResults) {
+      const projectHits = (projectResults as { hits?: HermesProject[] }).hits;
+
+      if (projectHits) {
+        // Fetch products associated with each project
+        // TODO;
+        debugger;
       }
     }
 

@@ -47,8 +47,7 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    docFacets?: FacetDropdownGroups;
-    projectFacets?: FacetDropdownGroups;
+    facets?: FacetDropdownGroups;
     scope: SearchScope;
     query?: string;
   };
@@ -71,7 +70,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get statuses(): FacetDropdownObjects {
     let statuses: FacetDropdownObjects = {};
-    for (let status in this.args.docFacets?.status) {
+    for (let status in this.args.facets?.status) {
       if (
         status === "Approved" ||
         status === "In-Review" ||
@@ -79,7 +78,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         status === "Obsolete" ||
         status === "WIP"
       ) {
-        statuses[status] = this.args.docFacets?.status[
+        statuses[status] = this.args.facets?.status[
           status
         ] as FacetDropdownObjectDetails;
       }
@@ -89,12 +88,13 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facets() {
+    console.log(this.args.facets);
     if (!this.args.facets) return;
 
     let facetArray: FacetArrayItem[] = [];
 
     Object.entries(this.args.facets).forEach(([key, value]) => {
-      if (key === FacetName.Status) {
+      if (key === FacetName.Status && this.args.scope === SearchScope.Docs) {
         facetArray.push({ name: key, values: this.statuses });
       } else {
         facetArray.push({ name: key as FacetName, values: value });

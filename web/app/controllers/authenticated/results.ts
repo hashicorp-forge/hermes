@@ -40,4 +40,15 @@ export default class AuthenticatedResultsController extends Controller {
 
     return title;
   }
+
+  protected get facets() {
+    const { docFacets, projectFacets } = this.model;
+
+    switch (this.scope) {
+      case SearchScope.Docs:
+        return docFacets;
+      case SearchScope.Projects:
+        return projectFacets;
+    }
+  }
 }

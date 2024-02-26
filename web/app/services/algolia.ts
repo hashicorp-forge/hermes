@@ -360,6 +360,7 @@ export default class AlgoliaService extends Service {
           this.configSvc.config.algolia_projects_index_name,
           query,
           {
+            facetFilters: this.buildFacetFilters(params),
             hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
             page: params.page ? params.page - 1 : 0,
           },
