@@ -1,4 +1,5 @@
 <X::DropdownList
+  data-test-facet-dropdown-popover
   @items={{@facets}}
   @listIsOrdered={{true}}
   @offset={{hash mainAxis=3 crossAxis=-5}}
@@ -12,12 +13,10 @@
       data-test-facet={{dasherize @name}}
       class="focus:z-10 focus-visible:z-10 active:z-10"
       @text={{get-facet-label @name}}
-      disabled={{@disabled}}
+      disabled={{this.isDisabled}}
     />
   </:anchor>
   <:item as |dd|>
-    {{log "D D" dd}}
-    {{log (get-facet-query-hash @name dd.value dd.attrs.isSelected)}}
     <dd.LinkTo
       data-test-facet-dropdown-link
       @route={{this.currentRouteName}}

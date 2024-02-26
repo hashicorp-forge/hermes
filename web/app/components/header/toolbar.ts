@@ -60,7 +60,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   /**
    * The statuses available as filters.
    */
-  protected get statuses(): FacetDropdownObjects | null {
+  protected get statuses(): FacetDropdownObjects {
     let statuses: FacetDropdownObjects = {};
     for (let status in this.args.facets?.status) {
       if (
@@ -76,12 +76,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       }
     }
 
-    if (Object.keys(statuses).length === 0) {
-      // This will disable the status dropdown
-      return null;
-    } else {
-      return statuses;
-    }
+    return statuses;
   }
 
   protected get facets() {

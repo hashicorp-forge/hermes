@@ -9,7 +9,6 @@ interface HeaderFacetDropdownComponentSignature {
   Args: {
     name: FacetName;
     facets: FacetDropdownObjects | null;
-    disabled?: boolean;
   };
 }
 
@@ -18,6 +17,10 @@ export default class HeaderFacetDropdownComponent extends Component<HeaderFacetD
 
   protected get currentRouteName() {
     return this.router.currentRouteName;
+  }
+
+  protected get isDisabled() {
+    return !this.args.facets || Object.keys(this.args.facets).length === 0;
   }
 }
 

@@ -1,9 +1,16 @@
 import Helper from "@ember/component/helper";
 import { FacetName } from "hermes/components/header/toolbar";
 
+export enum FacetLabel {
+  DocType = "Type",
+  Owners = "Owners",
+  Status = "Status",
+  Product = "Product/Area",
+}
+
 interface GetFacetLabelHelperSignature {
   Args: {
-    Positional: [facetName: FacetName];
+    Positional: [facetName: string];
   };
   Return: string;
 }
@@ -16,13 +23,13 @@ export default class GetFacetLabelHelper extends Helper<GetFacetLabelHelperSigna
 
     switch (facetName) {
       case FacetName.DocType:
-        return "Type";
+        return FacetLabel.DocType;
       case FacetName.Owners:
-        return "Owners";
+        return FacetLabel.Owners;
       case FacetName.Status:
-        return "Status";
+        return FacetLabel.Status;
       case FacetName.Product:
-        return "Product/Area";
+        return FacetLabel.Product;
       default:
         return facetName;
     }
