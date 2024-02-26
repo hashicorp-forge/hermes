@@ -58,7 +58,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facetsAreShown() {
-    return this.args.scope === SearchScope.Docs;
+    return this.args.scope !== SearchScope.All;
   }
 
   /**
