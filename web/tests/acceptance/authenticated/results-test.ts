@@ -4,6 +4,7 @@ import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
+import { FacetLabel } from "hermes/helpers/get-facet-label";
 
 // Header
 const DOC_SEARCH_RESULT = "[data-test-doc-search-result]";
@@ -14,8 +15,8 @@ const CLEAR_ALL_FILTERS_LINK = "[data-test-clear-all-filters-link]";
 
 // Filter buttons
 const FACET_DROPDOWN_TOGGLE = "[data-test-facet-dropdown-toggle]";
-const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="type"]`;
-const PRODUCT_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="product/area"]`;
+const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="${FacetLabel.DocType}"]`;
+const PRODUCT_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="${FacetLabel.Product}"]`;
 
 // Filter dropdowns
 const FACET_DROPDOWN_LINK = "[data-test-facet-dropdown-link]";
