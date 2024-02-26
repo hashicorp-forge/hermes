@@ -6,16 +6,21 @@ import { FacetName } from "hermes/components/header/toolbar";
 import { FacetLabel } from "hermes/helpers/get-facet-label";
 
 interface Context extends TestContext {
-  docType: FacetName.DocType;
-  owners: FacetName.Owners;
-  status: FacetName.Status;
-  product: FacetName.Product;
+  docType: FacetName;
+  owners: FacetName;
+  status: FacetName;
+  product: FacetName;
 }
 
 module("Integration | Helper | get-facet-label", function (hooks) {
   setupRenderingTest(hooks);
 
   test("it translates the facet label", async function (assert) {
+    this.set("docType", FacetName.DocType);
+    this.set("owners", FacetName.Owners);
+    this.set("status", FacetName.Status);
+    this.set("product", FacetName.Product);
+
     await render<Context>(hbs`
       <div class="doc-type">
         {{get-facet-label this.docType}}

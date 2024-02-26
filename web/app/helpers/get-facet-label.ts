@@ -15,7 +15,10 @@ interface GetFacetLabelHelperSignature {
   Return: string;
 }
 /**
- *
+ * A helper to translate a facet name to a human-readable label.
+ * E.g., `product` becomes `Product/Area`.
+ * If the facet is not recognized, it returns as is.
+ * Used in the filter dropdowns.
  */
 export default class GetFacetLabelHelper extends Helper<GetFacetLabelHelperSignature> {
   compute(positional: GetFacetLabelHelperSignature["Args"]["Positional"]) {

@@ -14,9 +14,9 @@ const ACTIVE_FILTER_LINK = "[data-test-active-filter-link]";
 const CLEAR_ALL_FILTERS_LINK = "[data-test-clear-all-filters-link]";
 
 // Filter buttons
-const FACET_DROPDOWN_TOGGLE = "[data-test-facet-dropdown-toggle]";
-const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="${FacetLabel.DocType}"]`;
-const PRODUCT_FACET_DROPDOWN_TOGGLE = `${FACET_DROPDOWN_TOGGLE}[data-test-facet="${FacetLabel.Product}"]`;
+const TRIGGER = "data-test-facet-dropdown-trigger";
+const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `[${TRIGGER}="${FacetLabel.DocType}"]`;
+const PRODUCT_FACET_DROPDOWN_TOGGLE = `[${TRIGGER}="${FacetLabel.Product}"]`;
 
 // Filter dropdowns
 const FACET_DROPDOWN_LINK = "[data-test-facet-dropdown-link]";
