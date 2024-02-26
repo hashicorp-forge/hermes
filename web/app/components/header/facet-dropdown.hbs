@@ -9,21 +9,19 @@
   <:anchor as |dd|>
     <dd.ToggleButton
       data-test-facet-dropdown-toggle
-      data-test-facet={{dasherize @label}}
-      class="focus:z-10 focus-visible:z-10 active:z-10
-        {{if this.positionIsLeft 'rounded-r-none'}}
-        {{if this.positionIsCenter 'rounded-none border-l-0'}}
-        {{if this.positionIsRight 'rounded-l-none border-l-0'}}
-        "
-      @text={{@label}}
+      data-test-facet={{dasherize @name}}
+      class="focus:z-10 focus-visible:z-10 active:z-10"
+      @text={{get-facet-label @name}}
       disabled={{@disabled}}
     />
   </:anchor>
   <:item as |dd|>
+    {{log "D D" dd}}
+    {{log (get-facet-query-hash @name dd.value dd.attrs.isSelected)}}
     <dd.LinkTo
       data-test-facet-dropdown-link
       @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label dd.value dd.attrs.isSelected}}
+      @query={{get-facet-query-hash @name dd.value dd.attrs.isSelected}}
     >
       <X::DropdownList::CheckableItem
         @value={{dd.value}}

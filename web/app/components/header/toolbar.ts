@@ -34,6 +34,11 @@ export interface SortByFacets {
   };
 }
 
+interface FacetArrayItem {
+  name: FacetName;
+  values: FacetDropdownObjects | null;
+}
+
 export type ActiveFilters = {
   [name in FacetName]: string[];
 };
@@ -77,6 +82,28 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     } else {
       return statuses;
     }
+  }
+
+  protected get facets() {
+    if (!this.args.facets) return;
+
+    let facetArray: FacetArrayItem[] = [];
+
+    Object.entries(this.args.facets).forEach(([key, value]) => {
+      if (key === FacetName.Status) {
+        facetArray.push({ name: key, values: this.statuses });
+      } else {
+        facetArray.push({ name: key as FacetName, values: value });
+      }
+    });
+
+    const order = ["docType", "status", "product", "owners"];
+
+    facetArray.sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    });
+
+    return facetArray;
   }
 
   /**
