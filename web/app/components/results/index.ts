@@ -10,7 +10,7 @@ interface ResultsIndexComponentSignature {
     docResults?: SearchResponse<HermesDocument>;
     projectResults?: SearchResponse<HermesProject>;
     productResults?: SearchForFacetValuesResponse;
-    query: string;
+    query: string | null;
   };
 }
 

@@ -7,6 +7,7 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { HermesProject } from "hermes/types/project";
+import { SearchResponse } from "instantsearch.js";
 
 export enum SearchScope {
   All = "All",
@@ -95,8 +96,11 @@ export default class AuthenticatedResultsRoute extends Route {
       productResultsPromise,
     ]);
 
+    const typedDocResults = docResults as SearchResponse<HermesDocument>;
+    const typedProjectResults = projectResults as SearchResponse<HermesProject>;
+
     if (docResults) {
-      const docHits = (docResults as { hits?: HermesDocument[] }).hits;
+      const docHits = typedDocResults.hits;
 
       if (docHits) {
         // Load owner information
@@ -105,7 +109,7 @@ export default class AuthenticatedResultsRoute extends Route {
     }
 
     if (projectResults) {
-      const projectHits = (projectResults as { hits?: HermesProject[] }).hits;
+      const projectHits = typedProjectResults.hits;
 
       if (projectHits) {
         // Fetch products associated with each project
@@ -118,9 +122,9 @@ export default class AuthenticatedResultsRoute extends Route {
 
     return {
       docFacets,
-      docResults,
+      docResults: typedDocResults,
       projectFacets,
-      projectResults,
+      projectResults: typedProjectResults,
       productResults,
     };
   }

@@ -15,7 +15,7 @@ interface DocTileMediumComponentSignature {
      * The search query associated with the current view.
      * Used to highlight search terms in the document title.
      */
-    query?: string;
+    query?: string | null;
   };
   Blocks: {
     default: [];
