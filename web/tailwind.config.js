@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 module.exports = {
   content: ["./app/**/*.{html,js,hbs,gts}"],
   theme: {
@@ -193,7 +195,15 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".wrap-anywhere": {
+          "overflow-wrap": "anywhere",
+        },
+      });
+    }),
+  ],
   corePlugins: {
     // Disable Tailwind's preflight to prevent clashes
     // with @hashicorp/design-system-components
