@@ -19,7 +19,8 @@ const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
 
 // Header
 const DOC_SEARCH_RESULT = "[data-test-doc-search-result]";
-const RESULTS_HEADER_TEXT = "[data-test-results-header-text]";
+const RESULTS_HEADLINE = "[data-test-results-headline]";
+const RESULTS_SUBHEAD = "[data-test-results-subhead]";
 const ACTIVE_FILTER_LIST = "[data-test-active-filter-list]";
 const ACTIVE_FILTER_LINK = "[data-test-active-filter-link]";
 const CLEAR_ALL_FILTERS_LINK = "[data-test-clear-all-filters-link]";
@@ -69,11 +70,12 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
 
+    assert.dom(RESULTS_HEADLINE).hasText("Results");
     assert
-      .dom(RESULTS_HEADER_TEXT)
+      .dom(RESULTS_SUBHEAD)
       .hasText(
-        `${totalDocCount} documents`,
-        "the correct header text is shown (plural, no query)",
+        `${totalDocCount} matches`,
+        "the correct header text is shown (plural)",
       );
 
     // search for title
@@ -81,12 +83,10 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert.dom(DOC_SEARCH_RESULT).exists({ count: 1 });
 
+    assert.dom(RESULTS_HEADLINE).hasText(`Results for ${uniqueTitle}`);
     assert
-      .dom(RESULTS_HEADER_TEXT)
-      .hasText(
-        `1 document matching ${uniqueTitle}`,
-        "the correct header text is shown (singular, with query)",
-      );
+      .dom(RESULTS_SUBHEAD)
+      .hasText("1 match", "the correct header text is shown (singular)");
   });
 
   test("you can filter results", async function (this: Context, assert) {
@@ -144,7 +144,7 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await visit("/results");
 
-    assert.dom(RESULTS_HEADER_TEXT).containsText(`${totalDocCount}`);
+    assert.dom(RESULTS_SUBHEAD).containsText(`${totalDocCount}`);
     assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
 
     assert
@@ -168,7 +168,7 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(secondFacet as unknown as Element);
 
-    assert.dom(RESULTS_HEADER_TEXT).containsText(`${frdCount}`);
+    assert.dom(RESULTS_SUBHEAD).containsText(`${frdCount}`);
     assert.dom(DOC_SEARCH_RESULT).exists({ count: frdCount });
 
     assert
@@ -201,7 +201,7 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(secondFacet as unknown as Element);
 
-    assert.dom(RESULTS_HEADER_TEXT).containsText("1");
+    assert.dom(RESULTS_SUBHEAD).containsText("1");
     assert.dom(DOC_SEARCH_RESULT).exists({ count: 1 });
 
     assert
@@ -234,7 +234,7 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(ACTIVE_FILTER_LINK);
 
-    assert.dom(RESULTS_HEADER_TEXT).containsText(`${terraformDocCount}`);
+    assert.dom(RESULTS_SUBHEAD).containsText(`${terraformDocCount}`);
     assert.dom(DOC_SEARCH_RESULT).exists({ count: terraformDocCount });
 
     assert
@@ -246,7 +246,7 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(CLEAR_ALL_FILTERS_LINK);
 
-    assert.dom(RESULTS_HEADER_TEXT).containsText(`${totalDocCount}`);
+    assert.dom(RESULTS_SUBHEAD).containsText(`${totalDocCount}`);
 
     assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
 
