@@ -49,15 +49,19 @@ export default class AuthenticatedDocumentsRoute extends Route {
       this.algolia.getDocResults.perform(searchIndex, params),
     ]);
 
-    const hits = (results as { hits?: HermesDocument[] }).hits;
+    const typedResults = results as SearchResponse<HermesDocument>;
+    const hits = typedResults.hits;
 
     if (hits) {
       // Load owner information
       await this.store.maybeFetchPeople.perform(hits);
     }
 
-    this.activeFilters.update(params);
-
-    return { facets, results, sortedBy };
+    this.activeFilters.update({ ...params, scope: undefined });
+    return {
+      facets,
+      results: typedResults,
+      sortedBy,
+    };
   }
 }

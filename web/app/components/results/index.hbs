@@ -1,12 +1,12 @@
-{{#unless (and (eq this.currentScope this.allScope) this.hitCount)}}
+{{#unless this.currentScopeIsAll}}
   <h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
-    {{this.hitCount}}
-    {{if (eq this.hitCount 1) "match" "matches"}}
+    {{this.nbHits}}
+    {{if (eq this.nbHits 1) "match" "matches"}}
   </h1>
 {{/unless}}
 
-{{#if this.hitCount}}
-  {{#if (eq this.currentScope this.allScope)}}
+{{#if this.nbHits}}
+  {{#if this.currentScopeIsAll}}
     <div class="mt-[33px] grid gap-9">
       {{#if @productResults.facetHits}}
         <div>
@@ -14,10 +14,6 @@
             <h4 class="hermes-h4">
               Product/Areas
             </h4>
-            {{!-- <Hds::BadgeCount
-              @text="{{@productResults.facetHits.length}}"
-              class="-mt-px"
-            /> --}}
           </div>
           <ol class="flex flex-wrap gap-5">
             {{#each @productResults.facetHits as |p|}}
@@ -31,10 +27,6 @@
                   <span>
                     {{p.value}}
                   </span>
-                  {{! <FlightIcon
-                  @name="chevron-right"
-                  class="-ml-0.5 text-color-foreground-disabled"
-                /> }}
                 </LinkTo>
               </li>
             {{/each}}
@@ -43,7 +35,6 @@
         </div>
       {{/if}}
       {{#if @projectResults.hits}}
-
         <div>
           <LinkTo
             @route="authenticated.results"
@@ -53,10 +44,6 @@
             <h4 class="hermes-h4">
               Projects
             </h4>
-            {{!-- <Hds::BadgeCount
-              @text="{{@projectResults.nbHits}}"
-              class="-mt-px"
-            /> --}}
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"
@@ -68,6 +55,7 @@
               {{! jiraIssueID is available }}
               {{! creator is available }}
               {{! description is available }}
+              {{! description should be searchable? }}
               <li class="group relative">
                 <Project::Tile @project={{p}} />
               </li>
@@ -85,7 +73,6 @@
             <h4 class="hermes-h4">
               Docs
             </h4>
-            {{!-- <Hds::BadgeCount @text="{{@docResults.nbHits}}" class="-mt-px" /> --}}
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"
@@ -110,7 +97,7 @@
       {{/each}}
     </ol>
     <Pagination
-      @currentPage={{(add @projectResults.page 1)}}
+      @currentPage={{add (or @projectResults.page 0) 1}}
       @nbPages={{@projectResults.nbPages}}
     />
   {{else}}
@@ -122,14 +109,12 @@
       {{/each}}
     </ol>
     <Pagination
-      @currentPage={{(add @docResults.page 1)}}
+      @currentPage={{(add (or @docResults.page 0) 1)}}
       @nbPages={{@docResults.nbPages}}
     />
   {{/if}}
 {{else}}
   {{! FIXME: On the docs and projects tabs, there's already a "0 matches" }}
+  {{! TODO: maybe just extra whitespace or an illustration }}
   Broaden your search you big dummy
 {{/if}}
-
-{{! If we're showing "all" results, we need some UI to show both results }}
-{{! Maybe we'll do that last }}

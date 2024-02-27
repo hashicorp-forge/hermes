@@ -10,6 +10,7 @@ import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import {
+  FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetRecord,
   FacetRecords,
@@ -117,7 +118,9 @@ export default class AlgoliaService extends Service {
    * Iterates over the keys of a facet object and transforms the `count` value
    * into a `FacetDropdownObjectDetails` object with `count` and `selected` properties.
    */
-  mapStatefulFacetKeys = (facetObject: AlgoliaFacetsObject): FacetRecords => {
+  mapStatefulFacetKeys = (
+    facetObject: AlgoliaFacetsObject,
+  ): Partial<FacetDropdownGroups> => {
     /**
      * e.g., facetObject === {
      *  owners: {
