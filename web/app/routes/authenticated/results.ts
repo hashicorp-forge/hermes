@@ -114,7 +114,7 @@ export default class AuthenticatedResultsRoute extends Route {
       if (projectHits) {
         // Fetch products associated with each project
         // TODO;
-        debugger;
+        // debugger;
       }
     }
 

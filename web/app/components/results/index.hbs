@@ -1,4 +1,4 @@
-{{#unless this.currentScopeIsAll}}
+{{#unless (and this.currentScopeIsAll this.nbHits)}}
   <h1 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
     {{this.nbHits}}
     {{if (eq this.nbHits 1) "match" "matches"}}
@@ -49,7 +49,7 @@
             />
           </LinkTo>
           <ol class="">
-            {{#each @projectResults.hits as |p|}}
+            {{#each (take 5 @projectResults.hits) as |p|}}
               {{! Products unavailable via Algolia }}
               {{! jiraIssueID is available }}
               {{! creator is available }}
@@ -84,6 +84,21 @@
               </li>
             {{/each}}
           </ol>
+          {{#if this.showMoreDocsButtonIsShown}}
+            <div class="mx-auto mt-6 max-w-[830px]">
+              <Hds::Button
+                data-test-link-to-all-docs
+                @color="secondary"
+                @text="Next page of docs"
+                @icon="arrow-right"
+                @iconPosition="trailing"
+                @isFullWidth={{true}}
+                @route="authenticated.results"
+                @query={{hash scope=this.docsScope page=2}}
+                class="py-3"
+              />
+            </div>
+          {{/if}}
         </div>
       {{/if}}
     </div>
@@ -112,8 +127,4 @@
       @nbPages={{@docResults.nbPages}}
     />
   {{/if}}
-{{else}}
-  {{! FIXME: On the docs and projects tabs, there's already a "0 matches" }}
-  {{! TODO: maybe just extra whitespace or an illustration }}
-  Broaden your search you big dummy
 {{/if}}

@@ -29,6 +29,14 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     );
   }
 
+  protected get showMoreDocsButtonIsShown() {
+    if (!this.currentScopeIsAll) return false;
+
+    const { docResults } = this.args;
+
+    return docResults?.page === 0 && docResults?.nbPages > 1;
+  }
+
   /**
    * The current scope of the search results.
    * If docResults and projectResults are both present, the scope is All,

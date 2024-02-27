@@ -10,6 +10,7 @@ import {
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
 import { SearchScope } from "hermes/routes/authenticated/results";
+import { assert } from "@ember/debug";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -62,6 +63,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facetsAreShown() {
+    if (!this.args.facets) return false;
     return this.args.scope !== SearchScope.All;
   }
 
@@ -88,7 +90,44 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facets() {
-    if (!this.args.facets) return;
+    assert("facets must exist", this.args.facets);
+
+    const facetsObjectIsEmpty = Object.keys(this.args.facets).length === 0;
+
+    if (facetsObjectIsEmpty) {
+      switch (this.args.scope) {
+        case SearchScope.Docs:
+          return [
+            {
+              name: FacetName.DocType,
+              values: null,
+            },
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+            {
+              name: FacetName.Product,
+              values: null,
+            },
+            {
+              name: FacetName.Owners,
+              values: null,
+            },
+          ];
+        case SearchScope.Projects:
+          return [
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+            {
+              name: FacetName.Product,
+              values: null,
+            },
+          ];
+      }
+    }
 
     let facetArray: FacetArrayItem[] = [];
 
