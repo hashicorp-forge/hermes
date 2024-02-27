@@ -45,7 +45,7 @@ export type ActiveFilters = {
 
 interface ToolbarComponentSignature {
   Args: {
-    facets?: FacetDropdownGroups;
+    facets?: Partial<FacetDropdownGroups>;
   };
 }
 
