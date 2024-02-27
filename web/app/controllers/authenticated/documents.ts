@@ -10,7 +10,7 @@ export default class AuthenticatedDocumentsController extends Controller {
   owners = [];
   page = 1;
   product = [];
-  sortBy = "dateDesc";
+  sortBy = SortByValue.DateDesc;
   status = [];
 
   declare model: ModelFrom<AuthenticatedDocumentsRoute>;
