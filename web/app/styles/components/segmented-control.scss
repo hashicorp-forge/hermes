@@ -3,7 +3,6 @@
 
   a {
     @apply relative flex h-9 w-1/3 items-center justify-center gap-1.5 rounded-none border border-color-palette-neutral-300;
-    @apply pr-1; // optical centering
     @apply bg-color-page-faint;
 
     &:first-child {

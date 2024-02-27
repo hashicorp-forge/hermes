@@ -1,13 +1,11 @@
-{{! TODO: this should take up space even if not there }}
 <div
-  class="active-filter-list mt-4 flex w-80 items-center justify-end"
+  class="segmented-control flex w-[340px] items-center justify-end"
   ...attributes
 >
   <LinkTo
     @route="authenticated.results"
     @query={{this.projectsQuery}}
-    class="active-filter-list-item
-      {{if (eq @scope this.projectsScope) 'active'}}"
+    class="{{if (eq @scope this.projectsScope) 'active'}}"
   >
     Projects
   </LinkTo>
@@ -15,7 +13,7 @@
   <LinkTo
     @route="authenticated.results"
     @query={{this.docsQuery}}
-    class="active-filter-list-item {{if (eq @scope this.docsScope) 'active'}}"
+    class="{{if (eq @scope this.docsScope) 'active'}}"
   >
     Docs
   </LinkTo>
@@ -23,8 +21,8 @@
   <LinkTo
     @route="authenticated.results"
     @query={{this.allQuery}}
-    class="active-filter-list-item {{if (eq @scope this.allScope) 'active'}}"
+    class="{{if (eq @scope this.allScope) 'active'}}"
   >
-    All
+    Top
   </LinkTo>
 </div>

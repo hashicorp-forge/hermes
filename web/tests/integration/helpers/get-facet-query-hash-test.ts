@@ -4,7 +4,6 @@ import { TestContext, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { FacetName } from "hermes/components/header/toolbar";
-import { SearchScope } from "hermes/routes/authenticated/results";
 
 interface Context extends TestContext {
   type: FacetName;

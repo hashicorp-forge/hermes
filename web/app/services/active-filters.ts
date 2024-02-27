@@ -6,7 +6,6 @@ import {
   ResultsRouteParams,
 } from "hermes/types/document-routes";
 import { ActiveFilters, FacetName } from "hermes/components/header/toolbar";
-import { SearchScope } from "hermes/routes/authenticated/results";
 
 export const DEFAULT_FILTERS = {
   [FacetName.DocType]: [],
