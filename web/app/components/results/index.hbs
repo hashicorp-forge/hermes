@@ -1,4 +1,4 @@
-<h2 data-test-results-header-text class="mb-8 text-display-300 font-semibold">
+<h2 data-test-results-header-text class="mb-6 text-display-300 font-semibold">
   {{@docResults.nbHits}}
   {{if (eq @docResults.nbHits 1) "match" "matches"}}
 </h2>
@@ -11,6 +11,6 @@
 </ol>
 
 <Pagination
-  @currentPage={{(add @docResults.page 1)}}
+  @currentPage={{(add (or @docResults.page 0) 1)}}
   @nbPages={{@docResults.nbPages}}
 />
