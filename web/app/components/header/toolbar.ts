@@ -88,7 +88,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected get facets() {
-    console.log(this.args.facets);
     if (!this.args.facets) return;
 
     let facetArray: FacetArrayItem[] = [];
