@@ -1,6 +1,6 @@
 {{page-title "All Docs"}}
 
-<Header::Toolbar @docFacets={{@model.facets}} />
+<Header::Toolbar @scope={{this.scope}} @facets={{@model.facets}} />
 
 <Documents::Table
   @docs={{@model.results.hits}}
