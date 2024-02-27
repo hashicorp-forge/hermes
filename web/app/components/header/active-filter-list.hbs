@@ -1,7 +1,7 @@
 {{#if this.shownFilters.length}}
   <div data-test-active-filter-list class="active-filter-list mb-7">
     <h3>Showing</h3>
-    <div class="active-filter-list-container">
+    <div class="flex min-h-[30px] flex-wrap items-center gap-1">
       {{#each this.shownFilters as |filter|}}
         <Header::ActiveFilterListItem @filter={{filter}} />
       {{/each}}

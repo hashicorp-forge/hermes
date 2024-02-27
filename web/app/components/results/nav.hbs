@@ -5,25 +5,26 @@
 >
   <LinkTo
     @route="authenticated.results"
-    @query={{hash scope=this.projectsScope q=@q page=1}}
-    class="active-filter-list-item gap-1.5
-      {{unless @projectCount 'mock-disabled'}}"
+    @query={{this.projectsQuery}}
+    class="active-filter-list-item
+      {{if (eq @scope this.projectsScope) 'active'}}"
   >
     Projects
-    <span class="font-medium text-color-foreground-faint">
-      {{or @projectCount 0}}
-    </span>
-
   </LinkTo>
 
   <LinkTo
     @route="authenticated.results"
-    @query={{hash scope=this.docsScope q=@q page=1}}
-    class="active-filter-list-item gap-1.5 {{unless @docCount 'mock-disabled'}}"
+    @query={{this.docsQuery}}
+    class="active-filter-list-item {{if (eq @scope this.docsScope) 'active'}}"
   >
     Docs
-    <span class="font-medium text-color-foreground-faint">
-      {{or @docCount 0}}
-    </span>
+  </LinkTo>
+
+  <LinkTo
+    @route="authenticated.results"
+    @query={{this.allQuery}}
+    class="active-filter-list-item {{if (eq @scope this.allScope) 'active'}}"
+  >
+    All
   </LinkTo>
 </div>

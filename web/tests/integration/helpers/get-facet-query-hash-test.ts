@@ -26,7 +26,6 @@ module("Integration | Helper | get-facet-query-hash", function (hooks) {
       owners: [],
       product: [],
       status: [],
-      scope: SearchScope.All,
     };
 
     this.set("type", FacetName.DocType);

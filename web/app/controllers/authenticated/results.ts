@@ -1,4 +1,5 @@
 import Controller from "@ember/controller";
+import { tracked } from "@glimmer/tracking";
 import AuthenticatedResultsRoute, {
   SearchScope,
 } from "hermes/routes/authenticated/results";
@@ -18,11 +19,12 @@ export default class AuthenticatedResultsController extends Controller {
 
   q = null;
   page = 1;
-  scope = SearchScope.All;
   docType = [];
   owners = [];
   product = [];
   status = [];
+
+  @tracked scope = SearchScope.All;
 
   declare model: ModelFrom<AuthenticatedResultsRoute>;
 

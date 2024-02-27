@@ -9,7 +9,6 @@ import { ActiveFilters, FacetName } from "hermes/components/header/toolbar";
 import { SearchScope } from "hermes/routes/authenticated/results";
 
 export const DEFAULT_FILTERS = {
-  [FacetName.Scope]: SearchScope.All,
   [FacetName.DocType]: [],
   [FacetName.Status]: [],
   [FacetName.Product]: [],
@@ -22,16 +21,7 @@ export default class ActiveFiltersService extends Service {
   @tracked index: ActiveFilters = DEFAULT_FILTERS;
 
   update(params: Partial<DocumentsRouteParams | ResultsRouteParams>) {
-    let scope = undefined;
-
-    if ("scope" in params) {
-      if (params.scope !== SearchScope.All) {
-        scope = params.scope;
-      }
-    }
-
     this.index = {
-      scope: scope,
       docType: params.docType || [],
       status: params.status || [],
       product: params.product || [],

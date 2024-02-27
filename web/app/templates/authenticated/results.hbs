@@ -5,15 +5,7 @@
     Results for
     <mark>{{this.q}}</mark>
   </h1>
-  {{#if (eq this.scope "All")}}
-    <Results::Nav
-      @scope={{this.scope}}
-      @q={{this.q}}
-      @docCount={{this.model.docResults.nbHits}}
-      @projectCount={{this.model.projectResults.nbHits}}
-      class="shrink-0"
-    />
-  {{/if}}
+  <Results::Nav @scope={{this.scope}} @q={{this.q}} class="shrink-0" />
 </div>
 
 <Header::Toolbar @scope={{this.scope}} @facets={{this.facets}} />

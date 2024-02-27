@@ -43,6 +43,7 @@
             <h4 class="hermes-h4">
               Projects
             </h4>
+            <Hds::BadgeCount @text="{{@projectResults.nbHits}}" />
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"
@@ -72,6 +73,7 @@
             <h4 class="hermes-h4">
               Docs
             </h4>
+            <Hds::BadgeCount @text="{{@docResults.nbHits}}" />
             <FlightIcon
               @name="chevron-right"
               class="-ml-0.5 text-color-foreground-disabled"

@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
 import { SearchScope } from "hermes/routes/authenticated/results";
+import { DEFAULT_FILTERS } from "hermes/services/active-filters";
 
 interface ResultsNavComponentSignature {
   Element: HTMLDivElement;
@@ -18,6 +19,24 @@ export default class ResultsNavComponent extends Component<ResultsNavComponentSi
   allScope = SearchScope.All;
   projectsScope = SearchScope.Projects;
   docsScope = SearchScope.Docs;
+
+  projectsQuery = {
+    ...DEFAULT_FILTERS,
+    scope: SearchScope.Projects,
+    page: 1,
+  };
+
+  docsQuery = {
+    ...DEFAULT_FILTERS,
+    scope: SearchScope.Docs,
+    page: 1,
+  };
+
+  allQuery = {
+    ...DEFAULT_FILTERS,
+    scope: SearchScope.All,
+    page: 1,
+  };
 }
 
 declare module "@glint/environment-ember-loose/registry" {
