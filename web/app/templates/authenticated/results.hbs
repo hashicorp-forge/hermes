@@ -1,5 +1,12 @@
 {{page-title this.pageTitle}}
 
-<Header::Toolbar @facets={{this.model.facets}} />
+<div class="mb-6">
+  <h1 class="w-full text-display-500">
+    Results for
+    <mark>{{this.q}}</mark>
+  </h1>
+</div>
 
-<Results @results={{this.model.results}} @query={{this.q}} />
+<Header::Toolbar @facets={{this.model.docFacets}} />
+
+<Results @docResults={{this.model.docResults}} @query={{this.q}} />
