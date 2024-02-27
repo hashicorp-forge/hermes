@@ -32,7 +32,9 @@ interface UserNavAction extends UserNavItem {
 type UserNavMenuItem = UserNavLinkTo | UserNavExternalLink | UserNavAction;
 
 interface HeaderNavComponentSignature {
-  Args: {};
+  Args: {
+    query?: string;
+  };
 }
 
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {

@@ -1,4 +1,4 @@
-import { restartableTask } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
@@ -14,7 +14,6 @@ import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
 import FetchService from "hermes/services/fetch";
 import { HermesProjectHit } from "hermes/types/project";
-import { LibraryTemplatePlugin } from "webpack";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects | HermesProjectHitObjects;
@@ -32,7 +31,9 @@ export interface HermesProjectHitObjects {
 
 interface HeaderSearchComponentSignature {
   Element: HTMLDivElement;
-  Args: {};
+  Args: {
+    query?: string;
+  };
 }
 
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
@@ -51,13 +52,32 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   protected productAreaSelector = `#${this.productAreaID}`;
   protected documentsSelector = `#${this.documentsID}`;
 
+  /**
+   * Whether there has been a search during this session.
+   * Used to determine whether to search a query on focus.
+   * Set true the first time a search is performed.
+   * See `maybeSearch` task for more context.
+   */
+  @tracked private hasSearched = false;
+
   @tracked protected searchInput: HTMLInputElement | null = null;
   @tracked protected searchInputIsEmpty = true;
   @tracked protected docMatches: HermesDocument[] = [];
   @tracked protected productAreaMatch: string | null = null;
   @tracked protected projectMatches: HermesProjectHit[] = [];
   @tracked protected viewAllResultsLink: HTMLAnchorElement | null = null;
-  @tracked protected query: string = "";
+  @tracked protected query: string = this.args.query ?? "";
+
+  protected get viewAllResultsQuery() {
+    return {
+      q: this.query,
+      page: 1,
+      docType: [],
+      product: [],
+      owners: [],
+      status: [],
+    };
+  }
 
   protected get items() {
     const viewAllDocResults =
@@ -92,15 +112,18 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    */
   @action maybeSubmitForm(dd: XDropdownListAnchorAPI, e: KeyboardEvent): void {
     if (e.key === "Enter") {
-      // Prevent the form from submitting
+      // Prevent the form from submitting, which causes a page reload
       e.preventDefault();
 
       // if there's a search and no focused item, view all results
       if (dd.focusedItemIndex === -1 && this.query.length) {
-        // only submit if there are results
-        if (this.items.length > 0) {
-          this.viewAllResults();
-          dd.hideContent();
+        // Ignore the event if the popover is shown and there's no results
+        if (dd.contentIsShown && this.items.length === 0) {
+          return;
+        } else {
+          // Cancel real-time search and kick off a transition to `/results`
+          this.search.cancelAll();
+          this.viewAllResults(dd);
         }
       }
     }
@@ -158,14 +181,42 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   }
 
   /**
+   * The task to maybe search Algolia. Called onInputFocus.
+   * If there's a query, but the user hasn't typed it,
+   * such as when clicking a search input populated by a query param,
+   * we initiate a search to avoid the "no matches" screen.
+   * The `isRunning` state is passed to DropdownList as `isLoading`.
+   */
+  protected maybeSearch = task(async () => {
+    if (this.query.length && !this.hasSearched) {
+      await this.search.perform();
+    }
+  });
+
+  /**
    * The action run when the form is submitted, which happens when the user
    * presses enter or on a query with no focused item.
    * Clicks the "View all results" link which has already has the
    * route and query information.
    */
-  @action protected viewAllResults(): void {
-    assert("viewAllResultsLink is expected", this.viewAllResultsLink);
-    this.viewAllResultsLink.click();
+  @action protected viewAllResults(dd?: XDropdownListAnchorAPI): void {
+    if (dd?.contentIsShown) {
+      /**
+       * When possible, we trigger the transition with a click
+       * to avoid any potential drift from the LinkTo handler.
+       */
+      assert("viewAllResultsLink is expected", this.viewAllResultsLink);
+      this.viewAllResultsLink.click();
+      dd.hideContent();
+    } else {
+      /**
+       * When the user hits enter before the dropdown is shown,
+       * we transition to the results page using the router.
+       */
+      this.router.transitionTo("authenticated.results", {
+        queryParams: this.viewAllResultsQuery,
+      });
+    }
   }
 
   /**
@@ -174,15 +225,12 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    * and updates the "itemsToShow" object.
    */
   protected search = restartableTask(
-    async (dd: any, inputEvent: Event): Promise<void> => {
-      let input = inputEvent.target;
+    async (dd?: XDropdownListAnchorAPI, inputEvent?: Event): Promise<void> => {
+      let input = inputEvent?.target;
 
-      assert(
-        "inputEvent.target must be an HTMLInputElement",
-        input instanceof HTMLInputElement,
-      );
-
-      this.query = input.value;
+      if (input instanceof HTMLInputElement) {
+        this.query = input.value;
+      }
 
       if (this.query.length) {
         this.searchInputIsEmpty = false;
@@ -223,6 +271,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           await this.store.maybeFetchPeople.perform(hits);
 
           this.docMatches = docs ? hits : [];
+
           if (productAreas) {
             const firstHit = productAreas.facetHits[0];
             if (firstHit) {
@@ -231,9 +280,12 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
               this.productAreaMatch = null;
             }
           }
+
           if (projects) {
             this.projectMatches = projects.hits as HermesProjectHit[];
           }
+
+          this.hasSearched = true;
         } catch (e: unknown) {
           console.error(e);
         }
@@ -242,13 +294,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.productAreaMatch = null;
         this.searchInputIsEmpty = true;
 
-        dd.hideContent();
+        dd?.hideContent();
         this.docMatches = [];
       }
 
       // Reopen the dropdown if it was closed on mousedown and there's a query
-      if (!dd.contentIsShown && this.query.length) {
-        dd.showContent();
+      if (!dd?.contentIsShown && this.query.length) {
+        dd?.showContent();
       }
 
       /**
@@ -263,13 +315,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
        */
       if (Ember.testing) {
         schedule("afterRender", () => {
-          dd.resetFocusedItemIndex();
-          dd.scheduleAssignMenuItemIDs();
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
         });
       } else {
         next(() => {
-          dd.resetFocusedItemIndex();
-          dd.scheduleAssignMenuItemIDs();
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
         });
       }
     },

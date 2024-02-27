@@ -5,6 +5,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
 import { HermesDocument } from "hermes/types/document";
+import { assert as emberAssert } from "@ember/debug";
 import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
@@ -15,21 +16,23 @@ import {
 const AVATAR_LINK = "[data-test-document-owner-avatar]";
 const AVATAR_IMAGE = `${AVATAR_LINK} img`;
 const TITLE = "[data-test-document-title]";
+const SUMMARY = "[data-test-document-summary]";
 const DOC_NUMBER = "[data-test-document-number]";
 const USER_NAME = "[data-test-document-owner-name]";
 const STATUS = "[data-test-document-status]";
 const TYPE = "[data-test-document-type]";
 const THUMBNAIL_BADGE = "[data-test-doc-thumbnail-product-badge]";
 
-interface DocTileMediumComponentContext extends MirageTestContext {
+interface Context extends MirageTestContext {
   doc: HermesDocument | RelatedHermesDocument;
+  query: string;
 }
 
 module("Integration | Component | doc/tile-medium", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  hooks.beforeEach(async function (this: DocTileMediumComponentContext) {
+  hooks.beforeEach(async function (this: Context) {
     authenticateTestUser(this);
 
     this.server.create("document", {
@@ -40,6 +43,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
       docType: "Bar",
       status: "WIP",
       owners: [TEST_USER_EMAIL],
+      _snippetResult: undefined,
     });
 
     this.server.create("related-hermes-document", {
@@ -53,7 +57,7 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     });
   });
 
-  test("it can render HermesDocuments or RelatedHermesDocuments", async function (this: DocTileMediumComponentContext, assert) {
+  test("it can render HermesDocuments or RelatedHermesDocuments", async function (this: Context, assert) {
     this.set("doc", this.server.schema.document.first().attrs);
 
     const hermesDocument = this.doc as HermesDocument;
@@ -71,9 +75,11 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
           )}%22%5D`,
         );
 
-      assert.dom(AVATAR_IMAGE).hasAttribute("src", TEST_USER_PHOTO);
+      emberAssert("summary is expected", doc.summary);
 
+      assert.dom(AVATAR_IMAGE).hasAttribute("src", TEST_USER_PHOTO);
       assert.dom(TITLE).hasText(doc.title);
+      assert.dom(SUMMARY).hasText(doc.summary);
       assert.dom(DOC_NUMBER).hasText(docNumber);
       assert.dom(USER_NAME).hasText(TEST_USER_NAME);
       assert.dom(STATUS).hasText(doc.status);
@@ -81,12 +87,10 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
 
       assert
         .dom(THUMBNAIL_BADGE)
-        .hasAttribute("data-test-product", doc.product as string);
+        .hasAttribute("data-test-product", doc.product);
     }
 
-    await render<DocTileMediumComponentContext>(
-      hbs`<Doc::TileMedium @doc={{this.doc}} />`,
-    );
+    await render<Context>(hbs`<Doc::TileMedium @doc={{this.doc}} />`);
 
     assertDocumentInfo(hermesDocument);
 
@@ -97,12 +101,38 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     assertDocumentInfo(relatedHermesDocument);
   });
 
-  test("the doc link has the correct url depending on whether its a draft", async function (this: DocTileMediumComponentContext, assert) {
+  test("it renders a snippet instead of a summary when possible", async function (this: Context, assert) {
+    this.server.create("document", {
+      id: "qwerty",
+      objectID: "qwerty",
+      title: "Bar",
+      summary: "Bar",
+      product: "Terraform",
+      docNumber: "456",
+      docType: "Bar",
+      status: "WIP",
+      owners: [TEST_USER_EMAIL],
+      _snippetResult: {
+        content: {
+          value: "This is a snippet",
+        },
+      },
+    });
+
+    const doc = this.server.schema.document.find("qwerty").attrs;
+
+    this.set("doc", doc);
+
+    await render<Context>(hbs`<Doc::TileMedium @doc={{this.doc}} />`);
+
+    assert.dom(SUMMARY).hasText(doc._snippetResult.content.value);
+    assert.dom(SUMMARY).doesNotIncludeText(doc.summary);
+  });
+
+  test("the doc link has the correct url depending on whether its a draft", async function (this: Context, assert) {
     this.set("doc", this.server.schema.document.first().attrs);
 
-    await render<DocTileMediumComponentContext>(
-      hbs`<Doc::TileMedium @doc={{this.doc}} />`,
-    );
+    await render<Context>(hbs`<Doc::TileMedium @doc={{this.doc}} />`);
 
     assert
       .dom("[data-test-document-link]")
@@ -115,5 +145,23 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     assert
       .dom("[data-test-document-link]")
       .hasAttribute("href", `/document/doc-0`);
+  });
+
+  test("it takes a query argument for title highlighting", async function (this: Context, assert) {
+    const query = "Foo";
+    const title = `The ${query} document`;
+    const doc = this.server.schema.relatedHermesDocument.first();
+
+    doc.update({ title });
+
+    this.set("doc", doc.attrs);
+    this.set("query", query);
+
+    await render<Context>(
+      hbs`<Doc::TileMedium @doc={{this.doc}} @query={{this.query}} />`,
+    );
+
+    assert.dom(TITLE).hasText(title);
+    assert.dom(`${TITLE} mark`).hasText(query);
   });
 });
