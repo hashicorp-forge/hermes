@@ -48,7 +48,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar
-        @docFacets={{this.facets}}
+        @facets={{this.facets}}
       />
     `);
 
@@ -81,7 +81,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     this.set("facets", { status: statusFacets });
 
     await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar @docFacets={{this.facets}} />
+      <Header::Toolbar @facets={{this.facets}} />
     `);
 
     await click("[data-test-facet-dropdown-trigger='Status']");
@@ -99,7 +99,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
     this.set("facets", { ...FACETS, status: undefined });
 
     await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar @docFacets={{this.facets}} />
+      <Header::Toolbar @facets={{this.facets}} />
     `);
 
     assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
