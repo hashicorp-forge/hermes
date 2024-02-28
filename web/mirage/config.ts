@@ -37,8 +37,6 @@ export default function (mirageConfig) {
         const indexName = request.url.split("indexes/")[1].split("/")[0];
         const requestBody = JSON.parse(request.requestBody);
 
-        console.log("requestBody", requestBody);
-
         const page = requestBody?.page ?? 0;
         const docModels = schema.document.all().models;
         const nbHits = docModels.length;

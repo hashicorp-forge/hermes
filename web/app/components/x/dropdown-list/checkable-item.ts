@@ -11,7 +11,7 @@ export interface XDropdownListCheckableItemComponentArgs {
   isSelected?: boolean;
   count?: number;
   checkmarkPosition?: `${CheckmarkPosition}`;
-  capitalize?: boolean;
+  shouldCapitalize?: boolean;
 }
 
 interface XDropdownListCheckableItemComponentSignature {
@@ -32,7 +32,7 @@ export default class XDropdownListCheckableItemComponent extends Component<XDrop
   }
 
   protected get value() {
-    if (this.args.capitalize) {
+    if (this.args.shouldCapitalize) {
       return capitalize(this.args.value ?? "");
     } else {
       return this.args.value;

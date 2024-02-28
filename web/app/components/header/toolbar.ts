@@ -61,8 +61,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     return this.router.currentRouteName;
   }
 
+  /**
+   * Whether the facets are shown.
+   * True as long as the scope is not "All".
+   */
   protected get facetsAreShown() {
-    if (!this.args.facets) return false;
     return this.args.scope !== SearchScope.All;
   }
 
@@ -89,6 +92,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     return statuses;
   }
 
+  /**
+   * The facets, depending on the scope.
+   * If the facets object is empty, we return the default facets.
+   * Otherwise, we return the facets from the object.
+   */
   protected get facets() {
     assert("facets must exist", this.args.facets);
 

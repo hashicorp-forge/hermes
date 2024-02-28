@@ -11,7 +11,8 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
   @service declare activeFilters: ActiveFiltersService;
 
   /**
-   * The route's default query parameters. Used to reset the filters.
+   * The route's default query parameters. Used by the
+   * "Clear All" button to reset the filters.
    */
   protected defaultQuery = {
     scope: SearchScope.All,

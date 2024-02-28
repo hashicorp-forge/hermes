@@ -6,16 +6,7 @@ import AuthenticatedResultsRoute, {
 import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedResultsController extends Controller {
-  queryParams = [
-    "page",
-    "q",
-    "scope",
-    "docType",
-    "owners",
-    "product",
-    "status",
-    // and whatever project filters there are
-  ];
+  queryParams = ["page", "q", "scope", "docType", "owners", "product"];
 
   q: string | null = null;
   page = 1;
@@ -43,6 +34,10 @@ export default class AuthenticatedResultsController extends Controller {
     return title;
   }
 
+  /**
+   * The facets, depending on the current scope.
+   * Passed to the template in a Glint-friendly format.
+   */
   protected get facets() {
     const { docFacets, projectFacets } = this.model;
 
