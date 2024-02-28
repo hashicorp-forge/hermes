@@ -116,7 +116,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert
       .dom(VIEW_ALL_RESULTS_LINK)
       .exists()
-      .hasText(`View all document results`)
+      .hasText(`View all results`)
       .hasAttribute("href", `/results?q=vault`);
   });
 
