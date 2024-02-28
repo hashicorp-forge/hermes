@@ -1,10 +1,9 @@
 import Component from "@glimmer/component";
-import { HermesUser } from "hermes/types/document";
 
 interface MultiselectUserEmailImageChipComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    option: HermesUser;
+    option: string;
   };
   Blocks: {
     default: [];

@@ -1,4 +1,4 @@
-//helios.hashicorp.design/components/badge-count?tab=code#component-api
+// helios.hashicorp.design/components/badge-count?tab=code#component-api
 
 import { ComponentLike } from "@glint/template";
 import { HdsBadgeCountColor, HdsBadgeType } from "hds/_shared";

@@ -1,0 +1,127 @@
+.hds-table {
+  @apply mb-8 table-fixed;
+  @apply border-0;
+
+  thead {
+    @apply sticky top-0 z-10 bg-color-page-primary;
+  }
+
+  th,
+  td .inner {
+    @apply py-3;
+  }
+
+  th,
+  td {
+    @apply pr-5 text-left align-top;
+    @apply border-b border-b-color-border-faint;
+
+    &:last-child:not(:first-child) {
+      @apply pr-0 text-right;
+    }
+
+    &.name {
+      @apply w-60 lg:w-auto;
+      @apply pl-0;
+    }
+
+    &.type {
+      @apply w-24;
+    }
+
+    &.status {
+      @apply w-32;
+    }
+
+    &.product {
+      @apply w-40;
+    }
+
+    &.owner {
+      @apply w-44;
+    }
+
+    &.time {
+      @apply w-28;
+    }
+  }
+
+  tbody {
+    td,
+    th {
+      .inner {
+        @apply relative;
+      }
+    }
+
+    + tbody th {
+      @apply pt-10;
+    }
+
+    tr {
+      @apply relative;
+
+      &:focus-within,
+      &:hover {
+        td {
+          @apply bg-color-surface-faint;
+        }
+      }
+
+      &:has(.name a:focus-visible) {
+        @apply relative z-10;
+
+        .name {
+          &::before {
+            content: "";
+            @apply absolute -left-2 top-px h-[calc(100%-1px)]  w-[calc(100%+16px)] rounded border-t bg-color-surface-faint outline outline-2 outline-color-border-strong;
+          }
+        }
+
+        td {
+          @apply border-t-transparent;
+        }
+      }
+
+      &:last-child {
+        td {
+          @apply border-b-0;
+        }
+      }
+    }
+  }
+}
+
+.sort-icon {
+  @apply absolute -left-1.5 top-1/2 flex -translate-y-1/2 -translate-x-full;
+}
+
+@keyframes sortIconIn {
+  from {
+    transform: translateX(2px);
+  }
+}
+
+.sortable-table-header {
+  @apply relative;
+
+  .sort-icon {
+    @apply text-color-foreground-faint;
+  }
+
+  &:not(.active) {
+    &:hover,
+    &:focus-within {
+      .sort-icon {
+        @apply visible;
+        > .flight-icon {
+          animation: sortIconIn 85ms ease-in;
+        }
+      }
+    }
+
+    .sort-icon {
+      @apply invisible text-color-foreground-disabled;
+    }
+  }
+}

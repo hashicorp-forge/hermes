@@ -1,6 +1,6 @@
 # Hermes
 
-![](https://github.com/hashicorp-forge/hermes/workflows/ci/badge.svg)
+[![CI](https://github.com/hashicorp-forge/hermes/workflows/ci/badge.svg?branch=main)](https://github.com/hashicorp-forge/hermes/actions/workflows/ci.yml?query=branch%3Amain)
 
 > Hermes is not an official HashiCorp project.
 > The repository contains software which is under active development and is in the alpha stage. Please read the “[Project Status](#project-status)” section for more information.
@@ -23,7 +23,6 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 1. Enable the following APIs for [Google Workspace APIs](https://developers.google.com/workspace/guides/enable-apis)
 
-   - Admin SDK API
    - Google Docs API
    - Google Drive API
    - Gmail API
@@ -84,6 +83,14 @@ The Application ID, Search API Key, and Write API Key in Algolia's [API Keys set
 
 Similarly, you will use these values to set the `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` environment variables at build time.
 
+### Jira (optional)
+
+Jira can be optionally configured to enable linking Hermes projects with Jira issues.
+
+1. [Create an API token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token) for Jira.
+
+1. Enable Jira using the `jira` block in the Hermes config file.
+
 ## Development and Usage
 
 ### Requirements
@@ -116,6 +123,8 @@ Hermes can be configured to point to any PostgreSQL database, but for running lo
 make docker/postgres/start
 ```
 
+The database password can be configured via the Hermes config.hcl or the `HERMES_SERVER_POSTGRES_PASSWORD` environment variable.
+
 ### Run the Server
 
 ```sh
@@ -138,6 +147,8 @@ NOTE: when not using a Google service account, this will automatically open a br
 - Go to [Delegating domain-wide authority to the service account](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority) and follow the instructions to enter the OAuth scopes.
 - Add the following OAuth scopes (comma-delimited list):
   `https://www.googleapis.com/auth/directory.readonly,https://www.googleapis.com/auth/documents,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/gmail.send`
+
+1. Configure the service account in the `auth` block under the `google_workspace` config block.
 
 More to come here...
 
@@ -179,6 +190,5 @@ As the project becomes more stable over the next several releases, we think it w
 
 Here are some higher-level initiatives that we are currently working on:
 
-- Support custom document types.
 - Increase test coverage.
 - Finish migration of using Algolia as a NoSQL database to PostgreSQL as the source of truth for all non-search data.

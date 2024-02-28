@@ -1,0 +1,49 @@
+{{! https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/ }}
+<div
+  data-test-product-select
+  {{! Fetch the most up-to-date product areas in the background }}
+  {{did-insert (perform this.productAreas.fetch)}}
+>
+  <X::DropdownList
+    @items={{this.products}}
+    @listIsOrdered={{true}}
+    @onItemClick={{this.onChange}}
+    @selected={{@selected}}
+    @placement={{@placement}}
+    @isSaving={{@isSaving}}
+    @renderOut={{@renderOut}}
+    @offset={{@offset}}
+    @matchAnchorWidth={{@matchAnchorWidth}}
+    @secondaryFilterAttribute="abbreviation"
+    class="theme--neutral"
+    ...attributes
+  >
+    <:anchor as |dd|>
+      <dd.ToggleSelect
+        data-test-product-select-toggle
+        class="gap-2
+          {{if @isSaving 'opacity-50'}}
+          {{if
+            (eq @color 'quarternary')
+            'quarternary-button'
+            'border-color-border-input shadow-elevation-low'
+          }}"
+        id="product-select"
+      >
+        <Inputs::ProductSelect::Item
+          @product={{dd.selected}}
+          @abbreviation={{this.selectedProductAbbreviation}}
+        />
+      </dd.ToggleSelect>
+    </:anchor>
+    <:item as |dd|>
+      <dd.Action data-test-product-select-item-button class="pr-5">
+        <Inputs::ProductSelect::Item
+          @product={{dd.value}}
+          @isSelected={{dd.isSelected}}
+          @abbreviation={{dd.attrs.abbreviation}}
+        />
+      </dd.Action>
+    </:item>
+  </X::DropdownList>
+</div>

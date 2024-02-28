@@ -1,11 +1,12 @@
 import parseDate from "hermes/utils/parse-date";
 import { module, test } from "qunit";
 import MockDate from "mockdate";
+import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 
 module("Unit | Utility | parse-date", function () {
   // Make sure the date is always the same
   // TODO: Freeze timezone
-  MockDate.set("2000-01-01T06:00:00.000-07:00");
+  MockDate.set(DEFAULT_MOCK_DATE);
 
   test("it parses dates", function (assert) {
     // Valid
@@ -14,7 +15,7 @@ module("Unit | Utility | parse-date", function () {
     assert.equal(parseDate("1980/12/20"), "20 Dec. 1980");
     assert.equal(parseDate("November 21, 1963", "long"), "21 November 1963");
     assert.equal(parseDate("November 21, 1963 12:30"), "21 Nov. 1963");
-    assert.equal(parseDate("2000-01-01T06:00:00.000-07:00"), "1 Jan. 2000");
+    assert.equal(parseDate(DEFAULT_MOCK_DATE), "1 Jan. 2000");
 
     // Invalid
     assert.equal(parseDate(undefined), null);

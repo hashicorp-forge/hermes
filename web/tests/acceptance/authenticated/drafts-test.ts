@@ -1,9 +1,8 @@
-import { visit } from "@ember/test-helpers";
+import { currentURL, visit } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { getPageTitle } from "ember-page-title/test-support";
 
 interface AuthenticatedDraftRouteTestContext extends MirageTestContext {}
 
@@ -15,8 +14,8 @@ module("Acceptance | authenticated/drafts", function (hooks) {
     await authenticateSession({});
   });
 
-  test("the page title is correct", async function (this: AuthenticatedDraftRouteTestContext, assert) {
+  test("it redirects to the my route", async function (this: AuthenticatedDraftRouteTestContext, assert) {
     await visit("/drafts");
-    assert.equal(getPageTitle(), "My Drafts | Hermes");
+    assert.equal(currentURL(), "/my/documents");
   });
 });

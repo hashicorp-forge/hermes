@@ -5,7 +5,7 @@
  */
 export default function parseDate(
   time?: string | number | Date,
-  monthFormat: "short" | "long" = "short"
+  monthFormat: "short" | "long" = "short",
 ): string | null {
   if (!time) {
     return null;

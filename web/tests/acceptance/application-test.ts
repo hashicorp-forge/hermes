@@ -1,4 +1,4 @@
-import { click, teardownContext, visit, waitFor } from "@ember/test-helpers";
+import { click, visit, waitFor } from "@ember/test-helpers";
 import { setupApplicationTest } from "ember-qunit";
 import { module, test } from "qunit";
 import {
@@ -7,6 +7,7 @@ import {
 } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import SessionService from "hermes/services/session";
+import { authenticateTestUser, TEST_SUPPORT_URL } from "hermes/mirage/utils";
 
 module("Acceptance | application", function (hooks) {
   setupApplicationTest(hooks);
@@ -16,7 +17,8 @@ module("Acceptance | application", function (hooks) {
     session: SessionService;
   }
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: ApplicationTestContext) {
+    authenticateTestUser(this);
     this.set("session", this.owner.lookup("service:session"));
   });
 
@@ -48,16 +50,6 @@ module("Acceptance | application", function (hooks) {
     assert
       .dom("[data-test-flash-notification-button]")
       .hasText("Authenticate with Google");
-
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    teardownContext(this);
   });
 
   test("a message shows when the back-end auth token expires", async function (this: ApplicationTestContext, assert) {
@@ -69,23 +61,13 @@ module("Acceptance | application", function (hooks) {
       .dom("[data-test-flash-notification]")
       .doesNotExist("no flash notification when session is valid");
 
-    this.server.schema.mes.first().update("isLoggedIn", false);
+    this.server.schema.me.first().update("isLoggedIn", false);
 
     await waitFor("[data-test-flash-notification]");
 
     assert
       .dom("[data-test-flash-notification]")
       .exists("flash notification is shown when session is invalid");
-
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    teardownContext(this);
   });
 
   test("the reauthenticate button works as expected (success)", async function (this: ApplicationTestContext, assert) {
@@ -108,7 +90,6 @@ module("Acceptance | application", function (hooks) {
     await click("[data-test-flash-notification-button]");
     await waitFor(successSelector);
 
-
     assert
       .dom(warningSelector)
       .doesNotExist("flash notification is dismissed on reauth buttonClick");
@@ -126,16 +107,6 @@ module("Acceptance | application", function (hooks) {
       .hasText("Welcome back, Test!");
 
     assert.equal(authCount, 1, "session.authenticate() was called");
-
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    teardownContext(this);
   });
 
   test("the reauthenticate button works as expected (failure)", async function (this: ApplicationTestContext, assert) {
@@ -164,15 +135,21 @@ module("Acceptance | application", function (hooks) {
     assert
       .dom(criticalSelector)
       .exists("flash notification is shown on re-auth failure");
+  });
 
-    /**
-     * FIXME: Investigate unresolved promises
-     *
-     * For reasons not yet clear, this test has unresolved promises
-     * that prevent it from completing naturally. Because of this,
-     * we handle teardown manually.
-     *
-     */
-    teardownContext(this);
+  test("the config is grabbed from the backend when the app loads", async function (this: ApplicationTestContext, assert) {
+    await authenticateSession({});
+
+    await visit("/");
+
+    assert
+      .dom(".footer [data-test-footer-support-link]")
+      .hasAttribute("href", TEST_SUPPORT_URL);
+
+    await click("[data-test-user-menu-toggle]");
+
+    assert
+      .dom("[data-test-user-menu-item='support'] a")
+      .hasAttribute("href", TEST_SUPPORT_URL);
   });
 });

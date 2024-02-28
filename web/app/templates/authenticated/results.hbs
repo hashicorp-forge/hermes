@@ -1,6 +1,5 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{page-title "Search Results"}}
+{{page-title this.pageTitle}}
 
-<Header @facets={{@model.facets}} @sortControlIsHidden={{true}} />
+<Header::Toolbar @facets={{this.model.facets}} />
 
-<Results @results={{@model.results}} @query={{this.q}} />
+<Results @results={{this.model.results}} @query={{this.q}} />

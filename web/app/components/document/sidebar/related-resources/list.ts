@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import move from "ember-animated/motions/move";
-import animateScale from "hermes/utils/ember-animated/animate-scale";
+import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import { easeOutQuad } from "hermes/utils/ember-animated/easings";
 import { TransitionContext, wait } from "ember-animated/.";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
@@ -8,12 +8,15 @@ import { action } from "@ember/object";
 import { Transition } from "ember-animated/-private/transition";
 import Ember from "ember";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
+import { assert } from "@ember/debug";
 
 interface DocumentSidebarRelatedResourcesListComponentSignature {
   Element: HTMLUListElement;
   Args: {
     items: any[];
     itemLimit?: number;
+    showModal?: () => void;
+    editingIsDisabled?: boolean;
   };
   Blocks: {
     resource: [resource: any];
@@ -42,6 +45,15 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
    */
   @action protected enableAnimation() {
     this.shouldAnimate = true;
+  }
+
+  /**
+   * The action to show the "add resource" modal.
+   * Triggered when clicking the empty-state button.
+   */
+  @action protected showModal() {
+    assert("showModal is required", this.args.showModal);
+    this.args.showModal();
   }
 
   /**
@@ -82,12 +94,10 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     yield wait(100);
 
     for (let sprite of insertedSprites) {
-      sprite.applyStyles({
-        opacity: "0",
-      });
-      void animateScale(sprite, {
-        from: 0.95,
-        to: 1,
+      void animateTransform(sprite, {
+        scale: {
+          from: 0.95,
+        },
         duration: 200,
         easing: easeOutQuad,
       });

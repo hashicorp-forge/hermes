@@ -1,24 +1,34 @@
 <div class="sidebar-section-header-container" ...attributes>
-  <div class="inline-flex relative">
+  <div class="relative inline-flex items-center">
     <h5 class="sidebar-section-header">
       {{@title}}
     </h5>
+    {{#if @titleTooltipText}}
+      <TooltipIcon @text={{@titleTooltipText}} class="ml-1.5" />
+    {{/if}}
     {{#if @badgeText}}
       <Hds::Badge
         data-test-sidebar-section-header-badge
         @text={{@badgeText}}
         @color="highlight"
+        @type="inverted"
         @size="small"
-        class="absolute -right-2 top-1/2 -translate-y-1/2 translate-x-full"
+        class="absolute -right-1.5 top-1/2 -translate-y-1/2 translate-x-full"
       />
     {{/if}}
   </div>
   {{#if this.buttonIsShown}}
     <Action
       {{on "click" this.buttonAction}}
+      data-test-sidebar-section-header-button
       data-test-section-header-button-for={{@title}}
-      class="sidebar-section-header-button"
+      class="quarternary-button {{if @buttonIsDisabled 'disabled'}}"
       aria-label={{or @buttonLabel "Add"}}
+      aria-disabled={{@buttonIsDisabled}}
+      {{(if
+        (and @buttonIsDisabled @disabledButtonTooltipText)
+        (modifier "tooltip" @disabledButtonTooltipText class="max-w-[200px]")
+      )}}
     >
       <FlightIcon @name={{or @buttonIcon "plus"}} />
     </Action>

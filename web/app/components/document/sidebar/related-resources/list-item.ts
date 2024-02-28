@@ -6,7 +6,8 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
-} from "hermes/components/document/sidebar/related-resources";
+} from "hermes/components/related-resources";
+import { OverflowItem } from "hermes/components/overflow-menu";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
@@ -34,12 +35,43 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
   private _itemIsExternalResource = "url" in this.args.resource;
 
   /**
+   * The items to display in the overflow menu.
+   * If the resource is an external resource, the "edit" item is included.
+   */
+  protected get overflowMenuItems(): Record<string, OverflowItem> {
+    let maybeEditItem = null;
+
+    if ("url" in this.args.resource) {
+      maybeEditItem = {
+        edit: {
+          label: "Edit",
+          icon: "edit",
+          action: () => this.showModal(),
+        },
+      };
+    }
+
+    const deleteItem = {
+      delete: {
+        label: "Remove",
+        icon: "trash",
+        action: () => this.args.removeResource(this.args.resource),
+      },
+    };
+
+    return {
+      ...maybeEditItem,
+      ...deleteItem,
+    };
+  }
+
+  /**
    * The resource's googleFileID, if it exists.
    * Used in the template to determine internal or external routing.
    */
   protected get documentObjectID(): string | null {
     if ("googleFileID" in this.args.resource) {
-      return (this.args.resource as RelatedHermesDocument).googleFileID;
+      return this.args.resource.googleFileID;
     } else {
       return null;
     }

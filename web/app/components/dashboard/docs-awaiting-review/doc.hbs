@@ -1,0 +1,44 @@
+{{#let (get @doc.owners 0) as |owner|}}
+  <li data-test-doc-awaiting-review class="doc-awaiting-review w-full">
+    <LinkTo
+      data-test-doc-awaiting-review-link
+      @route="authenticated.document"
+      @model={{@doc.objectID}}
+      class="main-inner py-4"
+    >
+      <div class="flex w-full items-center gap-[16px]">
+        <div class="-ml-1 flex gap-[3px]">
+          {{! Avatars }}
+          <Product::Avatar @size="small" @product={{@doc.product}} />
+          <Person::Avatar
+            data-test-doc-awaiting-review-owner-avatar
+            @email={{owner}}
+            @size="small"
+            class="-ml-px shrink-0"
+          />
+        </div>
+
+        {{! Title and docNumber }}
+        <div class="w-full overflow-hidden">
+          <div class="flex gap-2 text-display-300">
+            <h3 data-test-document-title class="truncate">
+              {{@doc.title}}
+            </h3>
+            <div
+              data-test-document-number
+              class="whitespace-nowrap font-regular"
+            >
+              {{@doc.docNumber}}
+            </div>
+          </div>
+        </div>
+
+        {{! Tags }}
+        <div class="tags">
+          <Hds::Badge data-test-document-type @text={{@doc.docType}} />
+        </div>
+
+      </div>
+    </LinkTo>
+  </li>
+{{/let}}

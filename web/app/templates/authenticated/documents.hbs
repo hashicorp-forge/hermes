@@ -1,0 +1,11 @@
+{{page-title "All Docs"}}
+
+<Header::Toolbar @facets={{this.model.facets}} />
+
+<Documents::Table
+  @docs={{this.model.results.hits}}
+  @nbPages={{this.model.results.nbPages}}
+  @currentPage={{(add this.model.results.page 1)}}
+  @sortDirection={{this.sortDirection}}
+  @currentSort="createdTime"
+/>

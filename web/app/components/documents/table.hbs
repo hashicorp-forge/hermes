@@ -1,0 +1,47 @@
+{{#if @docs}}
+  <table class="hds-table">
+    <thead>
+      <tr>
+        <th class="name">Name</th>
+        <th class="type">Type</th>
+        <th class="status">Status</th>
+        <th class="product">Product/Area</th>
+        <th class="owner">Owner</th>
+        <th class="time">
+          <Table::SortableHeader
+            @currentSort={{@currentSort}}
+            @sortDirection={{@sortDirection}}
+            @queryParam={{hash
+              sortBy=(if (eq @sortDirection "desc") "dateAsc" "dateDesc")
+              page=1
+            }}
+            @attribute="createdTime"
+            @defaultSortDirection="desc"
+          >
+            Created
+          </Table::SortableHeader>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each @docs as |doc|}}
+        <Table::Row @doc={{doc}} @timeColumn="createdTime" />
+      {{/each}}
+    </tbody>
+  </table>
+  {{#if this.paginationIsShown}}
+    <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+  {{/if}}
+{{else}}
+  {{#if @isDraft}}
+    <Hds::Alert @type="inline" as |A|>
+      <A.Title>No drafts found</A.Title>
+      <A.Button
+        @text="Create a document draft"
+        @color="primary"
+        @icon="file-plus"
+        @route="authenticated.new"
+      />
+    </Hds::Alert>
+  {{/if}}
+{{/if}}

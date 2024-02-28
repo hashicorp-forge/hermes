@@ -42,6 +42,9 @@ type Document struct {
 	DocumentType   DocumentType
 	DocumentTypeID uint
 
+	// DocumentFileRevision are the file revisions for the document.
+	FileRevisions []DocumentFileRevision
+
 	// Imported is true if the document was not created through the application.
 	Imported bool
 
@@ -62,8 +65,12 @@ type Document struct {
 	// Status is the status of the document.
 	Status DocumentStatus
 
+	// ShareableAsDraft is true if the document can be shared in the WIP (draft)
+	// status.
+	ShareableAsDraft bool
+
 	// Summary is a summary of the document.
-	Summary string
+	Summary *string
 
 	// Title is the title of the document. It only contains the title, and not the
 	// product abbreviation, document number, or document type.
@@ -133,6 +140,32 @@ func (d *Document) Create(db *gorm.DB) error {
 
 		return nil
 	})
+}
+
+// Delete deletes a document in database db.
+func (d *Document) Delete(db *gorm.DB) error {
+	if err := validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return err
+	}
+
+	return db.
+		Model(&d).
+		Where(Document{GoogleFileID: d.GoogleFileID}).
+		Delete(&d).
+		Error
 }
 
 // Find finds all documents from database db with the provided query, and
@@ -227,6 +260,7 @@ func GetLatestProductNumber(db *gorm.DB,
 			DocumentTypeID: dt.ID,
 			ProductID:      p.ID,
 		}).
+		Where("document_number IS NOT NULL").
 		Order("document_number desc").
 		First(&d).
 		Error; err != nil {
@@ -238,6 +272,49 @@ func GetLatestProductNumber(db *gorm.DB,
 	}
 
 	return d.DocumentNumber, nil
+}
+
+// GetProjects gets all projects associated with document d.
+func (d *Document) GetProjects(db *gorm.DB) ([]Project, error) {
+	if err := validation.ValidateStruct(d,
+		validation.Field(
+			&d.ID,
+			validation.When(d.GoogleFileID == "",
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+		validation.Field(
+			&d.GoogleFileID,
+			validation.When(d.ID == 0,
+				validation.Required.Error("either ID or GoogleFileID is required"),
+			),
+		),
+	); err != nil {
+		return nil, err
+	}
+
+	// Get document ID if not known.
+	if d.ID == 0 {
+		doc := &Document{
+			GoogleFileID: d.GoogleFileID,
+		}
+		if err := doc.Get(db); err != nil {
+			return nil, fmt.Errorf("error getting document: %w", err)
+		}
+		d.ID = doc.ID
+	}
+
+	// Find all projects that have the document as a related resource.
+	var projs []Project
+	if err := db.Table("projects").
+		Joins("JOIN project_related_resources prr ON projects.id = prr.project_id").
+		Joins("JOIN project_related_resource_hermes_documents prrhd ON prr.related_resource_id = prrhd.id").
+		Where("prr.related_resource_type = ? AND prrhd.document_id = ?", "project_related_resource_hermes_documents", d.ID).
+		Find(&projs).Error; err != nil {
+		return nil, fmt.Errorf("error getting projects for document: %w", err)
+	}
+
+	return projs, nil
 }
 
 // ReplaceRelatedResources replaces related resources for document d.
@@ -417,6 +494,7 @@ func (d *Document) Upsert(db *gorm.DB) error {
 		if err := tx.
 			Model(&d).
 			Where(Document{GoogleFileID: d.GoogleFileID}).
+			Select("*").
 			Omit(clause.Associations). // We manage associations in the BeforeSave hook.
 			Assign(*d).
 			FirstOrCreate(&d).
@@ -459,6 +537,14 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 	}
 	d.Contributors = contributors
 
+	// Get document type if DocumentTypeID is not set.
+	if d.DocumentTypeID == 0 && d.DocumentType.Name != "" {
+		if err := d.DocumentType.Get(db); err != nil {
+			return fmt.Errorf("error getting document type: %w", err)
+		}
+		d.DocumentTypeID = d.DocumentType.ID
+	}
+
 	// Find or create owner.
 	if d.Owner != nil && d.Owner.EmailAddress != "" {
 		if err := d.Owner.FirstOrCreate(db); err != nil {
@@ -500,34 +586,6 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 	}
 	d.Contributors = contributors
 
-	// Get custom fields.
-	var customFields []*DocumentCustomField
-	for _, c := range d.CustomFields {
-		// If we already know the document type custom field ID, get the rest of its
-		// data.
-		if c.DocumentTypeCustomFieldID != 0 {
-			if err := db.
-				Model(&c.DocumentTypeCustomField).
-				Where(DocumentTypeCustomField{
-					Model: gorm.Model{
-						ID: c.DocumentTypeCustomFieldID,
-					},
-				}).
-				First(&c.DocumentTypeCustomField).
-				Error; err != nil {
-				return fmt.Errorf(
-					"error getting document type custom field with known ID: %w", err)
-			}
-		}
-		c.DocumentTypeCustomField.DocumentType.Name = d.DocumentType.Name
-		if err := c.DocumentTypeCustomField.Get(db); err != nil {
-			return fmt.Errorf("error getting document type custom field: %w", err)
-		}
-		c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.DocumentType.ID
-		customFields = append(customFields, c)
-	}
-	d.CustomFields = customFields
-
 	// Get document type.
 	dt := d.DocumentType
 	if err := dt.Get(db); err != nil {
@@ -535,6 +593,34 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 	}
 	d.DocumentType = dt
 	d.DocumentTypeID = dt.ID
+
+	// Get custom fields.
+	var customFields []*DocumentCustomField
+	for _, c := range d.CustomFields {
+		c.DocumentTypeCustomField.DocumentType = d.DocumentType
+		c.DocumentTypeCustomField.DocumentTypeID = d.DocumentTypeID
+
+		// Get document type custom field.
+		if c.DocumentTypeCustomFieldID == 0 {
+			c.DocumentTypeCustomField.DocumentType = d.DocumentType
+			c.DocumentTypeCustomField.DocumentTypeID = d.DocumentTypeID
+
+			if err := c.DocumentTypeCustomField.Get(db); err != nil {
+				return fmt.Errorf("error getting document type custom field: %w", err)
+			}
+			c.DocumentTypeCustomFieldID = c.DocumentTypeCustomField.ID
+		} else {
+			if err := db.
+				First(&c.DocumentTypeCustomField, c.DocumentTypeCustomFieldID).
+				Error; err != nil {
+				return fmt.Errorf(
+					"error getting document type custom field by ID: %w", err)
+			}
+		}
+
+		customFields = append(customFields, c)
+	}
+	d.CustomFields = customFields
 
 	// Get owner.
 	if d.Owner != nil && d.Owner.EmailAddress != "" {
@@ -561,6 +647,7 @@ func (d *Document) replaceAssocations(db *gorm.DB) error {
 	if err := db.
 		Session(&gorm.Session{SkipHooks: true}).
 		Model(&d).
+		Unscoped().
 		Association("Approvers").
 		Replace(d.Approvers); err != nil {
 		return err
@@ -576,12 +663,56 @@ func (d *Document) replaceAssocations(db *gorm.DB) error {
 	}
 
 	// Replace custom fields.
-	if err := db.
-		Session(&gorm.Session{SkipHooks: true}).
-		Model(&d).
-		Association("CustomFields").
-		Replace(d.CustomFields); err != nil {
-		return err
+	if err := db.Transaction(func(db *gorm.DB) error {
+		if err := validation.ValidateStruct(d,
+			validation.Field(
+				&d.ID,
+				validation.When(d.GoogleFileID == "",
+					validation.Required.Error("either ID or GoogleFileID is required"),
+				),
+			),
+			validation.Field(
+				&d.GoogleFileID,
+				validation.When(d.ID == 0,
+					validation.Required.Error("either ID or GoogleFileID is required"),
+				),
+			),
+		); err != nil {
+			return err
+		}
+
+		// Get document ID if not known.
+		if d.ID == 0 {
+			doc := &Document{
+				GoogleFileID: d.GoogleFileID,
+			}
+			if err := doc.Get(db); err != nil {
+				return fmt.Errorf("error getting document: %w", err)
+			}
+			d.ID = doc.ID
+		}
+
+		// Delete existing DocumentCustomFields.
+		if err := db.
+			Unscoped(). // Hard delete instead of soft delete.
+			Where("document_id = ?", d.ID).
+			Delete(&DocumentCustomField{}).Error; err != nil {
+			return fmt.Errorf(
+				"error deleting existing document custom fields: %w", err)
+		}
+
+		// Create all DocumentCustomFields.
+		for _, cf := range d.CustomFields {
+			cf.DocumentID = d.ID
+			if err := cf.Create(db); err != nil {
+				return fmt.Errorf(
+					"error creating document custom field: %w", err)
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("error replacing document custom fields: %w", err)
 	}
 
 	return nil

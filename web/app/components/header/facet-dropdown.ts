@@ -2,13 +2,13 @@ import Component from "@glimmer/component";
 import { FacetDropdownObjects } from "hermes/types/facets";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
+import { FacetName } from "./toolbar";
 
 interface HeaderFacetDropdownComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    label: string;
+    name: FacetName;
     facets: FacetDropdownObjects | null;
-    disabled?: boolean;
   };
 }
 
@@ -17,6 +17,10 @@ export default class HeaderFacetDropdownComponent extends Component<HeaderFacetD
 
   protected get currentRouteName() {
     return this.router.currentRouteName;
+  }
+
+  protected get isDisabled() {
+    return !this.args.facets || Object.keys(this.args.facets).length === 0;
   }
 }
 

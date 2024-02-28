@@ -5,7 +5,7 @@ const getEnv = (key, defaultValue) => {
   const value = process.env[fullKey];
   if (value == null) {
     console.warn(
-      `env var ${fullKey} was not set! Proceeding with default value "${defaultValue}"`
+      `env var ${fullKey} was not set! Proceeding with default value "${defaultValue}"`,
     );
   }
   return value != null ? value : defaultValue;
@@ -46,7 +46,15 @@ module.exports = function (environment) {
       docsIndexName: getEnv("ALGOLIA_DOCS_INDEX_NAME", "docs"),
       draftsIndexName: getEnv("ALGOLIA_DRAFTS_INDEX_NAME", "drafts"),
       internalIndexName: getEnv("ALGOLIA_INTERNAL_INDEX_NAME", "internal"),
+      projectsIndexName: getEnv("ALGOLIA_PROJECTS_INDEX_NAME", "projects"),
       apiKey: getEnv("ALGOLIA_SEARCH_API_KEY"),
+    },
+
+    flashMessageDefaults: {
+      timeout: 5000,
+      extendedTimeout: 1000,
+      type: "success",
+      types: ["critical", "success"],
     },
 
     google: {
@@ -54,6 +62,8 @@ module.exports = function (environment) {
     },
 
     skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
+
+    shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
 
     torii: {
       sessionServiceName: "session",
@@ -72,6 +82,8 @@ module.exports = function (environment) {
   };
 
   if (environment === "development") {
+    ENV.shortLinkBaseURL = "https://fake.short.link";
+
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
@@ -80,6 +92,8 @@ module.exports = function (environment) {
   }
 
   if (environment === "test") {
+    ENV.shortLinkBaseURL = "https://fake.short.link";
+
     // Testem prefers this...
     ENV.locationType = "none";
 

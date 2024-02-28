@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -53,43 +57,38 @@ func ApprovalHandler(
 				return
 			}
 
-			// Get base document object from Algolia so we can determine the doc type.
-			baseDocObj := &hcd.BaseDoc{}
-			err = ar.Docs.GetObject(docID, &baseDocObj)
-			if err != nil {
-				l.Error("error requesting base document object from Algolia",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error requesting changes of document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Create new document object of the proper doc type.
-			docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-			if err != nil {
-				l.Error("error creating new empty doc",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error requesting changes of document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Get document object from Algolia.
-			err = ar.Docs.GetObject(docID, &docObj)
+			var algoObj map[string]any
+			err = ar.Docs.GetObject(docID, &algoObj)
 			if err != nil {
-				l.Error("error getting document from Algolia",
+				// Handle 404 from Algolia and only log a warning.
+				if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+					l.Warn("document object not found in Algolia",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Document not found", http.StatusNotFound)
+					return
+				} else {
+					l.Error("error requesting document from Algolia",
+						"error", err,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error accessing document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
+
+			// Convert Algolia object to a document.
+			doc, err := document.NewFromAlgoliaObject(
+				algoObj, cfg.DocumentTypes.DocumentType)
+			if err != nil {
+				l.Error("error converting Algolia object to document type",
 					"error", err,
 					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
 				)
 				http.Error(w, "Error accessing document",
 					http.StatusInternalServerError)
@@ -98,36 +97,35 @@ func ApprovalHandler(
 
 			// Authorize request.
 			userEmail := r.Context().Value("userEmail").(string)
-			if docObj.GetStatus() != "In-Review" {
+			if doc.Status != "In-Review" {
 				http.Error(w,
 					"Can only request changes of documents in the \"In-Review\" status",
 					http.StatusBadRequest)
 				return
 			}
-			if !contains(docObj.GetApprovers(), userEmail) {
+			if !contains(doc.Approvers, userEmail) {
 				http.Error(w, "Not authorized as a document approver",
 					http.StatusUnauthorized)
 				return
 			}
-			if contains(docObj.GetChangesRequestedBy(), userEmail) {
+			if contains(doc.ChangesRequestedBy, userEmail) {
 				http.Error(w, "Document already has changes requested by user",
 					http.StatusBadRequest)
 				return
 			}
 
 			// Add email to slice of users who have requested changes of the document.
-			docObj.SetChangesRequestedBy(
-				append(docObj.GetChangesRequestedBy(), userEmail))
+			doc.ChangesRequestedBy = append(doc.ChangesRequestedBy, userEmail)
 
 			// If user had previously approved, delete email from slice of users who
 			// have approved the document.
 			var newApprovedBy []string
-			for _, a := range docObj.GetApprovedBy() {
+			for _, a := range doc.ApprovedBy {
 				if a != userEmail {
 					newApprovedBy = append(newApprovedBy, a)
 				}
 			}
-			docObj.SetApprovedBy(newApprovedBy)
+			doc.ApprovedBy = newApprovedBy
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
@@ -151,45 +149,55 @@ func ApprovalHandler(
 					"path", r.URL.Path,
 					"doc_id", docID,
 					"rev_id", latestRev.Id)
-				http.Error(w, "Error requesting changes",
+				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
 			}
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Changes requested by %s", userEmail)
-			docObj.SetFileRevision(latestRev.Id, revisionName)
+			doc.SetFileRevision(latestRev.Id, revisionName)
 
-			// Save modified doc object in Algolia.
-			res, err := aw.Docs.SaveObject(docObj)
+			// Convert document to Algolia object.
+			docObj, err := doc.ToAlgoliaObject(true)
 			if err != nil {
-				l.Error("error saving requested changes doc object in Algolia",
+				l.Error("error converting document to Algolia object",
 					"error", err,
-					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
+					"doc_id", docID,
 				)
-				http.Error(w, "Error requesting changes of document",
+				http.Error(w, "Error updating document status",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Save new modified doc object in Algolia.
+			res, err := aw.Docs.SaveObject(docObj)
+			if err != nil {
+				l.Error("error saving approved document in Algolia",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID)
+				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
 			}
 			err = res.Wait()
 			if err != nil {
-				l.Error("error saving requested changes doc object in Algolia",
+				l.Error("error saving patched document in Algolia",
 					"error", err,
-					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
-				)
-				http.Error(w, "Error requesting changes of document",
+					"doc_id", docID)
+				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
 			}
 
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				docID, cfg.BaseURL, true, s)
-			if err != nil {
+			if err := doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
 				l.Error("error replacing doc header",
 					"error", err,
 					"doc_id", docID,
@@ -201,6 +209,18 @@ func ApprovalHandler(
 				return
 			}
 
+			// Update document reviews in the database.
+			if err := updateDocumentReviewsInDatabase(*doc, db); err != nil {
+				l.Error("error updating document reviews in the database",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+
 			// Write response.
 			w.WriteHeader(http.StatusOK)
 
@@ -210,6 +230,58 @@ func ApprovalHandler(
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
+
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Docs.GetObject(docID, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docID,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+			}
 
 		case "POST":
 			// Validate request.
@@ -242,43 +314,38 @@ func ApprovalHandler(
 				return
 			}
 
-			// Get base document object from Algolia so we can determine the doc type.
-			baseDocObj := &hcd.BaseDoc{}
-			err = ar.Docs.GetObject(docID, &baseDocObj)
-			if err != nil {
-				l.Error("error requesting base document object from Algolia",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Create new document object of the proper doc type.
-			docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-			if err != nil {
-				l.Error("error creating new empty doc",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Get document object from Algolia.
-			err = ar.Docs.GetObject(docID, &docObj)
+			var algoObj map[string]any
+			err = ar.Docs.GetObject(docID, &algoObj)
 			if err != nil {
-				l.Error("error getting document from Algolia",
+				// Handle 404 from Algolia and only log a warning.
+				if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+					l.Warn("document object not found in Algolia",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Document not found", http.StatusNotFound)
+					return
+				} else {
+					l.Error("error requesting document from Algolia",
+						"error", err,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error accessing document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
+
+			// Convert Algolia object to a document.
+			doc, err := document.NewFromAlgoliaObject(
+				algoObj, cfg.DocumentTypes.DocumentType)
+			if err != nil {
+				l.Error("error converting Algolia object to document type",
 					"error", err,
 					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
 				)
 				http.Error(w, "Error accessing document",
 					http.StatusInternalServerError)
@@ -287,19 +354,19 @@ func ApprovalHandler(
 
 			// Authorize request.
 			userEmail := r.Context().Value("userEmail").(string)
-			if docObj.GetStatus() != "In-Review" && docObj.GetStatus() != "In Review" {
+			if doc.Status != "In-Review" && doc.Status != "Approved" {
 				http.Error(w,
-					"Only documents in the \"In-Review\" status can be approved",
+					`Document status must be "In-Review" or "Approved" to approve`,
 					http.StatusBadRequest)
 				return
 			}
-			if !contains(docObj.GetApprovers(), userEmail) {
+			if !contains(doc.Approvers, userEmail) {
 				http.Error(w,
 					"Not authorized as a document approver",
 					http.StatusUnauthorized)
 				return
 			}
-			if contains(docObj.GetApprovedBy(), userEmail) {
+			if contains(doc.ApprovedBy, userEmail) {
 				http.Error(w,
 					"Document already approved by user",
 					http.StatusBadRequest)
@@ -307,17 +374,17 @@ func ApprovalHandler(
 			}
 
 			// Add email to slice of users who have approved the document.
-			docObj.SetApprovedBy(append(docObj.GetApprovedBy(), userEmail))
+			doc.ApprovedBy = append(doc.ApprovedBy, userEmail)
 
 			// If the user had previously requested changes, delete email from slice
 			// of users who have requested changes of the document.
 			var newChangesRequestedBy []string
-			for _, a := range docObj.GetChangesRequestedBy() {
+			for _, a := range doc.ChangesRequestedBy {
 				if a != userEmail {
 					newChangesRequestedBy = append(newChangesRequestedBy, a)
 				}
 			}
-			docObj.SetChangesRequestedBy(newChangesRequestedBy)
+			doc.ChangesRequestedBy = newChangesRequestedBy
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
@@ -348,37 +415,48 @@ func ApprovalHandler(
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Approved by %s", userEmail)
-			docObj.SetFileRevision(latestRev.Id, revisionName)
+			doc.SetFileRevision(latestRev.Id, revisionName)
 
-			// Save modified doc object in Algolia.
-			res, err := aw.Docs.SaveObject(docObj)
+			// Convert document to Algolia object.
+			docObj, err := doc.ToAlgoliaObject(true)
 			if err != nil {
-				l.Error("error saving approved doc object in Algolia",
+				l.Error("error converting document to Algolia object",
 					"error", err,
-					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
+					"doc_id", docID,
 				)
-				http.Error(w, "Error approving document",
+				http.Error(w, "Error updating document status",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Save new modified doc object in Algolia.
+			res, err := aw.Docs.SaveObject(docObj)
+			if err != nil {
+				l.Error("error saving approved document in Algolia",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID)
+				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
 			}
 			err = res.Wait()
 			if err != nil {
-				l.Error("error saving approved doc object in Algolia",
+				l.Error("error saving approved document in Algolia",
 					"error", err,
-					"doc_id", docID,
 					"method", r.Method,
 					"path", r.URL.Path,
-				)
-				http.Error(w, "Error approving document",
+					"doc_id", docID)
+				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
 			}
 
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				docID, cfg.BaseURL, true, s)
+			err = doc.ReplaceHeader(cfg.BaseURL, false, s)
 			if err != nil {
 				l.Error("error replacing doc header",
 					"error", err,
@@ -391,6 +469,18 @@ func ApprovalHandler(
 				return
 			}
 
+			// Update document reviews in the database.
+			if err := updateDocumentReviewsInDatabase(*doc, db); err != nil {
+				l.Error("error updating document reviews in the database",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				// Don't return an HTTP error because the database isn't the source of
+				// truth yet.
+			}
+
 			// Write response.
 			w.WriteHeader(http.StatusOK)
 
@@ -401,9 +491,98 @@ func ApprovalHandler(
 				"path", r.URL.Path,
 			)
 
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Docs.GetObject(docID, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docID,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+			}
+
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
 	})
+}
+
+// updateDocumentReviewsInDatabase takes a document and updates the associated
+// document reviews in the database.
+func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
+	var docReviews []models.DocumentReview
+	for _, a := range doc.Approvers {
+		u := models.User{
+			EmailAddress: a,
+		}
+		if helpers.StringSliceContains(doc.ApprovedBy, a) {
+			docReviews = append(docReviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: doc.ObjectID,
+				},
+				User:   u,
+				Status: models.ApprovedDocumentReviewStatus,
+			})
+		} else if helpers.StringSliceContains(doc.ChangesRequestedBy, a) {
+			docReviews = append(docReviews, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: doc.ObjectID,
+				},
+				User:   u,
+				Status: models.ChangesRequestedDocumentReviewStatus,
+			})
+		}
+	}
+
+	// Upsert document reviews in database.
+	for _, dr := range docReviews {
+		if err := dr.Update(db); err != nil {
+			return fmt.Errorf("error upserting document review: %w", err)
+		}
+	}
+
+	return nil
 }

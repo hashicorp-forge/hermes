@@ -3,11 +3,14 @@ import { setupRenderingTest } from "ember-qunit";
 import { find, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { assert as emberAssert } from "@ember/debug";
+import window from "ember-window-mock";
+import { setupWindowMock } from "ember-window-mock/test-support";
 
 const CONTAINER_SELECTOR = ".truncated-text-container";
 
 module("Integration | Component | truncated-text", function (hooks) {
   setupRenderingTest(hooks);
+  setupWindowMock(hooks);
 
   test("it truncates text", async function (assert) {
     await render(hbs`
@@ -18,15 +21,13 @@ module("Integration | Component | truncated-text", function (hooks) {
       </div>
     `);
 
-    // TODO: Take Percy screenshot
-
     // <p> tag is used if no `tagName` is provided
     const container = find(`p${CONTAINER_SELECTOR}`);
     const text = find(`${CONTAINER_SELECTOR} > span`);
 
     emberAssert(
       "container must be an HTMLElement",
-      container instanceof HTMLElement
+      container instanceof HTMLElement,
     );
     emberAssert("text must be an HTMLElement", text instanceof HTMLElement);
 
@@ -41,6 +42,18 @@ module("Integration | Component | truncated-text", function (hooks) {
 
     assert.equal(containerFontSize, "13px"); // text-body-100 size
     assert.equal(textFontSize, "28px");
+  });
+
+  test("it can truncate starting at a specific endpoint", async function (assert) {
+    await render(hbs`
+      <div style="width:275px">
+        <TruncatedText style="font-size:28px;" @startingBreakpoint="md">
+          This is a very long text that should be truncated
+        </TruncatedText>
+      </div>
+    `);
+
+    assert.dom(CONTAINER_SELECTOR).hasClass("starting-breakpoint-md");
   });
 
   test("it truncates text with a custom tag", async function (assert) {

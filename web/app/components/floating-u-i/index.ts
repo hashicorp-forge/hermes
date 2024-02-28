@@ -4,6 +4,7 @@ import { guidFor } from "@ember/object/internals";
 import { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { MatchAnchorWidthOptions } from "./content";
 
 interface FloatingUIAnchorAPI {
   contentIsShown: boolean;
@@ -28,6 +29,7 @@ interface FloatingUIComponentSignature {
     placement?: Placement | null;
     disableClose?: boolean;
     offset?: OffsetOptions;
+    matchAnchorWidth?: MatchAnchorWidthOptions;
   };
   Blocks: {
     anchor: [dd: FloatingUIAnchorAPI];

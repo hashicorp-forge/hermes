@@ -5,6 +5,7 @@ func ModelsToAutoMigrate() []interface{} {
 		&DocumentType{},
 		&Document{},
 		&DocumentCustomField{},
+		&DocumentFileRevision{},
 		&DocumentRelatedResource{},
 		&DocumentRelatedResourceExternalLink{},
 		&DocumentRelatedResourceHermesDocument{},
@@ -14,6 +15,10 @@ func ModelsToAutoMigrate() []interface{} {
 		&IndexerMetadata{},
 		&Product{},
 		&ProductLatestDocumentNumber{},
+		&Project{},
+		&ProjectRelatedResource{},
+		&ProjectRelatedResourceExternalLink{},
+		&ProjectRelatedResourceHermesDocument{},
 		&User{},
 	}
 }

@@ -1,0 +1,11 @@
+<div class="project-resource" ...attributes>
+
+  {{yield}}
+
+  {{#unless @isReadOnly}}
+    <OverflowMenu
+      @items={{@overflowMenuItems}}
+      @offset={{hash mainAxis=1 crossAxis=-3}}
+    />
+  {{/unless}}
+</div>

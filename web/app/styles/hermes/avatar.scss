@@ -1,0 +1,64 @@
+.avatar {
+  @apply relative flex shrink-0 items-center justify-center;
+
+  &.small,
+  &.medium {
+    .product-abbreviation {
+      &.letter-count-1 {
+        @apply text-[12px] font-semibold;
+      }
+
+      &.letter-count-2 {
+        @apply text-[9.5px] font-semibold;
+      }
+
+      &.letter-count-3 {
+        @apply text-[7.5px] font-bold;
+      }
+    }
+  }
+
+  &.small {
+    @apply h-5 w-5;
+
+    .default-user-icon {
+      @apply scale-[85%];
+    }
+  }
+
+  &.medium {
+    @apply h-7 w-7;
+  }
+
+  &.large {
+    @apply h-9 w-9;
+
+    .product-abbreviation {
+      &.letter-count-2 {
+        @apply text-[13px];
+      }
+      &.letter-count-3 {
+        @apply text-[11px] font-semibold;
+      }
+    }
+  }
+
+  &.xl {
+    @apply h-16 w-16;
+
+    .product-abbreviation {
+      @apply text-[32px] tracking-tight;
+
+      &.letter-count-2 {
+        @apply text-[24px];
+      }
+      &.letter-count-3 {
+        @apply text-[18px];
+      }
+    }
+  }
+}
+
+.product-abbreviation {
+  @apply flex font-medium leading-none tracking-tighter;
+}

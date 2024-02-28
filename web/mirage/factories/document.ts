@@ -1,4 +1,5 @@
 import { Factory } from "miragejs";
+import { TEST_USER_EMAIL } from "../utils";
 
 export function getTestDocNumber(product: string) {
   let abbreviation = "";
@@ -21,14 +22,17 @@ export function getTestDocNumber(product: string) {
 }
 
 export default Factory.extend({
+  id: (i: number) => `doc-${i}`,
   objectID: (i: number) => `doc-${i}`,
   title: (i: number) => `Test Document ${i}`,
-  status: "Draft",
+  status: "WIP",
   product: "Vault",
   docType: "RFC",
-  modifiedAgo: 1000000000,
   modifiedTime: 1,
+  createdTime: 1,
   appCreated: true,
+  isShareable: false,
+  isDraft: true,
   docNumber() {
     // @ts-ignore - Mirage types are wrong
     // See discussion at https://github.com/miragejs/miragejs/pull/525
@@ -39,5 +43,7 @@ export default Factory.extend({
       value: "This is a test document",
     },
   },
-  owners: ["testuser@example.com"],
+  projects: [],
+  approvers: [],
+  owners: [TEST_USER_EMAIL],
 });

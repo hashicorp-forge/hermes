@@ -1,0 +1,18 @@
+.new {
+  h1 {
+    @apply text-center text-display-400;
+  }
+
+  .create-new-form {
+    @apply mx-auto mt-6 max-w-xl;
+  }
+
+  .footer {
+    @apply mt-24;
+  }
+
+  .feature-icon {
+    --slideUpFrom: 4px;
+    animation: slideUp 1500ms cubic-bezier(0, 1, 0.5, 1);
+  }
+}

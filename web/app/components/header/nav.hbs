@@ -1,98 +1,107 @@
-{{! @glint-nocheck: not typesafe yet }}
-<div class="x-container">
+<nav class="header-nav x-container">
+  <LinkTo @route="authenticated.dashboard" class="header-nav-logo">
+    <HermesLogo />
+  </LinkTo>
 
-  <nav class="header-nav">
-    <LinkTo @route="authenticated.dashboard" class="header-nav-logo">
-      <HermesLogo />
+  <div class="primary-links">
+    <LinkTo
+      data-test-nav-link="projects"
+      @route="authenticated.projects"
+      @current-when="authenticated.projects.index"
+      @query={{this.defaultProjectsScreenQueryParams}}
+    >
+      Projects
     </LinkTo>
+    <LinkTo
+      data-test-nav-link="all"
+      @route="authenticated.documents"
+      @current-when="authenticated.documents"
+      @query={{this.defaultBrowseScreenQueryParams}}
+    >
+      All Docs
+    </LinkTo>
+    <LinkTo
+      data-test-nav-link="my"
+      @route="authenticated.my.documents"
+      @current-when="authenticated.my.documents"
+      @query={{this.defaultMyQueryParams}}
+    >
+      My Docs
+    </LinkTo>
+  </div>
 
-    <div class="primary-links">
-      <LinkTo
-        data-test-nav-link="all"
-        @route="authenticated.all"
-        @current-when="authenticated.all"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        All Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="my"
-        @route="authenticated.my"
-        @current-when="authenticated.my"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Docs
-      </LinkTo>
-      <LinkTo
-        data-test-nav-link="drafts"
-        @route="authenticated.drafts"
-        @current-when="authenticated.drafts"
-        @query={{this.defaultBrowseScreenQueryParams}}
-      >
-        My Drafts
-      </LinkTo>
-    </div>
+  <Header::Search @query={{@query}} class="global-search" />
 
-    <Header::Search class="global-search" />
-
-    <div class="user-buttons">
-      <Hds::Button
-        @route="authenticated.new"
-        @isIconOnly={{true}}
-        @text="Create draft"
-        @icon="file-plus"
-        class="create-draft-button"
-      />
-      <div class="relative">
-        {{#if this.userMenuHighlightIsShown}}
-          <Header::UserMenuHighlight />
-        {{/if}}
-        {{#if this.profile.picture}}
-          {{! Workaround until `referrerPolicy` is supported in dd.ToggleIcon }}
-          <img
-            src={{this.profile.picture}}
-            class="user-avatar"
-            role="presentation"
-            referrerpolicy="no-referrer"
-          />
-        {{/if}}
-        <Hds::Dropdown as |dd|>
-          <dd.ToggleIcon
-            data-test-user-menu-toggle
-            @text="User menu"
-            @icon="user"
-          />
-          <dd.Title
-            data-test-user-menu-title
-            {{did-insert this.onDropdownOpen}}
-            {{will-destroy this.onDropdownClose}}
-            @text={{this.profile.name}}
-            class="text-body-200"
-          />
-          <dd.Description
-            data-test-user-menu-email
-            @text={{this.profile.email}}
-            class="text-body-200"
-          />
-          <dd.Separator class="mt-2" />
-          <dd.Interactive
-            data-test-user-menu-item="email-notifications"
-            @route="authenticated.settings"
-            @text="Email notifications"
-            class={{if
-              this.emailNotificationsHighlightIsShown
-              "highlighted-new"
-            }}
-          />
-          {{#if this.showSignOut}}
-            <dd.Interactive
-              data-test-user-menu-item="sign-out"
-              {{on "click" this.invalidateSession}}
-              @text="Sign out"
+  <div class="user-buttons">
+    <Hds::Button
+      data-test-create-new-button
+      @route="authenticated.new"
+      @text="New"
+      @icon="plus"
+      class="pl-2.5 pr-4"
+    />
+    <div class="relative flex">
+      <X::DropdownList
+        @items={{this.dropdownListItems}}
+        @placement="bottom-end"
+        class="user-dropdown"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            @hasChevron={{true}}
+            aria-label="User menu"
+            class="user-menu-button -mr-1"
+          >
+            <Person::Avatar
+              @email={{this.profile.email}}
+              @size="large"
+              data-test-user-menu-toggle
             />
+          </dd.ToggleAction>
+          {{#if this.userMenuHighlightIsShown}}
+            <Header::UserMenuHighlight />
           {{/if}}
-        </Hds::Dropdown>
-      </div>
+        </:anchor>
+        <:header>
+          <div
+            {{did-insert this.onDropdownOpen}}
+            class="mb-1 border-b border-b-color-border-primary py-3.5 px-5"
+          >
+            <div class="font-semibold" data-test-user-menu-title>
+              {{this.profile.name}}
+            </div>
+            <div class="text-color-foreground-faint" data-test-user-menu-email>
+              {{this.profile.email}}
+            </div>
+          </div>
+        </:header>
+        <:item as |dd|>
+          <div
+            data-test-user-menu-item={{dasherize dd.attrs.label}}
+            class="w-full"
+          >
+            {{#if dd.attrs.route}}
+              <dd.LinkTo @route={{dd.attrs.route}}>
+                {{dd.attrs.label}}
+                {{#if dd.attrs.isNew}}
+                  <Hds::Badge
+                    @text="New"
+                    class="highlighted-new-badge ml-1.5"
+                  />
+                {{/if}}
+              </dd.LinkTo>
+            {{else if dd.attrs.href}}
+              <dd.ExternalLink href={{dd.attrs.href}} @iconIsShown={{true}}>
+                {{dd.attrs.label}}
+              </dd.ExternalLink>
+            {{else if dd.attrs.action}}
+              <dd.Action {{on "click" dd.attrs.action}}>
+                {{dd.attrs.label}}
+              </dd.Action>
+            {{/if}}
+          </div>
+        </:item>
+      </X::DropdownList>
     </div>
-  </nav>
-</div>
+  </div>
+</nav>

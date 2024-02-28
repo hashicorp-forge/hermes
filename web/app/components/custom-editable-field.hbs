@@ -1,72 +1,11 @@
-{{#if this.typeIsString}}
+<div class="editable-field-container" ...attributes>
   <EditableField
-    data-test-custom-string-field
-    @value={{get @document @field}}
-    @onChange={{@onChange}}
-    @loading={{@loading}}
-    @disabled={{@disabled}}
-  >
-    <:default>
-      {{#let (get @document @field) as |documentField|}}
-        <p
-          class="hds-typography-body-200 hds-foreground-primary truncate
-            {{unless documentField 'italic'}}"
-          title="{{or documentField 'None'}}"
-        >
-          {{#if documentField}}
-            {{documentField}}
-          {{else}}
-            <CustomEditableFields::EmptyState />
-          {{/if}}
-        </p>
-      {{/let}}
-    </:default>
-    <:editing as |F|>
-      <Hds::Form::Textarea::Field
-        @value={{F.value}}
-        name={{@field}}
-        {{auto-height-textarea}}
-        {{on "blur" F.update}}
-        data-test-custom-string-field-input
-      />
-    </:editing>
-  </EditableField>
-
-{{else if this.typeIsPeople}}
-  <EditableField
-    data-test-custom-people-field
-    @value={{get @attributes "value"}}
-    @onChange={{@onChange}}
-    @loading={{@loading}}
-    @disabled={{@disabled}}
-  >
-    <:default>
-      {{#if this.people.length}}
-        <ol>
-          {{#each this.people as |person|}}
-            <li class="whitespace-nowrap">
-              {{#if person.imgURL}}
-                <img
-                  src="{{person.imgURL}}"
-                  class="align-middle h-4 w-4 rounded-full"
-                />
-              {{/if}}
-              {{person.email}}
-            </li>
-          {{/each}}
-        </ol>
-      {{else}}
-        <CustomEditableFields::EmptyState />
-      {{/if}}
-    </:default>
-    <:editing as |F|>
-      <Inputs::PeopleSelect
-        class="multiselect--narrow"
-        @selected={{this.people}}
-        @onChange={{this.updateEmails}}
-        {{click-outside (fn F.update this.people)}}
-        data-test-custom-people-field-input
-      />
-    </:editing>
-  </EditableField>
-{{/if}}
+    data-test-custom-field
+    data-test-custom-field-type={{if this.typeIsPeople "people" "string"}}
+    @value={{if this.typeIsPeople this.emails this.stringValue}}
+    @onChange={{if this.typeIsPeople this.onPeopleSelectChange}}
+    @onSave={{if this.typeIsPeople this.onPeopleSave @onSave}}
+    @isSaving={{@isSaving}}
+    @isReadOnly={{@disabled}}
+  />
+</div>

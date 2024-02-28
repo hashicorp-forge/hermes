@@ -1,0 +1,71 @@
+<LinkTo
+  data-test-recently-viewed-item
+  @route={{this.targetRoute}}
+  @model={{this.modelID}}
+  @query={{this.query}}
+  class="h-full px-3 pt-3 pb-4"
+  ...attributes
+>
+  <div class="flex w-full justify-between">
+    {{! Status and Type }}
+    <div class="flex items-center gap-1.5 text-body-100">
+      {{#if this.itemIsDoc}}
+        <Document::StatusIcon @status={{this.doc.status}} />
+      {{else}}
+        <Project::StatusIcon @status={{this.project.status}} />
+      {{/if}}
+      <span data-test-recently-viewed-item-type class="ml-px">
+        {{if this.itemIsDoc this.doc.docType "Project"}}
+      </span>
+    </div>
+
+    {{! Avatars }}
+    <div class="flex items-center gap-1 text-body-100">
+      {{#if this.itemIsDoc}}
+        <Person::Avatar @email={{get this.doc.owners 0}} />
+      {{/if}}
+
+      {{#if this.products.length}}
+        {{#if this.additionalProductCount}}
+          <span
+            data-test-additional-product-count
+            class="mr-1 text-color-foreground-faint"
+          >
+            +{{this.additionalProductCount}}
+          </span>
+        {{/if}}
+
+        <ol class="flex flex-row-reverse gap-1">
+          {{#each this.products as |product|}}
+            <li>
+              <Product::Avatar @product={{product}} />
+            </li>
+          {{/each}}
+        </ol>
+      {{/if}}
+    </div>
+  </div>
+
+  {{! Text }}
+  <div class="mt-1 pr-8">
+    <h5 data-test-recently-viewed-item-title>
+      {{this.title}}
+      {{#if this.itemIsDoc}}
+        <span
+          data-test-recently-viewed-doc-number
+          class="whitespace-nowrap font-regular text-color-foreground-primary"
+        >
+          {{this.doc.docNumber}}
+        </span>
+      {{/if}}
+    </h5>
+    <p
+      data-test-recently-viewed-item-modified-time
+      class="mt-1 text-body-100 text-color-foreground-faint"
+    >
+      Modified
+      {{time-ago this.modifiedTime}}
+    </p>
+  </div>
+
+</LinkTo>

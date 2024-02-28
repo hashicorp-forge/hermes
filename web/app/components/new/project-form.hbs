@@ -1,0 +1,85 @@
+{{#if (and this.projectIsBeingCreated @isModal)}}
+  <div
+    class="grid h-full place-items-center pb-12 text-center"
+    data-test-creating-project-message
+  >
+    <div>
+      <FlightIcon @name="running" @size="24" class="mb-3.5" />
+      <h3 class="text-display-300 font-semibold text-color-foreground-strong">
+        Creating project...
+      </h3>
+    </div>
+  </div>
+{{else}}
+  <New::Form
+    data-test-project-form
+    @taskIsRunning={{this.projectIsBeingCreated}}
+    @icon="folder"
+    @headline="Start a project"
+    @taskIsRunningHeadline="Creating project..."
+    @taskIsRunningDescription="This shouldn't take long."
+    @buttonText="Create project"
+    @isModal={{@isModal}}
+    @buttonIsActive={{gt this.title.length 0}}
+    {{on "submit" this.maybeSubmitForm}}
+  >
+    <Hds::Form::Textarea::Field
+      {{on "keydown" this.onKeydown}}
+      {{auto-height-textarea}}
+      autofocus
+      {{autofocus}}
+      data-test-title
+      @value={{this.title}}
+      name="title"
+      placeholder="Enter a project title"
+      as |F|
+    >
+      <F.Label @isRequired={{true}}>
+        Title
+      </F.Label>
+      {{#if this.titleErrorIsShown}}
+        <F.Error data-test-title-error class="mt-2">
+          Title is required.
+        </F.Error>
+      {{/if}}
+    </Hds::Form::Textarea::Field>
+
+    <Hds::Form::Textarea::Field
+      data-test-description
+      {{on "keydown" this.onKeydown}}
+      @value={{this.description}}
+      rows="2"
+      placeholder="A short summary of your project"
+      name="description"
+      as |F|
+    >
+      <F.Label>Description</F.Label>
+    </Hds::Form::Textarea::Field>
+
+    {{#if this.jiraIsEnabled}}
+      <div>
+        <label for="jira-search-input" class="hermes-form-label mb-2">
+          Add Jira issue
+        </label>
+        <Project::JiraWidget
+          @issue={{this.jiraIssue}}
+          @isNewProjectForm={{true}}
+          @onIssueSelect={{this.setJiraIssue}}
+          @onIssueRemove={{this.removeJiraIssue}}
+        />
+      </div>
+    {{/if}}
+
+  </New::Form>
+
+  {{#unless this.projectIsBeingCreated}}
+    <div
+      class="mt-12 flex w-full justify-center gap-2 text-body-100 text-color-foreground-disabled"
+    >
+
+      <FlightIcon @name="enterprise" class="mr-1" />
+      Projects are visible to everyone in your organization.
+    </div>
+  {{/unless}}
+
+{{/if}}

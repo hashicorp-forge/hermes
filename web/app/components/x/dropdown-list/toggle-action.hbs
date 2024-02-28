@@ -7,7 +7,16 @@
   aria-controls={{@ariaControls}}
   aria-expanded={{@contentIsShown}}
   aria-haspopup="listbox"
+  class="{{if @hasChevron 'flex items-center gap-1'}}
+    {{if @contentIsShown 'open'}}
+    "
   ...attributes
 >
   {{yield}}
+  {{#if @hasChevron}}
+    <FlightIcon
+      data-test-toggle-action-chevron
+      @name={{if @contentIsShown "chevron-up" "chevron-down"}}
+    />
+  {{/if}}
 </Action>

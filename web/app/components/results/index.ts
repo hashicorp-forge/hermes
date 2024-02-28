@@ -5,18 +5,14 @@ import { capitalize } from "@ember/string";
 
 interface ResultsIndexComponentSignature {
   Args: {
-    results: SearchResponse;
+    results: SearchResponse<HermesDocument>;
     query: string;
   };
 }
 
 export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
-  get firstPageIsShown(): boolean {
-    return this.args.results.page === 0;
-  }
-
   get lowercasedQuery(): string {
-    return this.args.query.toLowerCase();
+    return this.args.query?.toLowerCase();
   }
 
   get capitalizedQuery(): string {
@@ -27,7 +23,7 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     let hits = this.args.results?.hits as HermesDocument[];
     // Assume at least one of the first 12 hits is a product match for the query.
     return hits.some(
-      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery
+      (hit) => hit.product?.toLowerCase() === this.lowercasedQuery,
     );
   }
 }

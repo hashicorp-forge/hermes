@@ -1,8 +1,6 @@
 {{! @glint-nocheck: not typesafe yet }}
 {{#maybe-in-element
-  (html-element ".ember-application")
-  (not @renderOut)
-  insertBefore=null
+  (html-element this.inElementTarget) (not @renderOut) insertBefore=null
 }}
   <div
     {{will-destroy this.cleanup}}

@@ -2,11 +2,11 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
@@ -40,18 +40,23 @@ type externalLinkRelatedResourceGetResponse struct {
 }
 
 type hermesDocumentRelatedResourceGetResponse struct {
-	GoogleFileID   string `json:"googleFileID"`
-	Title          string `json:"title"`
-	DocumentType   string `json:"documentType"`
-	DocumentNumber string `json:"documentNumber"`
-	SortOrder      int    `json:"sortOrder"`
+	GoogleFileID   string   `json:"googleFileID"`
+	Title          string   `json:"title"`
+	DocumentType   string   `json:"documentType"`
+	DocumentNumber string   `json:"documentNumber"`
+	SortOrder      int      `json:"sortOrder"`
+	Status         string   `json:"status"`
+	Owners         []string `json:"owners"`
+	OwnerPhotos    []string `json:"ownerPhotos"`
+	Product        string   `json:"product"`
 }
 
 func documentsResourceRelatedResourcesHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	docID string,
-	docObj hcd.Doc,
+	doc document.Document,
+	cfg *config.Config,
 	l hclog.Logger,
 	algoRead *algolia.Client,
 	db *gorm.DB,
@@ -115,8 +120,9 @@ func documentsResourceRelatedResourcesHandler(
 		}
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
-			algoDoc, err := getDocumentFromAlgolia(
-				hdrr.Document.GoogleFileID, algoRead)
+			// Get document object from Algolia.
+			var algoObj map[string]any
+			err = algoRead.Docs.GetObject(hdrr.Document.GoogleFileID, &algoObj)
 			if err != nil {
 				l.Error("error getting related resource document from Algolia",
 					"error", err,
@@ -130,14 +136,31 @@ func documentsResourceRelatedResourcesHandler(
 				return
 			}
 
+			// Convert Algolia object to a document.
+			doc, err := document.NewFromAlgoliaObject(
+				algoObj, cfg.DocumentTypes.DocumentType)
+			if err != nil {
+				l.Error("error converting Algolia object to document type",
+					"error", err,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing draft document",
+					http.StatusInternalServerError)
+				return
+			}
+
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				hermesDocumentRelatedResourceGetResponse{
 					GoogleFileID:   hdrr.Document.GoogleFileID,
-					Title:          algoDoc.GetTitle(),
-					DocumentType:   algoDoc.GetDocType(),
-					DocumentNumber: algoDoc.GetDocNumber(),
+					Title:          doc.Title,
+					DocumentType:   doc.DocType,
+					DocumentNumber: doc.DocNumber,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
+					Status:         doc.Status,
+					Owners:         doc.Owners,
+					OwnerPhotos:    doc.OwnerPhotos,
+					Product:        doc.Product,
 				})
 		}
 
@@ -161,7 +184,7 @@ func documentsResourceRelatedResourcesHandler(
 		// Authorize request (only the document owner can replace related
 		// resources).
 		userEmail := r.Context().Value("userEmail").(string)
-		if docObj.GetOwners()[0] != userEmail {
+		if doc.Owners[0] != userEmail {
 			http.Error(w, "Not a document owner", http.StatusUnauthorized)
 			return
 		}
@@ -235,29 +258,4 @@ func documentsResourceRelatedResourcesHandler(
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-}
-
-// getDocumentFromAlgolia gets a document object from Algolia.
-func getDocumentFromAlgolia(
-	docID string, algo *algolia.Client) (hcd.Doc, error) {
-
-	// Get base document object from Algolia so we can determine the doc type.
-	baseDocObj := &hcd.BaseDoc{}
-	if err := algo.Docs.GetObject(docID, &baseDocObj); err != nil {
-		return nil, fmt.Errorf(
-			"error retrieving base document object from Algolia: %w", err)
-	}
-
-	// Create new document object of the proper doc type.
-	docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-	if err != nil {
-		return nil, fmt.Errorf("error creating new empty doc")
-	}
-
-	// Get document object from Algolia.
-	if err := algo.Docs.GetObject(docID, &docObj); err != nil {
-		return nil, fmt.Errorf("error retrieving document object from Algolia")
-	}
-
-	return docObj, nil
 }

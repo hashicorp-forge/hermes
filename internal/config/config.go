@@ -17,6 +17,9 @@ type Config struct {
 	// BaseURL is the base URL used for building links.
 	BaseURL string `hcl:"base_url,optional"`
 
+	// Datadog contains the configuration for Datadog.
+	Datadog *Datadog `hcl:"datadog,block"`
+
 	// DocumentTypes contain available document types.
 	DocumentTypes *DocumentTypes `hcl:"document_types,block"`
 
@@ -35,6 +38,13 @@ type Config struct {
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
 
+	// Jira is the configuration for Hermes to work with Jira.
+	Jira *Jira `hcl:"jira,block"`
+
+	// LogFormat configures the logging format. Supported values are "standard" or
+	// "json".
+	LogFormat string `hcl:"log_format,optional"`
+
 	// Okta configures Hermes to work with Okta.
 	Okta *oktaalb.Config `hcl:"okta,block"`
 
@@ -49,6 +59,24 @@ type Config struct {
 
 	// ShortenerBaseURL is the base URL for building short links.
 	ShortenerBaseURL string `hcl:"shortener_base_url,optional"`
+
+	// SupportLinkURL is the URL for the support documentation.
+	SupportLinkURL string `hcl:"support_link_url,optional"`
+}
+
+// Datadog configures Hermes to send metrics to Datadog.
+type Datadog struct {
+	// Enabled enables sending metrics to Datadog.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// Env overrides the Datadog environment.
+	Env string `hcl:"env,optional"`
+
+	// Service overrides the Datadog service name.
+	Service string `hcl:"service,optional"`
+
+	// ServiceVersion overrides the Datadog service version.
+	ServiceVersion string `hcl:"service_version,optional"`
 }
 
 // DocumentTypes contain available document types.
@@ -71,6 +99,10 @@ type DocumentType struct {
 	// Example: "Create a Request for Comments document to present a proposal to
 	//   colleagues for their review and feedback."
 	Description string `hcl:"description,optional" json:"description"`
+
+	// FlightIcon is the name of the Helios flight icon.
+	// From: https://helios.hashicorp.design/icons/library
+	FlightIcon string `hcl:"flight_icon,optional" json:"flightIcon"`
 
 	// Template is the Google file ID for the document template used for this
 	// document type.
@@ -163,6 +195,10 @@ type Indexer struct {
 	// UpdateDraftHeaders enables the indexer to automatically update document
 	// headers for draft documents with Hermes document metadata.
 	UpdateDraftHeaders bool `hcl:"update_draft_headers,optional"`
+
+	// UseDatabaseForDocumentData will use the database instead of Algolia as the
+	// source of truth for document data, if true.
+	UseDatabaseForDocumentData bool `hcl:"use_database_for_document_data,optional"`
 }
 
 // GoogleWorkspace is the configuration to work with Google Workspace.
@@ -177,6 +213,9 @@ type GoogleWorkspace struct {
 	// DocsFolder is the folder that contains all published documents.
 	DocsFolder string `hcl:"docs_folder"`
 
+	// Domain is the Google Workspace domain (e.g., "hashicorp.com").
+	Domain string `hcl:"domain"`
+
 	// DraftsFolder is the folder that contains all document drafts.
 	DraftsFolder string `hcl:"drafts_folder"`
 
@@ -187,6 +226,12 @@ type GoogleWorkspace struct {
 	// ShortcutsFolder is the folder that contains document shortcuts organized
 	// into doc type and product subfolders.
 	ShortcutsFolder string `hcl:"shortcuts_folder"`
+
+	// TemporaryDraftsFolder is a folder that will brieflly contain document
+	// drafts before they are moved to the DraftsFolder. This is used when
+	// create_docs_as_user is true in the auth block, so document notification
+	// settings will be the same as when a user creates their own document.
+	TemporaryDraftsFolder string `hcl:"temporary_drafts_folder,optional"`
 }
 
 // GoogleWorkspaceOAuth2 is the configuration to use OAuth 2.0 to access Google
@@ -202,6 +247,21 @@ type GoogleWorkspaceOAuth2 struct {
 	// RedirectURI is an authorized redirect URI for the given client_id as
 	// specified in the Google API Console Credentials page.
 	RedirectURI string `hcl:"redirect_uri,optional"`
+}
+
+// Jira is the configuration for Hermes to work with Jira.
+type Jira struct {
+	// APIToken is the API token for authenticating to Jira.
+	APIToken string `hcl:"api_token,optional"`
+
+	// Enabled enables integration with Jira.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// URL is the URL of the Jira instance (ex: https://your-domain.atlassian.net).
+	URL string `hcl:"url,optional"`
+
+	// User is the user for authenticating to Jira.
+	User string `hcl:"user,optional"`
 }
 
 // Postgres configures PostgreSQL as the app database.

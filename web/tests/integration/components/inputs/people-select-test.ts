@@ -4,12 +4,12 @@ import { hbs } from "ember-cli-htmlbars";
 import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { HermesUser } from "hermes/types/document";
-import FetchService from "hermes/services/fetch";
+import { authenticateTestUser } from "hermes/mirage/utils";
+import { Response } from "miragejs";
 
 interface PeopleSelectContext extends MirageTestContext {
-  people: HermesUser[];
-  onChange: (newValue: HermesUser[]) => void;
+  people: string[];
+  onChange: (newValue: string[]) => void;
   isFirstFetchAttempt: boolean;
 }
 
@@ -17,14 +17,16 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   setupRenderingTest(hooks);
   setupMirage(hooks);
 
-  test("it functions as expected", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("person", 10);
+  hooks.beforeEach(function (this: PeopleSelectContext) {
+    authenticateTestUser(this);
+  });
 
+  test("it functions as expected", async function (this: PeopleSelectContext, assert) {
+    this.server.createList("google/person", 10);
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
@@ -53,7 +55,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     await click(".ember-power-select-option");
     assert
       .dom(".ember-power-select-multiple-option .person-email")
-      .hasText("user1@hashicorp.com", "User 1 was successfully selected");
+      .hasText("User 1", "User 1 was successfully selected");
 
     await fillIn(".ember-power-select-trigger-multiple-input", "2");
 
@@ -68,7 +70,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .hasText("No results found", "No duplicate users can be added");
 
     await click(
-      ".ember-power-select-multiple-option .ember-power-select-multiple-remove-btn"
+      ".ember-power-select-multiple-option .ember-power-select-multiple-remove-btn",
     );
 
     assert
@@ -77,26 +79,25 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   });
 
   test("it will retry if the server returns an error", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("person", 5);
+    this.server.createList("google/person", 5);
 
     this.set("people", []);
     this.onChange = (newValue) => this.set("people", newValue);
     this.set("isFirstFetchAttempt", true);
 
-    let fetchSvc = this.owner.lookup("service:fetch") as FetchService;
-
-    fetchSvc.set("fetch", async () => {
+    this.server.post("/people", () => {
       if (this.isFirstFetchAttempt) {
         this.set("isFirstFetchAttempt", false);
-        return new Response(null, { status: 504 });
+        return new Response(504);
       } else {
-        let people = JSON.stringify(this.server.schema.people.all().models);
-        return new Response(people, { status: 200 });
+        let people = JSON.stringify(
+          this.server.schema["google/people"].all().models,
+        );
+        return new Response(200, {}, people);
       }
     });
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
@@ -107,7 +108,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     let fillInPromise = fillIn(
       ".ember-power-select-trigger-multiple-input",
-      "any text - we're not actually querying"
+      "any text - we're not actually querying",
     );
 
     await waitFor(".ember-power-select-option--loading-message");

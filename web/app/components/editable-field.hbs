@@ -1,18 +1,113 @@
-<div class="editable-field" ...attributes {{did-insert this.captureElement}}>
-  {{#if (and this.editing (not @loading))}}
-    <div {{on "keydown" this.preventNewlines}} {{on "keyup" this.cancel}}>
-      {{yield (hash value=@value update=this.update) to="editing"}}
+<div
+  class="editable-field
+    {{if @isSaving 'saving'}}
+    {{if this.docNumberIsShown '!mb-12'}}
+    {{if (and this.editingIsEnabled (not @isSaving)) 'active z-10'}}"
+  ...attributes
+>
+  {{#if (and this.editingIsEnabled (not @isSaving))}}
+    <div {{did-insert this.registerEditingContainer}} class="w-full">
+      {{#if this.typeIsPeople}}
+        <Inputs::PeopleSelect
+          {{autofocus targetChildren=true}}
+          data-test-document-contributors-editable
+          class="multiselect--narrow"
+          {{! @glint-ignore - TODO: type this as an array }}
+          @selected={{this.value}}
+          @onChange={{this.onChange}}
+          @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+            shouldIgnoreEscape=true
+          }}
+        />
+      {{else}}
+        {{on-document "keydown" this.onTextFieldKeydown}}
+        <Hds::Form::Textarea::Field
+          {{auto-height-textarea}}
+          {{autofocus}}
+          {{dismissible
+            dismiss=(fn this.maybeUpdateValue this.value)
+            related=this.relatedButtons
+            shouldIgnoreEscape=true
+          }}
+          {{! @glint-ignore - TODO: type this as a string }}
+          @value={{this.value}}
+          placeholder={{@placeholder}}
+          name={{@name}}
+          as |F|
+        >
+          {{#if this.emptyValueErrorIsShown}}
+            <F.Error data-test-empty-value-error>This field is required</F.Error>
+          {{/if}}
+        </Hds::Form::Textarea::Field>
+      {{/if}}
+
+      {{! "Confirm" and "Cancel" buttons }}
+      <div class="edit-overlay-affordance">
+        <Hds::Button
+          data-test-save-button
+          @size={{or @buttonSize "small"}}
+          @text="Save"
+          @icon="check"
+          @isIconOnly={{true}}
+          {{on "click" (fn this.maybeUpdateValue this.value)}}
+        />
+        <Hds::Button
+          data-test-cancel-button
+          @text="Cancel"
+          @icon="x"
+          @isIconOnly={{true}}
+          @size={{or @buttonSize "small"}}
+          @color="secondary"
+          {{did-insert this.registerCancelButton}}
+          {{on "click" this.disableAndRevertChanges}}
+        />
+      </div>
     </div>
   {{else}}
-    {{#if @loading}}
-      <FlightIcon @name="loading" class="loading-indicator" />
+    {{#if @isSaving}}
+      <div data-test-saving-spinner class="edit-affordance light-gray">
+        <FlightIcon @name="loading" />
+      </div>
     {{/if}}
-    <button
-      class="field-toggle {{if @loading 'loading'}}"
-      disabled={{or @disabled @loading}}
-      {{on "click" this.edit}}
+    {{#if (or @isReadOnly @isSaving)}}
+      <div class="field-toggle read-only">
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @document={{@document}}
+          @placeholder={{@placeholder}}
+        />
+      </div>
+    {{else}}
+      <Action
+        {{did-insert this.registerToggleButton}}
+        {{on "click" this.enableEditing}}
+        class="field-toggle group"
+      >
+        <EditableField::ReadValue
+          @tag={{@tag}}
+          @value={{this.value}}
+          @document={{@document}}
+          @placeholder={{@placeholder}}
+        />
+        {{#unless @isReadOnly}}
+          <span class="edit-affordance gray">
+            <FlightIcon @name="edit" class="text-color-foreground-faint" />
+          </span>
+        {{/unless}}
+      </Action>
+    {{/if}}
+  {{/if}}
+
+  {{#if this.docNumberIsShown}}
+    <div
+      class="absolute bottom-1 left-[5px] h-6 translate-y-full text-display-300
+        {{if this.editingIsEnabled 'opacity-0'}}"
     >
-      {{yield}}
-    </button>
+      {{@document.docNumber}}
+    </div>
   {{/if}}
 </div>

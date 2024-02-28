@@ -1,118 +1,81 @@
 .related-resources-list {
-  @apply w-full mt-0.5;
+  @apply mt-0.5 w-full;
 
   .related-resource-inner {
-    @apply w-full relative;
+    @apply relative w-full;
 
-    &:hover,
+    &:hover:not(.disabled):not(:focus),
     &:focus-within {
       .related-resource-link {
-        @apply bg-color-surface-interactive-hover;
+        @apply border border-color-border-primary bg-color-page-primary;
       }
     }
   }
 
   .related-resource {
-    @apply flex w-full relative;
+    @apply relative flex w-full;
 
     .highlight-affordance {
-      @apply absolute top-0 left-0 w-full h-full rounded z-[-1];
-      @apply bg-color-surface-highlight border border-color-border-highlight;
+      @apply rounded;
+    }
+  }
+
+  .related-resource-link {
+    @apply relative grid items-start justify-start gap-2 rounded py-[5px];
+    @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;
+    @apply outline-offset-[3px];
+    grid-template-columns: 22px auto;
+
+    .hermes-document + .external-resource {
+      @apply mt-1.5;
+    }
+  }
+
+  .related-resource-link {
+    @apply relative grid items-start justify-start gap-2 rounded py-[5px];
+    @apply -ml-[8px] -mr-[4px] w-[calc(100%+12px)] pl-[8px] pr-3;
+    @apply outline-offset-[3px];
+    grid-template-columns: 22px auto;
+
+    .hermes-document + .external-resource {
+      @apply mt-1.5;
     }
   }
 }
 
-.related-resources-failed-to-load {
-  @apply text-display-300 text-color-foreground-faint opacity-50 font-semibold mb-2;
-}
-
 .related-resources-modal-container {
-  @apply relative px-3 w-full;
+  @apply relative w-full px-6;
 }
 
 .add-external-resource-container {
-  @apply w-full relative flex items-center;
-  @apply px-10 mt-6;
+  @apply relative flex w-full items-center;
+  @apply mt-6 px-10;
   @apply h-[228px];
   animation: fadeIn 400ms ease-out;
 
   &::before,
   &::after {
     content: "";
-    @apply absolute top-0 left-0 w-full h-full rounded-lg border z-[-1];
+    @apply absolute top-0 left-0 z-[-1] h-full w-full rounded-lg border;
   }
 
   &::before {
-    @apply opacity-0 bg-color-page-faint border-color-border-primary;
+    @apply border-color-border-primary bg-color-page-faint opacity-0;
     @apply hds-elevation-low;
     animation: fadeIn 200ms ease-out 500ms forwards;
   }
 
   &::after {
-    @apply bg-color-surface-highlight border-color-border-highlight;
-    animation: fadeIn 400ms ease-out, scaleIn 500ms ease-out,
+    @apply border-color-border-highlight bg-color-surface-highlight;
+    animation:
+      fadeIn 400ms ease-out,
+      scaleIn 500ms ease-out,
       fadeOut 500ms ease-out 600ms forwards;
   }
 }
 
-.related-resources-overflow-menu-item-button {
-  @apply w-full flex space-x-2 py-2 px-4 leading-none;
-
-  > .flight-icon {
-    @apply text-inherit;
-  }
-}
-
-.related-resources-overflow-button-container {
-  @apply absolute top-0 -right-1 pointer-events-none;
-  @apply w-16 flex justify-end rounded-tr;
-  @apply bg-gradient-to-l from-color-surface-interactive-hover via-color-surface-interactive-hover to-transparent;
-  @apply group-hover:visible group-focus-within:visible;
-
-  &:hover,
-  &:focus-within {
-    @apply visible;
-  }
-}
-
-.related-resource-overflow-button {
-  @apply relative pointer-events-auto p-[3px];
-
-  &:hover,
-  &:focus,
-  &:active,
-  &:focus-visible,
-  &.open {
-    .button-affordance {
-      @apply border-color-border-strong bg-color-surface-faint;
-    }
-  }
-
-  .button-affordance {
-    @apply flex top-[4px] right-0 rounded p-1;
-    @apply border border-transparent text-color-foreground-primary;
-  }
-}
-
-.related-resource-link {
-  @apply relative grid gap-2 items-start rounded border border-transparent py-[5px];
-  @apply w-[calc(100%+12px)] -ml-[8px] pl-[8px] pr-3 -mr-[4px];
-  @apply outline-offset-[3px];
-  grid-template-columns: 22px auto;
-
-  .hermes-document + .external-resource {
-    @apply mt-1.5;
-  }
-
-  .external-resource {
-    .related-resource-link {
-      @apply items-center;
-    }
-  }
-}
-
 .external-resource-title-input {
-  @apply text-display-300 font-semibold h-11 px-2.5;
+  @apply h-11 px-2.5 text-display-300 font-semibold;
 
   &::placeholder {
     @apply opacity-50;
@@ -121,18 +84,23 @@
 
 .external-resource-url {
   @apply relative w-full text-color-foreground-faint;
-  @apply pl-6 mb-5;
+  @apply mb-5 pl-6;
 
   .external-resource-favicon {
-    @apply w-4 h-4;
+    @apply h-4 w-4;
     @apply absolute left-0 top-1/2 -translate-y-1/2;
   }
 }
 
 .related-resources-modal-body-header {
-  @apply w-full text-color-foreground-faint text-display-300 opacity-75 font-semibold text-center;
+  @apply w-full text-center text-display-300 font-semibold text-color-foreground-faint opacity-75;
 }
 
 .related-document-option {
-  @apply w-full rounded grid place-items-center py-1.5 px-3 h-[74px];
+  @apply grid h-[74px] w-full place-items-center rounded py-1.5 px-3;
+}
+
+.highlight-affordance {
+  @apply absolute top-0 left-0 right-0 bottom-0 z-[-1];
+  @apply border border-color-border-highlight bg-color-surface-highlight;
 }

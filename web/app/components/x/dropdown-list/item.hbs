@@ -56,9 +56,19 @@
             focusMouseTarget=(perform this.maybeFocusMouseTarget)
             onClick=this.onClick
           )
+          ExternalLink=(component
+            "x/dropdown-list/external-link"
+            role=@listItemRole
+            isAriaSelected=this.isAriaSelected
+            isAriaChecked=@isSelected
+            registerElement=this.registerElement
+            focusMouseTarget=(perform this.maybeFocusMouseTarget)
+            onClick=this.onClick
+          )
           contentID=@contentID
           value=@value
           attrs=@attributes
+          selected=@selected
           isSelected=@isSelected
         )
       }}

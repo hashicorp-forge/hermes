@@ -1,21 +1,34 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{#unless (eq this.currentRouteName "authenticated.document")}}
-  <div class="footer">
-    <div class="x-container">
-      <div
-        class="text-body-200 text-color-foreground-faint flex items-center justify-center"
-      >
+<div class="footer" ...attributes>
+  <div class="footer-inner">
+    <div class="flex items-center space-x-4">
+      <div data-test-footer-copyright>
         ©
         {{this.currentYear}}
         HashiCorp
-        <div class="mx-2">•</div>
-        <ExternalLink
-          href="https://github.com/hashicorp-forge/hermes"
-          class="flex"
-        >
-          View Hermes on GitHub
-        </ExternalLink>
+      </div>
+      <div data-test-footer-version>
+        Hermes v{{this.version}}
+        ({{this.revision}})
       </div>
     </div>
+
+    <div class="flex items-center space-x-4">
+      <ExternalLink
+        data-test-footer-github-link
+        @iconIsShown={{true}}
+        href={{this.gitHubRepoURL}}
+      >
+        GitHub
+      </ExternalLink>
+      {{#if this.supportURL}}
+        <ExternalLink
+          data-test-footer-support-link
+          @iconIsShown={{true}}
+          href={{this.supportURL}}
+        >
+          Support
+        </ExternalLink>
+      {{/if}}
+    </div>
   </div>
-{{/unless}}
+</div>

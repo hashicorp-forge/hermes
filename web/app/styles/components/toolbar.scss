@@ -11,3 +11,25 @@
     }
   }
 }
+
+.facets {
+  li {
+    &:not(:first-child) {
+      button {
+        @apply rounded-none border-l-0;
+      }
+    }
+
+    &:first-child {
+      button {
+        @apply rounded-r-none;
+      }
+    }
+
+    &:last-child {
+      button {
+        @apply rounded-r-button-md;
+      }
+    }
+  }
+}

@@ -1,16 +1,9 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{page-title "Email Notifications"}}
 
-<Header @toolbarIsHidden={{true}} />
+<div class="max-w-2xl">
 
-<section>
-  <div class="x-container">
-    <div class="max-w-2xl">
-
-      <h1 class="hds-typography-display-500 mb-2.5">Email notifications</h1>
-      <p class="hds-typography-display-200">Get notified when docs are created
-        in the following areas...</p>
-      <Settings::SubscriptionList @allProductAreas={{@model}} />
-    </div>
-  </div>
-</section>
+  <h1 class="mb-2.5">Email notifications</h1>
+  <p class="hds-typography-display-200">Get notified when docs are created in
+    the following areas...</p>
+  <Settings::SubscriptionList @allProductAreas={{@model}} />
+</div>

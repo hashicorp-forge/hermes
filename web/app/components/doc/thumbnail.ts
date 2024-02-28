@@ -1,17 +1,24 @@
 import Component from "@glimmer/component";
 import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
+import { HermesSize } from "hermes/types/sizes";
+import { inject as service } from "@ember/service";
+import ProductAreasService from "hermes/services/product-areas";
+
+export type DocThumbnailSize = Exclude<HermesSize, HermesSize.XL>;
 
 interface DocThumbnailComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    isLarge?: boolean;
     status?: string;
     product?: string;
+    size?: `${DocThumbnailSize}`;
   };
 }
 
 export default class DocThumbnailComponent extends Component<DocThumbnailComponentSignature> {
+  @service declare productAreas: ProductAreasService;
+
   protected get status(): string | null {
     if (this.args.status) {
       return dasherize(this.args.status);
@@ -20,12 +27,20 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
     }
   }
 
-  protected get productShortName(): string | null {
-    if (this.args.product) {
-      return getProductId(this.args.product);
-    } else {
-      return null;
+  protected get size() {
+    return this.args.size ?? HermesSize.Small;
+  }
+
+  protected get badgeIsShown(): boolean {
+    if (getProductId(this.args.product)) {
+      return true;
     }
+
+    if (this.productAreas.getAbbreviation(this.args.product)) {
+      return true;
+    }
+
+    return false;
   }
 
   protected get isApproved(): boolean {

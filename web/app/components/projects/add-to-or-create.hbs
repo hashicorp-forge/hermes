@@ -1,0 +1,99 @@
+<Hds::Modal
+  data-test-add-to-or-create-project-modal
+  @onClose={{@onClose}}
+  class={{unless this.newProjectFormIsShown "search-window"}}
+  as |M|
+>
+  <M.Header data-test-modal-header>
+    {{if this.newProjectFormIsShown "Start a project" "Add doc to project"}}
+  </M.Header>
+  <M.Body
+    data-test-modal-body
+    {{! 69px footer height }}
+    class={{if this.newProjectFormIsShown "h-[calc(350px+69px)]" "h-[350px]"}}
+  >
+    {{#if this.newProjectFormIsShown}}
+      <New::ProjectForm
+        @document={{@document}}
+        @isModal={{true}}
+        @onModalClose={{@onClose}}
+      />
+    {{else}}
+      <X::DropdownList
+        @inputIsShown={{false}}
+        @items={{this.shownProjects}}
+        @disableClose={{true}}
+        @onItemClick={{this.onProjectClick}}
+        @placement={{null}}
+        @isLoading={{this.loadProjects.isRunning}}
+        class="non-floating-list theme--neutral"
+      >
+        <:anchor as |dd|>
+          <div class="search-container" {{did-insert dd.registerAnchor}}>
+            <div class="relative">
+              <Hds::Form::TextInput::Base
+                autofocus
+                @type="search"
+                @value={{this.query}}
+                {{did-insert (perform this.loadProjects dd)}}
+                {{on "input" this.updateInputValue}}
+                placeholder="Search projects"
+                aria-label="Search projects"
+                aria-controls={{dd.ariaControls}}
+                aria-expanded={{dd.contentIsShown}}
+                aria-haspopup="listbox"
+              />
+            </div>
+          </div>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-project-option class="block py-[6.5px]">
+            <div class="flex w-full items-center gap-3.5">
+              <Project::StatusIcon @status={{dd.attrs.status}} />
+              <div class="flex w-full items-center overflow-hidden">
+                <div class="flex w-full justify-between">
+                  <div
+                    class="w-full max-w-[70%] truncate text-display-300 font-semibold"
+                  >
+                    {{dd.attrs.title}}
+                  </div>
+                </div>
+                {{#if dd.attrs.products}}
+                  <div class="flex gap-px">
+                    {{#each dd.attrs.products as |product|}}
+                      <div>
+                        <Product::Avatar @product={{product}} />
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+          </dd.Action>
+        </:item>
+        <:no-matches>
+          <div class="grid h-48 place-items-center text-color-foreground-faint">
+            No matches
+          </div>
+        </:no-matches>
+        <:loading>
+          <div class="h-48 px-5">
+            <FlightIcon @name="loading" class="mt-2" />
+          </div>
+        </:loading>
+      </X::DropdownList>
+    {{/if}}
+  </M.Body>
+  {{#unless this.newProjectFormIsShown}}
+    <M.Footer data-test-modal-footer>
+      <Hds::Button
+        data-test-start-new-project-button
+        {{on "click" this.showNewProjectForm}}
+        @icon="plus"
+        @text="Start a new project..."
+        @color="tertiary"
+        class="-ml-1 pl-2.5"
+      />
+    </M.Footer>
+  {{/unless}}
+</Hds::Modal>

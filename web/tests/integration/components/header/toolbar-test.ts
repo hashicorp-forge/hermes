@@ -1,9 +1,19 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, findAll, render } from "@ember/test-helpers";
+import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import { FacetDropdownObjects } from "hermes/types/facets";
-import { SortByLabel } from "hermes/components/header/toolbar";
+import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
+import { FacetLabel } from "hermes/helpers/get-facet-label";
+
+// Filter buttons
+const TOGGLE = "[data-test-facet-dropdown-toggle]";
+const DOC_TYPE_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.DocType}"]`;
+const STATUS_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Status}"]`;
+const PRODUCT_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Product}"]`;
+const OWNER_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Owners}"]`;
+const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
+const POPOVER = "[data-test-facet-dropdown-popover]";
+const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
 
 const FACETS = {
   docType: {
@@ -18,58 +28,35 @@ const FACETS = {
   },
 };
 
+interface ToolbarTestContext extends TestContext {
+  facets: FacetDropdownGroups;
+}
+
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it renders a search input by default", async function (assert) {
+  test("it doesn't render if no facets are provided", async function (assert) {
     await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
       <Header::Toolbar />
     `);
 
     assert.dom(".facets").doesNotExist("Facets are hidden unless provided");
-    assert
-      .dom(".sort-by-dropdown")
-      .doesNotExist("Sort-by dropdown is hidden unless facets are provided");
   });
 
-  test("it renders facets when provided", async function (assert) {
+  test("it renders facets when provided", async function (this: ToolbarTestContext, assert) {
     this.set("facets", FACETS);
-    this.set("sortControlIsHidden", false);
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar
         @facets={{this.facets}}
-        @sortControlIsHidden={{this.sortControlIsHidden}}
       />
     `);
 
     assert.dom(".facets").exists();
-    assert
-      .dom("[data-test-header-sort-dropdown-trigger]")
-      .exists("Sort-by dropdown is shown with facets unless explicitly hidden");
 
     assert
       .dom(".facets [data-test-facet-dropdown-trigger]")
       .exists({ count: 4 });
-    assert
-      .dom("[data-test-header-sort-dropdown-trigger]")
-      .exists({ count: 1 })
-      .hasText(`Sort: ${SortByLabel.Newest}`);
-
-    await click(`[data-test-header-sort-dropdown-trigger]`);
-
-    assert
-      .dom(
-        "[data-test-header-sort-by-dropdown] .x-dropdown-list-item:nth-child(2)"
-      )
-      .hasText("Oldest");
-
-    this.set("sortControlIsHidden", true);
-    assert
-      .dom("[data-test-header-sort-by-dropdown]")
-      .doesNotExist("Sort-by dropdown hides when sortByHidden is true");
   });
 
   test("it handles status values correctly", async function (assert) {
@@ -93,61 +80,77 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     this.set("facets", { status: statusFacets });
 
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
     await click("[data-test-facet-dropdown-trigger='Status']");
 
     assert.deepEqual(
-      findAll(".x-dropdown-list-item-value")?.map((el) =>
-        el.textContent?.trim()
+      findAll("[data-test-x-dropdown-list-item-value]")?.map(
+        (el) => el.textContent?.trim(),
       ),
       ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
-      "Unsupported statuses are filtered out"
+      "Unsupported statuses are filtered out",
     );
   });
 
-  test("it conditionally renders the status facet disabled", async function (assert) {
-    this.set("facets", { status: {} });
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+  test("it renders undefined facets disabled", async function (assert) {
+    this.set("facets", { ...FACETS, status: undefined });
+
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
-    assert
-      .dom("[data-test-facet-dropdown-trigger='Status']")
-      .hasAttribute("disabled");
+
+    assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
+    assert.dom(PRODUCT_TOGGLE).isNotDisabled();
+    assert.dom(OWNER_TOGGLE).isNotDisabled();
+
+    assert.dom(STATUS_TOGGLE).isDisabled("the empty status facet is disabled");
   });
 
-  test("it conditionally disables the sort control", async function (assert) {
+  test("the order of the facets is correct", async function (this: ToolbarTestContext, assert) {
     this.set("facets", FACETS);
-    await render(hbs`
-      {{! @glint-nocheck: not typesafe yet }}
+
+    await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert
-      .dom(`[data-test-header-sort-dropdown-trigger]`)
-      .doesNotHaveAttribute("disabled");
-
-    this.set("facets", {});
-    assert
-      .dom(`[data-test-header-sort-dropdown-trigger]`)
-      .hasAttribute("disabled");
+    assert.deepEqual(
+      findAll(TOGGLE)?.map((el) => el.textContent?.trim()),
+      [
+        FacetLabel.DocType,
+        FacetLabel.Status,
+        FacetLabel.Product,
+        FacetLabel.Owners,
+      ],
+      "The facets are in the correct order",
+    );
   });
 
-  /**
-   * Waiting for acceptance tests to be implemented
-   */
-  todo(
-    "the owner facet is disabled on the 'my' and 'drafts' routes",
-    async function (assert) {
-      throw new Error("Will be implemented in an acceptance test");
-    }
-  );
+  test("the dropdown items are rendered correctly", async function (this: ToolbarTestContext, assert) {
+    this.set("facets", {
+      docType: {
+        RFC: { count: 1, isSelected: false },
+        PRD: { count: 30, isSelected: true },
+      },
+    });
 
-  todo("the sort can be changed", async function (assert) {
-    throw new Error("Will be implemented in an acceptance test");
+    await render<ToolbarTestContext>(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    await click(DOC_TYPE_TOGGLE);
+
+    assert.dom(DROPDOWN_ITEM).exists({ count: 2 });
+
+    const firstItem = `${POPOVER} li:nth-child(1)`;
+    const secondItem = `${POPOVER} li:nth-child(2)`;
+
+    assert.dom(firstItem).containsText("RFC").containsText("1");
+    assert.dom(`${firstItem} ${CHECK}`).hasClass("invisible");
+
+    assert.dom(secondItem).containsText("PRD").containsText("30");
+    assert.dom(`${secondItem} ${CHECK}`).hasClass("visible");
   });
 });

@@ -105,13 +105,28 @@ func (s *Service) GetDocs(folderID string) ([]*drive.File, error) {
 
 // GetFile returns a Google Drive file.
 func (s *Service) GetFile(fileID string) (*drive.File, error) {
-	resp, err := s.Drive.Files.Get(fileID).
-		Fields(fileFields).
-		SupportsAllDrives(true).
-		Do()
-	if err != nil {
-		return nil, fmt.Errorf("error getting file: %w", err)
+	var (
+		err  error
+		resp *drive.File
+	)
+
+	op := func() error {
+		resp, err = s.Drive.Files.Get(fileID).
+			Fields(fileFields).
+			SupportsAllDrives(true).
+			Do()
+		if err != nil {
+			return fmt.Errorf("error getting file: %w", err)
+		}
+
+		return nil
 	}
+
+	boErr := backoff.RetryNotify(op, defaultBackoff(), backoffNotify)
+	if boErr != nil {
+		return nil, boErr
+	}
+
 	return resp, nil
 }
 
@@ -229,6 +244,19 @@ func (s *Service) KeepRevisionForever(
 	return resp, nil
 }
 
+// KeepRevisionForever keeps a Google Drive file revision forever.
+func (s *Service) UpdateKeepRevisionForever(
+	fileID, revisionID string, keepForever bool) error {
+
+	_, err := s.Drive.Revisions.Update(fileID, revisionID, &drive.Revision{
+		KeepForever: keepForever,
+	}).
+		Fields("keepForever").
+		Do()
+
+	return err
+}
+
 // ListFiles lists files in a Google Drive folder using the provided query.
 func (s *Service) ListFiles(folderID, query string) ([]*drive.File, error) {
 	var files []*drive.File
@@ -340,6 +368,24 @@ func (s *Service) ShareFile(
 			EmailAddress: email,
 			Role:         role,
 			Type:         "user",
+		}).
+		SupportsAllDrives(true).
+		Do()
+	if err != nil {
+		return fmt.Errorf("error updating file permissions: %w", err)
+	}
+	return nil
+}
+
+// ShareFileWithDomain shares a Google Drive file with a domain.
+func (s *Service) ShareFileWithDomain(
+	fileID, domain, role string) error {
+
+	_, err := s.Drive.Permissions.Create(fileID,
+		&drive.Permission{
+			Domain: domain,
+			Role:   role,
+			Type:   "domain",
 		}).
 		SupportsAllDrives(true).
 		Do()

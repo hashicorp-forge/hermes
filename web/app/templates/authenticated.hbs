@@ -1,4 +1,9 @@
-{{! @glint-nocheck: not typesafe yet }}
-{{outlet}}
-
-<Footer />
+{{#if this.standardTemplateIsShown}}
+  <Header @query={{this.query}} />
+  <div class="x-container">
+    {{outlet}}
+    <Footer />
+  </div>
+{{else}}
+  {{outlet}}
+{{/if}}

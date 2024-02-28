@@ -1,38 +1,20 @@
-{{! @glint-nocheck: not typesafe yet }}
-<li class="subscription-list-item">
-  <button
-    class="text-body-300 text-color-foreground-primary flex items-center space-x-6 hover:cursor-pointer bg-transparent hover:bg-color-surface-action border-0 w-full h-full justify-between py-3 px-3.5 transition-colors"
-    type="button"
-    {{on "click" this.toggleChecked}}
+<li
+  data-test-subscription-list-item
+  class="flex w-full items-center justify-between py-2.5 px-2.5 hover:bg-color-page-faint"
+>
+  <LinkTo
+    data-test-subscription-list-item-link
+    @route="authenticated.product-areas.product-area"
+    @model={{dasherize @productArea}}
+    class="flex items-center gap-3"
   >
-    <div class="flex space-x-3 items-center">
-      {{#let (get-product-id @productArea) as |productID|}}
-        <Hds::IconTile
-          @size="small"
-          @logo={{productID}}
-          @icon={{unless productID "folder"}}
-        />
-      {{/let}}
-      <div data-test-subscription-list-item-name>
-        {{@productArea}}
-      </div>
+    <Product::Avatar @product={{@productArea}} @size="small" />
+    <div
+      data-test-subscription-list-item-name
+      class="underline-on-hover text-body-300"
+    >
+      {{@productArea}}
     </div>
-    <div class="shrink-0 flex items-center justify-end relative">
-      <Hds::Form::Toggle::Base
-        tabindex="-1"
-        name="toggle-subscription"
-        aria-label={{if this.isChecked "Unsubscribe" "Subscribe"}}
-        @value="enable"
-        checked={{this.isChecked}}
-      />
-      {{#if this.confirmationIsShown}}
-        <div
-          class="subscription-list-popover
-            {{if this.confirmationIsClosing 'out'}}"
-        >
-          {{if this.isChecked "Subscribed" "Unsubscribed"}}
-        </div>
-      {{/if}}
-    </div>
-  </button>
+  </LinkTo>
+  <Product::SubscriptionToggle @product={{@productArea}} @size="small" />
 </li>

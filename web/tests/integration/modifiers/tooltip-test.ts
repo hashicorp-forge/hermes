@@ -3,7 +3,6 @@ import { setupRenderingTest } from "ember-qunit";
 import { render, triggerEvent, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
-import { wait } from "ember-animated/.";
 
 module("Integration | Modifier | tooltip", function (hooks) {
   setupRenderingTest(hooks);
@@ -17,6 +16,10 @@ module("Integration | Modifier | tooltip", function (hooks) {
       <button data-test-button {{tooltip "more information"}}>
         Hover or focus me
       </button>
+
+      <span {{tooltip "more information" focusable=false}}>
+        Hover or focus me
+      </span>
     `);
 
     assert
@@ -24,15 +27,17 @@ module("Integration | Modifier | tooltip", function (hooks) {
       .hasAttribute(
         "tabindex",
         "0",
-        "div is not focusable, so it's given a tabindex of 0"
+        "div is not focusable, so it's given a tabindex of 0",
       );
 
     assert
       .dom("button")
       .doesNotHaveAttribute(
         "tabindex",
-        "button is focusable, so it's not given a tabindex"
+        "button is focusable, so it's not given a tabindex",
       );
+
+    assert.dom("span").hasAttribute("tabindex", "-1", "span is not focusable");
 
     let divTooltipSelector =
       "#" + htmlElement("[data-test-div]").getAttribute("aria-describedby");
@@ -43,7 +48,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
     assert.notEqual(
       divTooltipSelector,
       buttonTooltipSelector,
-      "div and button have unique tooltip ids"
+      "div and button have unique tooltip ids",
     );
 
     assert.dom(".hermes-tooltip").doesNotExist("tooltips hidden by default");
@@ -72,6 +77,8 @@ module("Integration | Modifier | tooltip", function (hooks) {
     await triggerEvent("[data-test-button]", "mouseenter");
 
     assert.dom(buttonTooltipSelector).exists();
+
+    await triggerEvent("[data-test-button]", "mouseleave");
   });
 
   test("it takes a placement argument", async function (assert) {
@@ -100,7 +107,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
       .hasAttribute(
         "data-tooltip-placement",
         "top",
-        "tooltip is placed top by default"
+        "tooltip is placed top by default",
       );
 
     await triggerEvent("[data-test-two]", "mouseenter");
@@ -110,7 +117,7 @@ module("Integration | Modifier | tooltip", function (hooks) {
       .hasAttribute(
         "data-tooltip-placement",
         "left-end",
-        "tooltip can be custom placed"
+        "tooltip can be custom placed",
       );
   });
 
@@ -138,5 +145,17 @@ module("Integration | Modifier | tooltip", function (hooks) {
     await triggerEvent(".tip", "mouseleave");
 
     assert.equal(tip.getAttribute("data-tooltip-state"), "closed");
+  });
+
+  test("you can pass a class to the tooltip", async function (assert) {
+    await render(hbs`
+      <div class="tip" {{tooltip "more information" class="foo"}}>
+        Hover or focus me
+      </div>
+    `);
+
+    await triggerEvent(".tip", "mouseenter");
+
+    assert.dom(".hermes-tooltip").hasClass("foo");
   });
 });

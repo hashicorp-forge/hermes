@@ -1,0 +1,14 @@
+<LinkTo
+  data-test-sortable-table-header
+  data-test-attribute={{@attribute}}
+  data-test-element="anchor"
+  @route={{this.currentRoute}}
+  @query={{@queryParam}}
+  class="sortable-table-header {{if this.isActive 'active'}}"
+  ...attributes
+>
+  <div class="sort-icon">
+    <FlightIcon @name={{this.iconName}} />
+  </div>
+  {{yield}}
+</LinkTo>

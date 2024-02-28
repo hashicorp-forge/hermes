@@ -1,0 +1,31 @@
+<div class="flex w-full space-x-3 overflow-hidden">
+  <Doc::Thumbnail
+    @status={{@document.status}}
+    @product={{@document.product}}
+    class="h-[62px] w-12 shrink-0"
+  />
+  <div class="flex w-full items-center overflow-hidden pr-8">
+    <div class="w-full">
+      <TruncatedText
+        @tagName="h5"
+        class="text-display-300 font-semibold text-color-foreground-strong"
+      >
+        {{@document.title}}
+      </TruncatedText>
+      <div class="mt-0.5 text-body-200 text-color-foreground-faint">
+        {{@document.docType}}
+        {{#if @document.docNumber}}
+          ·
+          {{@document.docNumber}}
+        {{/if}}
+
+        {{#let (get @document.owners 0) as |owner|}}
+          {{#if owner}}
+            ·
+            {{or (get-model-attr "person.name" owner) owner}}
+          {{/if}}
+        {{/let}}
+      </div>
+    </div>
+  </div>
+</div>

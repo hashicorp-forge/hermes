@@ -1,0 +1,39 @@
+{{#unless @isModal}}
+  <div class="relative mt-2 mb-5 flex justify-center">
+    <FlightIcon
+      data-test-feature-icon
+      @name={{if @taskIsRunning "running" @icon}}
+      @size="24"
+      class={{unless @taskIsRunning "feature-icon"}}
+    />
+  </div>
+
+  <h1 data-test-form-headline>
+    {{if @taskIsRunning @taskIsRunningHeadline @headline}}
+  </h1>
+{{/unless}}
+
+<AnimatedContainer @motion={{this.motion}}>
+  {{#animated-if this.taskIsRunningMessageIsShown use=this.transition}}
+    <div
+      data-test-task-is-running-description
+      class="mt-2 -mb-3 text-center text-body-300 text-color-foreground-faint"
+    >
+      {{@taskIsRunningDescription}}
+    </div>
+  {{else}}
+    <form data-test-new-form class="create-new-form" ...attributes>
+      <div class="grid {{if @isModal 'gap-5' 'gap-7'}}">
+        {{yield}}
+      </div>
+      <Hds::Button
+        data-test-submit
+        @text={{@buttonText}}
+        @isFullWidth={{true}}
+        @color={{if (or @buttonIsActive @isModal) "primary" "secondary"}}
+        type="submit"
+        class={{if @isModal "mt-6" "mt-8"}}
+      />
+    </form>
+  {{/animated-if}}
+</AnimatedContainer>

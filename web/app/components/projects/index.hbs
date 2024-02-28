@@ -1,0 +1,35 @@
+<div class="relative">
+  <nav
+    data-test-projects-nav
+    class="secondary-nav mx-auto mb-8 max-w-[430px] justify-center"
+  >
+    {{#each this.statuses as |status|}}
+      <LinkTo
+        data-test-tab={{status.value}}
+        @route="authenticated.projects"
+        @query={{hash status=status.value}}
+        class="hds-button hds-button--color-secondary"
+      >
+        {{status.label}}
+      </LinkTo>
+    {{/each}}
+  </nav>
+  <WhatsAProject class="absolute top-1/2 right-0 -translate-y-1/2" />
+</div>
+
+{{#if this.shownProjects.length}}
+  <ol data-test-projects-list class="divided-list relative">
+    {{#each this.shownProjects as |project|}}
+      <li data-test-project>
+        <Project::Tile @project={{project}} />
+      </li>
+    {{/each}}
+  </ol>
+{{else}}
+  <div
+    data-test-no-projects
+    class="flex h-64 flex-col items-center justify-center text-display-300"
+  >
+    <EmptyStateText @value="No {{@status}} projects" />
+  </div>
+{{/if}}

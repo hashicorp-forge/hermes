@@ -1,0 +1,18 @@
+{{#unless @hideProgress}}
+  <ol
+    class="doc-status doc-status--{{this.dasherizedName}}
+      grid w-full list-none grid-cols-3 items-center gap-0.5"
+  >
+    <li class="progress-bar"></li>
+    <li class="progress-bar"></li>
+    <li class="progress-bar"></li>
+  </ol>
+{{/unless}}
+
+<Hds::Badge
+  @text={{this.status.label}}
+  @color={{this.status.color}}
+  @type={{@type}}
+  class="doc-status whitespace-nowrap"
+  ...attributes
+/>

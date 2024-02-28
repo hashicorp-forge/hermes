@@ -1,0 +1,34 @@
+<div class="mb-10 w-full">
+  <div class="flex items-center">
+    <div class="flex items-center gap-3">
+      <h2>
+        Awaiting your review
+      </h2>
+      <Hds::BadgeCount
+        data-test-docs-awaiting-review-count
+        @text="{{@docs.length}}"
+      />
+    </div>
+  </div>
+
+  <ul class="divided-list mt-5">
+    {{#each this.docsToShow as |doc|}}
+      <Dashboard::DocsAwaitingReview::Doc @doc={{doc}} />
+    {{/each}}
+  </ul>
+
+  {{#if this.toggleButtonIsShown}}
+    <Action
+      data-test-docs-awaiting-review-toggle
+      {{on "click" this.toggleCollapsed}}
+      class="mt-4 flex items-center text-center text-body-200 text-color-foreground-action hover:text-color-foreground-action-hover"
+    >
+      <FlightIcon
+        data-test-docs-awaiting-review-toggle-icon
+        @name={{if this.isCollapsed "plus" "minus"}}
+        class="mr-1.5"
+      />
+      {{if this.isCollapsed "Show all" "Show fewer"}}
+    </Action>
+  {{/if}}
+</div>
