@@ -1,14 +1,266 @@
-<html>
+<!DOCTYPE html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width-device-width, initial-scale=1" />
+  <title>Review requested for {{.DocumentTitle}}</title>
+  <!-- TODO: Dynamic URL -->
+  <link
+    href="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/styles/email-styles.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+
   <body>
-    <p>Your review is requested.</p>
-    <h2>
-      <a href="{{.DocumentURL}}">
-        [{{.DocumentShortName}}] {{.DocumentTitle}}
-      </a>
-    </h2>
-    <p>by {{.DocumentOwner}}</p>
-    <hr />
-    <small>Sent by Hermes</small>
+    <table
+      align="center"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      height="100%"
+      width="100%"
+    >
+      <tr>
+        <td class="header">
+          <table class="container" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <a href="{{.BaseURL}}">
+                  <!-- TODO: Dynamic URL -->
+                  <img
+                    alt="HashiCorp Hermes"
+                    src="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/images/hermes-logo.png"
+                    height="30"
+                  />
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="border-b-gray">
+          <table
+            class="bg-white"
+            cellpadding="0"
+            cellspacing="0"
+            width="100%"
+            height="100%"
+            border="0"
+          >
+            <tr>
+              <td>
+                <table class="table-fixed" width="100%" height="100%">
+                  <tr>
+                    <td class="pt-20px"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table
+                  class="container"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                >
+                  <tr>
+                    <td>
+                      <h1 class="text-display-300">
+                        Your review is requested.
+                      </h1>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table class="table-fixed" width="100%" height="100%">
+                  <tr>
+                    <td class="pt-10px"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table
+                  class="container"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                >
+                  <tr>
+                    <td>
+                      <a href="{{.DocumentURL}}">
+                        <img
+                          align="left"
+                          data-file-id="6201816"
+                          height="70"
+                          src="document.png"
+                          class="doc-image"
+                          width="50"
+                        />
+                      </a>
+                    </td>
+                    <td class="w-full">
+                      <table>
+                        <tr>
+                          <td class="doc-title">
+                            <a href="{{.DocumentURL}}">{{.DocumentTitle}} </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="doc-information">
+                            {{.DocumentShortName}} &middot; {{.DocumentOwner}}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table class="table-fixed" width="100%" height="100%">
+                  <tr>
+                    <td class="pt-30px"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table
+                  class="container"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                >
+                  <tr>
+                    <td>
+                      <table
+                        class="button-wrapper"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                      >
+                        <tr>
+                          <td>
+                            <a class="button" href="{{.DocumentURL}}">
+                              View in Hermes
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table class="table-fixed" width="100%" height="100%">
+                  <tr>
+                    <td class="pt-35px">
+                      <table
+                        class="container"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                      >
+                        <tr>
+                          <td class="border-b-gray"></td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table
+                  class="container"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                >
+                  <tr>
+                    <td>
+                      <p>
+                        {{.DocumentOwner}} has requested your approval on a
+                        document. If you're unable to review it, you can
+                        <a href="{{.DocumentURL}}">visit the doc</a> to remove
+                        yourself as a reviewer.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table class="table-fixed" width="100%" height="100%">
+                  <tr>
+                    <td class="pt-40px">
+                      <table
+                        class="container"
+                        cellpadding="0"
+                        cellspacing="0"
+                        border="0"
+                      >
+                        <tr>
+                          <td></td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <table class="table-fixed" width="100%" height="100%">
+            <tr>
+              <td class="pt-30px">
+                <table
+                  class="container"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                >
+                  <tr>
+                    <td></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <table class="container" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <p class="footer-text">
+                  <!-- TODO: currentYear -->
+                  &copy; *CURRENT_YEAR* &middot; HashiCorp
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
-<a href="%s">[%s] %s</a>
