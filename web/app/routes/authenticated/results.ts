@@ -65,7 +65,6 @@ export default class AuthenticatedResultsRoute extends Route {
           },
         )
       : undefined;
-
     let docFacetsPromise = scopeIsProjects
       ? undefined
       : this.algolia.getFacets.perform(docsIndex, params);
@@ -81,7 +80,6 @@ export default class AuthenticatedResultsRoute extends Route {
     let projectResultsPromise = scopeIsDocs
       ? undefined
       : this.algolia.getProjectResults.perform(params);
-
     const [
       docFacets,
       docResults,

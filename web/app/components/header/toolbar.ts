@@ -71,17 +71,18 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get statuses(): FacetDropdownObjects {
     let statuses: FacetDropdownObjects = {};
+
     for (let status in this.args.facets?.status) {
-      if (
-        status === "Approved" ||
-        status === "In-Review" ||
-        status === "In Review" ||
-        status === "Obsolete" ||
-        status === "WIP"
-      ) {
-        statuses[status] = this.args.facets?.status[
-          status
-        ] as FacetDropdownObjectDetails;
+      switch (status) {
+        case "Approved":
+        case "In-Review":
+        case "In Review":
+        case "Obsolete":
+        case "WIP":
+          statuses[status] = this.args.facets?.status[
+            status
+          ] as FacetDropdownObjectDetails;
+          break;
       }
     }
 
@@ -118,10 +119,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
           return [
             {
               name: FacetName.Status,
-              values: null,
-            },
-            {
-              name: FacetName.Product,
               values: null,
             },
           ];

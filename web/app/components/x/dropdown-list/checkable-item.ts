@@ -1,3 +1,4 @@
+import { capitalize } from "@ember/string";
 import Component from "@glimmer/component";
 
 export enum CheckmarkPosition {
@@ -10,6 +11,7 @@ export interface XDropdownListCheckableItemComponentArgs {
   isSelected?: boolean;
   count?: number;
   checkmarkPosition?: `${CheckmarkPosition}`;
+  capitalize?: boolean;
 }
 
 interface XDropdownListCheckableItemComponentSignature {
@@ -27,6 +29,14 @@ export default class XDropdownListCheckableItemComponent extends Component<XDrop
    */
   protected get countIsShown(): boolean {
     return this.args.count !== undefined;
+  }
+
+  protected get value() {
+    if (this.args.capitalize) {
+      return capitalize(this.args.value ?? "");
+    } else {
+      return this.args.value;
+    }
   }
 }
 

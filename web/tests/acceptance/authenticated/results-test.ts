@@ -12,26 +12,58 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 import { FacetLabel } from "hermes/helpers/get-facet-label";
+import {
+  ProjectStatus,
+  projectStatusObjects,
+} from "hermes/types/project-status";
 
 // Global
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
 const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
 
 // Header
-const DOC_SEARCH_RESULT = "[data-test-doc-search-result]";
 const RESULTS_HEADLINE = "[data-test-results-headline]";
-const RESULTS_SUBHEAD = "[data-test-results-subhead]";
+const RESULTS_MATCH_COUNT = "[data-test-results-match-count]";
 const ACTIVE_FILTER_LIST = "[data-test-active-filter-list]";
 const ACTIVE_FILTER_LINK = "[data-test-active-filter-link]";
 const CLEAR_ALL_FILTERS_LINK = "[data-test-clear-all-filters-link]";
 
+// Segmented Control
+const SEG = "[data-test-results-nav]";
+const SEG_PROJECTS_LINK = `${SEG} [data-test-projects-link]`;
+const SEG_DOCS_LINK = `${SEG} [data-test-docs-link]`;
+const SEG_ALL_LINK = `${SEG} [data-test-all-link]`;
+
+// Section Header
+const SECTION_HEADER = "[data-test-section-header]";
+const COUNT = "[data-test-count]";
+const PRODUCT_RESULTS_CONTAINER = "[data-test-product-results]";
+const PRODUCT_RESULTS_HEADER = `${PRODUCT_RESULTS_CONTAINER} ${SECTION_HEADER}`;
+const PRODUCT_COUNT = `${PRODUCT_RESULTS_CONTAINER} ${COUNT}`;
+const PRODUCT_LINK = `${PRODUCT_RESULTS_CONTAINER} [data-test-product-link]`;
+
+const PROJECT_RESULTS_CONTAINER = "[data-test-project-results]";
+const PROJECT_RESULTS_HEADER = `${PROJECT_RESULTS_CONTAINER} ${SECTION_HEADER}`;
+const PROJECT_COUNT = `${PROJECT_RESULTS_CONTAINER} ${COUNT}`;
+const PROJECT_LINK = "[data-test-project-link]";
+
+const DOC_RESULTS_CONTAINER = "[data-test-doc-results]";
+const DOC_RESULTS_HEADER = `${DOC_RESULTS_CONTAINER} ${SECTION_HEADER}`;
+const DOC_COUNT = `${DOC_RESULTS_CONTAINER} ${COUNT}`;
+const DOC_LINK = "[data-test-doc-link]";
+const NEXT_PAGE_LINK = "[data-test-next-page-link]";
+
 // Filter buttons
-const TRIGGER = "data-test-facet-dropdown-trigger";
-const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `[${TRIGGER}="${FacetLabel.DocType}"]`;
-const PRODUCT_FACET_DROPDOWN_TOGGLE = `[${TRIGGER}="${FacetLabel.Product}"]`;
+const FACET_TOGGLE = "[data-test-facet-dropdown-toggle]";
+const FACET_TOGGLE_DATA_NAME = "data-test-facet-dropdown-trigger";
+const DOC_TYPE_FACET_DROPDOWN_TOGGLE = `[${FACET_TOGGLE_DATA_NAME}="${FacetLabel.DocType}"]`;
+const PRODUCT_FACET_DROPDOWN_TOGGLE = `[${FACET_TOGGLE_DATA_NAME}="${FacetLabel.Product}"]`;
 
 // Filter dropdowns
 const FACET_DROPDOWN_LINK = "[data-test-facet-dropdown-link]";
+
+// Pagination
+const PAGINATION = "[data-test-pagination]";
 
 interface Context extends MirageTestContext {}
 
@@ -53,7 +85,114 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.equal(getPageTitle(), "Search | Hermes");
   });
 
-  test("it shows document results", async function (this: Context, assert) {
+  test('there is a "top results" screen', async function (this: Context, assert) {
+    const query = "v"; // This will match `Vault` in the product facet
+    const docCount = 50;
+    const docMax = 12;
+    const projectCount = 10;
+    const projectMax = 5;
+
+    this.server.createList("document", 50, {
+      title: query,
+    });
+
+    this.server.createList("project", 10, {
+      title: query,
+    });
+
+    await visit(`/results?q=${query}`);
+
+    assert.dom(SEG_PROJECTS_LINK).doesNotHaveClass("active");
+    assert.dom(SEG_DOCS_LINK).doesNotHaveClass("active");
+    assert.dom(SEG_ALL_LINK).hasClass("active");
+
+    assert
+      .dom(FACET_TOGGLE)
+      .doesNotExist('filter bar is hidden in the "all" view');
+
+    assert
+      .dom(PAGINATION)
+      .doesNotExist('pagination is hidden in the "all" view');
+
+    assert
+      .dom(RESULTS_MATCH_COUNT)
+      .doesNotExist('match count is hidden in the "all view');
+
+    assert.dom(PRODUCT_RESULTS_HEADER).exists().doesNotHaveAttribute("href");
+    assert.dom(PRODUCT_COUNT).containsText("1");
+
+    assert
+      .dom(PRODUCT_LINK)
+      .exists({ count: 1 })
+      .containsText("Vault")
+      .hasAttribute("href", "/product-areas/vault");
+
+    assert
+      .dom(PROJECT_RESULTS_HEADER)
+      .exists()
+      .hasAttribute("href", `/results?q=${query}&scope=Projects`);
+
+    assert.dom(PROJECT_COUNT).containsText(projectCount.toString());
+    assert.dom(PROJECT_LINK).exists({ count: projectMax });
+
+    assert
+      .dom(DOC_RESULTS_HEADER)
+      .exists()
+      .hasAttribute("href", `/results?q=${query}&scope=Docs`);
+
+    assert.dom(DOC_COUNT).containsText(docCount.toString());
+    assert.dom(DOC_LINK).exists({ count: docMax });
+  });
+
+  test('match count is shown in the "all" view when there are no results', async function (this: Context, assert) {
+    await visit("/results");
+    assert.dom(RESULTS_MATCH_COUNT).containsText("0 matches");
+  });
+
+  test("it can scope to project results", async function (this: Context, assert) {
+    const normalProjectCount = 5;
+
+    this.server.createList("project", normalProjectCount);
+
+    const uniqueTitle = "Food Car Maps";
+
+    this.server.create("project", {
+      title: uniqueTitle,
+    });
+
+    await visit("/results?scope=Projects");
+
+    assert.dom(SEG_PROJECTS_LINK).hasClass("active");
+    assert.dom(SEG_DOCS_LINK).doesNotHaveClass("active");
+    assert.dom(SEG_ALL_LINK).doesNotHaveClass("active");
+
+    assert
+      .dom(FACET_TOGGLE)
+      .exists({ count: 1 }, "only the status filter is shown");
+
+    assert.dom(PROJECT_LINK).exists({ count: normalProjectCount + 1 });
+
+    assert.dom(RESULTS_HEADLINE).hasText("Results");
+
+    assert
+      .dom(RESULTS_MATCH_COUNT)
+      .hasText(
+        `${(normalProjectCount + 1).toString()} matches`,
+        "the correct header text is shown (plural)",
+      );
+
+    // search for title
+    await visit(`/results?q=${uniqueTitle.replace(" ", "+")}&scope=Projects`);
+
+    assert.dom(PROJECT_LINK).exists({ count: 1 });
+
+    assert.dom(RESULTS_HEADLINE).hasText(`Results for ${uniqueTitle}`);
+    assert
+      .dom(RESULTS_MATCH_COUNT)
+      .hasText("1 match", "the correct header text is shown (singular)");
+  });
+
+  test("it can scope to document results", async function (this: Context, assert) {
     const normalDocCount = 5;
 
     this.server.createList("document", normalDocCount);
@@ -64,34 +203,124 @@ module("Acceptance | authenticated/results", function (hooks) {
       title: uniqueTitle,
     });
 
-    await visit("/results"); // a query-less search will return everything
+    await visit("/results?scope=Docs"); // a query-less search will return everything
+
+    assert.dom(SEG_PROJECTS_LINK).doesNotHaveClass("active");
+    assert.dom(SEG_DOCS_LINK).hasClass("active");
+    assert.dom(SEG_ALL_LINK).doesNotHaveClass("active");
+
+    assert
+      .dom(FACET_TOGGLE)
+      .exists({ count: 4 }, 'filter bar is shown in the "docs" view');
 
     const totalDocCount = normalDocCount + 1;
 
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
+    assert.dom(DOC_LINK).exists({ count: totalDocCount });
 
     assert.dom(RESULTS_HEADLINE).hasText("Results");
 
     assert
-      .dom(RESULTS_SUBHEAD)
+      .dom(RESULTS_MATCH_COUNT)
       .hasText(
-        `${totalDocCount} matches`,
+        `${totalDocCount.toString()} matches`,
         "the correct header text is shown (plural)",
       );
 
     // search for title
-    await visit(`/results?q=${uniqueTitle.replace(" ", "+")}`);
+    await visit(`/results?q=${uniqueTitle.replace(" ", "+")}&scope=Docs`);
 
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: 1 });
-    await this.pauseTest();
+    assert.dom(DOC_LINK).exists({ count: 1 });
 
     assert.dom(RESULTS_HEADLINE).hasText(`Results for ${uniqueTitle}`);
     assert
-      .dom(RESULTS_SUBHEAD)
+      .dom(RESULTS_MATCH_COUNT)
       .hasText("1 match", "the correct header text is shown (singular)");
   });
 
-  test("you can filter results", async function (this: Context, assert) {
+  test("you can filter results (projects)", async function (this: Context, assert) {
+    // Create 3 projects
+    // 2 active; 1 completed
+
+    this.server.createList("project", 2, {
+      status: ProjectStatus.Active,
+    });
+    this.server.create("project", {
+      status: ProjectStatus.Completed,
+    });
+
+    // Capture the projectCounts we intend to test
+
+    const activeProjectCount = this.server.schema.projects.where({
+      status: ProjectStatus.Active,
+    }).length;
+
+    const completedProjectCount = this.server.schema.projects.where({
+      status: ProjectStatus.Completed,
+    }).length;
+
+    const totalProjectCount = activeProjectCount + completedProjectCount;
+
+    // Capture placeholder dropdown-link elements
+
+    let firstFacet;
+    let secondFacet;
+
+    // Helper function to capture the dropdown-link elements
+
+    const captureFacetElements = () => {
+      firstFacet = find(FACET_DROPDOWN_LINK);
+      secondFacet = findAll(FACET_DROPDOWN_LINK)[1];
+    };
+
+    await visit("/results?scope=Projects");
+
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${totalProjectCount}`);
+
+    assert.dom(PROJECT_LINK).exists({ count: totalProjectCount });
+
+    assert
+      .dom(ACTIVE_FILTER_LIST)
+      .doesNotExist("the active filters section is hidden");
+
+    assert
+      .dom(FACET_TOGGLE)
+      .exists({ count: 1 }, "only the status facet is shown");
+
+    await click(FACET_TOGGLE);
+
+    captureFacetElements();
+
+    assert
+      .dom(firstFacet)
+      .containsText(projectStatusObjects[ProjectStatus.Active].label)
+      .containsText(`${activeProjectCount}`);
+    assert
+      .dom(secondFacet)
+      .containsText(projectStatusObjects[ProjectStatus.Completed].label)
+      .containsText(`${completedProjectCount}`);
+
+    // Click the Completed filter
+
+    await click(secondFacet as unknown as Element);
+
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${completedProjectCount}`);
+    assert.dom(PROJECT_LINK).exists({ count: completedProjectCount });
+
+    assert
+      .dom(ACTIVE_FILTER_LINK)
+      .containsText("Completed")
+      .hasAttribute(
+        "href",
+        "/results?scope=Projects",
+        "the filter is shown in the active filters section with the correct link to remove it",
+      );
+
+    assert.dom(CLEAR_ALL_FILTERS_LINK).hasAttribute("href", "/results");
+
+    assert.dom(PROJECT_LINK).exists({ count: completedProjectCount });
+  });
+
+  test("you can filter results (docs)", async function (this: Context, assert) {
     // Create 3 RFCs
     // 2 for Vault; 1 for Terraform
 
@@ -144,16 +373,14 @@ module("Acceptance | authenticated/results", function (hooks) {
       secondFacet = findAll(FACET_DROPDOWN_LINK)[1];
     };
 
-    await visit("/results");
+    await visit("/results?scope=Docs");
 
-    assert.dom(RESULTS_SUBHEAD).containsText(`${totalDocCount}`);
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${totalDocCount}`);
+    assert.dom(DOC_LINK).exists({ count: totalDocCount });
 
     assert
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
-
-    // Open the docType facet dropdown
 
     await click(DOC_TYPE_FACET_DROPDOWN_TOGGLE);
 
@@ -170,21 +397,21 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(secondFacet as unknown as Element);
 
-    assert.dom(RESULTS_SUBHEAD).containsText(`${frdCount}`);
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: frdCount });
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${frdCount}`);
+    assert.dom(DOC_LINK).exists({ count: frdCount });
 
     assert
       .dom(ACTIVE_FILTER_LINK)
       .containsText("FRD")
       .hasAttribute(
         "href",
-        "/results",
+        "/results?scope=Docs",
         "the filter is shown in the active filters section with the correct link to remove it",
       );
 
     assert.dom(CLEAR_ALL_FILTERS_LINK).hasAttribute("href", "/results");
 
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: frdCount });
+    assert.dom(DOC_LINK).exists({ count: frdCount });
 
     // Open the product facet dropdown
 
@@ -203,8 +430,8 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(secondFacet as unknown as Element);
 
-    assert.dom(RESULTS_SUBHEAD).containsText("1");
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: 1 });
+    assert.dom(RESULTS_MATCH_COUNT).containsText("1");
+    assert.dom(DOC_LINK).exists({ count: 1 });
 
     assert
       .dom(ACTIVE_FILTER_LINK)
@@ -217,7 +444,7 @@ module("Acceptance | authenticated/results", function (hooks) {
       .containsText("FRD")
       .hasAttribute(
         "href",
-        "/results?product=%5B%22Terraform%22%5D",
+        "/results?product=%5B%22Terraform%22%5D&scope=Docs",
         "correct href to remove the filter",
       );
 
@@ -228,7 +455,7 @@ module("Acceptance | authenticated/results", function (hooks) {
       .containsText("Terraform")
       .hasAttribute(
         "href",
-        "/results?docType=%5B%22FRD%22%5D",
+        "/results?docType=%5B%22FRD%22%5D&scope=Docs",
         "correct href to remove the filter",
       );
 
@@ -236,21 +463,23 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     await click(ACTIVE_FILTER_LINK);
 
-    assert.dom(RESULTS_SUBHEAD).containsText(`${terraformDocCount}`);
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: terraformDocCount });
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${terraformDocCount}`);
+    assert.dom(DOC_LINK).exists({ count: terraformDocCount });
 
     assert
       .dom(ACTIVE_FILTER_LINK)
       .exists({ count: 1 }, "only the product filter is active")
-      .hasAttribute("href", "/results", "the active filter link is correct");
+      .hasAttribute(
+        "href",
+        "/results?scope=Docs",
+        "the active filter link is correct",
+      );
 
     // Turn off all filters
 
     await click(CLEAR_ALL_FILTERS_LINK);
 
-    assert.dom(RESULTS_SUBHEAD).containsText(`${totalDocCount}`);
-
-    assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
+    assert.dom(DOC_LINK).exists({ count: totalDocCount });
 
     assert
       .dom(ACTIVE_FILTER_LIST)
@@ -265,14 +494,15 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.dom(GLOBAL_SEARCH_INPUT).hasValue(query);
   });
 
-  test("search filters reset when the query changes", async function (this: Context, assert) {
+  test("search filters reset when the query changes (docs)", async function (this: Context, assert) {
     const title = "baz";
 
     this.server.create("document", {
       title,
     });
 
-    const initialURL = "/results?q=bar&page=2&status=%5B%22Approved%22%5D";
+    const initialURL =
+      "/results?scope=Docs&q=bar&page=2&status=%5B%22Approved%22%5D";
 
     await visit(initialURL);
 

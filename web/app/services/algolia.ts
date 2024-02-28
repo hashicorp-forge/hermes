@@ -16,11 +16,13 @@ import {
   FacetRecords,
 } from "hermes/types/facets";
 import SessionService from "./session";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 // FIXME: drafts endpoint breaks when you increase this number (to 100, e.g.)
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
-export const FACET_NAMES = ["docType", "owners", "product", "status"];
+export const DOC_FACET_NAMES = ["docType", "owners", "product", "status"];
+export const PROJECT_FACET_NAMES = ["status"];
 
 export interface AlgoliaHit {
   objectID: string;
@@ -227,7 +229,7 @@ export default class AlgoliaService extends Service {
    * and whether the owner is looking at their own docs.
    */
   buildFacetFilters(params: AlgoliaSearchParams, userIsOwner = false) {
-    let facets = FACET_NAMES;
+    let facets = DOC_FACET_NAMES;
 
     let facetFilters = [];
 
@@ -295,10 +297,14 @@ export default class AlgoliaService extends Service {
    */
   getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
     const query = params["q"] || "";
+    const { scope } = params;
 
     try {
+      const initialFacets =
+        scope === SearchScope.Projects ? PROJECT_FACET_NAMES : DOC_FACET_NAMES;
+
       const algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
-        facets: FACET_NAMES,
+        facets: initialFacets,
         hitsPerPage: HITS_PER_PAGE,
         maxValuesPerFacet: MAX_VALUES_PER_FACET,
         page: 0,
@@ -339,7 +345,7 @@ export default class AlgoliaService extends Service {
       try {
         return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
-          facets: FACET_NAMES,
+          facets: DOC_FACET_NAMES,
           hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,

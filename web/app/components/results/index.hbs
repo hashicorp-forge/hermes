@@ -1,6 +1,6 @@
 {{#unless (and this.scopeIsAll this.nbHits)}}
   {{! Hit count (not shown on the "All" screen unless saying "0 matches") }}
-  <h1 data-test-results-header-text class="mb-7 text-display-300 font-semibold">
+  <h1 data-test-results-match-count class="mb-7 text-display-300 font-semibold">
     {{this.nbHits}}
     {{if (eq this.nbHits 1) "match" "matches"}}
   </h1>
@@ -10,7 +10,7 @@
   <div class="{{if this.scopeIsAll 'mt-[30px]'}} grid gap-9">
     {{! Product/Areas }}
     {{#if this.productFacetHits}}
-      <div>
+      <div data-test-product-results>
         <Results::SectionHeader
           @text="Product/Areas"
           @count={{this.productFacetHits.length}}
@@ -18,8 +18,9 @@
         {{! All product areas }}
         <ol class="flex flex-wrap gap-5">
           {{#each this.productFacetHits as |product|}}
-            <li class="group relative">
+            <li data-test-product-list-item class="group relative">
               <LinkTo
+                data-test-product-link
                 @route="authenticated.product-areas.product-area"
                 @model={{dasherize product.value}}
                 {{! todo: hover, etc }}
@@ -37,7 +38,7 @@
     {{/if}}
     {{! Projects }}
     {{#if this.projectHits}}
-      <div>
+      <div data-test-project-results>
         {{#if this.scopeIsAll}}
           <Results::SectionHeader
             @text="Projects"
@@ -48,8 +49,8 @@
         {{! First 5 projects }}
         <ol class="divided-list">
           {{#each this.projectHits as |p|}}
-            <li class="group relative">
-              <Project::Tile @project={{p}} />
+            <li data-test-project-list-item class="group relative">
+              <Project::Tile data-test-project-link @project={{p}} />
             </li>
           {{/each}}
         </ol>
@@ -57,7 +58,7 @@
     {{/if}}
     {{! Docs }}
     {{#if this.docHits}}
-      <div>
+      <div data-test-doc-results>
         {{#if this.scopeIsAll}}
           <Results::SectionHeader
             @text="Docs"
@@ -68,8 +69,12 @@
         {{! First page of results }}
         <ol class="divided-list">
           {{#each this.docHits as |doc|}}
-            <li data-test-doc-search-result class="group relative">
-              <Doc::TileMedium @doc={{doc}} @query={{@query}} />
+            <li data-test-doc-list-item class="group relative">
+              <Doc::TileMedium
+                data-test-doc-link
+                @doc={{doc}}
+                @query={{@query}}
+              />
             </li>
           {{/each}}
         </ol>
@@ -77,7 +82,7 @@
         {{#if this.nextPageLinkIsShown}}
           <div class="mx-auto mt-8 mb-8 max-w-[830px]">
             <Hds::Button
-              data-test-link-to-all-docs
+              data-test-next-page-link
               @color="secondary"
               @text="Next page of docs"
               @icon="arrow-right"

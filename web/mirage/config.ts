@@ -37,6 +37,8 @@ export default function (mirageConfig) {
         const indexName = request.url.split("indexes/")[1].split("/")[0];
         const requestBody = JSON.parse(request.requestBody);
 
+        console.log("requestBody", requestBody);
+
         const page = requestBody?.page ?? 0;
         const docModels = schema.document.all().models;
         const nbHits = docModels.length;
@@ -104,10 +106,28 @@ export default function (mirageConfig) {
                 searchParams[filterType] = filterValue;
               });
 
+              /**
+               * We use status to determine if we're searching for projects or documents.
+               * If the status is present and set to a ProjectStatus value,
+               * we search for projects. Otherwise, we search for documents.
+               */
+              const maybeStatus = searchParams["status"];
+
+              let results;
+
+              switch (maybeStatus) {
+                case ProjectStatus.Active:
+                case ProjectStatus.Completed:
+                case ProjectStatus.Archived:
+                  results = this.schema.projects.where(searchParams);
+                  break;
+                default:
+                  results = this.schema.document.where(searchParams);
+              }
+
               // Query Mirage using the search params
 
-              const docResults = this.schema.document.where(searchParams);
-              const hits = docResults.models.map((doc) => doc.attrs);
+              const hits = results.models.map((hit) => hit.attrs);
 
               return new Response(
                 200,

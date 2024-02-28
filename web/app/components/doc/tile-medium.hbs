@@ -30,6 +30,7 @@
       <div class="w-full">
         <div class="mt-0.5 overflow-hidden">
           <LinkTo
+            ...attributes
             data-test-document-link
             @route="authenticated.document"
             @query={{hash draft=this.docIsDraft}}

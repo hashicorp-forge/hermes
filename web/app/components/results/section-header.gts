@@ -21,7 +21,7 @@ interface TitleAndCountSignature {
 class ResultsSectionTitleAndCount extends Component<TitleAndCountSignature> {
   <template>
     <h4 class="hermes-h4">{{@text}}</h4>
-    <HdsBadgeCount @text="{{@count}}" />
+    <HdsBadgeCount data-test-count @text="{{@count}}" />
   </template>
 }
 
@@ -29,6 +29,7 @@ export default class ResultsSectionHeaderComponent extends Component<ResultsSect
   <template>
     {{#if @query}}
       <LinkTo
+        data-test-section-header
         @route="authenticated.results"
         @query={{@query}}
         class="section-header"
@@ -40,7 +41,7 @@ export default class ResultsSectionHeaderComponent extends Component<ResultsSect
         />
       </LinkTo>
     {{else}}
-      <div class="section-header">
+      <div data-test-section-header class="section-header">
         <ResultsSectionTitleAndCount @text={{@text}} @count={{@count}} />
       </div>
     {{/if}}
