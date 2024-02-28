@@ -5,10 +5,6 @@
     @apply bg-color-surface-interactive-hover;
   }
 
-  &.active {
-    @apply border-color-border-action bg-color-surface-action text-color-foreground-action;
-  }
-
   .flight-icon {
     @apply -ml-1.5 mr-1 scale-75;
   }
