@@ -42,7 +42,7 @@ interface FacetArrayItem {
 }
 
 export type ActiveFilters = {
-  [name in FacetName]: string[] | undefined;
+  [name in FacetName]: string[];
 };
 
 interface ToolbarComponentSignature {
