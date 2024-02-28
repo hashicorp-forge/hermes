@@ -17,7 +17,7 @@ export default class AuthenticatedResultsController extends Controller {
     // and whatever project filters there are
   ];
 
-  q = null;
+  q: string | null = null;
   page = 1;
   docType = [];
   owners = [];
