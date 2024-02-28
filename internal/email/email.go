@@ -20,6 +20,7 @@ type User struct {
 }
 
 type DocumentApprovedEmailData struct {
+	BaseURL                  string
 	DocumentApprover         User
 	DocumentNonApproverCount int
 	DocumentShortName        string
@@ -56,6 +57,7 @@ func SendDocumentApprovedEmail(
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.BaseURL, validation.Required),
 		validation.Field(&data.DocumentApprover, validation.Required),
 		validation.Field(&data.DocumentShortName, validation.Required),
 		validation.Field(&data.DocumentTitle, validation.Required),
