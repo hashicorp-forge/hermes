@@ -24,7 +24,7 @@ const POPOVER_LOADING_ICON =
 const PROJECT_HITS = "[data-test-project-hits]";
 const DOCUMENT_HITS = "[data-test-document-hits]";
 const NO_MATCHES = "[data-test-no-matches]";
-const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
+const VIEW_ALL_RESULTS_LINK = "[data-test-view-all-results-link]";
 
 const PRODUCT_AREA_HIT = "[data-test-product-area-hit]";
 const PROJECT_HIT = "[data-test-project-hit]";
@@ -114,7 +114,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(DOCUMENT_HIT).hasAttribute("href", "/document/doc-0");
 
     assert
-      .dom(VIEW_ALL_DOCS_LINK)
+      .dom(VIEW_ALL_RESULTS_LINK)
       .exists()
       .hasText(`View all document results`)
       .hasAttribute("href", `/results?q=vault`);

@@ -37,9 +37,10 @@ export default class HeaderActiveFilterListItemComponent extends Component<Heade
   get query() {
     return {
       ...Object.fromEntries(
-        Object.entries(this.activeFilters.index).map(([key, value]) => {
-          return [key, value?.filter((filter) => filter !== this.args.filter)];
-        }),
+        Object.entries(this.activeFilters.index).map(([key, value]) => [
+          key,
+          value?.filter((filter) => filter !== this.args.filter),
+        ]),
       ),
       page: 1,
     };

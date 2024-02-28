@@ -96,11 +96,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * The facets, depending on the scope.
    * If the facets object is empty, we return the default facets.
    * Otherwise, we return the facets from the object.
+   * If the scope is "Docs", we replaces the "status" facet with
+   * the statuses from our getter.
    */
   protected get facets() {
-    assert("facets must exist", this.args.facets);
-
-    const facetsObjectIsEmpty = Object.keys(this.args.facets).length === 0;
+    const facetsObjectIsEmpty = Object.keys(this.args.facets ?? 0).length === 0;
 
     if (facetsObjectIsEmpty) {
       switch (this.args.scope) {
@@ -132,6 +132,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
           ];
       }
     }
+
+    assert("facets must exist", this.args.facets);
 
     let facetArray: FacetArrayItem[] = [];
 

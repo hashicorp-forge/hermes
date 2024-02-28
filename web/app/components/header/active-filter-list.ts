@@ -24,15 +24,10 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
   };
 
   /**
-   * A flat array of active filters, excluding "All" if it is present.
-   * Looped through in the template to render the filters.
+   * A flat array of active filters. Looped through in the template.
    */
-  protected get shownFilters() {
-    const objectValues = Object.values(this.activeFilters.index)
-      .flat()
-      .compact();
-
-    return objectValues.filter((value) => value !== SearchScope.All);
+  protected get shownFilters(): string[] {
+    return Object.values(this.activeFilters.index).flat().compact();
   }
 }
 

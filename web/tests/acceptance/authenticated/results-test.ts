@@ -19,7 +19,7 @@ import {
 
 // Global
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
-const VIEW_ALL_DOCS_LINK = "[data-test-view-all-docs-link]";
+const VIEW_ALL_RESULTS_LINK = "[data-test-view-all-results-link]";
 
 // Header
 const RESULTS_HEADLINE = "[data-test-results-headline]";
@@ -142,6 +142,11 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert.dom(DOC_COUNT).containsText(docCount.toString());
     assert.dom(DOC_LINK).exists({ count: docMax });
+
+    assert
+      .dom(NEXT_PAGE_LINK)
+      .exists()
+      .hasAttribute("href", `/results?page=2&q=${query}&scope=Docs`);
   });
 
   test('match count is shown in the "all" view when there are no results', async function (this: Context, assert) {
@@ -169,6 +174,8 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(FACET_TOGGLE)
       .exists({ count: 1 }, "only the status filter is shown");
+
+    assert.dom(PAGINATION).exists('pagination is shown in the "projects" view');
 
     assert.dom(PROJECT_LINK).exists({ count: normalProjectCount + 1 });
 
@@ -212,6 +219,8 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(FACET_TOGGLE)
       .exists({ count: 4 }, 'filter bar is shown in the "docs" view');
+
+    assert.dom(PAGINATION).exists('pagination is shown in the "docs" view');
 
     const totalDocCount = normalDocCount + 1;
 
@@ -292,11 +301,17 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert
       .dom(firstFacet)
-      .containsText(projectStatusObjects[ProjectStatus.Active].label)
+      .containsText(
+        projectStatusObjects[ProjectStatus.Active].label,
+        "the filter is properly capitalized",
+      )
       .containsText(`${activeProjectCount}`);
     assert
       .dom(secondFacet)
-      .containsText(projectStatusObjects[ProjectStatus.Completed].label)
+      .containsText(
+        projectStatusObjects[ProjectStatus.Completed].label,
+        "the filter is properly capitalized",
+      )
       .containsText(`${completedProjectCount}`);
 
     // Click the Completed filter
@@ -318,6 +333,13 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.dom(CLEAR_ALL_FILTERS_LINK).hasAttribute("href", "/results");
 
     assert.dom(PROJECT_LINK).exists({ count: completedProjectCount });
+
+    // visit a URL with no results
+
+    await visit("/results?status=%5B%22Archived%22%5D&scope=Projects");
+
+    assert.dom(FACET_TOGGLE).exists({ count: 1 }).isDisabled();
+    assert.dom(RESULTS_MATCH_COUNT).containsText("0 matches");
   });
 
   test("you can filter results (docs)", async function (this: Context, assert) {
@@ -484,6 +506,19 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
+
+    // visit a URL with no results
+    await visit("/results?docType=%5B%22ZZZZZZZZZ%22%5D&scope=Docs");
+
+    assert.dom(FACET_TOGGLE).exists({ count: 4 });
+
+    const facetToggles = findAll(FACET_TOGGLE);
+
+    facetToggles.forEach((toggle) => {
+      assert.dom(toggle).isDisabled();
+    });
+
+    assert.dom(RESULTS_MATCH_COUNT).containsText("0 matches");
   });
 
   test("the search input displays the route query on load", async function (this: Context, assert) {
@@ -509,7 +544,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.equal(currentURL(), initialURL);
 
     await fillIn(GLOBAL_SEARCH_INPUT, title);
-    await click(VIEW_ALL_DOCS_LINK);
+    await click(VIEW_ALL_RESULTS_LINK);
 
     assert.equal(
       currentURL(),
