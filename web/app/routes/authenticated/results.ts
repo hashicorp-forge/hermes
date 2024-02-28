@@ -36,14 +36,16 @@ export default class AuthenticatedResultsRoute extends Route {
   };
 
   async model(params: ResultsRouteParams) {
-    const searchIndex = this.configSvc.config.algolia_docs_index_name;
+    const docsIndex = this.configSvc.config.algolia_docs_index_name;
 
-    const [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
+    const [docFacets, docResults] = await Promise.all([
+      this.algolia.getFacets.perform(docsIndex, params),
+      this.algolia.getDocResults.perform(docsIndex, params),
     ]);
 
-    const hits = (results as { hits?: HermesDocument[] }).hits;
+    const typedDocResults = docResults as SearchResponse<HermesDocument>;
+
+    const hits = typedDocResults.hits;
 
     if (hits) {
       // Load owner information
@@ -52,7 +54,7 @@ export default class AuthenticatedResultsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { docFacets, docResults: typedDocResults };
   }
 
   /**

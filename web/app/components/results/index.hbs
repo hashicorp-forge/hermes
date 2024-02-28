@@ -1,17 +1,9 @@
-<h1
-  data-test-results-header-text
-  class="mb-4 text-display-300 font-semibold"
->{{@results.nbHits}}
-  {{if (eq 1 @results.nbHits) "document" "documents"}}
-  {{#if @query}}
-    matching
-    <mark>
-      {{@query}}
-    </mark>
-  {{/if}}
-</h1>
+<h2 data-test-results-subhead class="mb-6 text-display-300 font-semibold">
+  {{@docResults.nbHits}}
+  {{if (eq @docResults.nbHits 1) "match" "matches"}}
+</h2>
 <ol class="divided-list">
-  {{#each @results.hits as |doc|}}
+  {{#each @docResults.hits as |doc|}}
     <li data-test-doc-search-result class="group relative">
       <Doc::TileMedium @doc={{doc}} @query={{@query}} />
     </li>
@@ -19,6 +11,6 @@
 </ol>
 
 <Pagination
-  @currentPage={{(add @results.page 1)}}
-  @nbPages={{@results.nbPages}}
+  @currentPage={{(add (or @docResults.page 0) 1)}}
+  @nbPages={{@docResults.nbPages}}
 />
