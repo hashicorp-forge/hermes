@@ -68,7 +68,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     const totalDocCount = normalDocCount + 1;
 
     assert.dom(DOC_SEARCH_RESULT).exists({ count: totalDocCount });
-
+    await this.pauseTest();
     assert
       .dom(RESULTS_HEADER_TEXT)
       .hasText(
@@ -80,6 +80,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     await visit(`/results?q=${uniqueTitle.replace(" ", "+")}`);
 
     assert.dom(DOC_SEARCH_RESULT).exists({ count: 1 });
+    await this.pauseTest();
 
     assert
       .dom(RESULTS_HEADER_TEXT)

@@ -15,13 +15,29 @@ interface ResultsIndexComponentSignature {
 }
 
 export default class ResultsIndexComponent extends Component<ResultsIndexComponentSignature> {
-  allScope = SearchScope.All;
-  projectsScope = SearchScope.Projects;
-  docsScope = SearchScope.Docs;
+  /**
+   * The enum for the project search scope.
+   * Used in the template to satisfy type checks.
+   */
+  protected projectsScope = SearchScope.Projects;
 
   /**
-   * The number of hits for the current query,
-   * whether documents or projects.
+   * The enum for the docs search scope.
+   * Used in the template to satisfy type checks.
+   */
+  protected docsScope = SearchScope.Docs;
+
+  /**
+   * Whether the current scope is "all".
+   * Used in template and getter logic.
+   */
+  protected get scopeIsAll(): boolean {
+    return this.scope === SearchScope.All;
+  }
+
+  /**
+   * The hit count, whether documents or projects.
+   * Used in the template to determine headlines and content visibility.
    */
   protected get nbHits(): number {
     return (
@@ -29,8 +45,65 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     );
   }
 
-  protected get showMoreDocsButtonIsShown() {
-    if (!this.currentScopeIsAll) return false;
+  /**
+   * The current page, whether documents or projects.
+   * Passed to the `Pagination` component.
+   */
+  protected get page() {
+    return (
+      (this.args.docResults?.page || this.args.projectResults?.page || 0) + 1
+    );
+  }
+
+  /**
+   * The number of pages, whether documents or projects.
+   * Passed to the `Pagination` component.
+   */
+  protected get nbPages() {
+    return (
+      this.args.docResults?.nbPages || this.args.projectResults?.nbPages || 0
+    );
+  }
+
+  /**
+   * The document hits, if they exist.
+   * Used as shorthand in the template.
+   */
+  protected get docHits() {
+    return this.args.docResults?.hits;
+  }
+
+  /**
+   * The project hits, if they exist.
+   * Used as shorthand in the template.
+   * If the scope is "all", we only show 5 projects.
+   */
+  protected get projectHits() {
+    const maybeHits = this.args.projectResults?.hits;
+
+    if (this.scopeIsAll) {
+      return maybeHits?.slice(0, 5);
+    }
+
+    return maybeHits;
+  }
+
+  /**
+   * The product hits, if they exist.
+   * Used as shorthand in the template.
+   */
+  protected get productFacetHits() {
+    return this.args.productResults?.facetHits;
+  }
+
+  /**
+   * Whether the "next page of docs" link is shown.
+   * True on the first page of `all` results when there are more
+   * than one page of docs. When true, a link to the next page of
+   * docs is shown.
+   */
+  protected get nextPageLinkIsShown() {
+    if (!this.scopeIsAll) return false;
 
     const { docResults } = this.args;
 
@@ -43,7 +116,7 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
    * otherwise, it is Projects or Docs, depending on which is passed in.
    * Used in the template to determine which results to show.
    */
-  protected get currentScope(): string {
+  protected get scope(): string {
     if (this.args.docResults && this.args.projectResults) {
       return SearchScope.All;
     } else if (this.args.projectResults) {
@@ -51,10 +124,6 @@ export default class ResultsIndexComponent extends Component<ResultsIndexCompone
     } else {
       return SearchScope.Docs;
     }
-  }
-
-  protected get currentScopeIsAll(): boolean {
-    return this.currentScope === SearchScope.All;
   }
 }
 
