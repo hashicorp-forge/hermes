@@ -2,6 +2,7 @@
 @supports not selector(::-webkit-scrollbar) {
   .sidebar-body {
     @apply pr-4;
+    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
   }
 }
 
