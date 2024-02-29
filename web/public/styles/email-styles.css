@@ -1,21 +1,12 @@
-:root {
-  --c-page: #fff;
-  --c-page-faint: #fafafa;
-  --c-foreground-primary: #3b3d45;
-  --c-foreground-faint: #656a76;
-  --c-foreground-action: #1060ff;
-  --c-border-primary: #656a7633;
-}
-
 body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background-color: var(--c-page-faint);
+  background-color: #fafafa;
 }
 
 p {
-  color: var(--c-foreground-primary);
+  color: #3b3d45;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -38,12 +29,12 @@ p a {
 }
 
 .header {
-  border-bottom: 1px solid var(--c-border-primary);
+  border-bottom: 1px solid #656a7633;
   padding: 20px 0;
 }
 
 .doc-image {
-  border: 1px solid var(--c-border-primary);
+  border: 1px solid #656a7633;
   margin-right: 15px;
   width: auto;
 }
@@ -61,24 +52,24 @@ p a {
 .button-wrapper {
   border-collapse: separate;
   border-radius: 4px;
-  background-color: var(--c-foreground-action);
+  background-color: #1060ff;
 }
 
 .button {
   display: block;
   padding: 12px 14px;
   font-size: 14px;
-  color: var(--c-page);
+  color: #fff;
   text-decoration: none;
 }
 
 .footer-text {
   font-size: 12px;
-  color: var(--c-foreground-faint);
+  color: #656a76;
 }
 
 .border-b-gray {
-  border-bottom: 1px solid var(--c-border-primary);
+  border-bottom: 1px solid #656a7633;
 }
 
 .text-display-300 {
@@ -90,7 +81,7 @@ p a {
 }
 
 .bg-white {
-  background-color: var(--c-page);
+  background-color: #fff;
 }
 
 .w-full {
