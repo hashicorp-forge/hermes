@@ -481,7 +481,6 @@ func ReviewHandler(
 								BaseURL:           cfg.BaseURL,
 								DocumentOwner:     doc.Owners[0],
 								DocumentShortName: doc.DocNumber,
-								DocumentStatus:    doc.Status,
 								DocumentTitle:     doc.Title,
 								DocumentURL:       docURL,
 							},
