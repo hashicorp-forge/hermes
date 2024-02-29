@@ -1,3 +1,10 @@
+/* Create a gutter for the  scrollbar in Firefox */
+@supports not selector(::-webkit-scrollbar) {
+  .sidebar-body {
+    @apply pr-4;
+  }
+}
+
 .sidebar {
   @apply relative z-10 flex max-h-full flex-col pb-4;
 
@@ -123,9 +130,6 @@
         @apply bg-color-palette-neutral-400;
       }
     }
-
-    /* Style the scrollbar Firefox */
-    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
   }
 
   .document-title {
