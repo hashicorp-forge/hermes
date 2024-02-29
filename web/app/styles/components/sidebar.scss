@@ -1,4 +1,4 @@
-/* Create a gutter for the  scrollbar in Firefox */
+/* Customize the scrollbar in Firefox */
 @supports not selector(::-webkit-scrollbar) {
   .sidebar-body {
     @apply pr-4;
