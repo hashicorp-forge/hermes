@@ -20,6 +20,7 @@
         color: #3b3d45;
         font-size: 14px;
         line-height: 1.5;
+        margin: 0;
       }
 
       a {
@@ -29,6 +30,30 @@
 
       p a {
         text-decoration: underline;
+      }
+
+      .align-top {
+        vertical-align: top;
+      }
+
+      .font-normal {
+        font-weight: normal;
+      }
+
+      .tag {
+        padding: 4px 6px;
+        margin-top: 2px;
+        margin-right: 4px;
+        display: inline-block;
+        font-size: 13px;
+        background-color: #f1f2f3;
+        color: #656a76;
+        border-radius: 5px;
+      }
+
+      .tag.in-review {
+        background-color: #f9f2ff;
+        color: #911ced;
       }
 
       .container {
@@ -55,14 +80,9 @@
         font-weight: bold;
       }
 
-      .doc-information {
-        font-size: 14px;
-        color: gray;
-      }
-
       .button-wrapper {
         border-collapse: separate;
-        border-radius: 4px;
+        border-radius: 5px;
         background-color: #1060ff;
       }
 
@@ -75,6 +95,7 @@
       }
 
       .footer-text {
+        margin-top: 15px;
         font-size: 12px;
         color: #656a76;
       }
@@ -135,7 +156,7 @@
           <td class="header">
             <table class="container" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td>
+                <td class="align-top">
                   <a href="{{.BaseURL}}">
                     <!-- TODO: Dynamic URL -->
                     <img
@@ -179,7 +200,7 @@
                     <tr>
                       <td>
                         <h1 class="text-display-300">
-                          A new doc was published to {{.Product}}
+                          A new document was published to {{.Product}}
                         </h1>
                       </td>
                     </tr>
@@ -220,12 +241,23 @@
                         <table>
                           <tr>
                             <td class="doc-title">
-                              <a href="{{.DocumentURL}}">{{.DocumentTitle}} </a>
+                              <a href="{{.DocumentURL}}">
+                                {{.DocumentTitle}}
+                                <span class="font-normal">
+                                  {{.DocumentShortName}}
+                                </span>
+                              </a>
                             </td>
                           </tr>
                           <tr>
-                            <td class="doc-information">
-                              {{.DocumentShortName}} &middot; {{.DocumentOwner}}
+                            <td>
+                              <p>{{.DocumentOwner}} &middot; {{.Product}}</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="tags">
+                              <span class="tag in-review">In-Review</span>
+                              <span class="tag">{{.DocumentType}}</span>
                             </td>
                           </tr>
                         </table>
@@ -363,8 +395,7 @@
               <tr>
                 <td>
                   <p class="footer-text">
-                    <!-- TODO: currentYear -->
-                    &copy; *CURRENT_YEAR* &middot; Hermes
+                    &copy; {{.CurrentYear}} &middot; HashiCorp
                   </p>
                 </td>
               </tr>
