@@ -3,371 +3,375 @@
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:v="urn:schemas-microsoft-com:vml"
 >
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width-device-width, initial-scale=1" />
-  <title>{{.DocumentTitle}} was published on Hermes</title>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width-device-width, initial-scale=1" />
+    <title>{{.DocumentTitle}} was published on Hermes</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      background-color: #fafafa;
-    }
+    <style>
+      #body {
+        margin: 0;
+        padding: 0 0 30px;
+        font-family: sans-serif;
+        background-color: #fafafa !important;
+      }
 
-    p {
-      color: #3b3d45;
-      font-size: 14px;
-      line-height: 1.6;
-    }
+      p {
+        color: #3b3d45;
+        font-size: 14px;
+        line-height: 1.5;
+      }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+      a {
+        text-decoration: none;
+        color: inherit !important;
+      }
 
-    p a {
-      text-decoration: underline;
-    }
+      p a {
+        text-decoration: underline;
+      }
 
-    .container {
-      max-width: 600px;
-      padding: 0 20px;
-      height: 100%;
-      width: 100%;
-      margin: 0 auto;
-    }
+      .container {
+        max-width: 600px;
+        padding: 0 20px;
+        height: 100%;
+        width: 100%;
+        margin: 0 auto;
+      }
 
-    .header {
-      border-bottom: 1px solid #656a7633;
-      padding: 20px 0;
-    }
+      .header {
+        border-bottom: 1px solid #656a7633;
+        padding: 20px 0;
+      }
 
-    .doc-image {
-      border: 1px solid #656a7633;
-      margin-right: 15px;
-      width: auto;
-    }
+      .doc-image {
+        border: 1px solid #656a7633;
+        margin-right: 15px;
+        width: auto;
+      }
 
-    .doc-title {
-      font-size: 16px;
-      font-weight: bold;
-    }
+      .doc-title {
+        font-size: 16px;
+        font-weight: bold;
+      }
 
-    .doc-information {
-      font-size: 14px;
-      color: gray;
-    }
+      .doc-information {
+        font-size: 14px;
+        color: gray;
+      }
 
-    .button-wrapper {
-      border-collapse: separate;
-      border-radius: 4px;
-      background-color: #1060ff;
-    }
+      .button-wrapper {
+        border-collapse: separate;
+        border-radius: 4px;
+        background-color: #1060ff;
+      }
 
-    .button {
-      display: block;
-      padding: 12px 14px;
-      font-size: 14px;
-      color: #fff;
-      text-decoration: none;
-    }
+      .button {
+        display: block;
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #fff !important;
+        text-decoration: none;
+      }
 
-    .footer-text {
-      font-size: 12px;
-      color: #656a76;
-    }
+      .footer-text {
+        font-size: 12px;
+        color: #656a76;
+      }
 
-    .border-b-gray {
-      border-bottom: 1px solid #656a7633;
-    }
+      .border-b-gray {
+        border-bottom: 1px solid #656a7633;
+      }
 
-    .text-display-300 {
-      font-size: 24px;
-    }
+      .text-display-300 {
+        font-size: 24px;
+      }
 
-    .table-fixed {
-      table-layout: fixed;
-    }
+      .table-fixed {
+        table-layout: fixed;
+      }
 
-    .bg-white {
-      background-color: #fff;
-    }
+      .bg-white {
+        background-color: #fff !important;
+      }
 
-    .w-full {
-      width: 100%;
-    }
+      .w-full {
+        width: 100%;
+      }
 
-    .pt-10px {
-      padding-top: 10px;
-    }
+      .pt-10px {
+        padding-top: 10px;
+      }
 
-    .pt-20px {
-      padding-top: 20px;
-    }
+      .pt-20px {
+        padding-top: 20px;
+      }
 
-    .pt-30px {
-      padding-top: 30px;
-    }
+      .pt-30px {
+        padding-top: 30px;
+      }
 
-    .pt-35px {
-      padding-top: 35px;
-    }
+      .pt-35px {
+        padding-top: 35px;
+      }
 
-    .pt-40px {
-      padding-top: 40px;
-    }
-  </style>
+      .pt-40px {
+        padding-top: 40px;
+      }
+    </style>
+  </head>
 
   <body>
-    <table
-      align="center"
-      border="0"
-      cellpadding="0"
-      cellspacing="0"
-      height="100%"
-      width="100%"
-    >
-      <tr>
-        <td class="header">
-          <table class="container" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td>
-                <a href="{{.BaseURL}}">
-                  <!-- TODO: Dynamic URL -->
-                  <img
-                    alt="HashiCorp Hermes"
-                    src="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/images/hermes-logo.png"
-                    height="30"
-                  />
-                </a>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td class="border-b-gray">
-          <table
-            class="bg-white"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%"
-            height="100%"
-            border="0"
-          >
-            <tr>
-              <td>
-                <table class="table-fixed" width="100%" height="100%">
-                  <tr>
-                    <td class="pt-20px"></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table
-                  class="container"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td>
-                      <h1 class="text-display-300">
-                        A new doc was published to {{.Product}}
-                      </h1>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table class="table-fixed" width="100%" height="100%">
-                  <tr>
-                    <td class="pt-10px"></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table
-                  class="container"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td>
-                      <a href="{{.DocumentURL}}">
-                        <img
-                          align="left"
-                          data-file-id="6201816"
-                          height="70"
-                          src="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/images/document.png"
-                          class="doc-image"
-                          width="50"
-                        />
-                      </a>
-                    </td>
-                    <td class="w-full">
-                      <table>
-                        <tr>
-                          <td class="doc-title">
-                            <a href="{{.DocumentURL}}">{{.DocumentTitle}} </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="doc-information">
-                            {{.DocumentShortName}} &middot; {{.DocumentOwner}}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table class="table-fixed" width="100%" height="100%">
-                  <tr>
-                    <td class="pt-30px"></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table
-                  class="container"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td>
-                      <table
-                        class="button-wrapper"
-                        cellpadding="0"
-                        cellspacing="0"
-                        border="0"
-                      >
-                        <tr>
-                          <td>
-                            <a class="button" href="{{.DocumentURL}}">
-                              View in Hermes
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table class="table-fixed" width="100%" height="100%">
-                  <tr>
-                    <td class="pt-35px">
-                      <table
-                        class="container"
-                        cellpadding="0"
-                        cellspacing="0"
-                        border="0"
-                      >
-                        <tr>
-                          <td class="border-b-gray"></td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table
-                  class="container"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td>
-                      <p>
-                        You're receiving this email because you're subscribed to
-                        updates from {{.Product}}.
-                        <a href="{{.BaseURL}}/settings"
-                          >Manage your email notifications</a
+    <div id="body">
+      <table
+        align="center"
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        height="100%"
+        width="100%"
+      >
+        <tr>
+          <td class="header">
+            <table class="container" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <a href="{{.BaseURL}}">
+                    <!-- TODO: Dynamic URL -->
+                    <img
+                      alt="HashiCorp Hermes"
+                      src="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/images/hermes-logo.png"
+                      height="30"
+                    />
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="border-b-gray">
+            <table
+              class="bg-white"
+              cellpadding="0"
+              cellspacing="0"
+              width="100%"
+              height="100%"
+              border="0"
+            >
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-20px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <h1 class="text-display-300">
+                          A new doc was published to {{.Product}}
+                        </h1>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-10px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <a href="{{.DocumentURL}}">
+                          <img
+                            align="left"
+                            data-file-id="6201816"
+                            height="70"
+                            src="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/images/document.png"
+                            class="doc-image"
+                            width="50"
+                          />
+                        </a>
+                      </td>
+                      <td class="w-full">
+                        <table>
+                          <tr>
+                            <td class="doc-title">
+                              <a href="{{.DocumentURL}}">{{.DocumentTitle}} </a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="doc-information">
+                              {{.DocumentShortName}} &middot; {{.DocumentOwner}}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-30px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <table
+                          class="button-wrapper"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
                         >
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table class="table-fixed" width="100%" height="100%">
-                  <tr>
-                    <td class="pt-40px">
-                      <table
-                        class="container"
-                        cellpadding="0"
-                        cellspacing="0"
-                        border="0"
-                      >
-                        <tr>
-                          <td></td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <table class="table-fixed" width="100%" height="100%">
-            <tr>
-              <td class="pt-30px">
-                <table
-                  class="container"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <table class="container" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td>
-                <p class="footer-text">
-                  <!-- TODO: currentYear -->
-                  &copy; *CURRENT_YEAR* &middot; Hermes
-                </p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+                          <tr>
+                            <td>
+                              <a class="button" href="{{.DocumentURL}}">
+                                View in Hermes
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-35px">
+                        <table
+                          class="container"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
+                        >
+                          <tr>
+                            <td class="border-b-gray"></td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <p>
+                          You're receiving this email because you're subscribed
+                          to updates from {{.Product}}.
+                          <a href="{{.BaseURL}}/settings"
+                            >Manage your email notifications</a
+                          >
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-40px">
+                        <table
+                          class="container"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
+                        >
+                          <tr>
+                            <td></td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table class="table-fixed" width="100%" height="100%">
+              <tr>
+                <td class="pt-20px">
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table class="container" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <p class="footer-text">
+                    <!-- TODO: currentYear -->
+                    &copy; *CURRENT_YEAR* &middot; Hermes
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
   </body>
 </html>
