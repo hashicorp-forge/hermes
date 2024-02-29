@@ -6,12 +6,118 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width-device-width, initial-scale=1" />
   <title>Review requested for {{.DocumentTitle}}</title>
-  <!-- TODO: Dynamic URL -->
-  <link
-    href="https://raw.githubusercontent.com/hashicorp-forge/hermes/jeffdaley/email-templates/web/public/styles/email-styles.css"
-    rel="stylesheet"
-    type="text/css"
-  />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: #fafafa;
+    }
+
+    p {
+      color: #3b3d45;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    p a {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 0 20px;
+      height: 100%;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .header {
+      border-bottom: 1px solid #656a7633;
+      padding: 20px 0;
+    }
+
+    .doc-image {
+      border: 1px solid #656a7633;
+      margin-right: 15px;
+      width: auto;
+    }
+
+    .doc-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .doc-information {
+      font-size: 14px;
+      color: gray;
+    }
+
+    .button-wrapper {
+      border-collapse: separate;
+      border-radius: 4px;
+      background-color: #1060ff;
+    }
+
+    .button {
+      display: block;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #656a76;
+    }
+
+    .border-b-gray {
+      border-bottom: 1px solid #656a7633;
+    }
+
+    .text-display-300 {
+      font-size: 24px;
+    }
+
+    .table-fixed {
+      table-layout: fixed;
+    }
+
+    .bg-white {
+      background-color: #fff;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+
+    .pt-10px {
+      padding-top: 10px;
+    }
+
+    .pt-20px {
+      padding-top: 20px;
+    }
+
+    .pt-30px {
+      padding-top: 30px;
+    }
+
+    .pt-35px {
+      padding-top: 35px;
+    }
+
+    .pt-40px {
+      padding-top: 40px;
+    }
+  </style>
 
   <body>
     <table
