@@ -1,5 +1,6 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
+import AuthenticatedController from "hermes/controllers/authenticated";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 import ProductAreasService from "hermes/services/product-areas";
@@ -12,6 +13,20 @@ export default class AuthenticatedRoute extends Route {
   @service declare productAreas: ProductAreasService;
 
   beforeModel(transition: any) {
+    /**
+     * If the user is dry-loading the results route with a query,
+     * we capture the query on our controller and pass it to the search input.
+     */
+    const { to } = transition;
+    const query = to.queryParams["q"];
+
+    if (query && to.name.includes("results")) {
+      (this.controllerFor("authenticated") as AuthenticatedController).set(
+        "query",
+        query,
+      );
+    }
+
     /**
      * If using Google auth, check if the session is authenticated.
      * If unauthenticated, it will redirect to the auth screen.

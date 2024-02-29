@@ -750,25 +750,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 			doc.ModifiedTime = modifiedTime.Unix()
 
-			// Get owner photo by searching Google Workspace directory.
-			if len(doc.Owners) > 0 {
-				ppl, err := srv.GWService.SearchPeople(doc.Owners[0], "photos")
-				if err != nil {
-					srv.Logger.Error("error searching directory for owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) > 0 {
-					if len(ppl[0].Photos) > 0 {
-						doc.OwnerPhotos = []string{ppl[0].Photos[0].Url}
-					}
-				}
-			}
-
 			// Convert document to Algolia object because this is how it is expected
 			// by the frontend.
 			docObj, err := doc.ToAlgoliaObject(false)
@@ -802,25 +783,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Update recently viewed documents if this is a document view event. The
-			// Add-To-Recently-Viewed header is set in the request from the frontend
-			// to differentiate between document views and requests to only retrieve
-			// document metadata.
-			if r.Header.Get("Add-To-Recently-Viewed") != "" {
-				if err := updateRecentlyViewedDocs(
-					userEmail, docID, srv.DB, now,
-				); err != nil {
-					// If we get an error, log it but don't return an error response
-					// because this would degrade UX.
-					srv.Logger.Error("error updating recently viewed docs",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-				}
-			}
-
 			srv.Logger.Info("retrieved document draft",
 				"method", r.Method,
 				"path", r.URL.Path,
@@ -829,6 +791,23 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
+				// Update recently viewed documents if this is a document view event. The
+				// Add-To-Recently-Viewed header is set in the request from the frontend
+				// to differentiate between document views and requests to only retrieve
+				// document metadata.
+				if r.Header.Get("Add-To-Recently-Viewed") != "" {
+					if err := updateRecentlyViewedDocs(
+						userEmail, docID, srv.DB, now,
+					); err != nil {
+						srv.Logger.Error("error updating recently viewed docs",
+							"error", err,
+							"path", r.URL.Path,
+							"method", r.Method,
+							"doc_id", docID,
+						)
+					}
+				}
+
 				// Compare Algolia and database documents to find data inconsistencies.
 				// Get document object from Algolia.
 				var algoDoc map[string]any

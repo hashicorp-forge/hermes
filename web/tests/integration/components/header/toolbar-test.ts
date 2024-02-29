@@ -3,6 +3,17 @@ import { setupRenderingTest } from "ember-qunit";
 import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
+import { FacetLabel } from "hermes/helpers/get-facet-label";
+
+// Filter buttons
+const TOGGLE = "[data-test-facet-dropdown-toggle]";
+const DOC_TYPE_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.DocType}"]`;
+const STATUS_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Status}"]`;
+const PRODUCT_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Product}"]`;
+const OWNER_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Owners}"]`;
+const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
+const POPOVER = "[data-test-facet-dropdown-popover]";
+const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
 
 const FACETS = {
   docType: {
@@ -24,7 +35,7 @@ interface ToolbarTestContext extends TestContext {
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it renders a search input by default", async function (assert) {
+  test("it doesn't render if no facets are provided", async function (assert) {
     await render(hbs`
       <Header::Toolbar />
     `);
@@ -84,13 +95,62 @@ module("Integration | Component | header/toolbar", function (hooks) {
     );
   });
 
-  test("it conditionally renders the status facet disabled", async function (assert) {
-    this.set("facets", { status: {} });
+  test("it renders undefined facets disabled", async function (assert) {
+    this.set("facets", { ...FACETS, status: undefined });
+
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
-    assert
-      .dom("[data-test-facet-dropdown-trigger='Status']")
-      .hasAttribute("disabled");
+
+    assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
+    assert.dom(PRODUCT_TOGGLE).isNotDisabled();
+    assert.dom(OWNER_TOGGLE).isNotDisabled();
+
+    assert.dom(STATUS_TOGGLE).isDisabled("the empty status facet is disabled");
+  });
+
+  test("the order of the facets is correct", async function (this: ToolbarTestContext, assert) {
+    this.set("facets", FACETS);
+
+    await render<ToolbarTestContext>(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    assert.deepEqual(
+      findAll(TOGGLE)?.map((el) => el.textContent?.trim()),
+      [
+        FacetLabel.DocType,
+        FacetLabel.Status,
+        FacetLabel.Product,
+        FacetLabel.Owners,
+      ],
+      "The facets are in the correct order",
+    );
+  });
+
+  test("the dropdown items are rendered correctly", async function (this: ToolbarTestContext, assert) {
+    this.set("facets", {
+      docType: {
+        RFC: { count: 1, isSelected: false },
+        PRD: { count: 30, isSelected: true },
+      },
+    });
+
+    await render<ToolbarTestContext>(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    await click(DOC_TYPE_TOGGLE);
+
+    assert.dom(DROPDOWN_ITEM).exists({ count: 2 });
+
+    const firstItem = `${POPOVER} li:nth-child(1)`;
+    const secondItem = `${POPOVER} li:nth-child(2)`;
+
+    assert.dom(firstItem).containsText("RFC").containsText("1");
+    assert.dom(`${firstItem} ${CHECK}`).hasClass("invisible");
+
+    assert.dom(secondItem).containsText("PRD").containsText("30");
+    assert.dom(`${secondItem} ${CHECK}`).hasClass("visible");
   });
 });

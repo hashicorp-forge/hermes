@@ -13,8 +13,11 @@ const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
 const PROJECT_PRODUCT = `${PROJECT_TILE} [data-test-product]`;
 const PROJECT_JIRA_TYPE = `${PROJECT_TILE} [data-test-issue-type-image]`;
 const PROJECT_JIRA_KEY = `${PROJECT_TILE} [data-test-jira-key]`;
-
+const NO_PROJECTS = "[data-test-no-projects]";
 const SECONDARY_NAV = "[data-test-projects-nav]";
+const ACTIVE_TAB = `${SECONDARY_NAV} [data-test-tab="active"]`;
+const COMPLETED_TAB = `${SECONDARY_NAV} [data-test-tab="completed"]`;
+const ARCHIVED_TAB = `${SECONDARY_NAV} [data-test-tab="archived"]`;
 
 interface AuthenticatedProjectsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/projects", function (hooks) {
@@ -91,23 +94,40 @@ module("Acceptance | authenticated/projects", function (hooks) {
       .dom(PROJECT_TILE)
       .exists({ count: 1 }, "correct number of active projects");
 
-    await click(`${SECONDARY_NAV} [data-test-tab="completed"]`);
+    await click(COMPLETED_TAB);
 
     assert
       .dom(PROJECT_TILE)
       .exists({ count: 2 }, "correct number of completed projects");
     assert.equal(currentURL(), "/projects?status=completed");
 
-    await click(`${SECONDARY_NAV} [data-test-tab="archived"]`);
+    await click(ARCHIVED_TAB);
 
     assert
       .dom(PROJECT_TILE)
       .exists({ count: 3 }, "correct number of archived projects");
     assert.equal(currentURL(), "/projects?status=archived");
 
-    await click(`${SECONDARY_NAV} [data-test-tab="active"]`);
+    await click(ACTIVE_TAB);
 
     assert.dom(PROJECT_TILE).exists({ count: 1 });
     assert.equal(currentURL(), "/projects");
+  });
+
+  test("it shows an empty state", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
+    this.server.get("/projects", () => {
+      return new Response(200, {}, []);
+    });
+
+    await visit("/projects");
+
+    // by default we're on the active tab
+    assert.dom(NO_PROJECTS).containsText("No active projects");
+
+    await click(COMPLETED_TAB);
+    assert.dom(NO_PROJECTS).containsText("No completed projects");
+
+    await click(ARCHIVED_TAB);
+    assert.dom(NO_PROJECTS).containsText("No archived projects");
   });
 });

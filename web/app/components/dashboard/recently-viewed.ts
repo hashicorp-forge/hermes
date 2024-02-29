@@ -6,17 +6,17 @@ import { action } from "@ember/object";
 import { debounce } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import RecentlyViewedDocsService, {
+import RecentlyViewedService, {
   RecentlyViewedDoc,
-} from "hermes/services/recently-viewed-docs";
+  RecentlyViewedProject,
+} from "hermes/services/recently-viewed";
 
-export const RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT = 300;
+export const RECENTLY_VIEWED_SCROLL_AMOUNT = 300;
 
-interface DashboardRecentlyViewedDocsComponentSignature {}
+interface DashboardRecentlyViewedComponentSignature {}
 
-export default class DashboardRecentlyViewedDocsComponent extends Component<DashboardRecentlyViewedDocsComponentSignature> {
-  @service("recently-viewed-docs")
-  declare viewedDocs: RecentlyViewedDocsService;
+export default class DashboardRecentlyViewedComponent extends Component<DashboardRecentlyViewedComponentSignature> {
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare viewport: ViewportService;
 
   @tracked scrollBody: HTMLElement | null = null;
@@ -36,8 +36,14 @@ export default class DashboardRecentlyViewedDocsComponent extends Component<Dash
     return this._canScrollForward && this.screenIsSmall;
   }
 
-  protected get docs(): RecentlyViewedDoc[] | null {
-    return this.viewedDocs.all;
+  /**
+   * Aliased name for the recently viewed index.
+   * Used in the template to loop through the array if it exists.
+   */
+  protected get index():
+    | Array<RecentlyViewedDoc | RecentlyViewedProject>
+    | undefined {
+    return this.recentlyViewed.index;
   }
 
   @action registerScrollBody(element: HTMLElement): void {
@@ -73,7 +79,7 @@ export default class DashboardRecentlyViewedDocsComponent extends Component<Dash
   @action scrollForward(): void {
     assert("scroll body must be defined", this.scrollBody);
     this.scrollBody.scrollBy({
-      left: RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      left: RECENTLY_VIEWED_SCROLL_AMOUNT,
       behavior: "smooth",
     });
   }
@@ -81,7 +87,7 @@ export default class DashboardRecentlyViewedDocsComponent extends Component<Dash
   @action scrollBack(): void {
     assert("scroll body must be defined", this.scrollBody);
     this.scrollBody.scrollBy({
-      left: -RECENTLY_VIEWED_DOCS_SCROLL_AMOUNT,
+      left: -RECENTLY_VIEWED_SCROLL_AMOUNT,
       behavior: "smooth",
     });
   }
@@ -89,6 +95,6 @@ export default class DashboardRecentlyViewedDocsComponent extends Component<Dash
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Dashboard::RecentlyViewedDocs": typeof DashboardRecentlyViewedDocsComponent;
+    "Dashboard::RecentlyViewed": typeof DashboardRecentlyViewedComponent;
   }
 }

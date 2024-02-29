@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 module.exports = {
   content: ["./app/**/*.{html,js,hbs,gts}"],
   theme: {
@@ -73,7 +75,6 @@ module.exports = {
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border
-        "color-border-faint": "var(--token-color-border-faint)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",
         "color-border-faint": "var(--token-color-border-faint)",
@@ -193,7 +194,15 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".wrap-anywhere": {
+          "overflow-wrap": "anywhere",
+        },
+      });
+    }),
+  ],
   corePlugins: {
     // Disable Tailwind's preflight to prevent clashes
     // with @hashicorp/design-system-components

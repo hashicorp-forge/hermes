@@ -1,7 +1,7 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import { click, fillIn, visit, waitFor } from "@ember/test-helpers";
+import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -19,6 +19,10 @@ import {
 } from "hermes/mirage/utils";
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
+import RecentlyViewedService from "hermes/services/recently-viewed";
+
+const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
+const GLOBAL_SEARCH_PROJECT_HIT = "[data-test-project-hit]";
 
 const TITLE = "[data-test-project-title]";
 const READ_ONLY_TITLE = `${TITLE} .read-only`;
@@ -167,7 +171,6 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     const docType = "PRD";
     const docNumber = "LAB-023";
     const docOwner = "foo@bar.com";
-    const docOwnerPhotoURL = "#foo";
     const docProduct = "Terraform";
     const id = 250;
 
@@ -746,5 +749,55 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await visit("/projects/1");
 
     assert.dom(ADD_JIRA_BUTTON).doesNotExist();
+  });
+
+  test("you can load another project from the search popover", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const externalLink = this.server.create("related-external-link").attrs;
+    const title = "Food Father";
+
+    this.server.create("project", {
+      id: 2,
+      title,
+    });
+
+    // Override any factory `afterCreate` functions
+    this.server.schema.projects.find(2).update({
+      hermesDocuments: [],
+      externalLinks: [externalLink],
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(TITLE).hasText("Test Project");
+    assert
+      .dom(DOCUMENT_LINK)
+      .exists({ count: 1 }, "factory document link is shown");
+    assert.dom(EXTERNAL_LINK).doesNotExist("project has no external links");
+
+    await fillIn(GLOBAL_SEARCH_INPUT, "Food");
+
+    await click(GLOBAL_SEARCH_PROJECT_HIT);
+
+    assert.equal(currentURL(), "/projects/2");
+
+    assert.dom(TITLE).hasText(title, "the correct title is shown");
+    assert.dom(DOCUMENT_LINK).doesNotExist("project has no documents");
+    assert.dom(EXTERNAL_LINK).exists({ count: 1 }, "external link is shown");
+  });
+
+  test("the project is logged with the recently viewed service", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    const recentlyViewed = this.owner.lookup(
+      "service:recently-viewed",
+    ) as RecentlyViewedService;
+
+    assert.equal(recentlyViewed.index, undefined);
+
+    await visit("/projects/1");
+
+    assert.equal(recentlyViewed.index?.length, 1);
+
+    const project = recentlyViewed.index?.[0];
+
+    assert.equal(project?.id, "1");
   });
 });

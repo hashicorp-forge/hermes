@@ -1,50 +1,16 @@
-{{#if (and this.firstPageIsShown this.queryIsProductName)}}
-  <div
-    class="flex w-full flex-col items-start pb-10"
-    data-test-results-product-link
-  >
-    <Hds::Card::Container
-      @level="mid"
-      @hasBorder="true"
-      @overflow="hidden"
-      class="flex flex-col items-start space-y-3 px-4 pt-4 pb-3"
-    >
-      <Hds::Badge
-        @text={{this.capitalizedQuery}}
-        @icon={{or (get-product-id @query) "folder"}}
-      />
-      <Hds::Link::Standalone
-        @text="View all {{this.capitalizedQuery}} documents"
-        @icon="arrow-right-circle"
-        @iconPosition="trailing"
-        @route="authenticated.documents"
-        @query={{hash product=(array this.capitalizedQuery)}}
-      />
-    </Hds::Card::Container>
-  </div>
-{{/if}}
-
-<h1 class="text-display-300 font-semibold">{{@results.nbHits}}
-  documents matching “{{@query}}”</h1>
-<div class="flex w-full flex-col space-y-12 py-10">
-  <div class="tile-list">
-    {{#each @results.hits as |doc|}}
-      <Doc::Tile
-        @docID="{{doc.objectID}}"
-        @isResult={{true}}
-        @modifiedTime={{doc.modifiedTime}}
-        @owner="{{get doc.owners 0}}"
-        @productArea="{{doc.product}}"
-        @snippet="{{doc._snippetResult.content.value}}"
-        @status="{{lowercase doc.status}}"
-        @title="{{doc.title}}"
-      />
-    {{/each}}
-  </div>
-
-</div>
+<h2 data-test-results-subhead class="mb-6 text-display-300 font-semibold">
+  {{@docResults.nbHits}}
+  {{if (eq @docResults.nbHits 1) "match" "matches"}}
+</h2>
+<ol class="divided-list">
+  {{#each @docResults.hits as |doc|}}
+    <li data-test-doc-search-result class="group relative">
+      <Doc::TileMedium @doc={{doc}} @query={{@query}} />
+    </li>
+  {{/each}}
+</ol>
 
 <Pagination
-  @currentPage={{(add @results.page 1)}}
-  @nbPages={{@results.nbPages}}
+  @currentPage={{(add (or @docResults.page 0) 1)}}
+  @nbPages={{@docResults.nbPages}}
 />

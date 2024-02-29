@@ -10,6 +10,7 @@ import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import {
+  FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetRecord,
   FacetRecords,
@@ -20,6 +21,14 @@ import SessionService from "./session";
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const FACET_NAMES = ["docType", "owners", "product", "status"];
+
+export interface AlgoliaHit {
+  objectID: string;
+  _highlightResult?: {};
+  _snippetResult?: {};
+  _rankingInfo?: {};
+  _distinctSeqID?: number;
+}
 
 export type AlgoliaSearchParams = RequestOptions & SearchOptions;
 export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
@@ -109,7 +118,9 @@ export default class AlgoliaService extends Service {
    * Iterates over the keys of a facet object and transforms the `count` value
    * into a `FacetDropdownObjectDetails` object with `count` and `selected` properties.
    */
-  mapStatefulFacetKeys = (facetObject: AlgoliaFacetsObject): FacetRecords => {
+  mapStatefulFacetKeys = (
+    facetObject: AlgoliaFacetsObject,
+  ): Partial<FacetDropdownGroups> => {
     /**
      * e.g., facetObject === {
      *  owners: {
@@ -279,49 +290,38 @@ export default class AlgoliaService extends Service {
 
   /**
    * Returns FacetRecords for a given index and params.
-   * If the user is the owner, the facets will be filtered by the owner's email.
+   * Sends a non-faceted query to Algolia to get the facets of the entire index.
+   * (We don't yet scope facets to the current facetFilters.)
    */
-  getFacets = task(
-    async (
-      searchIndex: string,
-      params: AlgoliaSearchParams,
-      userIsOwner = false,
-    ): Promise<FacetRecords | undefined> => {
-      let query = params["q"] || "";
-      try {
-        let facetFilters = userIsOwner ? [`owners:${this.userEmail}`] : [];
-        let algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
-          facetFilters: facetFilters,
-          facets: FACET_NAMES,
-          hitsPerPage: HITS_PER_PAGE,
-          maxValuesPerFacet: MAX_VALUES_PER_FACET,
-          page: params.page ? params.page - 1 : 0,
-        });
+  getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
+    const query = params["q"] || "";
 
-        assert("getFacets expects facets to exist", algoliaFacets.facets);
+    try {
+      const algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
+        facets: FACET_NAMES,
+        hitsPerPage: HITS_PER_PAGE,
+        maxValuesPerFacet: MAX_VALUES_PER_FACET,
+        page: 0,
+      });
 
+      const facets = this.mapStatefulFacetKeys(
+        algoliaFacets.facets as AlgoliaFacetsObject,
+      );
+
+      // Mark facets as selected based on query parameters
+      Object.entries(facets).forEach(([name, facet]) => {
         /**
-         * Map the facets to a new object with additional nested properties
+         * e.g., name === "owner"
+         * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
          */
-        let facets: FacetRecords = this.mapStatefulFacetKeys(
-          algoliaFacets.facets,
-        );
+        this.markSelected(facet, params[name]);
+      });
 
-        // Mark facets as selected based on query parameters
-        Object.entries(facets).forEach(([name, facet]) => {
-          /**
-           * e.g., name === "owner"
-           * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
-           */
-          this.markSelected(facet, params[name]);
-        });
-
-        return facets;
-      } catch (e: unknown) {
-        console.error(e);
-      }
-    },
-  );
+      return facets;
+    } catch (e) {
+      console.error(e);
+    }
+  });
 
   /**
    * Returns a SearchResponse for a given index and params.

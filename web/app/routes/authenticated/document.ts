@@ -9,7 +9,7 @@ import { HermesDocument } from "hermes/types/document";
 import Transition from "@ember/routing/transition";
 import { HermesDocumentType } from "hermes/types/document-type";
 import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
-import RecentlyViewedDocsService from "hermes/services/recently-viewed-docs";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 import { assert } from "@ember/debug";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
@@ -28,8 +28,7 @@ interface DocumentRouteModel {
 export default class AuthenticatedDocumentRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service("recently-viewed-docs")
-  declare viewedDocs: RecentlyViewedDocsService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
   @service declare store: StoreService;
@@ -190,7 +189,7 @@ export default class AuthenticatedDocumentRoute extends Route {
      * Generally speaking, ensure an up-to-date list of recently viewed docs
      * by the time the user returns to the dashboard.
      */
-    void this.viewedDocs.fetchAll.perform();
+    void this.recentlyViewed.fetchAll.perform();
 
     /**
      * Record the document view with the analytics backend.

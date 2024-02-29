@@ -5,6 +5,7 @@ import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { assert as emberAssert } from "@ember/debug";
 
 import {
   TEST_WEB_CONFIG,
@@ -13,6 +14,7 @@ import {
   TEST_USER_GIVEN_NAME,
   TEST_USER_PHOTO,
 } from "../mirage/utils";
+import { getFacetsFromHits } from "./algolia/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -32,7 +34,16 @@ export default function (mirageConfig) {
        * Reviews the request and determines how to respond.
        */
       const handleAlgoliaRequest = (schema, request) => {
+        const indexName = request.url.split("indexes/")[1].split("/")[0];
         const requestBody = JSON.parse(request.requestBody);
+
+        const page = requestBody?.page ?? 0;
+        const docModels = schema.document.all().models;
+        const nbHits = docModels.length;
+        const nbPages = Math.ceil(nbHits / HITS_PER_PAGE);
+
+        let facets = requestBody?.facets ?? [];
+
         if (requestBody) {
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
@@ -48,11 +59,12 @@ export default function (mirageConfig) {
 
           if (facetFilters) {
             /**
-             * Facet filters arrive like ["owners:foo@bar.com"]
+             * Handle requests to the /my/documents route.
+             * These arrive like ["owners:foo@bar.com"]
              */
             if (facetFilters.includes(`owners:${TEST_USER_EMAIL}`)) {
               // A request from the my/documents route for published docs
-              const hits = schema.document.all().models.filter((doc) => {
+              const hits = docModels.filter((doc) => {
                 return (
                   doc.attrs.owners.includes(TEST_USER_EMAIL) &&
                   doc.attrs.status !== "WIP"
@@ -64,11 +76,54 @@ export default function (mirageConfig) {
                 {},
                 {
                   hits,
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, hits),
+                },
+              );
+            } else {
+              // FacetFilters come nested like this:
+              // [["product:Vault", "docType:RFC"]]
+              // so we need to flatten them
+
+              facetFilters = facetFilters.flat();
+
+              // Create a placeholder object to hold the search params
+
+              let searchParams: Record<string, any> = {};
+
+              // Loop through facetFilters and add them to the params
+
+              facetFilters.forEach((filter: string) => {
+                const filterType = filter.split(":")[0];
+                const filterValue = filter.split(":")[1];
+
+                emberAssert("filterType must exist", filterType);
+
+                searchParams[filterType] = filterValue;
+              });
+
+              // Query Mirage using the search params
+
+              const docResults = this.schema.document.where(searchParams);
+              const hits = docResults.models.map((doc) => doc.attrs);
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits,
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, hits),
                 },
               );
             }
           } else if (facetQuery) {
-            let facetMatch = schema.document.all().models.filter((doc) => {
+            // Product/area search
+            let facetMatch = docModels.filter((doc) => {
               return doc.attrs.product
                 .toLowerCase()
                 .includes(facetQuery.toLowerCase());
@@ -85,15 +140,48 @@ export default function (mirageConfig) {
           } else if (query !== undefined) {
             /**
              * A query exists, but may be empty.
-             * Typically, this is a query for a document title or product,
+             * Typically, this is a query for a document, project or product,
              * but sometimes it's a query by some optionalFilters.
              */
+            if (indexName?.includes("projects")) {
+              const projects = schema.projects
+                .all()
+                .models.filter((project) => {
+                  return (
+                    project.attrs.title
+                      .toLowerCase()
+                      .includes(query.toLowerCase()) ||
+                    project.attrs.description
+                      ?.toLowerCase()
+                      .includes(query.toLowerCase())
+                  );
+                });
+
+              const hits = projects.map((project) => {
+                return {
+                  ...project.attrs,
+                  objectID: project.attrs.id,
+                };
+              });
+
+              return new Response(
+                200,
+                {},
+                {
+                  hits,
+                  nbHits: hits.length,
+                  nbPages: Math.ceil(hits.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, hits),
+                },
+              );
+            }
 
             let docMatches = [];
             let idsToExclude: string[] = [];
 
             const setDefaultDocMatches = () => {
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return (
                   doc.attrs.title.toLowerCase().includes(query.toLowerCase()) ||
                   doc.attrs.product.toLowerCase().includes(query.toLowerCase())
@@ -106,13 +194,23 @@ export default function (mirageConfig) {
             // Used by the dashboard to fetch docs awaiting review.
             if (filters?.includes("approvers")) {
               const approvers = filters.split("approvers:'")[1].split("'")[0];
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return doc.attrs.approvers.some((approver) => {
                   return approvers.includes(approver);
                 });
               });
 
-              return new Response(200, {}, { hits: docMatches });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: docMatches,
+                  nbHits: docMatches.length,
+                  nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, docMatches),
+                },
+              );
             }
 
             if (filters?.includes("NOT objectID")) {
@@ -136,12 +234,22 @@ export default function (mirageConfig) {
                 .split('docNumber:"')[1]
                 .split('"')[0];
 
-              docMatches = schema.document.all().models.filter((doc) => {
+              docMatches = docModels.filter((doc) => {
                 return doc.attrs.docNumber === docNumber;
               });
 
               // Duplicates are detected in the front end
-              return new Response(200, {}, { hits: docMatches });
+              return new Response(
+                200,
+                {},
+                {
+                  hits: docMatches,
+                  nbHits: docMatches.length,
+                  nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                  page,
+                  facets: getFacetsFromHits(facets, docMatches),
+                },
+              );
             } else if (filters) {
               const requestIsForDocsAwaitingReview =
                 filters.includes(`approvers:'${TEST_USER_EMAIL}'`) &&
@@ -149,7 +257,7 @@ export default function (mirageConfig) {
               const requestIsForProductDocs = filters.includes(`product:`);
 
               if (requestIsForDocsAwaitingReview) {
-                docMatches = schema.document.all().models.filter((doc) => {
+                docMatches = docModels.filter((doc) => {
                   return (
                     doc.attrs.approvers.includes(TEST_USER_EMAIL) &&
                     doc.attrs.status.toLowerCase().includes("review")
@@ -157,7 +265,7 @@ export default function (mirageConfig) {
                 });
               } else if (requestIsForProductDocs) {
                 const product = filters.split("product:")[1].split('"')[1];
-                docMatches = schema.document.all().models.filter((doc) => {
+                docMatches = docModels.filter((doc) => {
                   return doc.attrs.product === product;
                 });
               } else {
@@ -179,6 +287,9 @@ export default function (mirageConfig) {
               {
                 hits: docMatches.slice(0, HITS_PER_PAGE),
                 nbHits: docMatches.length,
+                nbPages: Math.ceil(docMatches.length / HITS_PER_PAGE),
+                page,
+                facets: getFacetsFromHits(facets, docMatches),
               },
             );
           } else {
@@ -190,8 +301,11 @@ export default function (mirageConfig) {
               200,
               {},
               {
-                hits: schema.document.all().models.slice(0, HITS_PER_PAGE),
-                nbHits: schema.document.all().models.length,
+                hits: docModels.slice(0, HITS_PER_PAGE),
+                nbHits,
+                nbPages,
+                page,
+                facets: getFacetsFromHits(facets, docModels),
               },
             );
           }
@@ -342,9 +456,20 @@ export default function (mirageConfig) {
 
       // Fetch a single project.
       this.get("/projects/:project_id", (schema, request) => {
+        const shouldAddToRecentlyViewed =
+          request.requestHeaders["Add-To-Recently-Viewed"];
+
         const project = schema.projects.findBy({
           id: request.params.project_id,
         });
+
+        if (shouldAddToRecentlyViewed) {
+          schema.recentlyViewedProjects.create({
+            id: project.attrs.id,
+            viewedTime: Date.now(),
+          });
+        }
+
         return new Response(200, {}, project.attrs);
       });
 
@@ -476,7 +601,6 @@ export default function (mirageConfig) {
           200,
           {},
           {
-            facets: [],
             Hits: drafts,
             params: "",
             page: 0,
@@ -496,8 +620,15 @@ export default function (mirageConfig) {
       });
 
       // Determine if a draft is shareable
-      this.get("/drafts/:document_id/shareable", () => {
-        return new Response(200, {}, { isShareable: false });
+      this.get("/drafts/:document_id/shareable", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+        return new Response(
+          200,
+          {},
+          { isShareable: document.attrs.isShareable },
+        );
       });
 
       // Update whether a draft is shareable.
@@ -572,6 +703,67 @@ export default function (mirageConfig) {
         }
       });
 
+      // Delete a draft
+      this.delete("/drafts/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.destroy();
+          return new Response(200, {}, {});
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /*************************************************************************
+       *
+       * Document approvals
+       *
+       *************************************************************************/
+
+      /**
+       * Used when approving a document.
+       * Adds the user's email to the `approvedBy` array.
+       */
+      this.post("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
+            const approvedBy = document.attrs.approvedBy || [];
+            document.update({
+              approvedBy: [...approvedBy, TEST_USER_EMAIL],
+            });
+          }
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
+      /**
+       * Used when rejecting an FRD.
+       */
+      this.delete("/approvals/:document_id", (schema, request) => {
+        const document = schema.document.findBy({
+          objectID: request.params.document_id,
+        });
+
+        if (document) {
+          document.update({
+            changesRequestedBy: [TEST_USER_EMAIL],
+          });
+
+          return new Response(200, {}, document.attrs);
+        }
+
+        return new Response(404, {}, {});
+      });
+
       /*************************************************************************
        *
        * HEAD requests
@@ -640,28 +832,6 @@ export default function (mirageConfig) {
       });
 
       /**
-       * Used when approving a document.
-       * Adds the user's email to the `approvedBy` array.
-       */
-      this.post("/approvals/:document_id", (schema, request) => {
-        const document = schema.document.findBy({
-          objectID: request.params.document_id,
-        });
-
-        if (document) {
-          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
-            const approvedBy = document.attrs.approvedBy || [];
-            document.update({
-              approvedBy: [...approvedBy, TEST_USER_EMAIL],
-            });
-          }
-          return new Response(200, {}, document.attrs);
-        }
-
-        return new Response(404, {}, {});
-      });
-
-      /**
        * Used by the AuthenticatedUserService to add and remove subscriptions.
        */
       this.post("/me/subscriptions", () => {
@@ -718,6 +888,12 @@ export default function (mirageConfig) {
               longName: "Product Requirements",
               description:
                 "Summarize a problem statement and outline a phased approach to addressing it.",
+            },
+            {
+              name: "FRD",
+              longName: "Funding Request",
+              description:
+                "Capture a budget request, along with the business justification and expected returns.",
             },
           ]);
         } else {
@@ -815,7 +991,21 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedDocs.all().models.map((doc) => {
           return doc.attrs;
         });
-        return new Response(200, {}, index.slice(0, 10));
+
+        return new Response(200, {}, index.length === 0 ? null : index);
+      });
+
+      /**
+       * Used in the dashboard to show recently viewed projects
+       */
+      this.get("/me/recently-viewed-projects", (schema) => {
+        let index = schema.recentlyViewedProjects
+          .all()
+          .models.map((project) => {
+            return project.attrs;
+          });
+
+        return new Response(200, {}, index.length === 0 ? null : index);
       });
 
       /**

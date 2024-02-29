@@ -77,7 +77,10 @@ export default class ProductAvatarComponent extends Component<ProductAvatarCompo
     <div
       data-test-product-avatar
       style={{this.colorStyles}}
-      class="product-badge avatar rounded-md {{this.productID}} {{this.size}}"
+      class="product-badge avatar
+        {{if this.sizeIsSmall 'rounded' 'rounded-md'}}
+        {{this.productID}}
+        {{this.size}}"
       ...attributes
     >
       {{#if this.iconIsShown}}

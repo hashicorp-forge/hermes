@@ -6,8 +6,9 @@ import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
+import { SearchResponse } from "instantsearch.js";
 
-export default class ResultsRoute extends Route {
+export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
@@ -35,14 +36,16 @@ export default class ResultsRoute extends Route {
   };
 
   async model(params: ResultsRouteParams) {
-    const searchIndex = this.configSvc.config.algolia_docs_index_name;
+    const docsIndex = this.configSvc.config.algolia_docs_index_name;
 
-    let [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
+    const [docFacets, docResults] = await Promise.all([
+      this.algolia.getFacets.perform(docsIndex, params),
+      this.algolia.getDocResults.perform(docsIndex, params),
     ]);
 
-    const hits = (results as { hits?: HermesDocument[] }).hits;
+    const typedDocResults = docResults as SearchResponse<HermesDocument>;
+
+    const hits = typedDocResults.hits;
 
     if (hits) {
       // Load owner information
@@ -51,6 +54,14 @@ export default class ResultsRoute extends Route {
 
     this.activeFilters.update(params);
 
-    return { facets, results };
+    return { docFacets, docResults: typedDocResults };
+  }
+
+  /**
+   * The actions to run when the route is deactivated.
+   * Resets the active filters for the next time the route is activated.
+   */
+  deactivate() {
+    this.activeFilters.reset();
   }
 }

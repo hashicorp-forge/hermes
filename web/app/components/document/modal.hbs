@@ -17,6 +17,7 @@
 
     {{#if this.errorIsShown}}
       <ModalAlertError
+        data-test-modal-error
         @onDismiss={{this.resetErrors}}
         @title={{this.errorTitle}}
         @description={{this.errorDescription}}

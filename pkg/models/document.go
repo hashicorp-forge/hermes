@@ -304,34 +304,14 @@ func (d *Document) GetProjects(db *gorm.DB) ([]Project, error) {
 		d.ID = doc.ID
 	}
 
-	// Find all Hermes document project related resources for the document.
-	var docRRs []ProjectRelatedResourceHermesDocument
-	if err := db.
-		Where("document_id = ?", d.ID).
-		Find(&docRRs).
-		Error; err != nil {
-		return nil, fmt.Errorf(
-			"error finding Hermes document project related resources: %w", err)
-	}
-
-	// Find all associated project related resources.
-	var rrs []ProjectRelatedResource
-	if err := db.
-		Model(&docRRs).
-		Association("RelatedResource").
-		Find(&rrs); err != nil {
-		return nil, fmt.Errorf(
-			"error finding project related resources: %w", err)
-	}
-
-	// Find all associated projects.
+	// Find all projects that have the document as a related resource.
 	var projs []Project
-	if err := db.
-		Model(&rrs).
-		Association("Project").
-		Find(&projs); err != nil {
-		return nil, fmt.Errorf(
-			"error finding projects: %w", err)
+	if err := db.Table("projects").
+		Joins("JOIN project_related_resources prr ON projects.id = prr.project_id").
+		Joins("JOIN project_related_resource_hermes_documents prrhd ON prr.related_resource_id = prrhd.id").
+		Where("prr.related_resource_type = ? AND prrhd.document_id = ?", "project_related_resource_hermes_documents", d.ID).
+		Find(&projs).Error; err != nil {
+		return nil, fmt.Errorf("error getting projects for document: %w", err)
 	}
 
 	return projs, nil

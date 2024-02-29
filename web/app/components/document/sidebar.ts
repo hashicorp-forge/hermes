@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import { getOwner } from "@ember/application";
 import { inject as service } from "@ember/service";
 import {
+  dropTask,
   enqueueTask,
   keepLatestTask,
   restartableTask,
@@ -12,7 +13,7 @@ import {
 } from "ember-concurrency";
 import { capitalize, dasherize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
-import { debounce } from "@ember/runloop";
+import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
 import RouterService from "@ember/routing/router-service";
 import SessionService from "hermes/services/session";
@@ -33,13 +34,13 @@ import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resourc
 import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
+import RecentlyViewedService from "hermes/services/recently-viewed";
 
 interface DocumentSidebarComponentSignature {
   Args: {
     profile: PersonModel;
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
-    deleteDraft: (docId: string) => void;
     isCollapsed: boolean;
     toggleCollapsed: () => void;
   };
@@ -66,6 +67,7 @@ const SHARE_BUTTON_SELECTOR = "#sidebar-header-copy-url-button";
 export default class DocumentSidebarComponent extends Component<DocumentSidebarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare recentlyViewed: RecentlyViewedService;
   @service declare router: RouterService;
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
@@ -105,9 +107,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors: string[] = this.args.document.contributors || [];
 
   @tracked approvers: string[] = this.args.document.approvers || [];
+
   @tracked product = this.args.document.product || "";
 
   @tracked status = this.args.document.status;
+
+  /**
+   * Whether the user has left the approver role since page load.
+   * Dictates the "leaving..." state of the footer.
+   */
+  @tracked protected hasJustLeftApproverRole = false;
 
   /**
    * Projects this document is associated with.
@@ -143,6 +152,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * request finally completes. Used to reactively update the UI.
    */
   @tracked private newDraftVisibilityIcon: DraftVisibilityIcon | null = null;
+
+  /**
+   * Whether the Approvers list is shown.
+   * True except immediately after the user leaves the approver role.
+   * See note in `leaveApproverRole` for more information.
+   */
+  @tracked protected approversAreShown = true;
+
+  /**
+   * Whether an error is shown in the projects section.
+   * True when the `loadRelatedProjects` task fails.
+   * Reset when the user retries the request.
+   */
+  @tracked protected projectsErrorIsShown = false;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -258,10 +281,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("_body must exist", this._body);
     return this._body;
   }
-
-  get docIsLocked() {
-    return this.args.document?.locked;
-  }
+  /**
+   * Whether the document is locked to editing.
+   * True when a document is corrupt or has suggestions in the header.
+   * Initially set to the passed-in property; set true when a 423 is thrown.
+   */
+  @tracked protected docIsLocked = this.args.document?.locked;
 
   get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
@@ -270,31 +295,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       customEditableFields[field]["value"] = this.args.document[field];
     }
     return customEditableFields;
-  }
-
-  get approveButtonText() {
-    if (!this.hasApproved) {
-      return "Approve";
-    } else {
-      return "Already approved";
-    }
-  }
-
-  get requestChangesButtonText() {
-    // FRDs are a special case that can be approved or not approved.
-    if (this.args.document.docType === "FRD") {
-      if (!this.hasRequestedChanges) {
-        return "Not approved";
-      } else {
-        return "Already not approved";
-      }
-    }
-
-    if (!this.hasRequestedChanges) {
-      return "Request changes";
-    } else {
-      return "Already requested changes";
-    }
   }
 
   @action onDocTypeCheckboxChange(event: Event) {
@@ -377,18 +377,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  // hasApproved returns true if the logged in user has approved the document.
-  get hasApproved() {
-    return this.args.document.approvedBy?.includes(this.args.profile.email);
-  }
+  /**
+   * Whether the viewer has approved the document.
+   * True if their email is in the document's `approvedBy` array,
+   * and immediately when their approval completes.
+   */
+  @tracked protected hasApproved = this.args.document.approvedBy?.includes(
+    this.args.profile.email,
+  );
 
-  // hasRequestedChanges returns true if the logged in user has requested
-  // changes of the document.
-  get hasRequestedChanges() {
-    return this.args.document.changesRequestedBy?.includes(
-      this.args.profile.email,
-    );
-  }
+  /**
+   * Whether the viewer has requested changes to the document.
+   * True if their email is in the document's `changesRequestedBy` array,
+   * and immediately when their request completes.
+   */
+  @tracked protected hasRejectedFRD =
+    this.args.document.changesRequestedBy?.includes(this.args.profile.email);
 
   /**
    * Whether the doc status is approved. Used to determine editing privileges.
@@ -454,11 +458,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   /**
    * Whether the footer is shown.
-   * True for editors who may need to see the "doc is locked" message,
-   * as well as approvers and owners who need doc-management controls.
+   * True for owners and approvers who may need to see either the
+   * "doc is locked" message or the doc-management controls, except
+   * immediately after the user leaves the approver role.
    */
   protected get footerIsShown() {
-    return this.isApprover || this.isOwner || this.isContributor;
+    return !this.hasJustLeftApproverRole && (this.isApprover || this.isOwner);
   }
 
   /**
@@ -497,14 +502,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     assert("route must exist", route);
     route.refresh();
   }
-
-  @action maybeShowFlashError(error: Error, title: string) {
-    if (!this.modalIsShown) {
-      this.showFlashError(error, title);
+  /**
+   * The action to lock a document when a 423 error is thrown.
+   * Called by the `maybeShowFlashError` method as well as
+   * right before any errors are thrown.
+   */
+  @action private maybeLockDoc(error: Error) {
+    if (this.fetchSvc.getErrorCode(error) === 423) {
+      this.docIsLocked = true;
     }
   }
 
-  showFlashError(error: Error, title: string) {
+  private showFlashError(error: Error, title: string) {
     this.flashMessages.critical(error.message, {
       title,
       preventDuplicates: true,
@@ -532,14 +541,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * rich information in the list.
    */
   protected loadRelatedProjects = task(async () => {
-    const projectPromises = this.args.document.projects?.map((project) => {
-      return this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects/${project}`)
-        .then((response) => response?.json());
-    });
+    this.projectsErrorIsShown = false;
 
-    const projects = await Promise.all(projectPromises ?? []);
-    this._projects = projects;
+    try {
+      const projectPromises = this.args.document.projects?.map((project) => {
+        return this.fetchSvc
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/projects/${project}`,
+          )
+          .then((response) => response?.json());
+      });
+      const projects = await Promise.all(projectPromises ?? []);
+      this._projects = projects;
+    } catch (error) {
+      this.projectsErrorIsShown = true;
+    }
   });
 
   /**
@@ -563,7 +579,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
           shareButton.classList.add("out");
 
-          void this.fetchSvc.fetch(
+          const fetchPromise = this.fetchSvc.fetch(
             `/api/${this.configSvc.config.api_version}/drafts/${this.docID}/shareable`,
             {
               method: "PUT",
@@ -574,8 +590,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             },
           );
 
-          // Give time for the link icon to animate out
-          await timeout(Ember.testing ? 0 : 300);
+          await Promise.all([fetchPromise, timeout(Ember.testing ? 0 : 300)]);
 
           // With the animation done, we can now remove the button.
           this._docIsShareable = false;
@@ -599,11 +614,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           // Kick off the timer for the "link created" state.
           void this.showCreateLinkSuccessMessage.perform();
         }
-      } catch (error: unknown) {
-        this.showFlashError(
-          error as Error,
-          "Unable to update draft visibility",
-        );
+      } catch (error) {
+        const e = error as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to update draft visibility");
       } finally {
         // reset the new-visibility-intent icon
         this.newDraftVisibilityIcon = null;
@@ -612,9 +626,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   );
 
   saveProduct = keepLatestTask(async (product: string) => {
-    this.product = product;
-    await this.save.perform("product", this.product);
-    // productAbbreviation is computed by the back end
+    try {
+      this.product = product;
+      await this.save.perform("product", this.product);
+      // productAbbreviation is computed by the back end
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to save product");
+    }
   });
 
   get saveIsRunning() {
@@ -640,7 +660,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           [field]: serializedValue,
         });
       } catch (err) {
-        this.showFlashError(err as Error, "Unable to save document");
+        const e = err as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to save document");
       }
     }
   });
@@ -668,7 +690,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
             customFields: [field],
           });
         } catch (err) {
-          this.showFlashError(err as Error, "Unable to save document");
+          const e = err as Error;
+          this.maybeLockDoc(e);
+          this.showFlashError(e, "Unable to save document");
         }
       }
     },
@@ -686,9 +710,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           body: JSON.stringify(fields),
         },
       );
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to save document");
-      throw error;
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to save document");
     } finally {
       this.refreshRoute();
     }
@@ -720,9 +745,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       await this.waitForDocNumber.perform();
       this.requestReviewModalIsShown = false;
       this.docPublishedModalIsShown = true;
-    } catch (error: unknown) {
+    } catch (error) {
+      this.maybeLockDoc(error as Error);
       this.draftWasPublished = null;
-      this.maybeShowFlashError(error as Error, "Unable to request review");
+      // trigger the modal error
       throw error;
     }
   });
@@ -746,12 +772,30 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.docNumberLookupHasFailed = true;
   });
 
-  deleteDraft = task(async () => {
+  protected deleteDraft = dropTask(async () => {
     try {
-      await this.args.deleteDraft(this.docID);
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to delete draft");
-      throw error;
+      await this.fetchSvc.fetch(
+        `/api/${this.configSvc.config.api_version}/drafts/` + this.docID,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      void this.recentlyViewed.fetchAll.perform();
+
+      this.flashMessages.add({
+        message: "Document draft deleted",
+        title: "Done!",
+      });
+
+      this.router.transitionTo("authenticated.my.documents");
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+
+      // trigger the modal error
+      throw e;
     }
   });
 
@@ -812,6 +856,61 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * The action to leave the approver role.
+   * Updates the local approvers array and saves it to the back end.
+   * On success, shows a success message. On failure, shows an error message
+   * and reverts the local approvers array.
+   */
+  protected leaveApproverRole = task(async () => {
+    const cachedApprovers = this.approvers;
+
+    try {
+      this.approvers = this.approvers.filter(
+        (e) => e !== this.args.profile.email,
+      );
+
+      this.approvers = this.approvers;
+
+      await this.save.perform("approvers", this.approvers);
+
+      /**
+       * This is an unfortunate hack to re-render the approvers list
+       * after the user leaves the approver role. Because the EditableField
+       * component has its own caching logic, it doesn't inherit changes
+       * from external components. This can be changed in the future, but will
+       * require a refactor of the EditableField and sidebar components.
+       *
+       * TODO: Improve this
+       */
+      this.approversAreShown = false;
+      schedule("afterRender", () => {
+        this.approversAreShown = true;
+      });
+
+      // We set this so that the "Leaving..." state
+      // is shown until the UI updates.
+      this.hasJustLeftApproverRole = true;
+
+      this.flashMessages.add({
+        message: "You've left the approver role",
+        title: "Done!",
+      });
+    } catch (error) {
+      this.approvers = cachedApprovers;
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Error leaving approver role");
+    } finally {
+      setTimeout(() => {
+        // reset state after a short delay
+        this.hasJustLeftApproverRole = false;
+      }, 5000);
+    }
+  });
+
+  /**
    * Fetches the draft's `isShareable` attribute and updates the local property.
    * Called when a document draft is rendered.
    */
@@ -828,27 +927,46 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     } catch {}
   });
 
-  approve = task(async (options?: { skipSuccessMessage: boolean }) => {
-    try {
-      await this.fetchSvc.fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-      if (!options?.skipSuccessMessage) {
-        this.showFlashSuccess("Done!", "Document approved");
+  /**
+   * The action to approve a document. Triggered by clicking the "Approve"
+   * button in the footer. Saves the document's `approvedBy` array, which
+   * adds an approval badge to the approver's avatar. On success, shows
+   * the read-only "Approved" mock-button state.
+   */
+  approve = task(
+    async (options?: { skipSuccessMessage: boolean } | MouseEvent) => {
+      try {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+
+        this.hasApproved = true;
+
+        if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
+          this.showFlashSuccess("Done!", "Document approved");
+        }
+      } catch (error) {
+        const e = error as Error;
+        this.maybeLockDoc(e);
+        this.showFlashError(e, "Unable to approve");
+      } finally {
+        this.refreshRoute();
       }
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Unable to approve");
-      throw error;
-    }
+    },
+  );
 
-    this.refreshRoute();
-  });
-
-  requestChanges = task(async () => {
+  /**
+   * The action to reject an FRD, a doc-specific type of approval.
+   * Triggered by approvers clicking the thumbs-down button.
+   * Saves the document's `changesRequestedBy` array, which adds a
+   * rejection badge to the approver's avatar. On success, shows
+   * the read-only "Rejected" mock-button state.
+   */
+  rejectFRD = task(async () => {
     try {
       await this.fetchSvc.fetch(
         `/api/${this.configSvc.config.api_version}/approvals/${this.docID}`,
@@ -857,18 +975,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           headers: { "Content-Type": "application/json" },
         },
       );
-      // Add a notification for the user
-      let msg = "Requested changes for document";
-      // FRDs are a special case that can be approved or not approved.
-      if (this.args.document.docType === "FRD") {
-        msg = "Document marked as not approved";
-      }
-      this.showFlashSuccess("Done!", msg);
-    } catch (error: unknown) {
-      this.maybeShowFlashError(error as Error, "Change request failed");
-      throw error;
+
+      this.hasRejectedFRD = true;
+
+      this.showFlashSuccess("Done!", "FRD rejected");
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Couldn't process your request");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   changeDocumentStatus = task(async (newStatus: string) => {
@@ -886,15 +1003,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         "Done!",
         `Document status changed to "${newStatus}"`,
       );
-    } catch (error: unknown) {
+    } catch (error) {
       this.status = cachedStatus;
-      this.maybeShowFlashError(
-        error as Error,
-        "Unable to change document status",
-      );
-      throw error;
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to change document status");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
@@ -948,12 +1066,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           }),
         },
       );
-    } catch (error: unknown) {
+    } catch (error) {
       this._projects = cachedProjects;
       this._projects = this._projects;
-      this.maybeShowFlashError(error as Error, "Unable to remove project");
+
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to remove project");
+    } finally {
+      this.refreshRoute();
     }
-    this.refreshRoute();
   });
 
   /**
@@ -1011,10 +1133,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           }),
         },
       );
-    } catch (e: unknown) {
+    } catch (error) {
       this._projects = cachedProjects;
       this._projects = this._projects;
-      this.maybeShowFlashError(e as Error, "Unable to add document to project");
+
+      const e = error as Error;
+
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Unable to add document to project");
     }
   });
 }

@@ -1,6 +1,10 @@
 import Component from "@glimmer/component";
 
-interface HeaderComponentSignature {}
+interface HeaderComponentSignature {
+  Args: {
+    query?: string;
+  };
+}
 
 export default class HeaderComponent extends Component<HeaderComponentSignature> {}
 

@@ -10,6 +10,12 @@ interface DocTileMediumComponentSignature {
   Args: {
     doc: RelatedHermesDocument | HermesDocument;
     avatarIsLoading?: boolean;
+
+    /**
+     * The search query associated with the current view.
+     * Used to highlight search terms in the document title.
+     */
+    query?: string | null;
   };
   Blocks: {
     default: [];
@@ -46,6 +52,16 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
 
   protected get docIsDraft() {
     return this.args.doc.status?.toLowerCase() === "wip";
+  }
+
+  /**
+   * The snippet, if the doc is a search result.
+   * We show this instead of the doc description if it exists.
+   */
+  protected get snippet() {
+    if ("_snippetResult" in this.args.doc) {
+      return this.args.doc._snippetResult?.content.value;
+    }
   }
 }
 

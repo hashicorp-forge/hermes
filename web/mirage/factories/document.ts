@@ -31,6 +31,7 @@ export default Factory.extend({
   modifiedTime: 1,
   createdTime: 1,
   appCreated: true,
+  isShareable: false,
   isDraft: true,
   docNumber() {
     // @ts-ignore - Mirage types are wrong

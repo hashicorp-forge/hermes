@@ -34,13 +34,18 @@ export interface SortByFacets {
   };
 }
 
+interface FacetArrayItem {
+  name: FacetName;
+  values: FacetDropdownObjects | null;
+}
+
 export type ActiveFilters = {
   [name in FacetName]: string[];
 };
 
 interface ToolbarComponentSignature {
   Args: {
-    facets?: FacetDropdownGroups;
+    facets?: Partial<FacetDropdownGroups>;
   };
 }
 
@@ -55,7 +60,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   /**
    * The statuses available as filters.
    */
-  protected get statuses(): FacetDropdownObjects | null {
+  protected get statuses(): FacetDropdownObjects {
     let statuses: FacetDropdownObjects = {};
     for (let status in this.args.facets?.status) {
       if (
@@ -71,12 +76,29 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       }
     }
 
-    if (Object.keys(statuses).length === 0) {
-      // This will disable the status dropdown
-      return null;
-    } else {
-      return statuses;
-    }
+    return statuses;
+  }
+
+  protected get facets() {
+    if (!this.args.facets) return;
+
+    let facetArray: FacetArrayItem[] = [];
+
+    Object.entries(this.args.facets).forEach(([key, value]) => {
+      if (key === FacetName.Status) {
+        facetArray.push({ name: key, values: this.statuses });
+      } else {
+        facetArray.push({ name: key as FacetName, values: value });
+      }
+    });
+
+    const order = ["docType", "status", "product", "owners"];
+
+    facetArray.sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    });
+
+    return facetArray;
   }
 
   /**
