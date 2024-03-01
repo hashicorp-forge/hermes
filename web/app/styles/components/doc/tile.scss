@@ -1,11 +1,3 @@
-.doc-tile-title {
-  @apply overflow-hidden text-display-200 font-semibold text-color-foreground-strong;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-}
-
 .tile {
   .vertical-line {
     @apply text-color-foreground-faint opacity-50;
