@@ -116,6 +116,19 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Validate document status.
+			if doc.Status != "WIP" {
+				srv.Logger.Warn("document is not in WIP status",
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				http.Error(w,
+					"Cannot create review for a document that is not in WIP status",
+					http.StatusUnprocessableEntity)
+				return
+			}
+
 			// Get latest product number.
 			latestNum, err := models.GetLatestProductNumber(
 				tx, doc.DocType, doc.Product)
