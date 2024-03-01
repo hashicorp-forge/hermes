@@ -23,7 +23,7 @@ module(
     setupMirage(hooks);
 
     test("it capitalizes project statuses", async function (this: Context, assert) {
-      this.filter = ProjectStatus.Active;
+      this.set("filter", ProjectStatus.Active);
 
       await render<Context>(
         hbs`<Header::ActiveFilterListItem @filter={{this.filter}} />`,
@@ -33,19 +33,19 @@ module(
         .dom(LINK)
         .hasText(projectStatusObjects[ProjectStatus.Active].label);
 
-      this.filter = ProjectStatus.Completed;
+      this.set("filter", ProjectStatus.Completed);
 
       assert
         .dom(LINK)
         .hasText(projectStatusObjects[ProjectStatus.Completed].label);
 
-      this.filter = ProjectStatus.Archived;
+      this.set("filter", ProjectStatus.Archived);
 
       assert
         .dom(LINK)
         .hasText(projectStatusObjects[ProjectStatus.Archived].label);
 
-      this.filter = "foo";
+      this.set("filter", "foo");
 
       assert
         .dom(LINK)
