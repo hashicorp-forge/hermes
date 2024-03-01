@@ -8,7 +8,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hashicorp/go-hclog"
 )
@@ -97,8 +99,22 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 	// Get the public key from the regional endpoint.
 	url := fmt.Sprintf("https://public-keys.auth.elb.%s.amazonaws.com/%s",
 		oa.cfg.AWSRegion, kid)
-	resp, err := http.Get(url)
-	if err != nil {
+	var resp *http.Response
+	// Execute the HTTP request with exponential backoff.
+	bo := backoff.NewExponentialBackOff()
+	bo.MaxElapsedTime = 2 * time.Minute
+	err = backoff.RetryNotify(func() error {
+		resp, err = http.Get(url)
+		return err
+	}, bo,
+		func(err error, d time.Duration) {
+			oa.log.Warn("error getting ELB public key (retrying)",
+				"error", err,
+				"delay", d,
+			)
+		},
+	)
+	if err != nil || resp == nil {
 		return "", fmt.Errorf("error getting ELB public key: %w", err)
 	}
 	body, err := io.ReadAll(resp.Body)
