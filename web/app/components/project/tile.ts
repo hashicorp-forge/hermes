@@ -12,6 +12,11 @@ interface ProjectTileComponentSignature {
   Element: HTMLDivElement;
   Args: {
     project: HermesProject;
+    /**
+     * The search query, if any, that led to this project being shown.
+     * Used to highlight the matching text in the title.
+     */
+    query?: string;
   };
 }
 

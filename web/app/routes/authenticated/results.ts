@@ -6,8 +6,9 @@ import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
-import { HermesProject } from "hermes/types/project";
+import { HermesProject, HermesProjectHit } from "hermes/types/project";
 import { SearchResponse } from "instantsearch.js";
+import FetchService from "hermes/services/fetch";
 
 export enum SearchScope {
   All = "All",
@@ -17,6 +18,7 @@ export enum SearchScope {
 
 export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare store: StoreService;
@@ -95,7 +97,7 @@ export default class AuthenticatedResultsRoute extends Route {
     ]);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
-    const typedProjectResults = projectResults as SearchResponse<HermesProject>;
+    let typedProjectResults = projectResults as SearchResponse<HermesProject>;
 
     if (docResults) {
       const docHits = typedDocResults.hits;
@@ -107,12 +109,22 @@ export default class AuthenticatedResultsRoute extends Route {
     }
 
     if (projectResults) {
-      const projectHits = typedProjectResults.hits;
+      let { hits } = typedProjectResults;
 
-      if (projectHits) {
-        // Fetch products associated with each project
-        // TODO;
-        // debugger;
+      if (hits) {
+        /**
+         * Replace the hits with the full project models
+         */
+        typedProjectResults.hits = await Promise.all(
+          hits.map(
+            async (hit: HermesProjectHit) =>
+              await this.fetchSvc
+                .fetch(
+                  `/api/${this.configSvc.config.api_version}/projects/${hit.objectID}`,
+                )
+                .then((resp) => resp?.json()),
+          ),
+        );
       }
     }
 

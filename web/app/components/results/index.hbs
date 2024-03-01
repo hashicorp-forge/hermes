@@ -50,7 +50,11 @@
         <ol class="divided-list">
           {{#each this.projectHits as |p|}}
             <li data-test-project-list-item class="group relative">
-              <Project::Tile data-test-project-link @project={{p}} />
+              <Project::Tile
+                data-test-project-link
+                @project={{p}}
+                @query={{@query}}
+              />
             </li>
           {{/each}}
         </ol>
