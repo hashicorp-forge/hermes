@@ -125,7 +125,12 @@ export default function (mirageConfig) {
 
               // Query Mirage using the search params
 
-              const hits = results.models.map((hit) => hit.attrs);
+              const hits = results.models.map((hit) => {
+                return {
+                  ...hit.attrs,
+                  objectID: hit.attrs.id,
+                };
+              });
 
               return new Response(
                 200,

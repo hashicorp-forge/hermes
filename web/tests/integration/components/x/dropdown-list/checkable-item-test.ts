@@ -83,4 +83,15 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom(ITEM).hasStyle({ "grid-template-areas": '"label count check"' });
   });
+
+  test("it takes a `shouldCapitalize` argument", async function (this: XDropdownListCheckableItemTestContext, assert) {
+    await render<XDropdownListCheckableItemTestContext>(hbs`
+      <X::DropdownList::CheckableItem
+        @value="foo"
+        @shouldCapitalize={{true}}
+      />
+    `);
+
+    assert.dom(ITEM).hasText("Foo", "the value is capitalized");
+  });
 });

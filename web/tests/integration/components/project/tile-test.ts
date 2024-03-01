@@ -11,6 +11,7 @@ import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
 import { PROJECT_TILE_MAX_PRODUCTS } from "hermes/components/project/tile";
 
 const PROJECT_TITLE = "[data-test-title]";
+const PROJECT_LINK = "[data-test-project-tile-link]";
 const JIRA_LINK = "[data-test-jira-link]";
 const PROJECT_JIRA_TYPE_IMAGE = "[data-test-issue-type-image]";
 const PROJECT_JIRA_KEY = "[data-test-jira-key]";
@@ -22,6 +23,7 @@ interface ProjectTileComponentTestContext extends MirageTestContext {
   project: HermesProject;
   jiraStatus: string;
   tileIsShown: boolean;
+  query: string;
 }
 
 module("Integration | Component | project/tile", function (hooks) {
@@ -219,5 +221,51 @@ module("Integration | Component | project/tile", function (hooks) {
 
     assert.dom(PRODUCT_AVATAR).exists({ count: PROJECT_TILE_MAX_PRODUCTS });
     assert.dom(ADDITIONAL_PRODUCTS_LABEL).hasText("+2");
+  });
+
+  test("it can handle HermesProjects and HermesProjectHits", async function (this: ProjectTileComponentTestContext, assert) {
+    await render<ProjectTileComponentTestContext>(hbs`
+      <Project::Tile @project={{this.project}} />
+    `);
+
+    // Note: Factory project has an `id` but no `objectID`
+
+    assert
+      .dom(PROJECT_TITLE)
+      .hasText(this.project.title, "project with an id renders");
+    assert
+      .dom(PROJECT_LINK)
+      .hasAttribute("href", `/projects/${this.project.id}`);
+
+    this.server.create("project", {
+      id: null,
+      objectID: "123",
+    });
+
+    const project = this.server.schema.projects.findBy({
+      objectID: "123",
+    }).attrs;
+
+    this.set("project", project);
+
+    assert.dom(PROJECT_TITLE).hasText(project.title);
+    assert
+      .dom(PROJECT_LINK)
+      .hasAttribute("href", `/projects/${project.objectID}`);
+  });
+
+  test("it query-highlights the title", async function (this: ProjectTileComponentTestContext, assert) {
+    const query = "Test";
+    const title = `The ${query} Project`;
+
+    this.set("project.title", title);
+    this.set("query", query);
+
+    await render<ProjectTileComponentTestContext>(hbs`
+      <Project::Tile @project={{this.project}} @query={{this.query}} />
+    `);
+
+    assert.dom(PROJECT_TITLE).hasText(title);
+    assert.dom(`${PROJECT_TITLE} mark`).hasText(query);
   });
 });

@@ -46,6 +46,7 @@ const PROJECT_RESULTS_CONTAINER = "[data-test-project-results]";
 const PROJECT_RESULTS_HEADER = `${PROJECT_RESULTS_CONTAINER} ${SECTION_HEADER}`;
 const PROJECT_COUNT = `${PROJECT_RESULTS_CONTAINER} ${COUNT}`;
 const PROJECT_LINK = "[data-test-project-link]";
+const PROJECT_PRODUCT_AVATAR = `${PROJECT_LINK} [data-test-product-avatar]`;
 
 const DOC_RESULTS_CONTAINER = "[data-test-doc-results]";
 const DOC_RESULTS_HEADER = `${DOC_RESULTS_CONTAINER} ${SECTION_HEADER}`;
@@ -134,6 +135,12 @@ module("Acceptance | authenticated/results", function (hooks) {
 
     assert.dom(PROJECT_COUNT).containsText(projectCount.toString());
     assert.dom(PROJECT_LINK).exists({ count: projectMax });
+    assert
+      .dom(PROJECT_PRODUCT_AVATAR)
+      .exists(
+        { count: projectMax },
+        "product avatars are loaded from the back end",
+      );
 
     assert
       .dom(DOC_RESULTS_HEADER)

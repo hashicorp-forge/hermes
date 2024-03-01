@@ -4,14 +4,18 @@ import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesProject, JiraIssue } from "hermes/types/project";
+import {
+  HermesProject,
+  HermesProjectHit,
+  JiraIssue,
+} from "hermes/types/project";
 
 export const PROJECT_TILE_MAX_PRODUCTS = 3;
 
 interface ProjectTileComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    project: HermesProject;
+    project: HermesProject | HermesProjectHit;
     /**
      * The search query, if any, that led to this project being shown.
      * Used to highlight the matching text in the title.
