@@ -7,7 +7,7 @@
 {{/unless}}
 
 {{#if this.nbHits}}
-  <div class="{{if this.scopeIsAll 'mt-[30px]'}} grid gap-9">
+  <div class="{{if this.scopeIsAll 'mt-[30px]'}} grid gap-10">
     {{! Product/Areas }}
     {{#if this.productFacetHits}}
       <div data-test-product-results>
@@ -16,15 +16,14 @@
           @count={{this.productFacetHits.length}}
         />
         {{! All product areas }}
-        <ol class="flex flex-wrap gap-5">
+        <ol class="flex flex-wrap">
           {{#each this.productFacetHits as |product|}}
             <li data-test-product-list-item class="group relative">
               <LinkTo
                 data-test-product-link
                 @route="authenticated.product-areas.product-area"
                 @model={{dasherize product.value}}
-                {{! todo: hover, etc }}
-                class="flex h-10 items-center gap-3 text-display-300 font-semibold text-color-foreground-strong"
+                class="product-area-search-result"
               >
                 <Product::Avatar @product={{product.value}} />
                 <span>
