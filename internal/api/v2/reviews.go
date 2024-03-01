@@ -363,14 +363,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 			)
 
 			// Create shortcut in hierarchical folder structure.
-			shortcut, err := createShortcut(srv.Config, *doc, srv.GWService)
-			revertFuncs = append(revertFuncs, func() error {
-				if err := srv.GWService.DeleteFile(shortcut.Id); err != nil {
-					return fmt.Errorf("error deleting shortcut: %w", err)
-				}
-
-				return nil
-			})
+			_, err = createShortcut(srv.Config, *doc, srv.GWService)
 			if err != nil {
 				srv.Logger.Error("error creating shortcut",
 					"error", err,
