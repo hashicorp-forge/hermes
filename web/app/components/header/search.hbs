@@ -132,9 +132,9 @@
                 </dd.LinkTo>
               </li>
             {{else if dd.attrs.viewAllResults}}
-              {{! View all docs link }}
+              {{! View all results link }}
               <dd.LinkTo
-                data-test-view-all-docs-link
+                data-test-view-all-results-link
                 {{did-insert this.registerViewAllResultsLink}}
                 @route="authenticated.results"
                 @query={{this.viewAllResultsQuery}}
@@ -142,7 +142,7 @@
                 <div
                   class="flex items-center gap-1.5 px-1 pt-2 pb-2.5 text-body-100 text-color-foreground-faint"
                 >
-                  <span>View all document results</span>
+                  <span>View all results</span>
                   <FlightIcon
                     @name="arrow-right"
                     class="text-color-foreground-disabled"

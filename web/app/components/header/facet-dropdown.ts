@@ -8,7 +8,7 @@ interface HeaderFacetDropdownComponentSignature {
   Element: HTMLDivElement;
   Args: {
     name: FacetName;
-    facets: FacetDropdownObjects | null;
+    facets?: FacetDropdownObjects | null;
   };
 }
 

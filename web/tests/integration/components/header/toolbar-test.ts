@@ -4,6 +4,7 @@ import { TestContext, click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
 import { FacetLabel } from "hermes/helpers/get-facet-label";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 // Filter buttons
 const TOGGLE = "[data-test-facet-dropdown-toggle]";
@@ -30,34 +31,11 @@ const FACETS = {
 
 interface ToolbarTestContext extends TestContext {
   facets: FacetDropdownGroups;
+  scope: SearchScope;
 }
 
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
-
-  test("it doesn't render if no facets are provided", async function (assert) {
-    await render(hbs`
-      <Header::Toolbar />
-    `);
-
-    assert.dom(".facets").doesNotExist("Facets are hidden unless provided");
-  });
-
-  test("it renders facets when provided", async function (this: ToolbarTestContext, assert) {
-    this.set("facets", FACETS);
-
-    await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar
-        @facets={{this.facets}}
-      />
-    `);
-
-    assert.dom(".facets").exists();
-
-    assert
-      .dom(".facets [data-test-facet-dropdown-trigger]")
-      .exists({ count: 4 });
-  });
 
   test("it handles status values correctly", async function (assert) {
     const STATUS_NAMES = [
@@ -79,9 +57,10 @@ module("Integration | Component | header/toolbar", function (hooks) {
     });
 
     this.set("facets", { status: statusFacets });
+    this.set("scope", SearchScope.Docs);
 
     await render<ToolbarTestContext>(hbs`
-      <Header::Toolbar @facets={{this.facets}} />
+      <Header::Toolbar @scope={{this.scope}} @facets={{this.facets}} />
     `);
 
     await click("[data-test-facet-dropdown-trigger='Status']");

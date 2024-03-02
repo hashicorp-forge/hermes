@@ -57,8 +57,7 @@ export default class AuthenticatedDocumentsRoute extends Route {
       await this.store.maybeFetchPeople.perform(hits);
     }
 
-    this.activeFilters.update(params);
-
+    this.activeFilters.update({ ...params, scope: undefined });
     return {
       facets,
       results: typedResults,

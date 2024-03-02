@@ -14,6 +14,7 @@ import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
 import FetchService from "hermes/services/fetch";
 import { HermesProjectHit } from "hermes/types/project";
+import { SearchScope } from "hermes/routes/authenticated/results";
 
 export interface SearchResultObjects {
   [key: string]: unknown | HermesDocumentObjects | HermesProjectHitObjects;
@@ -71,6 +72,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
   protected get viewAllResultsQuery() {
     return {
       q: this.query,
+      scope: SearchScope.All,
       page: 1,
       docType: [],
       product: [],

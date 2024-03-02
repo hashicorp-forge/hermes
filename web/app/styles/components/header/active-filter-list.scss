@@ -1,12 +1,8 @@
 .active-filter-list {
-  @apply flex items-start pt-6;
+  @apply flex items-start gap-1;
 
   h3 {
     @apply mr-4 flex h-[30px] shrink-0 items-center font-semibold text-color-foreground-strong;
-  }
-
-  .active-filter-list-container {
-    @apply flex min-h-[30px] flex-wrap items-center;
   }
 
   .clear-all-link {

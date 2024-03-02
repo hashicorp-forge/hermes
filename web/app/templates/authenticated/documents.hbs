@@ -5,7 +5,7 @@
 <Documents::Table
   @docs={{this.model.results.hits}}
   @nbPages={{this.model.results.nbPages}}
-  @currentPage={{(add this.model.results.page 1)}}
+  @currentPage={{(add (or this.model.results.page 0) 1)}}
   @sortDirection={{this.sortDirection}}
   @currentSort="createdTime"
 />

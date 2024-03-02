@@ -1,6 +1,7 @@
 import Helper from "@ember/component/helper";
 import { inject as service } from "@ember/service";
 import { FacetName } from "hermes/components/header/toolbar";
+import { SearchScope } from "hermes/routes/authenticated/results";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface GetFacetQueryHashHelperSignature {
@@ -29,10 +30,13 @@ export default class GetFacetQueryHashHelper extends Helper<GetFacetQueryHashHel
 
     if (isSelected) {
       return Object.fromEntries(
-        Object.entries(this.activeFilters.index).map(([key, value]) => [
-          key,
-          value.filter((filter) => filter !== clickedFilter),
-        ]),
+        Object.entries(this.activeFilters.index).map(([key, value]) => {
+          if (typeof value === "string") {
+            return [key, value];
+          } else {
+            return [key, value?.filter((filter) => filter !== clickedFilter)];
+          }
+        }),
       );
     } else {
       return {

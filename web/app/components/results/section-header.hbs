@@ -1,0 +1,23 @@
+{{#if @query}}
+  <LinkTo
+    @route="authenticated.results"
+    @query={{@query}}
+    class="section-header"
+  >
+    <h4 class="hermes-h4">
+      {{@text}}
+    </h4>
+    <Hds::BadgeCount @text="{{@count}}" />
+    <FlightIcon
+      @name="chevron-right"
+      class="-ml-0.5 text-color-foreground-disabled"
+    />
+  </LinkTo>
+{{else}}
+  <div class="section-header">
+    <h4 class="hermes-h4">
+      {{@text}}
+    </h4>
+    <Hds::BadgeCount @text="{{@count}}" />
+  </div>
+{{/if}}

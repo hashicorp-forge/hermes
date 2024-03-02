@@ -4,14 +4,23 @@ import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesProject, JiraIssue } from "hermes/types/project";
+import {
+  HermesProject,
+  HermesProjectHit,
+  JiraIssue,
+} from "hermes/types/project";
 
 export const PROJECT_TILE_MAX_PRODUCTS = 3;
 
 interface ProjectTileComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    project: HermesProject;
+    project: HermesProject | HermesProjectHit;
+    /**
+     * The search query, if any, that led to this project being shown.
+     * Used to highlight the matching text in the title.
+     */
+    query?: string;
   };
 }
 
@@ -39,6 +48,19 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    * Set by the `fetchJiraIssue` task if the project has a jiraIssueID.
    */
   @tracked protected jiraIssue: JiraIssue | null = null;
+
+  /**
+   * The project ID used as our LinkTo model.
+   * If the project is an Algolia result, it has an `objectID`.
+   * If the project is retrieved from the back-end, it has an `id`.
+   */
+  protected get projectID() {
+    if ("objectID" in this.args.project) {
+      return this.args.project.objectID;
+    } else {
+      return this.args.project.id;
+    }
+  }
 
   /**
    * Whether the "+N" label is shown next to the product avatars.

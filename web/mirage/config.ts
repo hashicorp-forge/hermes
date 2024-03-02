@@ -104,10 +104,33 @@ export default function (mirageConfig) {
                 searchParams[filterType] = filterValue;
               });
 
+              /**
+               * We use status to determine if we're searching for projects or documents.
+               * If the status is present and set to a ProjectStatus value,
+               * we search for projects. Otherwise, we search for documents.
+               */
+              const maybeStatus = searchParams["status"];
+
+              let results;
+
+              switch (maybeStatus) {
+                case ProjectStatus.Active:
+                case ProjectStatus.Completed:
+                case ProjectStatus.Archived:
+                  results = this.schema.projects.where(searchParams);
+                  break;
+                default:
+                  results = this.schema.document.where(searchParams);
+              }
+
               // Query Mirage using the search params
 
-              const docResults = this.schema.document.where(searchParams);
-              const hits = docResults.models.map((doc) => doc.attrs);
+              const hits = results.models.map((hit) => {
+                return {
+                  ...hit.attrs,
+                  objectID: hit.attrs.id,
+                };
+              });
 
               return new Response(
                 200,

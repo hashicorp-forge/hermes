@@ -1,16 +1,107 @@
-<h2 data-test-results-subhead class="mb-6 text-display-300 font-semibold">
-  {{@docResults.nbHits}}
-  {{if (eq @docResults.nbHits 1) "match" "matches"}}
-</h2>
-<ol class="divided-list">
-  {{#each @docResults.hits as |doc|}}
-    <li data-test-doc-search-result class="group relative">
-      <Doc::TileMedium @doc={{doc}} @query={{@query}} />
-    </li>
-  {{/each}}
-</ol>
+{{#unless (and this.scopeIsAll this.nbHits)}}
+  {{! Hit count (not shown on the "All" screen unless saying "0 matches") }}
+  <h1 data-test-results-match-count class="mb-7 text-display-300 font-semibold">
+    {{this.nbHits}}
+    {{if (eq this.nbHits 1) "match" "matches"}}
+  </h1>
+{{/unless}}
 
-<Pagination
-  @currentPage={{(add (or @docResults.page 0) 1)}}
-  @nbPages={{@docResults.nbPages}}
-/>
+{{#if this.nbHits}}
+  <div class="{{if this.scopeIsAll 'mt-[30px]'}} grid gap-10">
+    {{! Product/Areas }}
+    {{#if this.productFacetHits}}
+      <div data-test-product-results>
+        <Results::SectionHeader
+          @text="Product/Areas"
+          @count={{this.productFacetHits.length}}
+        />
+        {{! All product areas }}
+        <ol class="flex flex-wrap">
+          {{#each this.productFacetHits as |product|}}
+            <li data-test-product-list-item class="group relative">
+              <LinkTo
+                data-test-product-link
+                @route="authenticated.product-areas.product-area"
+                @model={{dasherize product.value}}
+                class="product-area-search-result"
+              >
+                <Product::Avatar @product={{product.value}} />
+                <span>
+                  {{product.value}}
+                </span>
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ol>
+      </div>
+    {{/if}}
+    {{! Projects }}
+    {{#if this.projectHits}}
+      <div data-test-project-results>
+        {{#if this.scopeIsAll}}
+          <Results::SectionHeader
+            @text="Projects"
+            @query={{hash q=@query scope=this.projectsScope}}
+            @count={{@projectResults.nbHits}}
+          />
+        {{/if}}
+        {{! First 5 projects }}
+        <ol class="divided-list">
+          {{#each this.projectHits as |p|}}
+            <li data-test-project-list-item class="group relative">
+              <Project::Tile
+                data-test-project-link
+                @project={{p}}
+                @query={{@query}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+      </div>
+    {{/if}}
+    {{! Docs }}
+    {{#if this.docHits}}
+      <div data-test-doc-results>
+        {{#if this.scopeIsAll}}
+          <Results::SectionHeader
+            @text="Docs"
+            @query={{hash q=@query scope=this.docsScope}}
+            @count={{@docResults.nbHits}}
+          />
+        {{/if}}
+        {{! First page of results }}
+        <ol class="divided-list">
+          {{#each this.docHits as |doc|}}
+            <li data-test-doc-list-item class="group relative">
+              <Doc::TileMedium
+                data-test-doc-link
+                @doc={{doc}}
+                @query={{@query}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+        {{! Link to next page }}
+        {{#if this.nextPageLinkIsShown}}
+          <div class="mx-auto mt-8 mb-8 max-w-[830px]">
+            <Hds::Button
+              data-test-next-page-link
+              @color="secondary"
+              @text="Next page of docs"
+              @icon="arrow-right"
+              @iconPosition="trailing"
+              @isFullWidth={{true}}
+              @route="authenticated.results"
+              @query={{hash scope=this.docsScope page=2}}
+              class="py-3"
+            />
+          </div>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+  {{! Pagination }}
+  {{#unless this.scopeIsAll}}
+    <Pagination @currentPage={{this.page}} @nbPages={{this.nbPages}} />
+  {{/unless}}
+{{/if}}

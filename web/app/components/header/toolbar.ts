@@ -9,6 +9,8 @@ import {
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
+import { SearchScope } from "hermes/routes/authenticated/results";
+import { assert } from "@ember/debug";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -46,6 +48,8 @@ export type ActiveFilters = {
 interface ToolbarComponentSignature {
   Args: {
     facets?: Partial<FacetDropdownGroups>;
+    scope?: SearchScope;
+    query?: string;
   };
 }
 
@@ -58,34 +62,83 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
+   * Whether the facets are shown.
+   * True as long as the scope is not "All".
+   */
+  protected get facetsAreShown() {
+    return this.args.scope !== SearchScope.All;
+  }
+
+  /**
    * The statuses available as filters.
    */
   protected get statuses(): FacetDropdownObjects {
     let statuses: FacetDropdownObjects = {};
+
     for (let status in this.args.facets?.status) {
-      if (
-        status === "Approved" ||
-        status === "In-Review" ||
-        status === "In Review" ||
-        status === "Obsolete" ||
-        status === "WIP"
-      ) {
-        statuses[status] = this.args.facets?.status[
-          status
-        ] as FacetDropdownObjectDetails;
+      switch (status) {
+        case "Approved":
+        case "In-Review":
+        case "In Review":
+        case "Obsolete":
+        case "WIP":
+          statuses[status] = this.args.facets?.status[
+            status
+          ] as FacetDropdownObjectDetails;
+          break;
       }
     }
 
     return statuses;
   }
 
+  /**
+   * The facets, depending on the scope.
+   * If the facets object is empty, we return the default facets.
+   * Otherwise, we return the facets from the object.
+   * If the scope is "Docs", we replaces the "status" facet with
+   * the statuses from our getter.
+   */
   protected get facets() {
-    if (!this.args.facets) return;
+    const facetsObjectIsEmpty = Object.keys(this.args.facets ?? 0).length === 0;
+
+    if (facetsObjectIsEmpty) {
+      switch (this.args.scope) {
+        case SearchScope.Docs:
+          return [
+            {
+              name: FacetName.DocType,
+              values: null,
+            },
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+            {
+              name: FacetName.Product,
+              values: null,
+            },
+            {
+              name: FacetName.Owners,
+              values: null,
+            },
+          ];
+        case SearchScope.Projects:
+          return [
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+          ];
+      }
+    }
+
+    assert("facets must exist", this.args.facets);
 
     let facetArray: FacetArrayItem[] = [];
 
     Object.entries(this.args.facets).forEach(([key, value]) => {
-      if (key === FacetName.Status) {
+      if (key === FacetName.Status && this.args.scope === SearchScope.Docs) {
         facetArray.push({ name: key, values: this.statuses });
       } else {
         facetArray.push({ name: key as FacetName, values: value });
