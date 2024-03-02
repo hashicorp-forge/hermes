@@ -40,6 +40,7 @@ const TOOLTIP_SELECTOR = ".hermes-tooltip";
 const DRAFT_VISIBILITY_DROPDOWN_SELECTOR =
   "[data-test-draft-visibility-dropdown]";
 const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
+const DRAFT_VISIBILITY_READ_ONLY = "[data-test-draft-visibility-read-only]";
 const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
@@ -654,6 +655,10 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1?draft=true");
 
     assertEditingIsDisabled(assert);
+
+    assert
+      .dom(DRAFT_VISIBILITY_READ_ONLY)
+      .exists("draft visibility is shown in a read-only format");
   });
 
   test("non-owners can't edit the status of a doc", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1087,7 +1092,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .doesNotExist("no add related resource option");
 
     assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).isDisabled();
 
     assert
       .dom(DISABLED_FOOTER_H5)
@@ -1121,7 +1126,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .doesNotExist("no add related resource option");
 
     assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).isDisabled();
 
     assert
       .dom(DISABLED_FOOTER_H5)

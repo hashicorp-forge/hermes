@@ -101,8 +101,8 @@
             </:item>
           </X::DropdownList>
 
-          {{! visibility toggle }}
-          {{#if (and this.isDraft this.isOwner (not this.editingIsDisabled))}}
+          {{! visibility toggle/icon }}
+          {{#if this.isDraft}}
             <X::DropdownList
               data-test-draft-visibility-dropdown
               @items={{this.draftVisibilityOptions}}
@@ -112,18 +112,29 @@
               class="w-[350px]"
             >
               <:anchor as |dd|>
-                <dd.ToggleAction
-                  data-test-draft-visibility-toggle
-                  data-test-icon={{this.draftVisibilityIcon}}
-                  class="quarternary-button draft-visibility-button z-10 flex items-center"
-                  {{tooltip
-                    this.toggleDraftVisibilityTooltipText
-                    placement="bottom"
-                  }}
-                  @hasChevron={{true}}
-                >
-                  <FlightIcon @name={{this.draftVisibilityIcon}} />
-                </dd.ToggleAction>
+                {{#if this.isOwner}}
+                  <dd.ToggleAction
+                    data-test-draft-visibility-toggle
+                    data-test-icon={{this.draftVisibilityIcon}}
+                    class="quarternary-button draft-visibility-button z-10"
+                    disabled={{this.editingIsDisabled}}
+                    {{tooltip
+                      this.toggleDraftVisibilityTooltipText
+                      placement="bottom"
+                    }}
+                    @hasChevron={{true}}
+                  >
+                    <FlightIcon @name={{this.draftVisibilityIcon}} />
+                  </dd.ToggleAction>
+                {{else}}
+                  <div
+                    data-test-draft-visibility-read-only
+                    {{tooltip "Shareable draft" placement="bottom"}}
+                    class="draft-visibility-button items-center text-color-foreground-faint"
+                  >
+                    <FlightIcon @name="enterprise" />
+                  </div>
+                {{/if}}
               </:anchor>
               <:item as |dd|>
                 <dd.Action

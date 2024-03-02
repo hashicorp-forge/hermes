@@ -101,7 +101,7 @@
   }
 
   .draft-visibility-button {
-    @apply px-2.5;
+    @apply flex items-center px-2.5;
     // match the height of the header buttons
     @apply h-[38px];
     // offset the extra height relative to the badge
