@@ -4,21 +4,26 @@
   @searchEnabled={{true}}
   @search={{perform this.searchDirectory}}
   @searchField="email"
-  @options={{this.people}}
+  @options={{this.peopleAndGroups}}
   @selected={{@selected}}
   @renderInPlace={{@renderInPlace}}
-  @placeholder="Search for your peers..."
+  @placeholder="Search organization..."
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
   @onKeydown={{@onKeydown}}
   @disabled={{@disabled}}
+  @searchMessage=""
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
   ...attributes
   as |value|
 >
+  {{! there's no way to know if the value is part of what group }}
   <div class="flex items-center gap-2 overflow-hidden py-1">
     <Person::Avatar @email={{value}} @size="medium" class="shrink-0" />
+
+    {{! need some fallback logic / group-specific logic }}
+
     <div class="w-full">
       <div class="text-body-100 leading-tight">
         {{get-model-attr "person.name" value}}

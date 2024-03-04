@@ -15,6 +15,11 @@ export interface GoogleUser {
   photos: { url: string }[];
 }
 
+interface PeopleSelectGroup {
+  groupName: string;
+  options: string[];
+}
+
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
@@ -39,6 +44,30 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * Instantiated empty and populated by the `searchDirectory` task.
    */
   @tracked protected people: string[] = [];
+  @tracked protected groups: string[] = [];
+
+  protected get peopleAndGroups() {
+    console.log("firstPerson", this.people[0]);
+
+    let groups = undefined;
+    let people = undefined;
+
+    if (this.people.length > 0) {
+      people = {
+        groupName: "People",
+        options: this.people,
+      };
+    }
+
+    if (this.groups.length > 0) {
+      groups = {
+        groupName: "Groups",
+        options: this.groups,
+      };
+    }
+
+    return [people, groups].compact();
+  }
 
   /**
    * An action occurring on every keystroke.

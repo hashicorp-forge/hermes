@@ -1,4 +1,4 @@
-@import "ember-basic-dropdown";
+// https://github.com/cibernox/ember-power-select/blob/master/ember-power-select/scss/variables.scss
 
 // ember-power-select
 $ember-power-select-background-color: var(
@@ -18,9 +18,15 @@ $ember-power-select-border-color: var(
 );
 $ember-power-select-default-border: var(--token-form-control-border-width) solid
   $ember-power-select-border-color;
+
 $ember-power-select-default-border-radius: var(
   --token-form-control-border-radius
 );
+
+$ember-power-select-opened-border-radius: var(
+  --token-form-control-border-radius
+);
+
 $ember-power-select-focus-box-shadow: var(--token-elevation-low-box-shadow);
 $ember-power-select-dropdown-box-shadow: var(--token-elevation-low-box-shadow);
 $ember-power-select-option-padding: 7px; // Can't use --token-form-control-padding here.
@@ -42,3 +48,11 @@ $ember-power-select-multiple-option-line-height: 1.3;
 }
 
 @import "ember-power-select";
+
+.ember-power-select-group-name {
+  @apply hermes-h4 mt-px block py-1;
+}
+
+.ember-power-select-group .ember-power-select-option {
+  @apply pl-2;
+}
