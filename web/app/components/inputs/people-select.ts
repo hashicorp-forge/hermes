@@ -9,8 +9,13 @@ import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
-import { next, schedule } from "@ember/runloop";
+import PowerSelectMultiple, {
+  PowerSelectMultipleArgs,
+} from "ember-power-select/components/power-select-multiple";
+import {
+  PowerSelectArgs,
+  Select,
+} from "ember-power-select/components/power-select";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -31,7 +36,6 @@ interface InputsPeopleSelectComponentSignature {
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
-    matchAnchorWidth?: boolean;
   };
 }
 
@@ -49,8 +53,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    */
   @tracked protected people: string[] = [];
   @tracked protected groups: string[] = [];
-
-  @tracked protected query = "";
 
   protected get peopleAndGroups() {
     let groups = undefined;
@@ -73,6 +75,23 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     return [people, groups].compact();
   }
 
+  @action onClick(e: MouseEvent) {
+    // check if the query is empty.
+    // if it is, prevent default and stop propagation
+
+    const target = e.target as HTMLElement;
+    const input = target.closest(".ember-power-select-trigger") as HTMLElement;
+
+    if (input) {
+      const value = input.querySelector("input")?.value;
+      console.log(value);
+      if (value === "") {
+        // Prevent EmberPowerSelect from showing a "type to search" message
+        e.stopImmediatePropagation();
+      }
+    }
+  }
+
   /**
    * An action occurring on every keystroke.
    * Handles cases where the user clears the input,
@@ -85,17 +104,10 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     }
   }
 
-  @action registerAndShowDropdown(
-    dd: XDropdownListAnchorAPI,
-    element: HTMLElement,
-  ) {
-    dd.registerAnchor(element);
-
-    this.searchDirectory.perform();
-
-    next(() => {
-      dd.showContent();
-    });
+  @action onFocus(dropdown: Select) {
+    if (dropdown.searchText) {
+      dropdown.actions.open();
+    }
   }
 
   /**
@@ -113,6 +125,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     options: any,
   ) {
     const position = calculatePosition(trigger, content, destination, options);
+    // this should be conditional
     position.style["min-width"] = `320px`;
     return position;
   }
@@ -122,18 +135,16 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
    */
-  protected searchDirectory = restartableTask(async () => {
+  protected searchDirectory = restartableTask(async (query: string) => {
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
         const people = await this.store.query("person", {
-          query: this.query,
+          query,
         });
 
         if (people) {
-          console.log("people", people);
-          console.log("this.people", this.people);
           this.people = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
@@ -153,8 +164,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
           console.error(`Error querying people: ${e}`);
           throw e;
         }
-
-        console.log(`Error querying people: ${e}`);
 
         // Otherwise, wait and try again.
         await timeout(retryDelay);
