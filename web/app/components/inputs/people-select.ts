@@ -8,6 +8,9 @@ import FetchService from "hermes/services/fetch";
 import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
+import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import { next, schedule } from "@ember/runloop";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -28,6 +31,7 @@ interface InputsPeopleSelectComponentSignature {
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
+    matchAnchorWidth?: boolean;
   };
 }
 
@@ -46,9 +50,9 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   @tracked protected people: string[] = [];
   @tracked protected groups: string[] = [];
 
-  protected get peopleAndGroups() {
-    console.log("firstPerson", this.people[0]);
+  @tracked protected query = "";
 
+  protected get peopleAndGroups() {
     let groups = undefined;
     let people = undefined;
 
@@ -81,6 +85,19 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     }
   }
 
+  @action registerAndShowDropdown(
+    dd: XDropdownListAnchorAPI,
+    element: HTMLElement,
+  ) {
+    dd.registerAnchor(element);
+
+    this.searchDirectory.perform();
+
+    next(() => {
+      dd.showContent();
+    });
+  }
+
   /**
    * The action taken when focus leaves the component.
    * Clears the people list and calls `this.args.onBlur` if it exists.
@@ -89,21 +106,34 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     this.people = [];
   }
 
+  @action calculatePosition(
+    trigger: HTMLElement,
+    content: HTMLElement,
+    destination: HTMLElement,
+    options: any,
+  ) {
+    const position = calculatePosition(trigger, content, destination, options);
+    position.style["min-width"] = `320px`;
+    return position;
+  }
+
   /**
    * A task that queries the server for people matching the given query.
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
    */
-  protected searchDirectory = restartableTask(async (query: string) => {
+  protected searchDirectory = restartableTask(async () => {
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
         const people = await this.store.query("person", {
-          query,
+          query: this.query,
         });
 
         if (people) {
+          console.log("people", people);
+          console.log("this.people", this.people);
           this.people = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
@@ -123,6 +153,8 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
           console.error(`Error querying people: ${e}`);
           throw e;
         }
+
+        console.log(`Error querying people: ${e}`);
 
         // Otherwise, wait and try again.
         await timeout(retryDelay);

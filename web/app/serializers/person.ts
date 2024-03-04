@@ -12,7 +12,7 @@ export default class PersonSerializer extends JSONSerializer {
   normalizeResponse(
     _store: DS.Store,
     _primaryModelClass: any,
-    payload: GoogleUser[] | { results: GoogleUser[] },
+    payload: GoogleUser[] | { results: GoogleUser[] | null },
     _id: string | number,
     requestType: string,
   ) {
@@ -20,7 +20,7 @@ export default class PersonSerializer extends JSONSerializer {
 
     if (requestType === "query") {
       assert("results are expected for query requests", "results" in payload);
-      const people = payload.results.map((p: any) => {
+      const people = payload.results?.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
           type,
@@ -32,7 +32,7 @@ export default class PersonSerializer extends JSONSerializer {
           },
         };
       });
-      return { data: people };
+      return { data: people || [] };
     } else if (requestType === "queryRecord") {
       assert(
         "payload should not be an array of results",

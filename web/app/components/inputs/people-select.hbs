@@ -1,4 +1,61 @@
-<PowerSelectMultiple
+<X::DropdownList
+  @items={{this.peopleAndGroups}}
+  @selected={{@selected}}
+  @renderOut={{true}}
+  @matchAnchorWidth={{@matchAnchorWidth}}
+  class={{unless @matchAnchorWidth "w-[320px]"}}
+>
+  <:anchor as |dd|>
+    {{! input affordance mock-input }}
+    {{! shouldn't always autofocus/auto open the dropdown }}
+    {{! in the "new" form it's unopened }}
+    {{! we put the attributes on the anchor so pass in the autofocus modifier }}
+    <div class="hds-mock-input w-full" ...attributes>
+      <Hds::Form::TextInput::Base
+        {{did-insert dd.registerAnchor}}
+        {{on "focusin" dd.showContent}}
+        {{on "input" (perform this.searchDirectory)}}
+        @value={{this.query}}
+      />
+      {{#each dd.selected as |email|}}
+        <Person @email={{email}} />
+      {{/each}}
+    </div>
+  </:anchor>
+  {{!-- <:group as |g|>
+    <h4>{{g.groupName}}</h4>
+    <ol>
+      {{#each g.items as |item|}}
+        <li>
+          <g.item as |dd|>
+            {{dd.value}}
+          </g.item>
+        </li>
+      {{/each}}
+    </ol>
+  </:group> --}}
+  <:item as |dd|>
+    {{! TODO: <:group></:group> }}
+    {{log "itemdd" dd}}
+    <div class="flex items-center gap-2 overflow-hidden py-1">
+
+      <Person::Avatar @email={{dd.value}} @size="medium" class="shrink-0" />
+
+      {{! need some fallback logic / group-specific logic }}
+
+      <div class="w-full">
+        <div class="text-body-100 leading-tight">
+          {{get-model-attr "person.name" dd.value}}
+        </div>
+        <div class="text-body-100 leading-tight opacity-70">
+          {{get-model-attr "person.email" dd.value}}
+        </div>
+      </div>
+    </div>
+  </:item>
+</X::DropdownList>
+
+{{!-- <PowerSelectMultiple
   data-test-people-select
   class="hds-form-field__control multiselect w-full"
   @searchEnabled={{true}}
@@ -6,6 +63,7 @@
   @searchField="email"
   @options={{this.peopleAndGroups}}
   @selected={{@selected}}
+  @calculatePosition={{this.calculatePosition}}
   @renderInPlace={{@renderInPlace}}
   @placeholder="Search organization..."
   @onChange={{@onChange}}
@@ -33,4 +91,4 @@
       </div>
     </div>
   </div>
-</PowerSelectMultiple>
+</PowerSelectMultiple> --}}

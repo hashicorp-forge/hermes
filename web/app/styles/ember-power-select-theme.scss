@@ -56,3 +56,8 @@ $ember-power-select-multiple-option-line-height: 1.3;
 .ember-power-select-group .ember-power-select-option {
   @apply pl-2;
 }
+
+.ember-basic-dropdown-content {
+  border: none !important;
+  @apply hds-surface-high mt-px;
+}
