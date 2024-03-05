@@ -3,7 +3,7 @@ import timeAgo from "hermes/utils/time-ago";
 
 export interface TimeAgoHelperSignature {
   Args: {
-    Positional: [time: number];
+    Positional: [time?: number];
     Named: {
       limitTo24Hours?: boolean;
     };

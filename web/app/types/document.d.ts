@@ -13,8 +13,9 @@ export interface HermesDocument {
 
   /**
    * A timestamp in seconds. Used for sorting.
+   * Undefined when the doc was created off-app.
    */
-  createdTime: number;
+  createdTime?: number;
 
   /**
    * A timestamp in seconds. Used Translated by the `time-ago` helper
