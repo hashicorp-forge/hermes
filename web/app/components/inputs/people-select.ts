@@ -123,16 +123,17 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    const extraOffsetBelow = 4;
+    const extraOffsetBelow = 3;
     const extraOffsetAbove = extraOffsetBelow + 2;
 
-    const { verticalPosition } = position;
+    const { verticalPosition, horizontalPosition } = position;
 
-    console.log("verticalPosition", verticalPosition);
+    console.log("horizontalPosition", horizontalPosition);
 
-    let { top } = position.style;
+    let { top, left } = position.style;
 
     assert("top must be a number", typeof top === "number");
+    assert("left must be a number", typeof left === "number");
 
     switch (verticalPosition) {
       case VerticalPosition.Above:
@@ -143,7 +144,14 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         break;
     }
 
+    switch (horizontalPosition) {
+      case HorizontalPosition.Left:
+        left -= 3;
+        break;
+    }
+
     position.style.top = top;
+    position.style.left = left;
     position.style["min-width"] = `320px`;
 
     return position;

@@ -21,13 +21,13 @@
   as |value|
 >
   <div class="flex items-center gap-2 overflow-hidden py-1">
-    <Person::Avatar @email={{value}} @size="medium" class="shrink-0" />
-    <div class="w-full">
-      <div class="text-body-100 leading-tight">
+    <Person::Avatar @email={{value}} class="shrink-0" />
+    <div class="w-full min-w-0">
+      <div class="truncate text-body-200 leading-tight">
         {{get-model-attr "person.name" value}}
-      </div>
-      <div class="text-body-100 leading-tight opacity-70">
-        {{get-model-attr "person.email" value}}
+        <span class="ml-0.5 text-body-100 opacity-70">
+          {{get-model-attr "person.email" value}}
+        </span>
       </div>
     </div>
   </div>
