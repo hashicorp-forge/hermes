@@ -100,7 +100,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    if (!this.args.facets || Object.keys(this.args.facets ?? 0).length === 0) {
+    if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
       switch (this.args.scope) {
         case SearchScope.Docs:
           return [
