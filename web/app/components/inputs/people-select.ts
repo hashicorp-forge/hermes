@@ -16,6 +16,7 @@ import {
   PowerSelectArgs,
   Select,
 } from "ember-power-select/components/power-select";
+import { next } from "@ember/runloop";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -84,7 +85,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
     if (input) {
       const value = input.querySelector("input")?.value;
-      console.log(value);
       if (value === "") {
         // Prevent EmberPowerSelect from showing a "type to search" message
         e.stopImmediatePropagation();
@@ -98,9 +98,14 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * since `onChange` is not called in that case.
    * See: https://ember-power-select.com/docs/custom-search-action
    */
-  @action onInput(inputValue: string) {
+  @action onInput(inputValue: string, select: Select) {
     if (inputValue === "") {
       this.people = [];
+
+      // Prevent redundant "type to search" message from appearing
+      next(() => {
+        select.actions.close();
+      });
     }
   }
 
