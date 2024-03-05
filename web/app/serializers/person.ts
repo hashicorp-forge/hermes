@@ -27,7 +27,7 @@ export default class PersonSerializer extends JSONSerializer {
        */
       if (!payload.results) return { data: [] };
 
-      const people = payload.results?.map((p: any) => {
+      const people = payload.results.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
           type,
