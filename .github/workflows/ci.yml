@@ -26,6 +26,7 @@ jobs:
         # Workaround: https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
         env:
           SKIP_YARN_COREPACK_CHECK: true
+          YARN_IGNORE_NODE: 1
 
       - name: Set up Go
         uses: actions/setup-go@v3
