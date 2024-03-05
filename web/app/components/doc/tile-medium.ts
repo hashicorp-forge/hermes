@@ -4,6 +4,7 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
+import { DEFAULT_FILTERS } from "hermes/services/active-filters";
 
 interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
@@ -62,6 +63,18 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
     if ("_snippetResult" in this.args.doc) {
       return this.args.doc._snippetResult?.content.value;
     }
+  }
+  /**
+   * The query parameters to pass to the PersonAvatar LinkTo.
+   * Sets the "owners" filter to the owner of the document,
+   * and default values for the rest.
+   */
+  protected get ownerQuery() {
+    return {
+      ...DEFAULT_FILTERS,
+      owners: this.args.doc.owners,
+      page: 1,
+    };
   }
 }
 

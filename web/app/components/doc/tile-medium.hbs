@@ -16,7 +16,7 @@
         data-test-document-owner-avatar
         tabindex="-1"
         @route="authenticated.documents"
-        @query={{hash owners=(array owner)}}
+        @query={{this.ownerQuery}}
         disabled={{not owner}}
       >
         <Person::Avatar
