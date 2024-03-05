@@ -20,6 +20,13 @@ export default class PersonSerializer extends JSONSerializer {
 
     if (requestType === "query") {
       assert("results are expected for query requests", "results" in payload);
+
+      /**
+       * If the results are `null`, return an empty array to show
+       * the "No results found" message in the PeopleSelect.
+       */
+      if (!payload.results) return { data: [] };
+
       const people = payload.results?.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
@@ -32,7 +39,7 @@ export default class PersonSerializer extends JSONSerializer {
           },
         };
       });
-      return { data: people || [] };
+      return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
         "payload should not be an array of results",
