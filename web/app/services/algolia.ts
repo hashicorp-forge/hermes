@@ -193,7 +193,11 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetDropdownObjectDetails).isSelected = true;
+        const facetParam = facet[param];
+
+        if (facetParam) {
+          facetParam.isSelected = true;
+        }
       }
       /**
        * e.g., facet["Approved"] === { count: 6, isSelected: true }

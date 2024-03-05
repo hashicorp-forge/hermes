@@ -100,9 +100,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    const facetsObjectIsEmpty = Object.keys(this.args.facets ?? 0).length === 0;
-
-    if (facetsObjectIsEmpty) {
+    if (!this.args.facets || Object.keys(this.args.facets ?? 0).length === 0) {
       switch (this.args.scope) {
         case SearchScope.Docs:
           return [
@@ -131,27 +129,25 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
             },
           ];
       }
+    } else {
+      let facetArray: FacetArrayItem[] = [];
+
+      Object.entries(this.args.facets).forEach(([key, value]) => {
+        if (key === FacetName.Status && this.args.scope === SearchScope.Docs) {
+          facetArray.push({ name: key, values: this.statuses });
+        } else {
+          facetArray.push({ name: key as FacetName, values: value });
+        }
+      });
+
+      const order = ["docType", "status", "product", "owners"];
+
+      facetArray.sort((a, b) => {
+        return order.indexOf(a.name) - order.indexOf(b.name);
+      });
+
+      return facetArray;
     }
-
-    assert("facets must exist", this.args.facets);
-
-    let facetArray: FacetArrayItem[] = [];
-
-    Object.entries(this.args.facets).forEach(([key, value]) => {
-      if (key === FacetName.Status && this.args.scope === SearchScope.Docs) {
-        facetArray.push({ name: key, values: this.statuses });
-      } else {
-        facetArray.push({ name: key as FacetName, values: value });
-      }
-    });
-
-    const order = ["docType", "status", "product", "owners"];
-
-    facetArray.sort((a, b) => {
-      return order.indexOf(a.name) - order.indexOf(b.name);
-    });
-
-    return facetArray;
   }
 
   /**
