@@ -101,7 +101,8 @@ const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
   ".ember-power-select-multiple-remove-btn";
 
 const PROJECT_LINK = "[data-test-project-link]";
-const ADD_TO_PROJECT_BUTTON = "[data-test-projects-section-header] button";
+const ADD_TO_PROJECT_BUTTON =
+  "[data-test-section-header-button-for='Projects']";
 const ADD_TO_PROJECT_MODAL = "[data-test-add-to-or-create-project-modal]";
 const PROJECT_OPTION = "[data-test-project-option]";
 
@@ -1121,10 +1122,12 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(`${APPROVERS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only approvers list");
-    assert
-      .dom(ADD_RELATED_DOCUMENT_OPTION_SELECTOR)
-      .doesNotExist("no add related resource option");
 
+    assert
+      .dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR)
+      .hasAttribute("aria-disabled");
+
+    assert.dom(ADD_TO_PROJECT_BUTTON).hasAttribute("aria-disabled");
     assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
     assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).isDisabled();
 

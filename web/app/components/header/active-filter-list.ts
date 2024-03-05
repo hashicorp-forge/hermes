@@ -15,7 +15,6 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
    * "Clear All" button to reset the filters.
    */
   protected defaultQuery = {
-    scope: SearchScope.All,
     docType: [],
     owners: [],
     product: [],
