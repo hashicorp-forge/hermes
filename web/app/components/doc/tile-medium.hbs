@@ -65,7 +65,7 @@
               tabindex="-1"
               data-test-document-owner-name
               @route="authenticated.documents"
-              @query={{hash owners=(array owner)}}
+              @query={{this.ownerQuery}}
               disabled={{not owner}}
               class="underline-on-hover inline-block"
             >

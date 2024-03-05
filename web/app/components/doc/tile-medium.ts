@@ -65,7 +65,7 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
     }
   }
   /**
-   * The query parameters to pass to the PersonAvatar LinkTo.
+   * The query parameters for the doc-owner LinkTos.
    * Sets the "owners" filter to the owner of the document,
    * and default values for the rest.
    */
