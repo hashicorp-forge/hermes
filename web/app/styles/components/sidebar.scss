@@ -163,7 +163,7 @@
   }
 
   .person-list {
-    @apply w-full space-y-2;
+    @apply grid w-full gap-2.5;
   }
 
   .sidebar-footer {
