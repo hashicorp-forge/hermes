@@ -292,6 +292,7 @@
       {{! Related resources }}
       <div>
         <Document::Sidebar::RelatedResources
+          @docWasCreatedOffApp={{not @document.appCreated}}
           @editingIsDisabled={{this.editingIsDisabled}}
           @documentIsDraft={{this.isDraft}}
           @productArea={{@document.product}}

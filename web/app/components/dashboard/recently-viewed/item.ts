@@ -105,7 +105,7 @@ export default class DashboardRecentlyViewedItemComponent extends Component<Dash
   /**
    * The modified time of the item, whether it's a document or a project.
    */
-  protected get modifiedTime(): number {
+  protected get modifiedTime(): number | undefined {
     if (this.itemIsDoc) {
       return this.doc.modifiedTime || this.doc.createdTime;
     } else {

@@ -1,7 +1,7 @@
 .my {
   .hds-table {
     td {
-      @apply h-12 py-0 pr-10;
+      @apply py-0 pr-10;
 
       > .inner {
         @apply overflow-hidden;

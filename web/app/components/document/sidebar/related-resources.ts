@@ -5,10 +5,9 @@ import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
-import { restartableTask, task, timeout } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
-import Ember from "ember";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,
@@ -32,6 +31,7 @@ export interface DocumentSidebarRelatedResourcesComponentArgs {
   itemLimit?: number;
   modalInputPlaceholder: string;
   documentIsDraft?: boolean;
+  docWasCreatedOffApp?: boolean;
   editingIsDisabled?: boolean;
   scrollContainer: HTMLElement;
 }
@@ -208,6 +208,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * On error, triggers the "retry" design.
    */
   protected loadRelatedResources = task(async () => {
+    if (this.args.docWasCreatedOffApp) return;
+
     try {
       const resources = await this.fetchSvc
         .fetch(

@@ -30,7 +30,7 @@ export interface RelatedHermesDocument {
   title: string;
   documentType: string;
   documentNumber: string;
-  createdTime: number;
+  createdTime?: number;
   modifiedTime: number;
   sortOrder: number;
   product: string;
