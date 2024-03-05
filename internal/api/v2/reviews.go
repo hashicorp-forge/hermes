@@ -160,6 +160,11 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Reset the document creation time to the current time of publish.
+			now := time.Now()
+			doc.Created = now.Format("Jan 2, 2006")
+			doc.CreatedTime = now.Unix()
+
 			// Set the document number.
 			nextDocNum := latestNum + 1
 			doc.DocNumber = fmt.Sprintf("%s-%03d",
@@ -459,6 +464,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				}
 				return
 			}
+			d.DocumentCreatedAt = now // Reset to document published time.
 			d.Status = models.InReviewDocumentStatus
 			d.DocumentNumber = nextDocNum
 			d.DocumentModifiedAt = modifiedTime
