@@ -337,13 +337,15 @@ module("Acceptance | authenticated/results", function (hooks) {
         "the filter is shown in the active filters section with the correct link to remove it",
       );
 
-    assert.dom(CLEAR_ALL_FILTERS_LINK).hasAttribute("href", "/results");
+    assert
+      .dom(CLEAR_ALL_FILTERS_LINK)
+      .hasAttribute("href", "/results?scope=Projects");
 
     assert.dom(PROJECT_LINK).exists({ count: completedProjectCount });
 
     // visit a URL with no results
 
-    await visit("/results?status=%5B%22Archived%22%5D&scope=Projects");
+    await visit("/results?q=qwe123&scope=Projects");
 
     assert.dom(FACET_TOGGLE).exists({ count: 1 }).isDisabled();
     assert.dom(RESULTS_MATCH_COUNT).containsText("0 matches");
@@ -438,7 +440,9 @@ module("Acceptance | authenticated/results", function (hooks) {
         "the filter is shown in the active filters section with the correct link to remove it",
       );
 
-    assert.dom(CLEAR_ALL_FILTERS_LINK).hasAttribute("href", "/results");
+    assert
+      .dom(CLEAR_ALL_FILTERS_LINK)
+      .hasAttribute("href", "/results?scope=Docs");
 
     assert.dom(DOC_LINK).exists({ count: frdCount });
 
@@ -515,7 +519,7 @@ module("Acceptance | authenticated/results", function (hooks) {
       .doesNotExist("the active filters section is hidden");
 
     // visit a URL with no results
-    await visit("/results?docType=%5B%22ZZZZZZZZZ%22%5D&scope=Docs");
+    await visit("/results?q=ZZZZZZZZZ&scope=Docs");
 
     assert.dom(FACET_TOGGLE).exists({ count: 4 });
 
