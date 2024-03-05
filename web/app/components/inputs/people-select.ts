@@ -146,7 +146,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
     switch (horizontalPosition) {
       case HorizontalPosition.Left:
-        left -= 3;
+        left -= 4;
         break;
     }
 
