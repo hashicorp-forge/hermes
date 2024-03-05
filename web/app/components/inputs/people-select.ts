@@ -19,24 +19,22 @@ export interface GoogleUser {
   photos: { url: string }[];
 }
 
-enum VerticalPosition {
+enum ComputedVerticalPosition {
   Above = "above",
   Below = "below",
-  Auto = "auto",
 }
 
-enum HorizontalPosition {
+enum ComputedHorizontalPosition {
   Left = "left",
   Right = "right",
-  Auto = "auto",
 }
 
 interface CalculatePositionOptions {
-  horizontalPosition: HorizontalPosition;
-  verticalPosition: VerticalPosition;
+  horizontalPosition: ComputedHorizontalPosition;
+  verticalPosition: ComputedVerticalPosition;
   matchTriggerWidth: boolean;
-  previousHorizontalPosition?: HorizontalPosition;
-  previousVerticalPosition?: VerticalPosition;
+  previousHorizontalPosition?: ComputedHorizontalPosition;
+  previousVerticalPosition?: ComputedVerticalPosition;
   renderInPlace: boolean;
   dropdown: any;
 }
@@ -123,35 +121,38 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    const extraOffsetBelow = 3;
+    const extraOffsetLeft = 4;
+    const extraOffsetBelow = 2;
     const extraOffsetAbove = extraOffsetBelow + 2;
 
     const { verticalPosition, horizontalPosition } = position;
 
     console.log("horizontalPosition", horizontalPosition);
 
-    let { top, left } = position.style;
+    let { top, left, width } = position.style;
 
     assert("top must be a number", typeof top === "number");
     assert("left must be a number", typeof left === "number");
+    assert("width must be a number", typeof width === "number");
 
     switch (verticalPosition) {
-      case VerticalPosition.Above:
+      case ComputedVerticalPosition.Above:
         top -= extraOffsetAbove;
         break;
-      case VerticalPosition.Below:
+      case ComputedVerticalPosition.Below:
         top += extraOffsetBelow;
         break;
     }
 
     switch (horizontalPosition) {
-      case HorizontalPosition.Left:
-        left -= 4;
+      case ComputedHorizontalPosition.Left:
+        left -= extraOffsetLeft;
         break;
     }
 
     position.style.top = top;
     position.style.left = left;
+    position.style.width = width + extraOffsetLeft * 2;
     position.style["min-width"] = `320px`;
 
     return position;
@@ -167,11 +168,13 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
+        await timeout(500);
         const people = await this.store.query("person", {
           query,
         });
 
         if (people) {
+          console.log("there are people");
           this.people = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
@@ -181,6 +184,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               );
             });
         } else {
+          console.log("there are no people");
           this.people = [];
         }
         // stop the loop if the query was successful

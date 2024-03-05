@@ -49,7 +49,7 @@
   }
 
   .ember-power-select-multiple-option {
-    @apply relative inline-flex max-w-full items-center border-0;
+    @apply relative inline-flex max-w-full items-center border-0 text-color-foreground-strong;
 
     // Compensate for the chip padding by setting negative margins.
     // Allows content to maintain its position in both the edit and read-only states.
