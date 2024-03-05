@@ -22,30 +22,30 @@ type User struct {
 
 type DocumentApprovedEmailData struct {
 	BaseURL                  string
-	CurrentYear							 int
+	CurrentYear              int
 	DocumentApprover         User
-	DocumentOwner     			 string
+	DocumentOwner            string
 	DocumentNonApproverCount int
 	DocumentShortName        string
 	DocumentTitle            string
 	DocumentStatus           string
-	DocumentStatusClass 		 string
+	DocumentStatusClass      string
 	DocumentType             string
 	DocumentURL              string
 	Product                  string
 }
 
 type ReviewRequestedEmailData struct {
-	BaseURL           string
-	CurrentYear       int
-	DocumentOwner     string
-	DocumentShortName string
-	DocumentTitle     string
-	DocumentType      string
-	DocumentStatus    string
+	BaseURL             string
+	CurrentYear         int
+	DocumentOwner       string
+	DocumentShortName   string
+	DocumentTitle       string
+	DocumentType        string
+	DocumentStatus      string
 	DocumentStatusClass string
-	DocumentURL       string
-	Product           string
+	DocumentURL         string
+	Product             string
 }
 
 type SubscriberDocumentPublishedEmailData struct {
@@ -149,7 +149,7 @@ func SendReviewRequestedEmail(
 	// Set current year.
 	d.CurrentYear = time.Now().Year()
 
-  // Set status class.
+	// Set status class.
 	d.DocumentStatusClass = dasherizeStatus(d.DocumentStatus)
 
 	if err := tmpl.Execute(&body, d); err != nil {

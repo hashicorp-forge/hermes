@@ -550,15 +550,15 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					// Send email.
 					if err := email.SendDocumentApprovedEmail(
 						email.DocumentApprovedEmailData{
-							BaseURL: srv.Config.BaseURL,
-							DocumentOwner: doc.Owners[0],
+							BaseURL:          srv.Config.BaseURL,
+							DocumentOwner:    doc.Owners[0],
 							DocumentApprover: approver,
 							DocumentNonApproverCount: len(doc.Approvers) -
 								len(doc.ApprovedBy),
 							DocumentShortName: doc.DocNumber,
 							DocumentTitle:     doc.Title,
 							DocumentType:      doc.DocType,
-							DocumentStatus: 	 doc.Status,
+							DocumentStatus:    doc.Status,
 							DocumentURL:       docURL,
 							Product:           doc.Product,
 						},
