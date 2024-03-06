@@ -4,7 +4,7 @@
   @searchEnabled={{true}}
   @search={{perform this.searchDirectory}}
   @searchField="email"
-  @options={{this.items}}
+  @options={{this.options}}
   @selected={{@selected}}
   @renderInPlace={{@renderInPlace}}
   @placeholder="Search by name or email..."
@@ -21,18 +21,20 @@
   @eventType="click"
   {{on "click" this.onClick}}
   ...attributes
-  as |value|
+  as |person|
 >
-  {{! there's no way to know if the value is part of what group }}
   <div class="flex items-center gap-2 overflow-hidden py-1">
-    <Person::Avatar @email={{value}} />
+    {{! TODO: if (eq person.type "group") }}
+    {{! show an affordance or label }}
+    {{! anything we do here should also be accessible via the image chip }}
+    <Person::Avatar @email={{person.email}} />
     <div class="w-full min-w-0">
       <TruncatedText
         class="text-body-200 leading-tight text-color-foreground-primary"
       >
-        {{get-model-attr "person.name" value}}
+        {{get-model-attr "person.name" person.email}}
         <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
-          {{get-model-attr "person.email" value}}
+          {{person.email}}
         </span>
       </TruncatedText>
     </div>

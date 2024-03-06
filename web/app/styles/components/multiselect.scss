@@ -40,6 +40,18 @@
     @apply mr-6 flex h-full w-full flex-wrap gap-2.5;
   }
 
+  .ember-power-select-option {
+    @apply py-px px-3.5;
+
+    &:first-child {
+      @apply mt-[3px];
+    }
+
+    &:last-child {
+      @apply mb-[3px];
+    }
+  }
+
   .ember-power-select-trigger-multiple-input {
     @apply min-w-[80px] px-[3px] text-body-200 placeholder:text-color-foreground-disabled;
 

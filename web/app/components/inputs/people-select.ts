@@ -29,6 +29,16 @@ enum ComputedHorizontalPosition {
   Right = "right",
 }
 
+enum PeopleSelectOptionType {
+  Person = "person",
+  Group = "group",
+}
+
+export interface PeopleSelectOption {
+  email: string;
+  type: PeopleSelectOptionType;
+}
+
 interface CalculatePositionOptions {
   horizontalPosition: ComputedHorizontalPosition;
   verticalPosition: ComputedVerticalPosition;
@@ -63,31 +73,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The list of people to display in the dropdown.
    * Instantiated empty and populated by the `searchDirectory` task.
    */
-  @tracked protected people: string[] = [];
-  @tracked protected groups: string[] = [];
-
-  protected get items() {
-    if (!this.args.includeGroups) return this.people;
-
-    let groups = undefined;
-    let people = undefined;
-
-    if (this.people.length > 0) {
-      people = {
-        groupName: "People",
-        options: this.people,
-      };
-    }
-
-    if (this.groups.length > 0) {
-      groups = {
-        groupName: "Groups",
-        options: this.groups,
-      };
-    }
-
-    return [people, groups].compact();
-  }
+  @tracked protected options: PeopleSelectOption[] = [];
 
   /**
    * The action to run when the PowerSelect input is clicked.
@@ -113,7 +99,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    */
   @action protected onInput(inputValue: string, select: Select) {
     if (inputValue === "") {
-      this.people = [];
+      this.options = [];
 
       /**
        * Stop the redundant "type to search" message
@@ -151,7 +137,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
   @action protected onClose() {
-    this.people = [];
+    this.options = [];
   }
 
   /**
@@ -167,7 +153,10 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    const extraOffsetLeft = 8;
+    // FIXME: this offset is smaller in the sidebar
+    // in the new doc form, this should be 8.
+
+    const extraOffsetLeft = 2;
     const extraOffsetBelow = 2;
     const extraOffsetAbove = extraOffsetBelow + 2;
 
@@ -211,6 +200,9 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
+      let p: PeopleSelectOption[] = [];
+      let g: PeopleSelectOption[] = [];
+
       const peoplePromise = this.store.query("person", {
         query,
       });
@@ -227,23 +219,37 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         const [people, _groups] = await Promise.all(promises);
 
         if (people) {
-          this.people = people
-            .map((p: PersonModel) => p.email)
-            .filter((email: string) => {
+          p = people
+            .map((p: PersonModel) => {
+              return {
+                email: p.email,
+                type: "person",
+              } as PeopleSelectOption;
+            })
+            .filter((person: { email: string; type: string }) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedEmail) => selectedEmail === email,
+                (selectedEmail) => selectedEmail === person.email,
               );
             });
         } else {
-          this.people = [];
+          p = [];
         }
 
         if (_groups) {
           // TODO: set groups
         } else {
-          this.groups = [];
+          g = [];
         }
+
+        // concat and sort by email
+
+        this.options = [...p, ...g].sort((a, b) =>
+          a.email.localeCompare(b.email),
+        );
+
+        console.log("options", this.options);
+
         // stop the loop if the query was successful
         return;
       } catch (e) {
