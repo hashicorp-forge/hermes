@@ -9,7 +9,7 @@
     <div {{did-insert this.registerEditingContainer}} class="w-full">
       {{#if this.typeIsPeople}}
         <Inputs::PeopleSelect
-          {{autofocus targetChildren=true waitUntilNextRunloop=true}}
+          {{autofocus targetChildren=true}}
           data-test-document-contributors-editable
           class="multiselect--narrow"
           {{! @glint-ignore - TODO: type this as an array }}
