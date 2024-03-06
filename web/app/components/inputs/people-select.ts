@@ -104,7 +104,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The action taken when focus leaves the component.
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
-  @action onClose() {
+  @action protected onClose() {
     this.people = [];
   }
 
@@ -126,8 +126,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     const extraOffsetAbove = extraOffsetBelow + 2;
 
     const { verticalPosition, horizontalPosition } = position;
-
-    console.log("horizontalPosition", horizontalPosition);
 
     let { top, left, width } = position.style;
 
@@ -168,13 +166,11 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        await timeout(500);
         const people = await this.store.query("person", {
           query,
         });
 
         if (people) {
-          console.log("there are people");
           this.people = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
@@ -184,7 +180,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               );
             });
         } else {
-          console.log("there are no people");
           this.people = [];
         }
         // stop the loop if the query was successful
