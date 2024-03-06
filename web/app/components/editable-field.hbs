@@ -15,6 +15,7 @@
           {{! @glint-ignore - TODO: type this as an array }}
           @selected={{this.value}}
           @onChange={{this.onChange}}
+          @includeGroups={{@includeGroupsInPeopleSelect}}
           @onKeydown={{fn this.onPeopleSelectKeydown this.maybeUpdateValue}}
           {{dismissible
             dismiss=(fn this.maybeUpdateValue this.value)

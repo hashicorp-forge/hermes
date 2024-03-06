@@ -282,6 +282,7 @@
               @onSave={{perform this.save "approvers"}}
               @isSaving={{this.saveIsRunning}}
               @isReadOnly={{this.editingIsDisabled}}
+              @includeGroupsInPeopleSelect={{true}}
               {{! Provide the document to the `has-approved-doc` helper }}
               @document={{@document}}
             />
@@ -667,6 +668,7 @@
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
               <Inputs::PeopleSelect
+                @includeGroups={{true}}
                 @renderInPlace={{true}}
                 @selected={{this.approvers}}
                 @onChange={{this.updateApprovers}}

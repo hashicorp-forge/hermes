@@ -47,6 +47,7 @@ interface InputsPeopleSelectComponentSignature {
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: Select, event: KeyboardEvent) => void;
+    includeGroups?: boolean;
   };
 }
 
@@ -65,7 +66,9 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   @tracked protected people: string[] = [];
   @tracked protected groups: string[] = [];
 
-  protected get peopleAndGroups() {
+  protected get items() {
+    if (!this.args.includeGroups) return this.people;
+
     let groups = undefined;
     let people = undefined;
 
@@ -208,10 +211,20 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
+      const peoplePromise = this.store.query("person", {
+        query,
+      });
+
+      let promises = [];
+
+      promises.push(peoplePromise);
+
       try {
-        const people = await this.store.query("person", {
-          query,
-        });
+        if (this.args.includeGroups) {
+          // TODO: push group query
+        }
+
+        const [people, _groups] = await Promise.all(promises);
 
         if (people) {
           this.people = people
@@ -224,6 +237,12 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
             });
         } else {
           this.people = [];
+        }
+
+        if (_groups) {
+          // TODO: set groups
+        } else {
+          this.groups = [];
         }
         // stop the loop if the query was successful
         return;
