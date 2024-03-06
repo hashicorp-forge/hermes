@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"strings"
 	"text/template"
 	"time"
 
@@ -20,21 +21,31 @@ type User struct {
 }
 
 type DocumentApprovedEmailData struct {
+	BaseURL                  string
+	CurrentYear              int
 	DocumentApprover         User
+	DocumentOwner            string
 	DocumentNonApproverCount int
 	DocumentShortName        string
 	DocumentTitle            string
+	DocumentStatus           string
+	DocumentStatusClass      string
 	DocumentType             string
 	DocumentURL              string
+	Product                  string
 }
 
 type ReviewRequestedEmailData struct {
-	BaseURL           string
-	CurrentYear       int
-	DocumentOwner     string
-	DocumentShortName string
-	DocumentTitle     string
-	DocumentURL       string
+	BaseURL             string
+	CurrentYear         int
+	DocumentOwner       string
+	DocumentShortName   string
+	DocumentTitle       string
+	DocumentType        string
+	DocumentStatus      string
+	DocumentStatusClass string
+	DocumentURL         string
+	Product             string
 }
 
 type SubscriberDocumentPublishedEmailData struct {
@@ -56,10 +67,14 @@ func SendDocumentApprovedEmail(
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.BaseURL, validation.Required),
 		validation.Field(&data.DocumentApprover, validation.Required),
 		validation.Field(&data.DocumentShortName, validation.Required),
 		validation.Field(&data.DocumentTitle, validation.Required),
 		validation.Field(&data.DocumentURL, validation.Required),
+		validation.Field(&data.Product, validation.Required),
+		validation.Field(&data.DocumentType, validation.Required),
+		validation.Field(&data.DocumentStatus, validation.Required),
 	); err != nil {
 		return fmt.Errorf("error validating email data: %w", err)
 	}
@@ -75,6 +90,13 @@ func SendDocumentApprovedEmail(
 	if err != nil {
 		return fmt.Errorf("error parsing template: %w", err)
 	}
+
+	// Set current year.
+	data.CurrentYear = time.Now().Year()
+
+	// Set status class.
+	data.DocumentStatusClass = dasherizeStatus(data.DocumentStatus)
+
 	if err := tmpl.Execute(&body, data); err != nil {
 		return fmt.Errorf("error executing template: %w", err)
 	}
@@ -111,6 +133,9 @@ func SendReviewRequestedEmail(
 		validation.Field(&d.DocumentOwner, validation.Required),
 		validation.Field(&d.DocumentTitle, validation.Required),
 		validation.Field(&d.DocumentURL, validation.Required),
+		validation.Field(&d.Product, validation.Required),
+		validation.Field(&d.DocumentStatus, validation.Required),
+		validation.Field(&d.DocumentType, validation.Required),
 	); err != nil {
 		return fmt.Errorf("error validating email data: %w", err)
 	}
@@ -123,6 +148,9 @@ func SendReviewRequestedEmail(
 
 	// Set current year.
 	d.CurrentYear = time.Now().Year()
+
+	// Set status class.
+	d.DocumentStatusClass = dasherizeStatus(d.DocumentStatus)
 
 	if err := tmpl.Execute(&body, d); err != nil {
 		return fmt.Errorf("error executing template: %w", err)
@@ -179,4 +207,8 @@ func SendSubscriberDocumentPublishedEmail(
 		body.String(),
 	)
 	return err
+}
+
+func dasherizeStatus(status string) string {
+	return strings.ReplaceAll(strings.ToLower(status), " ", "-")
 }
