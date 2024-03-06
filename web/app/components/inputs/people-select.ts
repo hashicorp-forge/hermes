@@ -46,7 +46,7 @@ interface InputsPeopleSelectComponentSignature {
     onChange: (value: string[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
-    onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
+    onKeydown?: (dropdown: Select, event: KeyboardEvent) => void;
   };
 }
 
@@ -119,6 +119,27 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       next(() => {
         select.actions.close();
       });
+    }
+  }
+
+  /**
+   * The action to run on keydown.
+   * Checks if the key is "ArrowDown" or "ArrowUp" and if the input is empty.
+   * In these cases, we stop the dropdown from opening, otherwise we use the
+   * passed-in `onKeydown` action.
+   */
+  @action protected onKeydown(dropdown: Select, event: KeyboardEvent) {
+    switch (event.key) {
+      case "ArrowDown":
+      case "ArrowUp":
+        if (dropdown.searchText === "") {
+          dropdown.actions.close();
+          break;
+        } else {
+          this.args.onKeydown?.(dropdown, event);
+        }
+      default:
+        this.args.onKeydown?.(dropdown, event);
     }
   }
 
