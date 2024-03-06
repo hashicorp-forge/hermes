@@ -41,7 +41,7 @@
   }
 
   .ember-power-select-trigger-multiple-input {
-    @apply min-w-[80px] text-body-200;
+    @apply min-w-[80px] px-[3px] text-body-200 placeholder:text-color-foreground-disabled;
 
     &::-webkit-search-cancel-button {
       display: none;

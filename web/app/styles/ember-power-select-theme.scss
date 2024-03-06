@@ -37,8 +37,10 @@ $ember-power-select-multiple-option-padding: 0;
 $ember-power-select-multiple-option-line-height: 1.3;
 
 .ember-basic-dropdown-content {
+  @apply min-h-[34px];
+
   .hds-dropdown-list-item--variant-interactive {
-    @apply flex items-center px-3;
+    @apply flex items-center px-2;
   }
 }
 
@@ -50,13 +52,18 @@ $ember-power-select-multiple-option-line-height: 1.3;
 }
 
 .ember-power-select-options[role="listbox"] {
-  @apply max-h-[200px];
+  @apply mt-[3px] max-h-[200px];
 }
 
 .ember-power-select-option {
   @apply py-px;
+
+  &:last-child {
+    @apply mb-[3px];
+  }
 }
 
-.ember-power-select-option--loading-message {
-  @apply text-red-500;
+.ember-power-select-option--loading-message,
+.ember-power-select-option--no-matches-message {
+  @apply h-7 px-3.5 text-color-foreground-disabled;
 }
