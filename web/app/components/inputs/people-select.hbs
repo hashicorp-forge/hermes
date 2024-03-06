@@ -7,7 +7,7 @@
   @options={{this.peopleAndGroups}}
   @selected={{@selected}}
   @renderInPlace={{@renderInPlace}}
-  @placeholder="Search organization..."
+  @placeholder="Search by name or email..."
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
@@ -27,12 +27,14 @@
   <div class="flex items-center gap-2 overflow-hidden py-1">
     <Person::Avatar @email={{value}} />
     <div class="w-full min-w-0">
-      <div class="truncate text-body-200 leading-tight">
+      <TruncatedText
+        class="text-body-200 leading-tight text-color-foreground-primary"
+      >
         {{get-model-attr "person.name" value}}
         <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
           {{get-model-attr "person.email" value}}
         </span>
-      </div>
+      </TruncatedText>
     </div>
   </div>
 </PowerSelectMultiple>

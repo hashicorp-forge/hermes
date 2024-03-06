@@ -143,7 +143,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    const extraOffsetLeft = 4;
+    const extraOffsetLeft = 8;
     const extraOffsetBelow = 2;
     const extraOffsetAbove = extraOffsetBelow + 2;
 
