@@ -6,7 +6,6 @@
   @searchField="email"
   @options={{this.peopleAndGroups}}
   @selected={{@selected}}
-  @calculatePosition={{this.calculatePosition}}
   @renderInPlace={{@renderInPlace}}
   @placeholder="Search organization..."
   @onChange={{@onChange}}
@@ -15,26 +14,24 @@
   @onKeydown={{@onKeydown}}
   @onFocus={{this.onFocus}}
   @disabled={{@disabled}}
-  @eventType="click"
-  {{on "click" this.onClick}}
-  {{! TODO: figure out how to disable the "type to search state" }}
   @searchMessage=""
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
+  @calculatePosition={{this.calculatePosition}}
+  @loadingMessage="Loading..."
+  @eventType="click"
+  {{on "click" this.onClick}}
   ...attributes
   as |value|
 >
   {{! there's no way to know if the value is part of what group }}
   <div class="flex items-center gap-2 overflow-hidden py-1">
-    <Person::Avatar @email={{value}} @size="medium" class="shrink-0" />
-
-    {{! need some fallback logic / group-specific logic }}
-
-    <div class="w-full">
-      <div class="text-body-100 leading-tight">
+    <Person::Avatar @email={{value}} />
+    <div class="w-full min-w-0">
+      <div class="truncate text-body-200 leading-tight">
         {{get-model-attr "person.name" value}}
-      </div>
-      <div class="text-body-100 leading-tight opacity-70">
-        {{get-model-attr "person.email" value}}
+        <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
+          {{get-model-attr "person.email" value}}
+        </span>
       </div>
     </div>
   </div>

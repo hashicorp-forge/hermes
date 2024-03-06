@@ -37,8 +37,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     assert
       .dom(".ember-power-select-option")
-      .exists({ count: 1 })
-      .hasText("Type to search");
+      .doesNotExist('"Type to search" message is hidden');
 
     await fillIn(".ember-power-select-trigger-multiple-input", "u");
 
@@ -115,7 +114,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     assert
       .dom(".ember-power-select-option--loading-message")
-      .hasText("Loading options...");
+      .hasText("Loading...");
 
     await fillInPromise;
 

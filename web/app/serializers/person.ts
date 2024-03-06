@@ -20,7 +20,14 @@ export default class PersonSerializer extends JSONSerializer {
 
     if (requestType === "query") {
       assert("results are expected for query requests", "results" in payload);
-      const people = payload.results?.map((p: any) => {
+
+      /**
+       * If the results are `null`, return an empty array to show
+       * the "No results found" message in the PeopleSelect.
+       */
+      if (!payload.results) return { data: [] };
+
+      const people = payload.results.map((p: any) => {
         return {
           id: p.emailAddresses[0].value,
           type,

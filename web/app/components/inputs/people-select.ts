@@ -8,15 +8,10 @@ import FetchService from "hermes/services/fetch";
 import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
-import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
-import PowerSelectMultiple, {
-  PowerSelectMultipleArgs,
-} from "ember-power-select/components/power-select-multiple";
-import {
-  PowerSelectArgs,
-  Select,
-} from "ember-power-select/components/power-select";
+import { Select } from "ember-power-select/components/power-select";
 import { next } from "@ember/runloop";
+import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
+import { assert } from "@ember/debug";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -24,9 +19,24 @@ export interface GoogleUser {
   photos: { url: string }[];
 }
 
-interface PeopleSelectGroup {
-  groupName: string;
-  options: string[];
+enum ComputedVerticalPosition {
+  Above = "above",
+  Below = "below",
+}
+
+enum ComputedHorizontalPosition {
+  Left = "left",
+  Right = "right",
+}
+
+interface CalculatePositionOptions {
+  horizontalPosition: ComputedHorizontalPosition;
+  verticalPosition: ComputedVerticalPosition;
+  matchTriggerWidth: boolean;
+  previousHorizontalPosition?: ComputedHorizontalPosition;
+  previousVerticalPosition?: ComputedVerticalPosition;
+  renderInPlace: boolean;
+  dropdown: any;
 }
 
 interface InputsPeopleSelectComponentSignature {
@@ -76,17 +86,17 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     return [people, groups].compact();
   }
 
-  @action onClick(e: MouseEvent) {
-    // check if the query is empty.
-    // if it is, prevent default and stop propagation
-
+  /**
+   * The action to run when the PowerSelect input is clicked.
+   * Prevents the dropdown from opening when the input is empty.
+   */
+  @action protected onClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
     const input = target.closest(".ember-power-select-trigger") as HTMLElement;
 
     if (input) {
       const value = input.querySelector("input")?.value;
       if (value === "") {
-        // Prevent EmberPowerSelect from showing a "type to search" message
         e.stopImmediatePropagation();
       }
     }
@@ -98,20 +108,17 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * since `onChange` is not called in that case.
    * See: https://ember-power-select.com/docs/custom-search-action
    */
-  @action onInput(inputValue: string, select: Select) {
+  @action protected onInput(inputValue: string, select: Select) {
     if (inputValue === "") {
       this.people = [];
 
-      // Prevent redundant "type to search" message from appearing
+      /**
+       * Stop the redundant "type to search" message
+       * from appearing when the last character is deleted.
+       */
       next(() => {
         select.actions.close();
       });
-    }
-  }
-
-  @action onFocus(dropdown: Select) {
-    if (dropdown.searchText) {
-      dropdown.actions.open();
     }
   }
 
@@ -119,19 +126,55 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The action taken when focus leaves the component.
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
-  @action onClose() {
+  @action protected onClose() {
     this.people = [];
   }
 
-  @action calculatePosition(
+  /**
+   * Custom position-calculating function for the dropdown.
+   * Ensures the dropdown is at least 320px wide, instead of 100% of the trigger.
+   * Improves dropdown appearance when the trigger is small, e.g., in the sidebar.
+   */
+  @action protected calculatePosition(
     trigger: HTMLElement,
     content: HTMLElement,
     destination: HTMLElement,
-    options: any,
+    options: CalculatePositionOptions,
   ) {
     const position = calculatePosition(trigger, content, destination, options);
-    // this should be conditional
+
+    const extraOffsetLeft = 4;
+    const extraOffsetBelow = 2;
+    const extraOffsetAbove = extraOffsetBelow + 2;
+
+    const { verticalPosition, horizontalPosition } = position;
+
+    let { top, left, width } = position.style;
+
+    assert("top must be a number", typeof top === "number");
+    assert("left must be a number", typeof left === "number");
+    assert("width must be a number", typeof width === "number");
+
+    switch (verticalPosition) {
+      case ComputedVerticalPosition.Above:
+        top -= extraOffsetAbove;
+        break;
+      case ComputedVerticalPosition.Below:
+        top += extraOffsetBelow;
+        break;
+    }
+
+    switch (horizontalPosition) {
+      case ComputedHorizontalPosition.Left:
+        left -= extraOffsetLeft;
+        break;
+    }
+
+    position.style.top = top;
+    position.style.left = left;
+    position.style.width = width + extraOffsetLeft * 2;
     position.style["min-width"] = `320px`;
+
     return position;
   }
 
