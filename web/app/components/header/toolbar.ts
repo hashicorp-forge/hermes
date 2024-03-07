@@ -133,7 +133,10 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       let facetArray: FacetArrayItem[] = [];
 
       Object.entries(this.args.facets).forEach(([key, value]) => {
-        if (key === FacetName.Status && this.args.scope === SearchScope.Docs) {
+        if (
+          key === FacetName.Status &&
+          this.args.scope !== SearchScope.Projects
+        ) {
           facetArray.push({ name: key, values: this.statuses });
         } else {
           facetArray.push({ name: key as FacetName, values: value });
