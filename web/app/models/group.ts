@@ -1,6 +1,6 @@
 import Model, { attr } from "@ember-data/model";
 
-export default class GoogleGroupModel extends Model {
+export default class GroupModel extends Model {
   /**
    * The person's full name, e.g., "Jane Doe".
    */

@@ -814,6 +814,18 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * Google Groups
+       *
+       ************************************************************************/
+
+      // Query via the PeopleSelect
+      this.post("/groups", (schema, request) => {
+        // TODO: type this request
+        const query = JSON.parse(request.requestBody).query;
+      });
+
+      /*************************************************************************
+       *
        * HEAD requests
        *
        *************************************************************************/

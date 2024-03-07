@@ -1,18 +1,18 @@
 import JSONSerializer from "@ember-data/serializer/json";
 import DS from "ember-data";
-import GoogleGroupModel from "hermes/models/google-group";
+import GroupModel from "hermes/models/group";
 
-interface GoogleGroupPayload {
+interface GroupPayload {
   kind: string;
   etag: string;
-  groups: GoogleGroupModel[];
+  groups: GroupModel[];
   nextPageToken: string;
 }
 
 // PLACEHOLDER //
 
-interface GoogleGroupQueryParams {
-  query: string;
+interface GroupQueryParams {
+  query?: string;
   customer?: string;
   domain?: string;
   maxResults?: number;
@@ -22,7 +22,7 @@ interface GoogleGroupQueryParams {
   userKey?: string;
 }
 
-export default class GoogleGroupSerializer extends JSONSerializer {
+export default class GroupSerializer extends JSONSerializer {
   /**
    * The serializer for the `person` model.
    * Handles `query` and `queryRecord` requests to the EmberData store.
@@ -31,25 +31,18 @@ export default class GoogleGroupSerializer extends JSONSerializer {
   normalizeResponse(
     _store: DS.Store,
     _primaryModelClass: any,
-    _payload: GoogleGroupPayload,
+    _payload: GroupPayload,
     _id: string | number,
     requestType: string,
   ) {
+    debugger;
     if (requestType === "query") {
       const groups = {
         // TODO:
       };
       return { data: groups };
-    } else if (requestType === "queryRecord") {
-      // i'm assuming this will be a customer search
-
-      return {
-        data: {
-          // TODO:
-        },
-      };
     } else {
-      // Currently only `query` and `queryRecord` requests are used.
+      // Currently only `query` requests are used.
       return {};
     }
   }

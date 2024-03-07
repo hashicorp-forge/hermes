@@ -12,6 +12,7 @@ import { Select } from "ember-power-select/components/power-select";
 import { next } from "@ember/runloop";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
 import { assert } from "@ember/debug";
+import GroupModel from "hermes/models/group";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -203,20 +204,18 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let p: PeopleSelectOption[] = [];
       let g: PeopleSelectOption[] = [];
 
-      const peoplePromise = this.store.query("person", {
-        query,
-      });
-
-      let promises = [];
-
-      promises.push(peoplePromise);
+      let promises = [
+        this.store.query("person", {
+          query,
+        }),
+      ];
 
       try {
         if (this.args.includeGroups) {
-          // TODO: push group query
+          promises.push(this.store.query("group", { query }));
         }
 
-        const [people, _groups] = await Promise.all(promises);
+        const [people, groups] = await Promise.all(promises);
 
         if (people) {
           p = people
@@ -228,6 +227,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
             })
             .filter((person: { email: string; type: string }) => {
               // filter out any people already selected
+              // FIXME: combine with groups
               return !this.args.selected.find(
                 (selectedEmail) => selectedEmail === person.email,
               );
@@ -236,8 +236,23 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
           p = [];
         }
 
-        if (_groups) {
-          // TODO: set groups
+        console.log("did");
+
+        if (groups) {
+          g = groups
+            .map((g: GroupModel) => {
+              return {
+                email: g.email,
+                type: "group",
+              } as PeopleSelectOption;
+            })
+            .filter((group: { email: string; type: string }) => {
+              // filter out any people already selected
+              // FIXME: this is redundant
+              return !this.args.selected.find(
+                (selectedEmail) => selectedEmail === group.email,
+              );
+            });
         } else {
           g = [];
         }
