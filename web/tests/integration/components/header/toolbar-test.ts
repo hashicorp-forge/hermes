@@ -62,7 +62,6 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @scope={{this.scope}} @facets={{this.facets}} />
-    // Close and reopn
     `);
 
     await click(STATUS_TOGGLE);
