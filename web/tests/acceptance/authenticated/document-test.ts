@@ -66,6 +66,8 @@ const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
 
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 
+const OWNER_LINK = "[data-test-owner-link]";
+
 const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
@@ -191,6 +193,21 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DOC_STATUS_TOGGLE).doesNotExist();
     assert.dom(DOC_STATUS).hasText("WIP", "label exists but isn't clickable");
+  });
+
+  test("the owner is clickable", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1");
+
+    assert
+      .dom(OWNER_LINK)
+      .hasAttribute(
+        "href",
+        `/documents?owners=%5B%22${encodeURIComponent(TEST_USER_EMAIL)}%22%5D`,
+      );
   });
 
   test("you can change a draft's product area", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

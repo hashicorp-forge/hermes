@@ -248,9 +248,16 @@
       </div>
 
       {{! Owner }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person @email={{get @document.owners 0}} />
+      <div class="flex flex-col items-start">
+        <Document::Sidebar::SectionHeader @title="Owner" class="mb-2" />
+        <LinkTo
+          data-test-owner-link
+          @route="authenticated.documents"
+          @query={{get-owner-query (get @document.owners 0)}}
+          class="underlined-link grid"
+        >
+          <Person @email={{get @document.owners 0}} />
+        </LinkTo>
       </div>
 
       {{! Contributors }}
