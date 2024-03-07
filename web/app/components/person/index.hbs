@@ -1,5 +1,5 @@
 {{#unless this.isHidden}}
-  <div class="flex w-full space-x-2" ...attributes>
+  <div class="flex w-full min-w-0 space-x-2" ...attributes>
     <div class="relative shrink-0">
       <Person::Avatar @size="small" @email={{@email}} />
       {{#if this.badgeIsShown}}
