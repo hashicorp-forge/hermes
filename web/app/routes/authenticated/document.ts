@@ -91,6 +91,12 @@ export default class AuthenticatedDocumentRoute extends Route {
           .then((r) => r?.json());
         draftFetched = true;
 
+        // TODO
+        // fetch approvals endpoint
+        // send an OPTIONS request
+        // the response will contains an "allow" header
+        // and if that contains POST we can show the approve button
+
         // Add the draft owner to the list of people to fetch.
         peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
