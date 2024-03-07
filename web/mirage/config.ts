@@ -377,6 +377,7 @@ export default function (mirageConfig) {
        * Jira requests
        *
        *************************************************************************/
+
       // Get issue
       this.get("/jira/issues/:issue_id", (schema, request) => {
         const issue = schema.jiraIssues.findBy({
@@ -789,6 +790,30 @@ export default function (mirageConfig) {
 
       /*************************************************************************
        *
+       * People
+       *
+       *************************************************************************/
+
+      // Query via the PeopleSelect
+      this.post("/people", (schema, request) => {
+        let query: string = JSON.parse(request.requestBody).query;
+
+        // Search everyone's first emailAddress for matches
+        let matches: Collection<unknown> = schema["google/people"].where(
+          (person) => {
+            return (
+              person.emailAddresses[0].value.includes(query) ||
+              person.names[0].displayName.includes(query)
+            );
+          },
+        );
+
+        // Return the Collection models in Response format
+        return new Response(200, {}, matches.models);
+      });
+
+      /*************************************************************************
+       *
        * HEAD requests
        *
        *************************************************************************/
@@ -808,28 +833,6 @@ export default function (mirageConfig) {
        * POST requests
        *
        *************************************************************************/
-
-      /**
-       * Used by the `PeopleSelect` component to query for people
-       * without exposing personal information like a GET request might.
-       */
-      this.post("/people", (schema, request) => {
-        // Grab the query from the request body
-        let query: string = JSON.parse(request.requestBody).query;
-
-        // Search everyone's first emailAddress for matches
-        let matches: Collection<unknown> = schema["google/people"].where(
-          (person) => {
-            return (
-              person.emailAddresses[0].value.includes(query) ||
-              person.names[0].displayName.includes(query)
-            );
-          },
-        );
-
-        // Return the Collection models in Response format
-        return new Response(200, {}, matches.models);
-      });
 
       /**
        * Used when publishing a draft for review.
@@ -949,28 +952,6 @@ export default function (mirageConfig) {
             isLoggedIn: true,
           }).attrs;
         }
-      });
-
-      /**
-       * Used by the PeopleSelect component to get a list of people.
-       * Used to confirm that an approver has access to a document.
-       */
-      this.get("/people", (schema, request) => {
-        if (request.queryParams.emails !== "") {
-          const emails = request.queryParams.emails.split(",");
-
-          if (emails.length === 0) {
-            return new Response(200, {}, []);
-          }
-
-          const hermesUsers = emails.map((email: string) => {
-            return { emailAddresses: [{ value: email }], photos: [] };
-          });
-
-          return new Response(200, {}, hermesUsers);
-        }
-
-        return schema.people.all();
       });
 
       /**
