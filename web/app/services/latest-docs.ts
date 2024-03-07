@@ -43,7 +43,13 @@ export default class LatestDocsService extends Service {
 
     assert("response must exist", response);
 
-    this.index = response.hits as HermesDocument[];
+    this.index = response.hits.map((hit) => {
+      return {
+        ...hit,
+        // We use summary instead of snippet on the dashboard
+        _snippetResult: undefined,
+      };
+    }) as HermesDocument[];
 
     // Load the owner information
     await this.store.maybeFetchPeople.perform(this.index);

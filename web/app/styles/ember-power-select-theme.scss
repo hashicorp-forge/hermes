@@ -1,6 +1,5 @@
-@import "ember-basic-dropdown";
+// https://github.com/cibernox/ember-power-select/blob/master/ember-power-select/scss/variables.scss
 
-// ember-power-select
 $ember-power-select-background-color: var(
   --token-form-control-base-surface-color-default
 );
@@ -10,8 +9,9 @@ $ember-power-select-disabled-background-color: var(
 $ember-power-select-multiple-selection-background-color: var(
   --token-color-palette-neutral-100
 );
+$ember-power-select-highlighted-color: inherit;
 $ember-power-select-highlighted-background: var(
-  --token-color-foreground-action
+  --token-color-surface-interactive-hover
 );
 $ember-power-select-border-color: var(
   --token-form-control-base-border-color-default
@@ -21,24 +21,53 @@ $ember-power-select-default-border: var(--token-form-control-border-width) solid
 $ember-power-select-default-border-radius: var(
   --token-form-control-border-radius
 );
+
+$ember-power-select-opened-border-radius: var(
+  --token-form-control-border-radius
+);
+
 $ember-power-select-focus-box-shadow: var(--token-elevation-low-box-shadow);
 $ember-power-select-dropdown-box-shadow: var(--token-elevation-low-box-shadow);
-$ember-power-select-option-padding: 7px; // Can't use --token-form-control-padding here.
+$ember-power-select-option-padding: 8px;
 $ember-power-select-focus-outline: 3px solid
   var(--token-color-focus-action-external);
-$ember-power-select-trigger-ltr-padding: var(--token-form-control-padding);
-$ember-power-select-trigger-rtl-padding: var(--token-form-control-padding);
-$ember-power-select-multiple-option-padding: 0 7px;
+$ember-power-select-trigger-ltr-padding: 7px 5px;
+$ember-power-select-trigger-rtl-padding: 7px 5px;
+$ember-power-select-multiple-option-padding: 0;
 $ember-power-select-multiple-option-line-height: 1.3;
 
 .ember-basic-dropdown-content {
-  .hds-dropdown-list-item--variant-interactive {
-    @apply flex items-center px-3;
+  @apply min-h-[34px];
 
-    &:hover {
-      @apply bg-color-surface-interactive-hover;
-    }
+  .hds-dropdown-list-item--variant-interactive {
+    @apply flex items-center px-2;
   }
 }
 
 @import "ember-power-select";
+
+.ember-basic-dropdown-content {
+  border: none !important;
+  @apply hds-surface-high mt-px;
+}
+
+.ember-power-select-options[role="listbox"] {
+  @apply max-h-[200px];
+}
+
+.ember-power-select-option {
+  @apply py-px;
+
+  &:first-child {
+    @apply mt-[3px];
+  }
+
+  &:last-child {
+    @apply mb-[3px];
+  }
+}
+
+.ember-power-select-option--loading-message,
+.ember-power-select-option--no-matches-message {
+  @apply h-7 px-3.5 text-color-foreground-faint;
+}

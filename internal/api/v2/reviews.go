@@ -116,6 +116,19 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Validate document status.
+			if doc.Status != "WIP" {
+				srv.Logger.Warn("document is not in WIP status",
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+				http.Error(w,
+					"Cannot create review for a document that is not in WIP status",
+					http.StatusUnprocessableEntity)
+				return
+			}
+
 			// Get latest product number.
 			latestNum, err := models.GetLatestProductNumber(
 				tx, doc.DocType, doc.Product)
@@ -146,6 +159,11 @@ func ReviewsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+
+			// Reset the document creation time to the current time of publish.
+			now := time.Now()
+			doc.Created = now.Format("Jan 2, 2006")
+			doc.CreatedTime = now.Unix()
 
 			// Set the document number.
 			nextDocNum := latestNum + 1
@@ -363,14 +381,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 			)
 
 			// Create shortcut in hierarchical folder structure.
-			shortcut, err := createShortcut(srv.Config, *doc, srv.GWService)
-			revertFuncs = append(revertFuncs, func() error {
-				if err := srv.GWService.DeleteFile(shortcut.Id); err != nil {
-					return fmt.Errorf("error deleting shortcut: %w", err)
-				}
-
-				return nil
-			})
+			_, err = createShortcut(srv.Config, *doc, srv.GWService)
 			if err != nil {
 				srv.Logger.Error("error creating shortcut",
 					"error", err,
@@ -453,6 +464,7 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				}
 				return
 			}
+			d.DocumentCreatedAt = now // Reset to document published time.
 			d.Status = models.InReviewDocumentStatus
 			d.DocumentNumber = nextDocNum
 			d.DocumentModifiedAt = modifiedTime
@@ -530,8 +542,11 @@ func ReviewsHandler(srv server.Server) http.Handler {
 								BaseURL:           srv.Config.BaseURL,
 								DocumentOwner:     doc.Owners[0],
 								DocumentShortName: doc.DocNumber,
+								DocumentType:      doc.DocType,
 								DocumentTitle:     doc.Title,
+								DocumentStatus:    doc.Status,
 								DocumentURL:       docURL,
+								Product:           doc.Product,
 							},
 							[]string{approverEmail},
 							srv.Config.Email.FromAddress,

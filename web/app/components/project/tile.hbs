@@ -10,8 +10,9 @@
 
   <div class="project-tile-grid relative grid h-full w-full gap-2">
     <LinkTo
+      data-test-project-tile-link
       @route="authenticated.projects.project"
-      @model={{@project.id}}
+      @model={{this.projectID}}
       class="title-and-description grid items-center pl-2.5 outline-none"
     >
 
@@ -22,7 +23,7 @@
             data-test-title
             class="truncate text-display-300 font-semibold text-color-foreground-strong"
           >
-            {{@project.title}}
+            {{highlight-text @project.title @query}}
           </h3>
         </div>
       </div>

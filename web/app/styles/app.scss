@@ -28,7 +28,6 @@
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
 @use "components/header/search";
-@use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
 @use "components/doc/tile" as doc-tile;
@@ -49,6 +48,7 @@
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
 @use "hermes/avatar";
+@use "routes/results";
 @use "routes/my";
 
 @use "./buttons";

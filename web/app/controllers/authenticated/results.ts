@@ -1,9 +1,12 @@
 import Controller from "@ember/controller";
-import AuthenticatedResultsRoute from "hermes/routes/authenticated/results";
+import { tracked } from "@glimmer/tracking";
+import AuthenticatedResultsRoute, {
+  SearchScope,
+} from "hermes/routes/authenticated/results";
 import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedResultsController extends Controller {
-  queryParams = ["docType", "owners", "page", "product", "q", "status"];
+  queryParams = ["page", "q", "scope", "docType", "owners", "product"];
 
   q: string | null = null;
   page = 1;
@@ -11,6 +14,8 @@ export default class AuthenticatedResultsController extends Controller {
   owners = [];
   product = [];
   status = [];
+
+  @tracked scope = SearchScope.All;
 
   declare model: ModelFrom<AuthenticatedResultsRoute>;
 
@@ -27,5 +32,20 @@ export default class AuthenticatedResultsController extends Controller {
     }
 
     return title;
+  }
+
+  /**
+   * The facets, depending on the current scope.
+   * Passed to the template in a Glint-friendly format.
+   */
+  protected get facets() {
+    const { docFacets, projectFacets } = this.model;
+
+    switch (this.scope) {
+      case SearchScope.Docs:
+        return docFacets;
+      case SearchScope.Projects:
+        return projectFacets;
+    }
   }
 }

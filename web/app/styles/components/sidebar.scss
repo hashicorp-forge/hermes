@@ -1,3 +1,11 @@
+/* Customize the scrollbar in Firefox */
+@supports not selector(::-webkit-scrollbar) {
+  .sidebar-body {
+    @apply pr-4;
+    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
+  }
+}
+
 .sidebar {
   @apply relative z-10 flex max-h-full flex-col pb-4;
 
@@ -93,7 +101,7 @@
   }
 
   .draft-visibility-button {
-    @apply px-2.5;
+    @apply flex items-center px-2.5;
     // match the height of the header buttons
     @apply h-[38px];
     // offset the extra height relative to the badge
@@ -123,9 +131,6 @@
         @apply bg-color-palette-neutral-400;
       }
     }
-
-    /* Style the scrollbar Firefox */
-    scrollbar-color: var(--token-color-palette-neutral-300) transparent;
   }
 
   .document-title {
@@ -158,7 +163,7 @@
   }
 
   .person-list {
-    @apply w-full space-y-2;
+    @apply grid w-full gap-2.5;
   }
 
   .sidebar-footer {

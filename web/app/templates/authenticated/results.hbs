@@ -1,6 +1,7 @@
+{{set-body-class "results"}}
 {{page-title this.pageTitle}}
 
-<div class="mb-6">
+<div class="mb-6 flex w-full items-start gap-8">
   <h1 data-test-results-headline class="w-full text-display-500">
     Results
     {{#if this.q}}
@@ -8,8 +9,14 @@
       <mark>{{this.q}}</mark>
     {{/if}}
   </h1>
+  <Results::Nav @scope={{this.scope}} @q={{this.q}} class="shrink-0" />
 </div>
 
-<Header::Toolbar @facets={{this.model.docFacets}} />
+<Header::Toolbar @scope={{this.scope}} @facets={{this.facets}} />
 
-<Results @docResults={{this.model.docResults}} @query={{this.q}} />
+<Results
+  @docResults={{this.model.docResults}}
+  @projectResults={{this.model.projectResults}}
+  @productResults={{this.model.productResults}}
+  @query={{this.q}}
+/>

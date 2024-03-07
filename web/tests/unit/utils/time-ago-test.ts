@@ -13,6 +13,7 @@ module("Unit | Utility | time-ago", function () {
     assert.equal("1 minute ago", timeAgo(now - 60));
     assert.equal("5 minutes ago", timeAgo(now - 300));
     assert.equal("6 hours ago", timeAgo(now - 21600));
+    assert.equal("Unknown date", timeAgo(undefined));
 
     assert.equal("2 months ago", timeAgo(now - 5184000));
 

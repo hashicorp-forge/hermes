@@ -37,11 +37,11 @@
   }
 
   .ember-power-select-multiple-options {
-    @apply flex flex-wrap h-full mr-6;
+    @apply mr-6 flex h-full flex-wrap gap-2.5;
   }
 
   .ember-power-select-trigger-multiple-input {
-    min-width: 80px;
+    @apply min-w-[80px] px-[3px] text-body-200 placeholder:text-color-foreground-disabled;
 
     &::-webkit-search-cancel-button {
       display: none;
@@ -49,10 +49,14 @@
   }
 
   .ember-power-select-multiple-option {
-    @apply flex items-center px-0 m-0.5 max-w-[100%] relative pr-7 pl-1.5 py-1 border-0;
+    @apply relative inline-flex max-w-full items-center border-0 text-color-foreground-strong;
+
+    // Compensate for the chip padding by setting negative margins.
+    // Allows content to maintain its position in both the edit and read-only states.
+    @apply -my-1 -ml-[3px] -mr-1 py-1 px-0 pl-[3px] pr-7;
 
     .ember-power-select-multiple-remove-btn {
-      @apply absolute right-1 grid place-items-center h-5 w-5 shrink-0 z-10 rounded-sm text-color-foreground-primary pb-px;
+      @apply absolute right-1 z-10 grid h-5 w-5 shrink-0 place-items-center rounded-sm pb-px text-color-foreground-primary;
 
       &:hover {
         @apply bg-neutral-200;

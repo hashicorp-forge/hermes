@@ -281,7 +281,7 @@ func NewFromDatabaseModel(
 	doc.Contributors = contributors
 
 	// Created.
-	doc.Created = model.CreatedAt.Format("Jan 2, 2006")
+	doc.Created = model.DocumentCreatedAt.Format("Jan 2, 2006")
 
 	// CreatedTime.
 	doc.CreatedTime = model.DocumentCreatedAt.Unix()

@@ -1,0 +1,32 @@
+<div
+  data-test-results-nav
+  class="segmented-control flex w-[340px] items-center justify-end"
+  ...attributes
+>
+  <LinkTo
+    data-test-projects-link
+    @route="authenticated.results"
+    @query={{this.projectsQuery}}
+    class="{{if (eq @scope this.projectsScope) 'active'}}"
+  >
+    Projects
+  </LinkTo>
+
+  <LinkTo
+    data-test-docs-link
+    @route="authenticated.results"
+    @query={{this.docsQuery}}
+    class="{{if (eq @scope this.docsScope) 'active'}}"
+  >
+    Docs
+  </LinkTo>
+
+  <LinkTo
+    data-test-all-link
+    @route="authenticated.results"
+    @query={{this.allQuery}}
+    class="{{if (eq @scope this.allScope) 'active'}}"
+  >
+    Top
+  </LinkTo>
+</div>

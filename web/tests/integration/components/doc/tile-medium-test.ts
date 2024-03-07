@@ -57,6 +57,16 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
     });
   });
 
+  test("it handles splattributes", async function (this: Context, assert) {
+    this.set("doc", this.server.schema.document.first().attrs);
+
+    await render<Context>(
+      hbs`<Doc::TileMedium @doc={{this.doc}} class="unique-class" />`,
+    );
+
+    assert.dom(".unique-class").exists();
+  });
+
   test("it can render HermesDocuments or RelatedHermesDocuments", async function (this: Context, assert) {
     this.set("doc", this.server.schema.document.first().attrs);
 

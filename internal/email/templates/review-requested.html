@@ -1,14 +1,406 @@
-<html>
+<!DOCTYPE html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width-device-width, initial-scale=1" />
+    <title>Review requested for {{.DocumentTitle}}</title>
+
+    <style>
+      #body {
+        margin: 0;
+        padding: 0 0 30px;
+        font-family: sans-serif;
+        background-color: #fafafa !important;
+      }
+
+      p {
+        color: #3b3d45;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit !important;
+      }
+
+      p a {
+        text-decoration: underline;
+      }
+
+      .align-top {
+        vertical-align: top;
+      }
+
+      .font-normal {
+        font-weight: normal;
+      }
+
+      .tag {
+        padding: 4px 6px;
+        margin-top: 2px;
+        margin-right: 4px;
+        display: inline-block;
+        font-size: 13px;
+        background-color: #f1f2f3;
+        color: #656a76;
+        border-radius: 5px;
+      }
+
+      .tag.in-review {
+        background-color: #f9f2ff;
+        color: #911ced;
+      }
+
+      .container {
+        max-width: 600px;
+        padding: 0 20px;
+        height: 100%;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .header {
+        border-bottom: 1px solid #656a7633;
+        padding: 20px 0;
+      }
+
+      .doc-image {
+        border: 1px solid #656a7633;
+        margin-right: 15px;
+        width: auto;
+      }
+
+      .doc-title {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .button-wrapper {
+        border-collapse: separate;
+        border-radius: 5px;
+        background-color: #1060ff;
+      }
+
+      .button {
+        display: block;
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #fff !important;
+        text-decoration: none;
+      }
+
+      .footer-text {
+        font-size: 12px;
+        color: #656a76;
+      }
+
+      .border-b-gray {
+        border-bottom: 1px solid #656a7633;
+      }
+
+      .text-display-300 {
+        font-size: 24px;
+      }
+
+      .table-fixed {
+        table-layout: fixed;
+      }
+
+      .bg-white {
+        background-color: #fff !important;
+      }
+
+      .w-full {
+        width: 100%;
+      }
+
+      .pt-10px {
+        padding-top: 10px;
+      }
+
+      .pt-20px {
+        padding-top: 20px;
+      }
+
+      .pt-30px {
+        padding-top: 30px;
+      }
+
+      .pt-35px {
+        padding-top: 35px;
+      }
+
+      .pt-40px {
+        padding-top: 40px;
+      }
+    </style>
+  </head>
+
   <body>
-    <p>Hi!</p>
-    <p>
-      Your review has been requested for a new document,
-      <a href="{{.DocumentURL}}">[{{.DocumentShortName}}] {{.DocumentTitle}}</a
-      >, by {{.DocumentOwner}}.
-    </p>
-    <p>
-      Cheers,<br />
-      Hermes
-    </p>
+    <div id="body">
+      <table
+        align="center"
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        height="100%"
+        width="100%"
+      >
+        <tr>
+          <td class="header">
+            <table class="container" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <a href="{{.BaseURL}}">
+                    <img
+                      alt="Hermes"
+                      src="https://raw.githubusercontent.com/hashicorp-forge/hermes/main/web/public/images/hermes-logo.png"
+                      height="30"
+                    />
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="border-b-gray">
+            <table
+              class="bg-white"
+              cellpadding="0"
+              cellspacing="0"
+              width="100%"
+              height="100%"
+              border="0"
+            >
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-20px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <h1 class="text-display-300">
+                          Your review is requested.
+                        </h1>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-10px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <a href="{{.DocumentURL}}">
+                          <img
+                            align="left"
+                            height="70"
+                            src="https://raw.githubusercontent.com/hashicorp-forge/hermes/main/web/public/images/document.png"
+                            class="doc-image"
+                            width="50"
+                          />
+                        </a>
+                      </td>
+                      <td class="w-full">
+                        <table>
+                          <tr>
+                            <td class="doc-title">
+                              <a href="{{.DocumentURL}}">
+                                {{.DocumentTitle}}
+                                <span class="font-normal">
+                                  {{.DocumentShortName}}
+                                </span>
+                              </a>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <p>{{.DocumentOwner}} &middot; {{.Product}}</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="tags">
+                              <span class="tag {{.DocumentStatusClass}}"
+                                >{{.DocumentStatus}}</span
+                              >
+                              <span class="tag">{{.DocumentType}}</span>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-30px"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <table
+                          class="button-wrapper"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
+                        >
+                          <tr>
+                            <td>
+                              <a class="button" href="{{.DocumentURL}}">
+                                View in Hermes
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-35px">
+                        <table
+                          class="container"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
+                        >
+                          <tr>
+                            <td class="border-b-gray"></td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table
+                    class="container pt-10px"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td>
+                        <p>
+                          {{.DocumentOwner}} has requested your approval on a
+                          document. If you're unable to review it, you can
+                          <a href="{{.DocumentURL}}">visit the doc</a> to remove
+                          yourself as a reviewer.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="table-fixed" width="100%" height="100%">
+                    <tr>
+                      <td class="pt-40px">
+                        <table
+                          class="container"
+                          cellpadding="0"
+                          cellspacing="0"
+                          border="0"
+                        >
+                          <tr>
+                            <td></td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table class="table-fixed" width="100%" height="100%">
+              <tr>
+                <td class="pt-20px">
+                  <table
+                    class="container"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table class="container" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <p class="footer-text">
+                    &copy; {{.CurrentYear}} &middot; HashiCorp
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
   </body>
 </html>

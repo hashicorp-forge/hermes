@@ -1,6 +1,6 @@
-import RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
+import { SearchScope } from "hermes/routes/authenticated/results";
 import ActiveFiltersService from "hermes/services/active-filters";
 
 interface HeaderActiveFilterListComponentSignature {
@@ -9,25 +9,25 @@ interface HeaderActiveFilterListComponentSignature {
 
 export default class HeaderActiveFilterListComponent extends Component<HeaderActiveFilterListComponentSignature> {
   @service declare activeFilters: ActiveFiltersService;
-  @service declare router: RouterService;
 
   /**
-   * A flat array of all the active filters.
+   * The route's default query parameters. Used by the
+   * "Clear All" button to reset the filters.
    */
-  get shownFilters() {
-    return Object.values(this.activeFilters.index).flat();
-  }
-
-  /**
-   * The route's default query parameters. Used to reset the filters.
-   */
-  defaultQuery = {
+  protected defaultQuery = {
     docType: [],
     owners: [],
     product: [],
     status: [],
     page: 1,
   };
+
+  /**
+   * A flat array of active filters. Looped through in the template.
+   */
+  protected get shownFilters(): string[] {
+    return Object.values(this.activeFilters.index).flat().compact();
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

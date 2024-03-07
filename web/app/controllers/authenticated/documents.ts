@@ -6,6 +6,7 @@ import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedDocumentsController extends Controller {
   queryParams = ["docType", "owners", "page", "product", "sortBy", "status"];
+
   docType = [];
   owners = [];
   page = 1;

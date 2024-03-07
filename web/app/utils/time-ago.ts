@@ -6,11 +6,13 @@ import parseDate from "./parse-date";
  * Used throughout the app to format document metadata.
  */
 export default function timeAgo(
-  timeInSeconds: number,
+  timeInSeconds?: number,
   options?: {
     limitTo24Hours?: boolean;
   },
 ) {
+  if (!timeInSeconds) return "Unknown date";
+
   const now = Date.now();
   const before = new Date(timeInSeconds * 1000).getTime();
   const elapsed = now - before;
