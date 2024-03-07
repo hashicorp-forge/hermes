@@ -26,6 +26,21 @@ export default class DocumentStatusIconComponent extends Component<DocumentStatu
   protected get isObsolete() {
     return this.args.status === "Obsolete";
   }
+  /**
+   * Whether the default stroke is shown.
+   * True if the doc is a draft, in review, or in a non-standard state
+   */
+  protected get defaultStrokeIsShown() {
+    if (
+      this.isDraft ||
+      this.isInReview ||
+      (!this.isApproved && !this.isObsolete)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

@@ -69,5 +69,11 @@ module("Integration | Component | document/status-icon", function (hooks) {
     assert
       .dom(OBSOLETE_PAGE_STROKE)
       .exists("the obsolete state has a custom page stroke");
+
+    status = "Non-Standard";
+    this.set("status", status);
+
+    assert.dom(DEFAULT_PAGE_FILL).exists();
+    assert.dom(DEFAULT_PAGE_STROKE).exists();
   });
 });
