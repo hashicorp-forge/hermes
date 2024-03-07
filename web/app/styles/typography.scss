@@ -36,7 +36,7 @@ mark {
 }
 
 .truncated-text-container {
-  @apply block text-body-100 font-regular text-color-foreground-disabled;
+  @apply block text-body-100 font-regular text-color-foreground-faint;
 
   // These classes are applied by the TruncatedText component
   // based on its optional `startingBreakpoint` argument:

@@ -39,7 +39,7 @@ export default class PersonSerializer extends JSONSerializer {
           },
         };
       });
-      return { data: people || [] };
+      return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
         "payload should not be an array of results",
