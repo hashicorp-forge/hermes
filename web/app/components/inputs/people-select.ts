@@ -9,7 +9,7 @@ import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
 import { Select } from "ember-power-select/components/power-select";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
 import { assert } from "@ember/debug";
 
@@ -47,6 +47,12 @@ interface InputsPeopleSelectComponentSignature {
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
+    /**
+     * Whether the dropdown should be single-select.
+     * When true, will not show the dropdown when there's a selection.
+     */
+    isSingleSelect?: boolean;
+    destination?: string;
   };
 }
 
@@ -129,31 +135,31 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
     let { top, left, width } = position.style;
 
-    assert("top must be a number", typeof top === "number");
-    assert("left must be a number", typeof left === "number");
-    assert("width must be a number", typeof width === "number");
+    if (!top || !left || !width) {
+      return position;
+    } else {
+      switch (verticalPosition) {
+        case ComputedVerticalPosition.Above:
+          top -= extraOffsetAbove;
+          break;
+        case ComputedVerticalPosition.Below:
+          top += extraOffsetBelow;
+          break;
+      }
 
-    switch (verticalPosition) {
-      case ComputedVerticalPosition.Above:
-        top -= extraOffsetAbove;
-        break;
-      case ComputedVerticalPosition.Below:
-        top += extraOffsetBelow;
-        break;
+      switch (horizontalPosition) {
+        case ComputedHorizontalPosition.Left:
+          left -= extraOffsetLeft;
+          break;
+      }
+
+      position.style.top = top;
+      position.style.left = left;
+      position.style.width = width + extraOffsetLeft * 2;
+      position.style["min-width"] = `320px`;
+
+      return position;
     }
-
-    switch (horizontalPosition) {
-      case ComputedHorizontalPosition.Left:
-        left -= extraOffsetLeft;
-        break;
-    }
-
-    position.style.top = top;
-    position.style.left = left;
-    position.style.width = width + extraOffsetLeft * 2;
-    position.style["min-width"] = `320px`;
-
-    return position;
   }
 
   /**

@@ -18,7 +18,7 @@ interface DocumentModalComponentSignature {
     hideFooterWhileSaving?: boolean;
     color?: HdsModalColor;
     close: () => void;
-    task?: () => Promise<void> | void;
+    task?: (newOwner?: string) => Promise<void> | void;
   };
   Blocks: {
     default: [{ taskIsRunning: boolean }];

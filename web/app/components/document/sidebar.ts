@@ -75,6 +75,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
+  @tracked protected transferOwnershipModalIsShown = false;
   @tracked protected projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
@@ -167,8 +168,28 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @tracked protected projectsErrorIsShown = false;
 
+  /**
+   * The new owner of the document.
+   * Set when the user selects a new owner from the "Transfer ownership" modal.
+   */
+  @tracked private newOwner: string[] = [];
+
+  /**
+   * The value of the "Type to confirm" input
+   */
+  @tracked protected typeToConfirmValue = "";
+
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
+
+  /**
+   * Whether the typeToConfirmValue is correct.
+   * When true, enables the "Transfer ownership" button.
+   */
+  protected get typeToConfirmIsCorrect() {
+    // TODO: variable
+    return this.typeToConfirmValue === "TRANSFER";
+  }
 
   /**
    * All active projects. Used to render the list of
@@ -491,6 +512,33 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.projectsModalIsShown = false;
   }
 
+  /**
+   * The action to show the "Transfer ownership" modal.
+   * Triggered by clicking the "Transfer ownership" button in the footer.
+   */
+  @action protected showTransferOwnershipModal() {
+    this.transferOwnershipModalIsShown = true;
+  }
+
+  /**
+   * The action to hide the "Transfer ownership" modal.
+   * Passed to the "Transfer ownership" modal component and
+   * triggered on modal close.
+   */
+  @action protected hideTransferOwnershipModal() {
+    this.transferOwnershipModalIsShown = false;
+    this.typeToConfirmValue = "";
+    this.newOwner = [];
+  }
+
+  /**
+   * The action to set the `typeToConfirmValue` property.
+   * Runs on the `input` event of the "Type to confirm" input.
+   */
+  @action protected setTypeToConfirmValue(event: Event) {
+    this.typeToConfirmValue = (event.target as HTMLInputElement).value;
+  }
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -525,6 +573,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       message,
       title,
     });
+  }
+
+  /**
+   * The action to set the new intended owner of the doc.
+   * Called as the `onChange` action in the "Transfer ownership" modal's
+   * PeopleSelect component. Sets the newOwner property.
+   */
+  @action protected setNewOwner(newOwner: string[]) {
+    this.newOwner = newOwner;
   }
 
   /**
@@ -796,6 +853,32 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       // trigger the modal error
       throw e;
+    }
+  });
+
+  /**
+   * The task to transfer ownership of a document.
+   * Called when the user selects a new owner from the "Transfer ownership" modal.
+   * Updates the document's `owners` array and saves it to the back end.
+   */
+  protected transferOwnership = dropTask(async (newOwner?: string) => {
+    // assert the newOwner exists
+    try {
+      await this.patchDocument.perform({
+        owners: [newOwner],
+      });
+
+      this.transferOwnershipModalIsShown = false;
+
+      this.flashMessages.add({
+        message: "Ownership transferred",
+        // TODO: more explanation?
+        title: "Done!",
+      });
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+      this.showFlashError(e, "Error transferring ownership");
     }
   });
 
