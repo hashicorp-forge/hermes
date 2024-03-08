@@ -16,7 +16,7 @@
         data-test-document-owner-avatar
         tabindex="-1"
         @route="authenticated.documents"
-        @query={{this.ownerQuery}}
+        @query={{get-owner-query owner}}
         disabled={{not owner}}
       >
         <Person::Avatar
@@ -65,7 +65,7 @@
               tabindex="-1"
               data-test-document-owner-name
               @route="authenticated.documents"
-              @query={{this.ownerQuery}}
+              @query={{get-owner-query owner}}
               disabled={{not owner}}
               class="underline-on-hover inline-block"
             >

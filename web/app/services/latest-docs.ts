@@ -33,7 +33,7 @@ export default class LatestDocsService extends Service {
   fetchAll = keepLatestTask(async () => {
     const response = await this.algolia.searchIndex
       .perform(
-        this.configSvc.config.algolia_docs_index_name + "_modifiedTime_desc",
+        this.configSvc.config.algolia_docs_index_name + "_createdTime_desc",
         "",
         {
           hitsPerPage: 12,
