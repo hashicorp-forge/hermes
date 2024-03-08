@@ -2,6 +2,7 @@ import Component from "@glimmer/component";
 import LatestDocsService from "hermes/services/latest-docs";
 import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
+import { DEFAULT_FILTERS } from "hermes/services/active-filters";
 
 interface DashboardLatestDocsComponentSignature {}
 
@@ -18,6 +19,17 @@ export default class DashboardLatestDocsComponent extends Component<DashboardLat
 
   protected get docs(): HermesDocument[] | null {
     return this.latestDocs.index;
+  }
+
+  /**
+   * The query of the "See older docs" link.
+   * Resets any active filters and sets the page to 2.
+   */
+  protected get query() {
+    return {
+      ...DEFAULT_FILTERS,
+      page: 2,
+    };
   }
 }
 

@@ -4,6 +4,7 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import LatestDocsService from "hermes/services/latest-docs";
+import ActiveFiltersService from "hermes/services/active-filters";
 
 const NO_DOCS_PUBLISHED = "[data-test-no-docs-published]";
 const LATEST_DOC = "[data-test-latest-doc]";
@@ -45,6 +46,14 @@ module("Integration | Component | dashboard/latest-docs", function (hooks) {
   test("it shows a link to the next page of docs if there are more than one page", async function (this: Context, assert) {
     this.server.createList("document", 10);
 
+    const activeFilters = this.owner.lookup(
+      "service:active-filters",
+    ) as ActiveFiltersService;
+
+    activeFilters.update({
+      product: ["Labs"],
+    });
+
     const latestDocs = this.owner.lookup(
       "service:latest-docs",
     ) as LatestDocsService;
@@ -56,7 +65,13 @@ module("Integration | Component | dashboard/latest-docs", function (hooks) {
       <Dashboard::LatestDocs />
     `);
 
-    assert.dom(ALL_DOCS_LINK).exists();
+    assert
+      .dom(ALL_DOCS_LINK)
+      .hasAttribute(
+        "href",
+        "/documents?page=2",
+        "it links to a filter-less second page of docs",
+      );
   });
 
   test("it shows an icon when the fetch task is running", async function (this: Context, assert) {
