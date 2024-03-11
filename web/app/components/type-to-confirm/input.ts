@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 
 interface TypeToConfirmInputSignature {
-  Element: HTMLInputElement;
   Args: {
     onInput: (event: Event) => void;
     onKeydown: (event: KeyboardEvent) => void;

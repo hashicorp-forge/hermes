@@ -9,11 +9,13 @@
   @renderInPlace={{@renderInPlace}}
   @placeholder="Search for your peers..."
   {{! custom onChange? to stop the focus stuff from changing? }}
+  {{! need to prevent popover from opening if a single select }}
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
+  @onOpen={{this.maybeClose}}
   @triggerId={{@triggerId}}
-  @onKeydown={{@onKeydown}}
+  @onKeydown={{this.onKeydown}}
   @disabled={{@disabled}}
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
   @calculatePosition={{this.calculatePosition}}

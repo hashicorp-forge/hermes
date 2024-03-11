@@ -122,4 +122,10 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .dom(".ember-power-select-option")
       .exists({ count: 5 }, "Returns results after retrying");
   });
+
+  test("you can exclude the authenticated user from the list", async function (this: PeopleSelectContext, assert) {
+    // test the `excludeSelf` argument
+  });
+
+  test("you can limit the selection to a single person", async function (this: PeopleSelectContext, assert) {});
 });

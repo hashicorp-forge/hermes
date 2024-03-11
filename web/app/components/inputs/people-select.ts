@@ -9,8 +9,9 @@ import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
 import { Select } from "ember-power-select/components/power-select";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -51,7 +52,7 @@ interface InputsPeopleSelectComponentSignature {
      * When true, will not show the dropdown when there's a selection.
      */
     isSingleSelect?: boolean;
-    destination?: string;
+    excludeSelf?: boolean;
     triggerId?: string;
   };
 }
@@ -62,6 +63,7 @@ const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare authenticatedUser: AuthenticatedUserService;
   @service declare store: StoreService;
 
   /**
@@ -83,6 +85,25 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       if (value === "") {
         e.stopImmediatePropagation();
       }
+    }
+  }
+
+  // TODO: need to prevent the dropdown from opening when the input is empty
+  // and the user keys "enter", "down", or "up"
+  @action protected onKeydown(dropdown: Select, event: KeyboardEvent) {
+    switch (event.key) {
+      case "Enter":
+      case "ArrowDown":
+      case "ArrowUp":
+        event.stopPropagation();
+        schedule("afterRender", () => {
+          dropdown.actions.close();
+        });
+        break;
+      default:
+        if (this.args.onKeydown) {
+          this.args.onKeydown(dropdown, event);
+        }
     }
   }
 
@@ -112,6 +133,14 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    */
   @action protected onClose() {
     this.people = [];
+  }
+  /**
+   *
+   */
+  @action protected maybeClose(select: Select) {
+    if (this.args.isSingleSelect && select.selected.length > 0) {
+      select.actions.close();
+    }
   }
 
   /**
@@ -183,6 +212,13 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               // filter out any people already selected
               return !this.args.selected.find(
                 (selectedEmail) => selectedEmail === email,
+              );
+            })
+            .filter((email: string) => {
+              // filter the authenticated user if `excludeSelf` is true
+              return (
+                !this.args.excludeSelf ||
+                email !== this.authenticatedUser.info.email
               );
             });
         } else {

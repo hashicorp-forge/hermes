@@ -63,9 +63,13 @@ const PRODUCT_SELECT_PRODUCT_NAME = "[data-test-product-value]";
 const POPOVER = "[data-test-x-dropdown-list-content]";
 const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]`;
 const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
+// Transfer Ownership
+const TRANSFER_OWNERSHIP_BUTTON =
+  "[data-test-transfer-document-ownership-button]";
+const TRANSFER_OWNERSHIP_MODAL =
+  "[data-test-transfer-document-ownership-modal]";
 
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
-
 const OWNER_LINK = "[data-test-owner-link]";
 
 const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
@@ -693,6 +697,19 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(DOC_STATUS)
       .hasText("In review", "the status is shown but not as a toggle");
+  });
+
+  test("non-owners don't see the transfer-ownership button", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(TRANSFER_OWNERSHIP_BUTTON).doesNotExist();
   });
 
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1568,5 +1585,53 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(APPROVE_BUTTON).doesNotExist("the approve button is removed");
 
     assert.dom(DISABLED_FOOTER_H5).hasText("Document is locked");
+  });
+
+  test("owners can transfer ownership of their published docs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1");
+
+    assert
+      .dom(TRANSFER_OWNERSHIP_BUTTON)
+      .doesNotExist("drafts cannot be transferred");
+
+    const doc = this.server.schema.document.first();
+
+    doc.update({
+      isDraft: false,
+      status: "In review",
+    });
+
+    assert
+      .dom(TRANSFER_OWNERSHIP_BUTTON)
+      .exists('the "transfer ownership" button is shown for published docs');
+
+    await click(TRANSFER_OWNERSHIP_BUTTON);
+
+    assert.dom(TRANSFER_OWNERSHIP_MODAL).exists();
+
+    // assert button is disabled
+    // fill out people select
+    // assert button is still disabled
+    // typeToConfirm
+    // assert button is enabled
+    // click button
+    // assert "Transferring doc..." state is shown
+    // assert clicking the label focuses the input
+    // assert that when you select someone in the people select, the next input is focused
+    // assert that keying enter doesn't open a "locked" peopleselect
+    // assert single-selectness is enforced
+    // assert you can't select yourself
+    // assert that transferring works
+    // assert that the modal closes
+    // assert that a flash message is shown
+    // assert that the back-end is updated
+  });
+
+  test("an error is shown when ownership transferring fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // assert error states
   });
 });

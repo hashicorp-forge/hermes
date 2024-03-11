@@ -72,8 +72,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
-  protected transferOwnershipModalID = "transfer-ownership-modal";
-
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -180,6 +178,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    *
    */
   @tracked protected typeToConfirmInput: HTMLInputElement | null = null;
+
+  /**
+   *
+   */
+  @tracked protected transferOwnershipModal: HTMLElement | null = null;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -523,6 +526,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.newOwner = [];
   }
 
+  /**
+   *
+   */
+  @action protected registerTransferOwnershipModal(modal: HTMLElement) {
+    this.transferOwnershipModal = modal;
+  }
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -589,14 +599,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    *
    */
   @action protected focusPeopleSelect() {
-    const modal = document.getElementById(this.transferOwnershipModalID);
-
-    assert("modal must exist", modal);
-
-    const peopleSelect = modal.querySelector(".multiselect input");
-
+    const peopleSelect =
+      this.transferOwnershipModal?.querySelector(".multiselect input");
     assert("peopleSelect must exist", peopleSelect instanceof HTMLInputElement);
-
     peopleSelect.focus();
   }
 
@@ -604,14 +609,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    *
    */
   @action clickTransferButton() {
-    const modal = document.getElementById(this.transferOwnershipModalID);
-
-    assert("modal must exist", modal);
-
-    const button = modal.querySelector(".hds-button");
-
+    const button = this.transferOwnershipModal?.querySelector(".hds-button");
     assert("button must exist", button instanceof HTMLButtonElement);
-
     button.click();
   }
 

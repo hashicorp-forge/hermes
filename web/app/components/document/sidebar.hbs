@@ -412,6 +412,7 @@
         <div class="pt-5">
           <div class="border-t border-color-border-faint pt-7">
             <Action
+              data-test-transfer-document-ownership-button
               {{on "click" this.showTransferOwnershipModal}}
               class="flex gap-2 text-body-100 text-color-foreground-disabled hover:text-color-foreground-faint focus:text-color-foreground-faint"
             >
@@ -629,8 +630,9 @@
     >
       <Document::Modal
         data-test-transfer-ownership-modal
+        {{did-insert this.registerTransferOwnershipModal}}
         @headerText="Transfer ownership"
-        @errorTitle="Error transferring ownership"
+        @errorTitle="Couldn't transfer ownership"
         @close={{this.hideTransferOwnershipModal}}
         @secondaryButtonIsHidden={{true}}
         @task={{perform this.transferOwnership}}
@@ -640,7 +642,6 @@
           (not this.newOwner.length)
           (not T.hasConfirmed)
         }}
-        id={{this.transferOwnershipModalID}}
       >
         <:default as |M|>
           {{#if M.taskIsRunning}}
@@ -660,6 +661,7 @@
               <div>
                 <label
                   {{on "click" this.focusPeopleSelect}}
+                  {{! TODO: variable-ize }}
                   for="transfer-ownership-people-select"
                   class="hermes-form-label"
                 >
@@ -672,6 +674,7 @@
                   @onChange={{this.setNewOwner}}
                   @isSingleSelect={{true}}
                   @renderInPlace={{true}}
+                  @excludeSelf={{true}}
                 />
               </div>
               <div>
