@@ -573,7 +573,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * The action to set the new intended owner of the doc.
    * Called as the `onChange` action in the "Transfer ownership" modal's
    * PeopleSelect component. Sets the newOwner property and focuses the
-   * "Type TRANSFER to confirm" input.
+   * TypeToConfirm input.
    */
   @action protected setNewOwner(newOwner: string[]) {
     this.newOwner = newOwner;
