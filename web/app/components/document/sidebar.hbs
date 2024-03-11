@@ -622,7 +622,11 @@
   {{/if}}
 
   {{#if this.transferOwnershipModalIsShown}}
-    <TypeToConfirm @value="byeee" @onEnter={{this.clickTransferButton}} as |T|>
+    <TypeToConfirm
+      @value="transfer"
+      @onEnter={{this.clickTransferButton}}
+      as |T|
+    >
       <Document::Modal
         data-test-transfer-ownership-modal
         @headerText="Transfer ownership"
