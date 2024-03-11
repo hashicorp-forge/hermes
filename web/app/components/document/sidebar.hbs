@@ -622,53 +622,50 @@
   {{/if}}
 
   {{#if this.transferOwnershipModalIsShown}}
-    <Document::Modal
-      id="shit"
-      data-test-transfer-ownership-modal
-      @headerText="Transfer ownership"
-      @errorTitle="Error transferring ownership"
-      @close={{this.hideTransferOwnershipModal}}
-      @task={{perform this.transferOwnership}}
-      @taskButtonText="Confirm transfer"
-      @taskButtonLoadingText="Transferring..."
-      @hideFooterWhileSaving={{true}}
-      @taskButtonIsDisabled={{or
-        (not this.newOwner.length)
-        (not this.typeToConfirmIsCorrect)
-      }}
-    >
-      <:default as |M|>
-        <p class="mb-5 text-body-300">
-          Transfer this document to someone else in your workspace.
-          <br />
-          We'll email the new owner when the transfer is complete.
-        </p>
-        {{! TODO: semantics }}
-        <div class="hermes-form-label">
-          Select new owner
-        </div>
-        <Inputs::PeopleSelect
-          @selected={{this.newOwner}}
-          @onChange={{this.setNewOwner}}
-          @isSingleSelect={{true}}
-          @renderInPlace={{true}}
-        />
-        {{! Errors? }}
+    <TypeToConfirm @value="transfer" as |T|>
+      <Document::Modal
+        data-test-transfer-ownership-modal
+        @headerText="Transfer ownership"
+        @errorTitle="Error transferring ownership"
+        @close={{this.hideTransferOwnershipModal}}
+        @secondaryButtonIsHidden={{true}}
+        @task={{perform this.transferOwnership}}
+        @taskButtonText="Confirm transfer"
+        @taskButtonLoadingText="Transferring..."
+        @hideFooterWhileSaving={{true}}
+        @taskButtonIsDisabled={{or
+          (not this.newOwner.length)
+          (not T.hasConfirmed)
+        }}
+        id={{this.transferOwnershipModalID}}
+      >
+        <:default>
+          <p class="mb-5 text-body-300">
+            Give this document to someone in your workspace.
+            <br />
+            We'll notify them when the transfer completes.
+          </p>
 
-        {{! Type to confirm? }}
-        <div class="hermes-form-label mt-5">
-          Type
-          <em class="mark mx-1">TRANSFER</em>
-          to confirm
-        </div>
-        {{! EXCLUDE self from results }}
-        <Hds::Form::TextInput::Base
-          @value={{this.typeToConfirmValue}}
-          {{on "input" this.setTypeToConfirmValue}}
-          class="mb-3"
-        />
-      </:default>
-    </Document::Modal>
+          <label
+            {{on "click" this.focusPeopleSelect}}
+            for="transfer-ownership-people-select"
+            class="hermes-form-label"
+          >
+            Select new owner
+          </label>
+          <Inputs::PeopleSelect
+            {{autofocus waitUntilNextRunloop=true}}
+            @triggerId="transfer-ownership-people-select"
+            @selected={{this.newOwner}}
+            @onChange={{this.setNewOwner}}
+            @isSingleSelect={{true}}
+            @renderInPlace={{true}}
+          />
+          <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+        </:default>
+      </Document::Modal>
+    </TypeToConfirm>
+
   {{/if}}
 
   {{#if this.requestReviewModalIsShown}}

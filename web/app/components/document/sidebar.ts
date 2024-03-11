@@ -72,6 +72,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
+  protected transferOwnershipModalID = "transfer-ownership-modal";
+
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -175,21 +177,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked private newOwner: string[] = [];
 
   /**
-   * The value of the "Type to confirm" input
+   *
    */
-  @tracked protected typeToConfirmValue = "";
+  @tracked protected typeToConfirmInput: HTMLInputElement | null = null;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
-
-  /**
-   * Whether the typeToConfirmValue is correct.
-   * When true, enables the "Transfer ownership" button.
-   */
-  protected get typeToConfirmIsCorrect() {
-    // TODO: variable
-    return this.typeToConfirmValue === "TRANSFER";
-  }
 
   /**
    * All active projects. Used to render the list of
@@ -527,16 +520,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected hideTransferOwnershipModal() {
     this.transferOwnershipModalIsShown = false;
-    this.typeToConfirmValue = "";
     this.newOwner = [];
-  }
-
-  /**
-   * The action to set the `typeToConfirmValue` property.
-   * Runs on the `input` event of the "Type to confirm" input.
-   */
-  @action protected setTypeToConfirmValue(event: Event) {
-    this.typeToConfirmValue = (event.target as HTMLInputElement).value;
   }
 
   @action refreshRoute() {
@@ -578,10 +562,42 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    * The action to set the new intended owner of the doc.
    * Called as the `onChange` action in the "Transfer ownership" modal's
-   * PeopleSelect component. Sets the newOwner property.
+   * PeopleSelect component. Sets the newOwner property and focuses the
+   * "Type TRANSFER to confirm" input.
    */
   @action protected setNewOwner(newOwner: string[]) {
     this.newOwner = newOwner;
+    this.focusTypeToConfirmInput();
+  }
+
+  /**
+   *
+   */
+  @action protected registerTypeToConfirmInput(input: HTMLInputElement) {
+    this.typeToConfirmInput = input;
+  }
+
+  /**
+   *
+   */
+  @action protected focusTypeToConfirmInput() {
+    assert("typeToConfirmInput must exist", this.typeToConfirmInput);
+    this.typeToConfirmInput.focus();
+  }
+
+  /**
+   *
+   */
+  @action protected focusPeopleSelect() {
+    const modal = document.getElementById(this.transferOwnershipModalID);
+
+    assert("modal must exist", modal);
+
+    const peopleSelect = modal.querySelector(".multiselect input");
+
+    assert("peopleSelect must exist", peopleSelect instanceof HTMLInputElement);
+
+    peopleSelect.focus();
   }
 
   /**

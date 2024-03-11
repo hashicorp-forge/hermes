@@ -17,6 +17,7 @@ interface DocumentModalComponentSignature {
     taskButtonIsDisabled?: boolean;
     hideFooterWhileSaving?: boolean;
     color?: HdsModalColor;
+    secondaryButtonIsHidden?: boolean;
     close: () => void;
     task?: (newOwner?: string) => Promise<void> | void;
   };

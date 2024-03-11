@@ -9,9 +9,8 @@ import Ember from "ember";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
 import { Select } from "ember-power-select/components/power-select";
-import { next, schedule } from "@ember/runloop";
+import { next } from "@ember/runloop";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
-import { assert } from "@ember/debug";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
@@ -53,6 +52,7 @@ interface InputsPeopleSelectComponentSignature {
      */
     isSingleSelect?: boolean;
     destination?: string;
+    triggerId?: string;
   };
 }
 

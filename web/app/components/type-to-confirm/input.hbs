@@ -1,0 +1,14 @@
+<label class="hermes-form-label" for={{@id}}>
+  Type
+  <em class="mark mx-1">
+    {{@value}}
+  </em>
+  to confirm
+</label>
+
+<Hds::Form::TextInput::Base
+  {{on "input" @onInput}}
+  @value={{@inputValue}}
+  id={{@id}}
+  ...attributes
+/>

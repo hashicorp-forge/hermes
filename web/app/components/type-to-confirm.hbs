@@ -1,0 +1,12 @@
+{{yield
+  (hash
+    Input=(component
+      "type-to-confirm/input"
+      id=this.id
+      value=@value
+      inputValue=this.inputValue
+      onInput=this.updateValue
+    )
+    hasConfirmed=this.hasConfirmed
+  )
+}}
