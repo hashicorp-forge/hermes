@@ -622,7 +622,7 @@
   {{/if}}
 
   {{#if this.transferOwnershipModalIsShown}}
-    <TypeToConfirm @value="transfer" as |T|>
+    <TypeToConfirm @value="byeee" as |T|>
       <Document::Modal
         data-test-transfer-ownership-modal
         @headerText="Transfer ownership"
@@ -630,7 +630,7 @@
         @close={{this.hideTransferOwnershipModal}}
         @secondaryButtonIsHidden={{true}}
         @task={{perform this.transferOwnership}}
-        @taskButtonText="Confirm transfer"
+        @taskButtonText="Transfer"
         @taskButtonLoadingText="Transferring..."
         @hideFooterWhileSaving={{true}}
         @taskButtonIsDisabled={{or
@@ -646,22 +646,28 @@
             We'll notify them when the transfer completes.
           </p>
 
-          <label
-            {{on "click" this.focusPeopleSelect}}
-            for="transfer-ownership-people-select"
-            class="hermes-form-label"
-          >
-            Select new owner
-          </label>
-          <Inputs::PeopleSelect
-            {{autofocus waitUntilNextRunloop=true}}
-            @triggerId="transfer-ownership-people-select"
-            @selected={{this.newOwner}}
-            @onChange={{this.setNewOwner}}
-            @isSingleSelect={{true}}
-            @renderInPlace={{true}}
-          />
-          <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+          <div class="grid gap-4 pb-2.5">
+            <div>
+              <label
+                {{on "click" this.focusPeopleSelect}}
+                for="transfer-ownership-people-select"
+                class="hermes-form-label"
+              >
+                Select new owner
+              </label>
+              <Inputs::PeopleSelect
+                {{autofocus waitUntilNextRunloop=true}}
+                @triggerId="transfer-ownership-people-select"
+                @selected={{this.newOwner}}
+                @onChange={{this.setNewOwner}}
+                @isSingleSelect={{true}}
+                @renderInPlace={{true}}
+              />
+            </div>
+            <div>
+              <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+            </div>
+          </div>
         </:default>
       </Document::Modal>
     </TypeToConfirm>

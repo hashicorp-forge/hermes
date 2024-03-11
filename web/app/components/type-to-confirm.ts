@@ -34,6 +34,8 @@ export default class TypeToConfirm extends Component<TypeToConfirmSignature> {
 
     if (this.inputValue === this.args.value) {
       this.hasConfirmed = true;
+    } else {
+      this.hasConfirmed = false;
     }
   }
 }
