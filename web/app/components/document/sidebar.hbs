@@ -622,7 +622,7 @@
   {{/if}}
 
   {{#if this.transferOwnershipModalIsShown}}
-    <TypeToConfirm @value="byeee" as |T|>
+    <TypeToConfirm @value="byeee" @onEnter={{this.clickTransferButton}} as |T|>
       <Document::Modal
         data-test-transfer-ownership-modal
         @headerText="Transfer ownership"
@@ -630,8 +630,7 @@
         @close={{this.hideTransferOwnershipModal}}
         @secondaryButtonIsHidden={{true}}
         @task={{perform this.transferOwnership}}
-        @taskButtonText="Transfer"
-        @taskButtonLoadingText="Transferring..."
+        @taskButtonText="Transfer doc"
         @hideFooterWhileSaving={{true}}
         @taskButtonIsDisabled={{or
           (not this.newOwner.length)
@@ -639,35 +638,43 @@
         }}
         id={{this.transferOwnershipModalID}}
       >
-        <:default>
-          <p class="mb-5 text-body-300">
-            Give this document to someone in your workspace.
-            <br />
-            We'll notify them when the transfer completes.
-          </p>
+        <:default as |M|>
+          {{#if M.taskIsRunning}}
+            <div class="grid place-items-center pt-1 pb-8 text-center">
+              <FlightIcon @name="loading" @size="24" class="mb-5" />
+              <h2>Transferring doc...</h2>
+            </div>
+          {{else}}
 
-          <div class="grid gap-4 pb-2.5">
-            <div>
-              <label
-                {{on "click" this.focusPeopleSelect}}
-                for="transfer-ownership-people-select"
-                class="hermes-form-label"
-              >
-                Select new owner
-              </label>
-              <Inputs::PeopleSelect
-                {{autofocus waitUntilNextRunloop=true}}
-                @triggerId="transfer-ownership-people-select"
-                @selected={{this.newOwner}}
-                @onChange={{this.setNewOwner}}
-                @isSingleSelect={{true}}
-                @renderInPlace={{true}}
-              />
+            <p class="mb-5 text-body-300">
+              Give this document to someone in your workspace.
+              <br />
+              We'll notify them when the transfer completes.
+            </p>
+
+            <div class="grid gap-4 pb-2.5">
+              <div>
+                <label
+                  {{on "click" this.focusPeopleSelect}}
+                  for="transfer-ownership-people-select"
+                  class="hermes-form-label"
+                >
+                  Select new owner
+                </label>
+                <Inputs::PeopleSelect
+                  {{autofocus waitUntilNextRunloop=true}}
+                  @triggerId="transfer-ownership-people-select"
+                  @selected={{this.newOwner}}
+                  @onChange={{this.setNewOwner}}
+                  @isSingleSelect={{true}}
+                  @renderInPlace={{true}}
+                />
+              </div>
+              <div>
+                <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+              </div>
             </div>
-            <div>
-              <T.Input {{did-insert this.registerTypeToConfirmInput}} />
-            </div>
-          </div>
+          {{/if}}
         </:default>
       </Document::Modal>
     </TypeToConfirm>

@@ -5,7 +5,12 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import TypeToConfirmInput from "./type-to-confirm/input";
 
-type TypeToConfirmInputBoundArgs = "value" | "id" | "inputValue" | "onInput";
+type TypeToConfirmInputBoundArgs =
+  | "value"
+  | "id"
+  | "inputValue"
+  | "onInput"
+  | "onKeydown";
 
 interface TypeToConfirmInterface {
   Input: WithBoundArgs<typeof TypeToConfirmInput, TypeToConfirmInputBoundArgs>;
@@ -15,6 +20,7 @@ interface TypeToConfirmInterface {
 interface TypeToConfirmSignature {
   Args: {
     value: string;
+    onEnter?: () => void;
   };
   Blocks: {
     default: [T: TypeToConfirmInterface];
@@ -36,6 +42,14 @@ export default class TypeToConfirm extends Component<TypeToConfirmSignature> {
       this.hasConfirmed = true;
     } else {
       this.hasConfirmed = false;
+    }
+  }
+
+  @action onKeydown(event: KeyboardEvent) {
+    const { onEnter } = this.args;
+
+    if (this.hasConfirmed && event.key === "Enter" && onEnter) {
+      onEnter();
     }
   }
 }

@@ -601,6 +601,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   *
+   */
+  @action clickTransferButton() {
+    const modal = document.getElementById(this.transferOwnershipModalID);
+
+    assert("modal must exist", modal);
+
+    const button = modal.querySelector(".hds-button");
+
+    assert("button must exist", button instanceof HTMLButtonElement);
+
+    button.click();
+  }
+
+  /**
    * A task that waits for a short time and then resolves.
    * Used to trigger the "link created" state of the share button.
    */
@@ -771,7 +786,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  patchDocument = enqueueTask(async (fields) => {
+  patchDocument = enqueueTask(async (fields: any, throwOnError?: boolean) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {
@@ -784,6 +799,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
     } catch (error) {
+      if (throwOnError) {
+        throw error;
+      }
       const e = error as Error;
       this.maybeLockDoc(e);
       this.showFlashError(e, "Unable to save document");
@@ -878,23 +896,25 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Updates the document's `owners` array and saves it to the back end.
    */
   protected transferOwnership = dropTask(async (newOwner?: string) => {
-    // assert the newOwner exists
     try {
-      await this.patchDocument.perform({
-        owners: [newOwner],
-      });
+      await this.patchDocument.perform(
+        {
+          owners: [newOwner],
+        },
+        true,
+      );
 
       this.transferOwnershipModalIsShown = false;
 
       this.flashMessages.add({
         message: "Ownership transferred",
-        // TODO: more explanation?
         title: "Done!",
       });
     } catch (error) {
       const e = error as Error;
       this.maybeLockDoc(e);
-      this.showFlashError(e, "Error transferring ownership");
+      throw e;
+      // show modal error
     }
   });
 

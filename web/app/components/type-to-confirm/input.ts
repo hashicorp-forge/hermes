@@ -4,6 +4,7 @@ interface TypeToConfirmInputSignature {
   Element: HTMLInputElement;
   Args: {
     onInput: (event: Event) => void;
+    onKeydown: (event: KeyboardEvent) => void;
     inputValue: string;
     value: string;
     id: string;

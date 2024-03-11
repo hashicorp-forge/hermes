@@ -8,6 +8,7 @@
 
 <Hds::Form::TextInput::Base
   {{on "input" @onInput}}
+  {{on "keydown" @onKeydown}}
   @value={{@inputValue}}
   class="mt-1"
   id={{@id}}

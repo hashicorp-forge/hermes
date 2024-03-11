@@ -70,6 +70,11 @@ export default class DocumentModalComponent extends Component<DocumentModalCompo
 
     try {
       this.taskIsRunning = true;
+
+      if (!this.footerIsShown) {
+        this.resetErrors();
+      }
+
       await this.args.task();
       this.args.close();
     } catch (error: unknown) {
