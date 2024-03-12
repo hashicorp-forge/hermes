@@ -894,11 +894,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Called when the user selects a new owner from the "Transfer ownership" modal.
    * Updates the document's `owners` array and saves it to the back end.
    */
-  protected transferOwnership = dropTask(async (newOwner?: string) => {
+  protected transferOwnership = dropTask(async () => {
     try {
       await this.patchDocument.perform(
         {
-          owners: [newOwner],
+          owners: this.newOwner,
         },
         true,
       );
