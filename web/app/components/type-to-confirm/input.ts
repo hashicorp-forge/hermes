@@ -18,6 +18,7 @@ export default class TypeToConfirmInput extends Component<TypeToConfirmInputSign
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
+    // Only validate invocation via the `component` helper
     "type-to-confirm/input": typeof TypeToConfirmInput;
   }
 }

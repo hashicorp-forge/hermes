@@ -19,7 +19,15 @@ interface TypeToConfirmInterface {
 
 interface TypeToConfirmSignature {
   Args: {
+    /**
+     * The target value to confirm.
+     */
     value: string;
+
+    /**
+     * The action to run when the input is focused,
+     * valid, and the Enter key is pressed.
+     */
     onEnter?: () => void;
   };
   Blocks: {
@@ -28,14 +36,33 @@ interface TypeToConfirmSignature {
 }
 
 export default class TypeToConfirm extends Component<TypeToConfirmSignature> {
+  /**
+   * The typed value of the input. Updated on `input` events and used
+   * to compare against the `value` argument to determine validity.
+   */
   @tracked protected inputValue = "";
+
+  /**
+   * Whether the input value matches the `value` argument.
+   * Used internally to determine if the `onEnter` action should be called.
+   * Yielded to the block to allow for custom UI based on the input's validity,
+   */
   @tracked protected hasConfirmed = false;
 
+  /**
+   * The unique identifier for the component.
+   * Used to associate the input with its label.
+   */
   protected get id() {
     return guidFor(this);
   }
 
-  @action protected updateValue(event: Event) {
+  /**
+   * The action to update and validate the input value.
+   * Called on `input` events. If the input value matches the `value` argument,
+   * sets `hasConfirmed` to `true`. Otherwise, sets `hasConfirmed` to `false`.
+   */
+  @action protected onInput(event: Event) {
     this.inputValue = (event.target as HTMLInputElement).value;
 
     if (this.inputValue === this.args.value) {
@@ -45,10 +72,15 @@ export default class TypeToConfirm extends Component<TypeToConfirmSignature> {
     }
   }
 
-  @action onKeydown(event: KeyboardEvent) {
+  /**
+   * The action to run on input keydown.
+   * Calls the passed in `onEnter` action if it's present,
+   * the input is valid, and the Enter key is pressed.
+   */
+  @action protected onKeydown(event: KeyboardEvent) {
     const { onEnter } = this.args;
 
-    if (this.hasConfirmed && event.key === "Enter" && onEnter) {
+    if (onEnter && this.hasConfirmed && event.key === "Enter") {
       onEnter();
     }
   }

@@ -27,6 +27,7 @@ import {
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
   TEST_USER_NAME,
+  TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
@@ -1685,7 +1686,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(OWNERSHIP_TRANSFERRED_MODAL)
-      .containsText("Ownership transferred");
+      .containsText("Ownership transferred")
+      .containsText(`${TEST_USER_2_NAME} has been notified of the change.`);
 
     assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON).hasText("Close");
 

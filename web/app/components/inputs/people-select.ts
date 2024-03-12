@@ -47,12 +47,24 @@ interface InputsPeopleSelectComponentSignature {
     renderInPlace?: boolean;
     disabled?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
+
     /**
      * Whether the dropdown should be single-select.
      * When true, will not show the dropdown when there's a selection.
      */
     isSingleSelect?: boolean;
+
+    /**
+     * Whether to exclude the authenticated user from the dropdown.
+     * Used by the "Transfer ownership" modal, where suggesting the
+     * authenticated user as a new owner would be unhelpful.
+     */
     excludeSelf?: boolean;
+
+    /**
+     * The ID of the EmberPowerSelect trigger. Allows the label
+     * to be associated with the input for accessibility purposes.
+     */
     triggerId?: string;
   };
 }
@@ -88,8 +100,11 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     }
   }
 
-  // TODO: need to prevent the dropdown from opening when the input is empty
-  // and the user keys "enter", "down", or "up"
+  /**
+   * The action to run when the PowerSelect input is focused and a key is pressed.
+   * On Enter, ArrowDown, and ArrowUp, prevents the dropdown from opening in a
+   * useless state (e.g., "Type to search").
+   */
   @action protected onKeydown(dropdown: Select, event: KeyboardEvent) {
     switch (event.key) {
       case "Enter":
@@ -135,7 +150,9 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     this.people = [];
   }
   /**
-   *
+   * The action to maybe close the dropdown. Passed to the PeopleSelect
+   * as `onOpen`. If the dropdown is single-select and has a selection, i.e.,
+   * when there's nothing to show in the dropdown, it closes the dropdown.
    */
   @action protected maybeClose(select: Select) {
     if (this.args.isSingleSelect && select.selected.length > 0) {

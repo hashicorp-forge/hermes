@@ -71,8 +71,11 @@ export default class DocumentModalComponent extends Component<DocumentModalCompo
     try {
       this.taskIsRunning = true;
 
+      /**
+       * Clear errors before entering a full-modal state,
+       * such as when showing the "Transferring ownership" message.
+       */
       if (!this.footerIsShown) {
-        console.log("Footer is hidden, not running task");
         this.resetErrors();
       }
 

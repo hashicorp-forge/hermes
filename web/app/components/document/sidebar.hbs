@@ -631,7 +631,6 @@
     >
       <Document::Modal
         data-test-transfer-ownership-modal
-        {{did-insert this.registerTransferOwnershipModal}}
         @headerText="Transfer ownership"
         @errorTitle="Couldn't transfer ownership"
         @close={{this.hideTransferOwnershipModal}}
@@ -693,15 +692,37 @@
 
   {{! Ownership transferred }}
   {{#if this.ownershipTransferredModalIsShown}}
-    <Document::Modal
+    <Hds::Modal
       data-test-ownership-transferred-modal
-      @headerText="Ownership transferred"
-      @task={{this.hideOwnershipTransferredModal}}
-      @taskButtonText="Close"
-      {{! TODO: personalize this more }}
-      @bodyText="The document has been transferred to the new owner."
-      @close={{this.hideOwnershipTransferredModal}}
-    />
+      @onClose={{this.hideOwnershipTransferredModal}}
+      as |M|
+    >
+      <M.Header>
+        <div class="flex items-center">
+          <FlightIcon
+            @name="check-circle-fill"
+            class="mr-2 text-color-palette-green-200"
+          />
+          Done
+        </div>
+      </M.Header>
+      <M.Body>
+        <div class="grid place-items-center pt-8 pb-8 text-center">
+          <h2>Ownership transferred.</h2>
+          <p class="mb-2.5 flex text-body-300">
+            {{get-model-attr "person.name" (get @document.owners 0)}}
+            has been notified of the change.
+          </p>
+        </div>
+      </M.Body>
+      <M.Footer>
+        <Hds::Button
+          data-test-document-modal-primary-button
+          @text="Close"
+          {{on "click" this.hideOwnershipTransferredModal}}
+        />
+      </M.Footer>
+    </Hds::Modal>
   {{/if}}
 
   {{#if this.requestReviewModalIsShown}}
