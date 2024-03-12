@@ -910,14 +910,12 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Updates the document's `owners` array and saves it to the back end.
    */
   protected transferOwnership = dropTask(async () => {
-    const owner = this.newOwners[0];
-
-    assert("owner must exist", owner);
+    assert("owner must exist", this.newOwners.length > 0);
 
     try {
       await this.patchDocument.perform(
         {
-          owner,
+          owners: this.newOwners,
         },
         true,
       );
