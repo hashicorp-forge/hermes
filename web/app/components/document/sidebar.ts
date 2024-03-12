@@ -72,6 +72,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
+  protected transferOwnershipPeopleSelectID =
+    "transfer-ownership-people-select";
+
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
@@ -172,7 +175,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * The new owner of the document.
    * Set when the user selects a new owner from the "Transfer ownership" modal.
    */
-  @tracked private newOwner: string[] = [];
+  @tracked private newOwners: string[] = [];
 
   /**
    *
@@ -183,6 +186,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    *
    */
   @tracked protected transferOwnershipModal: HTMLElement | null = null;
+
+  /**
+   *
+   */
+  @tracked protected ownershipTransferredModalIsShown = false;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -523,7 +531,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected hideTransferOwnershipModal() {
     this.transferOwnershipModalIsShown = false;
-    this.newOwner = [];
+    this.newOwners = [];
   }
 
   /**
@@ -575,8 +583,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * PeopleSelect component. Sets the newOwner property and focuses the
    * TypeToConfirm input.
    */
-  @action protected setNewOwner(newOwner: string[]) {
-    this.newOwner = newOwner;
+  @action protected setNewOwner(newOwners: string[]) {
+    this.newOwners = newOwners;
     this.focusTypeToConfirmInput();
   }
 
@@ -608,10 +616,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    *
    */
-  @action clickTransferButton() {
+  @action protected clickTransferButton() {
     const button = this.transferOwnershipModal?.querySelector(".hds-button");
     assert("button must exist", button instanceof HTMLButtonElement);
     button.click();
+  }
+
+  /**
+   *
+   */
+  @action protected hideOwnershipTransferredModal() {
+    this.ownershipTransferredModalIsShown = false;
   }
 
   /**
@@ -895,20 +910,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Updates the document's `owners` array and saves it to the back end.
    */
   protected transferOwnership = dropTask(async () => {
+    const owner = this.newOwners[0];
+
+    assert("owner must exist", owner);
+
     try {
       await this.patchDocument.perform(
         {
-          owner: this.newOwner[0],
+          owner,
         },
         true,
       );
 
       this.transferOwnershipModalIsShown = false;
-
-      this.flashMessages.add({
-        message: "Ownership transferred",
-        title: "Done!",
-      });
+      this.ownershipTransferredModalIsShown = true;
     } catch (error) {
       const e = error as Error;
       this.maybeLockDoc(e);

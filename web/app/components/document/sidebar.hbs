@@ -622,6 +622,7 @@
     />
   {{/if}}
 
+  {{! Transfer ownership }}
   {{#if this.transferOwnershipModalIsShown}}
     <TypeToConfirm
       @value="transfer"
@@ -639,7 +640,7 @@
         @taskButtonText="Transfer doc"
         @hideFooterWhileSaving={{true}}
         @taskButtonIsDisabled={{or
-          (not this.newOwner.length)
+          (not this.newOwners.length)
           (not T.hasConfirmed)
         }}
       >
@@ -661,16 +662,15 @@
               <div>
                 <label
                   {{on "click" this.focusPeopleSelect}}
-                  {{! TODO: variable-ize }}
-                  for="transfer-ownership-people-select"
+                  for={{this.transferOwnershipPeopleSelectID}}
                   class="hermes-form-label"
                 >
                   Select new owner
                 </label>
                 <Inputs::PeopleSelect
                   {{autofocus waitUntilNextRunloop=true}}
-                  @triggerId="transfer-ownership-people-select"
-                  @selected={{this.newOwner}}
+                  @triggerId={{this.transferOwnershipPeopleSelectID}}
+                  @selected={{this.newOwners}}
                   @onChange={{this.setNewOwner}}
                   @isSingleSelect={{true}}
                   @renderInPlace={{true}}
@@ -685,7 +685,16 @@
         </:default>
       </Document::Modal>
     </TypeToConfirm>
+  {{/if}}
 
+  {{! Ownership transferred }}
+  {{#if this.ownershipTransferredModalIsShown}}
+    <Document::Modal
+      @headerText="Ownership transferred"
+      {{! TODO: personalize this more }}
+      @bodyText="The document has been transferred to the new owner."
+      @close={{this.hideOwnershipTransferredModal}}
+    />
   {{/if}}
 
   {{#if this.requestReviewModalIsShown}}
