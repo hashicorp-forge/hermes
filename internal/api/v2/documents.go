@@ -24,6 +24,7 @@ type DocumentPatchRequest struct {
 	Approvers    *[]string               `json:"approvers,omitempty"`
 	Contributors *[]string               `json:"contributors,omitempty"`
 	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
+	Owner        *string                 `json:"owner,omitempty"`
 	Status       *string                 `json:"status,omitempty"`
 	Summary      *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
@@ -522,6 +523,24 @@ func DocumentHandler(srv server.Server) http.Handler {
 					}
 				}
 			}
+			// Owner.
+			if req.Owner != nil {
+				doc.Owners = []string{*req.Owner}
+
+				// Give new owner edit access to the document.
+				if err := srv.GWService.ShareFile(
+					docID, *req.Owner, "writer"); err != nil {
+					srv.Logger.Error("error sharing file with new owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"new_owner", *req.Owner)
+					http.Error(w, "Error patching document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 			// Status.
 			if req.Status != nil {
 				doc.Status = *req.Status
@@ -700,6 +719,13 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// Document modified time.
 				model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
 
+				// Owner.
+				if req.Owner != nil {
+					model.Owner = &models.User{
+						EmailAddress: *req.Owner,
+					}
+				}
+
 				// Status.
 				if req.Status != nil {
 					switch *req.Status {
@@ -720,6 +746,89 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// Title.
 				if req.Title != nil {
 					model.Title = *req.Title
+				}
+
+				// Send email to new owner.
+				if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+					req.Owner != nil {
+					// Get document URL.
+					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+					if err != nil {
+						srv.Logger.Error("error getting document URL",
+							"error", err,
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+						http.Error(w, "Error patching document",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Get name of new document owner.
+					newOwner := email.User{
+						EmailAddress: *req.Owner,
+					}
+					ppl, err := srv.GWService.SearchPeople(
+						*req.Owner, "emailAddresses,names")
+					if err != nil {
+						srv.Logger.Warn("error searching directory for new owner",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", doc.Owners[0],
+						)
+					}
+					if len(ppl) == 1 && ppl[0].Names != nil {
+						newOwner.Name = ppl[0].Names[0].DisplayName
+					}
+
+					// Get name of old document owner.
+					oldOwner := email.User{
+						EmailAddress: userEmail,
+					}
+					ppl, err = srv.GWService.SearchPeople(
+						userEmail, "emailAddresses,names")
+					if err != nil {
+						srv.Logger.Warn("error searching directory for old owner",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", doc.Owners[0],
+						)
+					}
+					if len(ppl) == 1 && ppl[0].Names != nil {
+						oldOwner.Name = ppl[0].Names[0].DisplayName
+					}
+
+					if err := email.SendNewOwnerEmail(
+						email.NewOwnerEmailData{
+							BaseURL:           srv.Config.BaseURL,
+							DocumentShortName: doc.DocNumber,
+							DocumentStatus:    doc.Status,
+							DocumentTitle:     doc.Title,
+							DocumentType:      doc.DocType,
+							DocumentURL:       docURL,
+							NewDocumentOwner:  newOwner,
+							OldDocumentOwner:  oldOwner,
+							Product:           doc.Product,
+						},
+						[]string{doc.Owners[0]},
+						srv.Config.Email.FromAddress,
+						srv.GWService,
+					); err != nil {
+						srv.Logger.Error("error sending new owner email",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+						http.Error(w, "Error patching document",
+							http.StatusInternalServerError)
+						return
+					}
 				}
 
 				// Send emails to new approvers.
