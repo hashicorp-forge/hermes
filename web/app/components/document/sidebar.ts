@@ -72,6 +72,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
+  /**
+   * The ID shared between the "Select a new owner" PeopleSelect and its label.
+   */
   protected transferOwnershipPeopleSelectID =
     "transfer-ownership-people-select";
 
