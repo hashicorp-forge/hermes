@@ -407,7 +407,25 @@
           </div>
         {{/if}}
       {{/each-in}}
+
+      {{! Transfer ownership }}
+      {{#if this.isOwner}}
+        <div class="pt-5">
+          <div class="border-t border-color-border-faint pt-7">
+            <Action
+              data-test-transfer-document-ownership-button
+              {{on "click" this.showTransferOwnershipModal}}
+              disabled={{this.editingIsDisabled}}
+              class="flex gap-2 text-body-100 text-color-foreground-disabled hover:text-color-foreground-faint focus:text-color-foreground-faint"
+            >
+              <FlightIcon @name="swap-horizontal" />
+              Transfer ownership...
+            </Action>
+          </div>
+        </div>
+      {{/if}}
     </div>
+
   </div>
 
   {{#if this.footerIsShown}}
@@ -604,6 +622,109 @@
       @taskButtonLoadingText="Deleting..."
       @taskButtonIcon="trash"
     />
+  {{/if}}
+
+  {{! Transfer ownership }}
+  {{#if this.transferOwnershipModalIsShown}}
+    <TypeToConfirm
+      @value="transfer"
+      @onEnter={{this.clickTransferButton}}
+      as |T|
+    >
+      <Document::Modal
+        data-test-transfer-ownership-modal
+        @headerText="Transfer ownership"
+        @errorTitle="Couldn't transfer ownership"
+        @close={{this.hideTransferOwnershipModal}}
+        @secondaryButtonIsHidden={{true}}
+        @task={{perform this.transferOwnership}}
+        @taskButtonText="Transfer doc"
+        @hideFooterWhileSaving={{true}}
+        @taskButtonIsDisabled={{or
+          (not this.newOwners.length)
+          (not T.hasConfirmed)
+        }}
+      >
+        <:default as |M|>
+          {{#if M.taskIsRunning}}
+            <div
+              data-test-transferring-doc
+              class="grid place-items-center pt-1 pb-8 text-center"
+            >
+              <FlightIcon @name="loading" @size="24" class="mb-5" />
+              <h2>Transferring doc...</h2>
+            </div>
+          {{else}}
+
+            <p class="mb-5 text-body-300">
+              Give this document to someone in your workspace.
+              <br />
+              We'll notify them when the transfer completes.
+            </p>
+
+            <div class="grid gap-4 pb-2.5">
+              <div>
+                <label
+                  data-test-select-new-owner-label
+                  {{on "click" this.focusPeopleSelect}}
+                  for={{this.transferOwnershipPeopleSelectID}}
+                  class="hermes-form-label"
+                >
+                  Select new owner
+                </label>
+                <Inputs::PeopleSelect
+                  {{autofocus waitUntilNextRunloop=true}}
+                  @triggerId={{this.transferOwnershipPeopleSelectID}}
+                  @selected={{this.newOwners}}
+                  @onChange={{this.setNewOwner}}
+                  @isSingleSelect={{true}}
+                  @renderInPlace={{true}}
+                  @excludeSelf={{true}}
+                />
+              </div>
+              <div>
+                <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+              </div>
+            </div>
+          {{/if}}
+        </:default>
+      </Document::Modal>
+    </TypeToConfirm>
+  {{/if}}
+
+  {{! Ownership transferred }}
+  {{#if this.ownershipTransferredModalIsShown}}
+    <Hds::Modal
+      data-test-ownership-transferred-modal
+      @onClose={{this.hideOwnershipTransferredModal}}
+      as |M|
+    >
+      <M.Header>
+        <div class="flex items-center">
+          <FlightIcon
+            @name="check-circle-fill"
+            class="mr-2 text-color-palette-green-200"
+          />
+          Done
+        </div>
+      </M.Header>
+      <M.Body>
+        <div class="grid place-items-center pt-8 pb-8 text-center">
+          <h2>Ownership transferred.</h2>
+          <p class="mb-2.5 flex text-body-300">
+            {{get-model-attr "person.name" (get @document.owners 0)}}
+            has been notified of the change.
+          </p>
+        </div>
+      </M.Body>
+      <M.Footer>
+        <Hds::Button
+          data-test-document-modal-primary-button
+          @text="Close"
+          {{on "click" this.hideOwnershipTransferredModal}}
+        />
+      </M.Footer>
+    </Hds::Modal>
   {{/if}}
 
   {{#if this.requestReviewModalIsShown}}

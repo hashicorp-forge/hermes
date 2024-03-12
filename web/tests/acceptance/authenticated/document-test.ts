@@ -27,6 +27,7 @@ import {
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
   TEST_USER_NAME,
+  TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
@@ -64,8 +65,20 @@ const POPOVER = "[data-test-x-dropdown-list-content]";
 const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]`;
 const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
 
-const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
+/**
+ * Transfer ownership
+ */
+const TRANSFER_OWNERSHIP_BUTTON =
+  "[data-test-transfer-document-ownership-button]";
+const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
+const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
+const TRANSFERRING_DOC = "[data-test-transferring-doc]";
+const SELECT_NEW_OWNER_LABEL = "[data-test-select-new-owner-label]";
+const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
+const PEOPLE_SELECT_OPTION =
+  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
 
+const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 const OWNER_LINK = "[data-test-owner-link]";
 
 const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
@@ -79,7 +92,7 @@ const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
   "[data-test-publish-for-review-modal]";
 const DELETE_BUTTON = "[data-test-delete-draft-button]";
 const DELETE_MODAL = "[data-test-delete-draft-modal]";
-const DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR =
+const DOCUMENT_MODAL_PRIMARY_BUTTON =
   "[data-test-document-modal-primary-button]";
 const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
   "[data-test-publishing-for-review-message]";
@@ -101,7 +114,7 @@ const EDITABLE_FIELD_SAVE_BUTTON_SELECTOR =
   ".editable-field [data-test-save-button]";
 const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
   ".ember-power-select-multiple-remove-btn";
-
+const TYPE_TO_CONFIRM_INPUT = "[data-test-type-to-confirm-input]";
 const PROJECT_LINK = "[data-test-project-link]";
 const ADD_TO_PROJECT_BUTTON =
   "[data-test-section-header-button-for='Projects']";
@@ -546,9 +559,9 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DELETE_MODAL).exists("the user is shown a confirmation screen");
 
-    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR).hasText("Yes, delete");
+    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON).hasText("Yes, delete");
 
-    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     assert.dom(DELETE_MODAL).doesNotExist("the modal is dismissed");
 
@@ -695,6 +708,19 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasText("In review", "the status is shown but not as a toggle");
   });
 
+  test("non-owners don't see the transfer-ownership button", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      objectID: 1,
+      isDraft: false,
+      status: "In-Review",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(TRANSFER_OWNERSHIP_BUTTON).doesNotExist();
+  });
+
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
@@ -709,7 +735,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
 
-    let clickPromise = click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+    let clickPromise = click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     await waitFor(PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR);
     assert.dom(PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR).exists();
@@ -749,7 +775,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1?draft=true");
 
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
-    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
     assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
@@ -1328,7 +1354,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
-    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     assert.dom(MODAL_ERROR).containsText(ERROR_MESSAGE_TEXT);
   });
@@ -1347,7 +1373,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(DELETE_BUTTON);
 
-    await click(DOCUMENT_MODAL_PRIMARY_BUTTON_SELECTOR);
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     assert.dom(MODAL_ERROR).containsText(ERROR_MESSAGE_TEXT);
   });
@@ -1568,6 +1594,127 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(APPROVE_BUTTON).doesNotExist("the approve button is removed");
 
     assert.dom(DISABLED_FOOTER_H5).hasText("Document is locked");
+  });
+
+  test("owners can transfer ownership of their docs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      id: 1,
+      objectID: 1,
+    });
+
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_EMAIL }],
+    });
+
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_2_EMAIL }],
+    });
+
+    await visit("/document/1");
+
+    await click(TRANSFER_OWNERSHIP_BUTTON);
+
+    assert.dom(TRANSFER_OWNERSHIP_MODAL).exists();
+
+    assert
+      .dom(DOCUMENT_MODAL_PRIMARY_BUTTON)
+      .hasText("Transfer doc")
+      .isDisabled();
+
+    await click(SELECT_NEW_OWNER_LABEL);
+
+    assert
+      .dom(PEOPLE_SELECT_INPUT)
+      .isFocused("clicking the label focuses the input");
+
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_EMAIL);
+
+    assert
+      .dom(PEOPLE_SELECT_OPTION)
+      .doesNotExist("the authenticated user is not shown in the people select");
+
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_2_EMAIL);
+
+    assert.dom(PEOPLE_SELECT_OPTION).containsText(TEST_USER_2_EMAIL);
+
+    await click(PEOPLE_SELECT_OPTION);
+
+    assert
+      .dom(PEOPLE_SELECT_INPUT)
+      .isNotVisible("the input is hidden after selection");
+
+    assert
+      .dom(TYPE_TO_CONFIRM_INPUT)
+      .isFocused(
+        "the type-to-confirm input receives focus when a person is selected",
+      );
+
+    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON).isDisabled();
+
+    await fillIn(TYPE_TO_CONFIRM_INPUT, "transfer");
+
+    assert
+      .dom(DOCUMENT_MODAL_PRIMARY_BUTTON)
+      .isNotDisabled("the button is enabled when both inputs are filled");
+
+    const clickPromise = click(DOCUMENT_MODAL_PRIMARY_BUTTON);
+
+    await waitFor(TRANSFERRING_DOC);
+
+    assert.dom(TRANSFERRING_DOC).containsText("Transferring doc...");
+
+    await clickPromise;
+
+    assert.dom(TRANSFER_OWNERSHIP_MODAL).doesNotExist();
+
+    assert
+      .dom(OWNERSHIP_TRANSFERRED_MODAL)
+      .containsText("Ownership transferred")
+      .containsText("User 2 has been notified of the change.");
+
+    assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON).hasText("Close");
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
+
+    assert.dom(OWNERSHIP_TRANSFERRED_MODAL).doesNotExist();
+
+    const doc = this.server.schema.document.find(1);
+    const docOwner = doc.attrs.owners[0];
+
+    assert.equal(
+      docOwner,
+      TEST_USER_2_EMAIL,
+      "the doc owner is updated in the back end",
+    );
+  });
+
+  test("an error is shown when ownership transferring fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("document", {
+      id: 1,
+      objectID: 1,
+      isDraft: false,
+      status: "In-review",
+    });
+
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_2_EMAIL }],
+    });
+
+    await visit("/document/1");
+
+    await click(TRANSFER_OWNERSHIP_BUTTON);
+
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_2_EMAIL);
+    await click(PEOPLE_SELECT_OPTION);
+    await fillIn(TYPE_TO_CONFIRM_INPUT, "transfer");
+
+    this.server.patch("/documents/:document_id", () => {
+      return new Response(500, {}, "Error");
+    });
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
+
+    assert.dom(MODAL_ERROR).exists();
   });
 
   test("you can add a group as an approver", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

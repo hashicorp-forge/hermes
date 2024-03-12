@@ -72,9 +72,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
 
+  /**
+   * The ID shared between the "Select a new owner" PeopleSelect and its label.
+   */
+  protected transferOwnershipPeopleSelectID =
+    "transfer-ownership-people-select";
+
   @tracked deleteModalIsShown = false;
   @tracked requestReviewModalIsShown = false;
   @tracked docPublishedModalIsShown = false;
+  @tracked protected transferOwnershipModalIsShown = false;
   @tracked protected projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
   @tracked emailFields = ["approvers", "contributors"];
@@ -166,6 +173,24 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Reset when the user retries the request.
    */
   @tracked protected projectsErrorIsShown = false;
+
+  /**
+   * The new owner of the document.
+   * Set when the user selects a new owner from the "Transfer ownership" modal.
+   */
+  @tracked private newOwners: string[] = [];
+
+  /**
+   * The `TypeToConfirm` input of the "Transfer ownership" modal.
+   * Registered on insert and focused when the user selects a new owner.
+   */
+  @tracked protected typeToConfirmInput: HTMLInputElement | null = null;
+
+  /**
+   * Whether the "Ownership transferred" modal is shown.
+   * True when the `transferOwnership` task completes successfully.
+   */
+  @tracked protected ownershipTransferredModalIsShown = false;
 
   @tracked userHasScrolled = false;
   @tracked _body: HTMLElement | null = null;
@@ -491,6 +516,24 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.projectsModalIsShown = false;
   }
 
+  /**
+   * The action to show the "Transfer ownership" modal.
+   * Triggered by clicking the "Transfer ownership" button in the footer.
+   */
+  @action protected showTransferOwnershipModal() {
+    this.transferOwnershipModalIsShown = true;
+  }
+
+  /**
+   * The action to hide the "Transfer ownership" modal.
+   * Passed to the "Transfer ownership" modal component and
+   * triggered on modal close.
+   */
+  @action protected hideTransferOwnershipModal() {
+    this.transferOwnershipModalIsShown = false;
+    this.newOwners = [];
+  }
+
   @action refreshRoute() {
     // We force refresh due to a bug with `refreshModel: true`
     // See: https://github.com/emberjs/ember.js/issues/19260
@@ -525,6 +568,65 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       message,
       title,
     });
+  }
+
+  /**
+   * The action to set the new intended owner of the doc.
+   * Called as the `onChange` action in the "Transfer ownership" modal's
+   * PeopleSelect component. Sets the newOwner property and focuses the
+   * TypeToConfirm input.
+   */
+  @action protected setNewOwner(newOwners: string[]) {
+    this.newOwners = newOwners;
+    this.focusTypeToConfirmInput();
+  }
+
+  /**
+   * The action to register the "TypeToConfirm" input of the "Transfer ownership" modal.
+   * Runs on insert and captures the typeToConfirmInput for focus targeting.
+   */
+  @action protected registerTypeToConfirmInput(input: HTMLInputElement) {
+    this.typeToConfirmInput = input;
+  }
+
+  /**
+   * The action to focus the "TypeToConfirm" input of the "Transfer ownership" modal.
+   * Called for conveniences when the user selects a new owner from the PeopleSelect.
+   */
+  @action private focusTypeToConfirmInput() {
+    assert("typeToConfirmInput must exist", this.typeToConfirmInput);
+    this.typeToConfirmInput.focus();
+  }
+
+  /**
+   * The action to focus the PeopleSelect input. Runs when the `label` is clicked.
+   * This is a workaround until `ember-power-select` `8.0.0` is released, enabling
+   * the `labelText` argument in the PowerSelectMultiple component.
+   */
+  @action protected focusPeopleSelect() {
+    const peopleSelect = htmlElement(
+      "dialog .multiselect input",
+    ) as HTMLInputElement;
+    peopleSelect.focus();
+  }
+
+  /**
+   * The to click the "Transfer doc" button. Runs on Enter when the TypeToConfirm
+   * input is valid and focused. Runs the `transferOwnership` task along with
+   * the modal's internal tasks for consistency with the real click action.
+   */
+  @action protected clickTransferButton() {
+    const button = htmlElement("dialog .hds-button") as HTMLButtonElement;
+    button.click();
+  }
+
+  /**
+   * The action to show the "Ownership transferred" modal.
+   * Passed as the `onClose` action of the "Transfer ownership" modal
+   * and triggered when clicking the "Close" button in the modal.
+   */
+  @action protected hideOwnershipTransferredModal() {
+    this.ownershipTransferredModalIsShown = false;
   }
 
   /**
@@ -698,7 +800,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     },
   );
 
-  patchDocument = enqueueTask(async (fields) => {
+  patchDocument = enqueueTask(async (fields: any, throwOnError?: boolean) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
 
     try {
@@ -711,6 +813,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
     } catch (error) {
+      /**
+       * Errors are normally handled in a flash message, but if the
+       * consuming method needs special treatment, such as to trigger
+       * a modal error, we throw the error up the chain.
+       */
+      if (throwOnError) {
+        throw error;
+      }
       const e = error as Error;
       this.maybeLockDoc(e);
       this.showFlashError(e, "Unable to save document");
@@ -790,6 +900,34 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       });
 
       this.router.transitionTo("authenticated.my.documents");
+    } catch (error) {
+      const e = error as Error;
+      this.maybeLockDoc(e);
+
+      // trigger the modal error
+      throw e;
+    }
+  });
+
+  /**
+   * The task to transfer ownership of a document.
+   * Called when the user selects a new owner from the "Transfer ownership" modal.
+   * Updates the document's `owners` array and saves it to the back end.
+   */
+  protected transferOwnership = dropTask(async () => {
+    assert("owner must exist", this.newOwners.length > 0);
+
+    try {
+      await this.patchDocument.perform(
+        {
+          owners: this.newOwners,
+        },
+        true,
+      );
+
+      this.transferOwnershipModalIsShown = false;
+      this.ownershipTransferredModalIsShown = true;
+      this.newOwners = [];
     } catch (error) {
       const e = error as Error;
       this.maybeLockDoc(e);

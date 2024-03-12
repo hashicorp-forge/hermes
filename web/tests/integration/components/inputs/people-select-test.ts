@@ -1,16 +1,25 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render, waitFor } from "@ember/test-helpers";
+import { click, fillIn, render, rerender, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { authenticateTestUser } from "hermes/mirage/utils";
+import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
 import { Response } from "miragejs";
+
+const MULTISELECT = ".multiselect";
+const TRIGGER = ".ember-basic-dropdown-trigger";
+const INPUT = ".ember-power-select-trigger-multiple-input";
+const OPTION =
+  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
+const NO_MATCHES_MESSAGE = ".ember-power-select-option--no-matches-message";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: string[];
   onChange: (newValue: string[]) => void;
   isFirstFetchAttempt: boolean;
+  excludeSelf: boolean;
+  isSingleSelect: boolean;
 }
 
 module("Integration | Component | inputs/people-select", function (hooks) {
@@ -19,13 +28,13 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
   hooks.beforeEach(function (this: PeopleSelectContext) {
     authenticateTestUser(this);
+    this.server.createList("google/person", 10);
+
+    this.set("people", []);
+    this.set("onChange", (newValue: string[]) => this.set("people", newValue));
   });
 
   test("it functions as expected", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("google/person", 10);
-    this.set("people", []);
-    this.onChange = (newValue) => this.set("people", newValue);
-
     await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
@@ -33,39 +42,35 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       />
     `);
 
-    await click(".ember-basic-dropdown-trigger");
+    await click(TRIGGER);
+
+    assert.dom(OPTION).doesNotExist('"Type to search" message is hidden');
+
+    await fillIn(INPUT, "u");
 
     assert
-      .dom(".ember-power-select-option")
-      .doesNotExist('"Type to search" message is hidden');
-
-    await fillIn(".ember-power-select-trigger-multiple-input", "u");
-
-    assert
-      .dom(".ember-power-select-option")
+      .dom(OPTION)
       .exists({ count: 10 }, "Options matching `u` are suggested");
 
-    await fillIn(".ember-power-select-trigger-multiple-input", "1");
+    await fillIn(INPUT, "1");
 
-    assert
-      .dom(".ember-power-select-option")
-      .exists({ count: 2 }, "Results are filtered to match 1");
+    assert.dom(OPTION).exists({ count: 2 }, "Results are filtered to match 1");
 
-    await click(".ember-power-select-option");
+    await click(OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .hasText("User 1", "User 1 was successfully selected");
 
-    await fillIn(".ember-power-select-trigger-multiple-input", "2");
+    await fillIn(INPUT, "2");
 
-    await click(".ember-power-select-option");
+    await click(OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 2 }, "User 2 was successfully selected");
 
-    await fillIn(".ember-power-select-trigger-multiple-input", "2");
+    await fillIn(INPUT, "2");
     assert
-      .dom(".ember-power-select-option")
+      .dom(NO_MATCHES_MESSAGE)
       .hasText("No results found", "No duplicate users can be added");
 
     await click(
@@ -78,10 +83,6 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   });
 
   test("it will retry if the server returns an error", async function (this: PeopleSelectContext, assert) {
-    this.server.createList("google/person", 5);
-
-    this.set("people", []);
-    this.onChange = (newValue) => this.set("people", newValue);
     this.set("isFirstFetchAttempt", true);
 
     this.server.post("/people", () => {
@@ -103,12 +104,9 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       />
     `);
 
-    await click(".ember-basic-dropdown-trigger");
+    await click(TRIGGER);
 
-    let fillInPromise = fillIn(
-      ".ember-power-select-trigger-multiple-input",
-      "any text - we're not actually querying",
-    );
+    let fillInPromise = fillIn(INPUT, "any text - we're not actually querying");
 
     await waitFor(".ember-power-select-option--loading-message");
 
@@ -118,8 +116,59 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await fillInPromise;
 
+    assert.dom(OPTION).exists({ count: 10 }, "Returns results after retrying");
+  });
+
+  test("you can exclude the authenticated user from the list", async function (this: PeopleSelectContext, assert) {
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_EMAIL }],
+    });
+
+    this.set("excludeSelf", true);
+
+    await render<PeopleSelectContext>(hbs`
+      <Inputs::PeopleSelect
+        @selected={{this.people}}
+        @onChange={{this.onChange}}
+        @excludeSelf={{this.excludeSelf}}
+      />
+    `);
+
+    await click(TRIGGER);
+    await fillIn(INPUT, TEST_USER_EMAIL);
+
     assert
-      .dom(".ember-power-select-option")
-      .exists({ count: 5 }, "Returns results after retrying");
+      .dom(OPTION)
+      .doesNotExist("Authenticated user is not in the list of options");
+
+    this.set("excludeSelf", false);
+
+    await click(TRIGGER);
+    await fillIn(INPUT, TEST_USER_EMAIL);
+
+    assert
+      .dom(OPTION)
+      .exists({ count: 1 }, "Authenticated user is in the list of options");
+  });
+
+  test("you can limit the selection to a single person", async function (this: PeopleSelectContext, assert) {
+    this.set("isSingleSelect", true);
+
+    await render<PeopleSelectContext>(hbs`
+      <Inputs::PeopleSelect
+        @selected={{this.people}}
+        @onChange={{this.onChange}}
+        @isSingleSelect={{this.isSingleSelect}}
+      />
+    `);
+
+    assert.dom(MULTISELECT).doesNotHaveClass("selection-made");
+
+    await click(TRIGGER);
+    await fillIn(INPUT, "u");
+    await click(OPTION);
+
+    assert.dom(MULTISELECT).hasClass("selection-made");
+    assert.dom(INPUT).isNotVisible("input is hidden after a selection is made");
   });
 });

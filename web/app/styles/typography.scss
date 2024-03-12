@@ -1,6 +1,11 @@
 @use "variables" as v;
 
-mark {
+em {
+  @apply not-italic;
+}
+
+mark,
+.mark {
   @apply bg-color-surface-warning text-color-foreground-warning-on-surface;
 }
 

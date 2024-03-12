@@ -17,8 +17,9 @@ interface DocumentModalComponentSignature {
     taskButtonIsDisabled?: boolean;
     hideFooterWhileSaving?: boolean;
     color?: HdsModalColor;
+    secondaryButtonIsHidden?: boolean;
     close: () => void;
-    task?: () => Promise<void> | void;
+    task?: (newOwner?: string) => Promise<void> | void;
   };
   Blocks: {
     default: [{ taskIsRunning: boolean }];
@@ -69,6 +70,15 @@ export default class DocumentModalComponent extends Component<DocumentModalCompo
 
     try {
       this.taskIsRunning = true;
+
+      /**
+       * Clear errors before entering a full-modal state,
+       * such as when showing the "Transferring ownership" message.
+       */
+      if (!this.footerIsShown) {
+        this.resetErrors();
+      }
+
       await this.args.task();
       this.args.close();
     } catch (error: unknown) {

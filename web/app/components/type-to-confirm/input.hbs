@@ -1,0 +1,17 @@
+<label data-test-type-to-confirm-label class="hermes-form-label" for={{@id}}>
+  Type
+  <em class="mark mx-1">
+    {{@value}}
+  </em>
+  to confirm
+</label>
+
+<Hds::Form::TextInput::Base
+  data-test-type-to-confirm-input
+  {{on "input" @onInput}}
+  {{on "keydown" @onKeydown}}
+  @value={{@inputValue}}
+  class="mt-1"
+  id={{@id}}
+  ...attributes
+/>
