@@ -30,20 +30,11 @@ export default class GroupSerializer extends JSONSerializer {
    */
   normalizeResponse(
     _store: DS.Store,
-    _primaryModelClass: any,
+    _primaryModelClass: GroupModel,
     _payload: GroupPayload,
-    _id: string | number,
-    requestType: string,
+    _id: string | number | null,
+    requestType: "query",
   ) {
     debugger;
-    if (requestType === "query") {
-      const groups = {
-        // TODO:
-      };
-      return { data: groups };
-    } else {
-      // Currently only `query` requests are used.
-      return {};
-    }
   }
 }

@@ -212,6 +212,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
       try {
         if (this.args.includeGroups) {
+          console.log("pushi it");
           promises.push(this.store.query("group", { query }));
         }
 

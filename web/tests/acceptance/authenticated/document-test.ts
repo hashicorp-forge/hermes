@@ -1569,4 +1569,25 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DISABLED_FOOTER_H5).hasText("Document is locked");
   });
+
+  test("you can add a group as an approver", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.createList("google/person", 5);
+
+    this.server.create("group", {
+      name: "Engineering",
+      email: "engineering@hashicorp.com",
+    });
+
+    this.server.create("document", {
+      objectID: 1,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${APPROVERS_SELECTOR} button`);
+
+    await fillIn(`${APPROVERS_SELECTOR} input`, "Engineering");
+
+    await this.pauseTest();
+  });
 });

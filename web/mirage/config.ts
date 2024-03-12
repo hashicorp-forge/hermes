@@ -820,8 +820,13 @@ export default function (mirageConfig) {
 
       // Query via the PeopleSelect
       this.post("/groups", (schema, request) => {
-        // TODO: type this request
-        const query = JSON.parse(request.requestBody).query;
+        const { query } = JSON.parse(request.requestBody).query;
+
+        const matches = schema.groups.where((group) => {
+          return group.email.includes(query) || group.name.includes(query);
+        });
+
+        return new Response(200, {}, matches.models);
       });
 
       /*************************************************************************
