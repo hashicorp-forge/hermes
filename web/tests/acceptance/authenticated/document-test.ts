@@ -1596,7 +1596,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(DISABLED_FOOTER_H5).hasText("Document is locked");
   });
 
-  test("owners can transfer ownership of their published docs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+  test("owners can transfer ownership of their docs", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       id: 1,
       objectID: 1,
@@ -1611,23 +1611,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/1");
-
-    assert
-      .dom(TRANSFER_OWNERSHIP_BUTTON)
-      .doesNotExist("drafts cannot be transferred");
-
-    this.server.create("document", {
-      id: 2,
-      objectID: 2,
-      isDraft: false,
-      status: "In-review",
-    });
-
-    await visit("/document/2");
-
-    assert
-      .dom(TRANSFER_OWNERSHIP_BUTTON)
-      .exists('the "transfer ownership" button is shown for published docs');
 
     await click(TRANSFER_OWNERSHIP_BUTTON);
 
@@ -1695,7 +1678,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(OWNERSHIP_TRANSFERRED_MODAL).doesNotExist();
 
-    const doc = this.server.schema.document.find(2);
+    const doc = this.server.schema.document.find(1);
     const docOwner = doc.attrs.owners[0];
 
     assert.equal(

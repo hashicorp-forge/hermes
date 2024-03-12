@@ -408,12 +408,13 @@
       {{/each-in}}
 
       {{! Transfer ownership }}
-      {{#if (and this.isOwner (not this.isDraft))}}
+      {{#if this.isOwner}}
         <div class="pt-5">
           <div class="border-t border-color-border-faint pt-7">
             <Action
               data-test-transfer-document-ownership-button
               {{on "click" this.showTransferOwnershipModal}}
+              disabled={{this.editingIsDisabled}}
               class="flex gap-2 text-body-100 text-color-foreground-disabled hover:text-color-foreground-faint focus:text-color-foreground-faint"
             >
               <FlightIcon @name="swap-horizontal" />
