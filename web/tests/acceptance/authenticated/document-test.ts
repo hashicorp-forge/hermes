@@ -1687,7 +1687,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert
       .dom(OWNERSHIP_TRANSFERRED_MODAL)
       .containsText("Ownership transferred")
-      .containsText(`${TEST_USER_2_NAME} has been notified of the change.`);
+      .containsText("User 2 has been notified of the change.");
 
     assert.dom(DOCUMENT_MODAL_PRIMARY_BUTTON).hasText("Close");
 
