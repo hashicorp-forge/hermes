@@ -898,7 +898,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       await this.patchDocument.perform(
         {
-          owners: this.newOwner,
+          owner: this.newOwner[0],
         },
         true,
       );
