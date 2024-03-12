@@ -14,6 +14,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -42,6 +43,7 @@ type DraftsPatchRequest struct {
 	Approvers    *[]string               `json:"approvers,omitempty"`
 	Contributors *[]string               `json:"contributors,omitempty"`
 	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
+	Owners       *[]string               `json:"owners,omitempty"`
 	Product      *string                 `json:"product,omitempty"`
 	Summary      *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
@@ -172,6 +174,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
 						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
 							TemporaryDraftsFolder,
+						"user", userEmail,
 					)
 					http.Error(w, "Error creating document draft",
 						http.StatusInternalServerError)
@@ -959,6 +962,14 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 
 		case "PATCH":
+			// Authorize request.
+			if !isOwner {
+				http.Error(w,
+					"Only owners can patch a draft document",
+					http.StatusUnauthorized)
+				return
+			}
+
 			// Decode request. The request struct validates that the request only
 			// contains fields that are allowed to be patched.
 			var req DraftsPatchRequest
@@ -967,6 +978,20 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				http.Error(w, fmt.Sprintf("Bad request: %q", err),
 					http.StatusBadRequest)
 				return
+			}
+
+			// Validate owners.
+			if req.Owners != nil {
+				if len(*req.Owners) != 1 {
+					srv.Logger.Warn("invalid number of owners in patch request",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w,
+						"Bad request: invalid number of owners (only 1 allowed)",
+						http.StatusBadRequest)
+					return
+				}
 			}
 
 			// Validate product if it is in the patch request.
@@ -1299,6 +1324,28 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			// Document modified time.
 			model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
 
+			// Owner.
+			if req.Owners != nil {
+				doc.Owners = *req.Owners
+				model.Owner = &models.User{
+					EmailAddress: doc.Owners[0],
+				}
+
+				// Share file with new owner.
+				if err := srv.GWService.ShareFile(
+					docID, doc.Owners[0], "writer"); err != nil {
+					srv.Logger.Error("error sharing file with new owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"new_owner", doc.Owners[0])
+					http.Error(w, "Error patching document draft",
+						http.StatusInternalServerError)
+					return
+				}
+			}
+
 			// Product.
 			if req.Product != nil {
 				doc.Product = *req.Product
@@ -1315,7 +1362,6 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			// Summary.
 			if req.Summary != nil {
 				doc.Summary = *req.Summary
-				// model.Summary = *req.Summary
 				model.Summary = req.Summary
 			}
 
@@ -1323,6 +1369,89 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			if req.Title != nil {
 				doc.Title = *req.Title
 				model.Title = *req.Title
+			}
+
+			// Send email to new owner.
+			if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+				req.Owners != nil {
+				// Get document URL.
+				docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+				if err != nil {
+					srv.Logger.Error("error getting document URL",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error updating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Get name of new document owner.
+				newOwner := email.User{
+					EmailAddress: doc.Owners[0],
+				}
+				ppl, err := srv.GWService.SearchPeople(
+					doc.Owners[0], "emailAddresses,names")
+				if err != nil {
+					srv.Logger.Warn("error searching directory for new owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"person", doc.Owners[0],
+					)
+				}
+				if len(ppl) == 1 && ppl[0].Names != nil {
+					newOwner.Name = ppl[0].Names[0].DisplayName
+				}
+
+				// Get name of old document owner.
+				oldOwner := email.User{
+					EmailAddress: userEmail,
+				}
+				ppl, err = srv.GWService.SearchPeople(
+					userEmail, "emailAddresses,names")
+				if err != nil {
+					srv.Logger.Warn("error searching directory for old owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"person", doc.Owners[0],
+					)
+				}
+				if len(ppl) == 1 && ppl[0].Names != nil {
+					oldOwner.Name = ppl[0].Names[0].DisplayName
+				}
+
+				if err := email.SendNewOwnerEmail(
+					email.NewOwnerEmailData{
+						BaseURL:           srv.Config.BaseURL,
+						DocumentShortName: doc.DocNumber,
+						DocumentStatus:    doc.Status,
+						DocumentTitle:     doc.Title,
+						DocumentType:      doc.DocType,
+						DocumentURL:       docURL,
+						NewDocumentOwner:  newOwner,
+						OldDocumentOwner:  oldOwner,
+						Product:           doc.Product,
+					},
+					[]string{doc.Owners[0]},
+					srv.Config.Email.FromAddress,
+					srv.GWService,
+				); err != nil {
+					srv.Logger.Error("error sending new owner email",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error updating document draft",
+						http.StatusInternalServerError)
+					return
+				}
 			}
 
 			// Update document in the database.

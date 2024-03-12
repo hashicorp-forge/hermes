@@ -35,6 +35,20 @@ type DocumentApprovedEmailData struct {
 	Product                  string
 }
 
+type NewOwnerEmailData struct {
+	BaseURL             string
+	CurrentYear         int
+	DocumentShortName   string
+	DocumentStatus      string
+	DocumentStatusClass string
+	DocumentTitle       string
+	DocumentType        string
+	DocumentURL         string
+	NewDocumentOwner    User
+	OldDocumentOwner    User
+	Product             string
+}
+
 type ReviewRequestedEmailData struct {
 	BaseURL             string
 	CurrentYear         int
@@ -116,6 +130,64 @@ func SendDocumentApprovedEmail(
 		to,
 		from,
 		subject,
+		body.String(),
+	)
+	return err
+}
+
+func SendNewOwnerEmail(
+	data NewOwnerEmailData,
+	to []string,
+	from string,
+	svc *gw.Service,
+) error {
+	// Validate data.
+	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.BaseURL, validation.Required),
+		validation.Field(&data.DocumentShortName, validation.Required),
+		validation.Field(&data.DocumentStatus, validation.Required),
+		validation.Field(&data.DocumentTitle, validation.Required),
+		validation.Field(&data.DocumentType, validation.Required),
+		validation.Field(&data.DocumentURL, validation.Required),
+		validation.Field(&data.NewDocumentOwner, validation.Required),
+		validation.Field(&data.OldDocumentOwner, validation.Required),
+		validation.Field(&data.Product, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data: %w", err)
+	}
+	if err := validation.ValidateStruct(&data.NewDocumentOwner,
+		validation.Field(&data.NewDocumentOwner.EmailAddress, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating new document owner: %w", err)
+	}
+	if err := validation.ValidateStruct(&data.OldDocumentOwner,
+		validation.Field(&data.OldDocumentOwner.EmailAddress, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating old document owner: %w", err)
+	}
+
+	// Apply template.
+	var body bytes.Buffer
+	tmpl, err := template.ParseFS(tmplFS, "templates/new-owner.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	// Set current year.
+	data.CurrentYear = time.Now().Year()
+
+	// Set status class.
+	data.DocumentStatusClass = dasherizeStatus(data.DocumentStatus)
+
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	// Send email.
+	_, err = svc.SendEmail(
+		to,
+		from,
+		fmt.Sprintf("%s transferred to you", data.DocumentShortName),
 		body.String(),
 	)
 	return err
