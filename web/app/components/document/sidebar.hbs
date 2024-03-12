@@ -646,7 +646,10 @@
       >
         <:default as |M|>
           {{#if M.taskIsRunning}}
-            <div class="grid place-items-center pt-1 pb-8 text-center">
+            <div
+              data-test-transferring-doc
+              class="grid place-items-center pt-1 pb-8 text-center"
+            >
               <FlightIcon @name="loading" @size="24" class="mb-5" />
               <h2>Transferring doc...</h2>
             </div>
@@ -661,6 +664,7 @@
             <div class="grid gap-4 pb-2.5">
               <div>
                 <label
+                  data-test-select-new-owner-label
                   {{on "click" this.focusPeopleSelect}}
                   for={{this.transferOwnershipPeopleSelectID}}
                   class="hermes-form-label"
@@ -690,7 +694,10 @@
   {{! Ownership transferred }}
   {{#if this.ownershipTransferredModalIsShown}}
     <Document::Modal
+      data-test-ownership-transferred-modal
       @headerText="Ownership transferred"
+      @task={{this.hideOwnershipTransferredModal}}
+      @taskButtonText="Close"
       {{! TODO: personalize this more }}
       @bodyText="The document has been transferred to the new owner."
       @close={{this.hideOwnershipTransferredModal}}
