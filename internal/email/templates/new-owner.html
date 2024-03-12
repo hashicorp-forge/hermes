@@ -338,9 +338,8 @@
                     <tr>
                       <td>
                         <p>
-                          {{if
-                          .OldDocumentOwner.Name}}{{.OldDocumentOwner.Name}}{{else}}{{.OldDocumentOwner.EmailAddress}}{{end}}
-                          has transferred ownership of the above document.
+                          Transferred by {{if
+                          .OldDocumentOwner.Name}}{{.OldDocumentOwner.Name}}{{else}}{{.OldDocumentOwner.EmailAddress}}{{end}}.
                         </p>
                       </td>
                     </tr>
