@@ -24,7 +24,7 @@ type DocumentPatchRequest struct {
 	Approvers    *[]string               `json:"approvers,omitempty"`
 	Contributors *[]string               `json:"contributors,omitempty"`
 	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
-	Owner        *string                 `json:"owner,omitempty"`
+	Owners       *[]string               `json:"owners,omitempty"`
 	Status       *string                 `json:"status,omitempty"`
 	Summary      *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
@@ -340,6 +340,20 @@ func DocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Validate owners.
+			if req.Owners != nil {
+				if len(*req.Owners) != 1 {
+					srv.Logger.Warn("invalid number of owners in patch request",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w,
+						"Bad request: invalid number of owners (only 1 allowed)",
+						http.StatusBadRequest)
+					return
+				}
+			}
+
 			// Validate custom fields.
 			if req.CustomFields != nil {
 				for _, cf := range *req.CustomFields {
@@ -524,18 +538,18 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 			// Owner.
-			if req.Owner != nil {
-				doc.Owners = []string{*req.Owner}
+			if req.Owners != nil {
+				doc.Owners = *req.Owners
 
 				// Give new owner edit access to the document.
 				if err := srv.GWService.ShareFile(
-					docID, *req.Owner, "writer"); err != nil {
+					docID, doc.Owners[0], "writer"); err != nil {
 					srv.Logger.Error("error sharing file with new owner",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
 						"doc_id", docID,
-						"new_owner", *req.Owner)
+						"new_owner", doc.Owners[0])
 					http.Error(w, "Error patching document",
 						http.StatusInternalServerError)
 					return
@@ -720,9 +734,9 @@ func DocumentHandler(srv server.Server) http.Handler {
 				model.DocumentModifiedAt = time.Unix(doc.ModifiedTime, 0)
 
 				// Owner.
-				if req.Owner != nil {
+				if req.Owners != nil {
 					model.Owner = &models.User{
-						EmailAddress: *req.Owner,
+						EmailAddress: doc.Owners[0],
 					}
 				}
 
@@ -750,7 +764,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 				// Send email to new owner.
 				if srv.Config.Email != nil && srv.Config.Email.Enabled &&
-					req.Owner != nil {
+					req.Owners != nil {
 					// Get document URL.
 					docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
 					if err != nil {
@@ -767,10 +781,10 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 					// Get name of new document owner.
 					newOwner := email.User{
-						EmailAddress: *req.Owner,
+						EmailAddress: doc.Owners[0],
 					}
 					ppl, err := srv.GWService.SearchPeople(
-						*req.Owner, "emailAddresses,names")
+						doc.Owners[0], "emailAddresses,names")
 					if err != nil {
 						srv.Logger.Warn("error searching directory for new owner",
 							"error", err,
