@@ -1,5 +1,4 @@
 import { Factory } from "miragejs";
-import { assert } from "@ember/debug";
 import { TEST_USER_PHOTO } from "../../utils";
 
 export default Factory.extend({

@@ -260,8 +260,9 @@ module("Integration | Component | document/modal", function (hooks) {
     assert.dom(SECONDARY_BUTTON).doesNotExist();
   });
 
-  test("error are not shown when a full-modal task is running", async function (assert) {
+  test("errors are not shown when a full-modal task is running", async function (assert) {
     this.set("task", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
       throw new Error("error");
     });
 
@@ -269,6 +270,7 @@ module("Integration | Component | document/modal", function (hooks) {
       <Document::Modal
         @headerText={{this.headerText}}
         @errorTitle={{this.errorTitle}}
+        @hideFooterWhileSaving={{true}}
         @task={{this.task}}
         @close={{this.close}}
       />

@@ -1,7 +1,7 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render, waitFor } from "@ember/test-helpers";
+import { click, fillIn, render, rerender, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
@@ -10,7 +10,9 @@ import { Response } from "miragejs";
 const MULTISELECT = ".multiselect";
 const TRIGGER = ".ember-basic-dropdown-trigger";
 const INPUT = ".ember-power-select-trigger-multiple-input";
-const OPTION = ".ember-power-select-option";
+const OPTION =
+  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
+const NO_MATCHES_MESSAGE = ".ember-power-select-option--no-matches-message";
 
 interface PeopleSelectContext extends MirageTestContext {
   people: string[];
@@ -68,7 +70,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await fillIn(INPUT, "2");
     assert
-      .dom(OPTION)
+      .dom(NO_MATCHES_MESSAGE)
       .hasText("No results found", "No duplicate users can be added");
 
     await click(
@@ -114,12 +116,12 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await fillInPromise;
 
-    assert.dom(OPTION).exists({ count: 5 }, "Returns results after retrying");
+    assert.dom(OPTION).exists({ count: 10 }, "Returns results after retrying");
   });
 
   test("you can exclude the authenticated user from the list", async function (this: PeopleSelectContext, assert) {
     this.server.create("google/person", {
-      emailAddresses: [TEST_USER_EMAIL],
+      emailAddresses: [{ value: TEST_USER_EMAIL }],
     });
 
     this.set("excludeSelf", true);
@@ -140,6 +142,9 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .doesNotExist("Authenticated user is not in the list of options");
 
     this.set("excludeSelf", false);
+
+    await click(TRIGGER);
+    await fillIn(INPUT, TEST_USER_EMAIL);
 
     assert
       .dom(OPTION)
@@ -164,6 +169,6 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     await click(OPTION);
 
     assert.dom(MULTISELECT).hasClass("selection-made");
-    assert.dom(INPUT).doesNotExist("input is hidden after a selection is made");
+    assert.dom(INPUT).isNotVisible("input is hidden after a selection is made");
   });
 });

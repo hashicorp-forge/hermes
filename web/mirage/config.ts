@@ -1116,7 +1116,13 @@ export default function (mirageConfig) {
         });
         if (document) {
           let attrs = JSON.parse(request.requestBody);
+
+          if ("owner" in attrs) {
+            attrs.owners = [attrs.owner];
+          }
+
           document.update(attrs);
+
           return new Response(200, {}, document.attrs);
         }
       });

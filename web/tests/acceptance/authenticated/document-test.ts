@@ -69,13 +69,13 @@ const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
  */
 const TRANSFER_OWNERSHIP_BUTTON =
   "[data-test-transfer-document-ownership-button]";
-const TRANSFER_OWNERSHIP_MODAL =
-  "[data-test-transfer-document-ownership-modal]";
+const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
 const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
 const TRANSFERRING_DOC = "[data-test-transferring-doc]";
 const SELECT_NEW_OWNER_LABEL = "[data-test-select-new-owner-label]";
 const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
-const PEOPLE_SELECT_OPTION = ".ember-power-select-option";
+const PEOPLE_SELECT_OPTION =
+  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
 
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 const OWNER_LINK = "[data-test-owner-link]";
@@ -1602,6 +1602,10 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_EMAIL }],
+    });
+
+    this.server.create("google/person", {
       emailAddresses: [{ value: TEST_USER_2_EMAIL }],
     });
 
@@ -1653,7 +1657,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(PEOPLE_SELECT_INPUT)
-      .doesNotExist("the input is removed after selection");
+      .isNotVisible("the input is hidden after selection");
 
     assert
       .dom(TYPE_TO_CONFIRM_INPUT)
@@ -1697,11 +1701,34 @@ module("Acceptance | authenticated/document", function (hooks) {
       TEST_USER_2_EMAIL,
       "the doc owner is updated in the back end",
     );
-
-    await this.pauseTest();
   });
 
   test("an error is shown when ownership transferring fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    // assert error states
+    this.server.create("document", {
+      id: 1,
+      objectID: 1,
+      isDraft: false,
+      status: "In-review",
+    });
+
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_2_EMAIL }],
+    });
+
+    await visit("/document/1");
+
+    await click(TRANSFER_OWNERSHIP_BUTTON);
+
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_2_EMAIL);
+    await click(PEOPLE_SELECT_OPTION);
+    await fillIn(TYPE_TO_CONFIRM_INPUT, "transfer");
+
+    this.server.patch("/documents/:document_id", () => {
+      return new Response(500, {}, "Error");
+    });
+
+    await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
+
+    assert.dom(MODAL_ERROR).exists();
   });
 });

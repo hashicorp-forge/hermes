@@ -72,6 +72,7 @@ export default class DocumentModalComponent extends Component<DocumentModalCompo
       this.taskIsRunning = true;
 
       if (!this.footerIsShown) {
+        console.log("Footer is hidden, not running task");
         this.resetErrors();
       }
 
