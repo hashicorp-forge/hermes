@@ -155,27 +155,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   }
 
   /**
-   * The action to run on keydown.
-   * Checks if the key is "ArrowDown" or "ArrowUp" and if the input is empty.
-   * In these cases, we stop the dropdown from opening, otherwise we use the
-   * passed-in `onKeydown` action.
-   */
-  @action protected onKeydown(dropdown: Select, event: KeyboardEvent) {
-    switch (event.key) {
-      case "ArrowDown":
-      case "ArrowUp":
-        if (dropdown.searchText === "") {
-          dropdown.actions.close();
-          break;
-        } else {
-          this.args.onKeydown?.(dropdown, event);
-        }
-      default:
-        this.args.onKeydown?.(dropdown, event);
-    }
-  }
-
-  /**
    * The action taken when focus leaves the component.
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
@@ -264,7 +243,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
       try {
         if (this.args.includeGroups) {
-          console.log("pushi it");
           promises.push(this.store.query("group", { query }));
         }
 
@@ -285,18 +263,16 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
                 (selectedEmail) => selectedEmail === person.email,
               );
             })
-            .filter((email: string) => {
+            .filter((person) => {
               // filter the authenticated user if `excludeSelf` is true
               return (
                 !this.args.excludeSelf ||
-                email !== this.authenticatedUser.info.email
+                person.email !== this.authenticatedUser.info.email
               );
             });
         } else {
           p = [];
         }
-
-        console.log("did");
 
         if (groups) {
           g = groups
@@ -322,8 +298,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         this.options = [...p, ...g].sort((a, b) =>
           a.email.localeCompare(b.email),
         );
-
-        console.log("options", this.options);
 
         // stop the loop if the query was successful
         return;

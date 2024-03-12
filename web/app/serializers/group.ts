@@ -36,5 +36,6 @@ export default class GroupSerializer extends JSONSerializer {
     requestType: "query",
   ) {
     debugger;
+    return {};
   }
 }
