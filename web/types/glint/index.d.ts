@@ -39,6 +39,7 @@ import AnimatedContainer from "ember-animated/components/animated-container";
 import { AnimatedEachCurly } from "ember-animated/components/animated-each";
 import AnimatedValue from "ember-animated/components/animated-value";
 import AnimatedOrphans from "ember-animated/components/animated-orphans";
+import AnimatedTools from "ember-animated-tools/components/animated-tools";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import { HdsFormErrorComponent } from "hds/form/error";
@@ -56,6 +57,7 @@ declare module "@glint/environment-ember-loose/registry" {
     AnimatedContainer: typeof AnimatedContainer;
     AnimatedValue: typeof AnimatedValue;
     AnimatedOrphans: typeof AnimatedOrphans;
+    AnimatedTools: typeof AnimatedTools;
     "animated-each": typeof AnimatedEachCurly;
     "animated-if": typeof AnimatedIfCurly;
     PowerSelectMultiple: typeof PowerSelectMultiple;
