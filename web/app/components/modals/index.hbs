@@ -1,5 +1,0 @@
-{{#if (eq this.modalAlerts.activeModal "draftCreated")}}
-  <Modals::DraftCreated @close={{this.modalAlerts.closeAndResetData}} />
-{{else if (eq this.modalAlerts.activeModal "docTransferred")}}
-  <Modals::DocTransferred @close={{this.modalAlerts.closeAndResetData}} />
-{{/if}}

@@ -35,7 +35,7 @@ import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
-import ModalAlertsService from "hermes/services/modal-alerts";
+import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -929,13 +929,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.transferOwnershipModalIsShown = false;
 
-      this.modalAlerts.setActive("docTransferred", {
+      this.modalAlerts.setActive(ModalType.DocTransferred, {
         newOwner: this.newOwners[0],
       });
 
       this.newOwners = [];
 
-      if (this.isDraft) {
+      if (this.isDraft && !this.draftIsShareable) {
         this.router.transitionTo("authenticated.dashboard");
       }
     } catch (error) {

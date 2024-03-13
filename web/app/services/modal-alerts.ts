@@ -6,6 +6,7 @@ import { schedule } from "@ember/runloop";
 
 export enum ModalType {
   DraftCreated = "draftCreated",
+  DocTransferred = "docTransferred",
 }
 
 export default class ModalAlertsService extends Service {
