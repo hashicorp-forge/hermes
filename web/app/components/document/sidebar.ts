@@ -935,7 +935,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.newOwners = [];
 
-      if (this.isDraft && !this.draftIsShareable) {
+      if (this.isDraft && !this._docIsShareable) {
         this.router.transitionTo("authenticated.dashboard");
       }
     } catch (error) {
