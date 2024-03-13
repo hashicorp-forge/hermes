@@ -1,6 +1,7 @@
-import { module, test, todo } from "qunit";
+import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
-import ModalAlertsService from "hermes/services/modal-alerts";
+import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
+import { waitUntil } from "@ember/test-helpers";
 
 module("Unit | Service | modal-alerts", function (hooks) {
   setupTest(hooks);
@@ -12,15 +13,12 @@ module("Unit | Service | modal-alerts", function (hooks) {
 
     assert.equal(modalAlerts.activeModal, null);
 
-    modalAlerts.setActive("draftCreated");
-    assert.equal(modalAlerts.activeModal, "draftCreated");
+    modalAlerts.setActive(ModalType.DraftCreated);
+
+    await waitUntil(() => modalAlerts.activeModal === ModalType.DraftCreated);
 
     modalAlerts.close();
 
     assert.equal(modalAlerts.activeModal, null);
-  });
-
-  todo("can set an active modal with a delay", async function (assert) {
-    assert.equal(true, false);
   });
 });

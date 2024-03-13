@@ -108,16 +108,14 @@ export default class RecentlyViewedService extends Service {
               return {
                 doc,
                 ...d,
-              } as RecentlyViewedDoc; // Specify the return type as RecentlyViewedDoc
+              };
             })
-            .catch(() => {
-              /**
-               * A failed fetch here is likely a deleted or newly private draft.
-               * We return null to filter it out of the array and keep the
-               * widget from breaking.
-               */
-              return null;
-            }),
+            /**
+             * A failed fetch here is likely a deleted or newly private draft.
+             * We return null to filter it out of the array and keep the
+             * widget from breaking.
+             */
+            .catch(() => null),
         );
       });
 

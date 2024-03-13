@@ -2,7 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { render, rerender } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import ModalAlertsService from "hermes/services/modal-alerts";
+import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 
 module("Integration | Component | modals", function (hooks) {
   setupRenderingTest(hooks);
@@ -15,7 +15,7 @@ module("Integration | Component | modals", function (hooks) {
     await render(hbs`{{! @glint-nocheck }}<Modals />`);
 
     assert.dom("dialog").doesNotExist();
-    modalAlerts.setActive("draftCreated");
+    modalAlerts.setActive(ModalType.DraftCreated);
 
     await rerender();
     assert.dom("dialog").exists("draftCreated modal shown");
