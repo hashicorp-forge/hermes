@@ -2,9 +2,11 @@ import Service, { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
-import { task, timeout } from "ember-concurrency";
+import { schedule } from "@ember/runloop";
 
-export type ModalType = "draftCreated";
+export enum ModalType {
+  DraftCreated = "draftCreated",
+}
 
 export default class ModalAlertsService extends Service {
   @service declare router: RouterService;
@@ -22,8 +24,13 @@ export default class ModalAlertsService extends Service {
     this.activeModal = null;
   }
 
-  setActive = task(async (modalType: ModalType, delay: number = 0) => {
-    await timeout(delay);
-    this.activeModal = modalType;
-  });
+  /**
+   * The action to activate a modal by name.
+   * Scheduled `afterRender` to work on cross-route transitions
+   */
+  @action setActive(modalType: ModalType) {
+    schedule("afterRender", () => {
+      this.activeModal = modalType;
+    });
+  }
 }
