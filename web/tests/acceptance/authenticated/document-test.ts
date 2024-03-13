@@ -46,6 +46,7 @@ const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
 const APPROVE_BUTTON = "[data-test-approve-button]";
+const GROUP_APPROVER_MESSAGE = "[data-test-group-approver-message]";
 const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON =
   "[data-test-sidebar-footer-secondary-dropdown-button]";
 const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
@@ -674,6 +675,38 @@ module("Acceptance | authenticated/document", function (hooks) {
     const { changesRequestedBy } = doc.attrs;
 
     assert.true(changesRequestedBy?.includes(TEST_USER_EMAIL));
+  });
+
+  test("group approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    // TODO: Add group logic
+    this.server.options("/approvals/:document_id", () => {
+      return new Response(200, {}, { allow: ["POST"] });
+    });
+
+    this.server.create("document", {
+      id: 1,
+      objectID: 1,
+      isDraft: false,
+      status: "In-review",
+      approvers: [],
+      approvedBy: [],
+    });
+
+    await visit("/document/1");
+
+    assert.dom(APPROVE_BUTTON).exists('the "approve" button is shown');
+    assert.dom(GROUP_APPROVER_MESSAGE).exists();
+
+    await click(APPROVE_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
+    assert.dom(GROUP_APPROVER_MESSAGE).doesNotExist();
+
+    assert.dom(APPROVERS_SELECTOR).containsText(TEST_USER_NAME);
+
+    const docApprovers = this.server.schema.document.find(1).attrs.approvers;
+
+    assert.true(docApprovers.includes(TEST_USER_EMAIL));
   });
 
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

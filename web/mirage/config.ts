@@ -788,6 +788,10 @@ export default function (mirageConfig) {
         return new Response(404, {}, {});
       });
 
+      this.options("/approvals/:document_id", (schema, request) => {
+        return new Response(200, {}, { allow: [] });
+      });
+
       /*************************************************************************
        *
        * People

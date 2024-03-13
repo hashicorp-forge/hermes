@@ -23,6 +23,7 @@ interface AuthenticatedDocumentRouteParams {
 interface DocumentRouteModel {
   doc: HermesDocument;
   docType: HermesDocumentType;
+  viewerIsGroupApprover: boolean;
 }
 
 export default class AuthenticatedDocumentRoute extends Route {
@@ -91,12 +92,6 @@ export default class AuthenticatedDocumentRoute extends Route {
           .then((r) => r?.json());
         draftFetched = true;
 
-        // TODO
-        // fetch approvals endpoint
-        // send an OPTIONS request
-        // the response will contains an "allow" header
-        // and if that contains POST we can show the approve button
-
         // Add the draft owner to the list of people to fetch.
         peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
@@ -142,6 +137,28 @@ export default class AuthenticatedDocumentRoute extends Route {
 
         throw new Error(typedError.message);
       }
+    }
+
+    /**
+     * Check if the user is a group approver.
+     */
+    let viewerIsGroupApprover = false;
+
+    const resp = await this.fetchSvc
+      .fetch(
+        `
+      /api/${this.configSvc.config.api_version}/approvals/${params.document_id}
+    `,
+        {
+          method: "OPTIONS",
+        },
+      )
+      .then((r) => r?.json());
+
+    const allow = resp?.allow;
+
+    if (allow?.includes("POST")) {
+      viewerIsGroupApprover = true;
     }
 
     const typedDoc = doc as HermesDocument;
@@ -198,6 +215,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     return {
       doc: typedDoc,
       docType: this.docType(typedDoc),
+      viewerIsGroupApprover,
     };
   }
 

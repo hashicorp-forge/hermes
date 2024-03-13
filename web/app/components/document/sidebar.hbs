@@ -159,6 +159,10 @@
             </X::DropdownList>
           {{/if}}
         </div>
+        <div>
+          Heck:
+          {{@viewerIsGroupApprover}}
+        </div>
         <div class="editable-field-container document-title mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
@@ -475,9 +479,8 @@
         </div>
       {{else}}
         {{#let (and this.isDraft this.isOwner) as |canPublish|}}
-          {{#if (or canPublish this.isApprover)}}
+          {{#if (or canPublish this.isApprover this.isGroupApproverOnly)}}
             <div class="flex gap-2 px-3">
-
               {{#if canPublish}}
                 {{! Publish for review... }}
                 <Hds::Button
@@ -498,7 +501,7 @@
                   {{on "click" (fn (set this "deleteModalIsShown" true))}}
                 />
               {{else}}
-                {{! isApprover }}
+                {{! isApprover or isGroupApproverOnly}}
 
                 {{! Read-only / isRunning state }}
                 {{#if
@@ -540,57 +543,72 @@
                     class="w-full"
                     {{on "click" (perform this.approve)}}
                   />
-                  {{#if (eq @document.docType "FRD")}}
-                    {{! Reject FRD }}
-                    <Hds::Button
-                      data-test-reject-frd-button
-                      @text="Reject"
-                      @color="critical"
-                      @icon="thumbs-down"
-                      @isIconOnly={{true}}
-                      {{tooltip "Reject"}}
-                      {{on "click" (perform this.rejectFRD)}}
-                    />
-                  {{/if}}
-                  {{! Overflow menu (Leave approver role) }}
-                  <X::DropdownList
-                    data-test-sidebar-footer-overflow-menu
-                    @placement="top-start"
-                    @items={{array
-                      (hash
-                        icon="user-minus"
-                        label="Leave approver role"
-                        action=(perform this.leaveApproverRole)
-                      )
-                    }}
-                  >
-                    <:anchor as |dd|>
-                      <dd.ToggleAction>
-                        <Hds::Button
-                          data-test-sidebar-footer-secondary-dropdown-button
-                          @text="More actions"
-                          @icon="more-horizontal"
-                          @color="secondary"
-                          @isIconOnly={{true}}
-                        />
-                      </dd.ToggleAction>
-                    </:anchor>
-                    <:item as |dd|>
-                      <dd.Action
-                        class="flex gap-2.5"
-                        {{on "click" dd.attrs.action}}
-                      >
-                        <FlightIcon
-                          @name={{dd.attrs.icon}}
-                          class="opacity-60"
-                        />
-                        {{dd.attrs.label}}
-                      </dd.Action>
-                    </:item>
-                  </X::DropdownList>
+
+                  {{#unless this.isGroupApproverOnly}}
+                    {{#if (eq @document.docType "FRD")}}
+                      {{! Reject FRD }}
+                      <Hds::Button
+                        data-test-reject-frd-button
+                        @text="Reject"
+                        @color="critical"
+                        @icon="thumbs-down"
+                        @isIconOnly={{true}}
+                        {{tooltip "Reject"}}
+                        {{on "click" (perform this.rejectFRD)}}
+                      />
+                    {{/if}}
+
+                    {{! Overflow menu (Leave approver role) }}
+                    <X::DropdownList
+                      data-test-sidebar-footer-overflow-menu
+                      @placement="top-start"
+                      @items={{array
+                        (hash
+                          icon="user-minus"
+                          label="Leave approver role"
+                          action=(perform this.leaveApproverRole)
+                        )
+                      }}
+                    >
+                      <:anchor as |dd|>
+                        <dd.ToggleAction>
+                          <Hds::Button
+                            data-test-sidebar-footer-secondary-dropdown-button
+                            @text="More actions"
+                            @icon="more-horizontal"
+                            @color="secondary"
+                            @isIconOnly={{true}}
+                          />
+                        </dd.ToggleAction>
+                      </:anchor>
+                      <:item as |dd|>
+                        <dd.Action
+                          class="flex gap-2.5"
+                          {{on "click" dd.attrs.action}}
+                        >
+                          <FlightIcon
+                            @name={{dd.attrs.icon}}
+                            class="opacity-60"
+                          />
+                          {{dd.attrs.label}}
+                        </dd.Action>
+                      </:item>
+                    </X::DropdownList>
+                  {{/unless}}
                 {{/if}}
               {{/if}}
             </div>
+            {{#if (and this.isGroupApproverOnly (not this.hasApproved))}}
+              <div class="mt-1 px-3">
+                <div
+                  data-test-group-approver-message
+                  class="relative translate-y-2.5 text-[12px] leading-snug text-color-foreground-faint"
+                >
+                  Youʼre seeing this because a Google Group youʼre in is an
+                  approver.
+                </div>
+              </div>
+            {{/if}}
           {{/if}}
         {{/let}}
       {{/if}}

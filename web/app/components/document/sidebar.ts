@@ -42,6 +42,7 @@ interface DocumentSidebarComponentSignature {
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
     isCollapsed: boolean;
+    viewerIsGroupApprover: boolean;
     toggleCollapsed: () => void;
   };
 }
@@ -396,6 +397,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  protected get isGroupApproverOnly() {
+    return this.args.viewerIsGroupApprover && !this.isApprover;
+  }
+
   get isContributor() {
     return this.args.document.contributors?.some(
       (e) => e === this.args.profile.email,
@@ -418,22 +423,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @tracked protected hasRejectedFRD =
     this.args.document.changesRequestedBy?.includes(this.args.profile.email);
-
-  /**
-   * Whether the doc status is approved. Used to determine editing privileges.
-   * If the doc is approved, editing is exclusive to the doc owner.
-   */
-  private get docIsApproved() {
-    return this.args.document.status.toLowerCase() === "approved";
-  }
-
-  /**
-   * Whether the doc status is in review. Used to determine editing privileges.
-   * If the doc is in review, editing is exclusive to the doc owner.
-   */
-  private get docIsInReview() {
-    return dasherize(this.args.document.status) === "in-review";
-  }
 
   /**
    * Whether the document viewer is its owner.
@@ -488,7 +477,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * immediately after the user leaves the approver role.
    */
   protected get footerIsShown() {
-    return !this.hasJustLeftApproverRole && (this.isApprover || this.isOwner);
+    return (
+      !this.hasJustLeftApproverRole &&
+      (this.isApprover || this.isOwner || this.isGroupApproverOnly)
+    );
   }
 
   /**
