@@ -9,13 +9,13 @@ module("Integration | Component | modals", function (hooks) {
 
   test("it conditionally renders modals", async function (assert) {
     let modalAlerts = this.owner.lookup(
-      "service:modal-alerts"
+      "service:modal-alerts",
     ) as ModalAlertsService;
 
     await render(hbs`{{! @glint-nocheck }}<Modals />`);
 
     assert.dom("dialog").doesNotExist();
-    await modalAlerts.setActive.perform("draftCreated");
+    modalAlerts.setActive("draftCreated");
 
     await rerender();
     assert.dom("dialog").exists("draftCreated modal shown");

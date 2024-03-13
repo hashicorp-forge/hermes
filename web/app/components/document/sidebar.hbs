@@ -650,7 +650,7 @@
               data-test-transferring-doc
               class="grid place-items-center pt-1 pb-8 text-center"
             >
-              <FlightIcon @name="loading" @size="24" class="mb-5" />
+              <FlightIcon @name="running" @size="24" class="mb-5" />
               <h2>Transferring doc...</h2>
             </div>
           {{else}}
@@ -691,41 +691,6 @@
     </TypeToConfirm>
   {{/if}}
 
-  {{! Ownership transferred }}
-  {{#if this.ownershipTransferredModalIsShown}}
-    <Hds::Modal
-      data-test-ownership-transferred-modal
-      @onClose={{this.hideOwnershipTransferredModal}}
-      as |M|
-    >
-      <M.Header>
-        <div class="flex items-center">
-          <FlightIcon
-            @name="check-circle-fill"
-            class="mr-2 text-color-palette-green-200"
-          />
-          Done
-        </div>
-      </M.Header>
-      <M.Body>
-        <div class="grid place-items-center pt-8 pb-8 text-center">
-          <h2>Ownership transferred.</h2>
-          <p class="mb-2.5 flex text-body-300">
-            {{get-model-attr "person.name" (get @document.owners 0)}}
-            has been notified of the change.
-          </p>
-        </div>
-      </M.Body>
-      <M.Footer>
-        <Hds::Button
-          data-test-document-modal-primary-button
-          @text="Close"
-          {{on "click" this.hideOwnershipTransferredModal}}
-        />
-      </M.Footer>
-    </Hds::Modal>
-  {{/if}}
-
   {{#if this.requestReviewModalIsShown}}
     <Document::Modal
       data-test-publish-for-review-modal
@@ -748,7 +713,7 @@
             class="grid place-items-center pt-1 pb-12"
           >
             <div class="text-center">
-              <FlightIcon @name="loading" @size="24" class="mb-5" />
+              <FlightIcon @name="running" @size="24" class="mb-5" />
               <h2>Submitting for review...</h2>
               <p class="mb-2 text-body-300">This usually takes about a minute.</p>
               <span

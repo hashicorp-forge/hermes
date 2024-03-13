@@ -3,8 +3,9 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { task, timeout } from "ember-concurrency";
+import { schedule } from "@ember/runloop";
 
-export type ModalType = "draftCreated";
+export type ModalType = "draftCreated" | "docTransferred";
 
 export default class ModalAlertsService extends Service {
   @service declare router: RouterService;
@@ -17,13 +18,22 @@ export default class ModalAlertsService extends Service {
   }
 
   @tracked activeModal: ModalType | null = null;
+  @tracked activeModalData: Record<string, unknown> = {};
 
   @action close(): void {
     this.activeModal = null;
   }
 
-  setActive = task(async (modalType: ModalType, delay: number = 0) => {
-    await timeout(delay);
-    this.activeModal = modalType;
-  });
+  @action closeAndResetData(): void {
+    this.close();
+    this.activeModalData = {};
+  }
+
+  @action setActive(modalType: ModalType, data?: Record<string, unknown>) {
+    this.activeModalData = data || {};
+
+    schedule("afterRender", this, () => {
+      this.activeModal = modalType;
+    });
+  }
 }

@@ -91,7 +91,7 @@ export default class RecentlyViewedService extends Service {
 
       // Create a placeholder array for the full item promises
       let fullItemPromises: Promise<
-        RecentlyViewedDoc | RecentlyViewedProject
+        RecentlyViewedDoc | RecentlyViewedProject | null
       >[] = [];
 
       // Promise to get each doc and return it in the RecentlyViewedDoc format
@@ -108,7 +108,15 @@ export default class RecentlyViewedService extends Service {
               return {
                 doc,
                 ...d,
-              };
+              } as RecentlyViewedDoc; // Specify the return type as RecentlyViewedDoc
+            })
+            .catch(() => {
+              /**
+               * A failed fetch here is likely a deleted or newly private draft.
+               * We return null to filter it out of the array and keep the
+               * widget from breaking.
+               */
+              return null;
             }),
         );
       });
@@ -134,6 +142,7 @@ export default class RecentlyViewedService extends Service {
       // Load doc owners into the store
       await this.store.maybeFetchPeople.perform(
         formattedItems.map((d) => {
+          if (!d) return;
           if ("doc" in d) {
             return d.doc;
           }
@@ -141,7 +150,7 @@ export default class RecentlyViewedService extends Service {
       );
 
       // Update the local array to recompute the getter
-      this._index = formattedItems;
+      this._index = formattedItems.compact();
     } catch (e) {
       // Log an error if the fetch fails
       console.error("Error fetching recently viewed docs", e);

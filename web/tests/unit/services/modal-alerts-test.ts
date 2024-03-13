@@ -7,12 +7,12 @@ module("Unit | Service | modal-alerts", function (hooks) {
 
   test("can set or close an active modal", async function (assert) {
     const modalAlerts = this.owner.lookup(
-      "service:modal-alerts"
+      "service:modal-alerts",
     ) as ModalAlertsService;
 
     assert.equal(modalAlerts.activeModal, null);
 
-    await modalAlerts.setActive.perform("draftCreated");
+    modalAlerts.setActive("draftCreated");
     assert.equal(modalAlerts.activeModal, "draftCreated");
 
     modalAlerts.close();
