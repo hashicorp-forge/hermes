@@ -18,28 +18,28 @@ module("Unit | Service | modal-alerts", function (hooks) {
   });
 
   test("can show or hide an active modal", async function (this: Context, assert) {
-    assert.equal(this.modalAlerts.shown, null);
+    assert.equal(this.modalAlerts.opened, null);
 
-    this.modalAlerts.show(ModalType.DraftCreated);
+    this.modalAlerts.open(ModalType.DraftCreated);
 
-    await waitUntil(() => this.modalAlerts.shown === ModalType.DraftCreated);
+    await waitUntil(() => this.modalAlerts.opened === ModalType.DraftCreated);
 
-    this.modalAlerts.hide();
+    this.modalAlerts.close();
 
-    assert.equal(this.modalAlerts.shown, null);
+    assert.equal(this.modalAlerts.opened, null);
   });
 
   test("data can be included when showing a modal", async function (this: Context, assert) {
-    assert.equal(this.modalAlerts.shown, null);
+    assert.equal(this.modalAlerts.opened, null);
 
-    this.modalAlerts.show(ModalType.DraftCreated, { id: "123" });
+    this.modalAlerts.open(ModalType.DraftCreated, { id: "123" });
 
-    await waitUntil(() => this.modalAlerts.shown === ModalType.DraftCreated);
+    await waitUntil(() => this.modalAlerts.opened === ModalType.DraftCreated);
 
     assert.deepEqual(this.modalAlerts.data, { id: "123" });
 
-    this.modalAlerts.hideAndResetData();
+    this.modalAlerts.close();
 
-    assert.equal(this.modalAlerts.shown, null);
+    assert.equal(this.modalAlerts.opened, null);
   });
 });

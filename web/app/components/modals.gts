@@ -10,18 +10,26 @@ import { action } from "@ember/object";
 export default class ModalsComponent extends Component {
   @service declare modalAlerts: ModalAlertsService;
 
-  private get modal() {
-    return this.modalAlerts.shown;
+  /**
+   * Shorthand for the ModalAlerts `opened` property.
+   * Reduces boilerplate in the template.
+   */
+  private get opened() {
+    return this.modalAlerts.opened;
   }
 
+  /**
+   * Shorthand for the ModalAlerts `close` method.
+   * Reduces boilerplate in the template.
+   */
   @action private close() {
-    this.modalAlerts.hideAndResetData();
+    this.modalAlerts.close();
   }
 
   <template>
-    {{#if (eq this.modal ModalType.DraftCreated)}}
+    {{#if (eq this.opened ModalType.DraftCreated)}}
       <DraftCreated @close={{this.close}} />
-    {{else if (eq this.modal ModalType.DocTransferred)}}
+    {{else if (eq this.opened ModalType.DocTransferred)}}
       <DocTransferred @close={{this.close}} />
     {{/if}}
   </template>

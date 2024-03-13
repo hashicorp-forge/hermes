@@ -12,10 +12,10 @@ module("Integration | Component | modals", function (hooks) {
       "service:modal-alerts",
     ) as ModalAlertsService;
 
-    await render(hbs`{{! @glint-nocheck }}<Modals />`);
+    await render(hbs`<Modals />`);
 
     assert.dom("dialog").doesNotExist();
-    modalAlerts.show(ModalType.DraftCreated);
+    modalAlerts.open(ModalType.DraftCreated);
 
     await rerender();
     assert.dom("dialog").exists("draftCreated modal shown");

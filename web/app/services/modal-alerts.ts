@@ -12,18 +12,11 @@ export enum ModalType {
 export default class ModalAlertsService extends Service {
   @service declare router: RouterService;
 
-  init() {
-    super.init();
-    this.router.on("routeWillChange", () => {
-      this.hide();
-    });
-  }
-
   /**
    * The name of the currently shown modal, if any.
    * Used to determine which modal to show in the UI.
    */
-  @tracked shown: ModalType | null = null;
+  @tracked opened: ModalType | null = null;
 
   /**
    * Data for the active modal, if any.
@@ -33,30 +26,22 @@ export default class ModalAlertsService extends Service {
   @tracked data: Record<string, unknown> = {};
 
   /**
-   * The action to hide the currently shown modal.
-   * Called when a new route is requested.
-   */
-  @action hide(): void {
-    this.shown = null;
-  }
-
-  /**
    * The action to hide the currently shown modal and reset the data.
-   * Called when the user manually closes the modal.
+   * Called when the user closes the modal.
    */
-  @action hideAndResetData(): void {
-    this.hide();
+  @action close(): void {
+    this.opened = null;
     this.data = {};
   }
   /**
    * The action to activate a modal by name.
    * Scheduled `afterRender` to work on cross-route transitions
    */
-  @action show(modalType: ModalType, data?: Record<string, unknown>) {
+  @action open(modalType: ModalType, data?: Record<string, unknown>) {
     this.data = data || {};
 
     schedule("afterRender", () => {
-      this.shown = modalType;
+      this.opened = modalType;
     });
   }
 }
