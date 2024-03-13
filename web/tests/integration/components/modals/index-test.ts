@@ -15,7 +15,7 @@ module("Integration | Component | modals", function (hooks) {
     await render(hbs`{{! @glint-nocheck }}<Modals />`);
 
     assert.dom("dialog").doesNotExist();
-    modalAlerts.setActive(ModalType.DraftCreated);
+    modalAlerts.show(ModalType.DraftCreated);
 
     await rerender();
     assert.dom("dialog").exists("draftCreated modal shown");

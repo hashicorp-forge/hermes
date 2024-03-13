@@ -11,11 +11,11 @@ export default class ModalsComponent extends Component {
   @service declare modalAlerts: ModalAlertsService;
 
   private get modal() {
-    return this.modalAlerts.activeModal;
+    return this.modalAlerts.shown;
   }
 
   @action private close() {
-    this.modalAlerts.closeAndResetData();
+    this.modalAlerts.hideAndResetData();
   }
 
   <template>

@@ -13,7 +13,7 @@ export default class ModalsDocTransferredComponent extends Component<ModalsDocTr
   @service declare modalAlerts: ModalAlertsService;
 
   protected get newOwner() {
-    const { newOwner } = this.modalAlerts.activeModalData;
+    const { newOwner } = this.modalAlerts.data;
     assert("newOwner must be a string", typeof newOwner === "string");
     return newOwner;
   }

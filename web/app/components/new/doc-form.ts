@@ -227,7 +227,7 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
              * If `create_docs_as_user` is false, show a modal alert
              * explaining the limitations on notifications.
              */
-            this.modalAlerts.setActive(ModalType.DraftCreated);
+            this.modalAlerts.show(ModalType.DraftCreated);
           }
         });
     } catch (e) {

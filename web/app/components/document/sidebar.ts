@@ -929,7 +929,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       this.transferOwnershipModalIsShown = false;
 
-      this.modalAlerts.setActive(ModalType.DocTransferred, {
+      this.modalAlerts.show(ModalType.DocTransferred, {
         newOwner: this.newOwners[0],
       });
 
