@@ -698,7 +698,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(GROUP_APPROVER_MESSAGE).exists();
 
     await this.pauseTest();
-
     await click(APPROVE_BUTTON);
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");

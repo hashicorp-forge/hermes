@@ -544,20 +544,20 @@
                     {{on "click" (perform this.approve)}}
                   />
 
-                  {{#unless this.isGroupApproverOnly}}
-                    {{#if (eq @document.docType "FRD")}}
-                      {{! Reject FRD }}
-                      <Hds::Button
-                        data-test-reject-frd-button
-                        @text="Reject"
-                        @color="critical"
-                        @icon="thumbs-down"
-                        @isIconOnly={{true}}
-                        {{tooltip "Reject"}}
-                        {{on "click" (perform this.rejectFRD)}}
-                      />
-                    {{/if}}
+                  {{#if (eq @document.docType "FRD")}}
+                    {{! Reject FRD }}
+                    <Hds::Button
+                      data-test-reject-frd-button
+                      @text="Reject"
+                      @color="critical"
+                      @icon="thumbs-down"
+                      @isIconOnly={{true}}
+                      {{tooltip "Reject"}}
+                      {{on "click" (perform this.rejectFRD)}}
+                    />
+                  {{/if}}
 
+                  {{#unless this.isGroupApproverOnly}}
                     {{! Overflow menu (Leave approver role) }}
                     <X::DropdownList
                       data-test-sidebar-footer-overflow-menu
