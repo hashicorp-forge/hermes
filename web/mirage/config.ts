@@ -6,6 +6,7 @@ import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
 import { assert as emberAssert } from "@ember/debug";
+import { HermesDocument } from "hermes/types/document";
 
 import {
   TEST_WEB_CONFIG,
@@ -757,12 +758,20 @@ export default function (mirageConfig) {
         });
 
         if (document) {
-          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
-            const approvedBy = document.attrs.approvedBy || [];
-            document.update({
-              approvedBy: [...approvedBy, TEST_USER_EMAIL],
-            });
-          }
+          const { attrs } = document as { attrs: HermesDocument };
+          const { approvedBy, approvers } = attrs;
+
+          document.update({
+            approvedBy: [...(approvedBy || []), TEST_USER_EMAIL],
+            /**
+             * Add any new approvers to the list,
+             * such as in the case of group approvals.
+             */
+            approvers: approvers?.includes(TEST_USER_EMAIL)
+              ? approvers
+              : [...(approvers || []), TEST_USER_EMAIL],
+          });
+
           return new Response(200, {}, document.attrs);
         }
 

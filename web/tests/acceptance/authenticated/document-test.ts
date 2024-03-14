@@ -697,6 +697,8 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(APPROVE_BUTTON).exists('the "approve" button is shown');
     assert.dom(GROUP_APPROVER_MESSAGE).exists();
 
+    await this.pauseTest();
+
     await click(APPROVE_BUTTON);
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
@@ -1751,11 +1753,14 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("you can add a group as an approver", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    const name = "Engineering";
+    const email = "engineering@hashicorp.com";
+
     this.server.createList("google/person", 5);
 
     this.server.create("group", {
-      name: "Engineering",
-      email: "engineering@hashicorp.com",
+      name,
+      email,
     });
 
     this.server.create("document", {
@@ -1766,8 +1771,18 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(`${APPROVERS_SELECTOR} button`);
 
-    await fillIn(`${APPROVERS_SELECTOR} input`, "Engineering");
+    await fillIn(`${APPROVERS_SELECTOR} input`, name);
 
-    await this.pauseTest();
+    assert.dom(PEOPLE_SELECT_OPTION).containsText(name).containsText(email);
+
+    await click(PEOPLE_SELECT_OPTION);
+
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(APPROVERS_SELECTOR).containsText(name);
+
+    const doc = this.server.schema.document.find(1);
+
+    assert.true(doc.attrs.approvers.includes(email));
   });
 });

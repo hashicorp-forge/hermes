@@ -1076,6 +1076,11 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
         this.hasApproved = true;
 
+        if (!this.approvers.includes(this.args.profile.email)) {
+          this.approvers.push(this.args.profile.email);
+          this.approvers = this.approvers;
+        }
+
         if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
           this.showFlashSuccess("Done!", "Document approved");
         }
