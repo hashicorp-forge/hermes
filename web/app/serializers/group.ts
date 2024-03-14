@@ -1,12 +1,14 @@
 import JSONSerializer from "@ember-data/serializer/json";
+import { assert } from "@ember/debug";
 import DS from "ember-data";
 import GroupModel from "hermes/models/group";
 
 interface GroupPayload {
-  kind: string;
-  etag: string;
-  groups: GroupModel[];
-  nextPageToken: string;
+  // kind: string;
+  // etag: string;
+  // groups: GroupModel[];
+  // nextPageToken: string;
+  results: GroupModel[] | null;
 }
 
 // PLACEHOLDER //
@@ -31,11 +33,31 @@ export default class GroupSerializer extends JSONSerializer {
   normalizeResponse(
     _store: DS.Store,
     _primaryModelClass: GroupModel,
-    _payload: GroupPayload,
+    payload: GroupPayload,
     _id: string | number | null,
-    requestType: "query",
+    _requestType: "query",
   ) {
-    debugger;
-    return {};
+    assert("results are expected for query requests", "results" in payload);
+
+    /**
+     * If the results are `null`, return an empty array to show
+     * the "No results found" message in the PeopleSelect.
+     */
+    if (!payload.results) return { data: [] };
+
+    const groups = payload.results.map((g) => {
+      return {
+        id: g.email,
+        type: "group",
+        attributes: {
+          name: g.name,
+          email: g.email,
+        },
+      };
+    });
+
+    console.log("groo", groups);
+
+    return { data: groups };
   }
 }

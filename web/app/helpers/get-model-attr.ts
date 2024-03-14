@@ -6,6 +6,7 @@ import getModelAttr, { GetModelAttrArgs } from "hermes/utils/get-model-attr";
 export interface GetModelAttrSignature {
   Args: {
     Positional: GetModelAttrArgs;
+    Named: { fallback?: string };
   };
   Return: any;
 }
@@ -13,8 +14,8 @@ export interface GetModelAttrSignature {
 export default class GetModelAttrHelper extends Helper<GetModelAttrSignature> {
   @service declare store: StoreService;
 
-  compute(positional: GetModelAttrArgs) {
-    return getModelAttr(this.store, positional);
+  compute(positional: GetModelAttrArgs, named: { fallback?: string }) {
+    return getModelAttr(this.store, positional, named);
   }
 }
 
