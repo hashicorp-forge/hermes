@@ -36,6 +36,7 @@ import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
 import StoreService from "hermes/services/store";
+import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -74,6 +75,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare store: StoreService;
   @service declare flashMessages: HermesFlashMessagesService;
+  @service declare modalAlerts: ModalAlertsService;
 
   /**
    * The ID shared between the "Select a new owner" PeopleSelect and its label.
@@ -953,8 +955,16 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       );
 
       this.transferOwnershipModalIsShown = false;
-      this.ownershipTransferredModalIsShown = true;
+
+      this.modalAlerts.open(ModalType.DocTransferred, {
+        newOwner: this.newOwners[0],
+      });
+
       this.newOwners = [];
+
+      if (this.isDraft && !this._docIsShareable) {
+        this.router.transitionTo("authenticated.dashboard");
+      }
     } catch (error) {
       const e = error as Error;
       this.maybeLockDoc(e);
