@@ -1,10 +1,9 @@
 import Component from "@glimmer/component";
-import { PeopleSelectOption } from "../inputs/people-select";
 
 interface MultiselectUserEmailImageChipComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    option: PeopleSelectOption | string;
+    option: string;
   };
   Blocks: {
     default: [];
@@ -18,12 +17,7 @@ export default class MultiselectUserEmailImageChipComponent extends Component<Mu
    * otherwise it is the email property of the option.
    */
   protected get email() {
-    const { option } = this.args;
-    if (typeof option === "string") {
-      return option;
-    } else {
-      return option.email;
-    }
+    return this.args.option;
   }
 }
 

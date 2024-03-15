@@ -30,16 +30,6 @@ enum ComputedHorizontalPosition {
   Right = "right",
 }
 
-enum PeopleSelectOptionType {
-  Person = "person",
-  Group = "group",
-}
-
-export interface PeopleSelectOption {
-  email: string;
-  type: PeopleSelectOptionType;
-}
-
 interface CalculatePositionOptions {
   horizontalPosition: ComputedHorizontalPosition;
   verticalPosition: ComputedVerticalPosition;
@@ -94,7 +84,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The list of people to display in the dropdown.
    * Instantiated empty and populated by the `searchDirectory` task.
    */
-  @tracked protected options: PeopleSelectOption[] = [];
+  @tracked protected options: string[] = [];
 
   /**
    * The action to run when the PowerSelect input is clicked.
@@ -232,8 +222,8 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
-      let p: PeopleSelectOption[] = [];
-      let g: PeopleSelectOption[] = [];
+      let p: string[] = [];
+      let g: string[] = [];
 
       let promises = [
         this.store.query("person", {
@@ -250,24 +240,19 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         if (people) {
           p = people
-            .map((p: PersonModel) => {
-              return {
-                email: p.email,
-                type: "person",
-              } as PeopleSelectOption;
-            })
-            .filter((person: { email: string; type: string }) => {
+            .map((p: PersonModel) => p.email)
+            .filter((email: string) => {
               // filter out any people already selected
               // FIXME: combine with groups
               return !this.args.selected.find(
-                (selectedEmail) => selectedEmail === person.email,
+                (selectedEmail) => selectedEmail === email,
               );
             })
-            .filter((person) => {
+            .filter((email) => {
               // filter the authenticated user if `excludeSelf` is true
               return (
                 !this.args.excludeSelf ||
-                person.email !== this.authenticatedUser.info.email
+                email !== this.authenticatedUser.info.email
               );
             });
         } else {
@@ -276,17 +261,12 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         if (groups) {
           g = groups
-            .map((g: GroupModel) => {
-              return {
-                email: g.email,
-                type: "group",
-              } as PeopleSelectOption;
-            })
-            .filter((group: { email: string; type: string }) => {
+            .map((g: GroupModel) => g.email)
+            .filter((email) => {
               // filter out any people already selected
               // FIXME: this is redundant
               return !this.args.selected.find(
-                (selectedEmail) => selectedEmail === group.email,
+                (selectedEmail) => selectedEmail === email,
               );
             });
         } else {
@@ -295,9 +275,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         // concat and sort by email
 
-        this.options = [...p, ...g].sort((a, b) =>
-          a.email.localeCompare(b.email),
-        );
+        this.options = [...p, ...g].sort((a, b) => a.localeCompare(b));
 
         // stop the loop if the query was successful
         return;

@@ -30,15 +30,14 @@
     {{! TODO: if (eq person.type "group") }}
     {{! show an affordance or label }}
     {{! anything we do here should also be accessible via the image chip }}
-    <Person::Avatar @email={{option.email}} />
+    <Person::Avatar @email={{option}} />
     <div class="w-full min-w-0">
       <TruncatedText
         class="text-body-200 leading-tight text-color-foreground-primary"
       >
-        {{! sometimes this is `group.name` `person.email` }}
-        {{get-model-attr "person.name" option.email fallback="group.name"}}
+        {{get-model-attr "person.name" option fallback="group.name"}}
         <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
-          {{option.email}}
+          {{option}}
         </span>
       </TruncatedText>
     </div>

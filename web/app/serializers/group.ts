@@ -56,8 +56,6 @@ export default class GroupSerializer extends JSONSerializer {
       };
     });
 
-    console.log("groo", groups);
-
     return { data: groups };
   }
 }

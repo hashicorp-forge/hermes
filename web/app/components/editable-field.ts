@@ -39,7 +39,7 @@ export default class EditableFieldComponent extends Component<EditableFieldCompo
    * Required to handle both the PEOPLE and STRING fieldTypes,
    * which are processed differently by their sub-components.
    */
-  @tracked private cachedValue = this.args.value;
+  private cachedValue = this.args.value;
 
   /**
    * The value of the field. Initially set to the value passed in.

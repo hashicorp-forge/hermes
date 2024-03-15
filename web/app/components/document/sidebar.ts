@@ -35,6 +35,7 @@ import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
+import StoreService from "hermes/services/store";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -71,6 +72,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare recentlyViewed: RecentlyViewedService;
   @service declare router: RouterService;
   @service declare session: SessionService;
+  @service declare store: StoreService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   /**
@@ -114,7 +116,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
   @tracked contributors: string[] = this.args.document.contributors || [];
 
+  /**
+   *  TODO
+   */
   @tracked approvers: string[] = this.args.document.approvers || [];
+
+  /**
+   *  TODO
+   */
+
+  @tracked approverGroups: string[] = this.args.document.approverGroups || [];
+
+  /**
+   *  TODO
+   */
+  @tracked allApprovers: string[] = this.approverGroups.concat(this.approvers);
 
   @tracked product = this.args.document.product || "";
 
@@ -739,6 +755,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  /**
+   *
+   */
+  onApproversSave(emails: string[]) {
+    this.updateApprovers(emails);
+    void this.save.perform("approvers", emails);
+  }
+
   save = task(async (field: string, val: string | string[]) => {
     if (field && val !== undefined) {
       let serializedValue;
@@ -791,6 +815,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     },
   );
+
+  /**
+   * The action to save approvers. Called by the EditableField component `onSave`.
+   * Sends a patch request to update the `approvers` and `approverGroups` fields.
+   */
+  protected saveApprovers = dropTask(async () => {
+    await this.patchDocument.perform({
+      approvers: this.approvers,
+      approverGroups: this.approverGroups,
+    });
+  });
 
   patchDocument = enqueueTask(async (fields: any, throwOnError?: boolean) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
@@ -930,7 +965,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   @action updateApprovers(approvers: string[]) {
-    this.approvers = approvers;
+    // this is a mix of people and group approvers.
+    // need some way of differentiating between the two.
+    this.approvers = approvers.filter((approver) => {
+      return this.store.peekRecord("person", approver);
+    });
+
+    this.approverGroups = approvers.filter((approver) => {
+      return this.store.peekRecord("group", approver);
+    });
   }
 
   @action updateContributors(contributors: string[]) {

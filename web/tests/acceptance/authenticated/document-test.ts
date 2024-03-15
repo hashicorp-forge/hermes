@@ -46,7 +46,6 @@ const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
 const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
 const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
 const APPROVE_BUTTON = "[data-test-approve-button]";
-const GROUP_APPROVER_MESSAGE = "[data-test-group-approver-message]";
 const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON =
   "[data-test-sidebar-footer-secondary-dropdown-button]";
 const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
@@ -695,19 +694,19 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1");
 
     assert.dom(APPROVE_BUTTON).exists('the "approve" button is shown');
-    assert.dom(GROUP_APPROVER_MESSAGE).exists();
-
     await this.pauseTest();
     await click(APPROVE_BUTTON);
+    await this.pauseTest();
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
-    assert.dom(GROUP_APPROVER_MESSAGE).doesNotExist();
 
     assert.dom(APPROVERS_SELECTOR).containsText(TEST_USER_NAME);
 
-    const docApprovers = this.server.schema.document.find(1).attrs.approvers;
+    const doc = this.server.schema.document.find(1).attrs;
 
-    assert.true(docApprovers.includes(TEST_USER_EMAIL));
+    const { approvers } = doc;
+
+    assert.true(approvers.includes(TEST_USER_EMAIL));
   });
 
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1764,6 +1763,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     this.server.create("document", {
       objectID: 1,
+      id: 1,
     });
 
     await visit("/document/1?draft=true");
@@ -1780,8 +1780,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(APPROVERS_SELECTOR).containsText(name);
 
-    const doc = this.server.schema.document.find(1);
+    const doc = this.server.schema.document.find(1).attrs;
 
-    assert.true(doc.attrs.approvers.includes(email));
+    assert.true(doc.approverGroups.includes(email));
   });
 });

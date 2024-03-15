@@ -159,10 +159,6 @@
             </X::DropdownList>
           {{/if}}
         </div>
-        <div>
-          Heck:
-          {{@viewerIsGroupApprover}}
-        </div>
         <div class="editable-field-container document-title mb-8 -mt-[5px]">
           <EditableField
             data-test-document-title
@@ -288,9 +284,9 @@
             <EditableField
               data-test-document-approvers
               data-test-editable={{this.isOwner}}
-              @value={{this.approvers}}
+              @value={{this.allApprovers}}
               @onChange={{this.updateApprovers}}
-              @onSave={{perform this.save "approvers"}}
+              @onSave={{perform this.saveApprovers}}
               @isSaving={{this.saveIsRunning}}
               @isReadOnly={{this.editingIsDisabled}}
               @includeGroupsInPeopleSelect={{true}}
@@ -598,17 +594,6 @@
                 {{/if}}
               {{/if}}
             </div>
-            {{#if (and this.isGroupApproverOnly (not this.hasApproved))}}
-              <div class="mt-1 px-3">
-                <div
-                  data-test-group-approver-message
-                  class="relative translate-y-2.5 text-[12px] leading-snug text-color-foreground-faint"
-                >
-                  Youʼre seeing this because a Google Group youʼre in is an
-                  approver.
-                </div>
-              </div>
-            {{/if}}
           {{/if}}
         {{/let}}
       {{/if}}
