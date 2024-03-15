@@ -1686,6 +1686,12 @@ module("Acceptance | authenticated/document", function (hooks) {
       TEST_USER_2_EMAIL,
       "the doc owner is updated in the back end",
     );
+
+    assert.equal(
+      currentURL(),
+      "/dashboard",
+      "when transferring restricted drafts, the user is redirected to the dashboard",
+    );
   });
 
   test("an error is shown when ownership transferring fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {

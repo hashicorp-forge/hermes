@@ -1,0 +1,27 @@
+<Hds::Modal data-test-ownership-transferred-modal @onClose={{@close}} as |M|>
+  <M.Header>
+    <div class="flex items-center">
+      <FlightIcon
+        @name="check-circle-fill"
+        class="mr-2 text-color-palette-green-200"
+      />
+      Done
+    </div>
+  </M.Header>
+  <M.Body>
+    <div class="grid place-items-center pt-8 pb-8 text-center">
+      <h2>Ownership transferred.</h2>
+      <p class="mb-2.5 flex text-body-300">
+        {{get-model-attr "person.name" this.newOwner}}
+        has been notified of the change.
+      </p>
+    </div>
+  </M.Body>
+  <M.Footer>
+    <Hds::Button
+      data-test-document-modal-primary-button
+      @text="Close"
+      {{on "click" @close}}
+    />
+  </M.Footer>
+</Hds::Modal>
