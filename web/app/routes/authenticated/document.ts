@@ -75,20 +75,27 @@ export default class AuthenticatedDocumentRoute extends Route {
     // Get doc data from the app backend.
     if (params.draft) {
       try {
-        doc = await this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/drafts/` +
-              params.document_id,
-            {
-              method: "GET",
-              headers: {
-                // We set this header to differentiate between document views and
-                // requests to only retrieve document metadata.
-                "Add-To-Recently-Viewed": "true",
-              },
-            },
-          )
-          .then((r) => r?.json());
+        doc = await this.store.findRecord("draft", params.document_id, {
+          headers: {
+            // We set this header to differentiate between document views and
+            // requests to only retrieve document metadata.
+            "Add-To-Recently-Viewed": "true",
+          },
+        });
+        // doc = await this.fetchSvc
+        //   .fetch(
+        //     `/api/${this.configSvc.config.api_version}/drafts/` +
+        //       params.document_id,
+        //     {
+        //       method: "GET",
+        //       headers: {
+        //         // We set this header to differentiate between document views and
+        //         // requests to only retrieve document metadata.
+        //         "Add-To-Recently-Viewed": "true",
+        //       },
+        //     },
+        //   )
+        //   .then((r) => r?.json());
         draftFetched = true;
 
         // Add the draft owner to the list of people to fetch.

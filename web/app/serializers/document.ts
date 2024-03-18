@@ -2,11 +2,12 @@ import JSONSerializer from "@ember-data/serializer/json";
 import { assert } from "@ember/debug";
 import DS from "ember-data";
 import { HermesDocument } from "hermes/types/document";
+import { ModelFrom } from "hermes/types/route-models";
 
 export default class DocumentSerializer extends JSONSerializer {
   normalizeResponse(
     _store: DS.Store,
-    _primaryModelClass: any,
+    primaryModelClass: any, // type this
     payload: { doc: HermesDocument },
     _id: string | number,
     requestType: string,
@@ -37,7 +38,7 @@ export default class DocumentSerializer extends JSONSerializer {
       return {
         data: {
           id: objectID,
-          type: "document",
+          type: primaryModelClass.modelName,
           attributes: {
             _snippetResult,
             appCreated,
@@ -61,6 +62,8 @@ export default class DocumentSerializer extends JSONSerializer {
         },
       };
     }
+
+    console.log("this needs an explanation! unhandled mess! ugh!");
 
     return {};
   }
