@@ -28,6 +28,7 @@ import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
+import StoreService from "hermes/services/store";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -58,6 +59,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @service("config") declare configSvc: ConfigService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare router: RouterService;
+  @service declare store: StoreService;
 
   /**
    * The array of possible project statuses.
@@ -602,9 +604,8 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    */
   loadJiraIssue = task(async (jiraIssueID?: string) => {
     const id = jiraIssueID ?? this.args.project.jiraIssueID;
-    const issue = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/jira/issues/${id}`)
-      .then((response) => response?.json());
+    assert("jiraIssueID must exist", id);
+    const issue = await this.store.findRecord("jira-issue", id);
     this.jiraIssue = issue;
   });
 
