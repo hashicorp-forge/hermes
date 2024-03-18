@@ -132,7 +132,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    *  TODO
    */
-  @tracked allApprovers: string[] = this.approverGroups.concat(this.approvers);
+  protected get allApprovers() {
+    return this.approverGroups.concat(this.approvers);
+  }
 
   @tracked product = this.args.document.product || "";
 
@@ -182,7 +184,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    * Whether the Approvers list is shown.
    * True except immediately after the user leaves the approver role.
-   * See note in `leaveApproverRole` for more information.
+   * See note in `toggleApproverVisibility` for more information.
    */
   @tracked protected approversAreShown = true;
 
@@ -757,14 +759,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
-  /**
-   *
-   */
-  onApproversSave(emails: string[]) {
-    this.updateApprovers(emails);
-    void this.save.perform("approvers", emails);
-  }
-
   save = task(async (field: string, val: string | string[]) => {
     if (field && val !== undefined) {
       let serializedValue;
@@ -1039,6 +1033,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * This is an unfortunate hack to re-render the approvers list
+   * after the user leaves the approver role. Because the EditableField
+   * component has its own caching logic, it doesn't inherit changes
+   * from external components. This can be changed in the future, but will
+   * require a refactor of the EditableField and sidebar components.
+   *
+   * TODO: Improve this
+   */
+  @action private toggleApproverVisibility() {
+    this.approversAreShown = false;
+    schedule("afterRender", () => {
+      this.approversAreShown = true;
+    });
+  }
+
+  /**
    * The action to leave the approver role.
    * Updates the local approvers array and saves it to the back end.
    * On success, shows a success message. On failure, shows an error message
@@ -1056,19 +1066,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       await this.save.perform("approvers", this.approvers);
 
-      /**
-       * This is an unfortunate hack to re-render the approvers list
-       * after the user leaves the approver role. Because the EditableField
-       * component has its own caching logic, it doesn't inherit changes
-       * from external components. This can be changed in the future, but will
-       * require a refactor of the EditableField and sidebar components.
-       *
-       * TODO: Improve this
-       */
-      this.approversAreShown = false;
-      schedule("afterRender", () => {
-        this.approversAreShown = true;
-      });
+      this.toggleApproverVisibility();
 
       // We set this so that the "Leaving..." state
       // is shown until the UI updates.
@@ -1129,9 +1127,13 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
         this.hasApproved = true;
 
+        /**
+         * This will be the case with a group approver.
+         */
         if (!this.approvers.includes(this.args.profile.email)) {
           this.approvers.push(this.args.profile.email);
           this.approvers = this.approvers;
+          this.toggleApproverVisibility();
         }
 
         if (options instanceof MouseEvent || !options?.skipSuccessMessage) {

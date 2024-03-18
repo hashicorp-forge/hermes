@@ -14,7 +14,10 @@ export default class GroupAdapter extends ApplicationAdapter {
           query: query.query,
         }),
       })
-      .then((r) => r?.json());
+      .then((r) => r?.json())
+      .catch(() => {
+        console.log("TODO: implement");
+      });
 
     return RSVP.hash({ results });
   }

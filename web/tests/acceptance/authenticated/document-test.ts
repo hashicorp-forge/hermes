@@ -27,7 +27,6 @@ import {
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
   TEST_USER_NAME,
-  TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
@@ -697,7 +696,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
-    assert.dom(APPROVERS_SELECTOR).containsText(TEST_USER_NAME);
+    assert.dom(APPROVERS_SELECTOR).containsText("Me");
 
     const doc = this.server.schema.document.find(1).attrs;
 
