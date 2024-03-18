@@ -13,7 +13,7 @@ export default Factory.extend({
     const project = server.schema.projects.find(id);
 
     if (project) {
-      recentlyViewedProject.update({ project: project.attrs });
+      recentlyViewedProject.update({ project: project });
     } else {
       recentlyViewedProject.update({
         project: server.create("project", {

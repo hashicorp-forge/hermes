@@ -142,7 +142,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       hermesDocuments: undefined,
     });
 
-    project = project.attrs;
+    project = project;
 
     await visit("/projects/1");
 

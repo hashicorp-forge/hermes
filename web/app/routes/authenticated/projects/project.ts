@@ -2,6 +2,7 @@ import Route from "@ember/routing/route";
 import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
+import ProjectModel from "hermes/models/project";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RecentlyViewedService from "hermes/services/recently-viewed";
@@ -17,18 +18,13 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
   declare controller: AuthenticatedProjectsProjectController;
 
   async model(params: { project_id: string }): Promise<HermesProject> {
-    const projectPromise = this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/projects/${params.project_id}`,
-        {
-          headers: {
-            // We set this header to differentiate between project views and
-            // requests to only retrieve project metadata.
-            "Add-To-Recently-Viewed": "true",
-          },
-        },
-      )
-      .then((response) => response?.json());
+    const projectPromise = this.store.findRecord("project", params.project_id, {
+      headers: {
+        // We set this header to differentiate between project views and
+        // requests to only retrieve project metadata.
+        "Add-To-Recently-Viewed": "true",
+      },
+    }) as Promise<ProjectModel>;
 
     const projectResourcesPromise = this.fetchSvc
       .fetch(
@@ -55,8 +51,27 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
     // Load owner information
     await this.store.maybeFetchPeople.perform(hermesDocuments);
 
+    const {
+      id,
+      createdTime,
+      creator,
+      description,
+      jiraIssueID,
+      modifiedTime,
+      products,
+      status,
+      title,
+    } = project;
     return {
-      ...project,
+      id,
+      createdTime,
+      creator,
+      description,
+      jiraIssueID,
+      modifiedTime,
+      products,
+      status,
+      title,
       hermesDocuments,
       externalLinks,
     };

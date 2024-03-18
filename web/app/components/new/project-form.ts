@@ -13,6 +13,8 @@ import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
 import Ember from "ember";
+import StoreService from "hermes/services/store";
+import { ProjectStatus } from "hermes/types/project-status";
 
 const TIMEOUT = Ember.testing ? 0 : 2000;
 
@@ -29,6 +31,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
   @service declare flashMessages: HermesFlashMessagesService;
+  @service declare store: StoreService;
 
   /**
    * Whether the project is being created, or in the process of
@@ -112,16 +115,14 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   private createProject = task(async () => {
     try {
       this.projectIsBeingCreated = true;
-      const projectPromise = this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/projects`, {
-          method: "POST",
-          body: JSON.stringify({
-            title: cleanString(this.title),
-            description: cleanString(this.description),
-            jiraIssueID: this.jiraIssue?.key,
-          }),
+      // TODO: replace with createRecord :-)
+      const projectPromise = this.store
+        .createRecord("project", {
+          title: cleanString(this.title),
+          description: cleanString(this.description),
+          jiraIssueID: this.jiraIssue?.key,
         })
-        .then((response) => response?.json());
+        .save();
 
       /**
        * Create the project with a minimum duration.
@@ -129,7 +130,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
        * message to orient the user.
        */
       const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
-
+      console.log("newly created project", project);
       if (this.args.document) {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,

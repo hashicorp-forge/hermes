@@ -123,7 +123,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Represents the current status of the project.
    */
   protected get statusLabel() {
-    return this.statuses[this.status].label;
+    return this.statuses[this.status]?.label;
   }
 
   /**

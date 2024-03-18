@@ -36,6 +36,7 @@ import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
 import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
+import StoreService from "hermes/services/store";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -73,6 +74,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare session: SessionService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare modalAlerts: ModalAlertsService;
+  @service declare store: StoreService;
 
   /**
    * The ID shared between the "Select a new owner" PeopleSelect and its label.
@@ -649,11 +651,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
     try {
       const projectPromises = this.args.document.projects?.map((project) => {
-        return this.fetchSvc
-          .fetch(
-            `/api/${this.configSvc.config.api_version}/projects/${project}`,
-          )
-          .then((response) => response?.json());
+        return this.store.findRecord("project", project);
       });
       const projects = await Promise.all(projectPromises ?? []);
       this._projects = projects;

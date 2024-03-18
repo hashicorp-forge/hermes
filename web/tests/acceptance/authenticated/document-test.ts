@@ -1553,7 +1553,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     // retry the request (successfully)
     this.server.get("/projects/:project_id", () => {
       const project = this.server.schema.projects.findBy({ id: 1 });
-      return new Response(200, {}, project.attrs);
+      return new Response(200, {}, project);
     });
 
     await click(PROJECTS_ERROR_BUTTON);

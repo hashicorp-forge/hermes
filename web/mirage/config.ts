@@ -171,10 +171,8 @@ export default function (mirageConfig) {
                 .all()
                 .models.filter((project) => {
                   return (
-                    project.attrs.title
-                      .toLowerCase()
-                      .includes(query.toLowerCase()) ||
-                    project.attrs.description
+                    project.title.toLowerCase().includes(query.toLowerCase()) ||
+                    project.description
                       ?.toLowerCase()
                       .includes(query.toLowerCase())
                   );
@@ -182,8 +180,8 @@ export default function (mirageConfig) {
 
               const hits = projects.map((project) => {
                 return {
-                  ...project.attrs,
-                  objectID: project.attrs.id,
+                  ...project,
+                  objectID: project.id,
                 };
               });
 
@@ -407,8 +405,10 @@ export default function (mirageConfig) {
         let project = schema.projects.create(JSON.parse(request.requestBody));
         project.update({
           status: ProjectStatus.Active,
+          creator: TEST_USER_EMAIL,
+          createdTime: Date.now(),
         });
-        return new Response(200, {}, project.attrs);
+        return new Response(200, {}, project);
       });
 
       // Fetch a list of projects.
@@ -417,7 +417,7 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          projects.map((project) => project.attrs),
+          projects.map((project) => project),
         );
       });
 
@@ -447,7 +447,7 @@ export default function (mirageConfig) {
                 objectID: doc.googleFileID,
               });
 
-              const existingDocuments = project.attrs.hermesDocuments ?? [];
+              const existingDocuments = project.hermesDocuments ?? [];
 
               newHermesDocuments.push(
                 ...existingDocuments,
@@ -459,12 +459,12 @@ export default function (mirageConfig) {
                 return;
               } else {
                 fullDocument.update({
-                  projects: [...fullDocument.attrs.projects, project.attrs.id],
+                  projects: [...fullDocument.attrs.projects, project.id],
                 });
               }
 
               fullDocument.update({
-                projects: [...fullDocument.attrs.projects, project.attrs.id],
+                projects: [...fullDocument.attrs.projects, project.id],
               });
             });
 
@@ -473,7 +473,7 @@ export default function (mirageConfig) {
               externalLinks,
             });
 
-            return new Response(200, {}, project.attrs);
+            return new Response(200, {}, project);
           }
         },
       );
@@ -489,12 +489,12 @@ export default function (mirageConfig) {
 
         if (shouldAddToRecentlyViewed) {
           schema.recentlyViewedProjects.create({
-            id: project.attrs.id,
+            id: project.id,
             viewedTime: Date.now(),
           });
         }
 
-        return new Response(200, {}, project.attrs);
+        return new Response(200, {}, project);
       });
 
       // Update a project.
@@ -505,7 +505,7 @@ export default function (mirageConfig) {
 
         if (project) {
           project.update(JSON.parse(request.requestBody));
-          return new Response(200, {}, project.attrs);
+          return new Response(200, {}, project);
         }
       });
 
@@ -518,7 +518,7 @@ export default function (mirageConfig) {
       this.get("/projects/:project_id/related-resources", (schema, request) => {
         const projectID = request.params.project_id;
         const project = schema.projects.findBy({ id: projectID });
-        const { hermesDocuments, externalLinks } = project.attrs;
+        const { hermesDocuments, externalLinks } = project;
         return new Response(200, {}, { hermesDocuments, externalLinks });
       });
 
@@ -544,7 +544,7 @@ export default function (mirageConfig) {
 
           // documents that are in both the current project and the new request
 
-          const currentHermesDocuments = project.attrs.hermesDocuments ?? [];
+          const currentHermesDocuments = project.hermesDocuments ?? [];
           const incomingHermesDocuments = attrs.hermesDocuments ?? [];
 
           const documentsToRemove = currentHermesDocuments.filter((doc) => {
@@ -562,7 +562,7 @@ export default function (mirageConfig) {
 
             mirageDocument?.update({
               projects: mirageDocument.attrs.projects.filter(
-                (projectID) => projectID.toString() !== project.attrs.id,
+                (projectID) => projectID.toString() !== project.id,
               ),
             });
           });
@@ -572,7 +572,7 @@ export default function (mirageConfig) {
               objectID: doc,
             });
             mirageDocument?.update({
-              projects: [...mirageDocument.attrs.projects, project.attrs.id],
+              projects: [...mirageDocument.attrs.projects, project.id],
             });
           });
 
@@ -580,7 +580,7 @@ export default function (mirageConfig) {
             hermesDocuments,
             externalLinks,
           });
-          return new Response(200, {}, project.attrs);
+          return new Response(200, {}, project);
         }
       });
 
@@ -1006,7 +1006,7 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedProjects
           .all()
           .models.map((project) => {
-            return project.attrs;
+            return project;
           });
 
         return new Response(200, {}, index.length === 0 ? null : index);
@@ -1180,7 +1180,7 @@ export default function (mirageConfig) {
           let attrs = JSON.parse(request.requestBody);
 
           project.update(attrs);
-          return new Response(200, {}, project.attrs);
+          return new Response(200, {}, project);
         }
       });
     },

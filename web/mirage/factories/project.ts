@@ -1,6 +1,7 @@
 import { Factory, ModelInstance, Server } from "miragejs";
 import { HermesProject } from "hermes/types/project";
 import { TEST_USER_EMAIL } from "../utils";
+import { ProjectStatus } from "hermes/types/project-status";
 
 export default Factory.extend({
   id: (i: number) => i,
@@ -8,7 +9,7 @@ export default Factory.extend({
   createdTime: 1,
   modifiedTime: 1,
   creator: TEST_USER_EMAIL,
-  status: "active",
+  status: ProjectStatus.Active,
   products: ["Vault"],
 
   // @ts-ignore - Bug https://github.com/miragejs/miragejs/issues/1052
