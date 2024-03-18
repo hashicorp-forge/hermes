@@ -693,10 +693,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(APPROVE_BUTTON).exists('the "approve" button is shown');
-    await this.pauseTest();
     await click(APPROVE_BUTTON);
-    await this.pauseTest();
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 

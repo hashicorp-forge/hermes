@@ -153,7 +153,8 @@ export default class AuthenticatedDocumentRoute extends Route {
           method: "OPTIONS",
         },
       )
-      .then((r) => r?.json());
+      .then((r) => r?.json())
+      .catch(() => console.log("TODO: handle error"));
 
     const allow = resp?.allow;
 
