@@ -3,14 +3,11 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
+import JiraIssueModel from "hermes/models/jira-issue";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import StoreService from "hermes/services/store";
-import {
-  HermesProject,
-  HermesProjectHit,
-  JiraIssue,
-} from "hermes/types/project";
+import { HermesProject, HermesProjectHit } from "hermes/types/project";
 
 export const PROJECT_TILE_MAX_PRODUCTS = 3;
 
@@ -50,7 +47,7 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    * Used in the template to determine whether to show Jira-related data.
    * Set by the `fetchJiraIssue` task if the project has a jiraIssueID.
    */
-  @tracked protected jiraIssue: JiraIssue | null = null;
+  @tracked protected jiraIssue: JiraIssueModel | null = null;
 
   /**
    * The project ID used as our LinkTo model.

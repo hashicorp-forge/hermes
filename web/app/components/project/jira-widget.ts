@@ -4,16 +4,17 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { restartableTask } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
-import { JiraIssue, JiraPickerResult } from "hermes/types/project";
+import { JiraPickerResult } from "hermes/types/project";
 import ConfigService from "hermes/services/config";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
+import JiraIssueModel from "hermes/models/jira-issue";
 
 interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    issue?: JiraPickerResult | JiraIssue;
+    issue?: JiraPickerResult | JiraIssueModel;
     onIssueSelect?: (issue: any) => void;
     onIssueRemove?: () => void;
     isDisabled?: boolean;
