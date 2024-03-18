@@ -64,18 +64,6 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
       return this.args.doc._snippetResult?.content.value;
     }
   }
-  /**
-   * The query parameters for the doc-owner LinkTos.
-   * Sets the "owners" filter to the owner of the document,
-   * and default values for the rest.
-   */
-  protected get ownerQuery() {
-    return {
-      ...DEFAULT_FILTERS,
-      owners: this.args.doc.owners,
-      page: 1,
-    };
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

@@ -15,6 +15,7 @@ const OWNER_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Owners}"]`
 const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
 const POPOVER = "[data-test-facet-dropdown-popover]";
 const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
+const LIST_ITEM_VALUE = "[data-test-x-dropdown-list-item-value]";
 
 const FACETS = {
   docType: {
@@ -63,14 +64,40 @@ module("Integration | Component | header/toolbar", function (hooks) {
       <Header::Toolbar @scope={{this.scope}} @facets={{this.facets}} />
     `);
 
-    await click("[data-test-facet-dropdown-trigger='Status']");
+    await click(STATUS_TOGGLE);
+
+    const docFilters = [
+      "Approved",
+      "In-Review",
+      "In Review",
+      "Obsolete",
+      "WIP",
+    ];
 
     assert.deepEqual(
-      findAll("[data-test-x-dropdown-list-item-value]")?.map(
-        (el) => el.textContent?.trim(),
-      ),
-      ["Approved", "In-Review", "In Review", "Obsolete", "WIP"],
+      findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
+      docFilters,
       "Unsupported statuses are filtered out",
+    );
+
+    // Close and reopen (changing the scope closes the dropdown)
+    this.set("scope", SearchScope.Projects);
+    await click(STATUS_TOGGLE);
+
+    assert.deepEqual(
+      findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
+      STATUS_NAMES,
+      "All statuses are shown when the scope is not 'Docs'",
+    );
+
+    // Close and reopen
+    this.set("scope", undefined);
+    await click(STATUS_TOGGLE);
+
+    assert.deepEqual(
+      findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
+      docFilters,
+      "All statuses are shown when the scope is not defined",
     );
   });
 

@@ -5,6 +5,7 @@ import { authenticateSession } from "ember-simple-auth/test-support";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { getPageTitle } from "ember-page-title/test-support";
 import { FacetLabel } from "hermes/helpers/get-facet-label";
+import { TEST_USER_EMAIL } from "hermes/mirage/utils";
 
 const TABLE_HEADER_CREATED_SELECTOR =
   "[data-test-sortable-table-header][data-test-attribute=createdTime]";
@@ -13,6 +14,7 @@ const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
 const DOC_LINK = "[data-test-document-link]";
 const ACTIVE_FILTER_LINK = "[data-test-active-filter-link]";
 const CLEAR_ALL_LINK = "[data-test-clear-all-filters-link]";
+const OWNER_LINK = "[data-test-owner-link]";
 
 interface AuthenticatedDocumentsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/documents", function (hooks) {
@@ -83,6 +85,19 @@ module("Acceptance | authenticated/documents", function (hooks) {
     await click(ACTIVE_FILTER_LINK);
 
     assert.dom(DOC_LINK).exists({ count: 4 });
+  });
+
+  test("owners are clickable", async function (this: AuthenticatedDocumentsRouteTestContext, assert) {
+    this.server.create("document");
+
+    await visit("/documents");
+
+    assert
+      .dom(OWNER_LINK)
+      .hasAttribute(
+        "href",
+        `/documents?owners=%5B%22${encodeURIComponent(TEST_USER_EMAIL)}%22%5D`,
+      );
   });
 
   /**

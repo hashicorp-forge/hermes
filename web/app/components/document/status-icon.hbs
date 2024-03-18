@@ -32,7 +32,7 @@
     />
   {{/if}}
 
-  {{#if (or this.isDraft this.isInReview)}}
+  {{#if this.defaultStrokeIsShown}}
     {{! page stroke }}
     <path
       data-test-default-page-stroke

@@ -14,6 +14,14 @@
     min-width: 0;
   }
 
+  &.selection-made {
+    @apply bg-none;
+
+    input {
+      @apply hidden;
+    }
+  }
+
   &.ember-power-select-trigger,
   &.ember-power-select-trigger-multiple-input {
     line-height: 1;

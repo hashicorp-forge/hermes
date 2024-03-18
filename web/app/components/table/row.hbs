@@ -42,8 +42,15 @@
     </div>
   </td>
   <td data-test-table-row-owner-cell class="owner">
-    <div class="inner">
-      <Person @email={{get @doc.owners 0}} />
+    <div class="inner flex flex-col items-start">
+      <LinkTo
+        data-test-owner-link
+        @route="authenticated.documents"
+        @query={{get-owner-query (get @doc.owners 0)}}
+        class="underlined-link grid"
+      >
+        <Person @email={{get @doc.owners 0}} />
+      </LinkTo>
     </div>
   </td>
   <td class="time">

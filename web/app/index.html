@@ -1,20 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <!-- `head` sorted by https://rviscomi.github.io/capo.js/ -->
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Hermes</title>
-    <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hermes</title>
 
     {{content-for "head"}}
 
     <link integrity="" rel="stylesheet" href="{{rootURL}}assets/vendor.css" />
     <link integrity="" rel="stylesheet" href="{{rootURL}}assets/hermes.css" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="" />
+
     <link rel="icon" type="image/png" href="{{rootURL}}images/favicon.png" />
 
     {{content-for "head-footer"}}
   </head>
+
   <body>
     {{content-for "body"}}
 

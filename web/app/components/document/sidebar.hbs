@@ -248,9 +248,16 @@
       </div>
 
       {{! Owner }}
-      <div class="space-y-2">
-        <Document::Sidebar::SectionHeader @title="Owner" />
-        <Person @email={{get @document.owners 0}} />
+      <div class="flex flex-col items-start">
+        <Document::Sidebar::SectionHeader @title="Owner" class="mb-2" />
+        <LinkTo
+          data-test-owner-link
+          @route="authenticated.documents"
+          @query={{get-owner-query (get @document.owners 0)}}
+          class="underlined-link grid"
+        >
+          <Person @email={{get @document.owners 0}} />
+        </LinkTo>
       </div>
 
       {{! Contributors }}
@@ -399,51 +406,71 @@
           </div>
         {{/if}}
       {{/each-in}}
+
+      {{! Transfer ownership }}
+      {{#if this.isOwner}}
+        <div class="pt-5">
+          <div class="border-t border-color-border-faint pt-7">
+            <Action
+              data-test-transfer-document-ownership-button
+              {{on "click" this.showTransferOwnershipModal}}
+              disabled={{this.editingIsDisabled}}
+              class="flex gap-2 text-body-100 text-color-foreground-disabled hover:text-color-foreground-faint focus:text-color-foreground-faint"
+            >
+              <FlightIcon @name="swap-horizontal" />
+              Transfer ownership...
+            </Action>
+          </div>
+        </div>
+      {{/if}}
     </div>
+
   </div>
 
   {{#if this.footerIsShown}}
     <div
       data-test-sidebar-footer
-      class="sidebar-footer {{if this.editingIsDisabled 'locked'}}"
+      class="sidebar-footer
+        {{if
+          this.footerControlsAreDisabled
+          'border-t border-t-color-border-primary'
+        }}"
     >
       {{#if this.footerControlsAreDisabled}}
         {{! Disabled controls }}
-        <div class="-mb-1 px-3">
-          <div class="w-full border-t border-color-border-primary pt-3.5">
-            <div class="text-body-200 text-color-foreground-faint">
-              <h5
-                data-test-disabled-footer-h5
-                class="mb-1 flex items-center text-body-200 font-semibold text-color-foreground-primary"
-              >
-                {{if this.docIsLocked "Document is locked" "Read-only headers"}}
-                <FlightIcon
-                  @name="lock"
-                  class="-mt-px ml-1.5 shrink-0 text-color-foreground-faint"
-                />
-              </h5>
-              <p class="mb-1.5">
-                {{if
-                  this.docIsLocked
-                  "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
-                  "Weʼre unable to edit the metadata of files created offsite."
-                }}
-              </p>
-            </div>
-            {{#if this.docIsLocked}}
-              <Hds::Link::Standalone
-                @icon="arrow-right"
-                @iconPosition="trailing"
-                @text="See the issue on GitHub"
-                @size="small"
-                @href="https://github.com/hashicorp-forge/hermes/issues/181"
+        <div class="-mb-1 -mt-0.5 px-3">
+          <div class="text-body-200 text-color-foreground-faint">
+            <h5
+              data-test-disabled-footer-h5
+              class="mb-1 flex items-center text-body-200 font-semibold text-color-foreground-primary"
+            >
+              {{if this.docIsLocked "Document is locked" "Read-only headers"}}
+              <FlightIcon
+                @name="lock"
+                class="-mt-px ml-1.5 shrink-0 text-color-foreground-faint"
               />
-            {{else}}
-              <div class="text-body-100 text-color-foreground-faint">
-                Create docs in-app for best results.
-              </div>
-            {{/if}}
+            </h5>
+            <p class="mb-1.5">
+              {{if
+                this.docIsLocked
+                "Due to a Google API bug, all suggestions must be removed from the document header to unlock."
+                "Weʼre unable to edit the metadata of files created offsite."
+              }}
+            </p>
           </div>
+          {{#if this.docIsLocked}}
+            <Hds::Link::Standalone
+              @icon="arrow-right"
+              @iconPosition="trailing"
+              @text="See the issue on GitHub"
+              @size="small"
+              @href="https://github.com/hashicorp-forge/hermes/issues/181"
+            />
+          {{else}}
+            <div class="text-body-100 text-color-foreground-faint">
+              Create docs in-app for best results.
+            </div>
+          {{/if}}
         </div>
       {{else}}
         {{#let (and this.isDraft this.isOwner) as |canPublish|}}
@@ -596,6 +623,74 @@
     />
   {{/if}}
 
+  {{! Transfer ownership }}
+  {{#if this.transferOwnershipModalIsShown}}
+    <TypeToConfirm
+      @value="transfer"
+      @onEnter={{this.clickTransferButton}}
+      as |T|
+    >
+      <Document::Modal
+        data-test-transfer-ownership-modal
+        @headerText="Transfer ownership"
+        @errorTitle="Couldn't transfer ownership"
+        @close={{this.hideTransferOwnershipModal}}
+        @secondaryButtonIsHidden={{true}}
+        @task={{perform this.transferOwnership}}
+        @taskButtonText="Transfer doc"
+        @hideFooterWhileSaving={{true}}
+        @taskButtonIsDisabled={{or
+          (not this.newOwners.length)
+          (not T.hasConfirmed)
+        }}
+      >
+        <:default as |M|>
+          {{#if M.taskIsRunning}}
+            <div
+              data-test-transferring-doc
+              class="grid place-items-center pt-1 pb-8 text-center"
+            >
+              <FlightIcon @name="running" @size="24" class="mb-5" />
+              <h2>Transferring doc...</h2>
+            </div>
+          {{else}}
+
+            <p class="mb-5 text-body-300">
+              Give this document to someone in your workspace.
+              <br />
+              We'll notify them when the transfer completes.
+            </p>
+
+            <div class="grid gap-4 pb-2.5">
+              <div>
+                <label
+                  data-test-select-new-owner-label
+                  {{on "click" this.focusPeopleSelect}}
+                  for={{this.transferOwnershipPeopleSelectID}}
+                  class="hermes-form-label"
+                >
+                  Select new owner
+                </label>
+                <Inputs::PeopleSelect
+                  {{autofocus waitUntilNextRunloop=true}}
+                  @triggerId={{this.transferOwnershipPeopleSelectID}}
+                  @selected={{this.newOwners}}
+                  @onChange={{this.setNewOwner}}
+                  @isSingleSelect={{true}}
+                  @renderInPlace={{true}}
+                  @excludeSelf={{true}}
+                />
+              </div>
+              <div>
+                <T.Input {{did-insert this.registerTypeToConfirmInput}} />
+              </div>
+            </div>
+          {{/if}}
+        </:default>
+      </Document::Modal>
+    </TypeToConfirm>
+  {{/if}}
+
   {{#if this.requestReviewModalIsShown}}
     <Document::Modal
       data-test-publish-for-review-modal
@@ -618,7 +713,7 @@
             class="grid place-items-center pt-1 pb-12"
           >
             <div class="text-center">
-              <FlightIcon @name="loading" @size="24" class="mb-5" />
+              <FlightIcon @name="running" @size="24" class="mb-5" />
               <h2>Submitting for review...</h2>
               <p class="mb-2 text-body-300">This usually takes about a minute.</p>
               <span

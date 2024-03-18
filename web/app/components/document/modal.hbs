@@ -35,13 +35,15 @@
           disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
           {{on "click" (perform this.task)}}
         />
-        <Hds::Button
-          data-test-document-modal-secondary-button
-          @text="Cancel"
-          @color="secondary"
-          disabled={{this.taskIsRunning}}
-          {{on "click" F.close}}
-        />
+        {{#unless @secondaryButtonIsHidden}}
+          <Hds::Button
+            data-test-document-modal-secondary-button
+            @text="Cancel"
+            @color="secondary"
+            disabled={{this.taskIsRunning}}
+            {{on "click" F.close}}
+          />
+        {{/unless}}
       </Hds::ButtonSet>
     </M.Footer>
   {{/if}}
