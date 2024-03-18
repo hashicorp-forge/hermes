@@ -1,9 +1,11 @@
+import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
+import StoreService from "hermes/services/store";
 import {
   HermesProject,
   HermesProjectHit,
@@ -27,6 +29,7 @@ interface ProjectTileComponentSignature {
 export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare store: StoreService;
 
   constructor(owner: unknown, args: ProjectTileComponentSignature["Args"]) {
     super(owner, args);
@@ -96,13 +99,14 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    * Called in the constructor if the project has a jiraIssueID.
    */
   protected fetchJiraIssue = task(async () => {
-    const jiraIssue = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issues/${this.args.project.jiraIssueID}`,
-      )
-      .then((resp) => resp?.json());
+    assert("jiraIssueID must exist", this.args.project.jiraIssueID);
 
-    this.jiraIssue = jiraIssue as JiraIssue;
+    const jiraIssue = await this.store.findRecord(
+      "jira-issue",
+      this.args.project.jiraIssueID,
+    );
+
+    this.jiraIssue = jiraIssue;
   });
 }
 
