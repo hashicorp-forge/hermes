@@ -96,7 +96,7 @@ Jira can be optionally configured to enable linking Hermes projects with Jira is
 ### Requirements
 
 - Go 1.18
-- Node.js 16
+- Node.js 20
 - Yarn ~3.3.0 ([install with corepack](https://yarnpkg.com/getting-started/install))
 
 ### Configuration File
