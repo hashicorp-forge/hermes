@@ -10,10 +10,12 @@ export default class ProjectAdapter extends ApplicationAdapter {
     id: string,
     snapshot: DS.Snapshot<K>,
   ): RSVP.Promise<any> {
+    /**
+     * We set this header to differentiate between project views and
+     * requests to only retrieve project metadata.
+     */
     const headers = snapshot.adapterOptions?.["addToRecentlyViewed"]
-      ? {
-          "Add-To-Recently-Viewed": "true",
-        }
+      ? { "Add-To-Recently-Viewed": "true" }
       : undefined;
 
     const project = this.fetchSvc

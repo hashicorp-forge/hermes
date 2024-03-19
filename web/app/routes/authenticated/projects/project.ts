@@ -19,9 +19,7 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
 
   async model(params: { project_id: string }): Promise<HermesProject> {
     const projectPromise = this.store.findRecord("project", params.project_id, {
-      adapterOptions: {
-        addToRecentlyViewed: true,
-      },
+      adapterOptions: { addToRecentlyViewed: true },
     }) as Promise<ProjectModel>;
 
     const projectResourcesPromise = this.fetchSvc
