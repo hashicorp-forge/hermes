@@ -20,8 +20,6 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
   async model(params: { status: string }) {
     const projects = await this.store.findAll("project");
 
-    console.log("projects", projects);
-
     // We'll eventually use the status param in the query;
     // for now, we pass it to the component for local filtering
 

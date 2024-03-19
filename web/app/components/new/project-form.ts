@@ -130,7 +130,6 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
        * message to orient the user.
        */
       const [project] = await Promise.all([projectPromise, timeout(TIMEOUT)]);
-      console.log("newly created project", project);
       if (this.args.document) {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${project.id}/related-resources`,

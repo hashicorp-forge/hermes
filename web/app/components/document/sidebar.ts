@@ -655,10 +655,8 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return this.store.findRecord("project", project);
       });
       const projects = await Promise.all(projectPromises ?? []);
-      console.log("X", projects);
       this._projects = projects;
     } catch (error) {
-      console.log("Y", error);
       this.projectsErrorIsShown = true;
     }
   });

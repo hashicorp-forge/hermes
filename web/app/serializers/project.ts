@@ -47,7 +47,7 @@ export default class ProjectSerializer extends JSONSerializer {
           },
         };
       default:
-        console.log("dag nab", {
+        console.log("unhandled case", {
           requestType,
           payload,
         });

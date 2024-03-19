@@ -123,7 +123,6 @@ export default class RecentlyViewedService extends Service {
       recentlyViewedProjects?.forEach((p: IndexedProject) => {
         fullItemPromises.push(
           this.store.findRecord("project", p.id).then((project) => {
-            console.log("the projeeeeeeee", project);
             return {
               project,
               ...p,
