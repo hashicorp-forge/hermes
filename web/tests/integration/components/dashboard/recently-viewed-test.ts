@@ -60,6 +60,7 @@ module("Integration | Component | dashboard/recently-viewed", function (hooks) {
     });
 
     this.server.create("project", { id: "2", title: middleViewedTitle });
+
     this.server.create("recently-viewed-project", {
       id: "2",
       viewedTime: 2, // middle
