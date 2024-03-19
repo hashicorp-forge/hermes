@@ -37,6 +37,7 @@ import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
 import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 import StoreService from "hermes/services/store";
+import ProjectModel from "hermes/models/project";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -134,7 +135,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Set by `loadRelatedProjects` and used to render a list
    * of projects or an empty state.
    */
-  @tracked protected _projects: Array<HermesProjectInfo> | null = null;
+  @tracked protected _projects: Array<ProjectModel> | null = null;
 
   /**
    * Whether a draft was published during the session.
@@ -654,8 +655,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         return this.store.findRecord("project", project);
       });
       const projects = await Promise.all(projectPromises ?? []);
+      console.log("X", projects);
       this._projects = projects;
     } catch (error) {
+      console.log("Y", error);
       this.projectsErrorIsShown = true;
     }
   });
@@ -1230,7 +1233,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Adds the project to the local array and re-renders the list.
    * Saves the project's related resources to the back end.
    */
-  protected addDocToProject = task(async (project: HermesProjectInfo) => {
+  protected addDocToProject = task(async (project: ProjectModel) => {
     const cachedProjects = this._projects;
 
     try {

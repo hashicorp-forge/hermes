@@ -180,7 +180,7 @@ export default function (mirageConfig) {
 
               const hits = projects.map((project) => {
                 return {
-                  ...project,
+                  ...project.attrs,
                   objectID: project.id,
                 };
               });
@@ -408,7 +408,7 @@ export default function (mirageConfig) {
           creator: TEST_USER_EMAIL,
           createdTime: Date.now(),
         });
-        return new Response(200, {}, project);
+        return new Response(200, {}, project.attrs);
       });
 
       // Fetch a list of projects.
@@ -473,7 +473,7 @@ export default function (mirageConfig) {
               externalLinks,
             });
 
-            return new Response(200, {}, project);
+            return new Response(200, {}, project.attrs);
           }
         },
       );
@@ -494,7 +494,7 @@ export default function (mirageConfig) {
           });
         }
 
-        return new Response(200, {}, project);
+        return new Response(200, {}, project.attrs);
       });
 
       // Update a project.
@@ -505,7 +505,7 @@ export default function (mirageConfig) {
 
         if (project) {
           project.update(JSON.parse(request.requestBody));
-          return new Response(200, {}, project);
+          return new Response(200, {}, project.attrs);
         }
       });
 
@@ -580,7 +580,7 @@ export default function (mirageConfig) {
             hermesDocuments,
             externalLinks,
           });
-          return new Response(200, {}, project);
+          return new Response(200, {}, project.attrs);
         }
       });
 
@@ -819,6 +819,9 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
+        // Don't need this logged to the console every time
+        this.logging = false;
+
         let isLoggedIn = schema.db.me[0].isLoggedIn;
 
         if (isLoggedIn) {
@@ -1180,7 +1183,7 @@ export default function (mirageConfig) {
           let attrs = JSON.parse(request.requestBody);
 
           project.update(attrs);
-          return new Response(200, {}, project);
+          return new Response(200, {}, project.attrs);
         }
       });
     },

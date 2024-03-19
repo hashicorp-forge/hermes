@@ -8,10 +8,18 @@ export default class ProjectAdapter extends ApplicationAdapter {
     _store: DS.Store,
     _type: ModelRegistry[K],
     id: string,
-    _snapshot: DS.Snapshot<K>,
+    snapshot: DS.Snapshot<K>,
   ): RSVP.Promise<any> {
+    const headers = snapshot.adapterOptions?.["addToRecentlyViewed"]
+      ? {
+          "Add-To-Recently-Viewed": "true",
+        }
+      : undefined;
+
     const project = this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/projects/${id}`)
+      .fetch(`/api/${this.configSvc.config.api_version}/projects/${id}`, {
+        headers,
+      })
       .then((response) => response?.json());
 
     return RSVP.hash(project);

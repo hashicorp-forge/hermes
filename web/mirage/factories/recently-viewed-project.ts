@@ -10,16 +10,16 @@ export default Factory.extend({
    */
   afterCreate(recentlyViewedProject, server) {
     const { id } = recentlyViewedProject;
-    const project = server.schema.projects.find(id);
+    let project = server.schema.projects.find(id);
 
-    if (project) {
-      recentlyViewedProject.update({ project: project });
-    } else {
-      recentlyViewedProject.update({
-        project: server.create("project", {
-          id,
-        }).attrs,
+    if (!project) {
+      project = server.create("project", {
+        id,
       });
     }
+
+    recentlyViewedProject.update({
+      project: project.attrs,
+    });
   },
 });

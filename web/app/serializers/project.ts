@@ -12,39 +12,46 @@ export default class ProjectSerializer extends JSONSerializer {
   normalizeResponse(
     _store: DS.Store,
     _primaryModelClass: any,
-    payload: { projects: ProjectModel[] } | { project: ProjectModel },
+    payload: { projects: ProjectModel[] } | ProjectModel,
     _id: string | number,
     requestType: string,
   ) {
-    // TODO: convert to switch
-    console.log("payload", payload);
-    console.log("requestType", requestType);
-    if (requestType === "query") {
-      console.log("man");
-      return {};
-    } else if (requestType === "findRecord" || requestType === "createRecord") {
-      assert("project expected in the payload", "project" in payload);
-      return {
-        data: {
-          id: payload.project.id,
-          type: "project",
-          attributes: payload.project,
-        },
-      };
-    } else if (requestType === "findAll") {
-      assert("projects expected in the payload", "projects" in payload);
-      const projects = payload.projects.map((p) => {
+    switch (requestType) {
+      case "findRecord":
+      case "createRecord":
+        assert("id expected in the payload", "id" in payload);
         return {
-          id: p.id,
-          type: "project",
-          attributes: p,
+          data: {
+            id: payload.id,
+            type: "project",
+            attributes: payload,
+          },
         };
-      });
-      return { data: projects };
-    } else {
-      console.log("dag nab");
-      console.log();
-      return {};
+      case "findAll":
+        assert("projects expected in the payload", "projects" in payload);
+        const projects = payload.projects.map((p) => {
+          return {
+            id: p.id,
+            type: "project",
+            attributes: p,
+          };
+        });
+        return { data: projects };
+      case "updateRecord":
+        assert("id expected in the payload", "id" in payload);
+        return {
+          data: {
+            id: payload.id,
+            type: "project",
+            attributes: payload,
+          },
+        };
+      default:
+        console.log("dag nab", {
+          requestType,
+          payload,
+        });
+        return {};
     }
   }
 }

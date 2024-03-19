@@ -118,11 +118,7 @@ export default class AuthenticatedResultsRoute extends Route {
         typedProjectResults.hits = await Promise.all(
           hits.map(
             async (hit: HermesProjectHit) =>
-              await this.fetchSvc
-                .fetch(
-                  `/api/${this.configSvc.config.api_version}/projects/${hit.objectID}`,
-                )
-                .then((resp) => resp?.json()),
+              await this.store.findRecord("project", hit.objectID),
           ),
         );
       }

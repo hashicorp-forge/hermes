@@ -1,4 +1,4 @@
-import { Model } from "miragejs";
+import { Model, belongsTo } from "miragejs";
 
 export default Model.extend({
   // Required for Mirage, even though it's empty

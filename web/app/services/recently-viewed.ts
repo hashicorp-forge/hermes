@@ -122,15 +122,13 @@ export default class RecentlyViewedService extends Service {
       // Promise to get each project and return it in the RecentlyViewedProject format
       recentlyViewedProjects?.forEach((p: IndexedProject) => {
         fullItemPromises.push(
-          this.fetchSvc
-            .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)
-            .then((resp) => resp?.json())
-            .then((project) => {
-              return {
-                project,
-                ...p,
-              };
-            }),
+          this.store.findRecord("project", p.id).then((project) => {
+            console.log("the projeeeeeeee", project);
+            return {
+              project,
+              ...p,
+            };
+          }),
         );
       });
 

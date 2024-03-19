@@ -3,7 +3,7 @@ import { setupRenderingTest } from "ember-qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-import {
+import RecentlyViewedService, {
   RecentlyViewedDoc,
   RecentlyViewedProject,
 } from "hermes/services/recently-viewed";
@@ -116,9 +116,13 @@ module(
         products,
       });
 
-      this.server.create("recently-viewed-project", { id });
+      this.set("item", this.server.create("recently-viewed-project", { id }));
 
-      this.set("item", this.server.schema.recentlyViewedProjects.find(id));
+      const recentlyViewedService = this.owner.lookup(
+        "service:recently-viewed",
+      ) as RecentlyViewedService;
+
+      await recentlyViewedService.fetchAll.perform();
 
       await render<Context>(
         hbs`<Dashboard::RecentlyViewed::Item @item={{this.item}} />`,

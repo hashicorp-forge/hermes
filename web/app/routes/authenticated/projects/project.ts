@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { next, schedule } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
 import ProjectModel from "hermes/models/project";
@@ -19,10 +19,8 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
 
   async model(params: { project_id: string }): Promise<HermesProject> {
     const projectPromise = this.store.findRecord("project", params.project_id, {
-      headers: {
-        // We set this header to differentiate between project views and
-        // requests to only retrieve project metadata.
-        "Add-To-Recently-Viewed": "true",
+      adapterOptions: {
+        addToRecentlyViewed: true,
       },
     }) as Promise<ProjectModel>;
 

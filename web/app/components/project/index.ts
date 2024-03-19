@@ -569,15 +569,12 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   protected saveProjectInfo = enqueueTask(
     async (key: string, newValue?: string) => {
       try {
-        const valueToSave = { [key]: newValue };
-
-        const savePromise = this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify(valueToSave),
-          },
-        );
+        const savePromise = this.store
+          .findRecord("project", this.args.project.id)
+          .then((project) => {
+            project[key] = newValue;
+            return project.save();
+          });
         await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
