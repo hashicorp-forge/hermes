@@ -171,8 +171,10 @@ export default function (mirageConfig) {
                 .all()
                 .models.filter((project) => {
                   return (
-                    project.title.toLowerCase().includes(query.toLowerCase()) ||
-                    project.description
+                    project.attrs.title
+                      .toLowerCase()
+                      .includes(query.toLowerCase()) ||
+                    project.attrs.description
                       ?.toLowerCase()
                       .includes(query.toLowerCase())
                   );
@@ -181,7 +183,7 @@ export default function (mirageConfig) {
               const hits = projects.map((project) => {
                 return {
                   ...project.attrs,
-                  objectID: project.id,
+                  objectID: project.attrs.id,
                 };
               });
 
@@ -405,8 +407,6 @@ export default function (mirageConfig) {
         let project = schema.projects.create(JSON.parse(request.requestBody));
         project.update({
           status: ProjectStatus.Active,
-          creator: TEST_USER_EMAIL,
-          createdTime: Date.now(),
         });
         return new Response(200, {}, project.attrs);
       });
@@ -417,7 +417,7 @@ export default function (mirageConfig) {
         return new Response(
           200,
           {},
-          projects.map((project) => project),
+          projects.map((project) => project.attrs),
         );
       });
 
@@ -447,7 +447,7 @@ export default function (mirageConfig) {
                 objectID: doc.googleFileID,
               });
 
-              const existingDocuments = project.hermesDocuments ?? [];
+              const existingDocuments = project.attrs.hermesDocuments ?? [];
 
               newHermesDocuments.push(
                 ...existingDocuments,
@@ -459,12 +459,12 @@ export default function (mirageConfig) {
                 return;
               } else {
                 fullDocument.update({
-                  projects: [...fullDocument.attrs.projects, project.id],
+                  projects: [...fullDocument.attrs.projects, project.attrs.id],
                 });
               }
 
               fullDocument.update({
-                projects: [...fullDocument.attrs.projects, project.id],
+                projects: [...fullDocument.attrs.projects, project.attrs.id],
               });
             });
 
@@ -489,7 +489,7 @@ export default function (mirageConfig) {
 
         if (shouldAddToRecentlyViewed) {
           schema.recentlyViewedProjects.create({
-            id: project.id,
+            id: project.attrs.id,
             viewedTime: Date.now(),
           });
         }
@@ -518,7 +518,7 @@ export default function (mirageConfig) {
       this.get("/projects/:project_id/related-resources", (schema, request) => {
         const projectID = request.params.project_id;
         const project = schema.projects.findBy({ id: projectID });
-        const { hermesDocuments, externalLinks } = project;
+        const { hermesDocuments, externalLinks } = project.attrs;
         return new Response(200, {}, { hermesDocuments, externalLinks });
       });
 
@@ -544,7 +544,7 @@ export default function (mirageConfig) {
 
           // documents that are in both the current project and the new request
 
-          const currentHermesDocuments = project.hermesDocuments ?? [];
+          const currentHermesDocuments = project.attrs.hermesDocuments ?? [];
           const incomingHermesDocuments = attrs.hermesDocuments ?? [];
 
           const documentsToRemove = currentHermesDocuments.filter((doc) => {
@@ -562,7 +562,7 @@ export default function (mirageConfig) {
 
             mirageDocument?.update({
               projects: mirageDocument.attrs.projects.filter(
-                (projectID) => projectID.toString() !== project.id,
+                (projectID) => projectID.toString() !== project.attrs.id,
               ),
             });
           });
@@ -572,7 +572,7 @@ export default function (mirageConfig) {
               objectID: doc,
             });
             mirageDocument?.update({
-              projects: [...mirageDocument.attrs.projects, project.id],
+              projects: [...mirageDocument.attrs.projects, project.attrs.id],
             });
           });
 
@@ -819,7 +819,7 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
-        // Don't need this logged to the console every time
+        // Stop this from cluttering the console when "Mirage logging" is checked
         this.logging = false;
 
         let isLoggedIn = schema.db.me[0].isLoggedIn;
@@ -1009,7 +1009,7 @@ export default function (mirageConfig) {
         let index = schema.recentlyViewedProjects
           .all()
           .models.map((project) => {
-            return project;
+            return project.attrs;
           });
 
         return new Response(200, {}, index.length === 0 ? null : index);
