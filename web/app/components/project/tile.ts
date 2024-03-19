@@ -1,14 +1,13 @@
+import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
+import JiraIssueModel from "hermes/models/jira-issue";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import {
-  HermesProject,
-  HermesProjectHit,
-  JiraIssue,
-} from "hermes/types/project";
+import StoreService from "hermes/services/store";
+import { HermesProject, HermesProjectHit } from "hermes/types/project";
 
 export const PROJECT_TILE_MAX_PRODUCTS = 3;
 
@@ -27,6 +26,7 @@ interface ProjectTileComponentSignature {
 export default class ProjectTileComponent extends Component<ProjectTileComponentSignature> {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
+  @service declare store: StoreService;
 
   constructor(owner: unknown, args: ProjectTileComponentSignature["Args"]) {
     super(owner, args);
@@ -47,7 +47,7 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    * Used in the template to determine whether to show Jira-related data.
    * Set by the `fetchJiraIssue` task if the project has a jiraIssueID.
    */
-  @tracked protected jiraIssue: JiraIssue | null = null;
+  @tracked protected jiraIssue: JiraIssueModel | null = null;
 
   /**
    * The project ID used as our LinkTo model.
@@ -96,13 +96,14 @@ export default class ProjectTileComponent extends Component<ProjectTileComponent
    * Called in the constructor if the project has a jiraIssueID.
    */
   protected fetchJiraIssue = task(async () => {
-    const jiraIssue = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/jira/issues/${this.args.project.jiraIssueID}`,
-      )
-      .then((resp) => resp?.json());
+    assert("jiraIssueID must exist", this.args.project.jiraIssueID);
 
-    this.jiraIssue = jiraIssue as JiraIssue;
+    const jiraIssue = await this.store.findRecord(
+      "jira-issue",
+      this.args.project.jiraIssueID,
+    );
+
+    this.jiraIssue = jiraIssue;
   });
 }
 

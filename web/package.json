@@ -125,7 +125,7 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": ">=16",
+    "node": ">=20",
     "yarn": "~3.3.0"
   },
   "ember": {
