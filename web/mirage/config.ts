@@ -819,6 +819,9 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
+        // Stop this from cluttering the console when "Mirage logging" is checked
+        this.logging = false;
+
         let isLoggedIn = schema.db.me[0].isLoggedIn;
 
         if (isLoggedIn) {
