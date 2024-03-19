@@ -115,7 +115,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
   private createProject = task(async () => {
     try {
       this.projectIsBeingCreated = true;
-      // TODO: replace with createRecord :-)
+
       const projectPromise = this.store
         .createRecord("project", {
           title: cleanString(this.title),
