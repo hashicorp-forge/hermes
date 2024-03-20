@@ -31,7 +31,7 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   @tracked protected newProjectTitle = "";
   @tracked protected newProjectDescription = "";
   @tracked protected newProjectJiraObject = {};
-  @tracked private allProjects: HermesProject[] | null = null;
+  @tracked private activeProjects: HermesProject[] | null = null;
 
   /**
    * The projects that are shown in the search modal.
@@ -39,14 +39,13 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
    * that are already associated with the document.
    */
   protected get shownProjects() {
-    if (!this.allProjects) {
+    if (!this.activeProjects) {
       return [];
     }
 
-    return this.allProjects
+    return this.activeProjects
       .filter((project: HermesProject) => {
         return (
-          project.status === ProjectStatus.Active &&
           !this.args.document.projects?.includes(parseInt(project.id)) &&
           project.title.toLowerCase().includes(this.query.toLowerCase())
         );
@@ -89,8 +88,10 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   protected loadProjects = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
 
-    this.allProjects = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/projects`)
+    this.activeProjects = await this.fetchSvc
+      .fetch(
+        `/api/${this.configSvc.config.api_version}/projects?status=${ProjectStatus.Active}`,
+      )
       .then((response) => response?.json());
 
     next(() => {
