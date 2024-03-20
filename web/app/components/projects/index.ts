@@ -33,12 +33,6 @@ export default class ProjectsIndexComponent extends Component<ProjectsIndexCompo
       },
     ];
   }
-
-  protected get shownProjects() {
-    return this.args.projects.filter(
-      (project) => project.status === this.args.status,
-    );
-  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {
