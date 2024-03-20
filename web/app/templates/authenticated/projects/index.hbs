@@ -1,3 +1,8 @@
 {{page-title "All Projects"}}
 
-<Projects @projects={{this.model.projects}} @status={{this.model.status}} />
+<Projects
+  @status={{this.model.status}}
+  @projects={{this.model.projects}}
+  @currentPage={{this.model.currentPage}}
+  @nbPages={{this.model.nbPages}}
+/>
