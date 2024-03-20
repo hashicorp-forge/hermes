@@ -197,12 +197,6 @@ export default class AuthenticatedDocumentRoute extends Route {
 
   afterModel(model: DocumentRouteModel, transition: any) {
     /**
-     * Generally speaking, ensure an up-to-date list of recently viewed docs
-     * by the time the user returns to the dashboard.
-     */
-    void this.recentlyViewed.fetchAll.perform();
-
-    /**
      * Record the document view with the analytics backend.
      */
     void this.fetchSvc.fetch(
