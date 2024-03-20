@@ -64,11 +64,6 @@ export default class AuthenticatedProjectsProjectRoute extends Route {
 
   afterModel() {
     /**
-     * Update the recently viewed index in the background.
-     */
-    void this.recentlyViewed.fetchAll.perform();
-
-    /**
      * Set `newModelHasLoaded` false in case it was set true in the model hook.
      */
     schedule("afterRender", () => {
