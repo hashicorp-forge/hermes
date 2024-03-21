@@ -6,6 +6,7 @@
           Filter by:
         </h4>
         <ol class="facets flex items-center">
+          {{log "this.facets (template)" this.facets}}
           {{#each this.facets as |facet|}}
             <li>
               <Header::FacetDropdown

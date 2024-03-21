@@ -11,6 +11,10 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import { next } from "@ember/runloop";
 import { SearchScope } from "hermes/routes/authenticated/results";
 import { assert } from "@ember/debug";
+import {
+  DocStatus,
+  DocStatusLabel,
+} from "hermes/routes/authenticated/document";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -100,57 +104,88 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
-      switch (this.args.scope) {
-        case SearchScope.Docs:
-          return [
-            {
-              name: FacetName.DocType,
-              values: null,
+    console.log("scope?", this.args.scope);
+    switch (this.args.scope) {
+      case SearchScope.Projects:
+        return [
+          {
+            name: FacetName.Status,
+            values: this.args.facets?.status,
+          },
+        ];
+      default:
+        return [
+          {
+            name: FacetName.DocType,
+            // TODO: loop this
+            values: {},
+          },
+          {
+            name: FacetName.Status,
+            // TODO: loop this
+            values: {
+              [DocStatusLabel.Approved]:
+                this.args.facets?.status?.[DocStatus.Approved],
+              [DocStatusLabel.InReview]:
+                this.args.facets?.status?.[DocStatus.InReview],
+              [DocStatusLabel.Archived]:
+                this.args.facets?.status?.[DocStatus.Archived],
             },
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-            {
-              name: FacetName.Product,
-              values: null,
-            },
-            {
-              name: FacetName.Owners,
-              values: null,
-            },
-          ];
-        case SearchScope.Projects:
-          return [
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-          ];
-      }
-    } else {
-      let facetArray: FacetArrayItem[] = [];
-
-      Object.entries(this.args.facets).forEach(([key, value]) => {
-        if (
-          key === FacetName.Status &&
-          this.args.scope !== SearchScope.Projects
-        ) {
-          facetArray.push({ name: key, values: this.statuses });
-        } else {
-          facetArray.push({ name: key as FacetName, values: value });
-        }
-      });
-
-      const order = ["docType", "status", "product", "owners"];
-
-      facetArray.sort((a, b) => {
-        return order.indexOf(a.name) - order.indexOf(b.name);
-      });
-
-      return facetArray;
+          },
+        ];
     }
+
+    // if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
+    //   switch (this.args.scope) {
+    //     case SearchScope.Docs:
+    //       return [
+    //         {
+    //           name: FacetName.DocType,
+    //           values: null,
+    //         },
+    //         {
+    //           name: FacetName.Status,
+    //           values: null,
+    //         },
+    //         {
+    //           name: FacetName.Product,
+    //           values: null,
+    //         },
+    //         {
+    //           name: FacetName.Owners,
+    //           values: null,
+    //         },
+    //       ];
+    //     case SearchScope.Projects:
+    //       return [
+    //         {
+    //           name: FacetName.Status,
+    //           values: null,
+    //         },
+    //       ];
+    //   }
+    // } else {
+    //   let facetArray: FacetArrayItem[] = [];
+
+    //   Object.entries(this.args.facets).forEach(([key, value]) => {
+    //     if (
+    //       key === FacetName.Status &&
+    //       this.args.scope !== SearchScope.Projects
+    //     ) {
+    //       facetArray.push({ name: key, values: this.statuses });
+    //     } else {
+    //       facetArray.push({ name: key as FacetName, values: value });
+    //     }
+    //   });
+
+    //   const order = ["docType", "status", "product", "owners"];
+
+    //   facetArray.sort((a, b) => {
+    //     return order.indexOf(a.name) - order.indexOf(b.name);
+    //   });
+
+    //   return facetArray;
+    // }
   }
 
   /**
