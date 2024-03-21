@@ -17,6 +17,9 @@ import {
 } from "hermes/routes/authenticated/document";
 import DocumentTypesService from "hermes/services/document-types";
 import ProductAreasService from "hermes/services/product-areas";
+import { tracked } from "@glimmer/tracking";
+import { restartableTask } from "ember-concurrency";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -65,8 +68,22 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @service declare documentTypes: DocumentTypesService;
   @service declare productAreas: ProductAreasService;
 
+  /**
+   *
+   */
+  @tracked protected ownerQuery = "";
+
+  /**
+   *
+   */
+  @tracked protected ownerResults = [];
+
   get currentRouteName(): string {
     return this.router.currentRouteName;
+  }
+
+  protected get ownerFacetIsShown() {
+    return this.args.scope !== SearchScope.Projects;
   }
 
   /**
@@ -250,6 +267,16 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       closeDropdown();
     });
   }
+
+  @action protected maybeSubmitForm(dd: XDropdownListAnchorAPI, e: Event) {
+    if (e instanceof KeyboardEvent && e.key === "Enter") {
+      // this.submitForm();
+    }
+  }
+
+  protected searchOwners = restartableTask(
+    async (dd: XDropdownListAnchorAPI, e: Event) => {},
+  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {

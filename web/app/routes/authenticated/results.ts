@@ -67,34 +67,30 @@ export default class AuthenticatedResultsRoute extends Route {
           },
         )
       : undefined;
-    let docFacetsPromise = scopeIsProjects
-      ? undefined
-      : this.algolia.getFacets.perform(docsIndex, params);
 
     let docResultsPromise = scopeIsProjects
       ? undefined
       : this.algolia.getDocResults.perform(docsIndex, params);
 
-    let projectFacetsPromise = scopeIsDocs
-      ? undefined
-      : this.algolia.getFacets.perform(projectsIndex, params);
-
     let projectResultsPromise = scopeIsDocs
       ? undefined
       : this.algolia.getProjectResults.perform(params);
-    const [
-      docFacets,
-      docResults,
-      projectFacets,
-      projectResults,
-      productResults,
-    ] = await Promise.all([
-      docFacetsPromise,
-      docResultsPromise,
-      projectFacetsPromise,
-      projectResultsPromise,
+
+    const [docResults, projectResults, productResults] = await Promise.all([
+      docResultsPromise as Promise<SearchResponse<HermesDocument>> | undefined,
+      projectResultsPromise as
+        | Promise<SearchResponse<HermesProject>>
+        | undefined,
       productResultsPromise,
     ]);
+
+    const projectFacets = scopeIsDocs
+      ? undefined
+      : this.algolia.getFacets(projectResults, params);
+
+    const docFacets = scopeIsProjects
+      ? undefined
+      : this.algolia.getFacets(docResults, params);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
     let typedProjectResults = projectResults as SearchResponse<HermesProject>;

@@ -90,6 +90,10 @@ button {
   font-size: var(--token-typography-body-200-font-size);
 }
 
+input {
+  font-family: var(--token-typography-font-stack-display);
+}
+
 body {
   line-height: var(--token-typography-body-200-line-height);
   color: var(--token-color-foreground-primary);

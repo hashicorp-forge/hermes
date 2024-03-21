@@ -15,7 +15,8 @@
 .facets {
   li {
     &:not(:first-child) {
-      button {
+      button,
+      input {
         @apply rounded-none border-l-0;
       }
     }
@@ -27,7 +28,8 @@
     }
 
     &:last-child {
-      button {
+      button,
+      input {
         @apply rounded-r-button-md;
       }
     }

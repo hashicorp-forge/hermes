@@ -60,14 +60,17 @@ export default class AuthenticatedDocumentsRoute extends Route {
       ? this.productAreas.fetch.perform()
       : Promise.resolve();
 
-    const [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
+    const [results] = await Promise.all([
+      this.algolia.getDocResults.perform(
+        searchIndex,
+        params,
+      ) as SearchResponse<HermesDocument>,
       maybeFetchDocTypesPromise,
       maybeFetchProductsPromise,
     ]);
 
-    const typedResults = results as SearchResponse<HermesDocument>;
+    const facets = this.algolia.getFacets(results, params);
+    const typedResults = results;
     const hits = typedResults.hits;
 
     if (hits) {

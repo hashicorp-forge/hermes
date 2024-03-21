@@ -6,7 +6,6 @@
           Filter by:
         </h4>
         <ol class="facets flex items-center">
-          {{log "this.facets (template)" this.facets}}
           {{#each this.facets as |facet|}}
             <li>
               <Header::FacetDropdown
@@ -16,8 +15,44 @@
               />
             </li>
           {{/each}}
+          {{#if this.ownerFacetIsShown}}
+            <li>
+              <X::DropdownList
+                @items={{this.ownerResults}}
+                @inputIsShown={{false}}
+                @isLoading={{this.searchOwners.isRunning}}
+              >
+                <:anchor as |dd|>
+                  <div class="relative">
+                    <Hds::Form::TextInput::Base
+                      {{did-insert dd.registerAnchor}}
+                      {{on "input" (perform this.searchOwners dd)}}
+                      {{on "keydown" (fn this.maybeSubmitForm dd)}}
+                      @value={{this.ownerQuery}}
+                      type="search"
+                      placeholder="Search owners..."
+                      aria-label="Search owners..."
+                      aria-controls={{dd.ariaControls}}
+                      aria-expanded={{dd.contentIsShown}}
+                      aria-haspopup="listbox"
+                      class="w-[384px] border-color-border-strong pl-[35px] pr-3 text-body-200"
+                    />
+                    <FlightIcon
+                      @name="search"
+                      class="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2 text-color-foreground-faint"
+                    />
+                  </div>
+                </:anchor>
+                <:item as |dd|>
+                  D d
+                </:item>
+              </X::DropdownList>
+              {{! TODO: add icon }}
+            </li>
+          {{/if}}
         </ol>
       </div>
+
     </div>
     <Header::ActiveFilterList />
   </div>
