@@ -15,6 +15,8 @@ import {
   DocStatus,
   DocStatusLabel,
 } from "hermes/routes/authenticated/document";
+import DocumentTypesService from "hermes/services/document-types";
+import ProductAreasService from "hermes/services/product-areas";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -60,6 +62,8 @@ interface ToolbarComponentSignature {
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service declare router: RouterService;
   @service declare activeFilters: ActiveFiltersService;
+  @service declare documentTypes: DocumentTypesService;
+  @service declare productAreas: ProductAreasService;
 
   get currentRouteName(): string {
     return this.router.currentRouteName;
@@ -114,15 +118,60 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
           },
         ];
       default:
+        assert("document types must exist", this.documentTypes.index);
+        /**
+         * Need to use every item in the index to create the docTypeValues
+         * The `name` is the key, and the value can be accessed by the same
+         * key in this.args.facets?.docType as the value.
+         * Object will look like this:
+         * { "RFC": { count: 1, isSelected: false }, "PRD": { count: 1, isSelected: false }
+         */
+        let docTypeValues = {} as FacetDropdownObjects;
+
+        this.documentTypes.index?.forEach((docType) => {
+          const key = docType.name;
+          let value = this.args.facets?.docType?.[docType.name];
+
+          assert("key must exist", key);
+
+          if (!value) {
+            // TODO: decide what to do when the value is 0.
+            value = undefined;
+          }
+
+          docTypeValues = {
+            ...docTypeValues,
+            [key]: value,
+          } as FacetDropdownObjects;
+        });
+
+        let productValues = {} as FacetDropdownObjects;
+
+        console.log("productAreas", this.productAreas.index);
+
+        Object.keys(this.productAreas.index).forEach((product) => {
+          let value = this.args.facets?.product?.[product];
+          console.log("product", product);
+          console.log("value", value);
+
+          if (!value) {
+            // TODO: decide what to do when the value is 0.
+            value = undefined;
+          }
+
+          productValues = {
+            ...productValues,
+            [product]: value,
+          } as FacetDropdownObjects;
+        });
+
         return [
           {
             name: FacetName.DocType,
-            // TODO: loop this
-            values: {},
+            values: docTypeValues,
           },
           {
             name: FacetName.Status,
-            // TODO: loop this
             values: {
               [DocStatusLabel.Approved]:
                 this.args.facets?.status?.[DocStatus.Approved],
@@ -132,10 +181,14 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
                 this.args.facets?.status?.[DocStatus.Archived],
             },
           },
+          {
+            name: FacetName.Product,
+            values: productValues,
+          },
         ];
     }
 
-    // if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
+    //  if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
     //   switch (this.args.scope) {
     //     case SearchScope.Docs:
     //       return [

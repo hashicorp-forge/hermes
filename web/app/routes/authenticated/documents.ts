@@ -9,12 +9,14 @@ import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
 import DocumentTypesService from "hermes/services/document-types";
+import ProductAreasService from "hermes/services/product-areas";
 
 export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
+  @service declare productAreas: ProductAreasService;
   @service declare store: StoreService;
 
   queryParams = {
@@ -47,17 +49,22 @@ export default class AuthenticatedDocumentsRoute extends Route {
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
     /**
-     * If we haven't already fetched the document types,
+     * If we haven't yet fetched docTypes, or products
      * do so now for use in the filter dropdowns.
      */
     const maybeFetchDocTypesPromise = !this.documentTypes.index
       ? this.documentTypes.fetch.perform()
       : Promise.resolve();
 
+    const maybeFetchProductsPromise = !this.productAreas.index
+      ? this.productAreas.fetch.perform()
+      : Promise.resolve();
+
     const [facets, results] = await Promise.all([
       this.algolia.getFacets.perform(searchIndex, params),
       this.algolia.getDocResults.perform(searchIndex, params),
       maybeFetchDocTypesPromise,
+      maybeFetchProductsPromise,
     ]);
 
     const typedResults = results as SearchResponse<HermesDocument>;
