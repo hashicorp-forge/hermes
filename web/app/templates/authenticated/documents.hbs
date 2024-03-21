@@ -3,7 +3,10 @@
 <Header::Toolbar @facets={{this.model.facets}} />
 
 {{#unless this.activeFilters.isEmpty}}
-  <MatchCountHeadline filtered-doc-count @count={{this.model.results.nbHits}} />
+  <MatchCountHeadline
+    data-test-filtered-doc-count
+    @count={{this.model.results.nbHits}}
+  />
 {{/unless}}
 
 <Documents::Table

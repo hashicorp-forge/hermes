@@ -12,6 +12,7 @@ const TABLE_HEADER_CREATED_SELECTOR =
 const DOC_TYPE_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.DocType}"]`;
 const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
 const DOC_LINK = "[data-test-document-link]";
+const FILTERED_DOC_COUNT = "[data-test-filtered-doc-count]";
 const ACTIVE_FILTER_LINK = "[data-test-active-filter-link]";
 const CLEAR_ALL_LINK = "[data-test-clear-all-filters-link]";
 const OWNER_LINK = "[data-test-owner-link]";
@@ -69,6 +70,7 @@ module("Acceptance | authenticated/documents", function (hooks) {
 
     assert.dom(DOC_LINK).exists({ count: 4 });
     assert.dom(ACTIVE_FILTER_LINK).doesNotExist();
+    assert.dom(FILTERED_DOC_COUNT).doesNotExist();
     assert.dom(CLEAR_ALL_LINK).doesNotExist();
 
     await click(DOC_TYPE_TOGGLE);
@@ -78,8 +80,8 @@ module("Acceptance | authenticated/documents", function (hooks) {
     await click(DROPDOWN_ITEM);
 
     assert.dom(DOC_LINK).exists({ count: 2 });
-
     assert.dom(ACTIVE_FILTER_LINK).exists({ count: 1 });
+    assert.dom(FILTERED_DOC_COUNT).exists();
     assert.dom(CLEAR_ALL_LINK).exists();
 
     await click(ACTIVE_FILTER_LINK);
