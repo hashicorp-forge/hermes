@@ -19,6 +19,12 @@ export default class ActiveFiltersService extends Service {
 
   @tracked index: ActiveFilters = DEFAULT_FILTERS;
 
+  // Check whether every filter is an empty array
+  get isEmpty() {
+    console.log("isEmpty", this.index);
+    return Object.values(this.index).every((filter) => filter.length === 0);
+  }
+
   update(params: Partial<DocumentsRouteParams | ResultsRouteParams>) {
     this.index = {
       docType: params.docType || [],

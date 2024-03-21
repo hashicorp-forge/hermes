@@ -2,6 +2,10 @@
 
 <Header::Toolbar @facets={{this.model.facets}} />
 
+{{#unless this.activeFilters.isEmpty}}
+  <MatchCountHeadline filtered-doc-count @count={{this.model.results.nbHits}} />
+{{/unless}}
+
 <Documents::Table
   @docs={{this.model.results.hits}}
   @nbPages={{this.model.results.nbPages}}

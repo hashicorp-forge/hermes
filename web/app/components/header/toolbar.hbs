@@ -1,13 +1,13 @@
 {{#if this.facetsAreShown}}
   <div class="toolbar mb-7">
     <div class="mb-6 flex w-full justify-between">
-      <div class="flex items-center">
-        <h4 class="hermes-h4 mr-4">
+      <div class="flex w-full items-center">
+        <h4 class="hermes-h4 mr-4 shrink-0">
           Filter by:
         </h4>
-        <ol class="facets flex items-center">
+        <ol class="facets flex w-full items-center">
           {{#each this.facets as |facet|}}
-            <li>
+            <li class="shrink-0">
               <Header::FacetDropdown
                 data-test-facet={{facet.name}}
                 @name={{facet.name}}
@@ -16,7 +16,7 @@
             </li>
           {{/each}}
           {{#if this.ownerFacetIsShown}}
-            <li>
+            <li class="w-full">
               <X::DropdownList
                 @items={{this.ownerResults}}
                 @inputIsShown={{false}}
@@ -25,6 +25,8 @@
                 <:anchor as |dd|>
                   <div class="relative">
                     <Hds::Form::TextInput::Base
+                      {{! we only need this if it's not focused }}
+                      size="15"
                       {{did-insert dd.registerAnchor}}
                       {{on "input" (perform this.searchOwners dd)}}
                       {{on "keydown" (fn this.maybeSubmitForm dd)}}
@@ -35,7 +37,7 @@
                       aria-controls={{dd.ariaControls}}
                       aria-expanded={{dd.contentIsShown}}
                       aria-haspopup="listbox"
-                      class="w-[384px] border-color-border-strong pl-[35px] pr-3 text-body-200"
+                      class="w-auto border-color-border-strong pl-[35px] pr-3 text-body-200"
                     />
                     <FlightIcon
                       @name="search"

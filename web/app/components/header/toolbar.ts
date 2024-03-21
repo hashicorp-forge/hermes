@@ -125,7 +125,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    console.log("scope?", this.args.scope);
     switch (this.args.scope) {
       case SearchScope.Projects:
         return [
@@ -164,12 +163,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
 
         let productValues = {} as FacetDropdownObjects;
 
-        console.log("productAreas", this.productAreas.index);
-
         Object.keys(this.productAreas.index).forEach((product) => {
           let value = this.args.facets?.product?.[product];
-          console.log("product", product);
-          console.log("value", value);
 
           if (!value) {
             // TODO: decide what to do when the value is 0.
