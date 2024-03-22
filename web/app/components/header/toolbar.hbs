@@ -17,7 +17,7 @@
           {{/each}}
           {{#if this.ownerFacetIsShown}}
             {{! Search owners... }}
-            <li>
+            <li class="w-full">
               <X::DropdownList
                 @items={{this.ownerResults}}
                 @offset={{hash mainAxis=0 crossAxis=4}}
@@ -50,8 +50,8 @@
                       aria-controls={{dd.ariaControls}}
                       aria-expanded={{dd.contentIsShown}}
                       aria-haspopup="listbox"
-                      class="relative w-[205px] border-color-border-strong pl-[35px] pr-3 text-body-200 focus:w-[384px]
-                        {{if dd.contentIsShown 'mock-focus w-[384px]'}}"
+                      class="relative w-[384px] border-color-border-strong pl-[35px] pr-3 text-body-200
+                        {{if dd.contentIsShown 'mock-focus'}}"
                     />
                   </div>
                 </:anchor>
