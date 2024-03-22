@@ -33,6 +33,7 @@
                 <:anchor as |dd|>
                   <div class="relative">
                     <Hds::Form::TextInput::Base
+                      data-test-search-owners-input
                       {{did-insert dd.registerAnchor}}
                       {{on "input" (perform this.searchOwners dd)}}
                       {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
@@ -42,6 +43,7 @@
                       {{on "focusout" (fn this.setInputFocus false)}}
                       @value={{this.ownerQuery}}
                       @type="search"
+                      disabled={{this.ownersInputIsDisabled}}
                       name="owner"
                       placeholder="Search owners..."
                       aria-label="Search owners..."

@@ -20,6 +20,7 @@ import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { SearchForFacetValuesResponse } from "instantsearch.js";
 import Ember from "ember";
+import { ProjectStatus } from "hermes/types/project-status";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -115,6 +116,13 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
+   *
+   */
+  protected get ownersInputIsDisabled() {
+    return !this.args.facets || Object.keys(this.args.facets).length === 0;
+  }
+
+  /**
    * The statuses available as filters.
    */
   protected get statuses(): FacetDropdownObjects {
@@ -127,6 +135,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         case "In Review":
         case "Obsolete":
         case "WIP":
+        case `${ProjectStatus.Active}`:
+        case `${ProjectStatus.Completed}`:
+        case `${ProjectStatus.Archived}`:
           statuses[status] = this.args.facets?.status[
             status
           ] as FacetDropdownObjectDetails;
@@ -144,72 +155,49 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
-      switch (this.args.scope) {
-        case SearchScope.Docs:
-          return [
-            {
-              name: FacetName.DocType,
-              values: null,
-            },
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-            {
-              name: FacetName.Product,
-              values: null,
-            },
-          ];
-        case SearchScope.Projects:
-          return [
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-          ];
+    assert("facets must exist", this.args.facets);
+    let facetArray: FacetArrayItem[] = [];
+
+    Object.entries(this.args.facets).forEach(([key, value]) => {
+      switch (key) {
+        case FacetName.Owners:
+          break;
+        case FacetName.Status:
+          facetArray.push({
+            name: key as FacetName,
+            // Sorted alphabetically
+            values: this.statuses,
+          });
+          break;
+        case FacetName.DocType:
+          // Sorted alphabetically
+          facetArray.push({
+            name: key as FacetName,
+            values: Object.fromEntries(Object.entries(value).sort()),
+          });
+          break;
+        case FacetName.Product:
+          // Sorted alphabetically
+          facetArray.push({
+            name: key as FacetName,
+            values: Object.fromEntries(Object.entries(value).sort()),
+          });
+          break;
+        default:
+          facetArray.push({
+            name: key as FacetName,
+            values: value,
+          });
       }
-    } else {
-      let facetArray: FacetArrayItem[] = [];
+    });
 
-      Object.entries(this.args.facets).forEach(([key, value]) => {
-        switch (key) {
-          case FacetName.Owners:
-            break;
-          case FacetName.Status:
-            if (this.args.scope !== SearchScope.Projects) {
-              facetArray.push({
-                name: key as FacetName,
-                // Sorted alphabetically
-                values: this.statuses,
-              });
-            }
-            break;
-          case FacetName.DocType:
-            // Sorted alphabetically
-            facetArray.push({
-              name: key as FacetName,
-              values: Object.fromEntries(Object.entries(value).sort()),
-            });
-            break;
-          case FacetName.Product:
-            // Sorted alphabetically
-            facetArray.push({
-              name: key as FacetName,
-              values: Object.fromEntries(Object.entries(value).sort()),
-            });
-            break;
-        }
-      });
+    const order = ["docType", "status", "product", "owners"];
 
-      const order = ["docType", "status", "product", "owners"];
+    facetArray.sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    });
 
-      facetArray.sort((a, b) => {
-        return order.indexOf(a.name) - order.indexOf(b.name);
-      });
-
-      return facetArray;
-    }
+    return facetArray;
   }
 
   /**

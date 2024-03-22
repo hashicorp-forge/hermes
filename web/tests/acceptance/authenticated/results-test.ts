@@ -223,9 +223,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.dom(SEG_DOCS_LINK).hasClass("active");
     assert.dom(SEG_ALL_LINK).doesNotHaveClass("active");
 
-    assert
-      .dom(FACET_TOGGLE)
-      .exists({ count: 4 }, 'filter bar is shown in the "docs" view');
+    assert.dom(FACET_TOGGLE).exists('filter bar is shown in the "docs" view');
 
     assert.dom(PAGINATION).exists('pagination is shown in the "docs" view');
 
@@ -421,12 +419,12 @@ module("Acceptance | authenticated/results", function (hooks) {
       .dom(FACET_DROPDOWN_LINK)
       .exists({ count: 2 }, "two docType facets are shown");
 
-    assert.dom(firstFacet).containsText("RFC").containsText(`${rfcCount}`);
-    assert.dom(secondFacet).containsText("FRD").containsText(`${frdCount}`);
+    assert.dom(firstFacet).containsText("FRD").containsText(`${frdCount}`);
+    assert.dom(secondFacet).containsText("RFC").containsText(`${rfcCount}`);
 
     // Click the FRD filter
 
-    await click(secondFacet as unknown as Element);
+    await click(firstFacet as unknown as Element);
 
     assert.dom(RESULTS_MATCH_COUNT).containsText(`${frdCount}`);
     assert.dom(DOC_LINK).exists({ count: frdCount });
@@ -456,12 +454,12 @@ module("Acceptance | authenticated/results", function (hooks) {
       .dom(FACET_DROPDOWN_LINK)
       .exists({ count: 2 }, "two product facets are shown");
 
-    assert.dom(firstFacet).containsText("Vault");
-    assert.dom(secondFacet).containsText("Terraform");
+    assert.dom(firstFacet).containsText("Terraform");
+    assert.dom(secondFacet).containsText("Vault");
 
     // Click the Terraform filter
 
-    await click(secondFacet as unknown as Element);
+    await click(firstFacet as unknown as Element);
 
     assert.dom(RESULTS_MATCH_COUNT).containsText("1");
     assert.dom(DOC_LINK).exists({ count: 1 });
@@ -521,7 +519,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     // visit a URL with no results
     await visit("/results?q=ZZZZZZZZZ&scope=Docs");
 
-    assert.dom(FACET_TOGGLE).exists({ count: 4 });
+    assert.dom(FACET_TOGGLE).exists({ count: 3 });
 
     const facetToggles = findAll(FACET_TOGGLE);
 

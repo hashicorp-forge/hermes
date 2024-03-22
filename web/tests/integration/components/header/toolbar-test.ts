@@ -11,7 +11,7 @@ const TOGGLE = "[data-test-facet-dropdown-toggle]";
 const DOC_TYPE_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.DocType}"]`;
 const STATUS_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Status}"]`;
 const PRODUCT_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Product}"]`;
-const OWNER_TOGGLE = `[data-test-facet-dropdown-trigger="${FacetLabel.Owners}"]`;
+const OWNERS_INPUT = `[data-test-search-owners-input]`;
 const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
 const POPOVER = "[data-test-facet-dropdown-popover]";
 const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
@@ -68,8 +68,8 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     const docFilters = [
       "Approved",
-      "In-Review",
       "In Review",
+      "In-Review",
       "Obsolete",
       "WIP",
     ];
@@ -78,26 +78,6 @@ module("Integration | Component | header/toolbar", function (hooks) {
       findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
       docFilters,
       "Unsupported statuses are filtered out",
-    );
-
-    // Close and reopen (changing the scope closes the dropdown)
-    this.set("scope", SearchScope.Projects);
-    await click(STATUS_TOGGLE);
-
-    assert.deepEqual(
-      findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
-      STATUS_NAMES,
-      "All statuses are shown when the scope is not 'Docs'",
-    );
-
-    // Close and reopen
-    this.set("scope", undefined);
-    await click(STATUS_TOGGLE);
-
-    assert.deepEqual(
-      findAll(LIST_ITEM_VALUE)?.map((el) => el.textContent?.trim()),
-      docFilters,
-      "All statuses are shown when the scope is not defined",
     );
   });
 
@@ -110,7 +90,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
     assert.dom(PRODUCT_TOGGLE).isNotDisabled();
-    assert.dom(OWNER_TOGGLE).isNotDisabled();
+    assert.dom(OWNERS_INPUT).isNotDisabled();
 
     assert.dom(STATUS_TOGGLE).isDisabled("the empty status facet is disabled");
   });
@@ -124,12 +104,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.deepEqual(
       findAll(TOGGLE)?.map((el) => el.textContent?.trim()),
-      [
-        FacetLabel.DocType,
-        FacetLabel.Status,
-        FacetLabel.Product,
-        FacetLabel.Owners,
-      ],
+      [FacetLabel.DocType, FacetLabel.Status, FacetLabel.Product],
       "The facets are in the correct order",
     );
   });
@@ -153,10 +128,10 @@ module("Integration | Component | header/toolbar", function (hooks) {
     const firstItem = `${POPOVER} li:nth-child(1)`;
     const secondItem = `${POPOVER} li:nth-child(2)`;
 
-    assert.dom(firstItem).containsText("RFC").containsText("1");
-    assert.dom(`${firstItem} ${CHECK}`).hasClass("invisible");
+    assert.dom(firstItem).containsText("PRD").containsText("30");
+    assert.dom(`${firstItem} ${CHECK}`).hasClass("visible");
 
-    assert.dom(secondItem).containsText("PRD").containsText("30");
-    assert.dom(`${secondItem} ${CHECK}`).hasClass("visible");
+    assert.dom(secondItem).containsText("RFC").containsText("1");
+    assert.dom(`${secondItem} ${CHECK}`).hasClass("invisible");
   });
 });
