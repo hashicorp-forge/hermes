@@ -20,6 +20,9 @@ import ProductAreasService from "hermes/services/product-areas";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask } from "ember-concurrency";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import AlgoliaService from "hermes/services/algolia";
+import ConfigService from "hermes/services/config";
+import { SearchForFacetValuesResponse } from "instantsearch.js";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -63,7 +66,9 @@ interface ToolbarComponentSignature {
 }
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
+  @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
   @service declare productAreas: ProductAreasService;
@@ -76,7 +81,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   /**
    *
    */
-  @tracked protected ownerResults = [];
+  @tracked protected ownerResults: SearchForFacetValuesResponse | undefined =
+    undefined;
 
   get currentRouteName(): string {
     return this.router.currentRouteName;
@@ -206,7 +212,24 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   protected searchOwners = restartableTask(
-    async (dd: XDropdownListAnchorAPI, e: Event) => {},
+    async (dd: XDropdownListAnchorAPI, e: Event) => {
+      if (!dd.contentIsShown) {
+        dd.showContent();
+      }
+
+      this.ownerQuery = (e.target as HTMLInputElement).value;
+
+      await this.algolia.searchForFacetValues
+        .perform(
+          this.configSvc.config.algolia_docs_index_name,
+          "owners",
+          this.ownerQuery,
+        )
+        .then((results) => {
+          assert("facetHits must exist", results && "facetHits" in results);
+          this.ownerResults = results.facetHits;
+        });
+    },
   );
 }
 

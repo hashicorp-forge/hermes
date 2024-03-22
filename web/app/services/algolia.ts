@@ -393,7 +393,7 @@ export default class AlgoliaService extends Service {
       indexName: string,
       facetName: string,
       query: string,
-      params: RequestOptions,
+      params?: RequestOptions,
     ): Promise<SearchForFacetValuesResponse | undefined> => {
       try {
         let index = this.client.initIndex(indexName);
