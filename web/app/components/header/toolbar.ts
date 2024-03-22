@@ -110,11 +110,10 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
           statuses[status] = this.args.facets?.status[
             status
           ] as FacetDropdownObjectDetails;
-          break;
       }
     }
 
-    return statuses;
+    return Object.fromEntries(Object.entries(statuses).sort());
   }
 
   /**
@@ -125,132 +124,69 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    switch (this.args.scope) {
-      case SearchScope.Projects:
-        return [
-          {
-            name: FacetName.Status,
-            values: this.args.facets?.status,
-          },
-        ];
-      default:
-        assert("document types must exist", this.documentTypes.index);
-        /**
-         * Need to use every item in the index to create the docTypeValues
-         * The `name` is the key, and the value can be accessed by the same
-         * key in this.args.facets?.docType as the value.
-         * Object will look like this:
-         * { "RFC": { count: 1, isSelected: false }, "PRD": { count: 1, isSelected: false }
-         */
-        let docTypeValues = {} as FacetDropdownObjects;
-
-        this.documentTypes.index?.forEach((docType) => {
-          const key = docType.name;
-          let value = this.args.facets?.docType?.[docType.name];
-
-          assert("key must exist", key);
-
-          if (!value) {
-            // TODO: decide what to do when the value is 0.
-            value = undefined;
-          }
-
-          docTypeValues = {
-            ...docTypeValues,
-            [key]: value,
-          } as FacetDropdownObjects;
-        });
-
-        let productValues = {} as FacetDropdownObjects;
-
-        Object.keys(this.productAreas.index).forEach((product) => {
-          let value = this.args.facets?.product?.[product];
-
-          if (!value) {
-            // TODO: decide what to do when the value is 0.
-            value = undefined;
-          }
-
-          productValues = {
-            ...productValues,
-            [product]: value,
-          } as FacetDropdownObjects;
-        });
-
-        return [
-          {
-            name: FacetName.DocType,
-            values: docTypeValues,
-          },
-          {
-            name: FacetName.Status,
-            values: {
-              [DocStatusLabel.Approved]:
-                this.args.facets?.status?.[DocStatus.Approved],
-              [DocStatusLabel.InReview]:
-                this.args.facets?.status?.[DocStatus.InReview],
-              [DocStatusLabel.Archived]:
-                this.args.facets?.status?.[DocStatus.Archived],
+    if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
+      switch (this.args.scope) {
+        case SearchScope.Docs:
+          return [
+            {
+              name: FacetName.DocType,
+              values: null,
             },
-          },
-          {
-            name: FacetName.Product,
-            values: productValues,
-          },
-        ];
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+            {
+              name: FacetName.Product,
+              values: null,
+            },
+          ];
+        case SearchScope.Projects:
+          return [
+            {
+              name: FacetName.Status,
+              values: null,
+            },
+          ];
+      }
+    } else {
+      let facetArray: FacetArrayItem[] = [];
+
+      Object.entries(this.args.facets).forEach(([key, value]) => {
+        switch (key) {
+          case FacetName.Owners:
+            break;
+          case FacetName.Status:
+            if (this.args.scope !== SearchScope.Projects) {
+              facetArray.push({
+                name: key as FacetName,
+                // Sorted alphabetically
+                values: this.statuses,
+              });
+            }
+            break;
+          case FacetName.DocType:
+            // Sorted by count
+            facetArray.push({ name: key as FacetName, values: value });
+            break;
+          case FacetName.Product:
+            // Sorted alphabetically
+            facetArray.push({
+              name: key as FacetName,
+              values: Object.fromEntries(Object.entries(value).sort()),
+            });
+            break;
+        }
+      });
+
+      const order = ["docType", "status", "product", "owners"];
+
+      facetArray.sort((a, b) => {
+        return order.indexOf(a.name) - order.indexOf(b.name);
+      });
+
+      return facetArray;
     }
-
-    //  if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
-    //   switch (this.args.scope) {
-    //     case SearchScope.Docs:
-    //       return [
-    //         {
-    //           name: FacetName.DocType,
-    //           values: null,
-    //         },
-    //         {
-    //           name: FacetName.Status,
-    //           values: null,
-    //         },
-    //         {
-    //           name: FacetName.Product,
-    //           values: null,
-    //         },
-    //         {
-    //           name: FacetName.Owners,
-    //           values: null,
-    //         },
-    //       ];
-    //     case SearchScope.Projects:
-    //       return [
-    //         {
-    //           name: FacetName.Status,
-    //           values: null,
-    //         },
-    //       ];
-    //   }
-    // } else {
-    //   let facetArray: FacetArrayItem[] = [];
-
-    //   Object.entries(this.args.facets).forEach(([key, value]) => {
-    //     if (
-    //       key === FacetName.Status &&
-    //       this.args.scope !== SearchScope.Projects
-    //     ) {
-    //       facetArray.push({ name: key, values: this.statuses });
-    //     } else {
-    //       facetArray.push({ name: key as FacetName, values: value });
-    //     }
-    //   });
-
-    //   const order = ["docType", "status", "product", "owners"];
-
-    //   facetArray.sort((a, b) => {
-    //     return order.indexOf(a.name) - order.indexOf(b.name);
-    //   });
-
-    //   return facetArray;
-    // }
   }
 
   /**

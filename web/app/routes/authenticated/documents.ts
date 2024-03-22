@@ -8,15 +8,11 @@ import { SortByValue } from "hermes/components/header/toolbar";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { SearchResponse } from "instantsearch.js";
-import DocumentTypesService from "hermes/services/document-types";
-import ProductAreasService from "hermes/services/product-areas";
 
 export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
-  @service declare documentTypes: DocumentTypesService;
-  @service declare productAreas: ProductAreasService;
   @service declare store: StoreService;
 
   queryParams = {
@@ -48,29 +44,12 @@ export default class AuthenticatedDocumentsRoute extends Route {
         ? this.configSvc.config.algolia_docs_index_name + "_createdTime_asc"
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
-    /**
-     * If we haven't yet fetched docTypes, or products
-     * do so now for use in the filter dropdowns.
-     */
-    const maybeFetchDocTypesPromise = !this.documentTypes.index
-      ? this.documentTypes.fetch.perform()
-      : Promise.resolve();
-
-    const maybeFetchProductsPromise = !this.productAreas.index
-      ? this.productAreas.fetch.perform()
-      : Promise.resolve();
-
-    const [results] = await Promise.all([
-      this.algolia.getDocResults.perform(
-        searchIndex,
-        params,
-      ) as SearchResponse<HermesDocument>,
-      maybeFetchDocTypesPromise,
-      maybeFetchProductsPromise,
+    const [facets, results] = await Promise.all([
+      this.algolia.getFacets.perform(searchIndex, params),
+      this.algolia.getDocResults.perform(searchIndex, params),
     ]);
 
-    const facets = this.algolia.getFacets(results, params);
-    const typedResults = results;
+    const typedResults = results as SearchResponse<HermesDocument>;
     const hits = typedResults.hits;
 
     if (hits) {
