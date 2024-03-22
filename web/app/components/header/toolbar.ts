@@ -186,8 +186,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
             }
             break;
           case FacetName.DocType:
-            // Sorted by count
-            facetArray.push({ name: key as FacetName, values: value });
+            // Sorted alphabetically
+            facetArray.push({
+              name: key as FacetName,
+              values: Object.fromEntries(Object.entries(value).sort()),
+            });
             break;
           case FacetName.Product:
             // Sorted alphabetically
