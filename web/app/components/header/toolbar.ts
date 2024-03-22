@@ -8,21 +8,18 @@ import {
   FacetDropdownObjects,
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { SearchScope } from "hermes/routes/authenticated/results";
 import { assert } from "@ember/debug";
-import {
-  DocStatus,
-  DocStatusLabel,
-} from "hermes/routes/authenticated/document";
 import DocumentTypesService from "hermes/services/document-types";
 import ProductAreasService from "hermes/services/product-areas";
 import { tracked } from "@glimmer/tracking";
-import { restartableTask } from "ember-concurrency";
+import { restartableTask, task } from "ember-concurrency";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { SearchForFacetValuesResponse } from "instantsearch.js";
+import Ember from "ember";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -72,6 +69,23 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
   @service declare productAreas: ProductAreasService;
+  /**
+   * Whether there has been a search during this session.
+   * Used to determine whether to search a query on focus.
+   * Set true the first time a search is performed.
+   * See `maybeSearch` task for more context.
+   */
+  @tracked private hasSearched = false;
+
+  /**
+   *
+   */
+  @tracked protected inputIsFocused = false;
+
+  /**
+   *
+   */
+  @tracked protected searchInputIsEmpty = true;
 
   /**
    *
@@ -196,6 +210,43 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
+   *
+   */
+
+  @action protected setInputFocus(value: boolean) {
+    this.inputIsFocused = value;
+  }
+
+  @action protected resetOwnersQuery() {
+    this.ownerQuery = "";
+    this.ownerResults = undefined;
+    this.searchInputIsEmpty = true;
+  }
+
+  /**
+   * Checks whether the dropdown is open and closes it if it is.
+   * Uses mousedown instead of click to get ahead of the focusin event.
+   * This allows users to click the search input to dismiss the popover.
+   */
+  @action protected maybeCloseDropdown(dd: XDropdownListAnchorAPI) {
+    if (dd.contentIsShown) {
+      dd.hideContent();
+    }
+  }
+
+  /**
+   * The action run on input focusin.
+   * If the popover is closed but the input has a value,
+   * we open the popover.
+   * @param dd
+   */
+  @action protected maybeOpenDropdown(dd: XDropdownListAnchorAPI): void {
+    if (!dd.contentIsShown && this.ownerQuery.length) {
+      dd.showContent();
+    }
+  }
+
+  /**
    * Closes the dropdown on the next run loop.
    * Done so we don't interfere with Ember's <LinkTo> handling.
    */
@@ -205,30 +256,74 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     });
   }
 
-  @action protected maybeSubmitForm(dd: XDropdownListAnchorAPI, e: Event) {
-    if (e instanceof KeyboardEvent && e.key === "Enter") {
-      // this.submitForm();
+  /**
+   * The task to maybe search Algolia. Called onInputFocus.
+   * If there's a query, but the user hasn't typed it,
+   * such as when clicking a search input populated by a query param,
+   * we initiate a search to avoid the "no matches" screen.
+   * The `isRunning` state is passed to DropdownList as `isLoading`.
+   */
+  protected maybeSearch = task(async () => {
+    if (this.ownerQuery.length && !this.hasSearched) {
+      await this.searchOwners.perform();
     }
-  }
+  });
 
   protected searchOwners = restartableTask(
-    async (dd: XDropdownListAnchorAPI, e: Event) => {
-      if (!dd.contentIsShown) {
-        dd.showContent();
+    async (dd?: XDropdownListAnchorAPI, e?: Event) => {
+      const input = e?.target;
+
+      if (input instanceof HTMLInputElement) {
+        this.ownerQuery = input.value;
       }
 
-      this.ownerQuery = (e.target as HTMLInputElement).value;
+      if (this.ownerQuery.length) {
+        this.searchInputIsEmpty = false;
+        try {
+          await this.algolia.searchForFacetValues
+            .perform(
+              this.configSvc.config.algolia_docs_index_name,
+              "owners",
+              this.ownerQuery,
+            )
+            .then((results) => {
+              assert("facetHits must exist", results && "facetHits" in results);
+              this.ownerResults = results.facetHits;
+            });
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        dd?.hideContent();
+        this.resetOwnersQuery();
+      }
 
-      await this.algolia.searchForFacetValues
-        .perform(
-          this.configSvc.config.algolia_docs_index_name,
-          "owners",
-          this.ownerQuery,
-        )
-        .then((results) => {
-          assert("facetHits must exist", results && "facetHits" in results);
-          this.ownerResults = results.facetHits;
+      // Reopen the dropdown if it was closed on mousedown and there's a query
+      if (!dd?.contentIsShown && this.ownerQuery.length) {
+        dd?.showContent();
+      }
+
+      /**
+       * Although `dd.scheduleAssignMenuItemIDs` runs `afterRender`,
+       * it doesn't provide enough time for `in-element` to update.
+       * Therefore, we wait for the next run loop.
+       *
+       * This approach causes issues when testing, so we
+       * use `schedule` as an approximation.
+       *
+       * TODO: Improve this.
+       */
+      if (Ember.testing) {
+        schedule("afterRender", () => {
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
         });
+      } else {
+        next(() => {
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
+        });
+      }
     },
   );
 }

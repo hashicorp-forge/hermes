@@ -2,7 +2,7 @@
   <div class="toolbar mb-7">
     <div class="mb-6 flex w-full justify-between">
       <div class="flex w-full items-center">
-        <h4 class="hermes-h4 mr-4 shrink-0">
+        <h4 class="hermes-h4 mr-[19px] shrink-0">
           Filter by:
         </h4>
         <ol class="facets flex w-full items-center">
@@ -17,12 +17,17 @@
           {{/each}}
           {{! Search owners... }}
           {{#if this.ownerFacetIsShown}}
-            <li class="w-full">
+            <li>
               <X::DropdownList
                 @items={{this.ownerResults}}
+                @offset={{hash mainAxis=0 crossAxis=4}}
+                @placement="bottom-end"
+                @matchAnchorWidth={{hash enabled=true additionalWidth=8}}
                 @inputIsShown={{false}}
                 @isLoading={{this.searchOwners.isRunning}}
-                @matchAnchorWidth={{true}}
+                @onItemClick={{this.resetOwnersQuery}}
+                class="theme--neutral
+                  {{unless this.ownerResults.length 'no-matches'}}"
                 {{! TODO: extra offset }}
               >
                 <:anchor as |dd|>
@@ -31,54 +36,71 @@
                     <Hds::Form::TextInput::Base
                       {{did-insert dd.registerAnchor}}
                       {{on "input" (perform this.searchOwners dd)}}
-                      {{on "keydown" (fn this.maybeSubmitForm dd)}}
+                      {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
+                      {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+                      {{on "focusin" (perform this.maybeSearch)}}
+                      {{on "focusin" (fn this.setInputFocus true)}}
+                      {{on "focusout" (fn this.setInputFocus false)}}
                       @value={{this.ownerQuery}}
-                      type="search"
+                      @type="search"
+                      name="owner"
                       placeholder="Search owners..."
                       aria-label="Search owners..."
                       aria-controls={{dd.ariaControls}}
                       aria-expanded={{dd.contentIsShown}}
                       aria-haspopup="listbox"
-                      class="w-[205px] border-color-border-strong pl-[35px] pr-3 text-body-200 focus:w-[384px]
-                        {{if dd.contentIsShown 'w-[384px]'}}"
-                      {{! width needs to be extended not just but focus but whether the  }}
-                    />
-                    <FlightIcon
-                      @name="search"
-                      class="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2 text-color-foreground-faint"
+                      class="relative w-[205px] border-color-border-strong pl-[35px] pr-3 text-body-200 focus:w-[384px]
+                        {{if dd.contentIsShown 'mock-focus w-[384px]'}}"
                     />
                   </div>
+
                 </:anchor>
                 <:item as |dd|>
-                  <LinkTo
-                    @query={{get-facet-query-hash
-                      "owners"
-                      dd.attrs.value
-                      (is-active-filter dd.attrs.value)
-                    }}
-                    {{! FIXME: false should be dyanmic }}
-                  >
-                    checked?
-                    {{if (is-active-filter dd.attrs.value) "true" "false"}}
-                    <X::DropdownList::CheckableItem
-                      @isSelected={{is-active-filter dd.attrs.value}}
+
+                  {{! FIXME: this should happen at the component level }}
+                  {{#unless this.searchInputIsEmpty}}
+                    <dd.LinkTo
+                      @query={{get-facet-query-hash
+                        "owners"
+                        dd.attrs.value
+                        (is-active-filter dd.attrs.value)
+                      }}
+                      class="block"
                     >
+                      <X::DropdownList::CheckableItem
+                        @isSelected={{is-active-filter dd.attrs.value}}
+                      >
+                        <:default>
+                          {{!-- <Person @email={{dd.attrs.value}} /> --}}
+                          <div
+                            class="flex items-center gap-2 overflow-hidden py-1"
+                          >
+                            <Person::Avatar @email={{dd.attrs.value}} />
+                            <div class="w-full min-w-0">
+                              <div class="truncate text-body-200 leading-tight">
+                                {{get-model-attr "person.name" dd.attrs.value}}
+                                <span
+                                  class="ml-0.5 text-body-100 text-color-foreground-disabled"
+                                >
+                                  {{get-model-attr
+                                    "person.email"
+                                    dd.attrs.value
+                                  }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </:default>
+                      </X::DropdownList::CheckableItem>
+                    </dd.LinkTo>
+                  {{/unless}}
 
-                      <:default>
-                        {{! TODO: this doesnt load from the google API }}
-                        <Person @email={{dd.attrs.value}} />
-                        {{! checkable }}
-
-                      </:default>
-                    </X::DropdownList::CheckableItem>
-                  </LinkTo>
                 </:item>
               </X::DropdownList>
             </li>
           {{/if}}
         </ol>
       </div>
-
     </div>
     <Header::ActiveFilterList />
   </div>

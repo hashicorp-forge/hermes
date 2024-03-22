@@ -4,7 +4,7 @@ import ActiveFiltersService from "hermes/services/active-filters";
 
 export interface IsActiveFilterSignature {
   Args: {
-    Positional: string;
+    Positional: [string];
   };
   Return: boolean;
 }
@@ -12,7 +12,7 @@ export interface IsActiveFilterSignature {
 export default class IsActiveFilterHelper extends Helper<IsActiveFilterSignature> {
   @service declare activeFilters: ActiveFiltersService;
 
-  compute(positional: IsActiveFilterSignature["Args"]["Positional"]) {
+  compute([positional]: IsActiveFilterSignature["Args"]["Positional"]) {
     const activeFilters = Object.values(this.activeFilters.index).flat();
     return activeFilters.some((values) => values.includes(positional));
   }

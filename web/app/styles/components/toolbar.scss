@@ -17,7 +17,12 @@
     &:not(:first-child) {
       button,
       input {
-        @apply rounded-none border-l-0;
+        @apply rounded-none;
+      }
+
+      button,
+      input {
+        @apply border-l-0;
       }
     }
 
@@ -31,6 +36,13 @@
       button,
       input {
         @apply rounded-r-button-md;
+      }
+
+      input {
+        &:focus,
+        &.mock-focus {
+          @apply -ml-px rounded-l-button-md border-l;
+        }
       }
     }
   }

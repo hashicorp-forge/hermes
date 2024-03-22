@@ -3,11 +3,13 @@ import { XDropdownListInteractiveComponentArgs } from "./_shared";
 import { action } from "@ember/object";
 import Ember from "ember";
 import { next, schedule } from "@ember/runloop";
+import { inject as service } from "@ember/service";
+import RouterService from "@ember/routing/router-service";
 
 interface XDropdownListLinkToComponentSignature {
   Element: HTMLAnchorElement;
   Args: XDropdownListInteractiveComponentArgs & {
-    route: string;
+    route?: string;
     query?: Record<string, unknown>;
     model?: unknown;
     models?: unknown[];
@@ -18,6 +20,11 @@ interface XDropdownListLinkToComponentSignature {
 }
 
 export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {
+  @service declare router: RouterService;
+
+  protected get route() {
+    return this.args.route ?? this.router.currentRouteName;
+  }
   /**
    * The action to run when the item is clicked.
    * We wait until the next run loop so that we don't interfere with
