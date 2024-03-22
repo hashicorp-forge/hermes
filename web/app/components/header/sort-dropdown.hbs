@@ -13,7 +13,6 @@
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
-      @route={{this.currentRouteName}}
       @query={{hash
         sortBy=(if (eq dd.value "Newest") this.dateDesc this.dateAsc)
       }}

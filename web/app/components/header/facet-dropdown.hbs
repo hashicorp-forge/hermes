@@ -19,7 +19,6 @@
   <:item as |dd|>
     <dd.LinkTo
       data-test-facet-dropdown-link
-      @route={{this.currentRouteName}}
       @query={{get-facet-query-hash @name dd.value dd.attrs.isSelected}}
     >
       <X::DropdownList::CheckableItem
