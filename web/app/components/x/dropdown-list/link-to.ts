@@ -22,6 +22,10 @@ interface XDropdownListLinkToComponentSignature {
 export default class XDropdownListLinkToComponent extends Component<XDropdownListLinkToComponentSignature> {
   @service declare router: RouterService;
 
+  /**
+   * The route passed to Ember's <LinkTo> component.
+   * Uses the passed-in value or the current route name.
+   */
   protected get route() {
     return this.args.route ?? this.router.currentRouteName;
   }
