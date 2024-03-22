@@ -15,8 +15,8 @@
               />
             </li>
           {{/each}}
-          {{! Search owners... }}
           {{#if this.ownerFacetIsShown}}
+            {{! Search owners... }}
             <li>
               <X::DropdownList
                 @items={{this.ownerResults}}
@@ -26,12 +26,11 @@
                 @inputIsShown={{false}}
                 @isLoading={{this.searchOwners.isRunning}}
                 @onItemClick={{this.resetOwnersQuery}}
+                @listIsShown={{not this.searchInputIsEmpty}}
                 class="theme--neutral
                   {{unless this.ownerResults.length 'no-matches'}}"
-                {{! TODO: extra offset }}
               >
                 <:anchor as |dd|>
-                  {{! TODO: figure out a rounded focus outline }}
                   <div class="relative">
                     <Hds::Form::TextInput::Base
                       {{did-insert dd.registerAnchor}}
@@ -53,48 +52,43 @@
                         {{if dd.contentIsShown 'mock-focus w-[384px]'}}"
                     />
                   </div>
-
                 </:anchor>
                 <:item as |dd|>
-
-                  {{! FIXME: this should happen at the component level }}
-                  {{#unless this.searchInputIsEmpty}}
-                    <dd.LinkTo
-                      @query={{get-facet-query-hash
-                        "owners"
-                        dd.attrs.value
-                        (is-active-filter dd.attrs.value)
-                      }}
-                      class="block"
+                  <dd.LinkTo
+                    @query={{get-facet-query-hash
+                      "owners"
+                      dd.attrs.value
+                      (is-active-filter dd.attrs.value)
+                    }}
+                    class="block"
+                  >
+                    {{!-- <X::DropdownList::CheckableItem
+                      @isSelected={{is-active-filter dd.attrs.value}}
                     >
-                      <X::DropdownList::CheckableItem
-                        @isSelected={{is-active-filter dd.attrs.value}}
-                      >
-                        <:default>
-                          {{!-- <Person @email={{dd.attrs.value}} /> --}}
-                          <div
-                            class="flex items-center gap-2 overflow-hidden py-1"
-                          >
-                            <Person::Avatar @email={{dd.attrs.value}} />
-                            <div class="w-full min-w-0">
-                              <div class="truncate text-body-200 leading-tight">
-                                {{get-model-attr "person.name" dd.attrs.value}}
-                                <span
-                                  class="ml-0.5 text-body-100 text-color-foreground-disabled"
-                                >
-                                  {{get-model-attr
-                                    "person.email"
-                                    dd.attrs.value
-                                  }}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </:default>
-                      </X::DropdownList::CheckableItem>
-                    </dd.LinkTo>
-                  {{/unless}}
-
+                      <:default>
+                      </:default>
+                    </X::DropdownList::CheckableItem> --}}
+                    <div class="flex items-center gap-2 overflow-hidden">
+                      <Person::Avatar @email={{dd.attrs.value}} />
+                      <div class="w-full min-w-0">
+                        <div class="truncate text-body-200 leading-tight">
+                          {{#let
+                            (get-model-attr "person.name" dd.attrs.value)
+                            as |name|
+                          }}
+                            {{or name dd.attrs.value}}
+                            {{#if name}}
+                              <span
+                                class="ml-0.5 text-body-100 text-color-foreground-disabled"
+                              >
+                                {{dd.attrs.value}}
+                              </span>
+                            {{/if}}
+                          {{/let}}
+                        </div>
+                      </div>
+                    </div>
+                  </dd.LinkTo>
                 </:item>
               </X::DropdownList>
             </li>

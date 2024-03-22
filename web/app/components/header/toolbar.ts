@@ -285,6 +285,12 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
               this.configSvc.config.algolia_docs_index_name,
               "owners",
               this.ownerQuery,
+              {
+                // need to include "AND NOT" to exclude existing filtered owners
+                filters: this.activeFilters.index[FacetName.Owners]
+                  .map((owner) => `NOT owners:${owner}`)
+                  .join(" AND "),
+              },
             )
             .then((results) => {
               assert("facetHits must exist", results && "facetHits" in results);
