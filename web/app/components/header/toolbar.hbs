@@ -39,8 +39,6 @@
                       {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
                       {{on "focusin" (fn this.maybeOpenDropdown dd)}}
                       {{on "focusin" (perform this.maybeSearch)}}
-                      {{on "focusin" (fn this.setInputFocus true)}}
-                      {{on "focusout" (fn this.setInputFocus false)}}
                       @value={{this.ownerQuery}}
                       @type="search"
                       disabled={{this.ownersInputIsDisabled}}

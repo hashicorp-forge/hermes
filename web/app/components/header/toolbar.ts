@@ -1,7 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
 import {
   FacetDropdownGroups,
   FacetDropdownObjectDetails,
@@ -65,7 +64,6 @@ interface ToolbarComponentSignature {
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service declare router: RouterService;
   @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
@@ -79,29 +77,23 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @tracked private hasSearched = false;
 
   /**
-   *
-   */
-  @tracked protected inputIsFocused = false;
-
-  /**
-   *
+   * Whether the owners input is empty.
+   * Dictates when the dropdown is shown,
    */
   @tracked protected searchInputIsEmpty = true;
 
   /**
-   *
+   * The query for the owner facet. Updated on input
+   * and reset on selection.
    */
   @tracked protected ownerQuery = "";
 
   /**
-   *
+   * The results of an ownerSearch, if any.
+   * Looped through by the DropdownList component.
    */
   @tracked protected ownerResults: SearchForFacetValuesResponse | undefined =
     undefined;
-
-  get currentRouteName(): string {
-    return this.router.currentRouteName;
-  }
 
   protected get ownerFacetIsShown() {
     return this.args.scope !== SearchScope.Projects;
@@ -116,7 +108,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
-   *
+   * Whether the owners input is disabled.
+   * True if there are no owners in the facets object.
    */
   protected get ownersInputIsDisabled() {
     return !this.args.facets || Object.keys(this.args.facets).length === 0;
@@ -159,35 +152,26 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     let facetArray: FacetArrayItem[] = [];
 
     Object.entries(this.args.facets).forEach(([key, value]) => {
+      // Sort the values alphabetically
+      const name = key as FacetName;
+      const values = Object.fromEntries(Object.entries(value).sort());
+
       switch (key) {
         case FacetName.Owners:
+          // We handle this with a text input
           break;
         case FacetName.Status:
           facetArray.push({
-            name: key as FacetName,
-            // Sorted alphabetically
+            name,
             values: this.statuses,
-          });
-          break;
-        case FacetName.DocType:
-          // Sorted alphabetically
-          facetArray.push({
-            name: key as FacetName,
-            values: Object.fromEntries(Object.entries(value).sort()),
-          });
-          break;
-        case FacetName.Product:
-          // Sorted alphabetically
-          facetArray.push({
-            name: key as FacetName,
-            values: Object.fromEntries(Object.entries(value).sort()),
           });
           break;
         default:
           facetArray.push({
-            name: key as FacetName,
-            values: value,
+            name,
+            values,
           });
+          break;
       }
     });
 
@@ -201,13 +185,9 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   }
 
   /**
-   *
+   * The action to reset the owner-query-related properties.
+   * Called when the input is manually cleared, and when an item is selected.
    */
-
-  @action protected setInputFocus(value: boolean) {
-    this.inputIsFocused = value;
-  }
-
   @action protected resetOwnersQuery() {
     this.ownerQuery = "";
     this.ownerResults = undefined;
@@ -260,6 +240,10 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     }
   });
 
+  /**
+   * The task to query Algolia for the owner facet.
+   * Runs on the `input` event. Populates the dropdown with results.
+   */
   protected searchOwners = restartableTask(
     async (dd?: XDropdownListAnchorAPI, e?: Event) => {
       const input = e?.target;
@@ -277,7 +261,6 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
               "owners",
               this.ownerQuery,
               {
-                // need to include "AND NOT" to exclude existing filtered owners
                 filters: this.activeFilters.index[FacetName.Owners]
                   .map((owner) => `NOT owners:${owner}`)
                   .join(" AND "),
