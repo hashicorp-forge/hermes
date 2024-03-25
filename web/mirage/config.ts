@@ -46,7 +46,6 @@ export default function (mirageConfig) {
         let facets = requestBody?.facets ?? [];
 
         if (requestBody) {
-          console.log("requestBody", requestBody);
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
 
@@ -153,41 +152,44 @@ export default function (mirageConfig) {
              * "index-name/facets/owners/query"
              */
             const facetName = request.params["*"].split("/")[2];
+            let uniqueHits: string[] = [];
             let facetHits: Array<{ value: string }> = [];
-
-            console.log(facetName, facetQuery);
 
             switch (facetName) {
               case FacetName.Owners:
                 let ownerMatches = docModels.filter((doc) => {
-                  return doc.attrs.owners[0].includes(facetQuery);
+                  return doc.attrs.owners[0]
+                    .toLowerCase()
+                    .includes(facetQuery.toLowerCase());
                 });
 
-                facetHits = ownerMatches.map((doc) => {
-                  return { value: doc.attrs.owners[0] };
+                ownerMatches.forEach((doc) => {
+                  const owner = doc.attrs.owners[0];
+                  if (!uniqueHits.includes(owner)) {
+                    uniqueHits.push(owner);
+                  }
                 });
                 break;
 
               case FacetName.Product:
-                let uniqueProducts: string[] = [];
                 let productMatches = docModels.filter((doc) => {
-                  console.log("doc.attrs.product", doc.attrs.product);
                   return doc.attrs.product
                     .toLowerCase()
                     .includes(facetQuery.toLowerCase());
                 });
 
                 productMatches.forEach((doc) => {
-                  if (!uniqueProducts.includes(doc.attrs.product)) {
-                    uniqueProducts.push(doc.attrs.product);
+                  if (!uniqueHits.includes(doc.attrs.product)) {
+                    uniqueHits.push(doc.attrs.product);
                   }
-                });
-
-                facetHits = uniqueProducts.map((product) => {
-                  return { value: product };
                 });
                 break;
             }
+
+            facetHits = uniqueHits.map((product) => {
+              return { value: product };
+            });
+
             return new Response(200, {}, { facetHits });
           } else if (query !== undefined) {
             /**
