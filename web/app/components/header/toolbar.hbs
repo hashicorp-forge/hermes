@@ -54,28 +54,29 @@
                   </div>
                 </:anchor>
                 <:item as |dd|>
+                  {{log " d d d d" dd}}
                   <dd.LinkTo
                     @query={{get-facet-query-hash
                       "owners"
-                      dd.attrs.value
-                      (is-active-filter dd.attrs.value)
+                      dd.attrs
+                      (is-active-filter dd.attrs)
                     }}
                     class="block"
                   >
                     <div class="flex items-center gap-2 overflow-hidden">
-                      <Person::Avatar @email={{dd.attrs.value}} />
+                      <Person::Avatar @email={{dd.attrs}} />
                       <div class="w-full min-w-0">
                         <div class="truncate text-body-200 leading-tight">
                           {{#let
-                            (get-model-attr "person.name" dd.attrs.value)
+                            (get-model-attr "person.name" dd.attrs)
                             as |name|
                           }}
-                            {{or name dd.attrs.value}}
+                            {{or name dd.attrs}}
                             {{#if name}}
                               <span
                                 class="ml-0.5 text-body-100 text-color-foreground-disabled"
                               >
-                                {{dd.attrs.value}}
+                                {{dd.attrs}}
                               </span>
                             {{/if}}
                           {{/let}}

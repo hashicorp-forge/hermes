@@ -20,6 +20,8 @@ import ConfigService from "hermes/services/config";
 import { SearchForFacetValuesResponse } from "instantsearch.js";
 import Ember from "ember";
 import { ProjectStatus } from "hermes/types/project-status";
+import StoreService from "hermes/services/_store";
+import PersonModel from "hermes/models/person";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -68,6 +70,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
   @service declare productAreas: ProductAreasService;
+  @service declare store: StoreService;
   /**
    * Whether there has been a search during this session.
    * Used to determine whether to search a query on focus.
@@ -92,8 +95,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * The results of an ownerSearch, if any.
    * Looped through by the DropdownList component.
    */
-  @tracked protected ownerResults: SearchForFacetValuesResponse | undefined =
-    undefined;
+  @tracked protected ownerResults: string[] | undefined = undefined;
 
   protected get ownerFacetIsShown() {
     return this.args.scope !== SearchScope.Projects;
@@ -265,7 +267,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       if (this.ownerQuery.length) {
         this.searchInputIsEmpty = false;
         try {
-          await this.algolia.searchForFacetValues
+          const algoliaResultsPromise = this.algolia.searchForFacetValues
             .perform(
               this.configSvc.config.algolia_docs_index_name,
               "owners",
@@ -278,8 +280,33 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
             )
             .then((results) => {
               assert("facetHits must exist", results && "facetHits" in results);
-              this.ownerResults = results.facetHits;
+              return results.facetHits;
             });
+
+          const peoplePromise = this.store.query("person", {
+            query: this.ownerQuery,
+          });
+
+          const [algoliaResults, peopleResults] = await Promise.all([
+            algoliaResultsPromise,
+            peoplePromise,
+          ]);
+
+          let people: string[] = [];
+
+          if (peopleResults.length) {
+            people = peopleResults
+              .map((p: PersonModel) => p.email)
+              .filter((email: string) => {
+                return (
+                  !this.activeFilters.index[FacetName.Owners].includes(email) &&
+                  !algoliaResults.some((result) => result.value === email)
+                );
+              });
+          }
+          this.ownerResults = algoliaResults
+            .map((result) => result.value)
+            .concat(people);
         } catch (e) {
           console.error(e);
         }

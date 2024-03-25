@@ -162,4 +162,36 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .dom(OWNER_MATCH)
       .containsText(TEST_USER_NAME, "the owner's name is displayed");
   });
+
+  test("owners are searched in algolia and the google people api", async function (this: ToolbarTestContext, assert) {
+    this.server.create("google/person", {
+      names: [{ displayName: "Mishra" }],
+      emailAddresses: [{ value: "mishra@hashicorp.com" }],
+    });
+
+    this.server.create("google/person", {
+      names: [{ displayName: "Michelle" }],
+      emailAddresses: [{ value: "michelle@hashicorp.com" }],
+    });
+
+    this.server.create("document", {
+      status: "Approved",
+      owners: ["michelle@hashicorp.com"],
+    });
+
+    this.set("facets", FACETS);
+
+    await render<ToolbarTestContext>(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    await fillIn(OWNERS_INPUT, "mi");
+
+    assert
+      .dom(OWNER_MATCH)
+      .exists(
+        { count: 2 },
+        "both people are displayed even though only one is a doc owner; the duplicate entry is filtered out",
+      );
+  });
 });
