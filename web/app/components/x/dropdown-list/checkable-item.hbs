@@ -28,13 +28,11 @@
   </div>
 
   {{#if this.countIsShown}}
-    <div class="grid">
-      <Hds::BadgeCount
-        data-test-x-dropdown-list-checkable-item-count
-        @text="{{@count}}"
-        @size="small"
-        class="checkable-item-count ml-auto"
-      />
+    <div
+      data-test-x-dropdown-list-checkable-item-count
+      class="checkable-item-count ml-auto opacity-60"
+    >
+      {{@count}}
     </div>
   {{/if}}
 </div>

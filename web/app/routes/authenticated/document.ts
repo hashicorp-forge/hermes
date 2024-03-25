@@ -25,6 +25,20 @@ interface DocumentRouteModel {
   docType: HermesDocumentType;
 }
 
+export enum DocStatus {
+  Draft = "WIP",
+  Approved = "Approved",
+  InReview = "In-Review",
+  Archived = "Obsolete",
+}
+
+export enum DocStatusLabel {
+  Draft = "Draft",
+  Approved = "Approved",
+  InReview = "In Review",
+  Archived = "Archived",
+}
+
 export default class AuthenticatedDocumentRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;

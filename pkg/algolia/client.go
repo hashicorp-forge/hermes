@@ -131,7 +131,7 @@ func New(cfg *Config) (*Client, error) {
 			"approvers",
 			"approvedBy",
 			"docType",
-			"owners",
+			"searchable(owners)",
 			"searchable(product)",
 			"status",
 			"searchable(tags)",

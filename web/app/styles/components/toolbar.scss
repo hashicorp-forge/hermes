@@ -15,8 +15,14 @@
 .facets {
   li {
     &:not(:first-child) {
-      button {
-        @apply rounded-none border-l-0;
+      button,
+      input {
+        @apply rounded-none;
+      }
+
+      button,
+      input {
+        @apply border-l-0;
       }
     }
 
@@ -27,8 +33,16 @@
     }
 
     &:last-child {
-      button {
+      button,
+      input {
         @apply rounded-r-button-md;
+      }
+
+      input {
+        &:focus,
+        &.mock-focus {
+          @apply -ml-px rounded-l-button-md border-l;
+        }
       }
     }
   }

@@ -17,6 +17,8 @@ import {
 } from "hermes/types/facets";
 import SessionService from "./session";
 import { SearchScope } from "hermes/routes/authenticated/results";
+import { FacetName } from "hermes/components/header/toolbar";
+import StoreService from "./_store";
 
 // FIXME: drafts endpoint breaks when you increase this number (to 100, e.g.)
 export const HITS_PER_PAGE = 12;
@@ -38,6 +40,7 @@ export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
+  @service declare store: StoreService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   /**
@@ -393,11 +396,23 @@ export default class AlgoliaService extends Service {
       indexName: string,
       facetName: string,
       query: string,
-      params: RequestOptions,
+      params?: RequestOptions,
     ): Promise<SearchForFacetValuesResponse | undefined> => {
       try {
         let index = this.client.initIndex(indexName);
-        return await index.searchForFacetValues(facetName, query, params);
+        const results = await index.searchForFacetValues(
+          facetName,
+          query,
+          params,
+        );
+
+        if (facetName === FacetName.Owners) {
+          await this.store.maybeFetchPeople.perform(
+            results.facetHits.map((hit) => hit.value),
+          );
+        }
+
+        return results;
       } catch (e: unknown) {
         console.error(e);
       }
