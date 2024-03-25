@@ -1,10 +1,16 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, click, findAll, render } from "@ember/test-helpers";
+import { click, fillIn, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { FacetDropdownGroups, FacetDropdownObjects } from "hermes/types/facets";
 import { FacetLabel } from "hermes/helpers/get-facet-label";
 import { SearchScope } from "hermes/routes/authenticated/results";
+import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
+import {
+  authenticateTestUser,
+  TEST_USER_EMAIL,
+  TEST_USER_NAME,
+} from "hermes/mirage/utils";
 
 // Filter buttons
 const TOGGLE = "[data-test-facet-dropdown-toggle]";
@@ -16,27 +22,29 @@ const DROPDOWN_ITEM = "[data-test-facet-dropdown-link]";
 const POPOVER = "[data-test-facet-dropdown-popover]";
 const CHECK = "[data-test-x-dropdown-list-checkable-item-check]";
 const LIST_ITEM_VALUE = "[data-test-x-dropdown-list-item-value]";
+const OWNER_MATCH = "[data-test-x-dropdown-list-item-link-to]";
 
 const FACETS = {
   docType: {
     RFC: { count: 1, isSelected: false },
   },
-  owners: {
-    ["mishra@hashicorp.com"]: { count: 8, isSelected: false },
-  },
   product: { Labs: { count: 9, isSelected: false } },
   status: {
     Approved: { count: 3, isSelected: false },
   },
+  owners: {
+    ["mishra@hashicorp.com"]: { count: 8, isSelected: false },
+  },
 };
 
-interface ToolbarTestContext extends TestContext {
+interface ToolbarTestContext extends MirageTestContext {
   facets: FacetDropdownGroups;
   scope: SearchScope;
 }
 
 module("Integration | Component | header/toolbar", function (hooks) {
   setupRenderingTest(hooks);
+  setupMirage(hooks);
 
   test("it handles status values correctly", async function (assert) {
     const STATUS_NAMES = [
@@ -81,18 +89,18 @@ module("Integration | Component | header/toolbar", function (hooks) {
     );
   });
 
-  test("it renders undefined facets disabled", async function (assert) {
+  test("undefined statuses are hidden", async function (this: ToolbarTestContext, assert) {
     this.set("facets", { ...FACETS, status: undefined });
 
     await render<ToolbarTestContext>(hbs`
       <Header::Toolbar @facets={{this.facets}} />
     `);
 
-    assert.dom(DOC_TYPE_TOGGLE).isNotDisabled();
-    assert.dom(PRODUCT_TOGGLE).isNotDisabled();
-    assert.dom(OWNERS_INPUT).isNotDisabled();
+    assert.dom(DOC_TYPE_TOGGLE).exists();
+    assert.dom(PRODUCT_TOGGLE).exists();
+    assert.dom(OWNERS_INPUT).exists();
 
-    assert.dom(STATUS_TOGGLE).isDisabled("the empty status facet is disabled");
+    assert.dom(STATUS_TOGGLE).doesNotExist("the empty status facet is hidden");
   });
 
   test("the order of the facets is correct", async function (this: ToolbarTestContext, assert) {
@@ -133,5 +141,25 @@ module("Integration | Component | header/toolbar", function (hooks) {
 
     assert.dom(secondItem).containsText("RFC").containsText("1");
     assert.dom(`${secondItem} ${CHECK}`).hasClass("invisible");
+  });
+
+  test("owners can be searched", async function (this: ToolbarTestContext, assert) {
+    authenticateTestUser(this);
+
+    this.server.create("document", {
+      status: "Approved",
+    });
+
+    this.set("facets", FACETS);
+
+    await render<ToolbarTestContext>(hbs`
+      <Header::Toolbar @facets={{this.facets}} />
+    `);
+
+    await fillIn(OWNERS_INPUT, TEST_USER_EMAIL);
+
+    assert
+      .dom(OWNER_MATCH)
+      .containsText(TEST_USER_NAME, "the owner's name is displayed");
   });
 });

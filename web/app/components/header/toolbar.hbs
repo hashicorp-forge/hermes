@@ -7,6 +7,7 @@
         </h4>
         <ol class="facets flex w-full items-center">
           {{#each this.facets as |facet|}}
+            {{log "facet" facet}}
             <li class="shrink-0">
               <Header::FacetDropdown
                 data-test-facet={{facet.name}}

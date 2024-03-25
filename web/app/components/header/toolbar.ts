@@ -152,19 +152,24 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
     let facetArray: FacetArrayItem[] = [];
 
     Object.entries(this.args.facets).forEach(([key, value]) => {
-      // Sort the values alphabetically
       const name = key as FacetName;
-      const values = Object.fromEntries(Object.entries(value).sort());
 
-      switch (key) {
+      // Sort the values alphabetically
+      const values = value
+        ? Object.fromEntries(Object.entries(value).sort())
+        : null;
+
+      switch (name) {
         case FacetName.Owners:
           // We handle this with a text input
           break;
         case FacetName.Status:
-          facetArray.push({
-            name,
-            values: this.statuses,
-          });
+          if (values) {
+            facetArray.push({
+              name,
+              values: this.statuses,
+            });
+          }
           break;
         default:
           facetArray.push({
@@ -175,7 +180,12 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       }
     });
 
-    const order = ["docType", "status", "product", "owners"];
+    const order = [
+      FacetName.DocType,
+      FacetName.Status,
+      FacetName.Product,
+      FacetName.Owners,
+    ];
 
     facetArray.sort((a, b) => {
       return order.indexOf(a.name) - order.indexOf(b.name);

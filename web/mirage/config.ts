@@ -6,6 +6,7 @@ import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
 import { assert as emberAssert } from "@ember/debug";
+import { FacetName } from "hermes/components/header/toolbar";
 
 import {
   TEST_WEB_CONFIG,
@@ -45,6 +46,7 @@ export default function (mirageConfig) {
         let facets = requestBody?.facets ?? [];
 
         if (requestBody) {
+          console.log("requestBody", requestBody);
           const { facetQuery, query } = requestBody;
           let { facetFilters } = requestBody;
 
@@ -145,21 +147,48 @@ export default function (mirageConfig) {
               );
             }
           } else if (facetQuery) {
-            // Product/area search
-            let facetMatch = docModels.filter((doc) => {
-              return doc.attrs.product
-                .toLowerCase()
-                .includes(facetQuery.toLowerCase());
-            })[0];
-            if (facetMatch) {
-              return new Response(
-                200,
-                {},
-                { facetHits: [{ value: facetMatch.attrs.product }] },
-              );
-            } else {
-              return new Response(200, {}, { facetHits: [] });
+            /**
+             * Get the FacetName from the request.
+             * At this point `request.params["*"]` looks like:
+             * "index-name/facets/owners/query"
+             */
+            const facetName = request.params["*"].split("/")[2];
+            let facetHits: Array<{ value: string }> = [];
+
+            console.log(facetName, facetQuery);
+
+            switch (facetName) {
+              case FacetName.Owners:
+                let ownerMatches = docModels.filter((doc) => {
+                  return doc.attrs.owners[0].includes(facetQuery);
+                });
+
+                facetHits = ownerMatches.map((doc) => {
+                  return { value: doc.attrs.owners[0] };
+                });
+                break;
+
+              case FacetName.Product:
+                let uniqueProducts: string[] = [];
+                let productMatches = docModels.filter((doc) => {
+                  console.log("doc.attrs.product", doc.attrs.product);
+                  return doc.attrs.product
+                    .toLowerCase()
+                    .includes(facetQuery.toLowerCase());
+                });
+
+                productMatches.forEach((doc) => {
+                  if (!uniqueProducts.includes(doc.attrs.product)) {
+                    uniqueProducts.push(doc.attrs.product);
+                  }
+                });
+
+                facetHits = uniqueProducts.map((product) => {
+                  return { value: product };
+                });
+                break;
             }
+            return new Response(200, {}, { facetHits });
           } else if (query !== undefined) {
             /**
              * A query exists, but may be empty.
@@ -806,7 +835,6 @@ export default function (mirageConfig) {
       // Query via the PeopleSelect
       this.post("/people", (schema, request) => {
         let query: string = JSON.parse(request.requestBody).query;
-
         // Search everyone's first emailAddress for matches
         let matches: Collection<unknown> = schema["google/people"].where(
           (person) => {
