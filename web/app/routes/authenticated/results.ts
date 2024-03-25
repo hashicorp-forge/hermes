@@ -97,7 +97,6 @@ export default class AuthenticatedResultsRoute extends Route {
     ]);
 
     const typedDocResults = docResults as SearchResponse<HermesDocument>;
-
     let typedProjectResults = projectResults as SearchResponse<HermesProject>;
 
     if (docResults) {
