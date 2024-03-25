@@ -16,6 +16,7 @@ import {
   ProjectStatus,
   projectStatusObjects,
 } from "hermes/types/project-status";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/mirage/utils";
 
 // Global
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
@@ -62,6 +63,10 @@ const PRODUCT_FACET_DROPDOWN_TOGGLE = `[${FACET_TOGGLE_DATA_NAME}="${FacetLabel.
 
 // Filter dropdowns
 const FACET_DROPDOWN_LINK = "[data-test-facet-dropdown-link]";
+
+// Owner filter
+const OWNERS_INPUT = `[data-test-search-owners-input]`;
+const OWNER_MATCH = "[data-test-x-dropdown-list-item-link-to]";
 
 // Pagination
 const PAGINATION = "[data-test-pagination]";
@@ -374,6 +379,13 @@ module("Acceptance | authenticated/results", function (hooks) {
       product: "Terraform",
     });
 
+    // Create an RFC with another owner
+    this.server.create("document", {
+      docType: "RFC",
+      product: "Vault",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
     // Capture the docCounts we intend to test
 
     const rfcCount = this.server.schema.document.where({
@@ -410,6 +422,21 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
+
+    // Filter by owner
+
+    await fillIn(OWNERS_INPUT, TEST_USER_EMAIL);
+    await click(OWNER_MATCH);
+
+    captureFacetElements();
+
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${totalDocCount - 1}`);
+
+    // Turn off owner filter
+
+    await click(ACTIVE_FILTER_LINK);
+
+    // Begin to filter by docType
 
     await click(DOC_TYPE_FACET_DROPDOWN_TOGGLE);
 
