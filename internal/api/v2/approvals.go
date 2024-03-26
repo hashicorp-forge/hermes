@@ -15,87 +15,104 @@ import (
 
 func ApprovalsHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Validate request.
+		docID, err := parseResourceIDFromURL(r.URL.Path, "approvals")
+		if err != nil {
+			srv.Logger.Error("error parsing document ID",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+			)
+			http.Error(w, "Document ID not found", http.StatusNotFound)
+			return
+		}
+
+		// Check if document is locked.
+		locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+		if err != nil {
+			srv.Logger.Error("error checking document locked status",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			http.Error(w, "Error getting document status", http.StatusNotFound)
+			return
+		}
+		// Don't continue if document is locked.
+		if locked {
+			http.Error(w, "Document is locked", http.StatusLocked)
+			return
+		}
+
+		// Get document from database.
+		model := models.Document{
+			GoogleFileID: docID,
+		}
+		if err := model.Get(srv.DB); err != nil {
+			srv.Logger.Error("error getting document from database",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			http.Error(w, "Error accessing document",
+				http.StatusInternalServerError)
+			return
+		}
+
+		// Get reviews for the document.
+		var reviews models.DocumentReviews
+		if err := reviews.Find(srv.DB, models.DocumentReview{
+			Document: models.Document{
+				GoogleFileID: docID,
+			},
+		}); err != nil {
+			srv.Logger.Error("error getting reviews for document",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			return
+		}
+
+		// Get group reviews for the document.
+		var groupReviews models.DocumentGroupReviews
+		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
+			Document: models.Document{
+				GoogleFileID: docID,
+			},
+		}); err != nil {
+			srv.Logger.Error("error getting group reviews for document",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			return
+		}
+
+		// Convert database model to a document.
+		doc, err := document.NewFromDatabaseModel(
+			model, reviews, groupReviews)
+		if err != nil {
+			srv.Logger.Error("error converting database model to document type",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			http.Error(w, "Error accessing document",
+				http.StatusInternalServerError)
+			return
+		}
+
+		userEmail := r.Context().Value("userEmail").(string)
+
 		switch r.Method {
 		case "DELETE":
-			// Validate request.
-			docID, err := parseResourceIDFromURL(r.URL.Path, "approvals")
-			if err != nil {
-				srv.Logger.Error("error parsing document ID",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Document ID not found", http.StatusNotFound)
-				return
-			}
-
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
-			if err != nil {
-				srv.Logger.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
-			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
-			}
-
-			// Get document from database.
-			model := models.Document{
-				GoogleFileID: docID,
-			}
-			if err := model.Get(srv.DB); err != nil {
-				srv.Logger.Error("error getting document from database",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Get reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(srv.DB, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: docID,
-				},
-			}); err != nil {
-				srv.Logger.Error("error getting reviews for document",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-
-			// Convert database model to a document.
-			doc, err := document.NewFromDatabaseModel(
-				model, reviews)
-			if err != nil {
-				srv.Logger.Error("error converting database model to document type",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Authorize request.
-			userEmail := r.Context().Value("userEmail").(string)
 			if doc.Status != "In-Review" {
 				http.Error(w,
 					"Can only request changes of documents in the \"In-Review\" status",
@@ -311,102 +328,73 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				}
 			}()
 
+		case "OPTIONS":
+			// Document is not in review or approved status.
+			if doc.Status != "In-Review" && doc.Status != "Approved" {
+				w.Header().Set("Allowed", "")
+				return
+			}
+
+			// Document already approved by user.
+			if contains(doc.ApprovedBy, userEmail) {
+				w.Header().Set("Allowed", "")
+				return
+			}
+
+			// User is not an approver or in an approver group.
+			inApproverGroup, err := isUserInGroups(
+				userEmail, doc.ApproverGroups, srv.GWService)
+			if err != nil {
+				srv.Logger.Error("error calculating if user is in an approver group",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
+			}
+			if !contains(doc.Approvers, userEmail) && !inApproverGroup {
+				w.Header().Set("Allowed", "")
+				return
+			}
+
+			// User can approve.
+			w.Header().Set("Allowed", "POST")
+			return
+
 		case "POST":
-			// Validate request.
-			docID, err := parseResourceIDFromURL(r.URL.Path, "approvals")
-			if err != nil {
-				srv.Logger.Error("error parsing document ID from approvals path",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Document ID not found", http.StatusNotFound)
-				return
-			}
-
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
-			if err != nil {
-				srv.Logger.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
-			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
-			}
-
-			// Get document from database.
-			model := models.Document{
-				GoogleFileID: docID,
-			}
-			if err := model.Get(srv.DB); err != nil {
-				srv.Logger.Error("error getting document from database",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing document",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Get reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(srv.DB, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: docID,
-				},
-			}); err != nil {
-				srv.Logger.Error("error getting reviews for document",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-
-			// Convert database model to a document.
-			doc, err := document.NewFromDatabaseModel(
-				model, reviews)
-			if err != nil {
-				srv.Logger.Error("error converting database model to document type",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Authorize request.
-			userEmail := r.Context().Value("userEmail").(string)
 			if doc.Status != "In-Review" && doc.Status != "Approved" {
 				http.Error(w,
 					`Document status must be "In-Review" or "Approved" to approve`,
 					http.StatusBadRequest)
 				return
 			}
-			if !contains(doc.Approvers, userEmail) {
-				http.Error(w,
-					"Not authorized as a document approver",
-					http.StatusUnauthorized)
-				return
-			}
 			if contains(doc.ApprovedBy, userEmail) {
 				http.Error(w,
 					"Document already approved by user",
 					http.StatusBadRequest)
+				return
+			}
+			inApproverGroup, err := isUserInGroups(
+				userEmail, doc.ApproverGroups, srv.GWService)
+			if err != nil {
+				srv.Logger.Error("error calculating if user is in an approver group",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
+			}
+			if !contains(doc.Approvers, userEmail) && !inApproverGroup {
+				http.Error(w,
+					"Not authorized as a document approver",
+					http.StatusUnauthorized)
 				return
 			}
 

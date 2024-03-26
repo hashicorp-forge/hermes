@@ -21,12 +21,13 @@ import (
 // DocumentPatchRequest contains a subset of documents fields that are allowed
 // to be updated with a PATCH request.
 type DocumentPatchRequest struct {
-	Approvers    *[]string               `json:"approvers,omitempty"`
-	Contributors *[]string               `json:"contributors,omitempty"`
-	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
-	Owners       *[]string               `json:"owners,omitempty"`
-	Status       *string                 `json:"status,omitempty"`
-	Summary      *string                 `json:"summary,omitempty"`
+	Approvers      *[]string               `json:"approvers,omitempty"`
+	ApproverGroups *[]string               `json:"approverGroups,omitempty"`
+	Contributors   *[]string               `json:"contributors,omitempty"`
+	CustomFields   *[]document.CustomField `json:"customFields,omitempty"`
+	Owners         *[]string               `json:"owners,omitempty"`
+	Status         *string                 `json:"status,omitempty"`
+	Summary        *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
 	Title *string `json:"title,omitempty"`
 }
@@ -98,9 +99,25 @@ func DocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// Get group reviews for the document.
+		var groupReviews models.DocumentGroupReviews
+		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
+			Document: models.Document{
+				GoogleFileID: docID,
+			},
+		}); err != nil {
+			srv.Logger.Error("error getting group reviews for document",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			return
+		}
+
 		// Convert database model to a document.
 		doc, err := document.NewFromDatabaseModel(
-			model, reviews)
+			model, reviews, groupReviews)
 		if err != nil {
 			srv.Logger.Error("error converting database model to document type",
 				"error", err,
@@ -443,11 +460,28 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// request.
 				approversToEmail = compareSlices(doc.Approvers, *req.Approvers)
 			}
+			if len(doc.ApproverGroups) == 0 && req.ApproverGroups != nil &&
+				len(*req.ApproverGroups) != 0 {
+				// If there are no approver groups for the document, add all approver
+				// groups in the request.
+				approversToEmail = append(approversToEmail, *req.ApproverGroups...)
+			} else if req.ApproverGroups != nil && len(*req.ApproverGroups) != 0 {
+				// Only compare when there are stored approver groups and approver
+				// groups in the request.
+				approversToEmail = append(
+					approversToEmail,
+					compareSlices(doc.ApproverGroups, *req.ApproverGroups)...,
+				)
+			}
 
 			// Patch document (for Algolia).
 			// Approvers.
 			if req.Approvers != nil {
 				doc.Approvers = *req.Approvers
+			}
+			// Approver groups.
+			if req.ApproverGroups != nil {
+				doc.ApproverGroups = *req.ApproverGroups
 			}
 			// Contributors.
 			if req.Contributors != nil {
@@ -623,6 +657,18 @@ func DocumentHandler(srv server.Server) http.Handler {
 						approvers = append(approvers, &u)
 					}
 					model.Approvers = approvers
+				}
+
+				// Approver groups.
+				if req.ApproverGroups != nil {
+					approverGroups := make([]*models.Group, len(doc.ApproverGroups))
+					for i, a := range doc.ApproverGroups {
+						g := models.Group{
+							EmailAddress: a,
+						}
+						approverGroups[i] = &g
+					}
+					model.ApproverGroups = approverGroups
 				}
 
 				// Contributors.

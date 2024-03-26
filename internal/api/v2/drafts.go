@@ -39,12 +39,13 @@ type DraftsRequest struct {
 // DraftsPatchRequest contains a subset of drafts fields that are allowed to
 // be updated with a PATCH request.
 type DraftsPatchRequest struct {
-	Approvers    *[]string               `json:"approvers,omitempty"`
-	Contributors *[]string               `json:"contributors,omitempty"`
-	CustomFields *[]document.CustomField `json:"customFields,omitempty"`
-	Owners       *[]string               `json:"owners,omitempty"`
-	Product      *string                 `json:"product,omitempty"`
-	Summary      *string                 `json:"summary,omitempty"`
+	Approvers      *[]string               `json:"approvers,omitempty"`
+	ApproverGroups *[]string               `json:"approverGroups,omitempty"`
+	Contributors   *[]string               `json:"contributors,omitempty"`
+	CustomFields   *[]document.CustomField `json:"customFields,omitempty"`
+	Owners         *[]string               `json:"owners,omitempty"`
+	Product        *string                 `json:"product,omitempty"`
+	Summary        *string                 `json:"summary,omitempty"`
 	// Tags                []string `json:"tags,omitempty"`
 	Title *string `json:"title,omitempty"`
 }
@@ -660,9 +661,25 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// Get group reviews for the document.
+		var groupReviews models.DocumentGroupReviews
+		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
+			Document: models.Document{
+				GoogleFileID: docID,
+			},
+		}); err != nil {
+			srv.Logger.Error("error getting group reviews for document",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+			)
+			return
+		}
+
 		// Convert database model to a document.
 		doc, err := document.NewFromDatabaseModel(
-			model, reviews)
+			model, reviews, groupReviews)
 		if err != nil {
 			srv.Logger.Error("error converting database model to document type",
 				"error", err,
@@ -1159,6 +1176,20 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					approvers = append(approvers, &u)
 				}
 				model.Approvers = approvers
+			}
+
+			// Approver groups.
+			if req.ApproverGroups != nil {
+				doc.ApproverGroups = *req.ApproverGroups
+
+				approverGroups := make([]*models.Group, len(doc.ApproverGroups))
+				for i, a := range doc.ApproverGroups {
+					g := models.Group{
+						EmailAddress: a,
+					}
+					approverGroups[i] = &g
+				}
+				model.ApproverGroups = approverGroups
 			}
 
 			// Contributors.
