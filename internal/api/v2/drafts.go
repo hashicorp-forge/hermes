@@ -27,7 +27,6 @@ import (
 )
 
 type DraftsRequest struct {
-	Approvers           []string `json:"approvers,omitempty"`
 	Contributors        []string `json:"contributors,omitempty"`
 	DocType             string   `json:"docType,omitempty"`
 	Product             string   `json:"product,omitempty"`
@@ -297,12 +296,6 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 
 			// Create document in the database.
-			var approvers []*models.User
-			for _, c := range req.Approvers {
-				approvers = append(approvers, &models.User{
-					EmailAddress: c,
-				})
-			}
 			var contributors []*models.User
 			for _, c := range req.Contributors {
 				contributors = append(contributors, &models.User{
@@ -323,7 +316,6 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 			model := models.Document{
 				GoogleFileID:       f.Id,
-				Approvers:          approvers,
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
 				DocumentModifiedAt: createdTime,
