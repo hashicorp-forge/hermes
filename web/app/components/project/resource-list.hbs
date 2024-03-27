@@ -19,7 +19,11 @@
       finalRemoval=true
     }}
       <div>
-        <ol data-test-resource-list class="divided-list">
+        <ol
+          {{did-insert this.configureDragAndDropContainer}}
+          data-test-resource-list
+          class="divided-list"
+        >
           {{#animated-each
             @items
             rules=this.listTransitionRules
@@ -27,7 +31,11 @@
             finalRemoval=true
             as |item i|
           }}
-            <li class="group relative block" data-test-resource-list-item>
+            <li
+              {{did-insert this.configureDragAndDrop}}
+              class="group relative block"
+              data-test-resource-list-item
+            >
               {{yield (hash item=item index=i) to="item"}}
             </li>
           {{/animated-each}}

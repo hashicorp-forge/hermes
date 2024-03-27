@@ -12,6 +12,13 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  dropTargetForElements,
+  monitorForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import htmlElement from "hermes/utils/html-element";
+import { assert } from "@ember/debug";
 
 interface ProjectResourceListComponentSignature {
   Element: HTMLDivElement;
@@ -99,6 +106,32 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     } else {
       return emptyTransition;
     }
+  }
+
+  @action protected configureDragAndDrop(element: HTMLElement) {
+    const dragHandle = element.querySelector(".drag-handle");
+
+    assert("dragHandle must exist", dragHandle);
+
+    draggable({
+      element,
+      dragHandle,
+      onDrag: () => console.log("Something stopped dragging in me!"),
+      onDragStart: () => console.log("Something started dragging in me!"),
+    });
+
+    monitorForElements({
+      onDragStart: () => console.log("Something is dragging in me!"),
+    });
+  }
+
+  @action protected configureDragAndDropContainer(element: HTMLElement) {
+    dropTargetForElements({
+      element,
+      onDragEnter: () => console.log("Something entered me!"),
+      onDragLeave: () => console.log("Something left me!"),
+      onDrop: () => console.log("Something dropped in me!"),
+    });
   }
 
   *badgeTransition({ insertedSprites, removedSprites }: TransitionContext) {

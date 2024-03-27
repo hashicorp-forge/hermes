@@ -3,6 +3,11 @@
   {{yield}}
 
   {{#unless @isReadOnly}}
+    <Action
+      class="drag-handle absolute left-0 top-0 z-10 h-[20px] w-[20px] cursor-grab rounded bg-yellow-100"
+    >
+      <FlightIcon @name="menu" />
+    </Action>
     <OverflowMenu
       @items={{@overflowMenuItems}}
       @offset={{hash mainAxis=1 crossAxis=-3}}
