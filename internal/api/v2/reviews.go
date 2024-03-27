@@ -101,9 +101,25 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Get group reviews for the document.
+			var groupReviews models.DocumentGroupReviews
+			if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
+				Document: models.Document{
+					GoogleFileID: docID,
+				},
+			}); err != nil {
+				srv.Logger.Error("error getting group reviews for document",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+
 			// Convert database model to a document.
 			doc, err := document.NewFromDatabaseModel(
-				model, reviews)
+				model, reviews, groupReviews)
 			if err != nil {
 				srv.Logger.Error("error converting database model to document type",
 					"error", err,
@@ -487,8 +503,12 @@ func ReviewsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Give document approvers edit access to the document.
-			for _, a := range doc.Approvers {
+			// Create slice of all approvers consisting of individuals and groups.
+			allApprovers := append(doc.Approvers, doc.ApproverGroups...)
+
+			// Give document approvers and approver groups edit access to the
+			// document.
+			for _, a := range allApprovers {
 				if err := srv.GWService.ShareFile(docID, a, "writer"); err != nil {
 					srv.Logger.Error("error sharing file with approver",
 						"error", err,
@@ -533,10 +553,10 @@ func ReviewsHandler(srv server.Server) http.Handler {
 
 			// Send emails to approvers, if enabled.
 			if srv.Config.Email != nil && srv.Config.Email.Enabled {
-				if len(doc.Approvers) > 0 {
+				if len(allApprovers) > 0 {
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully from a failure here.
-					for _, approverEmail := range doc.Approvers {
+					for _, approverEmail := range allApprovers {
 						err := email.SendReviewRequestedEmail(
 							email.ReviewRequestedEmailData{
 								BaseURL:           srv.Config.BaseURL,

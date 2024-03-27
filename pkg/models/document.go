@@ -21,6 +21,10 @@ type Document struct {
 	// document.
 	Approvers []*User `gorm:"many2many:document_reviews;"`
 
+	// ApproverGroups is the list of groups whose approval is requested for the
+	// document.
+	ApproverGroups []*Group `gorm:"many2many:document_group_reviews;"`
+
 	// Contributors are users who have contributed to the document.
 	Contributors []*User `gorm:"many2many:document_contributors;"`
 
@@ -527,6 +531,16 @@ func (d *Document) createAssocations(db *gorm.DB) error {
 	}
 	d.Approvers = approvers
 
+	// Find or create approver groups.
+	var approverGroups []*Group
+	for _, a := range d.ApproverGroups {
+		if err := a.FirstOrCreate(db); err != nil {
+			return fmt.Errorf("error finding or creating approver groups: %w", err)
+		}
+		approverGroups = append(approverGroups, a)
+	}
+	d.ApproverGroups = approverGroups
+
 	// Find or create contributors.
 	var contributors []*User
 	for _, c := range d.Contributors {
@@ -575,6 +589,16 @@ func (d *Document) getAssociations(db *gorm.DB) error {
 		approvers = append(approvers, a)
 	}
 	d.Approvers = approvers
+
+	// Get approver groups.
+	var approverGroups []*Group
+	for _, a := range d.ApproverGroups {
+		if err := a.Get(db); err != nil {
+			return fmt.Errorf("error getting approver group: %w", err)
+		}
+		approverGroups = append(approverGroups, a)
+	}
+	d.ApproverGroups = approverGroups
 
 	// Get contributors.
 	var contributors []*User
@@ -650,6 +674,16 @@ func (d *Document) replaceAssocations(db *gorm.DB) error {
 		Unscoped().
 		Association("Approvers").
 		Replace(d.Approvers); err != nil {
+		return err
+	}
+
+	// Replace approver groups.
+	if err := db.
+		Session(&gorm.Session{SkipHooks: true}).
+		Model(&d).
+		Unscoped().
+		Association("ApproverGroups").
+		Replace(d.ApproverGroups); err != nil {
 		return err
 	}
 

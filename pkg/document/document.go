@@ -44,6 +44,10 @@ type Document struct {
 	// are requested for the document.
 	Approvers []string `json:"approvers,omitempty"`
 
+	// ApproverGroups is a slice of email address strings for groups whose
+	// approvals are requested for the document.
+	ApproverGroups []string `json:"approverGroups,omitempty"`
+
 	// ChangesRequestedBy is a slice of email address strings for users that have
 	// requested changes for the document.
 	ChangesRequestedBy []string `json:"changesRequestedBy,omitempty"`
@@ -234,7 +238,9 @@ func NewFromAlgoliaObject(
 
 // NewFromDatabaseModel creates a document from a document database model.
 func NewFromDatabaseModel(
-	model models.Document, reviews models.DocumentReviews,
+	model models.Document,
+	reviews models.DocumentReviews,
+	groupReviews models.DocumentGroupReviews,
 ) (*Document, error) {
 	doc := &Document{}
 
@@ -272,6 +278,13 @@ func NewFromDatabaseModel(
 	doc.ApprovedBy = approvedBy
 	doc.Approvers = approvers
 	doc.ChangesRequestedBy = changesRequestedBy
+
+	// ApproverGroups.
+	var approverGroups []string
+	for _, r := range groupReviews {
+		approverGroups = append(approverGroups, r.Group.EmailAddress)
+	}
+	doc.ApproverGroups = approverGroups
 
 	// Contributors.
 	contributors := []string{}
@@ -600,6 +613,20 @@ func (d Document) ToDatabaseModels(
 		}
 	}
 	doc.Approvers = approvers
+
+	// Approver groups.
+	var approverGroups []*models.Group
+	for _, a := range d.ApproverGroups {
+		g := models.Group{
+			EmailAddress: a,
+		}
+		// Validate email address.
+		if _, err := mail.ParseAddress(g.EmailAddress); err != nil {
+			continue
+		}
+		approverGroups = append(approverGroups, &g)
+	}
+	doc.ApproverGroups = approverGroups
 
 	return doc, reviews, nil
 }

@@ -575,7 +575,8 @@ func (doc *Document) ReplaceHeader(
 
 	// Approvers cell.
 	// Build approvers slice with a check next to reviewers who have approved.
-	var approvers []string
+	// Approver groups are listed first.
+	approvers := doc.ApproverGroups
 	for _, approver := range doc.Approvers {
 		if helpers.StringSliceContains(doc.ApprovedBy, approver) {
 			approvers = append(approvers, "✅ "+approver)
