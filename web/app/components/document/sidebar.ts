@@ -971,14 +971,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   });
 
   @action updateApprovers(approvers: string[]) {
-    // this is a mix of people and group approvers.
-    // need some way of differentiating between the two.
-    this.approvers = approvers.filter((approver) => {
-      return this.store.peekRecord("person", approver);
-    });
-
     this.approverGroups = approvers.filter((approver) => {
       return this.store.peekRecord("group", approver);
+    });
+
+    this.approvers = approvers.filter((approver) => {
+      if (!this.approverGroups.includes(approver)) {
+        return this.store.peekRecord("person", approver);
+      }
     });
   }
 

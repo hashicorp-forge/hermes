@@ -26,8 +26,8 @@ interface GroupQueryParams {
 
 export default class GroupSerializer extends JSONSerializer {
   /**
-   * The serializer for the `person` model.
-   * Handles `query` and `queryRecord` requests to the EmberData store.
+   * The serializer for the `group` model.
+   * Handles `query` requests to the EmberData store.
    * Formats the response to match the JSON spec.
    */
   normalizeResponse(

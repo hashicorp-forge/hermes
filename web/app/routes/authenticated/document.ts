@@ -153,8 +153,6 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     const allowed = resp?.headers.get("allowed");
 
-    console.log("allow", allowed);
-
     if (allowed?.includes("POST")) {
       viewerIsGroupApprover = true;
     }
@@ -171,6 +169,11 @@ export default class AuthenticatedDocumentRoute extends Route {
     if (typedDoc.approvers?.length) {
       // Add the approvers to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.approvers);
+    }
+
+    if (typedDoc.approverGroups?.length) {
+      // Add the approver groups to the list of people to fetch.
+      peopleToMaybeFetch.push(...typedDoc.approverGroups);
     }
 
     const customFields = typedDoc.customEditableFields;
