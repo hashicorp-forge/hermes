@@ -398,6 +398,28 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// If the user is a group approver, they won't be in the approvers list.
+			if !contains(doc.Approvers, userEmail) {
+				doc.Approvers = append(doc.Approvers, userEmail)
+
+				// Add approver in database.
+				model.Approvers = append(model.Approvers, &models.User{
+					EmailAddress: userEmail,
+				})
+				if err := model.Upsert(srv.DB); err != nil {
+					srv.Logger.Error(
+						"error updating document in the database to add approver",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error approving document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
+
 			// Add email to slice of users who have approved the document.
 			doc.ApprovedBy = append(doc.ApprovedBy, userEmail)
 
@@ -433,7 +455,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					"path", r.URL.Path,
 					"doc_id", docID,
 					"rev_id", latestRev.Id)
-				http.Error(w, "Error creating review",
+				http.Error(w, "Error approving document",
 					http.StatusInternalServerError)
 				return
 			}
