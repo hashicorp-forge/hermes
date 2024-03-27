@@ -755,6 +755,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return (
       this.save.isRunning ||
       this.saveCustomField.isRunning ||
+      this.patchDocument.isRunning ||
       this.saveProduct.isRunning
     );
   }

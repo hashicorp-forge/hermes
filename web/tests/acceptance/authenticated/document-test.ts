@@ -27,6 +27,7 @@ import {
   TEST_USER_EMAIL,
   TEST_SHORT_LINK_BASE_URL,
   TEST_USER_NAME,
+  TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
 

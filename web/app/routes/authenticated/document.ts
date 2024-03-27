@@ -146,19 +146,16 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     const resp = await this.fetchSvc
       .fetch(
-        `
-      /api/${this.configSvc.config.api_version}/approvals/${params.document_id}
-    `,
-        {
-          method: "OPTIONS",
-        },
+        `/api/${this.configSvc.config.api_version}/approvals/${params.document_id}`,
+        { method: "OPTIONS" },
       )
-      .then((r) => r?.json())
-      .catch(() => console.log("TODO: handle error"));
+      .then((r) => r);
 
-    const allow = resp?.allow;
+    const allowed = resp?.headers.get("allowed");
 
-    if (allow?.includes("POST")) {
+    console.log("allow", allowed);
+
+    if (allowed?.includes("POST")) {
       viewerIsGroupApprover = true;
     }
 
