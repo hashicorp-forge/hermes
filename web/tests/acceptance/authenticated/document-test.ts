@@ -751,6 +751,11 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("doc owners can publish their docs for review", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.create("google/person", {
+      emailAddresses: [{ value: TEST_USER_2_EMAIL }],
+      names: [{ displayName: TEST_USER_2_NAME }],
+    });
+
     this.server.create("document", {
       objectID: 1,
       docType: "PRD",
@@ -763,6 +768,16 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
+
+    // Add an approver
+    await click("dialog [data-test-people-select]");
+
+    await fillIn(
+      ".ember-power-select-trigger-multiple-input",
+      TEST_USER_2_EMAIL,
+    );
+
+    await click(PEOPLE_SELECT_OPTION);
 
     let clickPromise = click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
@@ -789,9 +804,11 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasText("Continue to document")
       .hasAttribute("data-test-color", "tertiary");
 
-    // TODO: Assert that clicking the modal dismisses it.
-    // Requires @hashicorp/design-system-components 2.9.0+
-    // https://github.com/hashicorp/design-system/commit/a6553ea032f70f0167f149589801b72154c3cf75
+    await click(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR);
+
+    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).doesNotExist();
+
+    assert.dom(APPROVERS_SELECTOR).containsText(TEST_USER_2_NAME);
   });
 
   test('the "document published" modal hides the share elements if the docNumber fails to load', async function (this: AuthenticatedDocumentRouteTestContext, assert) {

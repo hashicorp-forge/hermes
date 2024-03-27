@@ -23,6 +23,7 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 1. Enable the following APIs for [Google Workspace APIs](https://developers.google.com/workspace/guides/enable-apis)
 
+   - Admin SDK API
    - Google Docs API
    - Google Drive API
    - Gmail API
@@ -96,7 +97,7 @@ Jira can be optionally configured to enable linking Hermes projects with Jira is
 ### Requirements
 
 - Go 1.18
-- Node.js 16
+- Node.js 20
 - Yarn ~3.3.0 ([install with corepack](https://yarnpkg.com/getting-started/install))
 
 ### Configuration File

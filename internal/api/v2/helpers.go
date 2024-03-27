@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
+	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-multierror"
@@ -528,6 +529,27 @@ func CompareAlgoliaAndDatabaseDocument(
 	}
 
 	return result.ErrorOrNil()
+}
+
+// isUserInGroups returns true if a user is in any supplied groups, false
+// otherwise.
+func isUserInGroups(
+	userEmail string, groupEmails []string, svc *gw.Service) (bool, error) {
+	// Get groups for user.
+	userGroups, err := svc.AdminDirectory.Groups.List().
+		UserKey(userEmail).
+		Do()
+	if err != nil {
+		return false, fmt.Errorf("error getting groups for user: %w", err)
+	}
+
+	for _, g := range userGroups.Groups {
+		if contains(groupEmails, g.Email) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func getBooleanValue(in map[string]any, key string) (bool, error) {

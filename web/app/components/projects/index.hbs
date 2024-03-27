@@ -17,9 +17,9 @@
   <WhatsAProject class="absolute top-1/2 right-0 -translate-y-1/2" />
 </div>
 
-{{#if this.shownProjects.length}}
+{{#if @projects.length}}
   <ol data-test-projects-list class="divided-list relative">
-    {{#each this.shownProjects as |project|}}
+    {{#each @projects as |project|}}
       <li data-test-project>
         <Project::Tile @project={{project}} />
       </li>

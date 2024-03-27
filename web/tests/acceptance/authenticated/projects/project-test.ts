@@ -794,6 +794,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await visit("/projects/1");
 
+    await recentlyViewed.fetchAll.perform();
     assert.equal(recentlyViewed.index?.length, 1);
 
     const project = recentlyViewed.index?.[0];

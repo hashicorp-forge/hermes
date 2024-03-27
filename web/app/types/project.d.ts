@@ -5,18 +5,7 @@ import {
 import { ProjectStatus } from "./project-status";
 import { HermesDocument } from "./document";
 import { AlgoliaHit } from "hermes/services/algolia";
-
-export interface JiraIssue {
-  key: string;
-  url: string;
-  priority: string;
-  priorityImage: string;
-  status: string;
-  assignee?: string;
-  issueType: string;
-  issueTypeImage: string;
-  summary: string;
-}
+import JiraIssueModel from "hermes/models/jira-issue";
 
 export interface JiraPickerResult {
   key: string;
@@ -47,5 +36,5 @@ export interface HermesProjectResources {
 export interface HermesProject
   extends HermesProjectInfo,
     HermesProjectResources {
-  jiraIssue?: JiraIssue;
+  jiraIssue?: JiraIssueModel;
 }

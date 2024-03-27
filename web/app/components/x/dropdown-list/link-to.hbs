@@ -7,7 +7,7 @@
   aria-selected={{@isAriaSelected}}
   tabindex="-1"
   aria-checked={{@isAriaChecked}}
-  @route={{@route}}
+  @route={{this.route}}
   @query={{maybe-query @query}}
   @models={{model-or-models @model @models}}
   class="x-dropdown-list-item-link {{if @isAriaSelected 'is-aria-selected'}}"

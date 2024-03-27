@@ -413,8 +413,17 @@ export default function (mirageConfig) {
       });
 
       // Fetch a list of projects.
-      this.get("/projects", () => {
-        const projects = this.schema.projects.all().models;
+      // If a status is provided, filter by it.
+      this.get("/projects", (schema, request) => {
+        const { status } = request.queryParams;
+
+        let projects;
+
+        if (status) {
+          projects = schema.projects.where({ status }).models;
+        } else {
+          projects = schema.projects.all().models;
+        }
         return new Response(
           200,
           {},
@@ -850,6 +859,9 @@ export default function (mirageConfig) {
        *************************************************************************/
 
       this.head("/me", (schema, _request) => {
+        // Stop this from cluttering the console when "Mirage logging" is checked
+        this.logging = false;
+
         let isLoggedIn = schema.db.me[0].isLoggedIn;
 
         if (isLoggedIn) {

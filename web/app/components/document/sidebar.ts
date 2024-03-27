@@ -855,6 +855,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   requestReview = task(async () => {
     try {
       // Update approvers.
+      this.toggleApproverVisibility();
       await this.patchDocument.perform({
         approvers: this.approvers.compact(),
       });

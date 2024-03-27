@@ -17,11 +17,10 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
 
   async model(params: { status: string }) {
     const projects = await this.fetchSvc
-      .fetch(`/api/${this.configSvc.config.api_version}/projects`)
+      .fetch(
+        `/api/${this.configSvc.config.api_version}/projects?status=${params.status}`,
+      )
       .then((response) => response?.json());
-
-    // We'll eventually use the status param in the query;
-    // for now, we pass it to the component for local filtering
 
     return { projects, status: params.status as ProjectStatus };
   }

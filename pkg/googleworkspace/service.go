@@ -14,6 +14,7 @@ import (
 	"golang.org/x/oauth2/jwt"
 
 	"github.com/pkg/browser"
+	directory "google.golang.org/api/admin/directory/v1"
 	"google.golang.org/api/docs/v1"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/gmail/v1"
@@ -24,11 +25,12 @@ import (
 
 // Service provides access to the Google Workspace API.
 type Service struct {
-	Docs   *docs.Service
-	Drive  *drive.Service
-	Gmail  *gmail.Service
-	OAuth2 *oauth2api.Service
-	People *people.PeopleService
+	AdminDirectory *directory.Service
+	Docs           *docs.Service
+	Drive          *drive.Service
+	Gmail          *gmail.Service
+	OAuth2         *oauth2api.Service
+	People         *people.PeopleService
 }
 
 // Config is the configuration for interacting with Google Workspace using a
@@ -50,6 +52,7 @@ func NewFromConfig(cfg *Config) *Service {
 		Email:      cfg.ClientEmail,
 		PrivateKey: []byte(cfg.PrivateKey),
 		Scopes: []string{
+			"https://www.googleapis.com/auth/admin.directory.group.readonly",
 			"https://www.googleapis.com/auth/directory.readonly",
 			"https://www.googleapis.com/auth/documents",
 			"https://www.googleapis.com/auth/drive",
@@ -60,6 +63,10 @@ func NewFromConfig(cfg *Config) *Service {
 	}
 	client := conf.Client(context.TODO())
 
+	adminDirectorySrv, err := directory.NewService(context.TODO(), option.WithHTTPClient(client))
+	if err != nil {
+		log.Fatalf("Unable to retrieve Admin Directory client: %v", err)
+	}
 	docSrv, err := docs.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		log.Fatalf("Unable to retrieve Docs client: %v", err)
@@ -83,11 +90,12 @@ func NewFromConfig(cfg *Config) *Service {
 	peoplePeopleSrv := people.NewPeopleService(peopleSrv)
 
 	return &Service{
-		Docs:   docSrv,
-		Drive:  driveSrv,
-		Gmail:  gmailSrv,
-		OAuth2: oAuth2Srv,
-		People: peoplePeopleSrv,
+		AdminDirectory: adminDirectorySrv,
+		Docs:           docSrv,
+		Drive:          driveSrv,
+		Gmail:          gmailSrv,
+		OAuth2:         oAuth2Srv,
+		People:         peoplePeopleSrv,
 	}
 }
 
@@ -105,6 +113,7 @@ func New() *Service {
 
 	// If modifying these scopes, delete your previously saved token.json.
 	gc, err := google.ConfigFromJSON(b,
+		"https://www.googleapis.com/auth/admin.directory.group.readonly",
 		"https://www.googleapis.com/auth/directory.readonly",
 		"https://www.googleapis.com/auth/documents",
 		"https://www.googleapis.com/auth/drive",
@@ -114,6 +123,10 @@ func New() *Service {
 	}
 	client := getClient(gc)
 
+	adminDirectorySrv, err := directory.NewService(context.TODO(), option.WithHTTPClient(client))
+	if err != nil {
+		log.Fatalf("Unable to retrieve Admin Directory client: %v", err)
+	}
 	docSrv, err := docs.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		log.Fatalf("Unable to retrieve Google Docs client: %v", err)
@@ -137,11 +150,12 @@ func New() *Service {
 	peoplePeopleSrv := people.NewPeopleService(peopleSrv)
 
 	return &Service{
-		Docs:   docSrv,
-		Drive:  driveSrv,
-		Gmail:  gmailSrv,
-		OAuth2: oAuth2Srv,
-		People: peoplePeopleSrv,
+		AdminDirectory: adminDirectorySrv,
+		Docs:           docSrv,
+		Drive:          driveSrv,
+		Gmail:          gmailSrv,
+		OAuth2:         oAuth2Srv,
+		People:         peoplePeopleSrv,
 	}
 }
 
