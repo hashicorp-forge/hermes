@@ -12,20 +12,7 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
-
-type Item = {
-  id: string;
-  label: string;
-};
-
-const itemKey = Symbol("item");
-
-type ItemData = {
-  [itemKey]: true;
-  item: Item;
-  index: number;
-  instanceId: symbol;
-};
+import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
 interface ProjectResourceListComponentSignature {
   Element: HTMLDivElement;

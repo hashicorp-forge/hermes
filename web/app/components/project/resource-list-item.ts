@@ -18,37 +18,6 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { tracked } from "@glimmer/tracking";
 import { RelatedResource } from "../related-resources";
 
-type Item = {
-  id: string;
-  label: string;
-};
-
-const itemKey = Symbol("item");
-
-type ItemData = {
-  [itemKey]: true;
-  item: Item;
-  index: number;
-  instanceId: symbol;
-};
-
-function getItemData({
-  item,
-  index,
-  instanceId,
-}: {
-  item: Item;
-  index: number;
-  instanceId: symbol;
-}): ItemData {
-  return {
-    [itemKey]: true,
-    item,
-    index,
-    instanceId,
-  };
-}
-
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
@@ -68,6 +37,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @tracked protected closestEdge: Edge | null = null;
 
   @action protected configureDragAndDrop(element: HTMLElement) {
+    console.log("this.args.index", this.args.index);
     const dragHandle = element.querySelector(".drag-handle");
     assert("dragHandle must exist", dragHandle);
 
@@ -86,28 +56,19 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
             index: this.args.index,
           };
         },
-        onDrag: (e: ElementEventBasePayload) => {
-          const sourceIndex = e.source.data["index"];
-
-          assert(
-            "sourceIndex must be a number",
-            typeof sourceIndex === "number",
-          );
-
-          const dropTargetIndex = e.location.current.dropTargets[0]?.data;
-          console.log("sourceIndex", sourceIndex);
-          console.log("dropTargetIndex", dropTargetIndex);
-        },
       }),
 
       dropTargetForElements({
         element,
         getData(e: ElementDropTargetGetFeedbackArgs) {
-          return attachClosestEdge(e.source.data, {
-            element,
-            input: e.input,
-            allowedEdges: ["top", "bottom"],
-          });
+          return attachClosestEdge(
+            {},
+            {
+              element,
+              input: e.input,
+              allowedEdges: ["top", "bottom"],
+            },
+          );
         },
         canDrop: (e: ElementDropTargetGetFeedbackArgs) => {
           return e.source.element !== element;
@@ -132,23 +93,30 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
             typeof sourceIndex === "number",
           );
 
-          const dropTargetIndex = e.location.current.dropTargets[0]?.data;
-          console.log("sourceIndex", sourceIndex);
-          console.log("dropTargetIndex", dropTargetIndex);
+          const dropTarget = e.location.current.dropTargets[0];
 
-          // const isItemBeforeSource = index === sourceIndex - 1;
-          // const isItemAfterSource = index === sourceIndex + 1;
+          if (dropTarget) {
+            const dataIndex = dropTarget.element.getAttribute("data-index");
+            assert("data-index must exist", dataIndex);
+            // need to get the `data-index` attribute from the element
+            const index = parseInt(dataIndex, 10);
+            const isItemBeforeSource = index === sourceIndex - 1;
+            const isItemAfterSource = index === sourceIndex + 1;
 
-          // const isDropIndicatorHidden =
-          //   (isItemBeforeSource && closestEdge === "bottom") ||
-          //   (isItemAfterSource && closestEdge === "top");
+            const isDropIndicatorHidden =
+              (isItemBeforeSource && closestEdge === "bottom") ||
+              (isItemAfterSource && closestEdge === "top");
 
-          // if (isDropIndicatorHidden) {
-          //   setClosestEdge(null);
-          //   return;
-          // }
-
-          this.closestEdge = closestEdge;
+            if (isDropIndicatorHidden) {
+              this.closestEdge = null;
+              return;
+            } else {
+              this.closestEdge = closestEdge;
+            }
+          } else {
+            this.closestEdge = null;
+            return;
+          }
         },
         onDragEnter: (e: ElementDropTargetEventBasePayload) => {
           if (e.source.element !== element) {
@@ -163,6 +131,17 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           const { data } = e.source;
           const index = data["index"];
           assert("index must be a number", typeof index === "number");
+          const newIndex = parseInt(
+            e.location.current.dropTargets[0]?.element.getAttribute(
+              "data-index",
+            ) ?? "",
+            10,
+          );
+
+          console.log("onDrop", index, newIndex);
+
+          // call the passed-in action to update the order
+
           this.dragHasEntered = false;
           this.closestEdge = null;
         },
