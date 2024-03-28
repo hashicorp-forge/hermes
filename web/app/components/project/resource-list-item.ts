@@ -6,6 +6,7 @@ import {
   monitorForElements,
   ElementEventBasePayload,
   ElementDropTargetEventBasePayload,
+  ElementDropTargetGetFeedbackArgs,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import {
   attachClosestEdge,
@@ -15,6 +16,8 @@ import {
 import { assert } from "@ember/debug";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { tracked } from "@glimmer/tracking";
+import { RelatedResource } from "../related-resources";
+
 type Item = {
   id: string;
   label: string;
@@ -48,7 +51,10 @@ function getItemData({
 
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
-  Args: {};
+  Args: {
+    item: RelatedResource;
+    index: number;
+  };
   Blocks: {
     default: [];
   };
@@ -58,13 +64,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @tracked protected isDragging = false;
 
   @tracked protected dragHasEntered = false;
-
-  @tracked protected dragHasEnteredBottom = false;
-  @tracked protected dragHasEnteredTop = false;
-
-  @tracked protected clientY = 0;
-
-  @tracked protected currentMiddle = 0;
 
   @tracked protected closestEdge: Edge | null = null;
 
@@ -82,55 +81,67 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
         onDrop: () => {
           this.isDragging = false;
         },
-        getInitialData: (e) => {
+        getInitialData: () => {
           return {
-            someData: true,
-            // return some data that we can use to reorder later?
+            index: this.args.index,
           };
         },
         onDrag: (e: ElementEventBasePayload) => {
-          this.clientY = e.location.current.input.clientY;
+          const sourceIndex = e.source.data["index"];
+
+          assert(
+            "sourceIndex must be a number",
+            typeof sourceIndex === "number",
+          );
+
+          const dropTargetIndex = e.location.current.dropTargets[0]?.data;
+          console.log("sourceIndex", sourceIndex);
+          console.log("dropTargetIndex", dropTargetIndex);
         },
       }),
-      // monitorForElements({
-      //   onDrag: (e: ElementEventBasePayload) => {
-      //     debugger;
-      //   },
-      // }),
+
       dropTargetForElements({
         element,
-        getData({ input }) {
-          // FIXME
-          return attachClosestEdge(
-            {},
-            {
-              element,
-              input,
-              allowedEdges: ["top", "bottom"],
-            },
-          );
+        getData(e: ElementDropTargetGetFeedbackArgs) {
+          return attachClosestEdge(e.source.data, {
+            element,
+            input: e.input,
+            allowedEdges: ["top", "bottom"],
+          });
         },
-        canDrop: (e) => {
+        canDrop: (e: ElementDropTargetGetFeedbackArgs) => {
           return e.source.element !== element;
         },
-        onDrag: ({ self, source }) => {
-          const isSource = source.element === element;
+        onDrag: (e: ElementDropTargetEventBasePayload) => {
+          const isSource = e.source.element === element;
           if (isSource) {
             this.closestEdge = null;
             return;
           }
 
-          const closestEdge = extractClosestEdge(self.data);
+          const closestEdge = extractClosestEdge(e.self.data);
 
-          // const sourceIndex = source.data.index;
-          // invariant(typeof sourceIndex === 'number');
+          // TODO: this has logic to not show
+          // the indicator when dropping the item
+          // would not change the order of the list
+
+          const sourceIndex = e.source.data["index"];
+
+          assert(
+            "sourceIndex must be a number",
+            typeof sourceIndex === "number",
+          );
+
+          const dropTargetIndex = e.location.current.dropTargets[0]?.data;
+          console.log("sourceIndex", sourceIndex);
+          console.log("dropTargetIndex", dropTargetIndex);
 
           // const isItemBeforeSource = index === sourceIndex - 1;
           // const isItemAfterSource = index === sourceIndex + 1;
 
           // const isDropIndicatorHidden =
-          //   (isItemBeforeSource && closestEdge === 'bottom') ||
-          //   (isItemAfterSource && closestEdge === 'top');
+          //   (isItemBeforeSource && closestEdge === "bottom") ||
+          //   (isItemAfterSource && closestEdge === "top");
 
           // if (isDropIndicatorHidden) {
           //   setClosestEdge(null);
@@ -140,18 +151,8 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           this.closestEdge = closestEdge;
         },
         onDragEnter: (e: ElementDropTargetEventBasePayload) => {
-          console.log("ON DRAG ENEENE");
           if (e.source.element !== element) {
-            console.log("setting dragHasEntered to true");
             this.dragHasEntered = true;
-
-            const rect = element.getBoundingClientRect();
-            const top = rect.top;
-            const bottom = rect.bottom;
-
-            const middle = top + (bottom - top) / 2;
-
-            this.currentMiddle = middle;
           }
         },
         onDragLeave: () => {
@@ -159,6 +160,9 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           this.closestEdge = null;
         },
         onDrop: (e: ElementDropTargetEventBasePayload) => {
+          const { data } = e.source;
+          const index = data["index"];
+          assert("index must be a number", typeof index === "number");
           this.dragHasEntered = false;
           this.closestEdge = null;
         },
