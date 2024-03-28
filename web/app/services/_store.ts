@@ -22,7 +22,7 @@ export default class StoreService extends Store {
     ) => {
       if (!emailsOrDocs) return;
 
-      let promises: Promise<void>[] = [];
+      let promises: Promise<void | any>[] = [];
       let uniqueEmails: string[] = [];
 
       emailsOrDocs = emailsOrDocs.uniq(); // Remove duplicates
@@ -92,9 +92,12 @@ export default class StoreService extends Store {
               });
             }
           }),
-          this.queryRecord("group", {
-            emails: email,
-          }).catch((e) => {
+          /**
+           * Groups API doesn't have a `findRecord` equivalent, so we query instead.
+           */
+          this.query("group", {
+            query: email,
+          }).catch(() => {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in

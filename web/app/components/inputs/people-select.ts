@@ -238,6 +238,8 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         const [people, groups] = await Promise.all(promises);
 
+        console.log(people, groups);
+
         if (people) {
           p = people
             .map((p: PersonModel) => p.email)
