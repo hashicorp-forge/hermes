@@ -160,6 +160,7 @@
         @items={{this.hermesDocuments}}
         @shouldAnimate={{this.shouldAnimate}}
         @motion={{this.resourceListContainerMotion}}
+        @onSave={{this.saveDocumentOrder}}
         class="mt-7"
       >
         <:header>
@@ -170,6 +171,7 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
+              id={{doc.googleFileID}}
               @isReadOnly={{not this.projectIsActive}}
               @overflowMenuItems={{hash
                 delete=(hash
@@ -196,6 +198,7 @@
           @items={{this.externalLinks}}
           @shouldAnimate={{this.shouldAnimate}}
           @motion={{this.resourceListContainerMotion}}
+          {{! TODO: external reorder }}
         >
           <:header>
             <span data-test-external-links-header>

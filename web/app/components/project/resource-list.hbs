@@ -27,7 +27,11 @@
             finalRemoval=true
             as |item i|
           }}
-            <Project::ResourceListItem @item={{item}} @index={{i}}>
+            <Project::ResourceListItem
+              @onSave={{@onSave}}
+              @item={{item}}
+              @index={{i}}
+            >
               {{yield (hash item=item index=i) to="item"}}
             </Project::ResourceListItem>
           {{/animated-each}}

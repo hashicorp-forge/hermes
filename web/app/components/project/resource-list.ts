@@ -20,6 +20,7 @@ interface ProjectResourceListComponentSignature {
     items: RelatedResource[];
     shouldAnimate: boolean;
     motion: unknown;
+    onSave: (currentIndex: number, newIndex: number) => void;
   };
   Blocks: {
     header: [];

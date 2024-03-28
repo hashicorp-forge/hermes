@@ -23,6 +23,7 @@ interface ProjectResourceListItemComponentSignature {
   Args: {
     item: RelatedResource;
     index: number;
+    onSave: (currentIndex: number, newIndex: number) => void;
   };
   Blocks: {
     default: [];
@@ -37,7 +38,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @tracked protected closestEdge: Edge | null = null;
 
   @action protected configureDragAndDrop(element: HTMLElement) {
-    console.log("this.args.index", this.args.index);
     const dragHandle = element.querySelector(".drag-handle");
     assert("dragHandle must exist", dragHandle);
 
@@ -131,16 +131,31 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           const { data } = e.source;
           const index = data["index"];
           assert("index must be a number", typeof index === "number");
-          const newIndex = parseInt(
-            e.location.current.dropTargets[0]?.element.getAttribute(
-              "data-index",
-            ) ?? "",
+
+          const dropTargetElement = e.location.current.dropTargets[0]?.element;
+          let newIndex = parseInt(
+            dropTargetElement?.getAttribute("data-index") ?? "",
             10,
           );
+          const closestEdge =
+            dropTargetElement?.getAttribute("data-closest-edge");
 
-          console.log("onDrop", index, newIndex);
+          const isDraggingDown = index < newIndex;
+          const isDraggingUp = index > newIndex;
 
-          // call the passed-in action to update the order
+          console.log("index", index);
+          console.log("newIndex", newIndex);
+          console.log("closestEdge", closestEdge);
+
+          debugger;
+
+          if (closestEdge === "bottom" && isDraggingUp) {
+            newIndex += 1;
+          } else if (closestEdge === "top" && isDraggingDown) {
+            newIndex -= 1;
+          }
+
+          this.args.onSave(index, newIndex);
 
           this.dragHasEntered = false;
           this.closestEdge = null;

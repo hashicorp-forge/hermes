@@ -330,6 +330,23 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = true;
   }
 
+  @action protected saveDocumentOrder(currentIndex: number, newIndex: number) {
+    const cachedDocuments = this.hermesDocuments.slice();
+    // need to reorder this.hermesDocuments
+    // based on the order of docIDs
+
+    const [removed] = this.hermesDocuments.splice(currentIndex, 1);
+
+    assert("removed must exist", removed);
+
+    this.hermesDocuments.insertAt(newIndex, removed);
+
+    void this.saveProjectResources.perform(
+      cachedDocuments,
+      this.externalLinks.slice(),
+    );
+  }
+
   /**
    * The action to add a document to a project.
    * Adds a resource to the correct array, then saves the project.

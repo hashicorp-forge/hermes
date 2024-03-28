@@ -1,19 +1,20 @@
 <li
   {{did-insert this.configureDragAndDrop}}
   data-index={{@index}}
+  data-closest-edge={{this.closestEdge}}
   class="group relative block {{if this.isDragging 'is-dragging opacity-50'}}"
   data-test-resource-list-item
   ...attributes
 >
   {{#if this.dragHasEntered}}
     <div
-      class="absolute z-10 h-1 w-full
+      class="absolute z-10 h-1 w-full rounded-l-full rounded-r-full
         {{if
           (eq this.closestEdge 'top')
-          '-top-px -translate-y-1/2 bg-red-200'
+          '-top-px -translate-y-1/2 bg-color-foreground-action'
           (if
             (eq this.closestEdge 'bottom')
-            'bottom-0 translate-y-1/2 bg-blue-200'
+            'bottom-0 translate-y-1/2 bg-color-foreground-action'
           )
         }}"
     >
