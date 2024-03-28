@@ -1,0 +1,10 @@
+<li
+  {{did-insert this.configureDragAndDrop}}
+  class="group relative block
+    {{if this.isDragging 'opacity-50'}}
+    {{if this.dragHasEntered 'bg-yellow-500'}}"
+  data-test-resource-list-item
+  ...attributes
+>
+  {{yield}}
+</li>
