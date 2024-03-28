@@ -57,8 +57,9 @@ func GroupsHandler(srv server.Server) http.Handler {
 
 			// Apply groups prefix, if applicable.
 			if srv.Config.GoogleWorkspace.GroupsPrefix != "" {
-				// Only apply prefix if query does not already have it.
-				if !strings.HasPrefix(query, srv.Config.GoogleWorkspace.GroupsPrefix) {
+				// Only apply prefix if it looks like the user isn't beginning to type
+				// it.
+				if !strings.HasPrefix(srv.Config.GoogleWorkspace.GroupsPrefix, query) {
 					query = fmt.Sprintf(
 						"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
 				}
