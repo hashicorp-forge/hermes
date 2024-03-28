@@ -818,14 +818,14 @@ export default function (mirageConfig) {
 
       // Query via the PeopleSelect
       this.post("/people", (schema, request) => {
-        let query: string = JSON.parse(request.requestBody).query;
+        let query: string = JSON.parse(request.requestBody).query.toLowerCase();
 
         // Search everyone's first emailAddress for matches
         let matches: Collection<unknown> = schema["google/people"].where(
           (person) => {
             return (
-              person.emailAddresses[0].value.includes(query) ||
-              person.names[0].displayName.includes(query)
+              person.emailAddresses[0].value.toLowerCase().includes(query) ||
+              person.names[0].displayName.toLowerCase().includes(query)
             );
           },
         );

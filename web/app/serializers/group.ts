@@ -4,24 +4,7 @@ import DS from "ember-data";
 import GroupModel from "hermes/models/group";
 
 interface GroupPayload {
-  // kind: string;
-  // etag: string;
-  // groups: GroupModel[];
-  // nextPageToken: string;
   results: GroupModel[] | null;
-}
-
-// PLACEHOLDER //
-
-interface GroupQueryParams {
-  query?: string;
-  customer?: string;
-  domain?: string;
-  maxResults?: number;
-  orderBy?: string;
-  pageToken?: string;
-  sortOrder?: string;
-  userKey?: string;
 }
 
 export default class GroupSerializer extends JSONSerializer {

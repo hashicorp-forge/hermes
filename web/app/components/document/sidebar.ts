@@ -11,7 +11,7 @@ import {
   task,
   timeout,
 } from "ember-concurrency";
-import { capitalize, dasherize } from "@ember/string";
+import { capitalize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
@@ -119,18 +119,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked contributors: string[] = this.args.document.contributors || [];
 
   /**
-   *  TODO
+   * A locally tracked array of approvers. Used to update the UI immediately
+   * instead of waiting for the back end to confirm the change.
    */
   @tracked approvers: string[] = this.args.document.approvers || [];
 
   /**
-   *  TODO
+   * A locally tracked array of approverGroups. Used to update the UI immediately
+   * instead of waiting for the back end to confirm the change.
    */
 
   @tracked approverGroups: string[] = this.args.document.approverGroups || [];
 
   /**
-   *  TODO
+   * A computed property that returns all approvers and approverGroups.
+   * Passed to the EditableField component to render the list of approvers and groups.
+   * Recomputes when the approvers or approverGroups arrays change.
    */
   protected get allApprovers() {
     return this.approverGroups.concat(this.approvers);
@@ -417,6 +421,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     );
   }
 
+  /**
+   * Whether the viewer is a group approver, but not an individual approver.
+   * If true, hides the "Remove me" overflow menu next to the "Approve" button.
+   */
   protected get isGroupApproverOnly() {
     return this.args.viewerIsGroupApprover && !this.isApprover;
   }
@@ -970,6 +978,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   });
 
+  /**
+   * The action passed to the approvers EditableField as `onChange`.
+   * Updates the local approver arrays when people are added or removed.
+   */
   @action updateApprovers(approvers: string[]) {
     this.approverGroups = approvers.filter((approver) => {
       return this.store.peekRecord("group", approver);

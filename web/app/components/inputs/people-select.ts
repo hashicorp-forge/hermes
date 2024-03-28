@@ -175,9 +175,6 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    // FIXME: this offset is smaller in the sidebar
-    // in the new doc form, this should be 8.
-
     const extraOffsetLeft = 2;
     const extraOffsetBelow = 2;
     const extraOffsetAbove = extraOffsetBelow + 2;
@@ -238,14 +235,11 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         const [people, groups] = await Promise.all(promises);
 
-        console.log(people, groups);
-
         if (people) {
           p = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
               // filter out any people already selected
-              // FIXME: combine with groups
               return !this.args.selected.find(
                 (selectedEmail) => selectedEmail === email,
               );
@@ -273,8 +267,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
             })
             .map((g: GroupModel) => g.email)
             .filter((email) => {
-              // filter out any people already selected
-              // FIXME: this is redundant
+              // Filter out any people already selected
               return !this.args.selected.find(
                 (selectedEmail) => selectedEmail === email,
               );
@@ -283,11 +276,10 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
           g = [];
         }
 
-        // concat and sort by email
-
+        // Concatenate and sort alphabetically
         this.options = [...p, ...g].sort((a, b) => a.localeCompare(b));
 
-        // stop the loop if the query was successful
+        // Stop the loop if the query was successful
         return;
       } catch (e) {
         // Throw an error if this is the last retry.

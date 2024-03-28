@@ -1773,8 +1773,6 @@ module("Acceptance | authenticated/document", function (hooks) {
     const name = "Engineering";
     const email = "engineering@hashicorp.com";
 
-    this.server.createList("google/person", 5);
-
     this.server.create("group", {
       name,
       email,

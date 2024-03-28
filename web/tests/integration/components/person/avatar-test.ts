@@ -1,11 +1,13 @@
-import { render } from "@ember/test-helpers";
+import { render, rerender } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
 import {
+  TEST_USER_2_EMAIL,
   TEST_USER_EMAIL,
   TEST_USER_PHOTO,
   authenticateTestUser,
+  pushMirageIntoStore,
 } from "hermes/mirage/utils";
 import { module, test } from "qunit";
 
@@ -94,5 +96,28 @@ module("Integration | Component | person/avatar", async function (hooks) {
 
     assert.dom(IMAGE).doesNotExist();
     assert.dom(FALLBACK).exists();
+  });
+
+  test("people and groups have different fallback icons", async function (this: PersonAvatarTestContext, assert) {
+    this.server.create("group", {
+      id: TEST_USER_2_EMAIL,
+      email: TEST_USER_2_EMAIL,
+    });
+
+    pushMirageIntoStore(this);
+
+    this.set("email", TEST_USER_2_EMAIL);
+
+    await render<PersonAvatarTestContext>(hbs`
+      <Person::Avatar class="one" @email={{this.email}} />
+    `);
+
+    assert.dom(`${FALLBACK} svg`).hasAttribute("data-test-icon", "users");
+
+    this.set("email", "unknown");
+
+    await rerender();
+
+    assert.dom(`${FALLBACK} svg`).hasAttribute("data-test-icon", "user");
   });
 });

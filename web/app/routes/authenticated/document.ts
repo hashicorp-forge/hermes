@@ -139,10 +139,9 @@ export default class AuthenticatedDocumentRoute extends Route {
       }
     }
 
-    /**
-     * Check if the user is a group approver.
-     */
     let viewerIsGroupApprover = false;
+
+    // Check if the user is a group approver.
 
     const resp = await this.fetchSvc
       .fetch(
@@ -161,18 +160,17 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     typedDoc.isDraft = typedDoc.status === "WIP";
 
+    // Push the document's people into the store.
+
     if (typedDoc.contributors?.length) {
-      // Add the contributors to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.contributors);
     }
 
     if (typedDoc.approvers?.length) {
-      // Add the approvers to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.approvers);
     }
 
     if (typedDoc.approverGroups?.length) {
-      // Add the approver groups to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.approverGroups);
     }
 

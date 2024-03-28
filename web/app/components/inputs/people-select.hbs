@@ -16,7 +16,6 @@
   @triggerId={{@triggerId}}
   @onKeydown={{this.onKeydown}}
   @disabled={{@disabled}}
-  @searchMessage=""
   @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
   @calculatePosition={{this.calculatePosition}}
   @loadingMessage="Loading..."
@@ -27,9 +26,6 @@
   as |option|
 >
   <div class="flex items-center gap-2 overflow-hidden py-1">
-    {{! TODO: if (eq person.type "group") }}
-    {{! show an affordance or label }}
-    {{! anything we do here should also be accessible via the image chip }}
     <Person::Avatar @email={{option}} />
     <div class="w-full min-w-0">
       <TruncatedText
