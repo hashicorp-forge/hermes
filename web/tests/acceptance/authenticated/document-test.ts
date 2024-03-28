@@ -677,9 +677,8 @@ module("Acceptance | authenticated/document", function (hooks) {
   });
 
   test("group approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
-    // TODO: Add group logic
     this.server.options("/approvals/:document_id", () => {
-      return new Response(200, {}, { allow: ["POST"] });
+      return new Response(200, { allowed: "POST" }, {});
     });
 
     this.server.create("document", {

@@ -261,6 +261,14 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         if (groups) {
           g = groups
+            .filter((g: GroupModel) => {
+              const name = g.name.toLowerCase();
+              if (name.includes("departed") || name.includes("terminated")) {
+                return false;
+              } else {
+                return true;
+              }
+            })
             .map((g: GroupModel) => g.email)
             .filter((email) => {
               // filter out any people already selected
