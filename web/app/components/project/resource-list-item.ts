@@ -3,8 +3,6 @@ import Component from "@glimmer/component";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import {
   dropTargetForElements,
-  monitorForElements,
-  ElementEventBasePayload,
   ElementDropTargetEventBasePayload,
   ElementDropTargetGetFeedbackArgs,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
@@ -81,11 +79,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           }
 
           const closestEdge = extractClosestEdge(e.self.data);
-
-          // TODO: this has logic to not show
-          // the indicator when dropping the item
-          // would not change the order of the list
-
           const sourceIndex = e.source.data["index"];
 
           assert(
@@ -98,7 +91,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           if (dropTarget) {
             const dataIndex = dropTarget.element.getAttribute("data-index");
             assert("data-index must exist", dataIndex);
-            // need to get the `data-index` attribute from the element
             const index = parseInt(dataIndex, 10);
             const isItemBeforeSource = index === sourceIndex - 1;
             const isItemAfterSource = index === sourceIndex + 1;
@@ -142,12 +134,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
           const isDraggingDown = index < newIndex;
           const isDraggingUp = index > newIndex;
-
-          console.log("index", index);
-          console.log("newIndex", newIndex);
-          console.log("closestEdge", closestEdge);
-
-          debugger;
 
           if (closestEdge === "bottom" && isDraggingUp) {
             newIndex += 1;
