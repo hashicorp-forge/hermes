@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
 )
@@ -50,11 +51,24 @@ func GroupsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Sanitize query.
+			query := req.Query
+			query = strings.ReplaceAll(query, " ", "-")
+
+			// Apply groups prefix, if applicable.
+			if srv.Config.GoogleWorkspace.GroupsPrefix != "" {
+				// Only apply prefix if query does not already have it.
+				if !strings.HasPrefix(query, srv.Config.GoogleWorkspace.GroupsPrefix) {
+					query = fmt.Sprintf(
+						"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
+				}
+			}
+
 			// Retrieve groups.
 			groups, err := srv.GWService.AdminDirectory.Groups.List().
 				Domain(srv.Config.GoogleWorkspace.Domain).
 				MaxResults(10).
-				Query(fmt.Sprintf("email:%s*", req.Query)).
+				Query(fmt.Sprintf("email:%s*", query)).
 				Do()
 			if err != nil {
 				srv.Logger.Error("error searching groups",
