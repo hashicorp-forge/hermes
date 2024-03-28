@@ -1,16 +1,27 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
 import {
   FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetDropdownObjects,
 } from "hermes/types/facets";
 import ActiveFiltersService from "hermes/services/active-filters";
-import { next } from "@ember/runloop";
+import { next, schedule } from "@ember/runloop";
 import { SearchScope } from "hermes/routes/authenticated/results";
 import { assert } from "@ember/debug";
+import DocumentTypesService from "hermes/services/document-types";
+import ProductAreasService from "hermes/services/product-areas";
+import { tracked } from "@glimmer/tracking";
+import { restartableTask, task } from "ember-concurrency";
+import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import AlgoliaService from "hermes/services/algolia";
+import ConfigService from "hermes/services/config";
+import { SearchForFacetValuesResponse } from "instantsearch.js";
+import Ember from "ember";
+import { ProjectStatus } from "hermes/types/project-status";
+import StoreService from "hermes/services/_store";
+import PersonModel from "hermes/models/person";
 
 export enum SortByValue {
   DateDesc = "dateDesc",
@@ -54,11 +65,40 @@ interface ToolbarComponentSignature {
 }
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
-  @service declare router: RouterService;
+  @service("config") declare configSvc: ConfigService;
+  @service declare algolia: AlgoliaService;
   @service declare activeFilters: ActiveFiltersService;
+  @service declare documentTypes: DocumentTypesService;
+  @service declare productAreas: ProductAreasService;
+  @service declare store: StoreService;
+  /**
+   * Whether there has been a search during this session.
+   * Used to determine whether to search a query on focus.
+   * Set true the first time a search is performed.
+   * See `maybeSearch` task for more context.
+   */
+  @tracked private hasSearched = false;
 
-  get currentRouteName(): string {
-    return this.router.currentRouteName;
+  /**
+   * Whether the owners input is empty.
+   * Dictates when the dropdown is shown,
+   */
+  @tracked protected searchInputIsEmpty = true;
+
+  /**
+   * The query for the owner facet. Updated on input
+   * and reset on selection.
+   */
+  @tracked protected ownerQuery = "";
+
+  /**
+   * The results of an ownerSearch, if any.
+   * Looped through by the DropdownList component.
+   */
+  @tracked protected ownerResults: string[] | undefined = undefined;
+
+  protected get ownerFacetIsShown() {
+    return this.args.scope !== SearchScope.Projects;
   }
 
   /**
@@ -67,6 +107,14 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    */
   protected get facetsAreShown() {
     return this.args.scope !== SearchScope.All;
+  }
+
+  /**
+   * Whether the owners input is disabled.
+   * True if there are no owners in the facets object.
+   */
+  protected get ownersInputIsDisabled() {
+    return !this.args.facets || Object.keys(this.args.facets).length === 0;
   }
 
   /**
@@ -82,14 +130,16 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
         case "In Review":
         case "Obsolete":
         case "WIP":
+        case `${ProjectStatus.Active}`:
+        case `${ProjectStatus.Completed}`:
+        case `${ProjectStatus.Archived}`:
           statuses[status] = this.args.facets?.status[
             status
           ] as FacetDropdownObjectDetails;
-          break;
       }
     }
 
-    return statuses;
+    return Object.fromEntries(Object.entries(statuses).sort());
   }
 
   /**
@@ -100,56 +150,82 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
    * the statuses from our getter.
    */
   protected get facets() {
-    if (!this.args.facets || Object.keys(this.args.facets).length === 0) {
-      switch (this.args.scope) {
-        case SearchScope.Docs:
-          return [
-            {
-              name: FacetName.DocType,
-              values: null,
-            },
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-            {
-              name: FacetName.Product,
-              values: null,
-            },
-            {
-              name: FacetName.Owners,
-              values: null,
-            },
-          ];
-        case SearchScope.Projects:
-          return [
-            {
-              name: FacetName.Status,
-              values: null,
-            },
-          ];
+    assert("facets must exist", this.args.facets);
+    let facetArray: FacetArrayItem[] = [];
+
+    Object.entries(this.args.facets).forEach(([key, value]) => {
+      const name = key as FacetName;
+
+      // Sort the values alphabetically
+      const values = value
+        ? Object.fromEntries(Object.entries(value).sort())
+        : null;
+
+      switch (name) {
+        case FacetName.Owners:
+          // We handle this with a text input
+          break;
+        case FacetName.Status:
+          if (values) {
+            facetArray.push({
+              name,
+              values: this.statuses,
+            });
+          }
+          break;
+        default:
+          facetArray.push({
+            name,
+            values,
+          });
+          break;
       }
-    } else {
-      let facetArray: FacetArrayItem[] = [];
+    });
 
-      Object.entries(this.args.facets).forEach(([key, value]) => {
-        if (
-          key === FacetName.Status &&
-          this.args.scope !== SearchScope.Projects
-        ) {
-          facetArray.push({ name: key, values: this.statuses });
-        } else {
-          facetArray.push({ name: key as FacetName, values: value });
-        }
-      });
+    const order = [
+      FacetName.DocType,
+      FacetName.Status,
+      FacetName.Product,
+      FacetName.Owners,
+    ];
 
-      const order = ["docType", "status", "product", "owners"];
+    facetArray.sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    });
 
-      facetArray.sort((a, b) => {
-        return order.indexOf(a.name) - order.indexOf(b.name);
-      });
+    return facetArray;
+  }
 
-      return facetArray;
+  /**
+   * The action to reset the owner-query-related properties.
+   * Called when the input is manually cleared, and when an item is selected.
+   */
+  @action protected resetOwnersQuery() {
+    this.ownerQuery = "";
+    this.ownerResults = undefined;
+    this.searchInputIsEmpty = true;
+  }
+
+  /**
+   * Checks whether the dropdown is open and closes it if it is.
+   * Uses mousedown instead of click to get ahead of the focusin event.
+   * This allows users to click the search input to dismiss the popover.
+   */
+  @action protected maybeCloseDropdown(dd: XDropdownListAnchorAPI) {
+    if (dd.contentIsShown) {
+      dd.hideContent();
+    }
+  }
+
+  /**
+   * The action run on input focusin.
+   * If the popover is closed but the input has a value,
+   * we open the popover.
+   * @param dd
+   */
+  @action protected maybeOpenDropdown(dd: XDropdownListAnchorAPI): void {
+    if (!dd.contentIsShown && this.ownerQuery.length) {
+      dd.showContent();
     }
   }
 
@@ -162,6 +238,111 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       closeDropdown();
     });
   }
+
+  /**
+   * The task to maybe search Algolia. Called onInputFocus.
+   * If there's a query, but the user hasn't typed it,
+   * such as when clicking a search input populated by a query param,
+   * we initiate a search to avoid the "no matches" screen.
+   * The `isRunning` state is passed to DropdownList as `isLoading`.
+   */
+  protected maybeSearch = task(async () => {
+    if (this.ownerQuery.length && !this.hasSearched) {
+      await this.searchOwners.perform();
+    }
+  });
+
+  /**
+   * The task to query Algolia for the owner facet.
+   * Runs on the `input` event. Populates the dropdown with results.
+   */
+  protected searchOwners = restartableTask(
+    async (dd?: XDropdownListAnchorAPI, e?: Event) => {
+      const input = e?.target;
+
+      if (input instanceof HTMLInputElement) {
+        this.ownerQuery = input.value;
+      }
+
+      if (this.ownerQuery.length) {
+        this.searchInputIsEmpty = false;
+        try {
+          const algoliaResultsPromise = this.algolia.searchForFacetValues
+            .perform(
+              this.configSvc.config.algolia_docs_index_name,
+              "owners",
+              this.ownerQuery,
+              {
+                filters: this.activeFilters.index[FacetName.Owners]
+                  .map((owner) => `NOT owners:${owner}`)
+                  .join(" AND "),
+              },
+            )
+            .then((results) => {
+              assert("facetHits must exist", results && "facetHits" in results);
+              return results.facetHits;
+            });
+
+          const peoplePromise = this.store.query("person", {
+            query: this.ownerQuery,
+          });
+
+          const [algoliaResults, peopleResults] = await Promise.all([
+            algoliaResultsPromise,
+            peoplePromise,
+          ]);
+
+          let people: string[] = [];
+
+          if (peopleResults.length) {
+            people = peopleResults
+              .map((p: PersonModel) => p.email)
+              .filter((email: string) => {
+                return (
+                  !this.activeFilters.index[FacetName.Owners].includes(email) &&
+                  !algoliaResults.some((result) => result.value === email)
+                );
+              });
+          }
+          this.ownerResults = algoliaResults
+            .map((result) => result.value)
+            .concat(people);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        dd?.hideContent();
+        this.resetOwnersQuery();
+      }
+
+      // Reopen the dropdown if it was closed on mousedown and there's a query
+      if (!dd?.contentIsShown && this.ownerQuery.length) {
+        dd?.showContent();
+      }
+
+      /**
+       * Although `dd.scheduleAssignMenuItemIDs` runs `afterRender`,
+       * it doesn't provide enough time for `in-element` to update.
+       * Therefore, we wait for the next run loop.
+       *
+       * This approach causes issues when testing, so we
+       * use `schedule` as an approximation.
+       *
+       * TODO: Improve this.
+       */
+      if (Ember.testing) {
+        schedule("afterRender", () => {
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
+        });
+      } else {
+        next(() => {
+          dd?.resetFocusedItemIndex();
+          dd?.scheduleAssignMenuItemIDs();
+        });
+      }
+    },
+  );
 }
 
 declare module "@glint/environment-ember-loose/registry" {

@@ -1,13 +1,13 @@
 {{#if this.facetsAreShown}}
   <div class="toolbar mb-7">
     <div class="mb-6 flex w-full justify-between">
-      <div class="flex items-center">
-        <h4 class="hermes-h4 mr-4">
+      <div class="flex w-full items-center">
+        <h4 class="hermes-h4 mr-[19px] shrink-0">
           Filter by:
         </h4>
-        <ol class="facets flex items-center">
+        <ol class="facets flex w-full items-center">
           {{#each this.facets as |facet|}}
-            <li>
+            <li class="shrink-0">
               <Header::FacetDropdown
                 data-test-facet={{facet.name}}
                 @name={{facet.name}}
@@ -15,6 +15,79 @@
               />
             </li>
           {{/each}}
+          {{#if this.ownerFacetIsShown}}
+            {{! Search owners... }}
+            <li class="w-full">
+              <X::DropdownList
+                @items={{this.ownerResults}}
+                @offset={{hash mainAxis=0 crossAxis=4}}
+                @placement="bottom-end"
+                @matchAnchorWidth={{hash enabled=true additionalWidth=8}}
+                @inputIsShown={{false}}
+                @isLoading={{this.searchOwners.isRunning}}
+                @onItemClick={{this.resetOwnersQuery}}
+                @listIsShown={{not this.searchInputIsEmpty}}
+                class="theme--neutral
+                  {{unless this.ownerResults.length 'no-matches'}}"
+              >
+                <:anchor as |dd|>
+                  <div class="relative">
+                    <Hds::Form::TextInput::Base
+                      data-test-search-owners-input
+                      {{did-insert dd.registerAnchor}}
+                      {{on "input" (perform this.searchOwners dd)}}
+                      {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
+                      {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+                      {{on "focusin" (perform this.maybeSearch)}}
+                      @value={{this.ownerQuery}}
+                      @type="search"
+                      disabled={{this.ownersInputIsDisabled}}
+                      name="owner"
+                      placeholder="Search owners..."
+                      aria-label="Search owners..."
+                      aria-controls={{dd.ariaControls}}
+                      aria-expanded={{dd.contentIsShown}}
+                      aria-haspopup="listbox"
+                      class="relative w-[384px] border-color-border-strong pl-[35px] pr-3 text-body-200
+                        {{if dd.contentIsShown 'mock-focus'}}"
+                    />
+                  </div>
+                </:anchor>
+                <:item as |dd|>
+                  {{log " d d d d" dd}}
+                  <dd.LinkTo
+                    @query={{get-facet-query-hash
+                      "owners"
+                      dd.attrs
+                      (is-active-filter dd.attrs)
+                    }}
+                    class="block"
+                  >
+                    <div class="flex items-center gap-2 overflow-hidden">
+                      <Person::Avatar @email={{dd.attrs}} />
+                      <div class="w-full min-w-0">
+                        <div class="truncate text-body-200 leading-tight">
+                          {{#let
+                            (get-model-attr "person.name" dd.attrs)
+                            as |name|
+                          }}
+                            {{or name dd.attrs}}
+                            {{#if name}}
+                              <span
+                                class="ml-0.5 text-body-100 text-color-foreground-disabled"
+                              >
+                                {{dd.attrs}}
+                              </span>
+                            {{/if}}
+                          {{/let}}
+                        </div>
+                      </div>
+                    </div>
+                  </dd.LinkTo>
+                </:item>
+              </X::DropdownList>
+            </li>
+          {{/if}}
         </ol>
       </div>
     </div>
