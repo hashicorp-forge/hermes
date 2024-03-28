@@ -7,9 +7,44 @@ import {
   ElementEventBasePayload,
   ElementDropTargetEventBasePayload,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  attachClosestEdge,
+  Edge,
+  extractClosestEdge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { assert } from "@ember/debug";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { tracked } from "@glimmer/tracking";
+type Item = {
+  id: string;
+  label: string;
+};
+
+const itemKey = Symbol("item");
+
+type ItemData = {
+  [itemKey]: true;
+  item: Item;
+  index: number;
+  instanceId: symbol;
+};
+
+function getItemData({
+  item,
+  index,
+  instanceId,
+}: {
+  item: Item;
+  index: number;
+  instanceId: symbol;
+}): ItemData {
+  return {
+    [itemKey]: true,
+    item,
+    index,
+    instanceId,
+  };
+}
 
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
@@ -21,7 +56,17 @@ interface ProjectResourceListItemComponentSignature {
 
 export default class ProjectResourceListItemComponent extends Component<ProjectResourceListItemComponentSignature> {
   @tracked protected isDragging = false;
+
   @tracked protected dragHasEntered = false;
+
+  @tracked protected dragHasEnteredBottom = false;
+  @tracked protected dragHasEnteredTop = false;
+
+  @tracked protected clientY = 0;
+
+  @tracked protected currentMiddle = 0;
+
+  @tracked protected closestEdge: Edge | null = null;
 
   @action protected configureDragAndDrop(element: HTMLElement) {
     const dragHandle = element.querySelector(".drag-handle");
@@ -44,14 +89,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           };
         },
         onDrag: (e: ElementEventBasePayload) => {
-          const { location } = e;
-          const { current } = location;
-          const { dropTargets, input } = current;
-
-          console.log("dropTargets", dropTargets);
-          console.log("input", input);
-
-          // need to capture the position values
+          this.clientY = e.location.current.input.clientY;
         },
       }),
       // monitorForElements({
@@ -61,22 +99,68 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
       // }),
       dropTargetForElements({
         element,
-        canDrop: ({ source }) => {
-          console.log("canDrop?", source.element !== element);
-          return source.element !== element;
-          // return this.dragHasEntered;
+        getData({ input }) {
+          // FIXME
+          return attachClosestEdge(
+            {},
+            {
+              element,
+              input,
+              allowedEdges: ["top", "bottom"],
+            },
+          );
+        },
+        canDrop: (e) => {
+          return e.source.element !== element;
+        },
+        onDrag: ({ self, source }) => {
+          const isSource = source.element === element;
+          if (isSource) {
+            this.closestEdge = null;
+            return;
+          }
+
+          const closestEdge = extractClosestEdge(self.data);
+
+          // const sourceIndex = source.data.index;
+          // invariant(typeof sourceIndex === 'number');
+
+          // const isItemBeforeSource = index === sourceIndex - 1;
+          // const isItemAfterSource = index === sourceIndex + 1;
+
+          // const isDropIndicatorHidden =
+          //   (isItemBeforeSource && closestEdge === 'bottom') ||
+          //   (isItemAfterSource && closestEdge === 'top');
+
+          // if (isDropIndicatorHidden) {
+          //   setClosestEdge(null);
+          //   return;
+          // }
+
+          this.closestEdge = closestEdge;
         },
         onDragEnter: (e: ElementDropTargetEventBasePayload) => {
+          console.log("ON DRAG ENEENE");
           if (e.source.element !== element) {
+            console.log("setting dragHasEntered to true");
             this.dragHasEntered = true;
+
+            const rect = element.getBoundingClientRect();
+            const top = rect.top;
+            const bottom = rect.bottom;
+
+            const middle = top + (bottom - top) / 2;
+
+            this.currentMiddle = middle;
           }
         },
         onDragLeave: () => {
           this.dragHasEntered = false;
+          this.closestEdge = null;
         },
         onDrop: (e: ElementDropTargetEventBasePayload) => {
-          // TODO
           this.dragHasEntered = false;
+          this.closestEdge = null;
         },
       }),
     );

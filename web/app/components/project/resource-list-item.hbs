@@ -2,9 +2,13 @@
   {{did-insert this.configureDragAndDrop}}
   class="group relative block
     {{if this.isDragging 'opacity-50'}}
-    {{if this.dragHasEntered 'bg-yellow-500'}}"
+    {{if
+      this.dragHasEntered
+      (if (eq this.closestEdge 'bottom') 'bg-blue-500' 'bg-red-400')
+    }}"
   data-test-resource-list-item
   ...attributes
 >
+  <div class="absolute">{{this.closestEdge}}</div>
   {{yield}}
 </li>
