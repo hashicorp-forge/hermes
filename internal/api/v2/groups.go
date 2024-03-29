@@ -7,6 +7,16 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
+	admin "google.golang.org/api/admin/directory/v1"
+)
+
+const (
+	// maxGroupResults is the maximum total number of group results to return.
+	maxGroupResults = 20
+
+	// maxPrefixGroupResults is the maximum number of group results to return that
+	// use the groups prefix, if configured.
+	maxPrefixGroupResults = 10
 )
 
 type GroupsPostRequest struct {
@@ -55,24 +65,43 @@ func GroupsHandler(srv server.Server) http.Handler {
 			query := req.Query
 			query = strings.ReplaceAll(query, " ", "-")
 
-			// Apply groups prefix, if applicable.
+			var (
+				allGroups            []*admin.Group
+				err                  error
+				groups, prefixGroups *admin.Groups
+				maxNonPrefixGroups   = maxGroupResults
+			)
+
+			// Retrieve groups with prefix, if configured.
 			if srv.Config.GoogleWorkspace.GroupsPrefix != "" {
-				// Only apply prefix if it looks like the user isn't beginning to type
-				// it.
-				if !strings.HasPrefix(srv.Config.GoogleWorkspace.GroupsPrefix, query) {
-					query = fmt.Sprintf(
-						"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
+				maxNonPrefixGroups = maxGroupResults - maxPrefixGroupResults
+
+				prefixQuery := fmt.Sprintf(
+					"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
+				prefixGroups, err = srv.GWService.AdminDirectory.Groups.List().
+					Domain(srv.Config.GoogleWorkspace.Domain).
+					MaxResults(maxPrefixGroupResults).
+					Query(fmt.Sprintf("email:%s*", prefixQuery)).
+					Do()
+				if err != nil {
+					srv.Logger.Error("error searching groups with prefix",
+						append([]interface{}{
+							"error", err,
+						}, logArgs...)...)
+					http.Error(w, fmt.Sprintf("Error searching groups: %q", err),
+						http.StatusInternalServerError)
+					return
 				}
 			}
 
-			// Retrieve groups.
-			groups, err := srv.GWService.AdminDirectory.Groups.List().
+			// Retrieve groups without prefix.
+			groups, err = srv.GWService.AdminDirectory.Groups.List().
 				Domain(srv.Config.GoogleWorkspace.Domain).
-				MaxResults(10).
+				MaxResults(int64(maxNonPrefixGroups)).
 				Query(fmt.Sprintf("email:%s*", query)).
 				Do()
 			if err != nil {
-				srv.Logger.Error("error searching groups",
+				srv.Logger.Error("error searching groups without prefix",
 					append([]interface{}{
 						"error", err,
 					}, logArgs...)...)
@@ -81,9 +110,12 @@ func GroupsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			allGroups = concatGroupSlicesAndRemoveDuplicates(
+				prefixGroups.Groups, groups.Groups)
+
 			// Build response, stripping all attributes except email and name.
-			resp := make(GroupsPostResponse, len(groups.Groups))
-			for i, group := range groups.Groups {
+			resp := make(GroupsPostResponse, len(allGroups))
+			for i, group := range allGroups {
 				resp[i] = GroupsPostResponseGroup{
 					Email: group.Email,
 					Name:  group.Name,
@@ -110,4 +142,27 @@ func GroupsHandler(srv server.Server) http.Handler {
 			return
 		}
 	})
+}
+
+// concatGroupSlicesAndRemoveDuplicates concatenates two group slices and
+// removes any duplicate elements from the result.
+func concatGroupSlicesAndRemoveDuplicates(
+	slice1, slice2 []*admin.Group) []*admin.Group {
+	uniqueMap := make(map[string]*admin.Group)
+	result := []*admin.Group{}
+
+	// Add elements from both slices to the map.
+	for _, g := range slice1 {
+		uniqueMap[g.Email] = g
+	}
+	for _, g := range slice2 {
+		uniqueMap[g.Email] = g
+	}
+
+	// Add all unique elements from the map to the result slice.
+	for _, v := range uniqueMap {
+		result = append(result, v)
+	}
+
+	return result
 }
