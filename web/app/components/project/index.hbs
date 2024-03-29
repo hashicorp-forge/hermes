@@ -172,6 +172,8 @@
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
               id={{doc.googleFileID}}
+              @canMoveUp={{gt i.index 0}}
+              @canMoveDown={{lt i.index (add this.hermesDocuments.length -1)}}
               @isReadOnly={{not this.projectIsActive}}
               @overflowMenuItems={{hash
                 delete=(hash

@@ -215,6 +215,36 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     };
   }
 
+  protected get sortOrderMenuItems() {
+    // Move to top
+    // Move up
+    // Move down
+    // Move to bottom
+    // need to be dynamically enabled/disabled based on the index of the item relative to the other items
+    return {
+      "Move to top": {
+        label: "Move to top",
+        icon: "arrow-up",
+        action: () => {},
+      },
+      "Move up": {
+        label: "Move up",
+        icon: "arrow-up",
+        action: () => {},
+      },
+      "Move down": {
+        label: "Move down",
+        icon: "arrow-down",
+        action: () => {},
+      },
+      "Move to bottom": {
+        label: "Move to bottom",
+        icon: "arrow-down",
+        action: () => {},
+      },
+    };
+  }
+
   /**
    * The action to run when the "edit external link" modal is dismissed.
    * Hides the modal and resets the local state.

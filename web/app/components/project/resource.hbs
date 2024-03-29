@@ -3,12 +3,23 @@
   {{yield}}
 
   {{#unless @isReadOnly}}
-    {{! TODO: convert to dropdown list }}
-    <Action
-      class="drag-handle absolute left-1 top-1 z-10 grid h-[20px] w-[20px] cursor-grab place-items-center rounded bg-red-100"
-    >
-      <FlightIcon @name="menu" />
-    </Action>
+    {{! TODO: this needs to close on dragstart }}
+    <X::DropdownList @items={{this.sortOrderMenuItems}}>
+      <:anchor as |dd|>
+        <dd.ToggleAction
+          class="drag-handle absolute left-1 top-1 z-10 grid h-[20px] w-[20px] cursor-grab place-items-center rounded"
+        >
+
+          <FlightIcon @name="menu" />
+        </dd.ToggleAction>
+      </:anchor>
+      <:item as |dd|>
+        {{dd.attrs.label}}
+        {{if dd.attrs.disabled "dis" "en"}}
+      </:item>
+    </X::DropdownList>
+
+    {{! TODO: convert to dropdown }}
     <OverflowMenu
       @items={{@overflowMenuItems}}
       @offset={{hash mainAxis=1 crossAxis=-3}}
