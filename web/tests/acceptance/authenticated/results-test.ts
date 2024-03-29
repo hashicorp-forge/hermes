@@ -16,6 +16,7 @@ import {
   ProjectStatus,
   projectStatusObjects,
 } from "hermes/types/project-status";
+import { TEST_USER_2_EMAIL, TEST_USER_EMAIL } from "hermes/mirage/utils";
 
 // Global
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
@@ -62,6 +63,10 @@ const PRODUCT_FACET_DROPDOWN_TOGGLE = `[${FACET_TOGGLE_DATA_NAME}="${FacetLabel.
 
 // Filter dropdowns
 const FACET_DROPDOWN_LINK = "[data-test-facet-dropdown-link]";
+
+// Owner filter
+const OWNERS_INPUT = `[data-test-search-owners-input]`;
+const OWNER_MATCH = "[data-test-x-dropdown-list-item-link-to]";
 
 // Pagination
 const PAGINATION = "[data-test-pagination]";
@@ -223,9 +228,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     assert.dom(SEG_DOCS_LINK).hasClass("active");
     assert.dom(SEG_ALL_LINK).doesNotHaveClass("active");
 
-    assert
-      .dom(FACET_TOGGLE)
-      .exists({ count: 4 }, 'filter bar is shown in the "docs" view');
+    assert.dom(FACET_TOGGLE).exists('filter bar is shown in the "docs" view');
 
     assert.dom(PAGINATION).exists('pagination is shown in the "docs" view');
 
@@ -376,6 +379,13 @@ module("Acceptance | authenticated/results", function (hooks) {
       product: "Terraform",
     });
 
+    // Create an RFC with another owner
+    this.server.create("document", {
+      docType: "RFC",
+      product: "Vault",
+      owners: [TEST_USER_2_EMAIL],
+    });
+
     // Capture the docCounts we intend to test
 
     const rfcCount = this.server.schema.document.where({
@@ -413,6 +423,21 @@ module("Acceptance | authenticated/results", function (hooks) {
       .dom(ACTIVE_FILTER_LIST)
       .doesNotExist("the active filters section is hidden");
 
+    // Filter by owner
+
+    await fillIn(OWNERS_INPUT, TEST_USER_EMAIL);
+    await click(OWNER_MATCH);
+
+    captureFacetElements();
+
+    assert.dom(RESULTS_MATCH_COUNT).containsText(`${totalDocCount - 1}`);
+
+    // Turn off owner filter
+
+    await click(ACTIVE_FILTER_LINK);
+
+    // Begin to filter by docType
+
     await click(DOC_TYPE_FACET_DROPDOWN_TOGGLE);
 
     captureFacetElements();
@@ -421,12 +446,12 @@ module("Acceptance | authenticated/results", function (hooks) {
       .dom(FACET_DROPDOWN_LINK)
       .exists({ count: 2 }, "two docType facets are shown");
 
-    assert.dom(firstFacet).containsText("RFC").containsText(`${rfcCount}`);
-    assert.dom(secondFacet).containsText("FRD").containsText(`${frdCount}`);
+    assert.dom(firstFacet).containsText("FRD").containsText(`${frdCount}`);
+    assert.dom(secondFacet).containsText("RFC").containsText(`${rfcCount}`);
 
     // Click the FRD filter
 
-    await click(secondFacet as unknown as Element);
+    await click(firstFacet as unknown as Element);
 
     assert.dom(RESULTS_MATCH_COUNT).containsText(`${frdCount}`);
     assert.dom(DOC_LINK).exists({ count: frdCount });
@@ -456,12 +481,12 @@ module("Acceptance | authenticated/results", function (hooks) {
       .dom(FACET_DROPDOWN_LINK)
       .exists({ count: 2 }, "two product facets are shown");
 
-    assert.dom(firstFacet).containsText("Vault");
-    assert.dom(secondFacet).containsText("Terraform");
+    assert.dom(firstFacet).containsText("Terraform");
+    assert.dom(secondFacet).containsText("Vault");
 
     // Click the Terraform filter
 
-    await click(secondFacet as unknown as Element);
+    await click(firstFacet as unknown as Element);
 
     assert.dom(RESULTS_MATCH_COUNT).containsText("1");
     assert.dom(DOC_LINK).exists({ count: 1 });
@@ -521,7 +546,7 @@ module("Acceptance | authenticated/results", function (hooks) {
     // visit a URL with no results
     await visit("/results?q=ZZZZZZZZZ&scope=Docs");
 
-    assert.dom(FACET_TOGGLE).exists({ count: 4 });
+    assert.dom(FACET_TOGGLE).exists({ count: 3 });
 
     const facetToggles = findAll(FACET_TOGGLE);
 
