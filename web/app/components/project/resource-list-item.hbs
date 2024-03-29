@@ -6,6 +6,7 @@
   data-test-resource-list-item
   ...attributes
 >
+  {{! Drop affordance }}
   {{#if this.dragHasEntered}}
     <div
       class="absolute z-10 h-1 w-full rounded-l-full rounded-r-full
@@ -23,3 +24,22 @@
 
   {{yield}}
 </li>
+
+{{#if this.isDragging}}
+  {{! Target the customNativeDragPreview container }}
+  {{! This will be available by the time `html-element` runs }}
+  {{#in-element (html-element (concat "#" this.id)) insertBefore=null}}
+    <div
+      class="grid h-10 max-w-[500px] cursor-grabbing items-center rounded bg-color-page-primary px-3"
+    >
+      <div class="truncate font-semibold text-color-foreground-strong">
+        {{this.itemTitle}}
+        {{#if this.docNumber}}
+          <span class="ml-1 font-regular">
+            {{this.docNumber}}
+          </span>
+        {{/if}}
+      </div>
+    </div>
+  {{/in-element}}
+{{/if}}

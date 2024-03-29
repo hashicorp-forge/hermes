@@ -12,7 +12,6 @@ import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
-import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
 interface ProjectResourceListComponentSignature {
   Element: HTMLDivElement;

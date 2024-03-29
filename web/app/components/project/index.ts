@@ -330,6 +330,26 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = true;
   }
 
+  @action protected saveExternalLinkOrder(
+    currentIndex: number,
+    newIndex: number,
+  ) {
+    const cachedLinks = this.externalLinks.slice();
+    // need to reorder this.externalLinks
+    // based on the order of docIDs
+
+    const [removed] = this.externalLinks.splice(currentIndex, 1);
+
+    assert("removed must exist", removed);
+
+    this.externalLinks.insertAt(newIndex, removed);
+
+    void this.saveProjectResources.perform(
+      this.hermesDocuments.slice(),
+      cachedLinks,
+    );
+  }
+
   @action protected saveDocumentOrder(currentIndex: number, newIndex: number) {
     const cachedDocuments = this.hermesDocuments.slice();
     // need to reorder this.hermesDocuments

@@ -15,6 +15,8 @@ import { assert } from "@ember/debug";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { tracked } from "@glimmer/tracking";
 import { RelatedResource } from "../related-resources";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
+import { guidFor } from "@ember/object/internals";
 
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
@@ -29,11 +31,29 @@ interface ProjectResourceListItemComponentSignature {
 }
 
 export default class ProjectResourceListItemComponent extends Component<ProjectResourceListItemComponentSignature> {
+  id = guidFor(this);
+
   @tracked protected isDragging = false;
 
   @tracked protected dragHasEntered = false;
 
   @tracked protected closestEdge: Edge | null = null;
+
+  protected get itemTitle() {
+    if ("title" in this.args.item) {
+      return this.args.item.title;
+    } else {
+      return this.args.item.name;
+    }
+  }
+
+  protected get docNumber() {
+    if ("documentNumber" in this.args.item) {
+      return this.args.item.documentNumber;
+    } else {
+      return null;
+    }
+  }
 
   @action protected configureDragAndDrop(element: HTMLElement) {
     const dragHandle = element.querySelector(".drag-handle");
@@ -43,9 +63,18 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
       draggable({
         element,
         dragHandle,
-        onDragStart: () => {
+
+        onGenerateDragPreview: ({ nativeSetDragImage }) => {
           this.isDragging = true;
+          setCustomNativeDragPreview({
+            nativeSetDragImage,
+            render: ({ container }) => {
+              // Create a target for `in-element`
+              container.id = this.id;
+            },
+          });
         },
+
         onDrop: () => {
           this.isDragging = false;
         },

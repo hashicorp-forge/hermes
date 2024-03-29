@@ -11,7 +11,7 @@ interface HtmlElementHelperSignature {
 const htmlElementHelper = helper<HtmlElementHelperSignature>(
   ([selector]: [string]) => {
     return htmlElement(selector);
-  }
+  },
 );
 
 export default htmlElementHelper;

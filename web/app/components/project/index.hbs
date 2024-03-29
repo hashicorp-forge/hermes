@@ -198,7 +198,7 @@
           @items={{this.externalLinks}}
           @shouldAnimate={{this.shouldAnimate}}
           @motion={{this.resourceListContainerMotion}}
-          {{! TODO: external reorder }}
+          @onSave={{this.saveExternalLinkOrder}}
         >
           <:header>
             <span data-test-external-links-header>
