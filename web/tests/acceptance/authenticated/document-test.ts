@@ -692,6 +692,12 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
+    assert
+      .dom(OVERFLOW_MENU_BUTTON)
+      .doesNotExist(
+        'the "remove me" function is not available to group approvers',
+      );
+
     await click(APPROVE_BUTTON);
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
