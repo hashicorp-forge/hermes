@@ -1,9 +1,6 @@
 {{#unless (and this.scopeIsAll this.nbHits)}}
   {{! Hit count (not shown on the "All" screen unless saying "0 matches") }}
-  <h1 data-test-results-match-count class="mb-7 text-display-300 font-semibold">
-    {{this.nbHits}}
-    {{if (eq this.nbHits 1) "match" "matches"}}
-  </h1>
+  <MatchCountHeadline data-test-results-match-count @count={{this.nbHits}} />
 {{/unless}}
 
 {{#if this.nbHits}}
