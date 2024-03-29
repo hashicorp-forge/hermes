@@ -56,8 +56,12 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   }
 
   @action protected configureDragAndDrop(element: HTMLElement) {
+    // TODO: need some way of having a status change call this again
+
     const dragHandle = element.querySelector(".drag-handle");
-    assert("dragHandle must exist", dragHandle);
+
+    // This will be the case in readOnly mode
+    if (!dragHandle) return;
 
     combine(
       draggable({
