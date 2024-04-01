@@ -118,12 +118,27 @@ h1 {
 }
 
 .divided-list {
-  li {
+  li,
+  .drag-affordance-container {
     @apply border-t border-t-transparent;
+  }
+
+  .drag-affordance-container {
+    @apply border-b border-b-transparent;
+  }
+
+  > li:not(:last-child):hover {
+    .drag-affordance-container {
+      @apply border-b-color-border-faint;
+    }
   }
 
   > li:not(:first-child) {
     @apply border-t-color-border-faint;
+
+    &:hover .drag-affordance-container {
+      @apply border-t-color-border-faint;
+    }
   }
 }
 

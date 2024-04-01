@@ -74,7 +74,8 @@
 
     &:hover,
     &:focus-within {
-      .overflow-button-container {
+      .overflow-button-container,
+      .drag-affordance {
         @apply visible;
       }
     }
