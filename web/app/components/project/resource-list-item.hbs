@@ -1,7 +1,5 @@
 <li
-  {{! this needs to update when switching from active to inactive back to active }}
-  {{! (are we losing the handle div?) }}
-  {{did-insert this.configureDragAndDrop}}
+  {{did-insert this.registerElement}}
   data-index={{@index}}
   data-closest-edge={{this.closestEdge}}
   class="group relative block {{if this.isDragging 'is-dragging opacity-50'}}"
@@ -26,6 +24,16 @@
 
   {{yield}}
 </li>
+
+{{#unless @isReadOnly}}
+  {{#in-element (html-element ".ember-application") insertBefore=null}}
+    <div
+      {{did-insert this.configureDragAndDrop}}
+      class="absolute top-0 left-0"
+      aria-hidden={{true}}
+    />
+  {{/in-element}}
+{{/unless}}
 
 {{#if this.isDragging}}
   {{! Target the customNativeDragPreview container }}

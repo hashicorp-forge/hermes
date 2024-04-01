@@ -159,6 +159,7 @@
         data-test-document-list
         @items={{this.hermesDocuments}}
         @shouldAnimate={{this.shouldAnimate}}
+        @isReadOnly={{not this.projectIsActive}}
         @motion={{this.resourceListContainerMotion}}
         @onSave={{this.saveDocumentOrder}}
         class="mt-7"

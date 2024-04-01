@@ -18,6 +18,7 @@ interface ProjectResourceListComponentSignature {
   Args: {
     items: RelatedResource[];
     shouldAnimate: boolean;
+    isReadOnly: boolean;
     motion: unknown;
     onSave: (currentIndex: number, newIndex: number) => void;
   };

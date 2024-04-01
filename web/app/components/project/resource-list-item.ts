@@ -21,6 +21,7 @@ import { guidFor } from "@ember/object/internals";
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
+    isReadOnly: boolean;
     item: RelatedResource;
     index: number;
     onSave: (currentIndex: number, newIndex: number) => void;
@@ -38,6 +39,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @tracked protected dragHasEntered = false;
 
   @tracked protected closestEdge: Edge | null = null;
+  @tracked protected el: HTMLElement | null = null;
 
   protected get itemTitle() {
     if ("title" in this.args.item) {
@@ -55,13 +57,17 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     }
   }
 
-  @action protected configureDragAndDrop(element: HTMLElement) {
-    // TODO: need some way of having a status change call this again
+  @action registerElement(element: HTMLElement) {
+    this.el = element;
+  }
 
-    const dragHandle = element.querySelector(".drag-handle");
+  @action protected configureDragAndDrop() {
+    assert("element must exist", this.el);
 
-    // This will be the case in readOnly mode
-    if (!dragHandle) return;
+    const element = this.el;
+    const dragHandle = this.el.querySelector(".drag-handle");
+
+    assert("drag handle must exist", dragHandle);
 
     combine(
       draggable({
