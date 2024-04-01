@@ -172,7 +172,6 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
-              id={{doc.googleFileID}}
               @canMoveUp={{gt i.index 0}}
               @canMoveDown={{lt i.index (add this.hermesDocuments.length -1)}}
               @isReadOnly={{not this.projectIsActive}}
@@ -202,6 +201,7 @@
           @shouldAnimate={{this.shouldAnimate}}
           @motion={{this.resourceListContainerMotion}}
           @onSave={{this.saveExternalLinkOrder}}
+          @isReadOnly={{not this.projectIsActive}}
         >
           <:header>
             <span data-test-external-links-header>
@@ -210,6 +210,9 @@
           </:header>
           <:item as |i|>
             <Project::Resource
+              {{! id? }}
+              @canMoveUp={{gt i.index 0}}
+              @canMoveDown={{lt i.index (add this.externalLinks.length -1)}}
               @isReadOnly={{not this.projectIsActive}}
               @overflowMenuItems={{hash
                 edit=(hash
