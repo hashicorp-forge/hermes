@@ -23,6 +23,7 @@ interface ProjectResourceListItemComponentSignature {
   Args: {
     isReadOnly: boolean;
     item: RelatedResource;
+    itemCount: number;
     index: number;
     onSave: (currentIndex: number, newIndex: number) => void;
   };
@@ -86,7 +87,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   }
 
   @action protected moveToBottom() {
-    this.args.onSave(this.args.index, this.args.index + 1);
+    this.args.onSave(this.args.index, this.args.itemCount - 1);
   }
 
   @action protected configureDragAndDrop() {
