@@ -13,6 +13,7 @@ interface OverflowMenuComponentSignature {
     items: Record<string, OverflowItem>;
     offset?: OffsetOptions;
     isShown?: boolean;
+    renderOut?: boolean;
   };
 }
 
