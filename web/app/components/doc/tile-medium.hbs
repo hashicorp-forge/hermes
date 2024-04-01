@@ -35,11 +35,12 @@
             @route="authenticated.document"
             @query={{hash draft=this.docIsDraft}}
             @model={{this.docID}}
+            class="group/primary-link"
           >
             {{! Primary click area }}
             <div
               aria-hidden="true"
-              class="absolute -top-px left-0 -bottom-px w-full mix-blend-multiply group-focus-within:bg-color-page-faint group-focus-within:outline group-focus-within:outline-2 group-focus-within:outline-color-border-strong group-hover:bg-color-page-faint"
+              class="absolute -top-px left-0 -bottom-px w-full mix-blend-multiply group-hover:bg-color-page-faint group-focus/primary-link:outline group-focus/primary-link:outline-2 group-focus/primary-link:outline-color-border-strong"
             ></div>
 
             <h3 class="relative">
