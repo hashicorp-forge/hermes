@@ -7,13 +7,11 @@
     <X::DropdownList @items={{this.sortOrderMenuItems}}>
       <:anchor as |dd|>
         <div
-          {{! FIXME: 'drag handle' class is a flimsy target  }}
-          {{! TODO: use ID }}
-          class="drag-affordance-container absolute left-3 -top-px z-10 flex h-[calc(100%+2px)] w-8 -translate-x-full justify-center group-focus-within:bg-color-page-faint group-hover:bg-color-page-faint"
+          class="drag-affordance-container shaded absolute left-0 -top-px z-10 flex h-[calc(100%+2px)] -translate-x-full justify-center"
         >
-          {{! FIXME: anchor needs to be defined better in this setup }}
           <dd.ToggleAction
-            class="drag-affordance drag-handle invisible mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-disabled hover:text-color-foreground-primary
+            id={{concat @id "-drag-handle"}}
+            class="drag-affordance invisible relative left-2.5 -ml-1.5 mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-faint hover:text-color-foreground-primary
               {{if
                 dd.contentIsShown
                 'bg-color-surface-interactive-active text-color-foreground-primary'

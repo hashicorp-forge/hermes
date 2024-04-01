@@ -172,6 +172,7 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
+              @id={{i.id}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @isReadOnly={{i.isReadOnly}}
@@ -187,7 +188,7 @@
                 )
               }}
             >
-              <Doc::TileMedium @doc={{doc}} />
+              <Doc::TileMedium @canBeReordered={{true}} @doc={{doc}} />
             </Project::Resource>
           </RelatedResource::HermesDocument>
         </:item>
@@ -197,7 +198,7 @@
         We add a page background color to overlay any
         removed documents that are still animating out.
        }}
-      <div class="relative z-10 bg-color-page-primary pt-8">
+      <div class="relative z-10 mt-1 bg-color-page-primary pt-7">
         {{! External links }}
         <Project::ResourceList
           data-test-external-link-list
@@ -214,7 +215,7 @@
           </:header>
           <:item as |i|>
             <Project::Resource
-              {{! id? }}
+              @id={{i.id}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @moveToTop={{i.moveToTop}}

@@ -34,6 +34,7 @@ interface ProjectResourceListItemComponentSignature {
         moveUp: () => void;
         moveDown: () => void;
         moveToBottom: () => void;
+        id: string;
       },
     ];
   };
@@ -94,7 +95,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     assert("element must exist", this.el);
 
     const element = this.el;
-    const dragHandle = this.el.querySelector(".drag-handle");
+    const dragHandle = this.el.querySelector(`#${this.id}-drag-handle`);
 
     assert("drag handle must exist", dragHandle);
 

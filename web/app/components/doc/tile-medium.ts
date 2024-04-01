@@ -4,13 +4,13 @@ import { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
-import { DEFAULT_FILTERS } from "hermes/services/active-filters";
 
 interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
   Args: {
     doc: RelatedHermesDocument | HermesDocument;
     avatarIsLoading?: boolean;
+    canBeReordered?: boolean;
 
     /**
      * The search query associated with the current view.
