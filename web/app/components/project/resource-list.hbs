@@ -11,6 +11,7 @@
     {{/animated-if}}
   </div>
 
+  {{! @glint-ignore }}
   <AnimatedContainer @motion={{@motion}}>
     {{#animated-if
       (gt @items.length 0)
@@ -32,6 +33,7 @@
               @onSave={{@onSave}}
               @item={{item}}
               @index={{i}}
+              as |resourceListItem|
             >
               {{yield
                 (hash
@@ -40,6 +42,10 @@
                   isReadOnly=@isReadOnly
                   canMoveUp=(gt i 0)
                   canMoveDown=(lt i (add @items.length -1))
+                  moveToTop=resourceListItem.moveToTop
+                  moveUp=resourceListItem.moveUp
+                  moveDown=resourceListItem.moveDown
+                  moveToBottom=resourceListItem.moveToBottom
                 )
                 to="item"
               }}

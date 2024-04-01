@@ -14,10 +14,13 @@
         </dd.ToggleAction>
       </:anchor>
       <:item as |dd|>
-        <div class="flex items-center px-3 py-0.5 text-color-foreground-faint">
+        <dd.Action
+          {{on "click" dd.attrs.action}}
+          class="flex items-center px-3 py-0.5 text-color-foreground-faint"
+        >
           <FlightIcon @name={{dd.attrs.icon}} class="mr-2.5" />
           {{dd.attrs.label}}
-        </div>
+        </dd.Action>
       </:item>
     </X::DropdownList>
 

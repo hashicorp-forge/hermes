@@ -27,7 +27,14 @@ interface ProjectResourceListItemComponentSignature {
     onSave: (currentIndex: number, newIndex: number) => void;
   };
   Blocks: {
-    default: [];
+    default: [
+      {
+        moveToTop: () => void;
+        moveUp: () => void;
+        moveDown: () => void;
+        moveToBottom: () => void;
+      },
+    ];
   };
 }
 
@@ -40,6 +47,10 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
   @tracked protected closestEdge: Edge | null = null;
   @tracked protected el: HTMLElement | null = null;
+
+  protected get canMoveUp() {
+    return this.args.index > 0;
+  }
 
   protected get itemTitle() {
     if ("title" in this.args.item) {
@@ -59,6 +70,23 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
   @action registerElement(element: HTMLElement) {
     this.el = element;
+  }
+
+  @action protected moveToTop() {
+    this.args.onSave(this.args.index, 0);
+  }
+
+  @action protected moveUp() {
+    console.log("shouldMoveUp");
+    this.args.onSave(this.args.index, this.args.index - 1);
+  }
+
+  @action protected moveDown() {
+    this.args.onSave(this.args.index, this.args.index + 1);
+  }
+
+  @action protected moveToBottom() {
+    this.args.onSave(this.args.index, this.args.index + 1);
   }
 
   @action protected configureDragAndDrop() {

@@ -22,7 +22,14 @@
     </div>
   {{/if}}
 
-  {{yield}}
+  {{yield
+    (hash
+      moveToTop=this.moveToTop
+      moveUp=this.moveUp
+      moveDown=this.moveDown
+      moveToBottom=this.moveToBottom
+    )
+  }}
 </li>
 
 {{#unless @isReadOnly}}

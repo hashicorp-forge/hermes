@@ -27,10 +27,14 @@ interface ProjectResourceListComponentSignature {
     item: [
       {
         item: RelatedResource;
+        index: number;
         isReadOnly: boolean;
         canMoveUp: boolean;
         canMoveDown: boolean;
-        index: number;
+        moveToTop: () => void;
+        moveUp: () => void;
+        moveDown: () => void;
+        moveToBottom: () => void;
       },
     ];
   };

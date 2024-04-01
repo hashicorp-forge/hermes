@@ -8,6 +8,10 @@ interface ProjectResourceComponentSignature {
     canMoveDown: boolean;
     overflowMenuItems: Record<string, OverflowItem>;
     isReadOnly?: boolean;
+    moveToTop: () => void;
+    moveUp: () => void;
+    moveDown: () => void;
+    moveToBottom: () => void;
   };
   Blocks: {
     default: [];
@@ -19,29 +23,25 @@ export default class ProjectResourceComponent extends Component<ProjectResourceC
     const moveToTopObject = {
       label: "Move to top",
       icon: "top",
-      // TODO
-      action: () => {},
+      action: () => this.args.moveToTop(),
     };
 
     const moveUpObject = {
       label: "Move up",
       icon: "chevron-up",
-      // TODO
-      action: () => {},
+      action: () => this.args.moveUp(),
     };
 
     const moveDownObject = {
       label: "Move down",
       icon: "chevron-down",
-      // TODO
-      action: () => {},
+      action: () => this.args.moveDown(),
     };
 
     const moveToBottomObject = {
       label: "Move to bottom",
       icon: "bottom",
-      // TODO
-      action: () => {},
+      action: () => this.args.moveToBottom(),
     };
 
     const { canMoveUp, canMoveDown } = this.args;
