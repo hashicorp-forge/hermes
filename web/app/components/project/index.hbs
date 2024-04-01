@@ -173,8 +173,8 @@
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
               @canMoveUp={{gt i.index 0}}
-              @canMoveDown={{lt i.index (add this.hermesDocuments.length -1)}}
-              @isReadOnly={{not this.projectIsActive}}
+              @canMoveDown={{lt i.index (add i.itemsLength -1)}}
+              @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 delete=(hash
                   label="Remove"
@@ -212,8 +212,8 @@
             <Project::Resource
               {{! id? }}
               @canMoveUp={{gt i.index 0}}
-              @canMoveDown={{lt i.index (add this.externalLinks.length -1)}}
-              @isReadOnly={{not this.projectIsActive}}
+              @canMoveDown={{lt i.index (add i.itemsLength -1)}}
+              @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 edit=(hash
                   label="Edit"

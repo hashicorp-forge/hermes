@@ -27,6 +27,8 @@ interface ProjectResourceListComponentSignature {
     item: [
       {
         item: RelatedResource;
+        isReadOnly: boolean;
+        itemsLength: number;
         index: number;
       },
     ];

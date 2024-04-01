@@ -33,7 +33,15 @@
               @item={{item}}
               @index={{i}}
             >
-              {{yield (hash item=item index=i) to="item"}}
+              {{yield
+                (hash
+                  item=item
+                  index=i
+                  isReadOnly=@isReadOnly
+                  itemsLength=@items.length
+                )
+                to="item"
+              }}
             </Project::ResourceListItem>
           {{/animated-each}}
         </ol>
