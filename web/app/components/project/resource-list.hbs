@@ -38,7 +38,8 @@
                   item=item
                   index=i
                   isReadOnly=@isReadOnly
-                  itemsLength=@items.length
+                  canMoveUp=(gt i 0)
+                  canMoveDown=(lt i (add @items.length -1))
                 )
                 to="item"
               }}

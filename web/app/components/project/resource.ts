@@ -16,32 +16,44 @@ interface ProjectResourceComponentSignature {
 
 export default class ProjectResourceComponent extends Component<ProjectResourceComponentSignature> {
   protected get sortOrderMenuItems() {
-    return {
-      "Move to top": {
-        label: "Move to top",
-        icon: "arrow-up",
-        disabled: !this.args.canMoveUp,
-        action: () => {},
-      },
-      "Move up": {
-        label: "Move up",
-        icon: "arrow-up",
-        disabled: !this.args.canMoveUp,
-        action: () => {},
-      },
-      "Move down": {
-        label: "Move down",
-        icon: "arrow-down",
-        disabled: !this.args.canMoveDown,
-        action: () => {},
-      },
-      "Move to bottom": {
-        label: "Move to bottom",
-        icon: "arrow-down",
-        disabled: !this.args.canMoveDown,
-        action: () => {},
-      },
+    const moveToTopObject = {
+      label: "Move to top",
+      icon: "top",
+      // TODO
+      action: () => {},
     };
+
+    const moveUpObject = {
+      label: "Move up",
+      icon: "chevron-up",
+      // TODO
+      action: () => {},
+    };
+
+    const moveDownObject = {
+      label: "Move down",
+      icon: "chevron-down",
+      // TODO
+      action: () => {},
+    };
+
+    const moveToBottomObject = {
+      label: "Move to bottom",
+      icon: "bottom",
+      // TODO
+      action: () => {},
+    };
+
+    const { canMoveUp, canMoveDown } = this.args;
+
+    const items = [
+      canMoveUp ? moveToTopObject : null,
+      canMoveUp ? moveUpObject : null,
+      canMoveDown ? moveDownObject : null,
+      canMoveDown ? moveToBottomObject : null,
+    ];
+
+    return items.compact();
   }
 }
 

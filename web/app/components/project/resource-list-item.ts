@@ -161,6 +161,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
         onDrop: (e: ElementDropTargetEventBasePayload) => {
           const { data } = e.source;
           const index = data["index"];
+
           assert("index must be a number", typeof index === "number");
 
           const dropTargetElement = e.location.current.dropTargets[0]?.element;
@@ -184,6 +185,8 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
           this.dragHasEntered = false;
           this.closestEdge = null;
+
+          // TODO: aria announcement
         },
       }),
     );

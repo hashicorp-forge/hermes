@@ -172,8 +172,8 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
-              @canMoveUp={{gt i.index 0}}
-              @canMoveDown={{lt i.index (add i.itemsLength -1)}}
+              @canMoveUp={{i.canMoveUp}}
+              @canMoveDown={{i.canMoveDown}}
               @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 delete=(hash
@@ -211,8 +211,8 @@
           <:item as |i|>
             <Project::Resource
               {{! id? }}
-              @canMoveUp={{gt i.index 0}}
-              @canMoveDown={{lt i.index (add i.itemsLength -1)}}
+              @canMoveUp={{i.canMoveUp}}
+              @canMoveDown={{i.canMoveDown}}
               @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 edit=(hash
