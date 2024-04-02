@@ -12,7 +12,6 @@ interface ProjectResourceComponentSignature {
     moveUp: () => void;
     moveDown: () => void;
     moveToBottom: () => void;
-    id: string;
   };
   Blocks: {
     default: [];

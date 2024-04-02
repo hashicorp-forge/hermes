@@ -18,6 +18,11 @@ import { RelatedResource } from "../related-resources";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { guidFor } from "@ember/object/internals";
 
+enum Edges {
+  Top = "top",
+  Bottom = "bottom",
+}
+
 interface ProjectResourceListItemComponentSignature {
   Element: HTMLLIElement;
   Args: {
@@ -34,26 +39,48 @@ interface ProjectResourceListItemComponentSignature {
         moveUp: () => void;
         moveDown: () => void;
         moveToBottom: () => void;
-        id: string;
       },
     ];
   };
 }
 
 export default class ProjectResourceListItemComponent extends Component<ProjectResourceListItemComponentSignature> {
-  id = guidFor(this);
+  /**
+   * A unique identifier used for the `customNativeDragPreview` container.
+   * Used by `in-element` to render the drag preview in the correct location.
+   */
+  protected id = guidFor(this);
 
+  /**
+   * Whether the item is currently being dragged.
+   * Set true `onGenerateDragPreview` and false `onDrop`.
+   * Used to conditionally render the drag preview.
+   */
   @tracked protected isDragging = false;
 
+  /**
+   * Whether the item is currently being dragged over.
+   * Set true `onDragEnter` and false `onDragLeave`.
+   * Used to conditionally render the drop indicator.
+   */
   @tracked protected dragHasEntered = false;
 
+  /**
+   * The closest edge of the drop target element.
+   * Used to determine where the drop indicator should be rendered.
+   */
   @tracked protected closestEdge: Edge | null = null;
+
+  /**
+   * The list item element. Registered on render and used in drag-and-drop
+   * functions and scoped `querySelector` calls.
+   */
   @tracked protected el: HTMLElement | null = null;
 
-  protected get canMoveUp() {
-    return this.args.index > 0;
-  }
-
+  /**
+   * The title of the item, whether it's a document or a resource.
+   * Used in the `customNativeDragPreview`.
+   */
   protected get itemTitle() {
     if ("title" in this.args.item) {
       return this.args.item.title;
@@ -62,6 +89,10 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     }
   }
 
+  /**
+   * The document number of the item, if it's a document.
+   * Used in the `customNativeDragPreview`.
+   */
   protected get docNumber() {
     if ("documentNumber" in this.args.item) {
       return this.args.item.documentNumber;
@@ -70,32 +101,57 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     }
   }
 
-  @action registerElement(element: HTMLElement) {
+  /**
+   * The action to register the list item.
+   * Called on render and used as a target for drag-and-drop functions.
+   */
+  @action protected registerElement(element: HTMLElement) {
     this.el = element;
   }
 
+  /**
+   * The action to move an item to the top of the list.
+   * Called on click of the "move to top" button.
+   */
   @action protected moveToTop() {
     this.args.onSave(this.args.index, 0);
   }
 
+  /**
+   * The action to move an item up in the list.
+   * Called on click of the "move up" button.
+   */
   @action protected moveUp() {
     console.log("shouldMoveUp");
     this.args.onSave(this.args.index, this.args.index - 1);
   }
 
+  /**
+   * The action to move an item down in the list.
+   * Called on click of the "move down" button.
+   */
   @action protected moveDown() {
     this.args.onSave(this.args.index, this.args.index + 1);
   }
 
+  /**
+   * The action to move an item to the bottom of the list.
+   * Called on click of the "move to bottom" button.
+   */
   @action protected moveToBottom() {
     this.args.onSave(this.args.index, this.args.itemCount - 1);
   }
 
+  /**
+   * The action to configure the drag-and-drop functionality.
+   * Called on render if the list is interactive. Configures the drag-and-drop
+   * functionality for the list item.
+   */
   @action protected configureDragAndDrop() {
     assert("element must exist", this.el);
 
     const element = this.el;
-    const dragHandle = this.el.querySelector(`#${this.id}-drag-handle`);
+    const dragHandle = this.el.querySelector(`.drag-handle`);
 
     assert("drag handle must exist", dragHandle);
 
@@ -103,7 +159,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
       draggable({
         element,
         dragHandle,
-
         onGenerateDragPreview: ({ nativeSetDragImage }) => {
           this.isDragging = true;
           setCustomNativeDragPreview({
@@ -114,7 +169,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
             },
           });
         },
-
         onDrop: () => {
           this.isDragging = false;
         },
@@ -124,7 +178,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           };
         },
       }),
-
       dropTargetForElements({
         element,
         getData(e: ElementDropTargetGetFeedbackArgs) {
@@ -133,7 +186,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
             {
               element,
               input: e.input,
-              allowedEdges: ["top", "bottom"],
+              allowedEdges: [Edges.Top, Edges.Bottom],
             },
           );
         },
@@ -159,14 +212,16 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
           if (dropTarget) {
             const dataIndex = dropTarget.element.getAttribute("data-index");
+
             assert("data-index must exist", dataIndex);
+
             const index = parseInt(dataIndex, 10);
             const isItemBeforeSource = index === sourceIndex - 1;
             const isItemAfterSource = index === sourceIndex + 1;
 
             const isDropIndicatorHidden =
-              (isItemBeforeSource && closestEdge === "bottom") ||
-              (isItemAfterSource && closestEdge === "top");
+              (isItemBeforeSource && closestEdge === Edges.Bottom) ||
+              (isItemAfterSource && closestEdge === Edges.Top);
 
             if (isDropIndicatorHidden) {
               this.closestEdge = null;

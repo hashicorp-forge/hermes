@@ -172,7 +172,6 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
-              @id={{i.id}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @isReadOnly={{i.isReadOnly}}
@@ -215,7 +214,6 @@
           </:header>
           <:item as |i|>
             <Project::Resource
-              @id={{i.id}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @moveToTop={{i.moveToTop}}

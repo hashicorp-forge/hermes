@@ -10,8 +10,7 @@
           class="drag-affordance-container shaded absolute left-0 -top-px z-10 flex h-[calc(100%+2px)] -translate-x-full justify-center"
         >
           <dd.ToggleAction
-            id={{concat @id "-drag-handle"}}
-            class="drag-affordance invisible relative left-2.5 -ml-1.5 mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-faint hover:text-color-foreground-primary
+            class="drag-affordance drag-handle invisible relative left-2.5 -ml-1.5 mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-faint hover:text-color-foreground-primary
               {{if
                 dd.contentIsShown
                 'bg-color-surface-interactive-active text-color-foreground-primary'
