@@ -6,6 +6,7 @@ import {
   currentURL,
   fillIn,
   findAll,
+  triggerEvent,
   visit,
   waitFor,
 } from "@ember/test-helpers";
@@ -528,6 +529,73 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     await click(MOVE_OPTION);
 
     assertReordered(["doc-2", "doc-1", "doc-0"]);
+  });
+
+  test("you can reorder external links", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    this.server.createList("related-external-link", 2);
+
+    const project = this.server.schema.projects.first();
+
+    project.update({
+      externalLinks: this.server.schema.relatedExternalLinks
+        .all()
+        .models.map(
+          (link: { attrs: RelatedHermesDocument }, index: number) => ({
+            ...link.attrs,
+            sortOrder: index,
+          }),
+        ),
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(EXTERNAL_LINK).exists({ count: 3 });
+
+    let [first, second, third]: Array<Element | undefined> = [
+      undefined,
+      undefined,
+      undefined,
+    ];
+
+    const captureItems = () => {
+      [first, second, third] = findAll(EXTERNAL_LINK);
+      emberAssert("first link exists", first);
+      emberAssert("second link exists", second);
+      emberAssert("third link exists", third);
+    };
+
+    const assertReordered = (expectedOrder: string[]) => {
+      captureItems();
+
+      assert.dom(first).containsText(expectedOrder[0] as string);
+      assert.dom(second).containsText(expectedOrder[1] as string);
+      assert.dom(third).containsText(expectedOrder[2] as string);
+
+      const projectLinks =
+        this.server.schema.projects.first().attrs.externalLinks;
+
+      const relatedLinkIDs = projectLinks.map((link: any) => link.id);
+
+      assert.deepEqual(relatedLinkIDs, expectedOrder);
+    };
+
+    // Assert the initial order
+    assertReordered(["0", "1", "2"]);
+
+    // Open the reorder menu
+    await click(LINK_DRAG_HANDLE);
+
+    // move the first link to the bottom
+
+    const moveToBottom = findAll(MOVE_OPTION)[1];
+    emberAssert("second move option exists", moveToBottom);
+
+    await click(moveToBottom);
+
+    assertReordered(["1", "2", "0"]);
+
+    // We don't need to test this further; the underlying method
+    // has already been verified in the doc-reordering test
   });
 
   test("documents can only be removed or reordered if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
