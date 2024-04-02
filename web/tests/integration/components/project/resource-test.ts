@@ -1,18 +1,17 @@
-import { click, findAll, render, settled } from "@ember/test-helpers";
+import { click, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { setupRenderingTest } from "ember-qunit";
-import { HermesProject } from "hermes/types/project";
 import { module, test } from "qunit";
 import { assert as emberAssert } from "@ember/debug";
-import htmlElement from "hermes/utils/html-element";
-import { RelatedHermesDocument } from "hermes/components/related-resources";
-import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
-import { PROJECT_TILE_MAX_PRODUCTS } from "hermes/components/project/tile";
-import { MoveOptionLabel } from "hermes/components/project/resource";
+import {
+  MoveOptionIcon,
+  MoveOptionLabel,
+} from "hermes/components/project/resource";
 
 const DRAG_HANDLE = "[data-test-drag-handle]";
 const MOVE_OPTION = "[data-test-move-option]";
+const MOVE_ICON = "[data-test-move-icon]";
 
 interface Context extends MirageTestContext {
   overflowMenuItems: {};
@@ -81,14 +80,40 @@ module("Integration | Component | project/resource", function (hooks) {
 
     assert.dom(MOVE_OPTION).exists({ count: 4 }, "all move options are shown");
 
-    this.set("canMoveUp", false);
-
-    let moveOptionsText = findAll(MOVE_OPTION).map(
-      (el) => el.textContent?.trim(),
+    const moveIcons = findAll(MOVE_ICON).map((el) =>
+      el.getAttribute("data-test-icon"),
     );
 
     assert.deepEqual(
-      moveOptionsText,
+      moveIcons,
+      [
+        MoveOptionIcon.Top,
+        MoveOptionIcon.Up,
+        MoveOptionIcon.Down,
+        MoveOptionIcon.Bottom,
+      ],
+      "correct icons are shown",
+    );
+
+    let labels = findAll(MOVE_OPTION).map((el) => el.textContent?.trim());
+
+    assert.deepEqual(
+      labels,
+      [
+        MoveOptionLabel.Top,
+        MoveOptionLabel.Up,
+        MoveOptionLabel.Down,
+        MoveOptionLabel.Bottom,
+      ],
+      "correct labels are shown when both `canMoveUp` and `canMoveDown` are true",
+    );
+
+    this.set("canMoveUp", false);
+
+    labels = findAll(MOVE_OPTION).map((el) => el.textContent?.trim());
+
+    assert.deepEqual(
+      labels,
       [MoveOptionLabel.Down, MoveOptionLabel.Bottom],
       "only move-down options are shown when `canMoveUp` is false",
     );
@@ -96,10 +121,10 @@ module("Integration | Component | project/resource", function (hooks) {
     this.set("canMoveUp", true);
     this.set("canMoveDown", false);
 
-    moveOptionsText = findAll(MOVE_OPTION).map((el) => el.textContent?.trim());
+    labels = findAll(MOVE_OPTION).map((el) => el.textContent?.trim());
 
     assert.deepEqual(
-      moveOptionsText,
+      labels,
       [MoveOptionLabel.Top, MoveOptionLabel.Up],
       "only move-up options are shown when `canMoveDown` is false",
     );
