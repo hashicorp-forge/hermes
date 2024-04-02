@@ -1,7 +1,14 @@
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { authenticateSession } from "ember-simple-auth/test-support";
 import { module, test } from "qunit";
-import { click, currentURL, fillIn, visit, waitFor } from "@ember/test-helpers";
+import {
+  click,
+  currentURL,
+  fillIn,
+  findAll,
+  visit,
+  waitFor,
+} from "@ember/test-helpers";
 import { getPageTitle } from "ember-page-title/test-support";
 import { setupApplicationTest } from "ember-qunit";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -20,6 +27,9 @@ import {
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 import RecentlyViewedService from "hermes/services/recently-viewed";
+import { RelatedHermesDocument } from "hermes/components/related-resources";
+import { assert as emberAssert } from "@ember/debug";
+import { MoveOptionLabel } from "hermes/components/project/resource";
 
 const GLOBAL_SEARCH_INPUT = "[data-test-global-search-input]";
 const GLOBAL_SEARCH_PROJECT_HIT = "[data-test-project-hit]";
@@ -72,9 +82,11 @@ const EXTERNAL_LINK_OVERFLOW_MENU_BUTTON = `${EXTERNAL_LINK_LIST} [data-test-ove
 const OVERFLOW_MENU_EDIT = "[data-test-overflow-menu-action='edit']";
 const OVERFLOW_MENU_REMOVE = "[data-test-overflow-menu-action='remove']";
 
+// Drag and drop
 const DRAG_HANDLE = "[data-test-drag-handle]";
 const DOC_DRAG_HANDLE = `${DOCUMENT_LIST_ITEM} ${DRAG_HANDLE}`;
 const LINK_DRAG_HANDLE = `${EXTERNAL_LINK_LIST} ${DRAG_HANDLE}`;
+const MOVE_OPTION = "[data-test-move-option]";
 
 const DOCUMENT_LINK = "[data-test-document-link]";
 const DOCUMENT_TITLE = "[data-test-document-title]";
@@ -421,6 +433,101 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
       this.server.schema.projects.first().attrs.hermesDocuments;
 
     assert.equal(projectDocuments.length, 0);
+  });
+
+  test("you can reorder documents", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+    // The project starts with a related document; add two more.
+    this.server.createList("related-hermes-document", 2);
+
+    const project = this.server.schema.projects.first();
+
+    project.update({
+      hermesDocuments: this.server.schema.relatedHermesDocument
+        .all()
+        .models.map((doc: { attrs: RelatedHermesDocument }, index: number) => ({
+          ...doc.attrs,
+          sortOrder: index,
+        })),
+    });
+
+    await visit("/projects/1");
+
+    assert.dom(DOCUMENT_LIST_ITEM).exists({ count: 3 });
+
+    let [first, second, third]: Array<Element | undefined> = [
+      undefined,
+      undefined,
+      undefined,
+    ];
+
+    const captureItems = () => {
+      [first, second, third] = findAll(DOCUMENT_LIST_ITEM);
+      emberAssert("first doc exists", first);
+      emberAssert("second doc exists", second);
+      emberAssert("third doc exists", third);
+    };
+
+    const assertReordered = (expectedOrder: string[]) => {
+      captureItems();
+
+      assert.dom(first).containsText(expectedOrder[0] as string);
+      assert.dom(second).containsText(expectedOrder[1] as string);
+      assert.dom(third).containsText(expectedOrder[2] as string);
+
+      const projectDocuments =
+        this.server.schema.projects.first().attrs.hermesDocuments;
+
+      const relatedDocIDs = projectDocuments.map(
+        (doc: RelatedHermesDocument) => doc.googleFileID,
+      );
+
+      assert.deepEqual(relatedDocIDs, expectedOrder);
+    };
+
+    // Assert the initial order
+    assertReordered(["doc-0", "doc-1", "doc-2"]);
+
+    // Open the reorder menu
+    await click(DOC_DRAG_HANDLE);
+
+    // move the first document to the bottom
+    const moveToBottom = findAll(MOVE_OPTION)[1];
+    emberAssert("second move option exists", moveToBottom);
+    assert.dom(moveToBottom).containsText(MoveOptionLabel.Bottom);
+    await click(moveToBottom);
+
+    assertReordered(["doc-1", "doc-2", "doc-0"]);
+
+    // Open the reorder menu of `doc-1`
+    await click(DOC_DRAG_HANDLE);
+
+    // Move it to the bottom
+    const bottomOption = findAll(MOVE_OPTION)[1];
+    emberAssert("bottom move option exists", bottomOption);
+
+    await click(bottomOption);
+
+    assertReordered(["doc-2", "doc-0", "doc-1"]);
+
+    // Open the reorder menu of `doc-1` to test the top option
+
+    let dragHandle = findAll(DRAG_HANDLE)[2];
+    emberAssert("second move option exists", dragHandle);
+
+    // Move it to the top
+    await click(dragHandle);
+    await click(MOVE_OPTION);
+
+    assertReordered(["doc-1", "doc-2", "doc-0"]);
+
+    // Move `doc-2` to the top
+    dragHandle = findAll(DRAG_HANDLE)[1];
+    emberAssert("second move option exists", dragHandle);
+
+    await click(dragHandle);
+    await click(MOVE_OPTION);
+
+    assertReordered(["doc-2", "doc-1", "doc-0"]);
   });
 
   test("documents can only be removed or reordered if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

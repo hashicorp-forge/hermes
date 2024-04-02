@@ -1,4 +1,4 @@
-import { Factory, ModelInstance, Server } from "miragejs";
+import { Factory, ModelInstance } from "miragejs";
 import { HermesProject } from "hermes/types/project";
 import { TEST_USER_EMAIL } from "../utils";
 

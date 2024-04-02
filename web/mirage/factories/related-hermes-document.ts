@@ -20,4 +20,28 @@ export default Factory.extend({
   summary() {
     return `Summary for ${this.title}`;
   },
+
+  // @ts-ignore - Bug https://github.com/miragejs/miragejs/issues/1052
+  afterCreate(relatedHermesDocument, server) {
+    const { id } = relatedHermesDocument;
+    const doc = server.schema.document.find(id);
+
+    if (!doc) {
+      server.create("document", {
+        id,
+        objectID: id,
+        title: relatedHermesDocument.title,
+        docType: relatedHermesDocument.documentType,
+        docNumber: relatedHermesDocument.documentNumber,
+        owners: relatedHermesDocument.owners,
+        product: relatedHermesDocument.product,
+        status: relatedHermesDocument.status,
+        _snippetResult: {
+          content: {
+            value: relatedHermesDocument.summary,
+          },
+        },
+      });
+    }
+  },
 });
