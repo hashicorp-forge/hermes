@@ -19,3 +19,36 @@
     }
   }
 }
+
+.divided-list > li {
+  &:hover,
+  &:focus-within {
+    .drag-handle-container.shaded::before {
+      content: "";
+      @apply absolute top-0 bottom-0 left-0 right-0;
+      @apply bg-color-surface-faint;
+    }
+  }
+
+  &:not(:last-child) {
+    &:hover,
+    &:focus-within {
+      .drag-handle-container {
+        @apply border-b-color-border-faint;
+      }
+    }
+  }
+
+  &:not(:first-child) {
+    &:hover,
+    &:focus-within {
+      .drag-handle-container {
+        @apply border-t-color-border-faint;
+      }
+    }
+  }
+
+  .drag-handle-container {
+    @apply border-t border-b border-t-transparent border-b-transparent;
+  }
+}
