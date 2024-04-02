@@ -5,6 +5,7 @@ import {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
+  RelatedResourcesScope,
 } from "../related-resources";
 import { inject as service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
@@ -330,34 +331,66 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     this.editModalIsShown = true;
   }
 
-  @action protected saveExternalLinkOrder(
+  /**
+   * A triage method that saves the order of resources based on type.
+   * Caches the current array, removes the target resource from the array,
+   * inserts it at the new index, then patches the project.
+   */
+  @action private saveResourcesOrder(
+    resourceType: RelatedResourcesScope,
     currentIndex: number,
     newIndex: number,
   ) {
-    const cachedLinks = this.externalLinks.slice();
-    const [removed] = this.externalLinks.splice(currentIndex, 1);
+    const isDoc = resourceType === RelatedResourcesScope.Documents;
+
+    const cached = isDoc
+      ? this.hermesDocuments.slice()
+      : this.externalLinks.slice();
+
+    const [removed] = isDoc
+      ? this.hermesDocuments.splice(currentIndex, 1)
+      : this.externalLinks.splice(currentIndex, 1);
 
     assert("removed must exist", removed);
 
-    this.externalLinks.insertAt(newIndex, removed);
+    if (resourceType === RelatedResourcesScope.Documents) {
+      assert("removed must be a document", "googleFileID" in removed);
+      this.hermesDocuments.insertAt(newIndex, removed);
+      void this.saveProjectResources.perform(
+        cached,
+        this.externalLinks.slice(),
+      );
+    } else {
+      assert("removed must be a link", "url" in removed);
+      this.externalLinks.insertAt(newIndex, removed);
+      void this.saveProjectResources.perform(
+        this.hermesDocuments.slice(),
+        cached,
+      );
+    }
+  }
 
-    void this.saveProjectResources.perform(
-      this.hermesDocuments.slice(),
-      cachedLinks,
+  /**
+   * The action to save the order of external links.
+   * Called when the user reorders a link in the list.
+   */
+  @action protected saveLinkOrder(currentIndex: number, newIndex: number) {
+    this.saveResourcesOrder(
+      RelatedResourcesScope.ExternalLinks,
+      currentIndex,
+      newIndex,
     );
   }
 
+  /**
+   * The action to save the order of related documents.
+   * Called when the user reorders a document in the list.
+   */
   @action protected saveDocumentOrder(currentIndex: number, newIndex: number) {
-    const cachedDocuments = this.hermesDocuments.slice();
-    const [removed] = this.hermesDocuments.splice(currentIndex, 1);
-
-    assert("removed must exist", removed);
-
-    this.hermesDocuments.insertAt(newIndex, removed);
-
-    void this.saveProjectResources.perform(
-      cachedDocuments,
-      this.externalLinks.slice(),
+    this.saveResourcesOrder(
+      RelatedResourcesScope.Documents,
+      currentIndex,
+      newIndex,
     );
   }
 

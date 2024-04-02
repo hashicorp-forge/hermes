@@ -159,8 +159,8 @@
         data-test-document-list
         @items={{this.hermesDocuments}}
         @shouldAnimate={{this.shouldAnimate}}
-        @isReadOnly={{not this.projectIsActive}}
         @motion={{this.resourceListContainerMotion}}
+        @isReadOnly={{not this.projectIsActive}}
         @onSave={{this.saveDocumentOrder}}
         class="mt-7"
       >
@@ -205,7 +205,7 @@
           @items={{this.externalLinks}}
           @shouldAnimate={{this.shouldAnimate}}
           @motion={{this.resourceListContainerMotion}}
-          @onSave={{this.saveExternalLinkOrder}}
+          @onSave={{this.saveLinkOrder}}
           @isReadOnly={{not this.projectIsActive}}
         >
           <:header>
