@@ -137,6 +137,15 @@ h1 {
   }
 }
 
+.visible-with-group {
+  @apply group-focus-within:visible group-hover:visible;
+
+  &:hover,
+  &:focus-within {
+    @apply visible;
+  }
+}
+
 // Prevent the Flight Icons shim from taking up space
 .flight-sprite-container {
   position: fixed;
