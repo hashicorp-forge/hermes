@@ -9,6 +9,7 @@ import {
   offset,
   platform,
   shift,
+  hide,
 } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -30,6 +31,7 @@ interface FloatingUIContentSignature {
     renderOut?: boolean;
     offset?: OffsetOptions;
     matchAnchorWidth?: MatchAnchorWidthOptions;
+    hide: () => void;
   };
   Blocks: {
     default: [];
@@ -65,7 +67,7 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
   @action didInsert(e: HTMLElement) {
     this._content = e;
 
-    const { matchAnchorWidth, anchor, placement } = this.args;
+    const { anchor, placement } = this.args;
     const { content } = this;
 
     this.maybeMatchAnchorWidth();
@@ -79,6 +81,17 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
 
     let updatePosition = async () => {
       let _placement = placement || "bottom-start";
+
+      const elementBeingDragged = document.querySelector(".is-dragging");
+
+      /**
+       * If anchor exists within a div that's being dragged, hide the content.
+       * This prevents dropdowns from remaining open after being dragged.
+       */
+      if (elementBeingDragged && elementBeingDragged.contains(anchor)) {
+        this.args.hide();
+        return;
+      }
 
       computePosition(anchor, content, {
         platform,
@@ -95,7 +108,9 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
       });
     };
 
-    this.cleanup = autoUpdate(anchor, content, updatePosition);
+    this.cleanup = autoUpdate(anchor, content, updatePosition, {
+      layoutShift: true,
+    });
   }
 
   private maybeMatchAnchorWidth() {
