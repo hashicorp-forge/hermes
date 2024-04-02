@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	defaultHitsPerPage        = 24
 	MaxRecentlyViewedProjects = 10
 )
 
@@ -76,8 +77,34 @@ func ProjectsHandler(srv server.Server) http.Handler {
 
 			// Get query parameters.
 			q := r.URL.Query()
+			hitsPerPageParam := q.Get("hitsPerPage")
+			pageParam := q.Get("page")
 			statusParam := q.Get("status")
 			titleParam := q.Get("title")
+
+			// Set default values for page and hitsPerPage parameters.
+			page := 1
+			hitsPerPage := defaultHitsPerPage
+
+			// Parse page parameter.
+			if pageParam != "" {
+				p, err := strconv.Atoi(pageParam)
+				if err != nil {
+					http.Error(w, "Invalid page parameter", http.StatusBadRequest)
+					return
+				}
+				page = p
+			}
+
+			// Parse perPage parameter.
+			if hitsPerPageParam != "" {
+				hpp, err := strconv.Atoi(hitsPerPageParam)
+				if err != nil {
+					http.Error(w, "Invalid hitsPerPage parameter", http.StatusBadRequest)
+					return
+				}
+				hitsPerPage = hpp
+			}
 
 			// Build status condition for database query.
 			var cond models.Project
@@ -96,8 +123,11 @@ func ProjectsHandler(srv server.Server) http.Handler {
 
 			// Get projects from database.
 			projs := []models.Project{}
+			offset := (page - 1) * hitsPerPage
 			if err := srv.DB.
 				Where("title ILIKE ?", fmt.Sprintf("%%%s%%", titleParam)).
+				Offset(offset).
+				Limit(hitsPerPage).
 				Find(&projs, cond).
 				Error; err != nil &&
 				!errors.Is(err, gorm.ErrRecordNotFound) {
