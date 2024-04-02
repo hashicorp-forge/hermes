@@ -9,7 +9,6 @@ import {
   offset,
   platform,
   shift,
-  hide,
 } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
@@ -82,12 +81,13 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     let updatePosition = async () => {
       let _placement = placement || "bottom-start";
 
+      /**
+       * If anchor exists within a div that's being dragged, hide the content
+       * to prevent the dropdown from remaining open after its parent is dragged.
+       * The `is-dragging` class is added by Pragmatic Drag and Drop.
+       */
       const elementBeingDragged = document.querySelector(".is-dragging");
 
-      /**
-       * If anchor exists within a div that's being dragged, hide the content.
-       * This prevents dropdowns from remaining open after being dragged.
-       */
       if (elementBeingDragged && elementBeingDragged.contains(anchor)) {
         this.args.hide();
         return;
@@ -109,6 +109,7 @@ export default class FloatingUIContent extends Component<FloatingUIContentSignat
     };
 
     this.cleanup = autoUpdate(anchor, content, updatePosition, {
+      // Recompute on layout shifts such as drag and drop.
       layoutShift: true,
     });
   }

@@ -16,6 +16,7 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { tracked } from "@glimmer/tracking";
 import { RelatedResource } from "../related-resources";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
+import { announce } from "@atlaskit/pragmatic-drag-and-drop-live-region";
 import { guidFor } from "@ember/object/internals";
 
 enum Edges {
@@ -102,6 +103,14 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   }
 
   /**
+   * The action to announce the movement of an item to screen readers.
+   * Called when an item is moved up, down, to the top, or to the bottom.
+   */
+  private announceMovement(direction: string) {
+    announce(`${this.itemTitle} moved ${direction}`);
+  }
+
+  /**
    * The action to register the list item.
    * Called on render and used as a target for drag-and-drop functions.
    */
@@ -115,6 +124,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
    */
   @action protected moveToTop() {
     this.args.onSave(this.args.index, 0);
+    this.announceMovement("to top");
   }
 
   /**
@@ -122,8 +132,8 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
    * Called on click of the "move up" button.
    */
   @action protected moveUp() {
-    console.log("shouldMoveUp");
     this.args.onSave(this.args.index, this.args.index - 1);
+    this.announceMovement("up");
   }
 
   /**
@@ -132,6 +142,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
    */
   @action protected moveDown() {
     this.args.onSave(this.args.index, this.args.index + 1);
+    this.announceMovement("down");
   }
 
   /**
@@ -140,6 +151,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
    */
   @action protected moveToBottom() {
     this.args.onSave(this.args.index, this.args.itemCount - 1);
+    this.announceMovement("to bottom");
   }
 
   /**
@@ -270,8 +282,6 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
           this.dragHasEntered = false;
           this.closestEdge = null;
-
-          // TODO: aria announcement
         },
       }),
     );

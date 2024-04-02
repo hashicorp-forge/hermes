@@ -198,6 +198,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@atlaskit/pragmatic-drag-and-drop-live-region@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@atlaskit/pragmatic-drag-and-drop-live-region@npm:1.0.4"
+  dependencies:
+    "@babel/runtime": ^7.0.0
+  checksum: 7057e5d07b1b1849e365af8e128e8a3fa9a8b281a449ffe386a2d1d588a067a1c208264d0554514d736ef3239159b8ca65f8da970584ccabca8eee0ef49f917e
+  languageName: node
+  linkType: hard
+
 "@atlaskit/pragmatic-drag-and-drop@npm:^1.1.0, @atlaskit/pragmatic-drag-and-drop@npm:^1.1.3":
   version: 1.1.3
   resolution: "@atlaskit/pragmatic-drag-and-drop@npm:1.1.3"
@@ -13502,6 +13511,7 @@ __metadata:
   dependencies:
     "@atlaskit/pragmatic-drag-and-drop": ^1.1.3
     "@atlaskit/pragmatic-drag-and-drop-hitbox": ^1.0.3
+    "@atlaskit/pragmatic-drag-and-drop-live-region": ^1.0.4
     "@csstools/postcss-sass": ^5.0.1
     "@ember/optional-features": ^2.0.0
     "@ember/test-helpers": ^2.6.0

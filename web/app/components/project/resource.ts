@@ -19,26 +19,30 @@ interface ProjectResourceComponentSignature {
 }
 
 export default class ProjectResourceComponent extends Component<ProjectResourceComponentSignature> {
+  /**
+   * The items to display in the overflow menu according
+   * to the resource's position in the list.
+   */
   protected get sortOrderMenuItems() {
-    const moveToTopObject = {
+    const moveToTop = {
       label: "Move to top",
       icon: "top",
       action: () => this.args.moveToTop(),
     };
 
-    const moveUpObject = {
+    const moveUp = {
       label: "Move up",
       icon: "chevron-up",
       action: () => this.args.moveUp(),
     };
 
-    const moveDownObject = {
+    const moveDown = {
       label: "Move down",
       icon: "chevron-down",
       action: () => this.args.moveDown(),
     };
 
-    const moveToBottomObject = {
+    const moveToBottom = {
       label: "Move to bottom",
       icon: "bottom",
       action: () => this.args.moveToBottom(),
@@ -47,10 +51,10 @@ export default class ProjectResourceComponent extends Component<ProjectResourceC
     const { canMoveUp, canMoveDown } = this.args;
 
     const items = [
-      canMoveUp ? moveToTopObject : null,
-      canMoveUp ? moveUpObject : null,
-      canMoveDown ? moveDownObject : null,
-      canMoveDown ? moveToBottomObject : null,
+      canMoveUp ? moveToTop : null,
+      canMoveUp ? moveUp : null,
+      canMoveDown ? moveDown : null,
+      canMoveDown ? moveToBottom : null,
     ];
 
     return items.compact();

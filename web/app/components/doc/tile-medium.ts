@@ -10,6 +10,12 @@ interface DocTileMediumComponentSignature {
   Args: {
     doc: RelatedHermesDocument | HermesDocument;
     avatarIsLoading?: boolean;
+
+    /**
+     * Whether the tile is part of a list that can be reordered.
+     * If true, we extend the hover/focus affordance into the gutter
+     * where the grab handle will be.
+     */
     canBeReordered?: boolean;
 
     /**
