@@ -18,15 +18,14 @@ interface ProjectResourceListComponentSignature {
   Args: {
     items: RelatedResource[];
     shouldAnimate: boolean;
-    isReadOnly: boolean;
     motion: unknown;
+    isReadOnly: boolean;
     onSave: (currentIndex: number, newIndex: number) => void;
   };
   Blocks: {
     header: [];
     item: [
       {
-        id: string;
         item: RelatedResource;
         index: number;
         isReadOnly: boolean;
