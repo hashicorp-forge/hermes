@@ -22,10 +22,12 @@ const USER_NAME = "[data-test-document-owner-name]";
 const STATUS = "[data-test-document-status]";
 const TYPE = "[data-test-document-type]";
 const THUMBNAIL_BADGE = "[data-test-doc-thumbnail-product-badge]";
+const PRIMARY_CLICK_AREA = "[data-test-primary-click-area]";
 
 interface Context extends MirageTestContext {
   doc: HermesDocument | RelatedHermesDocument;
   query: string;
+  canBeReordered: boolean;
 }
 
 module("Integration | Component | doc/tile-medium", function (hooks) {
@@ -173,5 +175,30 @@ module("Integration | Component | doc/tile-medium", function (hooks) {
 
     assert.dom(TITLE).hasText(title);
     assert.dom(`${TITLE} mark`).hasText(query);
+  });
+
+  test("when `canBeReordered` is true, the click affordance changes", async function (this: Context, assert) {
+    this.set("doc", this.server.schema.document.first().attrs);
+    this.set("canBeReordered", false);
+
+    await render<Context>(hbs`
+      <div style="width: 500px; position: relative;">
+        <Doc::TileMedium
+          @doc={{this.doc}}
+          @canBeReordered={{this.canBeReordered}}
+        />
+      </div>
+    `);
+
+    assert.dom(PRIMARY_CLICK_AREA).hasStyle({ left: "0px", width: "500px" });
+
+    this.set("canBeReordered", true);
+
+    assert
+      .dom(PRIMARY_CLICK_AREA)
+      .hasStyle(
+        { left: "-20px", width: "520px", right: "0px" },
+        'when "canBeReordered" is true, the click area extends to the left by 20px to make room for the drag handle',
+      );
   });
 });
