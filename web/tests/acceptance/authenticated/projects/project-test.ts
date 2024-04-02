@@ -72,6 +72,10 @@ const EXTERNAL_LINK_OVERFLOW_MENU_BUTTON = `${EXTERNAL_LINK_LIST} [data-test-ove
 const OVERFLOW_MENU_EDIT = "[data-test-overflow-menu-action='edit']";
 const OVERFLOW_MENU_REMOVE = "[data-test-overflow-menu-action='remove']";
 
+const DRAG_HANDLE = "[data-test-drag-handle]";
+const DOC_DRAG_HANDLE = `${DOCUMENT_LIST_ITEM} ${DRAG_HANDLE}`;
+const LINK_DRAG_HANDLE = `${EXTERNAL_LINK_LIST} ${DRAG_HANDLE}`;
+
 const DOCUMENT_LINK = "[data-test-document-link]";
 const DOCUMENT_TITLE = "[data-test-document-title]";
 const DOCUMENT_SUMMARY = "[data-test-document-summary]";
@@ -419,23 +423,26 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(projectDocuments.length, 0);
   });
 
-  test("documents can only be removed if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("documents can only be removed or reordered if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     await visit("/projects/1");
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
+    assert.dom(DOC_DRAG_HANDLE).exists();
 
     await click(STATUS_TOGGLE);
     await click(COMPLETED_STATUS_ACTION);
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOC_DRAG_HANDLE).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ARCHIVED_STATUS_ACTION);
 
     assert.dom(DOCUMENT_LIST_ITEM).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(DOC_DRAG_HANDLE).doesNotExist();
   });
 
   test("you can add external links to a project", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
@@ -551,7 +558,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
     assert.equal(projectLinks.length, 0);
   });
 
-  test("external links can only be edited if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
+  test("external links can only be edited / reordered if the project is active", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     this.server.schema.projects.first().update({
       externalLinks: [this.server.create("related-external-link").attrs],
     });
@@ -560,18 +567,21 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     assert.dom(EXTERNAL_LINK).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).exists();
+    assert.dom(LINK_DRAG_HANDLE).exists();
 
     await click(STATUS_TOGGLE);
     await click(COMPLETED_STATUS_ACTION);
 
     assert.dom(EXTERNAL_LINK).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(LINK_DRAG_HANDLE).doesNotExist();
 
     await click(STATUS_TOGGLE);
     await click(ARCHIVED_STATUS_ACTION);
 
     assert.dom(EXTERNAL_LINK).exists();
     assert.dom(DOCUMENT_OVERFLOW_MENU_BUTTON).doesNotExist();
+    assert.dom(LINK_DRAG_HANDLE).doesNotExist();
   });
 
   test('the "add resource" button is hidden when the project is inactive', async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {

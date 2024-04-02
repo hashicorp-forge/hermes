@@ -34,7 +34,7 @@
               @onSave={{@onSave}}
               @item={{item}}
               @index={{i}}
-              as |resourceListItem|
+              as |r|
             >
               {{yield
                 (hash
@@ -43,10 +43,10 @@
                   isReadOnly=@isReadOnly
                   canMoveUp=(gt i 0)
                   canMoveDown=(lt i (add @items.length -1))
-                  moveToTop=resourceListItem.moveToTop
-                  moveUp=resourceListItem.moveUp
-                  moveDown=resourceListItem.moveDown
-                  moveToBottom=resourceListItem.moveToBottom
+                  moveToTop=r.moveToTop
+                  moveUp=r.moveUp
+                  moveDown=r.moveDown
+                  moveToBottom=r.moveToBottom
                 )
                 to="item"
               }}
