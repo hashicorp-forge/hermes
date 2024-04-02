@@ -4,10 +4,10 @@ import { OverflowItem } from "hermes/components/overflow-menu";
 interface ProjectResourceComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    canMoveUp: boolean;
-    canMoveDown: boolean;
     overflowMenuItems: Record<string, OverflowItem>;
     isReadOnly?: boolean;
+    canMoveUp: boolean;
+    canMoveDown: boolean;
     moveToTop: () => void;
     moveUp: () => void;
     moveDown: () => void;

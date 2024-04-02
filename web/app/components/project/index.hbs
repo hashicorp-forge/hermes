@@ -172,13 +172,13 @@
         <:item as |i|>
           <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
             <Project::Resource
+              @isReadOnly={{i.isReadOnly}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @moveToTop={{i.moveToTop}}
               @moveUp={{i.moveUp}}
               @moveDown={{i.moveDown}}
               @moveToBottom={{i.moveToBottom}}
-              @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 delete=(hash
                   label="Remove"
@@ -214,13 +214,13 @@
           </:header>
           <:item as |i|>
             <Project::Resource
+              @isReadOnly={{i.isReadOnly}}
               @canMoveUp={{i.canMoveUp}}
               @canMoveDown={{i.canMoveDown}}
               @moveToTop={{i.moveToTop}}
               @moveUp={{i.moveUp}}
               @moveDown={{i.moveDown}}
               @moveToBottom={{i.moveToBottom}}
-              @isReadOnly={{i.isReadOnly}}
               @overflowMenuItems={{hash
                 edit=(hash
                   label="Edit"

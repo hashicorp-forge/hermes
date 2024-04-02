@@ -280,6 +280,13 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
 
           this.args.onSave(index, newIndex);
 
+          // Announce to screen readers
+          announce(
+            `${this.itemTitle} moved from position ${index + 1} to ${
+              newIndex + 1
+            }`,
+          );
+
           this.dragHasEntered = false;
           this.closestEdge = null;
         },

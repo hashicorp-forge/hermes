@@ -119,16 +119,16 @@ h1 {
 
 .divided-list {
   > li,
-  .drag-affordance-container {
+  .drag-handle-container {
     @apply border-t border-t-transparent;
   }
 
-  .drag-affordance-container {
+  .drag-handle-container {
     @apply border-b border-b-transparent;
   }
 
   > li:hover {
-    .drag-affordance-container.shaded::before {
+    .drag-handle-container.shaded::before {
       content: "";
       @apply absolute top-0 bottom-0 left-0 right-0;
       @apply bg-color-surface-faint;
@@ -136,7 +136,7 @@ h1 {
   }
 
   > li:not(:last-child):hover {
-    .drag-affordance-container {
+    .drag-handle-container {
       @apply border-b-color-border-faint;
     }
   }
@@ -144,7 +144,7 @@ h1 {
   > li:not(:first-child) {
     @apply border-t-color-border-faint;
 
-    &:hover .drag-affordance-container {
+    &:hover .drag-handle-container {
       @apply border-t-color-border-faint;
     }
   }
@@ -157,6 +157,15 @@ h1 {
 
   > li:not(:first-child) {
     @apply border-l-color-border-faint;
+  }
+}
+
+.visible-with-group {
+  @apply group-focus-within:visible group-hover:visible;
+
+  &:hover,
+  &:focus-within {
+    @apply visible;
   }
 }
 
