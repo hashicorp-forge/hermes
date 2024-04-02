@@ -1,6 +1,12 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { TestContext, render } from "@ember/test-helpers";
+import {
+  TestContext,
+  find,
+  render,
+  rerender,
+  waitUntil,
+} from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
 import { OffsetOptions } from "@floating-ui/dom";
@@ -8,18 +14,26 @@ import { OffsetOptions } from "@floating-ui/dom";
 const DEFAULT_CONTENT_OFFSET = 5;
 const CONTENT_SELECTOR = ".hermes-floating-ui-content";
 
-interface FloatingUIComponentTestContext extends TestContext {
+interface Context extends TestContext {
   renderOut?: boolean;
   offset?: OffsetOptions;
+  class: string;
+  isShown: boolean;
+  spacerIsShown: boolean;
+  hide: () => void;
 }
 
 module("Integration | Component | floating-u-i/content", function (hooks) {
   setupRenderingTest(hooks);
 
-  test("it can be rendered inline or outside", async function (this: FloatingUIComponentTestContext, assert) {
+  hooks.beforeEach(function (this: Context) {
+    this.set("hide", () => {});
+  });
+
+  test("it can be rendered inline or outside", async function (this: Context, assert) {
     this.set("renderOut", false);
 
-    await render<FloatingUIComponentTestContext>(hbs`
+    await render<Context>(hbs`
       <div class="anchor">
         Attach here
       </div>
@@ -29,6 +43,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
           @id="1"
           @anchor={{html-element '.anchor'}}
           @renderOut={{this.renderOut}}
+          @hide={{this.hide}}
         >
           Content
         </FloatingUI::Content>
@@ -51,7 +66,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
   });
 
   test("it will render out to a dialog if one is present", async function (assert) {
-    await render<FloatingUIComponentTestContext>(hbs`
+    await render<Context>(hbs`
 
       <dialog>
         Dialog
@@ -66,6 +81,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
           @id="1"
           @anchor={{html-element '.anchor'}}
           @renderOut={{true}}
+          @hide={{this.hide}}
         >
           Content
         </FloatingUI::Content>
@@ -81,7 +97,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       .exists("content is rendered in the dialog");
   });
 
-  test("it is positioned by floating-ui", async function (this: FloatingUIComponentTestContext, assert) {
+  test("it is positioned by floating-ui", async function (this: Context, assert) {
     let contentWidth = 0;
     let anchorWidth = 0;
     let contentLeft = 0;
@@ -101,7 +117,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
     // Center the anchor so the content can be flexibly positioned
 
-    await render<FloatingUIComponentTestContext>(hbs`
+    await render<Context>(hbs`
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -112,6 +128,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             @id="1"
             @anchor={{html-element '.anchor'}}
             @placement="left"
+            @hide={{this.hide}}
           >
             Content
           </FloatingUI::Content>
@@ -138,7 +155,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
 
     this.clearRender();
 
-    await render<FloatingUIComponentTestContext>(hbs`
+    await render<Context>(hbs`
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -149,6 +166,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             @id="1"
             @anchor={{html-element '.anchor'}}
             @placement="right"
+            @hide={{this.hide}}
           >
             Content
           </FloatingUI::Content>
@@ -168,8 +186,8 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     );
   });
 
-  test("it can use a custom offset", async function (this: FloatingUIComponentTestContext, assert) {
-    await render(hbs`
+  test("it can use a custom offset", async function (this: Context, assert) {
+    await render<Context>(hbs`
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -180,6 +198,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             @id="1"
             @anchor={{html-element '.anchor'}}
             @placement="left"
+            @hide={{this.hide}}
           >
             Content
           </FloatingUI::Content>
@@ -203,7 +222,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     this.clearRender();
     this.set("offset", 10);
 
-    await render<FloatingUIComponentTestContext>(hbs`
+    await render<Context>(hbs`
       <div class="grid place-items-center w-full h-full">
         <div>
           <div class="anchor" style="width: 100px">
@@ -215,6 +234,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
             @anchor={{html-element '.anchor'}}
             @placement="left"
             @offset={{this.offset}}
+            @hide={{this.hide}}
           >
             Content
           </FloatingUI::Content>
@@ -236,7 +256,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
   });
 
   test("it can ignore dynamic positioning", async function (assert) {
-    await render(hbs`
+    await render<Context>(hbs`
       <div class="anchor">
         Attach
       </div>
@@ -244,6 +264,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
         @id="1"
         @anchor={{html-element '.anchor'}}
         @placement={{null}}
+        @hide={{this.hide}}
       >
         Content
       </FloatingUI::Content>
@@ -272,6 +293,54 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
       null,
       "content not positioned by floatingUI",
     );
+  });
+
+  test("it runs the passed-in hide action when the anchor is dragged", async function (assert) {
+    this.set("class", "");
+    this.set("isShown", true);
+
+    this.set("spacerIsShown", true);
+
+    this.set("hide", () => {
+      this.set("isShown", false);
+    });
+
+    await render<Context>(hbs`
+      <div class={{this.class}}>
+        {{#if this.spacerIsShown}}
+          <div>
+            Space
+          </div>
+        {{/if}}
+        {{#if this.isShown}}
+          <div class="anchor">
+            <FloatingUI::Content
+              @id="1"
+              @anchor={{html-element '.anchor'}}
+              @placement="bottom-start"
+              @hide={{this.hide}}
+            >
+            </FloatingUI::Content>
+          </div>
+        {{/if}}
+      </div>
+    `);
+
+    assert.dom(CONTENT_SELECTOR).exists();
+
+    this.set("class", "is-dragging");
+
+    assert
+      .dom(CONTENT_SELECTOR)
+      .exists("content is visible because the layout hasn't shifted");
+
+    // Trigger a layout shift
+    this.set("spacerIsShown", false);
+
+    // Confirm tht the content is hidden
+    await waitUntil(() => {
+      return !find(CONTENT_SELECTOR);
+    });
   });
 
   todo("it runs a cleanup function on teardown", async function (assert) {
