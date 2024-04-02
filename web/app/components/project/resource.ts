@@ -1,6 +1,20 @@
 import Component from "@glimmer/component";
 import { OverflowItem } from "hermes/components/overflow-menu";
 
+export enum MoveOptionLabel {
+  Top = "Move to top",
+  Up = "Move up",
+  Down = "Move down",
+  Bottom = "Move to bottom",
+}
+
+export enum MoveOptionIcon {
+  Top = "top",
+  Up = "chevron-up",
+  Down = "chevron-down",
+  Bottom = "bottom",
+}
+
 interface ProjectResourceComponentSignature {
   Element: HTMLDivElement;
   Args: {
@@ -25,26 +39,26 @@ export default class ProjectResourceComponent extends Component<ProjectResourceC
    */
   protected get sortOrderMenuItems() {
     const moveToTop = {
-      label: "Move to top",
-      icon: "top",
+      label: MoveOptionLabel.Top,
+      icon: MoveOptionIcon.Top,
       action: () => this.args.moveToTop(),
     };
 
     const moveUp = {
-      label: "Move up",
-      icon: "chevron-up",
+      label: MoveOptionLabel.Up,
+      icon: MoveOptionIcon.Up,
       action: () => this.args.moveUp(),
     };
 
     const moveDown = {
-      label: "Move down",
-      icon: "chevron-down",
+      label: MoveOptionLabel.Down,
+      icon: MoveOptionIcon.Down,
       action: () => this.args.moveDown(),
     };
 
     const moveToBottom = {
-      label: "Move to bottom",
-      icon: "bottom",
+      label: MoveOptionLabel.Bottom,
+      icon: MoveOptionIcon.Bottom,
       action: () => this.args.moveToBottom(),
     };
 

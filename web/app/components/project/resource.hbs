@@ -9,6 +9,7 @@
           class="drag-handle-container shaded absolute left-0 -top-px z-10 flex h-[calc(100%+2px)] -translate-x-full justify-center"
         >
           <dd.ToggleAction
+            data-test-drag-handle
             class="drag-handle visible-with-group invisible relative left-2.5 -ml-1.5 mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-faint hover:text-color-foreground-primary
               {{if
                 dd.contentIsShown
@@ -21,6 +22,7 @@
       </:anchor>
       <:item as |dd|>
         <dd.Action
+          data-test-move-option
           {{on "click" dd.attrs.action}}
           class="flex items-center gap-2 px-4 py-1.5"
         >
