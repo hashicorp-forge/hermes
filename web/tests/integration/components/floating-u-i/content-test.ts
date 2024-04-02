@@ -1,12 +1,6 @@
 import { module, test, todo } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import {
-  TestContext,
-  find,
-  render,
-  rerender,
-  waitUntil,
-} from "@ember/test-helpers";
+import { TestContext, find, render, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
 import { OffsetOptions } from "@floating-ui/dom";
@@ -298,9 +292,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
   test("it runs the passed-in hide action when the anchor is dragged", async function (assert) {
     this.set("class", "");
     this.set("isShown", true);
-
     this.set("spacerIsShown", true);
-
     this.set("hide", () => {
       this.set("isShown", false);
     });
@@ -337,7 +329,7 @@ module("Integration | Component | floating-u-i/content", function (hooks) {
     // Trigger a layout shift
     this.set("spacerIsShown", false);
 
-    // Confirm tht the content is hidden
+    // Confirm that the content is hidden
     await waitUntil(() => {
       return !find(CONTENT_SELECTOR);
     });
