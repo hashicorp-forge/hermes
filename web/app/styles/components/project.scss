@@ -72,13 +72,6 @@
   .project-resource {
     @apply relative;
 
-    &:hover,
-    &:focus-within {
-      .overflow-button-container {
-        @apply visible;
-      }
-    }
-
     .title {
       @apply text-display-200 font-semibold text-color-foreground-strong;
     }

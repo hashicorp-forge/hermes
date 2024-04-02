@@ -25,6 +25,20 @@ interface DocumentRouteModel {
   docType: HermesDocumentType;
 }
 
+export enum DocStatus {
+  Draft = "WIP",
+  Approved = "Approved",
+  InReview = "In-Review",
+  Archived = "Obsolete",
+}
+
+export enum DocStatusLabel {
+  Draft = "Draft",
+  Approved = "Approved",
+  InReview = "In Review",
+  Archived = "Archived",
+}
+
 export default class AuthenticatedDocumentRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
@@ -196,12 +210,6 @@ export default class AuthenticatedDocumentRoute extends Route {
   }
 
   afterModel(model: DocumentRouteModel, transition: any) {
-    /**
-     * Generally speaking, ensure an up-to-date list of recently viewed docs
-     * by the time the user returns to the dashboard.
-     */
-    void this.recentlyViewed.fetchAll.perform();
-
     /**
      * Record the document view with the analytics backend.
      */

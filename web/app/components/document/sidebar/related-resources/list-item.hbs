@@ -30,7 +30,7 @@
       </ExternalLink>
     {{/if}}
     {{#unless @editingIsDisabled}}
-      <OverflowMenu @items={{this.overflowMenuItems}} />
+      <OverflowMenu @items={{this.overflowMenuItems}} @renderOut={{true}} />
     {{/unless}}
   </div>
 </li>

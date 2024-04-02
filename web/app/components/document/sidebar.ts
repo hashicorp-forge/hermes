@@ -834,6 +834,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   requestReview = task(async () => {
     try {
       // Update approvers.
+      this.toggleApproverVisibility();
       await this.patchDocument.perform({
         approvers: this.approvers.compact(),
       });
@@ -1004,6 +1005,22 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * This is an unfortunate hack to re-render the approvers list
+   * after the user leaves the approver role. Because the EditableField
+   * component has its own caching logic, it doesn't inherit changes
+   * from external components. This can be changed in the future, but will
+   * require a refactor of the EditableField and sidebar components.
+   *
+   * TODO: Improve this
+   */
+  @action private toggleApproverVisibility() {
+    this.approversAreShown = false;
+    schedule("afterRender", () => {
+      this.approversAreShown = true;
+    });
+  }
+
+  /**
    * The action to leave the approver role.
    * Updates the local approvers array and saves it to the back end.
    * On success, shows a success message. On failure, shows an error message
@@ -1021,19 +1038,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       await this.save.perform("approvers", this.approvers);
 
-      /**
-       * This is an unfortunate hack to re-render the approvers list
-       * after the user leaves the approver role. Because the EditableField
-       * component has its own caching logic, it doesn't inherit changes
-       * from external components. This can be changed in the future, but will
-       * require a refactor of the EditableField and sidebar components.
-       *
-       * TODO: Improve this
-       */
-      this.approversAreShown = false;
-      schedule("afterRender", () => {
-        this.approversAreShown = true;
-      });
+      this.toggleApproverVisibility();
 
       // We set this so that the "Leaving..." state
       // is shown until the UI updates.

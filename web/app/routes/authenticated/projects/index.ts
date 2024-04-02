@@ -1,6 +1,5 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import { HITS_PER_PAGE } from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { ProjectStatus } from "hermes/types/project-status";
@@ -26,7 +25,7 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects?status=${
           params.status
-        }&page=${params.page || 1}&hitsPerPage=${HITS_PER_PAGE}`,
+        }&page=${params.page || 1}`,
       )
       .then((response) => response?.json());
 
