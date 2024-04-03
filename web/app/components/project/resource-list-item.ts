@@ -18,6 +18,7 @@ import { RelatedResource } from "../related-resources";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { announce } from "@atlaskit/pragmatic-drag-and-drop-live-region";
 import { guidFor } from "@ember/object/internals";
+import { schedule } from "@ember/runloop";
 
 enum Edges {
   Top = "top",
@@ -79,6 +80,11 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @tracked protected el: HTMLElement | null = null;
 
   /**
+   * The drag handle element. Targeted for focus after a drop.
+   */
+  @tracked protected _dragHandle: HTMLButtonElement | null = null;
+
+  /**
    * The title of the item, whether it's a document or a resource.
    * Used in the `customNativeDragPreview`.
    */
@@ -103,11 +109,25 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   }
 
   /**
+   * An asserted-true getter for the drag handle element.
+   */
+  protected get dragHandle() {
+    assert("dragHandle must exist", this._dragHandle);
+    return this._dragHandle;
+  }
+
+  /**
    * The action to announce the movement of an item to screen readers.
    * Called when an item is moved up, down, to the top, or to the bottom.
    */
   private announceMovement(direction: string) {
     announce(`${this.itemTitle} moved ${direction}`);
+  }
+
+  private scheduleFocusDragHandle() {
+    schedule("afterRender", () => {
+      this.dragHandle.focus();
+    });
   }
 
   /**
@@ -125,6 +145,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @action protected moveToTop() {
     this.args.onSave(this.args.index, 0);
     this.announceMovement("to top");
+    this.scheduleFocusDragHandle();
   }
 
   /**
@@ -134,6 +155,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @action protected moveUp() {
     this.args.onSave(this.args.index, this.args.index - 1);
     this.announceMovement("up");
+    this.scheduleFocusDragHandle();
   }
 
   /**
@@ -143,6 +165,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @action protected moveDown() {
     this.args.onSave(this.args.index, this.args.index + 1);
     this.announceMovement("down");
+    this.scheduleFocusDragHandle();
   }
 
   /**
@@ -152,6 +175,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
   @action protected moveToBottom() {
     this.args.onSave(this.args.index, this.args.itemCount - 1);
     this.announceMovement("to bottom");
+    this.scheduleFocusDragHandle();
   }
 
   private isHoveringSameParent(e: ElementDropTargetEventBasePayload) {
@@ -173,14 +197,12 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     assert("element must exist", this.el);
 
     const element = this.el;
-    const dragHandle = this.el.querySelector(`.drag-handle`);
-
-    assert("drag handle must exist", dragHandle);
+    this._dragHandle = this.el.querySelector(`.drag-handle`);
 
     combine(
       draggable({
         element,
-        dragHandle,
+        dragHandle: this.dragHandle,
         onGenerateDragPreview: ({ nativeSetDragImage }) => {
           this.isDragging = true;
           setCustomNativeDragPreview({
@@ -193,6 +215,10 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
         },
         onDrop: () => {
           this.isDragging = false;
+
+          schedule("afterRender", () => {
+            this.dragHandle.focus();
+          });
         },
         getInitialData: () => {
           return {

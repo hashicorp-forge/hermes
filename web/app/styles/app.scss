@@ -138,11 +138,11 @@ h1 {
 }
 
 .visible-with-group {
-  @apply group-focus-within:visible group-hover:visible;
+  @apply group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100;
 
   &:hover,
   &:focus-within {
-    @apply visible;
+    @apply visible opacity-100;
   }
 }
 
