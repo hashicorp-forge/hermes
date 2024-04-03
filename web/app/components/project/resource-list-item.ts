@@ -154,6 +154,16 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
     this.announceMovement("to bottom");
   }
 
+  private isHoveringSameParent(e: ElementDropTargetEventBasePayload) {
+    const sourceElement = e.source.element;
+    const selfElement = e.self.element;
+
+    const sourceElementParent = sourceElement.parentElement;
+    const selfElementParent = selfElement.parentElement;
+
+    return sourceElementParent === selfElementParent;
+  }
+
   /**
    * The action to configure the drag-and-drop functionality.
    * Called on render if the list is interactive. Configures the drag-and-drop
@@ -247,20 +257,9 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           }
         },
         onDragEnter: (e: ElementDropTargetEventBasePayload) => {
-          const { source, self } = e;
-
-          const sourceElement = source.element;
-          const selfElement = self.element;
-
-          const sourceElementParent = sourceElement.parentElement;
-          const selfElementParent = selfElement.parentElement;
-
-          const isHoveringSameParent =
-            sourceElementParent === selfElementParent;
-
           const isHoveringSelf = e.source.element === element;
 
-          if (!isHoveringSelf && isHoveringSameParent) {
+          if (!isHoveringSelf && this.isHoveringSameParent(e)) {
             this.dragHasEntered = true;
           }
         },
@@ -269,18 +268,7 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           this.closestEdge = null;
         },
         onDrop: (e: ElementDropTargetEventBasePayload) => {
-          const { source, self } = e;
-
-          const sourceElement = source.element;
-          const selfElement = self.element;
-
-          const sourceElementParent = sourceElement.parentElement;
-          const selfElementParent = selfElement.parentElement;
-
-          const isHoveringSameParent =
-            sourceElementParent === selfElementParent;
-
-          if (!isHoveringSameParent) {
+          if (!this.isHoveringSameParent(e)) {
             return;
           }
 
