@@ -1,8 +1,11 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
+import { HITS_PER_PAGE } from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { ProjectStatus } from "hermes/types/project-status";
+
+export const PROJECT_HITS_PER_PAGE = HITS_PER_PAGE * 2;
 
 interface AuthenticatedProjectsIndexRouteParams {
   status: string;

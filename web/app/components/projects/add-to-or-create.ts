@@ -88,11 +88,13 @@ export default class ProjectsAddToOrCreate extends Component<ProjectsAddToOrCrea
   protected loadProjects = task(async (dd: XDropdownListAnchorAPI) => {
     this.dd = dd;
 
-    this.activeProjects = await this.fetchSvc
+    const payload = await this.fetchSvc
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects?status=${ProjectStatus.Active}`,
       )
       .then((response) => response?.json());
+
+    this.activeProjects = payload.projects;
 
     next(() => {
       this.dd?.scheduleAssignMenuItemIDs();
