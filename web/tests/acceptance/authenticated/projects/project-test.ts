@@ -28,7 +28,10 @@ import {
 import MockDate from "mockdate";
 import { DEFAULT_MOCK_DATE } from "hermes/utils/mockdate/dates";
 import RecentlyViewedService from "hermes/services/recently-viewed";
-import { RelatedHermesDocument } from "hermes/components/related-resources";
+import {
+  RelatedExternalLink,
+  RelatedHermesDocument,
+} from "hermes/components/related-resources";
 import { assert as emberAssert } from "@ember/debug";
 import { MoveOptionLabel } from "hermes/components/project/resource";
 
@@ -534,34 +537,27 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
   test("you can reorder external links", async function (this: AuthenticatedProjectsProjectRouteTestContext, assert) {
     this.server.createList("related-external-link", 2);
 
-    const project = this.server.schema.projects.first();
+    let project = this.server.schema.projects.first();
 
     project.update({
       externalLinks: this.server.schema.relatedExternalLinks
         .all()
-        .models.map(
-          (link: { attrs: RelatedHermesDocument }, index: number) => ({
-            ...link.attrs,
-            sortOrder: index,
-          }),
-        ),
+        .models.map((link: { attrs: RelatedExternalLink }, index: number) => ({
+          ...link.attrs,
+          sortOrder: index,
+        })),
     });
 
     await visit("/projects/1");
 
-    assert.dom(EXTERNAL_LINK).exists({ count: 3 });
+    assert.dom(EXTERNAL_LINK).exists({ count: 2 });
 
-    let [first, second, third]: Array<Element | undefined> = [
-      undefined,
-      undefined,
-      undefined,
-    ];
+    let [first, second]: Array<Element | undefined> = [undefined, undefined];
 
     const captureItems = () => {
-      [first, second, third] = findAll(EXTERNAL_LINK);
+      [first, second] = findAll(EXTERNAL_LINK);
       emberAssert("first link exists", first);
       emberAssert("second link exists", second);
-      emberAssert("third link exists", third);
     };
 
     const assertReordered = (expectedOrder: string[]) => {
@@ -569,18 +565,21 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
       assert.dom(first).containsText(expectedOrder[0] as string);
       assert.dom(second).containsText(expectedOrder[1] as string);
-      assert.dom(third).containsText(expectedOrder[2] as string);
 
-      const projectLinks =
-        this.server.schema.projects.first().attrs.externalLinks;
+      project = this.server.schema.projects.first();
+      const projectLinks = project.externalLinks;
 
-      const relatedLinkIDs = projectLinks.map((link: any) => link.id);
+      const relatedLinkIDs = projectLinks.map((link: RelatedExternalLink) => {
+        return this.server.schema.relatedExternalLinks.findBy({
+          url: link.url,
+        }).id;
+      });
 
       assert.deepEqual(relatedLinkIDs, expectedOrder);
     };
 
     // Assert the initial order
-    assertReordered(["0", "1", "2"]);
+    assertReordered(["0", "1"]);
 
     // Open the reorder menu
     await click(LINK_DRAG_HANDLE);
@@ -592,7 +591,7 @@ module("Acceptance | authenticated/projects/project", function (hooks) {
 
     await click(moveToBottom);
 
-    assertReordered(["1", "2", "0"]);
+    assertReordered(["1", "0"]);
 
     // We don't need to test this further; the underlying method
     // has already been verified in the doc-reordering test
