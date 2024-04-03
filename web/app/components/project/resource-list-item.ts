@@ -247,7 +247,20 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           }
         },
         onDragEnter: (e: ElementDropTargetEventBasePayload) => {
-          if (e.source.element !== element) {
+          const { source, self } = e;
+
+          const sourceElement = source.element;
+          const selfElement = self.element;
+
+          const sourceElementParent = sourceElement.parentElement;
+          const selfElementParent = selfElement.parentElement;
+
+          const isHoveringSameParent =
+            sourceElementParent === selfElementParent;
+
+          const isHoveringSelf = e.source.element === element;
+
+          if (!isHoveringSelf && isHoveringSameParent) {
             this.dragHasEntered = true;
           }
         },
@@ -256,6 +269,21 @@ export default class ProjectResourceListItemComponent extends Component<ProjectR
           this.closestEdge = null;
         },
         onDrop: (e: ElementDropTargetEventBasePayload) => {
+          const { source, self } = e;
+
+          const sourceElement = source.element;
+          const selfElement = self.element;
+
+          const sourceElementParent = sourceElement.parentElement;
+          const selfElementParent = selfElement.parentElement;
+
+          const isHoveringSameParent =
+            sourceElementParent === selfElementParent;
+
+          if (!isHoveringSameParent) {
+            return;
+          }
+
           const { data } = e.source;
           const index = data["index"];
 
