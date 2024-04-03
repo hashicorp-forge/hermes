@@ -29,8 +29,11 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
       )
       .then((response) => response?.json());
 
-    console.log("params.page", params.page);
-
-    return { projects, status: params.status as ProjectStatus };
+    return {
+      projects,
+      status: params.status as ProjectStatus,
+      currentPage: 0, // TODO
+      nbPages: 0, // TODO
+    };
   }
 }

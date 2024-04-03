@@ -10,9 +10,8 @@ interface ProjectsIndexComponentSignature {
   Args: {
     projects: HermesProjectInfo[];
     status: ProjectStatus;
-    // TODO: Determine if these can be undefined
-    nbPages: number;
     currentPage: number;
+    nbPages: number;
   };
   Blocks: {
     default: [];
