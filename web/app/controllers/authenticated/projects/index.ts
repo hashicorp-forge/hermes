@@ -15,7 +15,6 @@ export default class AuthenticatedProjectsController extends Controller {
 
   /**
    * The current page. 1-indexed.
-   * TODO: Confirm this
    */
   page = 1;
 

@@ -18,10 +18,14 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
     status: {
       refreshModel: true,
     },
+    page: {
+      refreshModel: true,
+    },
   };
 
   async model(params: AuthenticatedProjectsIndexRouteParams) {
-    const projects = await this.fetchSvc
+    console.log("params", params);
+    const payload = await this.fetchSvc
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects?status=${
           params.status
@@ -29,11 +33,13 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
       )
       .then((response) => response?.json());
 
+    const { projects, page, numPages } = payload;
+
     return {
       projects,
       status: params.status as ProjectStatus,
-      currentPage: 0, // TODO
-      nbPages: 0, // TODO
+      page,
+      numPages,
     };
   }
 }
