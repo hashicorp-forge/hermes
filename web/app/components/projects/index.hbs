@@ -25,6 +25,9 @@
       </li>
     {{/each}}
   </ol>
+  {{#if (and @nbPages @currentPage)}}
+    <Pagination @nbPages={{@nbPages}} @currentPage={{@currentPage}} />
+  {{/if}}
 {{else}}
   <div
     data-test-no-projects

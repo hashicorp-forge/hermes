@@ -10,6 +10,8 @@ interface ProjectsIndexComponentSignature {
   Args: {
     projects: HermesProjectInfo[];
     status: ProjectStatus;
+    currentPage: number;
+    nbPages: number;
   };
   Blocks: {
     default: [];
