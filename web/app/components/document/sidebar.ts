@@ -11,7 +11,7 @@ import {
   task,
   timeout,
 } from "ember-concurrency";
-import { capitalize, dasherize } from "@ember/string";
+import { capitalize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
 import FetchService from "hermes/services/fetch";
@@ -86,39 +86,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked protected transferOwnershipModalIsShown = false;
   @tracked protected projectsModalIsShown = false;
   @tracked docTypeCheckboxValue = false;
-  @tracked emailFields = ["approvers", "contributors"];
 
   @tracked protected docType: HermesDocumentType | null = null;
-
-  get modalIsShown() {
-    return this.deleteModalIsShown || this.requestReviewModalIsShown;
-  }
-
-  /**
-   * Whether the doc is a draft.
-   * If the draft was recently published, return false.
-   * Otherwise use the passed-in isDraft property.
-   */
-  get isDraft() {
-    return this.draftWasPublished ? false : this.args.document?.isDraft;
-  }
-
-  get docID() {
-    return this.args.document?.objectID;
-  }
 
   // TODO: This state tracking could be improved with a document model
   // (not necessarily, an ember data model, but some sort of tracking-aware
   // class to stuff this in instead of passing a POJO around).
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
-
   @tracked contributors: string[] = this.args.document.contributors || [];
-
   @tracked approvers: string[] = this.args.document.approvers || [];
-
   @tracked product = this.args.document.product || "";
-
   @tracked status = this.args.document.status;
 
   /**
@@ -153,7 +131,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * Checked on render and changed when the user toggles permissions.
    * Used to
    */
-  @tracked _docIsShareable = false;
+  @tracked private _docIsShareable = false;
 
   /**
    * The icon of a new draft visibility. Set immediately when
@@ -194,8 +172,57 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @tracked protected ownershipTransferredModalIsShown = false;
 
-  @tracked userHasScrolled = false;
-  @tracked _body: HTMLElement | null = null;
+  /**
+   * Whether the user has scrolled the sidebar. When true,
+   * adds a border to the header to indicate scroll state.
+   */
+  @tracked protected userHasScrolled = false;
+
+  /**
+   * The scrollable body element. Its `scrollTop` property is used
+   * to determine the scroll state of the sidebar.
+   */
+  @tracked private body: HTMLElement | null = null;
+
+  /**
+   * Whether the document is locked to editing.
+   * True when a document is corrupt or has suggestions in the header.
+   * Initially set to the passed-in property; set true when a 423 is thrown.
+   */
+  @tracked protected docIsLocked = this.args.document?.locked;
+
+  /**
+   * Whether the viewer has approved the document.
+   * True if their email is in the document's `approvedBy` array,
+   * and immediately when their approval completes.
+   */
+  @tracked protected hasApproved = this.args.document.approvedBy?.includes(
+    this.args.profile.email,
+  );
+
+  /**
+   * Whether the viewer has requested changes to the document.
+   * True if their email is in the document's `changesRequestedBy` array,
+   * and immediately when their request completes.
+   */
+  @tracked protected hasRejectedFRD =
+    this.args.document.changesRequestedBy?.includes(this.args.profile.email);
+
+  /**
+   * Whether the doc is a draft.
+   * If the draft was recently published, return false.
+   * Otherwise use the passed-in isDraft property.
+   */
+  protected get isDraft() {
+    return this.draftWasPublished ? false : this.args.document?.isDraft;
+  }
+
+  /**
+   * The ID of the document. Used in API requests.
+   */
+  private get docID() {
+    return this.args.document?.objectID;
+  }
 
   /**
    * All active projects. Used to render the list of
@@ -221,6 +248,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       : DraftVisibility.Restricted;
   }
 
+  /**
+   * The context-specific text of the draft-visibility toggle.
+   */
   protected get toggleDraftVisibilityTooltipText() {
     if (this.draftVisibilityIcon === DraftVisibilityIcon.Restricted) {
       return capitalize(DraftVisibility.Restricted);
@@ -304,33 +334,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return this.isDraft && this._docIsShareable;
   }
 
-  get body() {
-    assert("_body must exist", this._body);
-    return this._body;
-  }
   /**
-   * Whether the document is locked to editing.
-   * True when a document is corrupt or has suggestions in the header.
-   * Initially set to the passed-in property; set true when a 423 is thrown.
+   * The custom editable fields for the document.
+   * Looped through in the template to render the fields.
    */
-  @tracked protected docIsLocked = this.args.document?.locked;
-
-  get customEditableFields() {
+  protected get customEditableFields() {
     let customEditableFields = this.args.document.customEditableFields || {};
     for (const field in customEditableFields) {
       // @ts-ignore - TODO: Type this
       customEditableFields[field]["value"] = this.args.document[field];
     }
     return customEditableFields;
-  }
-
-  @action onDocTypeCheckboxChange(event: Event) {
-    const eventTarget = event.target;
-    assert(
-      "event.target must be an HTMLInputElement",
-      eventTarget instanceof HTMLInputElement,
-    );
-    this.docTypeCheckboxValue = eventTarget.checked;
   }
 
   /**
@@ -391,50 +405,14 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     }
   }
 
-  // isApprover returns true if the logged in user is a document approver.
-  get isApprover() {
+  /**
+   * Whether the viewer is an approver of the document.
+   * If true, they'll see approval-based footer controls.
+   */
+  protected get isApprover() {
     return this.args.document.approvers?.some(
       (e) => e === this.args.profile.email,
     );
-  }
-
-  get isContributor() {
-    return this.args.document.contributors?.some(
-      (e) => e === this.args.profile.email,
-    );
-  }
-
-  /**
-   * Whether the viewer has approved the document.
-   * True if their email is in the document's `approvedBy` array,
-   * and immediately when their approval completes.
-   */
-  @tracked protected hasApproved = this.args.document.approvedBy?.includes(
-    this.args.profile.email,
-  );
-
-  /**
-   * Whether the viewer has requested changes to the document.
-   * True if their email is in the document's `changesRequestedBy` array,
-   * and immediately when their request completes.
-   */
-  @tracked protected hasRejectedFRD =
-    this.args.document.changesRequestedBy?.includes(this.args.profile.email);
-
-  /**
-   * Whether the doc status is approved. Used to determine editing privileges.
-   * If the doc is approved, editing is exclusive to the doc owner.
-   */
-  private get docIsApproved() {
-    return this.args.document.status.toLowerCase() === "approved";
-  }
-
-  /**
-   * Whether the doc status is in review. Used to determine editing privileges.
-   * If the doc is in review, editing is exclusive to the doc owner.
-   */
-  private get docIsInReview() {
-    return dasherize(this.args.document.status) === "in-review";
   }
 
   /**
@@ -499,6 +477,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   protected get editingIsEnabled() {
     return !this.editingIsDisabled;
+  }
+
+  /**
+   * The action run when the user clicks the docType checkbox.
+   * Toggles the local `docTypeCheckboxValue` property to
+   * enable or disable the "publish" button.
+   */
+  @action protected onDocTypeCheckboxChange(event: Event) {
+    const eventTarget = event.target;
+    assert(
+      "event.target must be an HTMLInputElement",
+      eventTarget instanceof HTMLInputElement,
+    );
+    this.docTypeCheckboxValue = eventTarget.checked;
   }
 
   /**
@@ -629,6 +621,83 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    */
   @action protected hideOwnershipTransferredModal() {
     this.ownershipTransferredModalIsShown = false;
+  }
+
+  @action updateApprovers(approvers: string[]) {
+    this.approvers = approvers;
+  }
+
+  @action updateContributors(contributors: string[]) {
+    this.contributors = contributors;
+  }
+
+  @action saveTitle(title: string) {
+    this.title = title;
+    void this.save.perform("title", this.title);
+  }
+
+  @action saveSummary(summary: string) {
+    this.summary = summary;
+    void this.save.perform("summary", this.summary);
+  }
+
+  @action closeDeleteModal() {
+    this.deleteModalIsShown = false;
+  }
+
+  @action closeRequestReviewModal() {
+    this.requestReviewModalIsShown = false;
+  }
+
+  @action protected closeRequestReviewSuccessModal() {
+    this.requestReviewModalIsShown = false;
+  }
+
+  /**
+   * The action run on the sidebar body's scroll event.
+   * If the user has scrolled, adds a border to the header.
+   */
+  @action onScroll() {
+    let onScrollFunction = () => {
+      assert("_body must exist", this.body);
+      this.userHasScrolled = this.body.scrollTop > 0;
+    };
+
+    debounce(this, onScrollFunction, 50);
+  }
+
+  /**
+   * Registers the body element locally and, if the document is a draft,
+   * kicks off the task to fetch the draft's `isShareable` attribute.
+   */
+  @action protected didInsertBody(element: HTMLElement) {
+    this.body = element;
+
+    if (this.isDraft) {
+      // kick off whether the draft is shareable.
+      void this.getDraftPermissions.perform();
+
+      // get docType for the "request review?" modal
+      this.args.docType.then((docType) => {
+        this.docType = docType;
+      });
+    }
+  }
+
+  /**
+   * This is an unfortunate hack to re-render the approvers list
+   * after the user leaves the approver role. Because the EditableField
+   * component has its own caching logic, it doesn't inherit changes
+   * from external components. This can be changed in the future, but will
+   * require a refactor of the EditableField and sidebar components.
+   *
+   * TODO: Improve this
+   */
+  @action private toggleApproverVisibility() {
+    this.approversAreShown = false;
+    schedule("afterRender", () => {
+      this.approversAreShown = true;
+    });
   }
 
   /**
@@ -947,78 +1016,6 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       throw e;
     }
   });
-
-  @action updateApprovers(approvers: string[]) {
-    this.approvers = approvers;
-  }
-
-  @action updateContributors(contributors: string[]) {
-    this.contributors = contributors;
-  }
-
-  @action saveTitle(title: string) {
-    this.title = title;
-    void this.save.perform("title", this.title);
-  }
-
-  @action saveSummary(summary: string) {
-    this.summary = summary;
-    void this.save.perform("summary", this.summary);
-  }
-
-  @action closeDeleteModal() {
-    this.deleteModalIsShown = false;
-  }
-
-  @action closeRequestReviewModal() {
-    this.requestReviewModalIsShown = false;
-  }
-
-  @action protected closeRequestReviewSuccessModal() {
-    this.requestReviewModalIsShown = false;
-  }
-
-  @action onScroll() {
-    let onScrollFunction = () => {
-      this.userHasScrolled = this.body.scrollTop > 0;
-    };
-
-    debounce(this, onScrollFunction, 50);
-  }
-
-  /**
-   * Registers the body element locally and, if the document is a draft,
-   * kicks off the task to fetch the draft's `isShareable` attribute.
-   */
-  @action protected didInsertBody(element: HTMLElement) {
-    this._body = element;
-
-    if (this.isDraft) {
-      // kick off whether the draft is shareable.
-      void this.getDraftPermissions.perform();
-
-      // get docType for the "request review?" modal
-      this.args.docType.then((docType) => {
-        this.docType = docType;
-      });
-    }
-  }
-
-  /**
-   * This is an unfortunate hack to re-render the approvers list
-   * after the user leaves the approver role. Because the EditableField
-   * component has its own caching logic, it doesn't inherit changes
-   * from external components. This can be changed in the future, but will
-   * require a refactor of the EditableField and sidebar components.
-   *
-   * TODO: Improve this
-   */
-  @action private toggleApproverVisibility() {
-    this.approversAreShown = false;
-    schedule("afterRender", () => {
-      this.approversAreShown = true;
-    });
-  }
 
   /**
    * The action to leave the approver role.
