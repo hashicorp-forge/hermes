@@ -219,6 +219,9 @@ type GoogleWorkspace struct {
 	// DraftsFolder is the folder that contains all document drafts.
 	DraftsFolder string `hcl:"drafts_folder"`
 
+	// GroupsPrefix is the prefix to use when searching for Google Groups.
+	GroupsPrefix string `hcl:"groups_prefix,optional"`
+
 	// OAuth2 is the configuration to use OAuth 2.0 to access Google Workspace
 	// APIs.
 	OAuth2 *GoogleWorkspaceOAuth2 `hcl:"oauth2,block"`

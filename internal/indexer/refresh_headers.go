@@ -201,9 +201,23 @@ func refreshDocumentHeader(
 			os.Exit(1)
 		}
 
+		// Get group reviews for the document.
+		var groupReviews models.DocumentGroupReviews
+		if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
+			Document: models.Document{
+				GoogleFileID: file.Id,
+			},
+		}); err != nil {
+			log.Error("error getting group reviews for document",
+				"error", err,
+				"google_file_id", file.Id,
+			)
+			os.Exit(1)
+		}
+
 		// Convert database record to a document.
 		doc, err = document.NewFromDatabaseModel(
-			model, reviews)
+			model, reviews, groupReviews)
 		if err != nil {
 			log.Error("error converting database record to document",
 				"error", err,

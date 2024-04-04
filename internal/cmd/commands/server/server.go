@@ -376,6 +376,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
 		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
 		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
+		{"/api/v2/groups", apiv2.GroupsHandler(srv)},
 		{"/api/v2/jira/issues/", apiv2.JiraIssueHandler(srv)},
 		{"/api/v2/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
 		{"/api/v2/me", apiv2.MeHandler(srv)},

@@ -23,6 +23,7 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 1. Enable the following APIs for [Google Workspace APIs](https://developers.google.com/workspace/guides/enable-apis)
 
+   - Admin SDK API
    - Google Docs API
    - Google Drive API
    - Gmail API

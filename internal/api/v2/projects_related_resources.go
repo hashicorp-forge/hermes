@@ -113,7 +113,7 @@ func projectsResourceRelatedResourcesHandler(
 			// Convert database model to a document. We don't need document review
 			// data for this endpoint.
 			doc, err := document.NewFromDatabaseModel(
-				hdrr.Document, models.DocumentReviews{})
+				hdrr.Document, models.DocumentReviews{}, models.DocumentGroupReviews{})
 			if err != nil {
 				srv.Logger.Error("error converting database model to document type",
 					append([]interface{}{

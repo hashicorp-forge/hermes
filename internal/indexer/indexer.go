@@ -432,6 +432,20 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
+			// Get group reviews for the document.
+			var groupReviews models.DocumentGroupReviews
+			if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting group reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
 			// Parse document modified time.
 			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
 			if err != nil {
@@ -451,7 +465,7 @@ func (idx *Indexer) Run() error {
 			var doc *document.Document
 			if idx.UseDatabaseForDocumentData {
 				// Convert database record to a document.
-				doc, err = document.NewFromDatabaseModel(dbDoc, reviews)
+				doc, err = document.NewFromDatabaseModel(dbDoc, reviews, groupReviews)
 				if err != nil {
 					log.Error("error converting database record to document",
 						"error", err,
