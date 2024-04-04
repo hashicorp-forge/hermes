@@ -88,6 +88,37 @@ func MeHandler(srv server.Server) http.Handler {
 					nil,
 					"user_email", userEmail,
 				)
+
+				// If configured, send an email to the user to notify them that their
+				// account was not found in the directory.
+				if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+					srv.Config.GoogleWorkspace != nil &&
+					srv.Config.GoogleWorkspace.UserNotFoundEmail != nil &&
+					srv.Config.GoogleWorkspace.UserNotFoundEmail.Enabled &&
+					srv.Config.GoogleWorkspace.UserNotFoundEmail.Body != "" &&
+					srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject != "" {
+					_, err = srv.GWService.SendEmail(
+						[]string{userEmail},
+						srv.Config.Email.FromAddress,
+						srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject,
+						srv.Config.GoogleWorkspace.UserNotFoundEmail.Body,
+					)
+					if err != nil {
+						srv.Logger.Error("error sending user not found email",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"user_email", userEmail,
+						)
+					} else {
+						srv.Logger.Info("user not found email sent",
+							"method", r.Method,
+							"path", r.URL.Path,
+							"user_email", userEmail,
+						)
+					}
+				}
+
 				return
 			}
 			p := ppl[0]
