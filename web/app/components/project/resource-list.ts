@@ -19,6 +19,8 @@ interface ProjectResourceListComponentSignature {
     items: RelatedResource[];
     shouldAnimate: boolean;
     motion: unknown;
+    isReadOnly: boolean;
+    onSave: (currentIndex: number, newIndex: number) => void;
   };
   Blocks: {
     header: [];
@@ -26,6 +28,13 @@ interface ProjectResourceListComponentSignature {
       {
         item: RelatedResource;
         index: number;
+        isReadOnly: boolean;
+        canMoveUp: boolean;
+        canMoveDown: boolean;
+        moveToTop: () => void;
+        moveUp: () => void;
+        moveDown: () => void;
+        moveToBottom: () => void;
       },
     ];
   };
