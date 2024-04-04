@@ -7,6 +7,7 @@ import { setupApplicationTest } from "ember-qunit";
 import { HermesProject } from "hermes/types/project";
 import { Response } from "miragejs";
 import { ProjectStatus } from "hermes/types/project-status";
+import { assert as emberAssert } from "@ember/debug";
 
 const PROJECT_TILE = "[data-test-project-tile]";
 const PROJECT_TITLE = `${PROJECT_TILE} [data-test-title]`;
@@ -18,6 +19,7 @@ const SECONDARY_NAV = "[data-test-projects-nav]";
 const ACTIVE_TAB = `${SECONDARY_NAV} [data-test-tab="active"]`;
 const COMPLETED_TAB = `${SECONDARY_NAV} [data-test-tab="completed"]`;
 const ARCHIVED_TAB = `${SECONDARY_NAV} [data-test-tab="archived"]`;
+const TEXT_PAGINATION_LINK = "[data-test-pagination-link-type='text']";
 
 interface AuthenticatedProjectsRouteTestContext extends MirageTestContext {}
 module("Acceptance | authenticated/projects", function (hooks) {
@@ -129,5 +131,54 @@ module("Acceptance | authenticated/projects", function (hooks) {
 
     await click(ARCHIVED_TAB);
     assert.dom(NO_PROJECTS).containsText("No archived projects");
+  });
+
+  test("it paginates", async function (this: AuthenticatedProjectsRouteTestContext, assert) {
+    const twoPagesWorth = 48;
+    const threePagesWorth = 72;
+    const fourPagesWorth = 96;
+
+    this.server.createList("project", twoPagesWorth, {
+      status: ProjectStatus.Active,
+    });
+    this.server.createList("project", threePagesWorth, {
+      status: ProjectStatus.Completed,
+    });
+    this.server.createList("project", fourPagesWorth, {
+      status: ProjectStatus.Archived,
+    });
+
+    await visit("/projects");
+
+    assert.dom(TEXT_PAGINATION_LINK).exists({ count: 2 });
+
+    // We'll use the second pagination link to assert the hrefs
+    const getPageTwoButton = () => {
+      let pageTwoButton = findAll(TEXT_PAGINATION_LINK)[1];
+      emberAssert("pageTwoButton must exist", pageTwoButton);
+      return pageTwoButton;
+    };
+
+    assert.dom(getPageTwoButton()).hasAttribute("href", "/projects?page=2");
+
+    // Click the `completed` tab
+    await click(COMPLETED_TAB);
+
+    // Expect 3 pages of pagination
+    assert.dom(TEXT_PAGINATION_LINK).exists({ count: 3 });
+
+    assert
+      .dom(getPageTwoButton())
+      .hasAttribute("href", "/projects?page=2&status=completed");
+
+    // Click the `archived` tab
+    await click(ARCHIVED_TAB);
+
+    // Expect 4 pages of pagination
+    assert.dom(TEXT_PAGINATION_LINK).exists({ count: 4 });
+
+    assert
+      .dom(getPageTwoButton())
+      .hasAttribute("href", "/projects?page=2&status=archived");
   });
 });

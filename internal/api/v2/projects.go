@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -38,7 +39,11 @@ type ProjectsPostRequest struct {
 	Title       string  `json:"title"`
 }
 
-type ProjectsGetResponse []project
+type ProjectsGetResponse struct {
+	NumPages int       `json:"numPages"`
+	Page     int       `json:"page"`
+	Projects []project `json:"projects"`
+}
 
 type ProjectsPostResponse struct {
 	ID int `json:"id"`
@@ -140,8 +145,27 @@ func ProjectsHandler(srv server.Server) http.Handler {
 				return
 			}
 
+			// Calculate total number of pages.
+			var totalProjects int64
+			if err := srv.DB.
+				Model(&models.Project{}).
+				Where("title ILIKE ?", fmt.Sprintf("%%%s%%", titleParam)).
+				Where(&cond).
+				Count(&totalProjects).
+				Error; err != nil {
+				srv.Logger.Error("error getting total number of projects",
+					append([]interface{}{
+						"error", err,
+					}, logArgs...)...)
+				http.Error(
+					w, "Error processing request", http.StatusInternalServerError)
+				return
+			}
+			totalPages := int(
+				math.Ceil(float64(totalProjects) / float64(hitsPerPage)))
+
 			// Build response.
-			resp := []project{}
+			projResp := []project{}
 			for _, p := range projs {
 				// Get products for the project.
 				products, err := getProductsForProject(p, srv.DB)
@@ -156,7 +180,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				resp = append(resp, project{
+				projResp = append(projResp, project{
 					CreatedTime:  p.ProjectCreatedAt.Unix(),
 					Creator:      p.Creator.EmailAddress,
 					Description:  p.Description,
@@ -167,6 +191,11 @@ func ProjectsHandler(srv server.Server) http.Handler {
 					Status:       p.Status.String(),
 					Title:        p.Title,
 				})
+			}
+			resp := ProjectsGetResponse{
+				NumPages: totalPages,
+				Page:     page,
+				Projects: projResp,
 			}
 
 			// Write response.

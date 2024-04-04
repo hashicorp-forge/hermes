@@ -11,6 +11,7 @@
     {{/animated-if}}
   </div>
 
+  {{! @glint-ignore }}
   <AnimatedContainer @motion={{@motion}}>
     {{#animated-if
       (gt @items.length 0)
@@ -27,9 +28,29 @@
             finalRemoval=true
             as |item i|
           }}
-            <li class="group relative block" data-test-resource-list-item>
-              {{yield (hash item=item index=i) to="item"}}
-            </li>
+            <Project::ResourceListItem
+              @isReadOnly={{@isReadOnly}}
+              @itemCount={{@items.length}}
+              @onSave={{@onSave}}
+              @item={{item}}
+              @index={{i}}
+              as |r|
+            >
+              {{yield
+                (hash
+                  item=item
+                  index=i
+                  isReadOnly=@isReadOnly
+                  canMoveUp=(gt i 0)
+                  canMoveDown=(lt i (add @items.length -1))
+                  moveToTop=r.moveToTop
+                  moveUp=r.moveUp
+                  moveDown=r.moveDown
+                  moveToBottom=r.moveToBottom
+                )
+                to="item"
+              }}
+            </Project::ResourceListItem>
           {{/animated-each}}
         </ol>
       </div>

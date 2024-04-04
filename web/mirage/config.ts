@@ -5,6 +5,7 @@ import { getTestDocNumber } from "./factories/document";
 import algoliaHosts from "./algolia/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { PROJECT_HITS_PER_PAGE } from "hermes/routes/authenticated/projects/index";
 import { assert as emberAssert } from "@ember/debug";
 import { HermesDocument } from "hermes/types/document";
 import { FacetName } from "hermes/components/header/toolbar";
@@ -446,7 +447,11 @@ export default function (mirageConfig) {
       // Fetch a list of projects.
       // If a status is provided, filter by it.
       this.get("/projects", (schema, request) => {
-        const { status } = request.queryParams;
+        let { status, page } = request.queryParams;
+
+        if (!page) {
+          page = 1;
+        }
 
         let projects;
 
@@ -455,10 +460,26 @@ export default function (mirageConfig) {
         } else {
           projects = schema.projects.all().models;
         }
+
+        const numPages = Math.ceil(projects.length / PROJECT_HITS_PER_PAGE);
+
+        projects = projects.map((project) => project.attrs);
+
+        // Return only the page requested
+
+        projects = projects.slice(
+          (page - 1) * PROJECT_HITS_PER_PAGE,
+          page * PROJECT_HITS_PER_PAGE,
+        );
+
         return new Response(
           200,
           {},
-          projects.map((project) => project.attrs),
+          {
+            page,
+            numPages,
+            projects,
+          },
         );
       });
 

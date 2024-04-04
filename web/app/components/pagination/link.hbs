@@ -14,7 +14,7 @@
   </span>
 {{else}}
   <LinkTo
-    @route={{this.currentRouteName}}
+    data-test-pagination-link-type={{if @icon "icon" "text"}}
     @query={{hash page=@page}}
     class="grid h-12 w-9 place-items-center hover:text-color-foreground-strong"
   >

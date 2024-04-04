@@ -92,6 +92,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
 
   protected defaultProjectsScreenQueryParams = {
     status: ProjectStatus.Active,
+    page: 1,
   };
 
   /**

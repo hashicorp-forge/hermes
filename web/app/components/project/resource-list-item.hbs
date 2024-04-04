@@ -1,0 +1,67 @@
+<li
+  {{did-insert this.registerElement}}
+  data-index={{@index}}
+  data-closest-edge={{this.closestEdge}}
+  class="group relative block {{if this.isDragging 'is-dragging opacity-50'}}"
+  data-test-resource-list-item
+  ...attributes
+>
+  {{! Drop affordance }}
+  {{#if this.dragHasEntered}}
+    <div
+      class="absolute z-10 h-1 w-full rounded-l-full rounded-r-full
+        {{if this.closestEdge 'bg-color-foreground-action'}}
+        {{if
+          (eq this.closestEdge 'top')
+          '-top-px -translate-y-1/2'
+          (if (eq this.closestEdge 'bottom') 'bottom-0 translate-y-1/2')
+        }}"
+    >
+    </div>
+  {{/if}}
+
+  {{yield
+    (hash
+      moveToTop=this.moveToTop
+      moveUp=this.moveUp
+      moveDown=this.moveDown
+      moveToBottom=this.moveToBottom
+    )
+  }}
+
+</li>
+
+{{!
+  A hidden div rendered only if the list is interactive.
+  Used to configure the drag-and-drop behavior in a state-reactive way,
+  refreshing or initializing when the list changes from read only to interactive.
+}}
+{{#unless @isReadOnly}}
+  {{#in-element (html-element ".ember-application") insertBefore=null}}
+    <div
+      {{did-insert this.configureDragAndDrop}}
+      class="absolute top-0 left-0"
+      aria-hidden={{true}}
+    />
+  {{/in-element}}
+{{/unless}}
+
+{{! Drag preview }}
+{{#if this.isDragging}}
+  {{! Target the customNativeDragPreview container }}
+  {{! This element will be available by the time `html-element` runs }}
+  {{#in-element (html-element (concat "#" this.id)) insertBefore=null}}
+    <div
+      class="grid h-10 max-w-[500px] cursor-grabbing items-center rounded bg-color-page-primary px-3"
+    >
+      <div class="truncate font-semibold text-color-foreground-strong">
+        {{this.itemTitle}}
+        {{#if this.docNumber}}
+          <span class="ml-1 font-regular">
+            {{this.docNumber}}
+          </span>
+        {{/if}}
+      </div>
+    </div>
+  {{/in-element}}
+{{/if}}

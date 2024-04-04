@@ -4,7 +4,7 @@ import { ProjectStatus } from "hermes/types/project-status";
 import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedProjectsController extends Controller {
-  queryParams = ["status"];
+  queryParams = ["status", "page"];
 
   /**
    * Because every Projects view is filtered, we set a param
@@ -12,6 +12,11 @@ export default class AuthenticatedProjectsController extends Controller {
    * "/projects?status=active"
    */
   status = ProjectStatus.Active;
+
+  /**
+   * The current page. 1-indexed.
+   */
+  page = 1;
 
   declare model: ModelFrom<AuthenticatedProjectsIndexRoute>;
 }

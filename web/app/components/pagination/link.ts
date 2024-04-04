@@ -1,5 +1,3 @@
-import RouterService from "@ember/routing/router-service";
-import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 
 interface PaginationLinkComponentSignature {
@@ -11,13 +9,7 @@ interface PaginationLinkComponentSignature {
   };
 }
 
-export default class PaginationLinkComponent extends Component<PaginationLinkComponentSignature> {
-  @service declare router: RouterService;
-
-  protected get currentRouteName(): string {
-    return this.router.currentRouteName;
-  }
-}
+export default class PaginationLinkComponent extends Component<PaginationLinkComponentSignature> {}
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
