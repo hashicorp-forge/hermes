@@ -34,12 +34,8 @@ Router.map(function () {
     });
     this.route("admin", function () {
       this.route("index", { path: "/" });
-      this.route("product-areas", function () {
-        this.route("add");
-      });
-      this.route("doc-types", function () {
-        this.route("add");
-      });
+      this.route("product-areas");
+      this.route("doc-types");
     });
   });
   this.route("authenticate");
